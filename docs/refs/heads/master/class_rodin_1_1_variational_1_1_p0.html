@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::P0 class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,11 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class Range, class Mesh&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P0 <span class="m-thin">class</span>
-        </h1>
-        <p>Degree 0 Lagrange finite element space.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>P0</h1><p class="rodin-reference-brief">Degree 0 Lagrange finite element space.</p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Range</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Mesh</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p0.html"><span class="nc">P0</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -92,8 +89,7 @@
         </table>
 <p>Represents the finite element space composed of discontinuous, piecewise constant functions:</p><div class="m-math"><svg style="width: 24.958em; height: 1.402em;" viewBox="74.475128 -13.45978 239.592833 13.45978">
 <title>
-\[
- \mathbb{P}_0 (\mathcal{T}_h)^d = \{ v : \mathcal{T}_h \rightarrow \mathbb{R}^d : v|_{\tau} \in \mathbb{P}_0(\tau), \ \tau \in \mathcal{T}_h \} \ ,
+\[ \mathbb{P}_0 (\mathcal{T}_h)^d = \{ v : \mathcal{T}_h \rightarrow \mathbb{R}^d : v|_{\tau} \in \mathbb{P}_0(\tau), \ \tau \in \mathcal{T}_h \} \ ,
 \]
 </title>
 <defs>
@@ -166,7 +162,34 @@ $ d \in \mathbb{N} $
 <use x='9.403522' y='0' xlink:href='#eq2-g1-50'/>
 <use x='20.69449' y='0' xlink:href='#eq2-g0-78'/>
 </g>
-</svg>.</p><aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the P0 class, please see <a href="_variational_2_p0_8h.html">P0Specializations</a>.</p></aside><table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0&lt;Real, Mesh&lt;Context::<wbr />Local&gt;&gt;</a></td><td>Scalar-valued local-mesh discontinuous piecewise constant space.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0&lt;Range, Mesh&lt;Context::<wbr />MPI&gt;&gt;</a></td><td>Scalar or vector-valued distributed-mesh discontinuous piecewise constant space.</td></tr></tbody></table><aside class="m-note m-default"><h4>See also</h4><p><a href="_variational_2_p0_8h.html">P0Specializations</a></p></aside>
+</svg>.</p><aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the P0 class, please see <a href="_variational_2_p0_8h.html">P0Specializations</a>.</p></aside><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_p0_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_geometry_a847fd93bb51df33c1df95191b75498c.html"><code>Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p0_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_geometry_a847fd93bb51df33c1df95191b75498c.html#a904f81f6ae8bee0a291cab00954dbf4b"><span class="nc">P0</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_matrix.html"><span class="nc">SpatialMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Matrix-valued finite element space with component-wise scalar basis replication.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_geometry_02b1019a22387996cd0b086e33d44f55.html"><code>Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p0_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_geometry_02b1019a22387996cd0b086e33d44f55.html#a904f81f6ae8bee0a291cab00954dbf4b"><span class="nc">P0</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_matrix.html"><span class="nc">SpatialMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Matrix-range finite element or expression specialization.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_geometry_528a191f4fdcc1b235c37cf6ac806724.html"><code>Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="o">&gt;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c"><span class="nc">Complex</span></a><span class="o">&gt;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p0_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_geometry_528a191f4fdcc1b235c37cf6ac806724.html#aa06dd2a6f15034144fd0f9e541673da6"><span class="nc">P0</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Cellwise constant vector space with independent component DOFs.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html"><code>Range, Geometry::Mesh&lt;Context::MPI&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Range</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html#ab8f52df96f9fbc3c3c6642be7e961888"><span class="nc">P0</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Range</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Distributed P0 finite element space for MPI meshes.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html"><code>Scalar, Geometry::Mesh&lt;Context::Local&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="o">&gt;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c"><span class="nc">Complex</span></a><span class="o">&gt;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p0_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html#ab8f52df96f9fbc3c3c6642be7e961888"><span class="nc">P0</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Scalar</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Scalar-valued piecewise constant (P0) Lagrange finite element space.</td></tr></tbody></table><aside class="m-note m-default"><h4>See also</h4><p><a href="group___p0_specializations.html" class="m-doc">P0 Template Specializations</a></p></aside>
       </div>
     </div>
   </div>
@@ -205,13 +228,20 @@ $ d \in \mathbb{N} $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

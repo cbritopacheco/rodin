@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::VectorFunctionBase class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,11 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_vector_function_8h.html">&lt;Rodin/Variational/VectorFunction.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>VectorFunctionBase <span class="m-thin">class</span>
-        </h1>
-        <p>Base class for vector-valued functions defined on a mesh.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>VectorFunctionBase</h1><p class="rodin-reference-brief">Base class for vector-valued functions defined on a mesh.</p><p class="rodin-reference-include">Defined in <a href="_vector_function_8h.html"><code>Rodin/Variational/VectorFunction.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#ad42a88d23d9d12ac0280d0abae88875e"><span class="nc">VectorFunctionBase</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -98,11 +94,11 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md514">Component Access</a></li>
+            <li><a href="#autotoc_md549">Component Access</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -112,16 +108,15 @@
         </nav>
 <aside class="m-note m-info"><h4>Note</h4><p>Vectors are zero indexed. This means that the 0-index corresponds to the 1st entry of the vector.</p></aside><p>VectorFunctionBase extends FunctionBase to represent vector-valued functions:</p><div class="m-math"><svg style="width: 5.757em; height: 1.091em;" viewBox="166.387278 -10.470988 55.270298 10.470988">
 <title>
-\[
-   \mathbf{f}: \Omega \to \mathbb{R}^d
+\[   \mathbf{f}: \Omega \to \mathbb{R}^d
 \]
 </title>
 <defs>
+<path id='eq1-g3-100' d='M4.28792-5.292154C4.29589-5.308095 4.319801-5.411706 4.319801-5.419676C4.319801-5.459527 4.28792-5.531258 4.192279-5.531258C4.160399-5.531258 3.913325-5.507347 3.730012-5.491407L3.283686-5.459527C3.108344-5.443587 3.028643-5.435616 3.028643-5.292154C3.028643-5.180573 3.140224-5.180573 3.235866-5.180573C3.618431-5.180573 3.618431-5.132752 3.618431-5.061021C3.618431-5.0132 3.55467-4.750187 3.514819-4.590785L3.124284-3.036613C3.052553-3.172105 2.82142-3.514819 2.335243-3.514819C1.3868-3.514819 .342715-2.406974 .342715-1.227397C.342715-.398506 .876712 .079701 1.490411 .079701C2.000498 .079701 2.438854-.326775 2.582316-.486177C2.725778 .063761 3.267746 .079701 3.363387 .079701C3.730012 .079701 3.913325-.223163 3.977086-.358655C4.136488-.645579 4.24807-1.107846 4.24807-1.139726C4.24807-1.187547 4.216189-1.243337 4.120548-1.243337S4.008966-1.195517 3.961146-.996264C3.849564-.557908 3.698132-.143462 3.387298-.143462C3.203985-.143462 3.132254-.294894 3.132254-.518057C3.132254-.669489 3.156164-.757161 3.180075-.860772L4.28792-5.292154ZM2.582316-.860772C2.183811-.310834 1.769365-.143462 1.514321-.143462C1.147696-.143462 .964384-.478207 .964384-.892653C.964384-1.267248 1.179577-2.12005 1.354919-2.470735C1.586052-2.956912 1.976588-3.291656 2.343213-3.291656C2.86127-3.291656 3.012702-2.709838 3.012702-2.614197C3.012702-2.582316 2.81345-1.801245 2.765629-1.594022C2.662017-1.219427 2.662017-1.203487 2.582316-.860772Z'/>
 <path id='eq1-g1-82' d='M3.203985-3.753923H3.634371L5.427646-.980324C5.547198-.789041 5.834122-.32279 5.965629-.143462C6.049315 0 6.085181 0 6.360149 0H8.009963C8.225156 0 8.404483 0 8.404483-.215193C8.404483-.310834 8.332752-.394521 8.225156-.418431C7.782814-.514072 7.197011-1.303113 6.910087-1.685679C6.826401-1.80523 6.228643-2.594271 5.427646-3.88543C6.491656-4.076712 7.519801-4.531009 7.519801-5.953674C7.519801-7.615442 5.762391-8.18929 4.351681-8.18929H.597758C.382565-8.18929 .191283-8.18929 .191283-7.974097C.191283-7.770859 .418431-7.770859 .514072-7.770859C1.195517-7.770859 1.255293-7.687173 1.255293-7.089415V-1.099875C1.255293-.502117 1.195517-.418431 .514072-.418431C.418431-.418431 .191283-.418431 .191283-.215193C.191283 0 .382565 0 .597758 0H3.873474C4.088667 0 4.267995 0 4.267995-.215193C4.267995-.418431 4.064757-.418431 3.93325-.418431C3.251806-.418431 3.203985-.514072 3.203985-1.099875V-3.753923ZM5.511333-4.339726C5.846077-4.782067 5.881943-5.415691 5.881943-5.941719C5.881943-6.515567 5.810212-7.149191 5.427646-7.639352C5.917808-7.531756 7.10137-7.161146 7.10137-5.953674C7.10137-5.176588 6.742715-4.566874 5.511333-4.339726ZM3.203985-7.12528C3.203985-7.376339 3.203985-7.770859 3.945205-7.770859C4.961395-7.770859 5.463512-7.352428 5.463512-5.941719C5.463512-4.399502 5.092902-4.172354 3.203985-4.172354V-7.12528ZM1.578082-.418431C1.673724-.633624 1.673724-.968369 1.673724-1.075965V-7.113325C1.673724-7.232877 1.673724-7.555666 1.578082-7.770859H2.940971C2.785554-7.579577 2.785554-7.340473 2.785554-7.161146V-1.075965C2.785554-.956413 2.785554-.633624 2.881196-.418431H1.578082ZM4.124533-3.753923C4.208219-3.765878 4.25604-3.777833 4.351681-3.777833C4.531009-3.777833 4.794022-3.801743 4.97335-3.825654C5.152677-3.53873 6.443836-1.41071 7.436115-.418431H6.276463L4.124533-3.753923Z'/>
+<path id='eq1-g2-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
 <path id='eq1-g4-10' d='M7.914321-1.865006H7.651308C7.591532-1.554172 7.531756-1.243337 7.436115-.992279C7.376339-.800996 7.340473-.705355 6.647073-.705355H5.702615C5.846077-1.374844 6.192777-1.948692 6.682939-2.689913C7.244832-3.56264 7.79477-4.435367 7.79477-5.427646C7.79477-7.07746 6.216687-8.416438 4.220174-8.416438C2.211706-8.416438 .645579-7.065504 .645579-5.427646C.645579-4.447323 1.183562-3.58655 1.745455-2.713823C2.247572-1.936737 2.606227-1.374844 2.737733-.705355H1.793275C1.099875-.705355 1.06401-.800996 1.004234-.980324C.908593-1.231382 .848817-1.578082 .789041-1.865006H.526027L.908593 0H2.761644C3.024658 0 3.048568 0 3.048568-.215193C3.048568-1.06401 2.666002-2.10411 2.426899-2.713823C2.080199-3.658281 1.75741-4.531009 1.75741-5.439601C1.75741-7.280697 3.036613-8.177335 4.220174-8.177335S6.682939-7.280697 6.682939-5.439601C6.682939-4.531009 6.348194-3.634371 6.01345-2.749689C5.810212-2.175841 5.391781-1.075965 5.391781-.227148C5.391781 0 5.427646 0 5.69066 0H7.531756L7.914321-1.865006Z'/>
 <path id='eq1-g4-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
-<path id='eq1-g3-100' d='M4.28792-5.292154C4.29589-5.308095 4.319801-5.411706 4.319801-5.419676C4.319801-5.459527 4.28792-5.531258 4.192279-5.531258C4.160399-5.531258 3.913325-5.507347 3.730012-5.491407L3.283686-5.459527C3.108344-5.443587 3.028643-5.435616 3.028643-5.292154C3.028643-5.180573 3.140224-5.180573 3.235866-5.180573C3.618431-5.180573 3.618431-5.132752 3.618431-5.061021C3.618431-5.0132 3.55467-4.750187 3.514819-4.590785L3.124284-3.036613C3.052553-3.172105 2.82142-3.514819 2.335243-3.514819C1.3868-3.514819 .342715-2.406974 .342715-1.227397C.342715-.398506 .876712 .079701 1.490411 .079701C2.000498 .079701 2.438854-.326775 2.582316-.486177C2.725778 .063761 3.267746 .079701 3.363387 .079701C3.730012 .079701 3.913325-.223163 3.977086-.358655C4.136488-.645579 4.24807-1.107846 4.24807-1.139726C4.24807-1.187547 4.216189-1.243337 4.120548-1.243337S4.008966-1.195517 3.961146-.996264C3.849564-.557908 3.698132-.143462 3.387298-.143462C3.203985-.143462 3.132254-.294894 3.132254-.518057C3.132254-.669489 3.156164-.757161 3.180075-.860772L4.28792-5.292154ZM2.582316-.860772C2.183811-.310834 1.769365-.143462 1.514321-.143462C1.147696-.143462 .964384-.478207 .964384-.892653C.964384-1.267248 1.179577-2.12005 1.354919-2.470735C1.586052-2.956912 1.976588-3.291656 2.343213-3.291656C2.86127-3.291656 3.012702-2.709838 3.012702-2.614197C3.012702-2.582316 2.81345-1.801245 2.765629-1.594022C2.662017-1.219427 2.662017-1.203487 2.582316-.860772Z'/>
-<path id='eq1-g2-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
 <path id='eq1-g0-102' d='M2.594271-4.794022H3.957161V-5.308095H2.534496V-6.539477C2.534496-7.782814 3.323537-7.974097 3.718057-7.974097C3.849564-7.974097 3.873474-7.962142 3.945205-7.938232C3.765878-7.81868 3.658281-7.615442 3.658281-7.364384C3.658281-6.886177 4.040847-6.670984 4.351681-6.670984C4.614695-6.670984 5.045081-6.850311 5.045081-7.376339C5.045081-7.866501 4.614695-8.368618 3.765878-8.368618C2.677958-8.368618 1.350934-7.914321 1.350934-6.527522V-5.308095H.466252V-4.794022H1.350934V-.514072H.526027V0C.800996-.02391 1.697634-.02391 2.032379-.02391C2.379078-.02391 3.347447-.02391 3.634371 0V-.514072H2.594271V-4.794022Z'/>
 </defs>
 <g id='eq1-page1'>
@@ -186,17 +181,9 @@ $ \nabla u $
 <use x='0' y='0' xlink:href='#eq5-g0-114'/>
 <use x='9.962671' y='0' xlink:href='#eq5-g1-117'/>
 </g>
-</svg> for scalar fields</li><li><strong>Fluxes</strong>: Heat flux, mass flux</li></ul><section id="autotoc_md514"><h3><a href="#autotoc_md514">Component Access</a></h3><p>Vector components can be accessed via:</p><ul><li>Index notation: <code>f(i)</code> for the i-th component</li><li>Coordinate accessors: <code>f.x()</code>, <code>f.y()</code>, <code>f.z()</code> for first three components</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_function_base.html">FunctionBase</a></p><p><a href="_real_function_8h.html">RealFunction</a></p><p><a href="_matrix_function_8h.html">MatrixFunction</a></p></aside></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;VectorFunctionBase&lt;Scalar, Derived&gt;&gt;</a>
-            </dt>
-            <dd>Base class for function objects which can be evaluated over a mesh.</dd>
-          </dl>
-        </section>
+</svg> for scalar fields</li><li><strong>Fluxes</strong>: Heat flux, mass flux</li></ul><section id="autotoc_md549"><h2><a href="#autotoc_md549">Component Access</a></h2><p>Vector components can be accessed via:</p><ul><li>Index notation: <code>f(i)</code> for the i-th component</li><li>Coordinate accessors: <code>f.x()</code>, <code>f.y()</code>, <code>f.z()</code> for first three components</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="_real_function_8h.html">RealFunction</a></p><p><a href="_matrix_function_8h.html">MatrixFunction</a></p></aside></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_function_base.html" title="FunctionBase&lt; VectorFunctionBase&lt; Scalar, Derived &gt; &gt;">FunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">VectorFunctionBase</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#ad42a88d23d9d12ac0280d0abae88875e"><span class="nc">VectorFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><span class="n">Derived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for function objects which can be evaluated over a mesh.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#a6049a2e88f41fa0b9ed05157cb23f772"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_function_base.html#ad29a755240e4c6938395b937a1c4a132">FunctionBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>9 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#aa75b0ee8f7f82337ebf0b88abfa91b18"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ad722433deff18a068eb7bd27da532d45"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#aba5919eddb1f90f8ca65bbd25d065d60"><code>traceOf()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -204,8 +191,8 @@ $ \nabla u $
               using <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc-self">ScalarType</a> = Scalar
             </dt>
             <dd>Type of scalar components.</dd>
-            <dt id="aeb3ca75be173af7ec989ccd7884e874f">
-              using <a href="#aeb3ca75be173af7ec989ccd7884e874f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;Scalar, Derived&gt;&gt;
+            <dt id="a1b63d0c7bcc465a6c471283b7a892965">
+              using <a href="#a1b63d0c7bcc465a6c471283b7a892965" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;<a href="#ad42a88d23d9d12ac0280d0abae88875e" class="m-doc">VectorFunctionBase</a>&lt;Scalar, Derived&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -218,11 +205,11 @@ $ \nabla u $
             </dt>
             <dd>Default constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a2336872a70bffdb2287f2fa4bc070e43" class="m-doc">VectorFunctionBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a2336872a70bffdb2287f2fa4bc070e43" class="m-doc">VectorFunctionBase</a>(</span><span class="m-doc-wrap">const VectorFunctionBase&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a46bf47524db4b552e5c4eace65020099" class="m-doc">VectorFunctionBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a46bf47524db4b552e5c4eace65020099" class="m-doc">VectorFunctionBase</a>(</span><span class="m-doc-wrap">VectorFunctionBase&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -262,20 +249,31 @@ $ \nabla u $
               <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order on a mesh entity.</dd>
-            <dt id="a6049a2e88f41fa0b9ed05157cb23f772">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6049a2e88f41fa0b9ed05157cb23f772" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6049a2e88f41fa0b9ed05157cb23f772" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#ad42a88d23d9d12ac0280d0abae88875e" class="m-doc">VectorFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polymorphically copies the derived function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the function on a Point belonging to the mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15eb99a5cecce266b59c5e7c1a9b2f4d" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the function at an integration point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afd564b09b05a55499d7576b85f69a01e" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j) const -&gt; auto</span>
+            </dt>
+            <dd>Extracts the (i,j)-th component of a matrix function.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a2336872a70bffdb2287f2fa4bc070e43"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2336872a70bffdb2287f2fa4bc070e43" class="m-doc-self">VectorFunctionBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2336872a70bffdb2287f2fa4bc070e43" class="m-doc-self">VectorFunctionBase</a>(</span><span class="m-doc-wrap">const VectorFunctionBase&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -292,10 +290,8 @@ $ \nabla u $
           </div></section>
           <section class="m-doc-details" id="a46bf47524db4b552e5c4eace65020099"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a46bf47524db4b552e5c4eace65020099" class="m-doc-self">VectorFunctionBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a46bf47524db4b552e5c4eace65020099" class="m-doc-self">VectorFunctionBase</a>(</span><span class="m-doc-wrap">VectorFunctionBase&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -312,10 +308,8 @@ $ \nabla u $
           </div></section>
           <section class="m-doc-details" id="a20a02eeff14d68d1c188d8f2386dc91d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20a02eeff14d68d1c188d8f2386dc91d" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20a02eeff14d68d1c188d8f2386dc91d" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Convenience accessor for the x-component (first component).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -326,14 +320,12 @@ $ \nabla u $
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-success"><h4>Precondition</h4><p>getDimension() &gt;= 1</p></aside>
+<aside class="m-note m-info"><h4>Precondition</h4><p>getDimension() &gt;= 1</p></aside>
           </div></section>
           <section class="m-doc-details" id="a9de13de57bb32fb45b61d857a716cb3a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9de13de57bb32fb45b61d857a716cb3a" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9de13de57bb32fb45b61d857a716cb3a" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Convenience accessor for the y-component (second component).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -344,14 +336,12 @@ $ \nabla u $
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-success"><h4>Precondition</h4><p>getDimension() &gt;= 2</p></aside>
+<aside class="m-note m-info"><h4>Precondition</h4><p>getDimension() &gt;= 2</p></aside>
           </div></section>
           <section class="m-doc-details" id="acbf3185432eb4f4bdaa34d7ecd729535"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbf3185432eb4f4bdaa34d7ecd729535" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbf3185432eb4f4bdaa34d7ecd729535" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Convenience accessor for the z-component (third component).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -362,14 +352,12 @@ $ \nabla u $
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-success"><h4>Precondition</h4><p>getDimension() &gt;= 3</p></aside>
+<aside class="m-note m-info"><h4>Precondition</h4><p>getDimension() &gt;= 3</p></aside>
           </div></section>
           <section class="m-doc-details" id="a35432dd5e47b1994ae143fff0e770739"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35432dd5e47b1994ae143fff0e770739" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35432dd5e47b1994ae143fff0e770739" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Accesses the i-th component of the vector function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -417,14 +405,12 @@ $ f_i(x) = (\mathbf{f}(x))_i $
 <use x='66.297542' y='0' xlink:href='#eq6-g3-41'/>
 <use x='70.849868' y='1.793263' xlink:href='#eq6-g1-105'/>
 </g>
-</svg></p><aside class="m-note m-success"><h4>Precondition</h4><p>i &lt; getDimension()</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="_component_8h.html">Component</a></p></aside>
+</svg></p><aside class="m-note m-info"><h4>Precondition</h4><p>i &lt; getDimension()</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="_component_8h.html">Component</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="af5f065ebe0b3b1c58b0c2402a50fc9e3"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the vector function at a point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -447,10 +433,8 @@ $ f_i(x) = (\mathbf{f}(x))_i $
           </div></section>
           <section class="m-doc-details" id="aa249459e67c36e2343e940d08970970a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the vector function at an integration point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -473,10 +457,8 @@ $ f_i(x) = (\mathbf{f}(x))_i $
           </div></section>
           <section class="m-doc-details" id="aad8f738241426a32d95c3696395698d3"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the dimension of the vector object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -490,10 +472,8 @@ $ f_i(x) = (\mathbf{f}(x))_i $
           </div></section>
           <section class="m-doc-details" id="a2db2949e727b5e6fecadb8cc5645b4d3"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the polynomial order on a mesh entity.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -513,6 +493,100 @@ $ f_i(x) = (\mathbf{f}(x))_i $
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a6049a2e88f41fa0b9ed05157cb23f772"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ad42a88d23d9d12ac0280d0abae88875e" class="m-doc">VectorFunctionBase</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6049a2e88f41fa0b9ed05157cb23f772" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Polymorphically copies the derived function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7c866cf8be951c464aceeb788579b29a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the function on a Point belonging to the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Point at which to evaluate the function</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Function value at the given point</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This operator provides convenient function call syntax for evaluation. Delegates to the derived class&#x27;s getValue() method via CRTP.</p>
+          </div></section>
+          <section class="m-doc-details" id="a15eb99a5cecce266b59c5e7c1a9b2f4d"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15eb99a5cecce266b59c5e7c1a9b2f4d" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the function at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afd564b09b05a55499d7576b85f69a01e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd564b09b05a55499d7576b85f69a01e" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j) const</span></span>
+            </h3>
+            <p>Extracts the (i,j)-th component of a matrix function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row index</td>
+                </tr>
+                <tr>
+                  <td>j&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Column index</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Component function object</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="_component_8h.html">Component</a></p></aside>
           </div></section>
         </section>
       </div>
@@ -553,13 +627,20 @@ $ f_i(x) = (\mathbf{f}(x))_i $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

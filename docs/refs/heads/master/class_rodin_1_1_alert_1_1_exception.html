@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Alert::Exception class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,17 +71,15 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>Exception <span class="m-thin">class</span>
-        </h1>
-        <p>Exception class with formatted output capabilities.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_alert.html">Alert</a></div><h1>Exception</h1><p class="rodin-reference-brief">Exception class with formatted output capabilities.</p><p class="rodin-reference-include">Defined in <a href="_alert_2_exception_8h.html"><code>Rodin/Alert/Exception.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">Exception</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
@@ -94,53 +89,21 @@
           </ul>
         </nav>
 <p>A specialized exception class that extends both std::exception and the Alert messaging system. When raised, it outputs a formatted error message with red coloring and terminates the program.</p><p>The Exception class provides stream-like insertion operators for building detailed error messages with formatting capabilities.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Prefix&gt;</div>
-              class <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message&lt;ExceptionPrefix&gt;</a>
-            </dt>
-            <dd>Forward declaration of the Message template class.</dd>
-          </dl>
-        </section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              class <a href="class_rodin_1_1_alert_1_1_class_exception.html" class="m-doc">ClassException</a>
-            </dt>
-            <dd>Exception class that automatically includes the class name.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class T, class FuncName&gt;</div>
-              class <a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">MemberFunctionException</a>
-            </dt>
-            <dd>Exception type for errors occurring in member functions.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_alert_1_1_namespaced_exception.html" class="m-doc">NamespacedException</a>
-            </dt>
-            <dd>Exception class that automatically includes the namespace name.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class FuncName&gt;</div>
-              class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5_exception.html" class="m-doc">Rodin::MMG::MMG5Exception</a>
-            </dt>
-            <dd>Exception type for MMG wrapper failures.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_test_function_mismatch_exception.html" class="m-doc">Rodin::Variational::TestFunctionMismatchException</a>
-            </dt>
-            <dd>Raised when an expression is combined with a foreign test function.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_trial_function_mismatch_exception.html" class="m-doc">Rodin::Variational::TrialFunctionMismatchException</a>
-            </dt>
-            <dd>Raised when an expression is combined with a foreign trial function.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li>exception</li><li><a href="class_rodin_1_1_alert_1_1_message.html" title="Message&lt; ExceptionPrefix &gt;">Message</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Exception</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_alert_1_1_class_exception.html" title="ClassException&lt; T &gt;">ClassException</a></li><li><a href="class_rodin_1_1_alert_1_1_member_function_exception.html" title="MemberFunctionException&lt; T, FuncName &gt;">MemberFunctionException</a></li><li><a href="class_rodin_1_1_alert_1_1_namespaced_exception.html" title="NamespacedException">NamespacedException</a></li><li class="rodin-inheritance-more"><a href="#derived-classes">+3 more</a></li></ul></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><code>exception</code><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">exception</span>
+</pre></details></td><td></td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_message.html"><code>Message&lt;ExceptionPrefix&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_alert_1_1_message.html#ace94da823978a4ee0ba31c42ac1b6a16"><span class="nc">Message</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_alert_1_1_exception_prefix.html"><span class="nc">ExceptionPrefix</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Forward declaration of the Message template class.</td></tr></tbody></table></section>
+        <section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_class_exception.html"><code>ClassException&lt;T&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">ClassException</span><span class="o">&lt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Exception class that automatically includes the class name.</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_member_function_exception.html"><code>MemberFunctionException&lt;T, FuncName&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">MemberFunctionException</span><span class="o">&lt;</span><span class="w"> </span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">FuncName</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Exception type for errors occurring in member functions.</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_namespaced_exception.html"><code>NamespacedException</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">NamespacedException</span>
+</pre></details></td><td>Exception class that automatically includes the namespace name.</td></tr></tbody></table><details class="rodin-derived-disclosure"><summary class="rodin-disclosure-button"><span class="rodin-see-more">See more</span><span class="rodin-see-less">See less</span></summary><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5_exception.html"><code>MMG::MMG5Exception&lt;FuncName&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">MMG</span><span class="o">::</span><span class="nc">MMG5Exception</span><span class="o">&lt;</span><span class="w"> </span><span class="n">FuncName</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Exception type for MMG wrapper failures.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_test_function_mismatch_exception.html"><code>Variational::TestFunctionMismatchException</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Variational</span><span class="o">::</span><span class="nc">TestFunctionMismatchException</span>
+</pre></details></td><td>Raised when an expression is combined with a foreign test function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_trial_function_mismatch_exception.html"><code>Variational::TrialFunctionMismatchException</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Variational</span><span class="o">::</span><span class="nc">TrialFunctionMismatchException</span>
+</pre></details></td><td>Raised when an expression is combined with a foreign trial function.</td></tr></tbody></table></details></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_exception.html#a02597c91458745158ac9d93726bcac0c"><code>raise()</code></a></td><td><a href="class_rodin_1_1_alert_1_1_message.html#a05fa0dbb9670de92ab00a301d3e676b5">Message::raise</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_message.html"><code>Message</code></a></td><td><details><summary>4 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_alert_1_1_message.html#ae86b1d95969f40504107a97b5af66432"><code>operator&lt;&lt;()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#a0ba9797c311384eee8ad17f6ea2d20fc"><code>operator&lt;&lt;()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#aaf41a99ca70ed695dfc5b78e1c1b03bd"><code>operator&lt;&lt;()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#a313a6aa220cc1d01a1ebf1d598043186"><code>setOutputStream()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a762ad030fcf7ff1c650fbb20fe541b6e">
-              using <a href="#a762ad030fcf7ff1c650fbb20fe541b6e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&lt;<a href="class_rodin_1_1_alert_1_1_exception_prefix.html" class="m-doc">ExceptionPrefix</a>&gt;
+              using <a href="#a762ad030fcf7ff1c650fbb20fe541b6e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_message.html#ace94da823978a4ee0ba31c42ac1b6a16" class="m-doc">Message</a>&lt;<a href="class_rodin_1_1_alert_1_1_exception_prefix.html" class="m-doc">ExceptionPrefix</a>&gt;
             </dt>
             <dd>Parent class type alias.</dd>
           </dl>
@@ -157,11 +120,11 @@
             </dt>
             <dd>Constructs an Exception with a specific output stream.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac18f0d2e03372cc0620efd911f87b57d" class="m-doc">Exception</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ac18f0d2e03372cc0620efd911f87b57d" class="m-doc">Exception</a>(</span><span class="m-doc-wrap">const Exception&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a2dde9a3d00b0b76635a510a5a0177700" class="m-doc">Exception</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a2dde9a3d00b0b76635a510a5a0177700" class="m-doc">Exception</a>(</span><span class="m-doc-wrap">Exception&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -183,14 +146,14 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="abfbc23b99b2e78b609d50ac688611236"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abfbc23b99b2e78b609d50ac688611236" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abfbc23b99b2e78b609d50ac688611236" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Constructs an Exception with an empty message.</p>
 <p>Creates an exception that outputs to std::cerr by default.</p>
           </div></section>
           <section class="m-doc-details" id="af854b0d2eaa1bf97cfd590cb4c6e2a96"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af854b0d2eaa1bf97cfd590cb4c6e2a96" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af854b0d2eaa1bf97cfd590cb4c6e2a96" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
             </h3>
             <p>Constructs an Exception with a specific output stream.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -207,7 +170,7 @@
           </div></section>
           <section class="m-doc-details" id="ac18f0d2e03372cc0620efd911f87b57d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac18f0d2e03372cc0620efd911f87b57d" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac18f0d2e03372cc0620efd911f87b57d" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">const Exception&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -224,7 +187,7 @@
           </div></section>
           <section class="m-doc-details" id="a2dde9a3d00b0b76635a510a5a0177700"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2dde9a3d00b0b76635a510a5a0177700" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2dde9a3d00b0b76635a510a5a0177700" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">Exception&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -241,14 +204,14 @@
           </div></section>
           <section class="m-doc-details" id="a02597c91458745158ac9d93726bcac0c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02597c91458745158ac9d93726bcac0c" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02597c91458745158ac9d93726bcac0c" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Raises the exception to the user.</p>
-<p>Outputs a formatted error message to the configured stream and terminates the program by calling std::abort(). The message includes the exception prefix and any accumulated message content.</p>
+<p>Outputs a formatted error message to the configured stream and throws a copy of this exception. The message includes the exception prefix and any accumulated message content.</p>
           </div></section>
           <section class="m-doc-details" id="abf843cbb29dec939d0731e491bab6f70"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const char* Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf843cbb29dec939d0731e491bab6f70" class="m-doc-self">what</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const char* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf843cbb29dec939d0731e491bab6f70" class="m-doc-self">what</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the exception message.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -300,13 +263,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Type Definitions module | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -159,120 +156,120 @@
           <h2>Typedef documentation</h2>
           <section class="m-doc-details" id="ga2ec70fb46786fa2f27ae0aa32467fc5c"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
+              
               <div class="m-doc-template">
                 template&lt;class T, class Container = Deque&lt;T&gt;&gt;
               </div>
               using <a href="#ga2ec70fb46786fa2f27ae0aa32467fc5c" class="m-doc-self">Stack</a> = std::stack&lt;T, Container&gt;
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard type for representing stacks.</p>
           </div></section>
           <section class="m-doc-details" id="gaaa7028d8cff093953627586709836fcb"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
+              
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
               using <a href="#gaaa7028d8cff093953627586709836fcb" class="m-doc-self">FlatSet</a> = boost::container::flat_set&lt;T&gt;
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard flat set type.</p>
           </div></section>
           <section class="m-doc-details" id="gad4ab17db1cb81a9e71fd86d9474255be"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
+              
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
               using <a href="#gad4ab17db1cb81a9e71fd86d9474255be" class="m-doc-self">UnorderedSet</a> = boost::unordered_set&lt;T&gt;
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard unordered set type.</p>
           </div></section>
           <section class="m-doc-details" id="gaa4e2542497b9d770faa236c58e485129"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
+              
               <div class="m-doc-template">
                 template&lt;class K, class T&gt;
               </div>
               using <a href="#gaa4e2542497b9d770faa236c58e485129" class="m-doc-self">Map</a> = boost::container::map&lt;K, T&gt;
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard ordered map type.</p>
           </div></section>
           <section class="m-doc-details" id="ga5f130bd8b1c58b36b367761092cb5d58"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
+              
               <div class="m-doc-template">
                 template&lt;class ... Params&gt;
               </div>
               using <a href="#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc-self">UnorderedMap</a> = boost::unordered_map&lt;Params...&gt;
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard unordered map type.</p>
           </div></section>
           <section class="m-doc-details" id="gac254f6b6b70bc4d0f93b9bd717356963"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
+              
               <div class="m-doc-template">
                 template&lt;class K, class T&gt;
               </div>
               using <a href="#gac254f6b6b70bc4d0f93b9bd717356963" class="m-doc-self">FlatMap</a> = boost::container::flat_map&lt;K, T&gt;
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard flat map type.</p>
           </div></section>
           <section class="m-doc-details" id="gad2973bbf1f33a52a394e09f8a0ed4293"><div>
             <h3>
               using <a href="#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc-self">IndexSet</a> = FlatSet&lt;Index&gt;
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
-            </h3>
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard set of indices.</p>
           </div></section>
           <section class="m-doc-details" id="gaaa637a5d2cafaa3f415bbb2a2aae306d"><div>
             <h3>
               using <a href="#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc-self">IndexVector</a> = std::vector&lt;Index&gt;
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
-            </h3>
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard vector of indices.</p>
           </div></section>
           <section class="m-doc-details" id="ga6c5e391ad8021755d9d9f9d5755539cb"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
+              
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
               using <a href="#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc-self">IndexMap</a> = FlatMap&lt;Index, T&gt;
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard map of indices to arbitrary types.</p>
           </div></section>
           <section class="m-doc-details" id="ga88eed706ceb890a15d7217b0c3be867b"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
+              
               <div class="m-doc-template">
                 template&lt;size_t Size&gt;
               </div>
               using <a href="#ga88eed706ceb890a15d7217b0c3be867b" class="m-doc-self">BitSet</a> = std::bitset&lt;Size&gt;
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard bitset template with fixed size.</p>
           </div></section>
           <section class="m-doc-details" id="ga8df8de90fe5d375d6ed7367a432cb66e"><div>
             <h3>
               using <a href="#ga8df8de90fe5d375d6ed7367a432cb66e" class="m-doc-self">BitSet2</a> = std::bitset&lt;2&gt;
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
-            </h3>
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard bitset with 2 bits.</p>
           </div></section>
           <section class="m-doc-details" id="gaaf8f4d77efd311ec7818ab421294ef82"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
+              
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
               using <a href="#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc-self">Optional</a> = std::optional&lt;T&gt;
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard optional type wrapper.</p>
           </div></section>
           <section class="m-doc-details" id="gabb48001a8affd5435f164fd88fa1a1bc"><div>
             <h3>
               using <a href="#gabb48001a8affd5435f164fd88fa1a1bc" class="m-doc-self">StringView</a> = std::string_view
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
-            </h3>
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
 <p>Standard string view type.</p>
           </div></section>
         </section>
@@ -314,13 +311,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

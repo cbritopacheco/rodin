@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Adaptation::SWIFT::HingeState class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a><span>›</span><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a></div><h1>HingeState</h1><p class="rodin-reference-brief">Pointwise slacks and Newton coefficients of the affine quadratic hinges.</p><p class="rodin-reference-include">Defined in <a href="_hinge_8h.html"><code>Rodin/Adaptation/SWIFT/Hinge.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">HingeState</span><span class="p">;</span>
+</pre>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt><a href="#a2693690fd3b8e702a9698dda99279d5a" class="m-doc">HingeState</a></dt><dd>Constructs the SWIFT hinge state.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper"><a href="#a2693690fd3b8e702a9698dda99279d5a" class="m-doc">HingeState</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_cell_deformation.html" class="m-doc">CellDeformation</a>&amp; deformation,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; innerGradient,
+              const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hingeCoefficient)</span>
+            </div></details></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt><a href="#a59401925ce106d661cd1355f497f1d44" class="m-doc">getEnergy</a></dt><dd>Affine quality energy with the construction parameters, evaluated only on demand.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="#a59401925ce106d661cd1355f497f1d44" class="m-doc">getEnergy</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hingeCoefficient,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> weightJ = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1),
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> weightQ = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1)) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </div></details></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4047b202ac9d86aa68d25c14e693be17" class="m-doc">isAdmissible</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Whether the frozen deformation permits evaluation; affine slacks may be negative.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a243dc8952986532523e01c284fd03f1e" class="m-doc">getJacobianRow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; gradient) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Negative Jacobian differential at the frozen outer state.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#add111d3e4e72a3c58a69ad16a834ce20" class="m-doc">getDistortionRow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; gradient) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Distortion differential at the frozen outer state.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abf1d7816af48e8104f9283bda4705aa2" class="m-doc">getJacobianAction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>The jacobian action.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa0b7b7958b9089e5f008ddcd8dd0fa89" class="m-doc">getDistortionAction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>The distortion action.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a125bec12c32f8b8dd129b073ab9ec9f4" class="m-doc">getJacobianSlack</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>The jacobian slack.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a37e68359b98ff38e41a8bf11f1f2a21b" class="m-doc">getDistortionSlack</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>The distortion slack.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8767c598ee4f399a340be291ea3ec279" class="m-doc">getJacobianHessian</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>The jacobian hessian.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15e149333dc05038a774f4c9f6a67844" class="m-doc">getDistortionHessian</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>The distortion hessian.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aeada8d7a764e0eecae1f7dcf068d7e68" class="m-doc">getJacobianForce</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>The jacobian force.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a51ddde3a0603e3f46a04634e65cd40df" class="m-doc">getDistortionForce</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>The distortion force.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a2693690fd3b8e702a9698dda99279d5a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2693690fd3b8e702a9698dda99279d5a" class="m-doc-self">HingeState</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_cell_deformation.html" class="m-doc">CellDeformation</a>&amp; deformation,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; innerGradient,
+              const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hingeCoefficient)</span></span>
+            </h3>
+            <p>Constructs the SWIFT hinge state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">deformation</td>
+                  <td>Frozen outer deformation.</td>
+                </tr>
+                <tr>
+                  <td>innerGradient</td>
+                  <td>Gradient of the proposed inner increment.</td>
+                </tr>
+                <tr>
+                  <td>parameters</td>
+                  <td>Quality bounds, guard widths and constraint strengths.</td>
+                </tr>
+                <tr>
+                  <td>hingeCoefficient</td>
+                  <td>Predicted decrease per volume, before constraint strengths.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a59401925ce106d661cd1355f497f1d44"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a59401925ce106d661cd1355f497f1d44" class="m-doc-self">getEnergy</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hingeCoefficient,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> weightJ = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1),
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> weightQ = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1)) const</span></span>
+            </h3>
+            <p>Affine quality energy with the construction parameters, evaluated only on demand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">parameters</td>
+                  <td>Quality guards and constraint strengths used at construction.</td>
+                </tr>
+                <tr>
+                  <td>hingeCoefficient</td>
+                  <td>Predicted decrease per volume used at construction.</td>
+                </tr>
+                <tr>
+                  <td>weightJ</td>
+                  <td>Frozen Jacobian witness measure.</td>
+                </tr>
+                <tr>
+                  <td>weightQ</td>
+                  <td>Frozen distortion witness measure.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The squared-hinge energy, or infinity for an inadmissible frozen state.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4047b202ac9d86aa68d25c14e693be17"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4047b202ac9d86aa68d25c14e693be17" class="m-doc-self">isAdmissible</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Whether the frozen deformation permits evaluation; affine slacks may be negative.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Whether the frozen deformation has a positive Jacobian.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a243dc8952986532523e01c284fd03f1e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a243dc8952986532523e01c284fd03f1e" class="m-doc-self">getJacobianRow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; gradient) const</span></span>
+            </h3>
+            <p>Negative Jacobian differential at the frozen outer state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">gradient</td>
+                  <td>Incremental deformation gradient.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The negative determinant differential.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="add111d3e4e72a3c58a69ad16a834ce20"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add111d3e4e72a3c58a69ad16a834ce20" class="m-doc-self">getDistortionRow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; gradient) const</span></span>
+            </h3>
+            <p>Distortion differential at the frozen outer state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">gradient</td>
+                  <td>Incremental deformation gradient.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The relative-distortion differential.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abf1d7816af48e8104f9283bda4705aa2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf1d7816af48e8104f9283bda4705aa2" class="m-doc-self">getJacobianAction</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The jacobian action.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The negative determinant differential on the inner increment.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa0b7b7958b9089e5f008ddcd8dd0fa89"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0b7b7958b9089e5f008ddcd8dd0fa89" class="m-doc-self">getDistortionAction</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The distortion action.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The distortion differential on the inner increment.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a125bec12c32f8b8dd129b073ab9ec9f4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a125bec12c32f8b8dd129b073ab9ec9f4" class="m-doc-self">getJacobianSlack</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The jacobian slack.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The affine distance above the Jacobian floor.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a37e68359b98ff38e41a8bf11f1f2a21b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37e68359b98ff38e41a8bf11f1f2a21b" class="m-doc-self">getDistortionSlack</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The distortion slack.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The affine distance below the distortion ceiling.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8767c598ee4f399a340be291ea3ec279"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8767c598ee4f399a340be291ea3ec279" class="m-doc-self">getJacobianHessian</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The jacobian hessian.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The active Jacobian hinge curvature coefficient, or zero.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a15e149333dc05038a774f4c9f6a67844"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e149333dc05038a774f4c9f6a67844" class="m-doc-self">getDistortionHessian</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The distortion hessian.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The active distortion hinge curvature coefficient, or zero.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aeada8d7a764e0eecae1f7dcf068d7e68"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeada8d7a764e0eecae1f7dcf068d7e68" class="m-doc-self">getJacobianForce</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The jacobian force.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The coefficient of the Jacobian row in the Newton load.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a51ddde3a0603e3f46a04634e65cd40df"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51ddde3a0603e3f46a04634e65cd40df" class="m-doc-self">getDistortionForce</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The distortion force.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The coefficient of the distortion row in the Newton load.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-8869a4936c9f.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,18 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_quadrature_rule_8h.html">&lt;Rodin/Variational/QuadratureRule.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Quadrature rule for integrating general functions on mesh polytopes.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>QuadratureRule <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Quadrature rule for integrating general functions on mesh polytopes.</p><p class="rodin-reference-include">Defined in <a href="_quadrature_rule_8h.html"><code>Rodin/Variational/QuadratureRule.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FunctionDerived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_function_base_3_01_function_derived_01_4_01_4.html#a671c93ffac04bb178191347f6fc91a28"><span class="nc">QuadratureRule</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_function_base.html"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FunctionDerived</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html">QuadratureRule</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Integrand</code></td><td><code>FunctionBase&lt; FunctionDerived &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-static-attribs">Public static variables</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
@@ -95,16 +91,9 @@
             </li>
           </ul>
         </nav>
-<p>This specialization evaluates scalar-valued function integrals on a single polytope using a quadrature formula and the corresponding mapped geometric quadrature points cached on the mesh.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>
-            </dt>
-            <dd>Base class for all objects in Rodin&#x27;s FormLanguage system.</dd>
-          </dl>
-        </section>
+<p>This specialization evaluates scalar-valued function integrals on a single polytope using a quadrature formula and the corresponding mapped geometric quadrature points owned by the rule.</p>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_form_language_1_1_base.html" title="FormLanguage::Base">FormLanguage::Base</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">QuadratureRule</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_base.html"><span class="nc">Base</span></a>
+</pre></details></td><td>Base class for all objects in Rodin&#x27;s FormLanguage system.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_function_base_3_01_function_derived_01_4_01_4.html#a3bcb01757d09766c1ef3eb5d3cff614d"><code>copy()</code></a></td><td><a href="class_rodin_1_1_form_language_1_1_base.html#a08bb560be7afa722eef3459e102dfd39">Base::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -143,11 +132,11 @@
             </dt>
             <dd>Constructs the quadrature rule for the given integrand.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a52e4d5082ffb29cb85f65b361289fd32" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a52e4d5082ffb29cb85f65b361289fd32" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap">const QuadratureRule&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a93b375d25b4866b567393c99eb40e7a2">
-              <span class="m-doc-wrap-bumper"><a href="#a93b375d25b4866b567393c99eb40e7a2" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a93b375d25b4866b567393c99eb40e7a2" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap">QuadratureRule&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -156,7 +145,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3bcb01757d09766c1ef3eb5d3cff614d" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3bcb01757d09766c1ef3eb5d3cff614d" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a671c93ffac04bb178191347f6fc91a28" class="m-doc">QuadratureRule</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of this object.</dd>
             <dt>
@@ -164,7 +153,7 @@
             </dt>
             <dd>Gets the currently bound polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a88893f2a917bb9285c4e180c6c5c2110" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a88893f2a917bb9285c4e180c6c5c2110" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="#a671c93ffac04bb178191347f6fc91a28" class="m-doc">QuadratureRule</a>&amp;</span>
             </dt>
             <dd>Binds the quadrature rule to a polytope.</dd>
             <dt>
@@ -180,7 +169,7 @@
             </dt>
             <dd>Gets the integrand.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3faca872d1040b7e23345a1da1375073" class="m-doc">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa133958cce53bf8c23508a5b97c73eb0" class="m-doc">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp;</span>
             </dt>
             <dd>Gets the quadrature formula currently used.</dd>
           </dl>
@@ -189,10 +178,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a671c93ffac04bb178191347f6fc91a28"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a671c93ffac04bb178191347f6fc91a28" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#a348c95821cfaf7edb5989b3631d3b1f5" class="m-doc">IntegrandType</a>&amp; f)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a671c93ffac04bb178191347f6fc91a28" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#a348c95821cfaf7edb5989b3631d3b1f5" class="m-doc">IntegrandType</a>&amp; f)</span></span>
             </h3>
             <p>Constructs the quadrature rule for the given integrand.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -209,20 +196,45 @@
           </div></section>
           <section class="m-doc-details" id="a52e4d5082ffb29cb85f65b361289fd32"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52e4d5082ffb29cb85f65b361289fd32" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52e4d5082ffb29cb85f65b361289fd32" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const QuadratureRule&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>The cached value and polytope binding are not copied. The quadrature formula pointer is copied because it refers to a canonical formula.</p>
+          </div></section>
+          <section class="m-doc-details" id="a93b375d25b4866b567393c99eb40e7a2"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93b375d25b4866b567393c99eb40e7a2" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">QuadratureRule&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a3bcb01757d09766c1ef3eb5d3cff614d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3bcb01757d09766c1ef3eb5d3cff614d" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a671c93ffac04bb178191347f6fc91a28" class="m-doc">QuadratureRule</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3bcb01757d09766c1ef3eb5d3cff614d" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -237,10 +249,8 @@
           </div></section>
           <section class="m-doc-details" id="a80ce01a2865f77c498ede02f7d4663de"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80ce01a2865f77c498ede02f7d4663de" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80ce01a2865f77c498ede02f7d4663de" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the currently bound polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -254,10 +264,8 @@
           </div></section>
           <section class="m-doc-details" id="a88893f2a917bb9285c4e180c6c5c2110"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88893f2a917bb9285c4e180c6c5c2110" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a671c93ffac04bb178191347f6fc91a28" class="m-doc">QuadratureRule</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88893f2a917bb9285c4e180c6c5c2110" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope)</span></span>
             </h3>
             <p>Binds the quadrature rule to a polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -277,14 +285,12 @@
                 </tr>
               </tfoot>
             </table>
-<p>If no explicit quadrature formula was set previously, a default generic polytope quadrature of order 1 is selected for the polytope geometry. The corresponding mapped quadrature is then retrieved from the mesh.</p>
+<p>A generic polytope quadrature of order 1 is selected for the current polytope geometry, including when binding a different reference cell. The corresponding mapped quadrature is owned until the next bind.</p>
           </div></section>
           <section class="m-doc-details" id="a353d9754ac67af541c2d4a35118aa535"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#a52c1d63b5e3f67079bec23d81519ca4d" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a353d9754ac67af541c2d4a35118aa535" class="m-doc-self">compute</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a52c1d63b5e3f67079bec23d81519ca4d" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a353d9754ac67af541c2d4a35118aa535" class="m-doc-self">compute</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Computes the integral value on the currently bound polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -298,10 +304,8 @@
           </div></section>
           <section class="m-doc-details" id="aa4caca1c2903b8b70648c487999306e6"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a52c1d63b5e3f67079bec23d81519ca4d" class="m-doc">ScalarType</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa4caca1c2903b8b70648c487999306e6" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a52c1d63b5e3f67079bec23d81519ca4d" class="m-doc">ScalarType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa4caca1c2903b8b70648c487999306e6" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the cached value, if available.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -315,10 +319,8 @@
           </div></section>
           <section class="m-doc-details" id="a904cdee8f54bf04b92b4ebbd7f18ace8"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a348c95821cfaf7edb5989b3631d3b1f5" class="m-doc">IntegrandType</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a904cdee8f54bf04b92b4ebbd7f18ace8" class="m-doc-self">getIntegrand</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a348c95821cfaf7edb5989b3631d3b1f5" class="m-doc">IntegrandType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a904cdee8f54bf04b92b4ebbd7f18ace8" class="m-doc-self">getIntegrand</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the integrand.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -330,12 +332,10 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a3faca872d1040b7e23345a1da1375073"><div>
+          <section class="m-doc-details" id="aa133958cce53bf8c23508a5b97c73eb0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3faca872d1040b7e23345a1da1375073" class="m-doc-self">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa133958cce53bf8c23508a5b97c73eb0" class="m-doc-self">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the quadrature formula currently used.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -386,13 +386,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

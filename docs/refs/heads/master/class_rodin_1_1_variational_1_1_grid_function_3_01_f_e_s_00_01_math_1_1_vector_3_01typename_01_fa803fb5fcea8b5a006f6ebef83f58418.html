@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::GridFunction&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,19 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_grid_function_8h.html">&lt;Rodin/Variational/GridFunction.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class FES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>GridFunction&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Grid function storing its degrees of freedom in a dense Math::Vector over the space&#x27;s scalar type (the standard local backend).</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>GridFunction <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Grid function storing its degrees of freedom in a dense Math::Vector over the space&#x27;s scalar type (the standard local backend).</p><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_math_1_1_vector_3_01typename_01_fa803fb5fcea8b5a006f6ebef83f58418.html#a5d6d5bfeed8c675c0e6288256614b32e"><span class="nc">GridFunction</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_grid_function.html">GridFunction</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>FES</code></td><td><code>FES</code></td></tr><tr><td><code>Data</code></td><td><code>Math::Vector&lt; typename FormLanguage::Traits&lt; FES &gt;::ScalarType &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -94,16 +91,8 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">::<wbr />FESType</a>, class Data = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#aee60825459fdaf14377eb17bc437a934" class="m-doc">::<wbr />DataType</a>&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase&lt;GridFunction&lt;FES, Math::Vector&lt;FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Base class for grid function objects.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" title="GridFunctionBase&lt; GridFunction&lt; FES, Math::Vector&lt; FormLanguage::Traits&lt; FES &gt;::ScalarType &gt; &gt; &gt;">GridFunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">GridFunction</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base.html"><code>GridFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c"><span class="nc">GridFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_math_1_1_vector_3_01typename_01_fa803fb5fcea8b5a006f6ebef83f58418.html#a5d6d5bfeed8c675c0e6288256614b32e"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for grid function objects.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base.html"><code>GridFunctionBase</code></a></td><td><details><summary>21 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a2b5727340d5581d5b23e24cd47652a5c"><code>argmax()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#af9f4820ea5fb253ead68bf314e38d456"><code>argmin()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4a1c0b519f1e883b370f4fd6c3b76ee5"><code>ContextType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a076499a78a29517d137192da51112c84"><code>ElementType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ab5a2f5705f2c21ba72347ecc0f50d556"><code>getColumns()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#aad8f738241426a32d95c3696395698d3"><code>getDimension()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4758cdb6b0d7f09e6719a7bfa884e86e"><code>getFiniteElementSpace()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a55906fdb64ef621b6b153e7d8d8adf35"><code>getName()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ac5827caceb168f6993f153e631adc85b"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a966cd5d873768a5a9b294a66c673785b"><code>getRows()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a3677f5a27ad4efb8d5567634bf0940e9"><code>getSize()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#af0e2923caa24f35613d3cc8427bdc6bb"><code>getValue()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a86092c214e872b8e109dce71824c1255"><code>interpolate()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a8988d177e65dc802b5e4b03bfdb47d55"><code>load()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#afd2113abcfab004d55f4bcbd6f904362"><code>MeshType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ad1ee35b232ba18e7f94fee522ab836ee"><code>save()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a3c0409f55497ff28ac68da355f3f64aa"><code>setData()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ad387f7268267dcfadf5a851549224848"><code>setName()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html"><code>GridFunctionBaseReference</code></a></td><td><details><summary>4 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a992cc9631a9fa2be535cf7e9a6789503"><code>copy()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a7c866cf8be951c464aceeb788579b29a"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a11cae0eed7fc3211076c29a6552091ab"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a00dc82bfe030a25cc55d89b93cf4b5a2"><code>setData()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -120,11 +109,11 @@
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a55b94d86d349da371369ff297ccd4268">
-              using <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc-self">DataType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;
+              using <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc-self">DataType</a> = <a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Coefficient data storage type.</dd>
-            <dt id="a3a7c9c7b52446b53d800779922de198e">
-              using <a href="#a3a7c9c7b52446b53d800779922de198e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&gt;
+            <dt id="a43e768efd91c231ad3ed6f6ebff26ed5">
+              using <a href="#a43e768efd91c231ad3ed6f6ebff26ed5" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&lt;<a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -137,11 +126,11 @@
             </dt>
             <dd>Constructs a zero grid function on a finite element space.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a45a1af78dc06ce60628dec2e89a98a2f" class="m-doc">GridFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a45a1af78dc06ce60628dec2e89a98a2f" class="m-doc">GridFunction</a>(</span><span class="m-doc-wrap">const GridFunction&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a9613f0f9086c77cc06a8886d52600b92" class="m-doc">GridFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a9613f0f9086c77cc06a8886d52600b92" class="m-doc">GridFunction</a>(</span><span class="m-doc-wrap">GridFunction&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -150,11 +139,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae6aa853b5a9418d1e0e1e04b58d4c26d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae6aa853b5a9418d1e0e1e04b58d4c26d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;&amp; other) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa10c0a45af82cdaab1c78ef9af315cbe" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa10c0a45af82cdaab1c78ef9af315cbe" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; other) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
@@ -174,47 +163,46 @@
             </dt>
             <dd>Accesses a coefficient by global DOF index.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Adds a scalar to every scalar coefficient.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Subtracts a scalar from every scalar coefficient.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Multiplies every coefficient by a scalar.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Divides every coefficient by a scalar.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Adds another grid function coefficient-wise.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Subtracts another grid function coefficient-wise.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Multiplies by another grid function coefficient-wise.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Divides by another grid function coefficient-wise.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>, class Pred&gt;</div>
+            <dt>class Function</dt><dd>Projects a source over a filtered region.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Function, class Pred&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a7bf67f07be076e2023ed7da153504931" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
-              const <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; v,
-              const Pred&amp; pred) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
-            </dt>
-            <dd>Projects a source over a filtered region.</dd>
+              const Function&amp; v,
+              const Pred&amp; pred) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
+            </div></details></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a69779584238dac7b4e23d9ff0a7b78b9" class="m-doc">setData</a>(</span><span class="m-doc-wrap">const <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&amp; data,
-              size_t offset = 0) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              size_t offset = 0) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Copies DOF data from a coefficient vector.</dd>
             <dt>
@@ -226,98 +214,68 @@
             </dt>
             <dd>Gets the coefficient vector.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa36388e4c7607b7956848961de144f19" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Returns the polynomial order used on a mesh entity.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a52b2a6e2f898ab31632b6ccfe5fea5ee" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a52b2a6e2f898ab31632b6ccfe5fea5ee" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp;</span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4107a9064ab310b5d2fa87a878625ae0" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4107a9064ab310b5d2fa87a878625ae0" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#acfc7fd27b959cb868fdf1ad16ebf1e1e" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; v) -&gt; Derived&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8428155d772fe2c7997a96f97196e6da" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; v) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp;</span>
             </dt>
             <dd>Assigns this grid function from a function or expression.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae77fe31796df64b0e93e43bd4ff0c67d" class="m-doc">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              const <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; fn) -&gt; Derived&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acc12aa01caaf34c26e5615735516eaaa" class="m-doc">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const Function&amp; fn) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp;</span>
             </dt>
             <dd>Projects a function on one mesh entity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a87ac29798860cf20e2d9a3dc46055d0c" class="m-doc">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; v) -&gt; Derived&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1aeb6e2b409c636d8f489065acda20ec" class="m-doc">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; v) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp;</span>
             </dt>
             <dd>Sets all DOFs attached to one mesh entity from a constant value.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab79e22182b7c08a26f9fa58340f12eca" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn) -&gt; Derived&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abaf16594e87535115421632ef23aff1b" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp;</span>
             </dt>
             <dd>Projects a source on all cells.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a180d030c75e0c658a20994011bde76c6" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
-              const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn) -&gt; Derived&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abae738f0e1d5e7b6d873e6be20e3c863" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp;</span>
             </dt>
             <dd>Projects a source on a geometric region.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aedae961b3f896ee9e221fb1e2e31b50a" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+            <dt><a href="#a624c1be80463014f636d8680f3480a29" class="m-doc">project</a></dt><dd>Projects a source on entities of a region with one attribute.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="#a624c1be80463014f636d8680f3480a29" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
               const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
-              const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) -&gt; Derived&amp;</span>
-            </dt>
-            <dd>Projects a source on entities of a region with one attribute.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#adde8b8ce0a112d4fe6bcab3505efb692" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp;</span>
+            </div></details></dd>
+            <dt><a href="#a3dd174cc366d482f7ce05866b178d0df" class="m-doc">project</a></dt><dd>Projects a source on entities of a region with selected attributes.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3dd174cc366d482f7ce05866b178d0df" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
               const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
-              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; Derived&amp;</span>
-            </dt>
-            <dd>Projects a source on entities of a region with selected attributes.</dd>
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp;</span>
+            </div></details></dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Pred&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae75269d737344d336db60324b1d3692d" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              <span class="m-doc-wrap-bumper">auto <a href="#a371deba5a3e94af613c5cca16d0c7b80" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
               const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; fn,
-              const Pred&amp; pred) -&gt; Derived&amp;</span>
+              const Pred&amp; pred) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp;</span>
             </dt>
             <dd>Projects a constant value over a filtered region.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>, class Pred&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#add293b7fe39a85c6b22e0ae915bb9456" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
-              const <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; fn,
-              const Pred&amp; pred) -&gt; Derived&amp;</span>
-            </dt>
-            <dd></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a762bdb82b08a0ed44679c8d5c4a000f4" class="m-doc">min</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Searches the minimum value in the grid function data.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8663bf2c2b14b0c0f1654dccf636f74c" class="m-doc">min</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const -&gt; <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Computes the minimum coefficient and its index.</dd>
-            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">max</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Searches for the maximum value in the grid function data.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7c7c15dc43a710a140062694b75a9980" class="m-doc">max</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const -&gt; <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Computes the maximum coefficient and its index.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a5d6d5bfeed8c675c0e6288256614b32e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap">const <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&amp; fes)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap">const <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&amp; fes)</span></span>
             </h3>
             <p>Constructs a zero grid function on a finite element space.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -334,10 +292,8 @@
           </div></section>
           <section class="m-doc-details" id="a45a1af78dc06ce60628dec2e89a98a2f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45a1af78dc06ce60628dec2e89a98a2f" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45a1af78dc06ce60628dec2e89a98a2f" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap">const GridFunction&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -354,10 +310,8 @@
           </div></section>
           <section class="m-doc-details" id="a9613f0f9086c77cc06a8886d52600b92"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9613f0f9086c77cc06a8886d52600b92" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9613f0f9086c77cc06a8886d52600b92" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap">GridFunction&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -374,10 +328,8 @@
           </div></section>
           <section class="m-doc-details" id="ae6aa853b5a9418d1e0e1e04b58d4c26d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6aa853b5a9418d1e0e1e04b58d4c26d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6aa853b5a9418d1e0e1e04b58d4c26d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -400,10 +352,8 @@
           </div></section>
           <section class="m-doc-details" id="aa10c0a45af82cdaab1c78ef9af315cbe"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa10c0a45af82cdaab1c78ef9af315cbe" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa10c0a45af82cdaab1c78ef9af315cbe" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; other)</span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -426,10 +376,8 @@
           </div></section>
           <section class="m-doc-details" id="a8663bf2c2b14b0c0f1654dccf636f74c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8663bf2c2b14b0c0f1654dccf636f74c" class="m-doc-self">min</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8663bf2c2b14b0c0f1654dccf636f74c" class="m-doc-self">min</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the minimum coefficient and its index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -452,10 +400,8 @@
           </div></section>
           <section class="m-doc-details" id="a7c7c15dc43a710a140062694b75a9980"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c7c15dc43a710a140062694b75a9980" class="m-doc-self">max</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c7c15dc43a710a140062694b75a9980" class="m-doc-self">max</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the maximum coefficient and its index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -478,10 +424,8 @@
           </div></section>
           <section class="m-doc-details" id="aa40b9fd92d45801380c5354c8822b016"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa40b9fd92d45801380c5354c8822b016" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> global)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa40b9fd92d45801380c5354c8822b016" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> global)</span></span>
             </h3>
             <p>Accesses a coefficient by global DOF index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -504,10 +448,8 @@
           </div></section>
           <section class="m-doc-details" id="a95d6456839cf18137da3b0d5f6dccbda"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a95d6456839cf18137da3b0d5f6dccbda" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> global) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a95d6456839cf18137da3b0d5f6dccbda" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> global) const</span></span>
             </h3>
             <p>Accesses a coefficient by global DOF index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -530,10 +472,8 @@
           </div></section>
           <section class="m-doc-details" id="a5a15c7fdd2c776656746e8ea2df8664d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
             <p>Adds a scalar to every scalar coefficient.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -556,10 +496,8 @@
           </div></section>
           <section class="m-doc-details" id="ad971d24f5a29ea157727c537fa23120d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
             <p>Subtracts a scalar from every scalar coefficient.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -582,10 +520,8 @@
           </div></section>
           <section class="m-doc-details" id="aa147a85f2c2df5480870d5b31277c0bb"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
             <p>Multiplies every coefficient by a scalar.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -608,10 +544,8 @@
           </div></section>
           <section class="m-doc-details" id="adf43b34e239e137af95f838dbfe5feea"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
             <p>Divides every coefficient by a scalar.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -634,10 +568,8 @@
           </div></section>
           <section class="m-doc-details" id="ab8cd8d1f3bb94590f68bbf067c78c528"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
             <p>Adds another grid function coefficient-wise.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -660,10 +592,8 @@
           </div></section>
           <section class="m-doc-details" id="af27d7820fb9dce5a22a90df5df2403ee"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
             <p>Subtracts another grid function coefficient-wise.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -686,10 +616,8 @@
           </div></section>
           <section class="m-doc-details" id="a44862edfff1ba702cd3efcaf0cb69479"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
             <p>Multiplies by another grid function coefficient-wise.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -712,10 +640,8 @@
           </div></section>
           <section class="m-doc-details" id="ae5d094b71239723ce0345f67721f4b28"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
             <p>Divides by another grid function coefficient-wise.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -740,10 +666,10 @@
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
-                template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>, class Pred&gt;
+                template&lt;class Function, class Pred&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7bf67f07be076e2023ed7da153504931" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
-              const <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; v,
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7bf67f07be076e2023ed7da153504931" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const Function&amp; v,
               const Pred&amp; pred)</span></span>
             </h3>
             <p>Projects a source over a filtered region.</p>
@@ -784,10 +710,8 @@
           </div></section>
           <section class="m-doc-details" id="a69779584238dac7b4e23d9ff0a7b78b9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69779584238dac7b4e23d9ff0a7b78b9" class="m-doc-self">setData</a>(</span><span class="m-doc-wrap">const <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&amp; data,
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69779584238dac7b4e23d9ff0a7b78b9" class="m-doc-self">setData</a>(</span><span class="m-doc-wrap">const <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&amp; data,
               size_t offset = 0)</span></span>
             </h3>
             <p>Copies DOF data from a coefficient vector.</p>
@@ -815,10 +739,8 @@
           </div></section>
           <section class="m-doc-details" id="a6ab9def81a5a105dfded770e0452996a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6ab9def81a5a105dfded770e0452996a" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6ab9def81a5a105dfded770e0452996a" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the mutable coefficient vector.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -832,10 +754,8 @@
           </div></section>
           <section class="m-doc-details" id="a0b208ee6b78fed255912b1f596d7177a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0b208ee6b78fed255912b1f596d7177a" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0b208ee6b78fed255912b1f596d7177a" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the coefficient vector.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -847,38 +767,10 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aa36388e4c7607b7956848961de144f19"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa36388e4c7607b7956848961de144f19" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Returns the polynomial order used on a mesh entity.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">polytope&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Entity whose finite element order is requested</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Polynomial order when available</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="a52b2a6e2f898ab31632b6ccfe5fea5ee"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52b2a6e2f898ab31632b6ccfe5fea5ee" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52b2a6e2f898ab31632b6ccfe5fea5ee" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -901,10 +793,8 @@
           </div></section>
           <section class="m-doc-details" id="a4107a9064ab310b5d2fa87a878625ae0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4107a9064ab310b5d2fa87a878625ae0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4107a9064ab310b5d2fa87a878625ae0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp; other)</span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -925,164 +815,240 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="acfc7fd27b959cb868fdf1ad16ebf1e1e"><div>
+          <section class="m-doc-details" id="a8428155d772fe2c7997a96f97196e6da"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-                template&lt;class <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acfc7fd27b959cb868fdf1ad16ebf1e1e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; v)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8428155d772fe2c7997a96f97196e6da" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; v)</span></span>
             </h3>
             <p>Assigns this grid function from a function or expression.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">v</td>
+                  <td>Value to assign.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to this grid function</td>
                 </tr>
               </tfoot>
             </table>
 <p>The source object <code>v</code> is forwarded to project().</p>
           </div></section>
-          <section class="m-doc-details" id="ae77fe31796df64b0e93e43bd4ff0c67d"><div>
+          <section class="m-doc-details" id="acc12aa01caaf34c26e5615735516eaaa"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-                template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae77fe31796df64b0e93e43bd4ff0c67d" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              const <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; fn)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc12aa01caaf34c26e5615735516eaaa" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const Function&amp; fn)</span></span>
             </h3>
             <p>Projects a function on one mesh entity.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Entity identified by its dimension and local index.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to this grid function</td>
                 </tr>
               </tfoot>
             </table>
 <p>The source function <code>fn</code> is interpolated on the entity identified by the <code>(dimension, index)</code> pair <code>p</code>.</p>
           </div></section>
-          <section class="m-doc-details" id="a87ac29798860cf20e2d9a3dc46055d0c"><div>
+          <section class="m-doc-details" id="a1aeb6e2b409c636d8f489065acda20ec"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87ac29798860cf20e2d9a3dc46055d0c" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1aeb6e2b409c636d8f489065acda20ec" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; v)</span></span>
             </h3>
             <p>Sets all DOFs attached to one mesh entity from a constant value.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Entity identified by its dimension and local index.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Function or value to transform or project.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to this grid function</td>
                 </tr>
               </tfoot>
             </table>
 <p>The constant value <code>v</code> is interpolated on the entity identified by the <code>(dimension, index)</code> pair <code>p</code>.</p>
           </div></section>
-          <section class="m-doc-details" id="ab79e22182b7c08a26f9fa58340f12eca"><div>
+          <section class="m-doc-details" id="abaf16594e87535115421632ef23aff1b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-                template&lt;class <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab79e22182b7c08a26f9fa58340f12eca" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abaf16594e87535115421632ef23aff1b" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn)</span></span>
             </h3>
             <p>Projects a source on all cells.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to this grid function</td>
                 </tr>
               </tfoot>
             </table>
 <p>The source object <code>fn</code> is interpolated on every cell.</p>
           </div></section>
-          <section class="m-doc-details" id="a180d030c75e0c658a20994011bde76c6"><div>
+          <section class="m-doc-details" id="abae738f0e1d5e7b6d873e6be20e3c863"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-                template&lt;class <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a180d030c75e0c658a20994011bde76c6" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abae738f0e1d5e7b6d873e6be20e3c863" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
               const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn)</span></span>
             </h3>
             <p>Projects a source on a geometric region.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">region</td>
+                  <td>Region on which to apply the operation.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to this grid function</td>
                 </tr>
               </tfoot>
             </table>
 <p>The source object <code>fn</code> is interpolated over <code>region</code>.</p>
           </div></section>
-          <section class="m-doc-details" id="aedae961b3f896ee9e221fb1e2e31b50a"><div>
+          <section class="m-doc-details" id="a624c1be80463014f636d8680f3480a29"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-                template&lt;class <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedae961b3f896ee9e221fb1e2e31b50a" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a624c1be80463014f636d8680f3480a29" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
               const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
               const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr)</span></span>
             </h3>
             <p>Projects a source on entities of a region with one attribute.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">region</td>
+                  <td>Region on which to apply the operation.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+                <tr>
+                  <td>attr</td>
+                  <td>Mesh attribute selecting the region.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to this grid function</td>
                 </tr>
               </tfoot>
             </table>
 <p>The source object <code>fn</code> is interpolated over entities of <code>region</code> whose attribute equals <code>attr</code>.</p>
           </div></section>
-          <section class="m-doc-details" id="adde8b8ce0a112d4fe6bcab3505efb692"><div>
+          <section class="m-doc-details" id="a3dd174cc366d482f7ce05866b178d0df"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-                template&lt;class <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adde8b8ce0a112d4fe6bcab3505efb692" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3dd174cc366d482f7ce05866b178d0df" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
               const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
               const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs)</span></span>
             </h3>
             <p>Projects a source on entities of a region with selected attributes.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">region</td>
+                  <td>Region on which to apply the operation.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+                <tr>
+                  <td>attrs</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to this grid function</td>
                 </tr>
               </tfoot>
             </table>
 <p>The source object <code>fn</code> is interpolated over entities of <code>region</code> whose attribute belongs to <code>attrs</code>. An empty attribute set accepts all entities in the region.</p>
           </div></section>
-          <section class="m-doc-details" id="ae75269d737344d336db60324b1d3692d"><div>
+          <section class="m-doc-details" id="a371deba5a3e94af613c5cca16d0c7b80"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-                template&lt;class Pred&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae75269d737344d336db60324b1d3692d" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a371deba5a3e94af613c5cca16d0c7b80" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
               const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; fn,
               const Pred&amp; pred)</span></span>
             </h3>
             <p>Projects a constant value over a filtered region.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
+                <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">Pred</td>
-                  <td>Predicate type selecting mesh entities</td>
+                  <td style="width: 1%">region</td>
+                  <td>Region on which to apply the operation.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+                <tr>
+                  <td>pred</td>
+                  <td>Predicate selecting the entities on which to project.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -1094,24 +1060,10 @@
             </table>
 <p>The constant value <code>fn</code> is interpolated over entities of <code>region</code> accepted by <code>pred</code>.</p>
           </div></section>
-          <section class="m-doc-details" id="add293b7fe39a85c6b22e0ae915bb9456"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-                template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>, class Pred&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add293b7fe39a85c6b22e0ae915bb9456" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
-              const <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; fn,
-              const Pred&amp; pred)</span></span>
-            </h3>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
-          </div></section>
           <section class="m-doc-details" id="a762bdb82b08a0ed44679c8d5c4a000f4"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a762bdb82b08a0ed44679c8d5c4a000f4" class="m-doc-self">min</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a762bdb82b08a0ed44679c8d5c4a000f4" class="m-doc-self">min</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Searches the minimum value in the grid function data.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1124,39 +1076,10 @@
             </table>
 <p>This function will compute the minimum value in the grid function data array.</p><aside class="m-note m-default"><h4>Complexity</h4><p>The operation is linear in the size of the number of entries in the underlying matrix.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a8663bf2c2b14b0c0f1654dccf636f74c"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8663bf2c2b14b0c0f1654dccf636f74c" class="m-doc-self">min</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Computes the minimum coefficient and its index.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">idx&nbsp;<span class="m-label m-flat m-warning">out</span></td>
-                  <td>Global DOF index attaining the minimum</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Minimum coefficient value</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
-          </div></section>
           <section class="m-doc-details" id="a83722b0cf86912c8e1cf177c0ede4d5d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc-self">max</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc-self">max</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Searches for the maximum value in the grid function data.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1168,33 +1091,6 @@
               </tfoot>
             </table>
 <p>This function will compute the maximum value in the grid function data array.</p><aside class="m-note m-default"><h4>Complexity</h4><p>The operation is linear in the size of the number of entries in the underlying matrix.</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a7c7c15dc43a710a140062694b75a9980"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c7c15dc43a710a140062694b75a9980" class="m-doc-self">max</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Computes the maximum coefficient and its index.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">idx&nbsp;<span class="m-label m-flat m-warning">out</span></td>
-                  <td>Global DOF index attaining the maximum</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Maximum coefficient value</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
           </div></section>
         </section>
       </div>
@@ -1235,13 +1131,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

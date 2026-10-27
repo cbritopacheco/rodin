@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Solid::FollowerPressureForce class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,7 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_follower_pressure_8h.html">&lt;Rodin/Solid/Integrators/FollowerPressure.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class TestFunctionType, class DisplacementType&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>FollowerPressureForce <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Linear-form integrator: follower pressure residual  <svg class="m-math" style="width: 9.965em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 95.660055 13.283652">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solid.html">Solid</a></div><h1>FollowerPressureForce <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Linear-form integrator: follower pressure residual  <svg class="m-math" style="width: 9.965em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 95.660055 13.283652">
 <title>
 $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
      \cdot \mathbf{w} $
@@ -114,14 +106,18 @@ $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
 <use x='79.782127' y='0' xlink:href='#eq1-g2-1'/>
 <use x='85.759681' y='0' xlink:href='#eq1-g0-119'/>
 </g>
-</svg>. Add it with &quot;+&quot; to the Problem (it already carries the residual-convention sign of a pressure pushing along the outward normal).</p>
+</svg>. Add it with &quot;+&quot; to the Problem (it already carries the residual-convention sign of a pressure pushing along the outward normal).</p><p class="rodin-reference-include">Defined in <a href="_follower_pressure_8h.html"><code>Rodin/Solid/Integrators/FollowerPressure.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TestFunctionType</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">DisplacementType</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html#a5643927256f4d7e042ec6e2626924ff7"><span class="nc">FollowerPressureForce</span></a><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -129,16 +125,8 @@ $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Number&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase&lt;Real&gt;</a>
-            </dt>
-            <dd>Base class for linear form integrators.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" title="Variational::LinearFormIntegratorBase&lt; Real &gt;">Variational::LinearFormIntegratorBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">FollowerPressureForce</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><code>Variational::LinearFormIntegratorBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for linear form integrators.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html#a11bdb4002f3e88b7b26e9d567e275ffb"><code>setPolytope()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a22832b479c9c755896c4b79b8cf40730">LinearFormIntegratorBase::setPolytope</a></td></tr><tr><td><a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html#a804c6a07f8876572c654f955d09a107c"><code>integrate()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a8679f07ef842cba7327119d748501eab">LinearFormIntegratorBase::integrate</a></td></tr><tr><td><a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html#a07a0ed42183d01cb7d7a5e5edf3caba3"><code>getPolytope()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a3e2cc56a785ee8329807d7407fd76401">LinearFormIntegratorBase::getPolytope</a></td></tr><tr><td><a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html#aba6371885ea424dd84df03d85fcb0706"><code>getRegion()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ac16226cca266745ac414468db3235c17">LinearFormIntegratorBase::getRegion</a></td></tr><tr><td><a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html#a916763c0422b35c28489f08228c2ec8e"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a15f41d8777010696597317c9083b7fc1">LinearFormIntegratorBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><code>Variational::LinearFormIntegratorBase</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ac76cd4c95442baa6361dfa9a0e9ba4a9"><code>getAttributes()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a863fc883c7ede3985157c5897e777024"><code>getTestDOFIndices()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a3319ca4dc61343f68e2f5ac7721b00ba"><code>getTestFunction()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a58d2c9eed0f2d47891079548f1a6d7d9"><code>getType()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#acdd90257d932f2691107f8b8b036770e"><code>over()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ae4fa921a8e67b4666830521dee9d15c0"><code>setDOFIndices()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_integrator.html"><code>Variational::Integrator</code></a></td><td><details><summary>7 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a350edea67dfa070881b66ed34db4c27c"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4fbdb76097cac108edbb0f49e74bfa11"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#adea5ccfd57d26e8af9eb776fdf191b04"><code>OrderType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a779c5028c546fddc461a6d6b10dcb299"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4c4c2ddfd3edbd42d18604bd674784a2"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a503b6171d3423d1daad5ac38b42b55bc"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a1d1cfd8ffb84e947f82999c682b666a7"><code>Type</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -171,14 +159,14 @@ $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a5643927256f4d7e042ec6e2626924ff7">
-              <span class="m-doc-wrap-bumper"><a href="#a5643927256f4d7e042ec6e2626924ff7" class="m-doc-self">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; pressure,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5643927256f4d7e042ec6e2626924ff7" class="m-doc">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; pressure,
               const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
               const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span>
             </dt>
-            <dd>Pressure captured BY REFERENCE: all copies follow the variable.</dd>
-            <dt id="aa577b6b9e487c36fd5c03a3772d58d5f">
-              <span class="m-doc-wrap-bumper"><a href="#aa577b6b9e487c36fd5c03a3772d58d5f" class="m-doc-self">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">FollowerPressureForce</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2cd37d03d783265ad4d9ba471c52a8ad" class="m-doc">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const FollowerPressureForce&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -186,27 +174,169 @@ $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a11bdb4002f3e88b7b26e9d567e275ffb">
-              <span class="m-doc-wrap-bumper">auto <a href="#a11bdb4002f3e88b7b26e9d567e275ffb" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face) -&gt; <a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">FollowerPressureForce</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a11bdb4002f3e88b7b26e9d567e275ffb" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face) -&gt; <a href="#a5643927256f4d7e042ec6e2626924ff7" class="m-doc">FollowerPressureForce</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Sets the current face and assembles the element residual.</dd>
-            <dt id="a804c6a07f8876572c654f955d09a107c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t te) -&gt; <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">size_t te) -&gt; <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns an entry of the current element residual vector.</dd>
-            <dt id="a07a0ed42183d01cb7d7a5e5edf3caba3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns the current face polytope.</dd>
-            <dt id="aba6371885ea424dd84df03d85fcb0706">
-              <span class="m-doc-wrap-bumper">auto <a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns the integration region.</dd>
-            <dt id="a916763c0422b35c28489f08228c2ec8e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a916763c0422b35c28489f08228c2ec8e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">FollowerPressureForce</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a916763c0422b35c28489f08228c2ec8e" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a5643927256f4d7e042ec6e2626924ff7" class="m-doc">FollowerPressureForce</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polymorphically copies this follower-pressure residual.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a5643927256f4d7e042ec6e2626924ff7"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5643927256f4d7e042ec6e2626924ff7" class="m-doc-self">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; pressure,
+              const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
+              const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pressure</td>
+                  <td>Pressure applied on the surface.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Test shape-function expression.</td>
+                </tr>
+                <tr>
+                  <td>displacement</td>
+                  <td>Displacement field.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Pressure captured BY REFERENCE: all copies follow the variable.</p>
+          </div></section>
+          <section class="m-doc-details" id="a2cd37d03d783265ad4d9ba471c52a8ad"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2cd37d03d783265ad4d9ba471c52a8ad" class="m-doc-self">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const FollowerPressureForce&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a11bdb4002f3e88b7b26e9d567e275ffb"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5643927256f4d7e042ec6e2626924ff7" class="m-doc">FollowerPressureForce</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11bdb4002f3e88b7b26e9d567e275ffb" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face) <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Sets the current face and assembles the element residual.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">face</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a804c6a07f8876572c654f955d09a107c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t te) <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns an entry of the current element residual vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">te</td>
+                  <td>Test shape-function expression.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Integral computed by the quadrature rule.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a07a0ed42183d01cb7d7a5e5edf3caba3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns the current face polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The current face polytope.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aba6371885ea424dd84df03d85fcb0706"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns the integration region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integration region.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a916763c0422b35c28489f08228c2ec8e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5643927256f4d7e042ec6e2626924ff7" class="m-doc">FollowerPressureForce</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a916763c0422b35c28489f08228c2ec8e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Polymorphically copies this follower-pressure residual.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -246,13 +376,20 @@ $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

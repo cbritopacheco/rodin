@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Adaptation::SWIFT::Distribution class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a><span>›</span><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a></div><h1>Distribution <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Sparse core of the frozen centered current-strain bilinear form.</p><p class="rodin-reference-include">Defined in <a href="_distribution_8h.html"><code>Rodin/Adaptation/SWIFT/Distribution.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TrialFunction</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TestFunction</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Displacement</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_distribution.html#aea4cea9d4b3a845d41c0138e76017432"><span class="nc">Distribution</span></a><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Inherits from</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Binds cached geometry and basis Jacobians, evaluates j and F^-1 once per quadrature point, then tabulates sym(grad v F^-1) before contracting pairs. Computes the local weighted deviatoric and divergence products. Subtracting the global mean-strain couplings gives the centered form; no independent element means are subtracted. Assembly clones isolate bind state.</p>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" title="Variational::LocalBilinearFormIntegratorBase&lt; TrialFunction::ScalarType &gt;">Variational::LocalBilinearFormIntegratorBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Distribution</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html"><code>Variational::LocalBilinearFormIntegratorBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html"><span class="nc">LocalBilinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">TrialFunction</span><span class="o">::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for bilinear form integrators whose trial and test functions live on the same polytope.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_distribution.html#a07a0ed42183d01cb7d7a5e5edf3caba3"><code>getPolytope()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#a3e2cc56a785ee8329807d7407fd76401">LocalBilinearFormIntegratorBase::getPolytope</a></td></tr><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_distribution.html#a147102f0e3a9b2f10749106d902a9d93"><code>setPolytope()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#adb84c7c3536a6c1534fb26e9cef0c2d3">LocalBilinearFormIntegratorBase::setPolytope</a></td></tr><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_distribution.html#a8fdde088130508ffcebbaf2bdc500d36"><code>integrate()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#a97c55b694574be6740d557e27aff8ba2">LocalBilinearFormIntegratorBase::integrate</a></td></tr><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_distribution.html#aba6371885ea424dd84df03d85fcb0706"><code>getRegion()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#ac16226cca266745ac414468db3235c17">LocalBilinearFormIntegratorBase::getRegion</a></td></tr><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_distribution.html#aacc147e8594c3fc894fd972eca88e60f"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#abd9e0b9a24c05710580eb93b237a21f9">LocalBilinearFormIntegratorBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html"><code>Variational::LocalBilinearFormIntegratorBase</code></a></td><td><details><summary>5 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#ac76cd4c95442baa6361dfa9a0e9ba4a9"><code>getAttributes()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#a863fc883c7ede3985157c5897e777024"><code>getTestDOFIndices()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#ae6ef7933caee02eb00ad6e9d088a12b2"><code>getTrialDOFIndices()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#a4bfd2df9744d5bfd92b05d1e6cea7a4a"><code>over()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#a3a7da362759274d841efff995be0e415"><code>setDOFIndices()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_integrator.html"><code>Variational::Integrator</code></a></td><td><details><summary>7 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a350edea67dfa070881b66ed34db4c27c"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4fbdb76097cac108edbb0f49e74bfa11"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#adea5ccfd57d26e8af9eb776fdf191b04"><code>OrderType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a779c5028c546fddc461a6d6b10dcb299"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4c4c2ddfd3edbd42d18604bd674784a2"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a503b6171d3423d1daad5ac38b42b55bc"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a1d1cfd8ffb84e947f82999c682b666a7"><code>Type</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html"><code>Variational::BilinearFormIntegratorBase</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html#a3319ca4dc61343f68e2f5ac7721b00ba"><code>getTestFunction()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html#aa35bc19de6026cd8134134430e4b5ec8"><code>getTrialFunction()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html#a58d2c9eed0f2d47891079548f1a6d7d9"><code>getType()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="aa03555b90a716baf6922955960a4bf2f">
+              using <a href="#aa03555b90a716baf6922955960a4bf2f" class="m-doc-self">ScalarType</a> = typename TrialFunction::ScalarType
+            </dt>
+            <dd>Scalar coefficient type of the trial field.</dd>
+            <dt id="ad4f06128fbc842efed38cb41fa6de0ec">
+              using <a href="#ad4f06128fbc842efed38cb41fa6de0ec" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;<a href="#aa03555b90a716baf6922955960a4bf2f" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Native cell-integrator interface.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt><a href="#aea4cea9d4b3a845d41c0138e76017432" class="m-doc">Distribution</a></dt><dd>Constructs the sparse core of the frozen distribution form.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper"><a href="#aea4cea9d4b3a845d41c0138e76017432" class="m-doc">Distribution</a>(</span><span class="m-doc-wrap">const TrialFunction&amp; trial,
+              const TestFunction&amp; test,
+              const Displacement&amp; current,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> deviatoric,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> divergence,
+              size_t order)</span>
+            </div></details></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            </dt>
+            <dd>Returns the polytope the expression is bound to.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a147102f0e3a9b2f10749106d902a9d93" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="#aea4cea9d4b3a845d41c0138e76017432" class="m-doc">Distribution</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            </dt>
+            <dd>Binds the expression to a polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8fdde088130508ffcebbaf2bdc500d36" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) -&gt; <a href="#aa03555b90a716baf6922955960a4bf2f" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
+            </dt>
+            <dd>Returns an entry of the element matrix.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">final</span></span>
+            </dt>
+            <dd>Returns the integration region.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aacc147e8594c3fc894fd972eca88e60f" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#aea4cea9d4b3a845d41c0138e76017432" class="m-doc">Distribution</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a copy of this integrator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae3f96d5cfbe543929c427910ec5869cc" class="m-doc">getCentering</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_matrix.html" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;</span>
+            </dt>
+            <dd>Global mean-strain subtraction represented by <svg class="m-math" style="width: 2.603em; height: 1.028em; vertical-align: -0.000em;" viewBox="0 -9.873238 24.984608 9.873238">
+<title>
+$UU^\top$
+</title>
+<defs>
+<path id='eq1-g0-62' d='M3.474969-5.164633H5.810212C5.937733-5.164633 6.113076-5.164633 6.113076-5.347945S5.937733-5.531258 5.810212-5.531258H.781071C.645579-5.531258 .470237-5.531258 .470237-5.347945S.645579-5.164633 .781071-5.164633H3.108344V-.310834C3.108344-.175342 3.108344 0 3.291656 0S3.474969-.175342 3.474969-.302864V-5.164633Z'/>
+<path id='eq1-g1-85' d='M6.049315-2.749689C5.630884-1.075965 4.244085-.095641 3.120299-.095641C2.259527-.095641 1.673724-.669489 1.673724-1.661768C1.673724-1.709589 1.673724-2.068244 1.80523-2.594271L2.976837-7.292653C3.084433-7.699128 3.108344-7.81868 3.957161-7.81868C4.172354-7.81868 4.291905-7.81868 4.291905-8.033873C4.291905-8.16538 4.184309-8.16538 4.112578-8.16538C3.897385-8.16538 3.646326-8.141469 3.419178-8.141469H2.008468C1.78132-8.141469 1.530262-8.16538 1.303113-8.16538C1.219427-8.16538 1.075965-8.16538 1.075965-7.938232C1.075965-7.81868 1.159651-7.81868 1.3868-7.81868C2.10411-7.81868 2.10411-7.723039 2.10411-7.591532C2.10411-7.519801 2.020423-7.173101 1.960648-6.969863L.920548-2.785554C.884682-2.654047 .812951-2.331258 .812951-2.008468C.812951-.6934 1.75741 .251059 3.060523 .251059C4.267995 .251059 5.606974-.705355 6.216687-2.223661C6.300374-2.426899 6.40797-2.84533 6.479701-3.16812C6.599253-3.598506 6.850311-4.65056 6.933998-4.961395L7.388294-6.75467C7.543711-7.376339 7.639352-7.770859 8.691407-7.81868C8.787049-7.830635 8.834869-7.926276 8.834869-8.033873C8.834869-8.16538 8.727273-8.16538 8.679452-8.16538C8.51208-8.16538 8.296887-8.141469 8.129514-8.141469H7.567621C6.826401-8.141469 6.443836-8.16538 6.43188-8.16538C6.360149-8.16538 6.216687-8.16538 6.216687-7.938232C6.216687-7.81868 6.312329-7.81868 6.396015-7.81868C7.113325-7.79477 7.161146-7.519801 7.161146-7.304608C7.161146-7.197011 7.161146-7.161146 7.113325-6.993773L6.049315-2.749689Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g1-85'/>
+<use x='9.199051' y='0' xlink:href='#eq1-g1-85'/>
+<use x='18.398102' y='-4.338437' xlink:href='#eq1-g0-62'/>
+</g>
+</svg>. Native linear forms integrate the symmetric strain in an orthonormal tensor basis. The volume and moments use the sparse core&#x27;s quadrature, preserving the variance identity for the centered form. Current volume is integrated directly as the same reference weights times geometric distortion and deformation determinant. Interpolated position fields cannot define this volume when displacement degree is below map degree.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aea4cea9d4b3a845d41c0138e76017432"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea4cea9d4b3a845d41c0138e76017432" class="m-doc-self">Distribution</a>(</span><span class="m-doc-wrap">const TrialFunction&amp; trial,
+              const TestFunction&amp; test,
+              const Displacement&amp; current,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> deviatoric,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> divergence,
+              size_t order)</span></span>
+            </h3>
+            <p>Constructs the sparse core of the frozen distribution form.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">trial</td>
+                  <td>Increment trial function.</td>
+                </tr>
+                <tr>
+                  <td>test</td>
+                  <td>Increment test function.</td>
+                </tr>
+                <tr>
+                  <td>current</td>
+                  <td>Frozen outer displacement.</td>
+                </tr>
+                <tr>
+                  <td>deviatoric</td>
+                  <td>Deviatoric strain weight including mesh scaling.</td>
+                </tr>
+                <tr>
+                  <td>divergence</td>
+                  <td>Divergence weight including mesh scaling.</td>
+                </tr>
+                <tr>
+                  <td>order</td>
+                  <td>Cell quadrature order.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a07a0ed42183d01cb7d7a5e5edf3caba3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns the polytope the expression is bound to.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The polytope the expression is bound to.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a147102f0e3a9b2f10749106d902a9d93"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aea4cea9d4b3a845d41c0138e76017432" class="m-doc">Distribution</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a147102f0e3a9b2f10749106d902a9d93" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Binds the expression to a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8fdde088130508ffcebbaf2bdc500d36"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aa03555b90a716baf6922955960a4bf2f" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8fdde088130508ffcebbaf2bdc500d36" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns an entry of the element matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tr</td>
+                  <td>Trial shape-function expression.</td>
+                </tr>
+                <tr>
+                  <td>te</td>
+                  <td>Test shape-function expression.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Integral computed by the quadrature rule.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aba6371885ea424dd84df03d85fcb0706"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns the integration region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integration region.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aacc147e8594c3fc894fd972eca88e60f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aea4cea9d4b3a845d41c0138e76017432" class="m-doc">Distribution</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacc147e8594c3fc894fd972eca88e60f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a copy of this integrator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to newly allocated copy</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae3f96d5cfbe543929c427910ec5869cc"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_matrix.html" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae3f96d5cfbe543929c427910ec5869cc" class="m-doc-self">getCentering</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Global mean-strain subtraction represented by <svg class="m-math" style="width: 2.603em; height: 1.028em; vertical-align: -0.000em;" viewBox="0 -9.873238 24.984608 9.873238">
+<title>
+$UU^\top$
+</title>
+<defs>
+<path id='eq1-g0-62' d='M3.474969-5.164633H5.810212C5.937733-5.164633 6.113076-5.164633 6.113076-5.347945S5.937733-5.531258 5.810212-5.531258H.781071C.645579-5.531258 .470237-5.531258 .470237-5.347945S.645579-5.164633 .781071-5.164633H3.108344V-.310834C3.108344-.175342 3.108344 0 3.291656 0S3.474969-.175342 3.474969-.302864V-5.164633Z'/>
+<path id='eq1-g1-85' d='M6.049315-2.749689C5.630884-1.075965 4.244085-.095641 3.120299-.095641C2.259527-.095641 1.673724-.669489 1.673724-1.661768C1.673724-1.709589 1.673724-2.068244 1.80523-2.594271L2.976837-7.292653C3.084433-7.699128 3.108344-7.81868 3.957161-7.81868C4.172354-7.81868 4.291905-7.81868 4.291905-8.033873C4.291905-8.16538 4.184309-8.16538 4.112578-8.16538C3.897385-8.16538 3.646326-8.141469 3.419178-8.141469H2.008468C1.78132-8.141469 1.530262-8.16538 1.303113-8.16538C1.219427-8.16538 1.075965-8.16538 1.075965-7.938232C1.075965-7.81868 1.159651-7.81868 1.3868-7.81868C2.10411-7.81868 2.10411-7.723039 2.10411-7.591532C2.10411-7.519801 2.020423-7.173101 1.960648-6.969863L.920548-2.785554C.884682-2.654047 .812951-2.331258 .812951-2.008468C.812951-.6934 1.75741 .251059 3.060523 .251059C4.267995 .251059 5.606974-.705355 6.216687-2.223661C6.300374-2.426899 6.40797-2.84533 6.479701-3.16812C6.599253-3.598506 6.850311-4.65056 6.933998-4.961395L7.388294-6.75467C7.543711-7.376339 7.639352-7.770859 8.691407-7.81868C8.787049-7.830635 8.834869-7.926276 8.834869-8.033873C8.834869-8.16538 8.727273-8.16538 8.679452-8.16538C8.51208-8.16538 8.296887-8.141469 8.129514-8.141469H7.567621C6.826401-8.141469 6.443836-8.16538 6.43188-8.16538C6.360149-8.16538 6.216687-8.16538 6.216687-7.938232C6.216687-7.81868 6.312329-7.81868 6.396015-7.81868C7.113325-7.79477 7.161146-7.519801 7.161146-7.304608C7.161146-7.197011 7.161146-7.161146 7.113325-6.993773L6.049315-2.749689Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g1-85'/>
+<use x='9.199051' y='0' xlink:href='#eq1-g1-85'/>
+<use x='18.398102' y='-4.338437' xlink:href='#eq1-g0-62'/>
+</g>
+</svg>. Native linear forms integrate the symmetric strain in an orthonormal tensor basis. The volume and moments use the sparse core&#x27;s quadrature, preserving the variance identity for the centered form. Current volume is integrated directly as the same reference weights times geometric distortion and deformation determinant. Interpolated position fields cannot define this volume when displacement degree is below map degree.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Mean-strain coupling matrix <svg class="m-math" style="width: 0.958em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.199055 8.169366">
+<title>
+$U$
+</title>
+<defs>
+<path id='eq2-g0-85' d='M6.049315-2.749689C5.630884-1.075965 4.244085-.095641 3.120299-.095641C2.259527-.095641 1.673724-.669489 1.673724-1.661768C1.673724-1.709589 1.673724-2.068244 1.80523-2.594271L2.976837-7.292653C3.084433-7.699128 3.108344-7.81868 3.957161-7.81868C4.172354-7.81868 4.291905-7.81868 4.291905-8.033873C4.291905-8.16538 4.184309-8.16538 4.112578-8.16538C3.897385-8.16538 3.646326-8.141469 3.419178-8.141469H2.008468C1.78132-8.141469 1.530262-8.16538 1.303113-8.16538C1.219427-8.16538 1.075965-8.16538 1.075965-7.938232C1.075965-7.81868 1.159651-7.81868 1.3868-7.81868C2.10411-7.81868 2.10411-7.723039 2.10411-7.591532C2.10411-7.519801 2.020423-7.173101 1.960648-6.969863L.920548-2.785554C.884682-2.654047 .812951-2.331258 .812951-2.008468C.812951-.6934 1.75741 .251059 3.060523 .251059C4.267995 .251059 5.606974-.705355 6.216687-2.223661C6.300374-2.426899 6.40797-2.84533 6.479701-3.16812C6.599253-3.598506 6.850311-4.65056 6.933998-4.961395L7.388294-6.75467C7.543711-7.376339 7.639352-7.770859 8.691407-7.81868C8.787049-7.830635 8.834869-7.926276 8.834869-8.033873C8.834869-8.16538 8.727273-8.16538 8.679452-8.16538C8.51208-8.16538 8.296887-8.141469 8.129514-8.141469H7.567621C6.826401-8.141469 6.443836-8.16538 6.43188-8.16538C6.360149-8.16538 6.216687-8.16538 6.216687-7.938232C6.216687-7.81868 6.312329-7.81868 6.396015-7.81868C7.113325-7.79477 7.161146-7.519801 7.161146-7.304608C7.161146-7.197011 7.161146-7.161146 7.113325-6.993773L6.049315-2.749689Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-85'/>
+</g>
+</svg> for the current fields and weights.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-8869a4936c9f.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

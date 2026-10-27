@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Adaptation::SWIFT::FittingTensor class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a><span>›</span><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a></div><h1>FittingTensor <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Matrix coefficient of the SWIFT surface fitting metric. Hessian of half the squared residual, with <svg class="m-math" style="width: 2.261em; height: 1.229em; vertical-align: -0.243em;" viewBox="0 -9.474739 21.704892 11.799346">
+<title>
+$D^2\phi$
+</title>
+<defs>
+<path id='eq1-g1-50' d='M2.247572-1.625903C2.375093-1.745455 2.709838-2.008468 2.83736-2.12005C3.331507-2.574346 3.801743-3.012702 3.801743-3.737983C3.801743-4.686426 3.004732-5.300125 2.008468-5.300125C1.052055-5.300125 .422416-4.574844 .422416-3.865504C.422416-3.474969 .73325-3.419178 .844832-3.419178C1.012204-3.419178 1.259278-3.53873 1.259278-3.841594C1.259278-4.25604 .860772-4.25604 .765131-4.25604C.996264-4.837858 1.530262-5.037111 1.920797-5.037111C2.662017-5.037111 3.044583-4.407472 3.044583-3.737983C3.044583-2.909091 2.462765-2.303362 1.522291-1.338979L.518057-.302864C.422416-.215193 .422416-.199253 .422416 0H3.57061L3.801743-1.42665H3.55467C3.53076-1.267248 3.466999-.868742 3.371357-.71731C3.323537-.653549 2.717808-.653549 2.590286-.653549H1.171606L2.247572-1.625903Z'/>
+<path id='eq1-g0-30' d='M5.140722-8.18929C5.140722-8.296887 5.057036-8.296887 5.021171-8.296887C4.913574-8.296887 4.901619-8.272976 4.853798-8.069738L4.208219-5.499377C4.172354-5.34396 4.160399-5.332005 4.148443-5.32005C4.136488-5.296139 4.052802-5.284184 4.028892-5.284184C2.068244-5.116812 .561893-3.502864 .561893-2.008468C.561893-.71731 1.554172 .071731 2.797509 .143462C2.701868 .514072 2.618182 .896638 2.52254 1.267248C2.355168 1.900872 2.259527 2.295392 2.259527 2.343213C2.259527 2.367123 2.259527 2.438854 2.379078 2.438854C2.414944 2.438854 2.462765 2.438854 2.486675 2.391034C2.510585 2.367123 2.582316 2.080199 2.630137 1.924782L3.072478 .143462C5.116812 .035866 6.670984-1.637858 6.670984-3.144209C6.670984-4.351681 5.762391-5.212453 4.435367-5.296139L5.140722-8.18929ZM4.363636-5.057036C5.152677-5.009215 5.941719-4.566874 5.941719-3.395268C5.941719-2.044334 4.99726-.251059 3.132254-.107597L4.363636-5.057036ZM2.857285-.095641C2.271482-.131507 1.291158-.442341 1.291158-1.75741C1.291158-3.263761 2.379078-4.937484 4.100623-5.045081L2.857285-.095641Z'/>
+<path id='eq1-g0-68' d='M1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .633624 0 .872727 0H4.662516C7.07746 0 9.432628-2.49863 9.432628-5.164633C9.432628-6.886177 8.404483-8.16538 6.694894-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.336239C7.460025-7.81868 8.488169-7.208966 8.488169-5.559153C8.488169-4.961395 8.249066-2.881196 7.089415-1.566127C6.75467-1.171606 5.846077-.3467 4.471233-.3467H3.108344C2.940971-.3467 2.917061-.3467 2.84533-.358655C2.713823-.37061 2.701868-.394521 2.701868-.490162C2.701868-.573848 2.725778-.645579 2.749689-.753176L4.399502-7.352428Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-68'/>
+<use x='10.044475' y='-4.338437' xlink:href='#eq1-g1-50'/>
+<use x='14.77679' y='0' xlink:href='#eq1-g0-30'/>
+</g>
+</svg> omitted and fixed gradient-scale normalization.</p><p class="rodin-reference-include">Defined in <a href="_fitting_tensor_8h.html"><code>Rodin/Adaptation/SWIFT/FittingTensor.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">GradDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Displacement</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LocatorType</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_tensor.html#a681ee28ac93403d7cca340754a657a5e"><span class="nc">FittingTensor</span></a><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Inherits from</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" title="Variational::MatrixFunctionBase&lt; Real, FittingTensor&lt; GradDerived, Displacement, LocatorType &gt; &gt;">Variational::MatrixFunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">FittingTensor</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html"><code>Variational::MatrixFunctionBase&lt;Real, …&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html"><span class="nc">MatrixFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_tensor.html#a681ee28ac93403d7cca340754a657a5e"><span class="nc">FittingTensor</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">GradDerived</span><span class="p">,</span><span class="w"> </span><span class="nc">Displacement</span><span class="p">,</span><span class="w"> </span><span class="n">LocatorType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for matrix-valued functions defined on a mesh.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_tensor.html#aba4a3a9887b3287fbff9d7065f1c0ec8"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html#a45c012c55b8470a767a7c06e1a062c73">MatrixFunctionBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>Variational::FunctionBase</code></a></td><td><details><summary>8 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html"><code>Variational::MatrixFunctionBase</code></a></td><td><details><summary>8 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html#af5f065ebe0b3b1c58b0c2402a50fc9e3"><code>getValue()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html#a7c866cf8be951c464aceeb788579b29a"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html#a15eb99a5cecce266b59c5e7c1a9b2f4d"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html#ad7584a02ad39a4e93816d166a02c170c"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html#afd564b09b05a55499d7576b85f69a01e"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html#a44ff9fe9f91406694a76cb99d4d2338f"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html#aba5919eddb1f90f8ca65bbd25d065d60"><code>traceOf()</code></a></li></ul></details></td></tr></tbody></table></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a515179486a633cd3bd8acc6d313ed50d">
+              using <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a9e6ed8cbf80765f7c226d640bf45c15c">
+              using <a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Range (evaluation value) type.</dd>
+            <dt id="a84c2020a829f6ef2eb3546d854313940">
+              using <a href="#a84c2020a829f6ef2eb3546d854313940" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">Variational::<wbr />MatrixFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="#a681ee28ac93403d7cca340754a657a5e" class="m-doc">FittingTensor</a>&lt;GradDerived, Displacement, LocatorType&gt;&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+            <dt id="a1280d0b23415d003ac43144770628a32">
+              using <a href="#a1280d0b23415d003ac43144770628a32" class="m-doc-self">GradType</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">Variational::<wbr />VectorFunctionBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, GradDerived&gt;
+            </dt>
+            <dd>Level-set gradient function type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt><a href="#a681ee28ac93403d7cca340754a657a5e" class="m-doc">FittingTensor</a></dt><dd>Constructs the fitting metric coefficient.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper"><a href="#a681ee28ac93403d7cca340754a657a5e" class="m-doc">FittingTensor</a>(</span><span class="m-doc-wrap">const <a href="#a1280d0b23415d003ac43144770628a32" class="m-doc">GradType</a>&amp; grad,
+              const Displacement&amp; current,
+              const LocatorType&amp; locator,
+              const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> normalization,
+              std::size_t dimension)</span>
+            </div></details></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#acc1e07d826049c3401b6a14122d06d85" class="m-doc">FittingTensor</a>(</span><span class="m-doc-wrap">const FittingTensor&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac2cf7231deca5d00bdaddf77168dca3a" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">Variational::<wbr />IntegrationPoint</a>&amp; ip) const -&gt; <a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a></span>
+            </dt>
+            <dd>Evaluates the coefficient at a point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a44e820ab5ce4634d93878211ffc30085" class="m-doc">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; std::size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Number of rows of the matrix value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a704883ed7aa6094bb95b59d3a42b7f43" class="m-doc">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; std::size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Number of columns of the matrix value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1277221b2d1c2fcb12361d7957fbb9c5" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Polynomial order of the composed fitting tensor when known. A globally constant vector is unchanged by deformation. Elementwise orders cannot be forwarded through point location: a moved entity may cross target cells, including cells with different constant gradients.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba4a3a9887b3287fbff9d7065f1c0ec8" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a681ee28ac93403d7cca340754a657a5e" class="m-doc">FittingTensor</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Clones this coefficient.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a681ee28ac93403d7cca340754a657a5e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a681ee28ac93403d7cca340754a657a5e" class="m-doc-self">FittingTensor</a>(</span><span class="m-doc-wrap">const <a href="#a1280d0b23415d003ac43144770628a32" class="m-doc">GradType</a>&amp; grad,
+              const Displacement&amp; current,
+              const LocatorType&amp; locator,
+              const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> normalization,
+              std::size_t dimension)</span></span>
+            </h3>
+            <p>Constructs the fitting metric coefficient.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">grad</td>
+                  <td>Gradient of the target level set.</td>
+                </tr>
+                <tr>
+                  <td>current</td>
+                  <td>Current displacement field.</td>
+                </tr>
+                <tr>
+                  <td>locator</td>
+                  <td>Locator for deformed evaluation points.</td>
+                </tr>
+                <tr>
+                  <td>parameters</td>
+                  <td>Model coefficients retained by reference.</td>
+                </tr>
+                <tr>
+                  <td>normalization</td>
+                  <td>Fixed gradient-scale normalization.</td>
+                </tr>
+                <tr>
+                  <td>dimension</td>
+                  <td>Spatial dimension.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acc1e07d826049c3401b6a14122d06d85"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc1e07d826049c3401b6a14122d06d85" class="m-doc-self">FittingTensor</a>(</span><span class="m-doc-wrap">const FittingTensor&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Coefficient to copy, cloning its target gradient.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac2cf7231deca5d00bdaddf77168dca3a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2cf7231deca5d00bdaddf77168dca3a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">Variational::<wbr />IntegrationPoint</a>&amp; ip) const</span></span>
+            </h3>
+            <p>Evaluates the coefficient at a point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Point preparation belongs to this evaluation. The coefficient retains only read-only dependencies, with one location per evaluation.</p>
+          </div></section>
+          <section class="m-doc-details" id="a44e820ab5ce4634d93878211ffc30085"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">std::size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44e820ab5ce4634d93878211ffc30085" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Number of rows of the matrix value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The rows.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a704883ed7aa6094bb95b59d3a42b7f43"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">std::size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a704883ed7aa6094bb95b59d3a42b7f43" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Number of columns of the matrix value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The columns.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1277221b2d1c2fcb12361d7957fbb9c5"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1277221b2d1c2fcb12361d7957fbb9c5" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Polynomial order of the composed fitting tensor when known. A globally constant vector is unchanged by deformation. Elementwise orders cannot be forwarded through point location: a moved entity may cross target cells, including cells with different constant gradients.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Reference entity on which the tensor is integrated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Zero for a globally constant gradient, or an empty optional.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aba4a3a9887b3287fbff9d7065f1c0ec8"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a681ee28ac93403d7cca340754a657a5e" class="m-doc">FittingTensor</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba4a3a9887b3287fbff9d7065f1c0ec8" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Clones this coefficient.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Newly allocated copy owned by the caller.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-8869a4936c9f.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

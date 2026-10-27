@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Alert::ResetT struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,10 +71,8 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>ResetT <span class="m-thin">struct</span>
-        </h1>
-        <p>Empty tag type for resetting terminal formatting.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_alert.html">Alert</a></div><h1>ResetT</h1><p class="rodin-reference-brief">Empty tag type for resetting terminal formatting.</p><p class="rodin-reference-include">Defined in <a href="_reset_8h.html"><code>Rodin/Alert/Reset.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">struct</span><span class="w"> </span><span class="nc">ResetT</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -94,12 +89,12 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="afdd1bb59696028ea8814d3088130d36f">
-              <span class="m-doc-wrap-bumper"><a href="#afdd1bb59696028ea8814d3088130d36f" class="m-doc-self">ResetT</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aa824a56676235fc37cb2711dd9d2e711" class="m-doc">ResetT</a>(</span><span class="m-doc-wrap">const ResetT&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a610407c7fe6b88bfb7ab1183737013b4">
-              <span class="m-doc-wrap-bumper"><a href="#a610407c7fe6b88bfb7ab1183737013b4" class="m-doc-self">ResetT</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#acbd509ad4ac0773ad7ebed80f1ba93c9" class="m-doc">ResetT</a>(</span><span class="m-doc-wrap">ResetT&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -107,15 +102,98 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a5d2d1851c3e7e42d7e5fa0db4ae857ce">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5d2d1851c3e7e42d7e5fa0db4ae857ce" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp;) -&gt; <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab747bec41751f7b7d808b2e8b2eecfb8" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const ResetT&amp; other) -&gt; ResetT&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
-            <dt id="ad22b5f3223e69bafcd8f29e0cf031bf0">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad22b5f3223e69bafcd8f29e0cf031bf0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp;&amp;) -&gt; <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a23b0fd536fd425e2e983c48dea305339" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">ResetT&amp;&amp; other) -&gt; ResetT&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aa824a56676235fc37cb2711dd9d2e711"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa824a56676235fc37cb2711dd9d2e711" class="m-doc-self">ResetT</a>(</span><span class="m-doc-wrap">const ResetT&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acbd509ad4ac0773ad7ebed80f1ba93c9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbd509ad4ac0773ad7ebed80f1ba93c9" class="m-doc-self">ResetT</a>(</span><span class="m-doc-wrap">ResetT&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab747bec41751f7b7d808b2e8b2eecfb8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">ResetT&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab747bec41751f7b7d808b2e8b2eecfb8" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const ResetT&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a23b0fd536fd425e2e983c48dea305339"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">ResetT&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23b0fd536fd425e2e983c48dea305339" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">ResetT&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -155,13 +233,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

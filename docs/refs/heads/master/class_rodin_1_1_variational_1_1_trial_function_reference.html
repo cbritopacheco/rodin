@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::TrialFunctionReference class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,11 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_trial_function_8h.html">&lt;Rodin/Variational/TrialFunction.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>TrialFunctionReference <span class="m-thin">class</span>
-        </h1>
-        <p>Reference wrapper for trial functions.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>TrialFunctionReference</h1><p class="rodin-reference-brief">Reference wrapper for trial functions.</p><p class="rodin-reference-include">Defined in <a href="_variational_2_trial_function_8h.html"><code>Rodin/Variational/TrialFunction.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Solution</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_trial_function_reference.html#aa683a89b41447ac62e476505b38070dd"><span class="nc">TrialFunctionReference</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -101,7 +97,7 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-static-attribs">Public static variables</a></li>
@@ -112,26 +108,13 @@
           </ul>
         </nav>
 <p>TrialFunctionReference provides a lightweight reference to a TrialFunction without owning the associated solution data. This is useful for creating expressions involving trial functions without unnecessary copies.</p><aside class="m-note m-default"><h4>See also</h4><p>TrialFunction</p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction&lt;TrialFunctionReference&lt;Solution, FES&gt;, FES, ShapeFunctionSpaceType::Trial&gt;</a>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>
-            </dt>
-            <dd>Represents a function which belongs to a trial space.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_shape_function.html" title="ShapeFunction&lt; TrialFunctionReference&lt; Solution, FES &gt;, FES, ShapeFunctionSpaceType::Trial &gt;">ShapeFunction</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">TrialFunctionReference</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_trial_function.html" title="TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;; TrialFunction&lt; Sol1, FES1 &gt;; TrialFunction&lt; Solution, FESType &gt;; TrialFunction&lt; Solution, FES &gt;">TrialFunction</a></li><li class="rodin-inheritance-more"><a href="#derived-classes">+3 more</a></li></ul></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_shape_function.html"><code>ShapeFunction&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_shape_function.html"><span class="nc">ShapeFunction</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_trial_function_reference.html#aa683a89b41447ac62e476505b38070dd"><span class="nc">TrialFunctionReference</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Solution</span><span class="p">,</span><span class="w"> </span><span class="nc">FES</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4"><span class="nc">ShapeFunctionSpaceType</span></a><span class="o">::</span><span class="no">Trial</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td></td></tr></tbody></table></section>
+        <section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_trial_function.html"><code>TrialFunction&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_trial_function.html"><span class="nc">TrialFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Variational</span><span class="o">::</span><span class="nc">GridFunction</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="nc">Data</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">FES</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Represents a function which belongs to a trial space.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_trial_function.html"><code>TrialFunction&lt;Sol1, FES1&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_trial_function.html"><span class="nc">TrialFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Sol1</span><span class="p">,</span><span class="w"> </span><span class="n">FES1</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Represents a function which belongs to a trial space.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_trial_function.html"><code>TrialFunction&lt;Solution, FESType&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_trial_function.html"><span class="nc">TrialFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Solution</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_trial_function_reference.html#aeb764ef99b9fe43949b7e3d34f279e53"><span class="nc">FESType</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Represents a function which belongs to a trial space.</td></tr></tbody></table><details class="rodin-derived-disclosure"><summary class="rodin-disclosure-button"><span class="rodin-see-more">See more</span><span class="rodin-see-less">See less</span></summary><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_trial_function.html"><code>TrialFunction&lt;Solution, FES&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_trial_function.html"><span class="nc">TrialFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Solution</span><span class="p">,</span><span class="w"> </span><span class="nc">FES</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Represents a function which belongs to a trial space.</td></tr></tbody></table></details></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -139,8 +122,8 @@
               using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
             </dt>
             <dd>Finite element space type.</dd>
-            <dt id="aa8a283e332ba4328866e02861c6b54e2">
-              using <a href="#aa8a283e332ba4328866e02861c6b54e2" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_trial_function_reference.html" class="m-doc">TrialFunctionReference</a>&lt;Solution, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc">SpaceType</a>&gt;
+            <dt id="a48d7b016045cc8a9f555e901d4acbbc0">
+              using <a href="#a48d7b016045cc8a9f555e901d4acbbc0" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;<a href="#aa683a89b41447ac62e476505b38070dd" class="m-doc">TrialFunctionReference</a>&lt;Solution, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc">SpaceType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -151,7 +134,7 @@
             <dt id="aa1144f1bd47edfc66987067264668fc7">
               static <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc-self">SpaceType</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Space type (trial space)</dd>
+            <dd>Space type (trial space).</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -163,24 +146,38 @@
             </dt>
             <dd>Constructs a reference to a trial function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a8045f9530f84c18c1bafb61c0e5b1ddb" class="m-doc">TrialFunctionReference</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function_reference.html" class="m-doc">TrialFunctionReference</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a8045f9530f84c18c1bafb61c0e5b1ddb" class="m-doc">TrialFunctionReference</a>(</span><span class="m-doc-wrap">const TrialFunctionReference&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a1b40e51f4fa53093056e4a3bee4a3d9a" class="m-doc">TrialFunctionReference</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function_reference.html" class="m-doc">TrialFunctionReference</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a1b40e51f4fa53093056e4a3bee4a3d9a" class="m-doc">TrialFunctionReference</a>(</span><span class="m-doc-wrap">TrialFunctionReference&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae6cdebdac13fd1cca1f66e146bca8a7a" class="m-doc">TrialFunctionReference</a>(</span><span class="m-doc-wrap">const TrialFunctionReference&amp; other,
+              const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;&amp; owner) <span class="m-label m-flat m-warning">protected</span></span>
+            </dt>
+            <dd>Copies shape state while binding a new owning trial function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a6fbbf7c4c5bbf5eeb71cd24f3f5006b0" class="m-doc">TrialFunctionReference</a>(</span><span class="m-doc-wrap">TrialFunctionReference&amp;&amp; other,
+              const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;&amp; owner) <span class="m-label m-flat m-warning">protected</span></span>
+            </dt>
+            <dd>Moves shape state while binding a new owning trial function.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a281aaae302783aeac52cacbc0da3b52f" class="m-doc">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; p) -&gt; <a href="class_rodin_1_1_variational_1_1_trial_function_reference.html" class="m-doc">TrialFunctionReference</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a531052a8d2a4f0dd55ef286e8c379913" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="#aa683a89b41447ac62e476505b38070dd" class="m-doc">TrialFunctionReference</a>&amp;</span>
+            </dt>
+            <dd>Starts a fresh cell binding and releases the previous point binding.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a281aaae302783aeac52cacbc0da3b52f" class="m-doc">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; p) -&gt; <a href="#aa683a89b41447ac62e476505b38070dd" class="m-doc">TrialFunctionReference</a>&amp;</span>
             </dt>
             <dd>Sets the evaluation point for the shape function.</dd>
-            <dt id="a5634f938127c5224007acbd338b54e99">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5634f938127c5224007acbd338b54e99" class="m-doc-self">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5634f938127c5224007acbd338b54e99" class="m-doc">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp;</span>
             </dt>
             <dd>Gets the integration point the expression is evaluated at.</dd>
             <dt>
@@ -211,16 +208,16 @@
               <span class="m-doc-wrap-bumper">auto <a href="#abf81e4d6099ce6d51813cbbedfcfe929" class="m-doc">getSolution</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the solution grid function (const).</dd>
-            <dt id="a5a94afbcbdc8935fdb49a8212e080807">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5a94afbcbdc8935fdb49a8212e080807" class="m-doc-self">setName</a>(</span><span class="m-doc-wrap">const std::string&amp; name) -&gt; <a href="class_rodin_1_1_variational_1_1_trial_function_reference.html" class="m-doc">TrialFunctionReference</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5a94afbcbdc8935fdb49a8212e080807" class="m-doc">setName</a>(</span><span class="m-doc-wrap">const std::string&amp; name) -&gt; <a href="#aa683a89b41447ac62e476505b38070dd" class="m-doc">TrialFunctionReference</a>&amp;</span>
             </dt>
             <dd>Sets the name of the field.</dd>
-            <dt id="a55906fdb64ef621b6b153e7d8d8adf35">
-              <span class="m-doc-wrap-bumper">auto <a href="#a55906fdb64ef621b6b153e7d8d8adf35" class="m-doc-self">getName</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gabb48001a8affd5435f164fd88fa1a1bc" class="m-doc">StringView</a>&gt; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a55906fdb64ef621b6b153e7d8d8adf35" class="m-doc">getName</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gabb48001a8affd5435f164fd88fa1a1bc" class="m-doc">StringView</a>&gt; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the name of the field.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7a44fcf6abaac9d9742cbcadd7d8c7f" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_trial_function_reference.html" class="m-doc">TrialFunctionReference</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7a44fcf6abaac9d9742cbcadd7d8c7f" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#aa683a89b41447ac62e476505b38070dd" class="m-doc">TrialFunctionReference</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a copy of this reference.</dd>
           </dl>
@@ -229,10 +226,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="aa683a89b41447ac62e476505b38070dd"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />TrialFunctionReference&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa683a89b41447ac62e476505b38070dd" class="m-doc-self">TrialFunctionReference</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;&amp; ref,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa683a89b41447ac62e476505b38070dd" class="m-doc-self">TrialFunctionReference</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;&amp; ref,
               const <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&amp; fes) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Constructs a reference to a trial function.</p>
@@ -254,10 +249,8 @@
           </div></section>
           <section class="m-doc-details" id="a8045f9530f84c18c1bafb61c0e5b1ddb"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />TrialFunctionReference&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8045f9530f84c18c1bafb61c0e5b1ddb" class="m-doc-self">TrialFunctionReference</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function_reference.html" class="m-doc">TrialFunctionReference</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8045f9530f84c18c1bafb61c0e5b1ddb" class="m-doc-self">TrialFunctionReference</a>(</span><span class="m-doc-wrap">const TrialFunctionReference&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -274,10 +267,8 @@
           </div></section>
           <section class="m-doc-details" id="a1b40e51f4fa53093056e4a3bee4a3d9a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />TrialFunctionReference&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b40e51f4fa53093056e4a3bee4a3d9a" class="m-doc-self">TrialFunctionReference</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function_reference.html" class="m-doc">TrialFunctionReference</a>&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b40e51f4fa53093056e4a3bee4a3d9a" class="m-doc-self">TrialFunctionReference</a>(</span><span class="m-doc-wrap">TrialFunctionReference&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -292,12 +283,80 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ae6cdebdac13fd1cca1f66e146bca8a7a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6cdebdac13fd1cca1f66e146bca8a7a" class="m-doc-self">TrialFunctionReference</a>(</span><span class="m-doc-wrap">const TrialFunctionReference&amp; other,
+              const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;&amp; owner) <span class="m-label m-warning">protected</span></span></span>
+            </h3>
+            <p>Copies shape state while binding a new owning trial function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Shape state to copy.</td>
+                </tr>
+                <tr>
+                  <td>owner</td>
+                  <td>New owner of this reference base.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6fbbf7c4c5bbf5eeb71cd24f3f5006b0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6fbbf7c4c5bbf5eeb71cd24f3f5006b0" class="m-doc-self">TrialFunctionReference</a>(</span><span class="m-doc-wrap">TrialFunctionReference&amp;&amp; other,
+              const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;&amp; owner) <span class="m-label m-warning">protected</span></span></span>
+            </h3>
+            <p>Moves shape state while binding a new owning trial function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Shape state to move.</td>
+                </tr>
+                <tr>
+                  <td>owner</td>
+                  <td>New owner of this reference base.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a531052a8d2a4f0dd55ef286e8c379913"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aa683a89b41447ac62e476505b38070dd" class="m-doc">TrialFunctionReference</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a531052a8d2a4f0dd55ef286e8c379913" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope)</span></span>
+            </h3>
+            <p>Starts a fresh cell binding and releases the previous point binding.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Entity whose basis will be evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This expression after rebinding its evaluation state.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a281aaae302783aeac52cacbc0da3b52f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_trial_function_reference.html" class="m-doc">TrialFunctionReference</a>&amp; Rodin::<wbr />Variational::<wbr />TrialFunctionReference&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a281aaae302783aeac52cacbc0da3b52f" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; p)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aa683a89b41447ac62e476505b38070dd" class="m-doc">TrialFunctionReference</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a281aaae302783aeac52cacbc0da3b52f" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; p)</span></span>
             </h3>
             <p>Sets the evaluation point for the shape function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -318,12 +377,25 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a5634f938127c5224007acbd338b54e99"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5634f938127c5224007acbd338b54e99" class="m-doc-self">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the integration point the expression is evaluated at.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integration point the expression is evaluated at.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a20a02eeff14d68d1c188d8f2386dc91d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />TrialFunctionReference&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20a02eeff14d68d1c188d8f2386dc91d" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20a02eeff14d68d1c188d8f2386dc91d" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the x-component of a vector-valued trial function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -349,10 +421,8 @@ $ u_x $
           </div></section>
           <section class="m-doc-details" id="a9de13de57bb32fb45b61d857a716cb3a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />TrialFunctionReference&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9de13de57bb32fb45b61d857a716cb3a" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9de13de57bb32fb45b61d857a716cb3a" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the y-component of a vector-valued trial function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -378,10 +448,8 @@ $ u_y $
           </div></section>
           <section class="m-doc-details" id="acbf3185432eb4f4bdaa34d7ecd729535"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />TrialFunctionReference&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbf3185432eb4f4bdaa34d7ecd729535" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbf3185432eb4f4bdaa34d7ecd729535" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the z-component of a vector-valued trial function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -407,10 +475,8 @@ $ u_z $
           </div></section>
           <section class="m-doc-details" id="ac5287464c39ed377af81f8543e4ff376"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />TrialFunctionReference&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the leaf (innermost) expression in the shape function tree.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -424,10 +490,8 @@ $ u_z $
           </div></section>
           <section class="m-doc-details" id="a4abf608647aa99c92d3092a56c1057cf"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Variational::<wbr />TrialFunctionReference&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4abf608647aa99c92d3092a56c1057cf" class="m-doc-self">getSolution</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4abf608647aa99c92d3092a56c1057cf" class="m-doc-self">getSolution</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the solution grid function (mutable).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -441,10 +505,8 @@ $ u_z $
           </div></section>
           <section class="m-doc-details" id="ac10ed89d40af768f3a1bb4be01f67a3f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />TrialFunctionReference&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac10ed89d40af768f3a1bb4be01f67a3f" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">decltype(auto) </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac10ed89d40af768f3a1bb4be01f67a3f" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the basis function at the specified local index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -467,10 +529,8 @@ $ u_z $
           </div></section>
           <section class="m-doc-details" id="abf81e4d6099ce6d51813cbbedfcfe929"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />TrialFunctionReference&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf81e4d6099ce6d51813cbbedfcfe929" class="m-doc-self">getSolution</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf81e4d6099ce6d51813cbbedfcfe929" class="m-doc-self">getSolution</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the solution grid function (const).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -482,12 +542,49 @@ $ u_z $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a5a94afbcbdc8935fdb49a8212e080807"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aa683a89b41447ac62e476505b38070dd" class="m-doc">TrialFunctionReference</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a94afbcbdc8935fdb49a8212e080807" class="m-doc-self">setName</a>(</span><span class="m-doc-wrap">const std::string&amp; name)</span></span>
+            </h3>
+            <p>Sets the name of the field.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">name</td>
+                  <td>Name of the object.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a55906fdb64ef621b6b153e7d8d8adf35"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gabb48001a8affd5435f164fd88fa1a1bc" class="m-doc">StringView</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55906fdb64ef621b6b153e7d8d8adf35" class="m-doc-self">getName</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the name of the field.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The name of the field.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ab7a44fcf6abaac9d9742cbcadd7d8c7f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_trial_function_reference.html" class="m-doc">TrialFunctionReference</a>* Rodin::<wbr />Variational::<wbr />TrialFunctionReference&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7a44fcf6abaac9d9742cbcadd7d8c7f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aa683a89b41447ac62e476505b38070dd" class="m-doc">TrialFunctionReference</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7a44fcf6abaac9d9742cbcadd7d8c7f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a copy of this reference.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -538,13 +635,20 @@ $ u_z $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

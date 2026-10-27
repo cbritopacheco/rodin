@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::PETSc::Assembly::ConstraintMap class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_p_e_t_sc.html">PETSc</a><span>›</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_assembly.html">Assembly</a></div><h1>ConstraintMap <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Affine constraint map with collective dependency closure.</p><p class="rodin-reference-include">Defined in <a href="_p_e_t_sc_2_assembly_2_constraint_map_8h.html"><code>Rodin/PETSc/Assembly/ConstraintMap.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_constraint_map.html"><span class="nc">ConstraintMap</span></a><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#autotoc_md189">Architecture</a></li>
+            <li><a href="#autotoc_md190">Implementation</a></li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Inherits from</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<section id="autotoc_md189"><h2><a href="#autotoc_md189">Architecture</a></h2><p>Identification rows specify <svg class="m-math" style="width: 11.328em; height: 1.297em; vertical-align: -0.365em;" viewBox="0 -8.966452 108.749941 12.453452">
+<title>
+$x_s=\sum_m C_{sm}x_m+d_s$
+</title>
+<defs>
+<path id='eq1-g0-80' d='M5.033126 6.38406L.789041 11.632379C.6934 11.75193 .681445 11.775841 .681445 11.823661C.681445 11.955168 .789041 11.955168 1.004234 11.955168H10.915068L11.943213 8.978331H11.644334C11.345455 9.874969 10.544458 10.604234 9.528269 10.950934C9.336986 11.01071 8.51208 11.297634 6.75467 11.297634H1.673724L5.822167 6.168867C5.905853 6.06127 5.929763 6.025405 5.929763 5.977584S5.917808 5.917808 5.846077 5.810212L1.960648 .478207H6.694894C8.057783 .478207 10.807472 .561893 11.644334 2.797509H11.943213L10.915068 0H1.004234C.681445 0 .669489 .011955 .669489 .382565L5.033126 6.38406Z'/>
+<path id='eq1-g3-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
+<path id='eq1-g3-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g1-109' d='M1.594022-1.307098C1.617933-1.42665 1.697634-1.729514 1.721544-1.849066C1.745455-1.928767 1.793275-2.12005 1.809215-2.199751C1.825156-2.239601 2.088169-2.757659 2.438854-3.020672C2.709838-3.227895 2.972852-3.291656 3.196015-3.291656C3.490909-3.291656 3.650311-3.116314 3.650311-2.749689C3.650311-2.558406 3.602491-2.375093 3.514819-2.016438C3.459029-1.809215 3.323537-1.275218 3.275716-1.060025L3.156164-.581818C3.116314-.446326 3.060523-.207223 3.060523-.167372C3.060523 .01594 3.211955 .079701 3.315567 .079701C3.459029 .079701 3.57858-.01594 3.634371-.111582C3.658281-.159402 3.722042-.430386 3.761893-.597758L3.945205-1.307098C3.969116-1.42665 4.048817-1.729514 4.072727-1.849066C4.184309-2.279452 4.184309-2.287422 4.367621-2.550436C4.630635-2.940971 5.00523-3.291656 5.539228-3.291656C5.826152-3.291656 5.993524-3.124284 5.993524-2.749689C5.993524-2.311333 5.65878-1.39477 5.507347-1.012204C5.427646-.804981 5.403736-.749191 5.403736-.597758C5.403736-.143462 5.778331 .079701 6.121046 .079701C6.902117 .079701 7.228892-1.036115 7.228892-1.139726C7.228892-1.219427 7.165131-1.243337 7.10934-1.243337C7.013699-1.243337 6.997758-1.187547 6.973848-1.107846C6.782565-.446326 6.447821-.143462 6.144956-.143462C6.017435-.143462 5.953674-.223163 5.953674-.406476S6.017435-.765131 6.097136-.964384C6.216687-1.267248 6.567372-2.183811 6.567372-2.630137C6.567372-3.227895 6.152927-3.514819 5.579078-3.514819C5.029141-3.514819 4.574844-3.227895 4.216189-2.733748C4.152428-3.371357 3.642341-3.514819 3.227895-3.514819C2.86127-3.514819 2.375093-3.387298 1.936737-2.81345C1.880946-3.291656 1.498381-3.514819 1.123786-3.514819C.844832-3.514819 .645579-3.347447 .510087-3.076463C.318804-2.701868 .239103-2.311333 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.621669-2.82142 .765131-3.291656 1.099875-3.291656C1.307098-3.291656 1.354919-3.092403 1.354919-2.917061C1.354919-2.773599 1.315068-2.622167 1.251308-2.359153C1.235367-2.295392 1.115816-1.825156 1.083935-1.713574L.789041-.518057C.757161-.398506 .70934-.199253 .70934-.167372C.70934 .01594 .860772 .079701 .964384 .079701C1.107846 .079701 1.227397-.01594 1.283188-.111582C1.307098-.159402 1.370859-.430386 1.41071-.597758L1.594022-1.307098Z'/>
+<path id='eq1-g1-115' d='M3.211955-2.996762C3.028643-2.964882 2.86127-2.82142 2.86127-2.622167C2.86127-2.478705 2.956912-2.375093 3.132254-2.375093C3.251806-2.375093 3.498879-2.462765 3.498879-2.82142C3.498879-3.315567 2.980822-3.514819 2.486675-3.514819C1.41868-3.514819 1.083935-2.757659 1.083935-2.351183C1.083935-2.271482 1.083935-1.984558 1.378829-1.761395C1.562142-1.617933 1.697634-1.594022 2.11208-1.514321C2.391034-1.458531 2.84533-1.378829 2.84533-.964384C2.84533-.757161 2.693898-.494147 2.470735-.342715C2.175841-.151432 1.785305-.143462 1.657783-.143462C1.466501-.143462 .924533-.175342 .72528-.494147C1.131756-.510087 1.187547-.836862 1.187547-.932503C1.187547-1.171606 .972354-1.227397 .876712-1.227397C.749191-1.227397 .422416-1.131756 .422416-.6934C.422416-.223163 .916563 .079701 1.657783 .079701C3.044583 .079701 3.339477-.900623 3.339477-1.235367C3.339477-1.952677 2.558406-2.10411 2.263512-2.1599C1.880946-2.231631 1.570112-2.287422 1.570112-2.622167C1.570112-2.765629 1.705604-3.291656 2.478705-3.291656C2.781569-3.291656 3.092403-3.203985 3.211955-2.996762Z'/>
+<path id='eq1-g2-67' d='M8.930511-8.308842C8.930511-8.416438 8.846824-8.416438 8.822914-8.416438S8.751183-8.416438 8.655542-8.296887L7.830635-7.292653C7.412204-8.009963 6.75467-8.416438 5.858032-8.416438C3.275716-8.416438 .597758-5.798257 .597758-2.988792C.597758-.992279 1.996513 .251059 3.741968 .251059C4.698381 .251059 5.535243-.155417 6.228643-.74122C7.268742-1.613948 7.579577-2.773599 7.579577-2.86924C7.579577-2.976837 7.483935-2.976837 7.44807-2.976837C7.340473-2.976837 7.328518-2.905106 7.304608-2.857285C6.75467-.992279 5.140722-.095641 3.945205-.095641C2.677958-.095641 1.578082-.908593 1.578082-2.606227C1.578082-2.988792 1.697634-5.068991 3.048568-6.635118C3.706102-7.400249 4.829888-8.069738 5.965629-8.069738C7.280697-8.069738 7.866501-6.981818 7.866501-5.762391C7.866501-5.451557 7.830635-5.188543 7.830635-5.140722C7.830635-5.033126 7.950187-5.033126 7.986052-5.033126C8.117559-5.033126 8.129514-5.045081 8.177335-5.260274L8.930511-8.308842Z'/>
+<path id='eq1-g2-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq1-g2-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g2-120'/>
+<use x='6.652087' y='1.793263' xlink:href='#eq1-g1-115'/>
+<use x='14.386967' y='0' xlink:href='#eq1-g3-61'/>
+<use x='26.812448' y='-8.966452' xlink:href='#eq1-g0-80'/>
+<use x='39.431827' y='3.487' xlink:href='#eq1-g1-109'/>
+<use x='49.412983' y='0' xlink:href='#eq1-g2-67'/>
+<use x='57.788029' y='1.793263' xlink:href='#eq1-g1-115'/>
+<use x='61.703947' y='1.793263' xlink:href='#eq1-g1-109'/>
+<use x='69.692606' y='0' xlink:href='#eq1-g2-120'/>
+<use x='76.344693' y='1.793263' xlink:href='#eq1-g1-109'/>
+<use x='86.990014' y='0' xlink:href='#eq1-g3-43'/>
+<use x='98.751329' y='0' xlink:href='#eq1-g2-100'/>
+<use x='104.834022' y='1.793263' xlink:href='#eq1-g1-115'/>
+</g>
+</svg>. A master can itself be constrained on another rank. Every rank therefore needs the complete constraint dependency graph before expanding a local matrix entry. Only prescribed values and identification rows are exchanged; matrix entries and unconstrained rows are not communicated here.</p></section><section id="autotoc_md190"><h2><a href="#autotoc_md190">Implementation</a></h2><p>Two collective gathers publish fixed rows and affine identification rows. Replicated boundary rows must agree, independently of master ordering. The native <a href="class_rodin_1_1_assembly_1_1_constraint_map.html" class="m-doc">ConstraintMap</a> then resolves transitive dependencies, propagates affine offsets and rejects cycles. Every rank receives the same graph, including ranks with no locally constrained DOFs. Assemblers invoke this collective only for identification conditions; ordinary value-prescribing boundaries retain their existing communication.</p></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html" title="Assembly::ConstraintMap&lt; PetscScalar &gt;">Assembly::ConstraintMap</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">ConstraintMap</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_constraint_map.html"><code>Assembly::ConstraintMap&lt;PetscScalar&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Assembly</span><span class="o">::</span><a href="class_rodin_1_1_assembly_1_1_constraint_map.html"><span class="nc">ConstraintMap</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">PetscScalar</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Read-only expansion map for value and identification constraints.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_constraint_map.html"><code>Assembly::ConstraintMap</code></a></td><td><details><summary>13 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a6a3ae7c7a8395b8c5c21d366bb4879e9"><code>expand()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a97abd18d186558cb081a24805c6e1999"><code>Expansion</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a32d626626eee0bc4ade146973f6abb1c"><code>finalize()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a723a57487b35cc237235ac730f513d8b"><code>getFixedValue()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a017148f14956e2ca25cf8c8c1db01915"><code>getIdentificationValue()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a00b6033eb9b7439b5776d57cffc67dc2"><code>getIdentifiedRows()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#aea2183b3b451c9cb9fcfb3a92bfc104a"><code>isFixed()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a06cc207eceb5bcf6d362bfa3e296a840"><code>isIdentified()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a0092e1dd2034bb02ff0507cc39a4a1e0"><code>reset()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#ad9aa7714ca73ce034d1f9f3178955f19"><code>setFixed()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a899c105eb4926ccf24420de66568fbac"><code>setIdentification()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a0b0705fd5294fe8e8a06d37e3e966f5a"><code>setIdentification()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a259cb5a711406a8c3e5d937eb9350cca"><code>size()</code></a></li></ul></details></td></tr></tbody></table></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a5f95d0dcff03b4f081627c07e1b9799c">
+              using <a href="#a5f95d0dcff03b4f081627c07e1b9799c" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_assembly_1_1_constraint_map.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />ConstraintMap</a>&lt;PetscScalar&gt;
+            </dt>
+            <dd>Backend-independent constraint algebra.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a6738678cd9c811e27897cb40592e58a5" class="m-doc">ConstraintMap</a>(</span><span class="m-doc-wrap">size_t count) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Creates a map indexed by global degrees of freedom.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a7495435ab9d824d853aaae91be5004c3" class="m-doc">finalize</a>(</span><span class="m-doc-wrap">MPI_Comm communicator)</span>
+            </dt>
+            <dd>Collectively resolves constraints across all communicator ranks.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a6738678cd9c811e27897cb40592e58a5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6738678cd9c811e27897cb40592e58a5" class="m-doc-self">ConstraintMap</a>(</span><span class="m-doc-wrap">size_t count) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Creates a map indexed by global degrees of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">count</td>
+                  <td>Global degree-of-freedom extent.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7495435ab9d824d853aaae91be5004c3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7495435ab9d824d853aaae91be5004c3" class="m-doc-self">finalize</a>(</span><span class="m-doc-wrap">MPI_Comm communicator)</span></span>
+            </h3>
+            <p>Collectively resolves constraints across all communicator ranks.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">communicator</td>
+                  <td>Communicator of the assembled linear system.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Exceptions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Alert::Exception</td>
+                  <td>For inconsistent replicated rows or cycles.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>All ranks must call with the same global extent, before local finalization or projection of any matrix/vector contributions.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-8869a4936c9f.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

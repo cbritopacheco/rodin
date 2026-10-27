@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin/IO/MEDIT.h file | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_ff6599c6033d39d885e7782b9df2e1c5.html">IO</a>/</span>MEDIT.h <span class="m-thin">file</span>
+        </h1>
+        <p>Declarations in MEDIT.h.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#enum-members">Enums</a></li>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">Rodin::IO</a></dt>
+            <dd>Reading and writing meshes, fields, and associated data.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_i_o_1_1_m_e_d_i_t_1_1_parse_entity.html" class="m-doc">Rodin::IO::MEDIT::ParseEntity</a>
+            </dt>
+            <dd>Parser for mesh entities (elements) in MEDIT format.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_m_e_d_i_t_1_1_parse_entity_1_1_data.html" class="m-doc">Rodin::IO::MEDIT::ParseEntity::Data</a>
+            </dt>
+            <dd>Parsed entity data.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_e_d_i_t_00_01_context_1_1_local_01_4.html" class="m-doc">Rodin::IO::MeshLoader&lt;IO::FileFormat::MEDIT, Context::Local&gt;</a>
+            </dt>
+            <dd>Specialization for loading Sequential meshes in the MEDIT file format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_m_e_d_i_t_00_01_context_1_1_local_01_4.html" class="m-doc">Rodin::IO::MeshPrinter&lt;FileFormat::MEDIT, Context::Local&gt;</a>
+            </dt>
+            <dd>MEDIT mesh printer for local meshes.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_e_d_i_t_00_01_variational_1_759081d00011f35269f7550058d038c7.html" class="m-doc">Rodin::IO::GridFunctionLoader&lt;FileFormat::MEDIT, Variational::P1&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>MEDIT grid-function loader for local P1 finite element spaces.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_e_d_i_t_00_01_variational_1_94a7998c5e4a0c8f11c7e3140bb5d154.html" class="m-doc">Rodin::IO::GridFunctionLoader&lt;FileFormat::MEDIT, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>MEDIT grid-function loader for local H1 finite element spaces.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base_3_01_file_format_1_1_m_e_d_i_t_00_01_f_e_s_00_01_data_01_4.html" class="m-doc">Rodin::IO::GridFunctionPrinterBase&lt;FileFormat::MEDIT, FES, Data&gt;</a>
+            </dt>
+            <dd>Base class for MEDIT grid-function printers.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_m_e_d_i_t_00_01_f_e_s_00_01_m0a53ca4f721c080cdcb0de309d8d05d7.html" class="m-doc">Rodin::IO::GridFunctionPrinter&lt;FileFormat::MEDIT, FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>MEDIT grid-function printer for vector-backed grid functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_e_d_i_t_00_01_f_e_s_00_01_mabbc9a86cabea2ab6e77ea469f5feace1.html" class="m-doc">Rodin::IO::GridFunctionLoader&lt;FileFormat::MEDIT, FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Reads matrix entries stored as independent MEDIT scalar vertex fields. Higher-order spaces interpolate the vertex field, as required by SolAtVertices.</dd>
+          </dl>
+        </section>
+        <section id="enum-members">
+          <h2><a href="#enum-members">Enums</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#ab7ba7e5475f5b6695b463ca219e2d448" class="m-doc">Keyword</a> { </span><span class="m-doc-wrap"><a href="#ab7ba7e5475f5b6695b463ca219e2d448ab576140247b770256feb125c63809b0f" class="m-doc">MeshVersionFormatted</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a9e0e31246b7b078403969b265870b3f4" class="m-doc">Dimension</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448ae4bb6129669488aedeeb0ae27bb91770" class="m-doc">Vertices</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a7ca66fdfaad3eb33fc65d7490178f856" class="m-doc">Triangles</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448acb7a9b8cf61d93dac16c1d95dee435c4" class="m-doc">Quadrilaterals</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a3eaad80cc054dfd7eb50a23e9ff0cd73" class="m-doc">Tetrahedra</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448afc2773194923413d75f851e77b813242" class="m-doc">Hexahedra</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a7c57b82c7ce10bee45ae47c712ba80eb" class="m-doc">Wedges</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448aff8e3e7230eb6da5eb9df66861459010" class="m-doc">Pyramids</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a3c48c8d300838304316b74d9297f9b7a" class="m-doc">Corners</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a6a2b898fb9d254ae43fb46e873d397bc" class="m-doc">Ridges</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a484afb8d54ec549700b1fe96417519a9" class="m-doc">Edges</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a5aa159e64487c12f9988d8fd67a141d1" class="m-doc">SolAtVertices</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448adb4974a38da9119de04739ecdfdb322f" class="m-doc">SolAtEdges</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448aa749644c3d4f39c99d3f89e208924c97" class="m-doc">SolAtTriangles</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a29db7c7cca0aab0be44571cc299ee95b" class="m-doc">SolAtQuadrilaterals</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448ad9ad8cbf42d5790c879714e9a3888851" class="m-doc">SolAtTetrahedra</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a2b08e7081fd616e02598299b7aaee009" class="m-doc">SolAtPentahedra</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448af4eeacfda241f95f85dd175274ba15b8" class="m-doc">SolAtHexahedra</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a3d97fa552a6e8a5382a1a32c3b1825fd" class="m-doc">RequiredVertices</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448ac57db5a236a322c832d260275e5fe571" class="m-doc">RequiredEdges</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448ada52b8ee8660581fc7531f39dbc08bde" class="m-doc">RequiredTriangles</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448afc75171c71e8ebb29959e9b17e13f28c" class="m-doc">RequiredTetrahedra</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a4ab971a51f0335cbf8d9c2c65d379e99" class="m-doc">Normals</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a01fda20f7c14725e2b73e04a48c28ab1" class="m-doc">NormalAtVertices</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a2588d65a3b15e2b8c5ddac3d9af9a750" class="m-doc">Tangents</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a1ebb95c47e58c1834a44b2278024f920" class="m-doc">TangentAtVertices</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448a87557f11575c0ad78e4e28abedc13b6e" class="m-doc">End</a> }</span>
+            </dt>
+            <dd>Keywords used in MEDIT mesh and solution file formats.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum <a href="#a24786ec97b9c06c9dcd291a7002c71dc" class="m-doc">SolutionType</a> { </span><span class="m-doc-wrap"><a href="#a24786ec97b9c06c9dcd291a7002c71dcae47767a8fd75c3f527962d1c194cc19c" class="m-doc">Real</a> = 1,
+              <a href="#a24786ec97b9c06c9dcd291a7002c71dcab01795c8def509d833c47954f53637b1" class="m-doc">Vector</a> = 2,
+              <a href="#a24786ec97b9c06c9dcd291a7002c71dca8ac4c524240a15686206908a553f744f" class="m-doc">Tensor</a> = 3 }</span>
+            </dt>
+            <dd>Solution data types in MEDIT solution files.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a31679ffe540af840756bba81b4a412b1" class="m-doc">toCharString</a>(</span><span class="m-doc-wrap">Keyword kw) -&gt; const char* <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Converts a MEDIT keyword enum to its string representation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abbc2d818a90691151870fb95191485f2" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const std::string&amp; str,
+              Keyword kw) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for equality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afcfa9c333200d9c4240978b3ef20f408" class="m-doc">operator!=</a>(</span><span class="m-doc-wrap">const std::string&amp; str,
+              Keyword kw) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for inequality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac391b190a910bfead34aef4c825e553c" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const std::string&amp; str) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for equality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1cc083cbc20ab0e6bf68a6a6724f20c4" class="m-doc">operator!=</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const std::string&amp; str) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for inequality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adce657245f878d40c9d6a0056664674f" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const char* str) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for equality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a213045e05f71180205b86caa6d6aeeee" class="m-doc">operator!=</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const char* str) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for inequality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9460428232ddb009f709c7146e8e2cc6" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const char* str,
+              Keyword kw) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for equality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a425ad79d486dc48a9623a86ba6fedf54" class="m-doc">operator!=</a>(</span><span class="m-doc-wrap">const char* str,
+              Keyword kw) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for inequality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaee4bd5250ba0727a8504b1a8ea85313" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              Keyword kw) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Writes the format keyword to a stream.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a56d187df2d7a26799069b34316cbb51b" class="m-doc">toKeyword</a>(</span><span class="m-doc-wrap">const char* str) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;Keyword&gt;</span>
+            </dt>
+            <dd>Converts text to a format keyword.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="ab7ba7e5475f5b6695b463ca219e2d448"><div>
+            <h3>
+              enum class <a href="#ab7ba7e5475f5b6695b463ca219e2d448" class="m-doc-self">Keyword</a>
+            </h3>
+            <p>Keywords used in MEDIT mesh and solution file formats.</p>
+<p>These keywords identify different sections in MEDIT files (.mesh and .sol). The MEDIT format is a text-based format used by the MMG remeshing software.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.ljll.math.upmc.fr/frey/logiciels/Docmedit.dir/index.html">MEDIT Format Specification</a></p></aside>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448ab576140247b770256feb125c63809b0f" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448ab576140247b770256feb125c63809b0f">MeshVersionFormatted</a></td>
+                  <td>
+                  <p>Format version declaration.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a9e0e31246b7b078403969b265870b3f4" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a9e0e31246b7b078403969b265870b3f4">Dimension</a></td>
+                  <td>
+                  <p>Spatial dimension.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448ae4bb6129669488aedeeb0ae27bb91770" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448ae4bb6129669488aedeeb0ae27bb91770">Vertices</a></td>
+                  <td>
+                  <p>Vertex coordinates section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a7ca66fdfaad3eb33fc65d7490178f856" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a7ca66fdfaad3eb33fc65d7490178f856">Triangles</a></td>
+                  <td>
+                  <p>Triangle elements section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448acb7a9b8cf61d93dac16c1d95dee435c4" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448acb7a9b8cf61d93dac16c1d95dee435c4">Quadrilaterals</a></td>
+                  <td>
+                  <p>Quadrilateral elements section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a3eaad80cc054dfd7eb50a23e9ff0cd73" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a3eaad80cc054dfd7eb50a23e9ff0cd73">Tetrahedra</a></td>
+                  <td>
+                  <p>Tetrahedral elements section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448afc2773194923413d75f851e77b813242" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448afc2773194923413d75f851e77b813242">Hexahedra</a></td>
+                  <td>
+                  <p>Hexahedral elements section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a7c57b82c7ce10bee45ae47c712ba80eb" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a7c57b82c7ce10bee45ae47c712ba80eb">Wedges</a></td>
+                  <td>
+                  <p>Wedge (prism) elements section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448aff8e3e7230eb6da5eb9df66861459010" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448aff8e3e7230eb6da5eb9df66861459010">Pyramids</a></td>
+                  <td>
+                  <p>Pyramid elements section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a3c48c8d300838304316b74d9297f9b7a" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a3c48c8d300838304316b74d9297f9b7a">Corners</a></td>
+                  <td>
+                  <p>Corner vertices section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a6a2b898fb9d254ae43fb46e873d397bc" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a6a2b898fb9d254ae43fb46e873d397bc">Ridges</a></td>
+                  <td>
+                  <p>Ridge edges section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a484afb8d54ec549700b1fe96417519a9" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a484afb8d54ec549700b1fe96417519a9">Edges</a></td>
+                  <td>
+                  <p>Edge elements section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a5aa159e64487c12f9988d8fd67a141d1" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a5aa159e64487c12f9988d8fd67a141d1">SolAtVertices</a></td>
+                  <td>
+                  <p>Solution at vertices.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448adb4974a38da9119de04739ecdfdb322f" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448adb4974a38da9119de04739ecdfdb322f">SolAtEdges</a></td>
+                  <td>
+                  <p>Solution at edges.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448aa749644c3d4f39c99d3f89e208924c97" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448aa749644c3d4f39c99d3f89e208924c97">SolAtTriangles</a></td>
+                  <td>
+                  <p>Solution at triangles.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a29db7c7cca0aab0be44571cc299ee95b" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a29db7c7cca0aab0be44571cc299ee95b">SolAtQuadrilaterals</a></td>
+                  <td>
+                  <p>Solution at quadrilaterals.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448ad9ad8cbf42d5790c879714e9a3888851" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448ad9ad8cbf42d5790c879714e9a3888851">SolAtTetrahedra</a></td>
+                  <td>
+                  <p>Solution at tetrahedra.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a2b08e7081fd616e02598299b7aaee009" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a2b08e7081fd616e02598299b7aaee009">SolAtPentahedra</a></td>
+                  <td>
+                  <p>Solution at pentahedra.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448af4eeacfda241f95f85dd175274ba15b8" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448af4eeacfda241f95f85dd175274ba15b8">SolAtHexahedra</a></td>
+                  <td>
+                  <p>Solution at hexahedra.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a3d97fa552a6e8a5382a1a32c3b1825fd" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a3d97fa552a6e8a5382a1a32c3b1825fd">RequiredVertices</a></td>
+                  <td>
+                  <p>Required vertices section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448ac57db5a236a322c832d260275e5fe571" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448ac57db5a236a322c832d260275e5fe571">RequiredEdges</a></td>
+                  <td>
+                  <p>Required edges section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448ada52b8ee8660581fc7531f39dbc08bde" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448ada52b8ee8660581fc7531f39dbc08bde">RequiredTriangles</a></td>
+                  <td>
+                  <p>Required triangles section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448afc75171c71e8ebb29959e9b17e13f28c" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448afc75171c71e8ebb29959e9b17e13f28c">RequiredTetrahedra</a></td>
+                  <td>
+                  <p>Required tetrahedra section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a4ab971a51f0335cbf8d9c2c65d379e99" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a4ab971a51f0335cbf8d9c2c65d379e99">Normals</a></td>
+                  <td>
+                  <p>Normal vectors section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a01fda20f7c14725e2b73e04a48c28ab1" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a01fda20f7c14725e2b73e04a48c28ab1">NormalAtVertices</a></td>
+                  <td>
+                  <p>Normals at vertices.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a2588d65a3b15e2b8c5ddac3d9af9a750" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a2588d65a3b15e2b8c5ddac3d9af9a750">Tangents</a></td>
+                  <td>
+                  <p>Tangent vectors section.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a1ebb95c47e58c1834a44b2278024f920" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a1ebb95c47e58c1834a44b2278024f920">TangentAtVertices</a></td>
+                  <td>
+                  <p>Tangents at vertices.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a87557f11575c0ad78e4e28abedc13b6e" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a87557f11575c0ad78e4e28abedc13b6e">End</a></td>
+                  <td>
+                  <p>End of file marker.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a24786ec97b9c06c9dcd291a7002c71dc"><div>
+            <h3>
+              enum <a href="#a24786ec97b9c06c9dcd291a7002c71dc" class="m-doc-self">SolutionType</a>
+            </h3>
+            <p>Solution data types in MEDIT solution files.</p>
+<p>Identifies the type of solution data stored in .sol files.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a24786ec97b9c06c9dcd291a7002c71dcae47767a8fd75c3f527962d1c194cc19c" class="m-doc-self" id="a24786ec97b9c06c9dcd291a7002c71dcae47767a8fd75c3f527962d1c194cc19c">Real</a></td>
+                  <td>
+                  <p>Scalar (real-valued) solution.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a24786ec97b9c06c9dcd291a7002c71dcab01795c8def509d833c47954f53637b1" class="m-doc-self" id="a24786ec97b9c06c9dcd291a7002c71dcab01795c8def509d833c47954f53637b1">Vector</a></td>
+                  <td>
+                  <p>Vector-valued solution.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a24786ec97b9c06c9dcd291a7002c71dca8ac4c524240a15686206908a553f744f" class="m-doc-self" id="a24786ec97b9c06c9dcd291a7002c71dca8ac4c524240a15686206908a553f744f">Tensor</a></td>
+                  <td>
+                  <p>Tensor-valued solution.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a31679ffe540af840756bba81b4a412b1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const char* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31679ffe540af840756bba81b4a412b1" class="m-doc-self">toCharString</a>(</span><span class="m-doc-wrap">Keyword kw) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Converts a MEDIT keyword enum to its string representation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">kw&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Keyword to convert</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>C-style string representation of the keyword</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abbc2d818a90691151870fb95191485f2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abbc2d818a90691151870fb95191485f2" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const std::string&amp; str,
+              Keyword kw)</span></span>
+            </h3>
+            <p>Compares the operands for equality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+                <tr>
+                  <td>kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare equal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afcfa9c333200d9c4240978b3ef20f408"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afcfa9c333200d9c4240978b3ef20f408" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const std::string&amp; str,
+              Keyword kw)</span></span>
+            </h3>
+            <p>Compares the operands for inequality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+                <tr>
+                  <td>kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare unequal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac391b190a910bfead34aef4c825e553c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac391b190a910bfead34aef4c825e553c" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const std::string&amp; str)</span></span>
+            </h3>
+            <p>Compares the operands for equality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+                <tr>
+                  <td>str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare equal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1cc083cbc20ab0e6bf68a6a6724f20c4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1cc083cbc20ab0e6bf68a6a6724f20c4" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const std::string&amp; str)</span></span>
+            </h3>
+            <p>Compares the operands for inequality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+                <tr>
+                  <td>str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare unequal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adce657245f878d40c9d6a0056664674f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adce657245f878d40c9d6a0056664674f" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const char* str)</span></span>
+            </h3>
+            <p>Compares the operands for equality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+                <tr>
+                  <td>str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare equal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a213045e05f71180205b86caa6d6aeeee"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a213045e05f71180205b86caa6d6aeeee" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const char* str)</span></span>
+            </h3>
+            <p>Compares the operands for inequality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+                <tr>
+                  <td>str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare unequal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9460428232ddb009f709c7146e8e2cc6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9460428232ddb009f709c7146e8e2cc6" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const char* str,
+              Keyword kw)</span></span>
+            </h3>
+            <p>Compares the operands for equality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+                <tr>
+                  <td>kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare equal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a425ad79d486dc48a9623a86ba6fedf54"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a425ad79d486dc48a9623a86ba6fedf54" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const char* str,
+              Keyword kw)</span></span>
+            </h3>
+            <p>Compares the operands for inequality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+                <tr>
+                  <td>kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare unequal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aaee4bd5250ba0727a8504b1a8ea85313"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaee4bd5250ba0727a8504b1a8ea85313" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              Keyword kw)</span></span>
+            </h3>
+            <p>Writes the format keyword to a stream.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream receiving the formatted data.</td>
+                </tr>
+                <tr>
+                  <td>kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream after insertion.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a56d187df2d7a26799069b34316cbb51b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;Keyword&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56d187df2d7a26799069b34316cbb51b" class="m-doc-self">toKeyword</a>(</span><span class="m-doc-wrap">const char* str)</span></span>
+            </h3>
+            <p>Converts text to a format keyword.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Matching keyword, or an empty optional if the text is not recognized.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-8869a4936c9f.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

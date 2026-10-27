@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::IntegrationPoint class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,13 +71,12 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>IntegrationPoint <span class="m-thin">class</span>
-        </h1>
-        <p>Evaluation point used by variational operators.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>IntegrationPoint</h1><p class="rodin-reference-brief">Evaluation point used by variational operators.</p><p class="rodin-reference-include">Defined in <a href="_integration_point_8h.html"><code>Rodin/Variational/IntegrationPoint.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">IntegrationPoint</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
+            <li><a href="#autotoc_md436">Reference association</a></li>
             <li>
               Reference
               <ul>
@@ -90,20 +86,25 @@
             </li>
           </ul>
         </nav>
-<p>An IntegrationPoint always stores a geometric point. It may optionally be associated to a quadrature formula and quadrature index:</p><ul><li><code>getQuadratureFormula() != nullptr</code>: the point is part of a quadrature loop, and <code>getIndex()</code> identifies the quadrature sample in that formula.</li><li><code>getQuadratureFormula() == nullptr</code>: the point represents a generic pointwise evaluation (outside a quadrature tabulation context). In this case, consumers are expected to evaluate using <code>getPoint().getReferenceCoordinates()</code> rather than quadrature tabulation.</li></ul><aside class="m-note m-info"><h4>Note</h4><p>The quadrature formula pointer is non-owning. The referenced quadrature object must outlive all IntegrationPoint uses that dereference this pointer.</p></aside>
+<p>An IntegrationPoint borrows a geometric point and optionally records the formula/index of its originating integration loop. This sampling metadata does not certify that the point still has that formula&#x27;s reference coordinates: mapping a face sample into a cell changes the chart.</p><section id="autotoc_md436"><h2><a href="#autotoc_md436">Reference association</a></h2><p>Construction from <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a> and a logical index establishes reference association through owned samples, without coordinate comparisons. <a href="#ab4ee42dc2752817b0db8bc67187bf3da" class="m-doc">getReferenceQuadratureFormula</a> returns that formula only when construction established this reference association. Direct point/formula/index construction records provenance only. Reference tabulation and coordinate-sensitive reuse must use the reference accessor; an absent association selects the supplied point&#x27;s reference coordinates. Coefficient snapshots may still use the originating sampling metadata.</p><aside class="m-note m-info"><h4>Note</h4><p>The quadrature formula pointer is non-owning. The referenced quadrature object must outlive all IntegrationPoint uses that dereference this pointer.</p></aside></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a226901bb2d853182750029c0186818af">
-              <span class="m-doc-wrap-bumper"><a href="#a226901bb2d853182750029c0186818af" class="m-doc-self">IntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a226901bb2d853182750029c0186818af" class="m-doc">IntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p)</span>
             </dt>
             <dd>Constructs an integration point from a geometric point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a20198759db6897c1f4b6f95c3c524f84" class="m-doc">IntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
-              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>* qf,
+              <span class="m-doc-wrap-bumper"><a href="#a21040e7c1a3efb16e1e8e0acd2f696a0" class="m-doc">IntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>* qf,
               size_t qp)</span>
             </dt>
-            <dd>Constructs a quadrature-associated integration point.</dd>
+            <dd>Records sampling provenance without certifying reference coordinates.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a395ce5945193f2dbcdb34da6cdc135c7" class="m-doc">IntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">Geometry::<wbr />PolytopeQuadrature</a>&amp; quadrature,
+              size_t qp)</span>
+            </dt>
+            <dd>Borrows an owned mapped sample with logical reference association.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -114,9 +115,13 @@
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a32eceb6f2fb4748f336249a143e3c623" class="m-doc">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>*</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4fb5305fe351dbced7b3b2aa4f52a0de" class="m-doc">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>*</span>
             </dt>
             <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab4ee42dc2752817b0db8bc67187bf3da" class="m-doc">getReferenceQuadratureFormula</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>* <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the logically certified reference formula, when available.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad65a47a8b8a83be5d0b456b1074d1220" class="m-doc">getIndex</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
@@ -125,13 +130,30 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a20198759db6897c1f4b6f95c3c524f84"><div>
+          <section class="m-doc-details" id="a226901bb2d853182750029c0186818af"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />IntegrationPoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20198759db6897c1f4b6f95c3c524f84" class="m-doc-self">IntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
-              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>* qf,
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a226901bb2d853182750029c0186818af" class="m-doc-self">IntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p)</span></span>
+            </h3>
+            <p>Constructs an integration point from a geometric point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a21040e7c1a3efb16e1e8e0acd2f696a0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a21040e7c1a3efb16e1e8e0acd2f696a0" class="m-doc-self">IntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>* qf,
               size_t qp)</span></span>
             </h3>
-            <p>Constructs a quadrature-associated integration point.</p>
+            <p>Records sampling provenance without certifying reference coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -139,7 +161,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Geometric point (usually built from quadrature sample coordinates)</td>
+                  <td>Geometric point, possibly mapped from the quadrature sample into another polytope</td>
                 </tr>
                 <tr>
                   <td>qf&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -152,9 +174,32 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a395ce5945193f2dbcdb34da6cdc135c7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a395ce5945193f2dbcdb34da6cdc135c7" class="m-doc-self">IntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">Geometry::<wbr />PolytopeQuadrature</a>&amp; quadrature,
+              size_t qp)</span></span>
+            </h3>
+            <p>Borrows an owned mapped sample with logical reference association.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">quadrature</td>
+                  <td>Owner of the mapped point and its reference association.</td>
+                </tr>
+                <tr>
+                  <td>qp</td>
+                  <td>Logical sample index in the mapped quadrature.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>No reference to the quadrature container is retained. The point and formula must outlive this binding, including after a container move. The formula is immutable and retained until process termination. Geometry changes require normal mapped-point reconstruction and rebinding.</p>
+          </div></section>
           <section class="m-doc-details" id="a2ad254d10c93568e5a3448c10112e47a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; Rodin::<wbr />Variational::<wbr />IntegrationPoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ad254d10c93568e5a3448c10112e47a" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ad254d10c93568e5a3448c10112e47a" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -165,9 +210,9 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a32eceb6f2fb4748f336249a143e3c623"><div>
+          <section class="m-doc-details" id="a4fb5305fe351dbced7b3b2aa4f52a0de"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>* Rodin::<wbr />Variational::<wbr />IntegrationPoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a32eceb6f2fb4748f336249a143e3c623" class="m-doc-self">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fb5305fe351dbced7b3b2aa4f52a0de" class="m-doc-self">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -178,9 +223,24 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ab4ee42dc2752817b0db8bc67187bf3da"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab4ee42dc2752817b0db8bc67187bf3da" class="m-doc-self">getReferenceQuadratureFormula</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the logically certified reference formula, when available.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Formula authorizing reference tabulation, or <code>nullptr</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Reference association is established by construction, without coordinate comparisons. Reads are local and non-collective.</p>
+          </div></section>
           <section class="m-doc-details" id="ad65a47a8b8a83be5d0b456b1074d1220"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />IntegrationPoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad65a47a8b8a83be5d0b456b1074d1220" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad65a47a8b8a83be5d0b456b1074d1220" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -231,13 +291,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

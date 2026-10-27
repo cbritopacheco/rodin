@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin namespace | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -75,8 +72,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          Rodin <span class="m-thin">namespace</span>
-        </h1>
+          Rodin <span class="m-thin">namespace</span>        </h1>
         <p>The Rodin library for finite element methods and shape optimization.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
@@ -86,6 +82,7 @@
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#typedef-members">Typedefs</a></li>
                 <li><a href="#func-members">Functions</a></li>
                 <li><a href="#var-members">Variables</a></li>
               </ul>
@@ -97,70 +94,68 @@
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin_1_1_adaptation.html" class="m-doc">Adaptation</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_tests_1_1_benchmarks.html" class="m-doc">Rodin::<wbr />Tests::<wbr />Benchmarks</a>.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_advection.html" class="m-doc">Advection</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_advection.html" class="m-doc">Rodin::<wbr />Advection</a>.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_alert.html" class="m-doc">Rodin::<wbr />Alert</a>.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Rodin::<wbr />Assembly</a>.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Rodin::<wbr />Context</a>.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_distance.html" class="m-doc">Rodin::<wbr />Distance</a>.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Rodin::<wbr />Eikonal</a>.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_elasticity.html" class="m-doc">Elasticity</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_elasticity.html" class="m-doc">Rodin::<wbr />Elasticity</a>.</dd>
+            <dd>Mesh adaptation and deformation operations.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
+            <dd>Typed expressions for constructing variational forms.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_advection.html" class="m-doc">Advection</a></dt>
+            <dd>Transport and advection of fields.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a></dt>
+            <dd>Contextual exceptions and diagnostic reporting.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></dt>
+            <dd>Global assembly of discrete operators.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a></dt>
+            <dd>Execution contexts for local and distributed computation.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance</a></dt>
+            <dd>Distance-field computations.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a></dt>
+            <dd>Eikonal equations and distance propagation.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::<wbr />Geometry</a>.</dd>
+            <dd>Meshes, geometric transformations, and mapped evaluation.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_heart.html" class="m-doc">Heart</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_heart.html" class="m-doc">Rodin::<wbr />Heart</a>.</dd>
+            <dd>Cardiac models and their coupled state evolution.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_hilbert.html" class="m-doc">Hilbert</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_hilbert.html" class="m-doc">Rodin::<wbr />Hilbert</a>.</dd>
+            <dd>Hilbert-space formulations and regularization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">Rodin::<wbr />IO</a>.</dd>
+            <dd>Reading and writing meshes, fields, and associated data.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_location.html" class="m-doc">Location</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_location.html" class="m-doc">Rodin::<wbr />Location</a>.</dd>
+            <dd>Spatial indexing and geometric search.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Math</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Rodin::<wbr />Math</a>.</dd>
+            <dd>Spatial arithmetic, matrix operations, and sparse linear algebra.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_traits.html" class="m-doc">Rodin::<wbr />Traits</a>.</dd>
+            <dd>Mesh adaptation through the MMG integration.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a></dt>
-            <dd>Distributed-memory parallel extensions using MPI.</dd>
+            <dd>Distributed meshes, finite element spaces, and search operations.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a></dt>
+            <dd>Finite element spaces, fields, and variational problems.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a></dt>
             <dd>PETSc integration module for Rodin.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_plot.html" class="m-doc">Plot</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_plot.html" class="m-doc">Rodin::<wbr />Plot</a>.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">Rodin::<wbr />QF</a>.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_scotch.html" class="m-doc">Scotch</a></dt>
-            <dd>PT-Scotch mesh partitioning integration.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_serialization.html" class="m-doc">Serialization</a></dt>
-            <dd>Namespace support for serialization of Rodin types.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid</a></dt>
-            <dd>Hyperelastic solid mechanics module for large-deformation problems.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a>.</dd>
+            <dd>Solution of linear and nonlinear discrete systems.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a></dt>
+            <dd>Module for defining quadrature formulae over reference polytopes.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_scotch.html" class="m-doc">Scotch</a></dt>
+            <dd>Graph partitioning through the Scotch integration.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid</a></dt>
+            <dd>Constitutive laws, kinematics, and solid-mechanics integration.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a></dt>
-            <dd>Module containing various utilities and classes for writing tests.</dd>
+            <dd>Helpers for constructing numerical tests.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a></dt>
+            <dd>Type utilities and generic programming helpers.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a></dt>
             <dd>Tests of the Rodin library</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_threads.html" class="m-doc">Threads</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_threads.html" class="m-doc">Rodin::<wbr />Threads</a>.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_traits.html" class="m-doc">Traits</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Rodin::<wbr />Utility</a>.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_test.html" class="m-doc">Rodin::<wbr />Test</a>.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_index_array_compare.html" class="m-doc">IndexArrayCompare</a>
+            </dt>
+            <dd>Functor for lexicographically ordering index arrays.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_index_array_equality.html" class="m-doc">IndexArrayEquality</a>
+            </dt>
+            <dd>Functor for comparing two index arrays for equality.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class From, class To&gt;</div>
               class <a href="class_rodin_1_1_cast.html" class="m-doc">Cast</a>
@@ -171,22 +166,6 @@
             </dt>
             <dd>Abstract base class for objects that can be copied.</dd>
             <dt>
-              struct <a href="struct_rodin_1_1_default_sentinel_t.html" class="m-doc">DefaultSentinelT</a>
-            </dt>
-            <dd>Sentinel type for default-constructed iterators.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_identifiable.html" class="m-doc">Identifiable</a>
-            </dt>
-            <dd>Abstract base class for objects that can be copied.</dd>
-            <dt>
-              struct <a href="struct_rodin_1_1_index_array_compare.html" class="m-doc">IndexArrayCompare</a>
-            </dt>
-            <dd>Functor for lexicographically ordering index arrays.</dd>
-            <dt>
-              struct <a href="struct_rodin_1_1_index_array_equality.html" class="m-doc">IndexArrayEquality</a>
-            </dt>
-            <dd>Functor for comparing two index arrays for equality.</dd>
-            <dt>
               struct <a href="struct_rodin_1_1_index_set_equality.html" class="m-doc">IndexSetEquality</a>
             </dt>
             <dd>Functor for comparing two IndexSet objects for equality.</dd>
@@ -194,10 +173,6 @@
               struct <a href="struct_rodin_1_1_index_set_hash.html" class="m-doc">IndexSetHash</a>
             </dt>
             <dd>Functor for computing a hash value for an IndexSet.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_moveable.html" class="m-doc">Moveable</a>
-            </dt>
-            <dd>Abstract base class for objects that can be moved.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class L, class R&gt;</div>
               class <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>
@@ -207,17 +182,82 @@
               <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
               class <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>
             </dt>
-            <dd>Forward declaration of the Tuple template class.</dd>
+            <dd>Forward declaration of the Tuple template class.<details class="rodin-specialization-disclosure"><summary>See specializations</summary><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_tuple_3_4.html"><code></code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_tuple_3_4.html#a94abdc953c5d97e5eb39a57e3577f945"><span class="nc">Tuple</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>Specialization of Tuple for an empty parameter pack.</td></tr><tr><td><a href="class_rodin_1_1_tuple_3_01_t_00_01_ts_8_8_8_01_4.html"><code>T, Ts...</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="n">Ts</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_tuple_3_01_t_00_01_ts_8_8_8_01_4.html#af87e49633aaa06bb108d912dff1f4608"><span class="nc">Tuple</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">T</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Ts</span><span class="p">...</span><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>A tuple class that extends std::tuple with additional functionality.</td></tr></tbody></table></details></dd>
             <dt>
-              <div class="m-doc-template">template&lt;class T, class ... Ts&gt;</div>
-              class <a href="class_rodin_1_1_tuple_3_01_t_00_01_ts_8_8_8_01_4.html" class="m-doc">Tuple&lt;T, Ts...&gt;</a>
+              struct <a href="struct_rodin_1_1_default_sentinel_t.html" class="m-doc">DefaultSentinelT</a>
             </dt>
-            <dd>A tuple class that extends std::tuple with additional functionality.</dd>
+            <dd>Sentinel type for default-constructed iterators.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_tuple_3_4.html" class="m-doc">Tuple&lt;&gt;</a>
+              class <a href="class_rodin_1_1_identifiable.html" class="m-doc">Identifiable</a>
             </dt>
-            <dd>Specialization of Tuple for an empty parameter pack.</dd>
+            <dd>Abstract base class for objects that can be copied.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_moveable.html" class="m-doc">Moveable</a>
+            </dt>
+            <dd>Abstract base class for objects that can be moved.</dd>
+            
+            
+          </dl>
+        </section>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class ScalarType&gt;</div>
+              using <a href="#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a> = Eigen::ArrayX&lt;ScalarType&gt;
+            </dt>
+            <dd>Alias for a dynamically sized array.</dd>
+            <dt>
+              using <a href="#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a> = <a href="#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a>&lt;<a href="#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
+            </dt>
+            <dd>Alias for an index array.</dd>
+            <dt>
+              using <a href="#a1dc165bbe1d2390cd0a21524320cd3eb" class="m-doc">Integer</a> = int
+            </dt>
+            <dd>Standard type for representing integer values.</dd>
+            <dt>
+              using <a href="#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> = bool
+            </dt>
+            <dd>Standard type for representing boolean values.</dd>
+            <dt>
+              using <a href="#a3ffd74e95952eacd75f04a2b85d61845" class="m-doc">Float</a> = float
+            </dt>
+            <dd>Standard type for representing (32 bit) floating-point values.</dd>
+            <dt>
+              using <a href="#ab8fcb63d96106a8bbedccf2848ca861d" class="m-doc">Double</a> = double
+            </dt>
+            <dd>Standard type for representing double precision (64 bit) floating-point values.</dd>
+            <dt>
+              using <a href="#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> = std::size_t
+            </dt>
+            <dd>Standard type for representing indices.</dd>
+            <dt>
+              using <a href="#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> = <a href="#ab8fcb63d96106a8bbedccf2848ca861d" class="m-doc">Double</a>
+            </dt>
+            <dd>Standard type for representing scalar values.</dd>
+            <dt>
+              using <a href="#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a> = std::complex&lt;<a href="#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
+            </dt>
+            <dd>Standard type for representing complex values.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              using <a href="#abab8a7d6e39a9b421ff10d164ffc3302" class="m-doc">List</a> = boost::container::list&lt;T&gt;
+            </dt>
+            <dd>Standard type for representing lists.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              using <a href="#a672da592edc3a0551b41b89d3ac37f50" class="m-doc">Deque</a> = boost::container::deque&lt;T&gt;
+            </dt>
+            <dd>Standard type for representing deques.</dd>
           </dl>
         </section>
         <section id="func-members">
@@ -225,8 +265,8 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class L, class R&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#aca27e15f10cd90debc45f2ffab02bf45" class="m-doc">Pair</a>(</span><span class="m-doc-wrap">L,
-              R) -&gt; Pair&lt; L, R &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a7fb0a8b058253a47e9f23cd0aeac4b76" class="m-doc">Pair</a>(</span><span class="m-doc-wrap">L lhs,
+              R rhs) -&gt; Pair&lt; L, R &gt;</span>
             </dt>
             <dd>Deduction guide for the Pair class.</dd>
             <dt>
@@ -259,16 +299,118 @@
           </dl>
         </section>
         <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aca27e15f10cd90debc45f2ffab02bf45"><div>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="ad1992f32ef98176d3cac1ed3dd4132be"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_pair_8h.html">&lt;Rodin/Pair.h&gt;</a></div>
+              
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              using <a href="#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc-self">Array</a> = Eigen::ArrayX&lt;ScalarType&gt;
+            </h3><p class="rodin-reference-include">Defined in <a href="_array_8h.html"><code>Rodin/Array.h</code></a></p>
+            <p>Alias for a dynamically sized array.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ScalarType</td>
+                  <td>The scalar type of the array.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This template alias defines a standard array type based on Eigen::ArrayX.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3b5d284c6fb7166b753c5664773266cc"><div>
+            <h3>
+              using <a href="#a3b5d284c6fb7166b753c5664773266cc" class="m-doc-self">IndexArray</a> = <a href="#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a>&lt;<a href="#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_array_8h.html"><code>Rodin/Array.h</code></a></p>
+            <p>Alias for an index array.</p>
+<p>This alias defines an index array using the standard array type with a predefined index type.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1dc165bbe1d2390cd0a21524320cd3eb"><div>
+            <h3>
+              using <a href="#a1dc165bbe1d2390cd0a21524320cd3eb" class="m-doc-self">Integer</a> = int
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
+            <p>Standard type for representing integer values.</p>
+          </div></section>
+          <section class="m-doc-details" id="a717a190167959b837148d927a5d380ba"><div>
+            <h3>
+              using <a href="#a717a190167959b837148d927a5d380ba" class="m-doc-self">Boolean</a> = bool
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
+            <p>Standard type for representing boolean values.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3ffd74e95952eacd75f04a2b85d61845"><div>
+            <h3>
+              using <a href="#a3ffd74e95952eacd75f04a2b85d61845" class="m-doc-self">Float</a> = float
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
+            <p>Standard type for representing (32 bit) floating-point values.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab8fcb63d96106a8bbedccf2848ca861d"><div>
+            <h3>
+              using <a href="#ab8fcb63d96106a8bbedccf2848ca861d" class="m-doc-self">Double</a> = double
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
+            <p>Standard type for representing double precision (64 bit) floating-point values.</p>
+          </div></section>
+          <section class="m-doc-details" id="a68df7958495e405a2df133a40d640251"><div>
+            <h3>
+              using <a href="#a68df7958495e405a2df133a40d640251" class="m-doc-self">Index</a> = std::size_t
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
+            <p>Standard type for representing indices.</p>
+          </div></section>
+          <section class="m-doc-details" id="a36afbd9801a3c5cba968cdec29036daf"><div>
+            <h3>
+              using <a href="#a36afbd9801a3c5cba968cdec29036daf" class="m-doc-self">Real</a> = <a href="#ab8fcb63d96106a8bbedccf2848ca861d" class="m-doc">Double</a>
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
+            <p>Standard type for representing scalar values.</p>
+          </div></section>
+          <section class="m-doc-details" id="a12f84f428d2b3ff138c176f003ef716c"><div>
+            <h3>
+              using <a href="#a12f84f428d2b3ff138c176f003ef716c" class="m-doc-self">Complex</a> = std::complex&lt;<a href="#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
+            <p>Standard type for representing complex values.</p>
+          </div></section>
+          <section class="m-doc-details" id="abab8a7d6e39a9b421ff10d164ffc3302"><div>
+            <h3>
+              
+              <div class="m-doc-template">
+                template&lt;class T&gt;
+              </div>
+              using <a href="#abab8a7d6e39a9b421ff10d164ffc3302" class="m-doc-self">List</a> = boost::container::list&lt;T&gt;
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
+            <p>Standard type for representing lists.</p>
+          </div></section>
+          <section class="m-doc-details" id="a672da592edc3a0551b41b89d3ac37f50"><div>
+            <h3>
+              
+              <div class="m-doc-template">
+                template&lt;class T&gt;
+              </div>
+              using <a href="#a672da592edc3a0551b41b89d3ac37f50" class="m-doc-self">Deque</a> = boost::container::deque&lt;T&gt;
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
+            <p>Standard type for representing deques.</p>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a7fb0a8b058253a47e9f23cd0aeac4b76"><div>
+            <h3><a href="#a7fb0a8b058253a47e9f23cd0aeac4b76" class="m-doc-self">Pair</a></h3><p class="rodin-reference-include">Defined in <a href="_pair_8h.html"><code>Rodin/Pair.h</code></a></p><details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              
               <div class="m-doc-template">
                 template&lt;class L, class R&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca27e15f10cd90debc45f2ffab02bf45" class="m-doc-self">Pair</a>(</span><span class="m-doc-wrap">L,
-              R) -&gt; Pair&lt; L, R &gt;</span></span>
-            </h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7fb0a8b058253a47e9f23cd0aeac4b76" class="m-doc-self">Pair</a>(</span><span class="m-doc-wrap">L lhs,
+              R rhs) -&gt; Pair&lt; L, R &gt;</span></span>
+            </div></details>
             <p>Deduction guide for the Pair class.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -284,24 +426,37 @@
                   <td>Type of the second element.</td>
                 </tr>
               </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>lhs</td>
+                  <td>Left element.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>Right element.</td>
+                </tr>
+              </tbody>
             </table>
 <p>This guide allows the compiler to deduce the template arguments for L and R when constructing a Pair object.</p>
           </div></section>
           <section class="m-doc-details" id="ae7ddab37285f52841774a1f06594cc87"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7ddab37285f52841774a1f06594cc87" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap">) -&gt; Tuple&lt;&gt;</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_tuple_8h.html">&lt;Rodin/Tuple.h&gt;</a></div>
-            </h3>
+            <h3><a href="#ae7ddab37285f52841774a1f06594cc87" class="m-doc-self">Tuple</a></h3><p class="rodin-reference-include">Defined in <a href="_tuple_8h.html"><code>Rodin/Tuple.h</code></a></p><details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7ddab37285f52841774a1f06594cc87" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap">) -&gt; Tuple&lt;&gt;</span></span>
+              
+            </div></details>
             <p>Deduction guide for the empty tuple.</p>
           </div></section>
           <section class="m-doc-details" id="af3c582b14567ea5c4058f1d6ff04f699"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_tuple_8h.html">&lt;Rodin/Tuple.h&gt;</a></div>
+            <h3><a href="#af3c582b14567ea5c4058f1d6ff04f699" class="m-doc-self">Tuple</a></h3><p class="rodin-reference-include">Defined in <a href="_tuple_8h.html"><code>Rodin/Tuple.h</code></a></p><details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              
               <div class="m-doc-template">
                 template&lt;class... Params&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af3c582b14567ea5c4058f1d6ff04f699" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap">Params... params) -&gt; Tuple&lt; Params... &gt;</span></span>
-            </h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af3c582b14567ea5c4058f1d6ff04f699" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap">Params... params) -&gt; Tuple&lt; Params... &gt;</span></span>
+            </div></details>
             <p>Deduction guide for a tuple from its constructor arguments.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -326,12 +481,12 @@
           </div></section>
           <section class="m-doc-details" id="a74e34a69a39a8bd20e7c0021a10567be"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_tuple_8h.html">&lt;Rodin/Tuple.h&gt;</a></div>
+              
               <div class="m-doc-template">
                 template&lt;Index First, Index Last&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static auto Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74e34a69a39a8bd20e7c0021a10567be" class="m-doc-self">IndexTuple</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
+              <span class="m-doc-wrap-bumper">static auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74e34a69a39a8bd20e7c0021a10567be" class="m-doc-self">IndexTuple</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_tuple_8h.html"><code>Rodin/Tuple.h</code></a></p>
             <p>Generates a tuple of indices.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -358,9 +513,9 @@
           </div></section>
           <section class="m-doc-details" id="ad9581b472b22e3c0f392a86bb92348ab"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::size_t Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9581b472b22e3c0f392a86bb92348ab" class="m-doc-self">operator&quot;&quot;_UZ</a>(</span><span class="m-doc-wrap">unsigned long long x) <span class="m-label m-primary">constexpr</span></span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
-            </h3>
+              <span class="m-doc-wrap-bumper">std::size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9581b472b22e3c0f392a86bb92348ab" class="m-doc-self">operator&quot;&quot;_UZ</a>(</span><span class="m-doc-wrap">unsigned long long x) <span class="m-label m-primary">constexpr</span></span></span>
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_types_8h.html"><code>Rodin/Types.h</code></a></p>
             <p>User-defined literal for size_t values.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -387,8 +542,8 @@
           <section class="m-doc-details" id="a4030fbfd291d610c5524ca79206e79b6"><div>
             <h3>
               <a href="struct_rodin_1_1_default_sentinel_t.html" class="m-doc">DefaultSentinelT</a> Rodin::<wbr /><a href="#a4030fbfd291d610c5524ca79206e79b6" class="m-doc-self">DefaultSentinel</a> <span class="m-label m-primary">constexpr</span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_index_generator_8h.html">&lt;Rodin/Geometry/IndexGenerator.h&gt;</a></div>
-            </h3>
+              
+            </h3><p class="rodin-reference-include">Defined in <a href="_index_generator_8h.html"><code>Rodin/Geometry/IndexGenerator.h</code></a></p>
             <p>Default sentinel value.</p>
           </div></section>
         </section>
@@ -430,13 +585,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

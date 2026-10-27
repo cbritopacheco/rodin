@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Solver::LeastSquaresCG&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,11 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_least_squares_c_g_8h.html">&lt;Rodin/Solver/LeastSquaresCG.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>LeastSquaresCG&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Least-squares conjugate gradient solver for sparse systems.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solver.html">Solver</a></div><h1>LeastSquaresCG <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Least-squares conjugate gradient solver for sparse systems.</p><p class="rodin-reference-include">Defined in <a href="_least_squares_c_g_8h.html"><code>Rodin/Solver/LeastSquaresCG.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LeastSquaresCG</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_linear_system.html"><span class="nc">LinearSystem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f"><span class="nc">SparseMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html">LeastSquaresCG</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>LinearSystem</code></td><td><code>Math::LinearSystem&lt; Math::SparseMatrix&lt; Scalar &gt;, Math::Vector&lt; Scalar &gt; &gt;</code></td></tr></tbody></table></section>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -97,7 +93,7 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -155,23 +151,15 @@ $ A^TAx = A^Tb $
 <use x='55.328928' y='-4.338437' xlink:href='#eq2-g0-84'/>
 <use x='61.933418' y='0' xlink:href='#eq2-g1-98'/>
 </g>
-</svg>. This is particularly useful for:</p><ul><li>Overdetermined systems (more equations than unknowns)</li><li>Rectangular matrices</li><li>Least-squares fitting problems</li></ul><p><strong>Example usage:</strong></p><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg>. This is particularly useful for:</p><ul><li>Overdetermined systems (more equations than unknowns)</li><li>Rectangular matrices</li><li>Least-squares fitting problems</li></ul><p><strong>Example usage:</strong></p><pre class="m-code"><span class="nc">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
-<span class="n">Solver</span><span class="o">::</span><span class="n">LeastSquaresCG</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+<span class="n">Solver</span><span class="o">::</span><span class="nc">LeastSquaresCG</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
 <span class="n">solver</span><span class="p">.</span><span class="n">setTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">)</span>
 <span class="w">      </span><span class="p">.</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
 <span class="w">      </span><span class="p">.</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-info"><h4>Note</h4><p>For well-conditioned square systems, prefer CG which is more efficient.</p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Abstract base class for linear system solvers.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" title="LinearSolverBase&lt; Math::LinearSystem&lt; Math::SparseMatrix&lt; Scalar &gt;, Math::Vector&lt; Scalar &gt; &gt; &gt;">LinearSolverBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">LeastSquaresCG</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html"><code>LinearSolverBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#ae28253f47bbc22b7e87643fd51631637"><span class="nc">LinearSolverBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_linear_system.html"><span class="nc">LinearSystem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f"><span class="nc">SparseMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Abstract base class for linear system solvers.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_mafc60ae01e8632722bca7ae1b93892333.html#af509b79c71ac180a02de0d6786a23574"><code>copy()</code></a></td><td><a href="class_rodin_1_1_copyable.html#ab4e2e0c492116fe03366ba4e4403a2c8">Copyable::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html"><code>LinearSolverBase</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#a07663f770d90c7558d8746889964d6bc"><code>getProblem()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -180,13 +168,13 @@ $ A^TAx = A^Tb $
             </dt>
             <dd>Type of scalar values.</dd>
             <dt id="a3c3e9c2215647cbae22cfcae7e75427d">
-              using <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+              using <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc-self">VectorType</a> = <a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Type of solution and right-hand side vectors.</dd>
             <dt id="ab63ab6eaeaaa03f9e1f192bccb16d69e">
               using <a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
             </dt>
-            <dd>Type of system matrix (operator)</dd>
+            <dd>Type of system matrix (operator).</dd>
             <dt id="a67d1c43c805caee8285834ec30abf729">
               using <a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc-self">LinearSystemType</a> = <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Math::<wbr />LinearSystem</a>&lt;<a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>, <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&gt;
             </dt>
@@ -196,7 +184,7 @@ $ A^TAx = A^Tb $
             </dt>
             <dd>Type of problem being solved.</dd>
             <dt id="a85385c6607a397925a213e9098256fdc">
-              using <a href="#a85385c6607a397925a213e9098256fdc" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase</a>&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+              using <a href="#a85385c6607a397925a213e9098256fdc" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#ae28253f47bbc22b7e87643fd51631637" class="m-doc">LinearSolverBase</a>&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -209,11 +197,11 @@ $ A^TAx = A^Tb $
             </dt>
             <dd>Constructs a LeastSquaresCG solver with default parameters.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#afd39b42cea6a2ba22028095f26704689" class="m-doc">LeastSquaresCG</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#afd39b42cea6a2ba22028095f26704689" class="m-doc">LeastSquaresCG</a>(</span><span class="m-doc-wrap">const LeastSquaresCG&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ab808ec2361a4cf556541c0d1c4bebe5b" class="m-doc">LeastSquaresCG</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ab808ec2361a4cf556541c0d1c4bebe5b" class="m-doc">LeastSquaresCG</a>(</span><span class="m-doc-wrap">LeastSquaresCG&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
             <dt id="a557d879ff9846a4df370439e6b44a68a">
@@ -226,11 +214,11 @@ $ A^TAx = A^Tb $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9a3305b9c86f6866e7a0f8dc0a353300" class="m-doc">setTolerance</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; tol) -&gt; <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9a3305b9c86f6866e7a0f8dc0a353300" class="m-doc">setTolerance</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; tol) -&gt; <a href="#a8948ef1c7c2b2578edc7eb1ff9296684" class="m-doc">LeastSquaresCG</a>&amp;</span>
             </dt>
             <dd>Sets the convergence tolerance for the iterative solver.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a292ac6f78673d4ed8278172eba290f97" class="m-doc">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t maxIt) -&gt; <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a292ac6f78673d4ed8278172eba290f97" class="m-doc">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t maxIt) -&gt; <a href="#a8948ef1c7c2b2578edc7eb1ff9296684" class="m-doc">LeastSquaresCG</a>&amp;</span>
             </dt>
             <dd>Sets the maximum number of iterations.</dd>
             <dt>
@@ -238,7 +226,7 @@ $ A^TAx = A^Tb $
             </dt>
             <dd>Solves the least-squares problem using the conjugate gradient method.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af509b79c71ac180a02de0d6786a23574" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af509b79c71ac180a02de0d6786a23574" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a8948ef1c7c2b2578edc7eb1ff9296684" class="m-doc">LeastSquaresCG</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a copy of this solver.</dd>
             <dt>
@@ -246,7 +234,7 @@ $ A^TAx = A^Tb $
             </dt>
             <dd>Solves the associated problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#adeb0e48252fd318e8aa17cc7cad8d7c0" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; system) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Solves the linear system.</dd>
           </dl>
@@ -255,10 +243,8 @@ $ A^TAx = A^Tb $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a8948ef1c7c2b2578edc7eb1ff9296684"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />LeastSquaresCG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8948ef1c7c2b2578edc7eb1ff9296684" class="m-doc-self">LeastSquaresCG</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8948ef1c7c2b2578edc7eb1ff9296684" class="m-doc-self">LeastSquaresCG</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span></span>
             </h3>
             <p>Constructs a LeastSquaresCG solver with default parameters.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -275,10 +261,8 @@ $ A^TAx = A^Tb $
           </div></section>
           <section class="m-doc-details" id="afd39b42cea6a2ba22028095f26704689"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />LeastSquaresCG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd39b42cea6a2ba22028095f26704689" class="m-doc-self">LeastSquaresCG</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd39b42cea6a2ba22028095f26704689" class="m-doc-self">LeastSquaresCG</a>(</span><span class="m-doc-wrap">const LeastSquaresCG&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -295,10 +279,8 @@ $ A^TAx = A^Tb $
           </div></section>
           <section class="m-doc-details" id="ab808ec2361a4cf556541c0d1c4bebe5b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />LeastSquaresCG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab808ec2361a4cf556541c0d1c4bebe5b" class="m-doc-self">LeastSquaresCG</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab808ec2361a4cf556541c0d1c4bebe5b" class="m-doc-self">LeastSquaresCG</a>(</span><span class="m-doc-wrap">LeastSquaresCG&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -315,10 +297,8 @@ $ A^TAx = A^Tb $
           </div></section>
           <section class="m-doc-details" id="a9a3305b9c86f6866e7a0f8dc0a353300"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>&amp; Rodin::<wbr />Solver::<wbr />LeastSquaresCG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9a3305b9c86f6866e7a0f8dc0a353300" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; tol)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a8948ef1c7c2b2578edc7eb1ff9296684" class="m-doc">LeastSquaresCG</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9a3305b9c86f6866e7a0f8dc0a353300" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; tol)</span></span>
             </h3>
             <p>Sets the convergence tolerance for the iterative solver.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -343,13 +323,13 @@ $ A^TAx = A^Tb $
 $ \|r_k\| &lt; \text{tol} \times \|b\| $
 </title>
 <defs>
+<path id='eq3-g5-108' d='M3.060999 0V-.178658C2.298727-.2263 2.167712-.345405 2.167712-1.000482V-8.111053L2.12007-8.134874C1.500723-7.932395 1.048124-7.81329 .2263-7.610812V-7.420244H.297763C.428778-7.432154 .571704-7.444065 .666988-7.444065C1.048124-7.444065 1.167229-7.277318 1.167229-6.717524V-1.036214C1.167229-.393047 1.000482-.23821 .250121-.178658V0H3.060999Z'/>
+<path id='eq3-g5-111' d='M5.597937-2.787058C5.597937-4.347334 4.50217-5.478832 2.977626-5.478832C1.42926-5.478832 .345405-4.335423 .345405-2.691774C.345405-1.083856 1.453081 .119105 2.953805 .119105S5.597937-1.143408 5.597937-2.787058ZM4.525991-2.37019C4.525991-1.024303 3.990019-.214389 3.096731-.214389C2.632221-.214389 2.191533-.500241 1.941412-.976661C1.607918-1.596007 1.41735-2.429743 1.41735-3.275389C1.41735-4.406886 1.977144-5.145338 2.822789-5.145338C3.823272-5.145338 4.525991-4.001929 4.525991-2.37019Z'/>
+<path id='eq3-g5-116' d='M3.323031-.786093L3.168194-.917109C2.906163-.607436 2.715595-.500241 2.453564-.500241C2.012875-.500241 1.834218-.809914 1.834218-1.572186V-4.978591H3.037178V-5.359727H1.834218V-6.741345C1.834218-6.86045 1.810397-6.896182 1.750844-6.896182C1.679381-6.777077 1.596007-6.669882 1.512634-6.562688C1.071945-5.90761 .666988-5.466921 .357315-5.288264C.2263-5.20489 .154837-5.133427 .154837-5.061964C.154837-5.026233 .166747-5.002412 .202479-4.978591H.833735V-1.393529C.833735-.393047 1.19105 .119105 1.88186 .119105C2.477385 .119105 2.929984-.166747 3.323031-.786093Z'/>
 <path id='eq3-g1-107' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.988294 .079701 1.052055-.175342 1.083935-.286924C1.163636-.621669 1.370859-1.466501 1.458531-1.801245C1.896887-1.753425 2.430884-1.601993 2.430884-1.147696C2.430884-1.107846 2.430884-1.067995 2.414944-.988294C2.391034-.884682 2.375093-.773101 2.375093-.73325C2.375093-.263014 2.725778 .079701 3.188045 .079701C3.52279 .079701 3.730012-.167372 3.833624-.318804C4.024907-.613699 4.152428-1.091905 4.152428-1.139726C4.152428-1.219427 4.088667-1.243337 4.032877-1.243337C3.937235-1.243337 3.921295-1.195517 3.889415-1.052055C3.785803-.67746 3.57858-.143462 3.203985-.143462C2.996762-.143462 2.948941-.318804 2.948941-.533998C2.948941-.637609 2.956912-.73325 2.996762-.916563C3.004732-.948443 3.036613-1.075965 3.036613-1.163636C3.036613-1.817186 2.215691-1.960648 1.809215-2.016438C2.10411-2.191781 2.375093-2.462765 2.470735-2.566376C2.909091-2.996762 3.267746-3.291656 3.650311-3.291656C3.753923-3.291656 3.849564-3.267746 3.913325-3.188045C3.482939-3.132254 3.482939-2.757659 3.482939-2.749689C3.482939-2.574346 3.618431-2.454795 3.793773-2.454795C4.008966-2.454795 4.24807-2.630137 4.24807-2.956912C4.24807-3.227895 4.056787-3.514819 3.658281-3.514819C3.196015-3.514819 2.781569-3.164134 2.327273-2.709838C1.865006-2.255542 1.665753-2.16787 1.538232-2.11208L2.327273-5.292154Z'/>
 <path id='eq3-g2-60' d='M7.878456-5.822167C8.093649-5.917808 8.117559-6.001494 8.117559-6.073225C8.117559-6.204732 8.021918-6.300374 7.890411-6.300374C7.866501-6.300374 7.854545-6.288418 7.687173-6.216687L1.219427-3.239851C1.004234-3.144209 .980324-3.060523 .980324-2.988792C.980324-2.905106 .992279-2.833375 1.219427-2.725778L7.687173 .251059C7.84259 .32279 7.866501 .334745 7.890411 .334745C8.021918 .334745 8.117559 .239103 8.117559 .107597C8.117559 .035866 8.093649-.047821 7.878456-.143462L1.721544-2.976837L7.878456-5.822167Z'/>
 <path id='eq3-g2-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
 <path id='eq3-g2-114' d='M4.65056-4.889664C4.27995-4.817933 4.088667-4.554919 4.088667-4.291905C4.088667-4.004981 4.315816-3.90934 4.483188-3.90934C4.817933-3.90934 5.092902-4.196264 5.092902-4.554919C5.092902-4.937484 4.722291-5.272229 4.124533-5.272229C3.646326-5.272229 3.096389-5.057036 2.594271-4.327771C2.510585-4.961395 2.032379-5.272229 1.554172-5.272229C1.08792-5.272229 .848817-4.913574 .705355-4.65056C.502117-4.220174 .32279-3.502864 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.812951-4.339726 1.0401-5.033126 1.518306-5.033126C1.80523-5.033126 1.888917-4.829888 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.338979 .119552 1.566127 .035866 1.637858-.203238C1.673724-.298879 2.116065-2.10411 2.187796-2.379078C2.247572-2.642092 2.319303-2.893151 2.379078-3.156164C2.426899-3.323537 2.47472-3.514819 2.510585-3.670237C2.546451-3.777833 2.86924-4.363636 3.16812-4.62665C3.311582-4.758157 3.622416-5.033126 4.112578-5.033126C4.303861-5.033126 4.495143-4.99726 4.65056-4.889664Z'/>
-<path id='eq3-g5-108' d='M3.060999 0V-.178658C2.298727-.2263 2.167712-.345405 2.167712-1.000482V-8.111053L2.12007-8.134874C1.500723-7.932395 1.048124-7.81329 .2263-7.610812V-7.420244H.297763C.428778-7.432154 .571704-7.444065 .666988-7.444065C1.048124-7.444065 1.167229-7.277318 1.167229-6.717524V-1.036214C1.167229-.393047 1.000482-.23821 .250121-.178658V0H3.060999Z'/>
-<path id='eq3-g5-111' d='M5.597937-2.787058C5.597937-4.347334 4.50217-5.478832 2.977626-5.478832C1.42926-5.478832 .345405-4.335423 .345405-2.691774C.345405-1.083856 1.453081 .119105 2.953805 .119105S5.597937-1.143408 5.597937-2.787058ZM4.525991-2.37019C4.525991-1.024303 3.990019-.214389 3.096731-.214389C2.632221-.214389 2.191533-.500241 1.941412-.976661C1.607918-1.596007 1.41735-2.429743 1.41735-3.275389C1.41735-4.406886 1.977144-5.145338 2.822789-5.145338C3.823272-5.145338 4.525991-4.001929 4.525991-2.37019Z'/>
-<path id='eq3-g5-116' d='M3.323031-.786093L3.168194-.917109C2.906163-.607436 2.715595-.500241 2.453564-.500241C2.012875-.500241 1.834218-.809914 1.834218-1.572186V-4.978591H3.037178V-5.359727H1.834218V-6.741345C1.834218-6.86045 1.810397-6.896182 1.750844-6.896182C1.679381-6.777077 1.596007-6.669882 1.512634-6.562688C1.071945-5.90761 .666988-5.466921 .357315-5.288264C.2263-5.20489 .154837-5.133427 .154837-5.061964C.154837-5.026233 .166747-5.002412 .202479-4.978591H.833735V-1.393529C.833735-.393047 1.19105 .119105 1.88186 .119105C2.477385 .119105 2.929984-.166747 3.323031-.786093Z'/>
 <path id='eq3-g0-2' d='M4.65056-3.323537L2.259527-5.702615C2.116065-5.846077 2.092154-5.869988 1.996513-5.869988C1.876961-5.869988 1.75741-5.762391 1.75741-5.630884C1.75741-5.547198 1.78132-5.523288 1.912827-5.391781L4.303861-2.988792L1.912827-.585803C1.78132-.454296 1.75741-.430386 1.75741-.3467C1.75741-.215193 1.876961-.107597 1.996513-.107597C2.092154-.107597 2.116065-.131507 2.259527-.274969L4.638605-2.654047L7.113325-.179328C7.137235-.167372 7.220922-.107597 7.292653-.107597C7.436115-.107597 7.531756-.215193 7.531756-.3467C7.531756-.37061 7.531756-.418431 7.49589-.478207C7.483935-.502117 5.583064-2.379078 4.985305-2.988792L7.173101-5.176588C7.232877-5.248319 7.412204-5.403736 7.47198-5.475467C7.483935-5.499377 7.531756-5.547198 7.531756-5.630884C7.531756-5.762391 7.436115-5.869988 7.292653-5.869988C7.197011-5.869988 7.149191-5.822167 7.017684-5.69066L4.65056-3.323537Z'/>
 <path id='eq3-g0-107' d='M2.056289-8.5599C2.056289-8.751183 2.056289-8.966376 1.817186-8.966376S1.578082-8.703362 1.578082-8.524035V2.546451C1.578082 2.737733 1.578082 2.988792 1.817186 2.988792S2.056289 2.773599 2.056289 2.582316V-8.5599ZM4.387547-8.524035C4.387547-8.715318 4.387547-8.966376 4.148443-8.966376S3.90934-8.751183 3.90934-8.5599V2.582316C3.90934 2.773599 3.90934 2.988792 4.148443 2.988792S4.387547 2.725778 4.387547 2.546451V-8.524035Z'/>
 </defs>
@@ -393,10 +373,8 @@ $ k $
           </div></section>
           <section class="m-doc-details" id="a292ac6f78673d4ed8278172eba290f97"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>&amp; Rodin::<wbr />Solver::<wbr />LeastSquaresCG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a292ac6f78673d4ed8278172eba290f97" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t maxIt)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a8948ef1c7c2b2578edc7eb1ff9296684" class="m-doc">LeastSquaresCG</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a292ac6f78673d4ed8278172eba290f97" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t maxIt)</span></span>
             </h3>
             <p>Sets the maximum number of iterations.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -420,10 +398,8 @@ $ k $
           </div></section>
           <section class="m-doc-details" id="a3c28e3be8d6ee14eb1c5e01d884f0cd9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />LeastSquaresCG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Solves the least-squares problem using the conjugate gradient method.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -440,10 +416,8 @@ $ k $
           </div></section>
           <section class="m-doc-details" id="af509b79c71ac180a02de0d6786a23574"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>* Rodin::<wbr />Solver::<wbr />LeastSquaresCG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af509b79c71ac180a02de0d6786a23574" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a8948ef1c7c2b2578edc7eb1ff9296684" class="m-doc">LeastSquaresCG</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af509b79c71ac180a02de0d6786a23574" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a copy of this solver.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -457,20 +431,16 @@ $ k $
           </div></section>
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />LeastSquaresCG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Solves the associated problem.</p>
 <p>This method delegates solving to the problem&#x27;s solve method, passing this solver as the argument.</p>
           </div></section>
-          <section class="m-doc-details" id="a9b645b21287f5ab7536bf8af83a9778c"><div>
+          <section class="m-doc-details" id="adeb0e48252fd318e8aa17cc7cad8d7c0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />LeastSquaresCG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) <span class="m-label m-warning">pure virtual</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adeb0e48252fd318e8aa17cc7cad8d7c0" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; system) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Solves the linear system.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -571,13 +541,20 @@ $ b $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

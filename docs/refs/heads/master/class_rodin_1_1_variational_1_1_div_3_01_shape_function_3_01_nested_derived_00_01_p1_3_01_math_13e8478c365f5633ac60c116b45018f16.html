@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Div&lt;ShapeFunction&lt;NestedDerived, P1&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,21 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_div_8h.html">&lt;Rodin/Variational/P1/Div.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Div&lt;ShapeFunction&lt;NestedDerived, P1&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Divergence of a P1 vector ShapeFunction.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Div <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Divergence of a P1 vector ShapeFunction.</p><p class="rodin-reference-include">Defined in <a href="_p1_2_div_8h.html"><code>Rodin/Variational/P1/Div.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">NestedDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Mesh</span><span class="p">,</span>
+<span class="w">  </span><a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4"><span class="nc">ShapeFunctionSpaceType</span></a><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3"><span class="nc">Space</span></a><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_div_3_01_shape_function_3_01_nested_derived_00_01_p1_3_01_math_13e8478c365f5633ac60c116b45018f16.html#a251401874f3126eec1cec22547303fb6"><span class="nc">Div</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_shape_function.html"><span class="nc">ShapeFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p1.html"><span class="nc">P1</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3"><span class="nc">Space</span></a><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_div.html">Div</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Operand</code></td><td><code>ShapeFunction&lt; NestedDerived, P1&lt; Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Space &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-static-attribs">Public static variables</a></li>
                 <li><a href="#pub-static-methods">Public static functions</a></li>
@@ -112,8 +111,7 @@ $ \nabla \cdot \mathbf{v} $
 </g>
 </svg> for P1 test/trial functions. Used in weak formulations like:</p><div class="m-math"><svg style="width: 7.379em; height: 2.819em;" viewBox="158.852697 -27.065451 70.837592 27.065451">
 <title>
-\[
-  \int_\Omega p (\nabla \cdot \mathbf{v}) \, dx
+\[  \int_\Omega p (\nabla \cdot \mathbf{v}) \, dx
 \]
 </title>
 <defs>
@@ -141,16 +139,8 @@ $ \nabla \cdot \mathbf{v} $
 <use x='223.038202' y='-10.793007' xlink:href='#eq2-g3-120'/>
 </g>
 </svg></div><p>for pressure-velocity coupling in Stokes/Navier-Stokes equations.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">::<wbr />FESType</a>, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::SpaceType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase&lt;Div&lt;ShapeFunction&lt;NestedDerived, P1&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Base class for shape function objects.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html" title="ShapeFunctionBase&lt; Div&lt; ShapeFunction&lt; NestedDerived, P1&lt; Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Space &gt; &gt; &gt;">ShapeFunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Div</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><code>ShapeFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a0abc221d3661e40c6eeeaefabaa145aa"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_div_3_01_shape_function_3_01_nested_derived_00_01_p1_3_01_math_13e8478c365f5633ac60c116b45018f16.html#a251401874f3126eec1cec22547303fb6"><span class="nc">Div</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function.html"><span class="nc">ShapeFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p1.html"><span class="nc">P1</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3"><span class="nc">Space</span></a><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for shape function objects.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_div_3_01_shape_function_3_01_nested_derived_00_01_p1_3_01_math_13e8478c365f5633ac60c116b45018f16.html#a0e071453b9d576fa6557bdc5600ae87c"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a1428ee337cebecb42cce3db0724526bb">ShapeFunctionBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><code>ShapeFunctionBase</code></a></td><td><details><summary>11 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#ad573d8e93ec4573179b3c070505db4f3"><code>getDOFIndices()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a4758cdb6b0d7f09e6719a7bfa884e86e"><code>getFiniteElementSpace()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a90de35c4d5a1039c7ba9b1cd513c472b"><code>getSpaceType()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a7a2822d595fc7e8eb77c64ce081f44e0"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a1515051b5ab120ca4827293920a77eb3"><code>setPoint()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3"><code>Space</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a79dcf0096154d396a307c8719e4297b3"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#ae4c1981477f7b922c050c34f2cbd2175"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a79da2f205115b16539fc39b4f3dd4fea"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -171,7 +161,7 @@ $ \nabla \cdot \mathbf{v} $
             </dt>
             <dd>Operand type.</dd>
             <dt id="a54821a550f7397aa6bbd4cef41b601b7">
-              using <a href="#a54821a550f7397aa6bbd4cef41b601b7" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&lt;<a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc">OperandType</a>&gt;, <a href="#af238e38bbb31d61a555368a3e8e23de6" class="m-doc">FESType</a>, <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc">SpaceType</a>&gt;
+              using <a href="#a54821a550f7397aa6bbd4cef41b601b7" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a0abc221d3661e40c6eeeaefabaa145aa" class="m-doc">ShapeFunctionBase</a>&lt;<a href="#a251401874f3126eec1cec22547303fb6" class="m-doc">Div</a>&lt;<a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc">OperandType</a>&gt;, <a href="#af238e38bbb31d61a555368a3e8e23de6" class="m-doc">FESType</a>, <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc">SpaceType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -188,8 +178,8 @@ $ \nabla \cdot \mathbf{v} $
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
-            <dt id="a0e360af4c963f9d7bb28dd798400b26e">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a0e360af4c963f9d7bb28dd798400b26e" class="m-doc-self">isTensorGeom</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a0e360af4c963f9d7bb28dd798400b26e" class="m-doc">isTensorGeom</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Tests whether a polytope geometry is a tensor-product one.</dd>
           </dl>
@@ -197,16 +187,16 @@ $ \nabla \cdot \mathbf{v} $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a251401874f3126eec1cec22547303fb6">
-              <span class="m-doc-wrap-bumper"><a href="#a251401874f3126eec1cec22547303fb6" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const <a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc">OperandType</a>&amp; u)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a251401874f3126eec1cec22547303fb6" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const <a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
             <dd>Constructs the expression from its operand.</dd>
-            <dt id="abca2166abd7e47734012c3c2e52f6fa7">
-              <span class="m-doc-wrap-bumper"><a href="#abca2166abd7e47734012c3c2e52f6fa7" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#abca2166abd7e47734012c3c2e52f6fa7" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const Div&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a5df8eb87e191a7662eabc19e7d7fd6b8">
-              <span class="m-doc-wrap-bumper"><a href="#a5df8eb87e191a7662eabc19e7d7fd6b8" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5df8eb87e191a7662eabc19e7d7fd6b8" class="m-doc">Div</a>(</span><span class="m-doc-wrap">Div&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -214,48 +204,295 @@ $ \nabla \cdot \mathbf{v} $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a1ffbdba2b29eb6f63414bd575f12f63a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the operand function.</dd>
-            <dt id="ac5287464c39ed377af81f8543e4ff376">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc">getLeaf</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the operand in the shape function expression.</dd>
-            <dt id="a41b3cd864cb7e194caa422ca3b66070f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a41b3cd864cb7e194caa422ca3b66070f" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a41b3cd864cb7e194caa422ca3b66070f" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Gets the global DOF indices for a polytope.</dd>
-            <dt id="a233f39a256667047f0c412b2a212bbd4">
-              <span class="m-doc-wrap-bumper">auto <a href="#a233f39a256667047f0c412b2a212bbd4" class="m-doc-self">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dd>Returns the number of local basis functions for a polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a233f39a256667047f0c412b2a212bbd4" class="m-doc">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the integration point the expression is evaluated at.</dd>
-            <dt id="a650c1c06f0e49dae5b501d579633005e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a650c1c06f0e49dae5b501d579633005e" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) -&gt; <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1826e5ccd6702a02dd8ff881aa50bbb7" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="#a251401874f3126eec1cec22547303fb6" class="m-doc">Div</a>&amp;</span>
+            </dt>
+            <dd>Starts a fresh cell binding for physical basis derivatives.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a650c1c06f0e49dae5b501d579633005e" class="m-doc">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) -&gt; <a href="#a251401874f3126eec1cec22547303fb6" class="m-doc">Div</a>&amp;</span>
             </dt>
             <dd>Sets the integration point the expression is evaluated at.</dd>
-            <dt id="a3049456bdf38f5ffdfb9fe8b6438c193">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3049456bdf38f5ffdfb9fe8b6438c193" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3049456bdf38f5ffdfb9fe8b6438c193" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a></span>
             </dt>
             <dd>Gets the basis function of a local degree of freedom.</dd>
-            <dt id="a2db2949e727b5e6fecadb8cc5645b4d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0e071453b9d576fa6557bdc5600ae87c" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0e071453b9d576fa6557bdc5600ae87c" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a251401874f3126eec1cec22547303fb6" class="m-doc">Div</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of the shape function.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a0e360af4c963f9d7bb28dd798400b26e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">static bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e360af4c963f9d7bb28dd798400b26e" class="m-doc-self">isTensorGeom</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Tests whether a polytope geometry is a tensor-product one.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">g</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Whether the geometry is a tensor-product reference cell.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a251401874f3126eec1cec22547303fb6"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a251401874f3126eec1cec22547303fb6" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const <a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc">OperandType</a>&amp; u)</span></span>
+            </h3>
+            <p>Constructs the expression from its operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u</td>
+                  <td>Operand expression.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abca2166abd7e47734012c3c2e52f6fa7"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abca2166abd7e47734012c3c2e52f6fa7" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const Div&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5df8eb87e191a7662eabc19e7d7fd6b8"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5df8eb87e191a7662eabc19e7d7fd6b8" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">Div&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1ffbdba2b29eb6f63414bd575f12f63a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc">OperandType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the operand function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The operand function.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac5287464c39ed377af81f8543e4ff376"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the operand in the shape function expression.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The operand in the shape function expression.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a41b3cd864cb7e194caa422ca3b66070f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41b3cd864cb7e194caa422ca3b66070f" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the number of local basis functions for a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Number of local basis functions on the selected entity.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a233f39a256667047f0c412b2a212bbd4"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a233f39a256667047f0c412b2a212bbd4" class="m-doc-self">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the integration point the expression is evaluated at.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integration point the expression is evaluated at.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1826e5ccd6702a02dd8ff881aa50bbb7"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a251401874f3126eec1cec22547303fb6" class="m-doc">Div</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1826e5ccd6702a02dd8ff881aa50bbb7" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope)</span></span>
+            </h3>
+            <p>Starts a fresh cell binding for physical basis derivatives.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Entity whose geometry remains fixed during this binding.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This expression with no point bound.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Affine simplex derivatives are prepared at the first point and reused throughout this binding. Curved or varying reference derivatives are prepared at each new quadrature sample. Rebinding the same entity discards the preceding physical results while retaining storage.</p>
+          </div></section>
+          <section class="m-doc-details" id="a650c1c06f0e49dae5b501d579633005e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a251401874f3126eec1cec22547303fb6" class="m-doc">Div</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a650c1c06f0e49dae5b501d579633005e" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip)</span></span>
+            </h3>
+            <p>Sets the integration point the expression is evaluated at.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Pyramidal scalar basis derivatives are rational and sample-dependent. Even with a constant inverse map, their contractions defining basis divergence must be recomputed at each reference sample. Tensor-product and pyramidal reference derivatives retain sample-indexed reuse.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3049456bdf38f5ffdfb9fe8b6438c193"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3049456bdf38f5ffdfb9fe8b6438c193" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const</span></span>
+            </h3>
+            <p>Gets the basis function of a local degree of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">local</td>
+                  <td>Index in the local numbering.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the selected local basis function at the evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2db2949e727b5e6fecadb8cc5645b4d3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">geom</td>
+                  <td>Reference geometry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a0e071453b9d576fa6557bdc5600ae87c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>* Rodin::<wbr />Variational::<wbr />Div&lt;ShapeFunction&lt;NestedDerived, P1&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e071453b9d576fa6557bdc5600ae87c" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a251401874f3126eec1cec22547303fb6" class="m-doc">Div</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e071453b9d576fa6557bdc5600ae87c" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of the shape function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -306,13 +543,20 @@ $ \nabla \cdot \mathbf{v} $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

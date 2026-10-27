@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,21 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_integral_8h.html">&lt;Rodin/Variational/Integral.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Integration of the dot product of a trial and test operators.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Integral <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Integration of the dot product of a trial and test operators.</p><p class="rodin-reference-include">Defined in <a href="_integral_8h.html"><code>Rodin/Variational/Integral.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TrialFES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TestFES</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_shape_function_base_3_01_l_h_s_derived_00550820bbffee55f7a1bd4ecc28b80011.html#a1c7d36abac12cb4eb98e2aa51f5a27f0"><span class="nc">Integral</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_dot.html"><span class="nc">Dot</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSDerived</span><span class="p">,</span><span class="w"> </span><span class="n">TrialFES</span><span class="p">,</span><span class="w"> </span><span class="n">TrialSpace</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSDerived</span><span class="p">,</span><span class="w"> </span><span class="n">TestFES</span><span class="p">,</span><span class="w"> </span><span class="n">TestSpace</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_integral.html">Integral</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Integrand</code></td><td><code>Dot&lt; ShapeFunctionBase&lt; LHSDerived, TrialFES, TrialSpace &gt;, ShapeFunctionBase&lt; RHSDerived, TestFES, TestSpace &gt; &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -94,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>Given two operators defined over trial and test spaces <svg class="m-math" style="width: 1.336em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 12.830164 9.962629">
+<p>Given two operators defined over trial and test spaces  <svg class="m-math" style="width: 1.336em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 12.830164 9.962629">
 <title>
 $ U_h
 $
@@ -121,8 +120,7 @@ $ V_h $
 </g>
 </svg>,</p><div class="m-math"><svg style="width: 17.639em; height: 1.258em;" viewBox="109.606219 -12.076098 169.330602 12.07611">
 <title>
-\[
-  A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
+\[  A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
 \]
 </title>
 <defs>
@@ -163,8 +161,7 @@ $ V_h $
 </g>
 </svg></div><p>this class represents the integral of their dot product:</p><div class="m-math"><svg style="width: 10.389em; height: 2.966em;" viewBox="144.406322 -28.471297 99.730374 28.471297">
 <title>
-\[
-  \int_{\mathcal{T}_h} A(u) : B(v) \ dx \ .
+\[  \int_{\mathcal{T}_h} A(u) : B(v) \ dx \ .
 \]
 </title>
 <defs>
@@ -200,16 +197,8 @@ $ V_h $
 <use x='240.885034' y='-12.198853' xlink:href='#eq4-g3-58'/>
 </g>
 </svg></div>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Local bilinear-form quadrature for the dot product of a trial and a test shape function.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" title="QuadratureRule&lt; Dot&lt; ShapeFunctionBase&lt; LHSDerived, TrialFES, TrialSpace &gt;, ShapeFunctionBase&lt; RHSDerived, TestFES, TestSpace &gt; &gt; &gt;">QuadratureRule</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Integral</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html"><code>QuadratureRule&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html#a96fc45e2ba2be9a96fe64f05168a4e3c"><span class="nc">QuadratureRule</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_dot.html"><span class="nc">Dot</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSDerived</span><span class="p">,</span><span class="w"> </span><span class="n">TrialFES</span><span class="p">,</span><span class="w"> </span><span class="n">TrialSpace</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSDerived</span><span class="p">,</span><span class="w"> </span><span class="n">TestFES</span><span class="p">,</span><span class="w"> </span><span class="n">TestSpace</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Local bilinear-form quadrature for the dot product of a trial and a test shape function.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_shape_function_base_3_01_l_h_s_derived_00550820bbffee55f7a1bd4ecc28b80011.html#aa5d79cb88973b769fdd1665729c03952"><code>getRegion()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html#a237ca71ce9684827200e02f7ddb22d3d">QuadratureRule::getRegion</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_shape_function_base_3_01_l_h_s_derived_00550820bbffee55f7a1bd4ecc28b80011.html#a4a70b1d9fada649341a2a2cf97479b4f"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html#a97e8bbec3df10545ba877130c3be5b93">QuadratureRule::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html"><code>LocalBilinearFormIntegratorBase</code></a></td><td><details><summary>5 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#ac76cd4c95442baa6361dfa9a0e9ba4a9"><code>getAttributes()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#a863fc883c7ede3985157c5897e777024"><code>getTestDOFIndices()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#ae6ef7933caee02eb00ad6e9d088a12b2"><code>getTrialDOFIndices()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#a4bfd2df9744d5bfd92b05d1e6cea7a4a"><code>over()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html#a3a7da362759274d841efff995be0e415"><code>setDOFIndices()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html"><code>QuadratureRule&lt;…&gt;</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html#a904cdee8f54bf04b92b4ebbd7f18ace8"><code>getIntegrand()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html#adbfdd734d436c5a1bbee19714721e493"><code>getPolytope()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html#af65301ad831f65b88eab3086cd8187cb"><code>integrate()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html#ad1801848c78c6463c513626ff578a564"><code>ScalarType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html#a53c153d3ac7c76d76b8bf2c014c9142b"><code>setPolytope()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html#a74ca465e855bdc704df1f2357926c6b4"><code>Specialized</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_integrator.html"><code>Integrator</code></a></td><td><details><summary>7 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a350edea67dfa070881b66ed34db4c27c"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4fbdb76097cac108edbb0f49e74bfa11"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#adea5ccfd57d26e8af9eb776fdf191b04"><code>OrderType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a779c5028c546fddc461a6d6b10dcb299"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4c4c2ddfd3edbd42d18604bd674784a2"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a503b6171d3423d1daad5ac38b42b55bc"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a1d1cfd8ffb84e947f82999c682b666a7"><code>Type</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html"><code>BilinearFormIntegratorBase</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html#a3319ca4dc61343f68e2f5ac7721b00ba"><code>getTestFunction()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html#aa35bc19de6026cd8134134430e4b5ec8"><code>getTrialFunction()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html#a58d2c9eed0f2d47891079548f1a6d7d9"><code>getType()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -226,7 +215,7 @@ $ V_h $
             </dt>
             <dd>Type of the integrand.</dd>
             <dt id="a623a79dabaed4b064fe975530995a51f">
-              using <a href="#a623a79dabaed4b064fe975530995a51f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&lt;<a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&gt;
+              using <a href="#a623a79dabaed4b064fe975530995a51f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html#a96fc45e2ba2be9a96fe64f05168a4e3c" class="m-doc">QuadratureRule</a>&lt;<a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&gt;
             </dt>
             <dd>Parent class.</dd>
           </dl>
@@ -244,11 +233,11 @@ $ V_h $
             </dt>
             <dd>Integral of the dot product of trial and test operators.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#afe615834f41161ec55dbbaae0ecc21b5" class="m-doc">Integral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#afe615834f41161ec55dbbaae0ecc21b5" class="m-doc">Integral</a>(</span><span class="m-doc-wrap">const Integral&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a15976049dc2524abebbe923a9c82badb" class="m-doc">Integral</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a15976049dc2524abebbe923a9c82badb" class="m-doc">Integral</a>(</span><span class="m-doc-wrap">Integral&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -261,7 +250,7 @@ $ V_h $
             </dt>
             <dd>Gets the integration region.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4a70b1d9fada649341a2a2cf97479b4f" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4a70b1d9fada649341a2a2cf97479b4f" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a1c7d36abac12cb4eb98e2aa51f5a27f0" class="m-doc">Integral</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of this integral.</dd>
           </dl>
@@ -270,10 +259,8 @@ $ V_h $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a1c7d36abac12cb4eb98e2aa51f5a27f0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c7d36abac12cb4eb98e2aa51f5a27f0" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; lhs,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c7d36abac12cb4eb98e2aa51f5a27f0" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; lhs,
               const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs)</span></span>
             </h3>
             <p>Integral of the dot product of trial and test operators.</p>
@@ -326,8 +313,7 @@ $ B(v) $
             </table>
 <p>Constructs an object representing the following integral:</p><div class="m-math"><svg style="width: 9.385em; height: 2.819em;" viewBox="149.223052 -27.065451 90.096913 27.065451">
 <title>
-\[
-  \int_\Omega A(u) : B(v) \ dx
+\[  \int_\Omega A(u) : B(v) \ dx
 \]
 </title>
 <defs>
@@ -362,10 +348,8 @@ $ B(v) $
           </div></section>
           <section class="m-doc-details" id="ac338fa679f846f2bd97d94e7cbb6fdd7"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac338fa679f846f2bd97d94e7cbb6fdd7" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; prod)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac338fa679f846f2bd97d94e7cbb6fdd7" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; prod)</span></span>
             </h3>
             <p>Integral of the dot product of trial and test operators.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -381,8 +365,7 @@ $ B(v) $
             </table>
 <p>Constructs the object representing the following integral:</p><div class="m-math"><svg style="width: 9.385em; height: 2.819em;" viewBox="149.223052 -27.065451 90.096913 27.065451">
 <title>
-\[
-  \int_\Omega A(u) : B(v) \ dx
+\[  \int_\Omega A(u) : B(v) \ dx
 \]
 </title>
 <defs>
@@ -417,10 +400,8 @@ $ B(v) $
           </div></section>
           <section class="m-doc-details" id="afe615834f41161ec55dbbaae0ecc21b5"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afe615834f41161ec55dbbaae0ecc21b5" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afe615834f41161ec55dbbaae0ecc21b5" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const Integral&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -437,10 +418,8 @@ $ B(v) $
           </div></section>
           <section class="m-doc-details" id="a15976049dc2524abebbe923a9c82badb"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15976049dc2524abebbe923a9c82badb" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15976049dc2524abebbe923a9c82badb" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">Integral&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -457,10 +436,8 @@ $ B(v) $
           </div></section>
           <section class="m-doc-details" id="aa5d79cb88973b769fdd1665729c03952"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the integration region.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -491,10 +468,8 @@ $ K \in \mathcal{T}_h $
           </div></section>
           <section class="m-doc-details" id="a4a70b1d9fada649341a2a2cf97479b4f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>* Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4a70b1d9fada649341a2a2cf97479b4f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a1c7d36abac12cb4eb98e2aa51f5a27f0" class="m-doc">Integral</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4a70b1d9fada649341a2a2cf97479b4f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this integral.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -545,13 +520,20 @@ $ K \in \mathcal{T}_h $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

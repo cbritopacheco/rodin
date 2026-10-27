@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin/Solid/Local/Output.h file | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -81,8 +78,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md233">Usage with CRTP</a></li>
-            <li><a href="#autotoc_md234">Usage with lambda / std::function</a></li>
+            <li><a href="#autotoc_md248">Usage with CRTP</a></li>
+            <li><a href="#autotoc_md249">Usage with lambda / std::function</a></li>
             <li>
               Reference
               <ul>
@@ -92,18 +89,25 @@
             </li>
           </ul>
         </nav>
-<p>An Output is the dual of Input: where an Input populates a ConstitutivePoint with auxiliary data before the constitutive law is evaluated, an Output reads the resulting cache at each quadrature point afterwards. This is the extraction site for quantities derived from the evaluation &ndash; committed internal variables, recovered stresses, strain energy, diagnostics &ndash; without hard-coding them into the integrator or the constitutive law, and without recomputing the kinematics at the call site.</p><p>The cache type is the law&#x27;s, so an Output is written against a specific law. The ConstitutivePoint carries <code>Tags::CellIndex</code> and <code>Tags::QuadraturePointIndex</code>, so an Output and an Input driven by the same pass address the same quadrature point.</p><section id="autotoc_md233"><h3><a href="#autotoc_md233">Usage with CRTP</a></h3><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">MyOutput</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="n">Output</span><span class="o">&lt;</span><span class="n">MyOutput</span><span class="o">&gt;</span>
+<p>An Output is the dual of Input: where an Input populates a ConstitutivePoint with auxiliary data before the constitutive law is evaluated, an Output reads the prepared law at each quadrature point afterwards. This is the extraction site for quantities derived from the evaluation &ndash; committed internal variables, recovered stresses, strain energy, diagnostics &ndash; without hard-coding them into the integrator or the constitutive law, and without recomputing the kinematics at the call site.</p><p>An Output receives a const prepared law, so it is written against a specific law. The ConstitutivePoint carries <code>Tags::CellIndex</code> and <code>Tags::QuadraturePointIndex</code>, so an Output and an Input driven by the same pass address the same quadrature point.</p><section id="autotoc_md248"><h2><a href="#autotoc_md248">Usage with CRTP</a></h2><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">MyOutput</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">Output</span><span class="o">&lt;</span><span class="n">MyOutput</span><span class="o">&gt;</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">extract</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="n">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Cache</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cache</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="n">MyOutput</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Law</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Law</span><span class="o">&amp;</span><span class="w"> </span><span class="n">law</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
 <span class="w">  </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// e.g., commit an internal variable</span>
-<span class="w">    </span><span class="n">state</span><span class="p">[</span><span class="n">cp</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">CellIndex</span><span class="o">&gt;</span><span class="p">()]</span>
-<span class="w">         </span><span class="p">[</span><span class="n">cp</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">QuadraturePointIndex</span><span class="o">&gt;</span><span class="p">()]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cache</span><span class="p">.</span><span class="n">activeExtension</span><span class="p">;</span>
+<span class="w">    </span><span class="n">state</span><span class="p">[</span><span class="n">cp</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="nc">CellIndex</span><span class="o">&gt;</span><span class="p">()]</span>
+<span class="w">         </span><span class="p">[</span><span class="n">cp</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="nc">QuadraturePointIndex</span><span class="o">&gt;</span><span class="p">()]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">law</span><span class="p">.</span><span class="n">getActiveExtension</span><span class="p">();</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
 
-<span class="n">ivw</span><span class="p">.</span><span class="n">setOutput</span><span class="p">(</span><span class="n">MyOutput</span><span class="p">{});</span></pre></section><section id="autotoc_md234"><h3><a href="#autotoc_md234">Usage with lambda / std::function</a></h3><pre class="m-code"><span class="n">ivw</span><span class="p">.</span><span class="n">setOutput</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="n">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cache</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="n">energy</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">cache</span><span class="p">.</span><span class="n">strain</span><span class="p">;</span>
+<span class="n">ivw</span><span class="p">.</span><span class="n">setOutput</span><span class="p">([</span><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MyOutput</span><span class="p">{}](</span><span class="k">const</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">law</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">Output</span><span class="o">&lt;</span><span class="n">MyOutput</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">output</span><span class="p">;</span>
+<span class="w">  </span><span class="n">base</span><span class="p">.</span><span class="n">extract</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span><span class="w"> </span><span class="n">law</span><span class="p">);</span>
+<span class="p">});</span></pre></section><section id="autotoc_md249"><h2><a href="#autotoc_md249">Usage with lambda / std::function</a></h2><pre class="m-code"><span class="n">ivw</span><span class="p">.</span><span class="n">setOutput</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">law</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">energy</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">law</span><span class="p">.</span><span class="n">getStrainEnergyDensity</span><span class="p">();</span>
 <span class="p">});</span>
 <span class="n">ivw</span><span class="p">.</span><span class="n">commit</span><span class="p">();</span></pre></section>
         <section id="namespaces">
@@ -112,7 +116,7 @@
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solid.html" class="m-doc">Rodin::Solid</a></dt>
-            <dd>Hyperelastic solid mechanics module for large-deformation problems.</dd>
+            <dd>Constitutive laws, kinematics, and solid-mechanics integration.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -163,13 +167,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Jacobian&lt;GridFunction&lt;P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,20 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0g_2_jacobian_8h.html">&lt;Rodin/Variational/P0g/Jacobian.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Data, class Mesh, class Scalar&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Jacobian&lt;GridFunction&lt;P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Jacobian of a P0g vector GridFunction (identically zero).</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Jacobian <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Jacobian of a P0g vector GridFunction (identically zero).</p><p class="rodin-reference-include">Defined in <a href="_p0g_2_jacobian_8h.html"><code>Rodin/Variational/P0g/Jacobian.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Data</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Mesh</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_jacobian_3_01_grid_function_3_01_p0g_3_01_math_1_1_spatial_vecto793d9f47c726b39af9361a9505fa94ef.html#adc64a41bbbdfcf272835bb7e4084990e"><span class="nc">Jacobian</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_grid_function.html"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p0g.html"><span class="nc">P0g</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Data</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_jacobian.html">Jacobian</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Operand</code></td><td><code>GridFunction&lt; P0g&lt; Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Data &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -94,16 +92,8 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Operand, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase&lt;GridFunction&lt;P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;, Jacobian&lt;GridFunction&lt;P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Base class for Jacobian matrix operator implementations.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_jacobian_base.html" title="JacobianBase&lt; GridFunction&lt; P0g&lt; Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Data &gt;, Jacobian&lt; GridFunction&lt; P0g&lt; Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt; &gt;">JacobianBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Jacobian</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_jacobian_base.html"><code>JacobianBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_jacobian_base.html"><span class="nc">JacobianBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_grid_function.html"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p0g.html"><span class="nc">P0g</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Data</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_jacobian_3_01_grid_function_3_01_p0g_3_01_math_1_1_spatial_vecto793d9f47c726b39af9361a9505fa94ef.html#adc64a41bbbdfcf272835bb7e4084990e"><span class="nc">Jacobian</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_grid_function.html"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p0g.html"><span class="nc">P0g</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Data</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for Jacobian matrix operator implementations.</td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -123,8 +113,8 @@
               using <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="#ae010161758a756d5d5a84ca8e5893392" class="m-doc">FESType</a>, Data&gt;
             </dt>
             <dd>Operand type.</dd>
-            <dt id="a1152d3e3aa5cb25191ebab93ebb387d8">
-              using <a href="#a1152d3e3aa5cb25191ebab93ebb387d8" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&gt;&gt;
+            <dt id="a42c9d5deecd3e61b54898c51a839b367">
+              using <a href="#a42c9d5deecd3e61b54898c51a839b367" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, <a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc">Jacobian</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -132,16 +122,16 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="adc64a41bbbdfcf272835bb7e4084990e">
-              <span class="m-doc-wrap-bumper"><a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc">Jacobian</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
             <dd>Constructs the expression from its operand.</dd>
-            <dt id="af5ed1b34f29463acebfe868aa0b5c950">
-              <span class="m-doc-wrap-bumper"><a href="#af5ed1b34f29463acebfe868aa0b5c950" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af5ed1b34f29463acebfe868aa0b5c950" class="m-doc">Jacobian</a>(</span><span class="m-doc-wrap">const Jacobian&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a203725244ef8426f03aa88af63c568e6">
-              <span class="m-doc-wrap-bumper"><a href="#a203725244ef8426f03aa88af63c568e6" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a203725244ef8426f03aa88af63c568e6" class="m-doc">Jacobian</a>(</span><span class="m-doc-wrap">Jacobian&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -154,28 +144,134 @@
               const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span>
             </dt>
             <dd>Interpolates J(u) at point p (always zero for P0g).</dd>
-            <dt id="a050a84d717e56cf813ce6be3e4ae8aa7">
-              <span class="m-doc-wrap-bumper">auto <a href="#a050a84d717e56cf813ce6be3e4ae8aa7" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
-            <dt id="a135391db6a7bb79f8223fe066364dcad">
-              <span class="m-doc-wrap-bumper">auto <a href="#a135391db6a7bb79f8223fe066364dcad" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a135391db6a7bb79f8223fe066364dcad" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc">Jacobian</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="adc64a41bbbdfcf272835bb7e4084990e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span></span>
+            </h3>
+            <p>Constructs the expression from its operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u</td>
+                  <td>Operand expression.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af5ed1b34f29463acebfe868aa0b5c950"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5ed1b34f29463acebfe868aa0b5c950" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const Jacobian&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a203725244ef8426f03aa88af63c568e6"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a203725244ef8426f03aa88af63c568e6" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">Jacobian&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ae9e9ff1cbc509a99ff9bbd30b93f3bca"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Data, class Mesh, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Jacobian&lt;GridFunction&lt;P0g&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&lt;Data, Mesh, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9e9ff1cbc509a99ff9bbd30b93f3bca" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>&amp; out,
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9e9ff1cbc509a99ff9bbd30b93f3bca" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>&amp; out,
               const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Interpolates J(u) at point p (always zero for P0g).</p>
-<p>The output matrix is sized (vdim x d), where:</p><ul><li>vdim = vector dimension of the FE space (typically mesh dim)</li><li>d = dimension of the polytope we are evaluating on (cell or face)</li></ul>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">out</td>
+                  <td>Storage for the computed result.</td>
+                </tr>
+                <tr>
+                  <td>p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The zero matrix has one row per field component and one column per ambient coordinate, including on embedded cells, faces and points.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4349bdb4e5088cb0ef3b17f34f72958c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity; the reported order is independent of this argument.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a135391db6a7bb79f8223fe066364dcad"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc">Jacobian</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a135391db6a7bb79f8223fe066364dcad" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
@@ -216,13 +312,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

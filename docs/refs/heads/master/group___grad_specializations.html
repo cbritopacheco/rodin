@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Grad Template Specializations module | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -88,7 +85,7 @@
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a></p></aside><table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;</a></td><td>Generic gradient base for scalar grid functions.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;H1&lt;K, Scalar, Mesh&gt;, GridFunction&lt;H1&lt;K, Scalar, Mesh&gt;, Data&gt;&gt;</a></td><td>Gradient of an H1 grid function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;H1&lt;K, Scalar, Mesh&gt;, ShapeFunction&lt;NestedDerived, H1&lt;K, Scalar, Mesh&gt;, Space&gt;&gt;</a></td><td>Gradient of an H1 shape-function expression.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P1&lt;Range, Mesh&gt;, GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&gt;</a></td><td>Gradient of a P1 grid function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P1&lt;Range, Mesh&gt;, ShapeFunction&lt;NestedDerived, P1&lt;Range, Mesh&gt;, Space&gt;&gt;</a></td><td>Gradient of a P1 shape-function expression.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P0&lt;Range, Mesh&gt;, GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;</a></td><td>Gradient of a P0 grid function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P0&lt;Range, Mesh&gt;, ShapeFunction&lt;NestedDerived, P0&lt;Range, Mesh&gt;, Space&gt;&gt;</a></td><td>Gradient of a P0 shape-function expression.</td></tr></tbody></table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a></p></aside><table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;GridFunction&lt;MatrixFES, Data&gt;&gt;</a></td><td>Matrix-valued grid-function operator for all supported spaces and backends.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;ShapeFunction&lt;Derived, MatrixFES, Space&gt;&gt;</a></td><td>Matrix shape-function operator with the scalar family&#x27;s geometry and trace semantics.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;</a></td><td>Generic gradient base for scalar grid functions.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;H1&lt;K, Scalar, Mesh&gt;, GridFunction&lt;H1&lt;K, Scalar, Mesh&gt;, Data&gt;&gt;</a></td><td>Gradient of an H1 grid function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;H1&lt;K, Scalar, Mesh&gt;, ShapeFunction&lt;NestedDerived, H1&lt;K, Scalar, Mesh&gt;, Space&gt;&gt;</a></td><td>Gradient of an H1 shape-function expression.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P1&lt;Range, Mesh&gt;, GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&gt;</a></td><td>Gradient of a P1 grid function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P1&lt;Range, Mesh&gt;, ShapeFunction&lt;NestedDerived, P1&lt;Range, Mesh&gt;, Space&gt;&gt;</a></td><td>Gradient of a P1 shape-function expression.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P0&lt;Range, Mesh&gt;, GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;</a></td><td>Gradient of a P0 grid function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P0&lt;Range, Mesh&gt;, ShapeFunction&lt;NestedDerived, P0&lt;Range, Mesh&gt;, Space&gt;&gt;</a></td><td>Gradient of a P0 shape-function expression.</td></tr></tbody></table>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -113,6 +110,16 @@
             </dt>
             <dd>Gradient of a ShapeFunction on H1&lt;K&gt; space.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh, class Data&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_h1_3_01_k_00_01_math_1_1_spatial_ma945021ac27314981b47f6b19d43a161d.html" class="m-doc">Rodin::Variational::Grad&lt;GridFunction&lt;H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradient of a matrix H1 solution, with derivative axis last. Uses this family&#x27;s scalar basis and component ordering.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_derived_00_01_h1_3_01_k_00_01_mathfa3b545519db5738a6def29dabe25c13.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;Derived, H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradients of matrix H1 trial or test bases.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p0_3_01_range_00_01_mesh_01_4_00_01_data_01_4_01_4.html" class="m-doc">Rodin::Variational::Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;</a>
             </dt>
@@ -123,10 +130,40 @@
             </dt>
             <dd>Gradient of a P0 ShapeFunction.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p0_3_01_math_1_1_spatial_matrix_3_00cb7d40ceecb21a995fa7b6900fc8f7d.html" class="m-doc">Rodin::Variational::Grad&lt;GridFunction&lt;P0&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradient of a matrix P0 solution, with derivative axis last. Uses this family&#x27;s scalar basis and component ordering.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_derived_00_01_p0_3_01_math_1_1_spa896c7fab0be25fd4e03c5bdfb626f716.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;Derived, P0&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradients of matrix P0 trial or test bases.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p0g_3_01_math_1_1_spatial_matrix_3_1351479fad793ffe6e8f98109837f792.html" class="m-doc">Rodin::Variational::Grad&lt;GridFunction&lt;P0g&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradient of a matrix P0g solution, with derivative axis last. Uses this family&#x27;s scalar basis and component ordering.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_derived_00_01_p0g_3_01_math_1_1_sp06b98832fb75025c4562659a68af6689.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;Derived, P0g&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradients of matrix P0g trial or test bases.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p1_3_01_scalacde5300190b44b3a7a99aef6fcfa52a3.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;NestedDerived, P1&lt;Scalar, Mesh&gt;, SpaceType&gt;&gt;</a>
             </dt>
             <dd>Gradient of a ShapeFunction.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p1_3_01_math_1_1_spatial_matrix_3_0d79f9244dca26a35991ad2b24ec2a611.html" class="m-doc">Rodin::Variational::Grad&lt;GridFunction&lt;P1&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradient of a matrix P1 solution, with derivative axis last. Uses this family&#x27;s scalar basis and component ordering.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_derived_00_01_p1_3_01_math_1_1_spa30b7b2770592471bafdc65bb1b344f62.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;Derived, P1&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradients of matrix P1 trial or test bases.</dd>
           </dl>
         </section>
       </div>
@@ -167,13 +204,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,14 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Vector-valued continuous piecewise polynomial (degree K) Lagrange finite element space.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>H1 <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Vector-valued continuous piecewise polynomial (degree K) Lagrange finite element space.</p><p class="rodin-reference-include">Defined in <a href="_variational_2_h1_2_h1_8h.html"><code>Rodin/Variational/H1/H1.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g0a47e13b731fd39ea7df5f39f21365b1.html#ab24b64bd7141cb3383a5f0d44141dd27"><span class="nc">H1</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">K</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_h1.html">H1</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>K</code></td><td><code>K</code></td></tr><tr><td><code>Range</code></td><td><code>Math::SpatialVector&lt; Scalar &gt;</code></td></tr><tr><td><code>Mesh</code></td><td><code>Geometry::Mesh&lt; Context::Local &gt;</code></td></tr></tbody></table></section>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -100,7 +100,7 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -120,8 +120,7 @@ $ d $
 </g>
 </svg>-dimensional vector-valued, continuous, piecewise polynomial functions:</p><div class="m-math"><svg style="width: 27.876em; height: 1.402em;" viewBox="60.466382 -13.45978 267.610311 13.45978">
 <title>
-\[
- [\mathbb{P}_K (\mathcal{T}_h)]^d = \{ \mathbf{v} \in [C^0(\mathcal{T}_h)]^d : \mathbf{v}|_{\tau} \in [\mathbb{P}_K(\tau)]^d, \ \tau \in \mathcal{T}_h \}
+\[ [\mathbb{P}_K (\mathcal{T}_h)]^d = \{ \mathbf{v} \in [C^0(\mathcal{T}_h)]^d : \mathbf{v}|_{\tau} \in [\mathbb{P}_K(\tau)]^d, \ \tau \in \mathcal{T}_h \}
 \]
 </title>
 <defs>
@@ -201,16 +200,8 @@ $ d $
 <use x='0' y='0' xlink:href='#eq3-g0-100'/>
 </g>
 </svg> is the vector dimension (typically the spatial dimension).</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Mesh, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace&lt;Geometry::Mesh&lt;Context::Local&gt;, H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Represernts a finite element space.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" title="FiniteElementSpace&lt; Geometry::Mesh&lt; Context::Local &gt;, H1&lt; K, Math::SpatialVector&lt; Scalar &gt;, Geometry::Mesh&lt; Context::Local &gt; &gt; &gt;">FiniteElementSpace</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">H1</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_finite_element_space.html"><code>FiniteElementSpace&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">FiniteElementSpace</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g0a47e13b731fd39ea7df5f39f21365b1.html#ab24b64bd7141cb3383a5f0d44141dd27"><span class="nc">H1</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Represernts a finite element space.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g0a47e13b731fd39ea7df5f39f21365b1.html#a23e73ba10e16901b2326d8212936b72b"><code>getSize()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a319cde5b2ea76e92e922845ecfa5c615">FiniteElementSpaceBase::getSize</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g0a47e13b731fd39ea7df5f39f21365b1.html#a1c88fa53fe90dcf92c359274842445e9"><code>getVectorDimension()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a15d4d7b3c5feccf689799d946e09555e">FiniteElementSpaceBase::getVectorDimension</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g0a47e13b731fd39ea7df5f39f21365b1.html#a023a4642b6e40a2d6ea68a6bdbb096bb"><code>getMesh()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_finite_element_space.html#a454a2020aefbc34d41040472431bf9bc">FiniteElementSpace::getMesh</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g0a47e13b731fd39ea7df5f39f21365b1.html#adba1954ca59742b5304d71dcc0854c65"><code>getDOFs()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#adecf53d8a9539fa3fb765d95ef7ecbd3">FiniteElementSpaceBase::getDOFs</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g0a47e13b731fd39ea7df5f39f21365b1.html#a23c5e849f8cac22f9578b2ee39c17d9a"><code>getGlobalIndex()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a1af6ddefe5c0c8eecd0327758e6c8f96">FiniteElementSpaceBase::getGlobalIndex</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_finite_element_space.html"><code>FiniteElementSpace</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_finite_element_space.html#a29f703c87fa4c46752435c503899a263"><code>getPullback()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_space.html#a16d569dadaf0ee93d7f0bd19fdd7766f"><code>getPushforward()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_space.html#aae9a656e9a7baf0394cc62f9c5f90cf7"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html"><code>FiniteElementSpaceBase</code></a></td><td><details><summary>4 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a941cd81695d891d128d7147ad1deb3a2"><code>operator!=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a8ff820ffdf99dcc1cfb638ab9c4681aa"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a91c26aa6ef77cda5c91ca891660c1255"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a058a75329717b1e8172d6fb365530ed4"><code>operator==()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -240,12 +231,12 @@ $ d $
               using <a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>
             </dt>
             <dd>Represents the Context of the H1 space.</dd>
-            <dt id="a5f01cbb241efd84893c51ba95d37efef">
-              using <a href="#a5f01cbb241efd84893c51ba95d37efef" class="m-doc-self">ElementType</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;&gt;
+            <dt id="a208de366c4b027028f9f467b76552516">
+              using <a href="#a208de366c4b027028f9f467b76552516" class="m-doc-self">ElementType</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;&gt;
             </dt>
             <dd>Type of finite element.</dd>
-            <dt id="a16684b7e715b851b6b93828d94f2c44e">
-              using <a href="#a16684b7e715b851b6b93828d94f2c44e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;<a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>, <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;, <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&gt;&gt;
+            <dt id="af7a86249112900f259bc43570c25a5ff">
+              using <a href="#af7a86249112900f259bc43570c25a5ff" class="m-doc-self">Parent</a> = FiniteElementSpace&lt;<a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>, <a href="#ab24b64bd7141cb3383a5f0d44141dd27" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;, <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
           </dl>
@@ -254,17 +245,17 @@ $ d $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ad6d2af4b67f331766268507dfed852cd" class="m-doc">H1</a>(</span><span class="m-doc-wrap">std::integral_constant&lt;size_t, K&gt;,
+              <span class="m-doc-wrap-bumper"><a href="#ab24b64bd7141cb3383a5f0d44141dd27" class="m-doc">H1</a>(</span><span class="m-doc-wrap">std::integral_constant&lt;size_t, K&gt; degree,
               const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;&amp; mesh,
               size_t vdim)</span>
             </dt>
             <dd>Constructs a vector H1 space on the given mesh.</dd>
-            <dt id="a23e372b6dc94a2f639bc0a9f1df91407">
-              <span class="m-doc-wrap-bumper"><a href="#a23e372b6dc94a2f639bc0a9f1df91407" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a23e372b6dc94a2f639bc0a9f1df91407" class="m-doc">H1</a>(</span><span class="m-doc-wrap">const H1&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="ac290444230b236c2f29e4f4df08c72b0">
-              <span class="m-doc-wrap-bumper"><a href="#ac290444230b236c2f29e4f4df08c72b0" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac290444230b236c2f29e4f4df08c72b0" class="m-doc">H1</a>(</span><span class="m-doc-wrap">H1&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -272,17 +263,17 @@ $ d $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="af8e63abd93c0a2bd7bfa2da01149cfe7">
-              <span class="m-doc-wrap-bumper">auto <a href="#af8e63abd93c0a2bd7bfa2da01149cfe7" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af8e63abd93c0a2bd7bfa2da01149cfe7" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#ab24b64bd7141cb3383a5f0d44141dd27" class="m-doc">H1</a>&amp;&amp; other) -&gt; <a href="#ab24b64bd7141cb3383a5f0d44141dd27" class="m-doc">H1</a>&amp;</span>
             </dt>
             <dd>Move assignment.</dd>
-            <dt id="a0361dce3e4a9416da0d9eb7f61f9b0d9">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0361dce3e4a9416da0d9eb7f61f9b0d9" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0361dce3e4a9416da0d9eb7f61f9b0d9" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ab24b64bd7141cb3383a5f0d44141dd27" class="m-doc">H1</a>&amp; other) -&gt; <a href="#ab24b64bd7141cb3383a5f0d44141dd27" class="m-doc">H1</a>&amp;</span>
             </dt>
             <dd>Copy assignment.</dd>
-            <dt id="ae158db2d2017a069f2ede653e5110753">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae158db2d2017a069f2ede653e5110753" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const <a href="#a5f01cbb241efd84893c51ba95d37efef" class="m-doc">ElementType</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae158db2d2017a069f2ede653e5110753" class="m-doc">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const <a href="#a208de366c4b027028f9f467b76552516" class="m-doc">ElementType</a>&amp;</span>
             </dt>
             <dd>Gets the finite element attached to a polytope.</dd>
             <dt>
@@ -293,8 +284,8 @@ $ d $
               <span class="m-doc-wrap-bumper">auto <a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc">getVectorDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the dimension of the range space, i.e. the number of components of each basis function.</dd>
-            <dt id="a023a4642b6e40a2d6ea68a6bdbb096bb">
-              <span class="m-doc-wrap-bumper">auto <a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the underlying mesh.</dd>
             <dt>
@@ -325,36 +316,26 @@ $ (d, i) $
 <use x='19.87261' y='0' xlink:href='#eq10-g1-41'/>
 </g>
 </svg>-polytope.</dd>
-            <dt id="aa4c6deb5102cf131a1c5ede7203ac033">
+            <dt>
               <div class="m-doc-template">template&lt;class Callable&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa4c6deb5102cf131a1c5ede7203ac033" class="m-doc-self">getPullback</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper">auto <a href="#aa4c6deb5102cf131a1c5ede7203ac033" class="m-doc">getPullback</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               Callable&amp;&amp; v) const -&gt; auto</span>
             </dt>
             <dd>Gets the pullback of a callable on a polytope.</dd>
-            <dt id="a2bb691029e9f76c7cca068caf5272566">
+            <dt>
               <div class="m-doc-template">template&lt;class Callable&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2bb691029e9f76c7cca068caf5272566" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper">auto <a href="#a2bb691029e9f76c7cca068caf5272566" class="m-doc">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               Callable&amp;&amp; v) const -&gt; auto</span>
             </dt>
             <dd>Gets the pushforward of a callable on a polytope.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Coefficient&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a75ab5d281112de8a83f589b883867ac3" class="m-doc">evaluate</a>(</span><span class="m-doc-wrap"><a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a>&amp; out,
-              const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
-              Coefficient&amp;&amp; coefficient,
-              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Evaluates the vector expansion directly at reference coordinates.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ad6d2af4b67f331766268507dfed852cd"><div>
+          <section class="m-doc-details" id="ab24b64bd7141cb3383a5f0d44141dd27"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6d2af4b67f331766268507dfed852cd" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">std::integral_constant&lt;size_t, K&gt;,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab24b64bd7141cb3383a5f0d44141dd27" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">std::integral_constant&lt;size_t, K&gt; degree,
               const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;&amp; mesh,
               size_t vdim)</span></span>
             </h3>
@@ -365,7 +346,11 @@ $ (d, i) $
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td style="width: 1%">degree</td>
+                  <td>Compile-time polynomial degree tag.</td>
+                </tr>
+                <tr>
+                  <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Mesh on which to build the finite element space</td>
                 </tr>
                 <tr>
@@ -375,12 +360,123 @@ $ (d, i) $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a23e372b6dc94a2f639bc0a9f1df91407"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e372b6dc94a2f639bc0a9f1df91407" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">const H1&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source object to copy or move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac290444230b236c2f29e4f4df08c72b0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac290444230b236c2f29e4f4df08c72b0" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">H1&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source object to copy or move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af8e63abd93c0a2bd7bfa2da01149cfe7"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ab24b64bd7141cb3383a5f0d44141dd27" class="m-doc">H1</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af8e63abd93c0a2bd7bfa2da01149cfe7" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#ab24b64bd7141cb3383a5f0d44141dd27" class="m-doc">H1</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move assignment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source object to copy or move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after assignment.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0361dce3e4a9416da0d9eb7f61f9b0d9"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ab24b64bd7141cb3383a5f0d44141dd27" class="m-doc">H1</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0361dce3e4a9416da0d9eb7f61f9b0d9" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ab24b64bd7141cb3383a5f0d44141dd27" class="m-doc">H1</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy assignment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source object to copy or move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after assignment.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae158db2d2017a069f2ede653e5110753"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a208de366c4b027028f9f467b76552516" class="m-doc">ElementType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae158db2d2017a069f2ede653e5110753" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <p>Gets the finite element attached to a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Entity dimension.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Local index of the polytope in its dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Finite element associated with the specified polytope.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a23e73ba10e16901b2326d8212936b72b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the total number of degrees of freedom.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -394,10 +490,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="a1c88fa53fe90dcf92c359274842445e9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the dimension of the range space, i.e. the number of components of each basis function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -409,12 +503,25 @@ $ (d, i) $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a023a4642b6e40a2d6ea68a6bdbb096bb"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the underlying mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The underlying mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="adba1954ca59742b5304d71dcc0854c65"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adba1954ca59742b5304d71dcc0854c65" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">size_t d,
+              
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adba1954ca59742b5304d71dcc0854c65" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Returns the global DOF indices attached to a given mesh entity.</p>
@@ -535,10 +642,8 @@ $ (d,i) $
           </div></section>
           <section class="m-doc-details" id="a23c5e849f8cac22f9578b2ee39c17d9a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23c5e849f8cac22f9578b2ee39c17d9a" class="m-doc-self">getGlobalIndex</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23c5e849f8cac22f9578b2ee39c17d9a" class="m-doc-self">getGlobalIndex</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> local) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the global index for the local degree of freedom on the <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
@@ -592,21 +697,95 @@ $ (d, i) $
                   <td>Local degree of freedom index.</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The global index for the local degree of freedom on the <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$ (d, i) $
+</title>
+<defs>
+<path id='eq12-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq12-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq12-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq12-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq12-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq12-page1'>
+<use x='0' y='0' xlink:href='#eq12-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq12-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq12-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq12-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq12-g1-41'/>
+</g>
+</svg>-polytope.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a75ab5d281112de8a83f589b883867ac3"><div>
+          <section class="m-doc-details" id="aa4c6deb5102cf131a1c5ede7203ac033"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar&gt;
-                template&lt;class Coefficient&gt;
+                template&lt;class Callable&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75ab5d281112de8a83f589b883867ac3" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap"><a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a>&amp; out,
-              const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
-              Coefficient&amp;&amp; coefficient,
-              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa4c6deb5102cf131a1c5ede7203ac033" class="m-doc-self">getPullback</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              Callable&amp;&amp; v) const</span></span>
             </h3>
-            <p>Evaluates the vector expansion directly at reference coordinates.</p>
-<p>Vector H1 uses a componentwise Lagrange map and therefore requires no range transformation after the structured local contraction.</p>
+            <p>Gets the pullback of a callable on a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">idx</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Field callable composed with the coordinate mapping.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Pullback operation for the specified polytope.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2bb691029e9f76c7cca068caf5272566"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K, class Scalar&gt;
+                template&lt;class Callable&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2bb691029e9f76c7cca068caf5272566" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              Callable&amp;&amp; v) const</span></span>
+            </h3>
+            <p>Gets the pushforward of a callable on a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">idx</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Field callable composed with the coordinate mapping.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Pushforward operation for the specified polytope.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
@@ -647,13 +826,20 @@ $ (d, i) $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

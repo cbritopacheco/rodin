@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <title>Examples and tutorials &raquo; Working with MMG &raquo; Adapting the mesh | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <link rel="prev" href="examples-mmg-mesh_optimization.html" />
   <link rel="next" href="examples-mmg-behavior.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -35,7 +37,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -43,25 +45,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -100,34 +97,34 @@
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
 
-<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span>
+<span class="kt">int</span><span class="w"> </span><span class="fm">main</span><span class="p">()</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="c1">// 1. Start with a coarse mesh</span>
-<span class="w">  </span><span class="n">MMG</span><span class="o">::</span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
-<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="n">MMG</span><span class="o">::</span><span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="p">});</span>
 
 <span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">adapt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">adapt</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">adapt</span><span class="p">)</span>
 <span class="w">  </span><span class="p">{</span>
 <span class="w">    </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
 
 <span class="w">    </span><span class="c1">// 2. Solve the PDE on the current mesh</span>
-<span class="w">    </span><span class="n">P1</span><span class="w"> </span><span class="n">vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="w">    </span><span class="n">TrialFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
-<span class="w">    </span><span class="n">TestFunction</span><span class="w">  </span><span class="n">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
-<span class="w">    </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="w">    </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
-<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">RealFunction</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
-<span class="w">            </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span>
-<span class="w">    </span><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
+<span class="w">    </span><span class="nc">P1</span><span class="w"> </span><span class="n">vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">    </span><span class="nc">TrialFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
+<span class="w">    </span><span class="nc">TestFunction</span><span class="w">  </span><span class="n">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
+<span class="w">    </span><span class="nc">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="w">    </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">RealFunction</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
+<span class="w">            </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span>
+<span class="w">    </span><span class="n">Solver</span><span class="o">::</span><span class="nc">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
 
 <span class="w">    </span><span class="c1">// 3. Adapt the mesh using MMG with solution-driven sizing</span>
-<span class="w">    </span><span class="n">MMG</span><span class="o">::</span><span class="n">Optimizer</span><span class="p">()</span>
+<span class="w">    </span><span class="n">MMG</span><span class="o">::</span><span class="nc">Optimizer</span><span class="p">()</span>
 <span class="w">      </span><span class="p">.</span><span class="n">setHMax</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
 <span class="w">      </span><span class="p">.</span><span class="n">setHMin</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
 <span class="w">      </span><span class="p">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"Adapted.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"Adapted.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span>
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></pre></section><section id="examples-mmg-adapt-behavior"><h2><a href="#examples-mmg-adapt-behavior">Expected Behavior</a></h2><p><code>MMG::Adapt</code> is intended for size-map-driven remeshing. It may insert, remove, and move vertices to match the requested metric subject to the configured <code>hmin</code>, <code>hmax</code>, Hausdorff, and gradation constraints. For pure mesh-quality cleanup without an external size map, use <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">MMG::<wbr />Optimizer</a>.</p><p>Required entities can be marked on <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> and are converted to MMG <code>MG_REQ</code> tags. See <a href="examples-mmg-behavior.html#examples-mmg-behavior-required" class="m-doc">Required entity behavior</a> for the distinction between uncut entities, optimization, and level-set cuts.</p></section><section id="examples-mmg-adapt-see-also"><h2><a href="#examples-mmg-adapt-see-also">See Also</a></h2><ul><li><a href="examples-mmg-mesh_optimization.html" class="m-doc">Mesh optimization</a></li><li><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a></li><li><a href="examples-pdes-poisson.html" class="m-doc">Poisson equation</a></li><li><a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG namespace</a></li></ul></section>
         <div class="m-note m-dim m-thin m-text-center"><a href="examples-mmg-mesh_optimization.html" class="m-doc">&laquo; Optimizing the mesh</a> | <a href="examples-mmg-index.html" class="m-doc">Working with MMG</a> | <a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees &raquo;</a></div>
@@ -169,13 +166,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

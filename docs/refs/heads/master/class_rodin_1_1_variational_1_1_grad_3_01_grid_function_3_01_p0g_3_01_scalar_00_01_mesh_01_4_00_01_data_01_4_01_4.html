@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Grad&lt;GridFunction&lt;P0g&lt;Scalar, Mesh&gt;, Data&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,21 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0g_2_grad_8h.html">&lt;Rodin/Variational/P0g/Grad.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Grad&lt;GridFunction&lt;P0g&lt;Scalar, Mesh&gt;, Data&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Gradient of a P0g grid function.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Grad <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Gradient of a P0g grid function.</p><p class="rodin-reference-include">Defined in <a href="_p0g_2_grad_8h.html"><code>Rodin/Variational/P0g/Grad.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Mesh</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Data</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html"><span class="nc">IsMatrixRange</span></a><span class="o">&lt;</span><span class="nc">Scalar</span><span class="o">&gt;::</span><span class="nc">Value</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p0g_3_01_scalar_00_01_mesh_01_4_00_01_data_01_4_01_4.html#a1a8a11e3409fa2de35f7f2d9cfee664e"><span class="nc">Grad</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_grid_function.html"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p0g.html"><span class="nc">P0g</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Data</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_grad.html">Grad</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Operand</code></td><td><code>GridFunction&lt; P0g&lt; Scalar, Mesh &gt;, Data &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -94,16 +93,8 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Operand, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase&lt;GridFunction&lt;P0g&lt;Scalar, Mesh&gt;, Data&gt;, Grad&lt;GridFunction&lt;P0g&lt;Scalar, Mesh&gt;, Data&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Base class for gradient operator implementations.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_grad_base.html" title="GradBase&lt; GridFunction&lt; P0g&lt; Scalar, Mesh &gt;, Data &gt;, Grad&lt; GridFunction&lt; P0g&lt; Scalar, Mesh &gt;, Data &gt; &gt; &gt;">GradBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Grad</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grad_base.html"><code>GradBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_grad_base.html"><span class="nc">GradBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_grid_function.html"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p0g.html"><span class="nc">P0g</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Data</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p0g_3_01_scalar_00_01_mesh_01_4_00_01_data_01_4_01_4.html#a1a8a11e3409fa2de35f7f2d9cfee664e"><span class="nc">Grad</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_grid_function.html"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_p0g.html"><span class="nc">P0g</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Data</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for gradient operator implementations.</td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -123,8 +114,8 @@
               using <a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc-self">SpatialVectorType</a> = <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Small spatial vector value type.</dd>
-            <dt id="a13473fbccac67b11bfc9e60da89db714">
-              using <a href="#a13473fbccac67b11bfc9e60da89db714" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&gt;&gt;
+            <dt id="a6015a8c48d7d9eb8942c86dca1855bb2">
+              using <a href="#a6015a8c48d7d9eb8942c86dca1855bb2" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, <a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc">Grad</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -132,16 +123,16 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a1a8a11e3409fa2de35f7f2d9cfee664e">
-              <span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u) <span class="m-label m-flat m-info">explicit</span> </span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs the expression from its operand.</dd>
-            <dt id="ab709e7e5fc05ea0621ef821468875e5f">
-              <span class="m-doc-wrap-bumper"><a href="#ab709e7e5fc05ea0621ef821468875e5f" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab709e7e5fc05ea0621ef821468875e5f" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const Grad&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="af13a14eb0844906b4cc9ff4b46525521">
-              <span class="m-doc-wrap-bumper"><a href="#af13a14eb0844906b4cc9ff4b46525521" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af13a14eb0844906b4cc9ff4b46525521" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">Grad&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -149,32 +140,140 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a1b4b7eaa334fe6aef66d7629ff427c14">
-              <span class="m-doc-wrap-bumper">void <a href="#a1b4b7eaa334fe6aef66d7629ff427c14" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a1b4b7eaa334fe6aef66d7629ff427c14" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
               const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span>
             </dt>
             <dd>Interpolates ∇u at point p (always zero for P0g).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a050a84d717e56cf813ce6be3e4ae8aa7" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polynomial order of the gradient (zero).</dd>
-            <dt id="a0380397dae890f140ce0a08f95bf5e75">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0380397dae890f140ce0a08f95bf5e75" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0380397dae890f140ce0a08f95bf5e75" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc">Grad</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a050a84d717e56cf813ce6be3e4ae8aa7"><div>
+          <section class="m-doc-details" id="a1a8a11e3409fa2de35f7f2d9cfee664e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Mesh, class Data&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P0g&lt;Scalar, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Mesh, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a050a84d717e56cf813ce6be3e4ae8aa7" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs the expression from its operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u</td>
+                  <td>Operand expression.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab709e7e5fc05ea0621ef821468875e5f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab709e7e5fc05ea0621ef821468875e5f" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const Grad&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af13a14eb0844906b4cc9ff4b46525521"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af13a14eb0844906b4cc9ff4b46525521" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">Grad&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1b4b7eaa334fe6aef66d7629ff427c14"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b4b7eaa334fe6aef66d7629ff427c14" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+            </h3>
+            <p>Interpolates ∇u at point p (always zero for P0g).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">out</td>
+                  <td>Storage for the computed result.</td>
+                </tr>
+                <tr>
+                  <td>p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The zero vector has one entry per ambient coordinate, independently of the dimension of the cell, face or point being evaluated.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4349bdb4e5088cb0ef3b17f34f72958c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Polynomial order of the gradient (zero).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity; the reported order is independent of this argument.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>P0g has order 0; its gradient is identically 0. Returning 0 is consistent with &quot;zero polynomial&quot;.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0380397dae890f140ce0a08f95bf5e75"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc">Grad</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0380397dae890f140ce0a08f95bf5e75" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
@@ -215,13 +314,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

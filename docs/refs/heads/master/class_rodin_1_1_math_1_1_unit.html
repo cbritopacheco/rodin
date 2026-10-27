@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Math::Unit class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,18 +71,17 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_unit_8h.html">&lt;Rodin/Math/Unit.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Derived, class T&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_math.html">Math</a>::<wbr/></span>Unit <span class="m-thin">class</span>
-        </h1>
-        <p>Base class for units using CRTP.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_math.html">Math</a></div><h1>Unit</h1><p class="rodin-reference-brief">Base class for units using CRTP.</p><p class="rodin-reference-include">Defined in <a href="_unit_8h.html"><code>Rodin/Math/Unit.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_math_1_1_unit.html#a8b322f7208c13b82a734720a73360ef9"><span class="nc">Unit</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md174">Type Safety</a></li>
-            <li><a href="#autotoc_md175">Arithmetic Operations</a></li>
-            <li><a href="#autotoc_md176">Example Usage</a></li>
+            <li><a href="#autotoc_md184">Type Safety</a></li>
+            <li><a href="#autotoc_md185">Arithmetic Operations</a></li>
+            <li><a href="#autotoc_md186">Example Usage</a></li>
             <li>
               Reference
               <ul>
@@ -97,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>This class provides a generic base for creating type-safe units with value semantics and arithmetic operations. It uses the Curiously Recurring Template Pattern (CRTP) to enable derived classes to return their own type from operations.</p><section id="autotoc_md174"><h3><a href="#autotoc_md174">Type Safety</a></h3><p>Units provide compile-time type safety, preventing accidental mixing of incompatible units (e.g., adding radians to meters).</p></section><section id="autotoc_md175"><h3><a href="#autotoc_md175">Arithmetic Operations</a></h3><p>All standard arithmetic operations are supported:</p><ul><li>Addition/subtraction: <svg class="m-math" style="width: 3.844em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 36.903201 8.767119">
+<p>This class provides a generic base for creating type-safe units with value semantics and arithmetic operations. It uses the Curiously Recurring Template Pattern (CRTP) to enable derived classes to return their own type from operations.</p><section id="autotoc_md184"><h2><a href="#autotoc_md184">Type Safety</a></h2><p>Units provide compile-time type safety, preventing accidental mixing of incompatible units (e.g., adding radians to meters).</p></section><section id="autotoc_md185"><h2><a href="#autotoc_md185">Arithmetic Operations</a></h2><p>All standard arithmetic operations are supported:</p><ul><li>Addition/subtraction: <svg class="m-math" style="width: 3.844em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 36.903201 8.767119">
 <title>
 $ u_1 \pm u_2 $
 </title>
@@ -172,18 +168,18 @@ $ -u $
 <use x='0' y='0' xlink:href='#eq5-g0-0'/>
 <use x='9.298497' y='0' xlink:href='#eq5-g1-117'/>
 </g>
-</svg></li><li>Compound assignments: +=, -=, *=, /=</li><li>Comparison: ==, !=, &lt;, &gt;, &lt;=, &gt;=</li></ul></section><section id="autotoc_md176"><h3><a href="#autotoc_md176">Example Usage</a></h3><pre class="m-code"><span class="c1">// Creating a derived unit class</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Meter</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Unit</span><span class="o">&lt;</span><span class="n">Meter</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="o">&gt;</span>
+</svg></li><li>Compound assignments: +=, -=, *=, /=</li><li>Comparison: ==, !=, &lt;, &gt;, &lt;=, &gt;=</li></ul><p>Comparisons follow the stored scalar type, including unordered floating-point NaN values.</p></section><section id="autotoc_md186"><h2><a href="#autotoc_md186">Example Usage</a></h2><pre class="m-code"><span class="c1">// Creating a derived unit class</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Meter</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="nc">Unit</span><span class="o">&lt;</span><span class="n">Meter</span><span class="p">,</span><span class="w"> </span><span class="nc">Real</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">public</span><span class="o">:</span>
-<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">Parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Unit</span><span class="o">&lt;</span><span class="n">Meter</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="o">&gt;</span><span class="p">;</span>
-<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">Parent</span><span class="o">::</span><span class="n">Parent</span><span class="p">;</span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="nc">Parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Unit</span><span class="o">&lt;</span><span class="n">Meter</span><span class="p">,</span><span class="w"> </span><span class="nc">Real</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="nc">Parent</span><span class="o">::</span><span class="nc">Parent</span><span class="p">;</span>
 <span class="p">};</span>
 
 <span class="c1">// Using the unit</span>
 <span class="n">Meter</span><span class="w"> </span><span class="nf">length1</span><span class="p">(</span><span class="mf">5.0</span><span class="p">);</span>
 <span class="n">Meter</span><span class="w"> </span><span class="nf">length2</span><span class="p">(</span><span class="mf">3.0</span><span class="p">);</span>
-<span class="n">Meter</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">length2</span><span class="p">;</span><span class="w">  </span><span class="c1">// 8.0 meters</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_math_1_1_rad.html">Rad</a></p></aside></section>
+<span class="n">Meter</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">length2</span><span class="p">;</span><span class="w">  </span><span class="c1">// 8.0 meters</span></pre></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -213,12 +209,12 @@ $ -u $
               <span class="m-doc-wrap-bumper"><a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>(</span><span class="m-doc-wrap">T v) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a unit from a value.</dd>
-            <dt id="a8f8c92e87a8165d7ca981f0c0fd0d45c">
-              <span class="m-doc-wrap-bumper"><a href="#a8f8c92e87a8165d7ca981f0c0fd0d45c" class="m-doc-self">Unit</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab3999b19efdb7407190631b8d462ed08" class="m-doc">Unit</a>(</span><span class="m-doc-wrap">const Unit&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="aedb1615ba4579cd38c8b671c7adb2e40">
-              <span class="m-doc-wrap-bumper"><a href="#aedb1615ba4579cd38c8b671c7adb2e40" class="m-doc-self">Unit</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a25c461b724c79e4279ee2c73920970cc" class="m-doc">Unit</a>(</span><span class="m-doc-wrap">Unit&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
             <dt>
@@ -230,76 +226,76 @@ $ -u $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a42d57c583e178ffe2485508d5c380e49">
-              <span class="m-doc-wrap-bumper">auto <a href="#a42d57c583e178ffe2485508d5c380e49" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp;) -&gt; <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a021031f58bb48cf29a78858c00009b66" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) -&gt; <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
-            <dt id="aee920db0c1412eaaa2918125238a29e0">
-              <span class="m-doc-wrap-bumper">auto <a href="#aee920db0c1412eaaa2918125238a29e0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0c2dd156fe3f8afc23d47ad3bf82f231" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp;&amp; other) -&gt; <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad726fba6216724a96f967eed36c1f9a3" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad726fba6216724a96f967eed36c1f9a3" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Equality comparison.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a72293f3406f02ff87a4d9ae8779a01b9" class="m-doc">operator!=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a72293f3406f02ff87a4d9ae8779a01b9" class="m-doc">operator!=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Inequality comparison.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3e01a2c508fc362268427b4d2fa684af" class="m-doc">operator&lt;</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3e01a2c508fc362268427b4d2fa684af" class="m-doc">operator&lt;</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Less-than comparison.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a029e33c44457d1149c1399f6e35b769e" class="m-doc">operator&gt;</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a029e33c44457d1149c1399f6e35b769e" class="m-doc">operator&gt;</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Greater-than comparison.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a452da445f903cae1a1afe0e574f4ae20" class="m-doc">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a452da445f903cae1a1afe0e574f4ae20" class="m-doc">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Less-than-or-equal comparison.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af0a6c4740f2d4137c953d7ade062d2fe" class="m-doc">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af0a6c4740f2d4137c953d7ade062d2fe" class="m-doc">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Greater-than-or-equal comparison.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a83bf94937e709995110b48f4d7fe34e2" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae965424fb638ef8d68e0b281bd050edb" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const -&gt; Derived <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Addition operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac6d9a4be9c9efef9b054892c9fea21af" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aca7f7071ea238f7e257dfd048f7c69ba" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const -&gt; Derived <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Subtraction operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab45aa3359a08a5824ea79cccfb630d8e" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a38e36651e055f69c5bb6e2be357bcdc8" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const -&gt; Derived <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Multiplication operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ace9b4c0f5087b2c56fd058e952b3da20" class="m-doc">operator/</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7184ebb91add1afb177953bf98daadd" class="m-doc">operator/</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const -&gt; Derived <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Division operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a14291b50c210b1616086b1f5cfdaba2c" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad3f801edbdd69feefcc5273fd5fe8e0" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">) const -&gt; Derived <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Unary plus operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aedb88e5ff6ebef27fa542626ec790693" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac2653c26a864eb66b899cfb31c8102b2" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">) const -&gt; Derived <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Unary minus operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afbe38d9dd7bfdb784c21ac7440488430" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0171fc7cb1dc8accdfa73cea839c216e" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Compound addition assignment.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a323eb471a78cb7f55449b1f6f3852052" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab634af0995c9bf5c9eb776b3903ebf3a" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Compound subtraction assignment.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a10d4885b7713e88081789c2a3ec3e25d" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4cd2584f7faf3c5b7b575f369a12975c" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Compound multiplication assignment.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a099dad6fb81e42821309f6b9483a435f" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aac786c56de7765606762cc2f84bd6658" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Compound division assignment.</dd>
           </dl>
@@ -308,10 +304,8 @@ $ -u $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ae79c83fbca959022127462dcdebe4893"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">static Derived Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae79c83fbca959022127462dcdebe4893" class="m-doc-self">One</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper">static Derived </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae79c83fbca959022127462dcdebe4893" class="m-doc-self">One</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Creates a unit with value 1.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -335,10 +329,8 @@ $ 1 $
           </div></section>
           <section class="m-doc-details" id="a31b6f6453acca85f259ca3e33c406fd2"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">static Derived Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31b6f6453acca85f259ca3e33c406fd2" class="m-doc-self">Zero</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper">static Derived </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31b6f6453acca85f259ca3e33c406fd2" class="m-doc-self">Zero</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Creates a unit with value 0.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -362,10 +354,8 @@ $ 0 $
           </div></section>
           <section class="m-doc-details" id="a8b322f7208c13b82a734720a73360ef9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc-self">Unit</a>(</span><span class="m-doc-wrap">T v) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc-self">Unit</a>(</span><span class="m-doc-wrap">T v) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a unit from a value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -380,12 +370,46 @@ $ 0 $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ab3999b19efdb7407190631b8d462ed08"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3999b19efdb7407190631b8d462ed08" class="m-doc-self">Unit</a>(</span><span class="m-doc-wrap">const Unit&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a25c461b724c79e4279ee2c73920970cc"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a25c461b724c79e4279ee2c73920970cc" class="m-doc-self">Unit</a>(</span><span class="m-doc-wrap">Unit&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a54724b9dd792a6022b918eae2f393734"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a54724b9dd792a6022b918eae2f393734" class="m-doc-self">operator T</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-info">explicit</span> </span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a54724b9dd792a6022b918eae2f393734" class="m-doc-self">operator T</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Explicit conversion to underlying type.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -397,12 +421,58 @@ $ 0 $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a021031f58bb48cf29a78858c00009b66"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a021031f58bb48cf29a78858c00009b66" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0c2dd156fe3f8afc23d47ad3bf82f231"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0c2dd156fe3f8afc23d47ad3bf82f231" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ad726fba6216724a96f967eed36c1f9a3"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad726fba6216724a96f967eed36c1f9a3" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad726fba6216724a96f967eed36c1f9a3" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Equality comparison.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -425,10 +495,8 @@ $ 0 $
           </div></section>
           <section class="m-doc-details" id="a72293f3406f02ff87a4d9ae8779a01b9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a72293f3406f02ff87a4d9ae8779a01b9" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a72293f3406f02ff87a4d9ae8779a01b9" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Inequality comparison.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -451,10 +519,8 @@ $ 0 $
           </div></section>
           <section class="m-doc-details" id="a3e01a2c508fc362268427b4d2fa684af"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e01a2c508fc362268427b4d2fa684af" class="m-doc-self">operator&lt;</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e01a2c508fc362268427b4d2fa684af" class="m-doc-self">operator&lt;</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Less-than comparison.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -477,10 +543,8 @@ $ 0 $
           </div></section>
           <section class="m-doc-details" id="a029e33c44457d1149c1399f6e35b769e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a029e33c44457d1149c1399f6e35b769e" class="m-doc-self">operator&gt;</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a029e33c44457d1149c1399f6e35b769e" class="m-doc-self">operator&gt;</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Greater-than comparison.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -503,10 +567,8 @@ $ 0 $
           </div></section>
           <section class="m-doc-details" id="a452da445f903cae1a1afe0e574f4ae20"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a452da445f903cae1a1afe0e574f4ae20" class="m-doc-self">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a452da445f903cae1a1afe0e574f4ae20" class="m-doc-self">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Less-than-or-equal comparison.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -529,10 +591,8 @@ $ 0 $
           </div></section>
           <section class="m-doc-details" id="af0a6c4740f2d4137c953d7ade062d2fe"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0a6c4740f2d4137c953d7ade062d2fe" class="m-doc-self">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0a6c4740f2d4137c953d7ade062d2fe" class="m-doc-self">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Greater-than-or-equal comparison.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -553,12 +613,10 @@ $ 0 $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a83bf94937e709995110b48f4d7fe34e2"><div>
+          <section class="m-doc-details" id="ae965424fb638ef8d68e0b281bd050edb"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83bf94937e709995110b48f4d7fe34e2" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae965424fb638ef8d68e0b281bd050edb" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Addition operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -579,12 +637,10 @@ $ 0 $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ac6d9a4be9c9efef9b054892c9fea21af"><div>
+          <section class="m-doc-details" id="aca7f7071ea238f7e257dfd048f7c69ba"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac6d9a4be9c9efef9b054892c9fea21af" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca7f7071ea238f7e257dfd048f7c69ba" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Subtraction operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -605,12 +661,10 @@ $ 0 $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ab45aa3359a08a5824ea79cccfb630d8e"><div>
+          <section class="m-doc-details" id="a38e36651e055f69c5bb6e2be357bcdc8"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab45aa3359a08a5824ea79cccfb630d8e" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38e36651e055f69c5bb6e2be357bcdc8" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Multiplication operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -631,12 +685,10 @@ $ 0 $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ace9b4c0f5087b2c56fd058e952b3da20"><div>
+          <section class="m-doc-details" id="ab7184ebb91add1afb177953bf98daadd"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ace9b4c0f5087b2c56fd058e952b3da20" class="m-doc-self">operator/</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7184ebb91add1afb177953bf98daadd" class="m-doc-self">operator/</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Division operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -657,12 +709,10 @@ $ 0 $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a14291b50c210b1616086b1f5cfdaba2c"><div>
+          <section class="m-doc-details" id="aad3f801edbdd69feefcc5273fd5fe8e0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a14291b50c210b1616086b1f5cfdaba2c" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad3f801edbdd69feefcc5273fd5fe8e0" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Unary plus operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -674,12 +724,10 @@ $ 0 $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aedb88e5ff6ebef27fa542626ec790693"><div>
+          <section class="m-doc-details" id="ac2653c26a864eb66b899cfb31c8102b2"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedb88e5ff6ebef27fa542626ec790693" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2653c26a864eb66b899cfb31c8102b2" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Unary minus operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -691,12 +739,10 @@ $ 0 $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="afbe38d9dd7bfdb784c21ac7440488430"><div>
+          <section class="m-doc-details" id="a0171fc7cb1dc8accdfa73cea839c216e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afbe38d9dd7bfdb784c21ac7440488430" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0171fc7cb1dc8accdfa73cea839c216e" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Compound addition assignment.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -717,12 +763,10 @@ $ 0 $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a323eb471a78cb7f55449b1f6f3852052"><div>
+          <section class="m-doc-details" id="ab634af0995c9bf5c9eb776b3903ebf3a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a323eb471a78cb7f55449b1f6f3852052" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab634af0995c9bf5c9eb776b3903ebf3a" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Compound subtraction assignment.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -743,12 +787,10 @@ $ 0 $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a10d4885b7713e88081789c2a3ec3e25d"><div>
+          <section class="m-doc-details" id="a4cd2584f7faf3c5b7b575f369a12975c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10d4885b7713e88081789c2a3ec3e25d" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4cd2584f7faf3c5b7b575f369a12975c" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Compound multiplication assignment.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -769,12 +811,10 @@ $ 0 $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a099dad6fb81e42821309f6b9483a435f"><div>
+          <section class="m-doc-details" id="aac786c56de7765606762cc2f84bd6658"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; Rodin::<wbr />Math::<wbr />Unit&lt;Derived, T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a099dad6fb81e42821309f6b9483a435f" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac786c56de7765606762cc2f84bd6658" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Compound division assignment.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -834,13 +874,20 @@ $ 0 $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

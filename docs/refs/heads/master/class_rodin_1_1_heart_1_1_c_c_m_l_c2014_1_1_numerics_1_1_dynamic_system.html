@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Heart::CCMLC2014::Numerics::DynamicSystem class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,11 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dynamic_system_8h.html">&lt;Rodin/Heart/CCMLC2014/Numerics/DynamicSystem.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class PassiveLaw, class Input&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart.html">Heart</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart_1_1_c_c_m_l_c2014.html">CCMLC2014</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_numerics.html">Numerics</a>::<wbr/></span>DynamicSystem <span class="m-thin">class</span>
-        </h1>
-        <p>Assembles the coupled full-state residual and exact tangent.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_heart.html">Heart</a><span>›</span>CCMLC2014<span>›</span>Numerics</div><h1>DynamicSystem</h1><p class="rodin-reference-brief">Assembles the coupled full-state residual and exact tangent.</p><p class="rodin-reference-include">Defined in <a href="_dynamic_system_8h.html"><code>Rodin/Heart/CCMLC2014/Numerics/DynamicSystem.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">PassiveLaw</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Input</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DynamicSystem</span><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -110,8 +106,8 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a49161cf03c4ad101e9f0d326674911ca">
-              <span class="m-doc-wrap-bumper"><a href="#a49161cf03c4ad101e9f0d326674911ca" class="m-doc-self">DynamicSystem</a>(</span><span class="m-doc-wrap">const Input&amp; input) <span class="m-label m-flat m-info">explicit</span> </span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a49161cf03c4ad101e9f0d326674911ca" class="m-doc">DynamicSystem</a>(</span><span class="m-doc-wrap">const Input&amp; input) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Construct the dynamic system assembler.</dd>
           </dl>
@@ -119,30 +115,151 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a55f22d0caa406331e230e8884009910a">
+            <dt><a href="#a55f22d0caa406331e230e8884009910a" class="m-doc">buildEvalData</a></dt><dd>Build intermediate evaluation data from candidate unknowns.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class DenseVector, class StateType, class EvalData&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a55f22d0caa406331e230e8884009910a" class="m-doc-self">buildEvalData</a>(</span><span class="m-doc-wrap">const DenseVector&amp; candidateUnknowns,
+              <span class="m-doc-wrap-bumper">void <a href="#a55f22d0caa406331e230e8884009910a" class="m-doc">buildEvalData</a>(</span><span class="m-doc-wrap">const DenseVector&amp; candidateUnknowns,
               const StateType&amp; currentState,
               const StateType&amp; previousState,
               typename DenseVector::Scalar tnp1,
               typename DenseVector::Scalar dt,
               EvalData&amp; evalData) const</span>
-            </dt>
-            <dd>Build intermediate evaluation data from candidate unknowns.</dd>
-            <dt id="a7d76a8c30c936c0584130c810a81258b">
+            </div></details></dd>
+            <dt><a href="#a7d76a8c30c936c0584130c810a81258b" class="m-doc">evaluateResidual</a></dt><dd>Evaluate the coupled 0D residual vector.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class DenseVector, class EvalData&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a7d76a8c30c936c0584130c810a81258b" class="m-doc-self">evaluateResidual</a>(</span><span class="m-doc-wrap">const EvalData&amp; evalData,
+              <span class="m-doc-wrap-bumper">void <a href="#a7d76a8c30c936c0584130c810a81258b" class="m-doc">evaluateResidual</a>(</span><span class="m-doc-wrap">const EvalData&amp; evalData,
               DenseVector&amp; residualVector) const</span>
-            </dt>
-            <dd>Evaluate the coupled 0D residual vector.</dd>
-            <dt id="a340f6fb34e5a872150db45d2ca4d0432">
+            </div></details></dd>
+            <dt><a href="#ac4c253bbc994655c8d167d14870d71b8" class="m-doc">evaluateJacobian</a></dt><dd>Assemble the exact Jacobian of the coupled residual.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class DenseMatrix, class EvalData&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a340f6fb34e5a872150db45d2ca4d0432" class="m-doc-self">evaluateJacobian</a>(</span><span class="m-doc-wrap">const EvalData&amp; evalData,
+              <span class="m-doc-wrap-bumper">void <a href="#ac4c253bbc994655c8d167d14870d71b8" class="m-doc">evaluateJacobian</a>(</span><span class="m-doc-wrap">const EvalData&amp; evalData,
               DenseMatrix&amp; jacobianMatrix,
-              typename DenseMatrix::Scalar) const</span>
-            </dt>
-            <dd>Assemble the exact Jacobian of the coupled residual.</dd>
+              typename DenseMatrix::Scalar dt) const</span>
+            </div></details></dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a49161cf03c4ad101e9f0d326674911ca"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49161cf03c4ad101e9f0d326674911ca" class="m-doc-self">DynamicSystem</a>(</span><span class="m-doc-wrap">const Input&amp; input) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Construct the dynamic system assembler.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">input</td>
+                  <td>Input data.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a55f22d0caa406331e230e8884009910a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveLaw, class Input&gt;
+                template&lt;class DenseVector, class StateType, class EvalData&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55f22d0caa406331e230e8884009910a" class="m-doc-self">buildEvalData</a>(</span><span class="m-doc-wrap">const DenseVector&amp; candidateUnknowns,
+              const StateType&amp; currentState,
+              const StateType&amp; previousState,
+              typename DenseVector::Scalar tnp1,
+              typename DenseVector::Scalar dt,
+              EvalData&amp; evalData) const</span></span>
+            </h3>
+            <p>Build intermediate evaluation data from candidate unknowns.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">candidateUnknowns</td>
+                  <td>Candidate vector of unknowns at the new time step.</td>
+                </tr>
+                <tr>
+                  <td>currentState</td>
+                  <td>State at the current time step.</td>
+                </tr>
+                <tr>
+                  <td>previousState</td>
+                  <td>State at the previous time step.</td>
+                </tr>
+                <tr>
+                  <td>tnp1</td>
+                  <td>Time at the new time step.</td>
+                </tr>
+                <tr>
+                  <td>dt</td>
+                  <td>Time-step size.</td>
+                </tr>
+                <tr>
+                  <td>evalData</td>
+                  <td>Evaluation data for the residual or Jacobian.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7d76a8c30c936c0584130c810a81258b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveLaw, class Input&gt;
+                template&lt;class DenseVector, class EvalData&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d76a8c30c936c0584130c810a81258b" class="m-doc-self">evaluateResidual</a>(</span><span class="m-doc-wrap">const EvalData&amp; evalData,
+              DenseVector&amp; residualVector) const</span></span>
+            </h3>
+            <p>Evaluate the coupled 0D residual vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">evalData</td>
+                  <td>Evaluation data for the residual or Jacobian.</td>
+                </tr>
+                <tr>
+                  <td>residualVector</td>
+                  <td>Storage for the residual vector.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac4c253bbc994655c8d167d14870d71b8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveLaw, class Input&gt;
+                template&lt;class DenseMatrix, class EvalData&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac4c253bbc994655c8d167d14870d71b8" class="m-doc-self">evaluateJacobian</a>(</span><span class="m-doc-wrap">const EvalData&amp; evalData,
+              DenseMatrix&amp; jacobianMatrix,
+              typename DenseMatrix::Scalar dt) const</span></span>
+            </h3>
+            <p>Assemble the exact Jacobian of the coupled residual.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">evalData</td>
+                  <td>Evaluation data for the residual or Jacobian.</td>
+                </tr>
+                <tr>
+                  <td>jacobianMatrix</td>
+                  <td>Storage for the Jacobian matrix.</td>
+                </tr>
+                <tr>
+                  <td>dt</td>
+                  <td>Time step supplied by the solver interface; time coefficients are taken from the evaluation data.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -182,13 +299,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

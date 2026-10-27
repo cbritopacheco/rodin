@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::PeriodicBCBase class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,17 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_periodic_b_c_8h.html">&lt;Rodin/Variational/PeriodicBC.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>PeriodicBCBase <span class="m-thin">class</span>
-        </h1>
-        <p>Abstract base class for a periodic boundary condition.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>PeriodicBCBase</h1><p class="rodin-reference-brief">Abstract base class for a periodic boundary condition.</p><p class="rodin-reference-include">Defined in <a href="_periodic_b_c_8h.html"><code>Rodin/Variational/PeriodicBC.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html"><span class="nc">PeriodicBCBase</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -94,15 +89,8 @@
           </ul>
         </nav>
 <aside class="m-note m-default"><h4>See also</h4><p>PeriodicBC</p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>
-            </dt>
-            <dd>Base class for all objects in Rodin&#x27;s FormLanguage system.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_form_language_1_1_base.html" title="FormLanguage::Base">FormLanguage::Base</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">PeriodicBCBase</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_base.html"><span class="nc">Base</span></a>
+</pre></details></td><td>Base class for all objects in Rodin&#x27;s FormLanguage system.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html#a04fb9ecf88dd05dbc08876812021f60c"><code>copy()</code></a></td><td><a href="class_rodin_1_1_form_language_1_1_base.html#a08bb560be7afa722eef3459e102dfd39">Base::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -110,8 +98,8 @@
               using <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc-self">ScalarType</a> = Scalar
             </dt>
             <dd>Scalar value type.</dd>
-            <dt id="aa70396c5255eb4ec7eacd49900a99ad4">
-              using <a href="#aa70396c5255eb4ec7eacd49900a99ad4" class="m-doc-self">DOFs</a> = <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;&gt;&gt;
+            <dt id="a1bec047a55b5206b406d42233f3bdfa2">
+              using <a href="#a1bec047a55b5206b406d42233f3bdfa2" class="m-doc-self">DOFs</a> = <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;&gt;&gt;
             </dt>
             <dd>Degree-of-freedom index container type.</dd>
           </dl>
@@ -124,7 +112,7 @@
             </dt>
             <dd>Assembles the periodic boundary condition.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2b01263c63728dde2f8acc22444e59c7" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aa70396c5255eb4ec7eacd49900a99ad4" class="m-doc">DOFs</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2b01263c63728dde2f8acc22444e59c7" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a1bec047a55b5206b406d42233f3bdfa2" class="m-doc">DOFs</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the map of periodic DOF constraints.</dd>
             <dt>
@@ -145,20 +133,16 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="aedef9817f0ecb43ca5cf9f5d10f6bcc3"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />PeriodicBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Assembles the periodic boundary condition.</p>
 <p>Computes the DOF constraints enforcing periodicity across specified boundaries. Creates relationships between DOFs on opposite periodic boundaries such that they share the same value.</p>
           </div></section>
           <section class="m-doc-details" id="a2b01263c63728dde2f8acc22444e59c7"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#aa70396c5255eb4ec7eacd49900a99ad4" class="m-doc">DOFs</a>&amp; Rodin::<wbr />Variational::<wbr />PeriodicBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b01263c63728dde2f8acc22444e59c7" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a1bec047a55b5206b406d42233f3bdfa2" class="m-doc">DOFs</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b01263c63728dde2f8acc22444e59c7" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the map of periodic DOF constraints.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -173,10 +157,8 @@
           </div></section>
           <section class="m-doc-details" id="abc32c3c7f43b45bf2d8383e7eda960e5"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />PeriodicBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc32c3c7f43b45bf2d8383e7eda960e5" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc32c3c7f43b45bf2d8383e7eda960e5" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the operand (trial function) of the periodic BC.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -190,10 +172,8 @@
           </div></section>
           <section class="m-doc-details" id="a8dbf78c7b91a81e12081d9cc4d48eb8a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> Rodin::<wbr />Variational::<wbr />PeriodicBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8dbf78c7b91a81e12081d9cc4d48eb8a" class="m-doc-self">isComponent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8dbf78c7b91a81e12081d9cc4d48eb8a" class="m-doc-self">isComponent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Checks if this is a component-wise periodic BC.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -207,10 +187,8 @@
           </div></section>
           <section class="m-doc-details" id="a04fb9ecf88dd05dbc08876812021f60c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a>* Rodin::<wbr />Variational::<wbr />PeriodicBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a04fb9ecf88dd05dbc08876812021f60c" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a04fb9ecf88dd05dbc08876812021f60c" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this periodic BC.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -261,13 +239,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

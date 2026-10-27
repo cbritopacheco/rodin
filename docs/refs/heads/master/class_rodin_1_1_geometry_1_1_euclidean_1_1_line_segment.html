@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Geometry::Euclidean::LineSegment class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a><span>›</span><a href="namespace_rodin_1_1_geometry_1_1_euclidean.html">Euclidean</a></div><h1>LineSegment</h1><p class="rodin-reference-brief">Segment <svg class="m-math" style="width: 9.825em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 94.323183 11.955168">
+<title>
+$ s(t)=p+t(q-p) $
+</title>
+<defs>
+<path id='eq1-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq1-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq1-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq1-g2-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
+<path id='eq1-g2-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g1-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+<path id='eq1-g1-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
+<path id='eq1-g1-115' d='M2.725778-2.391034C2.929016-2.355168 3.251806-2.283437 3.323537-2.271482C3.478954-2.223661 4.016936-2.032379 4.016936-1.458531C4.016936-1.08792 3.682192-.119552 2.295392-.119552C2.044334-.119552 1.147696-.155417 .908593-.812951C1.3868-.753176 1.625903-1.123786 1.625903-1.3868C1.625903-1.637858 1.458531-1.769365 1.219427-1.769365C.956413-1.769365 .609714-1.566127 .609714-1.028144C.609714-.32279 1.327024 .119552 2.283437 .119552C4.100623 .119552 4.638605-1.219427 4.638605-1.841096C4.638605-2.020423 4.638605-2.355168 4.25604-2.737733C3.957161-3.024658 3.670237-3.084433 3.024658-3.21594C2.701868-3.287671 2.187796-3.395268 2.187796-3.93325C2.187796-4.172354 2.402989-5.033126 3.53873-5.033126C4.040847-5.033126 4.531009-4.841843 4.65056-4.411457C4.124533-4.411457 4.100623-3.957161 4.100623-3.945205C4.100623-3.694147 4.327771-3.622416 4.435367-3.622416C4.60274-3.622416 4.937484-3.753923 4.937484-4.25604S4.483188-5.272229 3.550685-5.272229C1.984558-5.272229 1.566127-4.040847 1.566127-3.550685C1.566127-2.642092 2.450809-2.450809 2.725778-2.391034Z'/>
+<path id='eq1-g1-116' d='M2.402989-4.805978H3.502864C3.730012-4.805978 3.849564-4.805978 3.849564-5.021171C3.849564-5.152677 3.777833-5.152677 3.53873-5.152677H2.486675L2.929016-6.898132C2.976837-7.065504 2.976837-7.089415 2.976837-7.173101C2.976837-7.364384 2.82142-7.47198 2.666002-7.47198C2.570361-7.47198 2.295392-7.436115 2.199751-7.053549L1.733499-5.152677H.609714C.37061-5.152677 .263014-5.152677 .263014-4.925529C.263014-4.805978 .3467-4.805978 .573848-4.805978H1.637858L.848817-1.649813C.753176-1.231382 .71731-1.111831 .71731-.956413C.71731-.394521 1.111831 .119552 1.78132 .119552C2.988792 .119552 3.634371-1.625903 3.634371-1.709589C3.634371-1.78132 3.58655-1.817186 3.514819-1.817186C3.490909-1.817186 3.443088-1.817186 3.419178-1.769365C3.407223-1.75741 3.395268-1.745455 3.311582-1.554172C3.060523-.956413 2.510585-.119552 1.817186-.119552C1.458531-.119552 1.43462-.418431 1.43462-.681445C1.43462-.6934 1.43462-.920548 1.470486-1.06401L2.402989-4.805978Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g1-115'/>
+<use x='5.514006' y='0' xlink:href='#eq1-g2-40'/>
+<use x='10.066331' y='0' xlink:href='#eq1-g1-116'/>
+<use x='14.293491' y='0' xlink:href='#eq1-g2-41'/>
+<use x='22.166646' y='0' xlink:href='#eq1-g2-61'/>
+<use x='34.592127' y='0' xlink:href='#eq1-g1-112'/>
+<use x='43.123934' y='0' xlink:href='#eq1-g2-43'/>
+<use x='54.885249' y='0' xlink:href='#eq1-g1-116'/>
+<use x='59.112408' y='0' xlink:href='#eq1-g2-40'/>
+<use x='63.664734' y='0' xlink:href='#eq1-g1-113'/>
+<use x='71.940554' y='0' xlink:href='#eq1-g0-0'/>
+<use x='83.895714' y='0' xlink:href='#eq1-g1-112'/>
+<use x='89.770857' y='0' xlink:href='#eq1-g2-41'/>
+</g>
+</svg> between distinct endpoints. The closed segment corresponds to <svg class="m-math" style="width: 4.981em; height: 0.972em; vertical-align: -0.170em;" viewBox="0 -7.704442 47.813452 9.329999">
+<title>
+$ 0\leq t\leq1 $
+</title>
+<defs>
+<path id='eq2-g1-116' d='M2.402989-4.805978H3.502864C3.730012-4.805978 3.849564-4.805978 3.849564-5.021171C3.849564-5.152677 3.777833-5.152677 3.53873-5.152677H2.486675L2.929016-6.898132C2.976837-7.065504 2.976837-7.089415 2.976837-7.173101C2.976837-7.364384 2.82142-7.47198 2.666002-7.47198C2.570361-7.47198 2.295392-7.436115 2.199751-7.053549L1.733499-5.152677H.609714C.37061-5.152677 .263014-5.152677 .263014-4.925529C.263014-4.805978 .3467-4.805978 .573848-4.805978H1.637858L.848817-1.649813C.753176-1.231382 .71731-1.111831 .71731-.956413C.71731-.394521 1.111831 .119552 1.78132 .119552C2.988792 .119552 3.634371-1.625903 3.634371-1.709589C3.634371-1.78132 3.58655-1.817186 3.514819-1.817186C3.490909-1.817186 3.443088-1.817186 3.419178-1.769365C3.407223-1.75741 3.395268-1.745455 3.311582-1.554172C3.060523-.956413 2.510585-.119552 1.817186-.119552C1.458531-.119552 1.43462-.418431 1.43462-.681445C1.43462-.6934 1.43462-.920548 1.470486-1.06401L2.402989-4.805978Z'/>
+<path id='eq2-g0-20' d='M8.069738-7.10137C8.201245-7.161146 8.296887-7.220922 8.296887-7.364384C8.296887-7.49589 8.201245-7.603487 8.057783-7.603487C7.998007-7.603487 7.890411-7.555666 7.84259-7.531756L1.231382-4.411457C1.028144-4.315816 .992279-4.23213 .992279-4.136488C.992279-4.028892 1.06401-3.945205 1.231382-3.873474L7.84259-.765131C7.998007-.681445 8.021918-.681445 8.057783-.681445C8.18929-.681445 8.296887-.789041 8.296887-.920548C8.296887-1.028144 8.249066-1.099875 8.045828-1.195517L1.793275-4.136488L8.069738-7.10137ZM7.878456 1.637858C8.081694 1.637858 8.296887 1.637858 8.296887 1.398755S8.045828 1.159651 7.866501 1.159651H1.422665C1.243337 1.159651 .992279 1.159651 .992279 1.398755S1.207472 1.637858 1.41071 1.637858H7.878456Z'/>
+<path id='eq2-g2-48' d='M5.355915-3.825654C5.355915-4.817933 5.296139-5.786301 4.865753-6.694894C4.375592-7.687173 3.514819-7.950187 2.929016-7.950187C2.235616-7.950187 1.3868-7.603487 .944458-6.611208C.609714-5.858032 .490162-5.116812 .490162-3.825654C.490162-2.666002 .573848-1.793275 1.004234-.944458C1.470486-.035866 2.295392 .251059 2.917061 .251059C3.957161 .251059 4.554919-.37061 4.901619-1.06401C5.332005-1.960648 5.355915-3.132254 5.355915-3.825654ZM2.917061 .011955C2.534496 .011955 1.75741-.203238 1.530262-1.506351C1.398755-2.223661 1.398755-3.132254 1.398755-3.969116C1.398755-4.94944 1.398755-5.834122 1.590037-6.539477C1.793275-7.340473 2.402989-7.711083 2.917061-7.711083C3.371357-7.711083 4.064757-7.436115 4.291905-6.40797C4.447323-5.726526 4.447323-4.782067 4.447323-3.969116C4.447323-3.16812 4.447323-2.259527 4.315816-1.530262C4.088667-.215193 3.335492 .011955 2.917061 .011955Z'/>
+<path id='eq2-g2-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g2-48'/>
+<use x='9.17382' y='0' xlink:href='#eq2-g0-20'/>
+<use x='21.793146' y='0' xlink:href='#eq2-g1-116'/>
+<use x='29.341135' y='0' xlink:href='#eq2-g0-20'/>
+<use x='41.960461' y='0' xlink:href='#eq2-g2-49'/>
+</g>
+</svg>; parameter evaluation also accepts extrapolation. Storage has exactly Dimension components. Intersection returns a point only when unique, including a shared endpoint of collinear segments; positive-length overlaps return no unique point.</p><p class="rodin-reference-include">Defined in <a href="_line_segment_8h.html"><code>Rodin/Geometry/Euclidean/LineSegment.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="nc">Dimension</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment.html#a9e1b061f2943b3edeb51fc9f8c9ce48d"><span class="nc">LineSegment</span></a><span class="p">;</span>
+</pre>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Dimension</td>
+              <td>Ambient coordinate count.</td>
+            </tr>
+            <tr>
+              <td>T</td>
+              <td>Real coordinate scalar type.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Inherits from</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_base.html" title="Base&lt; LineSegment&lt; Dimension, T &gt;, T &gt;">Base</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">LineSegment</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_base.html"><code>Base&lt;LineSegment&lt;Dimension, T&gt;, T&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">Base</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment.html#a9e1b061f2943b3edeb51fc9f8c9ce48d"><span class="nc">LineSegment</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Dimension</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for Euclidean geometric objects using CRTP.</td></tr></tbody></table></section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a9e1b061f2943b3edeb51fc9f8c9ce48d" class="m-doc">LineSegment</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&amp; start,
+              const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&amp; end) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs a line segment from two points.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1cb66089e2e3260e4a55d003421b8ab4" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const T&amp; t) const -&gt; <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the parametric representation at parameter <svg class="m-math" style="width: 0.440em; height: 0.766em; vertical-align: -0.000em;" viewBox="0 -7.353395 4.22716 7.353395">
+<title>
+$ t $
+</title>
+<defs>
+<path id='eq5-g0-116' d='M2.402989-4.805978H3.502864C3.730012-4.805978 3.849564-4.805978 3.849564-5.021171C3.849564-5.152677 3.777833-5.152677 3.53873-5.152677H2.486675L2.929016-6.898132C2.976837-7.065504 2.976837-7.089415 2.976837-7.173101C2.976837-7.364384 2.82142-7.47198 2.666002-7.47198C2.570361-7.47198 2.295392-7.436115 2.199751-7.053549L1.733499-5.152677H.609714C.37061-5.152677 .263014-5.152677 .263014-4.925529C.263014-4.805978 .3467-4.805978 .573848-4.805978H1.637858L.848817-1.649813C.753176-1.231382 .71731-1.111831 .71731-.956413C.71731-.394521 1.111831 .119552 1.78132 .119552C2.988792 .119552 3.634371-1.625903 3.634371-1.709589C3.634371-1.78132 3.58655-1.817186 3.514819-1.817186C3.490909-1.817186 3.443088-1.817186 3.419178-1.769365C3.407223-1.75741 3.395268-1.745455 3.311582-1.554172C3.060523-.956413 2.510585-.119552 1.817186-.119552C1.458531-.119552 1.43462-.418431 1.43462-.681445C1.43462-.6934 1.43462-.920548 1.470486-1.06401L2.402989-4.805978Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-116'/>
+</g>
+</svg>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8ff364dd2e1d4e0fd9ef084d9299797b" class="m-doc">length</a>(</span><span class="m-doc-wrap">) const -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Computes the length of the segment.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9eba025988c3a6bc79ed29da06df6a41" class="m-doc">direction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;::Vector <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the unit direction vector.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a58c248407d5f8b7b0dc2331fd49da1a2" class="m-doc">start</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the start point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af781b3e87a4d43a22543c8d2c7209b23" class="m-doc">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the end point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae134f45964cd91cd1d15bd987a6f883a" class="m-doc">setStart</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&amp; start) -&gt; <a href="#a9e1b061f2943b3edeb51fc9f8c9ce48d" class="m-doc">LineSegment</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Sets the start point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afa46d150e6f69418d8e27f645db110c4" class="m-doc">setEnd</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&amp; end) -&gt; <a href="#a9e1b061f2943b3edeb51fc9f8c9ce48d" class="m-doc">LineSegment</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Sets the end point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae1569887111eb3a1acde12320e47b350" class="m-doc">reverse</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a9e1b061f2943b3edeb51fc9f8c9ce48d" class="m-doc">LineSegment</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns the reversed segment.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a03756fbaae527b390a795f6fc3f7cc96" class="m-doc">intersect</a>(</span><span class="m-doc-wrap">const <a href="#a9e1b061f2943b3edeb51fc9f8c9ce48d" class="m-doc">LineSegment</a>&lt;Dimension, T&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Computes the intersection point with another segment.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a76af618cd0feeae19b9a95c63c7e586a" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&amp; point) const -&gt; <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;</span>
+            </dt>
+            <dd>Projects onto the closed segment.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5e9b02485459541ef593f7470f8e46a3" class="m-doc">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&amp; point) const -&gt; T</span>
+            </dt>
+            <dd>Computes point distance.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a9e1b061f2943b3edeb51fc9f8c9ce48d"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9e1b061f2943b3edeb51fc9f8c9ce48d" class="m-doc-self">LineSegment</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&amp; start,
+              const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&amp; end) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs a line segment from two points.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">start&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Start point <svg class="m-math" style="width: 0.612em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 5.875143 7.47198">
+<title>
+$ p $
+</title>
+<defs>
+<path id='eq3-g0-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-112'/>
+</g>
+</svg></td>
+                </tr>
+                <tr>
+                  <td>end&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>End point <svg class="m-math" style="width: 0.585em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 5.61916 7.47198">
+<title>
+$ q $
+</title>
+<defs>
+<path id='eq4-g0-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g0-113'/>
+</g>
+</svg></td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1cb66089e2e3260e4a55d003421b8ab4"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1cb66089e2e3260e4a55d003421b8ab4" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const T&amp; t) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the parametric representation at parameter <svg class="m-math" style="width: 0.440em; height: 0.766em; vertical-align: -0.000em;" viewBox="0 -7.353395 4.22716 7.353395">
+<title>
+$ t $
+</title>
+<defs>
+<path id='eq5-g0-116' d='M2.402989-4.805978H3.502864C3.730012-4.805978 3.849564-4.805978 3.849564-5.021171C3.849564-5.152677 3.777833-5.152677 3.53873-5.152677H2.486675L2.929016-6.898132C2.976837-7.065504 2.976837-7.089415 2.976837-7.173101C2.976837-7.364384 2.82142-7.47198 2.666002-7.47198C2.570361-7.47198 2.295392-7.436115 2.199751-7.053549L1.733499-5.152677H.609714C.37061-5.152677 .263014-5.152677 .263014-4.925529C.263014-4.805978 .3467-4.805978 .573848-4.805978H1.637858L.848817-1.649813C.753176-1.231382 .71731-1.111831 .71731-.956413C.71731-.394521 1.111831 .119552 1.78132 .119552C2.988792 .119552 3.634371-1.625903 3.634371-1.709589C3.634371-1.78132 3.58655-1.817186 3.514819-1.817186C3.490909-1.817186 3.443088-1.817186 3.419178-1.769365C3.407223-1.75741 3.395268-1.745455 3.311582-1.554172C3.060523-.956413 2.510585-.119552 1.817186-.119552C1.458531-.119552 1.43462-.418431 1.43462-.681445C1.43462-.6934 1.43462-.920548 1.470486-1.06401L2.402989-4.805978Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-116'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">t&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Parameter value</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><svg class="m-math" style="width: 1.963em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 18.845817 11.955168">
+<title>
+$ s(t) $
+</title>
+<defs>
+<path id='eq11-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq11-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq11-g0-115' d='M2.725778-2.391034C2.929016-2.355168 3.251806-2.283437 3.323537-2.271482C3.478954-2.223661 4.016936-2.032379 4.016936-1.458531C4.016936-1.08792 3.682192-.119552 2.295392-.119552C2.044334-.119552 1.147696-.155417 .908593-.812951C1.3868-.753176 1.625903-1.123786 1.625903-1.3868C1.625903-1.637858 1.458531-1.769365 1.219427-1.769365C.956413-1.769365 .609714-1.566127 .609714-1.028144C.609714-.32279 1.327024 .119552 2.283437 .119552C4.100623 .119552 4.638605-1.219427 4.638605-1.841096C4.638605-2.020423 4.638605-2.355168 4.25604-2.737733C3.957161-3.024658 3.670237-3.084433 3.024658-3.21594C2.701868-3.287671 2.187796-3.395268 2.187796-3.93325C2.187796-4.172354 2.402989-5.033126 3.53873-5.033126C4.040847-5.033126 4.531009-4.841843 4.65056-4.411457C4.124533-4.411457 4.100623-3.957161 4.100623-3.945205C4.100623-3.694147 4.327771-3.622416 4.435367-3.622416C4.60274-3.622416 4.937484-3.753923 4.937484-4.25604S4.483188-5.272229 3.550685-5.272229C1.984558-5.272229 1.566127-4.040847 1.566127-3.550685C1.566127-2.642092 2.450809-2.450809 2.725778-2.391034Z'/>
+<path id='eq11-g0-116' d='M2.402989-4.805978H3.502864C3.730012-4.805978 3.849564-4.805978 3.849564-5.021171C3.849564-5.152677 3.777833-5.152677 3.53873-5.152677H2.486675L2.929016-6.898132C2.976837-7.065504 2.976837-7.089415 2.976837-7.173101C2.976837-7.364384 2.82142-7.47198 2.666002-7.47198C2.570361-7.47198 2.295392-7.436115 2.199751-7.053549L1.733499-5.152677H.609714C.37061-5.152677 .263014-5.152677 .263014-4.925529C.263014-4.805978 .3467-4.805978 .573848-4.805978H1.637858L.848817-1.649813C.753176-1.231382 .71731-1.111831 .71731-.956413C.71731-.394521 1.111831 .119552 1.78132 .119552C2.988792 .119552 3.634371-1.625903 3.634371-1.709589C3.634371-1.78132 3.58655-1.817186 3.514819-1.817186C3.490909-1.817186 3.443088-1.817186 3.419178-1.769365C3.407223-1.75741 3.395268-1.745455 3.311582-1.554172C3.060523-.956413 2.510585-.119552 1.817186-.119552C1.458531-.119552 1.43462-.418431 1.43462-.681445C1.43462-.6934 1.43462-.920548 1.470486-1.06401L2.402989-4.805978Z'/>
+</defs>
+<g id='eq11-page1'>
+<use x='0' y='0' xlink:href='#eq11-g0-115'/>
+<use x='5.514006' y='0' xlink:href='#eq11-g1-40'/>
+<use x='10.066331' y='0' xlink:href='#eq11-g0-116'/>
+<use x='14.293491' y='0' xlink:href='#eq11-g1-41'/>
+</g>
+</svg></td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Given <svg class="m-math" style="width: 2.862em; height: 0.907em; vertical-align: -0.049em;" viewBox="0 -8.235778 27.473269 8.703199">
+<title>
+$ t \in \mathbb{R} $
+</title>
+<defs>
+<path id='eq6-g0-82' d='M3.203985-3.753923H3.634371L5.427646-.980324C5.547198-.789041 5.834122-.32279 5.965629-.143462C6.049315 0 6.085181 0 6.360149 0H8.009963C8.225156 0 8.404483 0 8.404483-.215193C8.404483-.310834 8.332752-.394521 8.225156-.418431C7.782814-.514072 7.197011-1.303113 6.910087-1.685679C6.826401-1.80523 6.228643-2.594271 5.427646-3.88543C6.491656-4.076712 7.519801-4.531009 7.519801-5.953674C7.519801-7.615442 5.762391-8.18929 4.351681-8.18929H.597758C.382565-8.18929 .191283-8.18929 .191283-7.974097C.191283-7.770859 .418431-7.770859 .514072-7.770859C1.195517-7.770859 1.255293-7.687173 1.255293-7.089415V-1.099875C1.255293-.502117 1.195517-.418431 .514072-.418431C.418431-.418431 .191283-.418431 .191283-.215193C.191283 0 .382565 0 .597758 0H3.873474C4.088667 0 4.267995 0 4.267995-.215193C4.267995-.418431 4.064757-.418431 3.93325-.418431C3.251806-.418431 3.203985-.514072 3.203985-1.099875V-3.753923ZM5.511333-4.339726C5.846077-4.782067 5.881943-5.415691 5.881943-5.941719C5.881943-6.515567 5.810212-7.149191 5.427646-7.639352C5.917808-7.531756 7.10137-7.161146 7.10137-5.953674C7.10137-5.176588 6.742715-4.566874 5.511333-4.339726ZM3.203985-7.12528C3.203985-7.376339 3.203985-7.770859 3.945205-7.770859C4.961395-7.770859 5.463512-7.352428 5.463512-5.941719C5.463512-4.399502 5.092902-4.172354 3.203985-4.172354V-7.12528ZM1.578082-.418431C1.673724-.633624 1.673724-.968369 1.673724-1.075965V-7.113325C1.673724-7.232877 1.673724-7.555666 1.578082-7.770859H2.940971C2.785554-7.579577 2.785554-7.340473 2.785554-7.161146V-1.075965C2.785554-.956413 2.785554-.633624 2.881196-.418431H1.578082ZM4.124533-3.753923C4.208219-3.765878 4.25604-3.777833 4.351681-3.777833C4.531009-3.777833 4.794022-3.801743 4.97335-3.825654C5.152677-3.53873 6.443836-1.41071 7.436115-.418431H6.276463L4.124533-3.753923Z'/>
+<path id='eq6-g1-50' d='M6.551432-2.749689C6.75467-2.749689 6.969863-2.749689 6.969863-2.988792S6.75467-3.227895 6.551432-3.227895H1.482441C1.625903-4.829888 3.000747-5.977584 4.686426-5.977584H6.551432C6.75467-5.977584 6.969863-5.977584 6.969863-6.216687S6.75467-6.455791 6.551432-6.455791H4.662516C2.618182-6.455791 .992279-4.901619 .992279-2.988792S2.618182 .478207 4.662516 .478207H6.551432C6.75467 .478207 6.969863 .478207 6.969863 .239103S6.75467 0 6.551432 0H4.686426C3.000747 0 1.625903-1.147696 1.482441-2.749689H6.551432Z'/>
+<path id='eq6-g2-116' d='M2.402989-4.805978H3.502864C3.730012-4.805978 3.849564-4.805978 3.849564-5.021171C3.849564-5.152677 3.777833-5.152677 3.53873-5.152677H2.486675L2.929016-6.898132C2.976837-7.065504 2.976837-7.089415 2.976837-7.173101C2.976837-7.364384 2.82142-7.47198 2.666002-7.47198C2.570361-7.47198 2.295392-7.436115 2.199751-7.053549L1.733499-5.152677H.609714C.37061-5.152677 .263014-5.152677 .263014-4.925529C.263014-4.805978 .3467-4.805978 .573848-4.805978H1.637858L.848817-1.649813C.753176-1.231382 .71731-1.111831 .71731-.956413C.71731-.394521 1.111831 .119552 1.78132 .119552C2.988792 .119552 3.634371-1.625903 3.634371-1.709589C3.634371-1.78132 3.58655-1.817186 3.514819-1.817186C3.490909-1.817186 3.443088-1.817186 3.419178-1.769365C3.407223-1.75741 3.395268-1.745455 3.311582-1.554172C3.060523-.956413 2.510585-.119552 1.817186-.119552C1.458531-.119552 1.43462-.418431 1.43462-.681445C1.43462-.6934 1.43462-.920548 1.470486-1.06401L2.402989-4.805978Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g2-116'/>
+<use x='7.547989' y='0' xlink:href='#eq6-g1-50'/>
+<use x='18.838957' y='0' xlink:href='#eq6-g0-82'/>
+</g>
+</svg>, computes the parametric point <svg class="m-math" style="width: 1.963em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 18.845817 11.955168">
+<title>
+$ s(t) $
+</title>
+<defs>
+<path id='eq7-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq7-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq7-g0-115' d='M2.725778-2.391034C2.929016-2.355168 3.251806-2.283437 3.323537-2.271482C3.478954-2.223661 4.016936-2.032379 4.016936-1.458531C4.016936-1.08792 3.682192-.119552 2.295392-.119552C2.044334-.119552 1.147696-.155417 .908593-.812951C1.3868-.753176 1.625903-1.123786 1.625903-1.3868C1.625903-1.637858 1.458531-1.769365 1.219427-1.769365C.956413-1.769365 .609714-1.566127 .609714-1.028144C.609714-.32279 1.327024 .119552 2.283437 .119552C4.100623 .119552 4.638605-1.219427 4.638605-1.841096C4.638605-2.020423 4.638605-2.355168 4.25604-2.737733C3.957161-3.024658 3.670237-3.084433 3.024658-3.21594C2.701868-3.287671 2.187796-3.395268 2.187796-3.93325C2.187796-4.172354 2.402989-5.033126 3.53873-5.033126C4.040847-5.033126 4.531009-4.841843 4.65056-4.411457C4.124533-4.411457 4.100623-3.957161 4.100623-3.945205C4.100623-3.694147 4.327771-3.622416 4.435367-3.622416C4.60274-3.622416 4.937484-3.753923 4.937484-4.25604S4.483188-5.272229 3.550685-5.272229C1.984558-5.272229 1.566127-4.040847 1.566127-3.550685C1.566127-2.642092 2.450809-2.450809 2.725778-2.391034Z'/>
+<path id='eq7-g0-116' d='M2.402989-4.805978H3.502864C3.730012-4.805978 3.849564-4.805978 3.849564-5.021171C3.849564-5.152677 3.777833-5.152677 3.53873-5.152677H2.486675L2.929016-6.898132C2.976837-7.065504 2.976837-7.089415 2.976837-7.173101C2.976837-7.364384 2.82142-7.47198 2.666002-7.47198C2.570361-7.47198 2.295392-7.436115 2.199751-7.053549L1.733499-5.152677H.609714C.37061-5.152677 .263014-5.152677 .263014-4.925529C.263014-4.805978 .3467-4.805978 .573848-4.805978H1.637858L.848817-1.649813C.753176-1.231382 .71731-1.111831 .71731-.956413C.71731-.394521 1.111831 .119552 1.78132 .119552C2.988792 .119552 3.634371-1.625903 3.634371-1.709589C3.634371-1.78132 3.58655-1.817186 3.514819-1.817186C3.490909-1.817186 3.443088-1.817186 3.419178-1.769365C3.407223-1.75741 3.395268-1.745455 3.311582-1.554172C3.060523-.956413 2.510585-.119552 1.817186-.119552C1.458531-.119552 1.43462-.418431 1.43462-.681445C1.43462-.6934 1.43462-.920548 1.470486-1.06401L2.402989-4.805978Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g0-115'/>
+<use x='5.514006' y='0' xlink:href='#eq7-g1-40'/>
+<use x='10.066331' y='0' xlink:href='#eq7-g0-116'/>
+<use x='14.293491' y='0' xlink:href='#eq7-g1-41'/>
+</g>
+</svg> of the line segment parametrization:</p><div class="m-math"><svg style="width: 10.033em; height: 1.245em;" viewBox="146.113649 -11.955168 96.315681 11.955168">
+<title>
+\[  s(t) = p + t \left(q - p\right)
+\]
+</title>
+<defs>
+<path id='eq8-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq8-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq8-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq8-g2-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
+<path id='eq8-g2-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq8-g1-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+<path id='eq8-g1-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
+<path id='eq8-g1-115' d='M2.725778-2.391034C2.929016-2.355168 3.251806-2.283437 3.323537-2.271482C3.478954-2.223661 4.016936-2.032379 4.016936-1.458531C4.016936-1.08792 3.682192-.119552 2.295392-.119552C2.044334-.119552 1.147696-.155417 .908593-.812951C1.3868-.753176 1.625903-1.123786 1.625903-1.3868C1.625903-1.637858 1.458531-1.769365 1.219427-1.769365C.956413-1.769365 .609714-1.566127 .609714-1.028144C.609714-.32279 1.327024 .119552 2.283437 .119552C4.100623 .119552 4.638605-1.219427 4.638605-1.841096C4.638605-2.020423 4.638605-2.355168 4.25604-2.737733C3.957161-3.024658 3.670237-3.084433 3.024658-3.21594C2.701868-3.287671 2.187796-3.395268 2.187796-3.93325C2.187796-4.172354 2.402989-5.033126 3.53873-5.033126C4.040847-5.033126 4.531009-4.841843 4.65056-4.411457C4.124533-4.411457 4.100623-3.957161 4.100623-3.945205C4.100623-3.694147 4.327771-3.622416 4.435367-3.622416C4.60274-3.622416 4.937484-3.753923 4.937484-4.25604S4.483188-5.272229 3.550685-5.272229C1.984558-5.272229 1.566127-4.040847 1.566127-3.550685C1.566127-2.642092 2.450809-2.450809 2.725778-2.391034Z'/>
+<path id='eq8-g1-116' d='M2.402989-4.805978H3.502864C3.730012-4.805978 3.849564-4.805978 3.849564-5.021171C3.849564-5.152677 3.777833-5.152677 3.53873-5.152677H2.486675L2.929016-6.898132C2.976837-7.065504 2.976837-7.089415 2.976837-7.173101C2.976837-7.364384 2.82142-7.47198 2.666002-7.47198C2.570361-7.47198 2.295392-7.436115 2.199751-7.053549L1.733499-5.152677H.609714C.37061-5.152677 .263014-5.152677 .263014-4.925529C.263014-4.805978 .3467-4.805978 .573848-4.805978H1.637858L.848817-1.649813C.753176-1.231382 .71731-1.111831 .71731-.956413C.71731-.394521 1.111831 .119552 1.78132 .119552C2.988792 .119552 3.634371-1.625903 3.634371-1.709589C3.634371-1.78132 3.58655-1.817186 3.514819-1.817186C3.490909-1.817186 3.443088-1.817186 3.419178-1.769365C3.407223-1.75741 3.395268-1.745455 3.311582-1.554172C3.060523-.956413 2.510585-.119552 1.817186-.119552C1.458531-.119552 1.43462-.418431 1.43462-.681445C1.43462-.6934 1.43462-.920548 1.470486-1.06401L2.402989-4.805978Z'/>
+</defs>
+<g id='eq8-page1'>
+<use x='146.113649' y='-2.988792' xlink:href='#eq8-g1-115'/>
+<use x='151.627655' y='-2.988792' xlink:href='#eq8-g2-40'/>
+<use x='156.179981' y='-2.988792' xlink:href='#eq8-g1-116'/>
+<use x='160.40714' y='-2.988792' xlink:href='#eq8-g2-41'/>
+<use x='168.280295' y='-2.988792' xlink:href='#eq8-g2-61'/>
+<use x='180.705776' y='-2.988792' xlink:href='#eq8-g1-112'/>
+<use x='189.237583' y='-2.988792' xlink:href='#eq8-g2-43'/>
+<use x='200.998898' y='-2.988792' xlink:href='#eq8-g1-116'/>
+<use x='207.218555' y='-2.988792' xlink:href='#eq8-g2-40'/>
+<use x='211.770881' y='-2.988792' xlink:href='#eq8-g1-113'/>
+<use x='220.046701' y='-2.988792' xlink:href='#eq8-g0-0'/>
+<use x='232.001861' y='-2.988792' xlink:href='#eq8-g1-112'/>
+<use x='237.877004' y='-2.988792' xlink:href='#eq8-g2-41'/>
+</g>
+</svg></div><p>where <svg class="m-math" style="width: 0.612em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 5.875143 7.47198">
+<title>
+$p$
+</title>
+<defs>
+<path id='eq9-g0-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+</defs>
+<g id='eq9-page1'>
+<use x='0' y='0' xlink:href='#eq9-g0-112'/>
+</g>
+</svg> and <svg class="m-math" style="width: 0.585em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 5.61916 7.47198">
+<title>
+$q$
+</title>
+<defs>
+<path id='eq10-g0-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
+</defs>
+<g id='eq10-page1'>
+<use x='0' y='0' xlink:href='#eq10-g0-113'/>
+</g>
+</svg> are the start and end of the line segment, respectively.</p><aside class="m-note m-info"><h4>Note</h4><p>For <svg class="m-math" style="width: 4.405em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 42.292419 11.955168">
+<title>
+$ t \in [0, 1] $
+</title>
+<defs>
+<path id='eq12-g2-48' d='M5.355915-3.825654C5.355915-4.817933 5.296139-5.786301 4.865753-6.694894C4.375592-7.687173 3.514819-7.950187 2.929016-7.950187C2.235616-7.950187 1.3868-7.603487 .944458-6.611208C.609714-5.858032 .490162-5.116812 .490162-3.825654C.490162-2.666002 .573848-1.793275 1.004234-.944458C1.470486-.035866 2.295392 .251059 2.917061 .251059C3.957161 .251059 4.554919-.37061 4.901619-1.06401C5.332005-1.960648 5.355915-3.132254 5.355915-3.825654ZM2.917061 .011955C2.534496 .011955 1.75741-.203238 1.530262-1.506351C1.398755-2.223661 1.398755-3.132254 1.398755-3.969116C1.398755-4.94944 1.398755-5.834122 1.590037-6.539477C1.793275-7.340473 2.402989-7.711083 2.917061-7.711083C3.371357-7.711083 4.064757-7.436115 4.291905-6.40797C4.447323-5.726526 4.447323-4.782067 4.447323-3.969116C4.447323-3.16812 4.447323-2.259527 4.315816-1.530262C4.088667-.215193 3.335492 .011955 2.917061 .011955Z'/>
+<path id='eq12-g2-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
+<path id='eq12-g2-91' d='M2.988792 2.988792V2.546451H1.829141V-8.524035H2.988792V-8.966376H1.3868V2.988792H2.988792Z'/>
+<path id='eq12-g2-93' d='M1.853051-8.966376H.251059V-8.524035H1.41071V2.546451H.251059V2.988792H1.853051V-8.966376Z'/>
+<path id='eq12-g0-50' d='M6.551432-2.749689C6.75467-2.749689 6.969863-2.749689 6.969863-2.988792S6.75467-3.227895 6.551432-3.227895H1.482441C1.625903-4.829888 3.000747-5.977584 4.686426-5.977584H6.551432C6.75467-5.977584 6.969863-5.977584 6.969863-6.216687S6.75467-6.455791 6.551432-6.455791H4.662516C2.618182-6.455791 .992279-4.901619 .992279-2.988792S2.618182 .478207 4.662516 .478207H6.551432C6.75467 .478207 6.969863 .478207 6.969863 .239103S6.75467 0 6.551432 0H4.686426C3.000747 0 1.625903-1.147696 1.482441-2.749689H6.551432Z'/>
+<path id='eq12-g1-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq12-g1-116' d='M2.402989-4.805978H3.502864C3.730012-4.805978 3.849564-4.805978 3.849564-5.021171C3.849564-5.152677 3.777833-5.152677 3.53873-5.152677H2.486675L2.929016-6.898132C2.976837-7.065504 2.976837-7.089415 2.976837-7.173101C2.976837-7.364384 2.82142-7.47198 2.666002-7.47198C2.570361-7.47198 2.295392-7.436115 2.199751-7.053549L1.733499-5.152677H.609714C.37061-5.152677 .263014-5.152677 .263014-4.925529C.263014-4.805978 .3467-4.805978 .573848-4.805978H1.637858L.848817-1.649813C.753176-1.231382 .71731-1.111831 .71731-.956413C.71731-.394521 1.111831 .119552 1.78132 .119552C2.988792 .119552 3.634371-1.625903 3.634371-1.709589C3.634371-1.78132 3.58655-1.817186 3.514819-1.817186C3.490909-1.817186 3.443088-1.817186 3.419178-1.769365C3.407223-1.75741 3.395268-1.745455 3.311582-1.554172C3.060523-.956413 2.510585-.119552 1.817186-.119552C1.458531-.119552 1.43462-.418431 1.43462-.681445C1.43462-.6934 1.43462-.920548 1.470486-1.06401L2.402989-4.805978Z'/>
+</defs>
+<g id='eq12-page1'>
+<use x='0' y='0' xlink:href='#eq12-g1-116'/>
+<use x='7.547989' y='0' xlink:href='#eq12-g0-50'/>
+<use x='18.838957' y='0' xlink:href='#eq12-g2-91'/>
+<use x='22.090618' y='0' xlink:href='#eq12-g2-48'/>
+<use x='27.943609' y='0' xlink:href='#eq12-g1-59'/>
+<use x='33.187767' y='0' xlink:href='#eq12-g2-49'/>
+<use x='39.040758' y='0' xlink:href='#eq12-g2-93'/>
+</g>
+</svg>, the result lies on the segment. Values outside this range extrapolate beyond the segment endpoints.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a8ff364dd2e1d4e0fd9ef084d9299797b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">T </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ff364dd2e1d4e0fd9ef084d9299797b" class="m-doc-self">length</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Computes the length of the segment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Euclidean distance <svg class="m-math" style="width: 3.965em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 38.061337 11.955168">
+<title>
+$ \|q - p\| $
+</title>
+<defs>
+<path id='eq13-g1-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+<path id='eq13-g1-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
+<path id='eq13-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq13-g0-107' d='M2.056289-8.5599C2.056289-8.751183 2.056289-8.966376 1.817186-8.966376S1.578082-8.703362 1.578082-8.524035V2.546451C1.578082 2.737733 1.578082 2.988792 1.817186 2.988792S2.056289 2.773599 2.056289 2.582316V-8.5599ZM4.387547-8.524035C4.387547-8.715318 4.387547-8.966376 4.148443-8.966376S3.90934-8.751183 3.90934-8.5599V2.582316C3.90934 2.773599 3.90934 2.988792 4.148443 2.988792S4.387547 2.725778 4.387547 2.546451V-8.524035Z'/>
+</defs>
+<g id='eq13-page1'>
+<use x='0' y='0' xlink:href='#eq13-g0-107'/>
+<use x='5.977607' y='0' xlink:href='#eq13-g1-113'/>
+<use x='14.253427' y='0' xlink:href='#eq13-g0-0'/>
+<use x='26.208587' y='0' xlink:href='#eq13-g1-112'/>
+<use x='32.08373' y='0' xlink:href='#eq13-g0-107'/>
+</g>
+</svg></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9eba025988c3a6bc79ed29da06df6a41"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;::Vector </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9eba025988c3a6bc79ed29da06df6a41" class="m-doc-self">direction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the unit direction vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Unit vector from <code>start()</code> to <code>end()</code></td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Computes:</p><div class="m-math"><svg style="width: 3.965em; height: 2.734em;" viewBox="175.240827 -26.251069 38.061337 26.251069">
+<title>
+\[  \frac{q - p}{\|q - p\|}
+\]
+</title>
+<defs>
+<path id='eq14-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq14-g0-107' d='M2.056289-8.5599C2.056289-8.751183 2.056289-8.966376 1.817186-8.966376S1.578082-8.703362 1.578082-8.524035V2.546451C1.578082 2.737733 1.578082 2.988792 1.817186 2.988792S2.056289 2.773599 2.056289 2.582316V-8.5599ZM4.387547-8.524035C4.387547-8.715318 4.387547-8.966376 4.148443-8.966376S3.90934-8.751183 3.90934-8.5599V2.582316C3.90934 2.773599 3.90934 2.988792 4.148443 2.988792S4.387547 2.725778 4.387547 2.546451V-8.524035Z'/>
+<path id='eq14-g1-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+<path id='eq14-g1-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
+</defs>
+<g id='eq14-page1'>
+<use x='181.218426' y='-19.277213' xlink:href='#eq14-g1-113'/>
+<use x='189.494246' y='-19.277213' xlink:href='#eq14-g0-0'/>
+<use x='201.449406' y='-19.277213' xlink:href='#eq14-g1-112'/>
+<rect x='175.240827' y='-14.41734' height='.478187' width='38.061311'/>
+<use x='175.240827' y='-2.988792' xlink:href='#eq14-g0-107'/>
+<use x='181.218433' y='-2.988792' xlink:href='#eq14-g1-113'/>
+<use x='189.494253' y='-2.988792' xlink:href='#eq14-g0-0'/>
+<use x='201.449414' y='-2.988792' xlink:href='#eq14-g1-112'/>
+<use x='207.324557' y='-2.988792' xlink:href='#eq14-g0-107'/>
+</g>
+</svg></div>
+          </div></section>
+          <section class="m-doc-details" id="a58c248407d5f8b7b0dc2331fd49da1a2"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a58c248407d5f8b7b0dc2331fd49da1a2" class="m-doc-self">start</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the start point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Start point <svg class="m-math" style="width: 0.612em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 5.875143 7.47198">
+<title>
+$ p $
+</title>
+<defs>
+<path id='eq15-g0-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+</defs>
+<g id='eq15-page1'>
+<use x='0' y='0' xlink:href='#eq15-g0-112'/>
+</g>
+</svg></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af781b3e87a4d43a22543c8d2c7209b23"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af781b3e87a4d43a22543c8d2c7209b23" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the end point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>End point <svg class="m-math" style="width: 0.585em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 5.61916 7.47198">
+<title>
+$ q $
+</title>
+<defs>
+<path id='eq16-g0-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
+</defs>
+<g id='eq16-page1'>
+<use x='0' y='0' xlink:href='#eq16-g0-113'/>
+</g>
+</svg></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae134f45964cd91cd1d15bd987a6f883a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a9e1b061f2943b3edeb51fc9f8c9ce48d" class="m-doc">LineSegment</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae134f45964cd91cd1d15bd987a6f883a" class="m-doc-self">setStart</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&amp; start) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets the start point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">start&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>New start point</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this segment for method chaining</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afa46d150e6f69418d8e27f645db110c4"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a9e1b061f2943b3edeb51fc9f8c9ce48d" class="m-doc">LineSegment</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afa46d150e6f69418d8e27f645db110c4" class="m-doc-self">setEnd</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&amp; end) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets the end point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">end&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>New end point</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this segment for method chaining</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae1569887111eb3a1acde12320e47b350"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a9e1b061f2943b3edeb51fc9f8c9ce48d" class="m-doc">LineSegment</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae1569887111eb3a1acde12320e47b350" class="m-doc-self">reverse</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the reversed segment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>New segment with swapped start and end points</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a03756fbaae527b390a795f6fc3f7cc96"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a03756fbaae527b390a795f6fc3f7cc96" class="m-doc-self">intersect</a>(</span><span class="m-doc-wrap">const <a href="#a9e1b061f2943b3edeb51fc9f8c9ce48d" class="m-doc">LineSegment</a>&lt;Dimension, T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Computes the intersection point with another segment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Other line segment</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr>
+                  <th>Returns</th>
+                  <td>Optional intersection point</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>std::nullopt</td>
+                  <td>If the intersection has no unique point</td>
+                </tr>
+                <tr>
+                  <td>Point</td>
+                  <td>The unique intersection point</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Determines if two line segments intersect and returns the intersection point if it exists.</p>
+          </div></section>
+          <section class="m-doc-details" id="a76af618cd0feeae19b9a95c63c7e586a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a76af618cd0feeae19b9a95c63c7e586a" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&amp; point) const</span></span>
+            </h3>
+            <p>Projects onto the closed segment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">point</td>
+                  <td>Point.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Closest segment point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5e9b02485459541ef593f7470f8e46a3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">T </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5e9b02485459541ef593f7470f8e46a3" class="m-doc-self">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point.html" class="m-doc">Point</a>&lt;Dimension, T&gt;&amp; point) const</span></span>
+            </h3>
+            <p>Computes point distance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">point</td>
+                  <td>Point.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Euclidean distance.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-8869a4936c9f.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

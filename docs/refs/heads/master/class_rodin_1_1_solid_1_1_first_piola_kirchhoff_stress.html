@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Solid::FirstPiolaKirchhoffStress class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,16 +71,14 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_first_piola_kirchhoff_stress_8h.html">&lt;Rodin/Solid/Fields/FirstPiolaKirchhoffStress.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class LawDerived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>FirstPiolaKirchhoffStress <span class="m-thin">class</span>
-        </h1>
-        <p>Computes the first Piola-Kirchhoff stress from a constitutive law.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solid.html">Solid</a></div><h1>FirstPiolaKirchhoffStress</h1><p class="rodin-reference-brief">Computes the first Piola-Kirchhoff stress from a constitutive law.</p><p class="rodin-reference-include">Defined in <a href="_first_piola_kirchhoff_stress_8h.html"><code>Rodin/Solid/Fields/FirstPiolaKirchhoffStress.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LawDerived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solid_1_1_first_piola_kirchhoff_stress.html#a9339e17639d1326984a3a22fa19a6a85"><span class="nc">FirstPiolaKirchhoffStress</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md221">Usage</a></li>
+            <li><a href="#autotoc_md233">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -94,15 +89,15 @@
             </li>
           </ul>
         </nav>
-<section id="autotoc_md221"><h3><a href="#autotoc_md221">Usage</a></h3><pre class="m-code"><span class="n">NeoHookean</span><span class="w"> </span><span class="nf">law</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span>
-<span class="n">NeoHookean</span><span class="o">::</span><span class="n">Cache</span><span class="w"> </span><span class="n">cache</span><span class="p">;</span>
-<span class="n">KinematicState</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
+<section id="autotoc_md233"><h2><a href="#autotoc_md233">Usage</a></h2><pre class="m-code"><span class="nc">NeoHookean</span><span class="w"> </span><span class="nf">law</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span>
+<span class="nc">KinematicState</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
 <span class="n">state</span><span class="p">.</span><span class="n">setDisplacementGradient</span><span class="p">(</span><span class="n">gradU</span><span class="p">);</span>
-<span class="n">law</span><span class="p">.</span><span class="n">setCache</span><span class="p">(</span><span class="n">cache</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
+<span class="nc">ConstitutivePoint</span><span class="w"> </span><span class="nf">point</span><span class="p">(</span><span class="n">state</span><span class="p">);</span>
+<span class="n">law</span><span class="p">.</span><span class="n">setConstitutivePoint</span><span class="p">(</span><span class="n">point</span><span class="p">);</span>
 
-<span class="n">FirstPiolaKirchhoffStress</span><span class="o">&lt;</span><span class="n">NeoHookean</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pk1</span><span class="p">(</span><span class="n">law</span><span class="p">);</span>
-<span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="n">SpatialMatrix</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">P</span><span class="p">;</span>
-<span class="n">pk1</span><span class="p">.</span><span class="n">getFirstPiolaKirchhoffStress</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">cache</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">);</span></pre></section>
+<span class="nc">FirstPiolaKirchhoffStress</span><span class="o">&lt;</span><span class="nc">NeoHookean</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pk1</span><span class="p">(</span><span class="n">law</span><span class="p">);</span>
+<span class="n">Math</span><span class="o">::</span><span class="nc">SpatialMatrix</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">P</span><span class="p">;</span>
+<span class="n">pk1</span><span class="p">.</span><span class="n">getFirstPiolaKirchhoffStress</span><span class="p">(</span><span class="n">P</span><span class="p">);</span></pre></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -110,10 +105,6 @@
               using <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc-self">LawType</a> = LawDerived
             </dt>
             <dd>Constitutive law type.</dd>
-            <dt id="ae66c074f434a5e00e2bd00da759fb252">
-              using <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc-self">CacheType</a> = typename LawType::Cache
-            </dt>
-            <dd>Cache type used by the constitutive law.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -123,12 +114,12 @@
               <span class="m-doc-wrap-bumper"><a href="#a9339e17639d1326984a3a22fa19a6a85" class="m-doc">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; law)</span>
             </dt>
             <dd>Constructs the stress evaluator.</dd>
-            <dt id="a89ba7bd5273d637feee5bb97faf13bfa">
-              <span class="m-doc-wrap-bumper"><a href="#a89ba7bd5273d637feee5bb97faf13bfa" class="m-doc-self">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_first_piola_kirchhoff_stress.html" class="m-doc">FirstPiolaKirchhoffStress</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#afbbc715268c70151897e4763075ac15a" class="m-doc">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">const FirstPiolaKirchhoffStress&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="abd62ffdcd96ad4571775c07d17306636">
-              <span class="m-doc-wrap-bumper"><a href="#abd62ffdcd96ad4571775c07d17306636" class="m-doc-self">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_first_piola_kirchhoff_stress.html" class="m-doc">FirstPiolaKirchhoffStress</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac66f83b944cf19568053a8998406ebff" class="m-doc">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">FirstPiolaKirchhoffStress&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -137,9 +128,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a6583ffafc439ee162f165b32df82e1a3" class="m-doc">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
-              const <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc">CacheType</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a9f27ccb3e7ba7897755c79b4e339909f" class="m-doc">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P) const</span>
             </dt>
             <dd>Computes <svg class="m-math" style="width: 6.696em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 64.277902 11.955168">
 <title>
@@ -163,8 +152,8 @@ $ \mathbf{P} = \partial W / \partial \mathbf{F} $
 <use x='55.823491' y='0' xlink:href='#eq1-g0-70'/>
 </g>
 </svg>.</dd>
-            <dt id="ae6c4e20b7089a8517ed5c9a8cef7cb33">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
             </dt>
             <dd>Gets the constitutive law.</dd>
           </dl>
@@ -173,10 +162,8 @@ $ \mathbf{P} = \partial W / \partial \mathbf{F} $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a9339e17639d1326984a3a22fa19a6a85"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />FirstPiolaKirchhoffStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9339e17639d1326984a3a22fa19a6a85" class="m-doc-self">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; law)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9339e17639d1326984a3a22fa19a6a85" class="m-doc-self">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; law)</span></span>
             </h3>
             <p>Constructs the stress evaluator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -186,19 +173,51 @@ $ \mathbf{P} = \partial W / \partial \mathbf{F} $
               <tbody>
                 <tr>
                   <td style="width: 1%">law</td>
-                  <td>Reference to the constitutive law</td>
+                  <td>Reference to a prepared constitutive law</td>
                 </tr>
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a6583ffafc439ee162f165b32df82e1a3"><div>
+          <section class="m-doc-details" id="afbbc715268c70151897e4763075ac15a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />FirstPiolaKirchhoffStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6583ffafc439ee162f165b32df82e1a3" class="m-doc-self">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
-              const <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc">CacheType</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afbbc715268c70151897e4763075ac15a" class="m-doc-self">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">const FirstPiolaKirchhoffStress&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac66f83b944cf19568053a8998406ebff"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac66f83b944cf19568053a8998406ebff" class="m-doc-self">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">FirstPiolaKirchhoffStress&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9f27ccb3e7ba7897755c79b4e339909f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9f27ccb3e7ba7897755c79b4e339909f" class="m-doc-self">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P) const</span></span>
             </h3>
             <p>Computes <svg class="m-math" style="width: 6.696em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 64.277902 11.955168">
 <title>
@@ -231,15 +250,22 @@ $ \mathbf{P} = \partial W / \partial \mathbf{F} $
                   <td style="width: 1%">P&nbsp;<span class="m-label m-flat m-warning">out</span></td>
                   <td>Output stress tensor</td>
                 </tr>
-                <tr>
-                  <td>cache&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Precomputed law cache</td>
-                </tr>
-                <tr>
-                  <td>cp&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Constitutive point</td>
-                </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae6c4e20b7089a8517ed5c9a8cef7cb33"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the constitutive law.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The constitutive law.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
         </section>
@@ -281,13 +307,20 @@ $ \mathbf{P} = \partial W / \partial \mathbf{F} $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

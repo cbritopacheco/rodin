@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Math::Deg class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,42 +71,31 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_math.html">Math</a>::<wbr/></span>Deg <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_deg_8h.html">&lt;Rodin/Math/Deg.h&gt;</a></div>
-        </h1>
-        <p>Represents an angle in degrees.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_math.html">Math</a></div><h1>Deg</h1><p class="rodin-reference-brief">Represents an angle in degrees.</p><p class="rodin-reference-include">Defined in <a href="_deg_8h.html"><code>Rodin/Math/Deg.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_math_1_1_deg.html"><span class="nc">Deg</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md157">Example Usage</a></li>
+            <li><a href="#autotoc_md165">Example Usage</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>This class provides a type-safe wrapper for angles measured in degrees, inheriting all the unit arithmetic operations from the Unit base class. Provides a conversion method to radians.</p><section id="autotoc_md157"><h3><a href="#autotoc_md157">Example Usage</a></h3><pre class="m-code"><span class="n">Deg</span><span class="w"> </span><span class="nf">angle</span><span class="p">(</span><span class="mf">180.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// 180 degrees</span>
-<span class="n">Rad</span><span class="w"> </span><span class="n">radians</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">angle</span><span class="p">.</span><span class="n">toRad</span><span class="p">();</span><span class="w">  </span><span class="c1">// π radians</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_math_1_1_rad.html">Rad</a></p><p><a href="class_rodin_1_1_math_1_1_unit.html">Unit</a></p></aside></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived, class T&gt;</div>
-              class <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit&lt;Deg, Real&gt;</a>
-            </dt>
-            <dd>Base class for units using CRTP.</dd>
-          </dl>
-        </section>
+<p>This class provides a type-safe wrapper for angles measured in degrees, inheriting all the unit arithmetic operations from the Unit base class. Provides a conversion method to radians.</p><section id="autotoc_md165"><h2><a href="#autotoc_md165">Example Usage</a></h2><pre class="m-code"><span class="nc">Deg</span><span class="w"> </span><span class="nf">angle</span><span class="p">(</span><span class="mf">180.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// 180 degrees</span>
+<span class="nc">Rad</span><span class="w"> </span><span class="n">radians</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">angle</span><span class="p">.</span><span class="n">toRad</span><span class="p">();</span><span class="w">  </span><span class="c1">// π radians</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_math_1_1_rad.html">Rad</a></p></aside></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_math_1_1_unit.html" title="Unit&lt; Deg, Real &gt;">Unit</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Deg</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_math_1_1_unit.html"><code>Unit&lt;Deg, Real&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_math_1_1_unit.html#a8b322f7208c13b82a734720a73360ef9"><span class="nc">Unit</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_math_1_1_deg.html"><span class="nc">Deg</span></a><span class="p">,</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for units using CRTP.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_math_1_1_unit.html"><code>Unit</code></a></td><td><details><summary>22 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_math_1_1_unit.html#ae79c83fbca959022127462dcdebe4893"><code>One()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a54724b9dd792a6022b918eae2f393734"><code>operator Real()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a72293f3406f02ff87a4d9ae8779a01b9"><code>operator!=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a38e36651e055f69c5bb6e2be357bcdc8"><code>operator*()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a4cd2584f7faf3c5b7b575f369a12975c"><code>operator*=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#ae965424fb638ef8d68e0b281bd050edb"><code>operator+()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#aad3f801edbdd69feefcc5273fd5fe8e0"><code>operator+()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a0171fc7cb1dc8accdfa73cea839c216e"><code>operator+=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#aca7f7071ea238f7e257dfd048f7c69ba"><code>operator-()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#ac2653c26a864eb66b899cfb31c8102b2"><code>operator-()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#ab634af0995c9bf5c9eb776b3903ebf3a"><code>operator-=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#ab7184ebb91add1afb177953bf98daadd"><code>operator/()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#aac786c56de7765606762cc2f84bd6658"><code>operator/=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a3e01a2c508fc362268427b4d2fa684af"><code>operator&lt;()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a452da445f903cae1a1afe0e574f4ae20"><code>operator&lt;=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a021031f58bb48cf29a78858c00009b66"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a0c2dd156fe3f8afc23d47ad3bf82f231"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#ad726fba6216724a96f967eed36c1f9a3"><code>operator==()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a029e33c44457d1149c1399f6e35b769e"><code>operator&gt;()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#af0a6c4740f2d4137c953d7ade062d2fe"><code>operator&gt;=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a19462713b2aab2dae2c87c15f262c1df"><code>Type</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a31b6f6453acca85f259ca3e33c406fd2"><code>Zero()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a2be1e56e7d06247c9016678c81271022">
-              using <a href="#a2be1e56e7d06247c9016678c81271022" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&lt;<a href="class_rodin_1_1_math_1_1_deg.html" class="m-doc">Deg</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
+              using <a href="#a2be1e56e7d06247c9016678c81271022" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_math_1_1_unit.html#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&lt;<a href="class_rodin_1_1_math_1_1_deg.html" class="m-doc">Deg</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -127,7 +113,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a02ef69f20007ebb495b4ea40975f1106"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_rad.html" class="m-doc">Rad</a> Rodin::<wbr />Math::<wbr />Deg::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02ef69f20007ebb495b4ea40975f1106" class="m-doc-self">toRad</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_rad.html" class="m-doc">Rad</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02ef69f20007ebb495b4ea40975f1106" class="m-doc-self">toRad</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Converts the angle from degrees to radians.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -146,9 +132,9 @@ $ \text{rad} = \text{deg} \times \frac{\pi}{180} $
 <path id='eq1-g2-48' d='M3.897385-2.542466C3.897385-3.395268 3.809714-3.913325 3.5467-4.423412C3.196015-5.124782 2.550436-5.300125 2.11208-5.300125C1.107846-5.300125 .74122-4.550934 .629639-4.327771C.342715-3.745953 .326775-2.956912 .326775-2.542466C.326775-2.016438 .350685-1.211457 .73325-.573848C1.099875 .01594 1.689664 .167372 2.11208 .167372C2.494645 .167372 3.180075 .047821 3.57858-.74122C3.873474-1.315068 3.897385-2.024408 3.897385-2.542466ZM2.11208-.055791C1.841096-.055791 1.291158-.183313 1.123786-1.020174C1.036115-1.474471 1.036115-2.223661 1.036115-2.638107C1.036115-3.188045 1.036115-3.745953 1.123786-4.184309C1.291158-4.99726 1.912827-5.076961 2.11208-5.076961C2.383064-5.076961 2.933001-4.941469 3.092403-4.216189C3.188045-3.777833 3.188045-3.180075 3.188045-2.638107C3.188045-2.16787 3.188045-1.45056 3.092403-1.004234C2.925031-.167372 2.375093-.055791 2.11208-.055791Z'/>
 <path id='eq1-g2-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
 <path id='eq1-g2-56' d='M2.646077-2.87721C3.092403-3.092403 3.634371-3.490909 3.634371-4.112578C3.634371-4.869738 2.86127-5.300125 2.12005-5.300125C1.275218-5.300125 .589788-4.718306 .589788-3.969116C.589788-3.674222 .6934-3.403238 .892653-3.172105C1.028144-3.004732 1.060025-2.988792 1.554172-2.677958C.565878-2.239601 .350685-1.657783 .350685-1.211457C.350685-.334745 1.235367 .167372 2.10411 .167372C3.084433 .167372 3.873474-.494147 3.873474-1.338979C3.873474-1.841096 3.602491-2.175841 3.474969-2.311333C3.339477-2.438854 3.331507-2.446824 2.646077-2.87721ZM1.41071-3.626401C1.179577-3.761893 .988294-3.993026 .988294-4.27198C.988294-4.774097 1.538232-5.092902 2.10411-5.092902C2.725778-5.092902 3.235866-4.670486 3.235866-4.112578C3.235866-3.650311 2.87721-3.259776 2.406974-3.028643L1.41071-3.626401ZM1.801245-2.534496C1.833126-2.518555 2.741719-1.960648 2.87721-1.872976C3.004732-1.801245 3.419178-1.546202 3.419178-1.067995C3.419178-.454296 2.773599-.071731 2.12005-.071731C1.41071-.071731 .804981-.557908 .804981-1.211457C.804981-1.809215 1.251308-2.279452 1.801245-2.534496Z'/>
-<path id='eq1-g1-25' d='M2.263512-2.909091H3.180075C3.012702-2.183811 2.86924-1.594022 2.86924-1.004234C2.86924-.948443 2.86924-.605729 2.956912-.318804C3.060523 .01594 3.140224 .079701 3.283686 .079701C3.459029 .079701 3.642341-.071731 3.642341-.263014C3.642341-.318804 3.634371-.334745 3.602491-.406476C3.435118-.773101 3.315567-1.155666 3.315567-1.809215C3.315567-1.992528 3.315567-2.327273 3.435118-2.909091H4.399502C4.527024-2.909091 4.614695-2.909091 4.694396-2.972852C4.790037-3.060523 4.813948-3.164134 4.813948-3.211955C4.813948-3.435118 4.614695-3.435118 4.479203-3.435118H1.601993C1.43462-3.435118 1.131756-3.435118 .74122-3.052553C.454296-2.765629 .231133-2.399004 .231133-2.343213C.231133-2.271482 .286924-2.247572 .350685-2.247572C.430386-2.247572 .446326-2.271482 .494147-2.335243C.884682-2.909091 1.354919-2.909091 1.538232-2.909091H2.000498C1.769365-2.064259 1.346949-1.099875 1.052055-.518057C.996264-.398506 .916563-.239103 .916563-.167372C.916563 0 1.052055 .079701 1.179577 .079701C1.482441 .079701 1.562142-.223163 1.729514-.876712L2.263512-2.909091Z'/>
-<path id='eq1-g6-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
 <path id='eq1-g0-2' d='M4.65056-3.323537L2.259527-5.702615C2.116065-5.846077 2.092154-5.869988 1.996513-5.869988C1.876961-5.869988 1.75741-5.762391 1.75741-5.630884C1.75741-5.547198 1.78132-5.523288 1.912827-5.391781L4.303861-2.988792L1.912827-.585803C1.78132-.454296 1.75741-.430386 1.75741-.3467C1.75741-.215193 1.876961-.107597 1.996513-.107597C2.092154-.107597 2.116065-.131507 2.259527-.274969L4.638605-2.654047L7.113325-.179328C7.137235-.167372 7.220922-.107597 7.292653-.107597C7.436115-.107597 7.531756-.215193 7.531756-.3467C7.531756-.37061 7.531756-.418431 7.49589-.478207C7.483935-.502117 5.583064-2.379078 4.985305-2.988792L7.173101-5.176588C7.232877-5.248319 7.412204-5.403736 7.47198-5.475467C7.483935-5.499377 7.531756-5.547198 7.531756-5.630884C7.531756-5.762391 7.436115-5.869988 7.292653-5.869988C7.197011-5.869988 7.149191-5.822167 7.017684-5.69066L4.65056-3.323537Z'/>
+<path id='eq1-g6-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g1-25' d='M2.263512-2.909091H3.180075C3.012702-2.183811 2.86924-1.594022 2.86924-1.004234C2.86924-.948443 2.86924-.605729 2.956912-.318804C3.060523 .01594 3.140224 .079701 3.283686 .079701C3.459029 .079701 3.642341-.071731 3.642341-.263014C3.642341-.318804 3.634371-.334745 3.602491-.406476C3.435118-.773101 3.315567-1.155666 3.315567-1.809215C3.315567-1.992528 3.315567-2.327273 3.435118-2.909091H4.399502C4.527024-2.909091 4.614695-2.909091 4.694396-2.972852C4.790037-3.060523 4.813948-3.164134 4.813948-3.211955C4.813948-3.435118 4.614695-3.435118 4.479203-3.435118H1.601993C1.43462-3.435118 1.131756-3.435118 .74122-3.052553C.454296-2.765629 .231133-2.399004 .231133-2.343213C.231133-2.271482 .286924-2.247572 .350685-2.247572C.430386-2.247572 .446326-2.271482 .494147-2.335243C.884682-2.909091 1.354919-2.909091 1.538232-2.909091H2.000498C1.769365-2.064259 1.346949-1.099875 1.052055-.518057C.996264-.398506 .916563-.239103 .916563-.167372C.916563 0 1.052055 .079701 1.179577 .079701C1.482441 .079701 1.562142-.223163 1.729514-.876712L2.263512-2.909091Z'/>
 <path id='eq1-g5-97' d='M5.264443-.47642V-.786093C5.061964-.619346 4.919038-.559794 4.74038-.559794C4.466439-.559794 4.383065-.726541 4.383065-1.250603V-3.573151C4.383065-4.180587 4.323513-4.514081 4.156766-4.788022C3.906645-5.240622 3.394494-5.478832 2.667953-5.478832C2.060517-5.478832 1.488813-5.312085 1.155319-5.038143C.857556-4.788022 .666988-4.442618 .666988-4.144855C.666988-3.870914 .893288-3.632704 1.17914-3.632704S1.715113-3.870914 1.715113-4.132945C1.715113-4.180587 1.703202-4.240139 1.691292-4.323513C1.667471-4.430707 1.65556-4.525991 1.65556-4.609365C1.65556-4.930949 2.036696-5.19298 2.513116-5.19298C3.096731-5.19298 3.418315-4.847575 3.418315-4.204408V-3.477867C1.584097-2.739416 1.381618-2.644132 .869467-2.191533C.607436-1.953323 .440689-1.548365 .440689-1.155319C.440689-.404957 .95284 .119105 1.691292 .119105C2.215354 .119105 2.703684-.131016 3.430225-.750362C3.489778-.119105 3.704167 .119105 4.192497 .119105C4.597454 .119105 4.847575-.023821 5.264443-.47642ZM3.418315-1.464992C3.418315-1.095766 3.358762-.988572 3.108641-.833735C2.822789-.666988 2.489295-.571704 2.239175-.571704C1.822307-.571704 1.488813-.976661 1.488813-1.488813V-1.536455C1.488813-2.239175 1.977144-2.667953 3.418315-3.192015V-1.464992Z'/>
 <path id='eq1-g5-100' d='M5.848057-.500241V-.690809C5.633668-.678899 5.609847-.678899 5.574116-.678899C5.145338-.678899 5.050054-.809914 5.050054-1.357797V-8.111053L4.990501-8.134874C4.418797-7.932395 4.001929-7.81329 3.239657-7.610812V-7.420244C3.334941-7.432154 3.406404-7.432154 3.501688-7.432154C3.942377-7.432154 4.049571-7.313049 4.049571-6.824719V-4.96668C3.596972-5.347816 3.275389-5.478832 2.798968-5.478832C1.42926-5.478832 .321584-4.132945 .321584-2.441653C.321584-.917109 1.214871 .119105 2.525027 .119105C3.192015 .119105 3.644614-.119105 4.049571-.678899V.083374L4.097213 .119105L5.848057-.500241ZM4.049571-1.214871C4.049571-1.131498 3.966198-.988572 3.847093-.857556C3.632704-.619346 3.334941-.500241 2.989536-.500241C2.000965-.500241 1.345887-1.453081 1.345887-2.918073C1.345887-4.26396 1.929502-5.145338 2.8347-5.145338C3.465957-5.145338 4.049571-4.585544 4.049571-3.954287V-1.214871Z'/>
 <path id='eq1-g5-101' d='M5.050054-1.869949L4.859486-1.953323C4.287781-1.048124 3.77563-.70272 3.013357-.70272C2.35828-.70272 1.858039-1.012393 1.512634-1.65556C1.274424-2.12007 1.17914-2.536937 1.155319-3.29921H4.823754C4.72847-4.073392 4.609365-4.418797 4.311602-4.799933C3.954287-5.228711 3.406404-5.478832 2.787058-5.478832C1.310155-5.478832 .297763-4.287781 .297763-2.548848C.297763-.905198 1.155319 .119105 2.525027 .119105C3.668435 .119105 4.549812-.583615 5.050054-1.869949ZM3.608883-3.680346H1.17914C1.310155-4.621275 1.715113-5.050054 2.441653-5.050054S3.454046-4.716559 3.608883-3.680346Z'/>
@@ -211,13 +197,20 @@ $ \text{rad} = \text{deg} \times \frac{\pi}{180} $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::SubMesh&lt;Context::MPI&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,25 +71,23 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_geometry_2_sub_mesh_8h.html">&lt;Rodin/MPI/Geometry/SubMesh.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>SubMesh&lt;Context::MPI&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>SubMesh representing a distributed subregion of a parent MPI mesh.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a></div><h1>SubMesh <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">SubMesh representing a distributed subregion of a parent MPI mesh.</p><p class="rodin-reference-include">Defined in <a href="_m_p_i_2_geometry_2_sub_mesh_8h.html"><code>Rodin/MPI/Geometry/SubMesh.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SubMesh</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="o">&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html">SubMesh</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Context</code></td><td><code>Context::MPI</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
-              <a href="#autotoc_md177">Usage</a>
+              <a href="#autotoc_md187">Usage</a>
               <ul>
-                <li><a href="#autotoc_md178">Creating a distributed boundary submesh:</a></li>
+                <li><a href="#autotoc_md188">Creating a distributed boundary submesh:</a></li>
               </ul>
             </li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -100,28 +95,17 @@
             </li>
           </ul>
         </nav>
-<p>A <code>SubMesh&lt;Context::MPI&gt;</code> is an MPI mesh that represents a subset of polytopes from a parent <code>Mesh&lt;Context::MPI&gt;</code>, maintaining bidirectional index mappings between submesh-local shard indices and parent-local shard indices.</p><p>Each rank independently builds its portion of the submesh by including entities from its parent shard. The submesh keeps a collective logical dimension, so ranks that select no local top-dimensional entities still agree on the dimension of the distributed submesh.</p><p>The submesh initially inherits ownership metadata from the parent shard. Finalization reconciles selected shared entities because the parent owner of an entity need not participate in a strict submesh such as a boundary skin.</p><section id="autotoc_md177"><h2><a href="#autotoc_md177">Usage</a></h2><section id="autotoc_md178"><h3><a href="#autotoc_md178">Creating a distributed boundary submesh:</a></h3><pre class="m-code"><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<p>A <code>SubMesh&lt;Context::MPI&gt;</code> is an MPI mesh that represents a subset of polytopes from a parent <code>Mesh&lt;Context::MPI&gt;</code>, maintaining bidirectional index mappings between submesh-local shard indices and parent-local shard indices.</p><p>Each rank independently builds its portion of the submesh by including entities from its parent shard. The submesh keeps a collective logical dimension, so ranks that select no local top-dimensional entities still agree on the dimension of the distributed submesh.</p><p>The submesh initially inherits ownership metadata from the parent shard. Finalization reconciles selected shared entities because the parent owner of an entity need not participate in a strict submesh such as a boundary skin.</p><section id="autotoc_md187"><h2><a href="#autotoc_md187">Usage</a></h2><section id="autotoc_md188"><h3><a href="#autotoc_md188">Creating a distributed boundary submesh:</a></h3><pre class="m-code"><span class="nc">SubMesh</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">MPI</span><span class="o">&gt;::</span><span class="nc">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
 <span class="n">builder</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">mpiMesh</span><span class="p">);</span>
 
 <span class="c1">// Include all owned boundary faces on this rank</span>
 <span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mpiMesh</span><span class="p">.</span><span class="n">getBoundary</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
 <span class="w">  </span><span class="n">builder</span><span class="p">.</span><span class="n">include</span><span class="p">(</span><span class="n">mpiMesh</span><span class="p">.</span><span class="n">getDimension</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">it</span><span class="o">-&gt;</span><span class="n">getIndex</span><span class="p">());</span>
 
-<span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html">SubMeshBase</a></p><p><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">Mesh&lt;Context::<wbr />MPI&gt;</a></p><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html">SubMesh&lt;Context::<wbr />Local&gt;</a></p></aside></section></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>
-            </dt>
-            <dd>Abstract base class for SubMesh implementations.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Mesh&lt;Context::MPI&gt;</a>
-            </dt>
-            <dd>Distributed mesh specialization for MPI contexts.</dd>
-          </dl>
-        </section>
+<span class="nc">SubMesh</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">MPI</span><span class="o">&gt;</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html">SubMesh&lt;Context::<wbr />Local&gt;</a></p></aside></section></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" title="SubMeshBase">SubMeshBase</a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" title="Mesh&lt; Context::MPI &gt;">Mesh</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">SubMesh</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html"><code>SubMeshBase</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html"><span class="nc">SubMeshBase</span></a>
+</pre></details></td><td>Abstract base class for SubMesh implementations.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html"><code>Mesh&lt;Context::MPI&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ae6d83e8725a8c73cd8c6e400cf9d9d33"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Distributed mesh specialization for MPI contexts.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html#ac8c6a074ce3c7c6ee92364debb64df8f"><code>restriction()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html#a0515ce4cfde190fde4ca7e3d46c01d56">SubMeshBase::restriction</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html#a07118dd6dc984cb9260ae21fc61a4130"><code>isSubMesh()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a07118dd6dc984cb9260ae21fc61a4130">Mesh::isSubMesh</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html#adcd0454751e26563bc6a51046718bea0"><code>isLocalPoint()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#adcd0454751e26563bc6a51046718bea0">Mesh::isLocalPoint</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html#ae9d744e767d9fc546ca3f3e666554b3b"><code>getParent()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html#a7d48e539fe6f66d98e95031d30b24b4b">SubMeshBase::getParent</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html#a287a1b2a30ef4cef88679681d6aca405"><code>getPolytopeMap()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html#a2074410d89cecb7001dadb8b498ffebf">SubMeshBase::getPolytopeMap</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html#a824f93e01ba25a22356cff0ce669cac9"><code>getAncestors()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html#a372c956d64676e18b4e64c62d62ff8fc">SubMeshBase::getAncestors</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html#aa66d766684c6856007643ea05ce1479e"><code>asSubMesh()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#aa66d766684c6856007643ea05ce1479e">Mesh::asSubMesh</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html#a1c114dba2d138c6b2bf26203fc4723f1"><code>asSubMesh()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a1c114dba2d138c6b2bf26203fc4723f1">Mesh::asSubMesh</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html"><code>SubMeshBase</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html#a5d3d19539a5f05df6f6f329b5d0aebae"><code>Ancestor</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html#a11fb74405b66316e7163c6d1289f8724"><code>operator==()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html"><code>Mesh&lt;Context::MPI&gt;</code></a></td><td><details><summary>56 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a04f2540d940cc37b5c2538ed8e5b54be"><code>flush()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a7f5708e7b511ba4460df9947caf767af"><code>getArea()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#abe640c51631e5229dfefa8f2d9cd67d0"><code>getArea()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#af42c48bf2992798c8e8365602feed6f1"><code>getArea()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#abca9f0bf9ed1657fb10e7dd3c9fdbc4b"><code>getAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a7e96942960b71276876721cb5d9951ba"><code>getBoundary()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#afc2607dbb18c1c92e62f3c7bdc48b979"><code>getCell()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a4405d79a195b60a5881e1c7eeb32f01e"><code>getCell()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a01277d7ad215e3fe65b940508dff0b85"><code>getConnectivity()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ad0a12694f688f88ad1809af0891f347a"><code>getConnectivity()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ad2346a6e26e8a39fb63ebdf9c0eca50f"><code>getContext()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a6f7b22045efba4c92b80c545b2100c1f"><code>getDimension()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ac6135f94050c2a092b01a19db60a407e"><code>getFace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#adb7295b0f32fca58fd204c47925dab47"><code>getFace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ad6cca31cbc1228bd17c19eb14b768182"><code>getGeometry()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a561a1dbe3f3380de09f82d1907b7b99a"><code>getGlobalIndex()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#aa05fff103c9d811467a9a2a1a3e06a9e"><code>getInterface()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a70bd1f4d798eaf252639ab07572bc95c"><code>getLocalIndex()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#afd5d9204c1312cf4caecbb1cc9d76d75"><code>getMeasure()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ab0bfc5c541a898210683c9f3f70a92ee"><code>getMeasure()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ae99dbf6631fe74d9fd95236831da49bf"><code>getMeasure()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a2d613557ba40614c2d86e226e8cf1fc4"><code>getPerimeter()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ad98b386526e709f346e01ea1201a5921"><code>getPerimeter()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a4e593d98116c9c219c4f843384500821"><code>getPerimeter()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a4d05db0605a16f9456895baa1bd8650f"><code>getPolytope()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#afe4ac0131ad5294a2c1de18ae564117f"><code>getPolytope()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a1f247b875b87c087286298ad7d357b37"><code>getPolytopeCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ad35ac1c34eab205cfa6976c9c7f719dd"><code>getPolytopeCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a6244ad1d2bd992ac497746558353179c"><code>getPolytopeTransformation()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a4e505ed24a67115d839668e95f316f8f"><code>getQuadrature()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a1d9fdac33e0d0f9d7658c8e45c252162"><code>getShard()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#aed4f73e45cb37f989166d3682d4bb29f"><code>getShard()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#aed88568a450d0ecedcc6be7d794d61f5"><code>getSpaceDimension()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ac6499eb474c176af9491ff7cd8870bc1"><code>getVertex()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a209eaced7df93add96aea892847cdb47"><code>getVertex()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a3244640e687c2724ba4044c22a8c3001"><code>getVertexCoordinates()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#aedb17bb61a414bba468c922efb42e0d1"><code>getVolume()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a2eb114e516b1a7bd60d5ec1518b86eb9"><code>getVolume()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a4ee80dc195378129231997eae375fa4b"><code>getVolume()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ace457505a220adf5976c5832c65ea6ba"><code>isBoundary()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a4dd806893cb69ebedbe415967399220f"><code>isInterface()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#af738adc1f8c322938f1142a7f558f847"><code>load()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a5dde8f3fe84fe42339b13608ca014a72"><code>load()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a1e5387768e98e2c40a97ce10469d3c37"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#aa79834cf0c0207e486c9aafce690a472"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a5e1a800e00102347d0a1949a318cc61c"><code>reconcile()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a25ba8456fa8bbe3879babd957c8d89a2"><code>reconcile()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ad362bb3037096ed0a16c3a792dd00ea6"><code>save()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a23c2795d3ba94ed862ac66ec5a876044"><code>save()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#adca2cc21c7465cd5134715dc825ece42"><code>scale()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a10e7d36c3f266c020ac6298c82c19e45"><code>setAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a549ea06c366dd75590214054114c9fc0"><code>setPolytopeTransformation()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a1481b4cdbcd264df2ae0d74bfe246a3c"><code>setVertexCoordinates()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#aa055be8257bc8b7e38c5a1e347112df0"><code>setVertexCoordinates()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a54c21c63d47d55ceee78e1f61400c762"><code>UniformGrid()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a011f903f6064eecbca543064dd04efc1"><code>UniformGrid()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html"><code>MeshBase</code></a></td><td><details><summary>13 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a9000ddf38d8d853cbde9005de9efcafb"><code>getCellAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a3275fb6c3d9c1b19129046c40d555972"><code>getCellCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a1a93f6a1a2e97911722772d5429a79b1"><code>getFaceAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aa26e370d99a09c33f3f759c4bc52800e"><code>getFaceCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aafa1fbb6fcf1168fe50762a590fe5f89"><code>getName()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a24a4e01af898769244e11a4f94ca8fd0"><code>getVertexCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#acc802e09e1a41bb47fc3fa6394184885"><code>inclusion()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#acf82f9b2937375c7b1cf3dccb3df3312"><code>isEmpty()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5c0ab183385f8806ca268b5c1b31d55d"><code>isSurface()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5529f7a1957bdf41e4d323e3deb6f301"><code>operator!=()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a8a80bde2a1da80e943646eb2404423c0"><code>operator==()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a68e832cb064e3b7ca978d8e5911cf700"><code>serialize()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ad5193c20d0320dd32fd0c8df5460b883"><code>setName()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -131,7 +115,7 @@
             </dt>
             <dd>Builder for constructing distributed SubMesh instances.</dd>
             <dt id="a341654943c76ff0db62f01c763f29b3b">
-              using <a href="#a341654943c76ff0db62f01c763f29b3b" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;
+              using <a href="#a341654943c76ff0db62f01c763f29b3b" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ae6d83e8725a8c73cd8c6e400cf9d9d33" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;
             </dt>
             <dd>Parent mesh type.</dd>
           </dl>
@@ -140,15 +124,15 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a70c59b407eb58fb5154de3b8b5c6170f" class="m-doc">SubMesh</a>(</span><span class="m-doc-wrap">std::reference_wrapper&lt;const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt; parent) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#a70c59b407eb58fb5154de3b8b5c6170f" class="m-doc">SubMesh</a>(</span><span class="m-doc-wrap">std::reference_wrapper&lt;const <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ae6d83e8725a8c73cd8c6e400cf9d9d33" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt; parent) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs a submesh with a parent distributed mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#af0cbd32e3eb3c79832b7148e08b5152b" class="m-doc">SubMesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#af0cbd32e3eb3c79832b7148e08b5152b" class="m-doc">SubMesh</a>(</span><span class="m-doc-wrap">const SubMesh&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a4286a2e74ac7a331ed9c4bad4c4200cd" class="m-doc">SubMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a4286a2e74ac7a331ed9c4bad4c4200cd" class="m-doc">SubMesh</a>(</span><span class="m-doc-wrap">SubMesh&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -156,12 +140,12 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a29bd8f94bf6d563e743530f1978c5db6">
-              <span class="m-doc-wrap-bumper">auto <a href="#a29bd8f94bf6d563e743530f1978c5db6" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a733b4f793a14daf3a57e16a70ec822eb" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a70c59b407eb58fb5154de3b8b5c6170f" class="m-doc">SubMesh</a>&amp; other) -&gt; <a href="#a70c59b407eb58fb5154de3b8b5c6170f" class="m-doc">SubMesh</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Copy assignment (deleted).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad2d193c27bc240a3ae73e7f4b4780dc9" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad2d193c27bc240a3ae73e7f4b4780dc9" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a70c59b407eb58fb5154de3b8b5c6170f" class="m-doc">SubMesh</a>&amp;&amp; other) -&gt; <a href="#a70c59b407eb58fb5154de3b8b5c6170f" class="m-doc">SubMesh</a>&amp;</span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
@@ -177,11 +161,7 @@
             </dt>
             <dd>Checks whether a point is local to this submesh or its shard.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Gets the collective topological dimension of the distributed submesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae9d744e767d9fc546ca3f3e666554b3b" class="m-doc">getParent</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae9d744e767d9fc546ca3f3e666554b3b" class="m-doc">getParent</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ae6d83e8725a8c73cd8c6e400cf9d9d33" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the immediate parent mesh.</dd>
             <dt>
@@ -209,7 +189,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70c59b407eb58fb5154de3b8b5c6170f" class="m-doc-self">SubMesh</a>(</span><span class="m-doc-wrap">std::reference_wrapper&lt;const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt; parent) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70c59b407eb58fb5154de3b8b5c6170f" class="m-doc-self">SubMesh</a>(</span><span class="m-doc-wrap">std::reference_wrapper&lt;const <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ae6d83e8725a8c73cd8c6e400cf9d9d33" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt; parent) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Constructs a submesh with a parent distributed mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -229,7 +209,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0cbd32e3eb3c79832b7148e08b5152b" class="m-doc-self">SubMesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0cbd32e3eb3c79832b7148e08b5152b" class="m-doc-self">SubMesh</a>(</span><span class="m-doc-wrap">const SubMesh&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -249,7 +229,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4286a2e74ac7a331ed9c4bad4c4200cd" class="m-doc-self">SubMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4286a2e74ac7a331ed9c4bad4c4200cd" class="m-doc-self">SubMesh</a>(</span><span class="m-doc-wrap">SubMesh&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -264,12 +244,32 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a733b4f793a14daf3a57e16a70ec822eb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a70c59b407eb58fb5154de3b8b5c6170f" class="m-doc">SubMesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a733b4f793a14daf3a57e16a70ec822eb" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a70c59b407eb58fb5154de3b8b5c6170f" class="m-doc">SubMesh</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+            <p>Copy assignment (deleted).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ad2d193c27bc240a3ae73e7f4b4780dc9"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2d193c27bc240a3ae73e7f4b4780dc9" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a70c59b407eb58fb5154de3b8b5c6170f" class="m-doc">SubMesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2d193c27bc240a3ae73e7f4b4780dc9" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a70c59b407eb58fb5154de3b8b5c6170f" class="m-doc">SubMesh</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -295,7 +295,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8c6a074ce3c7c6ee92364debb64df8f" class="m-doc-self">restriction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8c6a074ce3c7c6ee92364debb64df8f" class="m-doc-self">restriction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Restricts a point from the parent mesh to this submesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -321,7 +321,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07118dd6dc984cb9260ae21fc61a4130" class="m-doc-self">isSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07118dd6dc984cb9260ae21fc61a4130" class="m-doc-self">isSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Checks if this mesh is a submesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -338,7 +338,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adcd0454751e26563bc6a51046718bea0" class="m-doc-self">isLocalPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adcd0454751e26563bc6a51046718bea0" class="m-doc-self">isLocalPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Checks whether a point is local to this submesh or its shard.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -359,30 +359,12 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a6f7b22045efba4c92b80c545b2100c1f"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Gets the collective topological dimension of the distributed submesh.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Collective topological dimension.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>This is the maximum included entity dimension across all ranks, not the dimension of the rank-local shard. Empty ranks therefore report the same logical submesh dimension as ranks that own selected entities.</p>
-          </div></section>
           <section class="m-doc-details" id="ae9d744e767d9fc546ca3f3e666554b3b"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9d744e767d9fc546ca3f3e666554b3b" class="m-doc-self">getParent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ae6d83e8725a8c73cd8c6e400cf9d9d33" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9d744e767d9fc546ca3f3e666554b3b" class="m-doc-self">getParent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the immediate parent mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -399,7 +381,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_geometry_1_1_sub_mesh_base_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a287a1b2a30ef4cef88679681d6aca405" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_geometry_1_1_sub_mesh_base_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a287a1b2a30ef4cef88679681d6aca405" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the polytope index mapping for a dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -412,21 +394,30 @@
                   <td>Topological dimension.</td>
                 </tr>
               </tbody>
-              <tfoot>
+              <thead>
                 <tr>
                   <th>Returns</th>
                   <td>Bidirectional mapping between submesh-local and parent-local indices.</td>
                 </tr>
-              </tfoot>
+              </thead>
+              <thead>
+                <tr><th colspan="2">Exceptions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Alert::Exception</td>
+                  <td>If no rank-local map slot exists for <code>d</code>.</td>
+                </tr>
+              </tbody>
             </table>
-<p>The mapping allows efficient queries:</p><ul><li><code>left[i]</code>: parent shard-local index for submesh shard-local index i</li><li><code>right[j]</code>: submesh shard-local index for parent shard-local index j</li></ul>
+<aside class="m-note m-info"><h4>Note</h4><p>This query and its error handling are non-collective.</p></aside><p>The mapping allows efficient queries:</p><ul><li><code>left[i]</code>: parent shard-local index for submesh shard-local index i</li><li><code>right[j]</code>: submesh shard-local index for parent shard-local index j</li></ul>
           </div></section>
           <section class="m-doc-details" id="a824f93e01ba25a22356cff0ce669cac9"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a672da592edc3a0551b41b89d3ac37f50" class="m-doc">Deque</a>&lt;<a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html#a5d3d19539a5f05df6f6f329b5d0aebae" class="m-doc">Ancestor</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a824f93e01ba25a22356cff0ce669cac9" class="m-doc-self">getAncestors</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a672da592edc3a0551b41b89d3ac37f50" class="m-doc">Deque</a>&lt;<a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html#a5d3d19539a5f05df6f6f329b5d0aebae" class="m-doc">Ancestor</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a824f93e01ba25a22356cff0ce669cac9" class="m-doc-self">getAncestors</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets all ancestor meshes.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -443,7 +434,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa66d766684c6856007643ea05ce1479e" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa66d766684c6856007643ea05ce1479e" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Downcasts to SubMeshBase.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -460,7 +451,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c114dba2d138c6b2bf26203fc4723f1" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c114dba2d138c6b2bf26203fc4723f1" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Downcasts to SubMeshBase (const).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -511,13 +502,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Assembly::OpenMP&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U, V&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,13 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_assembly_2_open_m_p_8h.html">&lt;Rodin/PETSc/Assembly/OpenMP.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class U, class V&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>OpenMP&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U, V&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>OpenMP-parallel assembly of a single-variable PETSc problem.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_assembly.html">Assembly</a></div><h1>OpenMP <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">OpenMP-parallel assembly of a single-variable PETSc problem.</p><p class="rodin-reference-include">Defined in <a href="_p_e_t_sc_2_assembly_2_open_m_p_8h.html"><code>Rodin/PETSc/Assembly/OpenMP.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">V</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_rodin_1_1_p_e_t_sc_1_1_math_1_1_linear_system_00_01_rabbb3795a41b5c8bf89b1e3130500f31.html#a14b2249366e25fb8b04d56fdde20690d"><span class="nc">OpenMP</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Rodin</span><span class="o">::</span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f"><span class="nc">LinearSystem</span></a><span class="p">,</span>
+<span class="w">  </span><span class="n">Rodin</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_problem.html"><span class="nc">Problem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Rodin</span><span class="o">::</span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f"><span class="nc">LinearSystem</span></a><span class="p">,</span><span class="w"> </span><span class="n">U</span><span class="p">,</span><span class="w"> </span><span class="n">V</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_assembly_1_1_open_m_p.html">OpenMP</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>LinearAlgebraType</code></td><td><code>Rodin::PETSc::Math::LinearSystem</code></td></tr><tr><td><code>Operand</code></td><td><code>Rodin::Variational::Problem&lt; Rodin::PETSc::Math::LinearSystem, U, V &gt;</code></td></tr></tbody></table></section>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -101,7 +99,7 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -109,17 +107,9 @@
             </li>
           </ul>
         </nav>
-<p>Assembles a <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a> backed by PETSc objects using OpenMP threads, populating both the system matrix and right-hand side vector.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Operand&gt;</div>
-              class <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U, V&gt;&gt;</a>
-            </dt>
-            <dd>Base class template for assembly operations.</dd>
-          </dl>
-        </section>
+<p>Assembles a <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> backed by PETSc objects using OpenMP threads, populating both the system matrix and right-hand side vector.</p>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" title="AssemblyBase&lt; Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt; Rodin::PETSc::Math::LinearSystem, U, V &gt; &gt;">AssemblyBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">OpenMP</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_assembly_base.html"><code>AssemblyBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_assembly_1_1_assembly_base.html"><span class="nc">AssemblyBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Rodin</span><span class="o">::</span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f"><span class="nc">LinearSystem</span></a><span class="p">,</span><span class="w"> </span><span class="n">Rodin</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_problem.html"><span class="nc">Problem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Rodin</span><span class="o">::</span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f"><span class="nc">LinearSystem</span></a><span class="p">,</span><span class="w"> </span><span class="n">U</span><span class="p">,</span><span class="w"> </span><span class="n">V</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class template for assembly operations.</td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -139,16 +129,16 @@
               using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = typename Parent::InputType
             </dt>
             <dd>Input data type for the assembly pipeline.</dd>
-            <dt id="a53d5f889ed2244180136220dee3550e2">
-              using <a href="#a53d5f889ed2244180136220dee3550e2" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&gt;::OperatorType
+            <dt id="a6cd2cd32fa9e71f1a9adcca7e22d9b4b">
+              using <a href="#a6cd2cd32fa9e71f1a9adcca7e22d9b4b" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&gt;::OperatorType
             </dt>
             <dd>Assembled operator type.</dd>
-            <dt id="ad8c2ec8c3a8a389d4ee4d68d23752d71">
-              using <a href="#ad8c2ec8c3a8a389d4ee4d68d23752d71" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&gt;::VectorType
+            <dt id="a64a89f5d1adcccbc96b4bf58fd54682d">
+              using <a href="#a64a89f5d1adcccbc96b4bf58fd54682d" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&gt;::VectorType
             </dt>
             <dd>PETSc vector type for the RHS and solution.</dd>
-            <dt id="a300079ad6084907cf854c54044979e34">
-              using <a href="#a300079ad6084907cf854c54044979e34" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&gt;::ScalarType
+            <dt id="aa971c9d1f1505aed06b07cdf7e77eb85">
+              using <a href="#aa971c9d1f1505aed06b07cdf7e77eb85" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&gt;::ScalarType
             </dt>
             <dd>PETSc scalar type.</dd>
             <dt id="a03b6659e84aa7200b96ab60acaa76c69">
@@ -159,16 +149,16 @@
               using <a href="#aed8949dbb39ddd94e64ba16e0ffcfa86" class="m-doc-self">TrialMeshType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#a03b6659e84aa7200b96ab60acaa76c69" class="m-doc">TrialFESType</a>&gt;::MeshType
             </dt>
             <dd>Mesh type for the trial finite element space.</dd>
-            <dt id="abc1165d9fada99406a4835886c628488">
-              using <a href="#abc1165d9fada99406a4835886c628488" class="m-doc-self">TrialMeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#aed8949dbb39ddd94e64ba16e0ffcfa86" class="m-doc">TrialMeshType</a>&gt;::ContextType
+            <dt id="a55c94e4204e38adc563ed69b01041beb">
+              using <a href="#a55c94e4204e38adc563ed69b01041beb" class="m-doc-self">TrialMeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#aed8949dbb39ddd94e64ba16e0ffcfa86" class="m-doc">TrialMeshType</a>&gt;::ContextType
             </dt>
             <dd>Context type for the trial mesh.</dd>
-            <dt id="ac3859a7e3ef0eddad69d23927f6446f6">
-              using <a href="#ac3859a7e3ef0eddad69d23927f6446f6" class="m-doc-self">LocalBilinearIntegratorBase</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;PetscScalar&gt;
+            <dt id="af628277dea96182851017121154c93b2">
+              using <a href="#af628277dea96182851017121154c93b2" class="m-doc-self">LocalBilinearIntegratorBase</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;PetscScalar&gt;
             </dt>
             <dd>Base type for local bilinear form integrators.</dd>
-            <dt id="ab2d1c9420188243bdd4388b093222836">
-              using <a href="#ab2d1c9420188243bdd4388b093222836" class="m-doc-self">GlobalBilinearIntegratorBase</a> = <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;PetscScalar&gt;
+            <dt id="abba293afcecacf7207153025bd6d6f37">
+              using <a href="#abba293afcecacf7207153025bd6d6f37" class="m-doc-self">GlobalBilinearIntegratorBase</a> = <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;PetscScalar&gt;
             </dt>
             <dd>Base type for global bilinear form integrators.</dd>
             <dt id="a7bb4a4d9c26ce732fbbf88aba362d27d">
@@ -184,12 +174,12 @@
               <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Default constructor.</dd>
-            <dt id="ae9ff110dd307a2e8d181728439fc88b0">
-              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="ab629819992d852fd6c2647d00eee90e6">
-              <span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -201,35 +191,69 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a8b291780b6be85ddb1aa9eb6f525ed17" class="m-doc">setThreadCount</a>(</span><span class="m-doc-wrap">size_t tc) -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Sets the number of OpenMP threads used by this backend.</dd>
-            <dt id="a2c80d9cf01a06038bc42cf79d1af63df">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc-self">getThreadCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc">getThreadCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the configured thread count, or OpenMP&#x27;s maximum.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a7201bb98fc8affa5f0c97246acce8d68" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
-              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a5ad8e8eb9a7e687d7c6610df31753992" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the full single-field PETSc linear system.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a7f571f4884a37874cd3c65f25656934e" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
+              <span class="m-doc-wrap-bumper">void <a href="#a223bc4ba58a655fe022036c60250bf91" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
               const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
-              <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">Rodin::<wbr />Variational::<wbr />AssemblyTarget</a> target) const</span>
+              <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">Rodin::<wbr />Variational::<wbr />AssemblyTarget</a> target)</span>
             </dt>
             <dd>Assembles only the requested single-field system target.</dd>
-            <dt id="a1d27227915eb0acdf4017085fbc61244">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a heap-allocated copy of this assembly backend.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ae9ff110dd307a2e8d181728439fc88b0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab629819992d852fd6c2647d00eee90e6"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a8b291780b6be85ddb1aa9eb6f525ed17"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class U, class V&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, Rodin::<wbr />Variational::<wbr />Problem&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b291780b6be85ddb1aa9eb6f525ed17" class="m-doc-self">setThreadCount</a>(</span><span class="m-doc-wrap">size_t tc) <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b291780b6be85ddb1aa9eb6f525ed17" class="m-doc-self">setThreadCount</a>(</span><span class="m-doc-wrap">size_t tc) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Sets the number of OpenMP threads used by this backend.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -250,13 +274,26 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a7201bb98fc8affa5f0c97246acce8d68"><div>
+          <section class="m-doc-details" id="a2c80d9cf01a06038bc42cf79d1af63df"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class U, class V&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, Rodin::<wbr />Variational::<wbr />Problem&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7201bb98fc8affa5f0c97246acce8d68" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
-              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc-self">getThreadCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the configured thread count, or OpenMP&#x27;s maximum.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The configured thread count, or OpenMP&#x27;s maximum.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5ad8e8eb9a7e687d7c6610df31753992"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5ad8e8eb9a7e687d7c6610df31753992" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assembles the full single-field PETSc linear system.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -275,14 +312,12 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a7f571f4884a37874cd3c65f25656934e"><div>
+          <section class="m-doc-details" id="a223bc4ba58a655fe022036c60250bf91"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class U, class V&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, Rodin::<wbr />Variational::<wbr />Problem&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f571f4884a37874cd3c65f25656934e" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a223bc4ba58a655fe022036c60250bf91" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
               const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
-              <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">Rodin::<wbr />Variational::<wbr />AssemblyTarget</a> target) const</span></span>
+              <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">Rodin::<wbr />Variational::<wbr />AssemblyTarget</a> target)</span></span>
             </h3>
             <p>Assembles only the requested single-field system target.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -303,6 +338,21 @@
                   <td>Assembly target to update.</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1d27227915eb0acdf4017085fbc61244"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a heap-allocated copy of this assembly backend.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
         </section>
@@ -344,13 +394,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

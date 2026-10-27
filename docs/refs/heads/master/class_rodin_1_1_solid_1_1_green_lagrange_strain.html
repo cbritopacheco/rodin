@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Solid::GreenLagrangeStrain class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,15 +71,12 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>GreenLagrangeStrain <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_green_lagrange_strain_8h.html">&lt;Rodin/Solid/Fields/GreenLagrangeStrain.h&gt;</a></div>
-        </h1>
-        <p>Computes the Green-Lagrange strain tensor from a kinematic state.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solid.html">Solid</a></div><h1>GreenLagrangeStrain</h1><p class="rodin-reference-brief">Computes the Green-Lagrange strain tensor from a kinematic state.</p><p class="rodin-reference-include">Defined in <a href="_green_lagrange_strain_8h.html"><code>Rodin/Solid/Fields/GreenLagrangeStrain.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">GreenLagrangeStrain</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md222">Usage</a></li>
+            <li><a href="#autotoc_md234">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -93,8 +87,7 @@
         </nav>
 <div class="m-math"><svg style="width: 7.423em; height: 2.499em;" viewBox="158.642791 -23.992863 71.257393 23.992863">
 <title>
-\[
-  \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I})
+\[  \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I})
 \]
 </title>
 <defs>
@@ -120,10 +113,10 @@
 <use x='220.338852' y='-8.200662' xlink:href='#eq1-g0-73'/>
 <use x='225.347859' y='-8.200662' xlink:href='#eq1-g2-41'/>
 </g>
-</svg></div><section id="autotoc_md222"><h3><a href="#autotoc_md222">Usage</a></h3><pre class="m-code"><span class="n">KinematicState</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
+</svg></div><section id="autotoc_md234"><h2><a href="#autotoc_md234">Usage</a></h2><pre class="m-code"><span class="nc">KinematicState</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
 <span class="n">state</span><span class="p">.</span><span class="n">setDisplacementGradient</span><span class="p">(</span><span class="n">gradU</span><span class="p">);</span>
-<span class="n">GreenLagrangeStrain</span><span class="w"> </span><span class="n">glStrain</span><span class="p">;</span>
-<span class="n">Math</span><span class="o">::</span><span class="n">SpatialMatrix</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">E</span><span class="p">;</span>
+<span class="nc">GreenLagrangeStrain</span><span class="w"> </span><span class="n">glStrain</span><span class="p">;</span>
+<span class="n">Math</span><span class="o">::</span><span class="nc">SpatialMatrix</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">E</span><span class="p">;</span>
 <span class="n">glStrain</span><span class="p">.</span><span class="n">getGreenLagrangeStrain</span><span class="p">(</span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">);</span></pre></section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
@@ -138,11 +131,11 @@ $ \mathbf{E} = \tfrac{1}{2}(\mathbf{C} - \mathbf{I}) $
 </title>
 <defs>
 <path id='eq2-g1-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq2-g2-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
+<path id='eq2-g2-50' d='M2.247572-1.625903C2.375093-1.745455 2.709838-2.008468 2.83736-2.12005C3.331507-2.574346 3.801743-3.012702 3.801743-3.737983C3.801743-4.686426 3.004732-5.300125 2.008468-5.300125C1.052055-5.300125 .422416-4.574844 .422416-3.865504C.422416-3.474969 .73325-3.419178 .844832-3.419178C1.012204-3.419178 1.259278-3.53873 1.259278-3.841594C1.259278-4.25604 .860772-4.25604 .765131-4.25604C.996264-4.837858 1.530262-5.037111 1.920797-5.037111C2.662017-5.037111 3.044583-4.407472 3.044583-3.737983C3.044583-2.909091 2.462765-2.303362 1.522291-1.338979L.518057-.302864C.422416-.215193 .422416-.199253 .422416 0H3.57061L3.801743-1.42665H3.55467C3.53076-1.267248 3.466999-.868742 3.371357-.71731C3.323537-.653549 2.717808-.653549 2.590286-.653549H1.171606L2.247572-1.625903Z'/>
 <path id='eq2-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
 <path id='eq2-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
 <path id='eq2-g3-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
-<path id='eq2-g2-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
-<path id='eq2-g2-50' d='M2.247572-1.625903C2.375093-1.745455 2.709838-2.008468 2.83736-2.12005C3.331507-2.574346 3.801743-3.012702 3.801743-3.737983C3.801743-4.686426 3.004732-5.300125 2.008468-5.300125C1.052055-5.300125 .422416-4.574844 .422416-3.865504C.422416-3.474969 .73325-3.419178 .844832-3.419178C1.012204-3.419178 1.259278-3.53873 1.259278-3.841594C1.259278-4.25604 .860772-4.25604 .765131-4.25604C.996264-4.837858 1.530262-5.037111 1.920797-5.037111C2.662017-5.037111 3.044583-4.407472 3.044583-3.737983C3.044583-2.909091 2.462765-2.303362 1.522291-1.338979L.518057-.302864C.422416-.215193 .422416-.199253 .422416 0H3.57061L3.801743-1.42665H3.55467C3.53076-1.267248 3.466999-.868742 3.371357-.71731C3.323537-.653549 2.717808-.653549 2.590286-.653549H1.171606L2.247572-1.625903Z'/>
 <path id='eq2-g0-67' d='M8.954421-8.033873C8.954421-8.308842 8.954421-8.344707 8.691407-8.344707L7.79477-7.483935C7.12528-8.057783 6.324284-8.344707 5.439601-8.344707C2.582316-8.344707 .74122-6.611208 .74122-4.100623C.74122-1.637858 2.52254 .143462 5.451557 .143462C7.579577 .143462 8.954421-1.315068 8.954421-2.725778C8.954421-2.929016 8.88269-2.940971 8.703362-2.940971C8.583811-2.940971 8.464259-2.940971 8.452304-2.809465C8.344707-.992279 6.802491-.37061 5.726526-.37061C4.94944-.37061 3.897385-.585803 3.227895-1.338979C2.809465-1.793275 2.426899-2.450809 2.426899-4.100623C2.426899-5.272229 2.606227-6.144956 3.16812-6.814446C3.93325-7.711083 5.128767-7.830635 5.702615-7.830635C6.599253-7.830635 8.045828-7.328518 8.404483-5.224408C8.428394-5.116812 8.53599-5.116812 8.679452-5.116812C8.954421-5.116812 8.954421-5.140722 8.954421-5.427646V-8.033873Z'/>
 <path id='eq2-g0-69' d='M8.440349-3.227895H7.938232C7.687173-1.446575 7.244832-.514072 5.164633-.514072H3.299626V-3.969116H4.004981C5.152677-3.969116 5.272229-3.478954 5.272229-2.570361H5.774346V-5.881943H5.272229C5.272229-4.985305 5.152677-4.483188 4.004981-4.483188H3.299626V-7.627397H5.164633C6.993773-7.627397 7.388294-6.850311 7.567621-5.308095H8.069738L7.723039-8.141469H.454296V-7.627397H1.721544V-.514072H.454296V0H7.926276L8.440349-3.227895Z'/>
 <path id='eq2-g0-73' d='M3.287671-7.687173H4.62665V-8.201245C4.196264-8.177335 3.000747-8.177335 2.49863-8.177335S.800996-8.177335 .37061-8.201245V-7.687173H1.709589V-.514072H.37061V0C.800996-.02391 1.996513-.02391 2.49863-.02391S4.196264-.02391 4.62665 0V-.514072H3.287671V-7.687173Z'/>
@@ -166,7 +159,7 @@ $ \mathbf{E} = \tfrac{1}{2}(\mathbf{C} - \mathbf{I}) $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a2aeaaae8cd36311e783b8800f5fcfd34"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />GreenLagrangeStrain::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2aeaaae8cd36311e783b8800f5fcfd34" class="m-doc-self">getGreenLagrangeStrain</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; E,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2aeaaae8cd36311e783b8800f5fcfd34" class="m-doc-self">getGreenLagrangeStrain</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; E,
               const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp; state) const</span></span>
             </h3>
             <p>Computes <svg class="m-math" style="width: 7.254em; height: 1.455em; vertical-align: -0.431em;" viewBox="0 -9.843428 69.638586 13.96606">
@@ -175,11 +168,11 @@ $ \mathbf{E} = \tfrac{1}{2}(\mathbf{C} - \mathbf{I}) $
 </title>
 <defs>
 <path id='eq2-g1-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq2-g2-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
+<path id='eq2-g2-50' d='M2.247572-1.625903C2.375093-1.745455 2.709838-2.008468 2.83736-2.12005C3.331507-2.574346 3.801743-3.012702 3.801743-3.737983C3.801743-4.686426 3.004732-5.300125 2.008468-5.300125C1.052055-5.300125 .422416-4.574844 .422416-3.865504C.422416-3.474969 .73325-3.419178 .844832-3.419178C1.012204-3.419178 1.259278-3.53873 1.259278-3.841594C1.259278-4.25604 .860772-4.25604 .765131-4.25604C.996264-4.837858 1.530262-5.037111 1.920797-5.037111C2.662017-5.037111 3.044583-4.407472 3.044583-3.737983C3.044583-2.909091 2.462765-2.303362 1.522291-1.338979L.518057-.302864C.422416-.215193 .422416-.199253 .422416 0H3.57061L3.801743-1.42665H3.55467C3.53076-1.267248 3.466999-.868742 3.371357-.71731C3.323537-.653549 2.717808-.653549 2.590286-.653549H1.171606L2.247572-1.625903Z'/>
 <path id='eq2-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
 <path id='eq2-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
 <path id='eq2-g3-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
-<path id='eq2-g2-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
-<path id='eq2-g2-50' d='M2.247572-1.625903C2.375093-1.745455 2.709838-2.008468 2.83736-2.12005C3.331507-2.574346 3.801743-3.012702 3.801743-3.737983C3.801743-4.686426 3.004732-5.300125 2.008468-5.300125C1.052055-5.300125 .422416-4.574844 .422416-3.865504C.422416-3.474969 .73325-3.419178 .844832-3.419178C1.012204-3.419178 1.259278-3.53873 1.259278-3.841594C1.259278-4.25604 .860772-4.25604 .765131-4.25604C.996264-4.837858 1.530262-5.037111 1.920797-5.037111C2.662017-5.037111 3.044583-4.407472 3.044583-3.737983C3.044583-2.909091 2.462765-2.303362 1.522291-1.338979L.518057-.302864C.422416-.215193 .422416-.199253 .422416 0H3.57061L3.801743-1.42665H3.55467C3.53076-1.267248 3.466999-.868742 3.371357-.71731C3.323537-.653549 2.717808-.653549 2.590286-.653549H1.171606L2.247572-1.625903Z'/>
 <path id='eq2-g0-67' d='M8.954421-8.033873C8.954421-8.308842 8.954421-8.344707 8.691407-8.344707L7.79477-7.483935C7.12528-8.057783 6.324284-8.344707 5.439601-8.344707C2.582316-8.344707 .74122-6.611208 .74122-4.100623C.74122-1.637858 2.52254 .143462 5.451557 .143462C7.579577 .143462 8.954421-1.315068 8.954421-2.725778C8.954421-2.929016 8.88269-2.940971 8.703362-2.940971C8.583811-2.940971 8.464259-2.940971 8.452304-2.809465C8.344707-.992279 6.802491-.37061 5.726526-.37061C4.94944-.37061 3.897385-.585803 3.227895-1.338979C2.809465-1.793275 2.426899-2.450809 2.426899-4.100623C2.426899-5.272229 2.606227-6.144956 3.16812-6.814446C3.93325-7.711083 5.128767-7.830635 5.702615-7.830635C6.599253-7.830635 8.045828-7.328518 8.404483-5.224408C8.428394-5.116812 8.53599-5.116812 8.679452-5.116812C8.954421-5.116812 8.954421-5.140722 8.954421-5.427646V-8.033873Z'/>
 <path id='eq2-g0-69' d='M8.440349-3.227895H7.938232C7.687173-1.446575 7.244832-.514072 5.164633-.514072H3.299626V-3.969116H4.004981C5.152677-3.969116 5.272229-3.478954 5.272229-2.570361H5.774346V-5.881943H5.272229C5.272229-4.985305 5.152677-4.483188 4.004981-4.483188H3.299626V-7.627397H5.164633C6.993773-7.627397 7.388294-6.850311 7.567621-5.308095H8.069738L7.723039-8.141469H.454296V-7.627397H1.721544V-.514072H.454296V0H7.926276L8.440349-3.227895Z'/>
 <path id='eq2-g0-73' d='M3.287671-7.687173H4.62665V-8.201245C4.196264-8.177335 3.000747-8.177335 2.49863-8.177335S.800996-8.177335 .37061-8.201245V-7.687173H1.709589V-.514072H.37061V0C.800996-.02391 1.996513-.02391 2.49863-.02391S4.196264-.02391 4.62665 0V-.514072H3.287671V-7.687173Z'/>
@@ -252,13 +245,20 @@ $ \mathbf{E} = \tfrac{1}{2}(\mathbf{C} - \mathbf{I}) $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

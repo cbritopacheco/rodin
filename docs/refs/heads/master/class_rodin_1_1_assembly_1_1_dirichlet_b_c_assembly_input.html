@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Assembly::DirichletBCAssemblyInput class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,13 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_assembly_2_input_8h.html">&lt;Rodin/Assembly/Input.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Scalar, class Solution, class FES, class Value&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>DirichletBCAssemblyInput <span class="m-thin">class</span>
-        </h1>
-        <p>Input data for Dirichlet boundary condition assembly.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_assembly.html">Assembly</a></div><h1>DirichletBCAssemblyInput</h1><p class="rodin-reference-brief">Input data for Dirichlet boundary condition assembly.</p><p class="rodin-reference-include">Defined in <a href="_assembly_2_input_8h.html"><code>Rodin/Assembly/Input.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Solution</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Value</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DirichletBCAssemblyInput</span><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -192,10 +190,8 @@ $ \Gamma_D $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a93840bc683812985707e247f743f2149"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Solution, class FES, class Value&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />DirichletBCAssemblyInput&lt;Scalar, Solution, FES, Value&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93840bc683812985707e247f743f2149" class="m-doc-self">DirichletBCAssemblyInput</a>(</span><span class="m-doc-wrap">const <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>&amp; u,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93840bc683812985707e247f743f2149" class="m-doc-self">DirichletBCAssemblyInput</a>(</span><span class="m-doc-wrap">const <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>&amp; u,
               const <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&amp; value,
               const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; essBdr)</span></span>
             </h3>
@@ -244,10 +240,8 @@ $ \Gamma_D $
           </div></section>
           <section class="m-doc-details" id="a167036e7e1cfcff01c5f031ea96d3fed"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Solution, class FES, class Value&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCAssemblyInput&lt;Scalar, Solution, FES, Value&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the trial function operand.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -261,10 +255,8 @@ $ \Gamma_D $
           </div></section>
           <section class="m-doc-details" id="a58394f435d1f6b082cb1335876cd501a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Solution, class FES, class Value&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCAssemblyInput&lt;Scalar, Solution, FES, Value&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a58394f435d1f6b082cb1335876cd501a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a58394f435d1f6b082cb1335876cd501a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the boundary value function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -278,10 +270,8 @@ $ \Gamma_D $
           </div></section>
           <section class="m-doc-details" id="aebcc7cb36480775d8bb4c133533030f1"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Solution, class FES, class Value&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCAssemblyInput&lt;Scalar, Solution, FES, Value&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebcc7cb36480775d8bb4c133533030f1" class="m-doc-self">getEssentialBoundary</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebcc7cb36480775d8bb4c133533030f1" class="m-doc-self">getEssentialBoundary</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the essential boundary attributes.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -332,13 +322,20 @@ $ \Gamma_D $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

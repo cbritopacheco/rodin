@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::ProblemUVBase class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,19 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_problem_8h.html">&lt;Rodin/Variational/Problem.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class LinearSystem, class U, class V&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ProblemUVBase <span class="m-thin">class</span>
-        </h1>
-        <p>General class to assemble linear systems with <code>Operator</code> and <code>Vector</code> generic types in a sequential context.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>ProblemUVBase</h1><p class="rodin-reference-brief">General class to assemble linear systems with <code>Operator</code> and <code>Vector</code> generic types in a sequential context.</p><p class="rodin-reference-include">Defined in <a href="_variational_2_problem_8h.html"><code>Rodin/Variational/Problem.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LinearSystem</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">V</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html#a129f609188c3ab62fd5422613b7ab302"><span class="nc">ProblemUVBase</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -94,16 +91,8 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase&lt;LinearSystem&gt;</a>
-            </dt>
-            <dd>Base class for variational problem objects.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_problem_base.html" title="ProblemBase&lt; LinearSystem &gt;">ProblemBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">ProblemUVBase</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_problem_base.html"><code>ProblemBase&lt;LinearSystem&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_problem_base.html#ac18adaf4a5ec02d17698a79b219b21b2"><span class="nc">ProblemBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">LinearSystem</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for variational problem objects.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html#aa0d60db9bf818de45b49b832ff573618"><code>assemble()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_problem_base.html#aa726049d7cc0816d213f0d30a05d1ff6">ProblemBase::assemble</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html#ae0e8cff62fbc1a049272fd2c47f7ba82"><code>solve()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_problem_base.html#a5ba14a75d5ef9a77c71307f9ee4430b2">ProblemBase::solve</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html#a255fac0867142558d5125e854b705227"><code>operator=()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_problem_base.html#acfdc6278cd6c14abafb2838f551ac03c">ProblemBase::operator=</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html#a0164f1dbe52662769b8abef471a949fd"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_problem_base.html#ae94b63d2837fe28b6421dc1a879cdcfc">ProblemBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_problem_base.html"><code>ProblemBase</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_problem_base.html#a776d79a2e627ff7c2978ab26fdb51335"><code>assemble()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_base.html#a2c7601e857e4b5de9c02ccaf2dc9d39e"><code>getBody()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_base.html#acc296912cd0f61d1d0bf336bc399a7b2"><code>getLinearSystem()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_base.html#a1e01f174fdab84c1e39575af9390f0df"><code>getLinearSystem()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_base.html#a5205aa8df7a3730c86d1afceeb47f586"><code>operator+=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_base.html#a90311b262b80f9812fb973c3c44e1eac"><code>operator-=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -164,7 +153,7 @@
             </dt>
             <dd>Problem body type.</dd>
             <dt id="a7fddbda8d70865050d73d5fb2eac535f">
-              using <a href="#a7fddbda8d70865050d73d5fb2eac535f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;
+              using <a href="#a7fddbda8d70865050d73d5fb2eac535f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html#ac18adaf4a5ec02d17698a79b219b21b2" class="m-doc">ProblemBase</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -172,17 +161,17 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a129f609188c3ab62fd5422613b7ab302">
-              <span class="m-doc-wrap-bumper"><a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc-self">ProblemUVBase</a>(</span><span class="m-doc-wrap">U&amp; u,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>(</span><span class="m-doc-wrap">U&amp; u,
               V&amp; v) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a problem base from trial and test functions.</dd>
-            <dt id="a725849f5a39c70ea234df0103842d36b">
-              <span class="m-doc-wrap-bumper"><a href="#a725849f5a39c70ea234df0103842d36b" class="m-doc-self">ProblemUVBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a725849f5a39c70ea234df0103842d36b" class="m-doc">ProblemUVBase</a>(</span><span class="m-doc-wrap">const ProblemUVBase&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a831b6dba1391967bcab5b2bc87f70c06">
-              <span class="m-doc-wrap-bumper"><a href="#a831b6dba1391967bcab5b2bc87f70c06" class="m-doc-self">ProblemUVBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a831b6dba1391967bcab5b2bc87f70c06" class="m-doc">ProblemUVBase</a>(</span><span class="m-doc-wrap">ProblemUVBase&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -190,56 +179,221 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a598c5679ef728bbb2cce185ca56b5f7c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a598c5679ef728bbb2cce185ca56b5f7c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a598c5679ef728bbb2cce185ca56b5f7c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>&amp; other) -&gt; <a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
-            <dt id="a82c826af50b8d8ff7c7c0e1f992c006e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a82c826af50b8d8ff7c7c0e1f992c006e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a82c826af50b8d8ff7c7c0e1f992c006e" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>&amp;&amp; other) -&gt; <a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
-            <dt id="afc25888fde96565f4ed1fd8c41168873">
-              <span class="m-doc-wrap-bumper">auto <a href="#afc25888fde96565f4ed1fd8c41168873" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#ab197c23e540bec9d570849d4829860da" class="m-doc">TrialFunctionType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afc25888fde96565f4ed1fd8c41168873" class="m-doc">getTrialFunction</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#ab197c23e540bec9d570849d4829860da" class="m-doc">TrialFunctionType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the trial function.</dd>
-            <dt id="a7f2e212a399abdbb7a74a2eebf1a2476">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7f2e212a399abdbb7a74a2eebf1a2476" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a54fd4869ac369b947916537d7e536b98" class="m-doc">TestFunctionType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Returns the test function.</dd>
-            <dt id="aab3a74a6d4baa14d8437c02b80a65d5a">
-              <span class="m-doc-wrap-bumper">auto <a href="#aab3a74a6d4baa14d8437c02b80a65d5a" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ab197c23e540bec9d570849d4829860da" class="m-doc">TrialFunctionType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Returns the trial function.</dd>
-            <dt id="aa6d2945af763c7cfd173dc823462bc88">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa6d2945af763c7cfd173dc823462bc88" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a54fd4869ac369b947916537d7e536b98" class="m-doc">TestFunctionType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7f2e212a399abdbb7a74a2eebf1a2476" class="m-doc">getTestFunction</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a54fd4869ac369b947916537d7e536b98" class="m-doc">TestFunctionType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the test function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa0d60db9bf818de45b49b832ff573618" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aab3a74a6d4baa14d8437c02b80a65d5a" class="m-doc">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ab197c23e540bec9d570849d4829860da" class="m-doc">TrialFunctionType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns the trial function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa6d2945af763c7cfd173dc823462bc88" class="m-doc">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a54fd4869ac369b947916537d7e536b98" class="m-doc">TestFunctionType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns the test function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa0d60db9bf818de45b49b832ff573618" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the underlying linear system to solve.</dd>
-            <dt id="ae0e8cff62fbc1a049272fd2c47f7ba82">
-              <span class="m-doc-wrap-bumper">void <a href="#ae0e8cff62fbc1a049272fd2c47f7ba82" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a0ed4296aede7cfe9c392a311b19d32d1" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ae0e8cff62fbc1a049272fd2c47f7ba82" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a0ed4296aede7cfe9c392a311b19d32d1" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solves the assembled problem with the given solver.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a255fac0867142558d5125e854b705227" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a255fac0867142558d5125e854b705227" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assigns a problem body to this problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0164f1dbe52662769b8abef471a949fd" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0164f1dbe52662769b8abef471a949fd" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of this problem.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a129f609188c3ab62fd5422613b7ab302"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc-self">ProblemUVBase</a>(</span><span class="m-doc-wrap">U&amp; u,
+              V&amp; v) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs a problem base from trial and test functions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u</td>
+                  <td>Trial shape function.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Test shape function.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a725849f5a39c70ea234df0103842d36b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a725849f5a39c70ea234df0103842d36b" class="m-doc-self">ProblemUVBase</a>(</span><span class="m-doc-wrap">const ProblemUVBase&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a831b6dba1391967bcab5b2bc87f70c06"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a831b6dba1391967bcab5b2bc87f70c06" class="m-doc-self">ProblemUVBase</a>(</span><span class="m-doc-wrap">ProblemUVBase&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a598c5679ef728bbb2cce185ca56b5f7c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a598c5679ef728bbb2cce185ca56b5f7c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a82c826af50b8d8ff7c7c0e1f992c006e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82c826af50b8d8ff7c7c0e1f992c006e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afc25888fde96565f4ed1fd8c41168873"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ab197c23e540bec9d570849d4829860da" class="m-doc">TrialFunctionType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afc25888fde96565f4ed1fd8c41168873" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the trial function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The trial function.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7f2e212a399abdbb7a74a2eebf1a2476"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a54fd4869ac369b947916537d7e536b98" class="m-doc">TestFunctionType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f2e212a399abdbb7a74a2eebf1a2476" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the test function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The test function.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aab3a74a6d4baa14d8437c02b80a65d5a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#ab197c23e540bec9d570849d4829860da" class="m-doc">TrialFunctionType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aab3a74a6d4baa14d8437c02b80a65d5a" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the trial function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The trial function.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa6d2945af763c7cfd173dc823462bc88"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a54fd4869ac369b947916537d7e536b98" class="m-doc">TestFunctionType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa6d2945af763c7cfd173dc823462bc88" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the test function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The test function.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="aa0d60db9bf818de45b49b832ff573618"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U, class V&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemUVBase&lt;LinearSystem, U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0d60db9bf818de45b49b832ff573618" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0d60db9bf818de45b49b832ff573618" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assembles the underlying linear system to solve.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -288,12 +442,28 @@ $ Au = b $
 </g>
 </svg>.</p>
           </div></section>
+          <section class="m-doc-details" id="ae0e8cff62fbc1a049272fd2c47f7ba82"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0e8cff62fbc1a049272fd2c47f7ba82" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a0ed4296aede7cfe9c392a311b19d32d1" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Solves the assembled problem with the given solver.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">solver</td>
+                  <td>Solver used for the linear system.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a255fac0867142558d5125e854b705227"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U, class V&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemUVBase&lt;LinearSystem, U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a255fac0867142558d5125e854b705227" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a255fac0867142558d5125e854b705227" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assigns a problem body to this problem.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -353,10 +523,8 @@ $ l(v) $
           </div></section>
           <section class="m-doc-details" id="a0164f1dbe52662769b8abef471a949fd"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U, class V&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase</a>* Rodin::<wbr />Variational::<wbr />ProblemUVBase&lt;LinearSystem, U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0164f1dbe52662769b8abef471a949fd" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a129f609188c3ab62fd5422613b7ab302" class="m-doc">ProblemUVBase</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0164f1dbe52662769b8abef471a949fd" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this problem.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -407,13 +575,20 @@ $ l(v) $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

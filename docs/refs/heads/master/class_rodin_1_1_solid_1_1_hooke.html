@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Solid::Hooke class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,15 +71,12 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>Hooke <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_hooke_8h.html">&lt;Rodin/Solid/Constitutive/Hooke.h&gt;</a></div>
-        </h1>
-        <p>Isotropic Hooke&#x27;s law for linear elasticity.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solid.html">Solid</a></div><h1>Hooke</h1><p class="rodin-reference-brief">Isotropic Hooke&#x27;s law for linear elasticity.</p><p class="rodin-reference-include">Defined in <a href="_hooke_8h.html"><code>Rodin/Solid/Constitutive/Hooke.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solid_1_1_hooke.html#ada14ccb45c452c8e3df8e09bab773fbe"><span class="nc">Hooke</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md219">Material parameter conversions</a></li>
+            <li><a href="#autotoc_md231">Material parameter conversions</a></li>
             <li>
               Reference
               <ul>
@@ -115,8 +109,7 @@ $ \mu $
 </g>
 </svg>, computes:</p><div class="m-math"><svg style="width: 10.040em; height: 1.245em;" viewBox="146.078335 -11.955168 96.386305 11.955168">
 <title>
-\[
-  \boldsymbol{\sigma} = \lambda (\operatorname{tr}\boldsymbol{\varepsilon})\mathbf{I}
+\[  \boldsymbol{\sigma} = \lambda (\operatorname{tr}\boldsymbol{\varepsilon})\mathbf{I}
                       + 2\mu \boldsymbol{\varepsilon}
 \]
 </title>
@@ -149,7 +142,7 @@ $ \mu $
 <use x='229.09956' y='-2.988792' xlink:href='#eq3-g2-22'/>
 <use x='236.14253' y='-2.988792' xlink:href='#eq3-g0-34'/>
 </g>
-</svg></div><section id="autotoc_md219"><h3><a href="#autotoc_md219">Material parameter conversions</a></h3><p>From Young&#x27;s modulus <svg class="m-math" style="width: 0.976em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.366198 8.169366">
+</svg></div><section id="autotoc_md231"><h2><a href="#autotoc_md231">Material parameter conversions</a></h2><p>From Young&#x27;s modulus <svg class="m-math" style="width: 0.976em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.366198 8.169366">
 <title>
 $ E $
 </title>
@@ -171,8 +164,7 @@ $ \nu $
 </g>
 </svg>:</p><div class="m-math"><svg style="width: 19.353em; height: 2.859em;" viewBox="100.778529 -27.446579 185.790404 27.446579">
 <title>
-\[
-  \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)}, \quad
+\[  \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)}, \quad
   \mu = \frac{E}{2(1+\nu)}
 \]
 </title>
@@ -225,7 +217,7 @@ $ \nu $
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">static auto <a href="#ac243082133bd7d67e4d1ee2d8d5401d6" class="m-doc">YoungPoisson</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> E,
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> nu) -&gt; <a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a></span>
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> nu) -&gt; <a href="#ada14ccb45c452c8e3df8e09bab773fbe" class="m-doc">Hooke</a></span>
             </dt>
             <dd>Constructs Hooke&#x27;s law from Young&#x27;s modulus and Poisson&#x27;s ratio.</dd>
           </dl>
@@ -238,12 +230,12 @@ $ \nu $
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> mu)</span>
             </dt>
             <dd>Constructs Hooke&#x27;s law with the given elastic parameters.</dd>
-            <dt id="a7613d99acc0bde4d0c394a86352f1dfa">
-              <span class="m-doc-wrap-bumper"><a href="#a7613d99acc0bde4d0c394a86352f1dfa" class="m-doc-self">Hooke</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af860d383e7c219bbc6c874de65b9621a" class="m-doc">Hooke</a>(</span><span class="m-doc-wrap">const Hooke&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="afd8e25c5c049764253c6e2656e2a1248">
-              <span class="m-doc-wrap-bumper"><a href="#afd8e25c5c049764253c6e2656e2a1248" class="m-doc-self">Hooke</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ad6bd8d12bc97c59f5ca82a3c397a4033" class="m-doc">Hooke</a>(</span><span class="m-doc-wrap">Hooke&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -251,12 +243,12 @@ $ \nu $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="adc43a5ed41c61c399d6221c075e0e20a">
-              <span class="m-doc-wrap-bumper">auto <a href="#adc43a5ed41c61c399d6221c075e0e20a" class="m-doc-self">getLameFirstParameter</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adc43a5ed41c61c399d6221c075e0e20a" class="m-doc">getLameFirstParameter</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Gets the first Lamé parameter.</dd>
-            <dt id="a8bc76204e126aaf61e4440b7bb525a60">
-              <span class="m-doc-wrap-bumper">auto <a href="#a8bc76204e126aaf61e4440b7bb525a60" class="m-doc-self">getShearModulus</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8bc76204e126aaf61e4440b7bb525a60" class="m-doc">getShearModulus</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Gets the shear modulus.</dd>
             <dt>
@@ -270,7 +262,7 @@ $ \nu $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ac243082133bd7d67e4d1ee2d8d5401d6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a> Rodin::<wbr />Solid::<wbr />Hooke::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac243082133bd7d67e4d1ee2d8d5401d6" class="m-doc-self">YoungPoisson</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> E,
+              <span class="m-doc-wrap-bumper">static <a href="#ada14ccb45c452c8e3df8e09bab773fbe" class="m-doc">Hooke</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac243082133bd7d67e4d1ee2d8d5401d6" class="m-doc-self">YoungPoisson</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> E,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> nu)</span></span>
             </h3>
             <p>Constructs Hooke&#x27;s law from Young&#x27;s modulus and Poisson&#x27;s ratio.</p>
@@ -298,7 +290,7 @@ $ \nu $
           </div></section>
           <section class="m-doc-details" id="ada14ccb45c452c8e3df8e09bab773fbe"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />Hooke::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ada14ccb45c452c8e3df8e09bab773fbe" class="m-doc-self">Hooke</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lambda,
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ada14ccb45c452c8e3df8e09bab773fbe" class="m-doc-self">Hooke</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lambda,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> mu)</span></span>
             </h3>
             <p>Constructs Hooke&#x27;s law with the given elastic parameters.</p>
@@ -338,9 +330,71 @@ $ \mu $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="af860d383e7c219bbc6c874de65b9621a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af860d383e7c219bbc6c874de65b9621a" class="m-doc-self">Hooke</a>(</span><span class="m-doc-wrap">const Hooke&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad6bd8d12bc97c59f5ca82a3c397a4033"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6bd8d12bc97c59f5ca82a3c397a4033" class="m-doc-self">Hooke</a>(</span><span class="m-doc-wrap">Hooke&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adc43a5ed41c61c399d6221c075e0e20a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc43a5ed41c61c399d6221c075e0e20a" class="m-doc-self">getLameFirstParameter</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the first Lamé parameter.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The first Lamé parameter.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8bc76204e126aaf61e4440b7bb525a60"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8bc76204e126aaf61e4440b7bb525a60" class="m-doc-self">getShearModulus</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the shear modulus.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The shear modulus.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ab20c2b8b85dc8e554a5b66c5ff8b941f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />Hooke::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab20c2b8b85dc8e554a5b66c5ff8b941f" class="m-doc-self">getStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; sigma,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab20c2b8b85dc8e554a5b66c5ff8b941f" class="m-doc-self">getStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; sigma,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; epsilon) const</span></span>
             </h3>
             <p>Computes the Cauchy stress from the infinitesimal strain.</p>
@@ -409,13 +463,20 @@ $ \boldsymbol{\varepsilon} $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

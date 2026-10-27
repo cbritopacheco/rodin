@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Alert::ExceptionPrefix class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,17 +71,15 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>ExceptionPrefix <span class="m-thin">class</span>
-        </h1>
-        <p>Prefix class for exception messages.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_alert.html">Alert</a></div><h1>ExceptionPrefix</h1><p class="rodin-reference-brief">Prefix class for exception messages.</p><p class="rodin-reference-include">Defined in <a href="_alert_2_exception_8h.html"><code>Rodin/Alert/Exception.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">ExceptionPrefix</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
               </ul>
@@ -92,21 +87,13 @@
           </ul>
         </nav>
 <p>Provides red-colored prefixing for exception messages using &quot;Error&quot; as the default prefix text.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&gt;</div>
-              class <a href="class_rodin_1_1_alert_1_1_message_prefix.html" class="m-doc">MessagePrefix&lt;RedT&gt;</a>
-            </dt>
-            <dd>Base class for message prefixes with colored text.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_alert_1_1_message_prefix.html" title="MessagePrefix&lt; RedT &gt;">MessagePrefix</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">ExceptionPrefix</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_message_prefix.html"><code>MessagePrefix&lt;RedT&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_alert_1_1_message_prefix.html#a09b0803a3939b20ad18d47aa7949f0ed"><span class="nc">MessagePrefix</span></a><span class="o">&lt;</span><span class="w"> </span><a href="struct_rodin_1_1_alert_1_1_red_t.html"><span class="nc">RedT</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for message prefixes with colored text.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_text.html"><code>Text</code></a></td><td><details><summary>15 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_alert_1_1_text.html#ad8bc9bf48308f5f14f18f08c509a67ac"><code>Background</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93"><code>Foreground</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#aea85cd6a245c54226e6187610d591f3c"><code>getAttributes()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a8bb91684ea86bc326ee0cb2de6da2f41"><code>getBackground()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#acf943f9355f51b9dcfd8a73943a0f39f"><code>getForeground()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a2232ae9dafaa0daef76207df109265ca"><code>getString()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a293793ceccb85eaf50b40efa1e2dd0a0"><code>setAttribute()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#aed5527e19bf03917aaadc166501a74c2"><code>setBlink()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#aa207d65909ee3f5cd1b89bd9783327b6"><code>setBold()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a4ef1147b6db444805b3a775cbc310d72"><code>setConcealed()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a3599c205fde4c98b4d61ed4cbf8b4337"><code>setCrossed()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#ac76885e70ca48e793fbbb34514c4a12a"><code>setDark()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a66f00c6e2b41f4ea8e34f9f7c76e28f8"><code>setItalic()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a03babc81f35757b4ee2ee6c138c7d344"><code>setReverse()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a341fea2a8a515b54201290a53a5bf8e9"><code>setUnderline()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a22a49b55e06462e33726f241f7429fc8">
-              using <a href="#a22a49b55e06462e33726f241f7429fc8" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_message_prefix.html" class="m-doc">MessagePrefix</a>&lt;<a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a>&gt;
+              using <a href="#a22a49b55e06462e33726f241f7429fc8" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_message_prefix.html#a09b0803a3939b20ad18d47aa7949f0ed" class="m-doc">MessagePrefix</a>&lt;<a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a>&gt;
             </dt>
             <dd>Parent class type alias.</dd>
           </dl>
@@ -124,7 +111,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="aee3cc0b67aa752a38abae56750f5141f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />ExceptionPrefix::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee3cc0b67aa752a38abae56750f5141f" class="m-doc-self">ExceptionPrefix</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee3cc0b67aa752a38abae56750f5141f" class="m-doc-self">ExceptionPrefix</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Default constructor.</p>
 <p>Initializes the exception prefix with the default &quot;Error&quot; text.</p>
@@ -168,13 +155,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

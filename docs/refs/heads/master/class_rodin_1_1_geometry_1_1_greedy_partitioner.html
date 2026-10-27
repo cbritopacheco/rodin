@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::GreedyPartitioner class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,18 +71,15 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>GreedyPartitioner <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_greedy_partitioner_8h.html">&lt;Rodin/Geometry/GreedyPartitioner.h&gt;</a></div>
-        </h1>
-        <p>Partitioner using a greedy algorithm.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a></div><h1>GreedyPartitioner</h1><p class="rodin-reference-brief">Partitioner using a greedy algorithm.</p><p class="rodin-reference-include">Defined in <a href="_greedy_partitioner_8h.html"><code>Rodin/Geometry/GreedyPartitioner.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">GreedyPartitioner</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -93,16 +87,9 @@
             </li>
           </ul>
         </nav>
-<p>This partitioning strategy uses a greedy approach to divide the mesh into a specified number of partitions. The algorithm processes polytopes sequentially and assigns them to partitions to balance the load.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a simpler and faster alternative to BalancedCompactPartitioner, but may produce less spatially compact partitions.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_partitioner.html">Partitioner</a></p><p><a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html">BalancedCompactPartitioner</a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_partitioner.html" class="m-doc">Partitioner</a>
-            </dt>
-            <dd>Abstract base class for mesh partitioning strategies.</dd>
-          </dl>
-        </section>
+<p>This partitioning strategy uses a greedy approach to divide the mesh into a specified number of partitions. The algorithm processes polytopes sequentially and assigns them to partitions to balance the load.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a simpler and faster alternative to BalancedCompactPartitioner, but may produce less spatially compact partitions.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html">BalancedCompactPartitioner</a></p></aside>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_partitioner.html" title="Partitioner">Partitioner</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">GreedyPartitioner</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html"><code>Partitioner</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">Partitioner</span>
+</pre></details></td><td>Abstract base class for mesh partitioning strategies.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_greedy_partitioner.html#a638c45c253983ca10bd05eefb530f8a7"><code>getMesh()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a018d58eb3401554c145543399d9d6e23">Partitioner::getMesh</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_greedy_partitioner.html#a5381b9cf65219f8dd901425091c1b790"><code>partition()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a0cb81f7b6a0cccc3ca16882218673967">Partitioner::partition</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_greedy_partitioner.html#a9c4424742927ef57655d348302bd4195"><code>getPartition()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a4e5d35160b1e50ebb2b1a81de333381f">Partitioner::getPartition</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_greedy_partitioner.html#abb85506e676b292ae799e68a858b8823"><code>getCount()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a840b63813db56691da0ba90697077abf">Partitioner::getCount</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html"><code>Partitioner</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a12e830ea3c0714fce4874d9c1d2cf346"><code>operator[]()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -155,7 +142,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a35a95e177870adc3532c39b129ba3328"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />GreedyPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35a95e177870adc3532c39b129ba3328" class="m-doc-self">GreedyPartitioner</a>(</span><span class="m-doc-wrap">const <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35a95e177870adc3532c39b129ba3328" class="m-doc-self">GreedyPartitioner</a>(</span><span class="m-doc-wrap">const <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; mesh)</span></span>
             </h3>
             <p>Constructs a greedy partitioner for the given mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -172,7 +159,7 @@
           </div></section>
           <section class="m-doc-details" id="a638c45c253983ca10bd05eefb530f8a7"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; Rodin::<wbr />Geometry::<wbr />GreedyPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a638c45c253983ca10bd05eefb530f8a7" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a638c45c253983ca10bd05eefb530f8a7" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the mesh being partitioned.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -186,7 +173,7 @@
           </div></section>
           <section class="m-doc-details" id="a6475ab30eb7c39ccd1a867d61ef17fca"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />GreedyPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6475ab30eb7c39ccd1a867d61ef17fca" class="m-doc-self">partition</a>(</span><span class="m-doc-wrap">size_t count)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6475ab30eb7c39ccd1a867d61ef17fca" class="m-doc-self">partition</a>(</span><span class="m-doc-wrap">size_t count)</span></span>
             </h3>
             <p>Partitions the mesh cells.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -204,7 +191,7 @@
           </div></section>
           <section class="m-doc-details" id="a5381b9cf65219f8dd901425091c1b790"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />GreedyPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5381b9cf65219f8dd901425091c1b790" class="m-doc-self">partition</a>(</span><span class="m-doc-wrap">size_t numPartitions,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5381b9cf65219f8dd901425091c1b790" class="m-doc-self">partition</a>(</span><span class="m-doc-wrap">size_t numPartitions,
               size_t d) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Partitions the mesh polytopes of dimension <code>d</code>.</p>
@@ -227,7 +214,7 @@
           </div></section>
           <section class="m-doc-details" id="a9c4424742927ef57655d348302bd4195"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />GreedyPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c4424742927ef57655d348302bd4195" class="m-doc-self">getPartition</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c4424742927ef57655d348302bd4195" class="m-doc-self">getPartition</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the partition index for a given polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -250,7 +237,7 @@
           </div></section>
           <section class="m-doc-details" id="abb85506e676b292ae799e68a858b8823"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />GreedyPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abb85506e676b292ae799e68a858b8823" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abb85506e676b292ae799e68a858b8823" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the total number of partitions.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -301,13 +288,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Mult&lt;LHS, LinearFormIntegratorBase&lt;RHSNumber&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,20 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_mult_8h.html">&lt;Rodin/Variational/Mult.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a>, class RHSNumber&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Mult&lt;LHS, LinearFormIntegratorBase&lt;RHSNumber&gt;&gt; <span class="m-thin">class</span>
-        </h1>
-        <p>Product expression.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Mult</h1><p class="rodin-reference-brief">Product expression.</p><p class="rodin-reference-include">Defined in <a href="_mult_8h.html"><code>Rodin/Variational/Mult.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="no">LHS</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSNumber</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Mult</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="no">LHS</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a7a3c26156d8b4b442895fcb0acc9ef93"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSNumber</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_mult.html">Mult</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>LHS</code></td><td><code>LHS</code></td></tr><tr><td><code>RHS</code></td><td><code>LinearFormIntegratorBase&lt; RHSNumber &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -94,33 +92,25 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Number&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase&lt;FormLanguage::Mult&lt;LHS, RHSNumber&gt;::Type&gt;</a>
-            </dt>
-            <dd>Base class for linear form integrators.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" title="LinearFormIntegratorBase&lt; FormLanguage::Mult&lt; LHS, RHSNumber &gt;::Type &gt;">LinearFormIntegratorBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Mult</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><code>LinearFormIntegratorBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a7a3c26156d8b4b442895fcb0acc9ef93"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_mult.html"><span class="nc">Mult</span></a><span class="o">&lt;</span><span class="w"> </span><span class="no">LHS</span><span class="p">,</span><span class="w"> </span><span class="n">RHSNumber</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">Type</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for linear form integrators.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_mult_3_01_l_h_s_00_01_linear_form_integrator_base_3_01_r_h_s_number_01_4_01_4.html#aa5d79cb88973b769fdd1665729c03952"><code>getRegion()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ac16226cca266745ac414468db3235c17">LinearFormIntegratorBase::getRegion</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_mult_3_01_l_h_s_00_01_linear_form_integrator_base_3_01_r_h_s_number_01_4_01_4.html#adbfdd734d436c5a1bbee19714721e493"><code>getPolytope()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a3e2cc56a785ee8329807d7407fd76401">LinearFormIntegratorBase::getPolytope</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_mult_3_01_l_h_s_00_01_linear_form_integrator_base_3_01_r_h_s_number_01_4_01_4.html#afb4630d495ac0d0c7c114f7b5e180671"><code>setPolytope()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a22832b479c9c755896c4b79b8cf40730">LinearFormIntegratorBase::setPolytope</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_mult_3_01_l_h_s_00_01_linear_form_integrator_base_3_01_r_h_s_number_01_4_01_4.html#a80b1dd43ad79c7d8b9655c92d75552b3"><code>integrate()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a8679f07ef842cba7327119d748501eab">LinearFormIntegratorBase::integrate</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_mult_3_01_l_h_s_00_01_linear_form_integrator_base_3_01_r_h_s_number_01_4_01_4.html#ad919c825b0e8d63078097ec3cf23fa53"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a15f41d8777010696597317c9083b7fc1">LinearFormIntegratorBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><code>LinearFormIntegratorBase</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ac76cd4c95442baa6361dfa9a0e9ba4a9"><code>getAttributes()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a863fc883c7ede3985157c5897e777024"><code>getTestDOFIndices()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a3319ca4dc61343f68e2f5ac7721b00ba"><code>getTestFunction()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a58d2c9eed0f2d47891079548f1a6d7d9"><code>getType()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#acdd90257d932f2691107f8b8b036770e"><code>over()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ae4fa921a8e67b4666830521dee9d15c0"><code>setDOFIndices()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_integrator.html"><code>Integrator</code></a></td><td><details><summary>7 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a350edea67dfa070881b66ed34db4c27c"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4fbdb76097cac108edbb0f49e74bfa11"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#adea5ccfd57d26e8af9eb776fdf191b04"><code>OrderType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a779c5028c546fddc461a6d6b10dcb299"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4c4c2ddfd3edbd42d18604bd674784a2"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a503b6171d3423d1daad5ac38b42b55bc"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a1d1cfd8ffb84e947f82999c682b666a7"><code>Type</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a30a18d37c383eb23729bd8bfe40f0d13">
-              using <a href="#a30a18d37c383eb23729bd8bfe40f0d13" class="m-doc-self">LHSType</a> = <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a>
+              using <a href="#a30a18d37c383eb23729bd8bfe40f0d13" class="m-doc-self">LHSType</a> = LHS
             </dt>
             <dd>Left-hand side operand type.</dd>
             <dt id="a135bffd38ff54db97698c84fd5d83680">
-              using <a href="#a135bffd38ff54db97698c84fd5d83680" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&lt;RHSNumber&gt;
+              using <a href="#a135bffd38ff54db97698c84fd5d83680" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a7a3c26156d8b4b442895fcb0acc9ef93" class="m-doc">LinearFormIntegratorBase</a>&lt;RHSNumber&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="ad32ec75492e466989fa80df276533322">
-              using <a href="#ad32ec75492e466989fa80df276533322" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_mult.html" class="m-doc">FormLanguage::<wbr />Mult</a>&lt;<a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a>, RHSNumber&gt;<a href="class_rodin_1_1_variational_1_1_integrator.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">::<wbr />Type</a>
+              using <a href="#ad32ec75492e466989fa80df276533322" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_mult.html" class="m-doc">FormLanguage::<wbr />Mult</a>&lt;LHS, RHSNumber&gt;<a href="class_rodin_1_1_variational_1_1_integrator.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">::<wbr />Type</a>
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a93d059833842d2e1a3036b89a2e9eb37">
-              using <a href="#a93d059833842d2e1a3036b89a2e9eb37" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&lt;<a href="#ad32ec75492e466989fa80df276533322" class="m-doc">ScalarType</a>&gt;
+              using <a href="#a93d059833842d2e1a3036b89a2e9eb37" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a7a3c26156d8b4b442895fcb0acc9ef93" class="m-doc">LinearFormIntegratorBase</a>&lt;<a href="#ad32ec75492e466989fa80df276533322" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -128,17 +118,17 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a67e7502e5cea880063ef1bcd15958de5">
-              <span class="m-doc-wrap-bumper"><a href="#a67e7502e5cea880063ef1bcd15958de5" class="m-doc-self">Mult</a>(</span><span class="m-doc-wrap">const <a href="#a30a18d37c383eb23729bd8bfe40f0d13" class="m-doc">LHSType</a>&amp; lhs,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a67e7502e5cea880063ef1bcd15958de5" class="m-doc">Mult</a>(</span><span class="m-doc-wrap">const <a href="#a30a18d37c383eb23729bd8bfe40f0d13" class="m-doc">LHSType</a>&amp; lhs,
               const <a href="#a135bffd38ff54db97698c84fd5d83680" class="m-doc">RHSType</a>&amp; rhs)</span>
             </dt>
             <dd>Constructs the expression from its left and right operands.</dd>
-            <dt id="aa1d80c8b8aedec4acb51c46de8f275f7">
-              <span class="m-doc-wrap-bumper"><a href="#aa1d80c8b8aedec4acb51c46de8f275f7" class="m-doc-self">Mult</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aa1d80c8b8aedec4acb51c46de8f275f7" class="m-doc">Mult</a>(</span><span class="m-doc-wrap">const Mult&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a44bd7a2f9f9987e61bbc44ccccbb4b41">
-              <span class="m-doc-wrap-bumper"><a href="#a44bd7a2f9f9987e61bbc44ccccbb4b41" class="m-doc-self">Mult</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a44bd7a2f9f9987e61bbc44ccccbb4b41" class="m-doc">Mult</a>(</span><span class="m-doc-wrap">Mult&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -146,44 +136,209 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="aa5d79cb88973b769fdd1665729c03952">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the integration region.</dd>
-            <dt id="a1c4c8d0fc64c62acc0fec4d7dce2b070">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1c4c8d0fc64c62acc0fec4d7dce2b070" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a30a18d37c383eb23729bd8bfe40f0d13" class="m-doc">LHSType</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1c4c8d0fc64c62acc0fec4d7dce2b070" class="m-doc">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a30a18d37c383eb23729bd8bfe40f0d13" class="m-doc">LHSType</a>&amp;</span>
             </dt>
             <dd>Gets the left-hand side operand.</dd>
-            <dt id="a236115cb6fe072b23febb139ecaa3ec1">
-              <span class="m-doc-wrap-bumper">auto <a href="#a236115cb6fe072b23febb139ecaa3ec1" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a135bffd38ff54db97698c84fd5d83680" class="m-doc">RHSType</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a236115cb6fe072b23febb139ecaa3ec1" class="m-doc">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a135bffd38ff54db97698c84fd5d83680" class="m-doc">RHSType</a>&amp;</span>
             </dt>
             <dd>Gets the right-hand side operand.</dd>
-            <dt id="adbfdd734d436c5a1bbee19714721e493">
-              <span class="m-doc-wrap-bumper">auto <a href="#adbfdd734d436c5a1bbee19714721e493" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adbfdd734d436c5a1bbee19714721e493" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the polytope the expression is bound to.</dd>
-            <dt id="afb4630d495ac0d0c7c114f7b5e180671">
-              <span class="m-doc-wrap-bumper">auto <a href="#afb4630d495ac0d0c7c114f7b5e180671" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afb4630d495ac0d0c7c114f7b5e180671" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="#a67e7502e5cea880063ef1bcd15958de5" class="m-doc">Mult</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Binds the expression to a polytope.</dd>
-            <dt id="a80b1dd43ad79c7d8b9655c92d75552b3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a80b1dd43ad79c7d8b9655c92d75552b3" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t local) -&gt; <a href="#ad32ec75492e466989fa80df276533322" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a80b1dd43ad79c7d8b9655c92d75552b3" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">size_t local) -&gt; <a href="#ad32ec75492e466989fa80df276533322" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns an entry of the element vector.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad919c825b0e8d63078097ec3cf23fa53" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad919c825b0e8d63078097ec3cf23fa53" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a67e7502e5cea880063ef1bcd15958de5" class="m-doc">Mult</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a copy of this integrator.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a67e7502e5cea880063ef1bcd15958de5"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67e7502e5cea880063ef1bcd15958de5" class="m-doc-self">Mult</a>(</span><span class="m-doc-wrap">const <a href="#a30a18d37c383eb23729bd8bfe40f0d13" class="m-doc">LHSType</a>&amp; lhs,
+              const <a href="#a135bffd38ff54db97698c84fd5d83680" class="m-doc">RHSType</a>&amp; rhs)</span></span>
+            </h3>
+            <p>Constructs the expression from its left and right operands.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>Left operand.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>Right operand.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa1d80c8b8aedec4acb51c46de8f275f7"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa1d80c8b8aedec4acb51c46de8f275f7" class="m-doc-self">Mult</a>(</span><span class="m-doc-wrap">const Mult&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a44bd7a2f9f9987e61bbc44ccccbb4b41"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44bd7a2f9f9987e61bbc44ccccbb4b41" class="m-doc-self">Mult</a>(</span><span class="m-doc-wrap">Mult&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa5d79cb88973b769fdd1665729c03952"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the integration region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integration region.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1c4c8d0fc64c62acc0fec4d7dce2b070"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a30a18d37c383eb23729bd8bfe40f0d13" class="m-doc">LHSType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c4c8d0fc64c62acc0fec4d7dce2b070" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the left-hand side operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The left-hand side operand.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a236115cb6fe072b23febb139ecaa3ec1"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a135bffd38ff54db97698c84fd5d83680" class="m-doc">RHSType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a236115cb6fe072b23febb139ecaa3ec1" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the right-hand side operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The right-hand side operand.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adbfdd734d436c5a1bbee19714721e493"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adbfdd734d436c5a1bbee19714721e493" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the polytope the expression is bound to.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The polytope the expression is bound to.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afb4630d495ac0d0c7c114f7b5e180671"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a67e7502e5cea880063ef1bcd15958de5" class="m-doc">Mult</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb4630d495ac0d0c7c114f7b5e180671" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Binds the expression to a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a80b1dd43ad79c7d8b9655c92d75552b3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ad32ec75492e466989fa80df276533322" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80b1dd43ad79c7d8b9655c92d75552b3" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t local) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns an entry of the element vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">local</td>
+                  <td>Index in the local numbering.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Integral computed by the quadrature rule.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ad919c825b0e8d63078097ec3cf23fa53"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a> _1, class RHSNumber&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a>* Rodin::<wbr />Variational::<wbr />Mult&lt;LHS, LinearFormIntegratorBase&lt;RHSNumber&gt;&gt;&lt;_1, RHSNumber&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad919c825b0e8d63078097ec3cf23fa53" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a67e7502e5cea880063ef1bcd15958de5" class="m-doc">Mult</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad919c825b0e8d63078097ec3cf23fa53" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a copy of this integrator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -234,13 +389,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

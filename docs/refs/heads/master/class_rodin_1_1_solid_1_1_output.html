@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Solid::Output class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,10 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_output_8h.html">&lt;Rodin/Solid/Local/Output.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Derived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>Output <span class="m-thin">class</span>
-        </h1>
-        <p>CRTP base class for outputs.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solid.html">Solid</a></div><h1>Output</h1><p class="rodin-reference-brief">CRTP base class for outputs.</p><p class="rodin-reference-include">Defined in <a href="_output_8h.html"><code>Rodin/Solid/Local/Output.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solid_1_1_output.html#ab22499e074e28a2edab14265d6c24b05"><span class="nc">Output</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -104,7 +99,7 @@
             </li>
           </ul>
         </nav>
-<p>Derived classes implement an <code>extract(const ConstitutivePoint&amp;, const Cache&amp;)</code> method that reads quantities out of a constitutive evaluation at each quadrature point.</p>
+<p>Derived classes implement an <code>extract(const ConstitutivePoint&amp;, const Law&amp;)</code> method that reads quantities out of a constitutive evaluation at each quadrature point.</p>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -112,12 +107,12 @@
               <span class="m-doc-wrap-bumper"><a href="#ab22499e074e28a2edab14265d6c24b05" class="m-doc-self">Output</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Default constructor for derived CRTP outputs.</dd>
-            <dt id="ae0b80512dbb6a7567eb0172aca439403">
-              <span class="m-doc-wrap-bumper"><a href="#ae0b80512dbb6a7567eb0172aca439403" class="m-doc-self">Output</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Output</a>&amp;) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab4eb44023be4a4ce05dce08c48250b5e" class="m-doc">Output</a>(</span><span class="m-doc-wrap">const Output&amp; other) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a826f825692d915cb92c322480d2cbcbb">
-              <span class="m-doc-wrap-bumper"><a href="#a826f825692d915cb92c322480d2cbcbb" class="m-doc-self">Output</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Output</a>&amp;&amp;) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a634fca3e1b486c4242888e42c0f457eb" class="m-doc">Output</a>(</span><span class="m-doc-wrap">Output&amp;&amp; other) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -126,9 +121,9 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Cache&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a0d5cb3b631b40a3e0c1502eabc21c5a8" class="m-doc">extract</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
-              const Cache&amp; cache) const</span>
+              <div class="m-doc-template">template&lt;class Law&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#aa0067aaf8f989a1db6e62d9d3c3f694b" class="m-doc">extract</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
+              const Law&amp; law) const</span>
             </dt>
             <dd>Extracts data from a constitutive evaluation.</dd>
           </dl>
@@ -136,26 +131,62 @@
         <section id="pro-methods">
           <h2><a href="#pro-methods">Protected functions</a></h2>
           <dl class="m-doc">
-            <dt id="a90a01a85ea4df09f2fb147a1e3912b0b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a90a01a85ea4df09f2fb147a1e3912b0b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Output</a>&amp;) -&gt; <a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Output</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6729a27b0d0da8417022711e3d8cf722" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ab22499e074e28a2edab14265d6c24b05" class="m-doc">Output</a>&amp; other) -&gt; <a href="#ab22499e074e28a2edab14265d6c24b05" class="m-doc">Output</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
-            <dt id="a20f3ac16aaa65432f2a8d6eb8b9c2228">
-              <span class="m-doc-wrap-bumper">auto <a href="#a20f3ac16aaa65432f2a8d6eb8b9c2228" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Output</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Output</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae4cff430252a7fdd839c3eee057f535a" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#ab22499e074e28a2edab14265d6c24b05" class="m-doc">Output</a>&amp;&amp; other) -&gt; <a href="#ab22499e074e28a2edab14265d6c24b05" class="m-doc">Output</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a0d5cb3b631b40a3e0c1502eabc21c5a8"><div>
+          <section class="m-doc-details" id="ab4eb44023be4a4ce05dce08c48250b5e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab4eb44023be4a4ce05dce08c48250b5e" class="m-doc-self">Output</a>(</span><span class="m-doc-wrap">const Output&amp; other) <span class="m-label m-warning">protected</span> <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a634fca3e1b486c4242888e42c0f457eb"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a634fca3e1b486c4242888e42c0f457eb" class="m-doc-self">Output</a>(</span><span class="m-doc-wrap">Output&amp;&amp; other) <span class="m-label m-warning">protected</span> <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa0067aaf8f989a1db6e62d9d3c3f694b"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Derived&gt;
-                template&lt;class Cache&gt;
+                template&lt;class Law&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />Output&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d5cb3b631b40a3e0c1502eabc21c5a8" class="m-doc-self">extract</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
-              const Cache&amp; cache) const</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0067aaf8f989a1db6e62d9d3c3f694b" class="m-doc-self">extract</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
+              const Law&amp; law) const</span></span>
             </h3>
             <p>Extracts data from a constitutive evaluation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -168,12 +199,60 @@
                   <td>The evaluated constitutive point</td>
                 </tr>
                 <tr>
-                  <td>cache&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The law&#x27;s cache at <code>cp</code></td>
+                  <td>law&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The prepared law at <code>cp</code></td>
                 </tr>
               </tbody>
             </table>
-<p>Called at each quadrature point after the constitutive law has populated its cache.</p>
+<p>Called at each quadrature point after the constitutive law has prepared its owned state.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6729a27b0d0da8417022711e3d8cf722"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ab22499e074e28a2edab14265d6c24b05" class="m-doc">Output</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6729a27b0d0da8417022711e3d8cf722" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ab22499e074e28a2edab14265d6c24b05" class="m-doc">Output</a>&amp; other) <span class="m-label m-warning">protected</span> <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae4cff430252a7fdd839c3eee057f535a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ab22499e074e28a2edab14265d6c24b05" class="m-doc">Output</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4cff430252a7fdd839c3eee057f535a" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#ab22499e074e28a2edab14265d6c24b05" class="m-doc">Output</a>&amp;&amp; other) <span class="m-label m-warning">protected</span> <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
@@ -214,13 +293,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

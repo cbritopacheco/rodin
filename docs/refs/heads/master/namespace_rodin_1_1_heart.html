@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Heart namespace | Rodin</title>
+  <title>Rodin::Heart module | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,33 +35,28 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
             <li>
-              <a href="modules.html">Modules</a>
+              <a href="modules.html" id="m-navbar-current">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -75,12 +72,12 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Heart <span class="m-thin">namespace</span>
-        </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_heart.html" class="m-doc">Rodin::<wbr />Heart</a>.</p>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Heart <span class="m-thin">module</span>        </h1>
+        <p>Cardiac models and their coupled state evolution.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
+            <li><a href="#autotoc_md626">Representative use</a></li>
             <li>
               Reference
               <ul>
@@ -90,15 +87,13 @@
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/Heart</p><p>Module for reduced-order (0D) cardiac models.</p><p>Provides lumped-parameter ventricular models used to calibrate and validate the 3D constitutive laws of the <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid</a> module. The main component is the CCMLC2014 0D ventricular model: a cardiac-cycle stepper driven by a reduced Holzapfel-type passive energy (reduced invariants with first and second derivatives) coupled to an active contraction law.</p><p>0D models integrate ordinary differential equations over a heartbeat and are orders of magnitude cheaper than 3D simulations; parameters should round-trip between the 0D cycle and the corresponding 3D laws before debugging full simulations.</p>
+<pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">report</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">dt</span><span class="p">);</span></pre><p><a href="#ad5c6ff77549565037bd0b324918edf80" class="m-doc">CCMLC2014T</a> advances a reduced ventricular model through a cardiac cycle. <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">HolzapfelReducedLaw</a> and <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_passive_law.html" class="m-doc">CCMLC2014PassiveLaw</a> supply its reduced passive energy and stress response. The module supports cardiac-cycle studies and constitutive parameter calibration before larger three-dimensional simulations.</p><p>0D models integrate ordinary differential equations over a heartbeat and are orders of magnitude cheaper than 3D simulations; parameters should round-trip between the 0D cycle and the corresponding 3D laws before debugging full simulations.</p><section id="autotoc_md626"><h2><a href="#autotoc_md626">Representative use</a></h2><p>The reduced ventricular model advances a configured state with a nonlinear time step:</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="nc">Model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Heart</span><span class="o">::</span><span class="nc">CCMLC2014T</span><span class="o">&lt;&gt;</span><span class="p">;</span>
+<span class="nc">Model</span><span class="o">::</span><span class="nc">Input</span><span class="w"> </span><span class="n">input</span><span class="p">;</span>
+<span class="nc">Model</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="n">input</span><span class="p">);</span>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">report</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">dt</span><span class="p">);</span></pre><p>Material, loading and initialization parameters in <code>input</code> must be chosen for the intended experiment before advancing the model.</p></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              struct <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_passive_law.html" class="m-doc">CCMLC2014PassiveLaw</a>
-            </dt>
-            <dd>Default passive stress law for the CCMLC2014 reduced model.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">HolzapfelReducedLaw</a>
@@ -106,9 +101,9 @@
             <dd>Passive-energy evaluator based on reduced invariants.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              struct <a href="struct_rodin_1_1_heart_1_1_passive_energy_derivatives.html" class="m-doc">PassiveEnergyDerivatives</a>
+              struct <a href="struct_rodin_1_1_heart_1_1_reduced_invariants.html" class="m-doc">ReducedInvariants</a>
             </dt>
-            <dd>Bundle of gradient and Hessian for passive-energy derivatives.</dd>
+            <dd>Reduced invariants used by the passive-energy law.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               struct <a href="struct_rodin_1_1_heart_1_1_reduced_invariant_gradient.html" class="m-doc">ReducedInvariantGradient</a>
@@ -121,9 +116,14 @@
             <dd>Second derivatives of passive-energy density with respect to reduced invariants.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              struct <a href="struct_rodin_1_1_heart_1_1_reduced_invariants.html" class="m-doc">ReducedInvariants</a>
+              struct <a href="struct_rodin_1_1_heart_1_1_passive_energy_derivatives.html" class="m-doc">PassiveEnergyDerivatives</a>
             </dt>
-            <dd>Reduced invariants used by the passive-energy law.</dd>
+            <dd>Bundle of gradient and Hessian for passive-energy derivatives.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              struct <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_passive_law.html" class="m-doc">CCMLC2014PassiveLaw</a>
+            </dt>
+            <dd>Default passive stress law for the CCMLC2014 reduced model.</dd>
           </dl>
         </section>
         <section id="typedef-members">
@@ -140,12 +140,12 @@
           <h2>Typedef documentation</h2>
           <section class="m-doc-details" id="ad5c6ff77549565037bd0b324918edf80"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_heart_2_forward_decls_8h.html">&lt;Rodin/Heart/ForwardDecls.h&gt;</a></div>
+              
               <div class="m-doc-template">
                 template&lt;class PassiveEnergyLaw = HolzapfelReducedLaw&lt;Real&gt;, class PassiveLaw = CCMLC2014PassiveLaw&lt;Real&gt;&gt;
               </div>
-              using Rodin::<wbr />Heart::<wbr /><a href="#ad5c6ff77549565037bd0b324918edf80" class="m-doc-self">CCMLC2014T</a> = <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html" class="m-doc">CCMLC2014::<wbr />Solver::<wbr />StepperT</a>&lt;PassiveEnergyLaw, PassiveLaw&gt;
-            </h3>
+              using <a href="#ad5c6ff77549565037bd0b324918edf80" class="m-doc-self">CCMLC2014T</a> = <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html" class="m-doc">CCMLC2014::<wbr />Solver::<wbr />StepperT</a>&lt;PassiveEnergyLaw, PassiveLaw&gt;
+            </h3><p class="rodin-reference-include">Defined in <a href="_heart_2_forward_decls_8h.html"><code>Rodin/Heart/ForwardDecls.h</code></a></p>
             <p>Default CCMLC2014 0D ventricular model type.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -203,13 +203,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::IO::XDMF::Grid class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,8 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html">XDMF</a>::<wbr/></span>Grid <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_x_d_m_f_8h.html">&lt;Rodin/IO/XDMF.h&gt;</a></div>
-        </h1>
-        <p>Handle to one named grid inside the XDMF domain.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_i_o.html">IO</a><span>›</span><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html">XDMF</a></div><h1>Grid</h1><p class="rodin-reference-brief">Handle to one named grid inside the XDMF domain.</p><p class="rodin-reference-include">Defined in <a href="_x_d_m_f_8h.html"><code>Rodin/IO/XDMF.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">Grid</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -95,17 +89,22 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="ad22da2de234b06dce1fc0a7017c4fcb0">
-              <span class="m-doc-wrap-bumper"><a href="#ad22da2de234b06dce1fc0a7017c4fcb0" class="m-doc-self">Grid</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>(</span><span class="m-doc-wrap">const Grid&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#abdf7e064ab7bfdc5d854fe463f5a672e" class="m-doc">Grid</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#acfe4c565fead651d42cba472f16ffa06" class="m-doc">XDMF</a>&amp; owner,
+              size_t index)</span>
+            </dt>
+            <dd>Borrows a registered grid in an XDMF document.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a261b1e12209872070c26bf97ea4e7284">
-              <span class="m-doc-wrap-bumper">auto <a href="#a261b1e12209872070c26bf97ea4e7284" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp;) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5ea79f9544b96ba5e6ee9bdbb4f2ecb5" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp; other) -&gt; <a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
@@ -115,32 +114,30 @@
             <dt>
               <div class="m-doc-template">template&lt;class MeshType&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#ab67d886066374382bb8b961af0796fc4" class="m-doc">setMesh</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
-              <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a5852c3f28e31c45bb2a2091948923b00" class="m-doc">MeshPolicy</a> policy = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a5852c3f28e31c45bb2a2091948923b00a84a8921b25f505d0d2077aeb5db4bc16" class="m-doc">MeshPolicy::<wbr />Static</a>) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp;</span>
+              <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a5852c3f28e31c45bb2a2091948923b00" class="m-doc">MeshPolicy</a> policy = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a5852c3f28e31c45bb2a2091948923b00a84a8921b25f505d0d2077aeb5db4bc16" class="m-doc">MeshPolicy::<wbr />Static</a>) -&gt; <a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp;</span>
             </dt>
             <dd>Sets the mesh observed by this grid.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a11cc5ffe88b6f43c400943a833918219" class="m-doc">setOptions</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid_options.html" class="m-doc">GridOptions</a>&amp; options) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a11cc5ffe88b6f43c400943a833918219" class="m-doc">setOptions</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid_options.html" class="m-doc">GridOptions</a>&amp; options) -&gt; <a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp;</span>
             </dt>
             <dd>Sets per-grid export options.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0b20440bcf39781850e7d4036d836eac" class="m-doc">getOptions</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid_options.html" class="m-doc">GridOptions</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the current grid options.</dd>
-            <dt>
+            <dt><a href="#afe06fa33e65cc5c150585842d6e5229c" class="m-doc">add</a></dt><dd>Registers a grid function attribute using its internal name.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#afe06fa33e65cc5c150585842d6e5229c" class="m-doc">add</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>,
-              <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc">AttributePolicy::<wbr />Transient</a>) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp;</span>
-            </dt>
-            <dd>Registers a grid function attribute using its internal name.</dd>
-            <dt>
+              <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc">AttributePolicy::<wbr />Transient</a>) -&gt; <a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp;</span>
+            </div></details></dd>
+            <dt><a href="#af0f682d72e60b316fd6c00d9244cb5d1" class="m-doc">add</a></dt><dd>Registers a grid function attribute with an explicit name.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#af0f682d72e60b316fd6c00d9244cb5d1" class="m-doc">add</a>(</span><span class="m-doc-wrap">const std::string&amp; name,
               const GridFunctionType&amp; gf,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>,
-              <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc">AttributePolicy::<wbr />Transient</a>) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp;</span>
-            </dt>
-            <dd>Registers a grid function attribute with an explicit name.</dd>
+              <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc">AttributePolicy::<wbr />Transient</a>) -&gt; <a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp;</span>
+            </div></details></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a7b97f8016266fd84fe7f135b6c7e9d1e" class="m-doc">hasMesh</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -150,11 +147,11 @@
             </dt>
             <dd>Returns the number of registered attributes.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8dd8cb1e1c5ecc6fa17d56a4fa4a107a" class="m-doc">reset</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8dd8cb1e1c5ecc6fa17d56a4fa4a107a" class="m-doc">reset</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp;</span>
             </dt>
             <dd>Resets the grid to its initial state.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a383268d8a8e99455ba68f0e7c503b1da" class="m-doc">clear</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a383268d8a8e99455ba68f0e7c503b1da" class="m-doc">clear</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp;</span>
             </dt>
             <dd>Removes all registered attributes from this grid.</dd>
             <dt>
@@ -163,28 +160,88 @@
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a5852c3f28e31c45bb2a2091948923b00" class="m-doc">MeshPolicy</a> policy) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">XDMF::<wbr />Grid</a>&amp;</span>
             </dt>
             <dd>Sets the mesh observed by this grid.</dd>
-            <dt>
+            <dt><a href="#aeb6507188e86c9da3a7d71cd1e7fc49f" class="m-doc">add</a></dt><dd>Registers a grid function attribute using its internal name.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#aeb6507188e86c9da3a7d71cd1e7fc49f" class="m-doc">add</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">XDMF::<wbr />Grid</a>&amp;</span>
-            </dt>
-            <dd>Registers a grid function attribute using its internal name.</dd>
-            <dt>
+            </div></details></dd>
+            <dt><a href="#a95ef65f518e5614840275f753d3b60c8" class="m-doc">add</a></dt><dd>Registers a grid function attribute with an explicit name.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a95ef65f518e5614840275f753d3b60c8" class="m-doc">add</a>(</span><span class="m-doc-wrap">const std::string&amp; name,
               const GridFunctionType&amp; gf,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">XDMF::<wbr />Grid</a>&amp;</span>
-            </dt>
-            <dd>Registers a grid function attribute with an explicit name.</dd>
+            </div></details></dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ae2e6ca947bde8a3aa040dfb892603bfb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc-self">Grid</a>(</span><span class="m-doc-wrap">const Grid&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abdf7e064ab7bfdc5d854fe463f5a672e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abdf7e064ab7bfdc5d854fe463f5a672e" class="m-doc-self">Grid</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#acfe4c565fead651d42cba472f16ffa06" class="m-doc">XDMF</a>&amp; owner,
+              size_t index)</span></span>
+            </h3>
+            <p>Borrows a registered grid in an XDMF document.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">owner</td>
+                  <td>Owning XDMF document, which must outlive this handle.</td>
+                </tr>
+                <tr>
+                  <td>index</td>
+                  <td>Registered grid index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5ea79f9544b96ba5e6ee9bdbb4f2ecb5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5ea79f9544b96ba5e6ee9bdbb4f2ecb5" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a600fb318ab8c06c51f1f27e3e2e9d518"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::string_view Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a600fb318ab8c06c51f1f27e3e2e9d518" class="m-doc-self">getName</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">std::string_view </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a600fb318ab8c06c51f1f27e3e2e9d518" class="m-doc-self">getName</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the name of this grid.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -201,7 +258,7 @@
               <div class="m-doc-template">
                 template&lt;class MeshType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab67d886066374382bb8b961af0796fc4" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
+              <span class="m-doc-wrap-bumper"><a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab67d886066374382bb8b961af0796fc4" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a5852c3f28e31c45bb2a2091948923b00" class="m-doc">MeshPolicy</a> policy = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a5852c3f28e31c45bb2a2091948923b00a84a8921b25f505d0d2077aeb5db4bc16" class="m-doc">MeshPolicy::<wbr />Static</a>)</span></span>
             </h3>
             <p>Sets the mesh observed by this grid.</p>
@@ -238,7 +295,7 @@
           </div></section>
           <section class="m-doc-details" id="a11cc5ffe88b6f43c400943a833918219"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11cc5ffe88b6f43c400943a833918219" class="m-doc-self">setOptions</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid_options.html" class="m-doc">GridOptions</a>&amp; options)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11cc5ffe88b6f43c400943a833918219" class="m-doc-self">setOptions</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid_options.html" class="m-doc">GridOptions</a>&amp; options)</span></span>
             </h3>
             <p>Sets per-grid export options.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -261,7 +318,7 @@
           </div></section>
           <section class="m-doc-details" id="a0b20440bcf39781850e7d4036d836eac"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid_options.html" class="m-doc">GridOptions</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0b20440bcf39781850e7d4036d836eac" class="m-doc-self">getOptions</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid_options.html" class="m-doc">GridOptions</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0b20440bcf39781850e7d4036d836eac" class="m-doc-self">getOptions</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the current grid options.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -278,7 +335,7 @@
               <div class="m-doc-template">
                 template&lt;class GridFunctionType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afe06fa33e65cc5c150585842d6e5229c" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              <span class="m-doc-wrap-bumper"><a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afe06fa33e65cc5c150585842d6e5229c" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc">AttributePolicy::<wbr />Transient</a>)</span></span>
             </h3>
@@ -324,7 +381,7 @@
               <div class="m-doc-template">
                 template&lt;class GridFunctionType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0f682d72e60b316fd6c00d9244cb5d1" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const std::string&amp; name,
+              <span class="m-doc-wrap-bumper"><a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0f682d72e60b316fd6c00d9244cb5d1" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const std::string&amp; name,
               const GridFunctionType&amp; gf,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy = <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc">AttributePolicy::<wbr />Transient</a>)</span></span>
@@ -371,7 +428,7 @@
           </div></section>
           <section class="m-doc-details" id="a7b97f8016266fd84fe7f135b6c7e9d1e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7b97f8016266fd84fe7f135b6c7e9d1e" class="m-doc-self">hasMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7b97f8016266fd84fe7f135b6c7e9d1e" class="m-doc-self">hasMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Tests whether a mesh has been set on this grid.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -385,7 +442,7 @@
           </div></section>
           <section class="m-doc-details" id="adddd17dcfbe002e45ccfa180bb6bc169"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adddd17dcfbe002e45ccfa180bb6bc169" class="m-doc-self">getAttributeCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adddd17dcfbe002e45ccfa180bb6bc169" class="m-doc-self">getAttributeCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the number of registered attributes.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -399,7 +456,7 @@
           </div></section>
           <section class="m-doc-details" id="a8dd8cb1e1c5ecc6fa17d56a4fa4a107a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8dd8cb1e1c5ecc6fa17d56a4fa4a107a" class="m-doc-self">reset</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8dd8cb1e1c5ecc6fa17d56a4fa4a107a" class="m-doc-self">reset</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Resets the grid to its initial state.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -414,7 +471,7 @@
           </div></section>
           <section class="m-doc-details" id="a383268d8a8e99455ba68f0e7c503b1da"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a383268d8a8e99455ba68f0e7c503b1da" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae2e6ca947bde8a3aa040dfb892603bfb" class="m-doc">Grid</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a383268d8a8e99455ba68f0e7c503b1da" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Removes all registered attributes from this grid.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -431,7 +488,7 @@
               <div class="m-doc-template">
                 template&lt;class MeshType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">XDMF::<wbr />Grid</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a252ac1a4cf3b0e3dcdf92602b05065d6" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">XDMF::<wbr />Grid</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a252ac1a4cf3b0e3dcdf92602b05065d6" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a5852c3f28e31c45bb2a2091948923b00" class="m-doc">MeshPolicy</a> policy)</span></span>
             </h3>
             <p>Sets the mesh observed by this grid.</p>
@@ -471,7 +528,7 @@
               <div class="m-doc-template">
                 template&lt;class GridFunctionType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">XDMF::<wbr />Grid</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb6507188e86c9da3a7d71cd1e7fc49f" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">XDMF::<wbr />Grid</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb6507188e86c9da3a7d71cd1e7fc49f" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy)</span></span>
             </h3>
@@ -517,7 +574,7 @@
               <div class="m-doc-template">
                 template&lt;class GridFunctionType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">XDMF::<wbr />Grid</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr />Grid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a95ef65f518e5614840275f753d3b60c8" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const std::string&amp; name,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">XDMF::<wbr />Grid</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a95ef65f518e5614840275f753d3b60c8" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const std::string&amp; name,
               const GridFunctionType&amp; gf,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center,
               <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy)</span></span>
@@ -601,13 +658,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

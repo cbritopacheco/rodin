@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Math::Rad class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,42 +71,31 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_math.html">Math</a>::<wbr/></span>Rad <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rad_8h.html">&lt;Rodin/Math/Rad.h&gt;</a></div>
-        </h1>
-        <p>Represents an angle in radians.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_math.html">Math</a></div><h1>Rad</h1><p class="rodin-reference-brief">Represents an angle in radians.</p><p class="rodin-reference-include">Defined in <a href="_rad_8h.html"><code>Rodin/Math/Rad.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_math_1_1_rad.html"><span class="nc">Rad</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md158">Example Usage</a></li>
+            <li><a href="#autotoc_md168">Example Usage</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>This class provides a type-safe wrapper for angles measured in radians, inheriting all the unit arithmetic operations from the Unit base class.</p><section id="autotoc_md158"><h3><a href="#autotoc_md158">Example Usage</a></h3><pre class="m-code"><span class="n">Rad</span><span class="w"> </span><span class="nf">angle1</span><span class="p">(</span><span class="n">Math</span><span class="o">::</span><span class="n">Constants</span><span class="o">::</span><span class="n">pi</span><span class="p">());</span><span class="w">  </span><span class="c1">// π radians (180 degrees)</span>
-<span class="n">Rad</span><span class="w"> </span><span class="n">angle2</span><span class="p">(</span><span class="n">Math</span><span class="o">::</span><span class="n">Constants</span><span class="o">::</span><span class="n">pi</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">  </span><span class="c1">// π/2 radians (90 degrees)</span>
-<span class="n">Rad</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">angle1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">angle2</span><span class="p">;</span><span class="w">  </span><span class="c1">// 3π/2 radians</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_math_1_1_unit.html">Unit</a></p></aside></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived, class T&gt;</div>
-              class <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit&lt;Rad, Real&gt;</a>
-            </dt>
-            <dd>Base class for units using CRTP.</dd>
-          </dl>
-        </section>
+<p>This class provides a type-safe wrapper for angles measured in radians, inheriting all the unit arithmetic operations from the Unit base class.</p><section id="autotoc_md168"><h2><a href="#autotoc_md168">Example Usage</a></h2><pre class="m-code"><span class="nc">Rad</span><span class="w"> </span><span class="nf">angle1</span><span class="p">(</span><span class="n">Math</span><span class="o">::</span><span class="n">Constants</span><span class="o">::</span><span class="n">pi</span><span class="p">());</span><span class="w">  </span><span class="c1">// π radians (180 degrees)</span>
+<span class="nc">Rad</span><span class="w"> </span><span class="n">angle2</span><span class="p">(</span><span class="n">Math</span><span class="o">::</span><span class="n">Constants</span><span class="o">::</span><span class="n">pi</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">  </span><span class="c1">// π/2 radians (90 degrees)</span>
+<span class="nc">Rad</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">angle1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">angle2</span><span class="p">;</span><span class="w">  </span><span class="c1">// 3π/2 radians</span></pre></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_math_1_1_unit.html" title="Unit&lt; Rad, Real &gt;">Unit</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Rad</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_math_1_1_unit.html"><code>Unit&lt;Rad, Real&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_math_1_1_unit.html#a8b322f7208c13b82a734720a73360ef9"><span class="nc">Unit</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_math_1_1_rad.html"><span class="nc">Rad</span></a><span class="p">,</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for units using CRTP.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_math_1_1_unit.html"><code>Unit</code></a></td><td><details><summary>22 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_math_1_1_unit.html#ae79c83fbca959022127462dcdebe4893"><code>One()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a54724b9dd792a6022b918eae2f393734"><code>operator Real()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a72293f3406f02ff87a4d9ae8779a01b9"><code>operator!=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a38e36651e055f69c5bb6e2be357bcdc8"><code>operator*()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a4cd2584f7faf3c5b7b575f369a12975c"><code>operator*=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#ae965424fb638ef8d68e0b281bd050edb"><code>operator+()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#aad3f801edbdd69feefcc5273fd5fe8e0"><code>operator+()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a0171fc7cb1dc8accdfa73cea839c216e"><code>operator+=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#aca7f7071ea238f7e257dfd048f7c69ba"><code>operator-()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#ac2653c26a864eb66b899cfb31c8102b2"><code>operator-()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#ab634af0995c9bf5c9eb776b3903ebf3a"><code>operator-=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#ab7184ebb91add1afb177953bf98daadd"><code>operator/()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#aac786c56de7765606762cc2f84bd6658"><code>operator/=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a3e01a2c508fc362268427b4d2fa684af"><code>operator&lt;()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a452da445f903cae1a1afe0e574f4ae20"><code>operator&lt;=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a021031f58bb48cf29a78858c00009b66"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a0c2dd156fe3f8afc23d47ad3bf82f231"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#ad726fba6216724a96f967eed36c1f9a3"><code>operator==()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a029e33c44457d1149c1399f6e35b769e"><code>operator&gt;()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#af0a6c4740f2d4137c953d7ade062d2fe"><code>operator&gt;=()</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a19462713b2aab2dae2c87c15f262c1df"><code>Type</code></a></li><li><a href="class_rodin_1_1_math_1_1_unit.html#a31b6f6453acca85f259ca3e33c406fd2"><code>Zero()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a518ed8265937651aa81a7989d89d18f2">
-              using <a href="#a518ed8265937651aa81a7989d89d18f2" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&lt;<a href="class_rodin_1_1_math_1_1_rad.html" class="m-doc">Rad</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
+              using <a href="#a518ed8265937651aa81a7989d89d18f2" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_math_1_1_unit.html#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>&lt;<a href="class_rodin_1_1_math_1_1_rad.html" class="m-doc">Rad</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -152,13 +138,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

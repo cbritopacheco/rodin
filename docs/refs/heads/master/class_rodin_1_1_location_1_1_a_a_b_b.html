@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Location::AABB class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,10 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class MeshType&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_location.html">Location</a>::<wbr/></span>AABB <span class="m-thin">class</span>
-        </h1>
-        <p>Bounding-volume-hierarchy point locator over axis-aligned boxes.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_location.html">Location</a></div><h1>AABB</h1><p class="rodin-reference-brief">Bounding-volume-hierarchy point locator over axis-aligned boxes.</p><p class="rodin-reference-include">Defined in <a href="_location_2_a_a_b_b_8h.html"><code>Rodin/Location/AABB.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">MeshType</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AABB</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -86,13 +82,19 @@
             <li>
               Reference
               <ul>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<section id="AABBArchitecture"><h2><a href="#AABBArchitecture">Architecture</a></h2><p>The locator answers the following geometric query. Given a physical point <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
+<table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_location_1_1_a_a_b_b_3_01_mesh_type_01_4.html"><code>MeshType</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">MeshType</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">is_base_of_v</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">MeshType</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_location_1_1_a_a_b_b_3_01_mesh_type_01_4.html#a63801bfa6ec89ed42b04b98140540687"><span class="nc">AABB</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">MeshType</span><span class="o">&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Noncollective point location in owned entities of an MPI mesh.</td></tr></tbody></table><section id="AABBArchitecture"><h2><a href="#AABBArchitecture">Architecture</a></h2><p>The locator answers the following geometric query. Given a physical point <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
 <title>
 $ x $
 </title>
@@ -131,8 +133,7 @@ $ \widehat x \in \widehat K $
 </g>
 </svg> such that</p><div class="m-math"><svg style="width: 5.882em; height: 1.245em;" viewBox="166.036254 -11.955168 56.470471 11.955168">
 <title>
-\[
-  x = T_K(\widehat x),
+\[  x = T_K(\widehat x),
 \]
 </title>
 <defs>
@@ -191,9 +192,8 @@ $ B_K $
 </g>
 </svg> satisfying</p><div class="m-math"><svg style="width: 7.424em; height: 1.526em;" viewBox="158.634764 -14.645101 71.273454 14.645101">
 <title>
-\[
-    T_K(\widehat K) \subset B_K .
-  \]
+\[    T_K(\widehat K) \subset B_K .
+\]
 </title>
 <defs>
 <path id='eq7-g1-26' d='M7.878456-5.977584C8.081694-5.977584 8.296887-5.977584 8.296887-6.216687S8.081694-6.455791 7.878456-6.455791H4.662516C2.618182-6.455791 .992279-4.901619 .992279-2.988792S2.618182 .478207 4.662516 .478207H7.878456C8.081694 .478207 8.296887 .478207 8.296887 .239103S8.081694 0 7.878456 0H4.686426C2.82142 0 1.470486-1.3868 1.470486-2.988792S2.82142-5.977584 4.686426-5.977584H7.878456Z'/>
@@ -218,12 +218,26 @@ $ B_K $
 <use x='218.453888' y='-1.195529' xlink:href='#eq7-g2-75'/>
 <use x='226.656557' y='-2.988792' xlink:href='#eq7-g3-58'/>
 </g>
-</svg></div><p>Tree nodes reject groups of polytopes, and leaf entries reject individual polytopes, using only componentwise box containment.</p></li><li>Narrow phase. For each surviving candidate, the actual transformation is inverted by Newton iteration. The candidate is accepted only when the physical residual is below tolerance and the recovered reference coordinate lies in the reference polytope. Consequently, the AABB never certifies membership; it only decides which candidates are worth testing.</li></ul><p>Boxes bound the whole curved image, not just sampled points on it. The transformation is resampled on a unisolvent reference lattice and converted into control points of a non-negative partition of unity (Bernstein on simplices, tensor Bernstein on quadrilaterals, hexahedra and wedges, the collapsed-coordinate basis on pyramids), whose extrema bound the image exactly for every polytope type and order. Degree-one factors need no conversion: the mapped vertices are already the control points, so affine and multilinear cells keep the cheap vertex box. Should a geometry ever fall outside this construction the box degrades to a heuristic inflation, and an exhaustive narrow-phase fallback can be enabled with setExhaustiveFallback(). The degree is taken from PolytopeTransformation::getOrder(), so a transformation that understates its own order understates its box.</p><p>Tolerances are relative to the mesh bounding-box diagonal. Queries are thread-safe: the lazy per-dimension build is guarded by a mutex and transformations are immutable after construction.</p></section>
+</svg></div><p>Tree nodes reject groups of polytopes, and leaf entries reject individual polytopes, using componentwise box containment. Optional control-hull projections reject further candidates before inversion.</p></li><li>Narrow phase. For each surviving candidate, the actual transformation is inverted by controlled Newton iteration, retrying from other reference points if the centroid attempt fails. A reference coordinate slightly outside the polytope is clipped back to it, then accepted only if the clipped point maps within physical tolerance of the query. The AABB never certifies membership; it only selects candidates to test.</li></ul><p>Boxes bound the whole curved image, not just sampled points on it. The transformation is resampled on a unisolvent reference lattice and converted into control points of a non-negative partition of unity (Bernstein on simplices, tensor Bernstein on quadrilaterals, hexahedra and wedges, the collapsed-coordinate basis on pyramids), whose extrema bound the image in exact arithmetic. Numerical boxes include a conversion roundoff allowance. Degree-one factors need no conversion: the mapped vertices are already the control points, so affine and multilinear cells keep the cheap vertex box. If a box cannot be computed reliably, that entry remains unpruned. An exhaustive narrow-phase fallback can also be enabled with setExhaustiveFallback(). The degree is obtained from PolytopeTransformation::getBounds(); unsupported maps remain unpruned.</p><p>Physical tolerance is relative to the mesh bounding-box diagonal. The reference tolerance only permits a small inversion overshoot before clipping; physical residual is checked again after clipping. Queries are thread-safe for concurrent queries on a fixed mesh and configuration: setters and mesh mutation must not overlap queries. The lazy build is guarded by a mutex and transformations are immutable after construction.</p></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a0e7ded7138eedfa6108fcec605907a17">
+              using <a href="#a0e7ded7138eedfa6108fcec605907a17" class="m-doc-self">Candidates</a> = std::vector&lt;std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&gt;
+            </dt>
+            <dd>Candidate local indices grouped by topological dimension.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a63801bfa6ec89ed42b04b98140540687">
-              <span class="m-doc-wrap-bumper"><a href="#a63801bfa6ec89ed42b04b98140540687" class="m-doc-self">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh) <span class="m-label m-flat m-info">explicit</span> </span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
+              <a href="#a0e7ded7138eedfa6108fcec605907a17" class="m-doc">Candidates</a> candidates)</span>
+            </dt>
+            <dd>Builds an index over an explicit candidate subset.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a63801bfa6ec89ed42b04b98140540687" class="m-doc">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Builds a locator bound to a fixed mesh.</dd>
           </dl>
@@ -231,59 +245,275 @@ $ B_K $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="aef53278f6d7eb7783958288e3f67e3a8">
-              <span class="m-doc-wrap-bumper">auto <a href="#aef53278f6d7eb7783958288e3f67e3a8" class="m-doc-self">getTolerance</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
-            </dt>
-            <dd>Relative physical tolerance (scaled by the mesh diagonal).</dd>
-            <dt id="a00ccdca093e2b940d4744bfe3794320d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a00ccdca093e2b940d4744bfe3794320d" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
-            </dt>
-            <dd>Sets the relative physical tolerance and invalidates the index.</dd>
-            <dt id="acbd2172e8f33da1492e91afe5dc25b42">
-              <span class="m-doc-wrap-bumper">auto <a href="#acbd2172e8f33da1492e91afe5dc25b42" class="m-doc-self">getReferenceTolerance</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
-            </dt>
-            <dd>Reference-space containment slack (reference coordinates are O(1)).</dd>
-            <dt id="a87d84c72f462752e93738d1427b02635">
-              <span class="m-doc-wrap-bumper">auto <a href="#a87d84c72f462752e93738d1427b02635" class="m-doc-self">setReferenceTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
-            </dt>
-            <dd>Sets the reference-space containment slack.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a45f13be3b8fa48212335ca5761617f49" class="m-doc">setExhaustiveFallback</a>(</span><span class="m-doc-wrap">bool fallback) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aef53278f6d7eb7783958288e3f67e3a8" class="m-doc">getTolerance</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a00ccdca093e2b940d4744bfe3794320d" class="m-doc">setTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance) -&gt; <a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acbd2172e8f33da1492e91afe5dc25b42" class="m-doc">getReferenceTolerance</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a87d84c72f462752e93738d1427b02635" class="m-doc">setReferenceTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance) -&gt; <a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum reference-space overshoot before clipping.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a45f13be3b8fa48212335ca5761617f49" class="m-doc">setExhaustiveFallback</a>(</span><span class="m-doc-wrap">bool fallback) -&gt; <a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp;</span>
             </dt>
             <dd>Enables the exhaustive narrow-phase fallback on broad-phase miss.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8ca4fa70401fca758cc999bf754c02a6" class="m-doc">setProjectionPruning</a>(</span><span class="m-doc-wrap">bool enabled) -&gt; <a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp;</span>
+            </dt>
+            <dd>Enables control-hull projections in addition to axis-aligned boxes.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af65dae747e0bf8c3345fdf083dff5dd6" class="m-doc">locate</a>(</span><span class="m-doc-wrap">size_t dimension,
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt;</span>
             </dt>
             <dd>Locates a physical point on a polytope of the requested dimension.</dd>
-            <dt id="a93d9a733708bbdfa234fa7a5a3dec0a1">
-              <span class="m-doc-wrap-bumper">auto <a href="#a93d9a733708bbdfa234fa7a5a3dec0a1" class="m-doc-self">locate</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a93d9a733708bbdfa234fa7a5a3dec0a1" class="m-doc">locate</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt;</span>
             </dt>
             <dd>Locates a physical point on a cell of the mesh dimension.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a3a0960489603e2eb68890b26257b5108"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc-self">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
+              <a href="#a0e7ded7138eedfa6108fcec605907a17" class="m-doc">Candidates</a> candidates)</span></span>
+            </h3>
+            <p>Builds an index over an explicit candidate subset.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Mesh whose original entity indices are retained.</td>
+                </tr>
+                <tr>
+                  <td>candidates</td>
+                  <td>Local entity indices grouped by topological dimension.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Exceptions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Alert::Exception</td>
+                  <td>For duplicate or out-of-range indices.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Entries retain their original mesh indices. Omitted dimensions and empty lists have no candidates, including in exhaustive fallback. Ownership and other selection policies belong to the caller. The tolerance scale still uses all mesh vertices. The candidate lists are a snapshot: reconstruct after topology, geometry or selection changes. Empty lists above the mesh dimension are permitted for empty shards.</p>
+          </div></section>
+          <section class="m-doc-details" id="a63801bfa6ec89ed42b04b98140540687"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a63801bfa6ec89ed42b04b98140540687" class="m-doc-self">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Builds a locator bound to a fixed mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Mesh on which the object is defined.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aef53278f6d7eb7783958288e3f67e3a8"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aef53278f6d7eb7783958288e3f67e3a8" class="m-doc-self">getTolerance</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The tolerance.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Relative physical tolerance (scaled by the mesh diagonal).</p>
+          </div></section>
+          <section class="m-doc-details" id="a00ccdca093e2b940d4744bfe3794320d"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a00ccdca093e2b940d4744bfe3794320d" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tolerance</td>
+                  <td>Tolerance used by the operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Sets the relative physical tolerance and invalidates the index.</p>
+          </div></section>
+          <section class="m-doc-details" id="acbd2172e8f33da1492e91afe5dc25b42"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbd2172e8f33da1492e91afe5dc25b42" class="m-doc-self">getReferenceTolerance</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The reference tolerance.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Maximum reference-space overshoot before clipping and residual check.</p>
+          </div></section>
+          <section class="m-doc-details" id="a87d84c72f462752e93738d1427b02635"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87d84c72f462752e93738d1427b02635" class="m-doc-self">setReferenceTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance)</span></span>
+            </h3>
+            <p>Sets the maximum reference-space overshoot before clipping.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tolerance</td>
+                  <td>Tolerance used by the operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a45f13be3b8fa48212335ca5761617f49"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class MeshType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp; Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45f13be3b8fa48212335ca5761617f49" class="m-doc-self">setExhaustiveFallback</a>(</span><span class="m-doc-wrap">bool fallback)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45f13be3b8fa48212335ca5761617f49" class="m-doc-self">setExhaustiveFallback</a>(</span><span class="m-doc-wrap">bool fallback)</span></span>
             </h3>
             <p>Enables the exhaustive narrow-phase fallback on broad-phase miss.</p>
-<p>Only useful for transformations of order three or higher, whose true extent may exceed the sampled, inflated boxes. Costs one full narrow-phase sweep per miss.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fallback</td>
+                  <td>Whether to enable the exhaustive fallback search.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Useful as a diagnostic when a transformation&#x27;s degree metadata does not describe its image. Unreliable control-point conversions already leave their entries unpruned. Costs one full narrow-phase sweep per miss.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8ca4fa70401fca758cc999bf754c02a6"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ca4fa70401fca758cc999bf754c02a6" class="m-doc-self">setProjectionPruning</a>(</span><span class="m-doc-wrap">bool enabled)</span></span>
+            </h3>
+            <p>Enables control-hull projections in addition to axis-aligned boxes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">enabled</td>
+                  <td>Whether to enable projection-based pruning.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Disabled by default because construction and storage costs depend on geometry and query reuse. Enable to reduce Newton retries on overlapping boxes during repeated point location. Membership checks and Newton seed retries are unchanged. Invalidates the existing index.</p>
           </div></section>
           <section class="m-doc-details" id="af65dae747e0bf8c3345fdf083dff5dd6"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class MeshType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt; Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af65dae747e0bf8c3345fdf083dff5dd6" class="m-doc-self">locate</a>(</span><span class="m-doc-wrap">size_t dimension,
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af65dae747e0bf8c3345fdf083dff5dd6" class="m-doc-self">locate</a>(</span><span class="m-doc-wrap">size_t dimension,
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x) const</span></span>
             </h3>
             <p>Locates a physical point on a polytope of the requested dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dimension</td>
+                  <td>Topological dimension of the entities to search.</td>
+                </tr>
+                <tr>
+                  <td>x</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Located mesh point, or an empty optional when the query cannot be certified.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Returns an empty optional when the point is outside every candidate polytope, when the coordinate dimension is incompatible with the mesh, or when the inverse transformation does not pass the residual checks.</p>
+          </div></section>
+          <section class="m-doc-details" id="a93d9a733708bbdfa234fa7a5a3dec0a1"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93d9a733708bbdfa234fa7a5a3dec0a1" class="m-doc-self">locate</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x) const</span></span>
+            </h3>
+            <p>Locates a physical point on a cell of the mesh dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">x</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Located mesh point, or an empty optional when the query cannot be certified.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
@@ -324,13 +554,20 @@ $ B_K $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

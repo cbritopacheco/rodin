@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::TestFunction class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,10 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_test_function_8h.html">&lt;Rodin/Variational/TestFunction.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class FES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>TestFunction <span class="m-thin">class</span>
-        </h1>
-        <p>Represents a function which belongs to a test space.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>TestFunction</h1><p class="rodin-reference-brief">Represents a function which belongs to a test space.</p><p class="rodin-reference-include">Defined in <a href="_variational_2_test_function_8h.html"><code>Rodin/Variational/TestFunction.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_test_function.html#ac097bbdee0efafbe262474dae2bec15f"><span class="nc">TestFunction</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -94,12 +89,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md502">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md503">Usage Example</a></li>
+            <li><a href="#autotoc_md537">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md538">Usage Example</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-static-attribs">Public static variables</a></li>
@@ -137,7 +132,7 @@ $ v \in V_h $
 <use x='20.700016' y='0' xlink:href='#eq2-g2-86'/>
 <use x='27.524366' y='1.793263' xlink:href='#eq2-g1-104'/>
 </g>
-</svg> is chosen from this space.</p><section id="autotoc_md502"><h3><a href="#autotoc_md502">Mathematical Foundation</a></h3><p>The weak formulation seeks <svg class="m-math" style="width: 3.553em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 34.104401 9.962629">
+</svg> is chosen from this space.</p><section id="autotoc_md537"><h2><a href="#autotoc_md537">Mathematical Foundation</a></h2><p>The weak formulation seeks <svg class="m-math" style="width: 3.553em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 34.104401 9.962629">
 <title>
 $ u \in U_h $
 </title>
@@ -155,8 +150,7 @@ $ u \in U_h $
 </g>
 </svg> such that:</p><div class="m-math"><svg style="width: 12.389em; height: 1.245em;" viewBox="134.555141 -11.955168 118.934626 11.955168">
 <title>
-\[
-  a(u, v) = l(v) \quad \forall v \in V_h
+\[       a(u, v) = l(v) \quad \forall v \in V_h
 \]
 </title>
 <defs>
@@ -260,32 +254,16 @@ $ U_h $
 <use x='0' y='0' xlink:href='#eq9-g1-85'/>
 <use x='7.950255' y='1.793263' xlink:href='#eq9-g0-104'/>
 </g>
-</svg>)</li></ul></section><section id="autotoc_md503"><h3><a href="#autotoc_md503">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">                    </span><span class="c1">// Define finite element space</span>
-<span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w">              </span><span class="c1">// Define test function</span>
+</svg>)</li></ul></section><section id="autotoc_md538"><h2><a href="#autotoc_md538">Usage Example</a></h2><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">                    </span><span class="c1">// Define finite element space</span>
+<span class="nc">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w">              </span><span class="c1">// Define test function</span>
 
 <span class="c1">// Use in variational formulation</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">bilinearForm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">linearForm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>TrialFunction, ShapeFunction</p></aside></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction&lt;TestFunction&lt;FES&gt;, FES, TestSpace&gt;</a>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class FES&gt;</div>
-              class <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html" class="m-doc">Rodin::PETSc::Variational::TestFunction</a>
-            </dt>
-            <dd>PETSc-aware test function wrapper.</dd>
-          </dl>
-        </section>
+<span class="k">auto</span><span class="w"> </span><span class="n">bilinearForm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">linearForm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>TrialFunction, ShapeFunction</p></aside></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_shape_function.html" title="ShapeFunction&lt; TestFunction&lt; FES &gt;, FES, TestSpace &gt;">ShapeFunction</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">TestFunction</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html" title="PETSc::Variational::TestFunction&lt; FES &gt;">PETSc::Variational::TestFunction</a></li></ul></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_shape_function.html"><code>ShapeFunction&lt;TestFunction&lt;FES&gt;, …&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_shape_function.html"><span class="nc">ShapeFunction</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_test_function.html#ac097bbdee0efafbe262474dae2bec15f"><span class="nc">TestFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="n">TestSpace</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td></td></tr></tbody></table></section>
+        <section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html"><code>PETSc::Variational::TestFunction&lt;FES&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="nc">TestFunction</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>PETSc-aware test function wrapper.</td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -294,7 +272,7 @@ $ U_h $
             </dt>
             <dd>Finite element space type.</dd>
             <dt id="ad69591311394dbd92b75665e375d7ac9">
-              using <a href="#ad69591311394dbd92b75665e375d7ac9" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, TestSpace&gt;
+              using <a href="#ad69591311394dbd92b75665e375d7ac9" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;<a href="#ac097bbdee0efafbe262474dae2bec15f" class="m-doc">TestFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, TestSpace&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -305,7 +283,7 @@ $ U_h $
             <dt id="afcf8d604d4a7332984f336178bc218c3">
               static <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> <a href="#afcf8d604d4a7332984f336178bc218c3" class="m-doc-self">Space</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Space type (test space)</dd>
+            <dd>Space type (test space).</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -316,11 +294,11 @@ $ U_h $
             </dt>
             <dd>Constructs a test function in the given finite element space.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a300cc55c6945a79f8978e41fa63eaeba" class="m-doc">TestFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a300cc55c6945a79f8978e41fa63eaeba" class="m-doc">TestFunction</a>(</span><span class="m-doc-wrap">const TestFunction&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aa0302a27b6a9e192dfcb34e6b4642085" class="m-doc">TestFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#aa0302a27b6a9e192dfcb34e6b4642085" class="m-doc">TestFunction</a>(</span><span class="m-doc-wrap">TestFunction&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -328,12 +306,12 @@ $ U_h $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="abaef323bb8483405d756d19350c9ac26">
-              <span class="m-doc-wrap-bumper">void <a href="#abaef323bb8483405d756d19350c9ac26" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a3dc8d937f4f5b212dcce79088c477dbd" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ac097bbdee0efafbe262474dae2bec15f" class="m-doc">TestFunction</a>&amp; other) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Copy assignment is deleted.</dd>
-            <dt id="ac9cd733132eabbe434c4915d9517ac18">
-              <span class="m-doc-wrap-bumper">void <a href="#ac9cd733132eabbe434c4915d9517ac18" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp;&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#abbc41d44a982dc230b0871ee658a0354" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#ac097bbdee0efafbe262474dae2bec15f" class="m-doc">TestFunction</a>&amp;&amp; other) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Move assignment is deleted.</dd>
             <dt>
@@ -349,11 +327,11 @@ $ U_h $
             </dt>
             <dd>Gets the z-component of a vector-valued test function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab6bfe62a4243971aaca69b3caa9aae8f" class="m-doc">getLeaf</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab6bfe62a4243971aaca69b3caa9aae8f" class="m-doc">getLeaf</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ac097bbdee0efafbe262474dae2bec15f" class="m-doc">TestFunction</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the leaf (innermost) expression in the shape function tree.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#abf653a780732d2b7cf5dbd9cd33cef96" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abf653a780732d2b7cf5dbd9cd33cef96" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#ac097bbdee0efafbe262474dae2bec15f" class="m-doc">TestFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a copy of this test function.</dd>
           </dl>
@@ -362,10 +340,8 @@ $ U_h $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ac097bbdee0efafbe262474dae2bec15f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />TestFunction&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac097bbdee0efafbe262474dae2bec15f" class="m-doc-self">TestFunction</a>(</span><span class="m-doc-wrap">const FES&amp; fes) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac097bbdee0efafbe262474dae2bec15f" class="m-doc-self">TestFunction</a>(</span><span class="m-doc-wrap">const FES&amp; fes) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a test function in the given finite element space.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -382,10 +358,8 @@ $ U_h $
           </div></section>
           <section class="m-doc-details" id="a300cc55c6945a79f8978e41fa63eaeba"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />TestFunction&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a300cc55c6945a79f8978e41fa63eaeba" class="m-doc-self">TestFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a300cc55c6945a79f8978e41fa63eaeba" class="m-doc-self">TestFunction</a>(</span><span class="m-doc-wrap">const TestFunction&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -402,10 +376,8 @@ $ U_h $
           </div></section>
           <section class="m-doc-details" id="aa0302a27b6a9e192dfcb34e6b4642085"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />TestFunction&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0302a27b6a9e192dfcb34e6b4642085" class="m-doc-self">TestFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0302a27b6a9e192dfcb34e6b4642085" class="m-doc-self">TestFunction</a>(</span><span class="m-doc-wrap">TestFunction&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -420,12 +392,46 @@ $ U_h $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a3dc8d937f4f5b212dcce79088c477dbd"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3dc8d937f4f5b212dcce79088c477dbd" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ac097bbdee0efafbe262474dae2bec15f" class="m-doc">TestFunction</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+            <p>Copy assignment is deleted.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abbc41d44a982dc230b0871ee658a0354"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abbc41d44a982dc230b0871ee658a0354" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#ac097bbdee0efafbe262474dae2bec15f" class="m-doc">TestFunction</a>&amp;&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+            <p>Move assignment is deleted.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a20a02eeff14d68d1c188d8f2386dc91d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />TestFunction&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20a02eeff14d68d1c188d8f2386dc91d" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20a02eeff14d68d1c188d8f2386dc91d" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the x-component of a vector-valued test function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -451,10 +457,8 @@ $ v_x $
           </div></section>
           <section class="m-doc-details" id="a9de13de57bb32fb45b61d857a716cb3a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />TestFunction&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9de13de57bb32fb45b61d857a716cb3a" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9de13de57bb32fb45b61d857a716cb3a" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the y-component of a vector-valued test function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -480,10 +484,8 @@ $ v_y $
           </div></section>
           <section class="m-doc-details" id="acbf3185432eb4f4bdaa34d7ecd729535"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />TestFunction&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbf3185432eb4f4bdaa34d7ecd729535" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbf3185432eb4f4bdaa34d7ecd729535" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the z-component of a vector-valued test function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -509,10 +511,8 @@ $ v_z $
           </div></section>
           <section class="m-doc-details" id="ab6bfe62a4243971aaca69b3caa9aae8f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp; Rodin::<wbr />Variational::<wbr />TestFunction&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab6bfe62a4243971aaca69b3caa9aae8f" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#ac097bbdee0efafbe262474dae2bec15f" class="m-doc">TestFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab6bfe62a4243971aaca69b3caa9aae8f" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the leaf (innermost) expression in the shape function tree.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -526,10 +526,8 @@ $ v_z $
           </div></section>
           <section class="m-doc-details" id="abf653a780732d2b7cf5dbd9cd33cef96"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>* Rodin::<wbr />Variational::<wbr />TestFunction&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf653a780732d2b7cf5dbd9cd33cef96" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ac097bbdee0efafbe262474dae2bec15f" class="m-doc">TestFunction</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf653a780732d2b7cf5dbd9cd33cef96" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a copy of this test function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -580,13 +578,20 @@ $ v_z $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

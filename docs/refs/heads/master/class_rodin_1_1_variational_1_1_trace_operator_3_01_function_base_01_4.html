@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::TraceOperator&lt;FunctionBase&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,52 +71,110 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_trace_operator_8h.html">&lt;Rodin/Variational/TraceOperator.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>TraceOperator&lt;FunctionBase&gt; <span class="m-thin">class</span>
-        </h1>
-        <p>Trace (boundary restriction) operator for functions.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>TraceOperator</h1><p class="rodin-reference-brief">Trace (boundary restriction) operator for functions.</p><p class="rodin-reference-include">Defined in <a href="_trace_operator_8h.html"><code>Rodin/Variational/TraceOperator.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TraceOperator</span><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&gt;</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_trace_operator.html">TraceOperator</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Operand</code></td><td><code>FunctionBase</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
               </ul>
             </li>
           </ul>
         </nav>
 <p>TraceOperator restricts a function to a specified boundary region, enabling evaluation and integration on boundary surfaces.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;Derived&gt;</a>
-            </dt>
-            <dd>Base class for function objects which can be evaluated over a mesh.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_function_base.html" title="FunctionBase&lt; Derived &gt;">FunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">TraceOperator</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase&lt;Derived&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Derived</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for function objects which can be evaluated over a mesh.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>21 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ad29a755240e4c6938395b937a1c4a132"><code>copy()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#aa75b0ee8f7f82337ebf0b88abfa91b18"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2db2949e727b5e6fecadb8cc5645b4d3"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af5f065ebe0b3b1c58b0c2402a50fc9e3"><code>getValue()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#aa249459e67c36e2343e940d08970970a"><code>getValue()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a7c866cf8be951c464aceeb788579b29a"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a15eb99a5cecce266b59c5e7c1a9b2f4d"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ad7584a02ad39a4e93816d166a02c170c"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#afd564b09b05a55499d7576b85f69a01e"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a02f58f805c9cd09c1326a38fcb96f441"><code>Parent</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ad722433deff18a068eb7bd27da532d45"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#aba5919eddb1f90f8ca65bbd25d065d60"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a20dbe1cce6705b4f3b317244eb839c26">
-              <span class="m-doc-wrap-bumper"><a href="#a20dbe1cce6705b4f3b317244eb839c26" class="m-doc-self">TraceOperator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&amp; fn,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a20dbe1cce6705b4f3b317244eb839c26" class="m-doc">TraceOperator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&amp; fn,
               <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr)</span>
             </dt>
             <dd>Constructs the trace of a function on a mesh attribute.</dd>
-            <dt id="a61b97c38f25b9b7923ba3d68b69db4e6">
-              <span class="m-doc-wrap-bumper"><a href="#a61b97c38f25b9b7923ba3d68b69db4e6" class="m-doc-self">TraceOperator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trace_operator.html" class="m-doc">TraceOperator</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a61b97c38f25b9b7923ba3d68b69db4e6" class="m-doc">TraceOperator</a>(</span><span class="m-doc-wrap">const TraceOperator&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a48bfaf418f84017e6832f7462a0c9fc5">
-              <span class="m-doc-wrap-bumper"><a href="#a48bfaf418f84017e6832f7462a0c9fc5" class="m-doc-self">TraceOperator</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trace_operator.html" class="m-doc">TraceOperator</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a48bfaf418f84017e6832f7462a0c9fc5" class="m-doc">TraceOperator</a>(</span><span class="m-doc-wrap">TraceOperator&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a20dbe1cce6705b4f3b317244eb839c26"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20dbe1cce6705b4f3b317244eb839c26" class="m-doc-self">TraceOperator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&amp; fn,
+              <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr)</span></span>
+            </h3>
+            <p>Constructs the trace of a function on a mesh attribute.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+                <tr>
+                  <td>attr</td>
+                  <td>Mesh attribute selecting the region.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a61b97c38f25b9b7923ba3d68b69db4e6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a61b97c38f25b9b7923ba3d68b69db4e6" class="m-doc-self">TraceOperator</a>(</span><span class="m-doc-wrap">const TraceOperator&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a48bfaf418f84017e6832f7462a0c9fc5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a48bfaf418f84017e6832f7462a0c9fc5" class="m-doc-self">TraceOperator</a>(</span><span class="m-doc-wrap">TraceOperator&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -159,13 +214,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::PyramidIndex struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,10 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_element_8hpp.html">&lt;Rodin/Variational/H1/H1Element.hpp&gt;</a></div>
-          <div class="m-doc-template">template&lt;size_t K&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>PyramidIndex <span class="m-thin">struct</span>
-        </h1>
-        <p>Indexing of the tensor-product modes on the reference pyramid.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>PyramidIndex</h1><p class="rodin-reference-brief">Indexing of the tensor-product modes on the reference pyramid.</p><p class="rodin-reference-include">Defined in <a href="_h1_element_8hpp.html"><code>Rodin/Variational/H1/H1Element.hpp</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">PyramidIndex</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -114,33 +109,180 @@
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
-            <dt id="a00990ba2772728ed92e9ccd72f9bea6f">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a00990ba2772728ed92e9ccd72f9bea6f" class="m-doc-self">getLayerOffset</a>(</span><span class="m-doc-wrap">size_t layer) -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a00990ba2772728ed92e9ccd72f9bea6f" class="m-doc">getLayerOffset</a>(</span><span class="m-doc-wrap">size_t layer) -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the index offset of a pyramid layer.</dd>
-            <dt id="af6aad5abdb272be8e0a364aefc22c89e">
-              <span class="m-doc-wrap-bumper">static auto <a href="#af6aad5abdb272be8e0a364aefc22c89e" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">size_t i,
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#af6aad5abdb272be8e0a364aefc22c89e" class="m-doc">getIndex</a>(</span><span class="m-doc-wrap">size_t i,
               size_t j,
               size_t k) -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the linear index of a tensor-product mode.</dd>
-            <dt id="a75a73695b45d04de3cedd3431292f321">
-              <span class="m-doc-wrap-bumper">static void <a href="#a75a73695b45d04de3cedd3431292f321" class="m-doc-self">decode</a>(</span><span class="m-doc-wrap">size_t idx,
+            <dt>
+              <span class="m-doc-wrap-bumper">static void <a href="#a75a73695b45d04de3cedd3431292f321" class="m-doc">decode</a>(</span><span class="m-doc-wrap">size_t idx,
               size_t&amp; i,
               size_t&amp; j,
               size_t&amp; k) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Decodes a linear index into its tensor-product indices.</dd>
-            <dt id="a67d10510b647e0d534d2511e79225fcb">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a67d10510b647e0d534d2511e79225fcb" class="m-doc-self">getTriangleLattice</a>(</span><span class="m-doc-wrap">size_t alpha) -&gt; <a href="struct_rodin_1_1_variational_1_1_pyramid_index_1_1_i_j.html" class="m-doc">IJ</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a67d10510b647e0d534d2511e79225fcb" class="m-doc">getTriangleLattice</a>(</span><span class="m-doc-wrap">size_t alpha) -&gt; <a href="struct_rodin_1_1_variational_1_1_pyramid_index_1_1_i_j.html" class="m-doc">IJ</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the number of modes on a triangular lattice.</dd>
-            <dt id="abf7a5de4046671f75b591213bbd24802">
-              <span class="m-doc-wrap-bumper">static auto <a href="#abf7a5de4046671f75b591213bbd24802" class="m-doc-self">getSideIndex</a>(</span><span class="m-doc-wrap">size_t local,
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#abf7a5de4046671f75b591213bbd24802" class="m-doc">getSideIndex</a>(</span><span class="m-doc-wrap">size_t local,
               size_t alpha) -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the index of a mode on a pyramid side.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a00990ba2772728ed92e9ccd72f9bea6f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">static size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a00990ba2772728ed92e9ccd72f9bea6f" class="m-doc-self">getLayerOffset</a>(</span><span class="m-doc-wrap">size_t layer) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the index offset of a pyramid layer.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">layer</td>
+                  <td>Lattice layer index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The index offset of a pyramid layer.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af6aad5abdb272be8e0a364aefc22c89e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">static size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6aad5abdb272be8e0a364aefc22c89e" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j,
+              size_t k) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the linear index of a tensor-product mode.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>j</td>
+                  <td>Index of the second coordinate.</td>
+                </tr>
+                <tr>
+                  <td>k</td>
+                  <td>Index of the requested lattice entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The linear index of a tensor-product mode.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a75a73695b45d04de3cedd3431292f321"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75a73695b45d04de3cedd3431292f321" class="m-doc-self">decode</a>(</span><span class="m-doc-wrap">size_t idx,
+              size_t&amp; i,
+              size_t&amp; j,
+              size_t&amp; k) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Decodes a linear index into its tensor-product indices.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">idx</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>j</td>
+                  <td>Index of the second coordinate.</td>
+                </tr>
+                <tr>
+                  <td>k</td>
+                  <td>Storage for the decoded lattice index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a67d10510b647e0d534d2511e79225fcb"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">static <a href="struct_rodin_1_1_variational_1_1_pyramid_index_1_1_i_j.html" class="m-doc">IJ</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67d10510b647e0d534d2511e79225fcb" class="m-doc-self">getTriangleLattice</a>(</span><span class="m-doc-wrap">size_t alpha) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the number of modes on a triangular lattice.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">alpha</td>
+                  <td>Basis or lattice index in the reference element.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The number of modes on a triangular lattice.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abf7a5de4046671f75b591213bbd24802"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">static size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf7a5de4046671f75b591213bbd24802" class="m-doc-self">getSideIndex</a>(</span><span class="m-doc-wrap">size_t local,
+              size_t alpha) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the index of a mode on a pyramid side.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">local</td>
+                  <td>Index in the local numbering.</td>
+                </tr>
+                <tr>
+                  <td>alpha</td>
+                  <td>Basis or lattice index in the reference element.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The index of a mode on a pyramid side.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -180,13 +322,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

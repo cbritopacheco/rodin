@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Alert::RGB struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,12 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;size_t RED, size_t GREEN, size_t BLUE&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>RGB <span class="m-thin">struct</span>
-        </h1>
-        <p>RGB color template with compile-time color values.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_alert.html">Alert</a></div><h1>RGB</h1><p class="rodin-reference-brief">RGB color template with compile-time color values.</p><p class="rodin-reference-include">Defined in <a href="_color_8h.html"><code>Rodin/Alert/Color.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">RED</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">GREEN</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">BLUE</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">RGB</span><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -111,7 +109,7 @@
             </li>
           </ul>
         </nav>
-<p>Forward declaration of RGB color template.</p><p>Template struct for representing RGB colors with compile-time validation. The color components are constrained to the range [0, 255] using static assertions. This enables type-safe custom terminal colors.</p><p>Example usage: <code class="m-code"><span class="k">using</span><span class="w"> </span><span class="n">MyColor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RGB</span><span class="o">&lt;</span><span class="mi">128</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="o">&gt;</span><span class="p">;</span></code></p><p>Template struct representing RGB color values for custom terminal colors.</p>
+<p>Forward declaration of RGB color template.</p><p>Template struct for representing RGB colors with compile-time validation. The color components are constrained to the range [0, 255] using static assertions. This enables type-safe custom terminal colors.</p><p>Example usage: <code class="m-code"><span class="k">using</span><span class="w"> </span><span class="n">MyColor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">RGB</span><span class="o">&lt;</span><span class="mi">128</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="o">&gt;</span><span class="p">;</span></code></p><p>Template struct representing RGB color values for custom terminal colors.</p>
         <section id="pub-static-attribs">
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
@@ -136,12 +134,12 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a0b9de70a77633e2648995ce4f34cee39">
-              <span class="m-doc-wrap-bumper"><a href="#a0b9de70a77633e2648995ce4f34cee39" class="m-doc-self">RGB</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab876e7237ccff51d6e892a43314044ff" class="m-doc">RGB</a>(</span><span class="m-doc-wrap">const RGB&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a7ca4be0edf3d37dbc569ff4c72a453ed">
-              <span class="m-doc-wrap-bumper"><a href="#a7ca4be0edf3d37dbc569ff4c72a453ed" class="m-doc-self">RGB</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a50a677b3d7f8fe62fe72d1c462dbae25" class="m-doc">RGB</a>(</span><span class="m-doc-wrap">RGB&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -149,12 +147,12 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a22ebc85ceb0846e364b67f689dc023c5">
-              <span class="m-doc-wrap-bumper">auto <a href="#a22ebc85ceb0846e364b67f689dc023c5" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a>&amp;) -&gt; <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab027c14a9bf36b833b2bb8142c1b9fc6" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const RGB&amp; other) -&gt; RGB&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
-            <dt id="a66362d4d39801e92ff92b9fccb5d5912">
-              <span class="m-doc-wrap-bumper">auto <a href="#a66362d4d39801e92ff92b9fccb5d5912" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a>&amp;&amp;) -&gt; <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a857fe437e921a800222bd5b389766a42" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">RGB&amp;&amp; other) -&gt; RGB&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
@@ -177,12 +175,94 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ab876e7237ccff51d6e892a43314044ff"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab876e7237ccff51d6e892a43314044ff" class="m-doc-self">RGB</a>(</span><span class="m-doc-wrap">const RGB&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a50a677b3d7f8fe62fe72d1c462dbae25"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a50a677b3d7f8fe62fe72d1c462dbae25" class="m-doc-self">RGB</a>(</span><span class="m-doc-wrap">RGB&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab027c14a9bf36b833b2bb8142c1b9fc6"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">RGB&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab027c14a9bf36b833b2bb8142c1b9fc6" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const RGB&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a857fe437e921a800222bd5b389766a42"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">RGB&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a857fe437e921a800222bd5b389766a42" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">RGB&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a45316f291fb4b39a7c1ff34a3dea8016"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t RED, size_t GREEN, size_t BLUE&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Alert::<wbr />RGB&lt;RED, GREEN, BLUE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45316f291fb4b39a7c1ff34a3dea8016" class="m-doc-self">r</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45316f291fb4b39a7c1ff34a3dea8016" class="m-doc-self">r</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the red component value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -196,10 +276,8 @@
           </div></section>
           <section class="m-doc-details" id="a002559b44d8fe12ec939f49300e0df19"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t RED, size_t GREEN, size_t BLUE&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Alert::<wbr />RGB&lt;RED, GREEN, BLUE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a002559b44d8fe12ec939f49300e0df19" class="m-doc-self">g</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a002559b44d8fe12ec939f49300e0df19" class="m-doc-self">g</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the green component value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -213,10 +291,8 @@
           </div></section>
           <section class="m-doc-details" id="a0111e2e50dde22c88e6da3c9a329eac0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t RED, size_t GREEN, size_t BLUE&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Alert::<wbr />RGB&lt;RED, GREEN, BLUE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0111e2e50dde22c88e6da3c9a329eac0" class="m-doc-self">b</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0111e2e50dde22c88e6da3c9a329eac0" class="m-doc-self">b</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the blue component value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -230,10 +306,8 @@
           </div></section>
           <section class="m-doc-details" id="adf895e85532850742c72ede6d5cacf38"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t RED, size_t GREEN, size_t BLUE&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Alert::<wbr />RGB&lt;RED, GREEN, BLUE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf895e85532850742c72ede6d5cacf38" class="m-doc-self">hex</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf895e85532850742c72ede6d5cacf38" class="m-doc-self">hex</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the hexadecimal representation of the color.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -284,13 +358,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

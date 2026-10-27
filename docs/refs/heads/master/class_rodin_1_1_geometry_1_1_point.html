@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::Point class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,20 +71,17 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Point <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_point_8h.html">&lt;Rodin/Geometry/Point.h&gt;</a></div>
-        </h1>
-        <p>Concrete implementation of a spatial point on a mesh.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a></div><h1>Point <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Concrete implementation of a spatial point on a mesh.</p><p class="rodin-reference-include">Defined in <a href="_point_8h.html"><code>Rodin/Geometry/Point.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_point.html#a4f231e95b03354c371d83171078c51d2"><span class="nc">Point</span></a><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md95">Usage Examples</a></li>
-            <li><a href="#autotoc_md96">Thread Safety</a></li>
+            <li><a href="#autotoc_md101">Usage Examples</a></li>
+            <li><a href="#autotoc_md102">Thread Safety</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -95,31 +89,24 @@
             </li>
           </ul>
         </nav>
-<p>This class provides a complete implementation of PointBase with storage for reference coordinates. Points can be constructed with various combinations of reference and physical coordinates.</p><section id="autotoc_md95"><h2><a href="#autotoc_md95">Usage Examples</a></h2><pre class="m-code"><span class="c1">// Create a point at the centroid of a cell in reference coordinates</span>
-<span class="n">Math</span><span class="o">::</span><span class="n">SpatialPoint</span><span class="w"> </span><span class="nf">rc</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<p>This class provides a complete implementation of PointBase with storage for reference coordinates. Points can be constructed with various combinations of reference and physical coordinates.</p><section id="autotoc_md101"><h2><a href="#autotoc_md101">Usage Examples</a></h2><pre class="m-code"><span class="c1">// Create a point at the centroid of a cell in reference coordinates</span>
+<span class="n">Math</span><span class="o">::</span><span class="nc">SpatialPoint</span><span class="w"> </span><span class="nf">rc</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
 <span class="n">rc</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mf">0.25</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25</span><span class="p">;</span><span class="w">  </span><span class="c1">// Barycentric coords for tetrahedron</span>
-<span class="n">Point</span><span class="w"> </span><span class="nf">p</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span><span class="w"> </span><span class="n">rc</span><span class="p">);</span>
+<span class="nc">Point</span><span class="w"> </span><span class="nf">p</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span><span class="w"> </span><span class="n">rc</span><span class="p">);</span>
 
 <span class="c1">// Access physical coordinates</span>
 <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"x = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", y = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", z = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">z</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 
 <span class="c1">// Compute Jacobian information</span>
 <span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">J</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getJacobian</span><span class="p">();</span>
-<span class="n">Real</span><span class="w"> </span><span class="n">detJ</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getJacobianDeterminant</span><span class="p">();</span></pre></section><section id="autotoc_md96"><h2><a href="#autotoc_md96">Thread Safety</a></h2><p>Not thread-safe. Each thread should use separate Point instances.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_point_base.html">PointBase</a></p><p><a href="class_rodin_1_1_geometry_1_1_polytope.html">Polytope</a></p><p><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html">PolytopeTransformation</a></p></aside></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a>
-            </dt>
-            <dd>Base class for spatial points on a discrete mesh.</dd>
-          </dl>
-        </section>
+<span class="nc">Real</span><span class="w"> </span><span class="n">detJ</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getJacobianDeterminant</span><span class="p">();</span></pre></section><section id="autotoc_md102"><h2><a href="#autotoc_md102">Thread Safety</a></h2><p>Not thread-safe. Each thread should use separate Point instances.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope.html">Polytope</a></p><p><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html">PolytopeTransformation</a></p></aside></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_point_base.html" title="PointBase">PointBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Point</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_point_base.html"><code>PointBase</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a1f4d2ff82fdcdd9b5805f3517a1dac4b"><span class="nc">PointBase</span></a>
+</pre></details></td><td>Base class for spatial points on a discrete mesh.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_point.html#adc5e3bc7d96dec7a43585c3520187a80"><code>getReferenceCoordinates()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_point_base.html#a321e2dee224d92cbbb2c32475e9451ca">PointBase::getReferenceCoordinates</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_point_base.html"><code>PointBase</code></a></td><td><details><summary>21 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#ae6f846771e19c0215cfbce4b591d8fb8"><code>blueNorm()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759"><code>Coordinates</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#ae978fb237b6e8f9d9cc17ac2327b682b"><code>getCoordinates()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#ac38f5f57c32771d1461008d3622aa137"><code>getDimension()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#a26211db859a52ebc2b03b4edec0c45d4"><code>getDistortion()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#ad1a7025f27342ac2ccba42850cce2e3c"><code>getJacobian()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#aa54384e819c3409f3ba04d7d85d7e422"><code>getJacobianDeterminant()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#ab4e089d30fb92a0c3972fbd127dc5fb3"><code>getJacobianInverse()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#ab58e9c8e7cce934bd765fbcb9ac19fe7"><code>getPhysicalCoordinates()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#a68e9aa816afb05b7a7bce6570afb2f11"><code>getPolytope()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#a1aab438162f8e6311caee3ac39ede38e"><code>lpNorm()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#ac2db078dfcc85672be2e6c7d351ecc45"><code>norm()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#a984b60ebb60699abe85cce103526338b"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#a665c72bcce6234267d2b00abdf87ab40"><code>operator&lt;()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#a7c7e5fbadae0c5cc29ed95a92bd0d1eb"><code>setPolytope()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#a769f8937ed4c8e87ee1f9d71575ac922"><code>squaredNorm()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#aea27891f2dec23a98e002c9b48b41081"><code>stableNorm()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01"><code>vector()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#af8a4ce6e2796488eabc85722cc484a40"><code>x()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#a8439f99c0c6a5366e4b01a22c1a21386"><code>y()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_point_base.html#ad401d038a4eca871937708925ae57727"><code>z()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a9eef895e3177c5cf56e1bb618ea21318">
-              using <a href="#a9eef895e3177c5cf56e1bb618ea21318" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a>
+              using <a href="#a9eef895e3177c5cf56e1bb618ea21318" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_point_base.html#a1f4d2ff82fdcdd9b5805f3517a1dac4b" class="m-doc">PointBase</a>
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -128,22 +115,35 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a4f231e95b03354c371d83171078c51d2" class="m-doc">Point</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
-              <a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#a4f231e95b03354c371d83171078c51d2" class="m-doc">Point</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs a point with reference coordinates.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a0046cbdf3dc1f2c301826d8b7873c477" class="m-doc">Point</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
-              <a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc,
-              <a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#a0046cbdf3dc1f2c301826d8b7873c477" class="m-doc">Point</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs with both reference and physical coordinates.</dd>
-            <dt id="a383ee92cd12d8fcafc7df62084caf7b2">
-              <span class="m-doc-wrap-bumper"><a href="#a383ee92cd12d8fcafc7df62084caf7b2" class="m-doc-self">Point</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#abda4cdd1d82a40b5a0a1301c61f1afc0" class="m-doc">Point</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc)</span>
+            </dt>
+            <dd>Constructs a reference point with a precomputed geometric Jacobian.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae6d649acf11f070eca2d0e17d4c67702" class="m-doc">Point</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp; qf,
+              size_t qp)</span>
+            </dt>
+            <dd>Constructs an owned reference sample with lazy physical coordinates.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a383ee92cd12d8fcafc7df62084caf7b2" class="m-doc">Point</a>(</span><span class="m-doc-wrap">const Point&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a5dc7a0c81a1a59d9766984ec3553df38">
-              <span class="m-doc-wrap-bumper"><a href="#a5dc7a0c81a1a59d9766984ec3553df38" class="m-doc-self">Point</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5dc7a0c81a1a59d9766984ec3553df38" class="m-doc">Point</a>(</span><span class="m-doc-wrap">Point&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -152,7 +152,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adc5e3bc7d96dec7a43585c3520187a80" class="m-doc">getReferenceCoordinates</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adc5e3bc7d96dec7a43585c3520187a80" class="m-doc">getReferenceCoordinates</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the reference coordinates.</dd>
           </dl>
@@ -161,8 +161,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a4f231e95b03354c371d83171078c51d2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f231e95b03354c371d83171078c51d2" class="m-doc-self">Point</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
-              <a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f231e95b03354c371d83171078c51d2" class="m-doc-self">Point</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Constructs a point with reference coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -183,9 +183,9 @@
           </div></section>
           <section class="m-doc-details" id="a0046cbdf3dc1f2c301826d8b7873c477"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0046cbdf3dc1f2c301826d8b7873c477" class="m-doc-self">Point</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
-              <a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc,
-              <a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0046cbdf3dc1f2c301826d8b7873c477" class="m-doc-self">Point</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Constructs with both reference and physical coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -208,9 +208,104 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="abda4cdd1d82a40b5a0a1301c61f1afc0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abda4cdd1d82a40b5a0a1301c61f1afc0" class="m-doc-self">Point</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc)</span></span>
+            </h3>
+            <p>Constructs a reference point with a precomputed geometric Jacobian.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">jacobian&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Jacobian of the polytope transformation at <code>rc</code>.</td>
+                </tr>
+                <tr>
+                  <td>polytope&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Polytope containing the point.</td>
+                </tr>
+                <tr>
+                  <td>rc&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference coordinates at which the Jacobian was evaluated.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>No reference to a formula or reference tabulation is retained. Copies and moves preserve the owned geometric data independently of the quadrature object that constructed the point. The distinct Jacobian-first signature preserves existing construction from Eigen coordinate expressions without conversion ambiguity.</p>
+          </div></section>
+          <section class="m-doc-details" id="ae6d649acf11f070eca2d0e17d4c67702"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6d649acf11f070eca2d0e17d4c67702" class="m-doc-self">Point</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp; qf,
+              size_t qp)</span></span>
+            </h3>
+            <p>Constructs an owned reference sample with lazy physical coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">jacobian</td>
+                  <td>Geometric Jacobian at sample <code>qp</code>.</td>
+                </tr>
+                <tr>
+                  <td>polytope</td>
+                  <td>Polytope containing the mapped sample.</td>
+                </tr>
+                <tr>
+                  <td>qf</td>
+                  <td>Formula supplying the reference coordinates.</td>
+                </tr>
+                <tr>
+                  <td>qp</td>
+                  <td>Sample index in the formula.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Reference coordinates are copied from the formula, so their logical provenance is established by construction. A retained point remains valid after formula destruction or reference-table eviction.</p>
+          </div></section>
+          <section class="m-doc-details" id="a383ee92cd12d8fcafc7df62084caf7b2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a383ee92cd12d8fcafc7df62084caf7b2" class="m-doc-self">Point</a>(</span><span class="m-doc-wrap">const Point&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5dc7a0c81a1a59d9766984ec3553df38"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5dc7a0c81a1a59d9766984ec3553df38" class="m-doc-self">Point</a>(</span><span class="m-doc-wrap">Point&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="adc5e3bc7d96dec7a43585c3520187a80"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a1e08531e17444fe8005f3a55c6ba2a01" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc5e3bc7d96dec7a43585c3520187a80" class="m-doc-self">getReferenceCoordinates</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc5e3bc7d96dec7a43585c3520187a80" class="m-doc-self">getReferenceCoordinates</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the reference coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -261,13 +356,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

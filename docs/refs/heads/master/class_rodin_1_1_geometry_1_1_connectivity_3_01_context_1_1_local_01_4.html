@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::Connectivity&lt;Context::Local&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,30 +71,28 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_connectivity_8h.html">&lt;Rodin/Geometry/Connectivity.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Connectivity&lt;Context::Local&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Mesh connectivity for sequential (local) meshes.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a></div><h1>Connectivity <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Mesh connectivity for sequential (local) meshes.</p><p class="rodin-reference-include">Defined in <a href="_connectivity_8h.html"><code>Rodin/Geometry/Connectivity.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Connectivity</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_geometry_1_1_connectivity.html">Connectivity</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>ContextType</code></td><td><code>Context::Local</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md58">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md66">Mathematical Foundation</a></li>
             <li>
-              <a href="#autotoc_md59">Usage</a>
+              <a href="#autotoc_md67">Usage</a>
               <ul>
-                <li><a href="#autotoc_md60">Basic Connectivity Computation</a></li>
-                <li><a href="#autotoc_md61">Mode Parameter</a></li>
-                <li><a href="#autotoc_md62">Common Connectivity Patterns</a></li>
+                <li><a href="#autotoc_md68">Basic Connectivity Computation</a></li>
+                <li><a href="#autotoc_md69">Mode Parameter</a></li>
+                <li><a href="#autotoc_md70">Common Connectivity Patterns</a></li>
               </ul>
             </li>
-            <li><a href="#autotoc_md63">Storage Efficiency</a></li>
-            <li><a href="#autotoc_md64">Thread Safety</a></li>
+            <li><a href="#autotoc_md71">Storage Efficiency</a></li>
+            <li><a href="#autotoc_md72">Thread Safety</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -120,7 +115,7 @@ $ d \rightarrow d&#x27; $
 <use x='24.679554' y='0' xlink:href='#eq1-g2-100'/>
 <use x='30.762247' y='-4.338437' xlink:href='#eq1-g0-48'/>
 </g>
-</svg> between polytopes</li><li>Geometry types for all polytopes</li></ul><section id="autotoc_md58"><h2><a href="#autotoc_md58">Mathematical Foundation</a></h2><p>For a mesh with topological dimension <svg class="m-math" style="width: 1.046em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.044475 8.169366">
+</svg> between polytopes</li><li>Geometry types for all polytopes</li></ul><section id="autotoc_md66"><h2><a href="#autotoc_md66">Mathematical Foundation</a></h2><p>For a mesh with topological dimension <svg class="m-math" style="width: 1.046em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.044475 8.169366">
 <title>
 $ D $
 </title>
@@ -132,8 +127,7 @@ $ D $
 </g>
 </svg>, the connectivity stores all incidence relations:</p><div class="m-math"><svg style="width: 13.130em; height: 1.218em;" viewBox="131.248981 -11.688635 126.045039 11.688647">
 <title>
-\[
- d \longrightarrow d&#x27;, \quad 0 \leq d, d&#x27; \leq D
+\[ d \longrightarrow d&#x27;, \quad 0 \leq d, d&#x27; \leq D
 \]
 </title>
 <defs>
@@ -199,24 +193,24 @@ $ d&#x27; $
 <use x='0' y='0' xlink:href='#eq6-g1-100'/>
 <use x='6.082693' y='-4.338437' xlink:href='#eq6-g0-48'/>
 </g>
-</svg>-dimensional polytopes.</p></section><section id="autotoc_md59"><h2><a href="#autotoc_md59">Usage</a></h2><section id="autotoc_md60"><h3><a href="#autotoc_md60">Basic Connectivity Computation</a></h3><p>Connectivity must be computed before use. The compute() method accepts an optional Mode parameter to control how missing polytopes are handled:</p><pre class="m-code"><span class="c1">// Compute face-to-cell incidence (edges to cells in 2D)</span>
+</svg>-dimensional polytopes.</p></section><section id="autotoc_md67"><h2><a href="#autotoc_md67">Usage</a></h2><section id="autotoc_md68"><h3><a href="#autotoc_md68">Basic Connectivity Computation</a></h3><p>Connectivity must be computed before use. The compute() method accepts an optional Mode parameter to control how missing polytopes are handled:</p><pre class="m-code"><span class="c1">// Compute face-to-cell incidence (edges to cells in 2D)</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
 
 <span class="c1">// Compute with explicit mode (default is Mode::Discover)</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">Connectivity</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;::</span><span class="n">Mode</span><span class="o">::</span><span class="n">Discover</span><span class="p">);</span></pre></section><section id="autotoc_md61"><h3><a href="#autotoc_md61">Mode Parameter</a></h3><p>The Mode parameter controls how connectivity computation handles missing polytopes:</p><ul><li><strong>Mode::Discover</strong> (default): Automatically discovers and creates missing sub-polytopes (e.g., edges, faces) during computation. This is the most common mode and ensures all necessary polytopes exist.</li><li><strong>Mode::Restrict</strong>: Only uses polytopes that already exist in the connectivity. Missing polytopes are not created. This mode is useful when you want to restrict connectivity to a specific subset of polytopes or when all required polytopes have been pre-computed.</li></ul><p>Example demonstrating the difference:</p><pre class="m-code"><span class="n">Connectivity</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">connectivity</span><span class="p">;</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nc">Connectivity</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;::</span><span class="nc">Mode</span><span class="o">::</span><span class="no">Discover</span><span class="p">);</span></pre></section><section id="autotoc_md69"><h3><a href="#autotoc_md69">Mode Parameter</a></h3><p>The Mode parameter controls how connectivity computation handles missing polytopes:</p><ul><li><strong>Mode::Discover</strong> (default): Automatically discovers and creates missing sub-polytopes (e.g., edges, faces) during computation. This is the most common mode and ensures all necessary polytopes exist.</li><li><strong>Mode::Restrict</strong>: Only uses polytopes that already exist in the connectivity. Missing polytopes are not created. This mode is useful when you want to restrict connectivity to a specific subset of polytopes or when all required polytopes have been pre-computed.</li></ul><p>Example demonstrating the difference:</p><pre class="m-code"><span class="nc">Connectivity</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">connectivity</span><span class="p">;</span>
 <span class="n">connectivity</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 <span class="w">            </span><span class="p">.</span><span class="n">nodes</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-<span class="w">            </span><span class="p">.</span><span class="n">polytope</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">})</span>
-<span class="w">            </span><span class="p">.</span><span class="n">polytope</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">});</span>
+<span class="w">            </span><span class="p">.</span><span class="n">polytope</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">})</span>
+<span class="w">            </span><span class="p">.</span><span class="n">polytope</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">});</span>
 
 <span class="c1">// Mode::Discover will create all edges automatically</span>
-<span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">Connectivity</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;::</span><span class="n">Mode</span><span class="o">::</span><span class="n">Discover</span><span class="p">);</span>
+<span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nc">Connectivity</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;::</span><span class="nc">Mode</span><span class="o">::</span><span class="no">Discover</span><span class="p">);</span>
 <span class="c1">// Now connectivity.getCount(1) returns 5 (the edges were created)</span>
 
 <span class="c1">// Mode::Restrict only uses existing edges</span>
 <span class="n">connectivity</span><span class="p">.</span><span class="n">clear</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
-<span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">Connectivity</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;::</span><span class="n">Mode</span><span class="o">::</span><span class="n">Restrict</span><span class="p">);</span>
-<span class="c1">// Uses only edges that already exist (all 5 from previous computation)</span></pre></section><section id="autotoc_md62"><h3><a href="#autotoc_md62">Common Connectivity Patterns</a></h3><pre class="m-code"><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">conn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">();</span>
+<span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nc">Connectivity</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;::</span><span class="nc">Mode</span><span class="o">::</span><span class="no">Restrict</span><span class="p">);</span>
+<span class="c1">// Uses only edges that already exist (all 5 from previous computation)</span></pre></section><section id="autotoc_md70"><h3><a href="#autotoc_md70">Common Connectivity Patterns</a></h3><pre class="m-code"><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">conn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">();</span>
 
 <span class="c1">// Compute cell-to-vertex connectivity</span>
 <span class="n">conn</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
@@ -229,16 +223,9 @@ $ d&#x27; $
 
 <span class="c1">// Get the edges of a specific cell</span>
 <span class="n">conn</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
-<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">edges</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">conn</span><span class="p">.</span><span class="n">getIncidence</span><span class="p">({</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="n">cellIndex</span><span class="p">);</span></pre></section></section><section id="autotoc_md63"><h2><a href="#autotoc_md63">Storage Efficiency</a></h2><p>The implementation is based on the efficient connectivity storage scheme described in <a href="citelist.html#CITEREF_logg2009efficient" class="m-doc">[7]</a>, which minimizes memory usage while enabling fast queries.</p></section><section id="autotoc_md64"><h2><a href="#autotoc_md64">Thread Safety</a></h2><p>Connectivity objects are not thread-safe during construction. Once finalized, read-only access is thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html">ConnectivityBase</a></p><p><a href="class_rodin_1_1_geometry_1_1_mesh.html">Mesh</a></p><p><a href="class_rodin_1_1_geometry_1_1_connectivity.html">Connectivity</a></p></aside></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>
-            </dt>
-            <dd>Abstract base class for mesh connectivity.</dd>
-          </dl>
-        </section>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">edges</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">conn</span><span class="p">.</span><span class="n">getIncidence</span><span class="p">({</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="n">cellIndex</span><span class="p">);</span></pre></section></section><section id="autotoc_md71"><h2><a href="#autotoc_md71">Storage Efficiency</a></h2><p>The implementation is based on the efficient connectivity storage scheme described in <a href="citelist.html#CITEREF_logg2009efficient" class="m-doc">[7]</a>, which minimizes memory usage while enabling fast queries.</p></section><section id="autotoc_md72"><h2><a href="#autotoc_md72">Thread Safety</a></h2><p>Connectivity objects are not thread-safe during construction. Once finalized, read-only access is thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh.html">Mesh</a></p></aside></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" title="ConnectivityBase">ConnectivityBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Connectivity</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html"><code>ConnectivityBase</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">ConnectivityBase</span>
+</pre></details></td><td>Abstract base class for mesh connectivity.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4.html#a689da7a36c441a0525e47787cc3f15aa"><code>getCount()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html#ab3a30530dc4724d558f254f044afa158">ConnectivityBase::getCount</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4.html#aa10ef02c10dd2f6239f37c08dc889b37"><code>getCount()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html#a880767b98276469d1b8776f68ecde624">ConnectivityBase::getCount</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4.html#a6f7b22045efba4c92b80c545b2100c1f"><code>getDimension()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html#aecbab974d66ff87d16610de96cf16878">ConnectivityBase::getDimension</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4.html#a33e3750d36fa38c0be4845901217d106"><code>getGeometry()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html#ac2a574f3f0ad9634fdbbc820cb7fee72">ConnectivityBase::getGeometry</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4.html#aac212244257c63d25888d1d0599eeb2c"><code>getPolytope()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html#a109480fe4c7a6b13c35e8092dfd44680">ConnectivityBase::getPolytope</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4.html#a5334684563c08049e041aae345942dc2"><code>getIncidence()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html#a755088e67ab39f1da8f3497fc95e1506">ConnectivityBase::getIncidence</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4.html#aa51539662d2c7cff28c383ece0e92ff8"><code>getIncidence()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html#af854f9f91cb32c7e92ee78b0123b6b0b">ConnectivityBase::getIncidence</a></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -267,11 +254,11 @@ $ d&#x27; $
             </dt>
             <dd>Default constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#abc4049bc41f31c69e3b8b70236c3e0b9" class="m-doc">Connectivity</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#abc4049bc41f31c69e3b8b70236c3e0b9" class="m-doc">Connectivity</a>(</span><span class="m-doc-wrap">const Connectivity&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a422b81ee8c346743fee2337037ca52c8" class="m-doc">Connectivity</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ab708fef38cf028b082e360aa193422ff" class="m-doc">Connectivity</a>(</span><span class="m-doc-wrap">Connectivity&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -280,78 +267,82 @@ $ d&#x27; $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4f8f86db381f19fc5f122537814ff1cb" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f8f86db381f19fc5f122537814ff1cb" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; other) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
-            <dt id="aa3f22750a1b6dd0290ba5766e4815c2f">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa3f22750a1b6dd0290ba5766e4815c2f" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1d5736da249ac4e9496a7f7e66defa6f" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;&amp; other) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a15e34caa35d9bff17c79f3dbeffa4897" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">size_t maximalDimension) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a86a6eb84f276b858e54cb31d2d594c52" class="m-doc">getRevision</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the revision of the stored topology.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15e34caa35d9bff17c79f3dbeffa4897" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">size_t maximalDimension) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Initializes connectivity for a mesh of given dimension.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a379c3b49220d009de868932afb6e5698" class="m-doc">nodes</a>(</span><span class="m-doc-wrap">size_t count) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a379c3b49220d009de868932afb6e5698" class="m-doc">nodes</a>(</span><span class="m-doc-wrap">size_t count) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Sets the number of vertices in the mesh.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad838acb050963f7e44a89c2e79e002de" class="m-doc">clear</a>(</span><span class="m-doc-wrap">size_t d,
-              size_t dp) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              size_t dp) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Clears an incidence relation.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a16fae4b28fbede8ab425f97419db282c" class="m-doc">reserve</a>(</span><span class="m-doc-wrap">size_t d,
-              size_t count) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              size_t count) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Reserves storage space for polytopes.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#abac0dae7a898571da4a762899248ecda" class="m-doc">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
-              std::initializer_list&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; p) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              std::initializer_list&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; p) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Adds a polytope from an initializer list.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab3ffe9232abc9720610bbceca489cf60" class="m-doc">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
               std::initializer_list&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; p,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; index) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; index) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Adds a polytope from an initializer list and returns its index.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a1a7927868611f0729e61068befbf3ad1" class="m-doc">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
-              const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; polytope) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Adds a polytope from an index array.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#addf7ed8f56fa1bf642e510dc38dcb79c" class="m-doc">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
               const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; polytope,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; index) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; index) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Adds a polytope from an index array and returns its index.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a5f44da40aebcc5eddadee525817339f2" class="m-doc">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
-              const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; polytope) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Adds a polytope to the mesh.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab09e33bff45b7853c63b57d2599e5a1c" class="m-doc">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
-              <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp;&amp; polytope) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp;&amp; polytope) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Adds a polytope by moving its vertex key.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a4bbc41acb081d6797f0a128a1222f36c" class="m-doc">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
               const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; polytope,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; index) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; index) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Adds a polytope and returns its connectivity index.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a37364ccc21d3e805f64c9d30ca392b94" class="m-doc">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
               <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp;&amp; polytope,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; index) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; index) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Adds a moved polytope key and returns its connectivity index.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a70734c04ed0a948ce0040fed77618585" class="m-doc">build</a>(</span><span class="m-doc-wrap">size_t d,
-              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Computes the entities of dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
@@ -367,44 +358,44 @@ $ d $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0fbf2269758390531cb11cabca6abacb" class="m-doc">local</a>(</span><span class="m-doc-wrap">size_t i,
               size_t d,
-              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Extracts local connectivity for a specific polytope.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a66fe84d0fb66a273175632a44d239409" class="m-doc">compute</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp,
-              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Computes connectivity between dimensions.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#abbe9ce4568a79b10d6a200d42249ad15" class="m-doc">discover</a>(</span><span class="m-doc-wrap">size_t d,
-              size_t dp) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              size_t dp) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Computes a dimension-to-dimension relation by discovering missing entities.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a771b2bf971809790cea36f9ed280b4e7" class="m-doc">restrict</a>(</span><span class="m-doc-wrap">size_t d,
-              size_t dp) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              size_t dp) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Computes a dimension-to-dimension relation using existing entities only.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a3b0869a70cc938de03369034040878c1" class="m-doc">transpose</a>(</span><span class="m-doc-wrap">size_t d,
-              size_t dp) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              size_t dp) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Transposes a connectivity relation.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a1660ad471cd0dd24dbec9686c505f095" class="m-doc">intersection</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp,
-              size_t dpp) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              size_t dpp) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Computes connectivity through intersection of two relations.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a4515ea737f6c967a0999db49e7ede379" class="m-doc">getSubPolytopes</a>(</span><span class="m-doc-wrap">std::vector&lt;SubPolytope&gt;&amp; out,
+              <span class="m-doc-wrap-bumper">void <a href="#a4515ea737f6c967a0999db49e7ede379" class="m-doc">getSubPolytopes</a>(</span><span class="m-doc-wrap">std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4_1_1_sub_polytope.html" class="m-doc">SubPolytope</a>&gt;&amp; out,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i,
               size_t d) const</span>
             </dt>
             <dd>Gets all sub-polytopes of a given polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9d81b62c39f866a95a214e9659679798" class="m-doc">getIndexMap</a>(</span><span class="m-doc-wrap">size_t dim) const -&gt; const PolytopeIndex&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9d81b62c39f866a95a214e9659679798" class="m-doc">getIndexMap</a>(</span><span class="m-doc-wrap">size_t dim) const -&gt; const <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4_1_1_polytope_index.html" class="m-doc">PolytopeIndex</a>&amp;</span>
             </dt>
             <dd>Gets the index mapping for a given dimension.</dd>
             <dt>
@@ -414,7 +405,7 @@ $ d $
             <dd>Gets the index for a polytope defined by a set of vertices.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a1f4b2b856b9aa72da7536b6a0be8e90c" class="m-doc">setIncidence</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, size_t&gt;&amp; p,
-              <a href="namespace_rodin_1_1_geometry.html#a1109e2bdd7327848ac57e234becf132f" class="m-doc">Incidence</a>&amp;&amp; inc) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <a href="namespace_rodin_1_1_geometry.html#ad512fb59b831d724819b15e21142baa6" class="m-doc">Incidence</a>&amp;&amp; inc) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Sets the incidence relation for a dimension pair.</dd>
             <dt>
@@ -441,7 +432,7 @@ $ d $
             <dd>Gets the vertex indices defining a polytope.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a5334684563c08049e041aae345942dc2" class="m-doc">getIncidence</a>(</span><span class="m-doc-wrap">size_t d,
-              size_t dp) const -&gt; const <a href="namespace_rodin_1_1_geometry.html#a1109e2bdd7327848ac57e234becf132f" class="m-doc">Incidence</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              size_t dp) const -&gt; const <a href="namespace_rodin_1_1_geometry.html#ad512fb59b831d724819b15e21142baa6" class="m-doc">Incidence</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the full incidence relation <svg class="m-math" style="width: 3.444em; height: 0.913em; vertical-align: -0.000em;" viewBox="0 -8.76629 33.059191 8.76629">
 <title>
@@ -472,11 +463,11 @@ $ d \rightarrow d&#x27; $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a6b22164ad582076811c01f5d0ef2e771" class="m-doc">setDirty</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp,
-              bool dirty = true) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              bool dirty = true) -&gt; <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Marks a cached incidence relation as dirty or clean.</dd>
-            <dt id="a2f4651816dee1f4e1f311b678e253efd">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2f4651816dee1f4e1f311b678e253efd" class="m-doc-self">getMaximalDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2f4651816dee1f4e1f311b678e253efd" class="m-doc">getMaximalDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Returns the maximal polytope dimension present in this connectivity.</dd>
             <dt>
@@ -497,12 +488,12 @@ $ d \rightarrow d&#x27; $
               enum class Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc-self">Mode</a>
             </h3>
             <p>Mode for connectivity construction.</p>
-<p>Controls how connectivity computation handles missing polytopes during the computation of incidence relations. This affects whether new sub-polytopes (edges, faces, etc.) are automatically created or only existing polytopes are used.</p><h4 id="autotoc_md65">Mode::Discover</h4><p>Automatically discovers and inserts missing polytopes during connectivity computation. This is the default and most commonly used mode.</p><p><strong>Behavior:</strong></p><ul><li>When computing connectivity from dimension <code>d</code> to dimension <code>dp</code>, any missing polytopes of dimension <code>dp</code> that are incident to polytopes of dimension <code>d</code> are automatically created and inserted.</li><li>Edge and face counts will increase as new entities are discovered.</li><li>Ensures complete connectivity information.</li></ul><p><strong>Use when:</strong></p><ul><li>Building connectivity for a new mesh</li><li>You need all sub-polytopes (edges, faces) to be available</li><li>Standard mesh operations that require complete connectivity</li></ul><p><strong>Example:</strong></p><pre class="m-code"><span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">Mode</span><span class="o">::</span><span class="n">Discover</span><span class="p">);</span>
-<span class="c1">// Creates all edges of cells automatically</span></pre><h4 id="autotoc_md66">Mode::Restrict</h4><p>Only uses polytopes that already exist in the connectivity without creating new ones.</p><p><strong>Behavior:</strong></p><ul><li>Only references polytopes of dimension <code>dp</code> that have been previously added to the connectivity.</li><li>Polytope counts remain unchanged.</li><li>Missing polytopes are silently skipped.</li><li>Useful for partial connectivity or working with pre-defined subsets.</li></ul><p><strong>Use when:</strong></p><ul><li>All required polytopes have been pre-computed</li><li>You want to restrict connectivity to a specific subset of polytopes</li><li>Re-computing connectivity relations after clearing them</li><li>Performance is critical and you&#x27;ve already built necessary polytopes</li></ul><p><strong>Example:</strong></p><pre class="m-code"><span class="c1">// First, build edges with Discover mode</span>
-<span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">Mode</span><span class="o">::</span><span class="n">Discover</span><span class="p">);</span>
+<p>Controls how connectivity computation handles missing polytopes during the computation of incidence relations. This affects whether new sub-polytopes (edges, faces, etc.) are automatically created or only existing polytopes are used.</p><h4 id="autotoc_md73">Mode::Discover</h4><p>Automatically discovers and inserts missing polytopes during connectivity computation. This is the default and most commonly used mode.</p><p><strong>Behavior:</strong></p><ul><li>When computing connectivity from dimension <code>d</code> to dimension <code>dp</code>, any missing polytopes of dimension <code>dp</code> that are incident to polytopes of dimension <code>d</code> are automatically created and inserted.</li><li>Edge and face counts will increase as new entities are discovered.</li><li>Ensures complete connectivity information.</li></ul><p><strong>Use when:</strong></p><ul><li>Building connectivity for a new mesh</li><li>You need all sub-polytopes (edges, faces) to be available</li><li>Standard mesh operations that require complete connectivity</li></ul><p><strong>Example:</strong></p><pre class="m-code"><span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nc">Mode</span><span class="o">::</span><span class="no">Discover</span><span class="p">);</span>
+<span class="c1">// Creates all edges of cells automatically</span></pre><h4 id="autotoc_md74">Mode::Restrict</h4><p>Only uses polytopes that already exist in the connectivity without creating new ones.</p><p><strong>Behavior:</strong></p><ul><li>Only references polytopes of dimension <code>dp</code> that have been previously added to the connectivity.</li><li>Polytope counts remain unchanged.</li><li>Missing polytopes are silently skipped.</li><li>Useful for partial connectivity or working with pre-defined subsets.</li></ul><p><strong>Use when:</strong></p><ul><li>All required polytopes have been pre-computed</li><li>You want to restrict connectivity to a specific subset of polytopes</li><li>Re-computing connectivity relations after clearing them</li><li>Performance is critical and you&#x27;ve already built necessary polytopes</li></ul><p><strong>Example:</strong></p><pre class="m-code"><span class="c1">// First, build edges with Discover mode</span>
+<span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nc">Mode</span><span class="o">::</span><span class="no">Discover</span><span class="p">);</span>
 <span class="c1">// Later, rebuild the relation using existing edges</span>
 <span class="n">connectivity</span><span class="p">.</span><span class="n">clear</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
-<span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">Mode</span><span class="o">::</span><span class="n">Restrict</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Mode::Restrict requires that the target polytopes already exist. If a sub-polytope hasn&#x27;t been added to the connectivity, it won&#x27;t be included in the incidence relation.</p></aside><aside class="m-note m-default"><h4>See also</h4><p>compute(), build(), local()</p></aside>
+<span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nc">Mode</span><span class="o">::</span><span class="no">Restrict</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Mode::Restrict requires that the target polytopes already exist. If a sub-polytope hasn&#x27;t been added to the connectivity, it won&#x27;t be included in the incidence relation.</p></aside><aside class="m-note m-default"><h4>See also</h4><p>compute(), build(), local()</p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -529,19 +520,41 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc4049bc41f31c69e3b8b70236c3e0b9" class="m-doc-self">Connectivity</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc4049bc41f31c69e3b8b70236c3e0b9" class="m-doc-self">Connectivity</a>(</span><span class="m-doc-wrap">const Connectivity&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source object to copy or move from.</td>
+                </tr>
+              </tbody>
+            </table>
 <p><code>PolytopeIndex::left</code> holds pointers into <code>PolytopeIndex::right</code>. A defaulted copy would leave them aliasing the source&#x27;s <code>right</code> map (dangling once the source dies), so relink them into this object&#x27;s own <code>right</code> map.</p>
           </div></section>
-          <section class="m-doc-details" id="a422b81ee8c346743fee2337037ca52c8"><div>
+          <section class="m-doc-details" id="ab708fef38cf028b082e360aa193422ff"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a422b81ee8c346743fee2337037ca52c8" class="m-doc-self">Connectivity</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;&amp;) <span class="m-label m-info">defaulted</span></span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab708fef38cf028b082e360aa193422ff" class="m-doc-self">Connectivity</a>(</span><span class="m-doc-wrap">Connectivity&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source object to copy or move from.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Moving a <code>std::unordered_map</code> preserves node addresses, so the <code>left</code> pointers remain valid; a defaulted move is correct.</p>
           </div></section>
           <section class="m-doc-details" id="a4f8f86db381f19fc5f122537814ff1cb"><div>
@@ -549,17 +562,78 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f8f86db381f19fc5f122537814ff1cb" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f8f86db381f19fc5f122537814ff1cb" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; other)</span></span>
             </h3>
             <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source object to copy or move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after assignment.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>See the copy constructor: <code>left</code> is relinked into this object&#x27;s own <code>right</code> map.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1d5736da249ac4e9496a7f7e66defa6f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d5736da249ac4e9496a7f7e66defa6f" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source object to copy or move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after assignment.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a86a6eb84f276b858e54cb31d2d594c52"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a86a6eb84f276b858e54cb31d2d594c52" class="m-doc-self">getRevision</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the revision of the stored topology.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Revision changed by explicit topology edits or replacement.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Derived incidence computations retain this revision. Topology edits must not run concurrently with mesh evaluation.</p>
           </div></section>
           <section class="m-doc-details" id="a15e34caa35d9bff17c79f3dbeffa4897"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e34caa35d9bff17c79f3dbeffa4897" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">size_t maximalDimension)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e34caa35d9bff17c79f3dbeffa4897" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">size_t maximalDimension)</span></span>
             </h3>
             <p>Initializes connectivity for a mesh of given dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -596,7 +670,7 @@ $ D $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a379c3b49220d009de868932afb6e5698" class="m-doc-self">nodes</a>(</span><span class="m-doc-wrap">size_t count)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a379c3b49220d009de868932afb6e5698" class="m-doc-self">nodes</a>(</span><span class="m-doc-wrap">size_t count)</span></span>
             </h3>
             <p>Sets the number of vertices in the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -622,7 +696,7 @@ $ D $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad838acb050963f7e44a89c2e79e002de" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad838acb050963f7e44a89c2e79e002de" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp)</span></span>
             </h3>
             <p>Clears an incidence relation.</p>
@@ -669,7 +743,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16fae4b28fbede8ab425f97419db282c" class="m-doc-self">reserve</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16fae4b28fbede8ab425f97419db282c" class="m-doc-self">reserve</a>(</span><span class="m-doc-wrap">size_t d,
               size_t count)</span></span>
             </h3>
             <p>Reserves storage space for polytopes.</p>
@@ -701,7 +775,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abac0dae7a898571da4a762899248ecda" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abac0dae7a898571da4a762899248ecda" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
               std::initializer_list&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; p)</span></span>
             </h3>
             <p>Adds a polytope from an initializer list.</p>
@@ -732,7 +806,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3ffe9232abc9720610bbceca489cf60" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3ffe9232abc9720610bbceca489cf60" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
               std::initializer_list&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; p,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; index)</span></span>
             </h3>
@@ -768,7 +842,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a7927868611f0729e61068befbf3ad1" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a7927868611f0729e61068befbf3ad1" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
               const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; polytope)</span></span>
             </h3>
             <p>Adds a polytope from an index array.</p>
@@ -799,7 +873,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#addf7ed8f56fa1bf642e510dc38dcb79c" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#addf7ed8f56fa1bf642e510dc38dcb79c" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
               const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; polytope,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; index)</span></span>
             </h3>
@@ -835,7 +909,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f44da40aebcc5eddadee525817339f2" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f44da40aebcc5eddadee525817339f2" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
               const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; polytope)</span></span>
             </h3>
             <p>Adds a polytope to the mesh.</p>
@@ -866,7 +940,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab09e33bff45b7853c63b57d2599e5a1c" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab09e33bff45b7853c63b57d2599e5a1c" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
               <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp;&amp; polytope)</span></span>
             </h3>
             <p>Adds a polytope by moving its vertex key.</p>
@@ -897,7 +971,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4bbc41acb081d6797f0a128a1222f36c" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4bbc41acb081d6797f0a128a1222f36c" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
               const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; polytope,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; index)</span></span>
             </h3>
@@ -933,7 +1007,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37364ccc21d3e805f64c9d30ca392b94" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37364ccc21d3e805f64c9d30ca392b94" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
               <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp;&amp; polytope,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; index)</span></span>
             </h3>
@@ -969,7 +1043,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70734c04ed0a948ce0040fed77618585" class="m-doc-self">build</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70734c04ed0a948ce0040fed77618585" class="m-doc-self">build</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>)</span></span>
             </h3>
             <p>Computes the entities of dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
@@ -1006,17 +1080,16 @@ $ d $
             </table>
 <p>Computes the connectivities:</p><div class="m-math"><svg style="width: 20.722em; height: 1.107em;" viewBox="94.807649 -10.626787 198.927708 10.626798">
 <title>
-\[
- D \longrightarrow d \quad \text{and} \quad D \longrightarrow 0, \quad 0 &lt; d &lt; D,
+\[ D \longrightarrow d \quad \text{and} \quad D \longrightarrow 0, \quad 0 &lt; d &lt; D,
 \]
 </title>
 <defs>
 <path id='eq10-g5-48' d='M5.355915-3.825654C5.355915-4.817933 5.296139-5.786301 4.865753-6.694894C4.375592-7.687173 3.514819-7.950187 2.929016-7.950187C2.235616-7.950187 1.3868-7.603487 .944458-6.611208C.609714-5.858032 .490162-5.116812 .490162-3.825654C.490162-2.666002 .573848-1.793275 1.004234-.944458C1.470486-.035866 2.295392 .251059 2.917061 .251059C3.957161 .251059 4.554919-.37061 4.901619-1.06401C5.332005-1.960648 5.355915-3.132254 5.355915-3.825654ZM2.917061 .011955C2.534496 .011955 1.75741-.203238 1.530262-1.506351C1.398755-2.223661 1.398755-3.132254 1.398755-3.969116C1.398755-4.94944 1.398755-5.834122 1.590037-6.539477C1.793275-7.340473 2.402989-7.711083 2.917061-7.711083C3.371357-7.711083 4.064757-7.436115 4.291905-6.40797C4.447323-5.726526 4.447323-4.782067 4.447323-3.969116C4.447323-3.16812 4.447323-2.259527 4.315816-1.530262C4.088667-.215193 3.335492 .011955 2.917061 .011955Z'/>
+<path id='eq10-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq10-g0-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
 <path id='eq10-g4-97' d='M5.264443-.47642V-.786093C5.061964-.619346 4.919038-.559794 4.74038-.559794C4.466439-.559794 4.383065-.726541 4.383065-1.250603V-3.573151C4.383065-4.180587 4.323513-4.514081 4.156766-4.788022C3.906645-5.240622 3.394494-5.478832 2.667953-5.478832C2.060517-5.478832 1.488813-5.312085 1.155319-5.038143C.857556-4.788022 .666988-4.442618 .666988-4.144855C.666988-3.870914 .893288-3.632704 1.17914-3.632704S1.715113-3.870914 1.715113-4.132945C1.715113-4.180587 1.703202-4.240139 1.691292-4.323513C1.667471-4.430707 1.65556-4.525991 1.65556-4.609365C1.65556-4.930949 2.036696-5.19298 2.513116-5.19298C3.096731-5.19298 3.418315-4.847575 3.418315-4.204408V-3.477867C1.584097-2.739416 1.381618-2.644132 .869467-2.191533C.607436-1.953323 .440689-1.548365 .440689-1.155319C.440689-.404957 .95284 .119105 1.691292 .119105C2.215354 .119105 2.703684-.131016 3.430225-.750362C3.489778-.119105 3.704167 .119105 4.192497 .119105C4.597454 .119105 4.847575-.023821 5.264443-.47642ZM3.418315-1.464992C3.418315-1.095766 3.358762-.988572 3.108641-.833735C2.822789-.666988 2.489295-.571704 2.239175-.571704C1.822307-.571704 1.488813-.976661 1.488813-1.488813V-1.536455C1.488813-2.239175 1.977144-2.667953 3.418315-3.192015V-1.464992Z'/>
 <path id='eq10-g4-100' d='M5.848057-.500241V-.690809C5.633668-.678899 5.609847-.678899 5.574116-.678899C5.145338-.678899 5.050054-.809914 5.050054-1.357797V-8.111053L4.990501-8.134874C4.418797-7.932395 4.001929-7.81329 3.239657-7.610812V-7.420244C3.334941-7.432154 3.406404-7.432154 3.501688-7.432154C3.942377-7.432154 4.049571-7.313049 4.049571-6.824719V-4.96668C3.596972-5.347816 3.275389-5.478832 2.798968-5.478832C1.42926-5.478832 .321584-4.132945 .321584-2.441653C.321584-.917109 1.214871 .119105 2.525027 .119105C3.192015 .119105 3.644614-.119105 4.049571-.678899V.083374L4.097213 .119105L5.848057-.500241ZM4.049571-1.214871C4.049571-1.131498 3.966198-.988572 3.847093-.857556C3.632704-.619346 3.334941-.500241 2.989536-.500241C2.000965-.500241 1.345887-1.453081 1.345887-2.918073C1.345887-4.26396 1.929502-5.145338 2.8347-5.145338C3.465957-5.145338 4.049571-4.585544 4.049571-3.954287V-1.214871Z'/>
 <path id='eq10-g4-110' d='M5.776594 0V-.178658C5.19298-.23821 5.050054-.381136 5.050054-.964751V-3.692256C5.050054-4.811844 4.525991-5.478832 3.644614-5.478832C3.096731-5.478832 2.727505-5.276353 1.917591-4.514081V-5.455011L1.834218-5.478832C1.250603-5.264443 .845646-5.133427 .190568-4.942859V-4.74038C.262031-4.776112 .381136-4.788022 .512152-4.788022C.845646-4.788022 .95284-4.609365 .95284-4.02575V-1.071945C.95284-.393047 .821825-.2263 .214389-.178658V0H2.739416V-.178658C2.13198-.2263 1.953323-.369226 1.953323-.798004V-4.144855C2.525027-4.680828 2.787058-4.823754 3.180104-4.823754C3.763719-4.823754 4.049571-4.454528 4.049571-3.668435V-1.17914C4.049571-.428778 3.894735-.2263 3.29921-.178658V0H5.776594Z'/>
-<path id='eq10-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
-<path id='eq10-g0-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
 <path id='eq10-g1-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
 <path id='eq10-g1-60' d='M7.878456-5.822167C8.093649-5.917808 8.117559-6.001494 8.117559-6.073225C8.117559-6.204732 8.021918-6.300374 7.890411-6.300374C7.866501-6.300374 7.854545-6.288418 7.687173-6.216687L1.219427-3.239851C1.004234-3.144209 .980324-3.060523 .980324-2.988792C.980324-2.905106 .992279-2.833375 1.219427-2.725778L7.687173 .251059C7.84259 .32279 7.866501 .334745 7.890411 .334745C8.021918 .334745 8.117559 .239103 8.117559 .107597C8.117559 .035866 8.093649-.047821 7.878456-.143462L1.721544-2.976837L7.878456-5.822167Z'/>
 <path id='eq10-g1-68' d='M1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .633624 0 .872727 0H4.662516C7.07746 0 9.432628-2.49863 9.432628-5.164633C9.432628-6.886177 8.404483-8.16538 6.694894-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.336239C7.460025-7.81868 8.488169-7.208966 8.488169-5.559153C8.488169-4.961395 8.249066-2.881196 7.089415-1.566127C6.75467-1.171606 5.846077-.3467 4.471233-.3467H3.108344C2.940971-.3467 2.917061-.3467 2.84533-.358655C2.713823-.37061 2.701868-.394521 2.701868-.490162C2.701868-.573848 2.725778-.645579 2.749689-.753176L4.399502-7.352428Z'/>
@@ -1080,7 +1153,7 @@ $ D \longrightarrow D $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0fbf2269758390531cb11cabca6abacb" class="m-doc-self">local</a>(</span><span class="m-doc-wrap">size_t i,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0fbf2269758390531cb11cabca6abacb" class="m-doc-self">local</a>(</span><span class="m-doc-wrap">size_t i,
               size_t d,
               <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>)</span></span>
             </h3>
@@ -1117,7 +1190,7 @@ $ D \longrightarrow D $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66fe84d0fb66a273175632a44d239409" class="m-doc-self">compute</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66fe84d0fb66a273175632a44d239409" class="m-doc-self">compute</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp,
               <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>)</span></span>
             </h3>
@@ -1147,14 +1220,14 @@ $ D \longrightarrow D $
                 </tr>
               </tfoot>
             </table>
-<p>Computes the incidence relation from polytopes of dimension <code>d</code> to polytopes of dimension <code>dp</code>. This establishes which polytopes of dimension <code>dp</code> are incident to each polytope of dimension <code>d</code>.</p><h4 id="autotoc_md67">Common Use Cases</h4><ul><li><code>compute(2, 0)</code>: Cell-to-vertex connectivity</li><li><code>compute(2, 1)</code>: Cell-to-edge connectivity (in 2D) or Cell-to-face connectivity (in 3D)</li><li><code>compute(1, 2)</code>: Edge-to-cell connectivity (useful for boundary detection)</li><li><code>compute(2, 2)</code>: Cell-to-cell connectivity (neighboring cells)</li></ul><h4 id="autotoc_md68">Mode Selection</h4><p>Use Mode::Discover when:</p><ul><li>Computing connectivity for the first time</li><li>You want all sub-polytopes to be automatically created</li><li>Working with a new mesh where edges/faces haven&#x27;t been generated</li></ul><p>Use Mode::Restrict when:</p><ul><li>All required polytopes already exist</li><li>You want to limit connectivity to a specific subset</li><li>Re-computing connectivity after clearing previous relations</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Mode::Restrict requires that polytopes of the target dimension already exist. If they don&#x27;t exist, they will not be referenced in the resulting connectivity.</p></aside>
+<p>Computes the incidence relation from polytopes of dimension <code>d</code> to polytopes of dimension <code>dp</code>. This establishes which polytopes of dimension <code>dp</code> are incident to each polytope of dimension <code>d</code>.</p><h4 id="autotoc_md75">Common Use Cases</h4><ul><li><code>compute(2, 0)</code>: Cell-to-vertex connectivity</li><li><code>compute(2, 1)</code>: Cell-to-edge connectivity (in 2D) or Cell-to-face connectivity (in 3D)</li><li><code>compute(1, 2)</code>: Edge-to-cell connectivity (useful for boundary detection)</li><li><code>compute(2, 2)</code>: Cell-to-cell connectivity (neighboring cells)</li></ul><h4 id="autotoc_md76">Mode Selection</h4><p>Use Mode::Discover when:</p><ul><li>Computing connectivity for the first time</li><li>You want all sub-polytopes to be automatically created</li><li>Working with a new mesh where edges/faces haven&#x27;t been generated</li></ul><p>Use Mode::Restrict when:</p><ul><li>All required polytopes already exist</li><li>You want to limit connectivity to a specific subset</li><li>Re-computing connectivity after clearing previous relations</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Mode::Restrict requires that polytopes of the target dimension already exist. If they don&#x27;t exist, they will not be referenced in the resulting connectivity.</p></aside>
           </div></section>
           <section class="m-doc-details" id="abbe9ce4568a79b10d6a200d42249ad15"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abbe9ce4568a79b10d6a200d42249ad15" class="m-doc-self">discover</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abbe9ce4568a79b10d6a200d42249ad15" class="m-doc-self">discover</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp)</span></span>
             </h3>
             <p>Computes a dimension-to-dimension relation by discovering missing entities.</p>
@@ -1185,7 +1258,7 @@ $ D \longrightarrow D $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a771b2bf971809790cea36f9ed280b4e7" class="m-doc-self">restrict</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a771b2bf971809790cea36f9ed280b4e7" class="m-doc-self">restrict</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp)</span></span>
             </h3>
             <p>Computes a dimension-to-dimension relation using existing entities only.</p>
@@ -1216,7 +1289,7 @@ $ D \longrightarrow D $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3b0869a70cc938de03369034040878c1" class="m-doc-self">transpose</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3b0869a70cc938de03369034040878c1" class="m-doc-self">transpose</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp)</span></span>
             </h3>
             <p>Transposes a connectivity relation.</p>
@@ -1248,7 +1321,7 @@ $ D \longrightarrow D $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1660ad471cd0dd24dbec9686c505f095" class="m-doc-self">intersection</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1660ad471cd0dd24dbec9686c505f095" class="m-doc-self">intersection</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp,
               size_t dpp)</span></span>
             </h3>
@@ -1317,7 +1390,7 @@ $ dp \to dpp $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4515ea737f6c967a0999db49e7ede379" class="m-doc-self">getSubPolytopes</a>(</span><span class="m-doc-wrap">std::vector&lt;SubPolytope&gt;&amp; out,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4515ea737f6c967a0999db49e7ede379" class="m-doc-self">getSubPolytopes</a>(</span><span class="m-doc-wrap">std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4_1_1_sub_polytope.html" class="m-doc">SubPolytope</a>&gt;&amp; out,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i,
               size_t d) const</span></span>
             </h3>
@@ -1347,7 +1420,7 @@ $ dp \to dpp $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const PolytopeIndex&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d81b62c39f866a95a214e9659679798" class="m-doc-self">getIndexMap</a>(</span><span class="m-doc-wrap">size_t dim) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4_1_1_polytope_index.html" class="m-doc">PolytopeIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d81b62c39f866a95a214e9659679798" class="m-doc-self">getIndexMap</a>(</span><span class="m-doc-wrap">size_t dim) const</span></span>
             </h3>
             <p>Gets the index mapping for a given dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1373,7 +1446,7 @@ $ dp \to dpp $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a772803ad1318e4eb4e9cd7213d3fd73d" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">size_t dim,
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a772803ad1318e4eb4e9cd7213d3fd73d" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">size_t dim,
               const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; key) const</span></span>
             </h3>
             <p>Gets the index for a polytope defined by a set of vertices.</p>
@@ -1404,8 +1477,8 @@ $ dp \to dpp $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1f4b2b856b9aa72da7536b6a0be8e90c" class="m-doc-self">setIncidence</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, size_t&gt;&amp; p,
-              <a href="namespace_rodin_1_1_geometry.html#a1109e2bdd7327848ac57e234becf132f" class="m-doc">Incidence</a>&amp;&amp; inc)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1f4b2b856b9aa72da7536b6a0be8e90c" class="m-doc-self">setIncidence</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, size_t&gt;&amp; p,
+              <a href="namespace_rodin_1_1_geometry.html#ad512fb59b831d724819b15e21142baa6" class="m-doc">Incidence</a>&amp;&amp; inc)</span></span>
             </h3>
             <p>Sets the incidence relation for a dimension pair.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1435,7 +1508,7 @@ $ dp \to dpp $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a689da7a36c441a0525e47787cc3f15aa" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">size_t dim) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a689da7a36c441a0525e47787cc3f15aa" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">size_t dim) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the count of polytopes in a dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1461,7 +1534,7 @@ $ dp \to dpp $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa10ef02c10dd2f6239f37c08dc889b37" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa10ef02c10dd2f6239f37c08dc889b37" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the count of polytopes of a specific geometry.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1487,7 +1560,7 @@ $ dp \to dpp $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the topological dimension of the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1514,7 +1587,7 @@ $ D $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a33e3750d36fa38c0be4845901217d106" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a33e3750d36fa38c0be4845901217d106" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the geometry type of a polytope.</p>
@@ -1545,7 +1618,7 @@ $ D $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac212244257c63d25888d1d0599eeb2c" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac212244257c63d25888d1d0599eeb2c" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the vertex indices defining a polytope.</p>
@@ -1576,7 +1649,7 @@ $ D $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin_1_1_geometry.html#a1109e2bdd7327848ac57e234becf132f" class="m-doc">Incidence</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5334684563c08049e041aae345942dc2" class="m-doc-self">getIncidence</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin_1_1_geometry.html#ad512fb59b831d724819b15e21142baa6" class="m-doc">Incidence</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5334684563c08049e041aae345942dc2" class="m-doc-self">getIncidence</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the full incidence relation <svg class="m-math" style="width: 3.444em; height: 0.913em; vertical-align: -0.000em;" viewBox="0 -8.76629 33.059191 8.76629">
@@ -1622,7 +1695,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc">IndexVector</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa51539662d2c7cff28c383ece0e92ff8" class="m-doc-self">getIncidence</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, size_t&gt; p,
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc">IndexVector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa51539662d2c7cff28c383ece0e92ff8" class="m-doc-self">getIncidence</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, size_t&gt; p,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets incident polytopes for a specific polytope.</p>
@@ -1653,7 +1726,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aadb14427a5e71f2873f8f324e16599d9" class="m-doc-self">isDirty</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aadb14427a5e71f2873f8f324e16599d9" class="m-doc-self">isDirty</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp) const</span></span>
             </h3>
             <p>Tests whether a cached incidence relation needs recomputation.</p>
@@ -1684,7 +1757,7 @@ $ d \rightarrow d&#x27; $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6b22164ad582076811c01f5d0ef2e771" class="m-doc-self">setDirty</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper"><a href="#abddac5e412e0bee5cb84f898ca770154" class="m-doc">Connectivity</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6b22164ad582076811c01f5d0ef2e771" class="m-doc-self">setDirty</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp,
               bool dirty = true)</span></span>
             </h3>
@@ -1715,13 +1788,30 @@ $ d \rightarrow d&#x27; $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a2f4651816dee1f4e1f311b678e253efd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f4651816dee1f4e1f311b678e253efd" class="m-doc-self">getMaximalDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the maximal polytope dimension present in this connectivity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Largest polytope dimension stored in the mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
                 template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
               const unsigned int version)</span></span>
             </h3>
             <p>Serializes the connectivity tables.</p>
@@ -1789,13 +1879,20 @@ $ d \rightarrow d&#x27; $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

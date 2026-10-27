@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,15 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dot_8h.html">&lt;Rodin/Variational/Dot.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Dot product of trial and test shape functions for bilinear forms.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Dot <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Dot product of trial and test shape functions for bilinear forms.</p><p class="rodin-reference-include">Defined in <a href="_dot_8h.html"><code>Rodin/Variational/Dot.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TrialFES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TestFES</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_dot_3_01_shape_function_base_3_01_l_h_s_derived_00_01_trial_f_e_c05da362fa61f70432d39f64e867babe.html#aa30605a78683afeabc4ff8128ffe0b63"><span class="nc">Dot</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSDerived</span><span class="p">,</span><span class="w"> </span><span class="n">TrialFES</span><span class="p">,</span><span class="w"> </span><span class="n">TrialSpace</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSDerived</span><span class="p">,</span><span class="w"> </span><span class="n">TestFES</span><span class="p">,</span><span class="w"> </span><span class="n">TestSpace</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_dot.html">Dot</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>LHS</code></td><td><code>ShapeFunctionBase&lt; LHSDerived, TrialFES, TrialSpace &gt;</code></td></tr><tr><td><code>RHS</code></td><td><code>ShapeFunctionBase&lt; RHSDerived, TestFES, TestSpace &gt;</code></td></tr></tbody></table></section>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -109,7 +109,7 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -119,8 +119,7 @@
         </nav>
 <p>Represents the inner product in a bilinear form:</p><div class="m-math"><svg style="width: 10.401em; height: 1.245em;" viewBox="144.344603 -11.955168 99.853785 11.955168">
 <title>
-\[
-   (u, v) \mapsto u(x) : v(x)
+\[   (u, v) \mapsto u(x) : v(x)
 \]
 </title>
 <defs>
@@ -173,15 +172,8 @@ $ a(u, v) $
 <use x='28.692087' y='0' xlink:href='#eq2-g1-41'/>
 </g>
 </svg>.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>
-            </dt>
-            <dd>Base class for all objects in Rodin&#x27;s FormLanguage system.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_form_language_1_1_base.html" title="FormLanguage::Base">FormLanguage::Base</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Dot</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_base.html"><span class="nc">Base</span></a>
+</pre></details></td><td>Base class for all objects in Rodin&#x27;s FormLanguage system.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_dot_3_01_shape_function_base_3_01_l_h_s_derived_00_01_trial_f_e_c05da362fa61f70432d39f64e867babe.html#a2b05336328aaaff5852fc5c16065eaf9"><code>copy()</code></a></td><td><a href="class_rodin_1_1_form_language_1_1_base.html#a08bb560be7afa722eef3459e102dfd39">Base::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -226,17 +218,17 @@ $ a(u, v) $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="aa30605a78683afeabc4ff8128ffe0b63">
-              <span class="m-doc-wrap-bumper"><a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; lhs,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc">Dot</a>(</span><span class="m-doc-wrap">const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; lhs,
               const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the expression from its left and right operands.</dd>
-            <dt id="a870b081053865d3cfcb309952451a411">
-              <span class="m-doc-wrap-bumper"><a href="#a870b081053865d3cfcb309952451a411" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a870b081053865d3cfcb309952451a411" class="m-doc">Dot</a>(</span><span class="m-doc-wrap">const Dot&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a8ea0b01546962a7618446316f478c041">
-              <span class="m-doc-wrap-bumper"><a href="#a8ea0b01546962a7618446316f478c041" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8ea0b01546962a7618446316f478c041" class="m-doc">Dot</a>(</span><span class="m-doc-wrap">Dot&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -244,45 +236,252 @@ $ a(u, v) $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a27d508dbc60ed5fe35334634980355ea">
-              <span class="m-doc-wrap-bumper">auto <a href="#a27d508dbc60ed5fe35334634980355ea" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a27d508dbc60ed5fe35334634980355ea" class="m-doc">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the left-hand side operand.</dd>
-            <dt id="a0dba62dd79cbb7ce209fc7718fe12843">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0dba62dd79cbb7ce209fc7718fe12843" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0dba62dd79cbb7ce209fc7718fe12843" class="m-doc">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the right-hand side operand.</dd>
-            <dt id="a5634f938127c5224007acbd338b54e99">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5634f938127c5224007acbd338b54e99" class="m-doc-self">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5634f938127c5224007acbd338b54e99" class="m-doc">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp;</span>
             </dt>
             <dd>Gets the integration point the expression is evaluated at.</dd>
-            <dt id="a7b027169fc2aef097c2528026c1e0cdd">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7b027169fc2aef097c2528026c1e0cdd" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) -&gt; <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7ed56821eb77041f629f7382e9893c78" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc">Dot</a>&amp;</span>
+            </dt>
+            <dd>Starts a fresh cell binding and releases the previous point binding.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7b027169fc2aef097c2528026c1e0cdd" class="m-doc">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) -&gt; <a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc">Dot</a>&amp;</span>
             </dt>
             <dd>Sets the integration point the expression is evaluated at.</dd>
-            <dt id="afff7a6689a01f69f38c4ab00ebb97955">
-              <span class="m-doc-wrap-bumper">auto <a href="#afff7a6689a01f69f38c4ab00ebb97955" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t tr,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afff7a6689a01f69f38c4ab00ebb97955" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">size_t tr,
               size_t te) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns an entry of the element matrix.</dd>
-            <dt id="a9a1cb09f4677024a3b681cdb49fe4a25">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2b05336328aaaff5852fc5c16065eaf9" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2b05336328aaaff5852fc5c16065eaf9" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc">Dot</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of this object.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aa30605a78683afeabc4ff8128ffe0b63"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; lhs,
+              const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs the expression from its left and right operands.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>Left operand.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>Right operand.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a870b081053865d3cfcb309952451a411"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a870b081053865d3cfcb309952451a411" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const Dot&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8ea0b01546962a7618446316f478c041"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ea0b01546962a7618446316f478c041" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">Dot&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a27d508dbc60ed5fe35334634980355ea"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a27d508dbc60ed5fe35334634980355ea" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the left-hand side operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The left-hand side operand.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0dba62dd79cbb7ce209fc7718fe12843"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0dba62dd79cbb7ce209fc7718fe12843" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the right-hand side operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The right-hand side operand.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5634f938127c5224007acbd338b54e99"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5634f938127c5224007acbd338b54e99" class="m-doc-self">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the integration point the expression is evaluated at.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integration point the expression is evaluated at.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7ed56821eb77041f629f7382e9893c78"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc">Dot</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7ed56821eb77041f629f7382e9893c78" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope)</span></span>
+            </h3>
+            <p>Starts a fresh cell binding and releases the previous point binding.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Entity whose basis will be evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This expression after rebinding its evaluation state.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7b027169fc2aef097c2528026c1e0cdd"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc">Dot</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7b027169fc2aef097c2528026c1e0cdd" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip)</span></span>
+            </h3>
+            <p>Sets the integration point the expression is evaluated at.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afff7a6689a01f69f38c4ab00ebb97955"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afff7a6689a01f69f38c4ab00ebb97955" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns an entry of the element matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tr</td>
+                  <td>Trial shape-function expression.</td>
+                </tr>
+                <tr>
+                  <td>te</td>
+                  <td>Test shape-function expression.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Expression for the selected component.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9a1cb09f4677024a3b681cdb49fe4a25"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">poly</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a2b05336328aaaff5852fc5c16065eaf9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>* Rodin::<wbr />Variational::<wbr />Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b05336328aaaff5852fc5c16065eaf9" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc">Dot</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b05336328aaaff5852fc5c16065eaf9" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -334,13 +533,20 @@ $ a(u, v) $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

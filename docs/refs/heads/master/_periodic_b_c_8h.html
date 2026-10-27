@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin/Variational/PeriodicBC.h file | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -81,10 +78,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md478">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md479">Applications</a></li>
-            <li><a href="#autotoc_md480">Implementation</a></li>
-            <li><a href="#autotoc_md481">Usage Example</a></li>
+            <li><a href="#autotoc_md511">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md512">Applications</a></li>
+            <li><a href="#autotoc_md513">Implementation</a></li>
+            <li><a href="#autotoc_md514">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -94,15 +91,14 @@
             </li>
           </ul>
         </nav>
-<p>This file defines classes for imposing periodic boundary conditions in finite element problems. Periodic conditions enforce that the solution values match across opposite boundaries of the domain.</p><section id="autotoc_md478"><h3><a href="#autotoc_md478">Mathematical Foundation</a></h3><p>A periodic boundary condition specifies:</p><div class="m-math"><svg style="width: 16.198em; height: 1.245em;" viewBox="116.27065 -11.955168 155.503566 11.955168">
+<p>This file defines classes for imposing periodic boundary conditions in finite element problems. Periodic conditions enforce that the solution values match across opposite boundaries of the domain.</p><section id="autotoc_md511"><h2><a href="#autotoc_md511">Mathematical Foundation</a></h2><p>A periodic boundary condition specifies:</p><div class="m-math"><svg style="width: 16.198em; height: 1.245em;" viewBox="116.27065 -11.955168 155.503566 11.955168">
 <title>
-\[
-  u(x + L) = u(x) \quad \text{for} \quad x \in \Gamma_-
+\[     u(x + L) = u(x) \quad \text{for} \quad x \in \Gamma_-
 \]
 </title>
 <defs>
-<path id='eq1-g1-50' d='M6.551432-2.749689C6.75467-2.749689 6.969863-2.749689 6.969863-2.988792S6.75467-3.227895 6.551432-3.227895H1.482441C1.625903-4.829888 3.000747-5.977584 4.686426-5.977584H6.551432C6.75467-5.977584 6.969863-5.977584 6.969863-6.216687S6.75467-6.455791 6.551432-6.455791H4.662516C2.618182-6.455791 .992279-4.901619 .992279-2.988792S2.618182 .478207 4.662516 .478207H6.551432C6.75467 .478207 6.969863 .478207 6.969863 .239103S6.75467 0 6.551432 0H4.686426C3.000747 0 1.625903-1.147696 1.482441-2.749689H6.551432Z'/>
 <path id='eq1-g0-0' d='M5.571108-1.809215C5.69863-1.809215 5.873973-1.809215 5.873973-1.992528S5.69863-2.175841 5.571108-2.175841H1.004234C.876712-2.175841 .70137-2.175841 .70137-1.992528S.876712-1.809215 1.004234-1.809215H5.571108Z'/>
+<path id='eq1-g1-50' d='M6.551432-2.749689C6.75467-2.749689 6.969863-2.749689 6.969863-2.988792S6.75467-3.227895 6.551432-3.227895H1.482441C1.625903-4.829888 3.000747-5.977584 4.686426-5.977584H6.551432C6.75467-5.977584 6.969863-5.977584 6.969863-6.216687S6.75467-6.455791 6.551432-6.455791H4.662516C2.618182-6.455791 .992279-4.901619 .992279-2.988792S2.618182 .478207 4.662516 .478207H6.551432C6.75467 .478207 6.969863 .478207 6.969863 .239103S6.75467 0 6.551432 0H4.686426C3.000747 0 1.625903-1.147696 1.482441-2.749689H6.551432Z'/>
 <path id='eq1-g5-102' d='M4.561723-7.396423C4.561723-7.825201 4.037661-8.134874 3.323031-8.134874C2.572669-8.134874 1.953323-7.81329 1.64365-7.277318S1.238692-6.312567 1.226782-5.359727H.250121V-4.978591H1.226782V-1.238692C1.226782-.369226 1.095766-.2263 .23821-.178658V0H3.334941V-.178658C2.35828-.214389 2.227264-.345405 2.227264-1.238692V-4.978591H3.680346V-5.359727H2.215354V-6.741345C2.215354-7.444065 2.441653-7.80138 2.894252-7.80138C3.156283-7.80138 3.31112-7.682275 3.525509-7.33687C3.716077-7.015287 3.859003-6.908092 4.061482-6.908092C4.347334-6.908092 4.561723-7.122481 4.561723-7.396423Z'/>
 <path id='eq1-g5-111' d='M5.597937-2.787058C5.597937-4.347334 4.50217-5.478832 2.977626-5.478832C1.42926-5.478832 .345405-4.335423 .345405-2.691774C.345405-1.083856 1.453081 .119105 2.953805 .119105S5.597937-1.143408 5.597937-2.787058ZM4.525991-2.37019C4.525991-1.024303 3.990019-.214389 3.096731-.214389C2.632221-.214389 2.191533-.500241 1.941412-.976661C1.607918-1.596007 1.41735-2.429743 1.41735-3.275389C1.41735-4.406886 1.977144-5.145338 2.822789-5.145338C3.823272-5.145338 4.525991-4.001929 4.525991-2.37019Z'/>
 <path id='eq1-g5-114' d='M3.990019-4.847575C3.990019-5.240622 3.739898-5.478832 3.334941-5.478832C2.8347-5.478832 2.489295-5.20489 1.905681-4.359244V-5.455011L1.846128-5.478832C1.214871-5.216801 .786093-5.061964 .083374-4.835665V-4.645096C.250121-4.680828 .357315-4.692738 .500241-4.692738C.798004-4.692738 .905198-4.50217 .905198-3.978108V-1.000482C.905198-.404957 .821825-.321584 .059553-.178658V0H2.918073V-.178658C2.108159-.214389 1.905681-.393047 1.905681-1.071945V-3.751809C1.905681-4.132945 2.417832-4.72847 2.739416-4.72847C2.810879-4.72847 2.918073-4.668917 3.049089-4.549812C3.239657-4.383065 3.370673-4.311602 3.525509-4.311602C3.811361-4.311602 3.990019-4.514081 3.990019-4.847575Z'/>
@@ -169,15 +165,15 @@ $ L $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-76'/>
 </g>
-</svg>.</p></section><section id="autotoc_md479"><h3><a href="#autotoc_md479">Applications</a></h3><ul><li>Crystal lattice simulations</li><li>Unit cell problems in homogenization</li><li>Fluid flow in periodic geometries</li><li>Wave propagation in periodic media</li></ul></section><section id="autotoc_md480"><h3><a href="#autotoc_md480">Implementation</a></h3><p>Periodic conditions are enforced by:</p><ol><li>Identifying matching DOF pairs on opposite boundaries</li><li>Constraining one DOF to equal its periodic partner</li><li>Eliminating dependent DOFs from the system</li></ol></section><section id="autotoc_md481"><h3><a href="#autotoc_md481">Usage Example</a></h3><pre class="m-code"><span class="c1">// Periodic BC between boundaries 1 and 2</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">pbc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PeriodicBC</span><span class="p">(</span><span class="n">u</span><span class="p">).</span><span class="n">from</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="n">to</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre></section>
+</svg>.</p></section><section id="autotoc_md512"><h2><a href="#autotoc_md512">Applications</a></h2><ul><li>Crystal lattice simulations</li><li>Unit cell problems in homogenization</li><li>Fluid flow in periodic geometries</li><li>Wave propagation in periodic media</li></ul></section><section id="autotoc_md513"><h2><a href="#autotoc_md513">Implementation</a></h2><p>Periodic conditions are enforced by:</p><ol><li>Identifying matching DOF pairs on opposite boundaries</li><li>Constraining one DOF to equal its periodic partner</li><li>Eliminating dependent DOFs from the system</li></ol></section><section id="autotoc_md514"><h2><a href="#autotoc_md514">Usage Example</a></h2><pre class="m-code"><span class="c1">// Periodic BC between boundaries 1 and 2</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">pbc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">PeriodicBC</span><span class="p">(</span><span class="n">u</span><span class="p">).</span><span class="n">from</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="n">to</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Finite element spaces, fields, and variational problems.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -233,13 +229,20 @@ $ L $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

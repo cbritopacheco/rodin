@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::MMG::Mesh class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,18 +71,15 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>Mesh <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_mesh_8h.html">&lt;Rodin/MMG/Mesh.h&gt;</a></div>
-        </h1>
-        <p>Local mesh enriched with MMG boundary tags and constraints.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_m_m_g.html">MMG</a></div><h1>Mesh</h1><p class="rodin-reference-brief">Local mesh enriched with MMG boundary tags and constraints.</p><p class="rodin-reference-include">Defined in <a href="_m_m_g_2_mesh_8h.html"><code>Rodin/MMG/Mesh.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">Mesh</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-static-methods">Public static functions</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
@@ -94,17 +88,9 @@
             </li>
           </ul>
         </nav>
-<p>This class extends <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;</a> with index sets used by MMG workflows:</p><ul><li>corners (<code>MG_CRN</code>),</li><li>ridges (<code>MG_GEO</code>),</li><li>required vertices (<code>MG_REQ</code>),</li><li>required edges (<code>MG_REQ</code> on edges),</li><li>required triangles (<code>MG_REQ</code> on triangle entities),</li><li>required tetrahedra (<code>MG_REQ</code> on tetrahedra).</li></ul><p>These sets are preserved when converting to/from native MMG structures via <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bd883b7f95228226fd6f267d044287" class="m-doc">MMG5::<wbr />rodinToMesh</a> and <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc">MMG5::<wbr />meshToRodin</a>. The optimizer and level-set wrappers also restore the required index sets when the original indices are still valid in the remeshed output. In MMG3D, required triangles refer to boundary triangles exported to MMG&#x27;s triangle table; interior faces of a tetrahedral mesh are not exported as MMG boundary triangles when face-cell incidence is available.</p><aside class="m-note m-info"><h4>Note</h4><p>Required entities are MMG constraints, not an unconditional element-integrity promise for every workflow. In level-set discretization, required entities that are not crossed by the level set are tested to keep their metadata and geometry in Rodin&#x27;s 2D/3D test cases. If the level set crosses a required entity, MMG may alter that entity in order to conform the output mesh to the isovalue.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::Local&gt;</a>
-            </dt>
-            <dd>Represents the subdivision of some domain into faces of (possibly) different geometries.</dd>
-          </dl>
-        </section>
+<p>This class extends <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a> with index sets used by MMG workflows:</p><ul><li>corners (<code>MG_CRN</code>),</li><li>ridges (<code>MG_GEO</code>),</li><li>required vertices (<code>MG_REQ</code>),</li><li>required edges (<code>MG_REQ</code> on edges),</li><li>required triangles (<code>MG_REQ</code> on triangle entities),</li><li>required tetrahedra (<code>MG_REQ</code> on tetrahedra).</li></ul><p>These sets are preserved when converting to/from native MMG structures via <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bd883b7f95228226fd6f267d044287" class="m-doc">rodinToMesh</a> and <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc">meshToRodin</a>. The optimizer and level-set wrappers also restore the required index sets when the original indices are still valid in the remeshed output. In MMG3D, required triangles refer to boundary triangles exported to MMG&#x27;s triangle table; interior faces of a tetrahedral mesh are not exported as MMG boundary triangles when face-cell incidence is available.</p><aside class="m-note m-info"><h4>Note</h4><p>Required entities are MMG constraints, not an unconditional element-integrity promise for every workflow. In level-set discretization, required entities that are not crossed by the level set are tested to keep their metadata and geometry in Rodin&#x27;s 2D/3D test cases. If the level set crosses a required entity, MMG may alter that entity in order to conform the output mesh to the isovalue.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a></p></aside>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" title="Geometry::Mesh&lt; Context::Local &gt;">Geometry::Mesh</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Mesh</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html"><code>Geometry::Mesh&lt;Context::Local&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Represents the subdivision of some domain into faces of (possibly) different geometries.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_m_m_g_1_1_mesh.html#ad362bb3037096ed0a16c3a792dd00ea6"><code>save()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a7215c83fd494e1e72781e74f9acde138">Mesh::save</a></td></tr><tr><td><a href="class_rodin_1_1_m_m_g_1_1_mesh.html#aa33c6cf03ddc1a84ed35e9db7d9132ac"><code>load()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#abf88784d713dfc3eccd085f7f9fb9773">Mesh::load</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html"><code>Geometry::Mesh&lt;Context::Local&gt;</code></a></td><td><details><summary>72 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aa66d766684c6856007643ea05ce1479e"><code>asSubMesh()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a1c114dba2d138c6b2bf26203fc4723f1"><code>asSubMesh()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ae48b0eb06ac78320310c37c2a103f165"><code>Box()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a7aeff67906a94df8534f5f44ec81bd8a"><code>Box()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2ebe602bf7270d001e88a1b954a35608"><code>ccl()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a6f087ec7662609ba9a93f51bb60ea559"><code>ccl()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a280d34a48272a2944347eba299380194"><code>ccl()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#af7f68a546e7434e8bf74b9f7d4130398"><code>ccl()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aa3f3ca208d6ecf325e509f59b23c3c9f"><code>ccl()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ab7473b4627d3b7c776e3ff355e76770d"><code>displace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#af654b48544c195ab99fe27e7bc3ed5fe"><code>flush()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a7f5708e7b511ba4460df9947caf767af"><code>getArea()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#abe640c51631e5229dfefa8f2d9cd67d0"><code>getArea()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aef8f2d8099f6409571fdd413acecd400"><code>getArea()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ab8facfe5a0e9c927987eae334bed3d2e"><code>getAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#abca2f0d800edd035174c48b8aec14c76"><code>getAttributeIndex()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ae0136b8e6724a1c7383cfb3981735a9e"><code>getBoundary()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2bca9a9b07817b09939904981651999e"><code>getCell()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aa3e186226e69e0a5aa07e5bb14d9f4d8"><code>getCell()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ab8fe845b23ef3cb5628aa63964b35fd9"><code>getConnectivity()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aab52b72c8bdfdba2154de955773ce3cf"><code>getConnectivity()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#abec500a2d7d961805241edefeeea01f5"><code>getContext()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ab9935bb24de567e5136c110eb2180696"><code>getDefaultPolytopeTransformation()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a6b670e6677871cdcf0cbc34740617e7a"><code>getDimension()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#adb6b1b331385a032bc3faea3747b286e"><code>getFace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a690698beb9010fc484bc87ffe258b1cd"><code>getFace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a731b43add6aba272d4297502a5ff19d6"><code>getGeometry()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#afb9e52721d28b811e43605092e3b8c73"><code>getInterface()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#afd5d9204c1312cf4caecbb1cc9d76d75"><code>getMeasure()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ab0bfc5c541a898210683c9f3f70a92ee"><code>getMeasure()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a89a74fc6f6232647804d097846944be5"><code>getMeasure()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2d613557ba40614c2d86e226e8cf1fc4"><code>getPerimeter()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ad98b386526e709f346e01ea1201a5921"><code>getPerimeter()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aebdabb738caffacc8ef881eaba858185"><code>getPerimeter()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ace5a24d478403c4eb3a270053e92da3c"><code>getPolytope()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ad85868350acb9d551fe93199c26e278f"><code>getPolytope()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a466f6a1b17ad2b0925fe6289332b4bed"><code>getPolytopeCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aa9cc9880fb91a216ea83671096e61243"><code>getPolytopeCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a333d0b9b2f4a63f4c5a6fe7542316269"><code>getPolytopeTransformation()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a3544696ed62b8f55ffc6ead543e7d12b"><code>getPolytopeTransformationIndex()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a4f467aa7374171800942e7e4a100d7ff"><code>getQuadrature()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a39d52066628132455cce25aefa575ab9"><code>getSpaceDimension()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a0b7b5aa8d517f36e8e8dc2b2ece0db0c"><code>getVertex()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ac3f28ae996afae0b748d36bc13b9377e"><code>getVertex()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a7bdaf4beee904dd8491695e4c0b10014"><code>getVertexCoordinates()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2d2ff1f373d0c8152aa39a4020ae866a"><code>getVertices()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aedb17bb61a414bba468c922efb42e0d1"><code>getVolume()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2eb114e516b1a7bd60d5ec1518b86eb9"><code>getVolume()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a4b812fae3a6c8e2ea2916694ed19535c"><code>getVolume()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a077fe0bdd903e2d7a7a611b1c89ca788"><code>isBoundary()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a02533151918fdbde086c1f65549cb3c5"><code>isInterface()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#acd63496fbf1f2d60dddc6aa7d11c733b"><code>isSubMesh()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a3cee134f1e07f60947bd85dcf9b08874"><code>keep()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a799153c4a7199d192071539880a67111"><code>keep()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#afb2a43ac4cb4d6cd4c5ebc64f6e7e034"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#af26e292ff63011c4a5ab2ec42e731a7b"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aefedf3d42ef570a1e3d2a073795a4c47"><code>scale()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a68e832cb064e3b7ca978d8e5911cf700"><code>serialize()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a040c01d335c937e2860c5dce21bfff39"><code>setAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#af3507fc6ce2660c3afa26624bc1affae"><code>setPolytopeTransformation()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ab153faf6107cbf3ed04f1ae0f8b0534d"><code>setVertexCoordinates()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a81d8f6728fa4a11521e1f376091710b7"><code>setVertexCoordinates()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a86324d0824fc5a5b9ae2f0115872c82f"><code>skin()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a967dc5873fa9d09f7c394ccc0323981f"><code>trace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ac19ad90ce7d194f90d53b16a98694d11"><code>trace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a59420a926b39ee8493e7aac9537e4893"><code>trace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a97c07df31cba1ff873f86a7801a3ee98"><code>trace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a00c8256789fb4b1821dc2a069df4022a"><code>trace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a04eca291faefd2262a792b0e71bb3f21"><code>trim()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a6ee9ba2539345c9478e4c1b048c13e26"><code>trim()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a9da6e5f40c0d6079ee0d40af03e9841d"><code>UniformGrid()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a208b253e13fe8578c4b277a422a0b175"><code>UniformGrid()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html"><code>Geometry::MeshBase</code></a></td><td><details><summary>13 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a9000ddf38d8d853cbde9005de9efcafb"><code>getCellAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a3275fb6c3d9c1b19129046c40d555972"><code>getCellCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a1a93f6a1a2e97911722772d5429a79b1"><code>getFaceAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aa26e370d99a09c33f3f759c4bc52800e"><code>getFaceCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aafa1fbb6fcf1168fe50762a590fe5f89"><code>getName()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a24a4e01af898769244e11a4f94ca8fd0"><code>getVertexCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#acc802e09e1a41bb47fc3fa6394184885"><code>inclusion()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#acf82f9b2937375c7b1cf3dccb3df3312"><code>isEmpty()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a3203ac272db4d8b0a23eef0ed605341f"><code>isLocalPoint()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5c0ab183385f8806ca268b5c1b31d55d"><code>isSurface()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5529f7a1957bdf41e4d323e3deb6f301"><code>operator!=()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a8a80bde2a1da80e943646eb2404423c0"><code>operator==()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ad5193c20d0320dd32fd0c8df5460b883"><code>setName()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -119,7 +105,7 @@
             <dt id="a5d11968e3ae899be574a41d47a17a36f">
               using <a href="#a5d11968e3ae899be574a41d47a17a36f" class="m-doc-self">Context</a> = typename Parent::Context
             </dt>
-            <dd>Mesh context type (always local for <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>).</dd>
+            <dd>Mesh context type (always local for <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>).</dd>
             <dt id="a748c4cb7eb953682ee130a23771ad367">
               using <a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc-self">CornerIndex</a> = <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>
             </dt>
@@ -152,7 +138,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">static auto <a href="#a4f87f0175bc4cbe6518ba48a2ed0555c" class="m-doc">Build</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">MMG::<wbr />Mesh::<wbr />Builder</a></span>
             </dt>
-            <dd>Creates a builder for constructing an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> instance.</dd>
+            <dd>Creates a builder for constructing an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> instance.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -162,16 +148,16 @@
               <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Constructs an empty MMG mesh.</dd>
-            <dt id="afceeead3b92b95c2a5b054efc880a83e">
-              <span class="m-doc-wrap-bumper"><a href="#afceeead3b92b95c2a5b054efc880a83e" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc">Parent</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#afceeead3b92b95c2a5b054efc880a83e" class="m-doc">Mesh</a>(</span><span class="m-doc-wrap"><a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc">Parent</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move-constructs from a base local mesh.</dd>
-            <dt id="a41e370009465e8495509f5063ff4b656">
-              <span class="m-doc-wrap-bumper"><a href="#a41e370009465e8495509f5063ff4b656" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a41e370009465e8495509f5063ff4b656" class="m-doc">Mesh</a>(</span><span class="m-doc-wrap">const Mesh&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a35fd55b8b9b41755f17756a07de4c0f8">
-              <span class="m-doc-wrap-bumper"><a href="#a35fd55b8b9b41755f17756a07de4c0f8" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a35fd55b8b9b41755f17756a07de4c0f8" class="m-doc">Mesh</a>(</span><span class="m-doc-wrap">Mesh&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -179,40 +165,40 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="af26e292ff63011c4a5ab2ec42e731a7b">
-              <span class="m-doc-wrap-bumper">auto <a href="#af26e292ff63011c4a5ab2ec42e731a7b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af26e292ff63011c4a5ab2ec42e731a7b" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp;&amp; other) -&gt; <a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Move assignment.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afb2a43ac4cb4d6cd4c5ebc64f6e7e034" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; other) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afb2a43ac4cb4d6cd4c5ebc64f6e7e034" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; other) -&gt; <a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Copy assignment is deleted.</dd>
-            <dt id="acf02536ee4b763b4ed403e777a2d8926">
-              <span class="m-doc-wrap-bumper">auto <a href="#acf02536ee4b763b4ed403e777a2d8926" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc">Parent</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acf02536ee4b763b4ed403e777a2d8926" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc">Parent</a>&amp;&amp; other) -&gt; <a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Move-assigns from a parent mesh, clearing MMG metadata.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aab9ef675634a1eb941561a46056947d9" class="m-doc">setCorner</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aab9ef675634a1eb941561a46056947d9" class="m-doc">setCorner</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx) -&gt; <a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Marks a vertex as a corner.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a36486520ad9e99573fcb4ffedcd01b67" class="m-doc">setRidge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a36486520ad9e99573fcb4ffedcd01b67" class="m-doc">setRidge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx) -&gt; <a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Marks an edge as a ridge.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5865a18e254a94a9dea279342546f7da" class="m-doc">setRequiredEdge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5865a18e254a94a9dea279342546f7da" class="m-doc">setRequiredEdge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx) -&gt; <a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Marks an edge as required.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a72ddbe6a916cc401b268d595e4ff52bd" class="m-doc">setRequiredTriangle</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> triangleIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a72ddbe6a916cc401b268d595e4ff52bd" class="m-doc">setRequiredTriangle</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> triangleIdx) -&gt; <a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Marks a triangle as required.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#abd159aec635152735f8008310f2b71aa" class="m-doc">setRequiredTetrahedron</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> tetrahedronIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abd159aec635152735f8008310f2b71aa" class="m-doc">setRequiredTetrahedron</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> tetrahedronIdx) -&gt; <a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Marks a tetrahedron as required.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a660daeaf3faa7b58bbda95c8d9ae8254" class="m-doc">setRequiredVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a660daeaf3faa7b58bbda95c8d9ae8254" class="m-doc">setRequiredVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx) -&gt; <a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Marks a vertex as required.</dd>
             <dt>
@@ -270,7 +256,7 @@
             <dd>Saves the mesh to disk.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aa33c6cf03ddc1a84ed35e9db7d9132ac" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
-              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) -&gt; <a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Loads the mesh from disk.</dd>
           </dl>
@@ -279,9 +265,9 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a4f87f0175bc4cbe6518ba48a2ed0555c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">MMG::<wbr />Mesh::<wbr />Builder</a> Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f87f0175bc4cbe6518ba48a2ed0555c" class="m-doc-self">Build</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">MMG::<wbr />Mesh::<wbr />Builder</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f87f0175bc4cbe6518ba48a2ed0555c" class="m-doc-self">Build</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-            <p>Creates a builder for constructing an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> instance.</p>
+            <p>Creates a builder for constructing an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> instance.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
@@ -291,16 +277,124 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="afceeead3b92b95c2a5b054efc880a83e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afceeead3b92b95c2a5b054efc880a83e" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc">Parent</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move-constructs from a base local mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a41e370009465e8495509f5063ff4b656"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41e370009465e8495509f5063ff4b656" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">const Mesh&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a35fd55b8b9b41755f17756a07de4c0f8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35fd55b8b9b41755f17756a07de4c0f8" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">Mesh&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af26e292ff63011c4a5ab2ec42e731a7b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af26e292ff63011c4a5ab2ec42e731a7b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move assignment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="afb2a43ac4cb4d6cd4c5ebc64f6e7e034"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb2a43ac4cb4d6cd4c5ebc64f6e7e034" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb2a43ac4cb4d6cd4c5ebc64f6e7e034" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
             </h3>
             <p>Copy assignment is deleted.</p>
-<p>Parent <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;</a> deletes copy assignment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Parent <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a> deletes copy assignment.</p>
+          </div></section>
+          <section class="m-doc-details" id="acf02536ee4b763b4ed403e777a2d8926"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf02536ee4b763b4ed403e777a2d8926" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc">Parent</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move-assigns from a parent mesh, clearing MMG metadata.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="aab9ef675634a1eb941561a46056947d9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aab9ef675634a1eb941561a46056947d9" class="m-doc-self">setCorner</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aab9ef675634a1eb941561a46056947d9" class="m-doc-self">setCorner</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx)</span></span>
             </h3>
             <p>Marks a vertex as a corner.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -323,7 +417,7 @@
           </div></section>
           <section class="m-doc-details" id="a36486520ad9e99573fcb4ffedcd01b67"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36486520ad9e99573fcb4ffedcd01b67" class="m-doc-self">setRidge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36486520ad9e99573fcb4ffedcd01b67" class="m-doc-self">setRidge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx)</span></span>
             </h3>
             <p>Marks an edge as a ridge.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -346,7 +440,7 @@
           </div></section>
           <section class="m-doc-details" id="a5865a18e254a94a9dea279342546f7da"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5865a18e254a94a9dea279342546f7da" class="m-doc-self">setRequiredEdge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5865a18e254a94a9dea279342546f7da" class="m-doc-self">setRequiredEdge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx)</span></span>
             </h3>
             <p>Marks an edge as required.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -369,7 +463,7 @@
           </div></section>
           <section class="m-doc-details" id="a72ddbe6a916cc401b268d595e4ff52bd"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a72ddbe6a916cc401b268d595e4ff52bd" class="m-doc-self">setRequiredTriangle</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> triangleIdx)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a72ddbe6a916cc401b268d595e4ff52bd" class="m-doc-self">setRequiredTriangle</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> triangleIdx)</span></span>
             </h3>
             <p>Marks a triangle as required.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -392,7 +486,7 @@
           </div></section>
           <section class="m-doc-details" id="abd159aec635152735f8008310f2b71aa"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abd159aec635152735f8008310f2b71aa" class="m-doc-self">setRequiredTetrahedron</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> tetrahedronIdx)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abd159aec635152735f8008310f2b71aa" class="m-doc-self">setRequiredTetrahedron</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> tetrahedronIdx)</span></span>
             </h3>
             <p>Marks a tetrahedron as required.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -415,7 +509,7 @@
           </div></section>
           <section class="m-doc-details" id="a660daeaf3faa7b58bbda95c8d9ae8254"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a660daeaf3faa7b58bbda95c8d9ae8254" class="m-doc-self">setRequiredVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a660daeaf3faa7b58bbda95c8d9ae8254" class="m-doc-self">setRequiredVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx)</span></span>
             </h3>
             <p>Marks a vertex as required.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -438,7 +532,7 @@
           </div></section>
           <section class="m-doc-details" id="a3925af43925006c61ac5d9e5678d425d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc">CornerIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3925af43925006c61ac5d9e5678d425d" class="m-doc-self">getCorners</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc">CornerIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3925af43925006c61ac5d9e5678d425d" class="m-doc-self">getCorners</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the corner index set (const).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -452,7 +546,7 @@
           </div></section>
           <section class="m-doc-details" id="a1cfe89b7bfa1e8567044cfc541481d2d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc">CornerIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1cfe89b7bfa1e8567044cfc541481d2d" class="m-doc-self">getCorners</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc">CornerIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1cfe89b7bfa1e8567044cfc541481d2d" class="m-doc-self">getCorners</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Gets the corner index set.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -466,7 +560,7 @@
           </div></section>
           <section class="m-doc-details" id="a735cbfcfc7d87fa8e59d1ea6edde26d0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="#a70cdd9fb622ee2942fd08cf918960e30" class="m-doc">RidgeIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a735cbfcfc7d87fa8e59d1ea6edde26d0" class="m-doc-self">getRidges</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a70cdd9fb622ee2942fd08cf918960e30" class="m-doc">RidgeIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a735cbfcfc7d87fa8e59d1ea6edde26d0" class="m-doc-self">getRidges</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the ridge index set (const).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -480,7 +574,7 @@
           </div></section>
           <section class="m-doc-details" id="a1ae25c1b3b29b135afa86f3799310873"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#a70cdd9fb622ee2942fd08cf918960e30" class="m-doc">RidgeIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ae25c1b3b29b135afa86f3799310873" class="m-doc-self">getRidges</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a70cdd9fb622ee2942fd08cf918960e30" class="m-doc">RidgeIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ae25c1b3b29b135afa86f3799310873" class="m-doc-self">getRidges</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Gets the ridge index set.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -494,7 +588,7 @@
           </div></section>
           <section class="m-doc-details" id="a426c5fcff56dbea0c524ecc8f0432221"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#ab2f9371ffc5d977987f9e254890b3c49" class="m-doc">RequiredEdgeIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a426c5fcff56dbea0c524ecc8f0432221" class="m-doc-self">getRequiredEdges</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ab2f9371ffc5d977987f9e254890b3c49" class="m-doc">RequiredEdgeIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a426c5fcff56dbea0c524ecc8f0432221" class="m-doc-self">getRequiredEdges</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Gets the required-edge index set.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -508,7 +602,7 @@
           </div></section>
           <section class="m-doc-details" id="a077fbaf7b5a6b6f8a28276cc62005ae6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="#ab2f9371ffc5d977987f9e254890b3c49" class="m-doc">RequiredEdgeIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a077fbaf7b5a6b6f8a28276cc62005ae6" class="m-doc-self">getRequiredEdges</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#ab2f9371ffc5d977987f9e254890b3c49" class="m-doc">RequiredEdgeIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a077fbaf7b5a6b6f8a28276cc62005ae6" class="m-doc-self">getRequiredEdges</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the required-edge index set (const).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -522,7 +616,7 @@
           </div></section>
           <section class="m-doc-details" id="a540627ac002702c673cbd7c4af6777d3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#a62d197fcdc9c3cecb383e7dd130b31ff" class="m-doc">RequiredTriangleIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a540627ac002702c673cbd7c4af6777d3" class="m-doc-self">getRequiredTriangles</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a62d197fcdc9c3cecb383e7dd130b31ff" class="m-doc">RequiredTriangleIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a540627ac002702c673cbd7c4af6777d3" class="m-doc-self">getRequiredTriangles</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Gets the required-triangle index set.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -536,7 +630,7 @@
           </div></section>
           <section class="m-doc-details" id="a775f588914e98a44c539222219b4f18a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="#a62d197fcdc9c3cecb383e7dd130b31ff" class="m-doc">RequiredTriangleIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a775f588914e98a44c539222219b4f18a" class="m-doc-self">getRequiredTriangles</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a62d197fcdc9c3cecb383e7dd130b31ff" class="m-doc">RequiredTriangleIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a775f588914e98a44c539222219b4f18a" class="m-doc-self">getRequiredTriangles</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the required-triangle index set (const).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -550,7 +644,7 @@
           </div></section>
           <section class="m-doc-details" id="a211d516885637388258500051385830c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#a14904369e8cc37993f124233f9470968" class="m-doc">RequiredTetrahedronIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a211d516885637388258500051385830c" class="m-doc-self">getRequiredTetrahedra</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a14904369e8cc37993f124233f9470968" class="m-doc">RequiredTetrahedronIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a211d516885637388258500051385830c" class="m-doc-self">getRequiredTetrahedra</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Gets the required-tetrahedron index set.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -564,7 +658,7 @@
           </div></section>
           <section class="m-doc-details" id="ad8f845fb3d6175b67afd893f6784d01b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="#a14904369e8cc37993f124233f9470968" class="m-doc">RequiredTetrahedronIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad8f845fb3d6175b67afd893f6784d01b" class="m-doc-self">getRequiredTetrahedra</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a14904369e8cc37993f124233f9470968" class="m-doc">RequiredTetrahedronIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad8f845fb3d6175b67afd893f6784d01b" class="m-doc-self">getRequiredTetrahedra</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the required-tetrahedron index set (const).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -578,7 +672,7 @@
           </div></section>
           <section class="m-doc-details" id="ac233b71ca7afeae0535518452390bb1b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#a03d97325a79a1055b1118aac754d1dde" class="m-doc">RequiredVertexIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac233b71ca7afeae0535518452390bb1b" class="m-doc-self">getRequiredVertices</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a03d97325a79a1055b1118aac754d1dde" class="m-doc">RequiredVertexIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac233b71ca7afeae0535518452390bb1b" class="m-doc-self">getRequiredVertices</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Gets the required-vertex index set.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -592,7 +686,7 @@
           </div></section>
           <section class="m-doc-details" id="a304f7c8648778d109defd28cacb9a75c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="#a03d97325a79a1055b1118aac754d1dde" class="m-doc">RequiredVertexIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a304f7c8648778d109defd28cacb9a75c" class="m-doc-self">getRequiredVertices</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a03d97325a79a1055b1118aac754d1dde" class="m-doc">RequiredVertexIndex</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a304f7c8648778d109defd28cacb9a75c" class="m-doc-self">getRequiredVertices</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the required-vertex index set (const).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -606,7 +700,7 @@
           </div></section>
           <section class="m-doc-details" id="ad362bb3037096ed0a16c3a792dd00ea6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad362bb3037096ed0a16c3a792dd00ea6" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad362bb3037096ed0a16c3a792dd00ea6" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Saves the mesh to disk.</p>
@@ -625,11 +719,11 @@
                 </tr>
               </tbody>
             </table>
-<p>For <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">Rodin::<wbr />IO::<wbr />FileFormat::<wbr />MEDIT</a> this writes MMG-specific sections via <a href="class_rodin_1_1_m_m_g_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a>. Other formats delegate to the parent mesh implementation.</p>
+<p>For <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">MEDIT</a> this writes MMG-specific sections via <a href="class_rodin_1_1_m_m_g_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a>. Other formats delegate to the parent mesh implementation.</p>
           </div></section>
           <section class="m-doc-details" id="aa33c6cf03ddc1a84ed35e9db7d9132ac"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa33c6cf03ddc1a84ed35e9db7d9132ac" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa33c6cf03ddc1a84ed35e9db7d9132ac" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Loads the mesh from disk.</p>
@@ -654,7 +748,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>For <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">Rodin::<wbr />IO::<wbr />FileFormat::<wbr />MEDIT</a> this restores MMG-specific sections via <a href="class_rodin_1_1_m_m_g_1_1_mesh_loader.html" class="m-doc">MeshLoader</a>. Other formats delegate to the parent mesh implementation.</p>
+<p>For <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">MEDIT</a> this restores MMG-specific sections via <a href="class_rodin_1_1_m_m_g_1_1_mesh_loader.html" class="m-doc">MeshLoader</a>. Other formats delegate to the parent mesh implementation.</p>
           </div></section>
         </section>
       </div>
@@ -695,13 +789,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

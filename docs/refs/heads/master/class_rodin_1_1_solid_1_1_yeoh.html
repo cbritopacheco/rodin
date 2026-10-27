@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Solid::Yeoh class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,15 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>Yeoh <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_yeoh_8h.html">&lt;Rodin/Solid/Constitutive/Yeoh.h&gt;</a></div>
-        </h1>
-        <p>Compressible Yeoh hyperelastic law.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solid.html">Solid</a></div><h1>Yeoh <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Compressible Yeoh hyperelastic law.</p><p class="rodin-reference-include">Defined in <a href="_yeoh_8h.html"><code>Rodin/Solid/Constitutive/Yeoh.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solid_1_1_yeoh.html#a4f78a698e190ec135401edf4edb4e8a0"><span class="nc">Yeoh</span></a><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -159,26 +152,9 @@ $ c_2, c_3 $
 <use x='15.014462' y='0' xlink:href='#eq4-g0-99'/>
 <use x='20.052451' y='1.793263' xlink:href='#eq4-g1-51'/>
 </g>
-</svg> control the strain-stiffening.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html">HyperElasticLaw</a></p><p><a href="class_rodin_1_1_solid_1_1_mooney_rivlin.html">MooneyRivlin</a></p><p><a href="class_rodin_1_1_solid_1_1_neo_hookean.html">NeoHookean</a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw&lt;Yeoh&gt;</a>
-            </dt>
-            <dd>CRTP base class for hyperelastic constitutive laws.</dd>
-          </dl>
-        </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt>
-              struct <a href="struct_rodin_1_1_solid_1_1_yeoh_1_1_cache.html" class="m-doc">Cache</a>
-            </dt>
-            <dd>Precomputed cache for the Yeoh law.</dd>
-          </dl>
-        </section>
+</svg> control the strain-stiffening.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solid_1_1_mooney_rivlin.html">MooneyRivlin</a></p><p><a href="class_rodin_1_1_solid_1_1_neo_hookean.html">NeoHookean</a></p></aside>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" title="HyperElasticLaw&lt; Yeoh &gt;">HyperElasticLaw</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Yeoh</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html"><code>HyperElasticLaw&lt;Yeoh&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">HyperElasticLaw</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_solid_1_1_yeoh.html#a4f78a698e190ec135401edf4edb4e8a0"><span class="nc">Yeoh</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>CRTP base class for hyperelastic constitutive laws.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html"><code>HyperElasticLaw</code></a></td><td><details><summary>4 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html#a5fa3d60ade418783cfb5d2d4232a29d6"><code>hasSameDirection()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li><li><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html#a7df4ef2783d4aa909ef378e59a8552e3"><code>hasSameKinematics()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li><li><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html#af960cd621d1deae8d89fa38e1fb84988"><code>operator=()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li><li><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html#ad7233b02e481fdba3c5aa6d068198974"><code>require()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li></ul></details></td></tr></tbody></table></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -189,12 +165,12 @@ $ c_2, c_3 $
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> bulkModulus)</span>
             </dt>
             <dd>Constructs a Yeoh law.</dd>
-            <dt id="ada88fded25d24e66a84a5a691e58d845">
-              <span class="m-doc-wrap-bumper"><a href="#ada88fded25d24e66a84a5a691e58d845" class="m-doc-self">Yeoh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_yeoh.html" class="m-doc">Yeoh</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#abb59dfaa5abe4e4bd5b0caa57bd1b502" class="m-doc">Yeoh</a>(</span><span class="m-doc-wrap">const Yeoh&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a076035eb7d549992052a6e91e4c3bf99">
-              <span class="m-doc-wrap-bumper"><a href="#a076035eb7d549992052a6e91e4c3bf99" class="m-doc-self">Yeoh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_yeoh.html" class="m-doc">Yeoh</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2327e3c06c2af410a501b3d2d15ee695" class="m-doc">Yeoh</a>(</span><span class="m-doc-wrap">Yeoh&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -202,8 +178,8 @@ $ c_2, c_3 $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a5bfa205ef816a11a895c479b1f6ee9c7">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5bfa205ef816a11a895c479b1f6ee9c7" class="m-doc-self">getMaterialConstantC1</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5bfa205ef816a11a895c479b1f6ee9c7" class="m-doc">getMaterialConstantC1</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Gets <svg class="m-math" style="width: 0.966em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.272171 6.940636">
 <title>
@@ -218,82 +194,80 @@ $ c_1 $
 <use x='5.037988' y='1.793263' xlink:href='#eq7-g1-49'/>
 </g>
 </svg>.</dd>
-            <dt id="a23e992ab64618cfdaaae0b8e118bc960">
-              <span class="m-doc-wrap-bumper">auto <a href="#a23e992ab64618cfdaaae0b8e118bc960" class="m-doc-self">getMaterialConstantC2</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a23e992ab64618cfdaaae0b8e118bc960" class="m-doc">getMaterialConstantC2</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Gets <svg class="m-math" style="width: 0.966em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.272171 6.940636">
 <title>
 $ c_2 $
 </title>
 <defs>
-<path id='eq8-g1-50' d='M2.247572-1.625903C2.375093-1.745455 2.709838-2.008468 2.83736-2.12005C3.331507-2.574346 3.801743-3.012702 3.801743-3.737983C3.801743-4.686426 3.004732-5.300125 2.008468-5.300125C1.052055-5.300125 .422416-4.574844 .422416-3.865504C.422416-3.474969 .73325-3.419178 .844832-3.419178C1.012204-3.419178 1.259278-3.53873 1.259278-3.841594C1.259278-4.25604 .860772-4.25604 .765131-4.25604C.996264-4.837858 1.530262-5.037111 1.920797-5.037111C2.662017-5.037111 3.044583-4.407472 3.044583-3.737983C3.044583-2.909091 2.462765-2.303362 1.522291-1.338979L.518057-.302864C.422416-.215193 .422416-.199253 .422416 0H3.57061L3.801743-1.42665H3.55467C3.53076-1.267248 3.466999-.868742 3.371357-.71731C3.323537-.653549 2.717808-.653549 2.590286-.653549H1.171606L2.247572-1.625903Z'/>
-<path id='eq8-g0-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
+<path id='eq9-g1-50' d='M2.247572-1.625903C2.375093-1.745455 2.709838-2.008468 2.83736-2.12005C3.331507-2.574346 3.801743-3.012702 3.801743-3.737983C3.801743-4.686426 3.004732-5.300125 2.008468-5.300125C1.052055-5.300125 .422416-4.574844 .422416-3.865504C.422416-3.474969 .73325-3.419178 .844832-3.419178C1.012204-3.419178 1.259278-3.53873 1.259278-3.841594C1.259278-4.25604 .860772-4.25604 .765131-4.25604C.996264-4.837858 1.530262-5.037111 1.920797-5.037111C2.662017-5.037111 3.044583-4.407472 3.044583-3.737983C3.044583-2.909091 2.462765-2.303362 1.522291-1.338979L.518057-.302864C.422416-.215193 .422416-.199253 .422416 0H3.57061L3.801743-1.42665H3.55467C3.53076-1.267248 3.466999-.868742 3.371357-.71731C3.323537-.653549 2.717808-.653549 2.590286-.653549H1.171606L2.247572-1.625903Z'/>
+<path id='eq9-g0-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
 </defs>
-<g id='eq8-page1'>
-<use x='0' y='0' xlink:href='#eq8-g0-99'/>
-<use x='5.037988' y='1.793263' xlink:href='#eq8-g1-50'/>
+<g id='eq9-page1'>
+<use x='0' y='0' xlink:href='#eq9-g0-99'/>
+<use x='5.037988' y='1.793263' xlink:href='#eq9-g1-50'/>
 </g>
 </svg>.</dd>
-            <dt id="a148507553f28686c5d4681a3d622f8cb">
-              <span class="m-doc-wrap-bumper">auto <a href="#a148507553f28686c5d4681a3d622f8cb" class="m-doc-self">getMaterialConstantC3</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a148507553f28686c5d4681a3d622f8cb" class="m-doc">getMaterialConstantC3</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Gets <svg class="m-math" style="width: 0.966em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.272171 6.940636">
 <title>
 $ c_3 $
 </title>
 <defs>
-<path id='eq9-g1-51' d='M2.016438-2.662017C2.646077-2.662017 3.044583-2.199751 3.044583-1.362889C3.044583-.366625 2.478705-.071731 2.056289-.071731C1.617933-.071731 1.020174-.231133 .74122-.653549C1.028144-.653549 1.227397-.836862 1.227397-1.099875C1.227397-1.354919 1.044085-1.538232 .789041-1.538232C.573848-1.538232 .350685-1.40274 .350685-1.083935C.350685-.326775 1.163636 .167372 2.072229 .167372C3.132254 .167372 3.873474-.565878 3.873474-1.362889C3.873474-2.024408 3.347447-2.630137 2.534496-2.805479C3.164134-3.028643 3.634371-3.57061 3.634371-4.208219S2.917061-5.300125 2.088169-5.300125C1.235367-5.300125 .589788-4.837858 .589788-4.23213C.589788-3.937235 .789041-3.809714 .996264-3.809714C1.243337-3.809714 1.40274-3.985056 1.40274-4.216189C1.40274-4.511083 1.147696-4.622665 .972354-4.630635C1.307098-5.068991 1.920797-5.092902 2.064259-5.092902C2.271482-5.092902 2.87721-5.029141 2.87721-4.208219C2.87721-3.650311 2.646077-3.315567 2.534496-3.188045C2.295392-2.940971 2.11208-2.925031 1.625903-2.893151C1.474471-2.885181 1.41071-2.87721 1.41071-2.773599C1.41071-2.662017 1.482441-2.662017 1.617933-2.662017H2.016438Z'/>
-<path id='eq9-g0-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
+<path id='eq11-g1-51' d='M2.016438-2.662017C2.646077-2.662017 3.044583-2.199751 3.044583-1.362889C3.044583-.366625 2.478705-.071731 2.056289-.071731C1.617933-.071731 1.020174-.231133 .74122-.653549C1.028144-.653549 1.227397-.836862 1.227397-1.099875C1.227397-1.354919 1.044085-1.538232 .789041-1.538232C.573848-1.538232 .350685-1.40274 .350685-1.083935C.350685-.326775 1.163636 .167372 2.072229 .167372C3.132254 .167372 3.873474-.565878 3.873474-1.362889C3.873474-2.024408 3.347447-2.630137 2.534496-2.805479C3.164134-3.028643 3.634371-3.57061 3.634371-4.208219S2.917061-5.300125 2.088169-5.300125C1.235367-5.300125 .589788-4.837858 .589788-4.23213C.589788-3.937235 .789041-3.809714 .996264-3.809714C1.243337-3.809714 1.40274-3.985056 1.40274-4.216189C1.40274-4.511083 1.147696-4.622665 .972354-4.630635C1.307098-5.068991 1.920797-5.092902 2.064259-5.092902C2.271482-5.092902 2.87721-5.029141 2.87721-4.208219C2.87721-3.650311 2.646077-3.315567 2.534496-3.188045C2.295392-2.940971 2.11208-2.925031 1.625903-2.893151C1.474471-2.885181 1.41071-2.87721 1.41071-2.773599C1.41071-2.662017 1.482441-2.662017 1.617933-2.662017H2.016438Z'/>
+<path id='eq11-g0-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
 </defs>
-<g id='eq9-page1'>
-<use x='0' y='0' xlink:href='#eq9-g0-99'/>
-<use x='5.037988' y='1.793263' xlink:href='#eq9-g1-51'/>
+<g id='eq11-page1'>
+<use x='0' y='0' xlink:href='#eq11-g0-99'/>
+<use x='5.037988' y='1.793263' xlink:href='#eq11-g1-51'/>
 </g>
 </svg>.</dd>
-            <dt id="ad82c251c711808751d9cb556fe725754">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad82c251c711808751d9cb556fe725754" class="m-doc-self">getBulkModulus</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad82c251c711808751d9cb556fe725754" class="m-doc">getBulkModulus</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Gets the bulk modulus <svg class="m-math" style="width: 0.702em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.738555 5.147373">
 <title>
 $ \kappa $
 </title>
 <defs>
-<path id='eq10-g0-20' d='M2.546451-2.988792C2.940971-3.203985 3.383313-3.574595 3.682192-3.825654C4.399502-4.447323 4.662516-4.638605 5.116812-4.817933C5.068991-4.746202 5.057036-4.65056 5.057036-4.566874C5.057036-4.244085 5.332005-4.184309 5.451557-4.184309C5.834122-4.184309 6.049315-4.542964 6.049315-4.770112C6.049315-4.841843 6.025405-5.152677 5.606974-5.152677C4.889664-5.152677 4.184309-4.542964 3.658281-4.100623C2.964882-3.490909 2.618182-3.227895 2.12802-3.072478L2.582316-4.97335C2.582316-5.164633 2.426899-5.272229 2.271482-5.272229C2.163885-5.272229 1.900872-5.236364 1.80523-4.853798L.6934-.418431C.657534-.274969 .657534-.251059 .657534-.179328C.657534-.011955 .789041 .119552 .968369 .119552C1.327024 .119552 1.398755-.191283 1.458531-.442341C1.530262-.6934 2.020423-2.689913 2.044334-2.761644C3.56264-2.689913 4.076712-2.307347 4.076712-1.721544C4.076712-1.637858 4.076712-1.601993 4.040847-1.470486C3.993026-1.243337 3.993026-1.111831 3.993026-1.0401C3.993026-.32279 4.459278 .119552 5.045081 .119552C5.535243 .119552 5.810212-.227148 5.989539-.537983C6.240598-1.004234 6.396015-1.661768 6.396015-1.709589C6.396015-1.769365 6.348194-1.817186 6.276463-1.817186C6.168867-1.817186 6.156912-1.769365 6.109091-1.578082C5.953674-1.004234 5.69066-.119552 5.080946-.119552C4.817933-.119552 4.686426-.274969 4.686426-.6934C4.686426-.920548 4.734247-1.183562 4.782067-1.362889C4.805978-1.482441 4.841843-1.625903 4.841843-1.75741C4.841843-2.84533 3.335492-2.952927 2.546451-2.988792Z'/>
+<path id='eq13-g0-20' d='M2.546451-2.988792C2.940971-3.203985 3.383313-3.574595 3.682192-3.825654C4.399502-4.447323 4.662516-4.638605 5.116812-4.817933C5.068991-4.746202 5.057036-4.65056 5.057036-4.566874C5.057036-4.244085 5.332005-4.184309 5.451557-4.184309C5.834122-4.184309 6.049315-4.542964 6.049315-4.770112C6.049315-4.841843 6.025405-5.152677 5.606974-5.152677C4.889664-5.152677 4.184309-4.542964 3.658281-4.100623C2.964882-3.490909 2.618182-3.227895 2.12802-3.072478L2.582316-4.97335C2.582316-5.164633 2.426899-5.272229 2.271482-5.272229C2.163885-5.272229 1.900872-5.236364 1.80523-4.853798L.6934-.418431C.657534-.274969 .657534-.251059 .657534-.179328C.657534-.011955 .789041 .119552 .968369 .119552C1.327024 .119552 1.398755-.191283 1.458531-.442341C1.530262-.6934 2.020423-2.689913 2.044334-2.761644C3.56264-2.689913 4.076712-2.307347 4.076712-1.721544C4.076712-1.637858 4.076712-1.601993 4.040847-1.470486C3.993026-1.243337 3.993026-1.111831 3.993026-1.0401C3.993026-.32279 4.459278 .119552 5.045081 .119552C5.535243 .119552 5.810212-.227148 5.989539-.537983C6.240598-1.004234 6.396015-1.661768 6.396015-1.709589C6.396015-1.769365 6.348194-1.817186 6.276463-1.817186C6.168867-1.817186 6.156912-1.769365 6.109091-1.578082C5.953674-1.004234 5.69066-.119552 5.080946-.119552C4.817933-.119552 4.686426-.274969 4.686426-.6934C4.686426-.920548 4.734247-1.183562 4.782067-1.362889C4.805978-1.482441 4.841843-1.625903 4.841843-1.75741C4.841843-2.84533 3.335492-2.952927 2.546451-2.988792Z'/>
 </defs>
-<g id='eq10-page1'>
-<use x='0' y='0' xlink:href='#eq10-g0-20'/>
+<g id='eq13-page1'>
+<use x='0' y='0' xlink:href='#eq13-g0-20'/>
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a7c3f4a25b01ac9b17fa90d43921b2dfb" class="m-doc">setCache</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_solid_1_1_yeoh_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a52820e9ea1d01ce61aabac029e65c931" class="m-doc">setConstitutivePoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) -&gt; <a href="#a4f78a698e190ec135401edf4edb4e8a0" class="m-doc">Yeoh</a>&amp;</span>
             </dt>
-            <dd>Populates the constitutive cache at the current state.</dd>
+            <dd>Binds owned evaluation data, reusing unchanged constitutive inputs.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad6e34e0670dc260c3510a097ab9bd352" class="m-doc">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_yeoh_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a859283bf64f988f608c32fcf0af4280d" class="m-doc">getKinematicState</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp;</span>
             </dt>
-            <dd>Computes the strain-energy density.</dd>
+            <dd>Returns the owned kinematics of the prepared point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#aa875e5dbc449421b1cc4fdb7471aa946" class="m-doc">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
-              const <a href="struct_rodin_1_1_solid_1_1_yeoh_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab96f841a63f48ada53e70ec7ac43d18d" class="m-doc">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Computes the first Piola-Kirchhoff stress.</dd>
+            <dd>Returns the strain-energy density at the prepared point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#adbcae15abc4f9d19395789c881e27e7d" class="m-doc">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
-              const <a href="struct_rodin_1_1_solid_1_1_yeoh_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
+              <span class="m-doc-wrap-bumper">void <a href="#a9f27ccb3e7ba7897755c79b4e339909f" class="m-doc">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P) const</span>
+            </dt>
+            <dd>Computes stress at the prepared point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aad67b877b6ec02ed52172441bab98235" class="m-doc">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dF) const</span>
             </dt>
-            <dd>Applies the material tangent to a deformation-gradient increment.</dd>
+            <dd>Computes the tangent action at the prepared point.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a4f78a698e190ec135401edf4edb4e8a0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />Yeoh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f78a698e190ec135401edf4edb4e8a0" class="m-doc-self">Yeoh</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c1,
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f78a698e190ec135401edf4edb4e8a0" class="m-doc-self">Yeoh</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c1,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c2,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c3,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> bulkModulus)</span></span>
@@ -351,111 +325,274 @@ $ \kappa $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a7c3f4a25b01ac9b17fa90d43921b2dfb"><div>
+          <section class="m-doc-details" id="abb59dfaa5abe4e4bd5b0caa57bd1b502"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />Yeoh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c3f4a25b01ac9b17fa90d43921b2dfb" class="m-doc-self">setCache</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_solid_1_1_yeoh_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abb59dfaa5abe4e4bd5b0caa57bd1b502" class="m-doc-self">Yeoh</a>(</span><span class="m-doc-wrap">const Yeoh&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
-            <p>Populates the constitutive cache at the current state.</p>
+            <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">cache</td>
-                  <td>The cache to fill</td>
-                </tr>
-                <tr>
-                  <td>cp</td>
-                  <td>The constitutive point</td>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
                 </tr>
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ad6e34e0670dc260c3510a097ab9bd352"><div>
+          <section class="m-doc-details" id="a2327e3c06c2af410a501b3d2d15ee695"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solid::<wbr />Yeoh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6e34e0670dc260c3510a097ab9bd352" class="m-doc-self">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_yeoh_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2327e3c06c2af410a501b3d2d15ee695" class="m-doc-self">Yeoh</a>(</span><span class="m-doc-wrap">Yeoh&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
-            <p>Computes the strain-energy density.</p>
+            <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">cache</td>
-                  <td>The precomputed constitutive cache</td>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
                 </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5bfa205ef816a11a895c479b1f6ee9c7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5bfa205ef816a11a895c479b1f6ee9c7" class="m-doc-self">getMaterialConstantC1</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets <svg class="m-math" style="width: 0.966em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.272171 6.940636">
+<title>
+$ c_1 $
+</title>
+<defs>
+<path id='eq7-g1-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
+<path id='eq7-g0-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g0-99'/>
+<use x='5.037988' y='1.793263' xlink:href='#eq7-g1-49'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
                 <tr>
-                  <td>cp</td>
-                  <td>The constitutive point</td>
+                  <th style="width: 1%">Returns</th>
+                  <td><svg class="m-math" style="width: 0.966em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.272171 6.940636">
+<title>
+$ c_1 $
+</title>
+<defs>
+<path id='eq8-g1-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
+<path id='eq8-g0-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
+</defs>
+<g id='eq8-page1'>
+<use x='0' y='0' xlink:href='#eq8-g0-99'/>
+<use x='5.037988' y='1.793263' xlink:href='#eq8-g1-49'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a23e992ab64618cfdaaae0b8e118bc960"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e992ab64618cfdaaae0b8e118bc960" class="m-doc-self">getMaterialConstantC2</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets <svg class="m-math" style="width: 0.966em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.272171 6.940636">
+<title>
+$ c_2 $
+</title>
+<defs>
+<path id='eq9-g1-50' d='M2.247572-1.625903C2.375093-1.745455 2.709838-2.008468 2.83736-2.12005C3.331507-2.574346 3.801743-3.012702 3.801743-3.737983C3.801743-4.686426 3.004732-5.300125 2.008468-5.300125C1.052055-5.300125 .422416-4.574844 .422416-3.865504C.422416-3.474969 .73325-3.419178 .844832-3.419178C1.012204-3.419178 1.259278-3.53873 1.259278-3.841594C1.259278-4.25604 .860772-4.25604 .765131-4.25604C.996264-4.837858 1.530262-5.037111 1.920797-5.037111C2.662017-5.037111 3.044583-4.407472 3.044583-3.737983C3.044583-2.909091 2.462765-2.303362 1.522291-1.338979L.518057-.302864C.422416-.215193 .422416-.199253 .422416 0H3.57061L3.801743-1.42665H3.55467C3.53076-1.267248 3.466999-.868742 3.371357-.71731C3.323537-.653549 2.717808-.653549 2.590286-.653549H1.171606L2.247572-1.625903Z'/>
+<path id='eq9-g0-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
+</defs>
+<g id='eq9-page1'>
+<use x='0' y='0' xlink:href='#eq9-g0-99'/>
+<use x='5.037988' y='1.793263' xlink:href='#eq9-g1-50'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><svg class="m-math" style="width: 0.966em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.272171 6.940636">
+<title>
+$ c_2 $
+</title>
+<defs>
+<path id='eq10-g1-50' d='M2.247572-1.625903C2.375093-1.745455 2.709838-2.008468 2.83736-2.12005C3.331507-2.574346 3.801743-3.012702 3.801743-3.737983C3.801743-4.686426 3.004732-5.300125 2.008468-5.300125C1.052055-5.300125 .422416-4.574844 .422416-3.865504C.422416-3.474969 .73325-3.419178 .844832-3.419178C1.012204-3.419178 1.259278-3.53873 1.259278-3.841594C1.259278-4.25604 .860772-4.25604 .765131-4.25604C.996264-4.837858 1.530262-5.037111 1.920797-5.037111C2.662017-5.037111 3.044583-4.407472 3.044583-3.737983C3.044583-2.909091 2.462765-2.303362 1.522291-1.338979L.518057-.302864C.422416-.215193 .422416-.199253 .422416 0H3.57061L3.801743-1.42665H3.55467C3.53076-1.267248 3.466999-.868742 3.371357-.71731C3.323537-.653549 2.717808-.653549 2.590286-.653549H1.171606L2.247572-1.625903Z'/>
+<path id='eq10-g0-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
+</defs>
+<g id='eq10-page1'>
+<use x='0' y='0' xlink:href='#eq10-g0-99'/>
+<use x='5.037988' y='1.793263' xlink:href='#eq10-g1-50'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a148507553f28686c5d4681a3d622f8cb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a148507553f28686c5d4681a3d622f8cb" class="m-doc-self">getMaterialConstantC3</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets <svg class="m-math" style="width: 0.966em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.272171 6.940636">
+<title>
+$ c_3 $
+</title>
+<defs>
+<path id='eq11-g1-51' d='M2.016438-2.662017C2.646077-2.662017 3.044583-2.199751 3.044583-1.362889C3.044583-.366625 2.478705-.071731 2.056289-.071731C1.617933-.071731 1.020174-.231133 .74122-.653549C1.028144-.653549 1.227397-.836862 1.227397-1.099875C1.227397-1.354919 1.044085-1.538232 .789041-1.538232C.573848-1.538232 .350685-1.40274 .350685-1.083935C.350685-.326775 1.163636 .167372 2.072229 .167372C3.132254 .167372 3.873474-.565878 3.873474-1.362889C3.873474-2.024408 3.347447-2.630137 2.534496-2.805479C3.164134-3.028643 3.634371-3.57061 3.634371-4.208219S2.917061-5.300125 2.088169-5.300125C1.235367-5.300125 .589788-4.837858 .589788-4.23213C.589788-3.937235 .789041-3.809714 .996264-3.809714C1.243337-3.809714 1.40274-3.985056 1.40274-4.216189C1.40274-4.511083 1.147696-4.622665 .972354-4.630635C1.307098-5.068991 1.920797-5.092902 2.064259-5.092902C2.271482-5.092902 2.87721-5.029141 2.87721-4.208219C2.87721-3.650311 2.646077-3.315567 2.534496-3.188045C2.295392-2.940971 2.11208-2.925031 1.625903-2.893151C1.474471-2.885181 1.41071-2.87721 1.41071-2.773599C1.41071-2.662017 1.482441-2.662017 1.617933-2.662017H2.016438Z'/>
+<path id='eq11-g0-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
+</defs>
+<g id='eq11-page1'>
+<use x='0' y='0' xlink:href='#eq11-g0-99'/>
+<use x='5.037988' y='1.793263' xlink:href='#eq11-g1-51'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><svg class="m-math" style="width: 0.966em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.272171 6.940636">
+<title>
+$ c_3 $
+</title>
+<defs>
+<path id='eq12-g1-51' d='M2.016438-2.662017C2.646077-2.662017 3.044583-2.199751 3.044583-1.362889C3.044583-.366625 2.478705-.071731 2.056289-.071731C1.617933-.071731 1.020174-.231133 .74122-.653549C1.028144-.653549 1.227397-.836862 1.227397-1.099875C1.227397-1.354919 1.044085-1.538232 .789041-1.538232C.573848-1.538232 .350685-1.40274 .350685-1.083935C.350685-.326775 1.163636 .167372 2.072229 .167372C3.132254 .167372 3.873474-.565878 3.873474-1.362889C3.873474-2.024408 3.347447-2.630137 2.534496-2.805479C3.164134-3.028643 3.634371-3.57061 3.634371-4.208219S2.917061-5.300125 2.088169-5.300125C1.235367-5.300125 .589788-4.837858 .589788-4.23213C.589788-3.937235 .789041-3.809714 .996264-3.809714C1.243337-3.809714 1.40274-3.985056 1.40274-4.216189C1.40274-4.511083 1.147696-4.622665 .972354-4.630635C1.307098-5.068991 1.920797-5.092902 2.064259-5.092902C2.271482-5.092902 2.87721-5.029141 2.87721-4.208219C2.87721-3.650311 2.646077-3.315567 2.534496-3.188045C2.295392-2.940971 2.11208-2.925031 1.625903-2.893151C1.474471-2.885181 1.41071-2.87721 1.41071-2.773599C1.41071-2.662017 1.482441-2.662017 1.617933-2.662017H2.016438Z'/>
+<path id='eq12-g0-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
+</defs>
+<g id='eq12-page1'>
+<use x='0' y='0' xlink:href='#eq12-g0-99'/>
+<use x='5.037988' y='1.793263' xlink:href='#eq12-g1-51'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad82c251c711808751d9cb556fe725754"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad82c251c711808751d9cb556fe725754" class="m-doc-self">getBulkModulus</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the bulk modulus <svg class="m-math" style="width: 0.702em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.738555 5.147373">
+<title>
+$ \kappa $
+</title>
+<defs>
+<path id='eq13-g0-20' d='M2.546451-2.988792C2.940971-3.203985 3.383313-3.574595 3.682192-3.825654C4.399502-4.447323 4.662516-4.638605 5.116812-4.817933C5.068991-4.746202 5.057036-4.65056 5.057036-4.566874C5.057036-4.244085 5.332005-4.184309 5.451557-4.184309C5.834122-4.184309 6.049315-4.542964 6.049315-4.770112C6.049315-4.841843 6.025405-5.152677 5.606974-5.152677C4.889664-5.152677 4.184309-4.542964 3.658281-4.100623C2.964882-3.490909 2.618182-3.227895 2.12802-3.072478L2.582316-4.97335C2.582316-5.164633 2.426899-5.272229 2.271482-5.272229C2.163885-5.272229 1.900872-5.236364 1.80523-4.853798L.6934-.418431C.657534-.274969 .657534-.251059 .657534-.179328C.657534-.011955 .789041 .119552 .968369 .119552C1.327024 .119552 1.398755-.191283 1.458531-.442341C1.530262-.6934 2.020423-2.689913 2.044334-2.761644C3.56264-2.689913 4.076712-2.307347 4.076712-1.721544C4.076712-1.637858 4.076712-1.601993 4.040847-1.470486C3.993026-1.243337 3.993026-1.111831 3.993026-1.0401C3.993026-.32279 4.459278 .119552 5.045081 .119552C5.535243 .119552 5.810212-.227148 5.989539-.537983C6.240598-1.004234 6.396015-1.661768 6.396015-1.709589C6.396015-1.769365 6.348194-1.817186 6.276463-1.817186C6.168867-1.817186 6.156912-1.769365 6.109091-1.578082C5.953674-1.004234 5.69066-.119552 5.080946-.119552C4.817933-.119552 4.686426-.274969 4.686426-.6934C4.686426-.920548 4.734247-1.183562 4.782067-1.362889C4.805978-1.482441 4.841843-1.625903 4.841843-1.75741C4.841843-2.84533 3.335492-2.952927 2.546451-2.988792Z'/>
+</defs>
+<g id='eq13-page1'>
+<use x='0' y='0' xlink:href='#eq13-g0-20'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The bulk modulus <svg class="m-math" style="width: 0.702em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.738555 5.147373">
+<title>
+$ \kappa $
+</title>
+<defs>
+<path id='eq14-g0-20' d='M2.546451-2.988792C2.940971-3.203985 3.383313-3.574595 3.682192-3.825654C4.399502-4.447323 4.662516-4.638605 5.116812-4.817933C5.068991-4.746202 5.057036-4.65056 5.057036-4.566874C5.057036-4.244085 5.332005-4.184309 5.451557-4.184309C5.834122-4.184309 6.049315-4.542964 6.049315-4.770112C6.049315-4.841843 6.025405-5.152677 5.606974-5.152677C4.889664-5.152677 4.184309-4.542964 3.658281-4.100623C2.964882-3.490909 2.618182-3.227895 2.12802-3.072478L2.582316-4.97335C2.582316-5.164633 2.426899-5.272229 2.271482-5.272229C2.163885-5.272229 1.900872-5.236364 1.80523-4.853798L.6934-.418431C.657534-.274969 .657534-.251059 .657534-.179328C.657534-.011955 .789041 .119552 .968369 .119552C1.327024 .119552 1.398755-.191283 1.458531-.442341C1.530262-.6934 2.020423-2.689913 2.044334-2.761644C3.56264-2.689913 4.076712-2.307347 4.076712-1.721544C4.076712-1.637858 4.076712-1.601993 4.040847-1.470486C3.993026-1.243337 3.993026-1.111831 3.993026-1.0401C3.993026-.32279 4.459278 .119552 5.045081 .119552C5.535243 .119552 5.810212-.227148 5.989539-.537983C6.240598-1.004234 6.396015-1.661768 6.396015-1.709589C6.396015-1.769365 6.348194-1.817186 6.276463-1.817186C6.168867-1.817186 6.156912-1.769365 6.109091-1.578082C5.953674-1.004234 5.69066-.119552 5.080946-.119552C4.817933-.119552 4.686426-.274969 4.686426-.6934C4.686426-.920548 4.734247-1.183562 4.782067-1.362889C4.805978-1.482441 4.841843-1.625903 4.841843-1.75741C4.841843-2.84533 3.335492-2.952927 2.546451-2.988792Z'/>
+</defs>
+<g id='eq14-page1'>
+<use x='0' y='0' xlink:href='#eq14-g0-20'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a52820e9ea1d01ce61aabac029e65c931"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a4f78a698e190ec135401edf4edb4e8a0" class="m-doc">Yeoh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52820e9ea1d01ce61aabac029e65c931" class="m-doc-self">setConstitutivePoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp)</span></span>
+            </h3>
+            <p>Binds owned evaluation data, reusing unchanged constitutive inputs.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">cp</td>
+                  <td>Constitutive point supplying kinematics and law-specific inputs.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>The stored energy density</td>
+                  <td>This law after successful binding.</td>
                 </tr>
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aa875e5dbc449421b1cc4fdb7471aa946"><div>
+          <section class="m-doc-details" id="a859283bf64f988f608c32fcf0af4280d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />Yeoh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa875e5dbc449421b1cc4fdb7471aa946" class="m-doc-self">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
-              const <a href="struct_rodin_1_1_solid_1_1_yeoh_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a859283bf64f988f608c32fcf0af4280d" class="m-doc-self">getKinematicState</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Computes the first Piola-Kirchhoff stress.</p>
+            <p>Returns the owned kinematics of the prepared point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Prepared kinematic state.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab96f841a63f48ada53e70ec7ac43d18d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab96f841a63f48ada53e70ec7ac43d18d" class="m-doc-self">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the strain-energy density at the prepared point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Stored strain-energy density.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9f27ccb3e7ba7897755c79b4e339909f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9f27ccb3e7ba7897755c79b4e339909f" class="m-doc-self">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P) const</span></span>
+            </h3>
+            <p>Computes stress at the prepared point.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">P&nbsp;<span class="m-label m-flat m-warning">out</span></td>
-                  <td>The resulting stress tensor</td>
-                </tr>
-                <tr>
-                  <td>cache</td>
-                  <td>The precomputed constitutive cache</td>
-                </tr>
-                <tr>
-                  <td>cp</td>
-                  <td>The constitutive point</td>
+                  <td style="width: 1%">P</td>
+                  <td>Output first Piola-Kirchhoff stress.</td>
                 </tr>
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="adbcae15abc4f9d19395789c881e27e7d"><div>
+          <section class="m-doc-details" id="aad67b877b6ec02ed52172441bab98235"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />Yeoh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adbcae15abc4f9d19395789c881e27e7d" class="m-doc-self">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
-              const <a href="struct_rodin_1_1_solid_1_1_yeoh_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad67b877b6ec02ed52172441bab98235" class="m-doc-self">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dF) const</span></span>
             </h3>
-            <p>Applies the material tangent to a deformation-gradient increment.</p>
+            <p>Computes the tangent action at the prepared point.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">dP&nbsp;<span class="m-label m-flat m-warning">out</span></td>
-                  <td>The resulting stress increment</td>
-                </tr>
-                <tr>
-                  <td>cache</td>
-                  <td>The precomputed constitutive cache</td>
-                </tr>
-                <tr>
-                  <td>cp</td>
-                  <td>The constitutive point</td>
+                  <td style="width: 1%">dP</td>
+                  <td>Output stress increment.</td>
                 </tr>
                 <tr>
                   <td>dF</td>
-                  <td>The deformation-gradient increment</td>
+                  <td>Deformation-gradient increment.</td>
                 </tr>
               </tbody>
             </table>
@@ -499,13 +636,20 @@ $ \kappa $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

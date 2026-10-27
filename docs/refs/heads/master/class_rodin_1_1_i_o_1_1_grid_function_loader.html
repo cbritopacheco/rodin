@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::IO::GridFunctionLoader class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,12 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>GridFunctionLoader <span class="m-thin">class</span>
-        </h1>
-        <p>Loader template for grid functions with specific file format.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_i_o.html">IO</a></div><h1>GridFunctionLoader</h1><p class="rodin-reference-brief">Loader template for grid functions with specific file format.</p><p class="rodin-reference-include">Defined in <a href="_grid_function_loader_8h.html"><code>Rodin/IO/GridFunctionLoader.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe"><span class="nc">FileFormat</span></a><span class="w"> </span><span class="n">Fmt</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Data</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html"><span class="nc">GridFunctionLoader</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -104,7 +102,7 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -113,17 +111,74 @@
             </li>
           </ul>
         </nav>
-<p>Primary template for GridFunctionLoader.</p><table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader&lt;IO::<wbr />FileFormat::<wbr />MFEM, FES, Data&gt;</a></td><td>Loads MFEM grid functions into Rodin-owned vector storage.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader&lt;IO::<wbr />FileFormat::<wbr />MFEM, FES, Math::<wbr />Vector&lt;Scalar&gt;&amp;&gt;</a></td><td>Loads MFEM grid functions into referenced vector storage.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader&lt;IO::<wbr />FileFormat::<wbr />MEDIT, FES, Data&gt;</a></td><td>Loads MEDIT grid functions into Rodin-owned vector storage.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader&lt;IO::<wbr />FileFormat::<wbr />MEDIT, FES, Math::<wbr />Vector&lt;Scalar&gt;&amp;&gt;</a></td><td>Loads MEDIT grid functions into referenced vector storage.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader&lt;IO::<wbr />FileFormat::<wbr />HDF5, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;</a></td><td>Loads HDF5 grid functions into Rodin vector storage.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader&lt;IO::<wbr />FileFormat::<wbr />HDF5, FES, Vec&gt;</a></td><td>Loads HDF5 grid functions into PETSc vector storage.</td></tr></tbody></table><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">GridFunctionLoader</a></p></aside><p>This primary template provides a default definition so that the compiler does not fail with &quot;implicit instantiation of undefined template&quot; when GridFunctionBase::load() is compiled for FES/Data combinations that do not have a matching partial specialization for a given file format.</p><aside class="m-note m-info"><h4>Note</h4><p>If you reach this template at runtime it means no specialization exists for the requested format/FES/Data triple. An exception is raised so that the unused switch branches in GridFunctionBase::load() remain compilable while still producing a clear error at runtime.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_loader.html">Loader</a></p><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;</a>
-            </dt>
-            <dd>Base template for loading objects from files or streams.</dd>
-          </dl>
-        </section>
+<p>Primary template for GridFunctionLoader.</p><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_h_d_f5_00_01_f_e_s_00_01_1_1_vec_01_4.html"><code>FileFormat::HDF5, FES, ::Vec</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GridFunctionLoader</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">HDF5</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><span class="o">::</span><span class="n">Vec</span><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>HDF5 loader for PETSc-backed grid functions.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_h_d_f5_00_01_f_e_s_00_01_math_dc6de039808d71549c96625799a50b75.html"><code>FileFormat::HDF5, FES, Math::Vector&lt;Scalar&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html"><span class="nc">GridFunctionLoader</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">HDF5</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>HDF5 grid function loader for local grid functions backed by Math::Vector&lt;Scalar&gt;.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_e_d_i_t_00_01_f_e_s_00_01_mabbc9a86cabea2ab6e77ea469f5feace1.html"><code>FileFormat::MEDIT, FES, Math::Vector&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html"><span class="nc">IsMatrixRange</span></a><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="nc">FES</span><span class="o">&gt;::</span><span class="nc">RangeType</span><span class="o">&gt;::</span><span class="nc">Value</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GridFunctionLoader</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MEDIT</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Reads matrix entries stored as independent MEDIT scalar vertex fields. Higher-order spaces interpolate the vertex field, as required by SolAtVertices.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_e_d_i_t_00_01_variational_1_94a7998c5e4a0c8f11c7e3140bb5d154.html"><code>FileFormat::MEDIT, Variational::H1&lt;K, …&gt;, Math::Vector&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Range</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html"><span class="nc">IsMatrixRange</span></a><span class="o">&lt;</span><span class="nc">Range</span><span class="o">&gt;::</span><span class="nc">Value</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GridFunctionLoader</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MEDIT</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_h1.html"><span class="nc">H1</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="nc">Range</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Range</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>MEDIT grid-function loader for local H1 finite element spaces.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_e_d_i_t_00_01_variational_1_759081d00011f35269f7550058d038c7.html"><code>FileFormat::MEDIT, Variational::P1&lt;Range, …&gt;, Math::Vector&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Range</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html"><span class="nc">IsMatrixRange</span></a><span class="o">&lt;</span><span class="nc">Range</span><span class="o">&gt;::</span><span class="nc">Value</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GridFunctionLoader</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MEDIT</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_p1.html"><span class="nc">P1</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Range</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Range</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>MEDIT grid-function loader for local P1 finite element spaces.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_f_e_s_00_01_math971bd62f483877e1a539011d5c867899.html"><code>FileFormat::MFEM, FES, Math::Vector&lt;Scalar&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html"><span class="nc">IsMatrixRange</span></a><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="nc">FES</span><span class="o">&gt;::</span><span class="nc">RangeType</span><span class="o">&gt;::</span><span class="nc">Value</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GridFunctionLoader</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Loads each MFEM component through the scalar family&#x27;s node mapping.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_e25ce5570c0c5790351369eb032d2a12.html"><code>FileFormat::MFEM, Variational::H1&lt;K, …&gt;, Math::Vector&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Range</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html"><span class="nc">IsMatrixRange</span></a><span class="o">&lt;</span><span class="nc">Range</span><span class="o">&gt;::</span><span class="nc">Value</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_e25ce5570c0c5790351369eb032d2a12.html#ae7b902ee10ffb33450ac1ca58df202f6"><span class="nc">GridFunctionLoader</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_h1.html"><span class="nc">H1</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="nc">Range</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Range</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Specialization for loading H1 grid functions from MFEM format.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_6ee8254a956b51895920e0e48fe4c901.html"><code>FileFormat::MFEM, Variational::P0&lt;Range, …&gt;, Math::Vector&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Range</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html"><span class="nc">IsMatrixRange</span></a><span class="o">&lt;</span><span class="nc">Range</span><span class="o">&gt;::</span><span class="nc">Value</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_6ee8254a956b51895920e0e48fe4c901.html#ae7b902ee10ffb33450ac1ca58df202f6"><span class="nc">GridFunctionLoader</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_p0.html"><span class="nc">P0</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Range</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Range</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Loader for P0 (piecewise constant) grid functions in MFEM format.</td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_f56c2f78720844daa893ee3a38efa37e.html"><code>FileFormat::MFEM, Variational::P1&lt;Range, …&gt;, Math::Vector&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Range</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html"><span class="nc">IsMatrixRange</span></a><span class="o">&lt;</span><span class="nc">Range</span><span class="o">&gt;::</span><span class="nc">Value</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_f56c2f78720844daa893ee3a38efa37e.html#ae7b902ee10ffb33450ac1ca58df202f6"><span class="nc">GridFunctionLoader</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_p1.html"><span class="nc">P1</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Range</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Range</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Specialization for loading P1 grid functions from MFEM format.</td></tr></tbody></table><p>This primary template provides a default definition so that the compiler does not fail with &quot;implicit instantiation of undefined template&quot; when GridFunctionBase::load() is compiled for FES/Data combinations that do not have a matching partial specialization for a given file format.</p><aside class="m-note m-info"><h4>Note</h4><p>If you reach this template at runtime it means no specialization exists for the requested format/FES/Data triple. An exception is raised so that the unused switch branches in GridFunctionBase::load() remain compilable while still producing a clear error at runtime.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a></p></aside>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_i_o_1_1_loader.html" title="Loader&lt; Variational::GridFunction&lt; FES, Data &gt; &gt;">Loader</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">GridFunctionLoader</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_loader.html"><code>Loader&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">Loader</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_grid_function.html"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="nc">Data</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base template for loading objects from files or streams.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html#a8546f878fca73682edd9c742edd7f2a0"><code>load()</code></a></td><td><a href="class_rodin_1_1_i_o_1_1_loader.html#a4a361edaafdca57b230ccf5f8bc6479a">Loader::load</a></td></tr><tr><td><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html#a6c83de099561717325b0b3a729cfeb1f"><code>getObject()</code></a></td><td><a href="class_rodin_1_1_i_o_1_1_loader.html#aa4f907de0650109219ed913846b7d85f">Loader::getObject</a></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -164,10 +219,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ae7b902ee10ffb33450ac1ca58df202f6"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;Fmt, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7b902ee10ffb33450ac1ca58df202f6" class="m-doc-self">GridFunctionLoader</a>(</span><span class="m-doc-wrap"><a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; gf)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7b902ee10ffb33450ac1ca58df202f6" class="m-doc-self">GridFunctionLoader</a>(</span><span class="m-doc-wrap"><a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; gf)</span></span>
             </h3>
             <p>Constructs a fallback grid function loader.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -184,10 +237,8 @@
           </div></section>
           <section class="m-doc-details" id="a8546f878fca73682edd9c742edd7f2a0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;Fmt, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Loads object from an input stream.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -205,10 +256,8 @@
           </div></section>
           <section class="m-doc-details" id="a6c83de099561717325b0b3a729cfeb1f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;Fmt, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6c83de099561717325b0b3a729cfeb1f" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-warning">protected</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6c83de099561717325b0b3a729cfeb1f" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-warning">protected</span></span></span>
             </h3>
             <p>Gets a reference to the object being loaded.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -260,13 +309,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

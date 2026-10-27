@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Average&lt;FunctionBase&lt;FunctionDerived&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,21 +71,20 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_average_8h.html">&lt;Rodin/Variational/Average.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Average&lt;FunctionBase&lt;FunctionDerived&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Average of a FunctionBase instance across an interface.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Average <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Average of a FunctionBase instance across an interface.</p><p class="rodin-reference-include">Defined in <a href="_average_8h.html"><code>Rodin/Variational/Average.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FunctionDerived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_average_3_01_function_base_3_01_function_derived_01_4_01_4.html#a01e544a064c3f67bcb5754cbdb25c976"><span class="nc">Average</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FunctionDerived</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_average.html">Average</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Operand</code></td><td><code>FunctionBase&lt; FunctionDerived &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md290">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md291">Usage Example</a></li>
+            <li><a href="#autotoc_md305">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md306">Usage Example</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -98,8 +94,7 @@
         </nav>
 <p>The Average operator computes the average value of a function across an interface (face) between two adjacent elements:</p><div class="m-math"><svg style="width: 10.583em; height: 2.499em;" viewBox="143.474012 -23.992863 101.594986 23.992863">
 <title>
-\[
-  \{\!\{u\}\!\} = \frac{1}{2}(u^+ + u^-)
+\[       \{\!\{u\}\!\} = \frac{1}{2}(u^+ + u^-)
 \]
 </title>
 <defs>
@@ -157,7 +152,7 @@ $ u^- $
 <use x='0' y='0' xlink:href='#eq3-g1-117'/>
 <use x='6.66244' y='-4.338437' xlink:href='#eq3-g0-0'/>
 </g>
-</svg> denote the values from the two sides of the interface.</p><section id="autotoc_md290"><h3><a href="#autotoc_md290">Mathematical Foundation</a></h3><p>In DG methods, functions are allowed to be discontinuous across element interfaces. The average operator is used to define consistent numerical fluxes and penalization terms:</p><ul><li><strong>Interior Penalty</strong>: <svg class="m-math" style="width: 9.391em; height: 1.582em; vertical-align: -0.581em;" viewBox="0 -9.630618 90.152057 15.18763">
+</svg> denote the values from the two sides of the interface.</p><section id="autotoc_md305"><h2><a href="#autotoc_md305">Mathematical Foundation</a></h2><p>In DG methods, functions are allowed to be discontinuous across element interfaces. The average operator is used to define consistent numerical fluxes and penalization terms:</p><ul><li><strong>Interior Penalty</strong>: <svg class="m-math" style="width: 9.391em; height: 1.582em; vertical-align: -0.581em;" viewBox="0 -9.630618 90.152057 15.18763">
 <title>
 $ \int_{\Gamma_h} \{\!\{\nabla u\}\!\} \cdot [\![v]\!] \, ds $
 </title>
@@ -245,27 +240,19 @@ $ \Gamma_h $
 <use x='0' y='0' xlink:href='#eq6-g1-0'/>
 <use x='7.314174' y='1.793263' xlink:href='#eq6-g0-104'/>
 </g>
-</svg> denotes the set of interior faces.</p></section><section id="autotoc_md291"><h3><a href="#autotoc_md291">Usage Example</a></h3><pre class="m-code"><span class="c1">// DG interior penalty term</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">penalty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InterfaceIntegral</span><span class="p">(</span><span class="n">Average</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a></p></aside></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;Average&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Base class for function objects which can be evaluated over a mesh.</dd>
-          </dl>
-        </section>
+</svg> denotes the set of interior faces.</p></section><section id="autotoc_md306"><h2><a href="#autotoc_md306">Usage Example</a></h2><pre class="m-code"><span class="c1">// DG interior penalty term</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">penalty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">InterfaceIntegral</span><span class="p">(</span><span class="nc">Average</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span><span class="w"> </span><span class="nc">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a></p></aside></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_function_base.html" title="FunctionBase&lt; Average&lt; FunctionBase&lt; FunctionDerived &gt; &gt; &gt;">FunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Average</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_average_3_01_function_base_3_01_function_derived_01_4_01_4.html#a01e544a064c3f67bcb5754cbdb25c976"><span class="nc">Average</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FunctionDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for function objects which can be evaluated over a mesh.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_average_3_01_function_base_3_01_function_derived_01_4_01_4.html#a7cd5c508f2e627c4f1fe55e0dad5d83a"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_function_base.html#ad29a755240e4c6938395b937a1c4a132">FunctionBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>9 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#aa75b0ee8f7f82337ebf0b88abfa91b18"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="ad21ec0105a62c182ed6e5e1d8f7c6817">
-              using <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;
+              using <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;
             </dt>
             <dd>Type of the operand function.</dd>
-            <dt id="a12803cb4387828551b4127982b384091">
-              using <a href="#a12803cb4387828551b4127982b384091" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&gt;
+            <dt id="ac21cbcecc931a90f87ec08d7684a9e1f">
+              using <a href="#ac21cbcecc931a90f87ec08d7684a9e1f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;<a href="#a01e544a064c3f67bcb5754cbdb25c976" class="m-doc">Average</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -278,11 +265,11 @@ $ \Gamma_h $
             </dt>
             <dd>Constructs an average operator for the given function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a343b1764282dc34877aeae3457e09b75" class="m-doc">Average</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a343b1764282dc34877aeae3457e09b75" class="m-doc">Average</a>(</span><span class="m-doc-wrap">const Average&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a7d291159217a9c238d8b70a4f7005ae3" class="m-doc">Average</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a7d291159217a9c238d8b70a4f7005ae3" class="m-doc">Average</a>(</span><span class="m-doc-wrap">Average&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -298,28 +285,57 @@ $ \Gamma_h $
               <span class="m-doc-wrap-bumper">auto <a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto</span>
             </dt>
             <dd>Evaluates the average at a point on an interface.</dd>
-            <dt id="ab7bb9b63358cd9e481d0f8b135298bb0">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7bb9b63358cd9e481d0f8b135298bb0" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7bb9b63358cd9e481d0f8b135298bb0" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto</span>
             </dt>
             <dd>Evaluates the expression at an integration point.</dd>
-            <dt id="a9fa1cc25cfbf42375a55404252133298">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7cd5c508f2e627c4f1fe55e0dad5d83a" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7cd5c508f2e627c4f1fe55e0dad5d83a" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a01e544a064c3f67bcb5754cbdb25c976" class="m-doc">Average</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a copy of this average operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac63306ce0c31337e27d739c2f4d81c80" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) -&gt; <a href="#a01e544a064c3f67bcb5754cbdb25c976" class="m-doc">Average</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Sets a single attribute as the trace domain.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac81d2637b0b5bee1a00132abcf3941c3" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
+              const A2&amp; a2,
+              const As&amp;... as) -&gt; <a href="#a01e544a064c3f67bcb5754cbdb25c976" class="m-doc">Average</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Sets multiple attributes as the trace domain.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad1977113701fffbb26aeef93988af153" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) -&gt; <a href="#a01e544a064c3f67bcb5754cbdb25c976" class="m-doc">Average</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Sets a set of attributes as the trace domain.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the function on a Point belonging to the mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15eb99a5cecce266b59c5e7c1a9b2f4d" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the function at an integration point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad7584a02ad39a4e93816d166a02c170c" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; auto</span>
+            </dt>
+            <dd>Extracts the i-th component of the function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afd564b09b05a55499d7576b85f69a01e" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j) const -&gt; auto</span>
+            </dt>
+            <dd>Extracts the (i,j)-th component of a matrix function.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a01e544a064c3f67bcb5754cbdb25c976"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Average&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01e544a064c3f67bcb5754cbdb25c976" class="m-doc-self">Average</a>(</span><span class="m-doc-wrap">const <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01e544a064c3f67bcb5754cbdb25c976" class="m-doc-self">Average</a>(</span><span class="m-doc-wrap">const <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs an average operator for the given function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -336,10 +352,8 @@ $ \Gamma_h $
           </div></section>
           <section class="m-doc-details" id="a343b1764282dc34877aeae3457e09b75"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Average&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a343b1764282dc34877aeae3457e09b75" class="m-doc-self">Average</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a343b1764282dc34877aeae3457e09b75" class="m-doc-self">Average</a>(</span><span class="m-doc-wrap">const Average&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -356,10 +370,8 @@ $ \Gamma_h $
           </div></section>
           <section class="m-doc-details" id="a7d291159217a9c238d8b70a4f7005ae3"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Average&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d291159217a9c238d8b70a4f7005ae3" class="m-doc-self">Average</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d291159217a9c238d8b70a4f7005ae3" class="m-doc-self">Average</a>(</span><span class="m-doc-wrap">Average&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -376,10 +388,8 @@ $ \Gamma_h $
           </div></section>
           <section class="m-doc-details" id="a1ab30419cd40172cfa127ab16519cd8a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Average&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ab30419cd40172cfa127ab16519cd8a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ab30419cd40172cfa127ab16519cd8a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the operand function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -393,10 +403,8 @@ $ \Gamma_h $
           </div></section>
           <section class="m-doc-details" id="aa99abe0e3bf589a8b7e1d9e7c7f6bea9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Average&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Evaluates the average at a point on an interface.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -444,12 +452,58 @@ $ \frac{1}{2}(u^+ + u^-) $
             </table>
 <p>The point must be on an interior face with exactly two adjacent elements.</p>
           </div></section>
+          <section class="m-doc-details" id="ab7bb9b63358cd9e481d0f8b135298bb0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7bb9b63358cd9e481d0f8b135298bb0" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
+            </h3>
+            <p>Evaluates the expression at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9fa1cc25cfbf42375a55404252133298"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a7cd5c508f2e627c4f1fe55e0dad5d83a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>* Rodin::<wbr />Variational::<wbr />Average&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7cd5c508f2e627c4f1fe55e0dad5d83a" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a01e544a064c3f67bcb5754cbdb25c976" class="m-doc">Average</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7cd5c508f2e627c4f1fe55e0dad5d83a" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a copy of this average operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -460,6 +514,195 @@ $ \frac{1}{2}(u^+ + u^-) $
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="ac63306ce0c31337e27d739c2f4d81c80"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a01e544a064c3f67bcb5754cbdb25c976" class="m-doc">Average</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac63306ce0c31337e27d739c2f4d81c80" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets a single attribute as the trace domain.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Mesh attribute defining the trace domain</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Convenience function to call traceOf(FlatSet&lt;int&gt;) with only one attribute. The trace operation restricts function evaluation to the specified boundary or interface regions.</p><aside class="m-note m-default"><h4>See also</h4><p>getTraceDomain()</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ac81d2637b0b5bee1a00132abcf3941c3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a01e544a064c3f67bcb5754cbdb25c976" class="m-doc">Average</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac81d2637b0b5bee1a00132abcf3941c3" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
+              const A2&amp; a2,
+              const As&amp;... as) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets multiple attributes as the trace domain.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">a1</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+                <tr>
+                  <td>a2</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+                <tr>
+                  <td>as</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The attributes are collected into the trace domain of the function.</p>
+          </div></section>
+          <section class="m-doc-details" id="ad1977113701fffbb26aeef93988af153"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a01e544a064c3f67bcb5754cbdb25c976" class="m-doc">Average</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad1977113701fffbb26aeef93988af153" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets a set of attributes as the trace domain.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Set of mesh attributes defining the trace domain</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The trace domain specifies regions (typically boundaries or interfaces) where the function should be evaluated via continuous extension from adjacent elements.</p><aside class="m-note m-default"><h4>See also</h4><p>getTraceDomain()</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a7c866cf8be951c464aceeb788579b29a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the function on a Point belonging to the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Point at which to evaluate the function</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Function value at the given point</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This operator provides convenient function call syntax for evaluation. Delegates to the derived class&#x27;s getValue() method via CRTP.</p>
+          </div></section>
+          <section class="m-doc-details" id="a15eb99a5cecce266b59c5e7c1a9b2f4d"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15eb99a5cecce266b59c5e7c1a9b2f4d" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the function at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad7584a02ad39a4e93816d166a02c170c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7584a02ad39a4e93816d166a02c170c" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
+            </h3>
+            <p>Extracts the i-th component of the function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Component index</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Component function object</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>For vector or matrix-valued functions, this returns a scalar function representing the specified component.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="_component_8h.html">Component</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="afd564b09b05a55499d7576b85f69a01e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd564b09b05a55499d7576b85f69a01e" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j) const</span></span>
+            </h3>
+            <p>Extracts the (i,j)-th component of a matrix function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row index</td>
+                </tr>
+                <tr>
+                  <td>j&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Column index</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Component function object</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="_component_8h.html">Component</a></p></aside>
           </div></section>
         </section>
       </div>
@@ -500,13 +743,20 @@ $ \frac{1}{2}(u^+ + u^-) $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

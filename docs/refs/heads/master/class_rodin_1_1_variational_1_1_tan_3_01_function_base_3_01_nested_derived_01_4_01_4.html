@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Tan&lt;FunctionBase&lt;NestedDerived&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,18 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_tangent_8h.html">&lt;Rodin/Variational/Tangent.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Tan&lt;FunctionBase&lt;NestedDerived&gt;&gt; <span class="m-thin">class</span>
-        </h1>
-        <p>Tangent function operator for real-valued scalar functions.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Tan</h1><p class="rodin-reference-brief">Tangent function operator for real-valued scalar functions.</p><p class="rodin-reference-include">Defined in <a href="_tangent_8h.html"><code>Rodin/Variational/Tangent.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">NestedDerived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_tan_3_01_function_base_3_01_nested_derived_01_4_01_4.html#a65c0b75b7d0639ca90fa1938efbaf134"><span class="nc">Tan</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_function_base.html"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_tan.html">Tan</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Operand</code></td><td><code>FunctionBase&lt; NestedDerived &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -96,11 +92,12 @@
         </nav>
 <p>Applies the tangent function pointwise to a given function:</p><div class="m-math"><svg style="width: 18.613em; height: 2.942em;" viewBox="104.330273 -28.243589 178.686903 28.243589">
 <title>
-\[
-   \text{Tan}(f)(x) = \tan(f(x)) = \frac{\sin(f(x))}{\cos(f(x))}
+\[   \text{Tan}(f)(x) = \tan(f(x)) = \frac{\sin(f(x))}{\cos(f(x))}
 \]
 </title>
 <defs>
+<path id='eq1-g0-102' d='M5.332005-4.805978C5.571108-4.805978 5.66675-4.805978 5.66675-5.033126C5.66675-5.152677 5.571108-5.152677 5.355915-5.152677H4.387547C4.614695-6.38406 4.782067-7.232877 4.877709-7.615442C4.94944-7.902366 5.200498-8.177335 5.511333-8.177335C5.762391-8.177335 6.01345-8.069738 6.133001-7.962142C5.66675-7.914321 5.523288-7.567621 5.523288-7.364384C5.523288-7.12528 5.702615-6.981818 5.929763-6.981818C6.168867-6.981818 6.527522-7.185056 6.527522-7.639352C6.527522-8.141469 6.025405-8.416438 5.499377-8.416438C4.985305-8.416438 4.483188-8.033873 4.244085-7.567621C4.028892-7.149191 3.90934-6.718804 3.634371-5.152677H2.833375C2.606227-5.152677 2.486675-5.152677 2.486675-4.937484C2.486675-4.805978 2.558406-4.805978 2.797509-4.805978H3.56264C3.347447-3.694147 2.857285-.992279 2.582316 .286924C2.379078 1.327024 2.199751 2.199751 1.601993 2.199751C1.566127 2.199751 1.219427 2.199751 1.004234 1.972603C1.613948 1.924782 1.613948 1.398755 1.613948 1.3868C1.613948 1.147696 1.43462 1.004234 1.207472 1.004234C.968369 1.004234 .609714 1.207472 .609714 1.661768C.609714 2.175841 1.135741 2.438854 1.601993 2.438854C2.82142 2.438854 3.323537 .251059 3.455044-.3467C3.670237-1.267248 4.25604-4.447323 4.315816-4.805978H5.332005Z'/>
+<path id='eq1-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
 <path id='eq1-g4-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
 <path id='eq1-g4-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
 <path id='eq1-g4-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
@@ -111,8 +108,6 @@
 <path id='eq1-g4-111' d='M5.487422-2.558406C5.487422-4.100623 4.315816-5.332005 2.929016-5.332005C1.494396-5.332005 .358655-4.064757 .358655-2.558406C.358655-1.028144 1.554172 .119552 2.917061 .119552C4.327771 .119552 5.487422-1.052055 5.487422-2.558406ZM2.929016-.143462C2.486675-.143462 1.948692-.334745 1.601993-.920548C1.279203-1.458531 1.267248-2.163885 1.267248-2.666002C1.267248-3.120299 1.267248-3.849564 1.637858-4.387547C1.972603-4.901619 2.49863-5.092902 2.917061-5.092902C3.383313-5.092902 3.88543-4.877709 4.208219-4.411457C4.578829-3.861519 4.578829-3.108344 4.578829-2.666002C4.578829-2.247572 4.578829-1.506351 4.267995-.944458C3.93325-.37061 3.383313-.143462 2.929016-.143462Z'/>
 <path id='eq1-g4-115' d='M3.921295-5.057036C3.921295-5.272229 3.921295-5.332005 3.801743-5.332005C3.706102-5.332005 3.478954-5.068991 3.395268-4.961395C3.024658-5.260274 2.654047-5.332005 2.271482-5.332005C.824907-5.332005 .394521-4.542964 .394521-3.88543C.394521-3.753923 .394521-3.335492 .848817-2.917061C1.231382-2.582316 1.637858-2.49863 2.187796-2.391034C2.84533-2.259527 3.000747-2.223661 3.299626-1.984558C3.514819-1.80523 3.670237-1.542217 3.670237-1.207472C3.670237-.6934 3.371357-.119552 2.319303-.119552C1.530262-.119552 .956413-.573848 .6934-1.769365C.645579-1.984558 .645579-1.996513 .633624-2.008468C.609714-2.056289 .561893-2.056289 .526027-2.056289C.394521-2.056289 .394521-1.996513 .394521-1.78132V-.155417C.394521 .059776 .394521 .119552 .514072 .119552C.573848 .119552 .585803 .107597 .789041-.143462C.848817-.227148 .848817-.251059 1.028144-.442341C1.482441 .119552 2.12802 .119552 2.331258 .119552C3.58655 .119552 4.208219-.573848 4.208219-1.518306C4.208219-2.163885 3.813699-2.546451 3.706102-2.654047C3.275716-3.024658 2.952927-3.096389 2.163885-3.239851C1.80523-3.311582 .932503-3.478954 .932503-4.196264C.932503-4.566874 1.183562-5.116812 2.259527-5.116812C3.56264-5.116812 3.634371-4.004981 3.658281-3.634371C3.670237-3.53873 3.753923-3.53873 3.789788-3.53873C3.921295-3.53873 3.921295-3.598506 3.921295-3.813699V-5.057036Z'/>
 <path id='eq1-g4-116' d='M2.008468-4.805978H3.694147V-5.152677H2.008468V-7.352428H1.745455C1.733499-6.228643 1.303113-5.080946 .215193-5.045081V-4.805978H1.231382V-1.482441C1.231382-.155417 2.116065 .119552 2.749689 .119552C3.502864 .119552 3.897385-.621669 3.897385-1.482441V-2.163885H3.634371V-1.506351C3.634371-.645579 3.287671-.143462 2.82142-.143462C2.008468-.143462 2.008468-1.255293 2.008468-1.458531V-4.805978Z'/>
-<path id='eq1-g0-102' d='M5.332005-4.805978C5.571108-4.805978 5.66675-4.805978 5.66675-5.033126C5.66675-5.152677 5.571108-5.152677 5.355915-5.152677H4.387547C4.614695-6.38406 4.782067-7.232877 4.877709-7.615442C4.94944-7.902366 5.200498-8.177335 5.511333-8.177335C5.762391-8.177335 6.01345-8.069738 6.133001-7.962142C5.66675-7.914321 5.523288-7.567621 5.523288-7.364384C5.523288-7.12528 5.702615-6.981818 5.929763-6.981818C6.168867-6.981818 6.527522-7.185056 6.527522-7.639352C6.527522-8.141469 6.025405-8.416438 5.499377-8.416438C4.985305-8.416438 4.483188-8.033873 4.244085-7.567621C4.028892-7.149191 3.90934-6.718804 3.634371-5.152677H2.833375C2.606227-5.152677 2.486675-5.152677 2.486675-4.937484C2.486675-4.805978 2.558406-4.805978 2.797509-4.805978H3.56264C3.347447-3.694147 2.857285-.992279 2.582316 .286924C2.379078 1.327024 2.199751 2.199751 1.601993 2.199751C1.566127 2.199751 1.219427 2.199751 1.004234 1.972603C1.613948 1.924782 1.613948 1.398755 1.613948 1.3868C1.613948 1.147696 1.43462 1.004234 1.207472 1.004234C.968369 1.004234 .609714 1.207472 .609714 1.661768C.609714 2.175841 1.135741 2.438854 1.601993 2.438854C2.82142 2.438854 3.323537 .251059 3.455044-.3467C3.670237-1.267248 4.25604-4.447323 4.315816-4.805978H5.332005Z'/>
-<path id='eq1-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
 <path id='eq1-g3-84' d='M7.062929-5.859968L6.991466-7.884753H.273942L.202479-5.859968H.488331C.774183-7.170123 1.048124-7.384512 2.382101-7.384512H3.025268V-1.42926C3.025268-.416868 2.894252-.285852 1.905681-.2263V0H5.383548V-.2263C4.406886-.273942 4.240139-.428778 4.240139-1.298245V-7.384512H4.883307C6.241104-7.384512 6.503135-7.170123 6.777077-5.859968H7.062929Z'/>
 <path id='eq1-g3-97' d='M5.264443-.47642V-.786093C5.061964-.619346 4.919038-.559794 4.74038-.559794C4.466439-.559794 4.383065-.726541 4.383065-1.250603V-3.573151C4.383065-4.180587 4.323513-4.514081 4.156766-4.788022C3.906645-5.240622 3.394494-5.478832 2.667953-5.478832C2.060517-5.478832 1.488813-5.312085 1.155319-5.038143C.857556-4.788022 .666988-4.442618 .666988-4.144855C.666988-3.870914 .893288-3.632704 1.17914-3.632704S1.715113-3.870914 1.715113-4.132945C1.715113-4.180587 1.703202-4.240139 1.691292-4.323513C1.667471-4.430707 1.65556-4.525991 1.65556-4.609365C1.65556-4.930949 2.036696-5.19298 2.513116-5.19298C3.096731-5.19298 3.418315-4.847575 3.418315-4.204408V-3.477867C1.584097-2.739416 1.381618-2.644132 .869467-2.191533C.607436-1.953323 .440689-1.548365 .440689-1.155319C.440689-.404957 .95284 .119105 1.691292 .119105C2.215354 .119105 2.703684-.131016 3.430225-.750362C3.489778-.119105 3.704167 .119105 4.192497 .119105C4.597454 .119105 4.847575-.023821 5.264443-.47642ZM3.418315-1.464992C3.418315-1.095766 3.358762-.988572 3.108641-.833735C2.822789-.666988 2.489295-.571704 2.239175-.571704C1.822307-.571704 1.488813-.976661 1.488813-1.488813V-1.536455C1.488813-2.239175 1.977144-2.667953 3.418315-3.192015V-1.464992Z'/>
 <path id='eq1-g3-110' d='M5.776594 0V-.178658C5.19298-.23821 5.050054-.381136 5.050054-.964751V-3.692256C5.050054-4.811844 4.525991-5.478832 3.644614-5.478832C3.096731-5.478832 2.727505-5.276353 1.917591-4.514081V-5.455011L1.834218-5.478832C1.250603-5.264443 .845646-5.133427 .190568-4.942859V-4.74038C.262031-4.776112 .381136-4.788022 .512152-4.788022C.845646-4.788022 .95284-4.609365 .95284-4.02575V-1.071945C.95284-.393047 .821825-.2263 .214389-.178658V0H2.739416V-.178658C2.13198-.2263 1.953323-.369226 1.953323-.798004V-4.144855C2.525027-4.680828 2.787058-4.823754 3.180104-4.823754C3.763719-4.823754 4.049571-4.454528 4.049571-3.668435V-1.17914C4.049571-.428778 3.894735-.2263 3.29921-.178658V0H5.776594Z'/>
@@ -201,16 +196,8 @@ $ \pi/2 $
 <use x='12.92226' y='0' xlink:href='#eq3-g1-50'/>
 </g>
 </svg>).</p><p>Always returns a real-valued function for real input.</p></aside><aside class="m-note m-default"><h4>See also</h4><p>Sin, Cos</p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;Tan&lt;FunctionBase&lt;NestedDerived&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_real_function_base.html" title="RealFunctionBase&lt; Tan&lt; FunctionBase&lt; NestedDerived &gt; &gt; &gt;">RealFunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Tan</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_real_function_base.html#a376db21de5186146a4a7afacddc76cf9"><span class="nc">RealFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_tan_3_01_function_base_3_01_nested_derived_01_4_01_4.html#a65c0b75b7d0639ca90fa1938efbaf134"><span class="nc">Tan</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_tan_3_01_function_base_3_01_nested_derived_01_4_01_4.html#adaca2763708fb632993d8de30417b6ab"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html#a0822ff4d9597b99e197fe8586179f5e5">RealFunctionBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>8 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase</code></a></td><td><details><summary>4 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_real_function_base.html#af5f065ebe0b3b1c58b0c2402a50fc9e3"><code>getValue()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_real_function_base.html#aa249459e67c36e2343e940d08970970a"><code>getValue()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_real_function_base.html#a515179486a633cd3bd8acc6d313ed50d"><code>ScalarType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_real_function_base.html#a1b80f06a428d3badf45e18059ef1b25b"><code>traceOf()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html"><code>ScalarFunctionBase</code></a></td><td><details><summary>7 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a7c866cf8be951c464aceeb788579b29a"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a15eb99a5cecce266b59c5e7c1a9b2f4d"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#ad7584a02ad39a4e93816d166a02c170c"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#afd564b09b05a55499d7576b85f69a01e"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a44ff9fe9f91406694a76cb99d4d2338f"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#aba5919eddb1f90f8ca65bbd25d065d60"><code>traceOf()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -218,8 +205,8 @@ $ \pi/2 $
               using <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;
             </dt>
             <dd>Operand type.</dd>
-            <dt id="a9e4057748b627f8bb6775b0b4dd090e5">
-              using <a href="#a9e4057748b627f8bb6775b0b4dd090e5" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_tan.html" class="m-doc">Tan</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&gt;&gt;
+            <dt id="a5fa3ad959eaf55c25910b2b5c5682d13">
+              using <a href="#a5fa3ad959eaf55c25910b2b5c5682d13" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html#a376db21de5186146a4a7afacddc76cf9" class="m-doc">RealFunctionBase</a>&lt;<a href="#a65c0b75b7d0639ca90fa1938efbaf134" class="m-doc">Tan</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -232,11 +219,11 @@ $ \pi/2 $
             </dt>
             <dd>Constructs tangent operator from a function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a0fb814fe564d6fd74ac18e4b5dcc4aee" class="m-doc">Tan</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_tan.html" class="m-doc">Tan</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a0fb814fe564d6fd74ac18e4b5dcc4aee" class="m-doc">Tan</a>(</span><span class="m-doc-wrap">const Tan&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a9d4b4fcf2659eec251a6ce5464e4bf79" class="m-doc">Tan</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_tan.html" class="m-doc">Tan</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a9d4b4fcf2659eec251a6ce5464e4bf79" class="m-doc">Tan</a>(</span><span class="m-doc-wrap">Tan&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -246,7 +233,7 @@ $ \pi/2 $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class ... Args&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8a68ffecb8973bd721eb4f1cf12c8896" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) -&gt; <a href="class_rodin_1_1_variational_1_1_tan.html" class="m-doc">Tan</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8a68ffecb8973bd721eb4f1cf12c8896" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) -&gt; <a href="#a65c0b75b7d0639ca90fa1938efbaf134" class="m-doc">Tan</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Restricts tangent operator to a trace.</dd>
             <dt>
@@ -282,12 +269,12 @@ $ \tan(f(p)) $
               <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp;</span>
             </dt>
             <dd>Gets the operand function.</dd>
-            <dt id="a42664e4653db460051ed108fdf48592c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a42664e4653db460051ed108fdf48592c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; g) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a42664e4653db460051ed108fdf48592c" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; g) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt;</span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adaca2763708fb632993d8de30417b6ab" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_tan.html" class="m-doc">Tan</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adaca2763708fb632993d8de30417b6ab" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a65c0b75b7d0639ca90fa1938efbaf134" class="m-doc">Tan</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of this tangent operator.</dd>
           </dl>
@@ -296,10 +283,8 @@ $ \tan(f(p)) $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a65c0b75b7d0639ca90fa1938efbaf134"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class NestedDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Tan&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a65c0b75b7d0639ca90fa1938efbaf134" class="m-doc-self">Tan</a>(</span><span class="m-doc-wrap">const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; v) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a65c0b75b7d0639ca90fa1938efbaf134" class="m-doc-self">Tan</a>(</span><span class="m-doc-wrap">const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; v) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs tangent operator from a function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -316,10 +301,8 @@ $ \tan(f(p)) $
           </div></section>
           <section class="m-doc-details" id="a0fb814fe564d6fd74ac18e4b5dcc4aee"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class NestedDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Tan&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0fb814fe564d6fd74ac18e4b5dcc4aee" class="m-doc-self">Tan</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_tan.html" class="m-doc">Tan</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0fb814fe564d6fd74ac18e4b5dcc4aee" class="m-doc-self">Tan</a>(</span><span class="m-doc-wrap">const Tan&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -336,10 +319,8 @@ $ \tan(f(p)) $
           </div></section>
           <section class="m-doc-details" id="a9d4b4fcf2659eec251a6ce5464e4bf79"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class NestedDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Tan&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d4b4fcf2659eec251a6ce5464e4bf79" class="m-doc-self">Tan</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_tan.html" class="m-doc">Tan</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d4b4fcf2659eec251a6ce5464e4bf79" class="m-doc-self">Tan</a>(</span><span class="m-doc-wrap">Tan&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -360,7 +341,7 @@ $ \tan(f(p)) $
                 template&lt;class NestedDerived&gt;
                 template&lt;class ... Args&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_tan.html" class="m-doc">Tan</a>&amp; Rodin::<wbr />Variational::<wbr />Tan&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a68ffecb8973bd721eb4f1cf12c8896" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a65c0b75b7d0639ca90fa1938efbaf134" class="m-doc">Tan</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a68ffecb8973bd721eb4f1cf12c8896" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Restricts tangent operator to a trace.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -387,7 +368,7 @@ $ \tan(f(p)) $
                 template&lt;class NestedDerived&gt;
                 template&lt;class Point&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Tan&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7315c8e73a0f62b8a736de30c09151af" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const</span></span>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7315c8e73a0f62b8a736de30c09151af" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const</span></span>
             </h3>
             <p>Evaluates <svg class="m-math" style="width: 5.004em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 48.039521 11.955168">
 <title>
@@ -434,10 +415,8 @@ $ \tan(f(p)) $
           </div></section>
           <section class="m-doc-details" id="a167036e7e1cfcff01c5f031ea96d3fed"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class NestedDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />Tan&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the operand function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -449,12 +428,34 @@ $ \tan(f(p)) $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a42664e4653db460051ed108fdf48592c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a42664e4653db460051ed108fdf48592c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; g) const</span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">g</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="adaca2763708fb632993d8de30417b6ab"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class NestedDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_tan.html" class="m-doc">Tan</a>* Rodin::<wbr />Variational::<wbr />Tan&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adaca2763708fb632993d8de30417b6ab" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a65c0b75b7d0639ca90fa1938efbaf134" class="m-doc">Tan</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adaca2763708fb632993d8de30417b6ab" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this tangent operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -505,13 +506,20 @@ $ \tan(f(p)) $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

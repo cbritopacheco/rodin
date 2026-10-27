@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin/Variational/QuadratureRule.h file | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -81,8 +78,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md490">Mathematical foundation</a></li>
-            <li><a href="#autotoc_md491">Usage</a></li>
+            <li><a href="#autotoc_md524">Mathematical foundation</a></li>
+            <li><a href="#autotoc_md525">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -92,10 +89,9 @@
             </li>
           </ul>
         </nav>
-<p>This file defines specializations of <code>Rodin::Variational::QuadratureRule</code> for integrating functions and shape-function expressions over mesh polytopes.</p><section id="autotoc_md490"><h3><a href="#autotoc_md490">Mathematical foundation</a></h3><p>A quadrature rule approximates an integral by a weighted sum:</p><div class="m-math"><svg style="width: 14.074em; height: 3.622em;" viewBox="126.714685 -35.965274 135.113609 34.76976">
+<p>This file defines specializations of <code>Rodin::Variational::QuadratureRule</code> for integrating functions and shape-function expressions over mesh polytopes.</p><section id="autotoc_md524"><h2><a href="#autotoc_md524">Mathematical foundation</a></h2><p>A quadrature rule approximates an integral by a weighted sum:</p><div class="m-math"><svg style="width: 14.074em; height: 3.622em;" viewBox="126.714685 -35.965274 135.113609 34.76976">
 <title>
-\[
-  \int_K f(x)\,dx \approx \sum_{q=1}^{n_q} w_q\,f(x_q),
+\[  \int_K f(x)\,dx \approx \sum_{q=1}^{n_q} w_q\,f(x_q),
 \]
 </title>
 <defs>
@@ -177,16 +173,54 @@ $ n_q $
 <use x='0' y='0' xlink:href='#eq4-g1-110'/>
 <use x='6.987606' y='1.793263' xlink:href='#eq4-g0-113'/>
 </g>
-</svg> is the number of quadrature points.</li></ul><p>In Rodin, the reference quadrature formula lives in the <a href="namespace_rodin_1_1_q_f.html" class="m-doc">Rodin::<wbr />QF</a> module, while the mapped geometric points live in <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />PolytopeQuadrature</a>. This separation allows:</p><ul><li>canonical reuse of reference quadrature formulas,</li><li>mesh-owned caching of mapped geometric quadrature points,</li><li>simpler and more efficient integrator implementations.</li></ul></section><section id="autotoc_md491"><h3><a href="#autotoc_md491">Usage</a></h3><p>Typical usage is:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">qr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">QuadratureRule</span><span class="p">(</span><span class="n">integrand</span><span class="p">);</span>
+</svg> is the number of quadrature points.</li></ul><p>In Rodin, the reference quadrature formula lives in the <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a> module, while the mapped geometric points live in <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>. This separation allows:</p><ul><li>canonical reuse of reference quadrature formulas,</li><li>integrator-owned mapped points for the currently bound polytope,</li><li>bounded mapped-point storage during a one-pass mesh traversal.</li></ul></section><section id="autotoc_md525"><h2><a href="#autotoc_md525">Usage</a></h2><p>Typical usage is:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">qr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">QuadratureRule</span><span class="p">(</span><span class="n">integrand</span><span class="p">);</span>
 <span class="n">qr</span><span class="p">.</span><span class="n">setPolytope</span><span class="p">(</span><span class="n">cell</span><span class="p">);</span>
-<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qr</span><span class="p">.</span><span class="n">compute</span><span class="p">();</span></pre><p>For local element integrators, setPolytope() binds the integrator to a concrete polytope, selects an appropriate quadrature formula, and retrieves the corresponding cached <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />PolytopeQuadrature</a> from the mesh.</p></section>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qr</span><span class="p">.</span><span class="n">compute</span><span class="p">();</span></pre><p>For local element integrators, setPolytope() binds the integrator to a concrete polytope, selects an appropriate quadrature formula, and owns the corresponding <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a> until the next bind or destruction. Moving a rule transfers this ownership without relocating the mapped points. Copying a rule does not copy its polytope binding. For <svg class="m-math" style="width: 0.884em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.486836 8.169366">
+<title>
+$ T $
+</title>
+<defs>
+<path id='eq5-g0-84' d='M4.985305-7.292653C5.057036-7.579577 5.080946-7.687173 5.260274-7.734994C5.355915-7.758904 5.750436-7.758904 6.001494-7.758904C7.197011-7.758904 7.758904-7.711083 7.758904-6.77858C7.758904-6.599253 7.711083-6.144956 7.639352-5.702615L7.627397-5.559153C7.627397-5.511333 7.675218-5.439601 7.746949-5.439601C7.866501-5.439601 7.866501-5.499377 7.902366-5.69066L8.249066-7.806725C8.272976-7.914321 8.272976-7.938232 8.272976-7.974097C8.272976-8.105604 8.201245-8.105604 7.962142-8.105604H1.422665C1.147696-8.105604 1.135741-8.093649 1.06401-7.878456L.334745-5.726526C.32279-5.702615 .286924-5.571108 .286924-5.559153C.286924-5.499377 .334745-5.439601 .406476-5.439601C.502117-5.439601 .526027-5.487422 .573848-5.642839C1.075965-7.089415 1.327024-7.758904 2.917061-7.758904H3.718057C4.004981-7.758904 4.124533-7.758904 4.124533-7.627397C4.124533-7.591532 4.124533-7.567621 4.064757-7.352428L2.462765-.932503C2.343213-.466252 2.319303-.3467 1.052055-.3467C.753176-.3467 .669489-.3467 .669489-.119552C.669489 0 .800996 0 .860772 0C1.159651 0 1.470486-.02391 1.769365-.02391H3.634371C3.93325-.02391 4.25604 0 4.554919 0C4.686426 0 4.805978 0 4.805978-.227148C4.805978-.3467 4.722291-.3467 4.411457-.3467C3.335492-.3467 3.335492-.454296 3.335492-.633624C3.335492-.645579 3.335492-.729265 3.383313-.920548L4.985305-7.292653Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-84'/>
+</g>
+</svg> active rules with at most <svg class="m-math" style="width: 0.966em; height: 1.093em; vertical-align: -0.243em;" viewBox="0 -8.169366 9.271248 10.493973">
+<title>
+$ Q $
+</title>
+<defs>
+<path id='eq6-g0-81' d='M5.092902-.071731C7.149191-.896638 8.679452-3.072478 8.679452-5.236364C8.679452-7.208966 7.388294-8.416438 5.71457-8.416438C3.156164-8.416438 .573848-5.66675 .573848-2.905106C.573848-1.028144 1.817186 .251059 3.550685 .251059C3.957161 .251059 4.351681 .191283 4.734247 .071731C4.662516 .789041 4.662516 .848817 4.662516 1.075965C4.662516 1.422665 4.662516 2.319303 5.618929 2.319303C7.041594 2.319303 7.567621 .083686 7.567621 .011955S7.519801-.107597 7.460025-.107597C7.388294-.107597 7.364384-.047821 7.328518 .083686C7.065504 .836862 6.443836 1.267248 5.917808 1.267248C5.308095 1.267248 5.152677 .848817 5.092902-.071731ZM2.940971-.131507C1.996513-.454296 1.542217-1.446575 1.542217-2.546451C1.542217-3.383313 1.853051-4.97335 2.642092-6.180822C3.526775-7.543711 4.710336-8.153425 5.642839-8.153425C6.886177-8.153425 7.723039-7.149191 7.723039-5.595019C7.723039-4.710336 7.304608-1.745455 5.057036-.430386C4.99726-1.0401 4.829888-1.75741 4.040847-1.75741C3.395268-1.75741 2.84533-1.111831 2.84533-.526027C2.84533-.394521 2.893151-.215193 2.940971-.131507ZM4.758157-.274969C4.327771-.083686 3.957161-.011955 3.622416-.011955C3.502864-.011955 3.084433-.011955 3.084433-.537983C3.084433-.968369 3.502864-1.518306 4.040847-1.518306C4.638605-1.518306 4.770112-1.111831 4.770112-.514072C4.770112-.442341 4.770112-.3467 4.758157-.274969Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g0-81'/>
+</g>
+</svg> points per cell, mapped-point storage is <svg class="m-math" style="width: 3.764em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 36.133983 11.955168">
+<title>
+$ O(TQ) $
+</title>
+<defs>
+<path id='eq7-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq7-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq7-g0-79' d='M8.679452-5.236364C8.679452-7.208966 7.388294-8.416438 5.71457-8.416438C3.156164-8.416438 .573848-5.66675 .573848-2.905106C.573848-1.028144 1.817186 .251059 3.550685 .251059C6.06127 .251059 8.679452-2.367123 8.679452-5.236364ZM3.622416-.02391C2.642092-.02391 1.601993-.74122 1.601993-2.606227C1.601993-3.694147 1.996513-5.475467 2.976837-6.670984C3.849564-7.723039 4.853798-8.153425 5.654795-8.153425C6.706849-8.153425 7.723039-7.388294 7.723039-5.66675C7.723039-4.60274 7.268742-2.940971 6.467746-1.80523C5.595019-.585803 4.507098-.02391 3.622416-.02391Z'/>
+<path id='eq7-g0-81' d='M5.092902-.071731C7.149191-.896638 8.679452-3.072478 8.679452-5.236364C8.679452-7.208966 7.388294-8.416438 5.71457-8.416438C3.156164-8.416438 .573848-5.66675 .573848-2.905106C.573848-1.028144 1.817186 .251059 3.550685 .251059C3.957161 .251059 4.351681 .191283 4.734247 .071731C4.662516 .789041 4.662516 .848817 4.662516 1.075965C4.662516 1.422665 4.662516 2.319303 5.618929 2.319303C7.041594 2.319303 7.567621 .083686 7.567621 .011955S7.519801-.107597 7.460025-.107597C7.388294-.107597 7.364384-.047821 7.328518 .083686C7.065504 .836862 6.443836 1.267248 5.917808 1.267248C5.308095 1.267248 5.152677 .848817 5.092902-.071731ZM2.940971-.131507C1.996513-.454296 1.542217-1.446575 1.542217-2.546451C1.542217-3.383313 1.853051-4.97335 2.642092-6.180822C3.526775-7.543711 4.710336-8.153425 5.642839-8.153425C6.886177-8.153425 7.723039-7.149191 7.723039-5.595019C7.723039-4.710336 7.304608-1.745455 5.057036-.430386C4.99726-1.0401 4.829888-1.75741 4.040847-1.75741C3.395268-1.75741 2.84533-1.111831 2.84533-.526027C2.84533-.394521 2.893151-.215193 2.940971-.131507ZM4.758157-.274969C4.327771-.083686 3.957161-.011955 3.622416-.011955C3.502864-.011955 3.084433-.011955 3.084433-.537983C3.084433-.968369 3.502864-1.518306 4.040847-1.518306C4.638605-1.518306 4.770112-1.111831 4.770112-.514072C4.770112-.442341 4.770112-.3467 4.758157-.274969Z'/>
+<path id='eq7-g0-84' d='M4.985305-7.292653C5.057036-7.579577 5.080946-7.687173 5.260274-7.734994C5.355915-7.758904 5.750436-7.758904 6.001494-7.758904C7.197011-7.758904 7.758904-7.711083 7.758904-6.77858C7.758904-6.599253 7.711083-6.144956 7.639352-5.702615L7.627397-5.559153C7.627397-5.511333 7.675218-5.439601 7.746949-5.439601C7.866501-5.439601 7.866501-5.499377 7.902366-5.69066L8.249066-7.806725C8.272976-7.914321 8.272976-7.938232 8.272976-7.974097C8.272976-8.105604 8.201245-8.105604 7.962142-8.105604H1.422665C1.147696-8.105604 1.135741-8.093649 1.06401-7.878456L.334745-5.726526C.32279-5.702615 .286924-5.571108 .286924-5.559153C.286924-5.499377 .334745-5.439601 .406476-5.439601C.502117-5.439601 .526027-5.487422 .573848-5.642839C1.075965-7.089415 1.327024-7.758904 2.917061-7.758904H3.718057C4.004981-7.758904 4.124533-7.758904 4.124533-7.627397C4.124533-7.591532 4.124533-7.567621 4.064757-7.352428L2.462765-.932503C2.343213-.466252 2.319303-.3467 1.052055-.3467C.753176-.3467 .669489-.3467 .669489-.119552C.669489 0 .800996 0 .860772 0C1.159651 0 1.470486-.02391 1.769365-.02391H3.634371C3.93325-.02391 4.25604 0 4.554919 0C4.686426 0 4.805978 0 4.805978-.227148C4.805978-.3467 4.722291-.3467 4.411457-.3467C3.335492-.3467 3.335492-.454296 3.335492-.633624C3.335492-.645579 3.335492-.729265 3.383313-.920548L4.985305-7.292653Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g0-79'/>
+<use x='9.271248' y='0' xlink:href='#eq7-g1-40'/>
+<use x='13.823574' y='0' xlink:href='#eq7-g0-84'/>
+<use x='22.310409' y='0' xlink:href='#eq7-g0-81'/>
+<use x='31.581657' y='0' xlink:href='#eq7-g1-41'/>
+</g>
+</svg>, independent of the number of traversed cells. The public mesh-owned quadrature cache remains available to callers that intentionally require stable borrowed quadratures across multiple cells; assembly neither evicts nor invalidates those objects. These lifetimes are independent of the assembly backend and require no collective operation.</p></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Finite element spaces, fields, and variational problems.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -252,13 +286,20 @@ $ n_q $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

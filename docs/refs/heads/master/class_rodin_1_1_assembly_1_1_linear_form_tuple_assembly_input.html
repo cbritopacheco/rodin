@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Assembly::LinearFormTupleAssemblyInput class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,10 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_assembly_2_input_8h.html">&lt;Rodin/Assembly/Input.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>LinearFormTupleAssemblyInput <span class="m-thin">class</span>
-        </h1>
-        <p>Input data for tuple of linear forms assembly.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_assembly.html">Assembly</a></div><h1>LinearFormTupleAssemblyInput</h1><p class="rodin-reference-brief">Input data for tuple of linear forms assembly.</p><p class="rodin-reference-include">Defined in <a href="_assembly_2_input_8h.html"><code>Rodin/Assembly/Input.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="n">Ts</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinearFormTupleAssemblyInput</span><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -134,8 +129,7 @@ $ W_h = W_{h,1} \times W_{h,2} $
 </g>
 </svg>, this assembles the block vector:</p><div class="m-math"><svg style="width: 4.485em; height: 2.989em;" viewBox="172.745378 -28.792153 43.052227 28.692695">
 <title>
-\[
-  b = \begin{bmatrix} b_1 \\ b_2 \end{bmatrix}
+\[  b = \begin{bmatrix} b_1 \\ b_2 \end{bmatrix}
 \]
 </title>
 <defs>
@@ -207,10 +201,8 @@ $ W_h = W_{h,1} \times W_{h,2} $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a609e16bf634a249dde563adc6b742b49"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class ... Ts&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />LinearFormTupleAssemblyInput&lt;Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a609e16bf634a249dde563adc6b742b49" class="m-doc-self">LinearFormTupleAssemblyInput</a>(</span><span class="m-doc-wrap">size_t size,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a609e16bf634a249dde563adc6b742b49" class="m-doc-self">LinearFormTupleAssemblyInput</a>(</span><span class="m-doc-wrap">size_t size,
               const <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc">Offsets</a>&amp; offsets,
               const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Ts...&gt;&amp; ins)</span></span>
             </h3>
@@ -237,10 +229,8 @@ $ W_h = W_{h,1} \times W_{h,2} $
           </div></section>
           <section class="m-doc-details" id="a9be1e4285daa77fe397767c097fbdc66"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class ... Ts&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Assembly::<wbr />LinearFormTupleAssemblyInput&lt;Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9be1e4285daa77fe397767c097fbdc66" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9be1e4285daa77fe397767c097fbdc66" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the total vector size.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -254,10 +244,8 @@ $ W_h = W_{h,1} \times W_{h,2} $
           </div></section>
           <section class="m-doc-details" id="a19bbc6286c3a4cb8de0da58740f63838"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class ... Ts&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc">Offsets</a>&amp; Rodin::<wbr />Assembly::<wbr />LinearFormTupleAssemblyInput&lt;Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19bbc6286c3a4cb8de0da58740f63838" class="m-doc-self">getOffsets</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc">Offsets</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19bbc6286c3a4cb8de0da58740f63838" class="m-doc-self">getOffsets</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the block offsets.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -271,10 +259,8 @@ $ W_h = W_{h,1} \times W_{h,2} $
           </div></section>
           <section class="m-doc-details" id="a213f7825536b3ce2c9a61b781f30576d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class ... Ts&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Ts...&gt;&amp; Rodin::<wbr />Assembly::<wbr />LinearFormTupleAssemblyInput&lt;Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a213f7825536b3ce2c9a61b781f30576d" class="m-doc-self">getTuple</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Ts...&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a213f7825536b3ce2c9a61b781f30576d" class="m-doc-self">getTuple</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the tuple of input data.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -325,13 +311,20 @@ $ W_h = W_{h,1} \times W_{h,2} $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

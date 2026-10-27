@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Distance · Rodin benchmarks</title>
+  <link rel="stylesheet" href="../../assets/mcss-22c93d2587ab.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600">
+  <link rel="stylesheet" href="../../assets/rodin-e6524bc0dfe4.css">
+  <link rel="stylesheet" href="../../assets/rodin-theme-a31a2c4268f0.css">
+  <link rel="stylesheet" href="../../assets/rodin.css">
+  <link rel="stylesheet" href="../../assets/rodin-theme.css">
+  <link rel="stylesheet" href="../../assets/site.css">
+  <script src="../../assets/rodin-theme.js"></script>
+  <script src="../../assets/rodin-navigation.js" defer></script>
+  
+  <script>window.MathJax={tex:{inlineMath:[['\\(','\\)']]},svg:{fontCache:'local'}};</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" defer></script>
+</head>
+<body class="rodin-benchmarks">
+  <header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="../../../index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon benchmark-search-trigger" title="Search benchmarks" onclick="return showSearch()" aria-label="Search benchmarks"><svg class="benchmark-magnifier-icon" style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="../../../pages.html">Pages</a>
+              <ol>
+                <li><a href="../../../guides-index.html">General concepts</a></li>
+                <li><a href="../../../examples-index.html">Examples and tutorials</a></li>
+                <li><a href="../../../gallery.html">Gallery</a></li>
+                <li><a href="../../../guides-io.html">I/O in Rodin</a></li>
+                <li><a href="../../../configuration.html">Configuration</a></li>
+                <li><a href="../../../notation-index.html">Notation</a></li>
+                <li><a href="../../../credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="../../../modules.html">Modules</a>
+              <ol>
+                <li><a href="../../../namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="../../../namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="../../../namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="../../../namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="../../../namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="../../../namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="../../../namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="../../../annotated.html">Classes</a></li>
+            <li><a href="../../../files.html">Files</a></li>
+            <li><a href="../../../benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon benchmark-search-trigger" title="Search benchmarks" onclick="return showSearch()" aria-label="Search benchmarks"><svg class="benchmark-magnifier-icon" style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+  <main><article>
+    <div class="m-container m-container-inflatable rodin-benchmark-layout"><div class="m-row">
+      <div class="m-col-l-10 m-push-l-1" data-rodin-content>
+      <nav class="benchmark-breadcrumb" aria-label="Breadcrumb"><a href="../../index.html">Benchmarks</a> / <a href="../../Rodin/index.html">Modules</a> / <a href="../../Rodin/Distance/index.html">Distance</a></nav>
+      <h1>Distance</h1>
+      <p class="benchmark-configuration">Published configurations</p>
+      
+      <p class="m-text m-dim"><em>Distance-field computations.</em></p><div class="benchmark-representative"><div class="m-math"><svg style="width: 11.772em; height: 1.870em;" viewBox="137.767582 -19.1504 113.007831 17.954886">
+<title>
+\[  d(\mathbf{x},\Gamma)=\inf_{\mathbf{y}\in\Gamma}\|\mathbf{x}-\mathbf{y}\|.
+\]
+</title>
+<defs>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g3-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g3-107' d='M2.056289-8.5599C2.056289-8.751183 2.056289-8.966376 1.817186-8.966376S1.578082-8.703362 1.578082-8.524035V2.546451C1.578082 2.737733 1.578082 2.988792 1.817186 2.988792S2.056289 2.773599 2.056289 2.582316V-8.5599ZM4.387547-8.524035C4.387547-8.715318 4.387547-8.966376 4.148443-8.966376S3.90934-8.751183 3.90934-8.5599V2.582316C3.90934 2.773599 3.90934 2.988792 4.148443 2.988792S4.387547 2.725778 4.387547 2.546451V-8.524035Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g5-0' d='M4.702366-5.419676H.350685V-5.156663H.526027C1.139726-5.156663 1.155666-5.068991 1.155666-4.774097V-.645579C1.155666-.350685 1.139726-.263014 .526027-.263014H.350685V0C1.028144-.02391 1.044085-.02391 1.578082-.02391C1.952677-.02391 2.534496-.02391 2.893151 0V-.263014H2.638107C1.888917-.263014 1.888917-.374595 1.888917-.653549V-4.829888C1.888917-5.100872 1.904857-5.156663 2.271482-5.156663H3.188045C4.423412-5.156663 4.550934-4.638605 4.686426-3.610461H4.933499L4.702366-5.419676Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g2-50' d='M4.630635-1.809215C4.758157-1.809215 4.933499-1.809215 4.933499-1.992528S4.758157-2.175841 4.630635-2.175841H1.075965C1.179577-3.283686 2.10411-4.128518 3.315567-4.128518H4.630635C4.758157-4.128518 4.933499-4.128518 4.933499-4.311831S4.758157-4.495143 4.630635-4.495143H3.291656C1.857036-4.495143 .70137-3.379328 .70137-1.992528C.70137-.597758 1.865006 .510087 3.291656 .510087H4.630635C4.758157 .510087 4.933499 .510087 4.933499 .326775S4.758157 .143462 4.630635 .143462H3.315567C2.10411 .143462 1.179577-.70137 1.075965-1.809215H4.630635Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g1-120' d='M4.028892-2.952927L5.415691-4.542964C5.547198-4.698381 5.654795-4.794022 6.647073-4.794022V-5.308095C5.977584-5.284184 5.953674-5.284184 5.547198-5.284184C5.200498-5.284184 4.686426-5.284184 4.351681-5.308095V-4.794022C4.578829-4.794022 4.829888-4.734247 4.829888-4.65056C4.829888-4.62665 4.770112-4.542964 4.746202-4.519054L3.706102-3.347447L2.52254-4.794022H3.024658V-5.308095C2.749689-5.284184 1.936737-5.284184 1.613948-5.284184C1.255293-5.284184 .609714-5.284184 .274969-5.308095V-4.794022H1.123786L2.988792-2.52254L1.43462-.765131C1.291158-.597758 1.207472-.514072 .215193-.514072V0C.932503-.02391 .956413-.02391 1.327024-.02391C1.673724-.02391 2.175841-.02391 2.510585 0V-.514072C2.283437-.514072 2.032379-.573848 2.032379-.657534C2.032379-.669489 2.032379-.681445 2.116065-.777086L3.311582-2.12802L4.638605-.514072H4.136488V0C4.423412-.02391 5.224408-.02391 5.559153-.02391C5.917808-.02391 6.551432-.02391 6.886177 0V-.514072H6.049315L4.028892-2.952927Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g1-121' d='M5.917808-4.531009C5.989539-4.698381 6.03736-4.794022 6.802491-4.794022V-5.308095C6.396015-5.284184 6.348194-5.284184 5.858032-5.284184C5.535243-5.284184 5.511333-5.284184 4.829888-5.308095V-4.794022C4.841843-4.794022 5.403736-4.794022 5.403736-4.638605C5.403736-4.60274 5.36787-4.531009 5.355915-4.495143L3.957161-1.482441L2.426899-4.794022H3.084433V-5.308095C2.797509-5.284184 1.984558-5.284184 1.649813-5.284184C1.303113-5.284184 .597758-5.284184 .286924-5.308095V-4.794022H1.052055L3.263761 0C3.203985 .143462 3.036613 .490162 2.976837 .633624C2.725778 1.171606 2.343213 1.996513 1.506351 1.996513C1.458531 1.996513 1.315068 1.996513 1.183562 1.924782C1.207472 1.912827 1.566127 1.769365 1.566127 1.315068C1.566127 .920548 1.279203 .669489 .920548 .669489C.549938 .669489 .263014 .920548 .263014 1.327024C.263014 1.888917 .789041 2.391034 1.506351 2.391034C2.486675 2.391034 3.132254 1.506351 3.371357 .980324L5.917808-4.531009Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g0-121' d='M4.327771-2.956912C4.399502-3.092403 4.415442-3.124284 4.909589-3.124284V-3.53873C4.606725-3.514819 4.590785-3.514819 4.24807-3.514819C4.192279-3.514819 3.769863-3.514819 3.53076-3.53873V-3.124284C3.53873-3.124284 3.857534-3.124284 3.857534-3.044583C3.857534-3.020672 3.833624-2.972852 3.817684-2.940971L2.84533-1.020174L1.777335-3.124284H2.15193V-3.53873C1.689664-3.514819 1.522291-3.514819 1.171606-3.514819C.988294-3.514819 .557908-3.514819 .239103-3.53873V-3.124284H.74122L2.319303 0C1.992528 .67746 1.928767 .757161 1.872976 .836862C1.570112 1.227397 1.227397 1.267248 1.099875 1.267248C1.028144 1.267248 .996264 1.259278 .956413 1.243337C1.115816 1.147696 1.187547 .988294 1.187547 .812951C1.187547 .494147 .948443 .318804 .6934 .318804C.430386 .318804 .191283 .494147 .191283 .820922C.191283 1.243337 .581818 1.601993 1.091905 1.601993C1.865006 1.601993 2.343213 .932503 2.454795 .71731L4.327771-2.956912Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g6-0' d='M6.503611-8.141469H.490162V-7.79477H.729265C1.590037-7.79477 1.625903-7.675218 1.625903-7.232877V-.908593C1.625903-.466252 1.590037-.3467 .729265-.3467H.490162V0C.777086-.02391 1.841096-.02391 2.199751-.02391C2.618182-.02391 3.670237-.02391 4.016936 0V-.3467H3.658281C2.618182-.3467 2.594271-.490162 2.594271-.920548V-7.316563C2.594271-7.711083 2.618182-7.79477 3.144209-7.79477H4.423412C6.073225-7.79477 6.38406-7.149191 6.551432-5.475467H6.814446L6.503611-8.141469Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g6-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g6-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g6-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g6-102' d='M2.056289-4.805978H3.407223V-5.152677H2.032379V-6.551432C2.032379-7.627397 2.582316-8.177335 3.072478-8.177335C3.16812-8.177335 3.347447-8.153425 3.490909-8.081694C3.443088-8.069738 3.144209-7.962142 3.144209-7.615442C3.144209-7.340473 3.335492-7.149191 3.610461-7.149191C3.897385-7.149191 4.088667-7.340473 4.088667-7.627397C4.088667-8.069738 3.658281-8.416438 3.084433-8.416438C2.247572-8.416438 1.303113-7.770859 1.303113-6.551432V-5.152677H.37061V-4.805978H1.303113V-.884682C1.303113-.3467 1.171606-.3467 .394521-.3467V0C.729265-.02391 1.3868-.02391 1.745455-.02391C2.068244-.02391 2.917061-.02391 3.19203 0V-.3467H2.952927C2.080199-.3467 2.056289-.478207 2.056289-.908593V-4.805978Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g6-105' d='M2.080199-7.364384C2.080199-7.675218 1.829141-7.950187 1.494396-7.950187C1.183562-7.950187 .920548-7.699128 .920548-7.376339C.920548-7.017684 1.207472-6.790535 1.494396-6.790535C1.865006-6.790535 2.080199-7.10137 2.080199-7.364384ZM.430386-5.140722V-4.794022C1.195517-4.794022 1.303113-4.722291 1.303113-4.136488V-.884682C1.303113-.3467 1.171606-.3467 .394521-.3467V0C.729265-.02391 1.303113-.02391 1.649813-.02391C1.78132-.02391 2.47472-.02391 2.881196 0V-.3467C2.10411-.3467 2.056289-.406476 2.056289-.872727V-5.272229L.430386-5.140722Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g6-110' d='M5.32005-2.905106C5.32005-4.016936 5.32005-4.351681 5.045081-4.734247C4.698381-5.200498 4.136488-5.272229 3.730012-5.272229C2.570361-5.272229 2.116065-4.27995 2.020423-4.040847H2.008468V-5.272229L.382565-5.140722V-4.794022C1.195517-4.794022 1.291158-4.710336 1.291158-4.124533V-.884682C1.291158-.3467 1.159651-.3467 .382565-.3467V0C.6934-.02391 1.338979-.02391 1.673724-.02391C2.020423-.02391 2.666002-.02391 2.976837 0V-.3467C2.211706-.3467 2.068244-.3467 2.068244-.884682V-3.108344C2.068244-4.363636 2.893151-5.033126 3.634371-5.033126S4.542964-4.423412 4.542964-3.694147V-.884682C4.542964-.3467 4.411457-.3467 3.634371-.3467V0C3.945205-.02391 4.590785-.02391 4.925529-.02391C5.272229-.02391 5.917808-.02391 6.228643 0V-.3467C5.630884-.3467 5.332005-.3467 5.32005-.705355V-2.905106Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g4-58' d='M2.199751-.573848C2.199751-.920548 1.912827-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.872727 1.0401-.585803C1.0401-.239103 1.327024 0 1.613948 0C1.960648 0 2.199751-.286924 2.199751-.573848Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g4-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='namespace_rodin_1_1_distance-representative-eq1-g4-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='namespace_rodin_1_1_distance-representative-eq1-page1'>
+<use x='137.767582' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g4-100'/>
+<use x='143.850275' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g6-40'/>
+<use x='148.402601' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g1-120'/>
+<use x='155.500982' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g4-59'/>
+<use x='160.74514' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g6-0'/>
+<use x='168.059315' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g6-41'/>
+<use x='175.93247' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g6-61'/>
+<use x='189.386564' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g6-105'/>
+<use x='192.638225' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g6-110'/>
+<use x='199.141548' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g6-102'/>
+<use x='188.357951' y='-2.745259' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g0-121'/>
+<use x='193.646499' y='-2.745259' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g2-50'/>
+<use x='199.292076' y='-2.745259' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g5-0'/>
+<use x='206.573152' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g3-107'/>
+<use x='212.550759' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g1-120'/>
+<use x='222.305803' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g3-0'/>
+<use x='234.260964' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g1-121'/>
+<use x='241.546144' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g3-107'/>
+<use x='247.523751' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g4-58'/>
+</g>
+</svg></div></div><div class="m-block m-flat"><p><a href="../../../class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> constructs distance fields through fast marching, while <a href="../../../class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> and <a href="../../../class_rodin_1_1_distance_1_1_signed_poisson.html" class="m-doc">SignedPoisson</a> provide PDE-based alternatives. These models convert boundary or level-set information into distance approximations for shape optimization, interface processing, and mesh adaptation.</p></div>
+      
+      
+      <p>No benchmarks have been registered for this module yet.</p>
+      
+      </div>
+    </div></div>
+  </article></main>
+  
+<div class="m-doc-search" id="search" role="dialog" aria-modal="true" aria-label="Benchmark search">
+  <a href="#!" onclick="return hideSearch()" aria-label="Dismiss search backdrop"></a>
+  <div class="m-container"><div class="m-row"><div class="m-col-m-8 m-push-m-2">
+    <div class="m-doc-search-header m-text m-small">
+      <div class="benchmark-search-shortcuts"><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+      <div id="search-symbolcount">Loading index…</div>
+      <button class="benchmark-search-close" type="button" aria-label="Close benchmark search" onclick="return hideSearch()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12 M18 6 6 18"></path></svg></button>
+    </div>
+    <div class="m-doc-search-content">
+      <form><input type="search" name="q" id="search-input" aria-label="Find benchmarks" placeholder="Loading…" disabled autocomplete="off" spellcheck="false"></form>
+      <noscript>Benchmark search requires JavaScript.</noscript>
+      <div id="search-help" class="m-text m-dim m-text-center">
+        <p>Find modules, classes and workloads by name, path or description.
+        Try <code>SpatialMatrix</code>, <code>pyramid</code> or <code>Stokes stability</code>.</p>
+        <p>Use ↑ / ↓ to select a result and Enter to open it. Tab completes a prefix.
+        Individual measured cases can be filtered on their benchmark page.</p>
+      </div>
+      <div id="search-notfound" class="m-text m-warning m-text-center">No matching benchmarks.</div>
+      <ul id="search-results"></ul>
+    </div>
+  </div></div></div>
+</div>
+<script src="../../assets/search-57e2ce511c71.js"></script>
+<script src="../../assets/searchdata-fc68b61a5937.js"></script>
+  <footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

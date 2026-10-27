@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Math::FixedSizeMatrix class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_math.html">Math</a></div><h1>FixedSizeMatrix</h1><p class="rodin-reference-brief">Compile-time fixed-size dense matrix.</p><p class="rodin-reference-include">Defined in <a href="_math_2_matrix_8h.html"><code>Rodin/Math/Matrix.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">ScalarType</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">Rows</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">Cols</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_math_1_1_fixed_size_matrix.html#a5e279dff31038be396e8222e8946e38a"><span class="nc">FixedSizeMatrix</span></a><span class="p">;</span>
+</pre>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">ScalarType</td>
+              <td>The element type</td>
+            </tr>
+            <tr>
+              <td>Rows</td>
+              <td>The number of rows (must be known at compile time)</td>
+            </tr>
+            <tr>
+              <td>Cols</td>
+              <td>The number of columns (must be known at compile time)</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Fixed-size matrix type.</p><p>A compile-time fixed-size matrix. Both dimensions are known at compile time, enabling optimizations and stack allocation without additional storage. Dot products conjugate the right operand.</p><p>Example uses:</p><ul><li>2×2 rotation matrices</li><li>3×3 transformation matrices</li><li>Small dense blocks in larger systems</li></ul>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="ab1907efa460862a200c287cc5827ce56">
+              using <a href="#ab1907efa460862a200c287cc5827ce56" class="m-doc-self">Parent</a> = Eigen::PlainObjectBase&lt;<a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&gt;
+            </dt>
+            <dd>Eigen storage and expression base.</dd>
+            <dt id="ae8ea49588b8426ca8772f655671095af">
+              using <a href="#ae8ea49588b8426ca8772f655671095af" class="m-doc-self">Base</a> = <a href="#ab1907efa460862a200c287cc5827ce56" class="m-doc">Parent</a>
+            </dt>
+            <dd>Base alias used by Eigen&#x27;s storage operations.</dd>
+            <dt id="a84e9b844fb562b2576cc8d2810d48b16">
+              using <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc-self">Scalar</a> = ScalarType
+            </dt>
+            <dd>Scalar coefficient type.</dd>
+            <dt id="a6b984126301ecc9d7a86e4b07cf04bb6">
+              using <a href="#a6b984126301ecc9d7a86e4b07cf04bb6" class="m-doc-self">Nested</a> = const <a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp;
+            </dt>
+            <dd>Reference retained when nested in an Eigen expression.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a5e279dff31038be396e8222e8946e38a">
+              <span class="m-doc-wrap-bumper"><a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc-self">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Constructs a matrix with Eigen&#x27;s default initialization.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a97b7fc9a64a806009eaf13a4ff2f918e" class="m-doc">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const FixedSizeMatrix&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copies the matrix and its owned coefficients.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aca2502861b03eac3b200d07f6975ba8a" class="m-doc">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">FixedSizeMatrix&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Moves the matrix and its owned coefficients.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#ab2304bc69d4dc0125d041278bbb407cb" class="m-doc">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const T&amp; value) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs a matrix from dimensions, coefficients or an Eigen object.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T0, class T1&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#adc1ce02aef495547671717c934f340f0" class="m-doc">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const T0&amp; first,
+              const T1&amp; second)</span>
+            </dt>
+            <dd>Constructs a matrix from dimensions or two vector coefficients.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#ae08bb6c973b7a3581fa187a0060cc0de" class="m-doc">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const Eigen::DenseBase&lt;Derived&gt;&amp; other)</span>
+            </dt>
+            <dd>Copies the coefficients of an Eigen dense expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a8a68e8f205687714840559f19d93d232" class="m-doc">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const Eigen::EigenBase&lt;Derived&gt;&amp; other)</span>
+            </dt>
+            <dd>Evaluates an Eigen operator, such as a permutation or solve.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a8d6bfd63ef099bc0c52930a3864246da" class="m-doc">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const Eigen::ReturnByValue&lt;Derived&gt;&amp; other)</span>
+            </dt>
+            <dd>Evaluates an Eigen return-by-value operation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a01f86fb9e191d9661c63100c963c864f" class="m-doc">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const std::initializer_list&lt;std::initializer_list&lt;<a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&gt;&gt;&amp; rows) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs a matrix from coefficients grouped by row.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a36da702bb8fb8c2934c4463c79bb84d0" class="m-doc">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; first,
+              const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; second,
+              const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; third)</span>
+            </dt>
+            <dd>Constructs a three-component row or column vector.</dd>
+            <dt><a href="#a95963c79b88a3f59410dc234419f4edf" class="m-doc">FixedSizeMatrix</a></dt><dd>Constructs a fixed-size vector from four or more coefficients.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class... Args&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a95963c79b88a3f59410dc234419f4edf" class="m-doc">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; first,
+              const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; second,
+              const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; third,
+              const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; fourth,
+              const Args&amp;... args)</span>
+            </div></details></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab31e90ef9647849419d51b17970937e2" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp; other) -&gt; <a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp;</span>
+            </dt>
+            <dd>Copies the matrix coefficients.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af49ec74a69763f4cd1b8f297e2cda1e5" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp;&amp; other) -&gt; <a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Moves the matrix coefficients.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3b0f5c3ec752b929ca5d464502c79399" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const Eigen::DenseBase&lt;Derived&gt;&amp; other) -&gt; <a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp;</span>
+            </dt>
+            <dd>Assigns a dense expression, resizing when necessary.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a43c9d6f88cb6dec90f183427867d618c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const Eigen::EigenBase&lt;Derived&gt;&amp; other) -&gt; <a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp;</span>
+            </dt>
+            <dd>Assigns an Eigen operator, retaining the Rodin matrix return type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#adbbd0830b112a3b8e7bbdad3525c0b1c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const Eigen::ReturnByValue&lt;Derived&gt;&amp; other) -&gt; <a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp;</span>
+            </dt>
+            <dd>Assigns an Eigen return-by-value operation.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aef2e34a6008ef1712f95ea530dcec79f" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const Eigen::RotationBase&lt;Derived, Cols&gt;&amp; rotation) -&gt; <a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp;</span>
+            </dt>
+            <dd>Assigns an Eigen rotation through its matrix representation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ade3b894493abd7c32d513774c54bfbf1" class="m-doc">innerStride</a>(</span><span class="m-doc-wrap">) const -&gt; Eigen::Index <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Stride between consecutive coefficients in the inner dimension.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab1a3ea8c292b4805a316f9864d5a4b06" class="m-doc">outerStride</a>(</span><span class="m-doc-wrap">) const -&gt; Eigen::Index <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Stride between consecutive columns, or rows for row-major storage.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a23022d0eebd574ad64f6180560a77ffd" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;Derived&gt;&amp; other) const -&gt; auto</span>
+            </dt>
+            <dd>Contracts with the conjugate of the right operand.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a97b7fc9a64a806009eaf13a4ff2f918e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97b7fc9a64a806009eaf13a4ff2f918e" class="m-doc-self">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const FixedSizeMatrix&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copies the matrix and its owned coefficients.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Matrix to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aca2502861b03eac3b200d07f6975ba8a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca2502861b03eac3b200d07f6975ba8a" class="m-doc-self">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">FixedSizeMatrix&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Moves the matrix and its owned coefficients.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Matrix to move.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab2304bc69d4dc0125d041278bbb407cb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rows, size_t Cols&gt;
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2304bc69d4dc0125d041278bbb407cb" class="m-doc-self">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const T&amp; value) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs a matrix from dimensions, coefficients or an Eigen object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Argument type understood by Eigen&#x27;s matrix constructor.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>value</td>
+                  <td>Dimension, coefficient, coefficient array or Eigen object.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adc1ce02aef495547671717c934f340f0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rows, size_t Cols&gt;
+                template&lt;class T0, class T1&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc1ce02aef495547671717c934f340f0" class="m-doc-self">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const T0&amp; first,
+              const T1&amp; second)</span></span>
+            </h3>
+            <p>Constructs a matrix from dimensions or two vector coefficients.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T0</td>
+                  <td>First argument type.</td>
+                </tr>
+                <tr>
+                  <td>T1</td>
+                  <td>Second argument type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>first</td>
+                  <td>Row count or first coefficient of a two-component vector.</td>
+                </tr>
+                <tr>
+                  <td>second</td>
+                  <td>Column count or second coefficient of a two-component vector.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae08bb6c973b7a3581fa187a0060cc0de"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rows, size_t Cols&gt;
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae08bb6c973b7a3581fa187a0060cc0de" class="m-doc-self">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const Eigen::DenseBase&lt;Derived&gt;&amp; other)</span></span>
+            </h3>
+            <p>Copies the coefficients of an Eigen dense expression.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Derived</td>
+                  <td>Eigen expression type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>other</td>
+                  <td>Expression to evaluate.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8a68e8f205687714840559f19d93d232"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rows, size_t Cols&gt;
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a68e8f205687714840559f19d93d232" class="m-doc-self">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const Eigen::EigenBase&lt;Derived&gt;&amp; other)</span></span>
+            </h3>
+            <p>Evaluates an Eigen operator, such as a permutation or solve.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Derived</td>
+                  <td>Eigen operator type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>other</td>
+                  <td>Operator to evaluate.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8d6bfd63ef099bc0c52930a3864246da"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rows, size_t Cols&gt;
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8d6bfd63ef099bc0c52930a3864246da" class="m-doc-self">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const Eigen::ReturnByValue&lt;Derived&gt;&amp; other)</span></span>
+            </h3>
+            <p>Evaluates an Eigen return-by-value operation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Derived</td>
+                  <td>Eigen operation type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>other</td>
+                  <td>Operation to evaluate.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a01f86fb9e191d9661c63100c963c864f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01f86fb9e191d9661c63100c963c864f" class="m-doc-self">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const std::initializer_list&lt;std::initializer_list&lt;<a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&gt;&gt;&amp; rows) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs a matrix from coefficients grouped by row.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rows</td>
+                  <td>Coefficient rows.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a36da702bb8fb8c2934c4463c79bb84d0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36da702bb8fb8c2934c4463c79bb84d0" class="m-doc-self">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; first,
+              const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; second,
+              const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; third)</span></span>
+            </h3>
+            <p>Constructs a three-component row or column vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">first</td>
+                  <td>First coefficient.</td>
+                </tr>
+                <tr>
+                  <td>second</td>
+                  <td>Second coefficient.</td>
+                </tr>
+                <tr>
+                  <td>third</td>
+                  <td>Third coefficient.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a95963c79b88a3f59410dc234419f4edf"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rows, size_t Cols&gt;
+                template&lt;class... Args&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a95963c79b88a3f59410dc234419f4edf" class="m-doc-self">FixedSizeMatrix</a>(</span><span class="m-doc-wrap">const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; first,
+              const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; second,
+              const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; third,
+              const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; fourth,
+              const Args&amp;... args)</span></span>
+            </h3>
+            <p>Constructs a fixed-size vector from four or more coefficients.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Args</td>
+                  <td>Remaining coefficient types.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>first</td>
+                  <td>First coefficient.</td>
+                </tr>
+                <tr>
+                  <td>second</td>
+                  <td>Second coefficient.</td>
+                </tr>
+                <tr>
+                  <td>third</td>
+                  <td>Third coefficient.</td>
+                </tr>
+                <tr>
+                  <td>fourth</td>
+                  <td>Fourth coefficient.</td>
+                </tr>
+                <tr>
+                  <td>args</td>
+                  <td>Remaining coefficients.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab31e90ef9647849419d51b17970937e2"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab31e90ef9647849419d51b17970937e2" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp; other)</span></span>
+            </h3>
+            <p>Copies the matrix coefficients.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Matrix to copy.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af49ec74a69763f4cd1b8f297e2cda1e5"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af49ec74a69763f4cd1b8f297e2cda1e5" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Moves the matrix coefficients.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Matrix to move.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3b0f5c3ec752b929ca5d464502c79399"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rows, size_t Cols&gt;
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3b0f5c3ec752b929ca5d464502c79399" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const Eigen::DenseBase&lt;Derived&gt;&amp; other)</span></span>
+            </h3>
+            <p>Assigns a dense expression, resizing when necessary.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Derived</td>
+                  <td>Eigen expression type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>other</td>
+                  <td>Expression to evaluate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a43c9d6f88cb6dec90f183427867d618c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rows, size_t Cols&gt;
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a43c9d6f88cb6dec90f183427867d618c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const Eigen::EigenBase&lt;Derived&gt;&amp; other)</span></span>
+            </h3>
+            <p>Assigns an Eigen operator, retaining the Rodin matrix return type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Derived</td>
+                  <td>Eigen operator type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>other</td>
+                  <td>Operator to evaluate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adbbd0830b112a3b8e7bbdad3525c0b1c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rows, size_t Cols&gt;
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adbbd0830b112a3b8e7bbdad3525c0b1c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const Eigen::ReturnByValue&lt;Derived&gt;&amp; other)</span></span>
+            </h3>
+            <p>Assigns an Eigen return-by-value operation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Derived</td>
+                  <td>Eigen operation type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>other</td>
+                  <td>Operation to evaluate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aef2e34a6008ef1712f95ea530dcec79f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rows, size_t Cols&gt;
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a5e279dff31038be396e8222e8946e38a" class="m-doc">FixedSizeMatrix</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aef2e34a6008ef1712f95ea530dcec79f" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const Eigen::RotationBase&lt;Derived, Cols&gt;&amp; rotation)</span></span>
+            </h3>
+            <p>Assigns an Eigen rotation through its matrix representation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Derived</td>
+                  <td>Eigen rotation type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>rotation</td>
+                  <td>Rotation to evaluate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ade3b894493abd7c32d513774c54bfbf1"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">Eigen::Index </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade3b894493abd7c32d513774c54bfbf1" class="m-doc-self">innerStride</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Stride between consecutive coefficients in the inner dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>One, since inner coefficients are contiguous.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab1a3ea8c292b4805a316f9864d5a4b06"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">Eigen::Index </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab1a3ea8c292b4805a316f9864d5a4b06" class="m-doc-self">outerStride</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Stride between consecutive columns, or rows for row-major storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The number of coefficients in the inner dimension.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a23022d0eebd574ad64f6180560a77ffd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rows, size_t Cols&gt;
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23022d0eebd574ad64f6180560a77ffd" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;Derived&gt;&amp; other) const</span></span>
+            </h3>
+            <p>Contracts with the conjugate of the right operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Derived</td>
+                  <td>Eigen type of the right operand.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>other</td>
+                  <td>Matrix of the same shape.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The right-conjugating inner product.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Computes <svg class="m-math" style="width: 5.878em; height: 1.575em; vertical-align: -0.527em;" viewBox="0 -10.082111 56.428389 15.118857">
+<title>
+$\sum_{i,j} A_{ij}\overline{B_{ij}}$
+</title>
+<defs>
+<path id='eq1-g2-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq1-g2-66' d='M4.375592-7.352428C4.483188-7.79477 4.531009-7.81868 4.99726-7.81868H6.551432C7.902366-7.81868 7.902366-6.670984 7.902366-6.563387C7.902366-5.595019 6.933998-4.363636 5.355915-4.363636H3.634371L4.375592-7.352428ZM6.396015-4.267995C7.699128-4.507098 8.88269-5.415691 8.88269-6.515567C8.88269-7.44807 8.057783-8.16538 6.706849-8.16538H2.86924C2.642092-8.16538 2.534496-8.16538 2.534496-7.938232C2.534496-7.81868 2.642092-7.81868 2.82142-7.81868C3.550685-7.81868 3.550685-7.723039 3.550685-7.591532C3.550685-7.567621 3.550685-7.49589 3.502864-7.316563L1.888917-.884682C1.78132-.466252 1.75741-.3467 .920548-.3467C.6934-.3467 .573848-.3467 .573848-.131507C.573848 0 .645579 0 .884682 0H4.985305C6.814446 0 8.225156-1.3868 8.225156-2.594271C8.225156-3.574595 7.364384-4.172354 6.396015-4.267995ZM4.698381-.3467H3.084433C2.917061-.3467 2.893151-.3467 2.82142-.358655C2.689913-.37061 2.677958-.394521 2.677958-.490162C2.677958-.573848 2.701868-.645579 2.725778-.753176L3.56264-4.124533H5.810212C7.220922-4.124533 7.220922-2.809465 7.220922-2.713823C7.220922-1.566127 6.180822-.3467 4.698381-.3467Z'/>
+<path id='eq1-g1-59' d='M1.490411-.119552C1.490411 .398506 1.378829 .852802 .884682 1.346949C.852802 1.370859 .836862 1.3868 .836862 1.42665C.836862 1.490411 .900623 1.538232 .956413 1.538232C1.052055 1.538232 1.713574 .908593 1.713574-.02391C1.713574-.533998 1.522291-.884682 1.171606-.884682C.892653-.884682 .73325-.661519 .73325-.446326C.73325-.223163 .884682 0 1.179577 0C1.370859 0 1.490411-.111582 1.490411-.119552Z'/>
+<path id='eq1-g1-105' d='M2.375093-4.97335C2.375093-5.148692 2.247572-5.276214 2.064259-5.276214C1.857036-5.276214 1.625903-5.084932 1.625903-4.845828C1.625903-4.670486 1.753425-4.542964 1.936737-4.542964C2.14396-4.542964 2.375093-4.734247 2.375093-4.97335ZM1.211457-2.048319L.781071-.948443C.74122-.828892 .70137-.73325 .70137-.597758C.70137-.207223 1.004234 .079701 1.42665 .079701C2.199751 .079701 2.526526-1.036115 2.526526-1.139726C2.526526-1.219427 2.462765-1.243337 2.406974-1.243337C2.311333-1.243337 2.295392-1.187547 2.271482-1.107846C2.088169-.470237 1.761395-.143462 1.44259-.143462C1.346949-.143462 1.251308-.183313 1.251308-.398506C1.251308-.589788 1.307098-.73325 1.41071-.980324C1.490411-1.195517 1.570112-1.41071 1.657783-1.625903L1.904857-2.271482C1.976588-2.454795 2.072229-2.701868 2.072229-2.83736C2.072229-3.235866 1.753425-3.514819 1.346949-3.514819C.573848-3.514819 .239103-2.399004 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.239601 .494147-2.319303C.71731-3.076463 1.083935-3.291656 1.323039-3.291656C1.43462-3.291656 1.514321-3.251806 1.514321-3.028643C1.514321-2.948941 1.506351-2.83736 1.42665-2.598257L1.211457-2.048319Z'/>
+<path id='eq1-g1-106' d='M3.291656-4.97335C3.291656-5.124782 3.172105-5.276214 2.980822-5.276214C2.741719-5.276214 2.534496-5.053051 2.534496-4.845828C2.534496-4.694396 2.654047-4.542964 2.84533-4.542964C3.084433-4.542964 3.291656-4.766127 3.291656-4.97335ZM1.625903 .398506C1.506351 .884682 1.115816 1.40274 .629639 1.40274C.502117 1.40274 .382565 1.370859 .366625 1.362889C.613699 1.243337 .645579 1.028144 .645579 .956413C.645579 .765131 .502117 .661519 .334745 .661519C.103611 .661519-.111582 .860772-.111582 1.123786C-.111582 1.42665 .183313 1.625903 .637609 1.625903C1.123786 1.625903 2.000498 1.323039 2.239601 .366625L2.956912-2.486675C2.980822-2.582316 2.996762-2.646077 2.996762-2.765629C2.996762-3.203985 2.646077-3.514819 2.183811-3.514819C1.338979-3.514819 .844832-2.399004 .844832-2.295392C.844832-2.223661 .900623-2.191781 .964384-2.191781C1.052055-2.191781 1.060025-2.215691 1.115816-2.335243C1.354919-2.885181 1.761395-3.291656 2.1599-3.291656C2.327273-3.291656 2.422914-3.180075 2.422914-2.917061C2.422914-2.805479 2.399004-2.693898 2.375093-2.582316L1.625903 .398506Z'/>
+<path id='eq1-g0-80' d='M5.033126 6.38406L.789041 11.632379C.6934 11.75193 .681445 11.775841 .681445 11.823661C.681445 11.955168 .789041 11.955168 1.004234 11.955168H10.915068L11.943213 8.978331H11.644334C11.345455 9.874969 10.544458 10.604234 9.528269 10.950934C9.336986 11.01071 8.51208 11.297634 6.75467 11.297634H1.673724L5.822167 6.168867C5.905853 6.06127 5.929763 6.025405 5.929763 5.977584S5.917808 5.917808 5.846077 5.810212L1.960648 .478207H6.694894C8.057783 .478207 10.807472 .561893 11.644334 2.797509H11.943213L10.915068 0H1.004234C.681445 0 .669489 .011955 .669489 .382565L5.033126 6.38406Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='-8.966452' xlink:href='#eq1-g0-80'/>
+<use x='12.61938' y='3.487' xlink:href='#eq1-g1-105'/>
+<use x='15.502519' y='3.487' xlink:href='#eq1-g1-59'/>
+<use x='17.854843' y='3.487' xlink:href='#eq1-g1-106'/>
+<use x='24.229498' y='0' xlink:href='#eq1-g2-65'/>
+<use x='33.004844' y='1.793263' xlink:href='#eq1-g1-105'/>
+<use x='35.887984' y='1.793263' xlink:href='#eq1-g1-106'/>
+<rect x='40.270141' y='-10.082111' height='.478187' width='16.158248'/>
+<use x='40.270141' y='0' xlink:href='#eq1-g2-66'/>
+<use x='49.163104' y='1.793263' xlink:href='#eq1-g1-105'/>
+<use x='52.046244' y='1.793263' xlink:href='#eq1-g1-106'/>
+</g>
+</svg>, consistently with <a href="namespace_rodin_1_1_math.html#af28a31fe86620d25a67338df85ad4cb0" class="m-doc">dot</a>. Eigen expressions and views retain their Eigen types; use <a href="namespace_rodin_1_1_math.html#af28a31fe86620d25a67338df85ad4cb0" class="m-doc">dot</a> to contract those with this convention.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-8869a4936c9f.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

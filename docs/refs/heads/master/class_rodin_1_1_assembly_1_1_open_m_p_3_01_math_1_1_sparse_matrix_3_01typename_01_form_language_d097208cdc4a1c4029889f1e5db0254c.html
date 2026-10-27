@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Assembly::OpenMP&lt;Math::SparseMatrix&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, Math::SparseMatrix&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,18 +71,21 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>OpenMP&lt;Math::SparseMatrix&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, Math::SparseMatrix&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>OpenMP assembly of the Math::SparseMatrix associated to a BilinearFormBase object.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_assembly.html">Assembly</a></div><h1>OpenMP <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">OpenMP assembly of the Math::SparseMatrix associated to a BilinearFormBase object.</p><p class="rodin-reference-include">Defined in <a href="_assembly_2_open_m_p_8h.html"><code>Rodin/Assembly/OpenMP.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Solution</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TrialFES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TestFES</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_math_1_1_sparse_matrix_3_01typename_01_form_language_d097208cdc4a1c4029889f1e5db0254c.html#a14b2249366e25fb8b04d56fdde20690d"><span class="nc">OpenMP</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f"><span class="nc">SparseMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_dot.html"><span class="nc">Dot</span></a><span class="o">&lt;</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">TrialFES</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">TestFES</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">Type</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_bilinear_form.html"><span class="nc">BilinearForm</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Solution</span><span class="p">,</span><span class="w"> </span><span class="n">TrialFES</span><span class="p">,</span><span class="w"> </span><span class="n">TestFES</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f"><span class="nc">SparseMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_dot.html"><span class="nc">Dot</span></a><span class="o">&lt;</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">TrialFES</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">TestFES</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">Type</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_assembly_1_1_open_m_p.html">OpenMP</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>LinearAlgebraType</code></td><td><code>Math::SparseMatrix&lt; typename FormLanguage::Dot&lt; typename FormLanguage::Traits&lt; TrialFES &gt;::ScalarType, typename FormLanguage::Traits&lt; TestFES &gt;::ScalarType &gt;::Type &gt;</code></td></tr><tr><td><code>Operand</code></td><td><code>Variational::BilinearForm&lt; Solution, TrialFES, TestFES, Math::SparseMatrix&lt; typename FormLanguage::Dot&lt; typename FormLanguage::Traits&lt; TrialFES &gt;::ScalarType, typename FormLanguage::Traits&lt; TestFES &gt;::ScalarType &gt;::Type &gt; &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -93,33 +93,25 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Operand&gt;</div>
-              class <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;Math::SparseMatrix&lt;FormLanguage::Dot&lt;FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, Math::SparseMatrix&lt;FormLanguage::Dot&lt;FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Base class template for assembly operations.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" title="AssemblyBase&lt; Math::SparseMatrix&lt; FormLanguage::Dot&lt; FormLanguage::Traits&lt; TrialFES &gt;::ScalarType, FormLanguage::Traits&lt; TestFES &gt;::ScalarType &gt;::Type &gt;, Variational::BilinearForm&lt; Solution, TrialFES, TestFES, Math::SparseMatrix&lt; FormLanguage::Dot&lt; FormLanguage::Traits&lt; TrialFES &gt;::ScalarType, FormLanguage::Traits&lt; TestFES &gt;::ScalarType &gt;::Type &gt; &gt; &gt;">AssemblyBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">OpenMP</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_assembly_base.html"><code>AssemblyBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_assembly_1_1_assembly_base.html"><span class="nc">AssemblyBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f"><span class="nc">SparseMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_dot.html"><span class="nc">Dot</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">TrialFES</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="p">,</span><span class="w"> </span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">TestFES</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">Type</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_bilinear_form.html"><span class="nc">BilinearForm</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Solution</span><span class="p">,</span><span class="w"> </span><span class="n">TrialFES</span><span class="p">,</span><span class="w"> </span><span class="n">TestFES</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f"><span class="nc">SparseMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_dot.html"><span class="nc">Dot</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">TrialFES</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="p">,</span><span class="w"> </span><span class="n">FormLanguage</span><span class="o">::</span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">TestFES</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;::</span><span class="nc">Type</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class template for assembly operations.</td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="abfb0f9c041b41e1c71231f8bab5e3bfc">
-              using <a href="#abfb0f9c041b41e1c71231f8bab5e3bfc" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_dot.html" class="m-doc">FormLanguage::<wbr />Dot</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType, typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;::Type
+            <dt id="ac70c8bc131b57907dd419f7a31b7ffb7">
+              using <a href="#ac70c8bc131b57907dd419f7a31b7ffb7" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_dot.html" class="m-doc">FormLanguage::<wbr />Dot</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType, typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;::Type
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="ab63ab6eaeaaa03f9e1f192bccb16d69e">
-              using <a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;<a href="#abfb0f9c041b41e1c71231f8bab5e3bfc" class="m-doc">ScalarType</a>&gt;
+              using <a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;<a href="#ac70c8bc131b57907dd419f7a31b7ffb7" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Assembled operator type.</dd>
-            <dt id="a2585442b962060e46edfeb15e5aac87a">
-              using <a href="#a2585442b962060e46edfeb15e5aac87a" class="m-doc-self">BilinearFormType</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Variational::<wbr />BilinearForm</a>&lt;Solution, TrialFES, TestFES, <a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>&gt;
+            <dt id="a38ea75cf139a7dbee6dda5dae059c052">
+              using <a href="#a38ea75cf139a7dbee6dda5dae059c052" class="m-doc-self">BilinearFormType</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Variational::<wbr />BilinearForm</a>&lt;Solution, TrialFES, TestFES, <a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>&gt;
             </dt>
             <dd>Bilinear form type assembled by this backend.</dd>
             <dt id="aac3bcbd70e6befccb25e723b6e3217af">
-              using <a href="#aac3bcbd70e6befccb25e723b6e3217af" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>&lt;<a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>, <a href="#a2585442b962060e46edfeb15e5aac87a" class="m-doc">BilinearFormType</a>&gt;
+              using <a href="#aac3bcbd70e6befccb25e723b6e3217af" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>&lt;<a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>, <a href="#a38ea75cf139a7dbee6dda5dae059c052" class="m-doc">BilinearFormType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
             <dt id="a0619bd014adbfe7e508b058eefb69dab">
@@ -139,12 +131,12 @@
               <span class="m-doc-wrap-bumper"><a href="#a5c027fae62271a225830a7713e7ff28d" class="m-doc">OpenMP</a>(</span><span class="m-doc-wrap">size_t threadCount)</span>
             </dt>
             <dd>Constructs an assembler with an explicit thread count.</dd>
-            <dt id="ae9ff110dd307a2e8d181728439fc88b0">
-              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="ab629819992d852fd6c2647d00eee90e6">
-              <span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -152,9 +144,17 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ad7224a3ca1dc16a2d63578186884071a">
-              <span class="m-doc-wrap-bumper">void <a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>&amp; res,
-              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5f52a37163732c13494178b8763800a3" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; other) -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Assigns the assembly policy and working storage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adf4cf036bb15e279216362eb78dc9b36" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp;&amp; other) -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Moves the assembly policy and working storage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aeb81393ec88e7868b493a38f839840f6" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Executes the assembly and returns the linear operator associated to the bilinear form.</dd>
             <dt>
@@ -175,10 +175,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a5c027fae62271a225830a7713e7ff28d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;&gt;&lt;Solution, TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c027fae62271a225830a7713e7ff28d" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">size_t threadCount)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c027fae62271a225830a7713e7ff28d" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">size_t threadCount)</span></span>
             </h3>
             <p>Constructs an assembler with an explicit thread count.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -193,12 +191,117 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ae9ff110dd307a2e8d181728439fc88b0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab629819992d852fd6c2647d00eee90e6"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5f52a37163732c13494178b8763800a3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f52a37163732c13494178b8763800a3" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Assigns the assembly policy and working storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source assembler.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this assembler.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adf4cf036bb15e279216362eb78dc9b36"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf4cf036bb15e279216362eb78dc9b36" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Moves the assembly policy and working storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source assembler.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this assembler.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aeb81393ec88e7868b493a38f839840f6"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb81393ec88e7868b493a38f839840f6" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Executes the assembly and returns the linear operator associated to the bilinear form.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">res</td>
+                  <td>Storage for the assembled operator.</td>
+                </tr>
+                <tr>
+                  <td>input</td>
+                  <td>Input data.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a2c80d9cf01a06038bc42cf79d1af63df"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;&gt;&lt;Solution, TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc-self">getThreadCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc-self">getThreadCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the effective thread count.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -212,10 +315,8 @@
           </div></section>
           <section class="m-doc-details" id="a055edffa61ed185af6a148b38f82144f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;&gt;&lt;Solution, TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a055edffa61ed185af6a148b38f82144f" class="m-doc-self">setThreadCount</a>(</span><span class="m-doc-wrap">size_t threadCount) <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a055edffa61ed185af6a148b38f82144f" class="m-doc-self">setThreadCount</a>(</span><span class="m-doc-wrap">size_t threadCount) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Sets the thread count.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -238,10 +339,8 @@
           </div></section>
           <section class="m-doc-details" id="a1d27227915eb0acdf4017085fbc61244"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;&gt;&lt;Solution, TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -292,13 +391,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

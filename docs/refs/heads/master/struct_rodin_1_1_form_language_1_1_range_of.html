@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::FormLanguage::RangeOf struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,62 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_traits_8h.html">&lt;Rodin/Variational/Traits.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class MatrixXpr&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a>::<wbr/></span>RangeOf <span class="m-thin">struct</span>
-        </h1>
-        <p>Type trait to deduce the mathematical range type of an expression.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a></div><h1>RangeOf</h1><p class="rodin-reference-brief">Type trait to deduce the mathematical range type of an expression.</p><p class="rodin-reference-include">Defined in <a href="_variational_2_traits_8h.html"><code>Rodin/Variational/Traits.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">MatrixXpr</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">RangeOf</span><span class="p">;</span>
+</pre><section id="rodin-specializations"><h2><a href="#rodin-specializations">Specializations</a></h2><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_boolean_01_4.html"><code>Boolean</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">RangeOf</span><span class="o">&lt;</span>
+<span class="w">  </span><a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba"><span class="nc">Boolean</span></a><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>Range type for Boolean values.</td></tr><tr><td><a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_complex_01_4.html"><code>Complex</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">RangeOf</span><span class="o">&lt;</span>
+<span class="w">  </span><a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c"><span class="nc">Complex</span></a><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>Range type for Complex values.</td></tr><tr><td><a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_eigen_1_1_matrix_3_01_scalar_00_01_rows_00_011_02623a597dc3a0022393643b8b041765.html"><code>Eigen::Matrix&lt;Scalar, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">Rows</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="nc">Options</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">MaxRows</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">MaxCols</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">RangeOf</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Eigen</span><span class="o">::</span><span class="nc">Matrix</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><span class="n">Rows</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nc">Options</span><span class="p">,</span><span class="w"> </span><span class="n">MaxRows</span><span class="p">,</span><span class="w"> </span><span class="n">MaxCols</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Range type for Eigen column vectors.</td></tr><tr><td><a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_eigen_1_1_matrix_3_01_scalar_00_01_rows_00_01_cf9d8867b63003b19b94e35f02c798bd7.html"><code>Eigen::Matrix&lt;Scalar, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">Rows</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">Cols</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="nc">Options</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">MaxRows</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">MaxCols</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">RangeOf</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Eigen</span><span class="o">::</span><span class="nc">Matrix</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><span class="n">Rows</span><span class="p">,</span><span class="w"> </span><span class="n">Cols</span><span class="p">,</span><span class="w"> </span><span class="nc">Options</span><span class="p">,</span><span class="w"> </span><span class="n">MaxRows</span><span class="p">,</span><span class="w"> </span><span class="n">MaxCols</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Range type for Eigen matrices.</td></tr><tr><td><a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_integer_01_4.html"><code>Integer</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">RangeOf</span><span class="o">&lt;</span>
+<span class="w">  </span><a href="namespace_rodin.html#a1dc165bbe1d2390cd0a21524320cd3eb"><span class="nc">Integer</span></a><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>Range type for Integer values.</td></tr><tr><td><a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4.html"><code>Math::SpatialMatrix&lt;Scalar&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">RangeOf</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_matrix.html"><span class="nc">SpatialMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Range type deduced for Math::SpatialMatrix.</td></tr><tr><td><a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_math_1_1_spatial_tensor_3_01_scalar_00_01_rank_01_4_01_4.html"><code>Math::SpatialTensor&lt;Scalar, Rank&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="nc">Rank</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">RangeOf</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_tensor.html"><span class="nc">SpatialTensor</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><span class="nc">Rank</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Range type for FunctionBase.</td></tr><tr><td><a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html"><code>Math::SpatialVector&lt;Scalar&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">RangeOf</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Range type deduced for Math::SpatialVector.</td></tr><tr><td><a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_real_01_4.html"><code>Real</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">RangeOf</span><span class="o">&lt;</span>
+<span class="w">  </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>Range type for Real values.</td></tr><tr><td><a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_variational_1_1_function_base_3_01_derived_01_4_01_4.html"><code>Variational::FunctionBase&lt;Derived&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><a href="struct_rodin_1_1_form_language_1_1_range_of.html"><span class="nc">RangeOf</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_function_base.html"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Derived</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Type traits for the matrix or tensor expression specialization.</td></tr><tr><td><a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_variational_1_1_shape_function_base_3_01_derive3809fe9cae3a47d32df2a10b6ad6ada2.html"><code>Variational::ShapeFunctionBase&lt;Derived, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4"><span class="nc">ShapeFunctionSpaceType</span></a><span class="w"> </span><span class="nc">Space</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><a href="struct_rodin_1_1_form_language_1_1_range_of.html"><span class="nc">RangeOf</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Derived</span><span class="p">,</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="nc">Space</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Range type for ShapeFunctionBase.</td></tr></tbody></table></section>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -106,8 +153,8 @@
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="a84841cff383a13316f2542c9dd61dcf6">
-              using <a href="#a84841cff383a13316f2542c9dd61dcf6" class="m-doc-self">Type</a> = std::conditional_t&lt;MatrixXpr::IsVectorAtCompileTime, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;typename MatrixXpr::Scalar&gt;, std::conditional_t&lt;MatrixXpr::ColsAtCompileTime==1, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;typename MatrixXpr::Scalar&gt;, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;typename MatrixXpr::Scalar&gt;&gt;&gt;
+            <dt id="aaa40977f40815e81d6ae0d68b3ec88e6">
+              using <a href="#aaa40977f40815e81d6ae0d68b3ec88e6" class="m-doc-self">Type</a> = std::conditional_t&lt;MatrixXpr::IsVectorAtCompileTime, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;typename MatrixXpr::Scalar&gt;, std::conditional_t&lt;MatrixXpr::ColsAtCompileTime==1, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;typename MatrixXpr::Scalar&gt;, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;typename MatrixXpr::Scalar&gt;&gt;&gt;
             </dt>
             <dd>Deduced result type.</dd>
           </dl>
@@ -150,13 +197,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

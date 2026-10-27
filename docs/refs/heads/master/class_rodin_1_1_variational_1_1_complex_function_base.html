@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::ComplexFunctionBase class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,10 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_complex_function_8h.html">&lt;Rodin/Variational/ComplexFunction.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Derived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ComplexFunctionBase <span class="m-thin">class</span>
-        </h1>
-        <p>Base class for complex-valued scalar functions.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>ComplexFunctionBase</h1><p class="rodin-reference-brief">Base class for complex-valued scalar functions.</p><p class="rodin-reference-include">Defined in <a href="_complex_function_8h.html"><code>Rodin/Variational/ComplexFunction.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_complex_function_base.html#aafea6f6a222b070832d46a34edf6e1bb"><span class="nc">ComplexFunctionBase</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -97,7 +92,7 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -110,8 +105,8 @@
 $ f: \Omega \to \mathbb{C} $
 </title>
 <defs>
-<path id='eq1-g0-67' d='M7.854545-8.021918C7.854545-8.225156 7.854545-8.416438 7.651308-8.416438C7.639352-8.416438 7.460025-8.416438 7.436115-8.201245C7.400249-7.866501 7.12528-7.866501 7.041594-7.866501C6.623163-7.866501 6.204732-8.045828 5.965629-8.153425C5.355915-8.416438 4.841843-8.416438 4.65056-8.416438C2.654047-8.416438 .442341-7.161146 .442341-4.100623C.442341-1.052055 2.606227 .227148 4.674471 .227148C5.308095 .227148 6.156912 .095641 7.029639-.430386C7.579577-.777086 8.18929-1.374844 8.18929-1.542217S8.009963-1.78132 7.938232-1.78132C7.854545-1.78132 7.806725-1.745455 7.687173-1.613948C6.993773-.824907 5.929763-.3467 4.865753-.3467C3.012702-.3467 2.546451-2.223661 2.546451-4.076712C2.546451-6.43188 3.407223-7.998007 4.686426-7.998007C5.583064-7.998007 7.017684-7.12528 7.424159-5.858032C7.460025-5.750436 7.49589-5.630884 7.651308-5.630884C7.854545-5.630884 7.854545-5.822167 7.854545-6.025405V-8.021918ZM7.436115-6.790535C7.292653-6.993773 7.137235-7.149191 6.838356-7.460025C6.898132-7.44807 6.993773-7.44807 7.053549-7.44807C7.185056-7.44807 7.340473-7.47198 7.436115-7.531756V-6.790535ZM3.19203-7.723039C2.917061-7.44807 2.12802-6.419925 2.12802-4.076712C2.12802-2.893151 2.307347-1.243337 3.383313-.382565C1.422665-1.016189 .860772-2.630137 .860772-4.088667C.860772-6.288418 2.068244-7.352428 3.19203-7.734994V-7.723039Z'/>
 <path id='eq1-g1-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
+<path id='eq1-g0-67' d='M7.854545-8.021918C7.854545-8.225156 7.854545-8.416438 7.651308-8.416438C7.639352-8.416438 7.460025-8.416438 7.436115-8.201245C7.400249-7.866501 7.12528-7.866501 7.041594-7.866501C6.623163-7.866501 6.204732-8.045828 5.965629-8.153425C5.355915-8.416438 4.841843-8.416438 4.65056-8.416438C2.654047-8.416438 .442341-7.161146 .442341-4.100623C.442341-1.052055 2.606227 .227148 4.674471 .227148C5.308095 .227148 6.156912 .095641 7.029639-.430386C7.579577-.777086 8.18929-1.374844 8.18929-1.542217S8.009963-1.78132 7.938232-1.78132C7.854545-1.78132 7.806725-1.745455 7.687173-1.613948C6.993773-.824907 5.929763-.3467 4.865753-.3467C3.012702-.3467 2.546451-2.223661 2.546451-4.076712C2.546451-6.43188 3.407223-7.998007 4.686426-7.998007C5.583064-7.998007 7.017684-7.12528 7.424159-5.858032C7.460025-5.750436 7.49589-5.630884 7.651308-5.630884C7.854545-5.630884 7.854545-5.822167 7.854545-6.025405V-8.021918ZM7.436115-6.790535C7.292653-6.993773 7.137235-7.149191 6.838356-7.460025C6.898132-7.44807 6.993773-7.44807 7.053549-7.44807C7.185056-7.44807 7.340473-7.47198 7.436115-7.531756V-6.790535ZM3.19203-7.723039C2.917061-7.44807 2.12802-6.419925 2.12802-4.076712C2.12802-2.893151 2.307347-1.243337 3.383313-.382565C1.422665-1.016189 .860772-2.630137 .860772-4.088667C.860772-6.288418 2.068244-7.352428 3.19203-7.734994V-7.723039Z'/>
 <path id='eq1-g3-10' d='M7.914321-1.865006H7.651308C7.591532-1.554172 7.531756-1.243337 7.436115-.992279C7.376339-.800996 7.340473-.705355 6.647073-.705355H5.702615C5.846077-1.374844 6.192777-1.948692 6.682939-2.689913C7.244832-3.56264 7.79477-4.435367 7.79477-5.427646C7.79477-7.07746 6.216687-8.416438 4.220174-8.416438C2.211706-8.416438 .645579-7.065504 .645579-5.427646C.645579-4.447323 1.183562-3.58655 1.745455-2.713823C2.247572-1.936737 2.606227-1.374844 2.737733-.705355H1.793275C1.099875-.705355 1.06401-.800996 1.004234-.980324C.908593-1.231382 .848817-1.578082 .789041-1.865006H.526027L.908593 0H2.761644C3.024658 0 3.048568 0 3.048568-.215193C3.048568-1.06401 2.666002-2.10411 2.426899-2.713823C2.080199-3.658281 1.75741-4.531009 1.75741-5.439601C1.75741-7.280697 3.036613-8.177335 4.220174-8.177335S6.682939-7.280697 6.682939-5.439601C6.682939-4.531009 6.348194-3.634371 6.01345-2.749689C5.810212-2.175841 5.391781-1.075965 5.391781-.227148C5.391781 0 5.427646 0 5.69066 0H7.531756L7.914321-1.865006Z'/>
 <path id='eq1-g3-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
 <path id='eq1-g2-102' d='M5.332005-4.805978C5.571108-4.805978 5.66675-4.805978 5.66675-5.033126C5.66675-5.152677 5.571108-5.152677 5.355915-5.152677H4.387547C4.614695-6.38406 4.782067-7.232877 4.877709-7.615442C4.94944-7.902366 5.200498-8.177335 5.511333-8.177335C5.762391-8.177335 6.01345-8.069738 6.133001-7.962142C5.66675-7.914321 5.523288-7.567621 5.523288-7.364384C5.523288-7.12528 5.702615-6.981818 5.929763-6.981818C6.168867-6.981818 6.527522-7.185056 6.527522-7.639352C6.527522-8.141469 6.025405-8.416438 5.499377-8.416438C4.985305-8.416438 4.483188-8.033873 4.244085-7.567621C4.028892-7.149191 3.90934-6.718804 3.634371-5.152677H2.833375C2.606227-5.152677 2.486675-5.152677 2.486675-4.937484C2.486675-4.805978 2.558406-4.805978 2.797509-4.805978H3.56264C3.347447-3.694147 2.857285-.992279 2.582316 .286924C2.379078 1.327024 2.199751 2.199751 1.601993 2.199751C1.566127 2.199751 1.219427 2.199751 1.004234 1.972603C1.613948 1.924782 1.613948 1.398755 1.613948 1.3868C1.613948 1.147696 1.43462 1.004234 1.207472 1.004234C.968369 1.004234 .609714 1.207472 .609714 1.661768C.609714 2.175841 1.135741 2.438854 1.601993 2.438854C2.82142 2.438854 3.323537 .251059 3.455044-.3467C3.670237-1.267248 4.25604-4.447323 4.315816-4.805978H5.332005Z'/>
@@ -134,16 +129,8 @@ $ \mathbb{C} $
 <use x='0' y='0' xlink:href='#eq2-g0-67'/>
 </g>
 </svg> denotes the field of complex numbers. Complex functions can be:</p><ul><li>Constructed from real and imaginary parts</li><li>Decomposed using Re() and Im() operations</li><li>Conjugated using Conjugate() operation</li></ul><aside class="m-note m-default"><h4>See also</h4><p>ComplexFunction, Re, Im, Conjugate</p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase&lt;Complex, ComplexFunctionBase&lt;Derived&gt;&gt;</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" title="ScalarFunctionBase&lt; Complex, ComplexFunctionBase&lt; Derived &gt; &gt;">ScalarFunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">ComplexFunctionBase</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html"><code>ScalarFunctionBase&lt;Complex, …&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#ad956ed4aec7d6dae5a657386701aecd1"><span class="nc">ScalarFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c"><span class="nc">Complex</span></a><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_complex_function_base.html#aafea6f6a222b070832d46a34edf6e1bb"><span class="nc">ComplexFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Derived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for scalar-valued functions with templated scalar type.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_complex_function_base.html#a0129b30567b4f5f5913dcb007b84b933"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#aac1e0e8d7fa21bb245a7ea2908036eb7">ScalarFunctionBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>8 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html"><code>ScalarFunctionBase</code></a></td><td><details><summary>7 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a7c866cf8be951c464aceeb788579b29a"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a15eb99a5cecce266b59c5e7c1a9b2f4d"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#ad7584a02ad39a4e93816d166a02c170c"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#afd564b09b05a55499d7576b85f69a01e"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a44ff9fe9f91406694a76cb99d4d2338f"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#aba5919eddb1f90f8ca65bbd25d065d60"><code>traceOf()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -151,8 +138,8 @@ $ \mathbb{C} $
               using <a href="#ad4dd159248d6cf0910ba183bcaa6aa2f" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>
             </dt>
             <dd>Scalar value type.</dd>
-            <dt id="abda9dc179f35f1a22f4cdfda38102820">
-              using <a href="#abda9dc179f35f1a22f4cdfda38102820" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;<a href="#ad4dd159248d6cf0910ba183bcaa6aa2f" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>&lt;Derived&gt;&gt;
+            <dt id="ac13f20520ddbb1535fa03b30b8476de0">
+              using <a href="#ac13f20520ddbb1535fa03b30b8476de0" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#ad956ed4aec7d6dae5a657386701aecd1" class="m-doc">ScalarFunctionBase</a>&lt;<a href="#ad4dd159248d6cf0910ba183bcaa6aa2f" class="m-doc">ScalarType</a>, <a href="#aafea6f6a222b070832d46a34edf6e1bb" class="m-doc">ComplexFunctionBase</a>&lt;Derived&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -164,12 +151,12 @@ $ \mathbb{C} $
               <span class="m-doc-wrap-bumper"><a href="#aafea6f6a222b070832d46a34edf6e1bb" class="m-doc-self">ComplexFunctionBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Default constructor.</dd>
-            <dt id="a6f91e11e90f89d20f140b6d0afc597a0">
-              <span class="m-doc-wrap-bumper"><a href="#a6f91e11e90f89d20f140b6d0afc597a0" class="m-doc-self">ComplexFunctionBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a6f91e11e90f89d20f140b6d0afc597a0" class="m-doc">ComplexFunctionBase</a>(</span><span class="m-doc-wrap">const ComplexFunctionBase&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="ae2a63faf4ef0b553611ea4fc0ad17d32">
-              <span class="m-doc-wrap-bumper"><a href="#ae2a63faf4ef0b553611ea4fc0ad17d32" class="m-doc-self">ComplexFunctionBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae2a63faf4ef0b553611ea4fc0ad17d32" class="m-doc">ComplexFunctionBase</a>(</span><span class="m-doc-wrap">ComplexFunctionBase&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
             <dt id="a684615d78cf91cb3fe1b240b1a47436c">
@@ -181,32 +168,138 @@ $ \mathbb{C} $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="af5f065ebe0b3b1c58b0c2402a50fc9e3">
-              <span class="m-doc-wrap-bumper">auto <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the complex function at a geometry point.</dd>
-            <dt id="aa249459e67c36e2343e940d08970970a">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa249459e67c36e2343e940d08970970a" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the complex function at an integration point.</dd>
-            <dt id="a943384230ba4ced03cc801fcda4cff6a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a943384230ba4ced03cc801fcda4cff6a" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a943384230ba4ced03cc801fcda4cff6a" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an optional polynomial order bound.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0129b30567b4f5f5913dcb007b84b933" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0129b30567b4f5f5913dcb007b84b933" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#aafea6f6a222b070832d46a34edf6e1bb" class="m-doc">ComplexFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of the function.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a6f91e11e90f89d20f140b6d0afc597a0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f91e11e90f89d20f140b6d0afc597a0" class="m-doc-self">ComplexFunctionBase</a>(</span><span class="m-doc-wrap">const ComplexFunctionBase&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae2a63faf4ef0b553611ea4fc0ad17d32"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae2a63faf4ef0b553611ea4fc0ad17d32" class="m-doc-self">ComplexFunctionBase</a>(</span><span class="m-doc-wrap">ComplexFunctionBase&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af5f065ebe0b3b1c58b0c2402a50fc9e3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the complex function at a geometry point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa249459e67c36e2343e940d08970970a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the complex function at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a943384230ba4ced03cc801fcda4cff6a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a943384230ba4ced03cc801fcda4cff6a" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns an optional polynomial order bound.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">poly</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a0129b30567b4f5f5913dcb007b84b933"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>* Rodin::<wbr />Variational::<wbr />ComplexFunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0129b30567b4f5f5913dcb007b84b933" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aafea6f6a222b070832d46a34edf6e1bb" class="m-doc">ComplexFunctionBase</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0129b30567b4f5f5913dcb007b84b933" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of the function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -258,13 +351,20 @@ $ \mathbb{C} $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

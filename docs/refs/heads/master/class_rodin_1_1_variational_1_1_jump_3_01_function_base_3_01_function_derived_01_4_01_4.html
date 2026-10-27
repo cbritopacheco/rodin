@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,21 +71,20 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_jump_8h.html">&lt;Rodin/Variational/Jump.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Jump of a FunctionBase instance across an interface.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Jump <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Jump of a FunctionBase instance across an interface.</p><p class="rodin-reference-include">Defined in <a href="_jump_8h.html"><code>Rodin/Variational/Jump.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FunctionDerived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_jump_3_01_function_base_3_01_function_derived_01_4_01_4.html#a1ed2f2b035ce4b6c731b8ff7bbba4f92"><span class="nc">Jump</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FunctionDerived</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_jump.html">Jump</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Operand</code></td><td><code>FunctionBase&lt; FunctionDerived &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md420">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md421">Usage Example</a></li>
+            <li><a href="#autotoc_md449">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md450">Usage Example</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -98,8 +94,7 @@
         </nav>
 <p>The Jump operator computes the jump (discontinuity) in a function&#x27;s value across an interface (face) between two adjacent elements:</p><div class="m-math"><svg style="width: 7.608em; height: 1.327em;" viewBox="157.503296 -12.740295 73.038248 12.740295">
 <title>
-\[
-  [\![u]\!] = u^+ - u^-
+\[       [\![u]\!] = u^+ - u^-
 \]
 </title>
 <defs>
@@ -148,7 +143,7 @@ $ u^- $
 <use x='0' y='0' xlink:href='#eq3-g1-117'/>
 <use x='6.66244' y='-4.338437' xlink:href='#eq3-g0-0'/>
 </g>
-</svg> denote the values from the two sides of the interface (with a chosen orientation).</p><section id="autotoc_md420"><h3><a href="#autotoc_md420">Mathematical Foundation</a></h3><p>In Discontinuous Galerkin (DG) methods, functions are allowed to be discontinuous across element interfaces. The jump operator captures this discontinuity and is used in:</p><ul><li><strong>Interior Penalty terms</strong>: <svg class="m-math" style="width: 7.217em; height: 1.582em; vertical-align: -0.581em;" viewBox="0 -9.630618 69.285604 15.18763">
+</svg> denote the values from the two sides of the interface (with a chosen orientation).</p><section id="autotoc_md449"><h2><a href="#autotoc_md449">Mathematical Foundation</a></h2><p>In Discontinuous Galerkin (DG) methods, functions are allowed to be discontinuous across element interfaces. The jump operator captures this discontinuity and is used in:</p><ul><li><strong>Interior Penalty terms</strong>: <svg class="m-math" style="width: 7.217em; height: 1.582em; vertical-align: -0.581em;" viewBox="0 -9.630618 69.285604 15.18763">
 <title>
 $ \int_{\Gamma_h} [\![u]\!] \cdot [\![v]\!] \, ds $
 </title>
@@ -270,27 +265,19 @@ $ \Gamma_h $
 <use x='0' y='0' xlink:href='#eq7-g1-0'/>
 <use x='7.314174' y='1.793263' xlink:href='#eq7-g0-104'/>
 </g>
-</svg> denotes the set of interior faces.</p></section><section id="autotoc_md421"><h3><a href="#autotoc_md421">Usage Example</a></h3><pre class="m-code"><span class="c1">// Evaluate jump of a function on an interface</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">jump_u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a></p></aside></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Base class for function objects which can be evaluated over a mesh.</dd>
-          </dl>
-        </section>
+</svg> denotes the set of interior faces.</p></section><section id="autotoc_md450"><h2><a href="#autotoc_md450">Usage Example</a></h2><pre class="m-code"><span class="c1">// Evaluate jump of a function on an interface</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">jump_u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a></p></aside></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_function_base.html" title="FunctionBase&lt; Jump&lt; FunctionBase&lt; FunctionDerived &gt; &gt; &gt;">FunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Jump</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_jump_3_01_function_base_3_01_function_derived_01_4_01_4.html#a1ed2f2b035ce4b6c731b8ff7bbba4f92"><span class="nc">Jump</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FunctionDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for function objects which can be evaluated over a mesh.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_jump_3_01_function_base_3_01_function_derived_01_4_01_4.html#a959056b7544a77015a9059227c19f33b"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_function_base.html#ad29a755240e4c6938395b937a1c4a132">FunctionBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>9 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#aa75b0ee8f7f82337ebf0b88abfa91b18"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="ad21ec0105a62c182ed6e5e1d8f7c6817">
-              using <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;
+              using <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;
             </dt>
             <dd>Type of the operand function.</dd>
-            <dt id="a242f51960048cbf05116be7a435b6a13">
-              using <a href="#a242f51960048cbf05116be7a435b6a13" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&gt;
+            <dt id="af481ed4de11f5d3ece20f89ff54f063c">
+              using <a href="#af481ed4de11f5d3ece20f89ff54f063c" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;<a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc">Jump</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -303,11 +290,11 @@ $ \Gamma_h $
             </dt>
             <dd>Constructs a jump operator for the given function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a5293ff47ee54e64cffae9e91abcaa531" class="m-doc">Jump</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5293ff47ee54e64cffae9e91abcaa531" class="m-doc">Jump</a>(</span><span class="m-doc-wrap">const Jump&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac55433d8d1237b1238d48f4a76489317" class="m-doc">Jump</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ac55433d8d1237b1238d48f4a76489317" class="m-doc">Jump</a>(</span><span class="m-doc-wrap">Jump&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -323,28 +310,57 @@ $ \Gamma_h $
               <span class="m-doc-wrap-bumper">auto <a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto</span>
             </dt>
             <dd>Evaluates the jump at a point on an interface.</dd>
-            <dt id="ab7bb9b63358cd9e481d0f8b135298bb0">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7bb9b63358cd9e481d0f8b135298bb0" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7bb9b63358cd9e481d0f8b135298bb0" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto</span>
             </dt>
             <dd>Evaluates the expression at an integration point.</dd>
-            <dt id="a9fa1cc25cfbf42375a55404252133298">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a959056b7544a77015a9059227c19f33b" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a959056b7544a77015a9059227c19f33b" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc">Jump</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a copy of this jump operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2711ef05da0101f8739c0f9d4ca71222" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) -&gt; <a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc">Jump</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Sets a single attribute as the trace domain.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a747b5f9827f6fd4f1c27bf4925bf69b3" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
+              const A2&amp; a2,
+              const As&amp;... as) -&gt; <a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc">Jump</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Sets multiple attributes as the trace domain.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7deb2610f0b42847609ebc6d4e600461" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) -&gt; <a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc">Jump</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Sets a set of attributes as the trace domain.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the function on a Point belonging to the mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15eb99a5cecce266b59c5e7c1a9b2f4d" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the function at an integration point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad7584a02ad39a4e93816d166a02c170c" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; auto</span>
+            </dt>
+            <dd>Extracts the i-th component of the function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afd564b09b05a55499d7576b85f69a01e" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j) const -&gt; auto</span>
+            </dt>
+            <dd>Extracts the (i,j)-th component of a matrix function.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a1ed2f2b035ce4b6c731b8ff7bbba4f92"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap">const <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap">const <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a jump operator for the given function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -361,10 +377,8 @@ $ \Gamma_h $
           </div></section>
           <section class="m-doc-details" id="a5293ff47ee54e64cffae9e91abcaa531"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5293ff47ee54e64cffae9e91abcaa531" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5293ff47ee54e64cffae9e91abcaa531" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap">const Jump&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -381,10 +395,8 @@ $ \Gamma_h $
           </div></section>
           <section class="m-doc-details" id="ac55433d8d1237b1238d48f4a76489317"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac55433d8d1237b1238d48f4a76489317" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac55433d8d1237b1238d48f4a76489317" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap">Jump&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -401,10 +413,8 @@ $ \Gamma_h $
           </div></section>
           <section class="m-doc-details" id="a1ab30419cd40172cfa127ab16519cd8a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ab30419cd40172cfa127ab16519cd8a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ab30419cd40172cfa127ab16519cd8a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the operand function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -418,10 +428,8 @@ $ \Gamma_h $
           </div></section>
           <section class="m-doc-details" id="aa99abe0e3bf589a8b7e1d9e7c7f6bea9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Evaluates the jump at a point on an interface.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -444,9 +452,9 @@ $ u^+(p) - u^-(p) $
 <defs>
 <path id='eq8-g0-0' d='M5.571108-1.809215C5.69863-1.809215 5.873973-1.809215 5.873973-1.992528S5.69863-2.175841 5.571108-2.175841H1.004234C.876712-2.175841 .70137-2.175841 .70137-1.992528S.876712-1.809215 1.004234-1.809215H5.571108Z'/>
 <path id='eq8-g1-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
-<path id='eq8-g3-43' d='M3.474969-1.809215H5.818182C5.929763-1.809215 6.105106-1.809215 6.105106-1.992528S5.929763-2.175841 5.818182-2.175841H3.474969V-4.527024C3.474969-4.638605 3.474969-4.813948 3.291656-4.813948S3.108344-4.638605 3.108344-4.527024V-2.175841H.757161C.645579-2.175841 .470237-2.175841 .470237-1.992528S.645579-1.809215 .757161-1.809215H3.108344V.541968C3.108344 .653549 3.108344 .828892 3.291656 .828892S3.474969 .653549 3.474969 .541968V-1.809215Z'/>
 <path id='eq8-g4-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
 <path id='eq8-g4-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq8-g3-43' d='M3.474969-1.809215H5.818182C5.929763-1.809215 6.105106-1.809215 6.105106-1.992528S5.929763-2.175841 5.818182-2.175841H3.474969V-4.527024C3.474969-4.638605 3.474969-4.813948 3.291656-4.813948S3.108344-4.638605 3.108344-4.527024V-2.175841H.757161C.645579-2.175841 .470237-2.175841 .470237-1.992528S.645579-1.809215 .757161-1.809215H3.108344V.541968C3.108344 .653549 3.108344 .828892 3.291656 .828892S3.474969 .653549 3.474969 .541968V-1.809215Z'/>
 <path id='eq8-g2-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
 <path id='eq8-g2-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
 </defs>
@@ -469,12 +477,58 @@ $ u^+(p) - u^-(p) $
             </table>
 <p>The point must be on an interior face with exactly two adjacent elements.</p>
           </div></section>
+          <section class="m-doc-details" id="ab7bb9b63358cd9e481d0f8b135298bb0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7bb9b63358cd9e481d0f8b135298bb0" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
+            </h3>
+            <p>Evaluates the expression at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9fa1cc25cfbf42375a55404252133298"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a959056b7544a77015a9059227c19f33b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class FunctionDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>* Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a959056b7544a77015a9059227c19f33b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc">Jump</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a959056b7544a77015a9059227c19f33b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a copy of this jump operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -485,6 +539,195 @@ $ u^+(p) - u^-(p) $
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a2711ef05da0101f8739c0f9d4ca71222"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc">Jump</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2711ef05da0101f8739c0f9d4ca71222" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets a single attribute as the trace domain.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Mesh attribute defining the trace domain</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Convenience function to call traceOf(FlatSet&lt;int&gt;) with only one attribute. The trace operation restricts function evaluation to the specified boundary or interface regions.</p><aside class="m-note m-default"><h4>See also</h4><p>getTraceDomain()</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a747b5f9827f6fd4f1c27bf4925bf69b3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc">Jump</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a747b5f9827f6fd4f1c27bf4925bf69b3" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
+              const A2&amp; a2,
+              const As&amp;... as) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets multiple attributes as the trace domain.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">a1</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+                <tr>
+                  <td>a2</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+                <tr>
+                  <td>as</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The attributes are collected into the trace domain of the function.</p>
+          </div></section>
+          <section class="m-doc-details" id="a7deb2610f0b42847609ebc6d4e600461"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc">Jump</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7deb2610f0b42847609ebc6d4e600461" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets a set of attributes as the trace domain.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Set of mesh attributes defining the trace domain</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The trace domain specifies regions (typically boundaries or interfaces) where the function should be evaluated via continuous extension from adjacent elements.</p><aside class="m-note m-default"><h4>See also</h4><p>getTraceDomain()</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a7c866cf8be951c464aceeb788579b29a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the function on a Point belonging to the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Point at which to evaluate the function</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Function value at the given point</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This operator provides convenient function call syntax for evaluation. Delegates to the derived class&#x27;s getValue() method via CRTP.</p>
+          </div></section>
+          <section class="m-doc-details" id="a15eb99a5cecce266b59c5e7c1a9b2f4d"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15eb99a5cecce266b59c5e7c1a9b2f4d" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the function at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad7584a02ad39a4e93816d166a02c170c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7584a02ad39a4e93816d166a02c170c" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
+            </h3>
+            <p>Extracts the i-th component of the function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Component index</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Component function object</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>For vector or matrix-valued functions, this returns a scalar function representing the specified component.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="_component_8h.html">Component</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="afd564b09b05a55499d7576b85f69a01e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd564b09b05a55499d7576b85f69a01e" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j) const</span></span>
+            </h3>
+            <p>Extracts the (i,j)-th component of a matrix function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row index</td>
+                </tr>
+                <tr>
+                  <td>j&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Column index</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Component function object</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="_component_8h.html">Component</a></p></aside>
           </div></section>
         </section>
       </div>
@@ -525,13 +768,20 @@ $ u^+(p) - u^-(p) $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

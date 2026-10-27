@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::MMG::Optimizer class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,18 +71,15 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>Optimizer <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_mesh_optimizer_8h.html">&lt;Rodin/MMG/MeshOptimizer.h&gt;</a></div>
-        </h1>
-        <p>Improves mesh quality while preserving characteristic local sizes.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_m_m_g.html">MMG</a></div><h1>Optimizer</h1><p class="rodin-reference-brief">Improves mesh quality while preserving characteristic local sizes.</p><p class="rodin-reference-include">Defined in <a href="_mesh_optimizer_8h.html"><code>Rodin/MMG/MeshOptimizer.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html#ae5293bf3af38973226944dd2c0abffa4"><span class="nc">Optimizer</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -93,15 +87,8 @@
           </ul>
         </nav>
 <p>This operator runs MMG optimization mode without prescribing an external metric field. It is useful for improving element shapes while keeping the mesh close to the current local edge-size distribution.</p><p>Typical usage is post-processing after adaptation/imported meshes to remove poorly shaped elements while preserving geometric features.</p><p>Required vertex, edge, triangle, and tetrahedron metadata is passed to MMG and restored on output when the original indices are still valid after the optimization.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>
-            </dt>
-            <dd>Base class for MMG-backed operations in Rodin.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" title="MMG5">MMG5</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Optimizer</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html"><code>MMG5</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">MMG5</span>
+</pre></details></td><td>Base class for MMG-backed operations in Rodin.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html"><code>MMG5</code></a></td><td><details><summary>14 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a0954c0dbf0d744cf8d3be5641173c185"><code>copyMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a1ef51aa345e4d15c90c74c01a5250c8a"><code>copySolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a36251842eb23f4ecc46dc1d1114ce55f"><code>copySolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a4aa91925305a7555c662ae9a5197469e"><code>copySolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bb517cd6d646592ab60cf5b7d450d4"><code>createMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a06cb29d3f77dc8acda9887609000476b"><code>createSolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a5bded16ea18dc87c86cb1b1c1bc3fdc5"><code>destroyMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#aba26af6c43d3b4638aa99e6e65ded72c"><code>destroySolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a378ed49847c971e53116e33195f3a42c"><code>isSurfaceMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a417246fbd6a72f45ccc4274a5e6f981c"><code>meshToRodin()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bd883b7f95228226fd6f267d044287"><code>rodinToMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#afb5c3ccd7f6e8748cd36345967656fdf"><code>setParameters()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ae6667ed0cdc09787425be26a540172de"><code>sMeshVersionFormatted</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#adc10b88a081a86571f71c3ee0433c791"><code>swapSolution()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -119,23 +106,23 @@
             </dt>
             <dd>Optimizes mesh quality in place.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a734ef68ed5ac33264a1aeb7a2e5231fc" class="m-doc">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a734ef68ed5ac33264a1aeb7a2e5231fc" class="m-doc">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true) -&gt; <a href="#ae5293bf3af38973226944dd2c0abffa4" class="m-doc">Optimizer</a>&amp;</span>
             </dt>
             <dd>Enables/disables ridge angle detection.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a975ebdd0d37d8bb598fb9b73201b7b9f" class="m-doc">setHMin</a>(</span><span class="m-doc-wrap">double hmin) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a975ebdd0d37d8bb598fb9b73201b7b9f" class="m-doc">setHMin</a>(</span><span class="m-doc-wrap">double hmin) -&gt; <a href="#ae5293bf3af38973226944dd2c0abffa4" class="m-doc">Optimizer</a>&amp;</span>
             </dt>
             <dd>Sets the minimum edge size constraint.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9aa5e009d86a84afa6869b4c249cf281" class="m-doc">setHMax</a>(</span><span class="m-doc-wrap">double hmax) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9aa5e009d86a84afa6869b4c249cf281" class="m-doc">setHMax</a>(</span><span class="m-doc-wrap">double hmax) -&gt; <a href="#ae5293bf3af38973226944dd2c0abffa4" class="m-doc">Optimizer</a>&amp;</span>
             </dt>
             <dd>Sets the maximum edge size constraint.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a449754f2afafcc906a776856b02a5b64" class="m-doc">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a449754f2afafcc906a776856b02a5b64" class="m-doc">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd) -&gt; <a href="#ae5293bf3af38973226944dd2c0abffa4" class="m-doc">Optimizer</a>&amp;</span>
             </dt>
             <dd>Sets the Hausdorff tolerance controlling boundary approximation.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab8846cd53d2eb25dd9c25469ed5fb3fa" class="m-doc">setGradation</a>(</span><span class="m-doc-wrap">double hgrad) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab8846cd53d2eb25dd9c25469ed5fb3fa" class="m-doc">setGradation</a>(</span><span class="m-doc-wrap">double hgrad) -&gt; <a href="#ae5293bf3af38973226944dd2c0abffa4" class="m-doc">Optimizer</a>&amp;</span>
             </dt>
             <dd>Sets the allowed gradation between adjacent edge sizes.</dd>
           </dl>
@@ -144,7 +131,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a586ab82aa1a8e334464e5935d839bd09"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />Optimizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a586ab82aa1a8e334464e5935d839bd09" class="m-doc-self">optimize</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a586ab82aa1a8e334464e5935d839bd09" class="m-doc-self">optimize</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh)</span></span>
             </h3>
             <p>Optimizes mesh quality in place.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -162,7 +149,7 @@
           </div></section>
           <section class="m-doc-details" id="a734ef68ed5ac33264a1aeb7a2e5231fc"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp; Rodin::<wbr />MMG::<wbr />Optimizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a734ef68ed5ac33264a1aeb7a2e5231fc" class="m-doc-self">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae5293bf3af38973226944dd2c0abffa4" class="m-doc">Optimizer</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a734ef68ed5ac33264a1aeb7a2e5231fc" class="m-doc-self">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true)</span></span>
             </h3>
             <p>Enables/disables ridge angle detection.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -185,7 +172,7 @@
           </div></section>
           <section class="m-doc-details" id="a975ebdd0d37d8bb598fb9b73201b7b9f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp; Rodin::<wbr />MMG::<wbr />Optimizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a975ebdd0d37d8bb598fb9b73201b7b9f" class="m-doc-self">setHMin</a>(</span><span class="m-doc-wrap">double hmin)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae5293bf3af38973226944dd2c0abffa4" class="m-doc">Optimizer</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a975ebdd0d37d8bb598fb9b73201b7b9f" class="m-doc-self">setHMin</a>(</span><span class="m-doc-wrap">double hmin)</span></span>
             </h3>
             <p>Sets the minimum edge size constraint.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -208,7 +195,7 @@
           </div></section>
           <section class="m-doc-details" id="a9aa5e009d86a84afa6869b4c249cf281"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp; Rodin::<wbr />MMG::<wbr />Optimizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9aa5e009d86a84afa6869b4c249cf281" class="m-doc-self">setHMax</a>(</span><span class="m-doc-wrap">double hmax)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae5293bf3af38973226944dd2c0abffa4" class="m-doc">Optimizer</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9aa5e009d86a84afa6869b4c249cf281" class="m-doc-self">setHMax</a>(</span><span class="m-doc-wrap">double hmax)</span></span>
             </h3>
             <p>Sets the maximum edge size constraint.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -231,7 +218,7 @@
           </div></section>
           <section class="m-doc-details" id="a449754f2afafcc906a776856b02a5b64"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp; Rodin::<wbr />MMG::<wbr />Optimizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a449754f2afafcc906a776856b02a5b64" class="m-doc-self">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae5293bf3af38973226944dd2c0abffa4" class="m-doc">Optimizer</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a449754f2afafcc906a776856b02a5b64" class="m-doc-self">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd)</span></span>
             </h3>
             <p>Sets the Hausdorff tolerance controlling boundary approximation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -254,7 +241,7 @@
           </div></section>
           <section class="m-doc-details" id="ab8846cd53d2eb25dd9c25469ed5fb3fa"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp; Rodin::<wbr />MMG::<wbr />Optimizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8846cd53d2eb25dd9c25469ed5fb3fa" class="m-doc-self">setGradation</a>(</span><span class="m-doc-wrap">double hgrad)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae5293bf3af38973226944dd2c0abffa4" class="m-doc">Optimizer</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8846cd53d2eb25dd9c25469ed5fb3fa" class="m-doc-self">setGradation</a>(</span><span class="m-doc-wrap">double hgrad)</span></span>
             </h3>
             <p>Sets the allowed gradation between adjacent edge sizes.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -314,13 +301,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

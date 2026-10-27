@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Alert::Text class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,11 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class F = <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>, class B = <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>Text <span class="m-thin">class</span>
-        </h1>
-        <p>Templated text class with foreground and background color support.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_alert.html">Alert</a></div><h1>Text</h1><p class="rodin-reference-brief">Templated text class with foreground and background color support.</p><p class="rodin-reference-include">Defined in <a href="_text_8h.html"><code>Rodin/Alert/Text.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><a href="struct_rodin_1_1_alert_1_1_no_color_t.html"><span class="nc">NoColorT</span></a><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><a href="struct_rodin_1_1_alert_1_1_no_color_t.html"><span class="nc">NoColorT</span></a><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_alert_1_1_text.html#a4bf6d989c9aa6b8c558c6545f0f66320"><span class="nc">Text</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -108,34 +105,14 @@
             </li>
           </ul>
         </nav>
-<p>A flexible text formatting class that supports foreground colors, background colors, and various text attributes for rich terminal output. The class uses template parameters to specify color types at compile time for type safety.</p><p>Example usage:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">redText</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Text</span><span class="o">&lt;</span><span class="n">RedT</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"Error message"</span><span class="p">);</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">boldText</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Text</span><span class="p">(</span><span class="s">"Important"</span><span class="p">).</span><span class="n">setBold</span><span class="p">();</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">styledText</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Text</span><span class="o">&lt;</span><span class="n">RedT</span><span class="p">,</span><span class="w"> </span><span class="n">BlueT</span><span class="o">&gt;</span><span class="p">(</span><span class="n">RedT</span><span class="p">{},</span><span class="w"> </span><span class="n">BlueT</span><span class="p">{},</span><span class="w"> </span><span class="s">"Styled text"</span><span class="p">);</span></pre>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&gt;</div>
-              class <a href="class_rodin_1_1_alert_1_1_message_prefix.html" class="m-doc">MessagePrefix</a>
-            </dt>
-            <dd>Base class for message prefixes with colored text.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&gt;</div>
-              class <a href="class_rodin_1_1_alert_1_1_message_prefix.html" class="m-doc">MessagePrefix</a>
-            </dt>
-            <dd>Base class for message prefixes with colored text.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&gt;</div>
-              class <a href="class_rodin_1_1_alert_1_1_message_prefix.html" class="m-doc">MessagePrefix</a>
-            </dt>
-            <dd>Base class for message prefixes with colored text.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&gt;</div>
-              class <a href="class_rodin_1_1_alert_1_1_message_prefix.html" class="m-doc">MessagePrefix</a>
-            </dt>
-            <dd>Base class for message prefixes with colored text.</dd>
-          </dl>
-        </section>
+<p>A flexible text formatting class that supports foreground colors, background colors, and various text attributes for rich terminal output. The class uses template parameters to specify color types at compile time for type safety.</p><p>Example usage:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">redText</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Text</span><span class="o">&lt;</span><span class="nc">RedT</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"Error message"</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">boldText</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Text</span><span class="p">(</span><span class="s">"Important"</span><span class="p">).</span><span class="n">setBold</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">styledText</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Text</span><span class="o">&lt;</span><span class="nc">RedT</span><span class="p">,</span><span class="w"> </span><span class="nc">BlueT</span><span class="o">&gt;</span><span class="p">(</span><span class="nc">RedT</span><span class="p">{},</span><span class="w"> </span><span class="nc">BlueT</span><span class="p">{},</span><span class="w"> </span><span class="s">"Styled text"</span><span class="p">);</span></pre>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><div class="rodin-inheritance-current">Text</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_alert_1_1_message_prefix.html" title="MessagePrefix&lt; RedT &gt;; MessagePrefix&lt; BlueT &gt;; MessagePrefix&lt; GreenT &gt;; MessagePrefix&lt; YellowT &gt;">MessagePrefix</a></li><li class="rodin-inheritance-more"><a href="#derived-classes">+3 more</a></li></ul></figure><section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_message_prefix.html"><code>MessagePrefix&lt;RedT&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">MessagePrefix</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">RedT</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for message prefixes with colored text.</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_message_prefix.html"><code>MessagePrefix&lt;BlueT&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">MessagePrefix</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">BlueT</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for message prefixes with colored text.</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_message_prefix.html"><code>MessagePrefix&lt;GreenT&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">MessagePrefix</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">GreenT</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for message prefixes with colored text.</td></tr></tbody></table><details class="rodin-derived-disclosure"><summary class="rodin-disclosure-button"><span class="rodin-see-more">See more</span><span class="rodin-see-less">See less</span></summary><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_message_prefix.html"><code>MessagePrefix&lt;YellowT&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">MessagePrefix</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">YellowT</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for message prefixes with colored text.</td></tr></tbody></table></details></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -182,12 +159,12 @@
               const std::string&amp; text)</span>
             </dt>
             <dd>Constructs text with foreground and background colors from a string.</dd>
-            <dt id="a7afe7f65861d42ab34e7e156622b00a7">
-              <span class="m-doc-wrap-bumper"><a href="#a7afe7f65861d42ab34e7e156622b00a7" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af54cc07c45c6d9d909c6e1aba6711c6b" class="m-doc">Text</a>(</span><span class="m-doc-wrap">const Text&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="ad22dc4c5b496fd9e73851fa805203969">
-              <span class="m-doc-wrap-bumper"><a href="#ad22dc4c5b496fd9e73851fa805203969" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a4c078588555385eeb5b045ce862eb9eb" class="m-doc">Text</a>(</span><span class="m-doc-wrap">Text&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -208,39 +185,39 @@
             </dt>
             <dd>Gets the background color.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a293793ceccb85eaf50b40efa1e2dd0a0" class="m-doc">setAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_alert.html#a15b1b83081915ae5239f81050ae0f550" class="m-doc">Attribute</a> a) -&gt; <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a293793ceccb85eaf50b40efa1e2dd0a0" class="m-doc">setAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_alert.html#a15b1b83081915ae5239f81050ae0f550" class="m-doc">Attribute</a> a) -&gt; <a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp;</span>
             </dt>
             <dd>Sets a text formatting attribute.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa207d65909ee3f5cd1b89bd9783327b6" class="m-doc">setBold</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa207d65909ee3f5cd1b89bd9783327b6" class="m-doc">setBold</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp;</span>
             </dt>
             <dd>Sets bold text formatting.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac76885e70ca48e793fbbb34514c4a12a" class="m-doc">setDark</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac76885e70ca48e793fbbb34514c4a12a" class="m-doc">setDark</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp;</span>
             </dt>
             <dd>Sets dark text formatting.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a66f00c6e2b41f4ea8e34f9f7c76e28f8" class="m-doc">setItalic</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a66f00c6e2b41f4ea8e34f9f7c76e28f8" class="m-doc">setItalic</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp;</span>
             </dt>
             <dd>Sets italic text formatting.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a341fea2a8a515b54201290a53a5bf8e9" class="m-doc">setUnderline</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a341fea2a8a515b54201290a53a5bf8e9" class="m-doc">setUnderline</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp;</span>
             </dt>
             <dd>Sets underlined text formatting.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aed5527e19bf03917aaadc166501a74c2" class="m-doc">setBlink</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aed5527e19bf03917aaadc166501a74c2" class="m-doc">setBlink</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp;</span>
             </dt>
             <dd>Sets blinking text effect.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a03babc81f35757b4ee2ee6c138c7d344" class="m-doc">setReverse</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a03babc81f35757b4ee2ee6c138c7d344" class="m-doc">setReverse</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp;</span>
             </dt>
             <dd>Sets reverse video formatting (inverted colors).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4ef1147b6db444805b3a775cbc310d72" class="m-doc">setConcealed</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4ef1147b6db444805b3a775cbc310d72" class="m-doc">setConcealed</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp;</span>
             </dt>
             <dd>Sets concealed/hidden text formatting.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3599c205fde4c98b4d61ed4cbf8b4337" class="m-doc">setCrossed</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3599c205fde4c98b4d61ed4cbf8b4337" class="m-doc">setCrossed</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp;</span>
             </dt>
             <dd>Sets crossed-out text formatting.</dd>
             <dt>
@@ -253,10 +230,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a4bf6d989c9aa6b8c558c6545f0f66320"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const char* text)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const char* text)</span></span>
             </h3>
             <p>Constructs text from a C-style string.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -273,10 +248,8 @@
           </div></section>
           <section class="m-doc-details" id="a600f1ffe68ec07d7ef5dcc6be044250f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a600f1ffe68ec07d7ef5dcc6be044250f" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const <a href="#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; fg,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a600f1ffe68ec07d7ef5dcc6be044250f" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const <a href="#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; fg,
               const char* text)</span></span>
             </h3>
             <p>Constructs text with foreground color from a C-style string.</p>
@@ -298,10 +271,8 @@
           </div></section>
           <section class="m-doc-details" id="a6cd5e06d3527cfe340c2529e3794ee1c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6cd5e06d3527cfe340c2529e3794ee1c" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const <a href="#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; fg,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6cd5e06d3527cfe340c2529e3794ee1c" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const <a href="#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; fg,
               const <a href="#ad8bc9bf48308f5f14f18f08c509a67ac" class="m-doc">Background</a>&amp; bg,
               const char* text)</span></span>
             </h3>
@@ -328,10 +299,8 @@
           </div></section>
           <section class="m-doc-details" id="a0fcfa21eed70cf88b45196f00f8a12b8"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0fcfa21eed70cf88b45196f00f8a12b8" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const std::string&amp; text)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0fcfa21eed70cf88b45196f00f8a12b8" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const std::string&amp; text)</span></span>
             </h3>
             <p>Constructs text from a string.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -348,10 +317,8 @@
           </div></section>
           <section class="m-doc-details" id="a0b53ce72a14793d5a1ce112f49bfe362"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0b53ce72a14793d5a1ce112f49bfe362" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const <a href="#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; fg,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0b53ce72a14793d5a1ce112f49bfe362" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const <a href="#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; fg,
               const std::string&amp; text)</span></span>
             </h3>
             <p>Constructs text with foreground color from a string.</p>
@@ -373,10 +340,8 @@
           </div></section>
           <section class="m-doc-details" id="ade95446c99c48de128e130ddb15c760e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade95446c99c48de128e130ddb15c760e" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const <a href="#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; fg,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade95446c99c48de128e130ddb15c760e" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const <a href="#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; fg,
               const <a href="#ad8bc9bf48308f5f14f18f08c509a67ac" class="m-doc">Background</a>&amp; bg,
               const std::string&amp; text)</span></span>
             </h3>
@@ -401,12 +366,46 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="af54cc07c45c6d9d909c6e1aba6711c6b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af54cc07c45c6d9d909c6e1aba6711c6b" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const Text&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4c078588555385eeb5b045ce862eb9eb"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4c078588555385eeb5b045ce862eb9eb" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">Text&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a2232ae9dafaa0daef76207df109265ca"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const std::string&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2232ae9dafaa0daef76207df109265ca" class="m-doc-self">getString</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const std::string&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2232ae9dafaa0daef76207df109265ca" class="m-doc-self">getString</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the text string content.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -420,10 +419,8 @@
           </div></section>
           <section class="m-doc-details" id="acf943f9355f51b9dcfd8a73943a0f39f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf943f9355f51b9dcfd8a73943a0f39f" class="m-doc-self">getForeground</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf943f9355f51b9dcfd8a73943a0f39f" class="m-doc-self">getForeground</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the foreground color.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -437,10 +434,8 @@
           </div></section>
           <section class="m-doc-details" id="a8bb91684ea86bc326ee0cb2de6da2f41"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#ad8bc9bf48308f5f14f18f08c509a67ac" class="m-doc">Background</a>&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8bb91684ea86bc326ee0cb2de6da2f41" class="m-doc-self">getBackground</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#ad8bc9bf48308f5f14f18f08c509a67ac" class="m-doc">Background</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8bb91684ea86bc326ee0cb2de6da2f41" class="m-doc-self">getBackground</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the background color.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -454,10 +449,8 @@
           </div></section>
           <section class="m-doc-details" id="a293793ceccb85eaf50b40efa1e2dd0a0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a293793ceccb85eaf50b40efa1e2dd0a0" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_alert.html#a15b1b83081915ae5239f81050ae0f550" class="m-doc">Attribute</a> a)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a293793ceccb85eaf50b40efa1e2dd0a0" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_alert.html#a15b1b83081915ae5239f81050ae0f550" class="m-doc">Attribute</a> a)</span></span>
             </h3>
             <p>Sets a text formatting attribute.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -480,10 +473,8 @@
           </div></section>
           <section class="m-doc-details" id="aa207d65909ee3f5cd1b89bd9783327b6"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa207d65909ee3f5cd1b89bd9783327b6" class="m-doc-self">setBold</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa207d65909ee3f5cd1b89bd9783327b6" class="m-doc-self">setBold</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Sets bold text formatting.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -497,10 +488,8 @@
           </div></section>
           <section class="m-doc-details" id="ac76885e70ca48e793fbbb34514c4a12a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac76885e70ca48e793fbbb34514c4a12a" class="m-doc-self">setDark</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac76885e70ca48e793fbbb34514c4a12a" class="m-doc-self">setDark</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Sets dark text formatting.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -514,10 +503,8 @@
           </div></section>
           <section class="m-doc-details" id="a66f00c6e2b41f4ea8e34f9f7c76e28f8"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66f00c6e2b41f4ea8e34f9f7c76e28f8" class="m-doc-self">setItalic</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66f00c6e2b41f4ea8e34f9f7c76e28f8" class="m-doc-self">setItalic</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Sets italic text formatting.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -531,10 +518,8 @@
           </div></section>
           <section class="m-doc-details" id="a341fea2a8a515b54201290a53a5bf8e9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a341fea2a8a515b54201290a53a5bf8e9" class="m-doc-self">setUnderline</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a341fea2a8a515b54201290a53a5bf8e9" class="m-doc-self">setUnderline</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Sets underlined text formatting.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -548,10 +533,8 @@
           </div></section>
           <section class="m-doc-details" id="aed5527e19bf03917aaadc166501a74c2"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed5527e19bf03917aaadc166501a74c2" class="m-doc-self">setBlink</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed5527e19bf03917aaadc166501a74c2" class="m-doc-self">setBlink</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Sets blinking text effect.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -565,10 +548,8 @@
           </div></section>
           <section class="m-doc-details" id="a03babc81f35757b4ee2ee6c138c7d344"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a03babc81f35757b4ee2ee6c138c7d344" class="m-doc-self">setReverse</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a03babc81f35757b4ee2ee6c138c7d344" class="m-doc-self">setReverse</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Sets reverse video formatting (inverted colors).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -582,10 +563,8 @@
           </div></section>
           <section class="m-doc-details" id="a4ef1147b6db444805b3a775cbc310d72"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4ef1147b6db444805b3a775cbc310d72" class="m-doc-self">setConcealed</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4ef1147b6db444805b3a775cbc310d72" class="m-doc-self">setConcealed</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Sets concealed/hidden text formatting.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -599,10 +578,8 @@
           </div></section>
           <section class="m-doc-details" id="a3599c205fde4c98b4d61ed4cbf8b4337"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3599c205fde4c98b4d61ed4cbf8b4337" class="m-doc-self">setCrossed</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4bf6d989c9aa6b8c558c6545f0f66320" class="m-doc">Text</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3599c205fde4c98b4d61ed4cbf8b4337" class="m-doc-self">setCrossed</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Sets crossed-out text formatting.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -616,10 +593,8 @@
           </div></section>
           <section class="m-doc-details" id="aea85cd6a245c54226e6187610d591f3c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class F, class B&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_alert.html#a15b1b83081915ae5239f81050ae0f550" class="m-doc">Attribute</a>&gt;&amp; Rodin::<wbr />Alert::<wbr />Text&lt;F, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea85cd6a245c54226e6187610d591f3c" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_alert.html#a15b1b83081915ae5239f81050ae0f550" class="m-doc">Attribute</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea85cd6a245c54226e6187610d591f3c" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the set of applied text attributes.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -670,13 +645,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>
