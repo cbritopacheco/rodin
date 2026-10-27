@@ -500,9 +500,13 @@ TEST(MPI_Geometry_Mesh, QuadratureCacheTracksScalingWithEmptyRoot)
       {
         const auto& quadrature = mesh.getQuadrature(dimension, cell, first);
         const auto& other = mesh.getQuadrature(dimension, cell, second);
-        EXPECT_NE(&quadrature, &other);
+        if (&first == &second)
+          EXPECT_EQ(&quadrature, &other);
+        else
+          EXPECT_NE(&quadrature, &other);
         EXPECT_EQ(&mesh.getQuadrature(dimension, cell, first), &quadrature);
         EXPECT_EQ(&quadrature.getQuadratureFormula(), &first);
+        EXPECT_EQ(&other.getQuadratureFormula(), &second);
         EXPECT_EQ(quadrature.getSize(), first.getSize());
         for (size_t point = 0; point < quadrature.getSize(); ++point)
         {

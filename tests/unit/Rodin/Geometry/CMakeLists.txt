@@ -384,3 +384,10 @@ add_executable(RodinGeometryIndexedTest GeometryIndexedTest.cpp)
 target_link_libraries(RodinGeometryIndexedTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Geometry)
 rodin_discover_tests(RodinGeometryIndexedTest PROPERTIES LABELS unit)
+
+add_executable(RodinGeometryBoundsTest BoundsTest.cpp)
+target_link_libraries(RodinGeometryBoundsTest
+  PRIVATE GTest::gtest_main Rodin::Geometry)
+rodin_discover_tests(RodinGeometryBoundsTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES LABELS unit)

@@ -274,7 +274,7 @@ TEST(Location_AABB, BacktracksAfterNonFiniteTrialMapping)
         return s * s * s + Real(1e-3) * t;
       }
 
-      size_t getOrder() const override
+      Optional<size_t> getDegree() const override
       {
         return 3;
       }
@@ -1061,7 +1061,7 @@ class QuadraticShear : public PolytopeTransformation
     QuadraticShear()
       : PolytopeTransformation(2, 2)
     {}
-    size_t getOrder() const override
+    Optional<size_t> getDegree() const override
     {
       return 2;
     }
@@ -1162,7 +1162,7 @@ class QuarticSegment : public PolytopeTransformation
     QuarticSegment()
       : PolytopeTransformation(1, 1)
     {}
-    size_t getOrder() const override
+    Optional<size_t> getDegree() const override
     {
       return 4;
     }

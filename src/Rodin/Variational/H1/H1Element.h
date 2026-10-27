@@ -145,7 +145,7 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Type;
 
     public:
-      static_assert(K > 0, "Polynomial degree K must be greater than 0.");
+      static_assert(K > 0, "Family order K must be greater than 0.");
 
       /// @brief Basis values and derivatives tabulated on the reference element.
       using Tabulation = ReferenceTabulation<Scalar>;
@@ -788,10 +788,10 @@ namespace Rodin::Variational
       const BasisFunction& getBasis(size_t i) const;
 
       /**
-       * @brief Gets the total maximum polynomial order of the element.
-       * @return Polynomial degree K
+       * @brief Returns a total polynomial degree bound for the reference basis.
+       * @return A total polynomial degree bound, or no value for rational pyramid bases.
        */
-      constexpr size_t getOrder() const
+      constexpr Optional<size_t> getDegree() const
       {
         using G = Geometry::Polytope::Type;
         switch (this->getGeometry())
@@ -807,9 +807,11 @@ namespace Rodin::Variational
 
           case G::Quadrilateral:
           case G::Wedge:
-          case G::Pyramid:
             // Tensor-product type: max total degree is 2K
             return 2 * K;
+
+          case G::Pyramid:
+            return std::nullopt;
 
           case G::Hexahedron:
             // 3D tensor product: max total degree is 3K
@@ -821,12 +823,22 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Degree of each simplex, tensor, or collapsed-coordinate factor.
-       * @returns The factor order.
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
        */
-      constexpr size_t getFactorOrder() const
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        return this->getGeometry() == Geometry::Polytope::Type::Point ? 0 : K;
+        return this->getLagrangeDegree(K, directions);
+      }
+
+      /**
+       * @brief Returns the finite-element family index.
+       * @returns The family index, independently of the reference geometry.
+       */
+      constexpr size_t getOrder() const
+      {
+        return K;
       }
 
       /**
@@ -977,7 +989,7 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Type;
 
     public:
-      static_assert(K > 0, "Polynomial degree K must be greater than 0.");
+      static_assert(K > 0, "Family order K must be greater than 0.");
 
       /// Parent class
       using Parent = FiniteElementBase<H1Element<K, Math::SpatialVector<Scalar>>>;
@@ -1469,10 +1481,10 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the polynomial order.
-       * @returns Polynomial order of the finite element.
+       * @brief Returns a total polynomial degree bound for the reference basis.
+       * @returns A total degree bound, or no polynomial bound for rational pyramids.
        */
-      constexpr size_t getOrder() const
+      constexpr Optional<size_t> getDegree() const
       {
         using G = Geometry::Polytope::Type;
         switch (this->getGeometry())
@@ -1488,9 +1500,11 @@ namespace Rodin::Variational
 
           case G::Quadrilateral:
           case G::Wedge:
-          case G::Pyramid:
             // Tensor-product type: max total degree is 2K
             return 2 * K;
+
+          case G::Pyramid:
+            return std::nullopt;
 
           case G::Hexahedron:
             // 3D tensor product: max total degree is 3K
@@ -1501,12 +1515,22 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Degree of each simplex, tensor, or collapsed-coordinate factor.
-       * @returns The factor order.
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
        */
-      constexpr size_t getFactorOrder() const
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        return this->getGeometry() == Geometry::Polytope::Type::Point ? 0 : K;
+        return this->getLagrangeDegree(K, directions);
+      }
+
+      /**
+       * @brief Returns the finite-element family index.
+       * @returns The family index, independently of the reference geometry.
+       */
+      constexpr size_t getOrder() const
+      {
+        return K;
       }
 
       /**
@@ -1766,6 +1790,25 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order when it is known.
        * @returns Polynomial order on the requested polytope, or no value when unavailable.
+       */
+      constexpr Optional<size_t> getDegree() const
+      {
+        return m_scalar.getDegree();
+      }
+
+      /**
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
+      {
+        return this->getLagrangeDegree(K, directions);
+      }
+
+      /**
+       * @brief Returns the finite-element family index.
+       * @returns The family index, independently of the reference geometry.
        */
       size_t getOrder() const
       {

@@ -301,12 +301,31 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the polynomial order.
+       * @brief Returns a total polynomial degree bound for the reference basis.
        * @returns Polynomial order of the finite element.
        */
       constexpr size_t getOrder() const
       {
         return 0;
+      }
+
+      /**
+       * @brief Returns the total polynomial degree of the reference basis.
+       * @returns Zero for the constant reference basis.
+       */
+      constexpr Optional<size_t> getDegree() const
+      {
+        return 0;
+      }
+
+      /**
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
+      {
+        return this->getLagrangeDegree(0, directions);
       }
   };
 
@@ -615,12 +634,31 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the polynomial order.
+       * @brief Returns a total polynomial degree bound for the reference basis.
        * @returns Polynomial order of the finite element.
        */
       constexpr size_t getOrder() const
       {
         return 0;
+      }
+
+      /**
+       * @brief Returns the total polynomial degree of the reference basis.
+       * @returns Zero for the constant reference basis.
+       */
+      constexpr Optional<size_t> getDegree() const
+      {
+        return 0;
+      }
+
+      /**
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
+      {
+        return this->getLagrangeDegree(0, directions);
       }
 
     private:
@@ -845,6 +883,25 @@ namespace Rodin::Variational
       size_t getOrder() const
       {
         return m_scalar.getOrder();
+      }
+
+      /**
+       * @brief Returns the total polynomial degree of the reference basis.
+       * @returns Zero for the constant reference basis.
+       */
+      constexpr Optional<size_t> getDegree() const
+      {
+        return 0;
+      }
+
+      /**
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
+      {
+        return this->getLagrangeDegree(0, directions);
       }
 
       /**

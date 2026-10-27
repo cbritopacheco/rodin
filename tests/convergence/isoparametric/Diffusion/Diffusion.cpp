@@ -599,7 +599,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
             for (auto polytope = mesh.getPolytope(d); polytope; ++polytope)
             {
               const RealH1Element<2> element(polytope->getGeometry());
-              EXPECT_EQ(polytope->getTransformation().getOrder(), element.getOrder());
+              EXPECT_EQ(polytope->getTransformation().getDegree(), element.getDegree());
               for (size_t local = 0; local < element.getCount(); ++local)
               {
                 const auto& rc = element.getNode(local);
@@ -641,7 +641,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
           for (auto polytope = mesh.getPolytope(d); polytope; ++polytope)
           {
             const RealH1Element<2> element(polytope->getGeometry());
-            EXPECT_EQ(polytope->getTransformation().getOrder(), element.getOrder());
+            EXPECT_EQ(polytope->getTransformation().getDegree(), element.getDegree());
             const auto& qf =
               QF::QuadratureFormula::get(GeometryCheckOrder, polytope->getGeometry());
             const Geometry::PolytopeQuadrature quadrature(*polytope, qf);

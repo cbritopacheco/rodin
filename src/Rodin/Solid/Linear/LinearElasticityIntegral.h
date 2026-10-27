@@ -15,6 +15,7 @@
 #ifndef RODIN_SOLID_LINEAR_LINEARELASTICITYINTEGRAL_H
 #define RODIN_SOLID_LINEAR_LINEARELASTICITYINTEGRAL_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <type_traits>
 
 #include "Rodin/FormLanguage/Traits.h"
@@ -207,8 +208,26 @@ namespace Rodin::Variational
 
         const size_t muOrder = getShearModulus().getOrder(polytope).value_or(size_t(0));
 
-        const size_t order =
-          std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
+        auto trialDegree = trialfe.getDegree();
+        if constexpr (requires { trialfe.getDegree({0, 1}); })
+        {
+          if (!trialDegree && polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+            trialDegree = trialfe.getDegree({0, 1});
+        }
+        auto testDegree = testfe.getDegree();
+        if constexpr (requires { testfe.getDegree({0, 1}); })
+        {
+          if (!testDegree && polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+            testDegree = testfe.getDegree({0, 1});
+        }
+        if (!trialDegree || !testDegree)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Cannot infer quadrature order for these finite elements. "
+            << "Use Integral with an explicit setOrder()." << Alert::Raise;
+        }
+
+        const size_t order = std::max(lambdaOrder, muOrder) + *trialDegree + *testDegree;
 
         m_qf = &QF::QuadratureFormula::get(order, geometry);
         m_quadrature = &polytope.getQuadrature(*m_qf);

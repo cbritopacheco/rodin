@@ -17,6 +17,7 @@ set(RodinGeometry_HEADERS
 )
 
 set(RodinGeometry_SRCS
+  Bounds.cpp
   Mesh.cpp
   Point.cpp
   Polytope.cpp

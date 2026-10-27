@@ -33,9 +33,9 @@ namespace
     {
       return element.getCount();
     }
-    size_t getOrder() const
+    Optional<size_t> getDegree() const
     {
-      return element.getOrder();
+      return element.getDegree();
     }
     const auto& getBasis(size_t local) const
     {
@@ -78,12 +78,15 @@ namespace
           const auto& formula = QF::QuadratureFormula::get(size_t{4}, geometry);
           constexpr Real CoordinateTolerance = 1e-11;
           auto inspect = [&](const PolytopeTransformation& chart) {
-            EXPECT_EQ(chart.getOrder(), element.getOrder());
+            EXPECT_EQ(chart.getDegree(), element.getDegree());
             EXPECT_EQ(chart.getReferenceDimension(), dimension);
             EXPECT_EQ(chart.getPhysicalDimension(), embedding);
             if constexpr (std::is_same_v<Element, DirectElement>)
             {
-              EXPECT_EQ(chart.getFactorOrder(), element.getOrder());
+              // The custom element does not expose directional information.
+              // The transformation falls back to its total polynomial bound.
+              if (dimension > 0)
+                EXPECT_EQ(chart.getDegree({0}), element.getDegree());
             }
             std::vector<Math::SpatialMatrix<Real>> jacobians;
             chart.jacobian(jacobians, formula);

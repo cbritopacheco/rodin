@@ -20,7 +20,7 @@ using namespace Rodin::Geometry;
 namespace
 {
   /// @brief External PointBase implementation owning its reference sample.
-  class OwnedReferencePoint : public PointBase
+  class OwnedReferencePoint final : public PointBase
   {
     public:
       OwnedReferencePoint(const Polytope& cell, const Math::SpatialPoint& reference)

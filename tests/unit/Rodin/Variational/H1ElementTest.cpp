@@ -229,7 +229,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 1);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 0);
+    EXPECT_EQ(k.getDegree(), 0);
 
     // Check basis function value
     EXPECT_NEAR(k.getBasis(0)(Math::Vector<Real>{{0}}), 1, RODIN_FUZZY_CONSTANT);
@@ -245,7 +245,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 3);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
 
     // Test basis functions at nodes (Lagrange property)
     {
@@ -328,7 +328,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 6);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
   }
 
   // Test P2 element on Quadrilateral geometry
@@ -341,7 +341,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 9);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_EQ(k.getDegree(), 4);
 
     // Test tensor product property at corner
     {
@@ -381,7 +381,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 4);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 3);
+    EXPECT_EQ(k.getDegree(), 3);
 
     // Test Lagrange property at nodes
     for (size_t i = 0; i < 4; i++)
@@ -426,7 +426,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 10);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
   }
 
   // Test P2 element on Wedge geometry
@@ -439,7 +439,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 18);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_EQ(k.getDegree(), 4);
   }
 
   // ========================================================================
@@ -455,7 +455,7 @@ namespace Rodin::Tests::Unit
 
     // P4 element on Segment should have 5 DOFs (k+1 = 4+1 = 5)
     EXPECT_EQ(k.getCount(), 5);
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_EQ(k.getDegree(), 4);
 
     // Test Lagrange property at nodes
     for (size_t i = 0; i < 5; i++)
@@ -521,7 +521,7 @@ namespace Rodin::Tests::Unit
 
     // P5 element on Segment should have 6 DOFs (k+1 = 5+1 = 6)
     EXPECT_EQ(k.getCount(), 6);
-    EXPECT_EQ(k.getOrder(), 5);
+    EXPECT_EQ(k.getDegree(), 5);
 
     // Test Lagrange property at nodes
     for (size_t i = 0; i < 6; i++)
@@ -588,7 +588,7 @@ namespace Rodin::Tests::Unit
 
     // P6 element on Segment should have 7 DOFs (k+1 = 6+1 = 7)
     EXPECT_EQ(k.getCount(), 7);
-    EXPECT_EQ(k.getOrder(), 6);
+    EXPECT_EQ(k.getDegree(), 6);
 
     // Test Lagrange property at nodes
     for (size_t i = 0; i < 7; i++)
@@ -863,11 +863,11 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies order property all orders for variational real H1 element by checking exact expected values.
   TEST(Rodin_Variational_RealH1Element, OrderProperty_AllOrders)
   {
-    EXPECT_EQ(RealH1Element<2>(Polytope::Type::Segment).getOrder(), 2);
-    EXPECT_EQ(RealH1Element<3>(Polytope::Type::Segment).getOrder(), 3);
-    EXPECT_EQ(RealH1Element<4>(Polytope::Type::Segment).getOrder(), 4);
-    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Segment).getOrder(), 5);
-    EXPECT_EQ(RealH1Element<6>(Polytope::Type::Segment).getOrder(), 6);
+    EXPECT_EQ(RealH1Element<2>(Polytope::Type::Segment).getDegree(), 2);
+    EXPECT_EQ(RealH1Element<3>(Polytope::Type::Segment).getDegree(), 3);
+    EXPECT_EQ(RealH1Element<4>(Polytope::Type::Segment).getDegree(), 4);
+    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Segment).getDegree(), 5);
+    EXPECT_EQ(RealH1Element<6>(Polytope::Type::Segment).getDegree(), 6);
   }
 
   // ========================================================================
@@ -1280,7 +1280,7 @@ namespace Rodin::Tests::Unit
     RealH1Element<2> k(Polytope::Type::Pyramid);
 
     EXPECT_EQ(k.getCount(), 14);
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_FALSE(k.getDegree());
   }
 
   /// @brief Verifies lagrange property P 2 pyramid for variational real H1 element by checking tolerance-based numerical results.
@@ -1382,7 +1382,7 @@ namespace Rodin::Tests::Unit
 
     // P2 element on Segment should have 3 DOFs
     EXPECT_EQ(k.getCount(), 3);
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
 
     // Test Lagrange property with complex values
     for (size_t i = 0; i < k.getCount(); i++)
@@ -1485,7 +1485,7 @@ namespace Rodin::Tests::Unit
 
     // P2 element on Segment with vdim=2 should have 3*2=6 DOFs
     EXPECT_EQ(k.getCount(), 6);
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
 
     // Check that nodes match scalar version
     RealH1Element<2> scalar_k(Polytope::Type::Segment);
@@ -1506,7 +1506,7 @@ namespace Rodin::Tests::Unit
 
     // P3 element on Segment with vdim=3 should have 4*3=12 DOFs
     EXPECT_EQ(k.getCount(), 12);
-    EXPECT_EQ(k.getOrder(), 3);
+    EXPECT_EQ(k.getDegree(), 3);
   }
 
   // Test Vector P2 basis function structure
@@ -1555,7 +1555,7 @@ namespace Rodin::Tests::Unit
 
     // P2 element on Triangle with vdim=2 should have 6*2=12 DOFs
     EXPECT_EQ(k.getCount(), 12);
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
   }
 
   // Test Vector P2 on Quadrilateral
@@ -1567,7 +1567,7 @@ namespace Rodin::Tests::Unit
 
     // P2 element on Quadrilateral with vdim=2 should have 9*2=18 DOFs
     EXPECT_EQ(k.getCount(), 18);
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_EQ(k.getDegree(), 4);
   }
 
   // Test Vector P2 on Tetrahedron
@@ -1579,7 +1579,7 @@ namespace Rodin::Tests::Unit
 
     // P2 element on Tetrahedron with vdim=3 should have 10*3=30 DOFs
     EXPECT_EQ(k.getCount(), 30);
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
   }
 
   // Test Vector P2 Jacobian computation
@@ -1632,7 +1632,7 @@ namespace Rodin::Tests::Unit
 
     // P4 element on Segment with vdim=3 should have 5*3=15 DOFs
     EXPECT_EQ(k.getCount(), 15);
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_EQ(k.getDegree(), 4);
   }
 
   // Test vector P3 on higher-dimensional elements
@@ -1644,7 +1644,7 @@ namespace Rodin::Tests::Unit
 
     // P3 element on Wedge: (k+1) * (k+1)(k+2)/2 = 4 * 4*5/2 = 4 * 10 = 40 scalar DOFs
     EXPECT_EQ(k.getCount(), 120);
-    EXPECT_EQ(k.getOrder(), 6);
+    EXPECT_EQ(k.getDegree(), 6);
   }
 
   // ========================================================================
@@ -1854,7 +1854,7 @@ namespace Rodin::Tests::Unit
 
     // P4 on Tetrahedron: (k+1)(k+2)(k+3)/6 = 5*6*7/6 = 35 scalar DOFs
     EXPECT_EQ(k.getCount(), 35 * vdim);
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_EQ(k.getDegree(), 4);
   }
 
   // Test Vector basis sparsity in components
@@ -2440,17 +2440,17 @@ namespace Rodin::Tests::Unit
   {
     // Verify order property is correct
 
-    EXPECT_EQ(RealP0Element(Polytope::Type::Segment).getOrder(), 0);
-    EXPECT_EQ(RealP0Element(Polytope::Type::Triangle).getOrder(), 0);
+    EXPECT_EQ(RealP0Element(Polytope::Type::Segment).getDegree(), 0);
+    EXPECT_EQ(RealP0Element(Polytope::Type::Triangle).getDegree(), 0);
 
-    EXPECT_EQ(RealP1Element(Polytope::Type::Segment).getOrder(), 1);
-    EXPECT_EQ(RealP1Element(Polytope::Type::Triangle).getOrder(), 1);
+    EXPECT_EQ(RealP1Element(Polytope::Type::Segment).getDegree(), 1);
+    EXPECT_EQ(RealP1Element(Polytope::Type::Triangle).getDegree(), 1);
 
-    EXPECT_EQ(RealH1Element<2>(Polytope::Type::Segment).getOrder(), 2);
-    EXPECT_EQ(RealH1Element<3>(Polytope::Type::Segment).getOrder(), 3);
-    EXPECT_EQ(RealH1Element<4>(Polytope::Type::Segment).getOrder(), 4);
-    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Segment).getOrder(), 5);
-    EXPECT_EQ(RealH1Element<6>(Polytope::Type::Segment).getOrder(), 6);
+    EXPECT_EQ(RealH1Element<2>(Polytope::Type::Segment).getDegree(), 2);
+    EXPECT_EQ(RealH1Element<3>(Polytope::Type::Segment).getDegree(), 3);
+    EXPECT_EQ(RealH1Element<4>(Polytope::Type::Segment).getDegree(), 4);
+    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Segment).getDegree(), 5);
+    EXPECT_EQ(RealH1Element<6>(Polytope::Type::Segment).getDegree(), 6);
   }
 
   /// @brief Comprehensive tests for H1Element<1> across all geometries.
@@ -2509,7 +2509,11 @@ namespace Rodin::Tests::Unit
         default:
           continue;
       }
-      EXPECT_EQ(pk.getOrder(), expected_order);
+      EXPECT_EQ(pk.getOrder(), 1);
+      if (geom == Polytope::Type::Pyramid)
+        EXPECT_FALSE(pk.getDegree());
+      else
+        EXPECT_EQ(pk.getDegree(), expected_order);
 
       // Test partition of unity
       Math::Vector<Real> p;

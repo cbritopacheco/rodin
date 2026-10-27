@@ -192,7 +192,7 @@ namespace Rodin::Tests::Unit
       Element element(geometry);
       const size_t count = element.getCount();
       const size_t dim = Geometry::Polytope::Traits(geometry).getDimension();
-      const size_t degree = geometry == G::Point ? 1 : element.getFactorOrder();
+      const size_t degree = geometry == G::Point ? 1 : element.getOrder();
       const auto polynomial = [&](const Math::SpatialPoint& r) {
         Real result = 1;
         for (size_t j = 0; j < dim; ++j)

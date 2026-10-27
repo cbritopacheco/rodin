@@ -222,6 +222,7 @@ namespace
           return H1<2, Matrix>(std::integral_constant<size_t, 2>{}, domain, 2, 3);
       };
       const auto value = [factor, dimension](const Point& p) {
+        (void)dimension;
         Matrix result(2, 3);
         for (size_t row = 0; row < 2; ++row)
         {

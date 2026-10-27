@@ -52,7 +52,13 @@ compare coordinate/key sets in tests.
   reconstruct them from vertex coordinates in FES-generic code.
 - `mesh.setVertexCoordinates(...)` flushes/invalidates transformations;
   `mesh.flush()` demotes everything back to affine.
-- Transformations expose geometry, not evaluation-cache identity. A fresh
+- Transformations expose geometry, not evaluation-cache identity. Their optional
+  `getDegree()` bounds total polynomial degree; `getDegree({directions...})`
+  bounds joint degree in selected reference coordinates. `isFirstOrder()`
+  certifies native vertex geometry without confusing multilinear or rational
+  maps with affine maps. `getBounds()` returns an owned conservative convex
+  enclosure, with pyramid bounds using the certified rational reference space.
+  Unknown enclosures leave location candidates unpruned. A fresh
   `setPolytope()` binding discards consumers' previous physical results even
   for the same logical entity. Geometry must remain fixed during a binding;
   changed geometry requires fresh points/quadrature and a new binding.
