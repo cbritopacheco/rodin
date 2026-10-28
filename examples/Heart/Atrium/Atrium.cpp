@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <filesystem>
+#include <iomanip>
 #include <Rodin/Alert.h>
 #include "Atrium.h"
 #include <boost/mpi/collectives.hpp>
@@ -15,7 +17,10 @@
 namespace Rodin::Examples::Heart
 {
   Atrium::Atrium(const Context::MPI& context, const Parameters& cfg)
-    : m_mesh(makeMesh(context, cfg))
+    : m_mesh(makeMesh(context, cfg)),
+      m_cavity(m_mesh, cfg.fluidMaterial),
+      m_volumePath((cfg.mode == Mode::Fluid ? cfg.fluid.xdmfBasename : cfg.solid.output) +
+        ".volume.csv")
   {
     if (cfg.mode != Mode::Solid && cfg.mode != Mode::Fluid && cfg.mode != Mode::FSI)
       Alert::Exception() << "Invalid atrium mode" << Alert::Raise;
@@ -40,7 +45,6 @@ namespace Rodin::Examples::Heart
     if (hasFluid)
       m_fluid.emplace(m_mesh, cfg.fluid, cfg.fluidMaterial);
   }
-
 
   Atrium::MeshType Atrium::makeMesh(const Context::MPI& context, const Parameters& cfg)
   {
@@ -120,6 +124,33 @@ namespace Rodin::Examples::Heart
       m_solid->initialize();
     if (m_fluid)
       m_fluid->initialize();
+    std::string failure;
+    const auto& comm = m_mesh.getContext().getCommunicator();
+    if (comm.rank() == 0)
+    {
+      try
+      {
+        const auto parent = std::filesystem::path(m_volumePath).parent_path();
+        if (!parent.empty())
+          std::filesystem::create_directories(parent);
+        m_volumeOutput.open(m_volumePath);
+        if (!m_volumeOutput)
+          failure = "Cannot open cavity-volume output " + m_volumePath;
+        else
+        {
+          m_volumeOutput << "time_s,reference_volume_ml,solid_cavity_volume_ml,fluid_"
+                            "domain_volume_ml,solid_volume_change_percent\n";
+        }
+      }
+      catch (const std::exception& error)
+      {
+        failure = error.what();
+      }
+    }
+    boost::mpi::broadcast(comm, failure, 0);
+    if (!failure.empty())
+      Alert::Exception() << failure << Alert::Raise;
+    writeVolume();
     m_initialized = true;
     m_failed = false;
     return *this;
@@ -133,6 +164,7 @@ namespace Rodin::Examples::Heart
       m_solid->step();
     if (m_fluid)
       m_fluid->step();
+    writeVolume();
     ++m_steps;
     m_failed = false;
   }
@@ -145,7 +177,55 @@ namespace Rodin::Examples::Heart
       m_solid->finish();
     if (m_fluid)
       m_fluid->finish();
+    if (m_volumeOutput.is_open())
+      m_volumeOutput.close();
     m_finished = true;
+  }
+
+  void Atrium::writeVolume()
+  {
+    const Real reference = m_cavity.getReferenceVolume() * CubicMillimetresToMillilitres;
+    if (m_solid)
+    {
+      m_solidCavityVolume =
+        m_cavity.evaluate(m_solid->getDisplacement()) * CubicMillimetresToMillilitres;
+    }
+    if (m_fluid)
+    {
+      m_fluidDomainVolume =
+        CavityVolume::measure(m_fluid->getMesh()) * CubicMetresToMillilitres;
+    }
+    const auto& comm = m_mesh.getContext().getCommunicator();
+    std::string failure;
+    if (comm.rank() == 0)
+    {
+      m_volumeOutput << std::setprecision(17) << getTime() << ',' << reference << ',';
+      if (m_solidCavityVolume)
+        m_volumeOutput << *m_solidCavityVolume;
+      m_volumeOutput << ',';
+      if (m_fluidDomainVolume)
+        m_volumeOutput << *m_fluidDomainVolume;
+      m_volumeOutput << ',';
+      if (m_solidCavityVolume)
+        m_volumeOutput << 100 * (*m_solidCavityVolume / reference - 1);
+      m_volumeOutput << '\n';
+      m_volumeOutput.flush();
+      if (!m_volumeOutput)
+        failure = "Cannot write cavity-volume output " + m_volumePath;
+    }
+    boost::mpi::broadcast(comm, failure, 0);
+    if (!failure.empty())
+      Alert::Exception() << failure << Alert::Raise;
+  }
+
+  Optional<Real> Atrium::getSolidCavityVolume() const noexcept
+  {
+    return m_solidCavityVolume;
+  }
+
+  Optional<Real> Atrium::getFluidDomainVolume() const noexcept
+  {
+    return m_fluidDomainVolume;
   }
 
   size_t Atrium::getStepCount() const noexcept

@@ -8,6 +8,8 @@
 #define RODIN_ATRIUM_ATRIUM_H
 
 #include <memory>
+#include <fstream>
+#include "CavityVolume.h"
 #include "Solid/Solid.h"
 #include "Fluid.h"
 
@@ -73,7 +75,16 @@ namespace Rodin::Examples::Heart
       /// @brief Returns the configured fluid, or null when it is disabled.
       const Fluid* getFluid() const noexcept;
 
+      /// @brief Returns the latest solid-enclosed cavity volume in mL, or empty when disabled.
+      Optional<Real> getSolidCavityVolume() const noexcept;
+
+      /// @brief Returns the latest fluid-domain volume in mL, or empty when disabled.
+      Optional<Real> getFluidDomainVolume() const noexcept;
+
     private:
+      /// @brief Collectively publishes initial and stepwise cavity diagnostics.
+      void writeVolume();
+
       /**
        * @brief Collectively loads and Scotch-partitions the combined source once.
        * @param context Communicator used by both component submeshes.
@@ -82,7 +93,15 @@ namespace Rodin::Examples::Heart
        */
       static MeshType makeMesh(const Context::MPI& context, const Parameters& parameters);
 
+      // Source geometry uses mm; fluid component geometry uses m.
+      static constexpr Real CubicMillimetresToMillilitres = 1e-3;
+      static constexpr Real CubicMetresToMillilitres = 1e6;
       MeshType m_mesh;
+      CavityVolume m_cavity;
+      std::string m_volumePath;
+      std::ofstream m_volumeOutput;
+      Optional<Real> m_solidCavityVolume;
+      Optional<Real> m_fluidDomainVolume;
       Optional<Solid> m_solid;
       Optional<Fluid> m_fluid;
       size_t m_steps = 0;

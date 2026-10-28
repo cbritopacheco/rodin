@@ -103,6 +103,39 @@ The fluid is tetrahedralized against that surface and coarsened with MMG3D
 while preserving its boundary triangulation. The geometry is a demonstration
 model requiring anatomical assessment.
 
+## Enclosed cavity volume
+
+`CavityVolume` measures the filled reference fluid region and the volume swept
+by the moving inner solid wall. The common mesh supplies that fluid region even
+in solid-only mode. With cavity-outward normal $N$, the divergence
+theorem gives
+
+$$
+V_s(t)=V_0+\frac13\int_{\Gamma_{fs,0}}
+\left[(X+u)\cdot\mathrm{cof}(I+\nabla_Xu)N-X\cdot N\right]\,dS_0.
+$$
+
+Inlet and outlet caps remain fixed, consistent with the prescribed zero rim
+displacement. The surface integral uses the displaced face tangents; it does
+not extend displacement into the fluid interior. MPI ownership excludes overlap
+replicas from both cell and interface integrals.
+
+The coordinator writes `<stem>.volume.csv` at initialization and after every
+completed step, with reference volume, solid-enclosed cavity volume, fluid-domain
+volume, and relative solid-volume change. Volumes are in mL. The stem is the
+solid output when a solid is selected, otherwise the fluid output. Disabled
+components have empty CSV entries. `getSolidCavityVolume()` and
+`getFluidDomainVolume()` expose the latest values without MPI collectives.
+
+Fluid mode has a fixed domain, so its volume remains constant. In the current
+independent `FSI` mode, solid-enclosed and fluid-domain volumes are recorded
+separately; they describe different geometries until interface motion is coupled.
+
+Solid states are written and flushed at each time step. Open the XDMF series
+in ParaView, apply **Warp By Vector** using **Displacement**, and use
+**File > Reload Files > Reload existing file(s)** to discover completed states.
+The CSV diagnostics are flushed at each step as well.
+
 ## Build and run
 
 From the repository root, configure MPI, PETSc, and Scotch and build the examples:
