@@ -29,22 +29,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install complex PETSc dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev
-          libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config lcov
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: PETScComplexConvergence
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Run complex PETSc convergence suite
       if: matrix.suite == 'bulk'
       run: ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP)PETSc(MPI)?Helmholtz|RodinPETScSNESStateTest|RodinPETSc(MPI)?ScalarIntegralTest|Rodin_Variational_Integral'

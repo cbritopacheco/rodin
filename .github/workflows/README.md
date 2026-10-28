@@ -57,13 +57,16 @@ changes performance only, never the tests or their acceptance conditions.
 
 Preinstalled transitive `Depends` and `Pre-Depends` packages are explicitly
 resolved to signed repository candidates as well. APT otherwise retains an older
-installed library whenever its version satisfies a minimum constraint, allowing
-producer and consumer runners from different image rollouts to disagree. The
-closure query includes installed packages only, excludes recommendations and
-virtual placeholders, and does not add unused alternative providers. Candidate
-policies are read in one bounded call. Archive keys include the expanded plan.
-The shared-build runtime checksum check remains mandatory: a repository change
-between jobs still fails closed instead of executing incompatible binaries.
+installed library whenever its version satisfies a minimum constraint. Resolution
+combines APT's simulated installation with an installed-dependency traversal
+seeded by every selected package, including new packages. This reaches libraries
+behind not-yet-installed intermediates such as MPI → hwloc → libudev. The pinned
+plan grows until stable, retaining earlier exact versions and rejecting solver
+conflicts. It excludes recommendations and unused alternative providers.
+Candidate policies are read in bounded batches, and the complete plan is logged.
+Archive keys include the expanded plan. The shared-build runtime checksum check
+remains mandatory: a repository change between jobs still fails closed instead
+of executing incompatible binaries.
 
 Shared Linux test and benchmark environments obtain their requested GCC/G++
 packages through the same signed APT plan and cached archives. They select the
@@ -71,7 +74,9 @@ explicit compiler pair through `CC` and `CXX`, verify matching full versions and
 log the runner-provided CMake version. They do not download `setup-cpp` merely
 to select tools already present on the hosted image. This avoids an additional
 action-archive transfer at every shared producer and consumer while preserving
-the configured compiler major version and all numerical test selections.
+the configured compiler major version and all numerical test selections. All
+dedicated execution lanes request this same environment from the restored build
+definition; they do not maintain separate compiler or package setup steps.
 
 Index attempts have a 90-second budget and complete package-download attempts a
 300-second budget. GNU `timeout` terminates the privileged APT process group
