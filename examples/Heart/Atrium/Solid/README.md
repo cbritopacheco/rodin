@@ -150,14 +150,27 @@ $$
 1060\,\mathrm{kg/m^3}=1.06\times10^{-6}\,\mathrm{kPa\,s^2/mm^2}.
 $$
 
-The defaults below are demonstration coefficients, not a calibrated atrial dataset.
+The passive matrix and fiber coefficients use the atrial tissue fit reported by
+[Augustin et al. (2020)](https://pmc.ncbi.nlm.nih.gov/articles/PMC7203597/).
+That fit includes fiber dispersion and distinct endocardial and epicardial
+orientations. Here the coefficients are applied to a single aligned family;
+the resulting law has not been refitted to the experimental stress–strain data.
+The source also scales stiffness for its imaged reference configuration; that
+configuration-dependent correction is not applied here. These defaults therefore
+provide a literature-based passive baseline rather than an organ-level calibration.
+
+The volume penalty, viscous coefficients, active parameters, and prescribed wave
+remain demonstration choices. In particular, the published peak-tension scale
+belongs to a different active model and cannot be identified with the cross-bridge
+source $\sigma_0$. Pressure preload and annular motion are not included in this
+solid example.
 
 | Parameter | Default | Option |
 |---|---:|---|
-| Matrix scale $a$ | $20\,\mathrm{kPa}$ | `--matrix-scale` |
-| Matrix exponent $b$ | $5$ | `--matrix-exponent` |
-| Fiber scale $a_f$ | $20\,\mathrm{kPa}$ | `--fiber-scale` |
-| Fiber exponent $b_f$ | $10$ | `--fiber-exponent` |
+| Matrix scale $a$ | $2.92\,\mathrm{kPa}$ | `--matrix-scale` |
+| Matrix exponent $b$ | $5.6$ | `--matrix-exponent` |
+| Fiber scale $a_f$ | $11.84\,\mathrm{kPa}$ | `--fiber-scale` |
+| Fiber exponent $b_f$ | $17.95$ | `--fiber-exponent` |
 | Volume penalty $\mu_v$ | $500\,\mathrm{kPa}$ | `--volume-penalty` |
 | Tissue viscosity $\nu$ | $0.2\,\mathrm{kPa\,s}$ | `--viscosity` |
 | Serial stiffness $E_s$ | $20\,\mathrm{kPa}$ | `--active-stiffness` |

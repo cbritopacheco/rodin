@@ -59,7 +59,14 @@ namespace Rodin::Examples::Heart::AtriumContraction
     Real relaxation = 10; // Magnitude of the resting electrical drive, in 1/s.
     Real speed = 200;
     Real width = 6;
-    Rodin::Solid::DemirayHolzapfelGasserOgden::Parameters passive;
+    /// @brief Literature-based atrial passive coefficients; see the solid README.
+    Rodin::Solid::DemirayHolzapfelGasserOgden::Parameters passive{
+      .matrixScale = 2.92,
+      .matrixExponent = 5.6,
+      .fiberScale = 11.84,
+      .fiberExponent = 17.95,
+      .volumePenalty = 500
+    };
     Real viscosity = 0.2; // Tissue viscosity, in kPa s.
     Real activeStiffness = 20; // Serial elastic stiffness, in kPa.
     Real activeDamping = 3; // Contractile dashpot, in kPa s.
