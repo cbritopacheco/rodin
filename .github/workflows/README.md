@@ -20,6 +20,7 @@ can share compilation without sharing runtime state.
 | [Style.yml](Style.yml) | Formatting, house-style, naming and documentation-warning checks, including their tooling regressions. |
 | [Documentation.yml](Documentation.yml) | Reusable documentation build and checks; also runs on pull requests. |
 | [Benchmarks.yml](Benchmarks.yml) | Runs and publishes performance benchmarks on pushes to the main development branches. |
+| [Preflight.yml](Preflight.yml) | Validates label metadata, matching rules and pinned labeler API behavior with read-only permissions and local fixtures. |
 | [Labeler.yml](Labeler.yml) | Maintains pull-request labels. |
 | [copilot-setup-steps.yml](copilot-setup-steps.yml) | Provisions the GitHub coding-agent environment; it is separate from numerical test scheduling. |
 

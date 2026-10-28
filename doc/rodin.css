@@ -746,10 +746,13 @@ main article .m-block.m-badge.rodin-license-badge > img {
 }
 
 /* CI status uses the active light/dark palette; stale results stay subdued. */
-.rodin-ci-success { color: var(--success-color); }
-.rodin-ci-danger { color: var(--danger-color); }
-.rodin-ci-warning { color: var(--warning-color); }
-.rodin-ci-muted { color: var(--dim-color, #88939f); }
+.rodin-ci-status { font-weight: 600; }
+.rodin-ci-success { color: var(--ci-success-color); }
+.rodin-ci-danger { color: var(--ci-danger-color); }
+.rodin-ci-warning { color: var(--ci-running-color); }
+.rodin-ci-queued { color: var(--ci-queued-color); }
+.rodin-ci-cancelled { color: var(--ci-cancelled-color); }
+.rodin-ci-muted { color: var(--ci-unknown-color); }
 .rodin-site-footer { position: relative; padding-inline: 2.5rem; }
 .rodin-ci-link { position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding: .5rem; color: inherit; }
 .rodin-ci-link:hover { color: var(--link-color); }
@@ -758,3 +761,5 @@ main article .m-block.m-badge.rodin-license-badge > img {
     mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%208a8.5%208.5%200%200%200-14-3L3%208m0-5v5h5M4%2016a8.5%208.5%200%200%200%2014%203l3-3m0%205v-5h-5M8%2012h8%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22black%22%3E%3Ccircle%20cx%3D%228%22%20cy%3D%2212%22%20r%3D%221.5%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%221.5%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2212%22%20r%3D%221.5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") center / contain no-repeat; }
   .rodin-ci-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 }
+
+.rodin-ci-checked { margin-top: 1.5rem; }

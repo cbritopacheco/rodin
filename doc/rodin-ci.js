@@ -11,11 +11,12 @@
   const refresh = document.createElement('button');
   refresh.type = 'button'; refresh.textContent = 'Refresh'; refresh.className = 'm-button m-default';
   const status = document.createElement('p'); status.setAttribute('role', 'status');
+  status.className = 'rodin-ci-checked';
   const output = document.createElement('div');
   root.append(branch, ' ', refresh, status, output);
   const api = 'https://api.github.com/repos/cbritopacheco/rodin';
   const actions = 'https://github.com/cbritopacheco/rodin/actions';
-  const workflows = ['Tests', 'Benchmarks', 'Build', 'Style', 'CodeQL', 'Labeler', 'Labeler Rules', 'Copilot setup steps', 'Documentation'];
+  const workflows = ['Tests', 'Benchmarks', 'Build', 'Style', 'CodeQL', 'Labeler', 'Preflight', 'Copilot setup steps', 'Documentation'];
   const link = (text, url) => {
     const node = document.createElement('a'); node.textContent = text;
     // API metadata is untrusted: link only to this repository's Actions pages.
@@ -61,7 +62,9 @@
           run?.head_sha !== sha ? 'rodin-ci-muted' :
           outcome === 'success' ? 'rodin-ci-success' :
           ['failure', 'timed_out', 'startup_failure', 'action_required'].includes(outcome) ? 'rodin-ci-danger' :
-          ['queued', 'in_progress', 'waiting', 'pending', 'requested'].includes(outcome) ? 'rodin-ci-warning' : 'rodin-ci-muted');
+          outcome === 'in_progress' ? 'rodin-ci-warning' :
+          ['queued', 'waiting', 'pending', 'requested'].includes(outcome) ? 'rodin-ci-queued' :
+          ['cancelled', 'skipped'].includes(outcome) ? 'rodin-ci-cancelled' : 'rodin-ci-muted');
         const commit = row.insertCell();
         if (run && /^[a-f0-9]{40}$/i.test(run.head_sha)) {
           const commitLink = document.createElement('a');

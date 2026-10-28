@@ -14,7 +14,7 @@ The write-enabled workflow uses `pull_request_target` and reads rules from the
 trusted base commit. It never checks out or executes pull-request code. Changes
 to its action version and rules take effect after merging into the target
 branch. The separate read-only
-[Labeler Rules workflow](../.github/workflows/LabelerRules.yml) tests proposed
+[Preflight workflow](../.github/workflows/Preflight.yml) tests proposed
 changes before that merge.
 
 ## Label catalog and colours
@@ -55,7 +55,7 @@ category colours and readable contrast.
 
 When adding a rule, add its metadata to the catalog and create or update the
 GitHub label with those values. Rename existing labels in place to preserve
-issue and PR assignments. The catalog is checked by the Labeler Rules workflow;
+issue and PR assignments. The catalog is checked by the Preflight workflow;
 it does not automatically write repository label metadata. The action can still
 create an absent label, but its default metadata should then be reconciled with
 the catalog. Neither reconciliation nor the labeler should delete manual labels.

@@ -327,11 +327,11 @@ class LabelerTest(unittest.TestCase):
         self.assertIs(action['with']['dot'], True)
         self.assertIs(action['with']['sync-labels'], False)
         self.assertEqual(job['permissions'], {'contents': 'read', 'pull-requests': 'write', 'issues': 'write'})
-        checks = yaml.safe_load((ROOT / '.github/workflows/LabelerRules.yml').read_text())
+        checks = yaml.safe_load((ROOT / '.github/workflows/Preflight.yml').read_text())
         self.assertEqual(set(checks['on']), {'pull_request', 'push'})
         self.assertNotIn('paths', checks['on']['pull_request'] or {})
         self.assertEqual(checks['permissions'], {'contents': 'read'})
-        checkout = next(s for s in checks['jobs']['Rules']['steps'] if
+        checkout = next(s for s in checks['jobs']['Labeler']['steps'] if
                         s.get('with', {}).get('repository') == 'actions/labeler')
         self.assertEqual(checkout['with']['ref'], revision)
         self.assertFalse(checkout['with']['persist-credentials'])
