@@ -45,7 +45,7 @@ VALVES = {
 ATTR_INLET, ATTR_OUTLET, ATTR_WALL, ATTR_KNIFE = 1, 2, 3, 4
 
 
-def build(step, name, f, lup, ldown, hk_rel, hm_rel, hf_rel, out, cavity_mode="full"):
+def build(step, name, f, lup, ldown, hk_rel, hm_rel, hf_rel, out, cavity_mode="full", wake_end=3.0):
     v = VALVES[name]
     R, Rk, t = v["R"], v["Rk"], v["t"]
     D = 2.0 * R
@@ -177,7 +177,7 @@ def build(step, name, f, lup, ldown, hk_rel, hm_rel, hf_rel, out, cavity_mode="f
     fd.setNumber(box, "VIn", hm); fd.setNumber(box, "VOut", hf)
     fd.setNumber(box, "XMin", -R); fd.setNumber(box, "XMax", R)
     fd.setNumber(box, "YMin", -R); fd.setNumber(box, "YMax", R)
-    fd.setNumber(box, "ZMin", -0.75 * D); fd.setNumber(box, "ZMax", 3.0 * D)
+    fd.setNumber(box, "ZMin", -0.75 * D); fd.setNumber(box, "ZMax", wake_end * D)
     fd.setNumber(box, "Thickness", 1.5 * D)
     # knife-wall junction curves (thin wedges at the bevel): finer
     def curves(faces):
@@ -295,6 +295,8 @@ def main():
     ap.add_argument("--hk", type=float, default=0.0125, help="size at the knife / D")
     ap.add_argument("--hm", type=float, default=0.0385, help="size in the jet box / D")
     ap.add_argument("--hf", type=float, default=0.1, help="far size / D")
+    ap.add_argument("--wake-end", type=float, default=3.0,
+                    help="downstream end of the jet box (size hm) / D, from the knife plane")
     ap.add_argument("--only", default="")
     ap.add_argument("--outdir", default="meshes")
     ap.add_argument("--cavity", default="full", choices=["full", "groove", "none"],
@@ -309,7 +311,7 @@ def main():
             continue
         for o in [int(x) for x in a.openings.split(",")]:
             out = os.path.join(a.outdir, f"{name}_open{o:03d}.mesh")
-            info = build(step, name, o / 100.0, a.lup, a.ldown, a.hk, a.hm, a.hf, out, a.cavity)
+            info = build(step, name, o / 100.0, a.lup, a.ldown, a.hk, a.hm, a.hf, out, a.cavity, a.wake_end)
             print(" ".join(f"{k}={v:.4g}" if isinstance(v, float) else f"{k}={v}"
                            for k, v in info.items()), flush=True)
     gmsh.finalize()

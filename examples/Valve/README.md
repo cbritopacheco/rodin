@@ -80,8 +80,10 @@ mpirun -n 8 ../build/examples/Valve/KnifeGateValve \
 Valores por defecto: agua a 20 °C (ρ = 998.2 kg/m³, μ = 1.002e-3 Pa·s,
 es decir `K = μ`, `n = 1`), U = 3 m/s, p_out = 150 psi = 1.0342 MPa.
 
-Opciones (prefijo `-kv_`): `mesh`, `out`, `rho`, `K` (Pa·sⁿ), `n`, `gdmin`,
-`mumin`, `mumax`, `inlet` (`velocity`|`pressure`), `umean`, `profile`
+Opciones (prefijo `-kv_`): `mesh`, `out`, `model` (`powerlaw`|`bingham`),
+`rho`, `K` (Pa·sⁿ), `n`, `gdmin`, `mumin`, `mumax`, `tau_y` (Pa), `mu_p`
+(Pa·s), `papa_m` (s), `bingham_ratio`, `inlet` (`velocity`|`pressure`),
+`umean`, `q` (caudal en m³/s; reemplaza a `umean`), `profile`
 (`auto`|`laminar`|`turbulent`|`uniform`), `pin`, `pout`, `ramp`,
 `total_pressure`, `dt`, `dtmin`, `dtmax`, `tend`, `adaptive_dt`, `easy`,
 `hard`, `maxit`, `tol`, `tau_dt`, `bdf`, `extrapolate`, `lumped`, `refactor_every`, `refactor_its`, `picard_monitor`, `tavg`, `steady_tol`,
@@ -144,6 +146,55 @@ con 200k–350k incógnitas y MUMPS, del orden de un día por caso en un
 equipo de escritorio con 8 núcleos (estimación, no medido). Para una
 primera pasada rápida, generar mallas más gruesas con
 `make_meshes.py --hk 0.025 --hm 0.06 --hf 0.15`.
+
+## Pulpa como plástico de Bingham (FPC8, `run_valves_bingham.sh`)
+
+Valores máximos de la tabla de la pulpa (fila de 8"): ρ = 1770 kg/m³,
+τ_y = 7.0 Pa, μ_p = 0.0182 Pa·s, Q = 188.8 m³/h (U = Q/A = 1.62 m/s).
+Salida a presión atmosférica (p_out = 0 manométrica).
+
+```sh
+cmake --build build -j --target KnifeGateValve
+mkdir -p ~/valve_runs && cd ~/valve_runs
+bash ~/rodin/examples/Valve/run_valves_bingham.sh            # 32 procesos, un caso a la vez
+NJOBS=3 bash ~/rodin/examples/Valve/run_valves_bingham.sh    # o tres casos a la vez, ~10 procesos c/u
+```
+
+Deja `runs_bingham/FPC8_open{000,025,075,100}/` (log, CSV, XDMF cada 10
+pasos) y `runs_bingham/forces_summary.csv`. Se puede relanzar: los casos
+terminados se saltan. No para en estado estacionario (`-kv_steady_tol 0`):
+corre hasta 20 D/U = 2.5 s y promedia desde 8 D/U = 1.0 s. El
+post-proceso es el mismo: `python3 postprocess_valves.py runs_bingham`.
+
+- **Ley constitutiva.** Bingham regularizado (Papanastasiou):
+  μ(γ̇) = μ_p + τ_y (1 − e^(−m γ̇))/γ̇, que tiende a μ_p + τ_y m en las
+  zonas que no fluyen. Por defecto m = (1000 − 1) μ_p/τ_y = 2.6 s, es decir
+  μ(0) = 1000 μ_p = 18.2 Pa·s: la tensión de fluencia se recupera a más de
+  99 % para γ̇ > 2 s⁻¹, y la cizalla en el flujo es de cientos de s⁻¹.
+  Más rígido: `-kv_papa_m 26` (μ(0) = 182 Pa·s; Picard más lento) o
+  `-kv_bingham_ratio`.
+- **Régimen.** Re_B = ρUD/μ_p ≈ 3.2e4, He = ρτ_yD²/μ_p² ≈ 1.6e6,
+  Bn = τ_yD/(μ_pU) ≈ 48. El Reynolds crítico de Hanks para ese He es
+  ≈ 1.8e4: el flujo en la tubería es turbulento (débilmente) y el perfil
+  de entrada `auto` es la ley 1/7. En laminar (`-kv_profile laminar`)
+  sería el de Buckingham–Reiner, con tapón de radio 0.73 R. El log imprime
+  estos números al inicio.
+- **0 % (cerrada).** No pasa caudal; se impone 150 psi (CWP) aguas arriba y
+  0 aguas abajo (`PIN_CLOSED`, `POUT_CLOSED`). El fluido está en reposo y
+  la fluencia no interviene: F_z = Δp · A_mojada.
+- **Mallas** `resources/examples/Valve/wake/` (las mismas de arriba con la
+  caja del chorro a `D/31` en vez de `D/26`, y hasta 4.5 D aguas abajo en
+  vez de 3 D: `make_meshes.py --only FPC8 --hm 0.032 --wake-end 4.5
+  --outdir wake`):
+
+  | archivo | vértices | tetraedros | γ mín |
+  |---|---|---|---|
+  | FPC8_open000.mesh | 137 248 | 721 860 | 0.20 |
+  | FPC8_open025.mesh | 135 874 | 717 370 | 0.16 |
+  | FPC8_open075.mesh | 125 841 | 661 257 | 0.18 |
+  | FPC8_open100.mesh | 130 041 | 673 435 | 0.15 |
+
+  ~1.7 veces las celdas de las mallas anteriores (~545 k incógnitas).
 
 ## Cómo se calcula la fuerza (y por qué así)
 

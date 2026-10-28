@@ -9,9 +9,14 @@
 #   runs/<valve>_open<NNN>/case.log    full log of the case
 #   runs/forces_summary.csv            one row per case
 #
-# Open gate: velocity inlet (developed profile, U = UMEAN), outlet at the
-# line pressure (150 psi). Closed gate: pressure inlet, 150 psi upstream and
-# 0 downstream (hydrostatic, a few steps suffice).
+# Open gate: velocity inlet (developed profile, U = UMEAN, or the flow rate
+# Q_<valve> in m^3/h), outlet at POUT (default the line pressure, 150 psi).
+# Closed gate: pressure inlet, PIN_CLOSED (150 psi) upstream and POUT_CLOSED
+# (0) downstream (hydrostatic, a few steps suffice).
+#
+# Fluid: MODEL=powerlaw (RHO, K, N; default water) or MODEL=bingham (RHO,
+# TAU_Y, MU_P; PAPA_M optional, see KnifeGateValve.cpp).
+# run_valves_bingham.sh sets these for the pulp of the 8" valve.
 #
 # A case whose case.log ends with the final summary is skipped, so the
 # script can be relaunched after an interruption. A failed case is reported
@@ -21,6 +26,9 @@
 #   bash examples/Valve/run_valves.sh
 # Overrides through the environment, e.g.
 #   NP=8 UMEAN=2.5 T_CONV=30 VALVES="FPC16" OPENINGS="25 50" bash examples/Valve/run_valves.sh
+# NJOBS > 1 runs that many cases at the same time with NP/NJOBS processes
+# each (more throughput than one case on all cores once a case has fewer
+# than ~30 k cells per process).
 #
 # Times are set in convective units D/U (D the bore, U the mean velocity),
 # so FPC8 and FPC16 get the same number of flow passes and of time steps:
@@ -41,7 +49,8 @@ EXE="${EXE:-$RODIN_ROOT/build/examples/Valve/KnifeGateValve}"
 MESH_DIR="${MESH_DIR:-$RODIN_ROOT/resources/examples/Valve}"
 OUT_DIR="${OUT_DIR:-$PWD/runs}"
 
-NP="${NP:-8}"                         # MPI processes (8 on the Mac)
+NP="${NP:-8}"                         # MPI processes in total (8 on the Mac)
+NJOBS="${NJOBS:-1}"                   # cases run at the same time (NP/NJOBS processes each)
 VALVES="${VALVES:-FPC8 FPC16}"
 OPENINGS="${OPENINGS:-0 25 50 75 100}"
 OUTPUT_EVERY="${OUTPUT_EVERY:-10}"    # XDMF every N time steps
@@ -52,7 +61,16 @@ RHO="${RHO:-998.2}"
 K="${K:-1.002e-3}"                    # Pa s^n (= mu for n = 1)
 N="${N:-1}"
 UMEAN="${UMEAN:-3.0}"                 # m/s, open gate
+Q_FPC8="${Q_FPC8:-}"                  # m^3/h; when set, replaces UMEAN for FPC8
+Q_FPC16="${Q_FPC16:-}"                # m^3/h; when set, replaces UMEAN for FPC16
+MODEL="${MODEL:-powerlaw}"            # powerlaw | bingham
+TAU_Y="${TAU_Y:-0}"                   # Pa, Bingham yield stress
+MU_P="${MU_P:-0}"                     # Pa s, Bingham plastic viscosity
+PAPA_M="${PAPA_M:-}"                  # s, Papanastasiou exponent (empty: executable default)
 PLINE="${PLINE:-1.0342e6}"            # Pa, 150 psi
+POUT="${POUT:-$PLINE}"                # Pa, outlet pressure with the gate open
+PIN_CLOSED="${PIN_CLOSED:-$PLINE}"    # Pa, upstream pressure held by the closed gate
+POUT_CLOSED="${POUT_CLOSED:-0}"       # Pa, downstream of the closed gate
 T_CONV="${T_CONV:-20}"                # t_end in units of D/U (open gate)
 T_AVG_CONV="${T_AVG_CONV:-8}"         # start of the time average, units of D/U
 DT_CONV="${DT_CONV:-0.0075}"          # initial dt, units of D/U (adaptive afterwards)
@@ -67,8 +85,56 @@ export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"   # MPI only: no oversubscription
 [ -x "$EXE" ] || { echo "Executable not found: $EXE" >&2;
   echo "Build it with: cmake --build build -j --target KnifeGateValve" >&2; exit 1; }
 mkdir -p "$OUT_DIR"
+NPJ=$(( NP / NJOBS )); [ "$NPJ" -ge 1 ] || NPJ=1
+
+if [ "$MODEL" = "bingham" ]; then
+  fluid=(-kv_model bingham -kv_rho "$RHO" -kv_tau_y "$TAU_Y" -kv_mu_p "$MU_P")
+  [ -n "$PAPA_M" ] && fluid+=(-kv_papa_m "$PAPA_M")
+else
+  fluid=(-kv_model powerlaw -kv_rho "$RHO" -kv_K "$K" -kv_n "$N")
+fi
 
 failed=()
+pids=(); ptags=()
+# Waits for the background cases until fewer than $1 are running (portable:
+# the bash 3.2 of macOS has no wait -n).
+throttle() {
+  while :; do
+    [ "${#pids[@]}" -eq 0 ] && return
+    local keep_p=() keep_t=() i
+    for i in "${!pids[@]}"; do
+      if kill -0 "${pids[$i]}" 2>/dev/null; then
+        keep_p+=("${pids[$i]}"); keep_t+=("${ptags[$i]}")
+      else
+        wait "${pids[$i]}" || failed+=("${ptags[$i]}")
+      fi
+    done
+    pids=("${keep_p[@]+"${keep_p[@]}"}"); ptags=("${keep_t[@]+"${keep_t[@]}"}")
+    [ "${#pids[@]}" -lt "$1" ] && return
+    sleep ${THROTTLE_SLEEP:-20}
+  done
+}
+
+run_case() {  # tag dir log bc...
+  local tag="$1" dir="$2" log="$3"; shift 3
+  echo "[$tag] start $(date '+%F %T')  ($NPJ processes)  -> $dir"
+  (
+    cd "$dir" &&
+    $MPIRUN -n "$NPJ" "$EXE" \
+      -kv_mesh "$mesh" -kv_out "$tag" \
+      "${fluid[@]}" \
+      "$@" \
+      -kv_steady_tol 0 \
+      -kv_output_every "$OUTPUT_EVERY" \
+      $EXTRA
+  ) > "$log" 2>&1
+  local status=$?
+  if [ $status -ne 0 ]; then
+    echo "[$tag] FAILED (exit $status), see $log"; return 1
+  fi
+  echo "[$tag] done  $(date '+%F %T')"
+}
+
 for valve in $VALVES; do
   for o in $OPENINGS; do
     tag=$(printf "%s_open%03d" "$valve" "$o")
@@ -83,48 +149,49 @@ for valve in $VALVES; do
       echo "[$tag] already done (skipped)"; continue
     fi
     case "$valve" in
-      FPC8)  D=0.2032 ;;
-      FPC16) D=0.382 ;;
+      FPC8)  D=0.2032; Qh="$Q_FPC8" ;;
+      FPC16) D=0.382;  Qh="$Q_FPC16" ;;
       *) echo "[$tag] unknown bore for $valve (skipped)"; failed+=("$tag"); continue ;;
     esac
-    tc=$(python3 -c "print($D/abs($UMEAN))")                 # D/U, s
+    if [ -n "$Qh" ]; then
+      Qs=$(python3 -c "print($Qh/3600.0)")                     # m^3/s
+      U=$(python3 -c "import math; print($Qs/(math.pi*$D**2/4))")
+      inflow=(-kv_q "$Qs")
+    else
+      U="$UMEAN"
+      inflow=(-kv_umean "$UMEAN")
+    fi
+    tc=$(python3 -c "print($D/abs($U))")                     # D/U, s
     tend=$(python3 -c "print($T_CONV*$tc)")
     tavg=$(python3 -c "print($T_AVG_CONV*$tc)")
     dt0=$(python3 -c "print($DT_CONV*$tc)")
     dtmax=$(python3 -c "print($DTMAX_CONV*$tc)")
-    printf "D=%s\ntc=%s\ntavg=%s\ntend=%s\n" "$D" "$tc" "$tavg" "$tend" > "$dir/case.env"
+    printf "D=%s\nU=%s\ntc=%s\ntavg=%s\ntend=%s\n" "$D" "$U" "$tc" "$tavg" "$tend" > "$dir/case.env"
 
     if [ "$o" -eq 0 ]; then
-      bc=(-kv_inlet pressure -kv_pin "$PLINE" -kv_pout 0 -kv_ramp 0 -kv_tend "$TEND_CLOSED" -kv_tavg 0)
+      bc=(-kv_inlet pressure -kv_pin "$PIN_CLOSED" -kv_pout "$POUT_CLOSED" -kv_ramp 0
+          -kv_tend "$TEND_CLOSED" -kv_tavg 0)
     else
-      bc=(-kv_inlet velocity -kv_umean "$UMEAN" -kv_pout "$PLINE" -kv_tend "$tend" -kv_tavg "$tavg"
+      bc=(-kv_inlet velocity "${inflow[@]}" -kv_pout "$POUT" -kv_tend "$tend" -kv_tavg "$tavg"
           -kv_dt "$dt0" -kv_dtmax "$dtmax")
     fi
 
-    echo "[$tag] start $(date '+%F %T')  ($NP processes)  -> $dir"
-    (
-      cd "$dir" &&
-      $MPIRUN -n "$NP" "$EXE" \
-        -kv_mesh "$mesh" -kv_out "$tag" \
-        -kv_rho "$RHO" -kv_K "$K" -kv_n "$N" \
-        "${bc[@]}" \
-        -kv_output_every "$OUTPUT_EVERY" \
-        $EXTRA
-    ) > "$log" 2>&1
-    status=$?
-    if [ $status -ne 0 ]; then
-      echo "[$tag] FAILED (exit $status), see $log"; failed+=("$tag")
+    if [ "$NJOBS" -gt 1 ]; then
+      throttle "$NJOBS"
+      run_case "$tag" "$dir" "$log" "${bc[@]}" &
+      pids+=($!); ptags+=("$tag")
     else
-      echo "[$tag] done  $(date '+%F %T')"
+      run_case "$tag" "$dir" "$log" "${bc[@]}" || failed+=("$tag")
     fi
   done
 done
+[ "$NJOBS" -gt 1 ] && throttle 1
 
 # ---- Summary: time averages of every case CSV -----------------------------
-python3 - "$OUT_DIR" "$NBATCH" "$UMEAN" "$PLINE" <<'PY'
+python3 - "$OUT_DIR" "$NBATCH" "$UMEAN" <<'PY'
 import csv, glob, math, os, sys
 
-out, nbatch, umean, pline = sys.argv[1], int(sys.argv[2]), float(sys.argv[3]), float(sys.argv[4])
+out, nbatch, umean = sys.argv[1], int(sys.argv[2]), float(sys.argv[3])
 rows = []
 for d in sorted(glob.glob(os.path.join(out, "*_open*"))):
     tag = os.path.basename(d)
@@ -180,7 +247,7 @@ for d in sorted(glob.glob(os.path.join(out, "*_open*"))):
     row = {
         "valve": valve, "opening_pct": opening,
         "inlet": "pressure" if opening == 0 else "velocity",
-        "U_mean_m_s": 0.0 if opening == 0 else umean,
+        "U_mean_m_s": 0.0 if opening == 0 else env.get("U", umean),
         "t_end_s": float(data[-1]["t"]), "t_avg_from_s": t0, "steps": len(data),
         "steps_averaged": len(win),
         "D_over_U_s": tc, "window_D_over_U": (W / tc) if (tc > 0 and opening) else 0.0,

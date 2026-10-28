@@ -8,13 +8,16 @@
 // KnifeGateValve.cpp
 //
 // Hydrodynamic force on the gate (knife) of a knife gate valve at a fixed
-// opening. Incompressible Navier-Stokes with a power-law viscosity in the
-// fluid of a straight pipe with the knife removed (meshes from
+// opening. Incompressible Navier-Stokes with a power-law or Bingham viscosity
+// in the fluid of a straight pipe with the knife removed (meshes from
 // examples/Valve/make_meshes.py):
 //
 //   rho (u - u^n)/dt + rho (grad u) u - div(2 mu(gd) e(u)) + grad p = 0,
 //   div u = 0,
-//   mu(gd) = K max(gd, gd_min)^(n - 1), clipped to [mu_min, mu_max],
+//   mu(gd) = K max(gd, gd_min)^(n - 1)                (power law), or
+//   mu(gd) = mu_p + tau_y (1 - exp(-m gd))/gd          (Bingham plastic,
+//            Papanastasiou; mu(0) = mu_p + tau_y m, m = (ratio - 1) mu_p/tau_y
+//            unless -kv_papa_m is given), clipped to [mu_min, mu_max],
 //   gd = sqrt(2 e(u):e(u)),
 //
 //   u = U w(r)/<w> e      on the inlet  (velocity inlet, default: developed
@@ -100,9 +103,12 @@
 //       -kv_inlet pressure -kv_pin 1.0342e6 -kv_pout 0 -kv_tend 0.1
 //   slurry (power law):
 //   ... -kv_rho 1400 -kv_K 0.3 -kv_n 0.6 -kv_umean 3
+//   pulp as a Bingham plastic, flow rate 188.8 m^3/h, atmospheric outlet:
+//   ... -kv_model bingham -kv_rho 1770 -kv_tau_y 7 -kv_mu_p 0.0182 -kv_q 0.052444 -kv_pout 0
 //
-// Options (prefix -kv_): mesh, out, rho, K, n, gdmin, mumin, mumax,
-// inlet (velocity|pressure), umean, profile (auto|laminar|turbulent|uniform), pin, pout,
+// Options (prefix -kv_): mesh, out, model (powerlaw|bingham), rho, K, n, gdmin,
+// mumin, mumax, tau_y, mu_p, papa_m, bingham_ratio,
+// inlet (velocity|pressure), umean, q (m^3/s, overrides umean), profile (auto|laminar|turbulent|uniform), pin, pout,
 // ramp, tangential (inlet penalty, kg/(m^2 s)), total_pressure (bool), dt,
 // dtmin, dtmax, tend, adaptive_dt (bool), grow, shrink, easy, hard, maxit,
 // tol, tau_dt (bool), bdf (1|2), extrapolate (bool), lumped (bool), refactor_every, refactor_its, picard_monitor (bool), tavg, steady_tol, steady_window, output_every, scale.
@@ -177,13 +183,22 @@ namespace Rodin::Examples::Valve
         Labels labels;
         Real meshScale = 1.0;      ///< mesh coordinates -> m
 
-        // Fluid: power law mu = K gd^(n-1). Default: water (n = 1, K = mu).
+        // Fluid: power law mu = K gd^(n-1) (default: water, n = 1, K = mu) or
+        // Bingham plastic, Papanastasiou regularisation
+        //   mu = mu_p + tau_y (1 - exp(-m gd))/gd   (-> mu_p + tau_y m as gd -> 0).
+        std::string model = "powerlaw";  ///< "powerlaw" or "bingham"
         Real rho = 998.2;          ///< kg/m^3 (water, 20 C)
         Real K = 1.002e-3;         ///< Pa s^n (water, 20 C: n = 1, K = mu)
         Real n = 1.0;              ///< flow index (n < 1 shear-thinning)
         Real gammaMin = 1.0e-2;    ///< 1/s, regularisation of gd -> 0
         Real muMin = 0.0;          ///< Pa s, clip of the apparent viscosity
         Real muMax = 1.0e3;        ///< Pa s
+        Real tauY = 0.0;           ///< Pa, Bingham yield stress
+        Real muP = 0.0;            ///< Pa s, Bingham plastic viscosity
+        /// s, Papanastasiou exponent m (< 0: from binghamRatio).
+        Real papanastasiou = -1.0;
+        /// mu(0)/mu_p of the regularised law when m is not given: m = (ratio - 1) mu_p/tau_y.
+        Real binghamRatio = 1.0e3;
 
         // Boundary conditions.
         /// Inlet: "velocity" (developed profile of mean speed uMean; open
@@ -191,8 +206,11 @@ namespace Rodin::Examples::Valve
         /// closed gate, where no flow rate can be imposed).
         std::string inlet = "velocity";
         Real uMean = 3.0;          ///< m/s, mean inlet velocity Q/A
-        /// "auto" (laminar power-law profile if Re_MR < 2100, else 1/7 law),
-        /// "laminar", "turbulent" (1/7 power law) or "uniform".
+        Real flowRate = -1.0;      ///< m^3/s; > 0 overrides uMean (U = Q/A_in of the mesh)
+        /// "auto" (laminar if Re_MR < 2100, Bingham: Re_B below Hanks'
+        /// critical Reynolds number; else the 1/7 law), "laminar" (developed
+        /// power-law or Buckingham-Reiner plug profile), "turbulent" (1/7
+        /// power law) or "uniform".
         std::string profile = "auto";
         Real pIn = 1.0342e6;       ///< Pa, inlet pressure (pressure inlet): 150 psi
         Real pOut = -1.0;          ///< Pa, outlet pressure (< 0: 150 psi with a velocity inlet, 0 with a pressure inlet)
@@ -303,6 +321,21 @@ namespace Rodin::Examples::Valve
         m_velocityInlet = (m_cfg.inlet == "velocity");
         if (!m_velocityInlet && m_cfg.inlet != "pressure")
           throw std::runtime_error("-kv_inlet must be velocity or pressure");
+        m_bingham = (m_cfg.model == "bingham");
+        if (!m_bingham && m_cfg.model != "powerlaw")
+          throw std::runtime_error("-kv_model must be powerlaw or bingham");
+        if (m_bingham)
+        {
+          if (m_cfg.muP <= 0.0 || m_cfg.tauY < 0.0)
+            throw std::runtime_error("Bingham: -kv_mu_p > 0 and -kv_tau_y >= 0 required");
+          if (m_cfg.papanastasiou < 0.0)
+            m_cfg.papanastasiou = (m_cfg.tauY > 0.0)
+              ? (m_cfg.binghamRatio - 1.0) * m_cfg.muP / m_cfg.tauY : 0.0;
+        }
+        // Flow rate given: U = Q/A_in with the area of the meshed inlet, so the
+        // imposed flux is exactly Q.
+        if (m_cfg.flowRate > 0.0)
+          m_cfg.uMean = m_cfg.flowRate / m_area[0];
         if (m_cfg.pOut < 0.0)
           m_cfg.pOut = m_velocityInlet ? 1.0342e6 : 0.0;
         // Reference velocity: U (velocity inlet) or the Bernoulli velocity of p_in - p_out.
@@ -325,7 +358,7 @@ namespace Rodin::Examples::Valve
           // Dominates rho |u| and mu/h at the inlet by ~10^3: a penalty, not a
           // stabilisation (MUMPS does not mind the conditioning).
           const Real R = std::sqrt(m_area[0] / M_PI);
-          m_cfg.tangentialPenalty = 1.0e3 * std::max(m_cfg.rho * m_uRef, m_cfg.K / (0.05 * R));
+          m_cfg.tangentialPenalty = 1.0e3 * std::max(m_cfg.rho * m_uRef, (m_bingham ? viscosity(0.0) : m_cfg.K) / (0.05 * R));
         }
 
         // l2 norm of a dof vector with |u| = U_B at every node.
@@ -375,12 +408,26 @@ namespace Rodin::Examples::Valve
             Alert::Warning() << "[partition] badly balanced (max/mean = " << imbalance
                              << "): most of the work sits on few ranks. Build Rodin with "
                                 "-DRODIN_USE_SCOTCH=ON." << Alert::Raise;
-          Alert::Info() << "[fluid] rho=" << m_cfg.rho << " kg/m^3  K=" << m_cfg.K << " Pa s^n  n=" << m_cfg.n
-                        << "  mu in [" << m_cfg.muMin << ", " << m_cfg.muMax << "] Pa s"
-                        << Alert::NewLine << "[bc] inlet: "
+          if (m_bingham)
+          {
+            Alert::Info() << "[fluid] Bingham (Papanastasiou)  rho=" << m_cfg.rho << " kg/m^3  tau_y=" << m_cfg.tauY
+                          << " Pa  mu_p=" << m_cfg.muP << " Pa s  m=" << m_cfg.papanastasiou
+                          << " s  mu(0)=" << viscosity(0.0) << " Pa s  mu in [" << m_cfg.muMin << ", "
+                          << m_cfg.muMax << "] Pa s"
+                          << Alert::Raise;
+            if (m_velocityInlet)
+              Alert::Info() << "[fluid] Re_B=" << m_reynolds << "  He=" << m_hedstrom
+                            << "  Re_c(Hanks)=" << m_reynoldsCritical << "  Bn=" << m_binghamNumber
+                            << "  laminar plug radius/R=" << m_plug << Alert::Raise;
+          }
+          else
+            Alert::Info() << "[fluid] rho=" << m_cfg.rho << " kg/m^3  K=" << m_cfg.K << " Pa s^n  n=" << m_cfg.n
+                          << "  mu in [" << m_cfg.muMin << ", " << m_cfg.muMax << "] Pa s" << Alert::Raise;
+          Alert::Info()
+                        << "[bc] inlet: "
                         << (m_velocityInlet
                               ? "velocity, U=" + std::to_string(m_cfg.uMean) + " m/s, " + m_profileName
-                                + " profile, Re_MR=" + std::to_string(m_reynolds)
+                                + " profile, Re=" + std::to_string(m_reynolds)
                               : "pressure, p_in=" + std::to_string(m_cfg.pIn) + " Pa ("
                                 + (m_cfg.totalPressure ? "total" : "static") + ")")
                         << "  p_out=" << m_cfg.pOut << " Pa  ramp=" << m_cfg.ramp << " s" << Alert::Raise;
@@ -558,13 +605,37 @@ namespace Rodin::Examples::Valve
           c /= d;
         m_inletRadius = std::sqrt(m_area[0] / M_PI);
 
-        // Metzner-Reed Reynolds number (= rho U D / mu for n = 1).
         const Real n = m_cfg.n, U = std::abs(m_cfg.uMean), D = 2.0 * m_inletRadius;
-        m_reynolds = m_cfg.rho * std::pow(U, 2.0 - n) * std::pow(D, n)
-                   / (m_cfg.K * std::pow(8.0, n - 1.0) * std::pow((3.0 * n + 1.0) / (4.0 * n), n));
+        Real critical = 2100.0;
+        if (m_bingham)
+        {
+          // Bingham Reynolds and Hedstrom numbers; Hanks' critical Reynolds
+          // number, x_c/(1 - x_c)^3 = He/16800, Re_c = He/(8 x_c) (1 - 4/3 x_c + x_c^4/3);
+          // the laminar profile is Buckingham-Reiner's (plug radius x R, x = tau_y/tau_w).
+          m_reynolds = m_cfg.rho * U * D / m_cfg.muP;
+          m_hedstrom = m_cfg.rho * m_cfg.tauY * D * D / (m_cfg.muP * m_cfg.muP);
+          m_binghamNumber = (U > 0.0) ? m_cfg.tauY * D / (m_cfg.muP * U) : 0.0;
+          const Real target = m_hedstrom / 16800.0;
+          const Real xc = bisect([target](Real x) { return x / std::pow(1.0 - x, 3) - target; });
+          critical = (xc > 0.0)
+            ? m_hedstrom / (8.0 * xc) * (1.0 - 4.0 / 3.0 * xc + std::pow(xc, 4) / 3.0) : 2100.0;
+          critical = std::max(critical, 2100.0);
+          m_reynoldsCritical = critical;
+          // B x = 1 - 4x/3 + x^4/3 with B = 4 mu_p U/(tau_y R) = 8/Bn.
+          const Real B = (m_binghamNumber > 0.0) ? 8.0 / m_binghamNumber : 0.0;
+          m_plug = (B > 0.0)
+            ? bisect([B](Real x) { return B * x - (1.0 - 4.0 * x / 3.0 + std::pow(x, 4) / 3.0); }) : 0.0;
+        }
+        else
+        {
+          // Metzner-Reed Reynolds number (= rho U D / mu for n = 1).
+          m_reynolds = m_cfg.rho * std::pow(U, 2.0 - n) * std::pow(D, n)
+                     / (m_cfg.K * std::pow(8.0, n - 1.0) * std::pow((3.0 * n + 1.0) / (4.0 * n), n));
+          m_reynoldsCritical = critical;
+        }
         m_profileName = m_cfg.profile;
         if (m_profileName == "auto")
-          m_profileName = (m_reynolds < 2100.0) ? "laminar" : "turbulent";
+          m_profileName = (m_reynolds < critical) ? "laminar" : "turbulent";
         if (m_profileName != "laminar" && m_profileName != "turbulent" && m_profileName != "uniform")
           throw std::runtime_error("-kv_profile must be auto, laminar, turbulent or uniform");
 
@@ -573,6 +644,21 @@ namespace Rodin::Examples::Valve
         m_profileScale = std::abs(m_cfg.uMean) * m_area[0] / boundaryIntegral(shape, L.inlet);
         if (m_cfg.uMean < 0.0)
           m_profileScale = -m_profileScale;
+      }
+
+      /// Root in (0, 1) of an increasing function f with f(0) < 0 < f(1^-) (0 if none).
+      template <class F>
+      static Real bisect(F&& f)
+      {
+        Real a = 0.0, b = 1.0 - 1.0e-12;
+        if (!(f(a) < 0.0 && f(b) > 0.0))
+          return 0.0;
+        for (int i = 0; i < 200 && b - a > 1.0e-14; ++i)
+        {
+          const Real c = 0.5 * (a + b);
+          (f(c) < 0.0 ? a : b) = c;
+        }
+        return 0.5 * (a + b);
       }
 
       /// Profile shape w(r/R) at a point (unnormalised), zero at the wall.
@@ -590,6 +676,11 @@ namespace Rodin::Examples::Valve
           r2 += dk * dk;
         }
         const Real s = std::min(std::sqrt(r2) / m_inletRadius, 1.0);
+        if (m_profileName == "laminar" && m_bingham)
+        {
+          const Real x = m_plug;  // plug radius / R
+          return (s <= x) ? (1.0 - x) * (1.0 - x) : (1.0 - s * s) - 2.0 * x * (1.0 - s);
+        }
         if (m_profileName == "laminar")
           return 1.0 - std::pow(s, (m_cfg.n + 1.0) / m_cfg.n);
         if (m_profileName == "turbulent")
@@ -770,7 +861,16 @@ namespace Rodin::Examples::Valve
       // ---- Constitutive law and stabilisation ---------------------------------
       Real viscosity(Real gd) const
       {
-        const Real mu = m_cfg.K * std::pow(std::max(gd, m_cfg.gammaMin), m_cfg.n - 1.0);
+        Real mu;
+        if (m_bingham)
+        {
+          // (1 - exp(-m gd))/gd, = m (1 - m gd/2 + ...) for small m gd.
+          const Real m = m_cfg.papanastasiou, x = m * gd;
+          const Real yield = (x < 1.0e-6) ? m * (1.0 - 0.5 * x) : -std::expm1(-x) / gd;
+          mu = m_cfg.muP + m_cfg.tauY * yield;
+        }
+        else
+          mu = m_cfg.K * std::pow(std::max(gd, m_cfg.gammaMin), m_cfg.n - 1.0);
         return std::clamp(mu, m_cfg.muMin, m_cfg.muMax);
       }
 
@@ -1144,6 +1244,8 @@ namespace Rodin::Examples::Valve
       Vec3 m_knifeNormal{};
       Vec3 m_flowDir{}, m_inletCentre{};
       Real m_inletRadius = 0.0, m_profileScale = 0.0, m_reynolds = 0.0;
+      bool m_bingham = false;
+      Real m_hedstrom = 0.0, m_binghamNumber = 0.0, m_reynoldsCritical = 0.0, m_plug = 0.0;
       std::string m_profileName = "none";
       Vec3 m_lastF{}, m_avgF{}, m_avgFd{};
       Real m_lastQ = 0.0, m_avgQ = 0.0, m_avgTime = 0.0;
@@ -1220,12 +1322,19 @@ int main(int argc, char** argv)
       value = (v == PETSC_TRUE);
     };
     real("-kv_scale", cfg.meshScale);
+    PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR, "-kv_model", buffer, sizeof(buffer), &got);
+    if (got)
+      cfg.model = buffer;
     real("-kv_rho", cfg.rho);
     real("-kv_K", cfg.K);
     real("-kv_n", cfg.n);
     real("-kv_gdmin", cfg.gammaMin);
     real("-kv_mumin", cfg.muMin);
     real("-kv_mumax", cfg.muMax);
+    real("-kv_tau_y", cfg.tauY);
+    real("-kv_mu_p", cfg.muP);
+    real("-kv_papa_m", cfg.papanastasiou);
+    real("-kv_bingham_ratio", cfg.binghamRatio);
     PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR, "-kv_inlet", buffer, sizeof(buffer), &got);
     if (got)
       cfg.inlet = buffer;
@@ -1233,6 +1342,7 @@ int main(int argc, char** argv)
     if (got)
       cfg.profile = buffer;
     real("-kv_umean", cfg.uMean);
+    real("-kv_q", cfg.flowRate);
     real("-kv_pin", cfg.pIn);
     real("-kv_pout", cfg.pOut);
     real("-kv_ramp", cfg.ramp);
