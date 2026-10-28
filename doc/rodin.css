@@ -763,3 +763,5 @@ main article .m-block.m-badge.rodin-license-badge > img {
 }
 
 .rodin-ci-checked { margin-top: 1.5rem; }
+
+.rodin-ci-branch + .rodin-ci-branch { margin-top: 2.5rem; }
