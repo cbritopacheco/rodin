@@ -158,6 +158,17 @@ namespace Rodin::Examples::Heart::AtriumContraction
        */
       Material prepare(const Geometry::Point& point) const;
 
+      /**
+       * @brief Initializes active fields with the residual's volume quadrature.
+       *
+       * The cellwise stiffness predictor averages the pointwise squared gamma
+       * updates before taking the square root. Inactive quadrature samples thus
+       * retain the constitutive floor even when a cell vertex is activated.
+       * Beta uses the volume mean of its pointwise update. These are initial
+       * guesses only; all three active fields remain in the global Newton solve.
+       */
+      void predictActiveState();
+
       /// @brief Packs mechanical and independent active fields into the Newton vector.
       void pack();
 

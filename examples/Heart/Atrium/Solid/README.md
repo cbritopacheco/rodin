@@ -129,9 +129,10 @@ Rodin's `InternalVirtualWork`, `Integral`, PETSc `KSP`, and `SNES`
 assemble and solve the four-field system. Every nonlinear and coupling term
 uses the same order-four quadrature policy. A collective state-domain check
 allows SNES line search to reject invalid active stretches and nonpositive wedges
-before constitutive assembly. An electrical
-upper bound over each wedge supplies only an initial Newton predictor; the
-active equations always evaluate their source at quadrature points.
+before constitutive assembly. The initial active predictor uses the same
+volume quadrature as the residual: stiffness is the mean squared-gamma update,
+while transformed stress uses the mean beta update. The active fields remain
+independent unknowns in the global Newton solve.
 
 The pulse traversal time is $T=(\max_X s(X)+3w)/v$. By default, `--steps N`
 sets $\Delta t=T/N$ and writes $N+1$ states including initialization.

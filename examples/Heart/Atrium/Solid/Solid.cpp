@@ -231,6 +231,33 @@ namespace Rodin::Examples::Heart::AtriumContraction
     return law;
   }
 
+  void Solid::predictActiveState()
+  {
+    const auto predict = [this](const Point& point, bool stiffness) {
+      const auto& cell = point.getPolytope();
+      const auto& formula =
+        QF::QuadratureFormula::get(QuadratureOrder, cell.getGeometry());
+      const auto& quadrature = cell.getQuadrature(formula);
+      Real sum = 0, measure = 0;
+      for (size_t q = 0; q < quadrature.getSize(); ++q)
+      {
+        const auto& sample = quadrature.getPoint(q);
+        const Real weight = formula.getWeight(q) * sample.getDistortion();
+        Rodin::Solid::ActiveFiberLaw::State previous;
+        previous.gamma = m_previousGamma(sample);
+        previous.beta = m_previousBeta(sample);
+        const auto state =
+          m_law.getActiveLaw().update(m_timeStep, previous, m_previousExtension(sample),
+            m_extension(sample), m_data.electricalAt(sample, m_time));
+        sum += weight * (stiffness ? state.gamma * state.gamma : state.beta);
+        measure += weight;
+      }
+      return stiffness ? std::sqrt(sum / measure) : sum / measure;
+    };
+    m_gamma = [&predict](const Point& point) { return predict(point, true); };
+    m_beta = [&predict](const Point& point) { return predict(point, false); };
+  }
+
   void Solid::pack()
   {
     m_increment.getSolution() = m_displacement;
@@ -346,24 +373,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
     m_predictedDisplacement = m_displacement + m_timeStep * m_velocity +
       (m_timeStep * m_timeStep * (Real(0.5) - NewmarkBeta)) * m_acceleration;
     m_predictedVelocity = m_velocity + (m_timeStep * (1 - NewmarkGamma)) * m_acceleration;
-    m_gamma = [this](const Point& point) {
-      Rodin::Solid::ActiveFiberLaw::State previous;
-      previous.gamma = m_previousGamma(point);
-      previous.beta = m_previousBeta(point);
-      return m_law.getActiveLaw()
-        .update(m_timeStep, previous, m_previousExtension(point), m_extension(point),
-          m_data.maximumElectrical(point.getPolytope(), m_time))
-        .gamma;
-    };
-    m_beta = [this](const Point& point) {
-      Rodin::Solid::ActiveFiberLaw::State previous;
-      previous.gamma = m_previousGamma(point);
-      previous.beta = m_previousBeta(point);
-      return m_law.getActiveLaw()
-        .update(m_timeStep, previous, m_previousExtension(point), m_extension(point),
-          m_data.maximumElectrical(point.getPolytope(), m_time))
-        .beta;
-    };
+    predictActiveState();
     pack();
     m_mechanics.assemble();
     m_newton->solve();

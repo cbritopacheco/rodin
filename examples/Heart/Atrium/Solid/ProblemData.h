@@ -141,14 +141,6 @@ namespace Rodin::Examples::Heart::AtriumContraction
     Real electricalAt(const Geometry::Point& point, Real time) const;
 
     /**
-     * @brief Bounds electrical drive over a wedge for an admissible Newton predictor.
-     * @param cell Wedge whose reference vertices define the projection interval.
-     * @param time Current physical time in seconds.
-     * @returns Maximum drive in inverse seconds; residuals still use quadrature values.
-     */
-    Real maximumElectrical(const Geometry::Polytope& cell, Real time) const;
-
-    /**
      * @brief Collectively checks each owned wedge over its entire reference cell.
      * @param displacement Current nodal displacement in mm.
      * @returns Minimum scaled determinant in mm, or no value for nonfinite geometry.

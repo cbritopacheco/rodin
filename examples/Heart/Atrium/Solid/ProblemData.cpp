@@ -501,22 +501,6 @@ namespace Rodin::Examples::Heart::AtriumContraction
     return (cfg.activation + cfg.relaxation) * activationAt(point, time) - cfg.relaxation;
   }
 
-  Real ProblemData::maximumElectrical(const Polytope& cell, Real time) const
-  {
-    Real lower = std::numeric_limits<Real>::infinity(), upper = -lower;
-    for (Index vertex : cell.getVertices())
-    {
-      const Real coordinate = waveDirection.dot(point3(mesh, vertex) - baseOrigin);
-      lower = std::min(lower, coordinate);
-      upper = std::max(upper, coordinate);
-    }
-    const Real center = cfg.speed * time;
-    const Real distance = std::clamp(center, lower, upper) - center;
-    const Real scaled = distance / cfg.width;
-    return (cfg.activation + cfg.relaxation) * std::exp(-scaled * scaled) -
-      cfg.relaxation;
-  }
-
   Optional<Real> ProblemData::minimumDeformedJacobian(
     const VectorField& displacement) const
   {
