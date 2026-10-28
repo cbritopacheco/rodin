@@ -579,3 +579,28 @@ superseded commits. Missing logs prevent recovery.
 The section also states the workflow's completeness requirement: all benchmark
 cases and ranks before pooling/publication, or all mandatory test and coverage
 contributions with a complete production line result of at least 95%.
+
+## API-backed README badges
+
+`CIBadges.yml` reads actual Actions run conclusions for current develop/master
+push commits and writes Shields endpoint JSON to the isolated `ci-badges` branch.
+It never redeploys Pages or changes source branches. The README uses these
+endpoints for Build, Tests, Benchmarks and Documentation; Codecov is unchanged.
+
+Success is green; failure/timeout red; queued blue; running amber; cancelled and
+skipped orange; unknown grey. Older-commit results are unknown for the new head.
+Publishers serialize through `rodin-ci-badges`, reread live state rather than
+trusting event order, and recheck the source head before each file update.
+
+Initial queue, start and completion events trigger refreshes. GitHub does not
+emit `workflow_run: requested` for reruns, so automatic recovery explicitly
+requests a badge refresh. A manually requeued run may retain its old badge until
+it starts; **CI status badges → Run workflow** provides a manual refresh.
+Shields caching and the publisher's own queue also delay visible updates.
+
+Documentation uses the actual `Publish documentation` job, with an explicit
+refresh after deployment so it does not wait for benchmark completion. The
+listener must reach the default branch before activation. No new secret is
+needed: `GITHUB_TOKEN` has read access to Actions and write access only within
+the repository. Badge endpoints are public JSON on raw.githubusercontent.com;
+missing endpoints remain unavailable until the first publisher initializes them.

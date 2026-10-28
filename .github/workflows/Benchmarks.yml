@@ -86,6 +86,7 @@ jobs:
       cancel-in-progress: false
     permissions:
       contents: write
+      actions: write
       pages: write
       id-token: write
     environment:
@@ -130,6 +131,20 @@ jobs:
         with:
           checkout: .ci-pages
           artifact-name: documentation-pages
+      - name: Refresh documentation badge
+        if: ${{ always() && !cancelled() && (steps.deployment.outcome == 'success' || steps.deployment.outcome == 'failure') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+          OUTCOME: ${{ steps.deployment.outcome }}
+          RUN: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
+        run: |
+          if gh api "repos/$GITHUB_REPOSITORY/actions/workflows/CIBadges.yml" >/dev/null 2>&1; then
+            gh workflow run CIBadges.yml --repo "$GITHUB_REPOSITORY" -f branch="$BRANCH" -f documentation="$OUTCOME" -f source_run="$RUN" -f source_sha="$SHA"
+          else
+            echo 'Badge publisher is not yet installed on the default branch.'
+          fi
   Publish:
     name: Publish documentation and benchmarks
     needs: [PublishDocumentation, Pool]

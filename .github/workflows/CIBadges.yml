@@ -1,0 +1,53 @@
+name: CI status badges
+on:
+  workflow_run:
+    workflows: [Build, Tests, Benchmarks]
+    types: [requested, in_progress, completed]
+    branches: [develop, master]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to refresh
+        type: choice
+        options: [develop, master]
+        default: develop
+      documentation:
+        description: Verified documentation deployment outcome
+        type: choice
+        options: [none, success, failure]
+        default: none
+      source_run:
+        description: Source publication run ID
+        type: string
+      source_sha:
+        description: Source publication commit
+        type: string
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: rodin-ci-badges
+  cancel-in-progress: false
+jobs:
+  Publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          lfs: false
+      - name: Publish current API status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ inputs.branch || github.event.workflow_run.head_branch }}
+          DOCUMENTATION: ${{ inputs.documentation }}
+          SOURCE_RUN: ${{ inputs.source_run }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          if [ "$DOCUMENTATION" = success ] || [ "$DOCUMENTATION" = failure ]; then
+            python3 dev/ci_badges.py --branch "$BRANCH" --documentation "$DOCUMENTATION" --source-run "$SOURCE_RUN" --source-sha "$SOURCE_SHA"
+          else
+            python3 dev/ci_badges.py --branch "$BRANCH"
+          fi

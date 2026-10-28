@@ -150,6 +150,15 @@ def main():
     try:
         recovery.message = recovery.execute()
         print(recovery.message)
+        if any(state == 'Retry requested' for _, state, _ in recovery.rows):
+            # requested workflow_run events do not fire for reruns. Refresh the
+            # API-backed badges explicitly after accepting an automatic retry.
+            result = subprocess.run(['gh', 'workflow', 'run', 'CIBadges.yml', '--repo',
+                                     os.environ['GITHUB_REPOSITORY'], '-f',
+                                     'branch=' + recovery.run['head_branch']],
+                                    capture_output=True, text=True)
+            if result.returncode:
+                print('Badge refresh request unavailable; the next run event will refresh status.')
     finally:
         # Keep inspection failures visible even if fetching logs or rerunning
         # fails. Never turn reporting failures into successful CI recovery.
