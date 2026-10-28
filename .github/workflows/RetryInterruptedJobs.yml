@@ -1,4 +1,5 @@
 name: CI reports and recovery
+run-name: CI report · ${{ github.event.workflow_run.name }} · ${{ github.event.workflow_run.head_branch }} · ${{ github.event.workflow_run.head_sha }} · attempt ${{ github.event.workflow_run.run_attempt }}
 on:
   workflow_run:
     workflows: [Tests, Benchmarks, Publish documentation manually]

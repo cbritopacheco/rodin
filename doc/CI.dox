@@ -1,0 +1,31 @@
+/**
+  @page ci-index Continuous integration
+  @brief Branch status, workflow runs and CI reports.
+
+  This index reads the public GitHub Actions API when refreshed. Select develop
+  or master to inspect the latest branch commit. A result from an older commit
+  is identified explicitly. GitHub remains the source of job logs, artifacts
+  and generated reports.
+
+  @section ci-status Current status
+
+  Status loads in the browser. JavaScript and access to api.github.com are
+  required. <a href="https://github.com/cbritopacheco/rodin/actions">Open GitHub Actions</a>.
+
+  @section ci-policies Policies
+
+  Reports are generated after a workflow completes. Automatic recovery applies
+  only to Tests and Benchmarks push runs on the current develop or master
+  commit: one interrupted job may be selected per completed attempt, with one
+  retry per job. GitHub also reruns its dependents. Compilation, numerical,
+  sanitizer, timeout, checksum and reported out-of-memory failures require
+  investigation. Intentional cancellations and superseded commits are excluded.
+
+  Complete coverage requires every mandatory contribution and the 95% production
+  line gate. Benchmark publication requires the complete campaign. A successful
+  upload or an individual green job does not establish either result.
+
+  Refresh is manual to limit public API requests. GitHub's unauthenticated API
+  rate limit may temporarily prevent updates; the direct workflow links remain
+  usable. No credentials are stored in this page.
+*/
