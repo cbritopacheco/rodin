@@ -11,12 +11,17 @@
 # finished cases (file DONE) are skipped, so the script can be relaunched.
 # Then: bash postprocess_pcm.sh OUT
 #
-# Mesh (structured, triangles): h_x = HX (5 mm: 400 cells over 2 m) and
-# n_y = max(NYMIN, e/HYMAX) across the layer, so h_y <= 1.25 mm: >= 20 cells
-# across every layer and 40 at 5 cm. At 5 cm the layer cooled from above at
-# night reaches Ra = g beta dT e^3/(nu alpha) ~ 1e6 (dT 5 K, Pr ~ 240): cells
-# of width ~2e = 10 cm (20 h_x) and thermal boundary layers of ~e/(2 Nu) ~
-# 4 mm (3+ h_y). REFINE=2 halves both sizes for a mesh-independence check.
+# Mesh (structured, triangles): h_x = HX (5 mm: 400 cells over 2 m); across
+# the layer, cells of HYTOP = 0.25 mm at the top face growing by GRADE = 1.04
+# downwards, n_y = max(NYMIN, ln(1 + e (GRADE - 1)/HYTOP)/ln GRADE): 20 cells
+# at 5 mm (h_y 0.17-0.36 mm), 57 at 50 mm (0.24-2.2 mm). Melting and
+# solidification start at the top face; the first liquid layer must span
+# several cells: with a uniform h_y of 1.25 mm (or 0.5 mm) at 50 mm, Newton
+# iterations grow from ~5 to 30 within minutes of the onset of melting and the
+# step diverges, while 0.25 mm keeps ~9 iterations (the 5 mm run that worked
+# had 0.25 mm). At 5 cm the layer cooled from above at night reaches
+# Ra ~ 1e6 (dT 5 K, Pr ~ 240): cells of width ~2e = 10 cm (20 h_x) and thermal
+# boundary layers of ~4 mm. REFINE=2 doubles n_x, n_y (GRADE -> sqrt(GRADE)).
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -37,7 +42,8 @@ MUSHY="${MUSHY:-1}"           # K, T_l - T_s (solver default 1 K)
 RETRIES="${RETRIES:-2}"       # restarts of a failed case (see run_case)
 LENGTH="${LENGTH:-2.0}"       # m, along the slope
 HX="${HX:-0.005}"             # m
-HYMAX="${HYMAX:-0.00125}"     # m
+HYTOP="${HYTOP:-0.00025}"     # m, cell height at the top face
+GRADE="${GRADE:-1.04}"        # height ratio of consecutive cells, top -> bottom
 NYMIN="${NYMIN:-20}"
 REFINE="${REFINE:-1}"
 TIN="${TIN:-24}"              # C, room below the ceiling
@@ -62,16 +68,18 @@ NX=$(awk -v L="$LENGTH" -v h="$HX" -v r="$REFINE" 'BEGIN { printf "%d", r * int(
   echo "date: $(date)"
   echo "git: $(git -C "$REPO" rev-parse --short HEAD 2>/dev/null || echo '?')"
   echo "THICKNESSES=$THICKNESSES ANGLE=$ANGLE FACING=$FACING NDAYS=$NDAYS DT=$DT"
-  echo "LENGTH=$LENGTH HX=$HX HYMAX=$HYMAX NYMIN=$NYMIN REFINE=$REFINE NP=$NP"
+  echo "LENGTH=$LENGTH HX=$HX HYTOP=$HYTOP GRADE=$GRADE NYMIN=$NYMIN REFINE=$REFINE NP=$NP"
   echo "TIN=$TIN UCEIL=$UCEIL ACH=$ACH ATTICH=$ATTICH EXTRA=$EXTRA"
 } > "$OUT/sweep.txt"
 
 run_case() {
   local mm="$1"
-  local e ny dir
+  local e ny grade dir
   e=$(awk -v mm="$mm" 'BEGIN { printf "%.6f", mm / 1000 }')
-  ny=$(awk -v e="$e" -v h="$HYMAX" -v n="$NYMIN" -v r="$REFINE" \
-       'BEGIN { m = e / h; m = (m == int(m)) ? m : int(m) + 1; if (m < n) m = n; printf "%d", r * m }')
+  ny=$(awk -v e="$e" -v h="$HYTOP" -v g="$GRADE" -v n="$NYMIN" -v r="$REFINE" \
+       'BEGIN { m = (g > 1) ? log(1 + e * (g - 1) / h) / log(g) : e / h;
+                m = (m == int(m)) ? m : int(m) + 1; if (m < n) m = n; printf "%d", r * m }')
+  grade=$(awk -v g="$GRADE" -v r="$REFINE" 'BEGIN { printf "%.8g", g ^ (1 / r) }')
   dir="$OUT/$(printf 'e_%02dmm' "$mm")"
   if [ -f "$dir/DONE" ]; then
     echo "[skip] $dir"
@@ -85,11 +93,11 @@ run_case() {
   # Retries also allow 100 Newton iterations (default 30).
   local dt="$DT" every="$EVERY" mushy="$MUSHY" try=0 retryOpts=""
   while :; do
-    echo "thickness_mm=$mm nx=$NX ny=$ny angle=$ANGLE dt=$dt mushy=$mushy ndays=$NDAYS" > "$dir/case.txt"
-    echo "[run ] e = $mm mm  mesh $NX x $ny  dt = $dt s  mushy = $mushy K  ($(date +%H:%M))"
+    echo "thickness_mm=$mm nx=$NX ny=$ny grade=$grade angle=$ANGLE dt=$dt mushy=$mushy ndays=$NDAYS" > "$dir/case.txt"
+    echo "[run ] e = $mm mm  mesh $NX x $ny (grade $grade)  dt = $dt s  mushy = $mushy K  ($(date +%H:%M))"
     # shellcheck disable=SC2086
     if (cd "$dir" && $MPIRUN -n "$NP" "$BIN" \
-          -pcm_thickness "$e" -pcm_length "$LENGTH" -pcm_nx "$NX" -pcm_ny "$ny" \
+          -pcm_thickness "$e" -pcm_length "$LENGTH" -pcm_nx "$NX" -pcm_ny "$ny" -pcm_ygrade "$grade" \
           -pcm_angle "$ANGLE" -pcm_weather "$WEATHER" -pcm_dt "$dt" -pcm_tend "$TEND" -pcm_mushy "$mushy" \
           -pcm_output_every "$every" -pcm_print_every "$every" \
           -pcm_attic 1 -pcm_tin "$TIN" -pcm_uceil "$UCEIL" -pcm_attic_ach "$ACH" \

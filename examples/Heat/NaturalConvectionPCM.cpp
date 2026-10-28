@@ -89,7 +89,8 @@
 //   mpirun -n 4 ./examples/Heat/NaturalConvectionPCM -pcm_dt 30 -pcm_tend 86400 \
 //     -pcm_angle 15 -snes_converged_reason
 //
-// Options: -pcm_length, -pcm_thickness (m), -pcm_nx, -pcm_ny, -pcm_dt, -pcm_tend, -pcm_angle (deg), -pcm_mushy (T_l - T_s, K;
+// Options: -pcm_length, -pcm_thickness (m), -pcm_nx, -pcm_ny, -pcm_ygrade (cell
+// height ratio from the top face down, 1: uniform), -pcm_dt, -pcm_tend, -pcm_angle (deg), -pcm_mushy (T_l - T_s, K;
 // PETSc option names are case-insensitive, so not -pcm_dT), -pcm_round (K, 0: Eq. 4),
 // -pcm_absorptivity, -pcm_hin, -pcm_tin (C), -pcm_weather, -pcm_output_every,
 // -pcm_print_every, -pcm_attic (1/0), -pcm_uceil, -pcm_attic_ach (1/h),
@@ -353,6 +354,7 @@ namespace Rodin::Examples::Heat
         Real thickness = 0.005; ///< m, PCM layer (y)
         size_t nx = 400;       ///< h = 5 mm
         size_t ny = 20;
+        Real yGrade = 1.0;     ///< height ratio of consecutive cells from the top face down (1: uniform)
 
         PCM pcm;
         Real gravity = 9.81;   ///< m/s^2
@@ -470,7 +472,8 @@ namespace Rodin::Examples::Heat
           const auto& m = m_cfg.pcm;
           Alert::Info() << "[mesh] cells=" << cells << " vertices=" << vertices
                         << "  " << m_cfg.length << " m x " << m_cfg.thickness << " m"
-                        << "  angle=" << m_cfg.angle << " deg" << Alert::Raise;
+                        << "  angle=" << m_cfg.angle << " deg  ny=" << m_cfg.ny
+                        << " grade=" << m_cfg.yGrade << Alert::Raise;
           Alert::Info() << "[bottom] " << (m_cfg.attic ? "attic" : "room")
                         << "  h_b=" << m_cfg.hBottom() << " W/m^2K  U_c=" << m_cfg.uCeiling
                         << "  H_v=" << m_cfg.hVent() << " W/m^2K  T_in="
@@ -523,12 +526,16 @@ namespace Rodin::Examples::Heat
           auto mesh = Mesh<Context::Local>::UniformGrid(
               Polytope::Type::Triangle, { cfg.nx + 1, cfg.ny + 1 });
           const Real hx = cfg.length / static_cast<Real>(cfg.nx);
-          const Real hy = cfg.thickness / static_cast<Real>(cfg.ny);
+          // Cell heights h_k = hy r^k, k = 0 at the top face (melting and
+          // solidification fronts start there), summing to the thickness.
+          const Real r = cfg.yGrade, e = cfg.thickness, n = static_cast<Real>(cfg.ny);
+          const bool uniform = std::abs(r - 1.0) < 1e-12;
+          const Real hy = uniform ? e / n : e * (r - 1.0) / (std::pow(r, n) - 1.0);
           for (auto it = mesh.getVertex(); it; ++it)
           {
             Math::SpatialPoint x = mesh.getVertexCoordinates(it->getIndex());
             x(0) *= hx;
-            x(1) *= hy;
+            x(1) = uniform ? x(1) * hy : e - hy * (std::pow(r, n - x(1)) - 1.0) / (r - 1.0);
             mesh.setVertexCoordinates(it->getIndex(), x);
           }
           mesh.flush();
@@ -656,13 +663,16 @@ namespace Rodin::Examples::Heat
         auto& self = *static_cast<NaturalConvectionPCM*>(ctx);
         PetscCall(self.m_rodinJacobian(snes, x, J, P, self.m_rodinJacobianCtx));
         // With PETSc >= 3.20 Rodin reuses the operator assembled at the same
-        // iterate (state cache); the diagonal is then already in it.
+        // iterate (object id + state cache); the diagonal is then already in it.
 #if PETSC_VERSION_GE(3, 20, 0)
         PetscObjectState state;
+        PetscObjectId id;
         PetscCall(VecGetState(x, &state));
-        if (state == self.m_jacobianState)
+        PetscCall(PetscObjectGetId(reinterpret_cast<PetscObject>(x), &id));
+        if (state == self.m_jacobianState && id == self.m_jacobianId)
           return PETSC_SUCCESS;
         self.m_jacobianState = state;
+        self.m_jacobianId = id;
 #endif
         const PCM& m = self.m_cfg.pcm;
         const Real dt = self.m_cfg.dt;
@@ -981,6 +991,7 @@ namespace Rodin::Examples::Heat
       PetscErrorCode (*m_rodinJacobian)(::SNES, ::Vec, ::Mat, ::Mat, void*) = nullptr;
       void* m_rodinJacobianCtx = nullptr;
       PetscObjectState m_jacobianState = -1;  ///< x state of the last diagonal update
+      PetscObjectId m_jacobianId = 0;         ///< and its object id (states are per object)
 
       Real m_t = 0.0;
       Weather::Sample m_sample{};
@@ -1032,6 +1043,7 @@ int main(int argc, char** argv)
     PetscInt nx = static_cast<PetscInt>(cfg.nx), ny = static_cast<PetscInt>(cfg.ny);
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_nx", &nx, PETSC_NULLPTR);
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_ny", &ny, PETSC_NULLPTR);
+    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_ygrade", &cfg.yGrade, PETSC_NULLPTR);
     cfg.nx = static_cast<size_t>(nx);
     cfg.ny = static_cast<size_t>(ny);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_length", &cfg.length, PETSC_NULLPTR);
