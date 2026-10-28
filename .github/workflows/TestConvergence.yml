@@ -30,21 +30,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: Convergence
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Run convergence suites
       run: "curved_pattern='^RodinConvergenceIsoparametric(P0Projection|GeometryApproximation|.*Diffusion|NonlinearPoisson|LinearElasticity|Stokes|Helmholtz)_'\n\
         case \"${{ matrix.suite }}\" in\n  baseline)\n    python3 dev/ci_tests.py run --group \"$CONVERGENCE_GROUP\" --profile\

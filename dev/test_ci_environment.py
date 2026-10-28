@@ -250,24 +250,104 @@ class EnvironmentTest(unittest.TestCase):
         self.assertEqual(query.call_args.kwargs['timeout'], environment.INDEX_TIMEOUT)
 
     def test_satisfied_preinstalled_runtime_dependencies_are_explicitly_upgraded(self):
-        # The simulation previously omitted these satisfied dependencies, leaving
-        # libudev/lzma/zlib at different hosted-image versions on each runner.
         dependencies = ['liblzma5', 'libudev1', 'zlib1g']
         versions = dict(lcov='2.0-1', liblzma5='5.6-1', libudev1='255-2', zlib1g='1.3-2')
         with tempfile.TemporaryDirectory() as tmp, \
                 patch.object(environment, 'sources', return_value=[]), \
                 patch.object(environment, 'installed_dependencies', return_value=dependencies), \
-                patch.object(environment, 'candidates', return_value=versions) as candidates, \
+                patch.object(environment, 'candidates', side_effect=[
+                    {'lcov': '2.0-1'}, {k: versions[k] for k in dependencies}]) as candidates, \
                 patch.object(environment.subprocess, 'check_output', return_value='amd64\n'), \
-                patch.object(environment, 'apt', side_effect=[None, '']) as apt:
+                patch.object(environment, 'apt', side_effect=[None, '', '']) as apt:
             root = Path(tmp)
             plan = environment.prepare(['lcov'], root / 'cache', root / 'state')
-        candidates.assert_called_once_with(['lcov', *dependencies], [])
+        self.assertEqual([c.args[0] for c in candidates.call_args_list], [['lcov'], dependencies])
         self.assertEqual(plan['versions'], versions)
         simulation = apt.call_args_list[-1].args[0]
         for name, version in versions.items():
             self.assertIn(name + '=' + version, simulation)
         self.assertIn('--no-remove', simulation)
+
+    def test_new_mpi_and_hwloc_packages_expose_preinstalled_udev_on_both_images(self):
+        # Mirrors apt-cache --installed: an uninstalled target is not traversed,
+        # but an explicitly supplied root is processed even before installation.
+        plans = []
+        for installed_udev in ['255-1', '255-2']:
+            with self.subTest(installed_udev=installed_udev), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                queries = []
+                simulations = []
+                def query(command, **kwargs):
+                    if command[:2] == ['dpkg', '--print-architecture']:
+                        return 'amd64\n'
+                    if 'depends' in command:
+                        queries.append(command)
+                        output = 'mpi-default-bin\n'
+                        if 'libhwloc15=2.10-1' in command:
+                            output += 'libhwloc15\n  Depends: libudev1\nlibudev1\n'
+                        return output
+                    self.assertIn('policy', command)
+                    versions = {'mpi-default-bin': '1.15-1', 'libudev1': '255-2'}
+                    names = command[command.index('policy') + 1:]
+                    return ''.join(name + ':\n  Installed: ' +
+                                   (installed_udev if name == 'libudev1' else '(none)') +
+                                   '\n  Candidate: ' + versions[name] + '\n' for name in names)
+                def apt(command, *args, **kwargs):
+                    if command == ['update']:
+                        return None
+                    self.assertIn('--no-remove', command)
+                    simulations.append(command)
+                    output = ('Inst mpi-default-bin (1.15-1 Ubuntu [amd64])\n'
+                              'Inst libopenmpi3t64 (4.1-1 Ubuntu [amd64])\n'
+                              'Inst libhwloc15 (2.10-1 Ubuntu [amd64])\n')
+                    if 'libudev1=255-2' in command and installed_udev != '255-2':
+                        output += 'Inst libudev1 [255-1] (255-2 Ubuntu [amd64])\n'
+                    return output
+                with patch.object(environment, 'sources', return_value=[]), \
+                        patch.object(environment.subprocess, 'check_output', side_effect=query), \
+                        patch.object(environment, 'apt', side_effect=apt):
+                    plan = environment.prepare(['mpi-default-bin'], root / 'cache', root / 'state')
+                plans.append(plan['versions'])
+                self.assertEqual(len(simulations), 2)
+                self.assertNotIn('libudev1=255-2', simulations[0])
+                self.assertIn('libudev1=255-2', simulations[1])
+                self.assertTrue(any('libhwloc15=2.10-1' in command for command in queries))
+                self.assertEqual(plan['versions']['libudev1'], '255-2')
+        self.assertEqual(plans[0], plans[1])
+
+    def test_dependency_expansion_reaches_a_fixed_point_without_losing_prior_pins(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(environment, 'sources', return_value=[]), \
+                patch.object(environment, 'installed_dependencies', side_effect=[['runtime'], ['runtime', 'base'], []]), \
+                patch.object(environment, 'candidates', side_effect=[
+                    {'app': '1'}, {'runtime': '2'}, {'base': '3'}]), \
+                patch.object(environment.subprocess, 'check_output', return_value='amd64\n'), \
+                patch.object(environment, 'apt', side_effect=[None, '', '', '']) as apt:
+            root = Path(tmp)
+            plan = environment.prepare(['app'], root / 'cache', root / 'state')
+        self.assertEqual(plan['versions'], {'app': '1', 'runtime': '2', 'base': '3'})
+        self.assertTrue(set(apt.call_args_list[1].args[0]) <= set(apt.call_args_list[2].args[0]))
+        self.assertTrue(set(apt.call_args_list[2].args[0]) <= set(apt.call_args_list[3].args[0]))
+
+    def test_conflicting_solver_versions_fail_before_plan_is_saved(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(environment, 'sources', return_value=[]), \
+                patch.object(environment, 'candidates', return_value={'app': '1'}), \
+                patch.object(environment, 'apt', side_effect=[None, 'Inst app (2 Ubuntu [amd64])\n']):
+            root = Path(tmp)
+            with self.assertRaisesRegex(ValueError, 'Conflicting resolved version'):
+                environment.prepare(['app=1'], root / 'cache', root / 'state')
+            self.assertFalse((root / 'state/plan.json').exists())
+
+    def test_all_dedicated_consumers_use_the_shared_producer_environment(self):
+        jobs = yaml.safe_load((ROOT / '.github/ci/targeted-lanes.yml').read_text())['jobs']
+        for name, job in jobs.items():
+            with self.subTest(job=name):
+                restore = [s for s in job['steps'] if s.get('uses') == './.github/actions/test-build']
+                self.assertEqual(len(restore), 1)
+                self.assertEqual(restore[0]['with']['environment'], 'true')
+                self.assertFalse(any(s.get('uses') in [
+                    'aminya/setup-cpp@v1', './.github/actions/apt-dependencies'] for s in job['steps']))
 
     def test_prepare_pins_transitive_versions_and_cache_key_changes_with_plan(self):
         with tempfile.TemporaryDirectory() as tmp, \
@@ -276,7 +356,9 @@ class EnvironmentTest(unittest.TestCase):
                 patch.object(environment, 'candidates', side_effect=[{'lcov': '2.0-1'}, {'lcov': '2.0-1'}]), \
                 patch.object(environment.subprocess, 'check_output', return_value='amd64\n'), \
                 patch.object(environment, 'apt', side_effect=[None, 'Inst libdep (3.1-2 Ubuntu [amd64])\n',
-                                                             None, 'Inst libdep (3.1-3 Ubuntu [amd64])\n']):
+                                                             'Inst libdep (3.1-2 Ubuntu [amd64])\n',
+                                                             None, 'Inst libdep (3.1-3 Ubuntu [amd64])\n',
+                                                             'Inst libdep (3.1-3 Ubuntu [amd64])\n']):
             root = Path(tmp); output = root / 'output'
             with patch.dict(os.environ, GITHUB_OUTPUT=str(output), ImageOS='ubuntu24', ImageVersion='same'):
                 plan = environment.prepare(['lcov'], root / 'cache', root / 'state')

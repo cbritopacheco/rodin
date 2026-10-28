@@ -162,21 +162,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: Convergence
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Run convergence suites
       run: "curved_pattern='^RodinConvergenceIsoparametric(P0Projection|GeometryApproximation|.*Diffusion|NonlinearPoisson|LinearElasticity|Stokes|Helmholtz)_'\n\
         case \"${{ matrix.suite }}\" in\n  baseline)\n    python3 dev/ci_tests.py run --group \"$CONVERGENCE_GROUP\"\
@@ -223,20 +214,11 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev
     - uses: ./.github/actions/test-build
       with:
         job: ConvergenceBaseline
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Run convergence suites
       run: "curved_pattern='^RodinConvergenceIsoparametric(P0Projection|GeometryApproximation|.*Diffusion|NonlinearPoisson|LinearElasticity|Stokes|Helmholtz)_'\n\
         case \"${{ matrix.suite }}\" in\n  baseline)\n    python3 dev/ci_tests.py run --group \"$CONVERGENCE_GROUP\"\
@@ -384,21 +366,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev lcov libomp-dev mpi-default-bin mpi-default-dev
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: MPIH1Restriction
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Record native MPI CPU placement
       env:
         MPI_RANKS: ${{ matrix.np }}
@@ -2152,21 +2125,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: PETScConvergence
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Run PETSc convergence suite
       if: matrix.suite == 'bulk'
       run: |
@@ -2535,21 +2499,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: PETScDegreeConvergence
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Run PETSc degree-refinement suites
       run: "prefix='^RodinConvergence(P|HP)PETSc${{ matrix.physics }}_'\nif [ \"${{ matrix.context }}\" != local\
         \ ]; then\n  if [ \"${{ matrix.physics }}\" = Stokes ]; then\n    prefix='^RodinConvergence(P|HP)PETScMPIStokes_${{\
@@ -4357,21 +4312,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: PETScCurvedConvergence
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Run curved PETSc convergence suites
       run: "physics_pattern='${{ matrix.physics }}'\nif [ \"${{ matrix.physics }}\" = Diffusion ]; then\n  physics_pattern='(Approximated|Lifted|SmoothLifted)?Diffusion'\n\
         fi\ncase \"${{ matrix.geometry }}\" in\n  tetrahedron) geometry_pattern='Tetrahedron' ;;\n  pyramid) geometry_pattern='Pyramid'\
@@ -5390,21 +5336,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: PETScCurvedBoundaryConvergence
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Run curved boundary convergence partition
       run: |
         case "${{ matrix.geometry }}" in
@@ -5610,21 +5547,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: PETScCurvedNonlinearTetrahedronConvergence
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Run curved nonlinear tetrahedral convergence partition
       run: "case \"${{ matrix.selection }}\" in\n  local) context_pattern='' ;;\n  np1|np2|np3|np4) context_pattern='MPI_${{\
         \ matrix.selection }}_' ;;\n  *) exit 1 ;;\nesac\nprefix=\"^RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary_${context_pattern}\"\
@@ -5786,21 +5714,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install complex PETSc dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config lcov
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: PETScComplexConvergence
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Run complex PETSc convergence suite
       if: matrix.suite == 'bulk'
       run: ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP)PETSc(MPI)?Helmholtz|RodinPETScSNESStateTest|RodinPETSc(MPI)?ScalarIntegralTest|Rodin_Variational_Integral'
@@ -5897,20 +5816,11 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libpetsc-${{ matrix.scalar }}-dev libomp-dev mpi-default-dev lcov
     - uses: ./.github/actions/test-build
       with:
         job: PETScMatrixRanges
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Discover coverage tests without runtime profiles
       env:
         GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded

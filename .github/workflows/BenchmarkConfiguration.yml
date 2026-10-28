@@ -33,6 +33,7 @@ jobs:
         run: python3 dev/benchmark_ci.py prepare --configuration "$CONFIGURATION" --output benchmark-common
       - uses: actions/upload-artifact@v4
         with:
+          overwrite: true
           name: benchmark-common-${{ inputs.configuration }}
           path: benchmark-common
           compression-level: 0
@@ -40,6 +41,7 @@ jobs:
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
+          overwrite: true
           name: benchmark-plan-common-${{ inputs.configuration }}
           path: benchmark-common/plan.json
           if-no-files-found: error

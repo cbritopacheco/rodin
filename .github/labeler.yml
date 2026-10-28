@@ -23,15 +23,15 @@ manufactured-tests:
 - changed-files:
   - any-glob-to-any-file:
     - tests/manufactured/**
-convergence-tests:
+convergence:
 - changed-files:
   - any-glob-to-any-file:
     - tests/convergence/**
-installation-tests:
+installation:
 - changed-files:
   - any-glob-to-any-file:
     - tests/installation/**
-nafems-tests:
+nafems:
 - changed-files:
   - any-glob-to-any-file:
     - tests/nafems/**
@@ -49,6 +49,7 @@ ci:
     - .github/actions/**
     - .github/ci/**
     - .github/labeler.yml
+    - .github/labels.yml
     - .github/dependabot.yml
     - codecov.yml
 developer-tooling:

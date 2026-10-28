@@ -1,4 +1,4 @@
-name: Labeler Rules
+name: Preflight
 'on':
   pull_request: null
   push:
@@ -8,8 +8,8 @@ name: Labeler Rules
 permissions:
   contents: read
 jobs:
-  Rules:
-    name: Regression Tests
+  Labeler:
+    name: Labeler
     runs-on: ubuntu-latest
     steps:
     - name: Check out proposed rules and regression tests
