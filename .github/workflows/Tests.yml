@@ -42,7 +42,7 @@ jobs:
         node-version: '24'
     - name: Verify pinned artifact client handles interrupted streams
       run: |
-        npm ci --prefix .github/actions/download-artifacts --ignore-scripts --no-audit --no-fund
+        python3 dev/ci_artifact_client.py --action .github/actions/download-artifacts --client .github/actions/download-artifacts
         node --test --test-concurrency=1 dev/test_ci_artifact_stream.js
     - name: Verify dependency graph and publish graph navigation
       run: python3 dev/ci_schedule.py --summary

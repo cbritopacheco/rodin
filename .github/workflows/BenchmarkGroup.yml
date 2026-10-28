@@ -102,6 +102,9 @@ jobs:
         run: |
           mkdir -p benchmark-diagnostics
           set -o pipefail
+          python3 -u dev/ci_resource_monitor.py benchmark-diagnostics/memory.log &
+          monitor_pid=$!
+          trap 'kill "$monitor_pid" 2>/dev/null || true; wait "$monitor_pid" 2>/dev/null || true' EXIT
           /usr/bin/time -v -o benchmark-diagnostics/resources.txt \
             python3 -u dev/benchmark_ci.py run --source benchmark-group --id "$LANE" --output benchmark-result \
             2>&1 | tee benchmark-diagnostics/execution.log

@@ -607,3 +607,21 @@ listener must reach the default branch before activation. No new secret is
 needed: `GITHUB_TOKEN` has read access to Actions and write access only within
 the repository. Badge endpoints are public JSON on raw.githubusercontent.com;
 missing endpoints remain unavailable until the first publisher initializes them.
+
+### Artifact-client bootstrap resilience
+
+The exact-name downloader and its Plan regression checks install the unchanged
+lockfile-pinned client through `dev/ci_artifact_client.py`. Successful installs
+are reused on the runner only when the lockfile marker and installed package
+are present. A failed invocation is retried at most twice for recognized
+network resets, DNS failures, timeouts or registry 502/503/504 responses.
+Lockfile, dependency-resolution, integrity and engine errors fail immediately.
+The success marker is written only after npm succeeds and the package exists.
+Install scripts remain disabled.
+
+Benchmark execution also emits memory readings every minute to its live job
+log and `benchmark-diagnostics/memory.log`. Host availability and cgroup limits
+and OOM counters are recorded where exposed. Missing counters remain unknown.
+The monitor is stopped when the lane exits. These measurements help distinguish
+resource exhaustion from hosted runner interruptions; they do not prevent a
+runner shutdown or replace the existing single-retry policy.

@@ -18,13 +18,8 @@ runs:
       env:
         ACTION_PATH: ${{ github.action_path }}
       run: |
-        client="$RUNNER_TEMP/rodin-artifact-client"
-        if ! cmp -s "$ACTION_PATH/package-lock.json" "$client/installed-package-lock.json"; then
-          mkdir -p "$client"
-          cp "$ACTION_PATH/package.json" "$ACTION_PATH/package-lock.json" "$client/"
-          npm ci --prefix "$client" --ignore-scripts --no-audit --no-fund
-          cp "$ACTION_PATH/package-lock.json" "$client/installed-package-lock.json"
-        fi
+        python3 "$GITHUB_WORKSPACE/dev/ci_artifact_client.py" \
+          --action "$ACTION_PATH" --client "$RUNNER_TEMP/rodin-artifact-client"
     - name: Download every mandatory artifact by exact name
       uses: actions/github-script@v8
       env:
