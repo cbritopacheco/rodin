@@ -62,6 +62,9 @@ namespace Rodin::Examples::Heart::Atrium
              << ",\n  \"apex_patch_faces\": " << m_data.apexPatchFaces
              << ",\n  \"fiber_fallback_cells\": " << m_data.fallbackCells
              << ",\n  \"fiber_coordinate_residual\": " << m_data.coordinateResidual
+             << ",\n  \"transmural_coordinate_residual\": " << m_data.transmuralResidual
+             << ",\n  \"max_endocardial_fiber_normal_component\": " << m_data.endocardialTangencyError
+             << ",\n  \"max_epicardial_fiber_normal_component\": " << m_data.epicardialTangencyError
              << ",\n  \"minimum_wave_coordinate_mm\": " << m_data.minimumProjection
              << ",\n  \"maximum_wave_coordinate_mm\": " << m_data.maximumProjection
              << ",\n  \"speed_mm_per_s\": " << m_cfg.speed
@@ -90,7 +93,10 @@ namespace Rodin::Examples::Heart::Atrium
               << "; appendage projection="
               << m_data.waveDirection.dot(m_cfg.appendageApex - m_data.baseOrigin)
               << " mm; harmonic residual=" << m_data.coordinateResidual
-              << "; fiber fallback cells=" << m_data.fallbackCells << std::endl;
+              << "; fiber fallback cells=" << m_data.fallbackCells
+              << "; transmural residual=" << m_data.transmuralResidual
+              << "; tangency (endo, epi)=" << m_data.endocardialTangencyError
+              << ", " << m_data.epicardialTangencyError << std::endl;
     }
     auto grid = m_output.grid();
     grid.setMesh(m_data.mesh);
@@ -114,6 +120,8 @@ namespace Rodin::Examples::Heart::Atrium
       m_data.fallbackField, IO::XDMF::Center::Cell, IO::XDMF::AttributePolicy::Static);
     grid.add(
       m_data.fiberCoordinate, IO::XDMF::Center::Node, IO::XDMF::AttributePolicy::Static);
+    grid.add(
+      m_data.transmuralCoordinate, IO::XDMF::Center::Node, IO::XDMF::AttributePolicy::Static);
     grid.add(
       m_data.waveCoordinate, IO::XDMF::Center::Node, IO::XDMF::AttributePolicy::Static);
     if (!cfg.fibersOnly && cfg.writeCSV && isRoot)

@@ -190,6 +190,7 @@ namespace Rodin::Examples::Heart::Atrium
       fiberSpace(mesh, 3),
       diagnosticSpace(mesh),
       fiberCoordinate(scalarSpace),
+      transmuralCoordinate(scalarSpace),
       waveCoordinate(scalarSpace),
       fiberField(fiberSpace),
       normalField(fiberSpace),
@@ -205,6 +206,7 @@ namespace Rodin::Examples::Heart::Atrium
       m_coordinateSolver(m_laplace)
   {
     inspectGeometry();
+    generateTransmuralCoordinate();
     generateFibers();
     Index selected;
     minimumProjection = waveCoordinate.min(selected);
@@ -240,8 +242,6 @@ namespace Rodin::Examples::Heart::Atrium
       minimumReferenceJacobian = std::min(minimumReferenceJacobian, determinant / area);
       if (!(determinant > 0) || !std::isfinite(determinant))
         badCells += shard.isOwned(3, cell->getIndex());
-      normals[cell->getIndex()] =
-        ((q[3] - q[0]) + (q[4] - q[1]) + (q[5] - q[2])).normalized();
       for (size_t j = 0; j < 3; ++j)
         innerVertex[cell->getVertices()(j)] = true;
     }
@@ -339,6 +339,103 @@ namespace Rodin::Examples::Heart::Atrium
       waveDirection *= -1;
   }
 
+  void ProblemData::generateTransmuralCoordinate()
+  {
+    constexpr Attribute Endocardium = 8, Epicardium = 9;
+    const auto& shard = mesh.getShard();
+    const auto& comm = mesh.getContext().getCommunicator();
+    std::set<std::array<Index, 3>> inner, outer;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      std::array<Index, 3> a, b;
+      for (size_t j = 0; j < 3; ++j)
+      {
+        a[j] = cell->getVertices()(j);
+        b[j] = cell->getVertices()(3 + j);
+      }
+      std::sort(a.begin(), a.end());
+      std::sort(b.begin(), b.end());
+      inner.insert(a);
+      outer.insert(b);
+    }
+    bool reserved = false;
+    for (auto face = mesh.getFace(); face; ++face)
+      reserved = reserved || face->getAttribute() == Endocardium ||
+        face->getAttribute() == Epicardium;
+    if (boost::mpi::all_reduce(comm, reserved, std::logical_or<bool>()))
+      Alert::Exception() << "Boundary labels 8 and 9 are reserved for coordinate solves"
+                         << Alert::Raise;
+    std::vector<std::pair<Index, Optional<Attribute>>> labels;
+    for (auto face = mesh.getFace(); face; ++face)
+    {
+      if (!shard.isBoundary(face->getIndex()) ||
+        face->getGeometry() != Polytope::Type::Triangle)
+        continue;
+      std::array<Index, 3> key;
+      for (size_t j = 0; j < 3; ++j)
+        key[j] = face->getVertices()(j);
+      std::sort(key.begin(), key.end());
+      if (!inner.contains(key) && !outer.contains(key))
+        continue;
+      labels.emplace_back(face->getIndex(), face->getAttribute());
+      mesh.setAttribute({2, face->getIndex()}, inner.contains(key) ? Endocardium : Epicardium);
+    }
+    m_laplace = Integral(Grad(m_coordinate), Grad(m_coordinateTest)) +
+      DirichletBC(m_coordinate, RealFunction(0)).on(Endocardium) +
+      DirichletBC(m_coordinate, RealFunction(1)).on(Epicardium);
+    m_coordinateSolver.setPrefix(std::string("atrium_transmural_"))
+      .setType(KSPCG).setTolerances(1e-12, 1e-14, 1e5, 10000);
+    m_laplace.solve(m_coordinateSolver);
+    transmuralResidual = m_coordinateSolver.getError();
+    for (const auto& item : labels)
+      mesh.setAttribute({2, item.first}, item.second);
+    if (!std::isfinite(transmuralResidual) || transmuralResidual > 1e-8)
+      Alert::Exception() << "The transmural-coordinate Laplace solve failed: "
+                         << transmuralResidual << Alert::Raise;
+    transmuralCoordinate = m_coordinate.getSolution();
+    transmuralCoordinate.setName("TransmuralCoordinate");
+    m_coordinate.getSolution() = Real(0);
+  }
+
+  ProblemData::Frame ProblemData::frameAt(const Point& point) const
+  {
+    Frame frame;
+    const auto transverse = Grad(transmuralCoordinate).getValue(point);
+    frame.normal = Vec(transverse(0), transverse(1), transverse(2));
+    if (!frame.normal.allFinite() || !(frame.normal.norm() > 0))
+      Alert::Exception() << "The transmural coordinate has an invalid gradient"
+                         << Alert::Raise;
+    frame.normal.normalize();
+    const auto gradient = Grad(fiberCoordinate).getValue(point);
+    frame.longitudinal = Vec(gradient(0), gradient(1), gradient(2));
+    constexpr Real tolerance = 1e-10;
+    if (frame.longitudinal.norm() > tolerance /
+      std::max(cfg.apexRadius, (cfg.appendageApex - baseOrigin).norm()))
+      frame.longitudinal.normalize();
+    else
+      frame.longitudinal.setZero();
+    frame.longitudinal -= frame.longitudinal.dot(frame.normal) * frame.normal;
+    if (frame.longitudinal.norm() < tolerance)
+    {
+      frame.fallback = 1;
+      const auto& x = point.getPhysicalCoordinates();
+      frame.longitudinal = cfg.appendageApex - Vec(x(0), x(1), x(2));
+      if (frame.longitudinal.norm() > 0)
+        frame.longitudinal.normalize();
+      frame.longitudinal -= frame.longitudinal.dot(frame.normal) * frame.normal;
+    }
+    if (frame.longitudinal.norm() < tolerance)
+    {
+      frame.fallback = 2;
+      Eigen::Index axis;
+      frame.normal.cwiseAbs().minCoeff(&axis);
+      frame.longitudinal = Vec::Unit(axis) - frame.normal(axis) * frame.normal;
+    }
+    frame.longitudinal.normalize();
+    frame.fiber = frame.longitudinal.cross(frame.normal).normalized();
+    return frame;
+  }
+
   void ProblemData::generateFibers()
   {
     const auto& comm = mesh.getContext().getCommunicator();
@@ -425,42 +522,41 @@ namespace Rodin::Examples::Heart::Atrium
       mesh.setAttribute({2, item.first}, item.second);
     fiberCoordinate = m_coordinate.getSolution();
     fiberCoordinate.setName("FiberCoordinate");
-    const auto coordinateGradient = Grad(fiberCoordinate);
-    constexpr Real DirectionTolerance = 1e-10;
-    const Real gradientTolerance = DirectionTolerance /
-      std::max(cfg.apexRadius, (cfg.appendageApex - baseOrigin).norm());
+    const auto& faceRule = QF::QuadratureFormula::get(4, Polytope::Type::Triangle);
     for (auto cell = mesh.getCell(); cell; ++cell)
     {
       const Point point(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
-      const auto gradient = coordinateGradient.getValue(point);
-      Vec direction(gradient(0), gradient(1), gradient(2));
-      const Vec normal = normals[cell->getIndex()];
-      if (direction.norm() > gradientTolerance)
-        direction.normalize();
-      else
-        direction.setZero();
-      direction -= direction.dot(normal) * normal;
-      if (direction.norm() < DirectionTolerance)
+      const auto frame = frameAt(point);
+      normals[cell->getIndex()] = frame.normal;
+      longitudinal[cell->getIndex()] = frame.longitudinal;
+      directions[cell->getIndex()] = frame.fiber;
+      fallback[cell->getIndex()] = frame.fallback;
+      if (!shard.isOwned(3, cell->getIndex()))
+        continue;
+      fallbackCells += frame.fallback > 0;
+      for (size_t layer = 0; layer < 2; ++layer)
       {
-        fallback[cell->getIndex()] = 1;
-        if (shard.isOwned(3, cell->getIndex()))
-          ++fallbackCells;
-        const auto x = point.getPhysicalCoordinates();
-        direction = cfg.appendageApex - Vec(x(0), x(1), x(2));
-        if (direction.norm() > 0)
-          direction.normalize();
-        direction -= direction.dot(normal) * normal;
+        for (size_t q = 0; q < faceRule.getSize(); ++q)
+        {
+          const auto& r = faceRule.getPoint(q);
+          const Point sample(*cell, Math::SpatialVector<Real>{r(0), r(1), Real(layer)});
+          const auto local = frameAt(sample);
+          const auto& jacobian = sample.getJacobian();
+          const Vec a(jacobian(0, 0), jacobian(1, 0), jacobian(2, 0));
+          const Vec b(jacobian(0, 1), jacobian(1, 1), jacobian(2, 1));
+          const Real error = std::abs(local.fiber.dot(a.cross(b).normalized()));
+          auto& maximum = layer == 0 ? endocardialTangencyError : epicardialTangencyError;
+          maximum = std::max(maximum, error);
+        }
       }
-      if (direction.norm() < DirectionTolerance)
-      {
-        fallback[cell->getIndex()] = 2;
-        Eigen::Index axis;
-        normal.cwiseAbs().minCoeff(&axis);
-        direction = Vec::Unit(axis) - normal(axis) * normal;
-      }
-      longitudinal[cell->getIndex()] = direction.normalized();
-      directions[cell->getIndex()] = direction.normalized().cross(normal).normalized();
     }
+    endocardialTangencyError = boost::mpi::all_reduce(
+      comm, endocardialTangencyError, boost::mpi::maximum<Real>());
+    epicardialTangencyError = boost::mpi::all_reduce(
+      comm, epicardialTangencyError, boost::mpi::maximum<Real>());
+    if (std::max(endocardialTangencyError, epicardialTangencyError) > 1e-8)
+      Alert::Exception() << "The fiber frame is not tangent to both wall surfaces"
+                         << Alert::Raise;
     fallbackCells = boost::mpi::all_reduce(comm, fallbackCells, std::plus<size_t>());
     const auto vectorField = [&](const std::vector<Vec>& values) {
       return VectorFunction(3, [&values](const Point& point) {
@@ -498,7 +594,7 @@ namespace Rodin::Examples::Heart::Atrium
   Math::SpatialVector<Real> ProblemData::fiberAt(const Point& point) const
   {
     Math::SpatialVector<Real> fiber(3);
-    fiber = directions.at(point.getPolytope().getIndex());
+    fiber = frameAt(point).fiber;
     return fiber;
   }
   Real ProblemData::electricalAt(const Point& point, Real time) const

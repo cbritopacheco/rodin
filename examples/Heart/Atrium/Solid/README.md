@@ -246,30 +246,47 @@ within 3 mm of this point, together with the corresponding outer triangles.
 A finite patch avoids imposing a point-only Dirichlet condition in the wall
 volume. Its radius and center can be changed from the command line.
 
-A single harmonic coordinate is solved with Rodin:
+Two harmonic coordinates are solved on the reference wall. A transmural
+coordinate $\psi$ distinguishes its endocardial and epicardial surfaces:
 
 $$
 -\Delta\psi=0\quad\text{in }\Omega_{\mathrm{wall}},\qquad
-\psi=0\quad\text{on rim 6},\qquad
-\psi=1\quad\text{on the appendage patch},
+\psi=0\quad\text{on }\Gamma_{\mathrm{endo}},\qquad
+\psi=1\quad\text{on }\Gamma_{\mathrm{epi}}.
 $$
 
-with zero normal flux on the remaining boundary. A temporary boundary label
-8 is used for this solve and then restored, preserving all original wall and
-rim labels.
-
-For each wedge, the known extrusion vectors supply a unit transmural
-normal $m$. The harmonic gradient is projected into the wall tangent
-plane and the fiber is constructed as
+A landmark coordinate $\phi$ supplies the in-plane anatomical orientation:
 
 $$
-\ell=\frac{(I-mm^T)\nabla\psi}{\|(I-mm^T)\nabla\psi\|},
-\qquad f=\ell\times m.
+-\Delta\phi=0\quad\text{in }\Omega_{\mathrm{wall}},\qquad
+\phi=0\quad\text{on rim 6},\qquad
+\phi=1\quad\text{on the appendage patch}.
 $$
 
-Thus the fibers are tangent to the wall and follow contours of the
-base-to-appendage coordinate. They are stored as one constant unit direction
-per wedge. There is no transmural rotation in this one-layer model.
+Both problems have zero normal flux on their remaining boundaries. The retained
+scalar problem and solver are reused for these successive solves. Temporary
+boundary labels 8 and 9 identify the wall surfaces; label 8 subsequently
+identifies the apex patch. Original labels are restored after each solve.
+The wedge ordering identifies the inner and outer triangular faces.
+
+The reference material frame is evaluated at each constitutive point:
+
+$$
+n_0=\frac{\nabla\psi}{\|\nabla\psi\|},\qquad
+\ell_0=\frac{(I-n_0\otimes n_0)\nabla\phi}
+{\|(I-n_0\otimes n_0)\nabla\phi\|},\qquad
+f_0=\ell_0\times n_0.
+$$
+
+The fiber follows level contours of the landmark coordinate, perpendicular to
+the projected base-to-appendage direction. Constant transmural boundary values
+make $\nabla\psi$ normal to both wall surfaces. On the single-layer linear
+wedge mesh, every vertex lies on one of the two surfaces, so the Dirichlet
+values fix $\psi$ as the interpolated through-thickness coordinate. Its
+physical gradient and the frame vary within a nonaffine wedge. The constitutive
+law uses this pointwise frame rather than its cell-center output samples.
+There is no prescribed rotation angle through the wall and only one fiber
+family contributes to passive reinforcement and active stress.
 
 This is a simplified use of the Laplace-gradient frame in Piersanti et al.,
 *Modeling cardiac muscle fibers in ventricular and atrial electrophysiology
@@ -281,8 +298,11 @@ Critical points are handled explicitly. If the harmonic tangent vanishes,
 the projected direction toward the apex is used; at a remaining pole, a
 Cartesian tangent is chosen. `FiberFallback` flags these cells: 0 means the
 harmonic construction, 1 the geometric-apex fallback, and 2 the pole fallback.
-`FiberCoordinate`, `LongitudinalDirection`, `WallNormal`, and
-`FiberDirection` are exported for inspection.
+`FiberCoordinate` and `TransmuralCoordinate` are exported as nodal fields.
+`LongitudinalDirection`, `WallNormal`, and `FiberDirection` are exported as
+cell-center samples of the pointwise frame; `FiberFallback` classifies the
+cell-center construction. Tangency is checked against the actual endocardial
+and epicardial face normals at surface quadrature points.
 
 ## Build and run
 

@@ -107,8 +107,8 @@ namespace Rodin::Examples::Heart::Atrium
    *
    * ## Architecture
    *
-   * Geometry inspection identifies the basal rim and extrusion normals. A scalar
-   * Laplace problem supplies the fiber frame. The fitted plane defines activation;
+   * Geometry inspection identifies the basal rim. Harmonic transmural and
+   * landmark coordinates supply a pointwise wall-tangent fiber frame. The fitted plane defines activation;
    * the fields and their spaces are retained for constitutive input and output.
    * The supporting distributed submesh and configuration must outlive this object.
    * Geometry reductions and the retained harmonic-coordinate solve are collective.
@@ -120,7 +120,7 @@ namespace Rodin::Examples::Heart::Atrium
     ScalarSpace scalarSpace;
     CellVectorSpace fiberSpace;
     CellScalarSpace diagnosticSpace;
-    ScalarField fiberCoordinate, waveCoordinate;
+    ScalarField fiberCoordinate, transmuralCoordinate, waveCoordinate;
     CellVectorField fiberField, normalField, longitudinalField;
     CellScalarField fallbackField;
     std::vector<Vec> directions, normals, longitudinal;
@@ -129,7 +129,9 @@ namespace Rodin::Examples::Heart::Atrium
     Vec baseOrigin = Vec::Zero(), waveDirection = Vec::Zero();
     size_t rimFaces = 0, apexPatchFaces = 0, fallbackCells = 0;
     Real minimumReferenceJacobian = std::numeric_limits<Real>::infinity();
-    Real coordinateResidual = 0, minimumProjection = 0, maximumProjection = 0;
+    Real coordinateResidual = 0, transmuralResidual = 0;
+    Real endocardialTangencyError = 0, epicardialTangencyError = 0;
+    Real minimumProjection = 0, maximumProjection = 0;
     Real endTime = 0;
 
     /**
@@ -179,8 +181,27 @@ namespace Rodin::Examples::Heart::Atrium
       CoordinateProblem m_laplace;
       Solver::KSP m_coordinateSolver;
 
-      /// @brief Collectively validates the wall and identifies its basal plane and normals.
+      /// @brief Collectively validates the wall and identifies its basal plane.
       void inspectGeometry();
+
+      /**
+       * @brief Pointwise orthonormal reference material frame.
+       */
+      struct Frame
+      {
+        Vec normal, longitudinal, fiber;
+        Real fallback = 0;
+      };
+
+      /**
+       * @brief Evaluates the frame from both coordinate gradients.
+       * @param point Reference material point in a wall cell.
+       * @returns Unit normal, projected longitudinal direction, and fiber direction.
+       */
+      Frame frameAt(const Geometry::Point& point) const;
+
+      /// @brief Solves the transmural coordinate with endocardial and epicardial data.
+      void generateTransmuralCoordinate();
 
       /// @brief Constructs the harmonic fiber frame and its diagnostic fields.
       void generateFibers();
