@@ -181,3 +181,14 @@
 .rodin-benchmarks #search-symbolcount { flex: 1; }
 .rodin-benchmarks .benchmark-search-close { order: 2; }
 .rodin-benchmarks .m-doc-search-content { border-top-left-radius: 0; border-top-right-radius: 0; }
+
+/* Explicit navigation actions share the documentation button styling. */
+.benchmark-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .8rem;
+  margin-top: 1.25rem;
+}
+.benchmark-actions .m-button { margin: 0; }
+.benchmark-search-action { margin-bottom: 1.5rem; }
