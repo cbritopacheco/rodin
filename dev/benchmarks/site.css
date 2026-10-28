@@ -212,3 +212,9 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+@media(max-width:991px)
+{
+  /* Reserve the complete fused search hit area before the menu button. */
+  #navigation .benchmark-search-trigger { margin-right: 0; }
+}
