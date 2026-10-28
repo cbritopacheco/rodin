@@ -765,3 +765,40 @@ main article .m-block.m-badge.rodin-license-badge > img {
 .rodin-ci-checked { margin-top: 1.5rem; }
 
 .rodin-ci-branch + .rodin-ci-branch { margin-top: 2.5rem; }
+
+/* Doxygen's bibliography keeps its citation anchors and definition-list semantics. */
+dl.m-doc:has(> dt > a[name^="CITEREF_"])
+{
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 1rem;
+}
+
+dl.m-doc:has(> dt > a[name^="CITEREF_"]) > :is(dt, dd)
+{
+  margin: 0;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--line-color);
+}
+
+dl.m-doc:has(> dt > a[name^="CITEREF_"]) > dt
+{
+  color: var(--link-color);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+dl.m-doc:has(> dt > a[name^="CITEREF_"]) > dd
+{
+  color: var(--color);
+  overflow-wrap: anywhere;
+}
+
+dl.m-doc:has(> dt > a[name^="CITEREF_"]) > dd > p
+{
+  margin: 0;
+  text-indent: 0;
+}
+
+/* Keep incoming citation links clear of the navigation bar. */
+a[name^="CITEREF_"] { scroll-margin-top: 4rem; }
