@@ -77,6 +77,12 @@ session. Use concise, explanatory, problem-driven mathematical prose:
 - Present definitions and equations in a logical sequence, then explain their
   meaning, assumptions, and limits. Distinguish proved results from numerical
   evidence.
+- For a model contribution, preferably include a small set of defining equations
+  in the PR description: the governing balance, constitutive relation, or update
+  law needed to understand the model. Define the symbols and relevant assumptions,
+  connect the equations to the classes that implement them, and use rendered
+  mathematics. Select equations for explanatory value rather than reproducing
+  the full derivation.
 - Make the exposition parallel to the code: name the principal classes and
   describe their mathematical roles, functionality, and relationships. Explain
   the resulting model or capability rather than listing files or private members.
