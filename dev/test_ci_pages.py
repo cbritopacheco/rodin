@@ -79,7 +79,7 @@ class PagesTest(unittest.TestCase):
             permissions = definition.get('permissions', workflow.get('permissions', {}))
             self.assertEqual(permissions['pages'], 'write')
             self.assertEqual(permissions['id-token'], 'write')
-            self.assertEqual(definition['environment']['name'], 'github-pages')
+            self.assertEqual(definition['environment']['name'], 'Documentation and benchmarks')
             self.assertTrue(any(step.get('uses') == './.github/actions/publish-pages'
                                 for step in definition['steps']))
         action = yaml.safe_load((ROOT / '.github/actions/publish-pages/action.yml').read_text())

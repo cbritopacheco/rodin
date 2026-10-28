@@ -442,7 +442,7 @@ names and retain both branch versions and existing complete histories.
 Repository setup for these publishers:
 
 - Set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**.
-- In **Settings → Environments → github-pages**, permit both `develop` and
+- In **Settings → Environments → Documentation and benchmarks**, permit both `develop` and
   `master` under deployment branches. Preserve the existing `gh-pages` rule if
   other workflows need it. Publication jobs retain this protected environment
   and require `pages: write` and `id-token: write`.

@@ -30,7 +30,7 @@ def prepare(repository, checkout):
     site = api(repository, 'pages')
     if site.get('build_type') != 'workflow':
         raise ValueError('Set repository Settings > Pages > Source to GitHub Actions; '
-                         'the github-pages environment must allow develop and master')
+                         'the Documentation and benchmarks environment must allow develop and master')
     commit = api(repository, 'git/ref/heads/gh-pages')['object']['sha']
     local = subprocess.check_output(['git', '-C', str(checkout), 'rev-parse', 'HEAD'], text=True).strip()
     if local != commit:

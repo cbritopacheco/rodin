@@ -88,7 +88,7 @@ jobs:
       pages: write
       id-token: write
     environment:
-      name: github-pages
+      name: Documentation and benchmarks
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
@@ -142,7 +142,7 @@ jobs:
       pages: write
       id-token: write
     environment:
-      name: github-pages
+      name: Documentation and benchmarks
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Require published documentation and complete benchmark results
