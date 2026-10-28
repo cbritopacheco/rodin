@@ -19,7 +19,8 @@ so partition boundaries are excluded from the cavity outline.
 
 ## Rendering
 
-ParaView's `pvpython` and `ffmpeg` are required. From the repository root:
+ParaView's `pvpython` is required; movie encoding also requires `ffmpeg`.
+From the repository root:
 
 ```sh
 pvpython --force-offscreen-rendering \
@@ -31,7 +32,18 @@ pvpython --force-offscreen-rendering \
 
 On macOS, `pvpython` can be invoked through
 `/Applications/ParaView-6.2.0.app/Contents/bin/pvpython`.
-The renderer also saves a ParaView state (`.pvsm`), the final frame (`.png`),
+To generate an interactive scene without rendering a movie or requiring
+`ffmpeg`, use:
+
+```sh
+pvpython examples/Heart/Atrium/Visualization/Volume.py \
+  output/atrium-fluid/Flow.xdmf \
+  output/atrium-fluid/Volume.pvsm --state-only
+```
+
+Open the resulting `.pvsm` through **File > Load State** in ParaView and press
+**Play** to advance through the saved simulation times.
+Movie rendering also saves a ParaView state (`.pvsm`), the final frame (`.png`),
 and rendering parameters and physical timestamps (`.json`) beside the movie.
 The state can be opened with **File > Load State** to adjust the camera,
 transfer functions, and surface opacity interactively.
@@ -52,7 +64,7 @@ opacity settings.
 
 1. Open the fluid XDMF series, apply **Merge Blocks** with **Merge Points**
    enabled, then apply **Calculator**, with
-   `100*mag(velocity)` for speed in centimetres per second.
+   `100*mag(Velocity)` for speed in centimetres per second.
 2. Apply **Resample To Image**, then select **Volume** representation and
    colour by the calculated scalar. Set the colour range for the full series
    and edit the opacity function to make low speeds transparent.

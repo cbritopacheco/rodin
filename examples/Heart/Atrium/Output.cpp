@@ -26,26 +26,29 @@ namespace Rodin::Examples::Heart::Atrium
 
   void Fluid::Output::bind()
   {
-    m_atrium.m_u.setName("velocity");
-    m_atrium.m_p.setName("pressure");
-    m_atrium.m_thCur.setName("thrombin");
-    m_atrium.m_fgCur.setName("fibrinogen");
-    m_atrium.m_fnCur.setName("fibrin");
-    m_atrium.m_tawss.setName("TAWSS");
-    m_atrium.m_osi.setName("OSI");
-    m_atrium.m_activation.setName("activation");
-    m_atrium.m_wss.setName("shearStress");
+    m_atrium.m_u.setName("Velocity");
+    m_atrium.m_p.setName("Pressure");
+    m_atrium.m_tawss.setName("TimeAveragedWallShearStress");
+    m_atrium.m_osi.setName("OscillatoryShearIndex");
+    m_atrium.m_wss.setName("WallShearStress");
 
     m_xdmf.setMesh(m_atrium.m_mesh);
-    m_xdmf.add("velocity", m_atrium.m_u.getSolution());
-    m_xdmf.add("pressure", m_atrium.m_p.getSolution());
-    m_xdmf.add("thrombin", m_atrium.m_thCur);
-    m_xdmf.add("fibrinogen", m_atrium.m_fgCur);
-    m_xdmf.add("fibrin", m_atrium.m_fnCur);
-    m_xdmf.add("TAWSS", m_atrium.m_tawss);
-    m_xdmf.add("OSI", m_atrium.m_osi);
-    m_xdmf.add("activation", m_atrium.m_activation);
-    m_xdmf.add("shearStress", m_atrium.m_wss);
+    m_xdmf.add("Velocity", m_atrium.m_u.getSolution());
+    m_xdmf.add("Pressure", m_atrium.m_p.getSolution());
+    m_xdmf.add("TimeAveragedWallShearStress", m_atrium.m_tawss);
+    m_xdmf.add("OscillatoryShearIndex", m_atrium.m_osi);
+    m_xdmf.add("WallShearStress", m_atrium.m_wss);
+    if (m_atrium.m_cfg.solveKinetics)
+    {
+      m_atrium.m_thCur.setName("Thrombin");
+      m_atrium.m_fgCur.setName("Fibrinogen");
+      m_atrium.m_fnCur.setName("Fibrin");
+      m_atrium.m_activation.setName("ThrombosisActivation");
+      m_xdmf.add("Thrombin", m_atrium.m_thCur);
+      m_xdmf.add("Fibrinogen", m_atrium.m_fgCur);
+      m_xdmf.add("Fibrin", m_atrium.m_fnCur);
+      m_xdmf.add("ThrombosisActivation", m_atrium.m_activation);
+    }
   }
 
   void Fluid::Output::openCSV()

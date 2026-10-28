@@ -218,6 +218,14 @@ Schwarz, local ILU, and diagonal scaling with matrix restoration, configurable
 through PETSc options. Output consists of a master XDMF file and per-rank HDF5
 pieces.
 
+Fluid arrays use PascalCase names: `Velocity`, `Pressure`, `WallShearStress`,
+`TimeAveragedWallShearStress`, and `OscillatoryShearIndex`. The last two are
+cycle statistics, updated after a completed cycle. `Thrombin`, `Fibrinogen`,
+`Fibrin`, and `ThrombosisActivation` are exported only when transport kinetics
+is enabled with `-atrium_kinetics true`; species evolution begins after the
+configured flow warm-up cycles. `ThrombosisActivation` is a wall-shear-based
+coagulation indicator, distinct from the solid's contractile activation.
+
 The [visualization pipeline](Visualization/README.md) renders fluid speed as a
 volume animation with a translucent cavity surface and physical timestamps.
 

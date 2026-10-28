@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import xml.etree.ElementTree as ET
 
 
 def write_mesh(path):
@@ -71,7 +72,8 @@ def main():
     env = dict(os.environ, OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1',
                VECLIB_MAXIMUM_THREADS='1')
 
-    def run(name, ranks, pressure, outlet=0, dt=.001, steps=3, amplitude=0):
+    def run(name, ranks, pressure, outlet=0, dt=.001, steps=3, amplitude=0,
+            kinetics=False):
         folder = output/name
         folder.mkdir(exist_ok=True)
         cmd = [args.mpiexec, '-n', str(ranks), str(args.executable.resolve()),
@@ -80,7 +82,8 @@ def main():
                '-atrium_output_every', '0', '-atrium_dt', str(dt),
                '-atrium_pin', str(pressure), '-atrium_pin_amplitude', str(amplitude),
                '-atrium_outlet_pressure', str(outlet), '-atrium_lv_model', 'false',
-               '-atrium_kinetics', 'false', '-ksp_type', 'preonly', '-pc_type', 'lu',
+               '-atrium_kinetics', str(kinetics).lower(),
+               '-atrium_flow_cycles', '0', '-ksp_type', 'preonly', '-pc_type', 'lu',
                '-pc_factor_mat_solver_type', 'mumps', '-mat_mumps_icntl_20', '0',
                '-ksp_diagonal_scale', 'false', '-ksp_diagonal_scale_fix', 'false']
         with (folder/'run.log').open('w') as log:
@@ -88,6 +91,13 @@ def main():
                            cwd=output, check=True)
         with (folder/'Flow.csv').open() as stream:
             rows = list(csv.DictReader(stream))
+        fields = {a.attrib['Name'] for a in
+                  ET.parse(folder/'Flow.xdmf').iter('Attribute')}
+        expected = {'Attribute', 'Velocity', 'Pressure', 'WallShearStress',
+                    'TimeAveragedWallShearStress', 'OscillatoryShearIndex'}
+        if kinetics:
+            expected |= {'Thrombin', 'Fibrinogen', 'Fibrin', 'ThrombosisActivation'}
+        assert fields == expected, (name, fields)
         assert len(rows) == steps + 1, (name, len(rows))
         assert abs(float(rows[-1]['time_s']) - dt*steps) < 1e-12
         for row in rows[1:]:
@@ -97,6 +107,7 @@ def main():
         return rows[1:]
 
     rest = run('rest', 2, 0)
+    run('kinetics', 2, 1, steps=1, kinetics=True)
     assert all(float(row['fluid_max_velocity_m_per_s']) == 0 for row in rest)
     forward = run('forward', 2, 1)
     serial = run('serial', 1, 1)

@@ -15,7 +15,9 @@ import paraview.simple as pv
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input', type=Path, help='Fluid XDMF time series.')
-    parser.add_argument('output', type=Path, help='Output MP4 movie.')
+    parser.add_argument('output', type=Path, help='Output MP4 movie or PVSM scene.')
+    parser.add_argument('--state-only', action='store_true',
+                        help='Save a ParaView scene without rendering or encoding a movie.')
     parser.add_argument('--units', choices=['m/s', 'cm/s'], default='cm/s')
     parser.add_argument('--fps', type=float, default=12)
     parser.add_argument('--resolution', type=int, default=128,
@@ -33,7 +35,7 @@ def main():
     if args.vmax is not None and (not math.isfinite(args.vmax) or args.vmax <= 0):
         parser.error('vmax must be finite and positive')
     encoder = shutil.which('ffmpeg')
-    if not encoder:
+    if not encoder and not args.state_only:
         parser.error('ffmpeg is required to encode MP4')
     source, output = args.input.resolve(), args.output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -47,14 +49,16 @@ def main():
         indices = [round(i * (len(times)-1) / max(args.max_frames-1, 1))
                    for i in range(args.max_frames)]
         times = [times[i] for i in indices]
+    reader.UpdatePipeline(times[0])
+    velocity = 'Velocity' if 'Velocity' in reader.PointData.keys() else 'velocity'
     speed = pv.Calculator(Input=merged)
-    speed.ResultArrayName = 'speed'
+    speed.ResultArrayName = 'Speed'
     factor = 100 if args.units == 'cm/s' else 1
-    speed.Function = f'{factor}*mag(velocity)'
+    speed.Function = f'{factor}*mag({velocity})'
     maximum = 0.0
     for t in times:
         speed.UpdatePipeline(t)
-        maximum = max(maximum, speed.PointData['speed'].GetRange()[1])
+        maximum = max(maximum, speed.PointData['Speed'].GetRange()[1])
     vmax = args.vmax if args.vmax is not None else maximum
     if not math.isfinite(vmax) or vmax <= 0:
         vmax = 1.0
@@ -69,14 +73,14 @@ def main():
     view.OrientationAxesVisibility = 0
     display = pv.Show(volume, view)
     display.Representation = 'Volume'
-    pv.ColorBy(display, ('POINTS', 'speed'))
-    lut = pv.GetColorTransferFunction('speed')
+    pv.ColorBy(display, ('POINTS', 'Speed'))
+    lut = pv.GetColorTransferFunction('Speed')
     lut.ColorSpace = 'RGB'
     lut.RGBPoints = [0, .02, .05, .18, .25*vmax, .08, .65, .85,
                      .5*vmax, .96, .96, .30, .75*vmax, 1., .5, .02,
                      vmax, .95, .12, .015]
     lut.RescaleTransferFunction(0, vmax)
-    opacity = pv.GetOpacityTransferFunction('speed')
+    opacity = pv.GetOpacityTransferFunction('Speed')
     opacity.Points = [0, 0, .5, 0, .02*vmax, .002, .5, 0,
                       .25*vmax, .04, .5, 0, .5*vmax, .16, .5, 0,
                       vmax, .6, .5, 0]
@@ -117,7 +121,14 @@ def main():
     view.ViewTime = times[0]
     pv.ResetCamera(view)
     view.GetActiveCamera().Zoom(1.3)
-    pv.SaveState(str(output.with_suffix('.pvsm')))
+    animation = pv.GetAnimationScene()
+    animation.UpdateAnimationUsingDataTimeSteps()
+    animation.AnimationTime = times[0]
+    state = output.with_suffix('.pvsm')
+    pv.SaveState(str(state))
+    if args.state_only:
+        print('Scene:', state)
+        return
     with tempfile.TemporaryDirectory(prefix='atrium-volume-') as tmp:
         for i, t in enumerate(times):
             view.ViewTime = t
