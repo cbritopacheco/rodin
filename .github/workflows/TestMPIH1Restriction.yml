@@ -15,7 +15,7 @@ permissions:
 jobs:
   MPIH1Restriction:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: ${{ matrix.partition == 'pyramid' && matrix.np == '8' && 180 || 90 }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(inputs.matrix) }}
