@@ -1,4 +1,4 @@
-# CoronaryArtery_FSI_Explicit_PETSc_MPI
+# Coronary FSI: Explicit_PETSc_MPI
 
 Staggered coronary ALE fluid–structure interaction with Robin coupling, a hyperelastic wall, and lumped inlet/outlet models. The interface map is not distributed, so this example must run on one MPI rank.
 
@@ -11,7 +11,7 @@ From the repository root, using a configured build tree:
 ```sh
 cmake --build build --target CoronaryArtery_FSI_Explicit_PETSc_MPI -j4
 cd build
-mpirun -n 1 ./examples/Heart/CoronaryArtery_FSI_Explicit_PETSc_MPI/CoronaryArtery_FSI_Explicit_PETSc_MPI
+mpirun -n 1 ./examples/Heart/CoronaryArtery/FSI/Explicit_PETSc_MPI/CoronaryArtery_FSI_Explicit_PETSc_MPI
 ```
 
 Run from the build root so the default relative resource paths resolve.

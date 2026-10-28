@@ -1,16 +1,7 @@
 add_subdirectory(Atrium)
 add_subdirectory(CCMLC2014_0D)
-add_subdirectory(CoronarySolid)
+add_subdirectory(CoronaryArtery)
 
 if (RODIN_USE_PETSC)
-  add_subdirectory(CoronaryArtery_FSI_Explicit_PETSc_Seq)
-  add_subdirectory(CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq)
-  add_subdirectory(ProteinTest)
-endif()
-
-if (RODIN_USE_PETSC AND RODIN_USE_MPI)
-  add_subdirectory(CoronaryArtery)
-  add_subdirectory(CoronaryArterySolid_PETSc_MPI)
-  add_subdirectory(CoronaryArtery_FSI_PETSc_MPI)
-  add_subdirectory(CoronaryArtery_FSI_Explicit_PETSc_MPI)
+  add_subdirectory(EctaticTubeThrombosis)
 endif()

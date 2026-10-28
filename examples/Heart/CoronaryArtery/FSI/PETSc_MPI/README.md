@@ -1,4 +1,4 @@
-# CoronaryArtery_FSI_PETSc_MPI
+# Coronary FSI: PETSc_MPI
 
 Monolithic coronary ALE fluid–structure interaction prototype using PETSc/MPI, a coronary fluid model, and a Neo-Hookean/Newmark wall.
 
@@ -11,7 +11,7 @@ From the repository root, using a configured build tree:
 ```sh
 cmake --build build --target CoronaryArtery_FSI_PETSc_MPI -j4
 cd build
-mpirun -n 1 ./examples/Heart/CoronaryArtery_FSI_PETSc_MPI/CoronaryArtery_FSI_PETSc_MPI
+mpirun -n 1 ./examples/Heart/CoronaryArtery/FSI/PETSc_MPI/CoronaryArtery_FSI_PETSc_MPI
 ```
 
 Run from the build root so the default relative resource paths resolve.

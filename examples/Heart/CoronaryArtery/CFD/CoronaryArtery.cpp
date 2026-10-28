@@ -58,7 +58,7 @@
  * `lcaTargetFlow`, `venularPressureFraction` and `coronaryComplianceTotal`.
  * The arteriolar resistance is assembled implicitly on the outlet boundary,
  * so the 3D-0D coupling is unconditionally stable in `dt`. See the `RCR`
- * documentation in `CoronaryArtery/CoupledLV0DCoronary3D.h`.
+ * documentation in `CoronaryArtery/CFD/CoupledLV0DCoronary3D.h`.
  * The 3D solve has local time-step adaptivity enabled by default: if the
  * PETSc KSP/SNES solve fails, the 3D flow state is restored and retried with
  * solver `dt *= 0.5`, down to 8 reductions. After accepted reduced solves,

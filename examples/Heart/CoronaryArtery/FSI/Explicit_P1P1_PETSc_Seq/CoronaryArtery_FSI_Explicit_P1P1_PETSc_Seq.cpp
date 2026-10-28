@@ -129,7 +129,7 @@ namespace
   // on the 3D outlet boundary as R_a Phi_a A (u.n)(v.n), so p_out carries only
   // p_c and the coupling is unconditionally stable in dt.  Phi = mu_ap/mu_N is
   // the rheological modulation read off the universal WRMS table.
-  // See the RCR documentation in CoronaryArtery/CoupledLV0DCoronary3D.h.
+  // See the RCR documentation in CoronaryArtery/CFD/CoupledLV0DCoronary3D.h.
   // --------------------------------------------------------------------------
   struct RCR
   {

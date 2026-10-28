@@ -10,4 +10,4 @@ target_link_libraries(CoronaryArtery_FSI_Explicit_PETSc_Seq
   Rodin::Assembly)
 
 target_include_directories(CoronaryArtery_FSI_Explicit_PETSc_Seq
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../..)

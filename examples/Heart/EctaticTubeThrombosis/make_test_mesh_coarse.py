@@ -59,7 +59,7 @@ for s in range(NZ):                        # pared lateral
         a2,b2 = node(s+1,NR,k), node(s+1,NR,k+1)
         faces.append((a1,b1,b2,ATTR_WALL)); faces.append((a1,b2,a2,ATTR_WALL))
 
-out = sys.argv[1] if len(sys.argv)>1 else 'ProteinTest.mesh'
+out = sys.argv[1] if len(sys.argv)>1 else 'EctaticTubeThrombosis.mesh'
 with open(out,'w') as f:
     f.write("MeshVersionFormatted 2\nDimension\n3\nVertices\n%d\n"%len(V))
     for v in V: f.write("%.12g %.12g %.12g 0\n"%tuple(v))

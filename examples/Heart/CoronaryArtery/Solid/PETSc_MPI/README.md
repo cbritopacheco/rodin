@@ -11,7 +11,7 @@ From the repository root, using a configured build tree:
 ```sh
 cmake --build build --target CoronaryArterySolid_PETSc_MPI -j4
 cd build
-mpirun -n 1 ./examples/Heart/CoronaryArterySolid_PETSc_MPI/CoronaryArterySolid_PETSc_MPI
+mpirun -n 1 ./examples/Heart/CoronaryArtery/Solid/PETSc_MPI/CoronaryArterySolid_PETSc_MPI
 ```
 
 Run from the build root so the default relative resource paths resolve.

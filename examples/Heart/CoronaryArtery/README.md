@@ -1,23 +1,17 @@
-# CoronaryArtery
+# Coronary artery models
 
-Coronary flow coupled to the lumped left-ventricle model and intramyocardial outlet beds. The driver supports Oseen and Newton flow solves.
+Coronary hemodynamics and arterial wall deformation involve different spatial
+models and coupling assumptions. The examples provide rigid-wall flow, wall
+mechanics, and fluid–structure interaction formulations.
 
-Requires `RODIN_USE_PETSC=ON` and `RODIN_USE_MPI=ON`.
+| Model | Formulation |
+|---|---|
+| [CFD](CFD/README.md) | Three-dimensional rigid-wall flow coupled to lumped ventricular and intramyocardial circulation models. |
+| [Solid](Solid/README.md) | Coronary wall dynamics driven by pressure and lumped heart motion. |
+| [Solid/PETSc_MPI](Solid/PETSc_MPI/README.md) | Distributed coronary wall dynamics. |
+| [FSI](FSI/README.md) | ALE fluid–structure formulations with staggered or monolithic coupling. |
 
-## Build and run
-
-From the repository root, using a configured build tree:
-
-```sh
-cmake --build build --target CoronaryArtery -j4
-cd build
-mpirun -n 1 ./examples/Heart/CoronaryArtery/CoronaryArtery
-```
-
-Run from the build root so the default relative resource paths resolve.
-Output files are written relative to the working directory. Hydrate mesh
-resources with `git lfs pull` before running.
-
-## Input and configuration
-
-The default mesh is `resources/examples/Heart/CoronaryArtery/Output3D.mesh`. See `CoronaryArtery.cpp` for the PETSc options, including `-coronary_dt`, `-coronary_nsteps`, and `-coronary_output_prefix`.
+The CFD and FSI models have distinct wall assumptions: CFD fixes the wall,
+whereas FSI solves its displacement and transfers interface data between the
+fluid and solid problems. Shared headers define constitutive, transport, and
+flow-assembly terms used by the example drivers.
