@@ -1240,7 +1240,7 @@
   | @ref Rodin::MMG::Adapt "MMG::Adapt" | Metric-based adaptation from a nodal size map. |
   | @ref Rodin::MMG::Optimizer "MMG::Optimizer" | Mesh-quality optimization without an external metric field. |
   | @ref Rodin::MMG::LevelSetDiscretizer "MMG::LevelSetDiscretizer" | Level-set meshing: cuts a background mesh along an isovalue or extracts the isosurface. |
-  | @ref Rodin::MMG::MMG5 "MMG::MMG5" | Base class providing shared MMG configuration and native conversion helpers. |
+  | @ref Rodin::MMG::Base "MMG::Base" | Shared MMG remeshing configuration inherited by the workflow classes. |
 
   # Workflow Semantics
 
@@ -1269,18 +1269,30 @@
   | 3D volumetric | MMG3D |
   | Surface in 3D | MMGS |
 
-  # Shared Configuration (MMG5 base)
+  # Shared Configuration (Base)
 
   The MMG wrappers inherit common configuration methods from
-  @ref Rodin::MMG::MMG5 "MMG5"; each returns `*this` for chaining:
+  @ref Rodin::MMG::Base "Base"; each returns `*this` for chaining:
 
   | Method | Description |
   |--------|-------------|
-  | @ref Rodin::MMG::MMG5 "setHMin(hmin)" | Minimal allowed edge size |
-  | @ref Rodin::MMG::MMG5 "setHMax(hmax)" | Maximal allowed edge size |
-  | @ref Rodin::MMG::MMG5 "setHausdorff(hausd)" | Hausdorff distance tolerance for boundary approximation |
-  | @ref Rodin::MMG::MMG5 "setGradation(hgrad)" | Edge-size gradation ratio between adjacent elements |
-  | @ref Rodin::MMG::MMG5 "setAngleDetection(bool)" | Enable ridge angle detection for feature preservation |
+  | @ref Rodin::MMG::Base "setHMin(hmin)" | Minimal allowed edge size |
+  | @ref Rodin::MMG::Base "setHMax(hmax)" | Maximal allowed edge size |
+  | @ref Rodin::MMG::Base "setHausdorff(hausd)" | Hausdorff distance tolerance for boundary approximation |
+  | @ref Rodin::MMG::Base "setGradation(hgrad)" | Edge-size gradation ratio between adjacent elements |
+  | @ref Rodin::MMG::Base "setAngleDetection(bool)" | Enable ridge angle detection for feature preservation |
+
+  # Native MMG V5 API
+
+  Native mesh handles are managed by @ref Rodin::MMG::V5::Mesh, with
+  conversions named @ref Rodin::MMG::V5::Mesh::toV5 and
+  @ref Rodin::MMG::V5::Mesh::fromV5. Native solution handles and grid-function
+  transfers are provided by @ref Rodin::MMG::V5::Solution.
+
+  | Namespace | Operations |
+  |-----------|------------|
+  | @ref Rodin::MMG::V5::Mesh | `create`, `copy`, `isSurface`, `destroy`, `toV5`, `fromV5` |
+  | @ref Rodin::MMG::V5::Solution | `create`, `copy`, `swap`, `destroy` |
 
   # Required Entities
 
@@ -1318,7 +1330,7 @@
 
   # LevelSetDiscretizer API
 
-  In addition to @ref Rodin::MMG::MMG5 "MMG5" parameters,
+  In addition to @ref Rodin::MMG::Base "Base" parameters,
   @ref Rodin::MMG::LevelSetDiscretizer "LevelSetDiscretizer" provides:
 
   | Method | Description |
