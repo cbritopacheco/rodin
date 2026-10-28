@@ -9,8 +9,7 @@
 
 #include <memory>
 #include <Rodin/Solid.h>
-#include <Rodin/Solver/NewtonSolver.h>
-#include <Rodin/Solver/SparseLU.h>
+#include <Rodin/PETSc/Solver/SNES.h>
 #include "ProblemData.h"
 
 namespace Rodin::Examples::Heart::AtriumContraction
@@ -18,15 +17,15 @@ namespace Rodin::Examples::Heart::AtriumContraction
   class Output;
 
   /**
-   * @brief Transient active atrial wall on a local wedge mesh.
+   * @brief Transient active atrial wall on a Scotch-partitioned MPI wedge mesh.
    *
    * ## Architecture
    *
    * The component retains its reference mesh, reference fibers, active fields, finite-element
    * spaces, active material, nonlinear problem, and solver between time steps.
    * Newmark updates advance displacement, velocity, and acceleration. Output
-   * observes the retained fields. This component uses the local Eigen backend;
-   * its mesh and interface are independent of the MPI fluid component.
+   * observes the retained fields. Distributed fields use PETSc storage and KSP/SNES solvers. The solid
+   * and fluid retain their own partitioned meshes and assembly state.
    */
   class Solid
   {
@@ -35,9 +34,12 @@ namespace Rodin::Examples::Heart::AtriumContraction
 
       /**
        * @brief Constructs the wall component and prescribed material inputs.
+       * @param parent Combined parent mesh, already distributed by the coordinator.
+       * @param material Solid volume label to extract.
        * @param parameters Validated wall, material, wave, and time configuration.
        */
-      explicit Solid(const Parameters& parameters);
+      Solid(const MeshType& parent, const Parameters& parameters,
+        Geometry::Attribute material = 4);
       ~Solid();
       Solid(const Solid&) = delete;
       Solid& operator=(const Solid&) = delete;
@@ -73,7 +75,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
       const Parameters& getParameters() const noexcept;
 
       /// @brief Returns the reference wall mesh, with coordinates in mm.
-      const Geometry::LocalMesh& getMesh() const noexcept;
+      const SubMeshType& getMesh() const noexcept;
 
       /// @brief Returns the current displacement in mm.
       const VectorField& getDisplacement() const noexcept;
@@ -94,20 +96,23 @@ namespace Rodin::Examples::Heart::AtriumContraction
       const CellScalarField& getActiveBeta() const noexcept;
 
     private:
-      using PassiveMaterial = Rodin::Solid::KelvinVoigt<Rodin::Solid::DemirayGasser>;
+      using PassiveMaterial =
+        Rodin::Solid::KelvinVoigt<Rodin::Solid::DemirayHolzapfelGasserOgden>;
       using Material =
         Rodin::Solid::ActiveContraction<PassiveMaterial, Rodin::Solid::ActiveFiberLaw>;
-      using Trial = Variational::TrialFunction<VectorField, VectorSpace>;
-      using Test = Variational::TestFunction<VectorSpace>;
-      using ActiveTrial = Variational::TrialFunction<CellScalarField, CellScalarSpace>;
-      using ActiveTest = Variational::TestFunction<CellScalarSpace>;
-      using LinearSystem =
-        Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+      using Trial = PETSc::Variational::TrialFunction<VectorField, VectorSpace>;
+      using Test = PETSc::Variational::TestFunction<VectorSpace>;
+      using ActiveTrial =
+        PETSc::Variational::TrialFunction<CellScalarField, CellScalarSpace>;
+      using ActiveTest = PETSc::Variational::TestFunction<CellScalarSpace>;
+      using LinearSystem = PETSc::Math::LinearSystem;
       using MechanicsProblem = Variational::Problem<LinearSystem, Trial, ActiveTrial,
         ActiveTrial, ActiveTrial, Test, ActiveTest, ActiveTest, ActiveTest>;
-      using LinearSolver = Solver::SparseLU<LinearSystem>;
-      using Newton = Solver::NewtonSolver<LinearSolver>;
+      using EquilibriumProblem = Variational::Problem<LinearSystem, Trial, Test>;
+      using LinearSolver = Solver::KSP;
+      using Newton = Solver::SNES;
       using InternalWork = Rodin::Solid::InternalVirtualWork<Material, VectorField>;
+      using PassiveWork = Rodin::Solid::InternalVirtualWork<PassiveMaterial, VectorField>;
 
       static constexpr Real NewmarkBeta = 0.25;
       static constexpr Real NewmarkGamma = 0.5;
@@ -117,11 +122,21 @@ namespace Rodin::Examples::Heart::AtriumContraction
       static constexpr size_t QuadratureOrder = 4;
       // Heuristic work caps; reaching either limit fails the time step.
       static constexpr size_t MaximumNewtonIterations = 80;
-      static constexpr size_t MaximumBacktracks = 60;
+
+      /// Function-evaluation budget allowing line-search backtracking at each Newton step.
+      static constexpr size_t MaximumFunctionEvaluations = 10000;
       // Absolute assembled residual tolerance in the example's mm/kPa/s units.
       // Relative stopping is disabled because the initial active residual can
       // be large while a mechanically unresolved residual remains significant.
       static constexpr Real AbsoluteResidualTolerance = 1e-8;
+
+      /**
+       * @brief Collectively extracts the solid cells from the common parent shard.
+       * @param parent Distributed mesh owned by the atrium coordinator.
+       * @param material Volume material label selected for the solid.
+       * @returns Solid submesh retaining its parent ancestry maps.
+       */
+      static SubMeshType makeMesh(const MeshType& parent, Geometry::Attribute material);
 
       /**
        * @brief Constructs passive elasticity, tissue viscosity, and active kinetics.
@@ -146,14 +161,17 @@ namespace Rodin::Examples::Heart::AtriumContraction
       /// @brief Packs mechanical and independent active fields into the Newton vector.
       void pack();
 
-      /// @brief Scatters the current Newton vector to its finite-element fields.
-      void scatter();
+      /**
+       * @brief Synchronizes the four retained fields from a global SNES iterate.
+       * @param values Distributed block iterate with field offsets defined by the spaces.
+       */
+      void scatter(const PETSc::Math::Vector& values);
 
       /// @brief Returns whether the current iterate has positive stretches and wedges.
       bool isAdmissible() const;
 
       Parameters m_parameters;
-      Geometry::LocalMesh m_mesh;
+      SubMeshType m_mesh;
       ProblemData m_data;
       VectorSpace m_space;
       CellScalarSpace m_activeSpace;
@@ -173,8 +191,11 @@ namespace Rodin::Examples::Heart::AtriumContraction
       InternalWork m_work;
       MechanicsProblem m_mechanics;
       LinearSolver m_linearSolver;
-      Newton m_newton;
-      Math::Vector<Real> m_iterate;
+      Optional<Newton> m_newton;
+      PassiveWork m_passiveWork;
+      EquilibriumProblem m_equilibrium;
+      LinearSolver m_equilibriumSolver;
+      Optional<Newton> m_equilibriumNewton;
       std::unique_ptr<Output> m_output;
       bool m_initialized = false, m_finished = false, m_failed = false;
   };

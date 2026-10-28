@@ -9,32 +9,19 @@
 #include <limits>
 #include <Rodin/Alert.h>
 #include "Atrium.h"
+#include <boost/mpi/collectives.hpp>
+#include <Rodin/Scotch/MeshPartitioner.h>
 
 namespace Rodin::Examples::Heart
 {
-  Atrium::Atrium(const Parameters& cfg)
-  {
-    if (cfg.mode != Mode::SolidOnly)
-    {
-      Alert::Exception() << "Fluid modes require an MPI context and PETSc"
-                         << Alert::Raise;
-    }
-    m_solid = std::make_unique<Solid>(cfg.solid);
-  }
-
-#ifdef RODIN_ATRIUM_HAS_FLUID
   Atrium::Atrium(const Context::MPI& context, const Parameters& cfg)
+    : m_mesh(makeMesh(context, cfg))
   {
     if (cfg.mode != Mode::SolidOnly && cfg.mode != Mode::FluidOnly &&
       cfg.mode != Mode::Independent)
       Alert::Exception() << "Invalid atrium mode" << Alert::Raise;
     const bool hasSolid = cfg.mode != Mode::FluidOnly;
     const bool hasFluid = cfg.mode != Mode::SolidOnly;
-    if (hasSolid && context.getCommunicator().size() != 1)
-    {
-      Alert::Exception() << "The local atrial solid requires one MPI rank"
-                         << Alert::Raise;
-    }
     if (cfg.mode == Mode::Independent)
     {
       const auto dt = cfg.solid.timeStep;
@@ -50,12 +37,73 @@ namespace Rodin::Examples::Heart
       }
     }
     if (hasSolid)
-      m_solid = std::make_unique<Solid>(cfg.solid);
+      m_solid.emplace(m_mesh, cfg.solid, cfg.solidMaterial);
     if (hasFluid)
-      m_fluid = std::make_unique<Fluid>(context, cfg.fluid);
+      m_fluid.emplace(m_mesh, cfg.fluid, cfg.fluidMaterial);
   }
 
-#endif
+
+  Atrium::MeshType Atrium::makeMesh(const Context::MPI& context, const Parameters& cfg)
+  {
+    const auto& comm = context.getCommunicator();
+    constexpr int Root = 0;
+    Geometry::LocalMesh local;
+    std::string failure;
+    if (comm.rank() == Root)
+    {
+      try
+      {
+        local.load(cfg.meshPath, IO::FileFormat::MEDIT);
+        if (local.getDimension() != 3 || local.getSpaceDimension() != 3 ||
+          local.getCellCount() == 0)
+          Alert::Exception() << "Expected a nonempty combined 3D mesh" << Alert::Raise;
+        for (size_t d = 1; d <= 3; ++d)
+        {
+          local.getConnectivity().compute(d, 0);
+          local.getConnectivity().compute(d, d);
+          local.getConnectivity().compute(d, d - 1);
+          local.getConnectivity().compute(d - 1, d);
+        }
+      }
+      catch (const std::exception& error)
+      {
+        failure = error.what();
+      }
+    }
+    boost::mpi::broadcast(comm, failure, Root);
+    if (!failure.empty())
+      Alert::Exception() << failure << Alert::Raise;
+    Rodin::MPI::Sharder sharder(context);
+    if (comm.rank() == Root)
+    {
+      try
+      {
+        Scotch::Partitioner partitioner(local);
+        partitioner.partition(static_cast<size_t>(comm.size()));
+        sharder.shard(partitioner);
+      }
+      catch (const std::exception& error)
+      {
+        failure = error.what();
+      }
+    }
+    boost::mpi::broadcast(comm, failure, Root);
+    if (!failure.empty())
+      Alert::Exception() << failure << Alert::Raise;
+    if (comm.rank() == Root)
+      sharder.scatter(Root);
+    auto mesh = sharder.gather(Root);
+    for (size_t d = 1; d <= 3; ++d)
+    {
+      mesh.getConnectivity().compute(d, 0);
+      mesh.getConnectivity().compute(d, d);
+      mesh.getConnectivity().compute(d, d - 1);
+      mesh.getConnectivity().compute(d - 1, d);
+    }
+    mesh.reconcile(2);
+    mesh.reconcile(1);
+    return mesh;
+  }
 
   Atrium::~Atrium() = default;
 
@@ -71,10 +119,8 @@ namespace Rodin::Examples::Heart
     m_failed = true;
     if (m_solid)
       m_solid->initialize();
-#ifdef RODIN_ATRIUM_HAS_FLUID
     if (m_fluid)
       m_fluid->initialize();
-#endif
     m_initialized = true;
     m_failed = false;
     return *this;
@@ -86,10 +132,8 @@ namespace Rodin::Examples::Heart
     m_failed = true;
     if (m_solid)
       m_solid->step();
-#ifdef RODIN_ATRIUM_HAS_FLUID
     if (m_fluid)
       m_fluid->step();
-#endif
     ++m_steps;
     m_failed = false;
   }
@@ -100,10 +144,8 @@ namespace Rodin::Examples::Heart
       return;
     if (m_solid)
       m_solid->finish();
-#ifdef RODIN_ATRIUM_HAS_FLUID
     if (m_fluid)
       m_fluid->finish();
-#endif
     m_finished = true;
   }
 
@@ -115,20 +157,21 @@ namespace Rodin::Examples::Heart
   {
     if (m_solid)
       return m_solid->getTime();
-#ifdef RODIN_ATRIUM_HAS_FLUID
     if (m_fluid)
       return m_fluid->getTime();
-#endif
     return 0;
   }
+  const Atrium::MeshType& Atrium::getMesh() const noexcept
+  {
+    return m_mesh;
+  }
+
   const Atrium::Solid* Atrium::getSolid() const noexcept
   {
-    return m_solid.get();
+    return m_solid ? &*m_solid : nullptr;
   }
-#ifdef RODIN_ATRIUM_HAS_FLUID
   const Atrium::Fluid* Atrium::getFluid() const noexcept
   {
-    return m_fluid.get();
+    return m_fluid ? &*m_fluid : nullptr;
   }
-#endif
 }

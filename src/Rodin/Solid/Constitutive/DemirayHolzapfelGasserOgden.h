@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SOLID_CONSTITUTIVE_DEMIRAYGASSER_H
-#define RODIN_SOLID_CONSTITUTIVE_DEMIRAYGASSER_H
+#ifndef RODIN_SOLID_CONSTITUTIVE_DEMIRAYHOLZAPFELGASSEROGDEN_H
+#define RODIN_SOLID_CONSTITUTIVE_DEMIRAYHOLZAPFELGASSEROGDEN_H
 
 #include <cmath>
 #include "HyperElasticLaw.h"
@@ -14,19 +14,23 @@
 namespace Rodin::Solid
 {
   /**
-   * @brief Three-dimensional Demiray–Gasser energy with one fiber family.
+   * @brief Three-dimensional Demiray matrix with one HGO-type reinforcement family.
    *
    * @f[
    * W=\frac{a}{2b}(e^{b(\bar I_1-3)}-1)
    *   +\frac{a_f}{2b_f}(e^{b_f(\bar I_4-1)^2}-1)+\mu_v(\log J)^2,
    * \qquad \bar I_i=J^{-2/3}I_i.
    * @f]
+   * The name identifies a hybrid of the Demiray matrix and
+   * Holzapfel–Gasser–Ogden-type directional reinforcement. The stated
+   * energy defines this single-family variant and its volumetric penalty.
    * The exponential terms use their continuous limits when an exponent is zero.
    * The volumetric coefficient gives initial bulk modulus @f$2\mu_v@f$.
    * Additive constants set the reference energy to zero without changing stress.
    * Stress and tangent are analytic derivatives of this same energy.
    */
-  class DemirayGasser final : public HyperElasticLaw<DemirayGasser>
+  class DemirayHolzapfelGasserOgden final
+    : public HyperElasticLaw<DemirayHolzapfelGasserOgden>
   {
     public:
       /// @brief Material coefficients in consistent stress units.
@@ -43,7 +47,7 @@ namespace Rodin::Solid
        * @brief Constructs the material from positive, finite coefficients.
        * @param parameters Elastic coefficients; scales have stress units.
        */
-      explicit DemirayGasser(const Parameters& parameters)
+      explicit DemirayHolzapfelGasserOgden(const Parameters& parameters)
         : m_parameters(parameters),
           m_logJ(0),
           m_scale(1),
@@ -61,7 +65,8 @@ namespace Rodin::Solid
           !std::isfinite(p.fiberExponent) || p.fiberExponent < 0 ||
           !std::isfinite(p.volumePenalty) || p.volumePenalty <= 0)
         {
-          Alert::Exception() << "Invalid Demiray–Gasser coefficients" << Alert::Raise;
+          Alert::Exception() << "Invalid Demiray–Holzapfel–Gasser–Ogden coefficients"
+                             << Alert::Raise;
         }
       }
 
@@ -76,16 +81,16 @@ namespace Rodin::Solid
        * @param point Constitutive point with three-dimensional kinematics.
        * @returns This material.
        */
-      DemirayGasser& setConstitutivePoint(const ConstitutivePoint& point)
+      DemirayHolzapfelGasserOgden& setConstitutivePoint(const ConstitutivePoint& point)
       {
         const auto& state = point.getKinematicState();
         if (state.getDimension() != 3 || !std::isfinite(state.getJacobian()) ||
           state.getJacobian() <= 0)
         {
           m_state.reset();
-          Alert::Exception()
-            << "Demiray–Gasser requires a positive three-dimensional deformation"
-            << Alert::Raise;
+          Alert::Exception() << "Demiray–Holzapfel–Gasser–Ogden requires a positive "
+                                "three-dimensional deformation"
+                             << Alert::Raise;
         }
         const auto fiber = FiberKinematics::direction(point);
         if (m_state && hasSameKinematics(*m_state, state) &&

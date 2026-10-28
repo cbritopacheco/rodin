@@ -42,7 +42,7 @@
 #include "Solid/Constitutive/Hooke.h"
 #include "Solid/Constitutive/HyperElasticLaw.h"
 #include "Solid/Constitutive/NeoHookean.h"
-#include "Solid/Constitutive/DemirayGasser.h"
+#include "Solid/Constitutive/DemirayHolzapfelGasserOgden.h"
 #include "Solid/Constitutive/KelvinVoigt.h"
 #include "Solid/Constitutive/SaintVenantKirchhoff.h"
 #include "Solid/Constitutive/MooneyRivlin.h"

@@ -7,7 +7,7 @@
 /// @file @brief Independent energy, stress, tangent, and objectivity tests.
 #include <gtest/gtest.h>
 #include <Eigen/Geometry>
-#include "Rodin/Solid/Constitutive/DemirayGasser.h"
+#include "Rodin/Solid/Constitutive/DemirayHolzapfelGasserOgden.h"
 
 using namespace Rodin;
 using namespace Rodin::Solid;
@@ -20,7 +20,7 @@ namespace
     Math::SpatialMatrix<Real> stress, tangent;
   };
 
-  Response evaluate(const DemirayGasser& material, const Eigen::Matrix3d& f,
+  Response evaluate(const DemirayHolzapfelGasserOgden& material, const Eigen::Matrix3d& f,
     const Eigen::Matrix3d& direction)
   {
     KinematicState state(3);
@@ -42,10 +42,10 @@ namespace
   }
 }
 
-TEST(Rodin_Solid_DemirayGasser, IndependentEnergyAndAllStressDerivatives)
+TEST(Rodin_Solid_DemirayHolzapfelGasserOgden, IndependentEnergyAndAllStressDerivatives)
 {
-  const DemirayGasser::Parameters parameters{3, 2, 4, 5, 17};
-  const DemirayGasser material(parameters);
+  const DemirayHolzapfelGasserOgden::Parameters parameters{3, 2, 4, 5, 17};
+  const DemirayHolzapfelGasserOgden material(parameters);
   Eigen::Matrix3d f;
   f << 1.12, .08, -.02, .03, .94, .04, -.01, .02, 1.05;
   Eigen::Matrix3d direction;
@@ -78,10 +78,10 @@ TEST(Rodin_Solid_DemirayGasser, IndependentEnergyAndAllStressDerivatives)
   EXPECT_LT((actual.tangent - (plus.stress - minus.stress) / (2 * step)).norm(), 2e-7);
 }
 
-TEST(Rodin_Solid_DemirayGasser, ReferenceStateVolumeAndZeroExponentLimits)
+TEST(Rodin_Solid_DemirayHolzapfelGasserOgden, ReferenceStateVolumeAndZeroExponentLimits)
 {
-  DemirayGasser::Parameters parameters{3, 0, 4, 0, 17};
-  const DemirayGasser material(parameters);
+  DemirayHolzapfelGasserOgden::Parameters parameters{3, 0, 4, 0, 17};
+  const DemirayHolzapfelGasserOgden material(parameters);
   const Eigen::Matrix3d identity = Eigen::Matrix3d::Identity();
   const auto rest = evaluate(material, identity, identity);
   EXPECT_DOUBLE_EQ(rest.energy, 0);
@@ -100,9 +100,9 @@ TEST(Rodin_Solid_DemirayGasser, ReferenceStateVolumeAndZeroExponentLimits)
     1.5 * (first - 3) + 2 * (fourth - 1) * (fourth - 1), 1e-12);
 }
 
-TEST(Rodin_Solid_DemirayGasser, RotationCovarianceAndTangentLinearity)
+TEST(Rodin_Solid_DemirayHolzapfelGasserOgden, RotationCovarianceAndTangentLinearity)
 {
-  const DemirayGasser material(DemirayGasser::Parameters{});
+  const DemirayHolzapfelGasserOgden material(DemirayHolzapfelGasserOgden::Parameters{});
   Eigen::Matrix3d f = Eigen::Matrix3d::Identity();
   f(0, 0) = 1.08;
   f(1, 2) = .04;
@@ -116,12 +116,12 @@ TEST(Rodin_Solid_DemirayGasser, RotationCovarianceAndTangentLinearity)
   EXPECT_LT((evaluate(material, f, 2 * h).tangent - 2 * a.tangent).norm(), 1e-12);
 }
 
-TEST(Rodin_Solid_DemirayGasser, InvalidCoefficientsAndUnboundState)
+TEST(Rodin_Solid_DemirayHolzapfelGasserOgden, InvalidCoefficientsAndUnboundState)
 {
-  auto parameters = DemirayGasser::Parameters{};
+  auto parameters = DemirayHolzapfelGasserOgden::Parameters{};
   parameters.matrixScale = -1;
-  EXPECT_THROW(DemirayGasser material(parameters), std::exception);
-  const DemirayGasser material(DemirayGasser::Parameters{});
+  EXPECT_THROW(DemirayHolzapfelGasserOgden material(parameters), std::exception);
+  const DemirayHolzapfelGasserOgden material(DemirayHolzapfelGasserOgden::Parameters{});
   EXPECT_THROW(material.getStrainEnergyDensity(), std::exception);
   KinematicState two(2);
   ConstitutivePoint point(two);
@@ -129,9 +129,9 @@ TEST(Rodin_Solid_DemirayGasser, InvalidCoefficientsAndUnboundState)
   EXPECT_THROW(other.setConstitutivePoint(point), std::exception);
 }
 
-TEST(Rodin_Solid_DemirayGasser, OwnedSnapshotAndChangedFiberBinding)
+TEST(Rodin_Solid_DemirayHolzapfelGasserOgden, OwnedSnapshotAndChangedFiberBinding)
 {
-  DemirayGasser material(DemirayGasser::Parameters{});
+  DemirayHolzapfelGasserOgden material(DemirayHolzapfelGasserOgden::Parameters{});
   KinematicState state(3);
   Math::SpatialMatrix<Real> h(3, 3);
   h.setZero();

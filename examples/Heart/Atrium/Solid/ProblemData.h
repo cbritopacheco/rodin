@@ -14,25 +14,27 @@
 #include <vector>
 #include <Eigen/Core>
 #include <Rodin/Geometry.h>
-#include <Rodin/Solid/Constitutive/DemirayGasser.h>
+#include <Rodin/MPI.h>
+#include <Rodin/PETSc.h>
+#include <Rodin/Solid/Constitutive/DemirayHolzapfelGasserOgden.h>
 #include <Rodin/Variational.h>
 
 namespace Rodin::Examples::Heart::AtriumContraction
 {
   using Vec = Eigen::Matrix<Real, 3, 1>;
-  using VectorSpace = Variational::P1<Math::SpatialVector<Real>>;
-  using ScalarSpace = Variational::P1<Real>;
-  using CellVectorSpace = Variational::P0<Math::SpatialVector<Real>>;
-  using CellScalarSpace = Variational::P0<Real>;
-  using VectorField = Variational::GridFunction<VectorSpace, Math::Vector<Real>>;
-  using ScalarField = Variational::GridFunction<ScalarSpace, Math::Vector<Real>>;
-  using CellVectorField = Variational::GridFunction<CellVectorSpace, Math::Vector<Real>>;
-  using CellScalarField = Variational::GridFunction<CellScalarSpace, Math::Vector<Real>>;
+  using MeshType = Geometry::Mesh<Context::MPI>;
+  using SubMeshType = Geometry::SubMesh<Context::MPI>;
+  using VectorSpace = Variational::P1<Math::SpatialVector<Real>, MeshType>;
+  using ScalarSpace = Variational::P1<Real, MeshType>;
+  using CellVectorSpace = Variational::P0<Math::SpatialVector<Real>, MeshType>;
+  using CellScalarSpace = Variational::P0<Real, MeshType>;
+  using VectorField = PETSc::Variational::GridFunction<VectorSpace>;
+  using ScalarField = PETSc::Variational::GridFunction<ScalarSpace>;
+  using CellVectorField = PETSc::Variational::GridFunction<CellVectorSpace>;
+  using CellScalarField = PETSc::Variational::GridFunction<CellScalarSpace>;
 
   struct Options
   {
-    std::string mesh =
-      "resources/examples/Heart/Atrium/AtriumWall_Repaired_Wedges_1mm.mesh";
     std::string output = "output/atrium-contraction/Contraction";
     size_t steps = 24;
     size_t stopAfter = 0;
@@ -45,7 +47,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
     Real relaxation = 10; // Magnitude of the resting electrical drive, in 1/s.
     Real speed = 200;
     Real width = 6;
-    Rodin::Solid::DemirayGasser::Parameters passive;
+    Rodin::Solid::DemirayHolzapfelGasserOgden::Parameters passive;
     Real viscosity = 0.2; // Tissue viscosity, in kPa s.
     Real activeStiffness = 20; // Serial elastic stiffness, in kPa.
     Real activeDamping = 3; // Contractile dashpot, in kPa s.
@@ -59,9 +61,10 @@ namespace Rodin::Examples::Heart::AtriumContraction
    * @brief Parses the example configuration.
    * @param argc Argument count.
    * @param argv Argument values.
+   * @param meshPath Common parent mesh path selected by the command line.
    * @returns Validated input configuration.
    */
-  Options readOptions(int argc, char** argv);
+  Options readOptions(int argc, char** argv, std::string& meshPath);
 
   /**
    * @brief Validates a programmatic configuration.
@@ -69,13 +72,6 @@ namespace Rodin::Examples::Heart::AtriumContraction
    * @returns Validated configuration.
    */
   Options validateOptions(const Options& cfg);
-
-  /**
-   * @brief Loads the wedge wall and computes boundary connectivity.
-   * @param cfg Input configuration.
-   * @returns Wall mesh.
-   */
-  Geometry::LocalMesh loadWall(const Options& cfg);
 
   /**
    * @brief Computes the minimum six-node wedge determinant on its reference cell.
@@ -92,11 +88,12 @@ namespace Rodin::Examples::Heart::AtriumContraction
    * Geometry inspection identifies the basal rim and extrusion normals. A scalar
    * Laplace problem supplies the fiber frame. The fitted plane defines activation;
    * the fields and their spaces are retained for constitutive input and output.
-   * The supporting mesh and configuration must outlive this object.
+   * The supporting distributed submesh and configuration must outlive this object.
+   * Geometry reductions and the retained harmonic-coordinate solve are collective.
    */
   struct ProblemData
   {
-    Geometry::LocalMesh& mesh;
+    MeshType& mesh;
     const Options& cfg;
     ScalarSpace scalarSpace;
     CellVectorSpace fiberSpace;
@@ -118,7 +115,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
      * @param wall Supporting wall mesh.
      * @param options Prescribed input configuration.
      */
-    ProblemData(Geometry::LocalMesh& wall, const Options& options);
+    ProblemData(MeshType& wall, const Options& options);
 
     /**
      * @brief Evaluates the material fiber direction.
@@ -152,14 +149,23 @@ namespace Rodin::Examples::Heart::AtriumContraction
     Real maximumElectrical(const Geometry::Polytope& cell, Real time) const;
 
     /**
-     * @brief Checks each deformed wedge over its entire reference cell.
+     * @brief Collectively checks each owned wedge over its entire reference cell.
      * @param displacement Current nodal displacement in mm.
      * @returns Minimum scaled determinant in mm, or no value for nonfinite geometry.
      */
     Optional<Real> minimumDeformedJacobian(const VectorField& displacement) const;
 
     private:
-      /// @brief Validates the wall and identifies its basal plane and normals.
+      using CoordinateTrial = PETSc::Variational::TrialFunction<ScalarField, ScalarSpace>;
+      using CoordinateTest = PETSc::Variational::TestFunction<ScalarSpace>;
+      using CoordinateProblem =
+        Variational::Problem<PETSc::Math::LinearSystem, CoordinateTrial, CoordinateTest>;
+      CoordinateTrial m_coordinate;
+      CoordinateTest m_coordinateTest;
+      CoordinateProblem m_laplace;
+      Solver::KSP m_coordinateSolver;
+
+      /// @brief Collectively validates the wall and identifies its basal plane and normals.
       void inspectGeometry();
 
       /// @brief Constructs the harmonic fiber frame and its diagnostic fields.

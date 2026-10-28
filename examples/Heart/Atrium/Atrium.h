@@ -9,9 +9,7 @@
 
 #include <memory>
 #include "Solid/Solid.h"
-#ifdef RODIN_ATRIUM_HAS_FLUID
 #include "Fluid.h"
-#endif
 
 namespace Rodin::Examples::Heart
 {
@@ -24,10 +22,9 @@ namespace Rodin::Examples::Heart
   class Atrium
   {
     public:
+      using MeshType = Geometry::Mesh<Context::MPI>;
       using Solid = AtriumContraction::Solid;
-#ifdef RODIN_ATRIUM_HAS_FLUID
       using Fluid = AtriumFluid;
-#endif
       enum class Mode
       {
         SolidOnly,
@@ -38,18 +35,16 @@ namespace Rodin::Examples::Heart
       struct Parameters
       {
         Mode mode = Mode::SolidOnly;
+        std::string meshPath =
+          "resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh";
+        Geometry::Attribute solidMaterial = 4;
+        Geometry::Attribute fluidMaterial = 1;
         Solid::Parameters solid;
-#ifdef RODIN_ATRIUM_HAS_FLUID
         Fluid::Parameters fluid;
-#endif
       };
 
-      /// @brief Constructs a solid-only model without an MPI context.
-      explicit Atrium(const Parameters& parameters);
-#ifdef RODIN_ATRIUM_HAS_FLUID
-      /// @brief Constructs the selected model using an MPI context for the fluid.
+      /// @brief Constructs the selected model using the shared MPI context.
       Atrium(const Context::MPI& context, const Parameters& parameters);
-#endif
       ~Atrium();
       Atrium(const Atrium&) = delete;
       Atrium& operator=(const Atrium&) = delete;
@@ -69,18 +64,27 @@ namespace Rodin::Examples::Heart
       /// @brief Returns the current physical time in seconds.
       Real getTime() const noexcept;
 
+      /// @brief Returns the combined distributed parent mesh in source length units.
+      const MeshType& getMesh() const noexcept;
+
       /// @brief Returns the configured solid, or null when it is disabled.
       const Solid* getSolid() const noexcept;
-#ifdef RODIN_ATRIUM_HAS_FLUID
+
       /// @brief Returns the configured fluid, or null when it is disabled.
       const Fluid* getFluid() const noexcept;
-#endif
 
     private:
-      std::unique_ptr<Solid> m_solid;
-#ifdef RODIN_ATRIUM_HAS_FLUID
-      std::unique_ptr<Fluid> m_fluid;
-#endif
+      /**
+       * @brief Collectively loads and Scotch-partitions the combined source once.
+       * @param context Communicator used by both component submeshes.
+       * @param parameters Common source path and material labels.
+       * @returns Reconciled parent mesh in source length units.
+       */
+      static MeshType makeMesh(const Context::MPI& context, const Parameters& parameters);
+
+      MeshType m_mesh;
+      Optional<Solid> m_solid;
+      Optional<Fluid> m_fluid;
       size_t m_steps = 0;
       bool m_initialized = false;
       bool m_finished = false;

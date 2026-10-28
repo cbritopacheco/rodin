@@ -1,7 +1,7 @@
 # Atrial solid electromechanics
 
 This example couples finite-strain atrial wall motion to independent active
-fiber variables. Demiray–Gasser elasticity and Green–Lagrange strain-rate
+fiber variables. An exponential Demiray matrix with single-family Holzapfel–Gasser–Ogden-type reinforcement and Green–Lagrange strain-rate
 viscosity form the passive tissue response. Rodin's `ActiveFiberLaw` supplies
 the Hill–Maxwell equations. Displacement uses continuous linear wedge shape
 functions; active extension, stiffness, and stress variables use discontinuous
@@ -19,7 +19,8 @@ E=\frac{C-I}{2},\quad
 \bar I_4=J^{-2/3}f_0\cdot Cf_0.
 $$
 
-The three-dimensional Demiray–Gasser stored energy is
+`DemirayHolzapfelGasserOgden` combines a Demiray matrix and a single-family
+HGO-type reinforcement. Its three-dimensional stored energy is
 
 $$
 W_p=\frac{a}{2b}\left[e^{b(\bar I_1-3)}-1\right]
@@ -124,10 +125,11 @@ for stiffness and transformed stress, midpoint active extension and the mean
 of current/previous fiber strains in the serial relation. The first-order
 active updates limit the temporal order of the coupled method.
 
-Rodin's `InternalVirtualWork`, `Integral`, `SparseLU`, and `NewtonSolver`
+Rodin's `InternalVirtualWork`, `Integral`, PETSc `KSP`, and `SNES`
 assemble and solve the four-field system. Every nonlinear and coupling term
-uses the same order-four quadrature policy. Backtracking enforces admissible
-active stretches, positive wedges, and a decreasing residual norm. An electrical
+uses the same order-four quadrature policy. A collective state-domain check
+allows SNES line search to reject invalid active stretches and nonpositive wedges
+before constitutive assembly. An electrical
 upper bound over each wedge supplies only an initial Newton predictor; the
 active equations always evaluate their source at quadrature points.
 
@@ -181,9 +183,12 @@ field and has no prescribed target-strain amplitude option. Setting
 - [`Output.h`](Output.h) and [`Output.cpp`](Output.cpp): observation of solved
   fields, XDMF export, metadata, and mechanical diagnostics.
 
-The reusable `AtriumSolid` component exposes `initialize()`, `step()`, and
-`finish()`. The mesh resources are in `resources/examples/Heart/Atrium/`:
+The reusable `Atrium::Solid` component exposes `initialize()`, `step()`, and
+`finish()`. The coordinator partitions the combined fluid–solid parent once with
+Scotch, then the component extracts its material-4 MPI submesh. Its mesh,
+problems, fields, and solvers are retained across steps. The mesh resources are in `resources/examples/Heart/Atrium/`:
 
+- `AtriumCoarse_FluidSolid_1mm.mesh`: conforming fluid tetrahedra and solid wedges.
 - `Coarse.mesh`: source atrial volume and labeled boundary.
 - `AtriumWall_Repaired_Surface.mesh`: prepared atrial wall surface.
 - `AtriumWall_Repaired_Wedges_1mm.mesh`: one outward layer of six-node wedges,
@@ -270,9 +275,12 @@ harmonic construction, 1 the geometric-apex fallback, and 2 the pole fallback.
 From the repository root with a configured build tree:
 
 ```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+  -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON -DRODIN_USE_SCOTCH=ON \
+  -DRODIN_CODE_COVERAGE=OFF
 cmake --build build --target AtriumContraction -j4
-build/examples/Heart/Atrium/Solid/AtriumContraction \
-  --mesh resources/examples/Heart/Atrium/AtriumWall_Repaired_Wedges_1mm.mesh \
+mpirun -n 4 build/examples/Heart/Atrium/Solid/AtriumContraction \
+  --mesh resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh \
   --output output/atrium-active/Contraction \
   --base-label 6 --apex 46.39638367 187.44307667 -205.03317767 \
   --apex-radius 3 --steps 24 --activation 20 --relaxation 10 \

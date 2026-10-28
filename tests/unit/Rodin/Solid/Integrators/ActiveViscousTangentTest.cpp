@@ -48,7 +48,9 @@ namespace
     active.crossBridgeStiffness = 100;
     active.contractility = 20;
     Solid::ActiveContraction law(
-      Solid::KelvinVoigt(Solid::DemirayGasser(Solid::DemirayGasser::Parameters{}), .2),
+      Solid::KelvinVoigt(Solid::DemirayHolzapfelGasserOgden(
+                           Solid::DemirayHolzapfelGasserOgden::Parameters{}),
+        .2),
       Solid::ActiveFiberLaw(active));
     constexpr Real velocityCoefficient = 20;
     const auto input = [&](Solid::ConstitutivePoint& point) {

@@ -13,7 +13,7 @@
 #include <set>
 #include <Eigen/Eigenvalues>
 #include <Rodin/Alert.h>
-#include <Rodin/Solver/SparseLU.h>
+#include <boost/mpi/collectives.hpp>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -21,12 +21,20 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Examples::Heart::AtriumContraction
 {
-  Options readOptions(int argc, char** argv)
+  Options readOptions(int argc, char** argv, std::string& meshPath)
   {
     Options out;
     for (int i = 1; i < argc; ++i)
     {
       const std::string key(argv[i]);
+      // PETSc consumes single-dash solver options; double-dash model options
+      // remain owned by this parser.
+      if (key.size() > 1 && key[0] == '-' && key[1] != '-')
+      {
+        while (i + 1 < argc && argv[i + 1][0] != '-')
+          ++i;
+        continue;
+      }
       if (key == "--help")
       {
         std::cout << "AtriumContraction [--mesh path] [--output stem] [--steps 24]\n"
@@ -62,7 +70,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
       }
       const std::string value(argv[i]);
       if (key == "--mesh")
-        out.mesh = value;
+        meshPath = value;
       else if (key == "--output")
         out.output = value;
       else if (key == "--steps")
@@ -117,7 +125,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
 
   Options validateOptions(const Options& cfg)
   {
-    (void)Rodin::Solid::DemirayGasser(cfg.passive);
+    (void)Rodin::Solid::DemirayHolzapfelGasserOgden(cfg.passive);
     if (cfg.steps == 0 || !std::isfinite(cfg.timeStep) || cfg.timeStep < 0 ||
       !std::isfinite(cfg.activation) || cfg.activation < 0 ||
       !std::isfinite(cfg.relaxation) || cfg.relaxation < 0 ||
@@ -137,7 +145,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
     return cfg;
   }
 
-  Vec point3(const LocalMesh& mesh, Index vertex)
+  Vec point3(const MeshType& mesh, Index vertex)
   {
     const auto x = mesh.getVertexCoordinates(vertex);
     return Vec(x(0), x(1), x(2));
@@ -169,19 +177,8 @@ namespace Rodin::Examples::Heart::AtriumContraction
     }
     return minimum;
   }
-  LocalMesh loadWall(const Options& cfg)
-  {
-    LocalMesh mesh;
-    mesh.load(cfg.mesh, IO::FileFormat::MEDIT);
-    if (mesh.getDimension() != 3 || mesh.getSpaceDimension() != 3)
-    {
-      Alert::Exception() << "Expected a 3D wall volume mesh" << Alert::Raise;
-    }
-    mesh.getConnectivity().compute(2, 3);
-    return mesh;
-  }
 
-  ProblemData::ProblemData(LocalMesh& wall, const Options& options)
+  ProblemData::ProblemData(MeshType& wall, const Options& options)
     : mesh(wall),
       cfg(options),
       scalarSpace(mesh),
@@ -193,32 +190,38 @@ namespace Rodin::Examples::Heart::AtriumContraction
       normalField(fiberSpace),
       longitudinalField(fiberSpace),
       fallbackField(diagnosticSpace),
-      directions(mesh.getCellCount()),
-      normals(mesh.getCellCount()),
-      longitudinal(mesh.getCellCount()),
-      fallback(mesh.getCellCount(), 0)
+      directions(mesh.getShard().getPolytopeCount(3)),
+      normals(mesh.getShard().getPolytopeCount(3)),
+      longitudinal(mesh.getShard().getPolytopeCount(3)),
+      fallback(mesh.getShard().getPolytopeCount(3), 0),
+      m_coordinate(scalarSpace),
+      m_coordinateTest(scalarSpace),
+      m_laplace(m_coordinate, m_coordinateTest),
+      m_coordinateSolver(m_laplace)
   {
     inspectGeometry();
     generateFibers();
-    minimumProjection = waveCoordinate.getData().minCoeff();
-    maximumProjection = waveCoordinate.getData().maxCoeff();
+    Index selected;
+    minimumProjection = waveCoordinate.min(selected);
+    maximumProjection = waveCoordinate.max(selected);
     constexpr Real PulsePadding = 3;
     endTime = (maximumProjection + PulsePadding * cfg.width) / cfg.speed;
   }
 
   void ProblemData::inspectGeometry()
   {
+    const auto& comm = mesh.getContext().getCommunicator();
+    const auto& shard = mesh.getShard();
     mesh.getConnectivity().compute(2, 3);
-    std::vector<bool> innerVertex(mesh.getVertexCount(), false);
+    std::vector<bool> innerVertex(shard.getVertexCount(), false);
     std::set<Index> baseVertices;
-    size_t badCells = 0;
+    size_t badCells = 0, invalidCells = 0;
     for (auto cell = mesh.getCell(); cell; ++cell)
     {
-      if (cell->getGeometry() != Polytope::Type::Wedge ||
-        cell->getAttribute() != Attribute{4})
+      if (cell->getGeometry() != Polytope::Type::Wedge)
       {
-        Alert::Exception() << "The mechanics input must contain only material-4 wedges"
-                           << Alert::Raise;
+        invalidCells += shard.isOwned(3, cell->getIndex());
+        continue;
       }
       std::array<Vec, 6> q;
       for (size_t j = 0; j < 6; ++j)
@@ -231,41 +234,55 @@ namespace Rodin::Examples::Heart::AtriumContraction
       const Real area = (q[1] - q[0]).cross(q[2] - q[0]).norm();
       minimumReferenceJacobian = std::min(minimumReferenceJacobian, determinant / area);
       if (!(determinant > 0) || !std::isfinite(determinant))
-        ++badCells;
+        badCells += shard.isOwned(3, cell->getIndex());
       normals[cell->getIndex()] =
         ((q[3] - q[0]) + (q[4] - q[1]) + (q[5] - q[2])).normalized();
       for (size_t j = 0; j < 3; ++j)
         innerVertex[cell->getVertices()(j)] = true;
     }
+    invalidCells = boost::mpi::all_reduce(comm, invalidCells, std::plus<size_t>());
+    if (invalidCells)
+      Alert::Exception() << "The solid submesh must contain only wedges" << Alert::Raise;
+    badCells = boost::mpi::all_reduce(comm, badCells, std::plus<size_t>());
+    minimumReferenceJacobian =
+      boost::mpi::all_reduce(comm, minimumReferenceJacobian, boost::mpi::minimum<Real>());
     if (badCells != 0)
     {
       Alert::Exception() << std::to_string(badCells) +
           " folded/degenerate wedges; repair before mechanics"
                          << Alert::Raise;
     }
-    for (auto face = mesh.getBoundary(); face; ++face)
+    for (auto face = mesh.getFace(); face; ++face)
     {
+      if (!shard.isBoundary(face->getIndex()))
+        continue;
       const auto tag = face->getAttribute();
       if (tag == cfg.baseLabel)
       {
         for (Index vertex : face->getVertices())
         {
           baseAllVertices.insert(vertex);
-          if (innerVertex[vertex])
+          if (innerVertex[vertex] && shard.isOwned(0, vertex))
             baseVertices.insert(vertex);
         }
       }
 
       if (tag == Attribute{1} || tag == Attribute{2} || tag == Attribute{3} ||
         tag == Attribute{5} || tag == Attribute{6})
-        ++rimFaces;
+      {
+        if (shard.isOwned(2, face->getIndex()))
+          ++rimFaces;
+      }
     }
+    rimFaces = boost::mpi::all_reduce(comm, rimFaces, std::plus<size_t>());
     if (rimFaces == 0)
     {
       Alert::Exception() << "No tagged inlet/outlet rim support faces found"
                          << Alert::Raise;
     }
-    if (baseVertices.size() < 3)
+    const size_t baseCount =
+      boost::mpi::all_reduce(comm, baseVertices.size(), std::plus<size_t>());
+    if (baseCount < 3)
     {
       Alert::Exception() << "Base label " << cfg.baseLabel
                          << " needs at least three inner-rim vertices" << Alert::Raise;
@@ -273,12 +290,24 @@ namespace Rodin::Examples::Heart::AtriumContraction
     Vec wallCenter = Vec::Zero();
     for (Index v : baseVertices)
       baseOrigin += point3(mesh, v);
-    baseOrigin /= baseVertices.size();
+    for (size_t k = 0; k < 3; ++k)
+    {
+      baseOrigin(k) =
+        boost::mpi::all_reduce(comm, baseOrigin(k), std::plus<Real>()) / baseCount;
+    }
     Eigen::Matrix3d covariance = Eigen::Matrix3d::Zero();
     for (Index v : baseVertices)
     {
       const Vec dx = point3(mesh, v) - baseOrigin;
       covariance += dx * dx.transpose();
+    }
+    for (size_t i = 0; i < 3; ++i)
+    {
+      for (size_t j = 0; j < 3; ++j)
+      {
+        covariance(i, j) =
+          boost::mpi::all_reduce(comm, Real(covariance(i, j)), std::plus<Real>());
+      }
     }
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> plane(covariance);
     if (plane.info() != Eigen::Success || plane.eigenvalues()(1) <= 0)
@@ -286,15 +315,29 @@ namespace Rodin::Examples::Heart::AtriumContraction
       Alert::Exception() << "The basal rim does not define a plane" << Alert::Raise;
     }
     waveDirection = plane.eigenvectors().col(0);
+    size_t vertexCount = 0;
     for (auto v = mesh.getVertex(); v; ++v)
-      wallCenter += point3(mesh, v->getIndex());
-    wallCenter /= mesh.getVertexCount();
+    {
+      if (shard.isOwned(0, v->getIndex()))
+      {
+        wallCenter += point3(mesh, v->getIndex());
+        ++vertexCount;
+      }
+    }
+    vertexCount = boost::mpi::all_reduce(comm, vertexCount, std::plus<size_t>());
+    for (size_t k = 0; k < 3; ++k)
+    {
+      wallCenter(k) =
+        boost::mpi::all_reduce(comm, wallCenter(k), std::plus<Real>()) / vertexCount;
+    }
     if (waveDirection.dot(wallCenter - baseOrigin) < 0)
       waveDirection *= -1;
   }
 
   void ProblemData::generateFibers()
   {
+    const auto& comm = mesh.getContext().getCommunicator();
+    const auto& shard = mesh.getShard();
     // One harmonic base-to-appendage coordinate supplies a simple anatomical
     // direction field. This omits the paper's regional bundle classifications.
     constexpr Attribute ApexPatchLabel = 8;
@@ -318,13 +361,13 @@ namespace Rodin::Examples::Heart::AtriumContraction
     }
     std::vector<std::pair<Index, Optional<Attribute>>> restoredLabels;
     std::set<Index> apexVertices;
-    for (auto face = mesh.getBoundary(); face; ++face)
+    bool reservedLabel = false;
+    for (auto face = mesh.getFace(); face; ++face)
     {
+      if (!shard.isBoundary(face->getIndex()))
+        continue;
       if (face->getAttribute() == ApexPatchLabel)
-      {
-        Alert::Exception() << "Boundary label 8 is reserved for the temporary apex patch"
-                           << Alert::Raise;
-      }
+        reservedLabel = true;
       if (face->getGeometry() != Polytope::Type::Triangle)
         continue;
       std::array<Index, 3> key;
@@ -336,35 +379,38 @@ namespace Rodin::Examples::Heart::AtriumContraction
       restoredLabels.emplace_back(face->getIndex(), face->getAttribute());
       apexVertices.insert(key.begin(), key.end());
     }
-    if (restoredLabels.empty())
+    if (boost::mpi::all_reduce(comm, reservedLabel, std::logical_or<bool>()))
+    {
+      Alert::Exception() << "Boundary label 8 is reserved for the temporary apex patch"
+                         << Alert::Raise;
+    }
+    for (const auto& item : restoredLabels)
+    {
+      if (shard.isOwned(2, item.first))
+        ++apexPatchFaces;
+    }
+    apexPatchFaces = boost::mpi::all_reduce(comm, apexPatchFaces, std::plus<size_t>());
+    if (apexPatchFaces == 0)
     {
       Alert::Exception() << "No wall triangles lie in the appendage-apex patch; check "
                             "--apex and --apex-radius"
                          << Alert::Raise;
     }
+    bool overlaps = false;
     for (Index vertex : apexVertices)
-    {
-      if (baseAllVertices.contains(vertex))
-      {
-        Alert::Exception() << "The appendage patch overlaps the base rim" << Alert::Raise;
-      }
-    }
+      overlaps = overlaps || baseAllVertices.contains(vertex);
+    if (boost::mpi::all_reduce(comm, overlaps, std::logical_or<bool>()))
+      Alert::Exception() << "The appendage patch overlaps the base rim" << Alert::Raise;
     for (const auto& item : restoredLabels)
       mesh.setAttribute({2, item.first}, ApexPatchLabel);
-    TrialFunction coordinate(scalarSpace);
-    TestFunction coordinateTest(scalarSpace);
-    Problem laplace(coordinate, coordinateTest);
-    laplace = Integral(Grad(coordinate), Grad(coordinateTest)) +
-      DirichletBC(coordinate, RealFunction(0)).on(cfg.baseLabel) +
-      DirichletBC(coordinate, RealFunction(1)).on(ApexPatchLabel);
-    Solver::SparseLU coordinateSolver(laplace);
-    coordinateSolver.solve();
-    const auto& coordinateSystem = laplace.getLinearSystem();
-    coordinateResidual =
-      (coordinateSystem.getOperator() * coordinateSystem.getSolution() -
-        coordinateSystem.getVector())
-        .norm() /
-      std::max<Real>(1, coordinateSystem.getVector().norm());
+    m_laplace = Integral(Grad(m_coordinate), Grad(m_coordinateTest)) +
+      DirichletBC(m_coordinate, RealFunction(0)).on(cfg.baseLabel) +
+      DirichletBC(m_coordinate, RealFunction(1)).on(ApexPatchLabel);
+    m_coordinateSolver.setPrefix(std::string("atrium_fibers_"))
+      .setType(KSPCG)
+      .setTolerances(1e-12, 1e-14, 1e5, 10000);
+    m_laplace.solve(m_coordinateSolver);
+    coordinateResidual = m_coordinateSolver.getError();
     if (!std::isfinite(coordinateResidual) || coordinateResidual > 1e-8)
     {
       Alert::Exception() << "The fiber-coordinate Laplace solve failed: "
@@ -372,9 +418,8 @@ namespace Rodin::Examples::Heart::AtriumContraction
     }
     for (const auto& item : restoredLabels)
       mesh.setAttribute({2, item.first}, item.second);
-    fiberCoordinate = coordinate.getSolution();
+    fiberCoordinate = m_coordinate.getSolution();
     fiberCoordinate.setName("FiberCoordinate");
-    apexPatchFaces = restoredLabels.size();
     const auto coordinateGradient = Grad(fiberCoordinate);
     constexpr Real DirectionTolerance = 1e-10;
     const Real gradientTolerance = DirectionTolerance /
@@ -393,7 +438,8 @@ namespace Rodin::Examples::Heart::AtriumContraction
       if (direction.norm() < DirectionTolerance)
       {
         fallback[cell->getIndex()] = 1;
-        ++fallbackCells;
+        if (shard.isOwned(3, cell->getIndex()))
+          ++fallbackCells;
         const auto x = point.getPhysicalCoordinates();
         direction = cfg.appendageApex - Vec(x(0), x(1), x(2));
         if (direction.norm() > 0)
@@ -410,6 +456,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
       longitudinal[cell->getIndex()] = direction.normalized();
       directions[cell->getIndex()] = direction.normalized().cross(normal).normalized();
     }
+    fallbackCells = boost::mpi::all_reduce(comm, fallbackCells, std::plus<size_t>());
     const auto vectorField = [&](const std::vector<Vec>& values) {
       return VectorFunction(3, [&values](const Point& point) {
         Math::SpatialVector<Real> result(3);
@@ -474,8 +521,11 @@ namespace Rodin::Examples::Heart::AtriumContraction
     const VectorField& displacement) const
   {
     Real minimum = std::numeric_limits<Real>::infinity();
+    const auto& comm = mesh.getContext().getCommunicator();
     for (auto cell = mesh.getCell(); cell; ++cell)
     {
+      if (!mesh.getShard().isOwned(3, cell->getIndex()))
+        continue;
       std::array<Vec, 6> q;
       for (size_t j = 0; j < 6; ++j)
       {
@@ -483,14 +533,18 @@ namespace Rodin::Examples::Heart::AtriumContraction
         const auto x = mesh.getVertexCoordinates(vertex);
         const auto& dofs = displacement.getFiniteElementSpace().getDOFs(0, vertex);
         for (size_t k = 0; k < 3; ++k)
-          q[j](k) = x(k) + displacement.getData()(dofs(k));
+          q[j](k) = x(k) + displacement[dofs(k)];
       }
       const Real determinant = minimumJacobian(q);
       const Real area = (q[1] - q[0]).cross(q[2] - q[0]).norm();
       if (!std::isfinite(determinant) || !std::isfinite(area) || area <= 0)
-        return std::nullopt;
-      minimum = std::min(minimum, determinant / area);
+        minimum = -std::numeric_limits<Real>::infinity();
+      else
+        minimum = std::min(minimum, determinant / area);
     }
+    minimum = boost::mpi::all_reduce(comm, minimum, boost::mpi::minimum<Real>());
+    if (!std::isfinite(minimum))
+      return std::nullopt;
     return minimum;
   }
 

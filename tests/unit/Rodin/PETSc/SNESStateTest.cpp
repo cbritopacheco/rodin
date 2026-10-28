@@ -5,10 +5,9 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief SNES iterate identity and state-synchronization contract. */
+/// @file @brief SNES iterate identity and state-synchronization contract.
 
 #include <gtest/gtest.h>
-#include <petsc.h>
 
 #include "Rodin/Geometry.h"
 #include "Rodin/PETSc.h"
@@ -189,6 +188,53 @@ TEST(Rodin_PETSc_SNESState, CubicNonrealManufacturedRootAndWarmStart)
   snes.solve();
   EXPECT_TRUE(snes.converged());
   EXPECT_EQ(snes.getIterationNumber(), 0);
+}
+#endif
+
+#ifndef PETSC_USE_COMPLEX
+/**
+ * @brief Domain validation rejects a negative Newton trial before coefficient evaluation.
+ *
+ * The manufactured equation is @f$1/u-4=0@f$ on @f$u>0@f$.
+ * Starting from one gives the inadmissible full Newton step @f$u=-2@f$.
+ */
+TEST(Rodin_PETSc_SNESState, DomainValidationBacktracksBeforeAssembly)
+{
+  auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Segment, {2});
+  P0<Real> space(mesh);
+  PETSc::Variational::GridFunction state(space);
+  state = Real(1);
+  PETSc::Variational::TrialFunction du(space);
+  PETSc::Variational::TestFunction v(space);
+  du.getSolution() = state;
+  size_t invalidEvaluations = 0, rejected = 0;
+  const auto inverse = RealFunction([&](const Point& point) {
+    const Real value = state(point);
+    if (value <= 0)
+      ++invalidEvaluations;
+    return 1 / value;
+  });
+  Problem problem(du, v);
+  problem = Integral(-inverse * inverse * du, v) + Integral(inverse - 4, v);
+  problem.assemble();
+  Solver::KSP ksp(problem);
+  Solver::SNES snes(ksp);
+  snes.setTolerances(1e-12, 0, 0, 30, 200)
+    .setStateUpdate([&](const PETSc::Math::Vector& x) { state.setData(x); })
+    .setStateValidation([&] {
+      Index index;
+      const bool valid = state.min(index) > 0;
+      if (!valid)
+        ++rejected;
+      return valid;
+    });
+  snes.solve();
+  EXPECT_TRUE(snes.converged());
+  EXPECT_GT(rejected, 0);
+  EXPECT_EQ(invalidEvaluations, 0);
+  Index index;
+  EXPECT_NEAR(state.min(index), 0.25, 1e-12);
+  EXPECT_LT(snes.getResidualNorm(), 1e-12);
 }
 #endif
 

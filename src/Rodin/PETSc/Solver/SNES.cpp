@@ -92,6 +92,12 @@ namespace Rodin::Solver
     return *this;
   }
 
+  SNES& SNES::setStateValidation(StateValidation validation)
+  {
+    m_validation = std::move(validation);
+    return *this;
+  }
+
   void SNES::solve()
   {
     auto& problem = this->getProblem();
@@ -116,6 +122,15 @@ namespace Rodin::Solver
     assert(ierr == PETSC_SUCCESS);
     (void) ierr;
     return reason;
+  }
+
+  Real SNES::getResidualNorm() const
+  {
+    PetscReal norm;
+    const PetscErrorCode ierr = SNESGetFunctionNorm(m_snes, &norm);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+    return norm;
   }
 
   bool SNES::converged() const
@@ -163,6 +178,12 @@ namespace Rodin::Solver
     PetscErrorCode ierr = Update(x, ctx);
     if (ierr)
       return ierr;
+    if (self->m_validation && !self->m_validation())
+    {
+      return target == Variational::AssemblyTarget::LHS
+        ? SNESSetJacobianDomainError(self->m_snes)
+        : SNESSetFunctionDomainError(self->m_snes);
+    }
 #if PETSC_VERSION_GE(3, 20, 0)
     PetscObjectState state;
     ierr = VecGetState(x, &state);

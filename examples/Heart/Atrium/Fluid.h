@@ -6,7 +6,7 @@
  */
 /**
  * @file Fluid.h
- * @brief Stabilised non-Newtonian atrium flow coupled to the 0D left ventricle.
+ * @brief Distributed Oseen P1/P1 atrial flow with SUPG and PSPG stabilization.
  *
  * 3D atrium: stabilised non-Newtonian flow with four pressure inlets and one
  * outlet closed by the 0D left ventricle through a mitral diode, plus the
@@ -18,9 +18,10 @@
  *   wall    : no slip, endothelial thrombin flux weighted by the cycle
  *             wall-shear indices.
  *
- * Equal order P1/P1, stabilised with VMS (convection, grad-div) and PSPG.
- * Runs under MPI; the mesh is partitioned on the root rank and scaled by
- * Config::meshScale.
+ * Equal order P1/P1 Oseen flow, stabilized with SUPG, PSPG, and grad-div.
+ * Ventricular coupling, species, and orthogonal subscales are optional.
+ * Runs on the fluid submesh of the common parent MPI partition. The child
+ * coordinates are converted with Config::meshScale.
  */
 #ifndef RODIN_ATRIUM_FLUID_H
 #define RODIN_ATRIUM_FLUID_H
@@ -52,11 +53,12 @@ namespace Rodin::Examples::Heart
       using Real = Rodin::Real;
       using Model = Rodin::Heart::CCMLC2014T<>;
       using Attribute = Rodin::Geometry::Attribute;
-      using MeshType = Rodin::Geometry::Mesh<Rodin::Context::MPI>;
+      using ParentMeshType = Rodin::Geometry::Mesh<Rodin::Context::MPI>;
+      using MeshType = Rodin::Geometry::SubMesh<Rodin::Context::MPI>;
 
       using VectorFESType =
-        Rodin::Variational::H1<1, Rodin::Math::SpatialVector<Real>, MeshType>;
-      using ScalarFESType = Rodin::Variational::H1<1, Real, MeshType>;
+        Rodin::Variational::H1<1, Rodin::Math::SpatialVector<Real>, ParentMeshType>;
+      using ScalarFESType = Rodin::Variational::H1<1, Real, ParentMeshType>;
 
       using VectorGridFunctionType =
         Rodin::PETSc::Variational::GridFunction<VectorFESType>;
@@ -199,7 +201,6 @@ namespace Rodin::Examples::Heart
 
       struct Parameters
       {
-        std::string meshPath = "../resources/examples/Heart/Atrium/Coarse.mesh";
         std::string xdmfBasename = "Atrium";
         std::string csvPath = "Atrium.csv";
 
@@ -246,7 +247,7 @@ namespace Rodin::Examples::Heart
         Real mitralResistanceClosed = 1.0e12;
 
         /// @brief Advance the lumped ventricle and use its outlet pressure.
-        bool useVentricularModel = true;
+        bool useVentricularModel = false;
 
         /// @brief Prescribed outlet pressure when the ventricle is disabled, in Pa.
         Real prescribedOutletPressure = 0.0;
@@ -276,20 +277,16 @@ namespace Rodin::Examples::Heart
         Real pspgScale = 1.0;
 
         /**
-         * @brief Enable the VMS convection and grad-div stabilisation.
-         * @details Disabling it leaves tau = tau_C = 0, so the custom
-         * integrators contribute nothing; PSPG is kept, since the
-         * equal-order pair is not stable without it. Diagnostic
-         * switch: these are the only terms in this example that no
-         * other MPI example in the tree exercises.
+         * @brief Enable orthogonal-subscale corrections to the Oseen stabilization.
+         * @details SUPG and PSPG remain active when this option is false.
          */
-        bool useVMS = true;
+        bool useVMS = false;
 
         ThrombosisParameters thrombosis;
 
         /// @brief Codina crosswind constant. 0 disables it.
         Real crosswindC = 0.7;
-        bool solveKinetics = true;
+        bool solveKinetics = false;
 
         /// @brief Divergence guard on max|u| (m/s).
         Real maxVelocity = 5.0;
@@ -316,7 +313,8 @@ namespace Rodin::Examples::Heart
         Real total = 0.0;
       };
 
-      AtriumFluid(const Rodin::Context::MPI& context, const Config& cfg);
+      AtriumFluid(
+        const ParentMeshType& parent, const Config& cfg, Attribute material = 1);
       ~AtriumFluid();
 
       AtriumFluid(const AtriumFluid&) = delete;
@@ -406,7 +404,8 @@ namespace Rodin::Examples::Heart
       }
 
     private:
-      static MeshType makeMesh(const Rodin::Context::MPI& context, const Config& cfg);
+      static MeshType makeMesh(
+        const ParentMeshType& parent, const Config& cfg, Attribute material);
       static Model::Input makeInput(const Config& cfg);
       static Real activationWave(const Activation& cfg, Real t);
       static Real atrialWave(const AtrialPressure& cfg, Real t);

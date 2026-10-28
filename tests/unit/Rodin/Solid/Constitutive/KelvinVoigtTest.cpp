@@ -7,7 +7,7 @@
 /// @file @brief Finite-strain viscosity, power, and consistent time tangent tests.
 #include <gtest/gtest.h>
 #include <Eigen/Geometry>
-#include "Rodin/Solid/Constitutive/DemirayGasser.h"
+#include "Rodin/Solid/Constitutive/DemirayHolzapfelGasserOgden.h"
 #include "Rodin/Solid/Constitutive/NeoHookean.h"
 #include "Rodin/Solid/Constitutive/KelvinVoigt.h"
 
@@ -31,7 +31,8 @@ namespace
     ConstitutivePoint point(state);
     point.set<Tags::VelocityGradient>(Math::SpatialMatrix<Real>(g));
     point.set<Tags::VelocityGradientDerivative>(coefficient);
-    KelvinVoigt material(DemirayGasser(DemirayGasser::Parameters{}), viscosity);
+    KelvinVoigt material(
+      DemirayHolzapfelGasserOgden(DemirayHolzapfelGasserOgden::Parameters{}), viscosity);
     material.setConstitutivePoint(point);
     Response result;
     material.getFirstPiolaKirchhoffStress(result.stress);
@@ -81,8 +82,8 @@ TEST(Rodin_Solid_KelvinVoigt, RigidRotationHasNoViscousStress)
 
 TEST(Rodin_Solid_KelvinVoigt, InvalidViscosityAndMissingRateInputs)
 {
-  const DemirayGasser elastic(DemirayGasser::Parameters{});
-  EXPECT_THROW((KelvinVoigt<DemirayGasser>(elastic, -1)), std::exception);
+  const DemirayHolzapfelGasserOgden elastic(DemirayHolzapfelGasserOgden::Parameters{});
+  EXPECT_THROW((KelvinVoigt<DemirayHolzapfelGasserOgden>(elastic, -1)), std::exception);
   KelvinVoigt material(elastic, 1);
   KinematicState state(3);
   ConstitutivePoint point(state);
@@ -112,7 +113,8 @@ TEST(Rodin_Solid_KelvinVoigt, SuperposedObserverSpinPreservesDissipation)
 
 TEST(Rodin_Solid_KelvinVoigt, RebindingRatesAndFailureInvalidatePreparedState)
 {
-  KelvinVoigt material(DemirayGasser(DemirayGasser::Parameters{}), 2);
+  KelvinVoigt material(
+    DemirayHolzapfelGasserOgden(DemirayHolzapfelGasserOgden::Parameters{}), 2);
   KinematicState state(3);
   ConstitutivePoint point(state);
   point.set<Tags::VelocityGradient>(Math::SpatialMatrix<Real>(Eigen::Matrix3d::Zero()));

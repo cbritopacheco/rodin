@@ -47,7 +47,7 @@ namespace Rodin::Solid
 
   class HolzapfelOgden;
 
-  class DemirayGasser;
+  class DemirayHolzapfelGasserOgden;
 
   template <class Law>
   class KelvinVoigt;

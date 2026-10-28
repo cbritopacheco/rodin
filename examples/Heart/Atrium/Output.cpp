@@ -7,6 +7,7 @@
 #include "Output.h"
 
 #include <limits>
+#include <filesystem>
 #include <Rodin/Alert.h>
 
 namespace Rodin::Examples::Heart
@@ -14,7 +15,14 @@ namespace Rodin::Examples::Heart
   AtriumFluid::Output::Output(AtriumFluid& atrium, const Context::MPI& context)
     : m_atrium(atrium),
       m_xdmf(context.getCommunicator(), atrium.m_cfg.xdmfBasename)
-  {}
+  {
+    for (const auto& name : {atrium.m_cfg.xdmfBasename, atrium.m_cfg.csvPath})
+    {
+      const auto parent = std::filesystem::path(name).parent_path();
+      if (!parent.empty())
+        std::filesystem::create_directories(parent);
+    }
+  }
 
   void AtriumFluid::Output::bind()
   {

@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <algorithm>
 #include <cassert>
 #include <exception>
 #include <iostream>
@@ -11,7 +12,7 @@
 #include <boost/mpi/environment.hpp>
 #include <Rodin/PETSc.h>
 #include <Rodin/MPI.h>
-#include "Fluid.h"
+#include "Atrium.h"
 
 int main(int argc, char** argv)
 {
@@ -26,11 +27,15 @@ int main(int argc, char** argv)
     (void)ierr;
   };
 
-  setPETScDefault("-ksp_type", "preonly");
-  setPETScDefault("-pc_type", "lu");
-  setPETScDefault("-pc_factor_mat_solver_type", "mumps");
-  setPETScDefault("-mat_mumps_icntl_20", "0");
-  setPETScDefault("-mat_mumps_icntl_21", "0");
+  setPETScDefault("-ksp_type", "gmres");
+  setPETScDefault("-pc_type", "asm");
+  setPETScDefault("-pc_asm_overlap", "2");
+  setPETScDefault("-sub_pc_type", "ilu");
+  setPETScDefault("-sub_pc_factor_levels", "1");
+  setPETScDefault("-ksp_gmres_restart", "100");
+  setPETScDefault("-ksp_rtol", "1e-10");
+  setPETScDefault("-ksp_diagonal_scale", "true");
+  setPETScDefault("-ksp_diagonal_scale_fix", "true");
 
   boost::mpi::environment env(argc, argv);
   boost::mpi::communicator world(PETSC_COMM_WORLD, boost::mpi::comm_attach);
@@ -41,6 +46,7 @@ int main(int argc, char** argv)
     int status = 0;
 
     {
+      Rodin::Examples::Heart::Atrium::Parameters parameters;
       Rodin::Examples::Heart::AtriumFluid::Config cfg;
 
       char buffer[512];
@@ -48,8 +54,16 @@ int main(int argc, char** argv)
       PetscOptionsGetString(
         PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_mesh", buffer, sizeof(buffer), &got);
       if (got)
-        cfg.meshPath = buffer;
+        parameters.meshPath = buffer;
 
+      got = PETSC_FALSE;
+      PetscOptionsGetString(
+        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_output", buffer, sizeof(buffer), &got);
+      if (got)
+      {
+        cfg.xdmfBasename = buffer;
+        cfg.csvPath = std::string(buffer) + ".csv";
+      }
       PetscReal real = 0.0;
       got = PETSC_FALSE;
       PetscOptionsGetReal(
@@ -61,6 +75,12 @@ int main(int argc, char** argv)
       PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_dt", &real, &got);
       if (got)
         cfg.dt = real;
+
+      got = PETSC_FALSE;
+      PetscOptionsGetReal(
+        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_pin_amplitude", &real, &got);
+      if (got)
+        cfg.inletPressureAmplitude = real;
 
       got = PETSC_FALSE;
       PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_pin", &real, &got);
@@ -131,8 +151,58 @@ int main(int argc, char** argv)
       if (got)
         cfg.solveKinetics = (flag == PETSC_TRUE);
 
-      Rodin::Examples::Heart::AtriumFluid simulation(context, cfg);
-      status = simulation.initialize().run();
+      using Atrium = Rodin::Examples::Heart::Atrium;
+      parameters.mode = Atrium::Mode::FluidOnly;
+      parameters.fluid = cfg;
+      parameters.solid = Rodin::Examples::Heart::AtriumContraction::readOptions(
+        argc, argv, parameters.meshPath);
+      got = PETSC_FALSE;
+      PetscOptionsGetString(
+        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_mode", buffer, sizeof(buffer), &got);
+      if (got)
+      {
+        const std::string mode(buffer);
+        if (mode == "solid")
+          parameters.mode = Atrium::Mode::SolidOnly;
+        else if (mode == "fluid")
+          parameters.mode = Atrium::Mode::FluidOnly;
+        else if (mode == "independent")
+          parameters.mode = Atrium::Mode::Independent;
+        else
+        {
+          Rodin::Alert::Exception()
+            << "Unknown atrium mode " << mode << Rodin::Alert::Raise;
+        }
+      }
+      if (parameters.mode == Atrium::Mode::Independent && parameters.solid.timeStep == 0)
+        parameters.solid.timeStep = cfg.dt;
+      for (int i = 1; i < argc; ++i)
+      {
+        if (std::string(argv[i]).starts_with("--"))
+          PetscOptionsClearValue(PETSC_NULLPTR, argv[i]);
+      }
+      size_t count = parameters.mode == Atrium::Mode::FluidOnly
+        ? static_cast<size_t>((cfg.flowCycles + cfg.speciesCycles) *
+            static_cast<int>(cfg.period / cfg.dt + 0.5))
+        : parameters.solid.steps;
+      if (parameters.mode != Atrium::Mode::FluidOnly && parameters.solid.stopAfter)
+        count = std::min(count, parameters.solid.stopAfter);
+      integer = static_cast<PetscInt>(count);
+      PetscOptionsGetInt(
+        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_steps", &integer, nullptr);
+      if (integer < 0)
+      {
+        Rodin::Alert::Exception()
+          << "Atrium step count must be nonnegative" << Rodin::Alert::Raise;
+      }
+      Atrium simulation(context, parameters);
+      simulation.initialize();
+      if (!(parameters.mode == Atrium::Mode::SolidOnly && parameters.solid.fibersOnly))
+      {
+        for (PetscInt step = 0; step < integer; ++step)
+          simulation.step();
+      }
+      simulation.finish();
     }
 
     PetscFinalize();

@@ -28,9 +28,9 @@ target_link_libraries(RodinSolidHolzapfelOgdenTest
   PRIVATE GTest::gtest_main Rodin::Solid)
 rodin_discover_tests(RodinSolidHolzapfelOgdenTest PROPERTIES LABELS unit)
 
-add_executable(RodinSolidDemirayGasserTest Constitutive/DemirayGasserTest.cpp)
-target_link_libraries(RodinSolidDemirayGasserTest PRIVATE GTest::gtest_main Rodin::Solid)
-rodin_discover_tests(RodinSolidDemirayGasserTest PROPERTIES LABELS unit)
+add_executable(RodinSolidDemirayHolzapfelGasserOgdenTest Constitutive/DemirayHolzapfelGasserOgdenTest.cpp)
+target_link_libraries(RodinSolidDemirayHolzapfelGasserOgdenTest PRIVATE GTest::gtest_main Rodin::Solid)
+rodin_discover_tests(RodinSolidDemirayHolzapfelGasserOgdenTest PROPERTIES LABELS unit)
 
 add_executable(RodinSolidKelvinVoigtTest Constitutive/KelvinVoigtTest.cpp)
 target_link_libraries(RodinSolidKelvinVoigtTest PRIVATE GTest::gtest_main Rodin::Solid)

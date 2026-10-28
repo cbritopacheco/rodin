@@ -19,6 +19,28 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Examples::Heart::AtriumContraction
 {
+  SubMeshType Solid::makeMesh(const MeshType& parent, Geometry::Attribute material)
+  {
+    SubMeshType::Builder builder;
+    builder.initialize(parent);
+    for (auto cell = parent.getCell(); cell; ++cell)
+    {
+      if (parent.getShard().isOwned(3, cell->getIndex()) &&
+        cell->getAttribute() == material)
+        builder.include(3, cell->getIndex());
+    }
+    auto mesh = builder.finalize();
+    if (mesh.getCellCount() == 0)
+      Alert::Exception() << "No solid cells for material " << material << Alert::Raise;
+    for (size_t d = 1; d <= 3; ++d)
+    {
+      mesh.getConnectivity().compute(d, 0);
+      mesh.getConnectivity().compute(d, d - 1);
+      mesh.getConnectivity().compute(d - 1, d);
+    }
+    return mesh;
+  }
+
   Solid::Material Solid::makeMaterial(const Parameters& cfg)
   {
     Rodin::Solid::ActiveFiberLaw::Parameters active;
@@ -28,13 +50,15 @@ namespace Rodin::Examples::Heart::AtriumContraction
     active.crossBridgeStiffness = cfg.crossBridgeStiffness;
     active.contractility = cfg.contractility;
     return Material(
-      PassiveMaterial(Rodin::Solid::DemirayGasser(cfg.passive), cfg.viscosity),
+      PassiveMaterial(
+        Rodin::Solid::DemirayHolzapfelGasserOgden(cfg.passive), cfg.viscosity),
       Rodin::Solid::ActiveFiberLaw(active));
   }
 
-  Solid::Solid(const Parameters& parameters)
+  Solid::Solid(
+    const MeshType& parent, const Parameters& parameters, Geometry::Attribute material)
     : m_parameters(validateOptions(parameters)),
-      m_mesh(loadWall(m_parameters)),
+      m_mesh(makeMesh(parent, material)),
       m_data(m_mesh, m_parameters),
       m_space(m_mesh, 3),
       m_activeSpace(m_mesh),
@@ -69,7 +93,9 @@ namespace Rodin::Examples::Heart::AtriumContraction
       m_mechanics(m_increment, m_extensionIncrement, m_gammaIncrement, m_betaIncrement,
         m_test, m_extensionTest, m_gammaTest, m_betaTest),
       m_linearSolver(m_mechanics),
-      m_newton(m_linearSolver)
+      m_passiveWork(m_law.getPassiveLaw(), m_displacement),
+      m_equilibrium(m_increment, m_test),
+      m_equilibriumSolver(m_equilibrium)
   {
     const VectorFunction zero(3, [](const Point&) {
       Math::SpatialVector<Real> value(3);
@@ -144,38 +170,26 @@ namespace Rodin::Examples::Heart::AtriumContraction
         m_mechanics += block;
       }
     }
-    m_newton.setMaxIterations(MaximumNewtonIterations)
-      .setAbsoluteTolerance(AbsoluteResidualTolerance)
-      .setRelativeTolerance(0);
-    m_newton.setStepPolicy([this](auto& values, const auto& system, const auto&) {
-      const Math::Vector<Real> saved = values, increment = system.getSolution();
-      const Real residual = system.getVector().norm();
-      Real scale = 1;
-      for (size_t attempt = 0; attempt < MaximumBacktracks; ++attempt)
-      {
-        values = saved + scale * increment;
-        scatter();
-        if (isAdmissible())
-        {
-          m_mechanics.assemble();
-          const Real trialResidual = m_mechanics.getLinearSystem().getVector().norm();
-          if (std::isfinite(trialResidual) && trialResidual < residual)
-          {
-            return Newton::StepResult{
-              .accepted = true, .stepNorm = scale * increment.norm()};
-          }
-        }
-        scale *= Real(0.5);
-      }
-      values = saved;
-      scatter();
-      return Newton::StepResult{.accepted = false, .stepNorm = 0};
+    m_passiveWork.setInput([this](Rodin::Solid::ConstitutivePoint& point) {
+      Math::SpatialMatrix<Real> zero(3, 3);
+      zero.setZero();
+      point.set<Rodin::Solid::Tags::FiberDirection>(
+        m_data.fiberAt(point.getPoint()->get()));
+      point.set<Rodin::Solid::Tags::VelocityGradient>(zero);
+      point.set<Rodin::Solid::Tags::VelocityGradientDerivative>(0);
     });
-    m_newton.setMonitor([](const auto& report) {
-      std::cout << "  Newton " << report.iterations
-                << " residual=" << report.finalResidual
-                << " damping=" << report.dampingFactor << std::endl;
-    });
+    m_passiveWork.setQuadratureOrder(QuadratureOrder);
+    m_equilibrium = m_passiveWork(m_increment, m_test) +
+      DirichletBC(m_increment, zero)
+        .on(Attribute{1}, Attribute{2}, Attribute{3}, Attribute{5}, Attribute{6});
+    pack();
+    m_mechanics.assemble();
+    m_newton.emplace(m_linearSolver);
+    m_newton
+      ->setTolerances(AbsoluteResidualTolerance, 0, 0, MaximumNewtonIterations,
+        MaximumFunctionEvaluations)
+      .setStateUpdate([this](const PETSc::Math::Vector& values) { scatter(values); })
+      .setStateValidation([this] { return isAdmissible(); });
   }
 
   Solid::~Solid() = default;
@@ -219,25 +233,33 @@ namespace Rodin::Examples::Heart::AtriumContraction
 
   void Solid::pack()
   {
-    m_iterate.resize(m_displacement.getData().size() + 3 * m_extension.getData().size());
-    m_iterate << m_displacement.getData(), m_extension.getData(), m_gamma.getData(),
-      m_beta.getData();
+    m_increment.getSolution() = m_displacement;
+    m_extensionIncrement.getSolution() = m_extension;
+    m_gammaIncrement.getSolution() = m_gamma;
+    m_betaIncrement.getSolution() = m_beta;
   }
 
-  void Solid::scatter()
+  void Solid::scatter(const PETSc::Math::Vector& values)
   {
-    const auto mechanics = m_displacement.getData().size(),
-               active = m_extension.getData().size();
-    m_displacement.getData() = m_iterate.head(mechanics);
-    m_extension.getData() = m_iterate.segment(mechanics, active);
-    m_gamma.getData() = m_iterate.segment(mechanics + active, active);
-    m_beta.getData() = m_iterate.tail(active);
+    const auto& offsets = m_mechanics.getTrialOffsets();
+    m_displacement.setData(values, offsets[0]);
+    m_extension.setData(values, offsets[1]);
+    m_gamma.setData(values, offsets[2]);
+    m_beta.setData(values, offsets[3]);
   }
 
   bool Solid::isAdmissible() const
   {
-    if (!m_iterate.allFinite() || m_gamma.getData().minCoeff() <= 0 ||
-      m_extension.getData().minCoeff() <= -Real(0.5))
+    Index index;
+    const Real minimumGamma = m_gamma.min(index);
+    const Real minimumExtension = m_extension.min(index);
+    const Real displacementNorm = m_displacement.norm(NORM_INFINITY);
+    const Real gammaNorm = m_gamma.norm(NORM_INFINITY);
+    const Real extensionNorm = m_extension.norm(NORM_INFINITY);
+    const Real betaNorm = m_beta.norm(NORM_INFINITY);
+    if (!std::isfinite(displacementNorm) || !std::isfinite(gammaNorm) ||
+      !std::isfinite(extensionNorm) || !std::isfinite(betaNorm) || minimumGamma <= 0 ||
+      minimumExtension <= -Real(0.5))
       return false;
     const auto minimum = m_data.minimumDeformedJacobian(m_displacement);
     return minimum && *minimum > 0;
@@ -256,39 +278,26 @@ namespace Rodin::Examples::Heart::AtriumContraction
     Real residual = 0;
     if (!m_parameters.fibersOnly)
     {
-      // With no fluid pressure, passive equilibrium has traction-free wall faces.
-      auto passive = m_law.getPassiveLaw();
-      auto work = Rodin::Solid::InternalVirtualWork(passive, m_displacement);
-      work.setInput([this](Rodin::Solid::ConstitutivePoint& cp) {
-        const auto& point = cp.getPoint()->get();
-        Math::SpatialMatrix<Real> zero(3, 3);
-        zero.setZero();
-        cp.set<Rodin::Solid::Tags::FiberDirection>(m_data.fiberAt(point));
-        cp.set<Rodin::Solid::Tags::VelocityGradient>(zero);
-        cp.set<Rodin::Solid::Tags::VelocityGradientDerivative>(0);
-      });
-      work.setQuadratureOrder(QuadratureOrder);
-      const VectorFunction zero(3, [](const Point&) {
-        Math::SpatialVector<Real> value(3);
-        value.setZero();
-        return value;
-      });
-      Problem equilibrium(m_increment, m_test);
-      equilibrium = work(m_increment, m_test) +
-        DirichletBC(m_increment, zero)
-          .on(Attribute{1}, Attribute{2}, Attribute{3}, Attribute{5}, Attribute{6});
-      LinearSolver linear(equilibrium);
-      Newton newton(linear);
-      newton.setMaxIterations(MaximumNewtonIterations)
-        .setAbsoluteTolerance(AbsoluteResidualTolerance)
-        .setRelativeTolerance(0);
-      newton.solve(m_displacement);
-      if (!newton.getReport().converged)
+      m_increment.getSolution() = m_displacement;
+      m_equilibrium.assemble();
+      m_equilibriumNewton.emplace(m_equilibriumSolver);
+      m_equilibriumNewton
+        ->setTolerances(AbsoluteResidualTolerance, 0, 0, MaximumNewtonIterations,
+          MaximumFunctionEvaluations)
+        .setStateUpdate([this](const PETSc::Math::Vector& values) {
+          m_displacement.setData(values, 0);
+        })
+        .setStateValidation([this] {
+          const auto minimum = m_data.minimumDeformedJacobian(m_displacement);
+          return minimum && *minimum > 0;
+        });
+      m_equilibriumNewton->solve();
+      if (!m_equilibriumNewton->converged())
       {
         Alert::Exception() << "Passive atrial equilibrium did not converge"
                            << Alert::Raise;
       }
-      residual = newton.getReport().finalResidual;
+      residual = m_equilibriumNewton->getResidualNorm();
     }
     m_extension = [this](const Point& point) {
       Rodin::Solid::KinematicState state(3);
@@ -329,28 +338,36 @@ namespace Rodin::Examples::Heart::AtriumContraction
     m_previousGamma = m_gamma;
     m_previousBeta = m_beta;
     m_time = (m_step + 1) * m_timeStep;
-    std::cout << "Step " << (m_step + 1) << '/' << m_parameters.steps
+    if (m_mesh.getContext().getCommunicator().rank() == 0)
+    {
+      std::cout << "Step " << (m_step + 1) << '/' << m_parameters.steps
               << " time=" << m_time << std::endl;
+    }
     m_predictedDisplacement = m_displacement + m_timeStep * m_velocity +
       (m_timeStep * m_timeStep * (Real(0.5) - NewmarkBeta)) * m_acceleration;
     m_predictedVelocity = m_velocity + (m_timeStep * (1 - NewmarkGamma)) * m_acceleration;
-    for (auto cell = m_mesh.getCell(); cell; ++cell)
-    {
-      const Point point(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+    m_gamma = [this](const Point& point) {
       Rodin::Solid::ActiveFiberLaw::State previous;
       previous.gamma = m_previousGamma(point);
       previous.beta = m_previousBeta(point);
-      const auto predicted =
-        m_law.getActiveLaw().update(m_timeStep, previous, m_previousExtension(point),
-          m_extension(point), m_data.maximumElectrical(*cell, m_time));
-      const Index index =
-        m_activeSpace.getGlobalIndex({m_mesh.getDimension(), cell->getIndex()}, 0);
-      m_gamma[index] = predicted.gamma;
-      m_beta[index] = predicted.beta;
-    }
+      return m_law.getActiveLaw()
+        .update(m_timeStep, previous, m_previousExtension(point), m_extension(point),
+          m_data.maximumElectrical(point.getPolytope(), m_time))
+        .gamma;
+    };
+    m_beta = [this](const Point& point) {
+      Rodin::Solid::ActiveFiberLaw::State previous;
+      previous.gamma = m_previousGamma(point);
+      previous.beta = m_previousBeta(point);
+      return m_law.getActiveLaw()
+        .update(m_timeStep, previous, m_previousExtension(point), m_extension(point),
+          m_data.maximumElectrical(point.getPolytope(), m_time))
+        .beta;
+    };
     pack();
-    m_newton.solve(m_iterate);
-    if (!m_newton.getReport().converged)
+    m_mechanics.assemble();
+    m_newton->solve();
+    if (!m_newton->converged())
     {
       Alert::Exception() << "Coupled atrial solid Newton solve did not converge"
                          << Alert::Raise;
@@ -358,8 +375,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
     m_acceleration =
       m_accelerationCoefficient * (m_displacement - m_predictedDisplacement);
     m_velocity = m_predictedVelocity + (NewmarkGamma * m_timeStep) * m_acceleration;
-    m_output->write(
-      m_time, m_newton.getReport().iterations, m_newton.getReport().finalResidual);
+    m_output->write(m_time, m_newton->getIterationNumber(), m_newton->getResidualNorm());
     ++m_step;
     m_failed = false;
   }
@@ -403,7 +419,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
   {
     return m_parameters;
   }
-  const LocalMesh& Solid::getMesh() const noexcept
+  const SubMeshType& Solid::getMesh() const noexcept
   {
     return m_mesh;
   }

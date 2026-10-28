@@ -28,10 +28,6 @@
 #include <Rodin/Alert.h>
 #include <Rodin/Configure.h>
 
-#ifdef RODIN_USE_SCOTCH
-#include <Rodin/Scotch/MeshPartitioner.h>
-#endif
-
 #include "Fluid.h"
 #include "Output.h"
 #include "CoronaryArtery/CoronaryArteryAlerts.h"
@@ -77,12 +73,13 @@ namespace Rodin::Examples::Heart
     }
   }
 
-  AtriumFluid::AtriumFluid(const Context::MPI& context, const Config& cfg)
+  AtriumFluid::AtriumFluid(
+    const ParentMeshType& parent, const Config& cfg, Attribute material)
     : m_cfg(cfg),
       m_input(makeInput(m_cfg)),
       m_model(m_input),
-      m_mesh(makeMesh(context, m_cfg)),
-      m_output(std::make_unique<Output>(*this, context)),
+      m_mesh(makeMesh(parent, m_cfg, material)),
+      m_output(std::make_unique<Output>(*this, parent.getContext())),
       m_inletSet(m_cfg.inlets.begin(), m_cfg.inlets.end()),
       m_vh(std::integral_constant<size_t, 1>{}, m_mesh, m_mesh.getSpaceDimension()),
       m_sh(std::integral_constant<size_t, 1>{}, m_mesh),
@@ -164,52 +161,45 @@ namespace Rodin::Examples::Heart
   }
 
   AtriumFluid::MeshType AtriumFluid::makeMesh(
-    const Context::MPI& context, const Config& cfg)
+    const ParentMeshType& parent, const Config& cfg, Attribute material)
   {
-    const auto& comm = context.getCommunicator();
-
-    Rodin::MPI::Sharder sharder(context);
-    if (comm.rank() == RootRank)
+    if (!std::isfinite(cfg.meshScale) || cfg.meshScale <= 0)
     {
-      Geometry::Mesh<Context::Local> mesh;
-      mesh.load(cfg.meshPath, IO::FileFormat::MEDIT);
-
-      if (mesh.getSpaceDimension() != 3)
-        throw std::runtime_error("Atrium expects a 3D tetrahedral mesh.");
-
-      const size_t D = mesh.getDimension();
-      mesh.getConnectivity().compute(D, D);
-      mesh.getConnectivity().compute(D, 0);
-      mesh.getConnectivity().compute(D, D - 1);
-      mesh.getConnectivity().compute(D - 1, D);
-      mesh.getConnectivity().compute(D - 1, 0);
-      mesh.getConnectivity().compute(D - 1, 1);
-      mesh.getConnectivity().compute(1, 0);
-
-#ifdef RODIN_USE_SCOTCH
-      Scotch::Partitioner partitioner(mesh);
-#else
-      Geometry::BalancedCompactPartitioner partitioner(mesh);
-#endif
-      partitioner.partition(static_cast<size_t>(comm.size()));
-      sharder.shard(partitioner);
-      sharder.scatter(RootRank);
+      Alert::Exception() << "Fluid length conversion must be finite and positive"
+                         << Alert::Raise;
     }
-
-    MeshType mesh = sharder.gather(RootRank);
+    MeshType::Builder builder;
+    builder.initialize(parent);
+    for (auto cell = parent.getCell(); cell; ++cell)
+    {
+      if (parent.getShard().isOwned(3, cell->getIndex()) &&
+        cell->getAttribute() == material)
+        builder.include(3, cell->getIndex());
+    }
+    auto mesh = builder.finalize();
+    if (mesh.getCellCount() == 0)
+      Alert::Exception() << "No fluid cells for material " << material << Alert::Raise;
+    size_t invalid = 0;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      if (cell->getGeometry() != Geometry::Polytope::Type::Tetrahedron &&
+        mesh.getShard().isOwned(3, cell->getIndex()))
+        ++invalid;
+    }
+    invalid = boost::mpi::all_reduce(
+      parent.getContext().getCommunicator(), invalid, std::plus<size_t>());
+    if (invalid)
+    {
+      Alert::Exception() << "The affine-P1 Oseen submesh requires tetrahedra"
+                         << Alert::Raise;
+    }
     mesh.scale(cfg.meshScale);
-
-    const size_t D = mesh.getDimension();
-    mesh.getConnectivity().compute(D, D);
-    mesh.getConnectivity().compute(D, 0);
-    mesh.getConnectivity().compute(D, D - 1);
-    mesh.getConnectivity().compute(D - 1, D);
-    mesh.getConnectivity().compute(D - 1, 0);
-    mesh.getConnectivity().compute(D - 1, 1);
-    mesh.getConnectivity().compute(1, 0);
-    mesh.reconcile(2);
-    mesh.reconcile(1);
-
+    for (size_t d = 1; d <= 3; ++d)
+    {
+      mesh.getConnectivity().compute(d, 0);
+      mesh.getConnectivity().compute(d, d - 1);
+      mesh.getConnectivity().compute(d - 1, d);
+    }
     return mesh;
   }
 
@@ -392,7 +382,7 @@ namespace Rodin::Examples::Heart
 
   AtriumFluid::Real AtriumFluid::tauPAt(const Point& p) const
   {
-    return m_cfg.pspgScale * tau1At(p) / m_cfg.rho;
+    return m_cfg.pspgScale / (m_cfg.rho / m_cfg.dt + m_cfg.rho / tau1At(p));
   }
 
   void AtriumFluid::axpy(Real a, const ::Vec& x, ::Vec& y)
@@ -490,7 +480,8 @@ namespace Rodin::Examples::Heart
     m_fgCur = fg0;
     m_fgPrev = fg0;
 
-    configureMassSolver(m_scalarProjectionKSP, "atrium_sproj_");
+    if (m_cfg.useVMS)
+      configureMassSolver(m_scalarProjectionKSP, "atrium_sproj_");
     configureMassSolver(m_vectorProjectionKSP, "atrium_vproj_");
     configureMassSolver(m_wssKSP, "atrium_wss_");
 
@@ -539,6 +530,7 @@ namespace Rodin::Examples::Heart
 
     const auto convU = Mult(Jacobian(m_u), m_uOld);
     const auto temam = Div(m_uOld) * Dot(m_u, m_v);
+    const auto streamlineTest = rho * Mult(Jacobian(m_v), m_uOld);
 
     const auto uNormal = Dot(m_u, normal) * normal;
     const auto uTangential = m_u - uNormal;
@@ -558,19 +550,24 @@ namespace Rodin::Examples::Heart
 
       + rho * Integral(Dot(convU, m_v)) + 0.5 * rho * Integral(temam)
 
-      + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_tauFn, rho) -
-      VMSConvectionLinearIntegrator(
-        m_v, m_sub, m_uOld, m_convProjection, m_tauFn, rho, dt)
-
-      + VMSGradDivBilinearIntegrator(m_u, m_v, m_tauCFn) -
-      VMSGradDivLinearIntegrator(m_v, m_piTilde, m_sqrtTauCFn)
+      // SUPG tests the complete affine-P1 momentum residual along the lagged flow.
+      + (rho / dt) * Integral(m_tauFn * m_u, streamlineTest) -
+      (rho / dt) * Integral(m_tauFn * m_uOld, streamlineTest) +
+      rho * Integral(m_tauFn * convU, streamlineTest) +
+      (0.5 * rho) * Integral(m_tauFn * Div(m_uOld) * m_u, streamlineTest) +
+      Integral(m_tauFn * Grad(m_p), streamlineTest) +
+      VMSGradDivBilinearIntegrator(m_u, m_v, m_tauCFn)
 
       + 2.0 * Integral(muLag * symU, symV) - Integral(m_p, Div(m_v)) +
       Integral(Div(m_u), m_q) +
       m_cfg.pressurePenalty * Integral(m_p, m_q)
 
-      // PSPG. Required by the equal-order pair.
-      + Integral(m_tauPFn * Grad(m_p), Grad(m_q))
+      // PSPG tests that same momentum residual with the pressure gradient.
+      + (rho / dt) * Integral(m_tauPFn * m_u, Grad(m_q)) -
+      (rho / dt) * Integral(m_tauPFn * m_uOld, Grad(m_q)) +
+      rho * Integral(m_tauPFn * convU, Grad(m_q)) +
+      (0.5 * rho) * Integral(m_tauPFn * Div(m_uOld) * m_u, Grad(m_q)) +
+      Integral(m_tauPFn * Grad(m_p), Grad(m_q))
 
       + BoundaryIntegral(pInFn * Dot(m_v, normal)).over(m_inletSet) +
       BoundaryIntegral(pOutFn * Dot(m_v, normal)).over(m_cfg.outlet)
@@ -587,6 +584,12 @@ namespace Rodin::Examples::Heart
       BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.outlet)
 
       + DirichletBC(m_u, Zero(dim)).on(m_cfg.wall);
+    if (m_cfg.useVMS)
+    {
+      m_flow -= VMSConvectionLinearIntegrator(
+        m_v, m_sub, m_uOld, m_convProjection, m_tauFn, rho, dt);
+      m_flow -= VMSGradDivLinearIntegrator(m_v, m_piTilde, m_sqrtTauCFn);
+    }
   }
 
   AtriumFluid::Real AtriumFluid::crosswind(const Point& p, Real cur, Real prev,
@@ -817,11 +820,7 @@ namespace Rodin::Examples::Heart
 
     if (isRoot())
     {
-      ThreeDInfo() << "Solving with PETSc KSP"
-                   << (m_step == 0 ? " (first solve: the direct factorization "
-                                     "is built here and is the slowest one)"
-                                   : "")
-                   << " ..." << Alert::Raise;
+      ThreeDInfo() << "Solving with PETSc KSP ..." << Alert::Raise;
       std::cout.flush();
     }
 
@@ -844,11 +843,17 @@ namespace Rodin::Examples::Heart
                 << Alert::Raise;
     }
 
+    if (reason <= 0)
+    {
+      Alert::Exception() << "Oseen linear solve did not converge, reason "
+                         << static_cast<int>(reason) << Alert::Raise;
+    }
+
     m_uOld.setData(m_u.getSolution().getData());
     if (m_cfg.useVMS)
       m_subOld.setData(m_sub.getData());
 
-    // A direct solve always "succeeds": check the physics, not the solver.
+    // Reject a nonfinite or excessive velocity after a converged linear solve.
     m_speed = std::max(std::abs(m_uOld.max()), std::abs(m_uOld.min()));
 
     return reason > 0 && std::isfinite(m_speed) && m_speed <= m_cfg.maxVelocity;
