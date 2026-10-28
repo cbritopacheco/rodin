@@ -11,7 +11,7 @@
 #include <Rodin/IO/XDMF.h>
 #include "ProblemData.h"
 
-namespace Rodin::Examples::Heart::AtriumContraction
+namespace Rodin::Examples::Heart::Atrium
 {
   /**
    * @brief XDMF export and diagnostics for the active solid state.

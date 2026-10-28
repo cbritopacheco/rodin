@@ -43,9 +43,9 @@
 #include "CoronaryArtery/ThrombosisModel.h"
 #include "CoronaryArtery/VMSConvectionIntegrator.h"
 
-namespace Rodin::Examples::Heart
+namespace Rodin::Examples::Heart::Atrium
 {
-  class AtriumFluid
+  class Fluid
   {
     public:
       class Output;
@@ -328,12 +328,12 @@ namespace Rodin::Examples::Heart
         Real total = 0.0;
       };
 
-      AtriumFluid(
+      Fluid(
         const ParentMeshType& parent, const Config& cfg, Attribute material = 1);
-      ~AtriumFluid();
+      ~Fluid();
 
-      AtriumFluid(const AtriumFluid&) = delete;
-      AtriumFluid& operator=(const AtriumFluid&) = delete;
+      Fluid(const Fluid&) = delete;
+      Fluid& operator=(const Fluid&) = delete;
 
       /**
        * @brief Initializes retained mesh-dependent fields, forms, solvers, and output.
@@ -341,7 +341,7 @@ namespace Rodin::Examples::Heart
        * @note Collective on the atrium communicator. Parameters that determine
        *   construction, since some coefficients are captured by the constructor.
        */
-      AtriumFluid& initialize();
+      Fluid& initialize();
 
       /**
        * @brief Advances one fluid, 0D, and enabled transport time step.

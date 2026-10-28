@@ -17,7 +17,7 @@
 #include <Rodin/Variational/Jacobian.h>
 #include <Rodin/Variational/P1/P1Element.h>
 
-namespace Rodin::Examples::Heart
+namespace Rodin::Examples::Heart::Atrium
 {
   /**
    * @brief Cavity volume bounded by a moving inner wall and fixed opening caps.

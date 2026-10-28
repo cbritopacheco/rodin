@@ -10,9 +10,9 @@
 #include <filesystem>
 #include <Rodin/Alert.h>
 
-namespace Rodin::Examples::Heart
+namespace Rodin::Examples::Heart::Atrium
 {
-  AtriumFluid::Output::Output(AtriumFluid& atrium, const Context::MPI& context)
+  Fluid::Output::Output(Fluid& atrium, const Context::MPI& context)
     : m_atrium(atrium),
       m_xdmf(context.getCommunicator(), atrium.m_cfg.xdmfBasename)
   {
@@ -24,7 +24,7 @@ namespace Rodin::Examples::Heart
     }
   }
 
-  void AtriumFluid::Output::bind()
+  void Fluid::Output::bind()
   {
     m_atrium.m_u.setName("velocity");
     m_atrium.m_p.setName("pressure");
@@ -48,7 +48,7 @@ namespace Rodin::Examples::Heart
     m_xdmf.add("shearStress", m_atrium.m_wss);
   }
 
-  void AtriumFluid::Output::openCSV()
+  void Fluid::Output::openCSV()
   {
     if (m_atrium.isRoot() && m_atrium.m_cfg.writeCSV)
     {
@@ -61,13 +61,13 @@ namespace Rodin::Examples::Heart
     }
   }
 
-  void AtriumFluid::Output::writeCSVHeader()
+  void Fluid::Output::writeCSVHeader()
   {
     m_csv << "t,cycle,pIn,pv,par,pd,valveOpen,qIn,qOut,maxU,"
           << "maxTAWSS,maxOSI,maxActivation,maxThrombin,minFibrinogen,maxFibrin\n";
   }
 
-  void AtriumFluid::Output::writeCSVRow(int cycle)
+  void Fluid::Output::writeCSVRow(int cycle)
   {
     const auto& s = m_atrium.m_model.getState();
     const Real tawss = m_atrium.m_tawss.max();
@@ -99,12 +99,12 @@ namespace Rodin::Examples::Heart
     m_csv.flush();
   }
 
-  void AtriumFluid::Output::write(Real time)
+  void Fluid::Output::write(Real time)
   {
     m_xdmf.write(time).flush();
   }
 
-  void AtriumFluid::Output::close()
+  void Fluid::Output::close()
   {
     m_xdmf.close();
     if (m_atrium.isRoot())

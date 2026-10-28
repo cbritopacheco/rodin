@@ -16,7 +16,7 @@
 #include <boost/mpi/collectives.hpp>
 #include <Rodin/Scotch/MeshPartitioner.h>
 
-namespace Rodin::Examples::Heart
+namespace Rodin::Examples::Heart::Atrium
 {
   Atrium::Atrium(const Context::MPI& context, const Parameters& cfg)
     : m_mesh(makeMesh(context, cfg)),

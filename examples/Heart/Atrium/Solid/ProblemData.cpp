@@ -19,7 +19,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-namespace Rodin::Examples::Heart::AtriumContraction
+namespace Rodin::Examples::Heart::Atrium
 {
   Options readOptions(int argc, char** argv, std::string& meshPath)
   {
@@ -39,15 +39,20 @@ namespace Rodin::Examples::Heart::AtriumContraction
       {
         std::cout << "AtriumContraction [--mesh path] [--output stem] [--steps 24]\n"
                      "  [--activation 20] [--relaxation 10] (1/s)\n"
-                     "  [--matrix-scale 20] [--matrix-exponent 5]\n"
-                     "  [--fiber-scale 20] [--fiber-exponent 10] [--volume-penalty 500]\n"
+                     "  [--matrix-scale 2.92] [--matrix-exponent 5.6]\n"
+                     "  [--fiber-scale 11.84] [--fiber-exponent 17.95] [--volume-penalty 500]\n"
                      "  [--viscosity .2] [--active-damping 3] (kPa s)\n"
                      "  [--active-stiffness 20] [--cross-bridge-stiffness 100]\n"
                      "  [--contractility 20] [--destruction-rate .4]\n"
                      "  [--density 1060] (kg/m^3) [--speed 200] [--width 6]\n"
                      "  [--stop-after n] [--dt seconds] [--base-label 6] [--apex x y z]\n"
-                     "  [--apex-radius 3] [--fibers-only]\n";
+                     "  [--apex-radius 3] [--fibers-only] [--cache-constitutive]\n";
         std::exit(0);
+      }
+      if (key == "--cache-constitutive")
+      {
+        out.cacheConstitutive = true;
+        continue;
       }
       if (key == "--fibers-only")
       {

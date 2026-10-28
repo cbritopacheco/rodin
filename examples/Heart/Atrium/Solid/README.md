@@ -332,3 +332,13 @@ in mL, measured using the moving inner wall and fixed inlet/outlet caps. The [co
 defines the volume calculation and the separate solid/fluid quantities in `FSI`
 mode. Existing ParaView readers can discover flushed states through
 **File > Reload Files > Reload existing file(s)**.
+
+## Constitutive reuse
+
+`--cache-constitutive` enables experimental rank-local reuse of the active
+residual, internal tangent, and displacement-coupling blocks across coefficient
+expressions at the same reference material point. Entries are invalidated after
+every synchronized Newton trial state and before assembly of a new time step.
+The mesh remains fixed in reference coordinates. The internal variables remain
+independent global unknowns; the residual and tangent equations are unchanged.
+The option is disabled by default.

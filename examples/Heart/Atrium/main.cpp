@@ -46,8 +46,8 @@ int main(int argc, char** argv)
     int status = 0;
 
     {
-      Rodin::Examples::Heart::Atrium::Parameters parameters;
-      Rodin::Examples::Heart::AtriumFluid::Config cfg;
+      Rodin::Examples::Heart::Atrium::Atrium::Parameters parameters;
+      Rodin::Examples::Heart::Atrium::Fluid::Config cfg;
 
       char buffer[512];
       PetscBool got = PETSC_FALSE;
@@ -151,10 +151,10 @@ int main(int argc, char** argv)
       if (got)
         cfg.solveKinetics = (flag == PETSC_TRUE);
 
-      using Atrium = Rodin::Examples::Heart::Atrium;
+      using Atrium = Rodin::Examples::Heart::Atrium::Atrium;
       parameters.mode = Atrium::Mode::Fluid;
       parameters.fluid = cfg;
-      parameters.solid = Rodin::Examples::Heart::AtriumContraction::readOptions(
+      parameters.solid = Rodin::Examples::Heart::Atrium::readOptions(
         argc, argv, parameters.meshPath);
       got = PETSC_FALSE;
       PetscOptionsGetString(

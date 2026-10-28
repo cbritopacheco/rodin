@@ -12,7 +12,7 @@
 #include <Rodin/PETSc/Solver/SNES.h>
 #include "ProblemData.h"
 
-namespace Rodin::Examples::Heart::AtriumContraction
+namespace Rodin::Examples::Heart::Atrium
 {
   class Output;
 
@@ -159,11 +159,41 @@ namespace Rodin::Examples::Heart::AtriumContraction
       void setInputs(Rodin::Solid::ConstitutivePoint& point) const;
 
       /**
+       * @brief Active residual, tangent, and momentum couplings at one material point.
+       *
+       * Owns only the blocks used by the mixed coefficient expressions. The
+       * reference mesh is fixed; a synchronization epoch identifies the current
+       * fields, history, predictors, and activation time. Entries are refreshed
+       * after each Newton state scatter and before each time-step assembly.
+       */
+      struct Prepared
+      {
+        size_t epoch = 0;
+        Rodin::Solid::ActiveFiberLaw::Residual residual;
+        Math::SpatialMatrix<Real> momentum{3, 3}, extension{3, 3};
+      };
+
+      /**
        * @brief Prepares the coupled material at a supplied reference point.
        * @param point Reference evaluation point.
-       * @returns Material with owned kinematics and active residuals.
+       * @returns Owned active blocks valid until the next preparation or state update.
        */
-      Material prepare(const Geometry::Point& point) const;
+      const Prepared& prepare(const Geometry::Point& point) const;
+
+      /// @brief State epoch for constitutive coefficients; advanced on every scatter.
+      size_t m_constitutiveEpoch = 1;
+
+      /// @brief Material-point keys use cell identity and exact reference coordinates.
+      using ConstitutiveKey = std::pair<Index, std::array<Real, 3>>;
+
+      /// @brief Rank-local reuse across coefficient expressions on the fixed mesh.
+      mutable UnorderedMap<ConstitutiveKey, Prepared> m_constitutiveCache;
+
+      /// @brief Owned scratch storage when constitutive reuse is disabled.
+      mutable Prepared m_uncachedPrepared;
+
+      /// @brief Rank-local preparation requests and actual constitutive evaluations.
+      mutable size_t m_prepareRequests = 0, m_prepareEvaluations = 0;
 
       /**
        * @brief Initializes active fields with the residual's volume quadrature.

@@ -19,7 +19,7 @@
 #include <Rodin/Solid/Constitutive/DemirayHolzapfelGasserOgden.h>
 #include <Rodin/Variational.h>
 
-namespace Rodin::Examples::Heart::AtriumContraction
+namespace Rodin::Examples::Heart::Atrium
 {
   using Vec = Eigen::Matrix<Real, 3, 1>;
   using MeshType = Geometry::Mesh<Context::MPI>;
@@ -55,6 +55,9 @@ namespace Rodin::Examples::Heart::AtriumContraction
     Vec appendageApex = Vec(46.39638367, 187.44307667, -205.03317767);
     Real apexRadius = 3;
     bool fibersOnly = false;
+
+    /// @brief Reuses active constitutive blocks within a synchronized Newton state.
+    bool cacheConstitutive = false;
     Real activation = 20; // Positive electrical peak, in 1/s.
     Real relaxation = 10; // Magnitude of the resting electrical drive, in 1/s.
     Real speed = 200;

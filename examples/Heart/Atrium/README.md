@@ -5,6 +5,10 @@ independently. A combined volume mesh contains fluid tetrahedra with material
 label 1 and solid wedges with material label 4. Their interface triangles share
 vertices in the parent mesh.
 
+All example types belong to `Rodin::Examples::Heart::Atrium`. The `Atrium`
+coordinator owns `Solid` and `Fluid` components. The component aliases on the
+coordinator remain available as `Atrium::Solid` and `Atrium::Fluid`.
+
 ## Mesh ownership and architecture
 
 `Atrium::Parameters::meshPath` selects the common mesh. `Atrium` loads it on
@@ -185,7 +189,7 @@ A program linked to `AtriumModels` can configure the common source and advance
 the selected components directly:
 
 ```cpp
-using Atrium = Rodin::Examples::Heart::Atrium;
+using Atrium = Rodin::Examples::Heart::Atrium::Atrium;
 Atrium::Parameters parameters;
 parameters.meshPath = "resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh";
 parameters.mode = Atrium::Mode::FSI;

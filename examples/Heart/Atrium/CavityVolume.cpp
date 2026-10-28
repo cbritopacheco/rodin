@@ -6,7 +6,7 @@
  */
 #include "CavityVolume.h"
 
-namespace Rodin::Examples::Heart
+namespace Rodin::Examples::Heart::Atrium
 {
   CavityVolume::CavityVolume(const MeshType& parent, Geometry::Attribute fluidMaterial)
     : m_parent(parent),

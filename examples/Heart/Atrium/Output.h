@@ -11,7 +11,7 @@
 #include <Rodin/IO/XDMF.h>
 #include "Fluid.h"
 
-namespace Rodin::Examples::Heart
+namespace Rodin::Examples::Heart::Atrium
 {
   /**
    * @brief Output for the atrium fluid and transport state.
@@ -22,7 +22,7 @@ namespace Rodin::Examples::Heart
    * distributed XDMF series, and records scalar cycle diagnostics on rank zero.
    * The atrium and its MPI context outlive this object.
    */
-  class AtriumFluid::Output
+  class Fluid::Output
   {
     public:
       /**
@@ -30,7 +30,7 @@ namespace Rodin::Examples::Heart
        * @param atrium Owning atrium.
        * @param context Communicator of the atrium mesh.
        */
-      Output(AtriumFluid& atrium, const Context::MPI& context);
+      Output(Fluid& atrium, const Context::MPI& context);
 
       /// @brief Registers the mesh and observed fields with XDMF.
       void bind();
@@ -57,7 +57,7 @@ namespace Rodin::Examples::Heart
 
     private:
       void writeCSVHeader();
-      AtriumFluid& m_atrium;
+      Fluid& m_atrium;
       IO::XDMF m_xdmf;
       std::ofstream m_csv;
   };

@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     Rodin::Context::MPI context(environment, world);
     try
     {
-      namespace AtriumSolid = Rodin::Examples::Heart::AtriumContraction;
+      namespace AtriumSolid = Rodin::Examples::Heart::Atrium;
       const auto setDefault = [](const char* name, const char* value) {
         PetscBool set = PETSC_FALSE;
         PetscErrorCode ierr =
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
       setDefault("-ksp_diagonal_scale", "true");
       setDefault("-ksp_diagonal_scale_fix", "true");
       setDefault("-snes_linesearch_max_it", "60");
-      using Atrium = Rodin::Examples::Heart::Atrium;
+      using Atrium = Rodin::Examples::Heart::Atrium::Atrium;
       Atrium::Parameters parameters;
       parameters.mode = Atrium::Mode::Solid;
       parameters.solid = AtriumSolid::readOptions(argc, argv, parameters.meshPath);

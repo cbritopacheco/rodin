@@ -17,7 +17,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-namespace Rodin::Examples::Heart::AtriumContraction
+namespace Rodin::Examples::Heart::Atrium
 {
   SubMeshType Solid::makeMesh(const MeshType& parent, Geometry::Attribute material)
   {
@@ -132,12 +132,8 @@ namespace Rodin::Examples::Heart::AtriumContraction
 
     const auto coupling = [this](bool momentum) {
       return MatrixFunction(3, 3, [this, momentum](const Point& point) {
-        const auto prepared = prepare(point);
-        const Real factor = momentum ? Real(0.5) * prepared.getActiveResponse().dStressDc
-                                     : prepared.getActiveResidual().strainDerivative[0];
-        return Math::SpatialMatrix<Real>(factor *
-          prepared.getKinematicState().getDeformationGradient() *
-          prepared.getFiberKinematics().tensor());
+        const auto& prepared = prepare(point);
+        return momentum ? prepared.momentum : prepared.extension;
       });
     };
     auto momentumCoupling =
@@ -155,7 +151,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
     for (size_t row = 0; row < 3; ++row)
     {
       auto residual = RealFunction([this, row](const Point& point) {
-        return prepare(point).getActiveResidual().value[row];
+        return prepare(point).residual.value[row];
       });
       auto load = Integral(residual, tests[row].get());
       load.setOrder(QuadratureOrder);
@@ -163,7 +159,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
       for (size_t column = 0; column < 3; ++column)
       {
         auto derivative = RealFunction([this, row, column](const Point& point) {
-          return prepare(point).getActiveResidual().derivative(row, column);
+          return prepare(point).residual.derivative(row, column);
         });
         auto block = Integral(derivative * increments[column].get(), tests[row].get());
         block.setOrder(QuadratureOrder);
@@ -220,15 +216,32 @@ namespace Rodin::Examples::Heart::AtriumContraction
     point.set<Tags::ElectricalActivation>(m_data.electricalAt(reference, m_time));
   }
 
-  Solid::Material Solid::prepare(const Point& point) const
+  const Solid::Prepared& Solid::prepare(const Point& point) const
   {
+    ++m_prepareRequests;
+    Prepared* prepared = &m_uncachedPrepared;
+    if (m_parameters.cacheConstitutive)
+    {
+      const auto& x = point.getReferenceCoordinates();
+      prepared = &m_constitutiveCache[
+        ConstitutiveKey{point.getPolytope().getIndex(), {x(0), x(1), x(2)}}];
+      if (prepared->epoch == m_constitutiveEpoch)
+        return *prepared;
+    }
+    ++m_prepareEvaluations;
     Rodin::Solid::KinematicState state(3);
     state.setDisplacementGradient(Jacobian(m_displacement).getValue(point));
     Rodin::Solid::ConstitutivePoint cp(point, state);
     setInputs(cp);
     auto law = m_law;
     law.setConstitutivePoint(cp);
-    return law;
+    prepared->residual = law.getActiveResidual();
+    const auto tensor = Math::SpatialMatrix<Real>(
+      law.getKinematicState().getDeformationGradient() * law.getFiberKinematics().tensor());
+    prepared->momentum = Real(0.5) * law.getActiveResponse().dStressDc * tensor;
+    prepared->extension = prepared->residual.strainDerivative[0] * tensor;
+    prepared->epoch = m_constitutiveEpoch;
+    return *prepared;
   }
 
   void Solid::predictActiveState()
@@ -268,6 +281,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
 
   void Solid::scatter(const PETSc::Math::Vector& values)
   {
+    ++m_constitutiveEpoch;
     const auto& offsets = m_mechanics.getTrialOffsets();
     m_displacement.setData(values, offsets[0]);
     m_extension.setData(values, offsets[1]);
@@ -374,6 +388,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
       (m_timeStep * m_timeStep * (Real(0.5) - NewmarkBeta)) * m_acceleration;
     m_predictedVelocity = m_velocity + (m_timeStep * (1 - NewmarkGamma)) * m_acceleration;
     predictActiveState();
+    ++m_constitutiveEpoch;
     pack();
     m_mechanics.assemble();
     m_newton->solve();
@@ -396,6 +411,13 @@ namespace Rodin::Examples::Heart::AtriumContraction
       return;
     if (m_output)
       m_output->close();
+    if (m_mesh.getContext().getCommunicator().rank() == 0)
+    {
+      std::cout << "Constitutive preparation (rank 0): requests=" << m_prepareRequests
+                << "; evaluations=" << m_prepareEvaluations
+                << "; cache=" << (m_parameters.cacheConstitutive ? "on" : "off")
+                << std::endl;
+    }
     m_finished = true;
   }
 

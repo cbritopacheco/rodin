@@ -18,7 +18,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-namespace Rodin::Examples::Heart::AtriumContraction
+namespace Rodin::Examples::Heart::Atrium
 {
   Output::Output(const Options& cfg, const ProblemData& data,
     Optional<DiagnosticState>& diagnostics, const VectorField& displacement,

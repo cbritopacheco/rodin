@@ -33,7 +33,7 @@
 #include "CoronaryArtery/CoronaryArteryAlerts.h"
 #include "CoronaryArtery/CoronaryArteryTiming.h"
 
-namespace Rodin::Examples::Heart
+namespace Rodin::Examples::Heart::Atrium
 {
   using namespace Rodin;
   using namespace Rodin::Math;
@@ -73,7 +73,7 @@ namespace Rodin::Examples::Heart
     }
   }
 
-  AtriumFluid::AtriumFluid(
+  Fluid::Fluid(
     const ParentMeshType& parent, const Config& cfg, Attribute material)
     : m_cfg(cfg),
       m_input(makeInput(m_cfg)),
@@ -153,14 +153,14 @@ namespace Rodin::Examples::Heart
     }
   }
 
-  AtriumFluid::~AtriumFluid() = default;
+  Fluid::~Fluid() = default;
 
-  bool AtriumFluid::isRoot() const
+  bool Fluid::isRoot() const
   {
     return m_mesh.getContext().getCommunicator().rank() == RootRank;
   }
 
-  AtriumFluid::MeshType AtriumFluid::makeMesh(
+  Fluid::MeshType Fluid::makeMesh(
     const ParentMeshType& parent, const Config& cfg, Attribute material)
   {
     if (!std::isfinite(cfg.meshScale) || cfg.meshScale <= 0)
@@ -203,7 +203,7 @@ namespace Rodin::Examples::Heart
     return mesh;
   }
 
-  AtriumFluid::Model::Input AtriumFluid::makeInput(const Config& cfg)
+  Fluid::Model::Input Fluid::makeInput(const Config& cfg)
   {
     Model::Input input;
 
@@ -278,7 +278,7 @@ namespace Rodin::Examples::Heart
     return input;
   }
 
-  AtriumFluid::Real AtriumFluid::activationWave(const Activation& cfg, Real t)
+  Fluid::Real Fluid::activationWave(const Activation& cfg, Real t)
   {
     const Real T = cfg.period;
     const Real tau = t - T * std::floor(t / T);
@@ -309,7 +309,7 @@ namespace Rodin::Examples::Heart
       (1.0 - ss((tau - cfg.tNegativeEnd) / (T - cfg.tNegativeEnd)));
   }
 
-  AtriumFluid::Real AtriumFluid::atrialWave(const AtrialPressure& cfg, Real t)
+  Fluid::Real Fluid::atrialWave(const AtrialPressure& cfg, Real t)
   {
     const Real T = cfg.period;
     const Real tau = t - T * std::floor(t / T);
@@ -335,12 +335,12 @@ namespace Rodin::Examples::Heart
     return cfg.minValue;
   }
 
-  AtriumFluid::Real AtriumFluid::cellSize(const Point& p)
+  Fluid::Real Fluid::cellSize(const Point& p)
   {
     return std::pow(p.getPolytope().getMeasure(), 1.0 / p.getPolytope().getDimension());
   }
 
-  AtriumFluid::Real AtriumFluid::viscosityAt(const Point& p) const
+  Fluid::Real Fluid::viscosityAt(const Point& p) const
   {
     const auto& cy = m_cfg.viscosity;
 
@@ -355,7 +355,7 @@ namespace Rodin::Examples::Heart
       std::pow(1.0 + std::pow(cy.lambda * shear, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
   }
 
-  AtriumFluid::Real AtriumFluid::tau1At(const Point& p) const
+  Fluid::Real Fluid::tau1At(const Point& p) const
   {
     const auto uc = m_uOld.getValue(p);
     const Real h = cellSize(p);
@@ -363,29 +363,29 @@ namespace Rodin::Examples::Heart
     return 1.0 / (4.0 * nu / (h * h) + 2.0 * std::sqrt(Math::dot(uc, uc)) / h);
   }
 
-  AtriumFluid::Real AtriumFluid::vmsTauAt(const Point& p) const
+  Fluid::Real Fluid::vmsTauAt(const Point& p) const
   {
     return m_cfg.vmsScale / (m_cfg.rho / m_cfg.dt + m_cfg.rho / tau1At(p));
   }
 
-  AtriumFluid::Real AtriumFluid::sqrtTauCAt(const Point& p) const
+  Fluid::Real Fluid::sqrtTauCAt(const Point& p) const
   {
     const Real h = cellSize(p);
     return std::sqrt(m_cfg.gradDivScale * m_cfg.rho * h * h / (4.0 * tau1At(p)));
   }
 
-  AtriumFluid::Real AtriumFluid::tauCAt(const Point& p) const
+  Fluid::Real Fluid::tauCAt(const Point& p) const
   {
     const Real s = sqrtTauCAt(p);
     return s * s;
   }
 
-  AtriumFluid::Real AtriumFluid::tauPAt(const Point& p) const
+  Fluid::Real Fluid::tauPAt(const Point& p) const
   {
     return m_cfg.pspgScale / (m_cfg.rho / m_cfg.dt + m_cfg.rho / tau1At(p));
   }
 
-  void AtriumFluid::axpy(Real a, const ::Vec& x, ::Vec& y)
+  void Fluid::axpy(Real a, const ::Vec& x, ::Vec& y)
   {
     PetscErrorCode ierr = VecAXPY(y, a, x);
     assert(ierr == PETSC_SUCCESS);
@@ -396,7 +396,7 @@ namespace Rodin::Examples::Heart
     (void)ierr;
   }
 
-  AtriumFluid& AtriumFluid::initialize()
+  Fluid& Fluid::initialize()
   {
     if (m_finished || m_failed)
     {
@@ -434,7 +434,7 @@ namespace Rodin::Examples::Heart
     return *this;
   }
 
-  void AtriumFluid::setupSpaces()
+  void Fluid::setupSpaces()
   {
     Model::State s0;
     s0.t = 0.0;
@@ -503,14 +503,14 @@ namespace Rodin::Examples::Heart
     }
   }
 
-  AtriumFluid::Real AtriumFluid::boundaryArea(Attribute tag)
+  Fluid::Real Fluid::boundaryArea(Attribute tag)
   {
     m_flux = BoundaryIntegral(m_one, m_qFlux).over(tag);
     m_flux.assemble();
     return std::max<Real>(m_flux(m_one), 1e-12);
   }
 
-  void AtriumFluid::setupFlow()
+  void Fluid::setupFlow()
   {
     const size_t dim = m_mesh.getSpaceDimension();
     const auto normal = BoundaryNormal(m_mesh);
@@ -592,7 +592,7 @@ namespace Rodin::Examples::Heart
     }
   }
 
-  AtriumFluid::Real AtriumFluid::crosswind(const Point& p, Real cur, Real prev,
+  Fluid::Real Fluid::crosswind(const Point& p, Real cur, Real prev,
     const Math::SpatialVector<Real>& gradient, Real diffusivity, Real reaction) const
   {
     const Real gn = std::sqrt(Math::dot(gradient, gradient));
@@ -604,7 +604,7 @@ namespace Rodin::Examples::Heart
       m_cfg.crosswindC * std::abs(residual) * cellSize(p) / (2.0 * gn) - diffusivity);
   }
 
-  void AtriumFluid::setupSpecies()
+  void Fluid::setupSpecies()
   {
     const Real Dth = m_cfg.thrombosis.diffusivityThrombin;
     const Real Dfg = m_cfg.thrombosis.diffusivityFibrinogen;
@@ -706,7 +706,7 @@ namespace Rodin::Examples::Heart
       DirichletBC(m_fg, RealFunction(fg0)).on(m_inletSet);
   }
 
-  void AtriumFluid::setupWallShear()
+  void Fluid::setupWallShear()
   {
     const auto normal = BoundaryNormal(m_mesh);
     const auto& cy = m_cfg.viscosity;
@@ -729,7 +729,7 @@ namespace Rodin::Examples::Heart
       BoundaryIntegral(Dot(wallStress, m_wssTest)).over(m_cfg.wall);
   }
 
-  bool AtriumFluid::advance0D()
+  bool Fluid::advance0D()
   {
     const auto rep = m_model.step(m_cfg.dt);
     m_pOut = m_model.getState().pv;
@@ -746,7 +746,7 @@ namespace Rodin::Examples::Heart
     return rep.converged;
   }
 
-  bool AtriumFluid::solveFlow()
+  bool Fluid::solveFlow()
   {
     const Real rho = m_cfg.rho;
     const Real dt = m_cfg.dt;
@@ -859,7 +859,7 @@ namespace Rodin::Examples::Heart
     return reason > 0 && std::isfinite(m_speed) && m_speed <= m_cfg.maxVelocity;
   }
 
-  void AtriumFluid::computeWallShear()
+  void Fluid::computeWallShear()
   {
     const auto shearStart = CoronaryClock::now();
     const auto& uSol = m_u.getSolution();
@@ -900,7 +900,7 @@ namespace Rodin::Examples::Heart
     m_timing.shear = secondsSince(shearStart);
   }
 
-  void AtriumFluid::closeCycle(Real elapsed)
+  void Fluid::closeCycle(Real elapsed)
   {
     if (elapsed <= 0.0)
       return;
@@ -957,7 +957,7 @@ namespace Rodin::Examples::Heart
     zeroWithGhosts(m_absShear.getData());
   }
 
-  void AtriumFluid::solveSpecies()
+  void Fluid::solveSpecies()
   {
     const auto speciesStart = CoronaryClock::now();
 
@@ -983,7 +983,7 @@ namespace Rodin::Examples::Heart
     m_timing.species = secondsSince(speciesStart);
   }
 
-  void AtriumFluid::computeFluxes()
+  void Fluid::computeFluxes()
   {
     const auto normal = BoundaryNormal(m_mesh);
     const auto& uSol = m_u.getSolution();
@@ -1001,7 +1001,7 @@ namespace Rodin::Examples::Heart
     m_outletPressure = m_flux(m_one) / m_outletArea;
   }
 
-  void AtriumFluid::step()
+  void Fluid::step()
   {
     if (m_finished || m_failed)
     {
@@ -1157,7 +1157,7 @@ namespace Rodin::Examples::Heart
     m_failed = false;
   }
 
-  void AtriumFluid::finish()
+  void Fluid::finish()
   {
     if (m_finished)
       return;
@@ -1171,7 +1171,7 @@ namespace Rodin::Examples::Heart
     m_finished = true;
   }
 
-  int AtriumFluid::run()
+  int Fluid::run()
   {
     if (m_finished || m_failed)
     {

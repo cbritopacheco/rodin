@@ -13,7 +13,7 @@
 #include "Solid/Solid.h"
 #include "Fluid.h"
 
-namespace Rodin::Examples::Heart
+namespace Rodin::Examples::Heart::Atrium
 {
   /**
    * @brief Coordinates independent atrial solid and fluid time steps.
@@ -25,8 +25,8 @@ namespace Rodin::Examples::Heart
   {
     public:
       using MeshType = Geometry::Mesh<Context::MPI>;
-      using Solid = AtriumContraction::Solid;
-      using Fluid = AtriumFluid;
+      using Solid = ::Rodin::Examples::Heart::Atrium::Solid;
+      using Fluid = ::Rodin::Examples::Heart::Atrium::Fluid;
       enum class Mode
       {
         Solid,
