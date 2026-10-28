@@ -122,6 +122,11 @@ cap interiors and fluid tetrahedra remain free to adapt. The solid coordinates,
 wedge connectivity, and shared interface triangulation are preserved. The geometry is a demonstration
 model requiring anatomical assessment.
 
+`resources/examples/Heart/Atrium/AtriumFine_FluidSolid_1mm.mesh` provides finer
+fluid tetrahedra and opening caps. The shared wall triangulation and opening
+rims are prescribed during MMG3D adaptation; the outward solid layer retains
+the same interface and nodal thickness. The coarse mesh remains the default.
+
 ## Enclosed cavity volume
 
 `CavityVolume` measures the filled reference fluid region and the volume swept
@@ -212,6 +217,9 @@ single dashes. The executables default to GMRES with overlapping additive
 Schwarz, local ILU, and diagonal scaling with matrix restoration, configurable
 through PETSc options. Output consists of a master XDMF file and per-rank HDF5
 pieces.
+
+The [visualization pipeline](Visualization/README.md) renders fluid speed as a
+volume animation with a translucent cavity surface and physical timestamps.
 
 A program linked to `AtriumModels` can configure the common source and advance
 the selected components directly:
