@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import base64
+import colorsys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
@@ -54,7 +55,30 @@ class LabelCatalogTest(unittest.TestCase):
                 ['ci', 'cmake', 'developer-tooling', 'dependencies', 'python', 'resources'],
                 ['bug', 'hotfix']]:
             with self.subTest(group=group):
-                self.assertEqual(len({catalog[name]['color'] for name in group}), 1)
+                hues = [colorsys.rgb_to_hls(*[
+                    int(catalog[name]['color'][i:i + 2], 16) / 255
+                    for i in (0, 2, 4)])[0] for name in group]
+                # Shades can differ, but related labels stay within 30 degrees.
+                self.assertTrue(all(min(abs(h - hues[0]), 1 - abs(h - hues[0])) <= 1 / 12
+                                    for h in hues))
+
+    def test_each_label_has_a_distinct_readable_shade(self):
+        catalog = yaml.safe_load((ROOT / '.github/labels.yml').read_text())
+        self.assertEqual(len({m['color'].lower() for m in catalog.values()}), len(catalog))
+        for name, metadata in catalog.items():
+            with self.subTest(label=name):
+                rgb = [int(metadata['color'][i:i + 2], 16) / 255 for i in (0, 2, 4)]
+                linear = [c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+                          for c in rgb]
+                luminance = sum(c * w for c, w in zip(linear, (0.2126, 0.7152, 0.0722)))
+                brightness = sum(c * w for c, w in zip(rgb, (0.2126, 0.7152, 0.0722)))
+                # Avoid mid-tones, leaving room for GitHub's foreground selection.
+                if brightness < 0.42:
+                    contrast = 1.05 / (luminance + 0.05)  # Light text on dark fill.
+                else:
+                    self.assertGreater(brightness, 0.65)
+                    contrast = (luminance + 0.05) / 0.05  # Dark text on light fill.
+                self.assertGreaterEqual(contrast, 4.5)
 
 
 class LabelerTest(unittest.TestCase):
