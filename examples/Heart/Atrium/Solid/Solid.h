@@ -31,6 +31,13 @@ namespace Rodin::Examples::Heart::AtriumContraction
   {
     public:
       using Parameters = Options;
+      using Diagnostics = DiagnosticState;
+
+      /// @brief Returns cached scalar diagnostics, or empty before a mechanical state is written.
+      const Optional<Diagnostics>& getDiagnostics() const noexcept
+      {
+        return m_diagnostics;
+      }
 
       /**
        * @brief Constructs the wall component and prescribed material inputs.
@@ -207,6 +214,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
       EquilibriumProblem m_equilibrium;
       LinearSolver m_equilibriumSolver;
       Optional<Newton> m_equilibriumNewton;
+      Optional<Diagnostics> m_diagnostics;
       std::unique_ptr<Output> m_output;
       bool m_initialized = false, m_finished = false, m_failed = false;
   };

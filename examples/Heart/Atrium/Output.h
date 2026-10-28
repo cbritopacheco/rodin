@@ -39,7 +39,7 @@ namespace Rodin::Examples::Heart
       void openCSV();
 
       /**
-       * @brief Writes cycle diagnostics.
+       * @brief Collects cycle diagnostics and writes the standalone CSV when enabled.
        * @param cycle Zero-based cycle index.
        * @note Collective on the atrium communicator.
        */

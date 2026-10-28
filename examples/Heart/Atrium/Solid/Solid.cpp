@@ -336,9 +336,9 @@ namespace Rodin::Examples::Heart::AtriumContraction
     m_previousGamma = m_gamma;
     m_previousBeta = m_beta;
     m_predictedDisplacement = m_displacement;
-    m_output = std::make_unique<Output>(m_parameters, m_data, m_displacement, m_velocity,
-      m_acceleration, m_extension, m_gamma, m_beta, m_timeStep, m_density, NewmarkBeta,
-      NewmarkGamma);
+    m_output = std::make_unique<Output>(m_parameters, m_data, m_diagnostics,
+      m_displacement, m_velocity, m_acceleration, m_extension, m_gamma, m_beta,
+      m_timeStep, m_density, NewmarkBeta, NewmarkGamma);
     m_output->write(0, 0, residual);
     m_initialized = true;
     m_failed = false;

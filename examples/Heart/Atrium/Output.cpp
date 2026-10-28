@@ -50,7 +50,7 @@ namespace Rodin::Examples::Heart
 
   void AtriumFluid::Output::openCSV()
   {
-    if (m_atrium.isRoot())
+    if (m_atrium.isRoot() && m_atrium.m_cfg.writeCSV)
     {
       m_csv.open(m_atrium.m_cfg.csvPath);
       if (!m_csv)
@@ -77,7 +77,13 @@ namespace Rodin::Examples::Heart
     const Real fg = m_atrium.m_fgCur.min();
     const Real fn = m_atrium.m_fnCur.max();
 
-    if (!m_atrium.isRoot())
+    m_atrium.m_diagnostics = Diagnostics{cycle, m_atrium.m_pIn,
+      m_atrium.m_cfg.useVentricularModel ? s.pv : m_atrium.m_pOut,
+      m_atrium.m_cfg.useVentricularModel ? Optional<Real>(s.par) : Optional<Real>{},
+      m_atrium.m_cfg.useVentricularModel ? Optional<Real>(s.pd) : Optional<Real>{},
+      m_atrium.m_valveOpen, m_atrium.m_qIn, m_atrium.m_qOut, m_atrium.m_speed, tawss, osi,
+      activation, th, fg, fn};
+    if (!m_atrium.isRoot() || !m_csv.is_open())
       return;
 
     const Real nan = std::numeric_limits<Real>::quiet_NaN();

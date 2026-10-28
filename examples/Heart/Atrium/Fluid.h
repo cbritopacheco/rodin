@@ -199,10 +199,25 @@ namespace Rodin::Examples::Heart
         Real distalLength = 0.2;
       };
 
+      /// @brief Scalar diagnostics from the most recent completed flow state, in SI units.
+      struct Diagnostics
+      {
+        int cycle;
+        Real inletPressure, outletPressure;
+        Optional<Real> arterialPressure, distalPressure;
+        bool valveOpen;
+        Real inletFlux, outletFlux, maximumVelocity;
+        Real maximumTAWSS, maximumOSI, maximumActivation;
+        Real maximumThrombin, minimumFibrinogen, maximumFibrin;
+      };
+
       struct Parameters
       {
         std::string xdmfBasename = "Atrium";
         std::string csvPath = "Atrium.csv";
+
+        /// @brief Standalone CSV output; coordinated runs use the common run CSV.
+        bool writeCSV = true;
 
         /// @brief No-slip wall.
         Attribute wall = 4;
@@ -388,6 +403,12 @@ namespace Rodin::Examples::Heart
         return m_p.getSolution();
       }
 
+      /// @brief Returns cached flow diagnostics, or empty before the first completed step.
+      const Optional<Diagnostics>& getDiagnostics() const noexcept
+      {
+        return m_diagnostics;
+      }
+
       /// @brief Returns the parameters supplied to the simulation.
       const Parameters& getParameters() const noexcept
       {
@@ -483,6 +504,7 @@ namespace Rodin::Examples::Heart
         Real reaction) const;
 
       Config m_cfg;
+      Optional<Diagnostics> m_diagnostics;
       Model::Input m_input;
       Model m_model;
 

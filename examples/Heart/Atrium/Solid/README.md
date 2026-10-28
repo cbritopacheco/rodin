@@ -313,9 +313,9 @@ active-extension extrema, contractile stress, Newton residuals, and minimum
 scaled Jacobian. Metadata records geometry, material coefficients, electrical
 source parameters, density, and time-integration coefficients.
 
-The coordinator also writes `<output>.volume.csv` after initialization and each
-completed step. It records the cavity volume enclosed by the moving inner wall
-and fixed inlet/outlet caps in mL. The [common model documentation](../README.md#enclosed-cavity-volume)
+The coordinator writes one `<output>.csv` after initialization and each completed
+step. It combines the mechanical and convergence diagnostics with cavity volume
+in mL, measured using the moving inner wall and fixed inlet/outlet caps. The [common model documentation](../README.md#enclosed-cavity-volume)
 defines the volume calculation and the separate solid/fluid quantities in `FSI`
 mode. Existing ParaView readers can discover flushed states through
 **File > Reload Files > Reload existing file(s)**.

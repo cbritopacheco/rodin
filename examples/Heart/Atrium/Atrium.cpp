@@ -5,6 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <algorithm>
+#include <array>
+#include <utility>
 #include <cmath>
 #include <limits>
 #include <filesystem>
@@ -19,8 +21,7 @@ namespace Rodin::Examples::Heart
   Atrium::Atrium(const Context::MPI& context, const Parameters& cfg)
     : m_mesh(makeMesh(context, cfg)),
       m_cavity(m_mesh, cfg.fluidMaterial),
-      m_volumePath((cfg.mode == Mode::Fluid ? cfg.fluid.xdmfBasename : cfg.solid.output) +
-        ".volume.csv")
+      m_csvPath(cfg.mode == Mode::Fluid ? cfg.fluid.csvPath : cfg.solid.output + ".csv")
   {
     if (cfg.mode != Mode::Solid && cfg.mode != Mode::Fluid && cfg.mode != Mode::FSI)
       Alert::Exception() << "Invalid atrium mode" << Alert::Raise;
@@ -41,9 +42,17 @@ namespace Rodin::Examples::Heart
       }
     }
     if (hasSolid)
-      m_solid.emplace(m_mesh, cfg.solid, cfg.solidMaterial);
+    {
+      auto parameters = cfg.solid;
+      parameters.writeCSV = false;
+      m_solid.emplace(m_mesh, parameters, cfg.solidMaterial);
+    }
     if (hasFluid)
-      m_fluid.emplace(m_mesh, cfg.fluid, cfg.fluidMaterial);
+    {
+      auto parameters = cfg.fluid;
+      parameters.writeCSV = false;
+      m_fluid.emplace(m_mesh, parameters, cfg.fluidMaterial);
+    }
   }
 
   Atrium::MeshType Atrium::makeMesh(const Context::MPI& context, const Parameters& cfg)
@@ -130,17 +139,12 @@ namespace Rodin::Examples::Heart
     {
       try
       {
-        const auto parent = std::filesystem::path(m_volumePath).parent_path();
+        const auto parent = std::filesystem::path(m_csvPath).parent_path();
         if (!parent.empty())
           std::filesystem::create_directories(parent);
-        m_volumeOutput.open(m_volumePath);
-        if (!m_volumeOutput)
-          failure = "Cannot open cavity-volume output " + m_volumePath;
-        else
-        {
-          m_volumeOutput << "time_s,reference_volume_ml,solid_cavity_volume_ml,fluid_"
-                            "domain_volume_ml,solid_volume_change_percent\n";
-        }
+        m_csvOutput.open(m_csvPath);
+        if (!m_csvOutput)
+          failure = "Cannot open run diagnostics " + m_csvPath;
       }
       catch (const std::exception& error)
       {
@@ -150,7 +154,7 @@ namespace Rodin::Examples::Heart
     boost::mpi::broadcast(comm, failure, 0);
     if (!failure.empty())
       Alert::Exception() << failure << Alert::Raise;
-    writeVolume();
+    writeDiagnostics();
     m_initialized = true;
     m_failed = false;
     return *this;
@@ -164,7 +168,7 @@ namespace Rodin::Examples::Heart
       m_solid->step();
     if (m_fluid)
       m_fluid->step();
-    writeVolume();
+    writeDiagnostics();
     ++m_steps;
     m_failed = false;
   }
@@ -177,12 +181,12 @@ namespace Rodin::Examples::Heart
       m_solid->finish();
     if (m_fluid)
       m_fluid->finish();
-    if (m_volumeOutput.is_open())
-      m_volumeOutput.close();
+    if (m_csvOutput.is_open())
+      m_csvOutput.close();
     m_finished = true;
   }
 
-  void Atrium::writeVolume()
+  void Atrium::writeDiagnostics()
   {
     const Real reference = m_cavity.getReferenceVolume() * CubicMillimetresToMillilitres;
     if (m_solid)
@@ -199,19 +203,82 @@ namespace Rodin::Examples::Heart
     std::string failure;
     if (comm.rank() == 0)
     {
-      m_volumeOutput << std::setprecision(17) << getTime() << ',' << reference << ',';
-      if (m_solidCavityVolume)
-        m_volumeOutput << *m_solidCavityVolume;
-      m_volumeOutput << ',';
-      if (m_fluidDomainVolume)
-        m_volumeOutput << *m_fluidDomainVolume;
-      m_volumeOutput << ',';
-      if (m_solidCavityVolume)
-        m_volumeOutput << 100 * (*m_solidCavityVolume / reference - 1);
-      m_volumeOutput << '\n';
-      m_volumeOutput.flush();
-      if (!m_volumeOutput)
-        failure = "Cannot write cavity-volume output " + m_volumePath;
+      const auto solid =
+        m_solid ? m_solid->getDiagnostics() : Optional<Solid::Diagnostics>{};
+      const auto fluid =
+        m_fluid ? m_fluid->getDiagnostics() : Optional<Fluid::Diagnostics>{};
+      const auto fields = std::to_array<std::pair<StringView, Optional<Real>>>(
+        {{"time_s", getTime()}, {"reference_volume_ml", reference},
+          {"solid_cavity_volume_ml", m_solidCavityVolume},
+          {"fluid_domain_volume_ml", m_fluidDomainVolume},
+          {"solid_volume_change_percent",
+            m_solidCavityVolume
+              ? Optional<Real>(100 * (*m_solidCavityVolume / reference - 1))
+              : Optional<Real>{}},
+          {"max_displacement_mm",
+            solid ? Optional<Real>(solid->maxDisplacement) : Optional<Real>{}},
+          {"activation_max",
+            solid ? Optional<Real>(solid->activationMax) : Optional<Real>{}},
+          {"newton_iterations",
+            solid ? Optional<Real>(solid->newtonIterations) : Optional<Real>{}},
+          {"residual", solid ? Optional<Real>(solid->residual) : Optional<Real>{}},
+          {"min_scaled_jacobian_mm",
+            solid ? Optional<Real>(solid->minimumJacobian) : Optional<Real>{}},
+          {"max_velocity_mm_per_s",
+            solid ? Optional<Real>(solid->maxVelocity) : Optional<Real>{}},
+          {"max_acceleration_mm_per_s2",
+            solid ? Optional<Real>(solid->maxAcceleration) : Optional<Real>{}},
+          {"min_active_extension",
+            solid ? Optional<Real>(solid->minimumExtension) : Optional<Real>{}},
+          {"max_active_extension",
+            solid ? Optional<Real>(solid->maximumExtension) : Optional<Real>{}},
+          {"max_contractile_stress_kPa",
+            solid ? Optional<Real>(solid->maximumStress) : Optional<Real>{}},
+          {"fluid_cycle", fluid ? Optional<Real>(fluid->cycle) : Optional<Real>{}},
+          {"fluid_inlet_pressure_pa",
+            fluid ? Optional<Real>(fluid->inletPressure) : Optional<Real>{}},
+          {"fluid_outlet_pressure_pa",
+            fluid ? Optional<Real>(fluid->outletPressure) : Optional<Real>{}},
+          {"fluid_arterial_pressure_pa",
+            fluid ? fluid->arterialPressure : Optional<Real>{}},
+          {"fluid_distal_pressure_pa", fluid ? fluid->distalPressure : Optional<Real>{}},
+          {"fluid_valve_open",
+            fluid ? Optional<Real>(fluid->valveOpen) : Optional<Real>{}},
+          {"fluid_inlet_flux_m3_per_s",
+            fluid ? Optional<Real>(fluid->inletFlux) : Optional<Real>{}},
+          {"fluid_outlet_flux_m3_per_s",
+            fluid ? Optional<Real>(fluid->outletFlux) : Optional<Real>{}},
+          {"fluid_max_velocity_m_per_s",
+            fluid ? Optional<Real>(fluid->maximumVelocity) : Optional<Real>{}},
+          {"fluid_max_TAWSS_pa",
+            fluid ? Optional<Real>(fluid->maximumTAWSS) : Optional<Real>{}},
+          {"fluid_max_OSI", fluid ? Optional<Real>(fluid->maximumOSI) : Optional<Real>{}},
+          {"fluid_max_activation",
+            fluid ? Optional<Real>(fluid->maximumActivation) : Optional<Real>{}},
+          {"fluid_max_thrombin",
+            fluid ? Optional<Real>(fluid->maximumThrombin) : Optional<Real>{}},
+          {"fluid_min_fibrinogen",
+            fluid ? Optional<Real>(fluid->minimumFibrinogen) : Optional<Real>{}},
+          {"fluid_max_fibrin",
+            fluid ? Optional<Real>(fluid->maximumFibrin) : Optional<Real>{}}});
+      if (m_csvOutput.tellp() == 0)
+      {
+        for (size_t i = 0; i < fields.size(); ++i)
+          m_csvOutput << (i == 0 ? "" : ",") << fields[i].first;
+        m_csvOutput << '\n';
+      }
+      m_csvOutput << std::setprecision(17);
+      for (size_t i = 0; i < fields.size(); ++i)
+      {
+        if (i != 0)
+          m_csvOutput << ',';
+        if (fields[i].second)
+          m_csvOutput << *fields[i].second;
+      }
+      m_csvOutput << '\n';
+      m_csvOutput.flush();
+      if (!m_csvOutput)
+        failure = "Cannot write run diagnostics " + m_csvPath;
     }
     boost::mpi::broadcast(comm, failure, 0);
     if (!failure.empty())

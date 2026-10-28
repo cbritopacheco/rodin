@@ -120,12 +120,18 @@ displacement. The surface integral uses the displaced face tangents; it does
 not extend displacement into the fluid interior. MPI ownership excludes overlap
 replicas from both cell and interface integrals.
 
-The coordinator writes `<stem>.volume.csv` at initialization and after every
-completed step, with reference volume, solid-enclosed cavity volume, fluid-domain
-volume, and relative solid-volume change. Volumes are in mL. The stem is the
-solid output when a solid is selected, otherwise the fluid output. Disabled
-components have empty CSV entries. `getSolidCavityVolume()` and
-`getFluidDomainVolume()` expose the latest values without MPI collectives.
+The coordinator writes **one CSV per run** at initialization and after every
+completed step. It combines displacement, activation, active-stress extrema,
+Newton convergence, cavity volumes, and the enabled fluid pressure, flux,
+wall-shear, and transport diagnostics. Volumes are in mL. Solid and `FSI` modes
+use `<solid-output>.csv`; fluid mode uses its configured `csvPath`. Component
+writers supply cached diagnostic snapshots to this common writer. Disabled
+quantities have empty entries; fluid diagnostics are available after the first
+completed flow step. All modes use the same column names.
+
+`getSolidCavityVolume()` and `getFluidDomainVolume()` expose the latest volume
+values without MPI collectives. Each component's `getDiagnostics()` similarly
+exposes the most recent scalar snapshot.
 
 Fluid mode has a fixed domain, so its volume remains constant. In the current
 independent `FSI` mode, solid-enclosed and fluid-domain volumes are recorded

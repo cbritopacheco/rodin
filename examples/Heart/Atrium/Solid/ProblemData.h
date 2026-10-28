@@ -33,9 +33,21 @@ namespace Rodin::Examples::Heart::AtriumContraction
   using CellVectorField = PETSc::Variational::GridFunction<CellVectorSpace>;
   using CellScalarField = PETSc::Variational::GridFunction<CellScalarSpace>;
 
+  /// @brief Scalar diagnostics from a completed solid state, in mm/kPa/s units.
+  struct DiagnosticState
+  {
+    Real maxDisplacement, activationMax;
+    size_t newtonIterations;
+    Real residual, minimumJacobian, maxVelocity, maxAcceleration;
+    Real minimumExtension, maximumExtension, maximumStress;
+  };
+
   struct Options
   {
     std::string output = "output/atrium-contraction/Contraction";
+
+    /// @brief Writes a standalone component CSV; the coordinator owns the run CSV.
+    bool writeCSV = true;
     size_t steps = 24;
     size_t stopAfter = 0;
     Real timeStep = 0; // Zero uses the wave-duration time step.

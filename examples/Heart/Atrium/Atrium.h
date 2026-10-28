@@ -82,8 +82,8 @@ namespace Rodin::Examples::Heart
       Optional<Real> getFluidDomainVolume() const noexcept;
 
     private:
-      /// @brief Collectively publishes initial and stepwise cavity diagnostics.
-      void writeVolume();
+      /// @brief Collectively publishes initial and stepwise run diagnostics.
+      void writeDiagnostics();
 
       /**
        * @brief Collectively loads and Scotch-partitions the combined source once.
@@ -98,8 +98,8 @@ namespace Rodin::Examples::Heart
       static constexpr Real CubicMetresToMillilitres = 1e6;
       MeshType m_mesh;
       CavityVolume m_cavity;
-      std::string m_volumePath;
-      std::ofstream m_volumeOutput;
+      std::string m_csvPath;
+      std::ofstream m_csvOutput;
       Optional<Real> m_solidCavityVolume;
       Optional<Real> m_fluidDomainVolume;
       Optional<Solid> m_solid;

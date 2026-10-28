@@ -20,7 +20,8 @@ namespace Rodin::Examples::Heart::AtriumContraction
    *
    * The writer observes the mechanical fields and owns the scalar activation
    * fields used for visualization. Each write validates the deformed wedges,
-   * exports the state, and records scalar diagnostics. Metadata describes the
+   * exports the state, and updates cached scalar diagnostics. Standalone CSV
+   * output is optional; coordinated runs use the common CSV. Metadata describes the
    * prescribed data and integration parameters. Observed inputs must outlive
    * this object; close() finalizes the XDMF document.
    */
@@ -31,6 +32,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
        * @brief Binds the mechanical state and configures output.
        * @param cfg Output and model configuration.
        * @param data Prescribed mesh and fields.
+       * @param diagnostics Destination for cached scalar diagnostics.
        * @param displacement Current displacement.
        * @param velocity Current velocity.
        * @param acceleration Current acceleration.
@@ -42,7 +44,8 @@ namespace Rodin::Examples::Heart::AtriumContraction
        * @param beta Newmark displacement parameter.
        * @param gamma Newmark velocity parameter.
        */
-      Output(const Options& cfg, const ProblemData& data, const VectorField& displacement,
+      Output(const Options& cfg, const ProblemData& data,
+        Optional<DiagnosticState>& diagnostics, const VectorField& displacement,
         const VectorField& velocity, const VectorField& acceleration,
         const CellScalarField& extension, const CellScalarField& gammaField,
         const CellScalarField& betaField, Real timeStep, Real density, Real beta,
@@ -62,6 +65,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
     private:
       const Options& m_cfg;
       const ProblemData& m_data;
+      Optional<DiagnosticState>& m_diagnostics;
       const VectorField& m_displacement;
       const VectorField& m_velocity;
       const VectorField& m_acceleration;

@@ -21,12 +21,13 @@ using namespace Rodin::Variational;
 namespace Rodin::Examples::Heart::AtriumContraction
 {
   Output::Output(const Options& cfg, const ProblemData& data,
-    const VectorField& displacement, const VectorField& velocity,
-    const VectorField& acceleration, const CellScalarField& extension,
-    const CellScalarField& gammaField, const CellScalarField& betaField, Real timeStep,
-    Real density, Real beta, Real gamma)
+    Optional<DiagnosticState>& diagnostics, const VectorField& displacement,
+    const VectorField& velocity, const VectorField& acceleration,
+    const CellScalarField& extension, const CellScalarField& gammaField,
+    const CellScalarField& betaField, Real timeStep, Real density, Real beta, Real gamma)
     : m_cfg(cfg),
       m_data(data),
+      m_diagnostics(diagnostics),
       m_displacement(displacement),
       m_velocity(velocity),
       m_acceleration(acceleration),
@@ -115,7 +116,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
       m_data.fiberCoordinate, IO::XDMF::Center::Node, IO::XDMF::AttributePolicy::Static);
     grid.add(
       m_data.waveCoordinate, IO::XDMF::Center::Node, IO::XDMF::AttributePolicy::Static);
-    if (!cfg.fibersOnly && isRoot)
+    if (!cfg.fibersOnly && cfg.writeCSV && isRoot)
     {
       m_log.open(cfg.output + ".csv");
       m_log << "time_s,max_displacement_mm,activation_max,newton_iterations,residual,min_"
@@ -178,14 +179,20 @@ namespace Rodin::Examples::Heart::AtriumContraction
     const Real extensionMin = m_extension.min(index),
                extensionMax = m_extension.max(index);
     const Real stressMax = m_contractileStress.max(index);
+    m_diagnostics = DiagnosticState{maximum, activationMax, iterations, residual,
+      minimumCurrentJacobian, maximumVelocity, maximumAcceleration, extensionMin,
+      extensionMax, stressMax};
     if (comm.rank() == 0)
     {
-      m_log << std::setprecision(17) << time << ',' << maximum << ',' << activationMax
-            << ',' << iterations << ',' << residual << ',' << minimumCurrentJacobian
-            << ',' << maximumVelocity << ',' << maximumAcceleration << ',' << extensionMin
-            << ',' << extensionMax << ',' << stressMax << '\n';
-    m_log.flush();
-    std::cout << "  max displacement=" << maximum << " mm" << std::endl;
+      if (m_log.is_open())
+      {
+        m_log << std::setprecision(17) << time << ',' << maximum << ',' << activationMax
+              << ',' << iterations << ',' << residual << ',' << minimumCurrentJacobian
+              << ',' << maximumVelocity << ',' << maximumAcceleration << ','
+              << extensionMin << ',' << extensionMax << ',' << stressMax << '\n';
+        m_log.flush();
+      }
+      std::cout << "  max displacement=" << maximum << " mm" << std::endl;
     }
   }
 
