@@ -88,6 +88,7 @@ namespace Rodin::Examples::Heart::Atrium
       m_v(m_vh),
       m_q(m_sh),
       m_uOld(m_vh),
+      m_speedMagnitude(m_sh),
       m_sTrial(m_sh),
       m_sTest(m_sh),
       m_wTrial(m_vh),
@@ -854,7 +855,8 @@ namespace Rodin::Examples::Heart::Atrium
       m_subOld.setData(m_sub.getData());
 
     // Reject a nonfinite or excessive velocity after a converged linear solve.
-    m_speed = std::max(std::abs(m_uOld.max()), std::abs(m_uOld.min()));
+    m_speedMagnitude = Sqrt(Dot(m_uOld, m_uOld));
+    m_speed = m_speedMagnitude.max();
 
     return reason > 0 && std::isfinite(m_speed) && m_speed <= m_cfg.maxVelocity;
   }
@@ -1023,12 +1025,8 @@ namespace Rodin::Examples::Heart::Atrium
     {
       Alert::Exception() << "Invalid prescribed fluid outlet parameters" << Alert::Raise;
     }
-    if (m_step == 0)
-      m_runStart = CoronaryClock::now();
     const int step = m_step;
     const int stepsPerCycle = m_stepsPerCycle;
-    const int totalCycles = m_cfg.flowCycles + m_cfg.speciesCycles;
-    const int totalSteps = totalCycles * stepsPerCycle;
     const Real PI = std::numbers::pi_v<Real>;
     // A failed solve can leave partially updated state; it cannot be retried.
     m_failed = true;
@@ -1041,8 +1039,8 @@ namespace Rodin::Examples::Heart::Atrium
 
     if (isRoot())
     {
-      Alert::Info() << "---- Step " << (step + 1) << "/" << totalSteps << "  cycle "
-                    << (cycle + 1) << "/" << totalCycles << "  t = " << m_t
+      Alert::Info() << "---- Step " << (step + 1) << "  cycle "
+                    << (cycle + 1) << "  t = " << m_t
                     << " s  (dt = " << m_cfg.dt << " s"
                     << (cycle < m_cfg.flowCycles ? ", warm-up" : "") << ") ----"
                     << Alert::Raise;
@@ -1108,7 +1106,7 @@ namespace Rodin::Examples::Heart::Atrium
 
       if (isRoot())
       {
-        Alert::Info() << "[cycle " << (cycle + 1) << "/" << totalCycles
+        Alert::Info() << "[cycle " << (cycle + 1)
                       << "] maxTAWSS=" << maxTawss << " Pa  maxOSI=" << maxOsi
                       << "  maxActivation=" << maxActivation << Alert::Raise;
       }
@@ -1135,9 +1133,6 @@ namespace Rodin::Examples::Heart::Atrium
 
     if (isRoot())
     {
-      const Real elapsed = secondsSince(m_runStart);
-      const Real perStep = elapsed / static_cast<Real>(step + 1);
-
       Alert::Info() << "[3D] max|u|=" << m_speed << " m/s  pIn=" << m_pIn
                     << " Pa  pv=" << m_pOut
                     << " Pa  valve=" << (m_valveOpen ? "open" : "closed")
@@ -1148,8 +1143,7 @@ namespace Rodin::Examples::Heart::Atrium
                     << "  asm=" << m_timing.assembly << "  ksp=" << m_timing.solve
                     << "  wss=" << m_timing.shear << "  flux=" << m_timing.fluxes
                     << "  species=" << m_timing.species << "  out=" << m_timing.output
-                    << "  total=" << m_timing.total << " s  |  ETA "
-                    << (perStep * (totalSteps - step - 1) / 60.0) << " min"
+                    << "  total=" << m_timing.total << " s"
                     << Alert::Raise;
       std::cout.flush();
     }

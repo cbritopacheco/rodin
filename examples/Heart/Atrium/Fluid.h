@@ -27,7 +27,6 @@
 #define RODIN_ATRIUM_FLUID_H
 
 #include <array>
-#include <chrono>
 #include <functional>
 #include <memory>
 #include <string>
@@ -522,6 +521,9 @@ namespace Rodin::Examples::Heart::Atrium
       ScalarTestFunctionType m_q;
       VectorGridFunctionType m_uOld;
 
+      /// @brief Nodal speed; its maximum is exact for affine P1 tetrahedral velocity.
+      ScalarGridFunctionType m_speedMagnitude;
+
       // ---- Reusable mass projections ---------------------------------------
       ScalarTrialFunctionType m_sTrial;
       ScalarTestFunctionType m_sTest;
@@ -606,7 +608,6 @@ namespace Rodin::Examples::Heart::Atrium
       Real m_initialPeriod = 0;
       bool m_initialUseVentricularModel = true;
       Real m_cycleElapsed = 0;
-      std::chrono::steady_clock::time_point m_runStart;
 
       /// @brief Number of completed steps, or index of the step being solved.
       int m_step = 0;

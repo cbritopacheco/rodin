@@ -92,6 +92,19 @@ are retained in the flow problem. The default uses a prescribed outlet pressure.
 Ventricular coupling, species transport, and orthogonal-subscale corrections are
 optional parameters, disabled by default.
 
+All reported opening fluxes use the outward fluid normal: inflow is negative
+and outflow is positive. For pressure-penalty coefficient $\epsilon_p$, the
+constant pressure test gives the global balance
+
+$$
+Q_{\mathrm{in}}+Q_{\mathrm{out}}
+=-\epsilon_p\int_{\Omega_f}p\,dX.
+$$
+
+This global balance does not enforce pointwise zero divergence. The reported
+maximum velocity is $\max_X\|u_h(X)\|_2$, evaluated from nodal speeds; for
+an affine P1 tetrahedral field the maximum occurs at a vertex.
+
 ## Units and mesh resource
 
 The parent mesh uses mm. The solid retains mm, kPa, and seconds; the fluid
@@ -174,8 +187,21 @@ mpirun -n 4 build/examples/Heart/Atrium/Atrium \
   -atrium_mode fluid \
   -atrium_mesh resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh \
   -atrium_output output/atrium-fluid/Flow \
-  -atrium_steps 24 -atrium_output_every 1 -atrium_dt 0.001
+  -atrium_steps 24 -atrium_output_every 1 -atrium_dt 0.001 \
+  -atrium_lv_model false -atrium_kinetics false
 ```
+
+The fluid checks use a generated tetrahedral tube and require MPI and MUMPS:
+
+```sh
+python3 examples/Heart/Atrium/Tests/Fluid.py --mpiexec mpiexec
+```
+
+`--executable` selects a configured driver and `--output` selects a result
+folder. The checks cover rest, pressure reversal, pressure-reference shifts,
+MPI consistency, global flux balance, and outlet-flux self-convergence under a
+smooth pressure source. They do not establish spatial convergence on the
+anatomical mesh or periodic atrial hemodynamics.
 
 `-atrium_mode fsi` selects both components on the same parent partition.
 Use `--dt` for the solid and `-atrium_dt` for the fluid, with equal values in
