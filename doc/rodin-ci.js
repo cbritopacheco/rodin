@@ -73,12 +73,11 @@
         const report = title && reports.workflow_runs.find(item => item.display_title === title && item.conclusion === 'success');
         row.insertCell().append(report ? link('Open report', report.html_url) : link('Summary', run?.html_url));
       }
-      output.append(table);
-      const note = document.createElement('p');
-      note.textContent = 'Open report links to a completed generated report when available; Summary opens GitHub’s native run page. Missing recent runs are unknown, not successful. Full coverage and campaign completeness are confirmed in the reports.';
-      output.append(note);
+      const actionsLink = document.createElement('p');
+      actionsLink.append(link('Open GitHub Actions', actions));
+      output.append(actionsLink, table);
     } catch (error) {
-      status.textContent = 'CI status unavailable: ' + error.message + '. Use the workflow links below.';
+      status.textContent = 'CI status is currently unavailable. Open a workflow below to check its status.';
       for (const name of workflows) {
         const p = document.createElement('p'); p.append(link(name, actions + '?query=' + encodeURIComponent('workflow:"' + name + '"'))); output.append(p);
       }

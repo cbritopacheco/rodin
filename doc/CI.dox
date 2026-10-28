@@ -2,17 +2,8 @@
   @page ci-index Continuous integration
   @brief Branch status, workflow runs and CI reports.
 
-  This index reads the public GitHub Actions API when refreshed. Select develop
-  or master to inspect the latest branch commit. A result from an older commit
-  is identified explicitly. GitHub remains the source of job logs, artifacts
-  and generated reports.
+  CI status and reports for develop and master.
 
   @section ci-status Current status
 
-  Status loads in the browser. JavaScript and access to api.github.com are
-  required. <a href="https://github.com/cbritopacheco/rodin/actions">Open GitHub Actions</a>.
-
-  Refresh is manual to limit public API requests. GitHub's unauthenticated API
-  rate limit may temporarily prevent updates; the direct workflow links remain
-  usable. No credentials are stored in this page.
 */
