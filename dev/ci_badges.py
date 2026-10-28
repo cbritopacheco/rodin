@@ -22,7 +22,7 @@ def state(status, conclusion):
 
 def badge(label, status, commit):
     return {'schemaVersion': 1, 'label': label, 'message': status.replace('_', ' '),
-            'color': COLORS[status], 'labelColor': '30363d', 'style': 'flat', 'commit': commit}
+            'color': COLORS[status], 'labelColor': '555', 'style': 'flat', 'commit': commit}
 
 
 class Publisher:
@@ -65,31 +65,78 @@ class Publisher:
                                   {'message': 'Initialize CI badge data', 'tree': tree['sha'], 'parents': []})
             self.request(self.prefix + '/git/refs', 'POST', {'ref': 'refs/heads/ci-badges', 'sha': commit['sha']})
 
+    def jobs(self, run):
+        key = run['id']
+        if key not in self.job_cache:
+            result, page = [], 1
+            try:
+                while True:
+                    rows = self.request(f"{self.prefix}/actions/runs/{key}/jobs?filter=latest&per_page=100&page={page}")['jobs']
+                    result.extend(rows)
+                    if len(rows) < 100:
+                        break
+                    page += 1
+                self.job_cache[key] = result
+            except subprocess.CalledProcessError:
+                self.job_cache[key] = self.checks(run)
+                if self.job_cache[key] is None:
+                    print('Job lookup unavailable; publishing unknown for affected unfinished statuses.')
+        return self.job_cache[key]
+
+    def checks(self, run):
+        # Large matrix runs can fail the REST job-list endpoint. Check results
+        # provide an independent read path for status and publication names.
+        if not run.get('check_suite_node_id'):
+            return None
+        latest, cursor = {}, None
+        query = ('query($suite:ID!,$cursor:String){node(id:$suite){... on CheckSuite{'
+                 'checkRuns(first:100,after:$cursor){nodes{databaseId name status conclusion}'
+                 'pageInfo{hasNextPage endCursor}}}}}')
+        try:
+            while True:
+                response = self.request('graphql', 'POST', {'query': query, 'variables':
+                                        {'suite': run['check_suite_node_id'], 'cursor': cursor}})
+                page = response['data']['node']['checkRuns']
+                for job in page['nodes']:
+                    if job['name'] not in latest or job['databaseId'] > latest[job['name']]['databaseId']:
+                        latest[job['name']] = job
+                if not page['pageInfo']['hasNextPage']:
+                    break
+                cursor = page['pageInfo']['endCursor']
+            return [dict(name=j['name'], status=j['status'].lower(),
+                         conclusion=(j['conclusion'] or '').lower()) for j in latest.values()]
+        except (subprocess.CalledProcessError, KeyError, TypeError):
+            return None
+
     def collect(self, sha, documentation=None, source_run=None, source_sha=None):
         result = {}
+        self.job_cache = {}
         benchmark_run = None
         for label, file in WORKFLOWS.items():
             runs = self.request(f'{self.prefix}/actions/workflows/{file}/runs?branch={self.branch}&event=push&per_page=1')['workflow_runs']
             run = runs[0] if runs else None
             status = state(run['status'], run.get('conclusion')) if run and run['head_sha'] == sha else 'unknown'
+            if run and run['head_sha'] == sha and run['status'] != 'completed':
+                jobs = self.jobs(run)
+                if jobs is None:
+                    status = 'unknown'
+                elif any(j['status'] == 'in_progress' for j in jobs):
+                    status = 'running'
+                elif any(j['status'] in {'queued', 'waiting', 'pending', 'requested'} for j in jobs):
+                    status = 'queued'
             result[label] = badge(label, status, sha)
             if label == 'Benchmarks':
                 benchmark_run = run if run and run['head_sha'] == sha else None
         doc_status = 'unknown'
         if benchmark_run:
             # Documentation publication is independent of the long benchmark campaign.
-            page = 1
-            while True:
-                jobs = self.request(f"{self.prefix}/actions/runs/{benchmark_run['id']}/jobs?filter=latest&per_page=100&page={page}")['jobs']
+            jobs = self.jobs(benchmark_run)
+            if jobs is not None:
                 found = next((j for j in jobs if j['name'] == 'Publish documentation'), None)
                 if found:
                     doc_status = state(found['status'], found.get('conclusion'))
-                    break
-                if len(jobs) < 100:
-                    if benchmark_run['status'] != 'completed':
-                        doc_status = 'queued'
-                    break
-                page += 1
+                elif benchmark_run['status'] != 'completed':
+                    doc_status = 'queued'
             # A publication step can report deployment immediately, before its
             # enclosing job or benchmark campaign has completed.
             if (documentation in {'success', 'failure'}

@@ -588,7 +588,10 @@ It never redeploys Pages or changes source branches. The README uses these
 endpoints for Build, Tests, Benchmarks and Documentation; Codecov is unchanged.
 
 Success is green; failure/timeout red; queued blue; running amber; cancelled and
-skipped orange; unknown grey. Older-commit results are unknown for the new head.
+skipped orange; unknown grey. For unfinished workflows, active matrix jobs take
+precedence over a queued parent status. Waiting jobs with no active job show
+queued. If the job-list endpoint fails, the publisher reads check results and
+discards older attempts. If both read paths fail, the badge shows unknown. Older-commit results are unknown for the new head.
 Publishers serialize through `rodin-ci-badges`, reread live state rather than
 trusting event order, and recheck the source head before each file update.
 

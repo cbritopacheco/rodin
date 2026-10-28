@@ -74,8 +74,9 @@
         row.insertCell().append(report ? link('Open report', report.html_url) : link('Summary', run?.html_url));
       }
       const actionsLink = document.createElement('p');
+      actionsLink.style.textAlign = 'center';
       actionsLink.append(link('Open GitHub Actions', actions));
-      output.append(actionsLink, table);
+      output.append(table, actionsLink);
     } catch (error) {
       status.textContent = 'CI status is currently unavailable. Open a workflow below to check its status.';
       for (const name of workflows) {

@@ -1,6 +1,7 @@
 """API conclusions, current-commit isolation and badge publication contracts."""
 import base64
 import json
+import subprocess
 import unittest
 
 from ci_badges import Publisher, badge, state
@@ -59,6 +60,18 @@ class BadgeTest(unittest.TestCase):
         self.assertEqual(publisher.collect('abc', 'success', '11', 'abc')['Documentation']['message'], 'unknown')
         self.assertEqual(publisher.collect('abc', 'success', '10', 'old')['Documentation']['message'], 'unknown')
 
+    def test_unavailable_documentation_lookup_keeps_other_results(self):
+        publisher, _ = self.fixture()
+        original = publisher.request
+        def unavailable(path, *args):
+            if '/jobs?' in path:
+                raise subprocess.CalledProcessError(1, ['gh'], stderr='HTTP 502')
+            return original(path, *args)
+        publisher.request = unavailable
+        records = publisher.collect('abc')
+        self.assertEqual(records['Documentation']['message'], 'unknown')
+        self.assertEqual(records['Build']['message'], 'cancelled')
+
     def test_only_badge_branch_files_are_written(self):
         publisher, calls = self.fixture()
         publisher.publish()
@@ -76,6 +89,50 @@ class BadgeTest(unittest.TestCase):
         publisher.head = lambda: next(heads)
         publisher.publish()
         self.assertFalse(any(method == 'PUT' for _, method, _ in calls))
+
+    def test_active_matrix_job_overrides_queued_parent_across_pages(self):
+        publisher, _ = self.fixture()
+        original = publisher.request
+        def running(path, *args):
+            if '/actions/workflows/' in path:
+                return {'workflow_runs': [dict(id=10, head_sha='abc', status='queued', conclusion=None)]}
+            if '/jobs?' in path:
+                if 'page=2' in path:
+                    return {'jobs': [dict(name='Execution', status='in_progress', conclusion=None)]}
+                return {'jobs': [dict(name='Build', status='completed', conclusion='success')] * 100}
+            return original(path, *args)
+        publisher.request = running
+        records = publisher.collect('abc')
+        self.assertEqual(records['Tests']['message'], 'running')
+        self.assertEqual(records['Tests']['color'], 'd49b16')
+
+    def test_waiting_job_without_active_jobs_is_queued(self):
+        publisher, _ = self.fixture()
+        original = publisher.request
+        def queued(path, *args):
+            if '/actions/workflows/' in path:
+                return {'workflow_runs': [dict(id=10, head_sha='abc', status='in_progress', conclusion=None)]}
+            if '/jobs?' in path:
+                return {'jobs': [dict(name='Next', status='queued', conclusion=None)]}
+            return original(path, *args)
+        publisher.request = queued
+        self.assertEqual(publisher.collect('abc')['Tests']['message'], 'queued')
+
+    def test_check_fallback_discards_old_attempts_and_preserves_active_jobs(self):
+        publisher, _ = self.fixture()
+        def checks(path, method, data):
+            self.assertEqual(path, 'graphql')
+            self.assertEqual(method, 'POST')
+            return {'data': {'node': {'checkRuns': {'nodes': [
+                dict(databaseId=1, name='Retried', status='IN_PROGRESS', conclusion=None),
+                dict(databaseId=2, name='Retried', status='COMPLETED', conclusion='SUCCESS'),
+                dict(databaseId=3, name='Active', status='IN_PROGRESS', conclusion=None)],
+                'pageInfo': {'hasNextPage': False}}}}}
+        publisher.request = checks
+        jobs = publisher.checks({'check_suite_node_id': 'suite'})
+        self.assertEqual(len(jobs), 2)
+        self.assertEqual(next(j for j in jobs if j['name'] == 'Retried')['status'], 'completed')
+        self.assertEqual(next(j for j in jobs if j['name'] == 'Active')['status'], 'in_progress')
 
     def test_non_branch_inputs_are_rejected(self):
         with self.assertRaises(ValueError):

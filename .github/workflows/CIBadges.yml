@@ -25,6 +25,7 @@ on:
 permissions:
   contents: write
   actions: read
+  checks: read
 concurrency:
   group: rodin-ci-badges
   cancel-in-progress: false
