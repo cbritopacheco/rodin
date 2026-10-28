@@ -28,7 +28,7 @@ FINE_PRINT = '''<div class="rodin-site-footer">
     {doxygen_version} and
     <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
   </p>
-  <a class="rodin-ci-link" href="ci-index.html" aria-label="Continuous integration" title="Continuous integration"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
 </div>'''
 
 # The documentation builder augments this lexer filter with declared C++ types
