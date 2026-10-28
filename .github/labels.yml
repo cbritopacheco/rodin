@@ -1,0 +1,163 @@
+# Canonical GitHub label metadata; path matching lives in labeler.yml.
+# Blue: core and numerical modules. Green: models and adaptation.
+# Amber: external backends. Slate blue: documentation and data interfaces.
+# Teal: validation. Purple: tooling. Red: defects. Grey: disposition.
+core:
+  color: 4C78A8
+  description: Core library types, root headers and shared infrastructure.
+alerts:
+  color: 4C78A8
+  description: Contextual exceptions, diagnostics and error reporting.
+context:
+  color: 4C78A8
+  description: Execution contexts for local and distributed computations.
+form-language:
+  color: 4C78A8
+  description: Typed expressions and composition of variational forms.
+math:
+  color: 4C78A8
+  description: Dense and sparse algebra, spatial types and mathematical utilities.
+qf:
+  color: 4C78A8
+  description: Reference quadrature formulas, rule selection and exactness.
+utility:
+  color: 4C78A8
+  description: Generic programming helpers, traits and type utilities.
+variational:
+  color: 4C78A8
+  description: Finite element spaces, fields, weak forms and variational problems.
+assembly:
+  color: 4C78A8
+  description: Construction of discrete matrices and vectors from variational forms.
+solver:
+  color: 4C78A8
+  description: Linear and nonlinear solvers, preconditioners and convergence controls.
+geometry:
+  color: 4C78A8
+  description: Meshes, topology, geometric mappings and geometric operations.
+location:
+  color: 4C78A8
+  description: Spatial indexing, bounding volumes and geometric point location.
+adaptation:
+  color: 5B8C5A
+  description: Mesh adaptation, deformation and shape optimization.
+advection:
+  color: 5B8C5A
+  description: Transport of fields and characteristic tracing.
+distance:
+  color: 5B8C5A
+  description: Distance fields and level-set distance computations.
+eikonal:
+  color: 5B8C5A
+  description: Eikonal equations, fast marching and distance propagation.
+heart:
+  color: 5B8C5A
+  description: Cardiac models and coupled state evolution.
+hilbert:
+  color: 5B8C5A
+  description: Hilbert-space formulations, gradients and regularization.
+solid:
+  color: 5B8C5A
+  description: Constitutive laws, kinematics and solid-mechanics formulations.
+linear-elasticity:
+  color: 5B8C5A
+  description: Linear-elasticity models, formulations and validation cases.
+mfem:
+  color: B8863B
+  description: MFEM interoperability and external mesh or finite-element data.
+mmg:
+  color: B8863B
+  description: MMG integration for mesh adaptation, optimization and remeshing.
+mpi:
+  color: B8863B
+  description: Distributed meshes, spaces, communication and MPI execution.
+petsc:
+  color: B8863B
+  description: PETSc-backed algebra, assembly, solvers and distributed computations.
+scotch:
+  color: B8863B
+  description: Scotch integration for graph and mesh partitioning.
+io:
+  color: 6686A3
+  description: Reading and writing meshes, fields and visualization data.
+serialization:
+  color: 6686A3
+  description: Serialization, reconstruction and persistence of library objects.
+docs:
+  color: 6686A3
+  description: Documentation, guides, API references and citation information.
+examples:
+  color: 6686A3
+  description: Example applications, tutorials and their input resources.
+unit-tests:
+  color: 39879A
+  description: Unit tests for individual library components and contracts.
+manufactured-tests:
+  color: 39879A
+  description: Manufactured-solution tests of numerical correctness.
+convergence:
+  color: 39879A
+  description: Mesh and degree refinement studies and convergence-rate tests.
+installation:
+  color: 39879A
+  description: Installation, exported targets and downstream package-consumption tests.
+nafems:
+  color: 39879A
+  description: NAFEMS reference problems and engineering validation benchmarks.
+benchmarks:
+  color: 39879A
+  description: Performance benchmarks, measurements and benchmark reporting.
+test:
+  color: 39879A
+  description: Library-side helpers for constructing and checking numerical tests.
+ci:
+  color: 8064A2
+  description: GitHub Actions workflows, shared actions and coverage infrastructure.
+cmake:
+  color: 8064A2
+  description: CMake configuration, build targets and package discovery.
+developer-tooling:
+  color: 8064A2
+  description: Developer scripts, formatting, static checks and agent guidance.
+dependencies:
+  color: 8064A2
+  description: Third-party libraries, submodules and dependency updates.
+python:
+  color: 8064A2
+  description: Python bindings, interfaces and supporting Python package code.
+resources:
+  color: 8064A2
+  description: Mesh files, datasets and other non-code resources.
+codex:
+  color: 8064A2
+  description: Changes or work associated with the Codex coding agent.
+bug:
+  color: C45B62
+  description: Incorrect behavior or a defect requiring a fix.
+hotfix:
+  color: C45B62
+  description: An urgent repair for a confirmed defect.
+enhancement:
+  color: 4A8B72
+  description: A new capability or improvement to existing functionality.
+good first issue:
+  color: 6A9B70
+  description: A scoped contribution suitable for a newcomer.
+help wanted:
+  color: 6A9B70
+  description: Contributions or additional maintainer attention are welcome.
+question:
+  color: 9A79B1
+  description: A question or a request for clarification.
+wip:
+  color: C49A45
+  description: Work in progress; not yet ready for final review or integration.
+duplicate:
+  color: 8A9199
+  description: Already tracked by another issue or pull request.
+invalid:
+  color: 8A9199
+  description: Reported behavior or request does not apply as stated.
+wontfix:
+  color: 8A9199
+  description: Reviewed and intentionally not planned for implementation.

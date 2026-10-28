@@ -27,6 +27,36 @@ MODULES = {
 }
 
 
+class LabelCatalogTest(unittest.TestCase):
+    def test_every_labeler_rule_has_documented_catalog_metadata(self):
+        rules = yaml.safe_load((ROOT / '.github/labeler.yml').read_text())
+        catalog = yaml.safe_load((ROOT / '.github/labels.yml').read_text())
+        self.assertLessEqual(set(rules), set(catalog))
+        for name, metadata in catalog.items():
+            with self.subTest(label=name):
+                self.assertEqual(set(metadata), {'color', 'description'})
+                self.assertRegex(metadata['color'], r'^[0-9A-Fa-f]{6}$')
+                self.assertTrue(metadata['description'].strip())
+                self.assertLessEqual(len(metadata['description']), 100)
+                self.assertLessEqual(len(name), 50)
+        for name in ['convergence', 'installation', 'nafems']:
+            self.assertIn(name, rules)
+            self.assertNotIn(name + '-tests', rules)
+            self.assertNotIn(name + '-tests', catalog)
+
+    def test_related_labels_share_their_palette(self):
+        catalog = yaml.safe_load((ROOT / '.github/labels.yml').read_text())
+        for group in [
+                ['core', 'geometry', 'location', 'math', 'variational', 'assembly', 'solver'],
+                ['adaptation', 'advection', 'distance', 'eikonal', 'heart', 'hilbert', 'solid'],
+                ['mfem', 'mmg', 'mpi', 'petsc', 'scotch'],
+                ['unit-tests', 'manufactured-tests', 'convergence', 'installation', 'nafems', 'benchmarks'],
+                ['ci', 'cmake', 'developer-tooling', 'dependencies', 'python', 'resources'],
+                ['bug', 'hotfix']]:
+            with self.subTest(group=group):
+                self.assertEqual(len({catalog[name]['color'] for name in group}), 1)
+
+
 class LabelerTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -163,11 +193,11 @@ class LabelerTest(unittest.TestCase):
 
     def test_convergence_physics_and_backend_paths(self):
         cases = {
-            'tests/convergence/h/PETScMPIPoisson/Only.cpp': {'convergence-tests', 'petsc', 'mpi', 'variational'},
+            'tests/convergence/h/PETScMPIPoisson/Only.cpp': {'convergence', 'petsc', 'mpi', 'variational'},
             'tests/convergence/hp/PETScLinearElasticity/Only.cpp':
-                {'convergence-tests', 'petsc', 'solid', 'linear-elasticity', 'variational'},
+                {'convergence', 'petsc', 'solid', 'linear-elasticity', 'variational'},
             'tests/convergence/isoparametric/GeometryApproximation/Only.cpp':
-                {'convergence-tests', 'geometry', 'variational'},
+                {'convergence', 'geometry', 'variational'},
         }
         for path, expected in cases.items():
             with self.subTest(path=path):
@@ -183,7 +213,7 @@ class LabelerTest(unittest.TestCase):
     def test_documentation_matches_root_nested_and_dot_directories(self):
         for path, expected in {
             'README.md': {'docs'}, '.github/workflows/README.md': {'docs', 'ci'},
-            'tests/convergence/README.md': {'docs', 'convergence-tests', 'variational'},
+            'tests/convergence/README.md': {'docs', 'convergence', 'variational'},
             'examples/Geometry/README.md': {'docs', 'examples'},
         }.items():
             with self.subTest(path=path):
@@ -192,12 +222,13 @@ class LabelerTest(unittest.TestCase):
     def test_infrastructure_categories(self):
         cases = {
             '.github/workflows/Tests.yml': {'ci'}, 'codecov.yml': {'ci'},
+            '.github/labels.yml': {'ci'},
             'dev/check_something.py': {'developer-tooling'},
             'src/Rodin/Math/CMakeLists.txt': {'cmake', 'math'},
             'tests/unit/Rodin/Geometry/CMakeLists.txt': {'cmake', 'geometry', 'unit-tests'},
             'tests/cmake/ThirdPartyIsolation/Only.cmake': {'cmake'},
-            'tests/installation/Only.cpp': {'installation-tests'},
-            'tests/nafems/cases/Only.cpp': {'nafems-tests'},
+            'tests/installation/Only.cpp': {'installation'},
+            'tests/nafems/cases/Only.cpp': {'nafems'},
             'py/Rodin/Only.cpp': {'python'}, 'resources/Only.mesh': {'resources'},
             'third-party/mmg/Only.h': {'dependencies', 'mmg'},
         }
