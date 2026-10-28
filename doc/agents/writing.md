@@ -70,6 +70,11 @@ such unless the evidence establishes causation.
 
 ## Pull request descriptions
 
+PR equations must use macros supported by the target Markdown math renderer.
+Do not use `\operatorname`; use `\mathrm{Div}`, `\mathrm{cof}`, or the
+corresponding upright notation instead. Avoid custom macros and unverified
+LaTeX commands, and check the rendered equations after updating the PR.
+
 Present what the pull request adds, rather than reporting the local development
 session. Use concise, explanatory, problem-driven mathematical prose:
 
