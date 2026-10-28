@@ -14,7 +14,7 @@ $$
 
 The volume average of $c$ measures the remaining fraction of the initial bolus.
 Coagulation species use the reaction and wall-source terms defined by the
-[thrombosis model](../CoronaryArtery/ThrombosisModel.h). Species transport does
+[thrombosis model](../../CoronaryArtery/ThrombosisModel.h). Species transport does
 not alter the flow or deform the wall.
 
 Requires `RODIN_USE_PETSC=ON`; MPI is not required.
@@ -26,7 +26,7 @@ From the repository root, using a configured build tree:
 ```sh
 cmake --build build --target EctaticTubeThrombosis -j4
 cd build
-./examples/Heart/EctaticTubeThrombosis/EctaticTubeThrombosis
+./examples/Heart/Thrombosis/EctaticTube/EctaticTubeThrombosis
 ```
 
 Run from the build root so the default relative resource paths resolve.
@@ -38,7 +38,7 @@ resources with `git lfs pull` before running.
 The default mesh is `resources/examples/Heart/EctaticTubeThrombosis.mesh`. Generate it from the repository root with:
 
 ```sh
-python3 examples/Heart/EctaticTubeThrombosis/make_test_mesh.py resources/examples/Heart/EctaticTubeThrombosis.mesh
+python3 examples/Heart/Thrombosis/EctaticTube/make_test_mesh.py resources/examples/Heart/EctaticTubeThrombosis.mesh
 ```
 
 The mesh can be selected with `-pt_mesh`. The `-pt_flow_cycles` option controls
