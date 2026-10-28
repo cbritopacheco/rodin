@@ -235,6 +235,23 @@ namespace Rodin::Solver
       static PetscErrorCode Residual(::SNES snes, ::Vec x, ::Vec f, void* ctx);
       static PetscErrorCode Jacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
 
+      /// Identity of the iterate a cache entry was built from. PETSc object
+      /// states are per-object counters: SNES evaluates the residual at the
+      /// line-search vector W and the Jacobian at X, whose states can coincide
+      /// with different contents, so the object id is part of the key.
+      struct Stamp
+      {
+        ::PetscObjectId id;
+        ::PetscObjectState state;
+
+        bool operator==(const Stamp& other) const
+        {
+          return id == other.id && state == other.state;
+        }
+      };
+
+      static PetscErrorCode GetStamp(::Vec x, Stamp& stamp);
+
     private:
       HandleType m_snes;   ///< Underlying PETSc SNES context.
       ::SNESType m_type;   ///< Requested SNES algorithm type.
@@ -244,9 +261,9 @@ namespace Rodin::Solver
       ::PetscInt m_maxIt, ///< Maximum nonlinear iterations.
         m_maxF; ///< Maximum function evaluations.
       StateUpdate m_update; ///< Optional state synchronization callback.
-      Optional<::PetscObjectState> m_lhsAssembled;
-      Optional<::PetscObjectState> m_rhsAssembled;
-      Optional<::PetscObjectState> m_updated;
+      Optional<Stamp> m_lhsAssembled;
+      Optional<Stamp> m_rhsAssembled;
+      Optional<Stamp> m_updated;
   };
 }
 

@@ -127,13 +127,26 @@ namespace Rodin::Solver
     return reason > 0;
   }
 
+  PetscErrorCode SNES::GetStamp(::Vec x, Stamp& stamp)
+  {
+    PetscErrorCode ierr = PetscObjectGetId(reinterpret_cast<::PetscObject>(x), &stamp.id);
+    if (ierr)
+      return ierr;
+#if PETSC_VERSION_GE(3, 20, 0)
+    return VecGetState(x, &stamp.state);
+#else
+    stamp.state = 0;
+    return PETSC_SUCCESS;
+#endif
+  }
+
   PetscErrorCode SNES::Update(::Vec x, void* ctx)
   {
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
 #if PETSC_VERSION_GE(3, 20, 0)
-    PetscObjectState state;
-    PetscErrorCode ierr = VecGetState(x, &state);
+    Stamp state;
+    PetscErrorCode ierr = GetStamp(x, state);
     if (ierr)
       return ierr;
     if (self->m_updated && *self->m_updated == state)
@@ -159,8 +172,8 @@ namespace Rodin::Solver
     if (ierr)
       return ierr;
 #if PETSC_VERSION_GE(3, 20, 0)
-    PetscObjectState state;
-    ierr = VecGetState(x, &state);
+    Stamp state;
+    ierr = GetStamp(x, state);
     if (ierr)
       return ierr;
 
