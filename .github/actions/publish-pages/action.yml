@@ -1,4 +1,4 @@
-name: Publish Pages snapshot
+name: Publish documentation and benchmarks
 description: Deploy the locked gh-pages checkout without queuing a second runner.
 inputs:
   checkout:

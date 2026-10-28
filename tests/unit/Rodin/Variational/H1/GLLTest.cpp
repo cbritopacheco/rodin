@@ -15,6 +15,21 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  namespace
+  {
+    // Snapshot during dynamic initialization, before any test body runs.
+    const auto InitialQuadraticNodes = GLL01<2>::getNodes();
+  }
+
+  /// @brief Mapped nodes are valid even when first requested before main.
+  TEST(GLL01, InitializationBeforeMain)
+  {
+    EXPECT_EQ(InitialQuadraticNodes[0], 0);
+    EXPECT_EQ(InitialQuadraticNodes[1], Real(0.5));
+    EXPECT_EQ(InitialQuadraticNodes[2], 1);
+    EXPECT_EQ(InitialQuadraticNodes, GLL01<2>::getNodes());
+  }
+
   //==========================================================================
   // GLL Node Count Tests
   //==========================================================================

@@ -104,13 +104,13 @@ class BuildGraphPlanTest(unittest.TestCase):
         # Reviewed execution partition snapshot: numerical registrations and MPI
         # ranks are independently checked by test_ci_backend_registration.py.
         for value, digest in [(ordinary, '009a23d4c5fc380bcca406302cfb7062208a2b14f3526f2ce6078cde95005c54'),
-                              (targeted, 'b7f67cd76ea3c97eb5f7ea1a6525d094b1293c3f95e0e5050ed7c5f7166dc90f')]:
+                              (targeted, '53e09f3c2a124de8430bba7f43f8f411e9ccddf47b5fe53a93d5cb610359cbd4')]:
             self.assertEqual(hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest(), digest)
         rows = graph.prepare(ordinary, targeted)
         self.assertEqual(len(rows), 46)
         requests = [r for row in rows for r in row['requests']]
-        self.assertEqual(len(requests), 1354)
-        self.assertEqual(len({graph.request_key(**r) for r in requests}), 1354)
+        self.assertEqual(len(requests), 1355)
+        self.assertEqual(len({graph.request_key(**r) for r in requests}), 1355)
         for row in rows:
             for request in row['requests']:
                 original = graph.specification(**request)
@@ -185,7 +185,7 @@ class BuildGraphPlanTest(unittest.TestCase):
             snapshot[name]['execution'] = [s for s in job['steps'] if s.get('name', '').startswith(
                 ('Run ', 'Discover ', 'Record native MPI CPU', 'Hydrate '))]
         digest = hashlib.sha256(json.dumps(snapshot, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
-        self.assertEqual(digest, '3fce779995376f36c30a94b0e5359e33a2612a3a8db047f86ca725ac0cb9606c')
+        self.assertEqual(digest, 'acea0bc3514459eb981d2b1ca415e6d512f9d2c52c1fb431f81aaeb7e17c78dd')
 
 
 class BuildGraphExecutionTest(unittest.TestCase):

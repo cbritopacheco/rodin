@@ -23,15 +23,15 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Compile-time Gauss–Lobatto–Legendre (GLL) nodes on [-1, 1].
+   * @brief Gauss–Lobatto–Legendre (GLL) nodes on [-1, 1].
    *
    * This class provides the @f$ K+1 @f$ GLL nodes associated with the
    * Legendre polynomial degree @f$ K @f$. The nodes consist of the endpoints
    * @f$ \{-1, 1\} @f$ and the interior zeros of @f$ (1 - x^2) P'_K(x) @f$.
    *
-   * The nodes are computed once at compile time (subject to compiler support
-   * for `constexpr` floating-point operations) using a Newton iteration with
-   * Chebyshev initial guesses, and cached in a static `constexpr` array.
+   * The nodes are computed once on first use with a Newton iteration and
+   * Chebyshev initial guesses. Function-local static storage makes initialization
+   * thread-safe and independent of translation-unit initialization order.
    *
    * @tparam K Polynomial degree.
    * @tparam Tolerance Newton stopping tolerance (compile-time constant).
@@ -58,18 +58,19 @@ namespace Rodin::Variational
        * @param i Index of the requested entry.
        * @returns The node.
        */
-      static constexpr Real getNode(size_t i)
+      static Real getNode(size_t i)
       {
-        return s_nodes[i];
+        return getNodes()[i];
       }
 
       /**
        * Full array of GLL nodes in ascending order.
        * @returns The nodes.
        */
-      static constexpr const std::array<Real, K + 1>& getNodes()
+      static const std::array<Real, K + 1>& getNodes()
       {
-        return s_nodes;
+        static const std::array<Real, K + 1> nodes = compute();
+        return nodes;
       }
 
     private:
@@ -157,10 +158,6 @@ namespace Rodin::Variational
 
         return nodes;
       }
-
-      // Keep initialization consistent across translation units and avoid
-      // imposing a constant-evaluation limit on higher orders.
-      inline static const std::array<Real, K + 1> s_nodes = compute();
   };
 
   /**
@@ -193,18 +190,19 @@ namespace Rodin::Variational
        * @param i Index of the requested entry.
        * @returns The node.
        */
-      static constexpr Real getNode(size_t i)
+      static Real getNode(size_t i)
       {
-        return s_nodes[i];
+        return getNodes()[i];
       }
 
       /**
        * Full array of mapped GLL nodes in ascending order.
        * @returns The nodes.
        */
-      static constexpr const std::array<Real, K + 1>& getNodes()
+      static const std::array<Real, K + 1>& getNodes()
       {
-        return s_nodes;
+        static const std::array<Real, K + 1> nodes = compute();
+        return nodes;
       }
 
     private:
@@ -226,9 +224,6 @@ namespace Rodin::Variational
 
         return nodes;
       }
-
-      // GLL<K> is initialized at runtime, so map its nodes at runtime too.
-      inline static const std::array<Real, K + 1> s_nodes = compute();
   };
 }
 

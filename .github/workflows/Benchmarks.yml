@@ -88,7 +88,7 @@ jobs:
       pages: write
       id-token: write
     environment:
-      name: github-pages
+      name: Documentation and benchmarks
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
@@ -123,14 +123,14 @@ jobs:
             git commit -m "Publish documentation $SHA"
             git push origin HEAD:gh-pages
           fi
-      - name: Deploy and verify the published Pages snapshot
+      - name: Publish documentation and benchmarks
         id: deployment
         uses: ./.github/actions/publish-pages
         with:
           checkout: .ci-pages
           artifact-name: documentation-pages
   Publish:
-    name: Publish complete benchmark histories
+    name: Publish documentation and benchmarks
     needs: [PublishDocumentation, Pool]
     if: always()
     runs-on: ubuntu-24.04
@@ -142,7 +142,7 @@ jobs:
       pages: write
       id-token: write
     environment:
-      name: github-pages
+      name: Documentation and benchmarks
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Require published documentation and complete benchmark results
@@ -183,7 +183,7 @@ jobs:
             git commit -m "Publish complete benchmark campaign $SHA"
             git push origin HEAD:gh-pages
           fi
-      - name: Deploy and verify the published Pages snapshot
+      - name: Publish documentation and benchmarks
         id: deployment
         uses: ./.github/actions/publish-pages
         with:

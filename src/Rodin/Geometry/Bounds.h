@@ -90,6 +90,12 @@ namespace Rodin::Geometry
       }
 
     private:
+      /**
+       * @brief Returns an outward-rounded support bound in a non-axis direction.
+       * @param direction Physical direction, not necessarily normalized.
+       * @param length Sum of absolute direction components.
+       * @returns An upper support bound, or infinity if it cannot be certified.
+       */
       Real getDirectionalSupport(
         const Math::SpatialVector<Real>& direction, Real length) const;
 
