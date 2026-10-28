@@ -42,7 +42,7 @@ TEST(MeshGeometry, CopyPreservesCurvature)
     return copied;
   }();
   const auto cell = mesh.getCell();
-  EXPECT_EQ(cell->getTransformation().getOrder(), 2u);
+  EXPECT_EQ(cell->getTransformation().getDegree(), 2u);
   const Point point(*cell, Math::SpatialPoint{0.5, 0});
   EXPECT_NEAR(point.x(), 0.5, 1e-14);
   EXPECT_NEAR(point.y(), 0.1, 1e-14);

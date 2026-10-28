@@ -33,7 +33,7 @@
 #include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Variational/ForwardDecls.h"
-#include "Rodin/Variational/FiniteElement.h"
+#include "Rodin/Variational/LagrangeFiniteElement.h"
 #include "Rodin/Variational/ReferenceTabulationCache.h"
 
 #include "ForwardDecls.h"
@@ -89,7 +89,7 @@ namespace Rodin::Variational
    * @see @ref P1ElementSpecializations "P1Element Template Specializations"
    */
   template <class Scalar>
-  class P1Element final : public FiniteElementBase<P1Element<Scalar>>
+  class P1Element final : public LagrangeFiniteElementBase<P1Element<Scalar>>
   {
     using G = Geometry::Polytope::Type;
 
@@ -97,7 +97,7 @@ namespace Rodin::Variational
       friend class boost::serialization::access;
 
       /// Parent class
-      using Parent = FiniteElementBase<P1Element<Scalar>>;
+      using Parent = LagrangeFiniteElementBase<P1Element<Scalar>>;
 
       /// @brief Scalar value type.
       using ScalarType = Scalar;
@@ -978,10 +978,10 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the polynomial order.
-       * @returns Polynomial order of the finite element.
+       * @brief Returns a total polynomial degree bound for the reference basis.
+       * @returns A total degree bound, or no polynomial bound for rational pyramids.
        */
-      size_t getOrder() const
+      constexpr Optional<size_t> getDegree() const
       {
         switch (this->getGeometry())
         {
@@ -993,8 +993,9 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
-          case Geometry::Polytope::Type::Pyramid:
             return 2;
+          case Geometry::Polytope::Type::Pyramid:
+            return std::nullopt;
           case Geometry::Polytope::Type::Hexahedron:
             return 3;
         }
@@ -1003,12 +1004,22 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Degree of each simplex, tensor, or collapsed-coordinate factor.
-       * @returns The factor order.
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
        */
-      constexpr size_t getFactorOrder() const
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        return this->getGeometry() == Geometry::Polytope::Type::Point ? 0 : 1;
+        return this->getLagrangeDegree(1, directions);
+      }
+
+      /**
+       * @brief Returns the finite-element family index.
+       * @returns The family index, independently of the reference geometry.
+       */
+      constexpr size_t getOrder() const
+      {
+        return 1;
       }
 
       /**
@@ -1020,7 +1031,7 @@ namespace Rodin::Variational
       template <class Archive>
       void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
-        ar& boost::serialization::base_object<Parent>(*this);
+        ar& boost::serialization::base_object<typename Parent::Parent>(*this);
       }
   };
 
@@ -1042,7 +1053,7 @@ namespace Rodin::Variational
    */
   template <class Scalar>
   class P1Element<Math::SpatialVector<Scalar>> final
-    : public FiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>
+    : public LagrangeFiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>
   {
     using G = Geometry::Polytope::Type;
 
@@ -1050,7 +1061,7 @@ namespace Rodin::Variational
       friend class boost::serialization::access;
 
       /// Parent class
-      using Parent = FiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>;
+      using Parent = LagrangeFiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>;
 
       /// @brief Scalar value type.
       using ScalarType = Scalar;
@@ -1490,10 +1501,10 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the polynomial order.
-       * @returns Polynomial order on the requested polytope, or no value when unavailable.
+       * @brief Returns a total polynomial degree bound for the reference basis.
+       * @returns A total degree bound, or no polynomial bound for rational pyramids.
        */
-      constexpr size_t getOrder() const
+      constexpr Optional<size_t> getDegree() const
       {
         switch (this->getGeometry())
         {
@@ -1505,8 +1516,9 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
-          case Geometry::Polytope::Type::Pyramid:
             return 2;
+          case Geometry::Polytope::Type::Pyramid:
+            return std::nullopt;
           case Geometry::Polytope::Type::Hexahedron:
             return 3;
         }
@@ -1515,12 +1527,22 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Degree of each simplex, tensor, or collapsed-coordinate factor.
-       * @returns Polynomial degree of each reference-coordinate factor.
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
        */
-      constexpr size_t getFactorOrder() const
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        return this->getGeometry() == Geometry::Polytope::Type::Point ? 0 : 1;
+        return this->getLagrangeDegree(1, directions);
+      }
+
+      /**
+       * @brief Returns the finite-element family index.
+       * @returns The family index, independently of the reference geometry.
+       */
+      constexpr size_t getOrder() const
+      {
+        return 1;
       }
 
       /**
@@ -1532,7 +1554,7 @@ namespace Rodin::Variational
       template <class Archive>
       void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
-        ar& boost::serialization::base_object<Parent>(*this);
+        ar& boost::serialization::base_object<typename Parent::Parent>(*this);
         ar & m_vdim;
         if constexpr (Archive::is_loading::value)
           *this = P1Element(this->getGeometry(), m_vdim);
@@ -1553,7 +1575,7 @@ namespace Rodin::Variational
   /// @brief Matrix-valued reference element built from scalar nodal functionals.
   template <class Scalar>
   class P1Element<Math::SpatialMatrix<Scalar>> final
-    : public FiniteElementBase<P1Element<Math::SpatialMatrix<Scalar>>>
+    : public LagrangeFiniteElementBase<P1Element<Math::SpatialMatrix<Scalar>>>
   {
     public:
       /// @brief Scalar reference element for this family.
@@ -1566,7 +1588,7 @@ namespace Rodin::Variational
       using RangeType = Math::SpatialMatrix<ScalarType>;
 
       /// @brief CRTP or finite element base class.
-      using Parent = FiniteElementBase<P1Element<Math::SpatialMatrix<Scalar>>>;
+      using Parent = LagrangeFiniteElementBase<P1Element<Math::SpatialMatrix<Scalar>>>;
 
       /// @brief Basis type of the underlying scalar element.
       using ScalarBasis = decltype(std::declval<ScalarElement>().getBasis(0));
@@ -1758,7 +1780,26 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the polynomial order when it is known.
-       * @returns Polynomial order on the requested polytope, or no value when unavailable.
+       * @returns A total degree bound, or no polynomial bound for rational pyramids.
+       */
+      constexpr Optional<size_t> getDegree() const
+      {
+        return m_scalar.getDegree();
+      }
+
+      /**
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
+      {
+        return this->getLagrangeDegree(1, directions);
+      }
+
+      /**
+       * @brief Returns the finite-element family index.
+       * @returns The family index, independently of the reference geometry.
        */
       size_t getOrder() const
       {

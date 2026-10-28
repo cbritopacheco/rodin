@@ -312,13 +312,16 @@ namespace Rodin::Tests::Benchmarks
           }
         }
         state.counters["dimension"] = d;
-        state.counters["geometry_order"] = cell.getTransformation().getOrder();
+        const auto geometryDegree = cell.getTransformation().getDegree();
+        state.counters["geometry_degree_known"] = geometryDegree.has_value();
+        if (geometryDegree)
+          state.counters["geometry_degree"] = *geometryDegree;
         state.counters["identity_map"] = IdentityMap;
         const bool affineReference = geometry == Geometry::Polytope::Type::Segment ||
           geometry == Geometry::Polytope::Type::Triangle ||
           geometry == Geometry::Polytope::Type::Tetrahedron;
         state.counters["warm_affine_reuse"] =
-          NativeP1 && affineReference && cell.getTransformation().getOrder() == 1;
+          NativeP1 && affineReference && cell.getTransformation().getDegree() == 1;
         state.counters["cells"] = 1;
         state.counters["degree"] = K;
         state.counters["basis_functions"] = fe.getCount();

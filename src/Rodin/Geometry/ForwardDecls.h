@@ -26,6 +26,8 @@
 
 namespace Rodin::Geometry
 {
+  class Bounds;
+
   /**
    * @brief Template container indexed by polytope geometry types.
    * @tparam T Type of values to store

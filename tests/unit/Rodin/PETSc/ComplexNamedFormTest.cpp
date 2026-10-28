@@ -78,7 +78,10 @@ namespace
     HelmholtzForm helmholtz(coefficient, Real(3), trial, test);
     const auto cell = *space.getMesh().getCell();
     const size_t degree =
-      space.getFiniteElement(cell.getDimension(), cell.getIndex()).getOrder();
+      space.getFiniteElement(cell.getDimension(), cell.getIndex())
+        .getDegree()
+        .value_or(
+          2 * space.getFiniteElement(cell.getDimension(), cell.getIndex()).getOrder());
     auto massIntegral = Integral(coefficient * trial, test);
     massIntegral.setOrder(2 * degree);
     auto diffusionIntegral = Integral(coefficient * Grad(trial), Grad(test));

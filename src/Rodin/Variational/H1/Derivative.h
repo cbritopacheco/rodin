@@ -263,7 +263,16 @@ namespace Rodin::Variational
        */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
-        const size_t k = H1Element<K, ScalarType>(geom.getGeometry()).getOrder();
+        const size_t k =
+          H1Element<K, ScalarType>(geom.getGeometry()).getDegree().value_or(2 * K);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (k == 0) ? 0 : (k - 1);
       }
 

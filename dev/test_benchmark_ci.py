@@ -2,6 +2,7 @@
 import csv
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import subprocess
@@ -183,6 +184,32 @@ class BenchmarkCampaignTest(unittest.TestCase):
         chunks = list(ci.partitions(names, 256))
         self.assertEqual([name for chunk in chunks for name in chunk], names)
         self.assertTrue(all(len(chunk) <= 256 and sum(len(name) + 1 for name in chunk) <= 60000 for chunk in chunks))
+
+    def test_selector_matches_exact_names_with_cpp_extended_regex(self):
+        # Google Benchmark uses std::regex::extended on its GCC CI build.
+        names = ['Integrator/H1P2-P1/GradGrad', 'Kernel/a[b]{c} +#', r'Backslash/\\']
+        others = ['Integrator/H1P2XP1/GradGrad', 'Kernel/ab{c} +#', r'Backslash/X']
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / 'selector.cpp'
+            executable = Path(folder) / 'selector'
+            source.write_text('''#include <regex>
+#include <iostream>
+int main(int argc, char** argv) {
+  try {
+    const std::regex pattern(argv[1], std::regex_constants::extended);
+    for (int i = 2; i < argc; ++i)
+      std::cout << std::regex_match(argv[i], pattern) << "\\n";
+  } catch (const std::regex_error& error) {
+    std::cerr << error.what();
+    return 1;
+  }
+}
+''')
+            subprocess.run([os.environ.get('CXX', 'c++'), '-std=c++17', str(source),
+                            '-o', str(executable)], check=True, capture_output=True)
+            result = subprocess.run([str(executable), ci.selector(names), *names, *others],
+                                    check=True, capture_output=True, text=True)
+            self.assertEqual(result.stdout.splitlines(), ['1'] * len(names) + ['0'] * len(others))
 
 
     def test_common_build_selects_only_the_required_library_closure(self):

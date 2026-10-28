@@ -115,7 +115,7 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
             AssemblyOrder,
             nearly ? Problem::Boundary::Dirichlet : Problem::Boundary::MixedTraction,
             nearly ? NearlyLambda : Lambda, nearly ? NearlyMu : Mu, PCJACOBI);
-          report("assembled");
+          report("problem-configured");
           history.append(Real(1) / Real(n - 1), {problem.solve()});
           report("solved-and-measured");
         }

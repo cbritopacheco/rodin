@@ -8,6 +8,7 @@
 #include <boost/serialization/complex.hpp>
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Variational/H1/H1Element.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;
@@ -146,7 +147,36 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(loaded->getReferenceDimension(), 2);
     EXPECT_EQ(loaded->getPhysicalDimension(), 2);
-    EXPECT_EQ(loaded->getOrder(), 1);
+    EXPECT_EQ(loaded->getDegree(), Optional<size_t>(1));
     EXPECT_NEAR((actual - expected).norm(), 0, RODIN_FUZZY_CONSTANT);
   }
+
+  /// @brief Element archives preserve geometry and component counts through the family base.
+  TEST(Rodin_Serialization_Elements, LagrangeFamilyRoundTrip)
+  {
+    const auto check = [](const auto& original, auto loaded) {
+      std::stringstream stream;
+      {
+        boost::archive::text_oarchive archive(stream);
+        archive << original;
+      }
+      {
+        boost::archive::text_iarchive archive(stream);
+        archive >> loaded;
+      }
+      EXPECT_EQ(loaded.getGeometry(), original.getGeometry());
+      EXPECT_EQ(loaded.getCount(), original.getCount());
+      EXPECT_EQ(loaded.getDegree(), original.getDegree());
+      EXPECT_EQ(loaded.getDegree({0}), original.getDegree({0}));
+    };
+    check(P1Element<Real>(Polytope::Type::Pyramid),
+      P1Element<Real>(Polytope::Type::Triangle));
+    check(P1Element<Math::SpatialVector<Real>>(Polytope::Type::Quadrilateral, 3),
+      P1Element<Math::SpatialVector<Real>>(Polytope::Type::Triangle, 2));
+    check(H1Element<2, Real>(Polytope::Type::Wedge),
+      H1Element<2, Real>(Polytope::Type::Triangle));
+    check(H1Element<3, Math::SpatialVector<Real>>(Polytope::Type::Hexahedron, 2),
+      H1Element<3, Math::SpatialVector<Real>>(Polytope::Type::Triangle, 3));
+  }
+
 }

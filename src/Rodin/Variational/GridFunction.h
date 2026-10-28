@@ -57,6 +57,8 @@
 #include <functional>
 #include <vector>
 #include <variant>
+#include "Rodin/Variational/H1/ForwardDecls.h"
+#include "Rodin/Variational/P1/ForwardDecls.h"
 #include <boost/filesystem.hpp>
 #include <type_traits>
 
@@ -1253,7 +1255,9 @@ namespace Rodin::Variational
        */
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const
       {
-        return static_cast<const Derived&>(*this).getOrder(geom);
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(
+          geom.getDimension(), geom.getIndex());
+        return getElementOrder(fe);
       }
 
       /**
@@ -1280,6 +1284,39 @@ namespace Rodin::Variational
       }
 
     private:
+      /**
+       * @brief Uses a generic element's established polynomial information.
+       * @param element Reference element, with no required family index.
+       * @returns Its degree bound, or no automatic estimate.
+       */
+      template <class Element>
+      static Optional<size_t> getElementOrder(const Element& element)
+      {
+        return element.getDegree();
+      }
+
+      /**
+       * @brief Retains the native P1 rational-pyramid accuracy estimate.
+       * @param element Reference element.
+       * @returns A polynomial bound or the established pyramid estimate.
+       */
+      template <class Range>
+      static Optional<size_t> getElementOrder(const P1Element<Range>& element)
+      {
+        return element.getDegree().value_or(2);
+      }
+
+      /**
+       * @brief Retains the H1 rational-pyramid accuracy estimate.
+       * @param element Reference element of family index K.
+       * @returns A polynomial bound or the established pyramid estimate.
+       */
+      template <size_t K, class Range>
+      static Optional<size_t> getElementOrder(const H1Element<K, Range>& element)
+      {
+        return element.getDegree().value_or(2 * K);
+      }
+
       /**
        * @brief Per-thread cache of the DOFs of the polytope
        * last evaluated.
@@ -1686,18 +1723,6 @@ namespace Rodin::Variational
       constexpr const DataType& getData() const
       {
         return m_data;
-      }
-
-      /**
-       * @brief Returns the polynomial order used on a mesh entity.
-       * @param[in] polytope Entity whose finite element order is requested
-       * @returns Polynomial order when available
-       */
-      constexpr Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
-      {
-        const auto& fes = this->getFiniteElementSpace();
-        return fes.getFiniteElement(polytope.getDimension(), polytope.getIndex())
-          .getOrder();
       }
 
     private:

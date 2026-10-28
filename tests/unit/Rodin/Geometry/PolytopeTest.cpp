@@ -989,7 +989,7 @@ namespace Rodin::Tests::Unit
     const auto& trans = triangle.getTransformation();
 
     // Just verify we can get the transformation
-    EXPECT_GE(trans.getOrder(), 0);
+    EXPECT_GE(trans.getDegree(), 0);
   }
 
   /// @brief Verifies polytope comparison less than for geometry polytope by checking true predicates, false predicates.

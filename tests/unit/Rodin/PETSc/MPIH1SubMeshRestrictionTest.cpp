@@ -342,11 +342,14 @@ namespace Rodin::Tests::Unit
           const auto original = parent.getPolytope(d, ancestor);
           ASSERT_TRUE(original);
           EXPECT_EQ(original->getGeometry(), cell->getGeometry());
-          EXPECT_EQ(cell->getTransformation().getFactorOrder(),
-            original->getTransformation().getFactorOrder());
+          EXPECT_EQ(cell->getTransformation().isFirstOrder(),
+            original->getTransformation().isFirstOrder());
           if (curved && d > 0)
           {
-            EXPECT_EQ(cell->getTransformation().getFactorOrder(), 2u);
+            EXPECT_FALSE(cell->getTransformation().isFirstOrder());
+            EXPECT_NE(dynamic_cast<const ParametricTransformation<RealH1Element<2>>*>(
+                        &cell->getTransformation()),
+              nullptr);
           }
           const IndexArray dofs = targetSpace.getDOFs(d, cell->getIndex());
           for (Index local = 0; local < static_cast<size_t>(dofs.size()); ++local)

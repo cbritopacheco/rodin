@@ -20,8 +20,8 @@
  * @f]
  * where @f$ \phi_i @f$ are P1 basis functions and @f$ u_{i,j} @f$ are DOF values.
  *
- * Since P1 basis gradients are constant on each element, the divergence is
- * also piecewise constant.
+ * On affine simplices, P1 basis gradients and the divergence are constant on
+ * each element. Curved or product cells can have varying physical derivatives.
  */
 
 #include "Rodin/Variational/ForwardDecls.h"
@@ -81,7 +81,7 @@ namespace Rodin::Variational
    * @brief Divergence of a P1 vector GridFunction.
    *
    * Computes @f$ \nabla \cdot \mathbf{u} @f$ for vector-valued P1 functions.
-   * The divergence is piecewise constant on each element:
+   * On affine simplices, the divergence is constant on each element:
    * @f[
    *   (\nabla \cdot \mathbf{u})|_K = \sum_{i=1}^{n_v} \mathbf{u}_i \cdot \nabla \phi_i
    * @f]
@@ -302,7 +302,16 @@ namespace Rodin::Variational
        */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
-        const size_t k = P1Element<ScalarType>(geom.getGeometry()).getOrder();
+        const size_t k =
+          P1Element<ScalarType>(geom.getGeometry()).getDegree().value_or(2);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (k == 0) ? 0 : (k - 1);
       }
 
@@ -377,7 +386,7 @@ namespace Rodin::Variational
           Geometry::Polytope::Type geometry;
 
           /// @brief Order of the geometric transformation.
-          size_t transformationOrder;
+          Optional<size_t> transformationOrder;
 
           /// @brief Vector dimension of the finite element space.
           size_t vectorDimension;
@@ -595,7 +604,7 @@ namespace Rodin::Variational
         m_binding.dimension = polytope.getDimension();
         m_binding.index = polytope.getIndex();
         m_binding.geometry = polytope.getGeometry();
-        m_binding.transformationOrder = polytope.getTransformation().getOrder();
+        m_binding.transformationOrder = polytope.getTransformation().getDegree();
         m_binding.vectorDimension = this->getFiniteElementSpace().getVectorDimension();
         m_binding.valid = true;
         return *this;
@@ -625,7 +634,7 @@ namespace Rodin::Variational
         const auto geom = poly.getGeometry();
 
         const auto& transformation = poly.getTransformation();
-        const size_t transformationOrder = transformation.getOrder();
+        const auto transformationOrder = transformation.getDegree();
         const auto* qf = ip.getReferenceQuadratureFormula();
 
         const auto& fes = this->getFiniteElementSpace();
@@ -657,8 +666,8 @@ namespace Rodin::Variational
           m_cache.div.resize(vdim * nv);
         }
 
-        const bool needsQp = (transformationOrder > 1) || isTensorGeom(geom) ||
-          geom == Geometry::Polytope::Type::Pyramid;
+        const bool needsQp = (!transformationOrder || *transformationOrder > 1) ||
+          isTensorGeom(geom) || geom == Geometry::Polytope::Type::Pyramid;
 
         typename Cache::QuadraturePointKey quadraturePointKey;
         if (needsQp)
@@ -733,6 +742,14 @@ namespace Rodin::Variational
         const auto k = getOperand().getOrder(geom);
         if (!k.has_value())
           return std::nullopt;
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (*k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (*k == 0) ? 0 : (*k - 1);
       }
 

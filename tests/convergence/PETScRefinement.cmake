@@ -64,7 +64,7 @@ function(rodin_add_petsc_refinement target source)
         endif()
       endif()
       add_test(NAME ${_test} COMMAND $<TARGET_FILE:${target}>
-        "--gtest_filter=${_filter}")
+        "--gtest_filter=${_filter}" --gtest_fail_if_no_test_selected)
       set_tests_properties(${_test} PROPERTIES
         LABELS "convergence;petsc;slow" TIMEOUT 1800)
       if (geometry STREQUAL "Pyramid")
@@ -91,7 +91,7 @@ function(rodin_add_petsc_refinement target source)
           endif()
           add_test(NAME ${_test}
             COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np} ${_oversubscribe}
-              $<TARGET_FILE:${target}> "--gtest_filter=${_filter}")
+              $<TARGET_FILE:${target}> "--gtest_filter=${_filter}" --gtest_fail_if_no_test_selected)
           set_tests_properties(${_test} PROPERTIES
             LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
           if (geometry STREQUAL "Pyramid")

@@ -361,7 +361,7 @@ namespace Rodin::Variational
        */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
-        return P1Element<ScalarType>(poly.getGeometry()).getOrder();
+        return P1Element<ScalarType>(poly.getGeometry()).getDegree().value_or(2);
       }
 
       virtual ShapeFunction* copy() const noexcept override
@@ -537,9 +537,9 @@ namespace Rodin::Variational
        */
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
-        return this->getFiniteElementSpace()
-          .getFiniteElement(poly.getDimension(), poly.getIndex())
-          .getOrder();
+        const auto& element = this->getFiniteElementSpace().getFiniteElement(
+          poly.getDimension(), poly.getIndex());
+        return element.getDegree().value_or(2);
       }
 
       ShapeFunction* copy() const noexcept override

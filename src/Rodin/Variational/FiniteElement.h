@@ -15,7 +15,7 @@
  * # Mathematical Foundation
  * A finite element is defined by:
  * - @f$ K @f$: Reference element geometry (interval, triangle, tetrahedron, etc.)
- * - @f$ P @f$: Polynomial space (e.g., @f$ \mathbb{P}_k @f$, @f$ \mathbb{Q}_k @f$)
+ * - @f$ P @f$: Reference function space (e.g., @f$ \mathbb{P}_k @f$ or @f$ \mathbb{Q}_k @f$)
  * - @f$ \Sigma @f$: Degrees of freedom (nodal values, moments, etc.)
  *
  * # Element Types
@@ -44,6 +44,8 @@
 #ifndef RODIN_VARIATIONAL_FINITEELEMENT_H
 #define RODIN_VARIATIONAL_FINITEELEMENT_H
 
+#include <initializer_list>
+
 #include <boost/serialization/access.hpp>
 
 #include "Rodin/Geometry/Polytope.h"
@@ -65,7 +67,7 @@ namespace Rodin::Variational
    * - `size_t getCount() const`
    * - `auto getBasis(size_t) const`
    * - `auto getLinearForm(size_t) const`
-   * - `size_t getOrder() const`
+   * - `Optional<size_t> getDegree() const`
    *
    * The base class stores only the reference geometry and forwards all
    * finite-element-specific queries to the Derived class.
@@ -295,26 +297,49 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns a characteristic polynomial order of the finite element.
+       * @brief Returns a total polynomial degree bound for reference basis components.
        *
-       * For polynomial-based elements, this is defined as the maximum total
-       * polynomial degree of the shape functions on the reference element,
-       * or a safe upper bound for it. It is typically used to select
-       * appropriate quadrature rules (e.g. rules exact for polynomials
-       * up to degree getOrder(), or 2*getOrder() for bilinear forms).
-       *
-       * The precise meaning may be refined in the Derived class
-       * documentation (e.g. @f$ \mathbb{P}_k @f$ vs @f$ \mathbb{Q}_k @f$
-       * elements, tensor-product spaces, etc.).
-       *
-       * @return Polynomial order (total degree or upper bound).
-       *
-       * @note CRTP method: implemented by the Derived class.
+       * A result @f$p@f$ certifies componentwise containment in
+       * @f$\mathcal P_p@f$ on the reference cell. An empty result means no
+       * polynomial bound is established, including rational pyramid bases.
+       * Family indexing belongs to the concrete element's getOrder() method.
+       * @returns A conservative total degree bound, or no established bound.
        */
-      constexpr
-      size_t getOrder() const
+      constexpr Optional<size_t> getDegree() const
       {
-        return static_cast<const Derived&>(*this).getOrder();
+        return static_cast<const Derived&>(*this).getDegree();
+      }
+
+      /**
+       * @brief Bounds reference-basis degree in selected coordinate directions.
+       *
+       * Degree is total in the selected coordinates, treating all other
+       * coordinates as coefficients. Indices are zero-based; repeated indices
+       * are ignored and an empty selection has degree zero. Unknown or invalid
+       * selections return no value. A generic polynomial element may return its
+       * total-degree bound when it cannot establish a sharper one.
+       * @param directions Reference-coordinate indices.
+       * @returns A conservative degree bound, or no established bound.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
+      {
+        const size_t dimension = Geometry::Polytope::Traits(getGeometry()).getDimension();
+        for (const size_t direction : directions)
+        {
+          if (direction >= dimension)
+            return std::nullopt;
+        }
+        if (directions.size() == 0)
+          return 0;
+        using Method = Optional<size_t> (Derived::*)(std::initializer_list<size_t>) const;
+        if constexpr (requires { static_cast<Method>(&Derived::getDegree); })
+        {
+          constexpr auto selected = static_cast<Method>(&Derived::getDegree);
+          constexpr auto inherited = static_cast<Method>(&FiniteElementBase::getDegree);
+          if constexpr (selected != inherited)
+            return static_cast<const Derived&>(*this).getDegree(directions);
+        }
+        return getDegree();
       }
 
       /**
