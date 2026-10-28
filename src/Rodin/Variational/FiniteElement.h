@@ -45,6 +45,7 @@
 #define RODIN_VARIATIONAL_FINITEELEMENT_H
 
 #include <initializer_list>
+#include <type_traits>
 
 #include <boost/serialization/access.hpp>
 
@@ -331,12 +332,15 @@ namespace Rodin::Variational
         }
         if (directions.size() == 0)
           return 0;
-        using Method = Optional<size_t> (Derived::*)(std::initializer_list<size_t>) const;
-        if constexpr (requires { static_cast<Method>(&Derived::getDegree); })
+        // Identify the declaring class without comparing instrumented function
+        // addresses: GCC's UBSan instrumentation can prevent constant evaluation.
+        constexpr auto declaringClass =
+          []<class Owner>(Optional<size_t> (Owner::*)(std::initializer_list<size_t>)
+              const) { return std::type_identity<Owner>{}; };
+        if constexpr (requires { declaringClass(&Derived::getDegree); })
         {
-          constexpr auto selected = static_cast<Method>(&Derived::getDegree);
-          constexpr auto inherited = static_cast<Method>(&FiniteElementBase::getDegree);
-          if constexpr (selected != inherited)
+          using Owner = typename decltype(declaringClass(&Derived::getDegree))::type;
+          if constexpr (!std::is_same_v<Owner, FiniteElementBase>)
             return static_cast<const Derived&>(*this).getDegree(directions);
         }
         return getDegree();
