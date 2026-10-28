@@ -55,6 +55,16 @@ under `runner.temp/rodin-apt-archives`, outside the system cache removed by
 `apt-get clean`. Locks and partial downloads are not cached. A missing cache
 changes performance only, never the tests or their acceptance conditions.
 
+Preinstalled transitive `Depends` and `Pre-Depends` packages are explicitly
+resolved to signed repository candidates as well. APT otherwise retains an older
+installed library whenever its version satisfies a minimum constraint, allowing
+producer and consumer runners from different image rollouts to disagree. The
+closure query includes installed packages only, excludes recommendations and
+virtual placeholders, and does not add unused alternative providers. Candidate
+policies are read in one bounded call. Archive keys include the expanded plan.
+The shared-build runtime checksum check remains mandatory: a repository change
+between jobs still fails closed instead of executing incompatible binaries.
+
 Shared Linux test and benchmark environments obtain their requested GCC/G++
 packages through the same signed APT plan and cached archives. They select the
 explicit compiler pair through `CC` and `CXX`, verify matching full versions and

@@ -213,20 +213,43 @@ def apt(arguments, source_options, archives, timeout, capture=False):
 
 def candidates(requested, source_options):
     """Pin candidates from the selected source before resolving the full plan."""
-    result = {}
-    for package in requested:
-        if '=' in package:
-            name, version = package.split('=', 1)
-        else:
-            name = package
-            policy = subprocess.check_output(['apt-cache', *source_options, 'policy', name], text=True,
-                                             env=dict(os.environ, LC_ALL='C'))
-            match = re.search(r'^\s*Candidate: (\S+)', policy, re.M)
-            if not match or match[1] == '(none)':
-                raise ValueError('No APT candidate for ' + name)
-            version = match[1]
-        result[name] = version
+    result = dict(package.split('=', 1) for package in requested if '=' in package)
+    names = sorted(set(package for package in requested if '=' not in package))
+    if not names:
+        return result
+    # One cache read for the full closure, rather than spawning apt-cache once
+    # per library on every producer and consumer.
+    policy = subprocess.check_output(['apt-cache', *source_options, 'policy', *names],
+                                     text=True, timeout=INDEX_TIMEOUT,
+                                     env=dict(os.environ, LC_ALL='C'))
+    records = dict(re.findall(r'^(\S+):\n((?:[ \t].*(?:\n|$))*)', policy, re.M))
+    for name in names:
+        match = re.search(r'^\s*Candidate: (\S+)', records.get(name, records.get(name.split(':', 1)[0], '')), re.M)
+        if not match or match[1] == '(none)':
+            raise ValueError('No APT candidate for ' + name)
+        result[name] = match[1]
     return result
+
+
+def installed_dependencies(requested, source_options):
+    """Include preinstalled transitive dependencies in explicit candidate selection.
+
+    APT normally leaves a dependency untouched when its installed version meets
+    the minimum constraint. Hosted-image rollouts can therefore produce different
+    runtime bytes from identical top-level requests. Traverse only installed
+    Depends/PreDepends edges; do not install unused alternatives or recommendations.
+    New dependencies remain the responsibility of APT's pinned simulation below.
+    """
+    output = subprocess.check_output(
+        ['apt-cache', *source_options, 'depends', '--recurse', '--installed',
+         '--important', '--no-recommends', '--no-suggests', '--no-conflicts',
+         '--no-breaks', '--no-replaces', '--no-enhances', *requested],
+        text=True, timeout=INDEX_TIMEOUT, env=dict(os.environ, LC_ALL='C'))
+    # Unindented names identify traversed real packages. Indented dependency
+    # edges and <virtual-package> placeholders are not install requests.
+    dependencies = set(re.findall(r'^([a-z0-9][a-z0-9+.\-]*(?::[a-z0-9]+)?)$', output, re.M))
+    explicit = {package.split('=', 1)[0] for package in requested}
+    return sorted(dependencies - explicit)
 
 
 def prepare(requested, archives, state):
@@ -244,7 +267,7 @@ def prepare(requested, archives, state):
             print('APT index attempt failed:', mirror or 'runner sources', flush=True)
     else:
         raise RuntimeError('All signed APT index sources failed') from last_error
-    versions = candidates(requested, options)
+    versions = candidates(requested + installed_dependencies(requested, options), options)
     pinned = [name + '=' + version for name, version in sorted(versions.items())]
     simulation = apt(['--simulate', '--no-remove', 'install', *pinned], options,
                      archives, INDEX_TIMEOUT, capture=True)
@@ -259,7 +282,7 @@ def prepare(requested, archives, state):
     # Image identity covers the preinstalled package baseline. Compiler flags,
     # MPI rank counts and test selections do not fragment dependency caches.
     baseline = [system, architecture, os.environ.get('ImageOS'), os.environ.get('ImageVersion'), requested]
-    prefix = 'rodin-apt-v1-' + hashlib.sha256(json.dumps(baseline, sort_keys=True).encode()).hexdigest()[:24] + '-'
+    prefix = 'rodin-apt-v2-' + hashlib.sha256(json.dumps(baseline, sort_keys=True).encode()).hexdigest()[:24] + '-'
     key = prefix + hashlib.sha256(json.dumps(versions, sort_keys=True).encode()).hexdigest()[:24]
     if os.environ.get('GITHUB_OUTPUT'):
         with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
