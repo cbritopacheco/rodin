@@ -25,30 +25,33 @@ triage. The labeler rules use `convergence`, `installation` and `nafems` for tho
 three test categories; unit and manufactured tests retain `unit-tests` and
 `manufactured-tests`.
 
-Every label has its own shade; related labels remain in the same colour family.
+All labels in a category use the same colour. Module colours follow the roles in the
+[main-page architecture diagram](../doc/Images/Architecture.svg), with grey
+for tests and brown for developer tools:
 
-| Family | Shade range | Labels |
-| :----- | :---------- | :----- |
-| Core and numerical modules | Dark blues | Core, geometry, algebra, forms, assembly and solvers |
-| Models and adaptation | Dark greens | Adaptation, transport, distance, cardiac and solid models |
-| External backends | Dark ambers | MFEM, MMG, MPI, PETSc and Scotch |
-| Documentation and data interfaces | Light slate blues | Documentation, examples, IO and serialization |
-| Tests and validation | Dark teals | Unit, manufactured, convergence, installation, NAFEMS and benchmarks |
-| Development infrastructure | Dark purples | CI, CMake, dependencies, tooling, Python, resources and Codex |
-| Defects | Dark reds | Bugs and hotfixes |
-| Contributions | Light greens | Good first issues and help wanted |
-| Disposition | Light greys | Duplicate, invalid and wontfix |
+| Role | Colour | Labels |
+| :--- | :----------- | :----- |
+| Core modules | Blue | Core, Geometry, Math, QF, FormLanguage, Variational, Assembly, Solver and IO |
+| Models | Green | Adaptation, Advection, Distance, Eikonal, Heart, Hilbert, Solid and linear elasticity |
+| Integrations and dependencies | Yellow-gold | MFEM, MMG, MPI, PETSc, Scotch, dependencies and Python bindings |
+| Shared services | Muted purple | Alert, Context, Utility, Location and Serialization |
+| Tests and validation | Grey | Unit, manufactured, convergence, installation, NAFEMS, benchmarks and Test helpers |
+| Developer tooling | Brown | CI, CMake, developer tooling, resources and Codex |
+| Documentation and examples | Light blue | Docs and examples |
+| Defects | Red | Bugs and hotfixes |
+| Contributions | Light green | Good first issues and help wanted |
+| Disposition | Light grey | Duplicate, invalid and wontfix |
 
 Enhancements use a dark green, questions a light lavender, and work in progress
 a light amber. Names and descriptions carry the meaning; colour is a secondary
 grouping cue.
 
 GitHub controls the foreground and theme-specific rendering; its label API
-accepts a background colour, not a separate text colour. The palette avoids
+accepts a background colour, not a separate text colour. The category colours avoid
 mid-tones: dark fills are checked against light text and light fills against
-dark text, with at least 4.5:1 contrast. Regression tests require distinct
-colours, related hues and readable contrast. Labels may be rendered differently
-by GitHub's light and dark themes.
+dark text, with at least 4.5:1 contrast. Regression tests check the module hues
+against the diagram, grey test labels, brown developer-tool labels, uniform
+category colours and readable contrast.
 
 When adding a rule, add its metadata to the catalog and create or update the
 GitHub label with those values. Rename existing labels in place to preserve

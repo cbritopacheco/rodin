@@ -1,141 +1,140 @@
 # Canonical GitHub label metadata; path matching lives in labeler.yml.
-# Distinct shades within each family: blue core, green models, amber backends,
-# light slate documentation/interfaces, teal validation, purple tooling,
-# red defects and light grey dispositions. GitHub controls text colour.
+# One colour per category: blue core, green models, yellow-gold integrations,
+# purple services, grey tests and brown developer tools. GitHub controls text colour.
 core:
-  color: '345679'
+  color: 28648F
   description: Core library types, root headers and shared infrastructure.
 alerts:
-  color: '446583'
+  color: '756082'
   description: Contextual exceptions, diagnostics and error reporting.
 context:
-  color: 3F5E83
+  color: '756082'
   description: Execution contexts for local and distributed computations.
 form-language:
-  color: 3F6092
+  color: 28648F
   description: Typed expressions and composition of variational forms.
 math:
-  color: '365987'
+  color: 28648F
   description: Dense and sparse algebra, spatial types and mathematical utilities.
 qf:
-  color: 3E698E
+  color: 28648F
   description: Reference quadrature formulas, rule selection and exactness.
 utility:
-  color: 3E5C79
+  color: '756082'
   description: Generic programming helpers, traits and type utilities.
 variational:
-  color: '395689'
+  color: 28648F
   description: Finite element spaces, fields, weak forms and variational problems.
 assembly:
-  color: '416895'
+  color: 28648F
   description: Construction of discrete matrices and vectors from variational forms.
 solver:
-  color: '385275'
+  color: 28648F
   description: Linear and nonlinear solvers, preconditioners and convergence controls.
 geometry:
-  color: '386585'
+  color: 28648F
   description: Meshes, topology, geometric mappings and geometric operations.
 location:
-  color: 446C8D
+  color: '756082'
   description: Spatial indexing, bounding volumes and geometric point location.
 adaptation:
-  color: '407249'
+  color: 39764D
   description: Mesh adaptation, deformation and shape optimization.
 advection:
-  color: 3D7153
+  color: 39764D
   description: Transport of fields and characteristic tracing.
 distance:
-  color: 3F7550
+  color: 39764D
   description: Distance fields and level-set distance computations.
 eikonal:
-  color: 396F47
+  color: 39764D
   description: Eikonal equations, fast marching and distance propagation.
 heart:
-  color: '427643'
+  color: 39764D
   description: Cardiac models and coupled state evolution.
 hilbert:
-  color: '437555'
+  color: 39764D
   description: Hilbert-space formulations, gradients and regularization.
 solid:
-  color: 3A6E3E
+  color: 39764D
   description: Constitutive laws, kinematics and solid-mechanics formulations.
 linear-elasticity:
-  color: 43754A
+  color: 39764D
   description: Linear-elasticity models, formulations and validation cases.
 mfem:
-  color: 89602A
+  color: E8D978
   description: MFEM interoperability and external mesh or finite-element data.
 mmg:
-  color: 84642D
+  color: E8D978
   description: MMG integration for mesh adaptation, optimization and remeshing.
 mpi:
-  color: 8C6231
+  color: E8D978
   description: Distributed meshes, spaces, communication and MPI execution.
 petsc:
-  color: 805D28
+  color: E8D978
   description: PETSc-backed algebra, assembly, solvers and distributed computations.
 scotch:
-  color: 80652D
+  color: E8D978
   description: Scotch integration for graph and mesh partitioning.
 io:
-  color: B9C9DA
+  color: 28648F
   description: Reading and writing meshes, fields and visualization data.
 serialization:
-  color: B0BFD4
+  color: '756082'
   description: Serialization, reconstruction and persistence of library objects.
 docs:
-  color: C2D3E0
+  color: B9C9DA
   description: Documentation, guides, API references and citation information.
 examples:
-  color: CDD9E5
+  color: B9C9DA
   description: Example applications, tutorials and their input resources.
 unit-tests:
-  color: 31737C
+  color: C8CBCD
   description: Unit tests for individual library components and contracts.
 manufactured-tests:
-  color: 34707F
+  color: C8CBCD
   description: Manufactured-solution tests of numerical correctness.
 convergence:
-  color: 316F72
+  color: C8CBCD
   description: Mesh and degree refinement studies and convergence-rate tests.
 installation:
-  color: 38737F
+  color: C8CBCD
   description: Installation, exported targets and downstream package-consumption tests.
 nafems:
-  color: '357576'
+  color: C8CBCD
   description: NAFEMS reference problems and engineering validation benchmarks.
 benchmarks:
-  color: 2F6779
+  color: C8CBCD
   description: Performance benchmarks, measurements and benchmark reporting.
 test:
-  color: '397379'
+  color: C8CBCD
   description: Library-side helpers for constructing and checking numerical tests.
 ci:
-  color: '644686'
+  color: 76513D
   description: GitHub Actions workflows, shared actions and coverage infrastructure.
 cmake:
-  color: 62498D
+  color: 76513D
   description: CMake configuration, build targets and package discovery.
 developer-tooling:
-  color: 5F427B
+  color: 76513D
   description: Developer scripts, formatting, static checks and agent guidance.
 dependencies:
-  color: 6C5091
+  color: E8D978
   description: Third-party libraries, submodules and dependency updates.
 python:
-  color: 6B4681
+  color: E8D978
   description: Python bindings, interfaces and supporting Python package code.
 resources:
-  color: 724F8C
+  color: 76513D
   description: Mesh files, datasets and other non-code resources.
 codex:
-  color: '594384'
+  color: 76513D
   description: Changes or work associated with the Codex coding agent.
 bug:
-  color: 9F3C49
+  color: A63F4B
   description: Incorrect behavior or a defect requiring a fix.
 hotfix:
-  color: 8F323A
+  color: A63F4B
   description: An urgent repair for a confirmed defect.
 enhancement:
   color: 42735C
@@ -144,7 +143,7 @@ good first issue:
   color: B9DABE
   description: A scoped contribution suitable for a newcomer.
 help wanted:
-  color: ADD1B8
+  color: B9DABE
   description: Contributions or additional maintainer attention are welcome.
 question:
   color: CAB7DA
@@ -156,8 +155,8 @@ duplicate:
   color: D4DAE1
   description: Already tracked by another issue or pull request.
 invalid:
-  color: C8CFD8
+  color: D4DAE1
   description: Reported behavior or request does not apply as stated.
 wontfix:
-  color: BEC6D0
+  color: D4DAE1
   description: Reviewed and intentionally not planned for implementation.

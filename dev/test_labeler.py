@@ -6,12 +6,14 @@ import colorsys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
 import tempfile
 import threading
 import unittest
+import xml.etree.ElementTree as ET
 from urllib.parse import parse_qs, unquote, urlsplit
 
 import yaml
@@ -45,26 +47,62 @@ class LabelCatalogTest(unittest.TestCase):
             self.assertNotIn(name + '-tests', rules)
             self.assertNotIn(name + '-tests', catalog)
 
-    def test_related_labels_share_their_palette(self):
+    def test_each_category_uses_one_colour(self):
         catalog = yaml.safe_load((ROOT / '.github/labels.yml').read_text())
         for group in [
-                ['core', 'geometry', 'location', 'math', 'variational', 'assembly', 'solver'],
-                ['adaptation', 'advection', 'distance', 'eikonal', 'heart', 'hilbert', 'solid'],
-                ['mfem', 'mmg', 'mpi', 'petsc', 'scotch'],
-                ['unit-tests', 'manufactured-tests', 'convergence', 'installation', 'nafems', 'benchmarks'],
-                ['ci', 'cmake', 'developer-tooling', 'dependencies', 'python', 'resources'],
-                ['bug', 'hotfix']]:
+                ['core', 'geometry', 'math', 'qf', 'form-language', 'variational', 'assembly', 'solver', 'io'],
+                ['alerts', 'context', 'utility', 'location', 'serialization'],
+                ['adaptation', 'advection', 'distance', 'eikonal', 'heart', 'hilbert', 'solid', 'linear-elasticity'],
+                ['mfem', 'mmg', 'mpi', 'petsc', 'scotch', 'dependencies', 'python'],
+                ['unit-tests', 'manufactured-tests', 'convergence', 'installation', 'nafems', 'benchmarks', 'test'],
+                ['ci', 'cmake', 'developer-tooling', 'resources', 'codex'],
+                ['docs', 'examples'], ['bug', 'hotfix'],
+                ['good first issue', 'help wanted'], ['duplicate', 'invalid', 'wontfix']]:
             with self.subTest(group=group):
-                hues = [colorsys.rgb_to_hls(*[
-                    int(catalog[name]['color'][i:i + 2], 16) / 255
-                    for i in (0, 2, 4)])[0] for name in group]
-                # Shades can differ, but related labels stay within 30 degrees.
-                self.assertTrue(all(min(abs(h - hues[0]), 1 - abs(h - hues[0])) <= 1 / 12
-                                    for h in hues))
+                self.assertEqual(len({catalog[name]['color'].lower() for name in group}), 1)
 
-    def test_each_label_has_a_distinct_readable_shade(self):
+    def test_module_hues_follow_the_documentation_architecture(self):
         catalog = yaml.safe_load((ROOT / '.github/labels.yml').read_text())
-        self.assertEqual(len({m['color'].lower() for m in catalog.values()}), len(catalog))
+        diagram = ET.parse(ROOT / 'doc/Images/Architecture.svg').getroot()
+        ns = {'svg': 'http://www.w3.org/2000/svg'}
+        styles = diagram.find('svg:style', ns).text
+        roles = set()
+        for group in diagram.findall('svg:g', ns):
+            role = group.get('class')
+            if role not in {'core', 'model', 'backend', 'shared'}:
+                continue
+            roles.add(role)
+            color = re.search(r'\.' + role + r'\s*\{\s*color:\s*#([0-9a-fA-F]{6})', styles)[1]
+            expected = colorsys.rgb_to_hls(*[int(color[i:i + 2], 16) / 255 for i in (0, 2, 4)])[0]
+            for node in group.findall('svg:text', ns):
+                if node.get('class') != 'name':
+                    continue
+                for name in node.text.split(' · '):
+                    label = MODULES.get(name.split(' / ')[0])
+                    # Test helpers follow the user's grey test-label override.
+                    if label is None or label == 'test':
+                        continue
+                    with self.subTest(module=name, role=role):
+                        shade = catalog[label]['color']
+                        hue = colorsys.rgb_to_hls(*[int(shade[i:i + 2], 16) / 255
+                                                   for i in (0, 2, 4)])[0]
+                        self.assertLessEqual(min(abs(hue - expected), 1 - abs(hue - expected)), 1 / 12)
+        self.assertEqual(roles, {'core', 'model', 'backend', 'shared'})
+
+    def test_tests_are_grey_and_developer_tools_are_brown(self):
+        catalog = yaml.safe_load((ROOT / '.github/labels.yml').read_text())
+        for name in ['unit-tests', 'manufactured-tests', 'convergence', 'installation',
+                     'nafems', 'benchmarks', 'test']:
+            rgb = [int(catalog[name]['color'][i:i + 2], 16) / 255 for i in (0, 2, 4)]
+            self.assertLessEqual(colorsys.rgb_to_hls(*rgb)[2], 0.08)
+        for name in ['ci', 'cmake', 'developer-tooling', 'resources', 'codex']:
+            rgb = [int(catalog[name]['color'][i:i + 2], 16) / 255 for i in (0, 2, 4)]
+            hue, lightness, saturation = colorsys.rgb_to_hls(*rgb)
+            self.assertTrue(20 / 360 <= hue <= 35 / 360)
+            self.assertLess(lightness, 0.45)
+
+    def test_label_colours_have_readable_contrast(self):
+        catalog = yaml.safe_load((ROOT / '.github/labels.yml').read_text())
         for name, metadata in catalog.items():
             with self.subTest(label=name):
                 rgb = [int(metadata['color'][i:i + 2], 16) / 255 for i in (0, 2, 4)]
