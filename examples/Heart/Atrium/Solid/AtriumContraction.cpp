@@ -48,7 +48,7 @@ int main(int argc, char** argv)
       setDefault("-snes_linesearch_max_it", "60");
       using Atrium = Rodin::Examples::Heart::Atrium;
       Atrium::Parameters parameters;
-      parameters.mode = Atrium::Mode::SolidOnly;
+      parameters.mode = Atrium::Mode::Solid;
       parameters.solid = AtriumSolid::readOptions(argc, argv, parameters.meshPath);
       for (int i = 1; i < argc; ++i)
       {

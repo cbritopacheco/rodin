@@ -17,12 +17,11 @@ namespace Rodin::Examples::Heart
   Atrium::Atrium(const Context::MPI& context, const Parameters& cfg)
     : m_mesh(makeMesh(context, cfg))
   {
-    if (cfg.mode != Mode::SolidOnly && cfg.mode != Mode::FluidOnly &&
-      cfg.mode != Mode::Independent)
+    if (cfg.mode != Mode::Solid && cfg.mode != Mode::Fluid && cfg.mode != Mode::FSI)
       Alert::Exception() << "Invalid atrium mode" << Alert::Raise;
-    const bool hasSolid = cfg.mode != Mode::FluidOnly;
-    const bool hasFluid = cfg.mode != Mode::SolidOnly;
-    if (cfg.mode == Mode::Independent)
+    const bool hasSolid = cfg.mode != Mode::Fluid;
+    const bool hasFluid = cfg.mode != Mode::Solid;
+    if (cfg.mode == Mode::FSI)
     {
       const auto dt = cfg.solid.timeStep;
       const auto fluidDt = cfg.fluid.dt;
@@ -31,7 +30,7 @@ namespace Rodin::Examples::Heart
       if (cfg.solid.fibersOnly || !std::isfinite(dt) || !std::isfinite(fluidDt) ||
         dt <= 0 || fluidDt <= 0 || std::abs(dt - fluidDt) > tolerance)
       {
-        Alert::Exception() << "Independent components require matching positive "
+        Alert::Exception() << "FSI components require matching positive "
                               "time steps and an active solid mechanics problem"
                            << Alert::Raise;
       }

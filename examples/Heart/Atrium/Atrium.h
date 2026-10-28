@@ -16,8 +16,8 @@ namespace Rodin::Examples::Heart
   /**
    * @brief Coordinates independent atrial solid and fluid time steps.
    *
-   * Independent mode advances both components without exchanging interface
-   * data. Each component owns its mesh, problem, solver, and output.
+   * FSI mode currently advances both components independently without exchanging
+   * interface data. Each component owns its mesh, problem, solver, and output.
    */
   class Atrium
   {
@@ -27,14 +27,14 @@ namespace Rodin::Examples::Heart
       using Fluid = AtriumFluid;
       enum class Mode
       {
-        SolidOnly,
-        FluidOnly,
-        Independent
+        Solid,
+        Fluid,
+        FSI
       };
 
       struct Parameters
       {
-        Mode mode = Mode::SolidOnly;
+        Mode mode = Mode::Solid;
         std::string meshPath =
           "resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh";
         Geometry::Attribute solidMaterial = 4;

@@ -24,13 +24,13 @@ problem and passive-equilibrium problem. The fluid retains its Oseen problem,
 wall-shear problem, and projection problems. Assembly reuses the fixed mesh and
 Rodin's transformation and quadrature machinery across time steps.
 
-`Atrium::Parameters::mode` selects `SolidOnly`, `FluidOnly`, or `Independent`.
+`Atrium::Parameters::mode` selects `Solid`, `Fluid`, or `FSI`.
 `initialize()` prepares the selected components, `step()` advances each once,
 and `finish()` closes their outputs. These operations are collective on the
-parent communicator. Independent mode requires equal positive solid and fluid
-time increments. It advances the two equations without exchanging interface
-motion or traction. A failed coordinated step cannot be retried because one
-component may already have advanced.
+parent communicator. FSI mode requires equal positive solid and fluid
+time increments. It currently advances the two equations independently without
+exchanging interface motion or traction. A failed coordinated step cannot be
+retried because one component may already have advanced.
 
 `getMesh()` exposes the combined parent. `getSolid()` and `getFluid()` return
 the selected components, or null when disabled. Each component's `getMesh()`
@@ -134,7 +134,7 @@ mpirun -n 4 build/examples/Heart/Atrium/Atrium \
   -atrium_steps 24 -atrium_output_every 1 -atrium_dt 0.001
 ```
 
-`-atrium_mode independent` selects both components on the same parent partition.
+`-atrium_mode fsi` selects both components on the same parent partition.
 Use `--dt` for the solid and `-atrium_dt` for the fluid, with equal values in
 seconds. Solid options use double dashes; fluid and PETSc solver options use
 single dashes. The executables default to GMRES with overlapping additive
@@ -149,7 +149,7 @@ the selected components directly:
 using Atrium = Rodin::Examples::Heart::Atrium;
 Atrium::Parameters parameters;
 parameters.meshPath = "resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh";
-parameters.mode = Atrium::Mode::Independent;
+parameters.mode = Atrium::Mode::FSI;
 parameters.solid.timeStep = 0.001;
 parameters.fluid.dt = 0.001;
 

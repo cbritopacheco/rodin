@@ -152,7 +152,7 @@ int main(int argc, char** argv)
         cfg.solveKinetics = (flag == PETSC_TRUE);
 
       using Atrium = Rodin::Examples::Heart::Atrium;
-      parameters.mode = Atrium::Mode::FluidOnly;
+      parameters.mode = Atrium::Mode::Fluid;
       parameters.fluid = cfg;
       parameters.solid = Rodin::Examples::Heart::AtriumContraction::readOptions(
         argc, argv, parameters.meshPath);
@@ -163,29 +163,29 @@ int main(int argc, char** argv)
       {
         const std::string mode(buffer);
         if (mode == "solid")
-          parameters.mode = Atrium::Mode::SolidOnly;
+          parameters.mode = Atrium::Mode::Solid;
         else if (mode == "fluid")
-          parameters.mode = Atrium::Mode::FluidOnly;
-        else if (mode == "independent")
-          parameters.mode = Atrium::Mode::Independent;
+          parameters.mode = Atrium::Mode::Fluid;
+        else if (mode == "fsi")
+          parameters.mode = Atrium::Mode::FSI;
         else
         {
           Rodin::Alert::Exception()
             << "Unknown atrium mode " << mode << Rodin::Alert::Raise;
         }
       }
-      if (parameters.mode == Atrium::Mode::Independent && parameters.solid.timeStep == 0)
+      if (parameters.mode == Atrium::Mode::FSI && parameters.solid.timeStep == 0)
         parameters.solid.timeStep = cfg.dt;
       for (int i = 1; i < argc; ++i)
       {
         if (std::string(argv[i]).starts_with("--"))
           PetscOptionsClearValue(PETSC_NULLPTR, argv[i]);
       }
-      size_t count = parameters.mode == Atrium::Mode::FluidOnly
+      size_t count = parameters.mode == Atrium::Mode::Fluid
         ? static_cast<size_t>((cfg.flowCycles + cfg.speciesCycles) *
             static_cast<int>(cfg.period / cfg.dt + 0.5))
         : parameters.solid.steps;
-      if (parameters.mode != Atrium::Mode::FluidOnly && parameters.solid.stopAfter)
+      if (parameters.mode != Atrium::Mode::Fluid && parameters.solid.stopAfter)
         count = std::min(count, parameters.solid.stopAfter);
       integer = static_cast<PetscInt>(count);
       PetscOptionsGetInt(
@@ -197,7 +197,7 @@ int main(int argc, char** argv)
       }
       Atrium simulation(context, parameters);
       simulation.initialize();
-      if (!(parameters.mode == Atrium::Mode::SolidOnly && parameters.solid.fibersOnly))
+      if (!(parameters.mode == Atrium::Mode::Solid && parameters.solid.fibersOnly))
       {
         for (PetscInt step = 0; step < integer; ++step)
           simulation.step();
