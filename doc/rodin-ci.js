@@ -15,7 +15,7 @@
   root.append(branch, ' ', refresh, status, output);
   const api = 'https://api.github.com/repos/cbritopacheco/rodin';
   const actions = 'https://github.com/cbritopacheco/rodin/actions';
-  const workflows = ['Tests', 'Benchmarks', 'Build', 'Style', 'CodeQL', 'Labeler', 'Labeler Rules', 'Copilot setup steps', 'Documentation', 'Publish documentation manually'];
+  const workflows = ['Tests', 'Benchmarks', 'Build', 'Style', 'CodeQL', 'Labeler', 'Labeler Rules', 'Copilot setup steps', 'Documentation'];
   const link = (text, url) => {
     const node = document.createElement('a'); node.textContent = text;
     // API metadata is untrusted: link only to this repository's Actions pages.
@@ -38,7 +38,10 @@
         read('/actions/workflows/RetryInterruptedJobs.yml/runs?status=completed&per_page=100').catch(() => ({workflow_runs: []}))
       ]);
       const sha = head.commit.sha;
-      status.textContent = selected + ' · ' + sha + ' · Checked ' + new Date().toLocaleString();
+      status.textContent = selected + ' · ';
+      const headLink = document.createElement('a');
+      headLink.textContent = sha; headLink.href = 'https://github.com/cbritopacheco/rodin/commit/' + sha;
+      status.append(headLink, ' · Checked ' + new Date().toLocaleString());
       const table = document.createElement('table'); table.className = 'm-table';
       const header = table.createTHead().insertRow();
       for (const text of ['Workflow', 'Status', 'Commit', 'Report']) {
@@ -53,16 +56,26 @@
         result.textContent = run ? (run.conclusion || run.status) : 'No recent run';
         if (run && run.head_sha !== sha) result.append(' · older commit');
         // Green is reserved for a successful result on the current branch head.
-        if (run?.head_sha === sha && run.conclusion === 'success') result.className = 'm-text m-success';
-        if (run?.conclusion === 'failure') result.className = 'm-text m-danger';
-        row.insertCell().textContent = run ? run.head_sha.slice(0, 10) : '—';
+        const outcome = run?.conclusion || run?.status;
+        result.className = 'rodin-ci-status ' + (
+          run?.head_sha !== sha ? 'rodin-ci-muted' :
+          outcome === 'success' ? 'rodin-ci-success' :
+          ['failure', 'timed_out', 'startup_failure', 'action_required'].includes(outcome) ? 'rodin-ci-danger' :
+          ['queued', 'in_progress', 'waiting', 'pending', 'requested'].includes(outcome) ? 'rodin-ci-warning' : 'rodin-ci-muted');
+        const commit = row.insertCell();
+        if (run && /^[a-f0-9]{40}$/i.test(run.head_sha)) {
+          const commitLink = document.createElement('a');
+          commitLink.textContent = run.head_sha.slice(0, 10);
+          commitLink.href = 'https://github.com/cbritopacheco/rodin/commit/' + run.head_sha;
+          commit.append(commitLink);
+        } else commit.textContent = '—';
         const title = run && 'CI report · ' + name + ' · ' + selected + ' · ' + run.head_sha + ' · attempt ' + run.run_attempt;
         const report = title && reports.workflow_runs.find(item => item.display_title === title && item.conclusion === 'success');
-        row.insertCell().append(report ? link('Open report', report.html_url) : link('Run summary', run?.html_url));
+        row.insertCell().append(report ? link('Open report', report.html_url) : link('Summary', run?.html_url));
       }
       output.append(table);
       const note = document.createElement('p');
-      note.textContent = 'Open report links to a completed generated report when available; Run summary opens GitHub’s native run page. Missing recent runs are unknown, not successful. Full coverage and campaign completeness are confirmed in the reports.';
+      note.textContent = 'Open report links to a completed generated report when available; Summary opens GitHub’s native run page. Missing recent runs are unknown, not successful. Full coverage and campaign completeness are confirmed in the reports.';
       output.append(note);
     } catch (error) {
       status.textContent = 'CI status unavailable: ' + error.message + '. Use the workflow links below.';

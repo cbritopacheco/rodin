@@ -32,7 +32,7 @@ class WorkflowSummaryTest(unittest.TestCase):
         self.assertIn('**Complete campaign validation / pooling:** failure', text)
 
     def test_site_link_requires_successful_publication(self):
-        self.run['name'] = 'Publish documentation manually'
+        self.run['name'] = 'Documentation'
         job = dict(id=12, name='Publish documentation', status='completed', conclusion='failure')
         self.assertNotIn('[Published site]', render(self.run, [job], 'owner/repo'))
         job['conclusion'] = 'success'

@@ -744,3 +744,17 @@ main article .m-block.m-badge.rodin-license-badge > img {
   border-radius: 0;
   object-fit: contain;
 }
+
+/* CI status uses the active light/dark palette; stale results stay subdued. */
+.rodin-ci-success { color: var(--success-color); }
+.rodin-ci-danger { color: var(--danger-color); }
+.rodin-ci-warning { color: var(--warning-color); }
+.rodin-ci-muted { color: var(--dim-color, #88939f); }
+.rodin-site-footer { position: relative; padding-inline: 2.5rem; }
+.rodin-ci-link { position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding: .5rem; color: inherit; }
+.rodin-ci-link:hover { color: var(--link-color); }
+@supports (mask-image: url("")) {
+  .rodin-ci-mark { display: inline-block; width: 1.3rem; height: 1.3rem; vertical-align: middle; background: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 3h18v14H3z' fill='none' stroke='black' stroke-width='2'/%3E%3Cpath d='m7 10 3 3 7-7M8 21h8M12 17v4' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat; }
+  .rodin-ci-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}

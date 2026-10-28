@@ -19,7 +19,6 @@ can share compilation without sharing runtime state.
 | [Build.yml](Build.yml) | Independent compilation checks across build types, threading and backend configurations. |
 | [Style.yml](Style.yml) | Formatting, house-style, naming and documentation-warning checks, including their tooling regressions. |
 | [Documentation.yml](Documentation.yml) | Reusable documentation build and checks; also runs on pull requests. |
-| [PublishDocumentation.yml](PublishDocumentation.yml) | Manual documentation build and publication without the benchmark campaign. |
 | [Benchmarks.yml](Benchmarks.yml) | Runs and publishes performance benchmarks on pushes to the main development branches. |
 | [Labeler.yml](Labeler.yml) | Maintains pull-request labels. |
 | [copilot-setup-steps.yml](copilot-setup-steps.yml) | Provisions the GitHub coding-agent environment; it is separate from numerical test scheduling. |
@@ -550,7 +549,7 @@ job; its eventual status is available in the source workflow's attempts.
 ### Compact workflow reports
 
 **CI reports and recovery** renders one report after each completed Tests,
-Benchmarks or manual documentation-publication workflow. It runs separately
+or Benchmarks workflow. It runs separately
 after completion so interrupted runners cannot prevent reporting. Its summary
 links the source workflow and lists registered, started, passed, failed,
 cancelled and skipped job counts, with at most 30 failed jobs and
