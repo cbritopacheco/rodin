@@ -11,7 +11,7 @@ From the repository root, using a configured build tree:
 ```sh
 cmake --build build --target CCMLC2014_0D -j4
 cd build
-./examples/Heart/CCMLC2014_0D/CCMLC2014_0D
+./examples/Heart/Ventricle/CCMLC2014_0D/CCMLC2014_0D
 ```
 
 Output files are written relative to the working directory.
