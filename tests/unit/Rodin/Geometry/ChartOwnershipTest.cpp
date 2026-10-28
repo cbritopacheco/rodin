@@ -86,7 +86,9 @@ namespace
               // The custom element does not expose directional information.
               // The transformation falls back to its total polynomial bound.
               if (dimension > 0)
+              {
                 EXPECT_EQ(chart.getDegree({0}), element.getDegree());
+              }
             }
             std::vector<Math::SpatialMatrix<Real>> jacobians;
             chart.jacobian(jacobians, formula);
