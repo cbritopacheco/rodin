@@ -58,6 +58,7 @@ jobs:
         run: python3 dev/check_documentation_navigation.py
       - uses: actions/upload-artifact@v4
         with:
+          overwrite: true
           name: documentation
           path: ${{ github.workspace }}/build/doc/html
           if-no-files-found: error

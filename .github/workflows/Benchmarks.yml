@@ -73,6 +73,7 @@ jobs:
       - run: python3 dev/benchmark_ci.py pool --artifacts benchmark-inputs --output benchmark-complete
       - uses: actions/upload-artifact@v4
         with:
+          overwrite: true
           name: benchmark-complete
           path: benchmark-complete
           if-no-files-found: error

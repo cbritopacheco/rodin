@@ -22,13 +22,13 @@ runs:
       run: python3 dev/deploy_pages.py prepare --checkout "$CHECKOUT"
     - uses: actions/upload-pages-artifact@v4
       with:
-        name: ${{ inputs.artifact-name }}
+        name: ${{ inputs.artifact-name }}-${{ github.run_attempt }}
         path: ${{ inputs.checkout }}
     - name: Deploy the exact uploaded artifact
       id: deployment
       uses: actions/deploy-pages@v4
       with:
-        artifact_name: ${{ inputs.artifact-name }}
+        artifact_name: ${{ inputs.artifact-name }}-${{ github.run_attempt }}
     - name: Verify the served publication marker
       shell: bash
       env:
