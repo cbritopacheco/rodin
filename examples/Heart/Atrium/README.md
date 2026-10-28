@@ -116,8 +116,10 @@ An interface exchange must explicitly convert displacement and traction units.
 coarse fluid volume sharing the repaired wall's inner surface and a single
 outward wedge layer with nodal extrusion distance $1\,\mathrm{mm}$. The wall's
 surface preparation includes a local handle-to-disk repair and MMGS adaptation.
-The fluid is tetrahedralized against that surface and coarsened with MMG3D
-while preserving its boundary triangulation. The geometry is a demonstration
+The fluid is tetrahedralized against that surface and adapted with MMG3D.
+Shared wall triangles and vertices and opening-rim edges are marked as required;
+cap interiors and fluid tetrahedra remain free to adapt. The solid coordinates,
+wedge connectivity, and shared interface triangulation are preserved. The geometry is a demonstration
 model requiring anatomical assessment.
 
 ## Enclosed cavity volume
