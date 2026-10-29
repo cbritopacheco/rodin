@@ -86,14 +86,14 @@ def main():
     env = dict(os.environ, OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1',
                VECLIB_MAXIMUM_THREADS='1')
     apex = [math.cos(.6)*8, 0, -math.sin(.6)*8]
-    def run(name, ranks, contractility, mode='fsi', lag=5):
+    def run(name, ranks, contractility, mode='fsi', lag=5, steps=5, atol=1e-4, dt=.001):
         folder = output/name
         folder.mkdir(exist_ok=True)
         cmd = [args.mpiexec, '-n', str(ranks), str(args.executable.resolve()),
                '-atrium_mode', mode, '-atrium_mesh', str(mesh),
                '-atrium_output', str(folder/'Flow'), '--output', str(folder/'Solid'),
-               '-atrium_steps', '5', '-atrium_dt', '.001', '--dt', '.001',
-               '--steps', '5', '--apex', *map(str,apex), '--apex-radius', '3',
+               '-atrium_steps', str(steps), '-atrium_dt', str(dt), '--dt', str(dt),
+               '--steps', str(steps), '-atrium_fsi_atol', str(atol), '--apex', *map(str,apex), '--apex-radius', '3',
                '--contractility', str(contractility), '--cache-constitutive',
                '-atrium_output_every', '1', '-atrium_fluid_lag_preconditioner', str(lag),
                '-ksp_type', 'gmres', '-ksp_rtol', '1e-12', '-ksp_max_it', '500',
@@ -112,6 +112,13 @@ def main():
     serial = run('active-serial', 1, 20)
     four = run('active-four-ranks', 4, 20)
     fresh = run('active-fresh', 2, 20, lag=1)
+    tight = run('active-tight', 2, 20, atol=1e-6)
+    probe = run('robin-probe', 2, 20, steps=1, atol=1)
+    assert float(probe[-1]['fsi_velocity_mismatch_m_per_s']) > 1e-12
+    finite = run('finite-motion', 2, 100, steps=10, dt=.02)
+    for r in finite[1:]:
+        assert float(r['fsi_min_mesh_jacobian'])>0
+        assert abs(float(r['fsi_cavity_volume_difference_ml']))<1e-9
     solid = run('solid', 2, 20, mode='solid')
     for r in parallel[1:]:
         assert float(r['fluid_inlet_pressure_pa']) == 0
@@ -119,7 +126,8 @@ def main():
         assert not r['fluid_arterial_pressure_pa']
         assert float(r['fsi_min_mesh_jacobian']) > 0
         assert float(r['fsi_robin_residual_pa']) <= float(r['fsi_robin_tolerance_pa'])
-        assert float(r['fsi_velocity_mismatch_m_per_s']) < 1e-10
+        tolerance = math.sqrt(3)*float(r['fsi_robin_tolerance_pa'])/float(r['fsi_robin_coefficient_pa_s_per_m'])
+        assert float(r['fsi_velocity_mismatch_m_per_s']) <= tolerance*(1+1e-6)
         assert float(r['fsi_displacement_mismatch_m']) < 1e-12
         assert abs(float(r['fsi_cavity_volume_difference_ml'])) < 1e-9
         flux = sum(float(r[k]) for k in
@@ -136,12 +144,16 @@ def main():
     for a,b in zip(parallel[1:],fresh[1:]):
         for key in ('max_displacement_mm','fluid_max_velocity_m_per_s'):
             assert abs(float(a[key])-float(b[key])) < 1e-7*max(abs(float(b[key])),1e-9)
+    assert float(tight[-1]['fsi_velocity_mismatch_m_per_s']) < float(parallel[-1]['fsi_velocity_mismatch_m_per_s'])
+    assert abs(float(tight[-1]['max_displacement_mm'])-float(parallel[-1]['max_displacement_mm'])) < .01*float(tight[-1]['max_displacement_mm'])
+    assert float(parallel[1]['max_displacement_mm']) < float(solid[1]['max_displacement_mm'])
     assert abs(float(parallel[-1]['max_displacement_mm'])-
                float(solid[-1]['max_displacement_mm'])) > 1e-10
     report = dict(rest=True, motion_driven_flow=True, mpi_consistency=True,
                   shared_interface_volume=True, global_flux_balance=True,
-                  interface_continuity=True, retained_pc_matches_fresh=True,
-                  fluid_feedback_changes_solid=True)
+                  interface_continuity_to_robin_tolerance=True, retained_pc_matches_fresh=True,
+                  robin_probe_has_finite_slip=True, tighter_tolerance_reduces_slip=True, finite_motion_geometry=True,
+                  fluid_feedback_changes_solid=True, initial_fluid_load_resists_contraction=True)
     (output/'checks.json').write_text(json.dumps(report,indent=2))
     print(json.dumps(report,indent=2))
     print('Output:',output)

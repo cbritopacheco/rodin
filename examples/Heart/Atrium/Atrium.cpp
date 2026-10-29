@@ -281,6 +281,12 @@ namespace Rodin::Examples::Heart::Atrium
           {"fsi_velocity_mismatch_m_per_s",
             m_fsi ? Optional<Real>(m_fsi->getDiagnostics().velocityMismatch)
                   : Optional<Real>{}},
+          {"fsi_newmark_velocity_mismatch_m_per_s",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().newmarkVelocityMismatch)
+                  : Optional<Real>{}},
+          {"fsi_robin_coefficient_pa_s_per_m",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().robinCoefficient)
+                  : Optional<Real>{}},
           {"fsi_displacement_mismatch_m",
             m_fsi ? Optional<Real>(m_fsi->getDiagnostics().displacementMismatch)
                   : Optional<Real>{}},

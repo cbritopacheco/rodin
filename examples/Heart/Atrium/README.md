@@ -107,66 +107,133 @@ an affine P1 tetrahedral field the maximum occurs at a vertex.
 
 ## Contraction-driven FSI
 
-Fluid inertia feeds back on the thin atrial wall, so a single motion/traction
-exchange need not produce a consistent timestep. `FSI` uses a partitioned
-Robin–Dirichlet iteration. With the fluid-outward normal $n_f$ and fluid stress
-$\sigma_f=-pI+2\mu D(u_f)$, the interface conditions are
+Fluid inertia loads the contracting wall, so independently advancing the two
+components does not enforce their interface conditions. `FSI` uses a partitioned
+Robin–Robin construction with the fluid impedance and interface convective
+correction of the [coronary P1/P1 example](../CoronaryArtery/FSI/Explicit_P1P1_PETSc_Seq/README.md).
+Both subproblems receive Robin data on material label 4.
+
+Let $n_f$ point out of the current fluid domain, $N_s$ out of the reference solid,
+and $J_\Gamma=dS/dS_0$. The continuous target is displacement compatibility,
+velocity continuity, and traction equilibrium:
 
 $$
-u_f=v_s,\qquad d_f=d_s,\qquad t_s=-\sigma_f n_f.
+d_f=d_s,\qquad u_f=\dot d_s,\qquad
+P_sN_s=J_\Gamma(-\sigma_fn_f),\qquad
+\sigma_f=-pI+2\mu D(u_f).
 $$
 
-Here $d_f$ is the fluid mesh displacement and $t_s$ is the spatial load on the
-solid. Its reference-area value is $T_s=J_\Gamma t_s$, where $J_\Gamma$ is the
-current-to-reference interface area ratio. The solid trial solves
+The time-discrete interface rate is
 
 $$
-P_sN_s+\alpha v_s=g^k,\qquad
-\widehat g^{k+1}=J_\Gamma(-\sigma_f n_f)+\alpha u_f.
+v_\Gamma^{n+1}=\frac{d_s^{n+1}-d_s^n}{\Delta t}.
 $$
 
-This is Robin–Dirichlet transmission: the fluid velocity is imposed strongly.
-It is distinct from the [coronary Robin–Robin operator](../CoronaryArtery/FSI/README.md#transmission-conditions),
-which also places a Robin condition on the fluid.
+It matches the BDF1 ALE boundary velocity. For the selected average-acceleration
+Newmark parameters, it also equals $(v_s^{n+1}+v_s^n)/2$. The solid retains its
+Newmark endpoint velocity for bulk inertia and tissue viscosity; that endpoint
+velocity is distinct from the interface rate at finite time step.
 
-Both Robin terms use reference area. At convergence, velocity continuity
-cancels them and recovers traction equilibrium. The coefficient $\alpha$ has
-units $\mathrm{Pa\,s/m}$; its automatic value is
-$\rho_f V_f^{1/3}/\Delta t$. This impedance scale is a numerical choice,
-not a tissue parameter. Aitken relaxation updates
-$g^{k+1}=g^k+\omega_k(\widehat g^{k+1}-g^k)$, with bounded factors. Convergence
-uses the unrelaxed nodal Robin residual, measured in Pa. Fluid traction is
-projected onto the reference interface from pressure and the recovered
-velocity gradient; this is a stress-based discrete transfer.
+### Robin data and reference-area traction
 
-The fluid receives the solid velocity as an essential condition on label 4.
+Let $T^k$ denote the fluid reaction on the solid per reference area and let
+$\alpha_0>0$ be a reference-area Robin impedance. A correction sweep solves
+
+$$
+P_s^{k+1}N_s+\alpha_0v_\Gamma^{k+1}=g^k,\qquad
+g^k=T^k+\alpha_0u_f^k.
+$$
+
+The fluid receives the following boundary contribution to its weak residual:
+
+$$
+\int_{\Gamma(t)}\frac{\alpha_0(u_f^{k+1}-v_\Gamma^{k+1})+T^k}{J_\Gamma}
+\cdot v\,dS
+-\frac{\rho_f}{2}\int_{\Gamma(t)}[(u_f^n-a)\cdot n_f]
+(u_f^{k+1}\cdot v)\,dS.
+$$
+
+Here $a$ is the ALE mesh velocity. Division by $J_\Gamma$ converts reference-area
+Robin data to the moving fluid surface. The second integral is the weakly
+consistent interface convective correction. Fluid velocity is not constrained
+by an interface Dirichlet condition.
+
+After the fluid solve, the unrelaxed transmission update is
+
+$$
+\widehat T^{k+1}=T^k+\alpha_0(u_f^{k+1}-v_\Gamma^{k+1}),\qquad
+\widehat g^{k+1}=\widehat T^{k+1}+\alpha_0u_f^{k+1}.
+$$
+
+This is the reference fluid variational reaction, including interface
+stabilization. Matching P1 traces permit this update directly in their nodal
+space. It does not reconstruct traction from recovered output gradients.
+This construction follows the discrete Robin stress update in
+[Burman et al. (2025), equations (13), (16)–(19)](https://discovery.ucl.ac.uk/id/eprint/10210489/).
+The paper's energy-stability result is not asserted for the present active,
+viscous, Newmark solid discretization.
+
+The pair $(g,T)$ is relaxed with the same bounded Aitken factor. Both unrelaxed
+updates must satisfy a componentwise maximum-norm criterion,
+
+$$
+\max(\|\widehat g-g\|_\infty,\|\widehat T-T\|_\infty)
+\leq\epsilon_a+\epsilon_r
+\max(\|\widehat g\|_\infty,\|\widehat T\|_\infty).
+$$
+
+All quantities in this criterion use Pa. In particular, its traction update
+bounds the interface velocity jump componentwise by the pressure tolerance
+divided by $\alpha_0$. A loose sweep can leave slip; both histories are committed
+only after the configured criterion is met. Exhausting the iteration budget
+terminates the step.
+
+The automatic impedance uses the coronary scaling with a matrix-based isotropic
+small-strain modulus:
+
+$$
+\alpha_0=\sqrt{\rho_{s,0}E_m},\qquad
+E_m=\frac{9K_m\mu_m}{3K_m+\mu_m},\qquad
+\mu_m=a,\quad K_m=2\mu_v.
+$$
+
+Material coefficients are converted to Pa for this calculation. This scale
+omits directional fiber reinforcement and is an algorithmic choice, not a full
+anisotropic Young modulus. `-atrium_fsi_robin` supplies an explicit positive
+value in $\mathrm{Pa\,s/m}$.
+
+### ALE evolution and problem ownership
+
 A harmonic extension of solid displacement moves the fluid interior; opening
-caps remain fixed. With mesh velocity $a=(d_f^{n+1}-d_f^n)/\Delta t$ and cell
-volume ratio $r_K=|K^n|/|K^{n+1}|$, the conservative first-order ALE residual is
+caps remain fixed. With $a=(d_f^{n+1}-d_f^n)/\Delta t$ and cell-volume ratio
+$r_K=|K^n|/|K^{n+1}|$, the conservative first-order ALE residual is
 
 $$
 R_m^{\mathrm{ALE}}=
-\rho\frac{u_f^{n+1}-r_Ku_f^n}{\Delta t}
-+\rho[(u_f^n-a)\cdot\nabla]u_f^{n+1}
-+\rho\left(\frac12\nabla\cdot u_f^n-\nabla\cdot a\right)u_f^{n+1}
+\rho_f\frac{u_f^{n+1}-r_Ku_f^n}{\Delta t}
++\rho_f[(u_f^n-a)\cdot\nabla]u_f^{n+1}
++\rho_f\left(\frac12\nabla\cdot u_f^n-\nabla\cdot a\right)u_f^{n+1}
 -\nabla\cdot(2\mu_nD(u_f^{n+1}))+\nabla p^{n+1}.
 $$
 
 SUPG and PSPG use this residual and the relative advecting velocity. Previous
-velocity and solid internal states remain fixed through the coupling trials.
-The fluid boundary receives the Newmark solid velocity, whereas the ALE mesh
-velocity uses a backward displacement difference. These rates differ at finite
-time step; exact time-discrete agreement is not imposed.
+fluid velocity and solid internal states remain fixed through coupling trials.
+Mesh motion invalidates Rodin's geometric caches through its coordinate API.
+The same spaces, Problems, solvers, and MPI trace scatter plan are retained.
+Recovered gradients and wall-shear projections are computed once per accepted
+physical step and remain output/statistics operations.
 
-Mesh motion invalidates Rodin's geometric caches through the mesh coordinate
-API. The coupled driver retains the same spaces, Problems, solvers, and MPI
-interface scatter plans. Gradient and traction projections are reassembled.
+The common CSV records the Robin coefficient, update residual and tolerance,
+fluid/BDF1 interface velocity mismatch, fluid/Newmark endpoint mismatch, and
+shared-geometry mismatch separately. Fluid `MeshVelocity` gives the BDF1 target
+at the wall; solid `Velocity` gives the Newmark endpoint velocity. The two fields
+should not be identified at finite time step.
 
 All openings have zero imposed pressure and no prescribed flux. Fluid starts
 at rest and active wall contraction drives the flow. Backflow stabilization
-remains active. FSI currently excludes the 0D ventricular driver, species
-transport, and orthogonal subscales. The outer solid surface is unloaded and
-opening rims are clamped. No valve or circulatory model is represented.
+remains active. FSI excludes the 0D ventricular driver, species transport, and
+orthogonal subscales. The outer solid surface is unloaded and opening rims are
+clamped. No valve or circulatory model is represented.
 
 ## Units and mesh resource
 
@@ -289,7 +356,7 @@ python3 examples/Heart/Atrium/Tests/FSI.py --mpiexec mpiexec
 ```
 
 The coupled checks use a conforming tetrahedron/wedge tube and examine rest,
-contraction-driven flow, interface continuity, global flux balance, common
+contraction-driven flow, interface continuity to the Robin tolerance, global flux balance, common
 cavity volume, MPI consistency, and fluid feedback on the solid.
 
 The fluid checks use a generated tetrahedral tube and require MPI and MUMPS:

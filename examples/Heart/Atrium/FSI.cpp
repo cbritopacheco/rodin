@@ -11,27 +11,11 @@
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/vector.hpp>
 #include "FSI.h"
-#include "CavityVolume.h"
 
 namespace Rodin::Examples::Heart::Atrium
 {
   using namespace Geometry;
   using namespace Variational;
-
-  Fluid::MeshType FSI::makeInterface(const Fluid& fluid)
-  {
-    Fluid::MeshType::Builder builder;
-    builder.initialize(fluid.m_mesh);
-    for (auto face = fluid.m_mesh.getBoundary(); face; ++face)
-    {
-      if (face->getAttribute() == fluid.m_cfg.wall &&
-        fluid.m_mesh.getShard().isOwned(2, face->getIndex()))
-        builder.include(2, face->getIndex());
-    }
-    auto mesh = builder.finalize();
-    mesh.getConnectivity().compute(2, 0);
-    return mesh;
-  }
 
   template <class SourceField, class TargetField>
   ::VecScatter FSI::makeScatter(const Fluid::MeshType& sourceMesh,
@@ -149,22 +133,21 @@ namespace Rodin::Examples::Heart::Atrium
     : m_solid(solid),
       m_fluid(fluid),
       m_parameters(parameters),
-      m_interface(makeInterface(fluid)),
-      m_interfaceSpace(std::integral_constant<size_t, 1>{}, m_interface, 3),
       m_motionTrial(fluid.m_vh),
-      m_tractionTrial(m_interfaceSpace),
       m_motionTest(fluid.m_vh),
-      m_tractionTest(m_interfaceSpace),
       m_motion(m_motionTrial, m_motionTest),
-      m_traction(m_tractionTrial, m_tractionTest),
       m_motionSolver(m_motion),
-      m_tractionSolver(m_traction),
       m_previousMeshDisplacement(fluid.m_vh),
       m_importedTraction(solid.m_space),
+      m_trialTraction(solid.m_space),
       m_importedVelocity(solid.m_space),
+      m_interfaceVelocity(solid.m_space),
       m_previousRobinData(solid.m_space),
       m_previousResidual(solid.m_space),
       m_residualDifference(solid.m_space),
+      m_tractionResidual(solid.m_space),
+      m_previousTractionResidual(solid.m_space),
+      m_tractionResidualDifference(solid.m_space),
       m_robinCoefficient(parameters.robinCoefficient)
   {
     if (parameters.maximumIterations < 1 ||
@@ -192,19 +175,31 @@ namespace Rodin::Examples::Heart::Atrium
     fluid.m_cfg.prescribedOutletResistance = 0;
     fluid.m_cfg.inletImpedance = 0;
     fluid.m_cfg.inletTangentialDamping = 0;
-    // Boundary impedances are value coefficients in the retained flow form.
-    fluid.setupFlow();
     if (m_robinCoefficient == 0)
     {
-      m_robinCoefficient =
-        fluid.m_cfg.rho * std::cbrt(CavityVolume::measure(fluid.m_mesh)) / fluid.m_cfg.dt;
+      // Matrix-based isotropic scale; fiber reinforcement is not isotropic.
+      constexpr Real KilopascalsToPascals = 1e3;
+      const auto& passive = solid.m_parameters.passive;
+      const Real shear = KilopascalsToPascals * passive.matrixScale;
+      const Real bulk = KilopascalsToPascals * 2 * passive.volumePenalty;
+      const Real young = 9 * bulk * shear / (3 * bulk + shear);
+      m_robinCoefficient = std::sqrt(solid.m_parameters.density * young);
+      if (!(m_robinCoefficient > 0))
+      {
+        Alert::Exception() << "A positive FSI Robin coefficient is required"
+                           << Alert::Raise;
+      }
     }
-    // Pa s/m -> kPa s/mm. Robin data are expressed per reference solid area.
+    fluid.m_robinCoefficient = m_robinCoefficient;
+    m_diagnostics.robinCoefficient = m_robinCoefficient;
+    // Rebuild the retained form after setting its constant boundary coefficients.
+    fluid.setupFlow();
+    // Pa s/m -> kPa s/mm. Both sides use the same reference-area impedance.
     solid.m_robinCoefficient = 1e-6 * m_robinCoefficient;
-    const auto velocity = solid.m_predictedVelocity +
-      solid.m_velocityCoefficient *
-        (solid.m_displacement - solid.m_predictedDisplacement);
-    solid.m_mechanics += solid.m_robinCoefficient * solid.m_velocityCoefficient *
+    const Real interfaceVelocityDerivative = 1 / solid.m_timeStep;
+    const auto velocity =
+      interfaceVelocityDerivative * (solid.m_displacement - solid.m_previousDisplacement);
+    solid.m_mechanics += solid.m_robinCoefficient * interfaceVelocityDerivative *
       BoundaryIntegral(solid.m_increment, solid.m_test).over(Attribute{4});
     solid.m_mechanics += BoundaryIntegral(
       solid.m_robinCoefficient * velocity - solid.m_robinData, solid.m_test)
@@ -218,9 +213,6 @@ namespace Rodin::Examples::Heart::Atrium
         .on(Attribute{1}, Attribute{2}, Attribute{3}, Attribute{5}, Attribute{6});
     m_motionSolver.setPrefix(std::string("atrium_ale_")).setType(KSPCG);
     m_motionSolver.setTolerances(1e-12, 1e-30, 1e5, 10000);
-    m_tractionSolver.setPrefix(std::string("atrium_traction_")).setType(KSPCG);
-    m_tractionSolver.setTolerances(1e-12, 1e-30, 1e5, 10000);
-
     m_referenceVertices.resize(fluid.m_mesh.getShard().getVertexCount());
     for (auto vertex = fluid.m_mesh.getVertex(); vertex; ++vertex)
       m_referenceVertices[vertex->getIndex()] = vertex->getCoordinates();
@@ -233,16 +225,23 @@ namespace Rodin::Examples::Heart::Atrium
       m_referenceCellDeterminants[cell->getIndex()] = point.getJacobian().determinant();
       m_previousCellMeasures[cell->getIndex()] = cell->getMeasure();
     }
+    m_referenceFaceMeasures.resize(fluid.m_mesh.getShard().getPolytopeCount(2));
+    fluid.m_inverseInterfaceStretches.assign(m_referenceFaceMeasures.size(), 1);
+    for (auto face = fluid.m_mesh.getFace(); face; ++face)
+      m_referenceFaceMeasures[face->getIndex()] = face->getMeasure();
     m_previousMeshDisplacement = zero;
     m_importedTraction = zero;
+    m_trialTraction = zero;
+    m_interfaceVelocity = zero;
+    m_tractionResidual = zero;
+    m_previousTractionResidual = zero;
+    m_tractionResidualDifference = zero;
     m_importedVelocity = zero;
     m_previousRobinData = zero;
     m_previousResidual = zero;
     m_residualDifference = zero;
     m_solidToFluid = makeScatter(
       solid.m_mesh, solid.m_displacement, fluid.m_mesh, fluid.m_wallDisplacement);
-    m_tractionToSolid = makeScatter(
-      m_interface, m_tractionTrial.getSolution(), solid.m_mesh, m_importedTraction);
   }
 
   FSI::~FSI()
@@ -253,12 +252,6 @@ namespace Rodin::Examples::Heart::Atrium
       assert(ierr == PETSC_SUCCESS);
       (void)ierr;
     }
-    if (m_tractionToSolid)
-    {
-      const PetscErrorCode ierr = VecScatterDestroy(&m_tractionToSolid);
-      assert(ierr == PETSC_SUCCESS);
-      (void)ierr;
-    }
   }
 
   void FSI::initialize()
@@ -266,6 +259,7 @@ namespace Rodin::Examples::Heart::Atrium
     moveFluidMesh();
     m_previousMeshDisplacement.setData(m_fluid.m_meshDisplacement.getData());
     m_fluid.m_meshVelocity = Math::SpatialVector<Real>{0, 0, 0};
+    m_fluid.m_wallVelocity = Math::SpatialVector<Real>{0, 0, 0};
   }
 
   void FSI::restoreReference()
@@ -277,7 +271,6 @@ namespace Rodin::Examples::Heart::Atrium
   void FSI::moveFluidMesh()
   {
     transfer(m_solidToFluid, m_solid.m_displacement, m_fluid.m_wallDisplacement, 1e-3);
-    transfer(m_solidToFluid, m_solid.m_velocity, m_fluid.m_wallVelocity, 1e-3);
     restoreReference();
     m_motion.assemble();
     m_motion.solve(m_motionSolver);
@@ -291,6 +284,7 @@ namespace Rodin::Examples::Heart::Atrium
     m_fluid.m_meshDisplacement.setData(m_motionTrial.getSolution().getData());
     m_fluid.m_meshVelocity =
       (m_fluid.m_meshDisplacement - m_previousMeshDisplacement) / m_fluid.m_cfg.dt;
+    m_fluid.m_wallVelocity.setData(m_fluid.m_meshVelocity.getData());
     std::vector<Math::SpatialPoint> moved(m_referenceVertices.size());
     const Polytope::Traits vertexTraits(Polytope::Type::Point);
     for (auto vertex = m_fluid.m_mesh.getVertex(); vertex; ++vertex)
@@ -301,6 +295,14 @@ namespace Rodin::Examples::Heart::Atrium
     }
     for (Index i = 0; i < moved.size(); ++i)
       m_fluid.m_mesh.setVertexCoordinates(i, moved[i]);
+    for (auto face = m_fluid.m_mesh.getBoundary(); face; ++face)
+    {
+      if (face->getAttribute() == m_fluid.m_cfg.wall)
+      {
+        m_fluid.m_inverseInterfaceStretches[face->getIndex()] =
+          m_referenceFaceMeasures[face->getIndex()] / face->getMeasure();
+      }
+    }
     Real minimum = std::numeric_limits<Real>::infinity();
     for (auto cell = m_fluid.m_mesh.getCell(); cell; ++cell)
     {
@@ -322,60 +324,22 @@ namespace Rodin::Examples::Heart::Atrium
 
   void FSI::updateTraction()
   {
-    const auto normal = BoundaryNormal(m_fluid.m_mesh);
-    VectorFunction traction(3, [this, normal](const Point& reference) {
-      const Index faceIndex =
-        m_interface.getPolytopeMap(2).left.at(reference.getPolytope().getIndex());
-      const auto face = m_fluid.m_mesh.getFace(faceIndex);
-      const Point current(*face, reference.getReferenceCoordinates());
-      const auto n = normal.getValue(current);
-      Math::SpatialMatrix<Real> gradient(3, 3);
-      const std::array rows{m_fluid.m_gradRec0(current), m_fluid.m_gradRec1(current),
-        m_fluid.m_gradRec2(current)};
-      for (Index i = 0; i < 3; ++i)
-      {
-        for (Index j = 0; j < 3; ++j)
-          gradient(i, j) = rows[i](j);
-      }
-      const auto& cells =
-        m_fluid.m_mesh.getConnectivity().getIncidence(2, 3).at(faceIndex);
-      assert(cells.size() == 1);
-      const auto cell = m_fluid.m_mesh.getCell(cells.front());
-      const Point center(*cell, Math::SpatialPoint{.25, .25, .25});
-      const Real mu = m_fluid.viscosityAt(center);
-      const Real stretch = face->getMeasure() / reference.getPolytope().getMeasure();
-      return Math::SpatialVector<Real>(stretch *
-        (m_fluid.m_p.getSolution()(current) * n -
-          mu * (gradient + gradient.transpose()) * n));
-    });
-    // The interface itself is a two-dimensional mesh: integrate its cells.
-    // Opaque coefficient: traction is P1 on each affine interface triangle.
-    constexpr size_t TractionOrder = 2;
-    auto load = Integral(traction, m_tractionTest);
-    load.setOrder(TractionOrder);
-    m_traction = Integral(m_tractionTrial, m_tractionTest) - load;
-    m_traction.assemble();
-    m_traction.solve(m_tractionSolver);
-    ::KSPConvergedReason reason;
-    const PetscErrorCode ierr =
-      KSPGetConvergedReason(m_tractionSolver.getHandle(), &reason);
-    assert(ierr == PETSC_SUCCESS);
-    (void)ierr;
-    if (reason <= 0)
-    {
-      Alert::Exception() << "Interface traction projection did not converge"
-                         << Alert::Raise;
-    }
-    transfer(m_tractionToSolid, m_tractionTrial.getSolution(), m_importedTraction, 1e-3);
     transfer(m_solidToFluid, m_fluid.m_u.getSolution(), m_importedVelocity, 1e3,
       SCATTER_REVERSE);
+    transfer(
+      m_solidToFluid, m_fluid.m_wallVelocity, m_interfaceVelocity, 1e3, SCATTER_REVERSE);
+    // The Robin stress update is the fluid variational reaction, including
+    // the interface convective correction. All three traces are P1.
+    m_trialTraction = m_importedTraction +
+      m_solid.m_robinCoefficient * (m_importedVelocity - m_interfaceVelocity);
     m_solid.m_robinData =
-      m_importedTraction + m_solid.m_robinCoefficient * m_importedVelocity;
+      m_trialTraction + m_solid.m_robinCoefficient * m_importedVelocity;
   }
 
   void FSI::step()
   {
     m_diagnostics = Diagnostics{};
+    m_diagnostics.robinCoefficient = m_robinCoefficient;
     m_previousMeshDisplacement.setData(m_fluid.m_meshDisplacement.getData());
     for (auto cell = m_fluid.m_mesh.getCell(); cell; ++cell)
       m_previousCellMeasures[cell->getIndex()] = cell->getMeasure();
@@ -390,20 +354,24 @@ namespace Rodin::Examples::Heart::Atrium
       moveFluidMesh();
       if (!m_fluid.solveFlow())
         Alert::Exception() << "FSI fluid velocity exceeded its limit" << Alert::Raise;
-      m_fluid.computeWallShear();
       updateTraction();
-      PetscReal difference = 0, norm = 0;
+      PetscReal difference = 0, norm = 0, tractionDifference = 0, tractionNorm = 0;
+      m_tractionResidual = m_importedTraction - m_trialTraction;
       m_previousRobinData.axpy(-1, m_solid.m_robinData);
       PetscErrorCode ierr =
         VecNorm(m_previousRobinData.getData(), NORM_INFINITY, &difference);
       assert(ierr == PETSC_SUCCESS);
       ierr = VecNorm(m_solid.m_robinData.getData(), NORM_INFINITY, &norm);
       assert(ierr == PETSC_SUCCESS);
+      ierr = VecNorm(m_tractionResidual.getData(), NORM_INFINITY, &tractionDifference);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecNorm(m_trialTraction.getData(), NORM_INFINITY, &tractionNorm);
+      assert(ierr == PETSC_SUCCESS);
       (void)ierr;
       m_diagnostics.iterations = iteration;
-      m_diagnostics.robinResidual = 1e3 * difference;
-      m_diagnostics.robinTolerance =
-        m_parameters.absoluteTolerance + m_parameters.relativeTolerance * 1e3 * norm;
+      m_diagnostics.robinResidual = 1e3 * std::max(difference, tractionDifference);
+      m_diagnostics.robinTolerance = m_parameters.absoluteTolerance +
+        m_parameters.relativeTolerance * 1e3 * std::max(norm, tractionNorm);
       if (m_fluid.isRoot())
       {
         Alert::Info() << "FSI iteration " << iteration
@@ -412,6 +380,8 @@ namespace Rodin::Examples::Heart::Atrium
       }
       if (m_diagnostics.robinResidual <= m_diagnostics.robinTolerance)
       {
+        m_importedTraction.setData(m_trialTraction.getData());
+        transfer(m_solidToFluid, m_importedTraction, m_fluid.m_wallTraction, 1e3);
         converged = true;
         break;
       }
@@ -419,13 +389,23 @@ namespace Rodin::Examples::Heart::Atrium
       {
         m_residualDifference.setData(m_previousRobinData.getData());
         m_residualDifference.axpy(-1, m_previousResidual);
-        PetscScalar numerator = 0, denominator = 0;
+        m_tractionResidualDifference = m_tractionResidual - m_previousTractionResidual;
+        PetscScalar numerator = 0, denominator = 0, tractionNumerator = 0,
+                    tractionDenominator = 0;
         ierr = VecDot(
           m_previousResidual.getData(), m_residualDifference.getData(), &numerator);
         assert(ierr == PETSC_SUCCESS);
         ierr = VecDot(
           m_residualDifference.getData(), m_residualDifference.getData(), &denominator);
         assert(ierr == PETSC_SUCCESS);
+        ierr = VecDot(m_previousTractionResidual.getData(),
+          m_tractionResidualDifference.getData(), &tractionNumerator);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecDot(m_tractionResidualDifference.getData(),
+          m_tractionResidualDifference.getData(), &tractionDenominator);
+        assert(ierr == PETSC_SUCCESS);
+        numerator += tractionNumerator;
+        denominator += tractionDenominator;
         if (PetscRealPart(denominator) > 0)
         {
           const Real proposal =
@@ -438,12 +418,16 @@ namespace Rodin::Examples::Heart::Atrium
         }
       }
       m_previousResidual.setData(m_previousRobinData.getData());
+      m_previousTractionResidual.setData(m_tractionResidual.getData());
       m_solid.m_robinData.axpy(1 - relaxation, m_previousRobinData);
+      m_trialTraction.axpy(1 - relaxation, m_tractionResidual);
+      m_importedTraction.setData(m_trialTraction.getData());
+      transfer(m_solidToFluid, m_importedTraction, m_fluid.m_wallTraction, 1e3);
       m_diagnostics.relaxation = relaxation;
     }
     if (!converged)
       Alert::Exception() << "Atrium interface iteration did not converge" << Alert::Raise;
-    Real velocityMismatch = 0, displacementMismatch = 0;
+    Real velocityMismatch = 0, displacementMismatch = 0, newmarkMismatch = 0;
     transfer(m_solidToFluid, m_fluid.m_meshDisplacement, m_residualDifference, 1e3,
       SCATTER_REVERSE);
     const Polytope::Traits vertexTraits(Polytope::Type::Point);
@@ -455,6 +439,8 @@ namespace Rodin::Examples::Heart::Atrium
       {
         const Point point(*m_solid.m_mesh.getVertex(vertex), vertexTraits.getVertex(0));
         velocityMismatch = std::max(velocityMismatch,
+          1e-3 * (m_interfaceVelocity(point) - m_importedVelocity(point)).norm());
+        newmarkMismatch = std::max(newmarkMismatch,
           1e-3 * (m_solid.m_velocity(point) - m_importedVelocity(point)).norm());
         displacementMismatch = std::max(displacementMismatch,
           1e-3 * (m_solid.m_displacement(point) - m_residualDifference(point)).norm());
@@ -477,6 +463,8 @@ namespace Rodin::Examples::Heart::Atrium
     const auto& comm = m_fluid.m_mesh.getContext().getCommunicator();
     m_diagnostics.velocityMismatch =
       boost::mpi::all_reduce(comm, velocityMismatch, boost::mpi::maximum<Real>());
+    m_diagnostics.newmarkVelocityMismatch =
+      boost::mpi::all_reduce(comm, newmarkMismatch, boost::mpi::maximum<Real>());
     m_diagnostics.displacementMismatch =
       boost::mpi::all_reduce(comm, displacementMismatch, boost::mpi::maximum<Real>());
     const auto normal = BoundaryNormal(m_fluid.m_mesh);
@@ -485,6 +473,7 @@ namespace Rodin::Examples::Heart::Atrium
         .over(m_fluid.m_cfg.wall);
     m_fluid.m_flux.assemble();
     m_diagnostics.wallFlux = m_fluid.m_flux(m_fluid.m_one);
+    m_fluid.computeWallShear();
     m_solid.commitStep();
     m_fluid.commitStep();
   }

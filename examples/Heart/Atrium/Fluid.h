@@ -10,7 +10,7 @@
  *
  * Equal-order P1/P1 Oseen flow uses SUPG, PSPG, and grad-div stabilization.
  * Standalone flow has pressure-driven openings and a fixed no-slip wall.
- * FSI supplies interface velocity, harmonic ALE motion, and zero-pressure
+ * FSI supplies Robin interface data, harmonic ALE motion, and zero-pressure
  * open boundaries. Ventricular coupling, species transport, and orthogonal
  * subscales are optional standalone models and are disabled in FSI.
  * The fluid submesh retains the common MPI partition and parent identities;
@@ -532,9 +532,11 @@ namespace Rodin::Examples::Heart::Atrium
       VectorTestFunctionType m_v;
       ScalarTestFunctionType m_q;
       VectorGridFunctionType m_uOld;
-      VectorGridFunctionType m_wallVelocity, m_wallDisplacement;
+      VectorGridFunctionType m_wallVelocity, m_wallDisplacement, m_wallTraction;
       VectorGridFunctionType m_meshVelocity, m_meshDisplacement;
       bool m_coupled = false;
+      Real m_robinCoefficient = 0; ///< Reference-area impedance in Pa s/m.
+      std::vector<Real> m_inverseInterfaceStretches;
       std::vector<Real> m_massRatios;
 
       /// @brief Nodal speed; its maximum is exact for affine P1 tetrahedral velocity.

@@ -91,6 +91,7 @@ namespace Rodin::Examples::Heart::Atrium
       m_uOld(m_vh),
       m_wallVelocity(m_vh),
       m_wallDisplacement(m_vh),
+      m_wallTraction(m_vh),
       m_meshVelocity(m_vh),
       m_meshDisplacement(m_vh),
       m_speedMagnitude(m_sh),
@@ -463,6 +464,7 @@ namespace Rodin::Examples::Heart::Atrium
     m_uOld = zeroVector;
     m_wallVelocity = zeroVector;
     m_wallDisplacement = zeroVector;
+    m_wallTraction = zeroVector;
     m_meshVelocity = zeroVector;
     m_meshDisplacement = zeroVector;
     m_subOld = zeroVector;
@@ -600,9 +602,30 @@ namespace Rodin::Examples::Heart::Atrium
         BoundaryIntegral(Dot(uTangential, m_v)).over(m_inletSet)
 
       + BoundaryIntegral(inletBackflow * Dot(m_u, m_v)).over(m_inletSet) +
-      BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.outlet)
-
-      + DirichletBC(m_u, m_wallVelocity).on(m_cfg.wall);
+      BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.outlet);
+    if (m_coupled)
+    {
+      // Robin data live per reference area; integrate on the moving fluid wall.
+      RealFunction inverseStretch([this](const Point& point) {
+        return m_inverseInterfaceStretches.at(point.getPolytope().getIndex());
+      });
+      constexpr size_t RobinOrder = 2;
+      constexpr size_t InterfaceConvectionOrder = 3;
+      auto impedance = BoundaryIntegral(inverseStretch * m_u, m_v);
+      auto velocity = BoundaryIntegral(inverseStretch * m_wallVelocity, m_v);
+      auto traction = BoundaryIntegral(inverseStretch * m_wallTraction, m_v);
+      auto convection = BoundaryIntegral(Dot(transport, normal) * Dot(m_u, m_v));
+      impedance.setOrder(RobinOrder);
+      velocity.setOrder(RobinOrder);
+      traction.setOrder(RobinOrder);
+      convection.setOrder(InterfaceConvectionOrder);
+      m_flow += m_robinCoefficient * impedance.over(m_cfg.wall);
+      m_flow -= m_robinCoefficient * velocity.over(m_cfg.wall);
+      m_flow += traction.over(m_cfg.wall);
+      m_flow -= (0.5 * rho) * convection.over(m_cfg.wall);
+    }
+    else
+      m_flow += DirichletBC(m_u, m_wallVelocity).on(m_cfg.wall);
     if (m_cfg.useVMS)
     {
       m_flow -= VMSConvectionLinearIntegrator(
