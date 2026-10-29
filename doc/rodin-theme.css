@@ -783,6 +783,11 @@ body
   background: var(--dim-color);
 }
 @media screen and (min-width: 992px) {
+  /* Leave a gutter between the aligned dividers and full-width article blocks. */
+  main article > .m-container > .m-row > .m-col-l-10 {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
   #navigation > .m-container > .m-row { position: relative; }
   #navigation #m-navbar-brand {
     position: absolute;
@@ -820,7 +825,7 @@ main article .m-col-l-10:has(> .rodin-main-brand) > h1 {
     top: 0;
     bottom: 0;
     width: 1px;
-    background: var(--line-color);
+    background: color-mix(in srgb, var(--line-color) 75%, var(--dim-color));
   }
   .rodin-page-nav.rodin-page-nav-fit[data-side="left"] { padding-right: .75rem; }
   .rodin-page-nav.rodin-page-nav-fit[data-side="left"]::before { right: calc(-1rem - .5px); }
