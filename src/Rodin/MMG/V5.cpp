@@ -13,21 +13,21 @@
 #include "libmmg3d.h"
 #include "mmg2d/libmmg2d.h"
 
-#include "MMG5.h"
+#include "V5.h"
 
 namespace Rodin::MMG
 {
-  MMG5::MMG5()
+  Base::Base()
     : m_ridgeDetection(true)
   {}
 
-  MMG5_pMesh MMG5::createMesh(size_t version, size_t dim, Optional<size_t> spaceDim)
+  MMG5_pMesh V5::Mesh::create(size_t version, size_t dim, Optional<size_t> spaceDim)
   {
     const size_t embedding = spaceDim.value_or(dim);
     if (!((dim == 2 && (embedding == 2 || embedding == 3)) ||
           (dim == 3 && embedding == 3)))
     {
-      MMG5Exception(__func__)
+      MMGException(__func__)
         << "Unsupported MMG mesh dimensions: topology " << dim << ", embedding "
         << embedding << ". Supported topology/embedding dimensions are 2/2, 2/3, and 3/3."
         << Alert::Raise;
@@ -35,8 +35,8 @@ namespace Rodin::MMG
 
     MMG5_pMesh res;
     MMG5_SAFE_CALLOC(res, 1, MMG5_Mesh,
-      MMG5Exception(__func__) << "Failed to allocate memory for the mesh."
-                              << Alert::Raise);
+      MMGException(__func__) << "Failed to allocate memory for the mesh."
+                             << Alert::Raise);
     const bool isSurface = dim == 2 && embedding == 3;
     if (isSurface)
     {
@@ -61,7 +61,7 @@ namespace Rodin::MMG
     return res;
   }
 
-  bool MMG5::isSurfaceMesh(const MMG5_pMesh mesh)
+  bool V5::Mesh::isSurface(const MMG5_pMesh mesh)
   {
     assert(mesh->dim >= 2);
     switch (mesh->dim)
@@ -75,7 +75,7 @@ namespace Rodin::MMG
     }
   }
 
-  void MMG5::copyMesh(const MMG5_pMesh src, MMG5_pMesh dst)
+  void V5::Mesh::copy(const MMG5_pMesh src, MMG5_pMesh dst)
   {
     assert(src);
     assert(dst);
@@ -91,7 +91,7 @@ namespace Rodin::MMG
     // MMG5_int* : mesh->adja
     if (src->adja)
     {
-      const size_t entriesPerCell = src->dim == 2 || isSurfaceMesh(src) ? 3 : 4;
+      const size_t entriesPerCell = src->dim == 2 || V5::Mesh::isSurface(src) ? 3 : 4;
       const size_t cellCount = entriesPerCell == 3 ? src->ntmax : src->nemax;
       constexpr size_t adjacencyPadding = 5;
       const size_t adjacencySize = entriesPerCell * cellCount + adjacencyPadding;
@@ -292,15 +292,15 @@ namespace Rodin::MMG
       dst->nameout = nullptr;
   }
 
-  MMG5_pSol MMG5::createSolution(MMG5_pMesh mesh, size_t vdim)
+  MMG5_pSol V5::Solution::create(MMG5_pMesh mesh, size_t vdim)
   {
     assert(mesh);
     if (vdim < 1 || vdim > 3)
       return nullptr;
     MMG5_pSol res = nullptr;
     MMG5_SAFE_CALLOC(res, 1, MMG5_Sol,
-      MMG5Exception(__func__) << "Failed to allocate memory for MMG5_pSol."
-                              << Alert::Raise);
+      MMGException(__func__) << "Failed to allocate memory for MMG5_pSol."
+                             << Alert::Raise);
     res->ver = mesh->ver;
     res->size = vdim;
     if (vdim == 1)
@@ -316,8 +316,8 @@ namespace Rodin::MMG
       // So (res->size + 1) * (res->np + 1) seems to work for most
       // applications
       MMG5_SAFE_CALLOC(res->m, (res->size + 1) * (res->npmax + 1), Real,
-        MMG5Exception(__func__)
-          << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
+        MMGException(__func__) << "Failed to allocate memory for MMG5_pSol->m"
+                               << Alert::Raise);
     }
     else
     {
@@ -327,7 +327,7 @@ namespace Rodin::MMG
     return res;
   }
 
-  MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
+  MMG5_pMesh V5::Mesh::toV5(const Rodin::Geometry::LocalMesh& src)
   {
     bool isSurface = src.isSurface();
     assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
@@ -357,8 +357,8 @@ namespace Rodin::MMG
       validate(ptr->getRequiredTetrahedra(), Geometry::Polytope::Type::Tetrahedron);
     }
 
-    MMG5_pMesh res =
-      createMesh(sMeshVersionFormatted, src.getDimension(), src.getSpaceDimension());
+    MMG5_pMesh res = V5::Mesh::create(
+      V5::Mesh::sMeshVersionFormatted, src.getDimension(), src.getSpaceDimension());
 
     res->npi = 0;
     res->nai = 0;
@@ -398,8 +398,8 @@ namespace Rodin::MMG
       MMGS_Set_commonFunc();
       if (!MMGS_zaldy(res))
       {
-        MMG5Exception(__func__)
-          << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+        MMGException(__func__) << "Memory allocation for MMG5_pMesh failed."
+                               << Alert::Raise;
       }
 
       // Copy points (always)
@@ -469,8 +469,8 @@ namespace Rodin::MMG
       MMG2D_Set_commonFunc();
       if (!MMG2D_zaldy(res))
       {
-        MMG5Exception(__func__)
-          << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+        MMGException(__func__) << "Memory allocation for MMG5_pMesh failed."
+                               << Alert::Raise;
       }
 
       // Copy points (always)
@@ -598,8 +598,8 @@ namespace Rodin::MMG
       MMG3D_Set_commonFunc();
       if (!MMG3D_zaldy(res))
       {
-        MMG5Exception(__func__)
-          << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+        MMGException(__func__) << "Memory allocation for MMG5_pMesh failed."
+                               << Alert::Raise;
       }
 
       // Copy points (always)
@@ -696,7 +696,7 @@ namespace Rodin::MMG
     }
     else
     {
-      MMG5Exception(__func__) << "Unhandled case." << Alert::Raise;
+      MMGException(__func__) << "Unhandled case." << Alert::Raise;
       return nullptr;
     }
 
@@ -796,7 +796,7 @@ namespace Rodin::MMG
     return res;
   }
 
-  MMG::Mesh MMG5::meshToRodin(const MMG5_pMesh src)
+  MMG::Mesh V5::Mesh::fromV5(const MMG5_pMesh src)
   {
     assert(src);
     MMG::Mesh::Builder build;
@@ -846,8 +846,8 @@ namespace Rodin::MMG
       }
       default:
       {
-        MMG5Exception(__func__)
-          << "Space dimension greater than 3 not supported." << Alert::Raise;
+        MMGException(__func__) << "Space dimension greater than 3 not supported."
+                               << Alert::Raise;
         break;
       }
     }
@@ -902,7 +902,7 @@ namespace Rodin::MMG
     return build.finalize();
   }
 
-  void MMG5::copySolution(const MMG5_pSol src, MMG5_pSol dst)
+  void V5::Solution::copy(const MMG5_pSol src, MMG5_pSol dst)
   {
     assert(src);
     assert(dst);
@@ -913,8 +913,8 @@ namespace Rodin::MMG
     if (dst->np)
     {
       MMG5_SAFE_CALLOC(dst->m, dst->size * (dst->npmax + 1), Real,
-        MMG5Exception(__func__)
-          << "Failed to allocate memory for the MMG5_pSol->m." << Alert::Raise);
+        MMGException(__func__) << "Failed to allocate memory for the MMG5_pSol->m."
+                               << Alert::Raise);
       std::copy(src->m, src->m + dst->size * (dst->np + 1), dst->m);
     }
     else
@@ -926,8 +926,8 @@ namespace Rodin::MMG
     {
       auto nameInLength = std::strlen(src->namein);
       MMG5_SAFE_CALLOC(dst->namein, nameInLength + 1, char,
-        MMG5Exception(__func__)
-          << "Failed to allocate memory for the MMG5_pSol->namein." << Alert::Raise);
+        MMGException(__func__) << "Failed to allocate memory for the MMG5_pSol->namein."
+                               << Alert::Raise);
       std::memcpy(dst->namein, src->namein, nameInLength + 1);
     }
     else
@@ -939,8 +939,8 @@ namespace Rodin::MMG
     {
       auto nameOutLength = std::strlen(src->nameout);
       MMG5_SAFE_CALLOC(dst->nameout, nameOutLength + 1, char,
-        MMG5Exception(__func__)
-          << "Failed to allocate memory for the MMG5_pSol->nameout." << Alert::Raise);
+        MMGException(__func__) << "Failed to allocate memory for the MMG5_pSol->nameout."
+                               << Alert::Raise);
       std::memcpy(dst->nameout, src->nameout, nameOutLength + 1);
     }
     else
@@ -949,7 +949,7 @@ namespace Rodin::MMG
     }
   }
 
-  void MMG5::swapSolution(MMG5_pSol a, MMG5_pSol b)
+  void V5::Solution::swap(MMG5_pSol a, MMG5_pSol b)
   {
     assert(a);
     assert(b);
@@ -968,7 +968,7 @@ namespace Rodin::MMG
     std::swap(a->ver, b->ver);
   }
 
-  void MMG5::destroySolution(MMG5_pSol sol)
+  void V5::Solution::destroy(MMG5_pSol sol)
   {
     if (sol)
     {
@@ -983,13 +983,13 @@ namespace Rodin::MMG
     sol = nullptr;
   }
 
-  void MMG5::destroyMesh(MMG5_pMesh mesh)
+  void V5::Mesh::destroy(MMG5_pMesh mesh)
   {
     assert(mesh);
     // The bundled MMG cleanup omits the level-set base-reference array.
     if (mesh->info.br)
       MMG5_DEL_MEM(mesh, mesh->info.br);
-    if (isSurfaceMesh(mesh))
+    if (V5::Mesh::isSurface(mesh))
     {
       MMGS_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &mesh, MMG5_ARG_end);
     }
@@ -1007,10 +1007,10 @@ namespace Rodin::MMG
     }
   }
 
-  MMG5& MMG5::setParameters(MMG5_pMesh mesh)
+  Base& Base::setParameters(MMG5_pMesh mesh)
   {
     assert(mesh);
-    bool isSurface = isSurfaceMesh(mesh);
+    bool isSurface = V5::Mesh::isSurface(mesh);
     switch (mesh->dim)
     {
       case 2:
@@ -1084,7 +1084,7 @@ namespace Rodin::MMG
       }
       default:
       {
-        MMG5Exception(__func__) << "Unhandled case." << Alert::Raise;
+        MMGException(__func__) << "Unhandled case." << Alert::Raise;
         break;
       }
     }
