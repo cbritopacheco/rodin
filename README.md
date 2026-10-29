@@ -487,6 +487,20 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
   <em>Click on any preview to open the full video or image.</em>
 </p>
 
+### CFD
+
+<table>
+  <tr>
+    <td align="center" valign="bottom" width="33%">
+      <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/CFD/AtriumP1P1/AtriumP1P1.mp4">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/CFD/AtriumP1P1/Preview.png" alt="AtriumP1P1 CFD simulation" width="300">
+      </a>
+      <br />
+      CFD simulation in an atrium
+    </td>
+  </tr>
+</table>
+
 ### Shape optimization
 
 <table>
@@ -523,38 +537,10 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
   <tr>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/TemperatureMinimization.webm">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/Preview.png?v=optimized" alt="Minimization of temperature over a 2D plaque" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/Preview.png?v=optimized" alt="Minimization of temperature over a 2D plaque" width="300">
       </a>
       <br />
       Minimization of temperature over a 2D plaque
-    </td>
-        <td align="center" valign="bottom" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
-      </a>
-      <br />
-      Placeholder
-    </td>
-        <td align="center" valign="bottom" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
-      </a>
-      <br />
-      Placeholder
-    </td>
-  </tr>
-</table>
-
-### CFD
-
-<table>
-  <tr>
-    <td align="center" valign="bottom" width="33%">
-      <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/CFD/AtriumP1P1/AtriumP1P1.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/CFD/AtriumP1P1/Preview.png" alt="AtriumP1P1 CFD simulation" width="100%">
-      </a>
-      <br />
-      CFD simulation in an atrium (AtriumP1P1 example)
     </td>
   </tr>
 </table>
@@ -576,13 +562,6 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
       </a>
       <br />
       CFD simulation of blood flow in an atrium (by <a href="https://cfdusach.cl/">CFD Lab at USACH</a>)
-    </td>
-        <td align="center" valign="bottom" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
-      </a>
-      <br />
-      Placeholder
     </td>
   </tr>
 </table>
