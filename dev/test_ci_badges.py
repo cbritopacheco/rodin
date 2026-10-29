@@ -43,7 +43,7 @@ class BadgeTest(unittest.TestCase):
         records = publisher.collect('abc')
         self.assertEqual(records['Build']['message'], 'cancelled')
         self.assertEqual(records['Tests']['color'], 'e87924')
-        self.assertEqual(records['Documentation']['message'], 'unknown')
+        self.assertEqual(records['Documentation']['message'], 'cancelled')
 
     def test_previous_commit_success_is_unknown(self):
         publisher, _ = self.fixture(source='old')
@@ -69,11 +69,35 @@ class BadgeTest(unittest.TestCase):
         self.assertEqual(records['Benchmarks']['message'], 'cancelled')
         self.assertEqual(publisher.collect('abc', 'failure', '10', 'abc')['Documentation']['message'], 'passing')
 
+    def test_documentation_reports_build_and_publication_progress(self):
+        cases = [
+            ('in_progress', None, 'queued', None, 'running'),
+            ('queued', None, 'queued', None, 'queued'),
+            ('completed', 'success', 'in_progress', None, 'running'),
+            ('completed', 'failure', 'completed', 'skipped', 'failing'),
+            ('completed', 'success', 'completed', 'failure', 'failing'),
+            ('completed', 'success', 'completed', 'success', 'passing'),
+        ]
+        for build_status, build_result, publish_status, publish_result, expected in cases:
+            with self.subTest(expected=expected, build=build_status, publish=publish_status):
+                publisher, _ = self.fixture()
+                original = publisher.request
+                def response(path, *args):
+                    if '/workflows/Documentation.yml/runs?' in path:
+                        return {'workflow_runs': [dict(id=20, head_sha='abc', status='queued', conclusion=None)]}
+                    if '/actions/runs/20/jobs?' in path:
+                        return {'jobs': [
+                            dict(name='Build-And-Deploy', status=build_status, conclusion=build_result),
+                            dict(name='Publish documentation', status=publish_status, conclusion=publish_result)]}
+                    return original(path, *args)
+                publisher.request = response
+                self.assertEqual(publisher.collect('abc')['Documentation']['message'], expected)
+
     def test_verified_deployment_override_is_tied_to_source_run_and_commit(self):
         publisher, _ = self.fixture()
         self.assertEqual(publisher.collect('abc', 'success', '10', 'abc')['Documentation']['message'], 'passing')
-        self.assertEqual(publisher.collect('abc', 'success', '11', 'abc')['Documentation']['message'], 'unknown')
-        self.assertEqual(publisher.collect('abc', 'success', '10', 'old')['Documentation']['message'], 'unknown')
+        self.assertEqual(publisher.collect('abc', 'success', '11', 'abc')['Documentation']['message'], 'cancelled')
+        self.assertEqual(publisher.collect('abc', 'success', '10', 'old')['Documentation']['message'], 'cancelled')
 
     def test_unavailable_documentation_lookup_keeps_other_results(self):
         publisher, _ = self.fixture()

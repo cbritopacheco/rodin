@@ -132,9 +132,17 @@ class Publisher:
             jobs = self.jobs(doc_run)
             if jobs is not None:
                 found = next((j for j in jobs if j['name'] == 'Publish documentation'), None)
-                if found:
-                    doc_status = state(found['status'], found.get('conclusion'))
-                elif doc_run['status'] != 'completed':
+                if any(j.get('conclusion') in {'failure', 'timed_out', 'startup_failure', 'action_required'} for j in jobs):
+                    doc_status = 'failure'
+                elif found and found.get('conclusion') == 'success':
+                    doc_status = 'success'
+                elif any(j['status'] == 'in_progress' for j in jobs):
+                    doc_status = 'running'
+                elif doc_run['status'] == 'completed':
+                    doc_status = state(doc_run['status'], doc_run.get('conclusion'))
+                    if doc_status == 'success':
+                        doc_status = 'unknown'
+                else:
                     doc_status = 'queued'
             # A publication step can report deployment immediately, before its
             # enclosing publication job has completed.
