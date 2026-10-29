@@ -95,6 +95,38 @@ class RecoveryTest(unittest.TestCase):
             self.recovery.execute()
         self.assertFalse(self.posted())
 
+    def test_unavailable_logs_do_not_block_other_verified_interruptions(self):
+        for missing_name, eligible_name in [("A missing", "Z eligible"), ("Z missing", "A eligible")]:
+            with self.subTest(missing=missing_name):
+                self.calls.clear()
+                self.jobs = [dict(self.jobs[0], id=12, name=missing_name),
+                             dict(self.jobs[0], id=14, name=eligible_name)]
+                original = self.api
+                def missing(endpoint, **kwargs):
+                    if endpoint.endswith("/jobs/12/logs"):
+                        raise RuntimeError("Logs unavailable")
+                    return original(endpoint, **kwargs)
+                recovery = ci_retry.Recovery("owner/repo", {"workflow_run": {"id": 8}}, missing)
+                self.assertIn("single retry", recovery.execute())
+                self.assertEqual(self.posted(), ["repos/owner/repo/actions/jobs/14/rerun"])
+                decisions = {job['id']: state for job, state, _ in recovery.rows}
+                self.assertEqual(decisions[12], "Inspection failed")
+                self.assertEqual(decisions[14], "Retry requested")
+                self.assertIn("Logs unavailable; no retry requested", recovery.summary())
+
+    def test_all_missing_logs_are_reported_before_inspection_fails(self):
+        self.jobs.append(dict(self.jobs[0], id=14, name="Other lane"))
+        original = self.api
+        def missing(endpoint, **kwargs):
+            if endpoint.endswith("/logs"):
+                raise RuntimeError("Logs unavailable")
+            return original(endpoint, **kwargs)
+        self.recovery.api = missing
+        with self.assertRaisesRegex(RuntimeError, "Logs unavailable"):
+            self.recovery.execute()
+        self.assertFalse(self.posted())
+        self.assertEqual({job['id'] for job, _, _ in self.recovery.rows}, {12, 14})
+
     def test_summary_reports_every_failure_and_exact_log_links(self):
         self.jobs += [dict(self.jobs[0], id=14, name="Other | <lane>")]
         self.recovery.message = self.recovery.execute()

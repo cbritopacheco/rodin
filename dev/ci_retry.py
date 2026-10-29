@@ -80,6 +80,7 @@ class Recovery:
         for job in jobs:
             histories.setdefault(job["name"], []).append(job)
         candidates = []
+        inspection_errors = []
         for name, history in sorted(histories.items()):
             job = max(history, key=lambda item: item["id"])
             if job.get("conclusion") not in {"failure", "cancelled", "timed_out"}:
@@ -94,9 +95,10 @@ class Recovery:
                 continue
             try:
                 logs = self.api(f"{self.prefix}/actions/jobs/{job['id']}/logs", raw=True)
-            except Exception:
+            except Exception as error:
                 self.rows.append((job, "Inspection failed", "Logs unavailable; no retry requested"))
-                raise
+                inspection_errors.append(error)
+                continue
             failure = FAILURE.search(logs)
             if failure:
                 self.rows.append((job, "No retry", "Failure evidence: " + failure.group()))
@@ -121,6 +123,11 @@ class Recovery:
             return (f"Requested the single retry for job {job['id']} ({job['name']}) at "
                     f"{run['head_sha']}. GitHub also reruns its dependents. "
                     "All numerical and completeness gates remain mandatory.")
+        # An unavailable log never qualifies its lane for recovery, but must
+        # not discard independently verified interruptions in other lanes. If
+        # nothing can be retried, retain the inspection failure as an error.
+        if inspection_errors:
+            raise inspection_errors[0]
         return "No eligible interrupted job remains; failures require investigation."
 
     def summary(self):
