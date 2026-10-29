@@ -146,12 +146,11 @@ namespace Rodin::Tests::Benchmarks
         const Math::Vector<Real> wrong = exact.array() + Real(1);
         const Real wrongResidual = residual(wrong);
         using System = std::remove_reference_t<decltype(system)>;
-        using SolverType = std::conditional_t<BlockGMRES,
-          Solver::GMRES<System, StokesBlockPreconditioner>, Solver::SparseLU<System>>;
+        using SolverType =
+          std::conditional_t<BlockGMRES, Solver::GMRES<System>, Solver::SparseLU<System>>;
         Optional<SolverType> solver;
         if constexpr (Solve)
         {
-          solver.emplace(problem);
           if constexpr (BlockGMRES)
           {
             BilinearForm pressureMass(p, q);
@@ -159,13 +158,18 @@ namespace Rodin::Tests::Benchmarks
             integrand.setOrder(QuadratureOrder);
             pressureMass = integrand;
             pressureMass.assemble();
-            solver->getPreconditioner().configure(
+            StokesBlockPreconditioner pc;
+            pc.configure(
               std::move(pressureMass.getOperator()), problem.getTrialOffsets()[1]);
+            solver.emplace(problem, pc);
             solver->setRestart(60).setMaxIterations(1200).setTolerance(1e-13);
             system.getSolution().setZero();
           }
           else
+          {
+            solver.emplace(problem);
             solver->setRefinementSteps(1);
+          }
           solver->solve(system);
         }
         const auto coefficientError = [&]() {

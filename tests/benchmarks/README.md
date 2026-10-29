@@ -98,7 +98,9 @@ solver workloads additionally require solver success, coefficient reproduction
 and the true solved residual; all existing thresholds are unchanged.
 
 `RodinStokesGMRESBenchmarks` uses the production native
-`Solver::GMRES<System, StokesBlockPreconditioner>` API. Its benchmark-owned
+`Solver::GMRES<System>` API, constructed with a configured
+`StokesBlockPreconditioner`. The preconditioner type is retained inside the
+solver's private Eigen backend. Its benchmark-owned
 preconditioner applies incomplete Cholesky to the velocity block and an LDLT
 pressure mass solve for the Schur approximation, including the explicit mean
 constraint. Pressure mass storage has shared immutable ownership across solver

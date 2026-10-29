@@ -40,29 +40,29 @@
  * ```
  *
  * @par Custom native preconditioners
- * `GMRES<LinearSystem, Preconditioner>` accepts an Eigen-compatible
- * preconditioner and exposes its owned configuration through getPreconditioner().
- * The default void parameter preserves the existing native diagonal
- * preconditioner and PETSc KSP specialization. Custom types must support copy
- * assignment of valid configuration. Types containing noncopyable numerical
- * factors should copy settings and immutable owned inputs into a fresh state;
- * compute rebuilds factors independently for every solver instance and solve.
- * A failed preconditioner setup leaves the supplied solution unchanged.
+ * Both GMRES(problem) and GMRES(problem, pc) produce GMRES<LinearSystem>.
+ * The native specialization owns a private backend whose Eigen solver retains
+ * the concrete preconditioner type throughout its numerical loop. Preconditioner
+ * configuration is copied at construction; it must own or safely share its
+ * inputs. Solver copies clone configuration into fresh, independent backends.
+ * No dispatch is added within Krylov iterations or preconditioner applications.
+ * The default diagonal preconditioner and PETSc KSP specialization are unchanged.
+ * A failed setup leaves the supplied solution unchanged.
  *
  * @see <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html">GMRES</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_GMRES_H
 #define RODIN_SOLVER_GMRES_H
 
+#include <limits>
+#include <memory>
 #include <type_traits>
 #include <Eigen/Core>
 #include <unsupported/Eigen/IterativeSolvers>
-
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/Matrix.h"
-
 #include "ForwardDecls.h"
 #include "Rodin/Types.h"
 #include "LinearSolver.h"
@@ -70,449 +70,427 @@
 namespace Rodin::FormLanguage
 {
   /// @brief Form-language traits for GMRES solvers.
-  template <class LinearSystem, class Preconditioner>
-  struct Traits<Solver::GMRES<LinearSystem, Preconditioner>>
+  template <class LinearSystem>
+  struct Traits<Solver::GMRES<LinearSystem>>
   {
-    /// @brief Linear system type.
     using LinearSystemType = LinearSystem;
   };
 }
+
+/// @cond INTERNAL
+namespace Rodin::Solver::Internal
+{
+  /**
+   * @brief Owns an Eigen GMRES backend independently of its preconditioner type.
+   * @tparam LinearSystem Native sparse or dense linear system.
+   *
+   * Settings and result inspection require no backend dispatch. One virtual call
+   * performs the complete compute/solve operation; Eigen's iterations remain
+   * statically typed. Configuration copies never copy the computed Eigen solver.
+   */
+  template <class LinearSystem>
+  class EigenGMRES
+  {
+    private:
+      using Operator = typename FormLanguage::Traits<LinearSystem>::OperatorType;
+      using Scalar = typename Operator::Scalar;
+
+      struct Settings
+      {
+        Optional<Real> tolerance;
+        Optional<size_t> maximumIterations;
+        Optional<size_t> restart;
+      };
+
+      struct Result
+      {
+        Eigen::ComputationInfo status;
+        size_t iterations;
+        Real error;
+      };
+
+      struct Backend
+      {
+        virtual ~Backend() = default;
+        virtual std::unique_ptr<Backend> cloneConfiguration() const = 0;
+        virtual Result solve(LinearSystem& system, const Settings& settings) = 0;
+      };
+
+      template <class Preconditioner>
+      class EigenBackend final : public Backend
+      {
+        public:
+          explicit EigenBackend(const Preconditioner& configuration)
+            : m_configuration(configuration)
+          {
+            m_solver.preconditioner() = m_configuration;
+          }
+
+          std::unique_ptr<Backend> cloneConfiguration() const override
+          {
+            return std::make_unique<EigenBackend>(m_configuration);
+          }
+
+          Result solve(LinearSystem& system, const Settings& settings) override
+          {
+            if (settings.tolerance)
+              m_solver.setTolerance(*settings.tolerance);
+            if (settings.maximumIterations)
+              m_solver.setMaxIterations(*settings.maximumIterations);
+            if (settings.restart)
+              m_solver.set_restart(*settings.restart);
+            m_solver.compute(system.getOperator());
+            if (m_solver.info() != Eigen::Success)
+              return {m_solver.info(), 0, std::numeric_limits<Real>::infinity()};
+            if (system.getSolution().size() == system.getVector().size())
+            {
+              system.getSolution() =
+                m_solver.solveWithGuess(system.getVector(), system.getSolution());
+            }
+            else
+              system.getSolution() = m_solver.solve(system.getVector());
+            return {m_solver.info(), size_t(m_solver.iterations()), m_solver.error()};
+          }
+
+        private:
+          const Preconditioner m_configuration;
+          Eigen::GMRES<Operator, Preconditioner> m_solver;
+      };
+
+    public:
+      /// @brief Constructs the unchanged Eigen default diagonal backend.
+      EigenGMRES()
+        : EigenGMRES(Eigen::DiagonalPreconditioner<Scalar>{})
+      {}
+
+      /// @brief Copies preconditioner configuration into a typed owned backend.
+      template <class Preconditioner>
+      explicit EigenGMRES(const Preconditioner& configuration)
+        : m_backend(std::make_unique<EigenBackend<Preconditioner>>(configuration)),
+          m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
+      {
+        static_assert(std::is_copy_constructible_v<Preconditioner> &&
+            std::is_copy_assignable_v<Preconditioner>,
+          "GMRES preconditioners must support copying their configuration.");
+      }
+
+      /// @brief Copies settings and configuration, without copying factors or results.
+      EigenGMRES(const EigenGMRES& other)
+        : m_backend(other.m_backend->cloneConfiguration()),
+          m_settings(other.m_settings),
+          m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
+      {}
+
+      /// @brief Moves settings into a fresh backend while leaving factors independent.
+      EigenGMRES(EigenGMRES&& other)
+        : EigenGMRES(static_cast<const EigenGMRES&>(other))
+      {}
+
+      /// @brief Records the backend tolerance for the next solve.
+      void setTolerance(Real tolerance)
+      {
+        m_settings.tolerance = tolerance;
+      }
+
+      /// @brief Records the explicit iteration limit.
+      void setMaxIterations(size_t count)
+      {
+        m_settings.maximumIterations = count;
+      }
+
+      /// @brief Records the explicit restart dimension.
+      void setRestart(size_t count)
+      {
+        m_settings.restart = count;
+      }
+
+      /// @brief Dispatches one complete backend operation and records its diagnostics.
+      void solve(LinearSystem& system)
+      {
+        m_result = m_backend->solve(system, m_settings);
+      }
+
+      /// @brief Returns whether the most recent operation succeeded.
+      Boolean success() const
+      {
+        return m_result.status == Eigen::Success;
+      }
+
+      /// @brief Returns the last completed backend iteration count.
+      size_t getIterationNumber() const
+      {
+        return m_result.iterations;
+      }
+
+      /// @brief Returns the backend estimate, not an independently measured residual.
+      Real getError() const
+      {
+        return m_result.error;
+      }
+
+    private:
+      std::unique_ptr<Backend> m_backend;
+      Settings m_settings;
+      Result m_result;
+  };
+}
+
+/// @endcond
 
 namespace Rodin::Solver
 {
   /**
    * @defgroup GMRESSpecializations GMRES Template Specializations
-   * @brief Template specializations of the GMRES class.
-   * @see @ref GMRES
-   *
-   * | Specialization | Description |
-   * |----------------|-------------|
-   * | @ref GMRES "GMRES<LinearSystem<SparseMatrix<Scalar>, Vector<Scalar>>>" | Iterative GMRES solver for sparse systems. |
-   * | @ref GMRES "GMRES<LinearSystem<Matrix<Scalar>, Vector<Scalar>>>" | Iterative GMRES solver for dense systems. |
-   * | @ref GMRES "GMRES<PETSc::LinearSystem>" | PETSc-backed GMRES solver for distributed systems. |
+   * @ingroup RodinSolvers
+   * @brief Native sparse and dense GMRES implementations.
    */
+  /**
+   * @ingroup RodinCTAD
+   * @brief Deduces the linear system when selecting the default backend.
+   */
+  template <class LinearSystem>
+  GMRES(Variational::ProblemBase<LinearSystem>& problem) -> GMRES<LinearSystem>;
 
   /**
    * @ingroup RodinCTAD
-   * @brief CTAD (Class Template Argument Deduction) guide for GMRES
-   * @param pb Variational problem to operate on.
+   * @brief Deduces the linear system; the preconditioner type remains private.
    */
-  template <class LinearSystem>
-  GMRES(Variational::ProblemBase<LinearSystem>& pb) -> GMRES<LinearSystem>;
+  template <class LinearSystem, class Preconditioner>
+  GMRES(Variational::ProblemBase<LinearSystem>& problem, const Preconditioner& pc)
+    -> GMRES<LinearSystem>;
 
   /**
    * @ingroup GMRESSpecializations
-   * @brief GMRES solver for sparse systems.
-   *
-   * @tparam Scalar The scalar type (e.g., Real, Complex)
+   * @brief Native SparseMatrix GMRES with an owned, type-erased Eigen backend.
+   * @tparam Scalar Real or complex scalar field.
    */
-  template <class Scalar, class Preconditioner>
-  class GMRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>,
-    Preconditioner>
-    final : public LinearSolverBase<
+  template <class Scalar>
+  class GMRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
+    : public LinearSolverBase<
         Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
-      /// @brief Scalar value type.
+      /// @brief Assembled native system type.
+      using LinearSystemType =
+        Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
+
+      /// @brief Native operator type.
+      using OperatorType = Math::SparseMatrix<Scalar>;
+
+      /// @brief Native vector type.
+      using VectorType = Math::Vector<Scalar>;
+
+      /// @brief Coefficient scalar type.
       using ScalarType = Scalar;
 
-      /// @brief Eigen-compatible preconditioner; void retains the backend default.
-      using PreconditionerType = std::conditional_t<std::is_void_v<Preconditioner>,
-        Eigen::DiagonalPreconditioner<ScalarType>, Preconditioner>;
-
-      static_assert(std::is_copy_assignable_v<PreconditionerType>,
-        "GMRES preconditioners must support copying their configuration.");
-
-      /// @brief Vector type of the linear system.
-      using VectorType = Math::Vector<ScalarType>;
-
-      /// @brief Assembled operator type.
-      using OperatorType = Math::SparseMatrix<ScalarType>;
-
-      /// @brief Linear system type.
-      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
-
-      /// @brief Associated problem base type.
-      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
-
-      /// @brief Parent class type.
+      /// @brief Solver base type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
+      /// @brief Associated variational problem type.
+      using ProblemBaseType = typename Parent::ProblemBaseType;
+
+      /// @brief Associated problem type, retained for dense callers.
+      using ProblemType = ProblemBaseType;
       using Parent::solve;
 
-      /**
-       * @brief Constructs the solver from the problem to be solved.
-       * @param pb Variational problem to operate on.
-       */
-      GMRES(ProblemBaseType& pb)
-        : Parent(pb),
-          m_maxIterations(),
-          m_restart()
+      /// @brief Constructs the existing default-preconditioned native solver.
+      explicit GMRES(ProblemBaseType& problem)
+        : Parent(problem)
       {}
 
       /**
-       * @brief Copies the problem and configured settings into a fresh backend.
-       * @param other Object to copy from.
+       * @brief Copies a configured preconditioner into the private typed backend.
+       * @param problem Problem whose system is solved.
+       * @param pc Eigen-compatible, copy-configurable preconditioner.
        */
+      template <class Preconditioner>
+      GMRES(ProblemBaseType& problem, const Preconditioner& pc)
+        : Parent(problem),
+          m_native(pc)
+      {}
+
+      /// @brief Copies the problem and settings into fresh independent factors.
       GMRES(const GMRES& other)
         : Parent(other),
-          m_maxIterations(other.m_maxIterations),
-          m_restart(other.m_restart)
-      {
-        if constexpr (!std::is_void_v<Preconditioner>)
-          m_solver.preconditioner() = other.m_solver.preconditioner();
-        setTolerance(other.m_solver.tolerance());
-        if (m_maxIterations)
-          setMaxIterations(*m_maxIterations);
-        if (m_restart)
-          setRestart(*m_restart);
-      }
+          m_native(other.m_native)
+      {}
 
-      /**
-       * @brief Transfers the problem and configured settings into a fresh backend.
-       * @param other Object to move from.
-       */
+      /// @brief Transfers the problem while rebuilding an independent backend.
       GMRES(GMRES&& other)
         : Parent(std::move(other)),
-          m_maxIterations(other.m_maxIterations),
-          m_restart(other.m_restart)
-      {
-        if constexpr (!std::is_void_v<Preconditioner>)
-          m_solver.preconditioner() = other.m_solver.preconditioner();
-        setTolerance(other.m_solver.tolerance());
-        if (m_maxIterations)
-          setMaxIterations(*m_maxIterations);
-        if (m_restart)
-          setRestart(*m_restart);
-      }
+          m_native(std::move(other.m_native))
+      {}
 
-      /// @brief Destructor.
-      ~GMRES() = default;
-
-      /**
-       * @brief Accesses the preconditioner configuration before the next solve.
-       * @returns Mutable preconditioner owned by this solver.
-       *
-       * Custom preconditioners follow Eigen's compute/solve/info protocol.
-       * Copy assignment must preserve configuration with valid ownership;
-       * expensive backend factors should be rebuilt by compute, not shared
-       * between solver copies. Every solve recomputes the preconditioner.
-       */
-      PreconditionerType& getPreconditioner()
+      /// @brief Sets the relative backend tolerance.
+      GMRES& setTolerance(const Real& tolerance)
       {
-        return m_solver.preconditioner();
-      }
-
-      /// @brief Returns the owned preconditioner for inspection.
-      const PreconditionerType& getPreconditioner() const
-      {
-        return m_solver.preconditioner();
-      }
-
-      /**
-       * @brief Sets the convergence tolerance; returns a reference to this solver.
-       * @param tol Convergence tolerance.
-       * @returns Reference to this object after the operation.
-       */
-      GMRES& setTolerance(const Real& tol)
-      {
-        m_solver.setTolerance(tol);
+        m_native.setTolerance(tolerance);
         return *this;
       }
 
-      /**
-       * @brief Sets the maximum number of iterations; returns a reference to this solver.
-       * @param maxIt Maximum number of solver iterations.
-       * @returns Reference to this object after the operation.
-       */
-      GMRES& setMaxIterations(size_t maxIt)
+      /// @brief Sets the explicit iteration limit.
+      GMRES& setMaxIterations(size_t count)
       {
-        m_maxIterations = maxIt;
-        m_solver.setMaxIterations(maxIt);
+        m_native.setMaxIterations(count);
         return *this;
       }
 
-      /**
-       * @brief Sets the GMRES restart parameter (dimension of Krylov subspace before restart).
-       *
-       * Larger values can improve convergence but increase memory and cost per iteration.
-       * @param restart Number of iterations between solver restarts.
-       * @returns Reference to this object after the operation.
-       */
-      GMRES& setRestart(size_t restart)
+      /// @brief Sets the restart dimension controlling Krylov storage.
+      GMRES& setRestart(size_t count)
       {
-        m_restart = restart;
-        m_solver.set_restart(restart);
+        m_native.setRestart(count);
         return *this;
       }
 
-      /**
-       * @brief Solves the assembled linear system.
-       * @param axb Variational expression defining the problem.
-       */
-      void solve(LinearSystemType& axb) override
+      /// @brief Solves the system, preserving the supplied initial-guess behavior.
+      void solve(LinearSystemType& system) override
       {
-        m_solver.compute(axb.getOperator());
-        if (m_solver.info() != Eigen::Success)
-          return;
-        if (axb.getSolution().size() == axb.getVector().size())
-          axb.getSolution() = m_solver.solveWithGuess(axb.getVector(), axb.getSolution());
-        else
-          axb.getSolution() = m_solver.solve(axb.getVector());
+        m_native.solve(system);
       }
 
-      /**
-       * @brief Returns whether the most recent solve converged successfully.
-       * @returns Whether the operation completed successfully.
-       */
+      /// @brief Returns whether the last setup and solve succeeded.
       Boolean success() const
       {
-        return m_solver.info() == Eigen::Success;
+        return m_native.success();
       }
 
-      /**
-       * @brief Returns Eigen's iteration count for the most recent solve.
-       * @returns Solver-reported iteration count, without reinterpretation.
-       */
+      /// @brief Returns the last backend iteration count.
       size_t getIterationNumber() const
       {
-        return m_solver.iterations();
+        return m_native.getIterationNumber();
       }
 
-      /**
-       * @brief Returns Eigen's relative error estimate for the most recent solve.
-       *
-       * This backend estimate is not an independently evaluated true residual.
-       * Both diagnostics require a completed solve.
-       *
-       * @returns Solver-reported relative error estimate.
-       */
+      /// @brief Returns the backend error estimate, not the true residual.
       Real getError() const
       {
-        return m_solver.error();
+        return m_native.getError();
       }
 
-      /**
-       * @brief Returns a polymorphic copy of this solver.
-       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
-       */
+      /// @brief Copies configuration into a newly allocated solver owned by the caller.
       GMRES* copy() const noexcept override
       {
         return new GMRES(*this);
       }
 
     private:
-      Optional<size_t>
-        m_maxIterations; ///< Explicit iteration limit; absence retains Eigen's size-dependent default.
-      Optional<size_t> m_restart; ///< Explicit Krylov restart dimension.
-      Eigen::GMRES<OperatorType, PreconditionerType> m_solver;
+      Internal::EigenGMRES<LinearSystemType> m_native;
   };
 
   /**
    * @ingroup GMRESSpecializations
-   * @brief GMRES solver for dense systems.
-   *
-   * @tparam Scalar The scalar type (e.g., Real, Complex)
+   * @brief Native Matrix GMRES with an owned, type-erased Eigen backend.
+   * @tparam Scalar Real or complex scalar field.
    */
-  template <class Scalar, class Preconditioner>
-  class GMRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>,
-    Preconditioner>
-    final : public LinearSolverBase<
+  template <class Scalar>
+  class GMRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
+    : public LinearSolverBase<
         Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
-      /// @brief Scalar value type.
+      /// @brief Assembled native system type.
+      using LinearSystemType =
+        Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
+
+      /// @brief Native operator type.
+      using OperatorType = Math::Matrix<Scalar>;
+
+      /// @brief Native vector type.
+      using VectorType = Math::Vector<Scalar>;
+
+      /// @brief Coefficient scalar type.
       using ScalarType = Scalar;
 
-      /// @brief Eigen-compatible preconditioner; void retains the backend default.
-      using PreconditionerType = std::conditional_t<std::is_void_v<Preconditioner>,
-        Eigen::DiagonalPreconditioner<ScalarType>, Preconditioner>;
-
-      static_assert(std::is_copy_assignable_v<PreconditionerType>,
-        "GMRES preconditioners must support copying their configuration.");
-
-      /// @brief Vector type of the linear system.
-      using VectorType = Math::Vector<ScalarType>;
-
-      /// @brief Assembled operator type.
-      using OperatorType = Math::Matrix<ScalarType>;
-
-      /// @brief Linear system type.
-      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
-
-      /// @brief Problem type solved by this solver.
-      using ProblemType = Variational::ProblemBase<LinearSystemType>;
-
-      /// @brief Parent class type.
+      /// @brief Solver base type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
+      /// @brief Associated variational problem type.
+      using ProblemBaseType = typename Parent::ProblemBaseType;
+
+      /// @brief Associated problem type, retained for dense callers.
+      using ProblemType = ProblemBaseType;
       using Parent::solve;
 
-      /**
-       * @brief Constructs the solver from the problem to be solved.
-       * @param pb Variational problem to operate on.
-       */
-      GMRES(ProblemType& pb)
-        : Parent(pb),
-          m_maxIterations(),
-          m_restart()
+      /// @brief Constructs the existing default-preconditioned native solver.
+      explicit GMRES(ProblemBaseType& problem)
+        : Parent(problem)
       {}
 
       /**
-       * @brief Copies the problem and configured settings into a fresh backend.
-       * @param other Object to copy from.
+       * @brief Copies a configured preconditioner into the private typed backend.
+       * @param problem Problem whose system is solved.
+       * @param pc Eigen-compatible, copy-configurable preconditioner.
        */
+      template <class Preconditioner>
+      GMRES(ProblemBaseType& problem, const Preconditioner& pc)
+        : Parent(problem),
+          m_native(pc)
+      {}
+
+      /// @brief Copies the problem and settings into fresh independent factors.
       GMRES(const GMRES& other)
         : Parent(other),
-          m_maxIterations(other.m_maxIterations),
-          m_restart(other.m_restart)
-      {
-        if constexpr (!std::is_void_v<Preconditioner>)
-          m_solver.preconditioner() = other.m_solver.preconditioner();
-        setTolerance(other.m_solver.tolerance());
-        if (m_maxIterations)
-          setMaxIterations(*m_maxIterations);
-        if (m_restart)
-          setRestart(*m_restart);
-      }
+          m_native(other.m_native)
+      {}
 
-      /**
-       * @brief Transfers the problem and configured settings into a fresh backend.
-       * @param other Object to move from.
-       */
+      /// @brief Transfers the problem while rebuilding an independent backend.
       GMRES(GMRES&& other)
         : Parent(std::move(other)),
-          m_maxIterations(other.m_maxIterations),
-          m_restart(other.m_restart)
-      {
-        if constexpr (!std::is_void_v<Preconditioner>)
-          m_solver.preconditioner() = other.m_solver.preconditioner();
-        setTolerance(other.m_solver.tolerance());
-        if (m_maxIterations)
-          setMaxIterations(*m_maxIterations);
-        if (m_restart)
-          setRestart(*m_restart);
-      }
+          m_native(std::move(other.m_native))
+      {}
 
-      /// @brief Destructor.
-      ~GMRES() = default;
-
-      /**
-       * @brief Accesses the preconditioner configuration before the next solve.
-       * @returns Mutable preconditioner owned by this solver.
-       *
-       * Custom preconditioners follow Eigen's compute/solve/info protocol.
-       * Copy assignment must preserve configuration with valid ownership;
-       * expensive backend factors should be rebuilt by compute, not shared
-       * between solver copies. Every solve recomputes the preconditioner.
-       */
-      PreconditionerType& getPreconditioner()
+      /// @brief Sets the relative backend tolerance.
+      GMRES& setTolerance(const Real& tolerance)
       {
-        return m_solver.preconditioner();
-      }
-
-      /// @brief Returns the owned preconditioner for inspection.
-      const PreconditionerType& getPreconditioner() const
-      {
-        return m_solver.preconditioner();
-      }
-
-      /**
-       * @brief Sets the convergence tolerance; returns a reference to this solver.
-       * @param tol Convergence tolerance.
-       * @returns Reference to this object after the operation.
-       */
-      GMRES& setTolerance(const Real& tol)
-      {
-        m_solver.setTolerance(tol);
+        m_native.setTolerance(tolerance);
         return *this;
       }
 
-      /**
-       * @brief Sets the maximum number of iterations; returns a reference to this solver.
-       * @param maxIt Maximum number of solver iterations.
-       * @returns Reference to this object after the operation.
-       */
-      GMRES& setMaxIterations(size_t maxIt)
+      /// @brief Sets the explicit iteration limit.
+      GMRES& setMaxIterations(size_t count)
       {
-        m_maxIterations = maxIt;
-        m_solver.setMaxIterations(maxIt);
+        m_native.setMaxIterations(count);
         return *this;
       }
 
-      /**
-       * @brief Sets the Krylov restart dimension; returns a reference to this solver.
-       * @param restart Number of iterations between solver restarts.
-       * @returns Reference to this object after the operation.
-       */
-      GMRES& setRestart(size_t restart)
+      /// @brief Sets the restart dimension controlling Krylov storage.
+      GMRES& setRestart(size_t count)
       {
-        m_restart = restart;
-        m_solver.set_restart(restart);
+        m_native.setRestart(count);
         return *this;
       }
 
-      /**
-       * @brief Solves the assembled linear system.
-       * @param axb Variational expression defining the problem.
-       */
-      void solve(LinearSystemType& axb) override
+      /// @brief Solves the system, preserving the supplied initial-guess behavior.
+      void solve(LinearSystemType& system) override
       {
-        m_solver.compute(axb.getOperator());
-        if (m_solver.info() != Eigen::Success)
-          return;
-        if (axb.getSolution().size() == axb.getVector().size())
-          axb.getSolution() = m_solver.solveWithGuess(axb.getVector(), axb.getSolution());
-        else
-          axb.getSolution() = m_solver.solve(axb.getVector());
+        m_native.solve(system);
       }
 
-      /**
-       * @brief Returns whether the most recent solve converged successfully.
-       * @returns Whether the operation completed successfully.
-       */
+      /// @brief Returns whether the last setup and solve succeeded.
       Boolean success() const
       {
-        return m_solver.info() == Eigen::Success;
+        return m_native.success();
       }
 
-      /**
-       * @brief Returns Eigen's iteration count for the most recent solve.
-       * @returns Solver-reported iteration count, without reinterpretation.
-       */
+      /// @brief Returns the last backend iteration count.
       size_t getIterationNumber() const
       {
-        return m_solver.iterations();
+        return m_native.getIterationNumber();
       }
 
-      /**
-       * @brief Returns Eigen's relative error estimate for the most recent solve.
-       *
-       * This backend estimate is not an independently evaluated true residual.
-       * Both diagnostics require a completed solve.
-       *
-       * @returns Solver-reported relative error estimate.
-       */
+      /// @brief Returns the backend error estimate, not the true residual.
       Real getError() const
       {
-        return m_solver.error();
+        return m_native.getError();
       }
 
-      /**
-       * @brief Returns a polymorphic copy of this solver.
-       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
-       */
+      /// @brief Copies configuration into a newly allocated solver owned by the caller.
       GMRES* copy() const noexcept override
       {
         return new GMRES(*this);
       }
 
     private:
-      Optional<size_t>
-        m_maxIterations; ///< Explicit iteration limit; absence retains Eigen's size-dependent default.
-      Optional<size_t> m_restart; ///< Explicit Krylov restart dimension.
-      Eigen::GMRES<OperatorType, PreconditionerType> m_solver;
+      Internal::EigenGMRES<LinearSystemType> m_native;
   };
 }
-
 #endif

@@ -29,6 +29,11 @@ namespace Rodin::Tests::Unit
       std::shared_ptr<size_t> setups = std::make_shared<size_t>(0);
 
       CountingDiagonal() = default;
+      CountingDiagonal(const CountingDiagonal& other)
+        : scale(other.scale),
+          fail(other.fail),
+          setups(other.setups)
+      {}
       CountingDiagonal& operator=(const CountingDiagonal& other)
       {
         scale = other.scale;
@@ -42,8 +47,9 @@ namespace Rodin::Tests::Unit
       CountingDiagonal& compute(const Matrix& matrix)
       {
         ++*setups;
-        m_status = fail ? Eigen::NumericalIssue : Eigen::Success;
-        if (!fail)
+        m_status = (fail || matrix.coeff(0, 0) == Scalar(0)) ? Eigen::NumericalIssue
+                                                             : Eigen::Success;
+        if (m_status == Eigen::Success)
           m_diagonal.compute(matrix);
         return *this;
       }
@@ -85,7 +91,7 @@ namespace Rodin::Tests::Unit
   {
     using namespace Variational;
     using System = Math::LinearSystem<Matrix, Math::Vector<Scalar>>;
-    using SolverType = Solver::GMRES<System, CountingDiagonal<Scalar>>;
+    using SolverType = Solver::GMRES<System>;
     auto mesh = Geometry::LocalMesh::UniformGrid(Geometry::Polytope::Type::Segment, {8});
     P1<Scalar> space(mesh);
     TrialFunction u(space);
@@ -105,10 +111,28 @@ namespace Rodin::Tests::Unit
         matrix.coeffRef(i, i + 1) = Scalar(0.5);
     }
     system.getVector() = matrix * exact;
-    SolverType solver(problem);
-    solver.setTolerance(1e-13).setRestart(4).setMaxIterations(200);
-    solver.getPreconditioner().scale = 0.5;
-    const auto setups = solver.getPreconditioner().setups;
+    std::shared_ptr<size_t> setups;
+    const auto makeSolver = [&]() {
+      CountingDiagonal<Scalar> pc;
+      pc.scale = 0.5;
+      setups = pc.setups;
+      Solver::GMRES configured(problem, pc);
+      static_assert(std::is_same_v<decltype(configured), SolverType>);
+      configured.setTolerance(1e-13).setRestart(4).setMaxIterations(200);
+      // Mutating and then destroying the caller's configuration must be safe.
+      pc.fail = true;
+      return configured;
+    };
+    auto solver = makeSolver();
+    Solver::GMRES defaultSolver(problem);
+    static_assert(std::is_same_v<decltype(defaultSolver), decltype(solver)>);
+    Solver::GMRES identitySolver(problem, Eigen::IdentityPreconditioner{});
+    static_assert(std::is_same_v<decltype(identitySolver), decltype(solver)>);
+    identitySolver.setTolerance(1e-13).setMaxIterations(200);
+    system.getSolution().setZero();
+    identitySolver.solve(system);
+    EXPECT_TRUE(identitySolver.success());
+    EXPECT_LT((system.getSolution() - exact).norm() / exact.norm(), 1e-11);
     const auto check = [&](auto& tested) {
       const auto before = *setups;
       system.getSolution().setZero();
@@ -117,7 +141,16 @@ namespace Rodin::Tests::Unit
       EXPECT_GT(*setups, before);
       EXPECT_LT((system.getSolution() - exact).norm() / exact.norm(), 1e-11);
       EXPECT_LT((matrix * system.getSolution() - system.getVector()).norm(), 1e-10);
-      EXPECT_EQ(std::as_const(tested).getPreconditioner().scale, 0.5);
+      Eigen::GMRES<Matrix, CountingDiagonal<Scalar>> reference;
+      reference.preconditioner().scale = 0.5;
+      reference.setTolerance(1e-13);
+      reference.set_restart(4);
+      reference.setMaxIterations(200);
+      reference.compute(matrix);
+      const Math::Vector<Scalar> expected = reference.solve(system.getVector());
+      EXPECT_EQ(tested.getIterationNumber(), size_t(reference.iterations()));
+      EXPECT_EQ(tested.getError(), reference.error());
+      EXPECT_EQ((system.getSolution() - expected).norm(), 0);
     };
     check(solver);
     SolverType copied(solver);
@@ -126,13 +159,13 @@ namespace Rodin::Tests::Unit
     check(moved);
     std::unique_ptr<SolverType> cloned(solver.copy());
     check(*cloned);
-    solver.getPreconditioner().fail = true;
+    matrix.coeffRef(0, 0) = Scalar(0);
     system.getSolution().setConstant(Scalar(-3));
     const auto sentinel = system.getSolution().eval();
     solver.solve(system);
     EXPECT_FALSE(solver.success());
     EXPECT_EQ((system.getSolution() - sentinel).norm(), 0);
-    solver.getPreconditioner().fail = false;
+    matrix.coeffRef(0, 0) = Scalar(4);
     check(solver);
   }
 

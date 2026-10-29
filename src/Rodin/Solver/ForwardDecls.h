@@ -212,8 +212,6 @@ namespace Rodin::Solver
   /**
    * @brief Generalized minimal residual iterative solver.
    * @tparam LinearSystem Type of linear system to solve
-   * @tparam Preconditioner Copy-configurable native Eigen preconditioner, or void
-   * to retain the backend default. PETSc keeps its KSP configuration interface.
    *
    * GMRES is an iterative method for solving non-symmetric linear systems.
    *
@@ -225,7 +223,7 @@ namespace Rodin::Solver
    *
    * @see @ref GMRESSpecializations "GMRES Template Specializations"
    */
-  template <class LinearSystem, class Preconditioner = void>
+  template <class LinearSystem>
   class GMRES;
 
   /**
