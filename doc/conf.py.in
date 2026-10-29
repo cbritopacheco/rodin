@@ -39,7 +39,7 @@ M_CODE_FILTERS_POST = {'C++': cpp_highlighter()}
 
 THEME_COLOR = '#18191c'
 
-FAVICON = '@CMAKE_SOURCE_DIR@/brand/icons/favicon-navy.svg'
+FAVICON = '@CMAKE_SOURCE_DIR@/brand/icons/favicon-monogram.svg'
 
 SEARCH_NAME_SIZE_BYTES = 2
 

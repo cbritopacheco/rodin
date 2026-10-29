@@ -213,6 +213,32 @@ pre.m-code
   background: var(--code-background-color);
 }
 
+/* Keep blocks inside an anchored section clear of its selection indicator. */
+article .m-container-inflatable section[id]:target > :is(pre, .m-note, .m-frame, .m-block, .m-code-figure, .m-console-figure),
+article .m-container-inflatable section[id]:target section > :is(pre, .m-note, .m-frame, .m-block, .m-code-figure, .m-console-figure),
+article .m-container-inflatable section[id]:target .m-container-inflate > :is(pre, .m-note, .m-frame, .m-block, .m-code-figure, .m-console-figure)
+{
+  margin-left: 0;
+  margin-right: 0;
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+}
+
+article .m-container-inflatable section[id]:target > pre,
+article .m-container-inflatable section[id]:target section > pre,
+article .m-container-inflatable section[id]:target .m-container-inflate > pre
+{
+  border-left-width: 1px;
+  padding-left: 1rem;
+}
+
+article .m-container-inflatable section[id]:target :is(.m-code-figure, .m-console-figure)::before
+{
+  border-left-width: 0.125rem;
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+}
+
 .m-code .k,
 .m-code .kd,
 .m-code .kn,

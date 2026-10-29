@@ -5,6 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 //! [poisson-source]
+#include <cstdlib>
+
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
@@ -33,14 +35,15 @@ int main()
   RealFunction f = 1;
 
   Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero());
+  poisson = Integral(Grad(u), Grad(v)) - Integral(f, v)
+             + DirichletBC(u, Zero());
   //! [poisson-form]
 
   //! [poisson-solve]
   CG solver(poisson);
   solver.solve();
   if (!solver.success())
-    return 1;
+    return EXIT_FAILURE;
   //! [poisson-solve]
 
   //! [poisson-export]

@@ -24,11 +24,6 @@
   font-family: 'Manrope', sans-serif;
 }
 
-/* Anchored sections must not draw a competing line between coloured blocks. */
-article section:target:has(.m-block) {
-  border-left-color: transparent;
-}
-
 /* Keep the full-width layout and inline contents on smaller screens. */
 .rodin-page-nav
 {
