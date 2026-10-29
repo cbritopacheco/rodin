@@ -10,7 +10,7 @@ from ci_badges import Publisher, badge, state
 class BadgeTest(unittest.TestCase):
     def test_status_colours(self):
         cases = [('queued', None, 'queued', '2874c7'), ('in_progress', None, 'running', 'd49b16'),
-                 ('completed', 'success', 'success', '2e8540'), ('completed', 'failure', 'failure', 'c62828'),
+                 ('completed', 'success', 'passing', '2e8540'), ('completed', 'failure', 'failing', 'c62828'),
                  ('completed', 'timed_out', 'timed_out', 'c62828'),
                  ('completed', 'cancelled', 'cancelled', 'e87924'),
                  ('completed', 'skipped', 'skipped', 'e87924'),
@@ -51,12 +51,12 @@ class BadgeTest(unittest.TestCase):
 
     def test_documentation_uses_publication_job_independently(self):
         publisher, _ = self.fixture(documentation=dict(name='Publish documentation', status='completed', conclusion='success'))
-        self.assertEqual(publisher.collect('abc')['Documentation']['message'], 'success')
+        self.assertEqual(publisher.collect('abc')['Documentation']['message'], 'passing')
         self.assertEqual(publisher.collect('abc')['Benchmarks']['message'], 'cancelled')
 
     def test_verified_deployment_override_is_tied_to_source_run_and_commit(self):
         publisher, _ = self.fixture()
-        self.assertEqual(publisher.collect('abc', 'success', '10', 'abc')['Documentation']['message'], 'success')
+        self.assertEqual(publisher.collect('abc', 'success', '10', 'abc')['Documentation']['message'], 'passing')
         self.assertEqual(publisher.collect('abc', 'success', '11', 'abc')['Documentation']['message'], 'unknown')
         self.assertEqual(publisher.collect('abc', 'success', '10', 'old')['Documentation']['message'], 'unknown')
 

@@ -21,7 +21,7 @@ def state(status, conclusion):
 
 
 def badge(label, status, commit):
-    return {'schemaVersion': 1, 'label': label, 'message': status.replace('_', ' '),
+    return {'schemaVersion': 1, 'label': label, 'message': {'success': 'passing', 'failure': 'failing'}.get(status, status.replace('_', ' ')),
             'color': COLORS[status], 'labelColor': '555', 'style': 'flat', 'commit': commit}
 
 
