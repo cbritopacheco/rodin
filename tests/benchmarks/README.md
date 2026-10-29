@@ -88,6 +88,15 @@ rank.
 The Stokes assembly and solver registrations use `CASE_BATCH 1`: individual
 large cases can take many minutes outside their reported timed operations.
 Separate lanes retain every case while limiting work lost to a runner shutdown.
+The [runner resource budget](../README.md#github-runner-resource-budget) applies
+to the complete invocation, including untimed setup and numerical qualification.
+
+Stokes assembly qualification checks the exact affine patch residual and both
+wrong-field and missing-pressure sensitivity controls without constructing a
+solver. Every repeated assembly retains its exact-field residual check. The
+solver workload additionally requires successful SparseLU factorization,
+coefficient reproduction and the solved residual; all existing thresholds are
+unchanged.
 
 Non-root display reporters must redirect their output stream as well as suppress
 measurement callbacks: Google Benchmark writes `--benchmark_list_tests` output

@@ -125,9 +125,10 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-int main() {
+int main()
+{
   Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {8, 8});
-  P1 Vh(mesh);
+  P1 vh(mesh);
   std::cout << "Rodin installation verified!" << std::endl;
   return 0;
 }
@@ -459,27 +460,6 @@ manager.
 | RODIN_USE_SUITESPARSE  | Build with SuiteSparse support                    |
 | RODIN_SILENCE_WARNINGS | Silence warnings outputted by Rodin               |
 | RODIN_BUILD_PY         | Build Python bindings                             |
-
-## Development
-
-Rodin includes a GitHub Copilot custom agent called **Rodin** that assists with building and testing code changes.
-
-### Using the Rodin Agent
-
-The Rodin agent can help you:
-- Compile the Rodin codebase
-- Run unit tests, manufactured tests, and benchmarks
-- Troubleshoot build and test failures
-- Understand the build system
-
-To use the Rodin agent in GitHub Copilot Chat:
-```
-@Rodin build and test my changes
-@Rodin compile the code and run unit tests
-@Rodin help me fix this build error
-```
-
-For more information, see [.github/agents/README.md](.github/agents/README.md).
 
 ## Gallery
 
