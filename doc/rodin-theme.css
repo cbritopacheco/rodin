@@ -806,11 +806,6 @@ main article .m-col-l-10:has(> .rodin-main-brand) > h1 {
   .rodin-page-nav.rodin-page-nav-fit[data-side="right"] { padding-left: .75rem; }
 }
 
-@media screen and (min-width: 1200px) {
-  #navigation #m-navbar-brand {
-    width: var(--rodin-home-width, auto);
-  }
-}
 
 @media(max-width:359px) {
   #navigation #m-navbar-brand { margin-right: .25rem; padding-right: .25rem; }

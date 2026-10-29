@@ -75,11 +75,12 @@
   @code{.cpp}
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.scale(1.0 / 15.0);
   mesh.getConnectivity().compute(1, 2);
   @endcode
 
-  This creates a mesh with @f$ 2 \times 16^2 = 512 @f$ triangular cells
-  and @f$ 17^2 = 289 @f$ vertices.
+  This creates a mesh with @f$ 2 \times 15^2 = 450 @f$ triangular cells
+  and @f$ 16^2 = 256 @f$ vertices.
 
   @section examples-pdes-poisson-space Finite Element Space
 

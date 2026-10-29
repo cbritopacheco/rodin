@@ -58,11 +58,13 @@
   @code{.cpp}
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  mesh.scale(1.0 / 15.0);
   mesh.getConnectivity().compute(1, 2);
 
   P1 vh(mesh);
   TrialFunction u(vh);
   TestFunction  v(vh);
+  RealFunction f = 1;
 
   Problem problem(u, v);
   problem = Integral(Grad(u), Grad(v))

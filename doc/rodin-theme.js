@@ -59,6 +59,8 @@
   function initializeControl() {
     const brand = document.querySelector('#m-navbar-brand');
     if (!brand) return false;
+    brand.setAttribute('aria-label', 'Rodin home');
+    brand.setAttribute('title', 'Rodin home');
     if (document.querySelector('#rodin-theme-trigger')) return true;
     if (!brand.querySelector('.rodin-home-icon')) {
       const home = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
