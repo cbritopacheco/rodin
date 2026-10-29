@@ -77,166 +77,6 @@ namespace Rodin::FormLanguage
   };
 }
 
-/// @cond INTERNAL
-namespace Rodin::Solver::Internal
-{
-  /**
-   * @brief Owns an Eigen GMRES backend independently of its preconditioner type.
-   * @tparam LinearSystem Native sparse or dense linear system.
-   *
-   * Settings and result inspection require no backend dispatch. One virtual call
-   * performs the complete compute/solve operation; Eigen's iterations remain
-   * statically typed. Configuration copies never copy the computed Eigen solver.
-   */
-  template <class LinearSystem>
-  class EigenGMRES
-  {
-    private:
-      using Operator = typename FormLanguage::Traits<LinearSystem>::OperatorType;
-      using Scalar = typename Operator::Scalar;
-
-      struct Settings
-      {
-        Optional<Real> tolerance;
-        Optional<size_t> maximumIterations;
-        Optional<size_t> restart;
-      };
-
-      struct Result
-      {
-        Eigen::ComputationInfo status;
-        size_t iterations;
-        Real error;
-      };
-
-      struct Backend
-      {
-        virtual ~Backend() = default;
-        virtual std::unique_ptr<Backend> cloneConfiguration() const = 0;
-        virtual Result solve(LinearSystem& system, const Settings& settings) = 0;
-      };
-
-      template <class Preconditioner>
-      class EigenBackend final : public Backend
-      {
-        public:
-          explicit EigenBackend(const Preconditioner& configuration)
-            : m_configuration(configuration)
-          {
-            m_solver.preconditioner() = m_configuration;
-          }
-
-          std::unique_ptr<Backend> cloneConfiguration() const override
-          {
-            return std::make_unique<EigenBackend>(m_configuration);
-          }
-
-          Result solve(LinearSystem& system, const Settings& settings) override
-          {
-            if (settings.tolerance)
-              m_solver.setTolerance(*settings.tolerance);
-            if (settings.maximumIterations)
-              m_solver.setMaxIterations(*settings.maximumIterations);
-            if (settings.restart)
-              m_solver.set_restart(*settings.restart);
-            m_solver.compute(system.getOperator());
-            if (m_solver.info() != Eigen::Success)
-              return {m_solver.info(), 0, std::numeric_limits<Real>::infinity()};
-            if (system.getSolution().size() == system.getVector().size())
-            {
-              system.getSolution() =
-                m_solver.solveWithGuess(system.getVector(), system.getSolution());
-            }
-            else
-              system.getSolution() = m_solver.solve(system.getVector());
-            return {m_solver.info(), size_t(m_solver.iterations()), m_solver.error()};
-          }
-
-        private:
-          const Preconditioner m_configuration;
-          Eigen::GMRES<Operator, Preconditioner> m_solver;
-      };
-
-    public:
-      /// @brief Constructs the unchanged Eigen default diagonal backend.
-      EigenGMRES()
-        : EigenGMRES(Eigen::DiagonalPreconditioner<Scalar>{})
-      {}
-
-      /// @brief Copies preconditioner configuration into a typed owned backend.
-      template <class Preconditioner>
-      explicit EigenGMRES(const Preconditioner& configuration)
-        : m_backend(std::make_unique<EigenBackend<Preconditioner>>(configuration)),
-          m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
-      {
-        static_assert(std::is_copy_constructible_v<Preconditioner> &&
-            std::is_copy_assignable_v<Preconditioner>,
-          "GMRES preconditioners must support copying their configuration.");
-      }
-
-      /// @brief Copies settings and configuration, without copying factors or results.
-      EigenGMRES(const EigenGMRES& other)
-        : m_backend(other.m_backend->cloneConfiguration()),
-          m_settings(other.m_settings),
-          m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
-      {}
-
-      /// @brief Moves settings into a fresh backend while leaving factors independent.
-      EigenGMRES(EigenGMRES&& other)
-        : EigenGMRES(static_cast<const EigenGMRES&>(other))
-      {}
-
-      /// @brief Records the backend tolerance for the next solve.
-      void setTolerance(Real tolerance)
-      {
-        m_settings.tolerance = tolerance;
-      }
-
-      /// @brief Records the explicit iteration limit.
-      void setMaxIterations(size_t count)
-      {
-        m_settings.maximumIterations = count;
-      }
-
-      /// @brief Records the explicit restart dimension.
-      void setRestart(size_t count)
-      {
-        m_settings.restart = count;
-      }
-
-      /// @brief Dispatches one complete backend operation and records its diagnostics.
-      void solve(LinearSystem& system)
-      {
-        m_result = m_backend->solve(system, m_settings);
-      }
-
-      /// @brief Returns whether the most recent operation succeeded.
-      Boolean success() const
-      {
-        return m_result.status == Eigen::Success;
-      }
-
-      /// @brief Returns the last completed backend iteration count.
-      size_t getIterationNumber() const
-      {
-        return m_result.iterations;
-      }
-
-      /// @brief Returns the backend estimate, not an independently measured residual.
-      Real getError() const
-      {
-        return m_result.error;
-      }
-
-    private:
-      std::unique_ptr<Backend> m_backend;
-      Settings m_settings;
-      Result m_result;
-  };
-}
-
-/// @endcond
-
 namespace Rodin::Solver
 {
   /**
@@ -293,9 +133,73 @@ namespace Rodin::Solver
       using ProblemType = ProblemBaseType;
       using Parent::solve;
 
+    private:
+      struct Settings
+      {
+        Optional<Real> tolerance;
+        Optional<size_t> maximumIterations;
+        Optional<size_t> restart;
+      };
+
+      struct Result
+      {
+        Eigen::ComputationInfo status;
+        size_t iterations;
+        Real error;
+      };
+
+      struct Backend
+      {
+        virtual ~Backend() = default;
+        virtual std::unique_ptr<Backend> cloneConfiguration() const = 0;
+        virtual Result solve(LinearSystemType& system, const Settings& settings) = 0;
+      };
+
+      template <class Preconditioner>
+      class EigenBackend final : public Backend
+      {
+        public:
+          explicit EigenBackend(const Preconditioner& configuration)
+            : m_configuration(configuration)
+          {
+            m_solver.preconditioner() = m_configuration;
+          }
+
+          std::unique_ptr<Backend> cloneConfiguration() const override
+          {
+            return std::make_unique<EigenBackend>(m_configuration);
+          }
+
+          Result solve(LinearSystemType& system, const Settings& settings) override
+          {
+            if (settings.tolerance)
+              m_solver.setTolerance(*settings.tolerance);
+            if (settings.maximumIterations)
+              m_solver.setMaxIterations(*settings.maximumIterations);
+            if (settings.restart)
+              m_solver.set_restart(*settings.restart);
+            m_solver.compute(system.getOperator());
+            if (m_solver.info() != Eigen::Success)
+              return {m_solver.info(), 0, std::numeric_limits<Real>::infinity()};
+            if (system.getSolution().size() == system.getVector().size())
+            {
+              system.getSolution() =
+                m_solver.solveWithGuess(system.getVector(), system.getSolution());
+            }
+            else
+              system.getSolution() = m_solver.solve(system.getVector());
+            return {m_solver.info(), size_t(m_solver.iterations()), m_solver.error()};
+          }
+
+        private:
+          const Preconditioner m_configuration;
+          Eigen::GMRES<OperatorType, Preconditioner> m_solver;
+      };
+
+    public:
       /// @brief Constructs the existing default-preconditioned native solver.
       explicit GMRES(ProblemBaseType& problem)
-        : Parent(problem)
+        : GMRES(problem, Eigen::DiagonalPreconditioner<Scalar>{})
       {}
 
       /**
@@ -306,64 +210,73 @@ namespace Rodin::Solver
       template <class Preconditioner>
       GMRES(ProblemBaseType& problem, const Preconditioner& pc)
         : Parent(problem),
-          m_native(pc)
-      {}
+          m_backend(std::make_unique<EigenBackend<Preconditioner>>(pc)),
+          m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
+      {
+        static_assert(std::is_copy_constructible_v<Preconditioner> &&
+            std::is_copy_assignable_v<Preconditioner>,
+          "GMRES preconditioners must support copying their configuration.");
+      }
 
       /// @brief Copies the problem and settings into fresh independent factors.
       GMRES(const GMRES& other)
         : Parent(other),
-          m_native(other.m_native)
+          m_backend(other.m_backend->cloneConfiguration()),
+          m_settings(other.m_settings),
+          m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
       {}
 
       /// @brief Transfers the problem while rebuilding an independent backend.
       GMRES(GMRES&& other)
         : Parent(std::move(other)),
-          m_native(std::move(other.m_native))
+          m_backend(other.m_backend->cloneConfiguration()),
+          m_settings(other.m_settings),
+          m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
       {}
 
       /// @brief Sets the relative backend tolerance.
       GMRES& setTolerance(const Real& tolerance)
       {
-        m_native.setTolerance(tolerance);
+        m_settings.tolerance = tolerance;
         return *this;
       }
 
       /// @brief Sets the explicit iteration limit.
       GMRES& setMaxIterations(size_t count)
       {
-        m_native.setMaxIterations(count);
+        m_settings.maximumIterations = count;
         return *this;
       }
 
       /// @brief Sets the restart dimension controlling Krylov storage.
       GMRES& setRestart(size_t count)
       {
-        m_native.setRestart(count);
+        m_settings.restart = count;
         return *this;
       }
 
       /// @brief Solves the system, preserving the supplied initial-guess behavior.
       void solve(LinearSystemType& system) override
       {
-        m_native.solve(system);
+        m_result = m_backend->solve(system, m_settings);
       }
 
       /// @brief Returns whether the last setup and solve succeeded.
       Boolean success() const
       {
-        return m_native.success();
+        return m_result.status == Eigen::Success;
       }
 
       /// @brief Returns the last backend iteration count.
       size_t getIterationNumber() const
       {
-        return m_native.getIterationNumber();
+        return m_result.iterations;
       }
 
       /// @brief Returns the backend error estimate, not the true residual.
       Real getError() const
       {
-        return m_native.getError();
+        return m_result.error;
       }
 
       /// @brief Copies configuration into a newly allocated solver owned by the caller.
@@ -373,7 +286,9 @@ namespace Rodin::Solver
       }
 
     private:
-      Internal::EigenGMRES<LinearSystemType> m_native;
+      std::unique_ptr<Backend> m_backend;
+      Settings m_settings;
+      Result m_result;
   };
 
   /**
@@ -410,9 +325,73 @@ namespace Rodin::Solver
       using ProblemType = ProblemBaseType;
       using Parent::solve;
 
+    private:
+      struct Settings
+      {
+        Optional<Real> tolerance;
+        Optional<size_t> maximumIterations;
+        Optional<size_t> restart;
+      };
+
+      struct Result
+      {
+        Eigen::ComputationInfo status;
+        size_t iterations;
+        Real error;
+      };
+
+      struct Backend
+      {
+        virtual ~Backend() = default;
+        virtual std::unique_ptr<Backend> cloneConfiguration() const = 0;
+        virtual Result solve(LinearSystemType& system, const Settings& settings) = 0;
+      };
+
+      template <class Preconditioner>
+      class EigenBackend final : public Backend
+      {
+        public:
+          explicit EigenBackend(const Preconditioner& configuration)
+            : m_configuration(configuration)
+          {
+            m_solver.preconditioner() = m_configuration;
+          }
+
+          std::unique_ptr<Backend> cloneConfiguration() const override
+          {
+            return std::make_unique<EigenBackend>(m_configuration);
+          }
+
+          Result solve(LinearSystemType& system, const Settings& settings) override
+          {
+            if (settings.tolerance)
+              m_solver.setTolerance(*settings.tolerance);
+            if (settings.maximumIterations)
+              m_solver.setMaxIterations(*settings.maximumIterations);
+            if (settings.restart)
+              m_solver.set_restart(*settings.restart);
+            m_solver.compute(system.getOperator());
+            if (m_solver.info() != Eigen::Success)
+              return {m_solver.info(), 0, std::numeric_limits<Real>::infinity()};
+            if (system.getSolution().size() == system.getVector().size())
+            {
+              system.getSolution() =
+                m_solver.solveWithGuess(system.getVector(), system.getSolution());
+            }
+            else
+              system.getSolution() = m_solver.solve(system.getVector());
+            return {m_solver.info(), size_t(m_solver.iterations()), m_solver.error()};
+          }
+
+        private:
+          const Preconditioner m_configuration;
+          Eigen::GMRES<OperatorType, Preconditioner> m_solver;
+      };
+
+    public:
       /// @brief Constructs the existing default-preconditioned native solver.
       explicit GMRES(ProblemBaseType& problem)
-        : Parent(problem)
+        : GMRES(problem, Eigen::DiagonalPreconditioner<Scalar>{})
       {}
 
       /**
@@ -423,64 +402,73 @@ namespace Rodin::Solver
       template <class Preconditioner>
       GMRES(ProblemBaseType& problem, const Preconditioner& pc)
         : Parent(problem),
-          m_native(pc)
-      {}
+          m_backend(std::make_unique<EigenBackend<Preconditioner>>(pc)),
+          m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
+      {
+        static_assert(std::is_copy_constructible_v<Preconditioner> &&
+            std::is_copy_assignable_v<Preconditioner>,
+          "GMRES preconditioners must support copying their configuration.");
+      }
 
       /// @brief Copies the problem and settings into fresh independent factors.
       GMRES(const GMRES& other)
         : Parent(other),
-          m_native(other.m_native)
+          m_backend(other.m_backend->cloneConfiguration()),
+          m_settings(other.m_settings),
+          m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
       {}
 
       /// @brief Transfers the problem while rebuilding an independent backend.
       GMRES(GMRES&& other)
         : Parent(std::move(other)),
-          m_native(std::move(other.m_native))
+          m_backend(other.m_backend->cloneConfiguration()),
+          m_settings(other.m_settings),
+          m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
       {}
 
       /// @brief Sets the relative backend tolerance.
       GMRES& setTolerance(const Real& tolerance)
       {
-        m_native.setTolerance(tolerance);
+        m_settings.tolerance = tolerance;
         return *this;
       }
 
       /// @brief Sets the explicit iteration limit.
       GMRES& setMaxIterations(size_t count)
       {
-        m_native.setMaxIterations(count);
+        m_settings.maximumIterations = count;
         return *this;
       }
 
       /// @brief Sets the restart dimension controlling Krylov storage.
       GMRES& setRestart(size_t count)
       {
-        m_native.setRestart(count);
+        m_settings.restart = count;
         return *this;
       }
 
       /// @brief Solves the system, preserving the supplied initial-guess behavior.
       void solve(LinearSystemType& system) override
       {
-        m_native.solve(system);
+        m_result = m_backend->solve(system, m_settings);
       }
 
       /// @brief Returns whether the last setup and solve succeeded.
       Boolean success() const
       {
-        return m_native.success();
+        return m_result.status == Eigen::Success;
       }
 
       /// @brief Returns the last backend iteration count.
       size_t getIterationNumber() const
       {
-        return m_native.getIterationNumber();
+        return m_result.iterations;
       }
 
       /// @brief Returns the backend error estimate, not the true residual.
       Real getError() const
       {
-        return m_native.getError();
+        return m_result.error;
       }
 
       /// @brief Copies configuration into a newly allocated solver owned by the caller.
@@ -490,7 +478,9 @@ namespace Rodin::Solver
       }
 
     private:
-      Internal::EigenGMRES<LinearSystemType> m_native;
+      std::unique_ptr<Backend> m_backend;
+      Settings m_settings;
+      Result m_result;
   };
 }
 #endif
