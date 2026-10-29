@@ -22,7 +22,7 @@ def main():
     parser.add_argument('--fps', type=float, default=12)
     parser.add_argument('--resolution', type=int, default=128,
                         help='Samples along each axis of the visualization grid.')
-    parser.add_argument('--size', type=int, nargs=2, default=[1280, 720])
+    parser.add_argument('--size', type=int, nargs=2, default=[1920, 900])
     parser.add_argument('--max-frames', type=int, default=0,
                         help='Subsample solved states; zero renders every state.')
     parser.add_argument('--vmax', type=float, help='Fixed legend maximum in selected units.')
@@ -66,19 +66,60 @@ def main():
     volume.SamplingDimensions = [args.resolution] * 3
     volume.UseInputBounds = 1
     surface = pv.ExtractSurface(Input=merged)
-    view = pv.CreateView('RenderView')
-    layout = pv.CreateLayout(name='Atrium Flow')
-    layout.AssignView(0, view)
-    pv.SetActiveView(view)
-    layout.SetSize(*args.size)
-    view.ViewSize = args.size
-    view.UseColorPaletteForBackground = 0
-    view.Background = [.015, .025, .055]
-    view.OrientationAxesVisibility = 0
-    display = pv.Show(volume, view)
-    display.Representation = 'Volume'
-    pv.ColorBy(display, ('POINTS', 'Speed'))
     lut = pv.GetColorTransferFunction('Speed')
+    speed.UpdatePipeline(times[0])
+    bounds = speed.GetDataInformation().GetBounds()
+    diagonal = math.sqrt(sum((bounds[2*i+1]-bounds[2*i])**2 for i in range(3)))
+    center = [(bounds[2*i]+bounds[2*i+1])/2 for i in range(3)]
+    views = [pv.CreateView('RenderView') for _ in range(2)]
+    layout = pv.CreateLayout(name='Atrium Flow')
+    layout.SplitHorizontal(0, .5)
+    for location, view in enumerate(views, start=1):
+        layout.AssignView(location, view)
+    layout.SetSize(*args.size)
+    time = pv.AnnotateTimeFilter(Input=reader)
+    time.Format = 't = {time:.3f} s'
+    for view, label, direction in zip(views, ['Back', 'Front'], [1, -1]):
+        view.UseColorPaletteForBackground = 0
+        view.Background = [.015, .025, .055]
+        view.OrientationAxesVisibility = 0
+        display = pv.Show(volume, view)
+        display.Representation = 'Volume'
+        pv.ColorBy(display, ('POINTS', 'Speed'))
+        display.ScalarOpacityUnitDistance = diagonal / 60
+        skin = pv.Show(surface, view)
+        skin.Representation = 'Surface'
+        pv.ColorBy(skin, None)
+        skin.DiffuseColor = [.85, .92, 1.]
+        skin.Opacity = .16
+        skin.Ambient = .3
+        skin.Diffuse = .7
+        skin.Specular = .3
+        skin.SpecularPower = 25
+        display.SetScalarBarVisibility(view, True)
+        bar = pv.GetScalarBar(lut, view)
+        bar.Title = 'Speed'
+        bar.ComponentTitle = f'({args.units})'
+        bar.TitleColor = [.95, .95, .98]
+        bar.LabelColor = [.95, .95, .98]
+        bar.WindowLocation = 'Lower Right Corner'
+        title = pv.Text(Text=f'{args.title}\n{label} view')
+        title_display = pv.Show(title, view)
+        title_display.WindowLocation = 'Upper Left Corner'
+        title_display.FontSize = 16
+        title_display.Color = [.95, .95, .98]
+        time_display = pv.Show(time, view)
+        time_display.WindowLocation = 'Upper Right Corner'
+        time_display.FontSize = 14
+        time_display.Color = [.95, .95, .98]
+        view.CameraFocalPoint = center
+        view.CenterOfRotation = center
+        view.CameraPosition = [center[0]+direction*diagonal,
+                               center[1]+direction*diagonal, center[2]+diagonal]
+        view.CameraViewUp = [0, 0, 1]
+        view.CameraParallelProjection = 1
+        view.ViewTime = times[0]
+        pv.ResetCamera(view)
     lut.ColorSpace = 'RGB'
     lut.RGBPoints = [0, .10, .35, 1., .25*vmax, .05, 1., 1.,
                      .5*vmax, 1., 1., .55, .75*vmax, 1., .70, .12,
@@ -89,42 +130,8 @@ def main():
                       .25*vmax, .04, .5, 0, .5*vmax, .16, .5, 0,
                       vmax, .6, .5, 0]
     opacity.RescaleTransferFunction(0, vmax)
-    speed.UpdatePipeline(times[0])
-    bounds = speed.GetDataInformation().GetBounds()
-    diagonal = math.sqrt(sum((bounds[2*i+1]-bounds[2*i])**2 for i in range(3)))
-    display.ScalarOpacityUnitDistance = diagonal / 60
-    skin = pv.Show(surface, view)
-    skin.Representation = 'Surface'
-    pv.ColorBy(skin, None)
-    skin.DiffuseColor = [.8, .85, .95]
-    skin.Opacity = .06
-    skin.Specular = .1
-    display.SetScalarBarVisibility(view, True)
-    bar = pv.GetScalarBar(lut, view)
-    bar.Title = 'Speed'
-    bar.ComponentTitle = f'({args.units})'
-    bar.TitleColor = [.95, .95, .98]
-    bar.LabelColor = [.95, .95, .98]
-    bar.WindowLocation = 'Lower Right Corner'
-    title = pv.Text(Text=args.title)
-    title_display = pv.Show(title, view)
-    title_display.WindowLocation = 'Upper Left Corner'
-    title_display.FontSize = 18
-    title_display.Color = [.95, .95, .98]
-    time = pv.AnnotateTimeFilter(Input=reader)
-    time.Format = 't = {time:.3f} s'
-    time_display = pv.Show(time, view)
-    time_display.WindowLocation = 'Upper Right Corner'
-    time_display.FontSize = 14
-    time_display.Color = [.95, .95, .98]
-    center = [(bounds[2*i]+bounds[2*i+1])/2 for i in range(3)]
-    view.CameraFocalPoint = center
-    view.CenterOfRotation = center
-    view.CameraPosition = [c+diagonal for c in center]
-    view.CameraViewUp = [0, 0, 1]
-    view.CameraParallelProjection = 1
-    view.ViewTime = times[0]
-    pv.ResetCamera(view)
+    lut.AutomaticRescaleRangeMode = 'Never'
+    pv.SetActiveView(views[0])
     animation = pv.GetAnimationScene()
     animation.UpdateAnimationUsingDataTimeSteps()
     animation.AnimationTime = times[0]
@@ -135,12 +142,12 @@ def main():
         return
     with tempfile.TemporaryDirectory(prefix='atrium-volume-') as tmp:
         for i, t in enumerate(times):
-            view.ViewTime = t
+            animation.AnimationTime = t
             volume.UpdatePipeline(t)
             surface.UpdatePipeline(t)
-            pv.Render(view)
+            pv.RenderAllViews()
             frame = Path(tmp)/f'frame-{i:05d}.png'
-            pv.SaveScreenshot(str(frame), view, ImageResolution=args.size)
+            pv.SaveScreenshot(str(frame), layout, ImageResolution=args.size)
             if i == len(times)-1:
                 shutil.copyfile(frame, output.with_suffix('.png'))
             print(f'Rendered {i+1}/{len(times)}: t={t:.6g} s', flush=True)
@@ -150,7 +157,8 @@ def main():
     metadata = dict(source=str(source), units=args.units, velocity_factor=factor,
                     legend_maximum=vmax, selected_times_s=times, fps=args.fps,
                     movie_duration_s=len(times)/args.fps,
-                    sampling_dimensions=[args.resolution]*3)
+                    sampling_dimensions=[args.resolution]*3,
+                    views=['Back', 'Front'])
     output.with_suffix('.json').write_text(json.dumps(metadata, indent=2))
     print('Movie:', output)
 

@@ -1,9 +1,13 @@
 # Atrial flow visualization
 
 The fluid component writes velocity and pressure at the requested output times.
-`Volume.py` renders the velocity magnitude through the cavity, with a faint
+`Volume.py` renders the velocity magnitude through the cavity, with a translucent
 surface overlay to locate the wall and openings. An orthographic isometric
-camera is centered on the cavity bounds and fitted to the viewport.
+camera is centered on the cavity bounds and fitted to the viewport. The layout
+shows back and front views side by side, with the front camera rotated by
+$180^\circ$ about the vertical axis. Both views share the same velocity field,
+colour scale, opacity function, and animation time. The translucent cavity
+surface provides a visible anatomical outline around the flow.
 The displayed scalar is
 
 $$
