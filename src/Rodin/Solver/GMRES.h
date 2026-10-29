@@ -158,7 +158,19 @@ namespace Rodin::Solver
       struct BackendBase
       {
         virtual ~BackendBase() = default;
+
+        /**
+         * @brief Copies the preconditioner configuration into a fresh backend.
+         * @return An independently owned backend without computed factors.
+         */
         virtual std::unique_ptr<BackendBase> clone() const = 0;
+
+        /**
+         * @brief Computes the backend setup and solves the supplied system.
+         * @param system Linear system whose solution is updated on successful setup.
+         * @param settings Convergence tolerance, iteration limit, and restart length.
+         * @return Computation status, iteration count, and estimated relative error.
+         */
         virtual Result solve(LinearSystemType& system, const Settings& settings) = 0;
       };
 
@@ -166,17 +178,31 @@ namespace Rodin::Solver
       class Backend final : public BackendBase
       {
         public:
+          /**
+           * @brief Constructs a backend from an owned preconditioner configuration.
+           * @param configuration Preconditioner configuration copied into the backend.
+           */
           explicit Backend(const Preconditioner& configuration)
             : m_configuration(configuration)
           {
             m_solver.preconditioner() = m_configuration;
           }
 
+          /**
+           * @brief Copies the configuration without retaining computed factors.
+           * @return A fresh backend with the same preconditioner configuration.
+           */
           std::unique_ptr<BackendBase> clone() const override
           {
             return std::make_unique<Backend>(m_configuration);
           }
 
+          /**
+           * @brief Computes the preconditioner and solves the associated system.
+           * @param system Linear system whose solution is updated on successful setup.
+           * @param settings Convergence tolerance, iteration limit, and restart length.
+           * @return Computation status, iteration count, and estimated relative error.
+           */
           Result solve(LinearSystemType& system, const Settings& settings) override
           {
             if (settings.tolerance)
@@ -387,7 +413,19 @@ namespace Rodin::Solver
       struct BackendBase
       {
         virtual ~BackendBase() = default;
+
+        /**
+         * @brief Copies the preconditioner configuration into a fresh backend.
+         * @return An independently owned backend without computed factors.
+         */
         virtual std::unique_ptr<BackendBase> clone() const = 0;
+
+        /**
+         * @brief Computes the backend setup and solves the supplied system.
+         * @param system Linear system whose solution is updated on successful setup.
+         * @param settings Convergence tolerance, iteration limit, and restart length.
+         * @return Computation status, iteration count, and estimated relative error.
+         */
         virtual Result solve(LinearSystemType& system, const Settings& settings) = 0;
       };
 
@@ -395,17 +433,31 @@ namespace Rodin::Solver
       class Backend final : public BackendBase
       {
         public:
+          /**
+           * @brief Constructs a backend from an owned preconditioner configuration.
+           * @param configuration Preconditioner configuration copied into the backend.
+           */
           explicit Backend(const Preconditioner& configuration)
             : m_configuration(configuration)
           {
             m_solver.preconditioner() = m_configuration;
           }
 
+          /**
+           * @brief Copies the configuration without retaining computed factors.
+           * @return A fresh backend with the same preconditioner configuration.
+           */
           std::unique_ptr<BackendBase> clone() const override
           {
             return std::make_unique<Backend>(m_configuration);
           }
 
+          /**
+           * @brief Computes the preconditioner and solves the associated system.
+           * @param system Linear system whose solution is updated on successful setup.
+           * @param settings Convergence tolerance, iteration limit, and restart length.
+           * @return Computation status, iteration count, and estimated relative error.
+           */
           Result solve(LinearSystemType& system, const Settings& settings) override
           {
             if (settings.tolerance)
