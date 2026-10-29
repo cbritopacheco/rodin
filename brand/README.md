@@ -33,6 +33,7 @@ Start with [the visual identity board](designs/brand-board.svg).
 | Compact color mark | [R monogram](logos/monogram-color.svg) |
 | Compact single-color mark | [R monogram in navy](logos/monogram-navy.svg) |
 | Compact reversed mark | [R monogram in white](logos/monogram-white.svg) |
+| Documentation browser icon | [Navy monogram favicon](icons/favicon-navy.svg) |
 | Small interface mark | [Micro R](icons/favicon.svg) |
 
 The color, navy, and white R monograms share the same geometry.

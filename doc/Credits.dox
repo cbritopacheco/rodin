@@ -4,6 +4,31 @@
 
   @tableofcontents
 
+  @section credits-index-people People
+
+  @m_class{m-block m-info m-badge rodin-credit-person}
+
+  @parblock
+  <img src="Images/OscarRuz.jpeg" alt="Portrait of Oscar Ruz" />
+  <h3>Oscar Ruz</h3>
+
+  Universidad de Santiago de Chile. Member of the
+  [Computational Heat and Fluid Flow Lab](https://cfdusach.cl/).
+  @endparblock
+
+  @section credits-index-laboratories Laboratories
+
+  @m_class{m-block m-info m-badge rodin-credit-lab}
+
+  @parblock
+  <img src="Images/CFDLab.png" alt="CFD-LAB logo" />
+  <h3>Computational Heat and Fluid Flow Lab</h3>
+
+  [CFD-LAB](https://cfdusach.cl/), Universidad de Santiago de Chile.
+  Research in computational heat transfer, fluid flow, and fluid–structure
+  interaction.
+  @endparblock
+
   @section credits-index-3rd-party Third-party Software
 
   @subsection credits-index-boost Boost

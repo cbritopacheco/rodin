@@ -819,3 +819,31 @@ main article .m-col-l-10:has(> .rodin-main-brand) > h1 {
     height: .875rem;
   }
 }
+
+/* Credit portraits and institutional marks retain their own proportions. */
+.rodin-credit-person img {
+  object-fit: cover;
+  object-position: 35% 35%;
+}
+.rodin-credit-person h4,
+.rodin-credit-lab h4 {
+  margin-left: 5rem;
+}
+.rodin-credit-lab img {
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
+  background: white;
+  border-radius: 0.25rem;
+}
+
+/* Keep the example figure subordinate to the tutorial text. */
+#examples-pdes-poisson-output figure.m-figure::before {
+  border-color: transparent;
+}
+#examples-pdes-poisson-output figure.m-figure figcaption {
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+}

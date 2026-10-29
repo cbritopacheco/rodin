@@ -5,6 +5,7 @@ target_link_libraries(Poisson
   Rodin::Geometry
   Rodin::Assembly
   Rodin::Variational
+  Rodin::IO
   )
 
 add_executable(Elasticity Elasticity.cpp)
