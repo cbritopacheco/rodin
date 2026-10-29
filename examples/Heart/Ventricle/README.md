@@ -1,7 +1,19 @@
 # Ventricle models
 
-Ventricular contraction and circulatory loading can be represented by lumped
-pressure, volume, and flow variables without a spatial mesh.
+Ventricular contraction can be reduced to chamber deformation, active muscle
+variables, and vascular pressures without resolving a three-dimensional wall.
+For state $z$, the reduced dynamics are written as
 
-[CCMLC2014_0D](CCMLC2014_0D/README.md) couples a lumped left-ventricle model
-to a four-element Windkessel and records their pressure, volume, and flow history.
+$$
+\mathcal R_{0D}(z,\dot z,t;\theta)=0,
+$$
+
+where $\theta$ contains reference geometry, material and circulation parameters.
+The algebraic pressure/flow relations and valve states distinguish this system
+from a prescribed pressure waveform.
+
+[CCMLC2014_0D](CCMLC2014_0D/README.md) advances spherical chamber motion,
+contractile variables, and proximal/distal arterial compliances. It records
+pressure, volume, and flow without a spatial mesh. Coronary drivers use the
+same model to supply pressure or motion data; the contraction-driven atrium FSI
+example currently has no ventricular coupling.

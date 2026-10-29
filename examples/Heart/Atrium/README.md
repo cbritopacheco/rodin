@@ -125,6 +125,10 @@ P_sN_s+\alpha v_s=g^k,\qquad
 \widehat g^{k+1}=J_\Gamma(-\sigma_f n_f)+\alpha u_f.
 $$
 
+This is Robin–Dirichlet transmission: the fluid velocity is imposed strongly.
+It is distinct from the [coronary Robin–Robin operator](../CoronaryArtery/FSI/README.md#transmission-conditions),
+which also places a Robin condition on the fluid.
+
 Both Robin terms use reference area. At convergence, velocity continuity
 cancels them and recovers traction equilibrium. The coefficient $\alpha$ has
 units $\mathrm{Pa\,s/m}$; its automatic value is
@@ -150,6 +154,10 @@ $$
 
 SUPG and PSPG use this residual and the relative advecting velocity. Previous
 velocity and solid internal states remain fixed through the coupling trials.
+The fluid boundary receives the Newmark solid velocity, whereas the ALE mesh
+velocity uses a backward displacement difference. These rates differ at finite
+time step; exact time-discrete agreement is not imposed.
+
 Mesh motion invalidates Rodin's geometric caches through the mesh coordinate
 API. The coupled driver retains the same spaces, Problems, solvers, and MPI
 interface scatter plans. Gradient and traction projections are reassembled.
