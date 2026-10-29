@@ -37,7 +37,7 @@ from documentation_highlighting import cpp_highlighter
 RODIN_CPP_HIGHLIGHTER = cpp_highlighter
 M_CODE_FILTERS_POST = {'C++': cpp_highlighter()}
 
-THEME_COLOR = '#071F46'
+THEME_COLOR = '#18191c'
 
 FAVICON = '@CMAKE_SOURCE_DIR@/brand/icons/favicon.svg'
 
