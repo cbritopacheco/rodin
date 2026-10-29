@@ -787,7 +787,7 @@ body
   #navigation #m-navbar-brand {
     position: absolute;
     top: 0;
-    left: calc(100% / 12 + 1rem);
+    left: calc(100% / 12);
     transform: translateX(-100%);
     margin: 0;
     padding-left: 0;
@@ -799,6 +799,13 @@ body
     height: 1.3125rem;
   }
   #navigation #m-navbar-collapse { margin-left: calc(100% / 12 + 1rem); }
+}
+
+@media screen and (min-width: 992px) and (max-width: 1199px) {
+  #navigation .rodin-wordmark {
+    width: 3rem;
+    height: 1.05rem;
+  }
 }
 
 /* Avoid flashing a duplicate title before in-page navigation initializes. */
