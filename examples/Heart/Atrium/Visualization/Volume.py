@@ -119,12 +119,12 @@ def main():
     time_display.Color = [.95, .95, .98]
     center = [(bounds[2*i]+bounds[2*i+1])/2 for i in range(3)]
     view.CameraFocalPoint = center
-    view.CameraPosition = [center[0]+diagonal, center[1]+.65*diagonal,
-                           center[2]+.8*diagonal]
+    view.CenterOfRotation = center
+    view.CameraPosition = [c+diagonal for c in center]
     view.CameraViewUp = [0, 0, 1]
+    view.CameraParallelProjection = 1
     view.ViewTime = times[0]
     pv.ResetCamera(view)
-    view.GetActiveCamera().Zoom(1.3)
     animation = pv.GetAnimationScene()
     animation.UpdateAnimationUsingDataTimeSteps()
     animation.AnimationTime = times[0]

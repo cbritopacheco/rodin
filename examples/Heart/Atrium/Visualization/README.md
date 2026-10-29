@@ -2,7 +2,9 @@
 
 The fluid component writes velocity and pressure at the requested output times.
 `Volume.py` renders the velocity magnitude through the cavity, with a faint
-surface overlay to locate the wall and openings. The displayed scalar is
+surface overlay to locate the wall and openings. An orthographic isometric
+camera is centered on the cavity bounds and fitted to the viewport.
+The displayed scalar is
 
 $$
 s(X,t)=c\,\lVert u_h(X,t)\rVert_2,
