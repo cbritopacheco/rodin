@@ -9,6 +9,7 @@ from pathlib import Path
 import subprocess
 import zipfile
 
+from ci_badges import Publisher
 from ci_summary import append, cell
 
 
@@ -16,6 +17,18 @@ def api(endpoint):
     result = subprocess.run(['gh', 'api', '--paginate', '--slurp', endpoint],
                             check=True, capture_output=True, text=True)
     return json.loads(result.stdout)
+
+
+def workflow_jobs(run, repository):
+    """Keep large matrices reportable when the Actions REST listing fails."""
+    try:
+        return [job for page in api(f"repos/{repository}/actions/runs/{run['id']}/jobs?filter=latest&per_page=100")
+                for job in page['jobs']]
+    except subprocess.CalledProcessError:
+        jobs = Publisher(repository, run['head_branch']).checks(run)
+        if jobs is None:
+            raise
+        return jobs
 
 
 def render(run, jobs, repository, coverage=None):
@@ -26,7 +39,7 @@ def render(run, jobs, repository, coverage=None):
             f"Commit: {cell(run['head_sha'])} · Attempt {run['run_attempt']} · **{cell(run['conclusion'])}**", '',
             '### Policies', '',
             '- **Automatic retry:** After workflow completion, at most one interrupted job is selected per attempt. Each job can be retried once, only on a current develop or master push commit. GitHub also reruns its dependents.',
-            '- **Retry exclusions:** Compilation, numerical, sanitizer, timeout, checksum and out-of-memory failures are not retried. Intentional workflow cancellations and superseded commits are excluded. Missing logs prevent recovery.',
+            '- **Retry exclusions:** Compilation, numerical, sanitizer, timeout, checksum and out-of-memory failures are not retried. Intentional workflow cancellations and superseded commits are excluded. Missing logs prevent recovery for the affected job.',
             ('- **Completeness:** Every planned benchmark case and MPI rank contribution is required before pooling and publication.' if run['name'] == 'Benchmarks' else '- **Completeness:** Every mandatory test and coverage contribution is required. Coverage / Finalize must pass the complete production line coverage gate of at least 95%.' if run['name'] == 'Tests' else '- **Publication:** The site link is shown only after successful publication.'), '',
             '### Job results', '',
             '| Registered | Ran | Passed | Failed / timed out | Cancelled | Skipped | Other / pending |',
@@ -73,10 +86,10 @@ def main():
     run_id = int(event['workflow_run']['id'])
     prefix = f'repos/{repository}/actions/runs/{run_id}'
     run = api(prefix)[0]
-    jobs = [j for page in api(prefix + '/jobs?filter=latest&per_page=100') for j in page['jobs']]
+    jobs = workflow_jobs(run, repository)
     coverage = None
     if run['name'] == 'Tests':
-        artifacts = [a for page in api(prefix + '/artifacts?per_page=100') for a in page['artifacts']
+        artifacts = [a for page in api(prefix + '/artifacts?name=coverage-final-summary&per_page=100') for a in page['artifacts']
                      if a['name'] == 'coverage-final-summary' and not a['expired']
                      and a['created_at'] >= run['run_started_at']]
         if len(artifacts) == 1:

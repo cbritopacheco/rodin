@@ -152,7 +152,7 @@ class RecoveryTest(unittest.TestCase):
         import yaml
         root = Path(__file__).resolve().parents[1]
         workflow = yaml.safe_load((root / ".github/workflows/RetryInterruptedJobs.yml").read_text())
-        self.assertEqual(workflow["permissions"], {"contents": "read", "actions": "write"})
+        self.assertEqual(workflow["permissions"], {"contents": "read", "checks": "read", "actions": "write"})
         steps = workflow["jobs"]["Recover"]["steps"]
         self.assertEqual(steps[0]["with"]["ref"], "${{ github.sha }}")
         self.assertNotIn("secrets.", str(steps))

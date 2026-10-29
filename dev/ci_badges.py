@@ -90,7 +90,7 @@ class Publisher:
             return None
         latest, cursor = {}, None
         query = ('query($suite:ID!,$cursor:String){node(id:$suite){... on CheckSuite{'
-                 'checkRuns(first:100,after:$cursor){nodes{databaseId name status conclusion}'
+                 'checkRuns(first:100,after:$cursor){nodes{databaseId name status conclusion startedAt}'
                  'pageInfo{hasNextPage endCursor}}}}}')
         try:
             while True:
@@ -103,7 +103,7 @@ class Publisher:
                 if not page['pageInfo']['hasNextPage']:
                     break
                 cursor = page['pageInfo']['endCursor']
-            return [dict(name=j['name'], status=j['status'].lower(),
+            return [dict(id=j['databaseId'], name=j['name'], started_at=j.get('startedAt'), status=j['status'].lower(),
                          conclusion=(j['conclusion'] or '').lower()) for j in latest.values()]
         except (subprocess.CalledProcessError, KeyError, TypeError):
             return None
