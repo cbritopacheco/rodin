@@ -381,8 +381,8 @@ pre.m-code
 
 .rodin-home-icon
 {
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 1.125rem;
+  height: 1.125rem;
   flex-shrink: 0;
   fill: none;
   stroke: currentColor;
@@ -745,8 +745,8 @@ body
 /* The outlined wordmark follows the navigation color in both themes. */
 .rodin-wordmark {
   display: inline-block;
-  width: 5.2rem;
-  height: 1.82rem;
+  width: 4.25rem;
+  height: 1.4875rem;
   flex-shrink: 0;
   background-color: currentColor;
   -webkit-mask: url('wordmark-white.svg') center / contain no-repeat;
@@ -754,9 +754,10 @@ body
   font-size: 0;
 }
 .rodin-main-brand {
-  margin: .5rem 0 2rem;
+  margin: .5rem 0 1.5rem;
 }
 .rodin-main-brand img {
+  width: 18rem;
   max-width: 100%;
   height: auto;
 }
