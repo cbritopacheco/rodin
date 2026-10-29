@@ -15,17 +15,16 @@ using namespace Rodin::Geometry;
 /// @brief Native copies retain the capacity and free lists needed for insertion.
 TEST(MMG5Copy, InsertionAfterSourceDestruction)
 {
-  using Native = MMG::MMG5;
-  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
   for (const bool volume : {false, true})
   {
     SCOPED_TRACE(volume);
     auto mesh = volume ? LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2})
                        : LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
-    Owner source(Native::rodinToMesh(mesh), Native::destroyMesh);
+    Owner source(MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
     Owner copy(
-      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
-    Native::copyMesh(source.get(), copy.get());
+      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), MMG::V5::Mesh::destroy);
+    MMG::V5::Mesh::copy(source.get(), copy.get());
     ASSERT_EQ(copy->npmax, source->npmax);
     ASSERT_GT(copy->npmax, copy->np);
     const auto oldCount = copy->np;
@@ -51,19 +50,20 @@ TEST(MMG5Copy, InsertionAfterSourceDestruction)
 TEST(MMG5Copy, SolutionGridFunctionRoundtrip)
 {
   const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
-  using Native = MMG::MMG5;
-  std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> nativeMesh(
-    Native::rodinToMesh(mesh), Native::destroyMesh);
+
+  std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)> nativeMesh(
+    MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
   const auto check = [&](auto& source, auto& destination, size_t components) {
     for (Index i = 0; i < source.getData().size(); ++i)
       source.getData()(i) = Real(i + 1) / 8;
-    std::unique_ptr<MMG5_Sol, decltype(&Native::destroySolution)> native(
-      Native::createSolution(nativeMesh.get(), components), Native::destroySolution);
-    Native::copySolution(source, native.get());
+    std::unique_ptr<MMG5_Sol, decltype(&MMG::V5::Solution::destroy)> native(
+      MMG::V5::Solution::create(nativeMesh.get(), components),
+      MMG::V5::Solution::destroy);
+    MMG::V5::Solution::copy(source, native.get());
     ASSERT_EQ(native->np, mesh.getVertexCount());
     for (size_t i = 0; i < mesh.getVertexCount() * components; ++i)
       EXPECT_EQ(native->m[components + i], source.getData()(i));
-    Native::copySolution(native.get(), destination);
+    MMG::V5::Solution::copy(native.get(), destination);
     EXPECT_EQ(destination.getData(), source.getData());
   };
   Variational::P1 scalarSpace(mesh);

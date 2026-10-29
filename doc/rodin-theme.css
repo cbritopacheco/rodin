@@ -1,33 +1,58 @@
+/* Manrope is bundled with the brand kit under the SIL Open Font License. */
+@font-face {
+  font-family: Manrope;
+  src: url('Manrope-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: Manrope;
+  src: url('Manrope-SemiBold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: Manrope;
+  src: url('Manrope-Bold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 /* Rodin palette; the upstream m.css components retain their CSS variables. */
 :root,
 body
 {
+  --font: 'Manrope', sans-serif;
+  --code-font: ui-monospace, 'SFMono-Regular', Consolas, monospace;
   color-scheme: dark;
-  --background-color: #20252d;
+  --background-color: #202124;
   --color: #dee3eb;
-  --line-color: #414957;
+  --line-color: #41434a;
   --link-color: #87b5da;
   --link-active-color: #b7d3e9;
   --dim-color: #a3adbc;
   --code-color: #e6edf3;
-  --code-background-color: #191e26;
-  --code-note-background-color: #252c36;
-  --console-background-color: #191e26;
-  --header-background-color: #191e26;
+  --code-background-color: #18191c;
+  --code-note-background-color: #25262b;
+  --console-background-color: #18191c;
+  --header-background-color: #18191c;
   --header-color: #dee3eb;
   --header-link-color: #dee3eb;
   --header-link-current-color: #87b5da;
   --header-link-active-color: #b7d3e9;
-  --header-link-active-background-color: #292f39;
+  --header-link-active-background-color: #282a2f;
   --article-heading-color: #dee3eb;
   --article-heading-active-color: #b7d3e9;
   --article-header-color: #dee3eb;
   --navpanel-link-color: #dee3eb;
-  --footer-background-color: #292f39;
+  --footer-background-color: #282a2f;
   --footer-color: #a3adbc;
   --default-color: #dee3eb;
   --default-filled-color: #dee3eb;
-  --default-filled-background-color: #292f39;
+  --default-filled-background-color: #282a2f;
   --default-filled-link-color: #87b5da;
   --success-color: #96b99c;
   --success-filled-background-color: #29362f;
@@ -46,7 +71,7 @@ body
   --warning-filled-color: #e3d6b5;
   --primary-color: #87b5da;
   --danger-color: #df9292;
-  --button-background-color: #292f39;
+  --button-background-color: #282a2f;
   --code-base: #e6edf3;
   --code-keyword: #c6a4db;
   --code-type: #87b5da;
@@ -63,7 +88,7 @@ body
   :root:not([data-theme]) body
   {
     color-scheme: light;
-    --background-color: #f7f8fa;
+    --background-color: #F4F8FB;
     --color: #27323f;
     --line-color: #d1d8e0;
     --link-color: #28648f;
@@ -123,7 +148,7 @@ body
 :root[data-theme="light"] body
 {
   color-scheme: light;
-  --background-color: #f7f8fa;
+  --background-color: #F4F8FB;
   --color: #27323f;
   --line-color: #d1d8e0;
   --link-color: #28648f;
@@ -293,36 +318,36 @@ pre.m-code
   color: var(--code-base);
 }
 
-img.m-image.rodin-logo-light
+.rodin-logo-light
 {
   display: none;
 }
 
-img.m-image.rodin-logo-dark
+.rodin-logo-dark
 {
   display: block;
 }
 
 @media(prefers-color-scheme:light)
 {
-  :root:not([data-theme]) img.m-image.rodin-logo-light
+  :root:not([data-theme]) .rodin-logo-light
   {
     display: block;
   }
 
-  :root:not([data-theme]) img.m-image.rodin-logo-dark
+  :root:not([data-theme]) .rodin-logo-dark
   {
     display: none;
   }
 
 }
 
-:root[data-theme="light"] img.m-image.rodin-logo-light
+:root[data-theme="light"] .rodin-logo-light
 {
   display: block;
 }
 
-:root[data-theme="light"] img.m-image.rodin-logo-dark
+:root[data-theme="light"] .rodin-logo-dark
 {
   display: none;
 }
@@ -356,8 +381,8 @@ img.m-image.rodin-logo-dark
 
 .rodin-home-icon
 {
-  width: 1cap;
-  height: 1cap;
+  width: 1.125rem;
+  height: 1.125rem;
   flex-shrink: 0;
   fill: none;
   stroke: currentColor;
@@ -518,76 +543,59 @@ img.m-image.rodin-logo-dark
   color: var(--link-color);
 }
 
-/* Collapse before the icon-and-text links would wrap onto a second row. */
-@media(max-width:991px)
-{
-  #navigation > .m-container > .m-row > .m-hide-m
-  {
-    display: flex;
-    align-items: center;
-    width: auto;
-    margin-left: auto;
+/* Use a compact icon row when navigation labels no longer fit. */
+@media(max-width:991px) {
+  #navigation > .m-container { padding-right: 3rem; }
+  #navigation > .m-container > .m-row { flex-wrap: nowrap; }
+  #navigation > .m-container > .m-row > .m-hide-m { display: none; }
+  #navigation #m-navbar-brand { margin-right: .5rem; padding-right: .5rem; }
+  #navigation .rodin-wordmark { display: none; }
+  #navigation #m-navbar-collapse {
+    display: block;
     flex: 0 0 auto;
+    width: auto;
+    margin: 0;
+    padding: 0;
   }
-
-  #navigation #m-navbar-collapse
-  {
-    display: none;
-    flex: 0 0 calc(100% + 3.5rem);
-    width: calc(100% + 3.5rem);
-    padding-bottom: 1rem;
-  }
-
-  #navigation:target #m-navbar-collapse { display: block; }
-  #navigation #m-navbar-show,
-  #navigation #m-navbar-hide
-  {
-    align-items: center;
-    min-height: 3rem;
-    line-height: 3rem;
-  }
-
-  #navigation #m-navbar-show { display: inline-flex; }
-  #navigation #m-navbar-hide,
-  #navigation:target #m-navbar-show { display: none; }
-  #navigation:target #m-navbar-hide { display: inline-flex; }
-  #navigation #m-navbar-collapse .m-show-m { display: none; }
-
-  #navigation #m-navbar-collapse > .m-row > ol
-  {
-    width: 50%;
-    padding-inline: 1rem;
-  }
-
-  #navigation #m-navbar-collapse > .m-row > ol > li
-  {
+  #navigation #m-navbar-collapse > .m-row { display: flex; margin: 0; }
+  #navigation #m-navbar-collapse > .m-row > ol {
+    display: flex;
+    width: auto;
+    margin: 0;
+    padding: 0;
     float: none;
-    margin-left: -1rem;
-    border-width: 0 0 0 .25rem;
   }
-
-  #navigation #m-navbar-collapse li a
-  {
-    white-space: normal;
-    line-height: 1.5rem;
-    margin-left: -.25rem;
-    padding-inline: .75rem;
-    border-width: 0 0 0 .25rem;
+  #navigation #m-navbar-collapse > .m-row > ol > li {
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    float: none;
   }
-
-  #navigation #m-navbar-collapse ol ol
-  {
+  #navigation #m-navbar-collapse > .m-row > ol > li > a {
+    justify-content: center;
+    width: 2rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    gap: 0;
+    font-size: 0;
+  }
+  #navigation #m-navbar-collapse > .m-row > ol > li > a svg {
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+  }
+  #navigation #m-navbar-collapse .m-doc-search-icon:has(.rodin-benchmark-icon) {
+    width: 3rem;
+    gap: .4rem;
+  }
+  #navigation #m-navbar-collapse .benchmark-search-trigger { min-width: 0; }
+  #navigation #m-navbar-collapse .benchmark-search-trigger .rodin-benchmark-icon {
     position: static;
-    visibility: visible;
-    padding-left: 1.5rem;
+    transform: none;
   }
-
-  #navigation #m-navbar-collapse ol ol li
-  {
-    margin-left: -1rem;
-    border-left-width: .25rem;
-  }
-
+  #navigation #m-navbar-collapse ol ol { display: none; }
 }
 
 :root,
@@ -715,4 +723,104 @@ body
 .rodin-page-nav li > a::before
 {
   border-color: var(--rodin-section-color, var(--line-color));
+}
+
+/* The outlined wordmark follows the navigation color in both themes. */
+.rodin-wordmark {
+  display: inline-block;
+  width: 4.25rem;
+  height: 1.4875rem;
+  flex-shrink: 0;
+  background-color: currentColor;
+  -webkit-mask: url('wordmark-white.svg') center / contain no-repeat;
+  mask: url('wordmark-white.svg') center / contain no-repeat;
+  font-size: 0;
+}
+.rodin-main-brand {
+  margin: .5rem 0 1.5rem;
+}
+.rodin-main-brand img {
+  width: 18rem;
+  max-width: 100%;
+  height: auto;
+}
+.rodin-main-brand p {
+  margin: .25rem 0 0;
+  font-weight: 600;
+  text-indent: 0;
+}
+
+/* Reserve a separate home area before the main navigation links. */
+#navigation #m-navbar-brand {
+  position: relative;
+  margin-right: .75rem;
+  padding-right: 1.25rem;
+}
+#navigation #m-navbar-brand::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: .75rem;
+  width: 2px;
+  height: 1.5rem;
+  background: var(--dim-color);
+}
+@media screen and (min-width: 992px) {
+  /* Leave a gutter between the aligned dividers and full-width article blocks. */
+  main article > .m-container > .m-row > .m-col-l-10 {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  #navigation > .m-container > .m-row { position: relative; }
+  #navigation #m-navbar-brand {
+    position: absolute;
+    top: 0;
+    left: calc(100% / 12);
+    transform: translateX(-100%);
+    margin: 0;
+    padding-left: 0;
+    padding-right: 1rem;
+  }
+  #navigation #m-navbar-brand::after { right: -1px; }
+  #navigation #m-navbar-collapse { margin-left: calc(100% / 12 + 1rem); }
+}
+
+@media screen and (min-width: 992px) and (max-width: 1199px) {
+  /* Keep room for the full-size home link in the narrow desktop gutter. */
+  main article > .m-container > .m-row > .m-col-l-10.m-push-l-1 {
+    left: calc(100% / 12 + 1.5rem);
+    width: calc(10 * 100% / 12 - 1.5rem);
+  }
+  #navigation #m-navbar-brand { left: calc(100% / 12 + 1.5rem); }
+  #navigation #m-navbar-collapse { margin-left: calc(100% / 12 + 2.5rem); }
+}
+
+/* Avoid flashing a duplicate title before in-page navigation initializes. */
+main article .m-col-l-10:has(> .rodin-main-brand) > h1 {
+  display: none;
+}
+
+/* Keep space between the page outline and the article on either side. */
+@media screen and (min-width: 1200px) {
+  .rodin-page-nav.rodin-page-nav-fit[data-side="left"] { padding-right: .75rem; }
+  .rodin-page-nav.rodin-page-nav-fit[data-side="right"] { padding-left: .75rem; }
+}
+
+@media screen and (min-width: 1200px) {
+  #navigation #m-navbar-brand {
+    width: var(--rodin-home-width, auto);
+  }
+}
+
+@media(max-width:359px) {
+  #navigation #m-navbar-brand { margin-right: .25rem; padding-right: .25rem; }
+  #navigation #m-navbar-collapse > .m-row > ol > li > a { width: 1.75rem; }
+  #navigation #m-navbar-collapse .m-doc-search-icon:has(.rodin-benchmark-icon) {
+    width: 2.25rem;
+    gap: .125rem;
+  }
+  #navigation #m-navbar-collapse .m-doc-search-icon:has(.rodin-benchmark-icon) svg {
+    width: .875rem;
+    height: .875rem;
+  }
 }

@@ -36,7 +36,7 @@ Eigen); 3D paths do.
 Wrapper over the MMG remesher: `MMG::Mesh` (Rodin mesh + MMG metadata),
 `Adapt` (metric-based adaptation), `MeshOptimizer` (quality optimization),
 `LevelSetDiscretizer` (implicit-domain discretization from a level set),
-`MMG5.h` conversion utilities, MEDIT loader/printer specializations. On
+`V5.h` conversion utilities, MEDIT loader/printer specializations. On
 this branch MMG is the remesher and implicit-domain discretizer; native
 alternatives exist only on other branches.
 

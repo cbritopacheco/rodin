@@ -13,9 +13,9 @@ int main(int argc, char** argv)
 {
   using namespace Rodin::Tests::Benchmarks;
   bool failed = false;
-  StokesWorkload<2>::registerCases<true>(failed);
-  StokesWorkload<3>::registerCases<true>(failed);
-  StokesWorkload<4>::registerCases<true>(failed);
+  StokesWorkload<2, false>::registerCases<true>(failed);
+  StokesWorkload<3, false>::registerCases<true>(failed);
+  StokesWorkload<4, false>::registerCases<true>(failed);
   StokesWorkload<2, true>::registerCases<true>(failed);
   StokesWorkload<3, true>::registerCases<true>(failed);
   StokesWorkload<4, true>::registerCases<true>(failed);
@@ -29,8 +29,10 @@ int main(int argc, char** argv)
 #else
   benchmark::AddCustomContext("assembly_backend", "Eigen/Sequential");
 #endif
-  benchmark::AddCustomContext("timed_operation",
-    "Public SparseLU factorization, solve and one residual correction");
+  benchmark::AddCustomContext(
+    "timed_operation", "Public GMRES preconditioner setup and restarted solve from zero");
+  benchmark::AddCustomContext("preconditioner",
+    "Full block Schur: velocity incomplete Cholesky, pressure mass LDLT, explicit mean");
   benchmark::AddCustomContext("compiler", __VERSION__);
   const size_t cases = benchmark::RunSpecifiedBenchmarks();
   benchmark::Shutdown();

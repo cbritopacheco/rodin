@@ -19,7 +19,9 @@ artifacts are written under the CMake build tree.
   top-level reference pages.
 - `Guides/` contains narrative user guides and conceptual documentation.
 - `Examples/` and `ExamplesIndex.dox` organize example-program pages.
-- `Images/`, `favicon.ico`, and `rodin.css` provide visual assets and styling.
+- `../brand/` is the canonical source for the logo, wordmark, SVG favicon and bundled Manrope fonts.
+- `Images/`, `rodin.css` and `rodin-theme.css` provide illustrations and site styling.
+  Brand assets and font licenses are copied into the generated site; no external font service is required.
 - `References.bib` stores bibliography entries used by Doxygen citations.
 - `agents/` contains the AI-agent knowledge base. It is documentation about
   how Rodin is designed and maintained, not user-facing API reference.
