@@ -104,7 +104,17 @@ namespace Rodin::Examples::Heart::Atrium
           std::cout << Alert::Text<>(m_label).setBold();
         else
           std::cout << m_label;
-        std::cout << ": " << what() << std::endl;
+        if (m_label.starts_with("[Timestep "))
+        {
+          const std::string text(what());
+          const auto split = text.find(' ');
+          std::cout << ": " << text.substr(0, split) << " --------------- |";
+          if (split != std::string::npos)
+            std::cout << text.substr(split);
+          std::cout << std::endl;
+        }
+        else
+          std::cout << ": " << what() << std::endl;
       }
 
     private:
