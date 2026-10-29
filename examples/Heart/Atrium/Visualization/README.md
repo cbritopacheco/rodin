@@ -23,6 +23,12 @@ unless `--vmax` specifies it explicitly in the selected units.
 MPI pieces are merged with coincident vertices before surface extraction,
 so partition boundaries are excluded from the cavity outline.
 
+The input may come from [fixed-domain fluid or coupled FSI](../README.md).
+FSI fluid XDMF already contains moving physical coordinates; an additional
+displacement warp would apply the motion twice. Solid output instead stores
+reference coordinates and its separate `Displacement` field. Rendering computes
+observables from saved states and adds no fluid or structural evolution.
+
 ## Rendering
 
 ParaView's `pvpython` is required; movie encoding also requires `ffmpeg`.

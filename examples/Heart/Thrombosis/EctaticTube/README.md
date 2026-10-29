@@ -1,21 +1,61 @@
-# Ectatic tube thrombosis
+# Ectatic tube flow, coagulation, and washout
 
-An ectatic tube introduces regions of slow recirculating flow in which washout
-and coagulation can be studied. A sequential flow solve supplies the velocity
-for one-way transport of thrombin, fibrinogen, fibrin, and a washout tracer.
-The outlet is traction-free; no lumped outlet circulation is imposed.
+A tube with an enlarged segment supplies a fixed geometry in which residence
+and coagulation can be examined together. The fluid is solved at every time
+step and transports thrombin $T$, fibrinogen $G$, fibrin $F$, and an independent
+washout tracer $c$. Transport is one-way: concentrations do not change the flow.
 
-For tracer concentration $c$ and fluid velocity $u$, the washout model is
+## Fluid and species models
+
+Continuous P1 velocity and pressure solve a transient, shear-thinning Oseen
+problem with equal-order pressure stabilization, orthogonal-subscale VMS, and
+grad-div terms. Carreau–Yasuda stress is
+$\sigma=-pI+2\mu(\dot\gamma)D(u)$. The wall is fixed and no-slip. A prescribed
+pulsatile inlet pressure has impedance and tangential damping; the outlet is
+traction-free with backflow stabilization. There is no ventricular or lumped
+outlet circulation model.
+
+With reaction constant $k$ and species diffusivities $D_i$, the transport balances are
 
 $$
-\partial_t c+u\cdot\nabla c=0,
-\qquad c(X,0)=1,\qquad c|_{\Gamma_{\mathrm{in}}}=0.
+\partial_tT+u\cdot\nabla T-D_T\Delta T=0,\qquad
+\partial_tG+u\cdot\nabla G-D_G\Delta G=-kGT,\qquad
+\partial_tF+u\cdot\nabla F-D_F\Delta F=kGT.
 $$
 
-The volume average of $c$ measures the remaining fraction of the initial bolus.
-Coagulation species use the reaction and wall-source terms defined by the
-[thrombosis model](../../CoronaryArtery/ThrombosisModel.h). Species transport does
-not alter the flow or deform the wall.
+Activated endothelium supplies thrombin through the boundary flux
+$D_T\nabla T\cdot n=j_T A$; $A$ depends on completed-cycle wall-shear indices.
+Fibrinogen inflow supplies the feed concentration; thrombin and fibrin inflow
+values are zero. [`ThrombosisParameters`](../../CoronaryArtery/ThrombosisModel.h)
+defines concentrations, reaction rates, diffusion, and activation parameters.
+The model does not include platelets, lysis, clot permeability, or mechanical
+occlusion.
+
+The washout equation and observable are
+
+$$
+\partial_tc+u\cdot\nabla c=0,\qquad c(X,0)=1,\qquad
+c|_{\Gamma_{\mathrm{in}}}=0,\qquad
+R(t)=\frac{1}{|\Omega|}\int_\Omega c(X,t)\,dX.
+$$
+
+Thus $R$ measures the remaining fraction of the original bolus, independently
+of thrombin production or fibrinogen conversion.
+
+## Time integration, stabilization, and output
+
+Backward Euler advances the P1 transport fields. SUPG terms test their transient,
+advective, diffusive, and reaction residuals; residual-based crosswind diffusion
+controls sharp concentration fronts. Numerical stabilization does not by itself
+prove positivity or a concentration maximum principle.
+
+Flow warm-up precedes species activation. Cycle-integrated wall shear provides
+TAWSS and OSI, used by the wall-source indicator. The geometry is a conduit
+with an ectatic segment, not a patient-specific coronary reconstruction.
+The generated mesh uses metre coordinates; velocity, pressure, time, and
+concentration use SI units, including $\mathrm{mol/m^3}$ for species.
+XDMF stores flow, species, and washout fields. Scalar histories report fluxes,
+wall-shear indices, concentration content, and the volume-weighted washout $R$.
 
 Requires `RODIN_USE_PETSC=ON`; MPI is not required.
 

@@ -8,6 +8,11 @@ functions; active extension, stiffness, and stress variables use discontinuous
 cellwise constants. The coupled Newton problem retains its spaces, forms,
 fields, and solvers across time steps.
 
+In the standalone solid problem the opening rims are fixed and the outer wall
+is unloaded. In [FSI mode](../README.md#contraction-driven-fsi), fluid traction
+and a Robin interface term enter the same retained mechanical problem; the
+passive and active constitutive equations below are retained.
+
 ## Passive material and dissipation
 
 For displacement $u$, reference fiber $f_0$, and reference velocity $v$,
