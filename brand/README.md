@@ -26,13 +26,13 @@ Start with [the visual identity board](designs/brand-board.svg).
 
 | Use | Reference SVG |
 | --- | --- |
-| Primary signature on a light background | [Horizontal color](logos/rodin-horizontal-color.svg) |
-| Primary signature on a dark background | [Horizontal white](logos/rodin-horizontal-white.svg) |
-| Single-color signature | [Horizontal navy](logos/rodin-horizontal-navy.svg) |
-| Compact color mark | [R monogram](logos/rodin-monogram-color.svg) |
-| Compact single-color mark | [R monogram in navy](logos/rodin-monogram-navy.svg) |
-| Compact reversed mark | [R monogram in white](logos/rodin-monogram-white.svg) |
-| Small interface mark | [Micro R](icons/rodin-favicon.svg) |
+| Primary signature on a light background | [Horizontal color](logos/horizontal-color.svg) |
+| Primary signature on a dark background | [Horizontal white](logos/horizontal-white.svg) |
+| Single-color signature | [Horizontal navy](logos/horizontal-navy.svg) |
+| Compact color mark | [R monogram](logos/monogram-color.svg) |
+| Compact single-color mark | [R monogram in navy](logos/monogram-navy.svg) |
+| Compact reversed mark | [R monogram in white](logos/monogram-white.svg) |
+| Small interface mark | [Micro R](icons/favicon.svg) |
 
 The color, navy, and white R monograms share the same geometry.
 White variants have transparent backgrounds. The outline R is intended
