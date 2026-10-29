@@ -12,14 +12,15 @@
 #include "CavityVolume.h"
 #include "Solid/Solid.h"
 #include "Fluid.h"
+#include "FSI.h"
 
 namespace Rodin::Examples::Heart::Atrium
 {
   /**
-   * @brief Coordinates independent atrial solid and fluid time steps.
+   * @brief Advances atrial solid, fluid, or contraction-driven coupled dynamics.
    *
-   * FSI mode currently advances both components independently without exchanging
-   * interface data. Each component owns its mesh, problem, solver, and output.
+   * FSI mode exchanges motion and traction on the shared material interface.
+   * Each component retains its mesh, problem, solver, and physical history.
    */
   class Atrium
   {
@@ -43,6 +44,7 @@ namespace Rodin::Examples::Heart::Atrium
         Geometry::Attribute fluidMaterial = 1;
         Solid::Parameters solid;
         Fluid::Parameters fluid;
+        FSI::Parameters fsi;
       };
 
       /// @brief Constructs the selected model using the shared MPI context.
@@ -104,6 +106,7 @@ namespace Rodin::Examples::Heart::Atrium
       Optional<Real> m_fluidDomainVolume;
       Optional<Solid> m_solid;
       Optional<Fluid> m_fluid;
+      Optional<FSI> m_fsi;
       size_t m_steps = 0;
       bool m_initialized = false;
       bool m_finished = false;

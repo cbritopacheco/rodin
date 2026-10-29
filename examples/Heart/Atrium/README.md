@@ -1,7 +1,7 @@
 # Atrium
 
-`Atrium` advances a solid wall, an incompressible fluid, or both components
-independently. A combined volume mesh contains fluid tetrahedra with material
+`Atrium` advances a solid wall, an incompressible fluid, or their coupled
+dynamics. A combined volume mesh contains fluid tetrahedra with material
 label 1 and solid wedges with material label 4. Their interface triangles share
 vertices in the parent mesh.
 
@@ -32,9 +32,9 @@ Rodin's transformation and quadrature machinery across time steps.
 `initialize()` prepares the selected components, `step()` advances each once,
 and `finish()` closes their outputs. These operations are collective on the
 parent communicator. FSI mode requires equal positive solid and fluid
-time increments. It currently advances the two equations independently without
-exchanging interface motion or traction. A failed coordinated step cannot be
-retried because one component may already have advanced.
+time increments. `FSI` freezes both previous physical states while iterating
+interface motion and traction. Both components commit their states only after
+interface convergence; a failed step terminates the run.
 
 `getMesh()` exposes the combined parent. `getSolid()` and `getFluid()` return
 the selected components, or null when disabled. Each component's `getMesh()`
@@ -105,12 +105,67 @@ This global balance does not enforce pointwise zero divergence. The reported
 maximum velocity is $\max_X\|u_h(X)\|_2$, evaluated from nodal speeds; for
 an affine P1 tetrahedral field the maximum occurs at a vertex.
 
+## Contraction-driven FSI
+
+Fluid inertia feeds back on the thin atrial wall, so a single motion/traction
+exchange need not produce a consistent timestep. `FSI` uses a partitioned
+Robin–Dirichlet iteration. With the fluid-outward normal $n_f$ and fluid stress
+$\sigma_f=-pI+2\mu D(u_f)$, the interface conditions are
+
+$$
+u_f=v_s,\qquad d_f=d_s,\qquad t_s=-\sigma_f n_f.
+$$
+
+Here $d_f$ is the fluid mesh displacement and $t_s$ is the spatial load on the
+solid. Its reference-area value is $T_s=J_\Gamma t_s$, where $J_\Gamma$ is the
+current-to-reference interface area ratio. The solid trial solves
+
+$$
+P_sN_s+\alpha v_s=g^k,\qquad
+\widehat g^{k+1}=J_\Gamma(-\sigma_f n_f)+\alpha u_f.
+$$
+
+Both Robin terms use reference area. At convergence, velocity continuity
+cancels them and recovers traction equilibrium. The coefficient $\alpha$ has
+units $\mathrm{Pa\,s/m}$; its automatic value is
+$\rho_f V_f^{1/3}/\Delta t$. This impedance scale is a numerical choice,
+not a tissue parameter. Aitken relaxation updates
+$g^{k+1}=g^k+\omega_k(\widehat g^{k+1}-g^k)$, with bounded factors. Convergence
+uses the unrelaxed nodal Robin residual, measured in Pa. Fluid traction is
+projected onto the reference interface from pressure and the recovered
+velocity gradient; this is a stress-based discrete transfer.
+
+The fluid receives the solid velocity as an essential condition on label 4.
+A harmonic extension of solid displacement moves the fluid interior; opening
+caps remain fixed. With mesh velocity $a=(d_f^{n+1}-d_f^n)/\Delta t$ and cell
+volume ratio $r_K=|K^n|/|K^{n+1}|$, the conservative first-order ALE residual is
+
+$$
+R_m^{\mathrm{ALE}}=
+\rho\frac{u_f^{n+1}-r_Ku_f^n}{\Delta t}
++\rho[(u_f^n-a)\cdot\nabla]u_f^{n+1}
++\rho\left(\frac12\nabla\cdot u_f^n-\nabla\cdot a\right)u_f^{n+1}
+-\nabla\cdot(2\mu_nD(u_f^{n+1}))+\nabla p^{n+1}.
+$$
+
+SUPG and PSPG use this residual and the relative advecting velocity. Previous
+velocity and solid internal states remain fixed through the coupling trials.
+Mesh motion invalidates Rodin's geometric caches through the mesh coordinate
+API. The coupled driver retains the same spaces, Problems, solvers, and MPI
+interface scatter plans. Gradient and traction projections are reassembled.
+
+All openings have zero imposed pressure and no prescribed flux. Fluid starts
+at rest and active wall contraction drives the flow. Backflow stabilization
+remains active. FSI currently excludes the 0D ventricular driver, species
+transport, and orthogonal subscales. The outer solid surface is unloaded and
+opening rims are clamped. No valve or circulatory model is represented.
+
 ## Units and mesh resource
 
 The parent mesh uses mm. The solid retains mm, kPa, and seconds; the fluid
 submesh converts coordinates to metres with `fluid.meshScale` and uses SI units.
 The conversion changes neither parent ancestry nor interface vertex identities.
-An interface exchange must explicitly convert displacement and traction units.
+`FSI` converts displacement, velocity, and traction explicitly during exchange.
 
 `resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh` contains a
 coarse fluid volume sharing the repaired wall's inner surface and a single
@@ -157,9 +212,10 @@ completed flow step. All modes use the same column names.
 values without MPI collectives. Each component's `getDiagnostics()` similarly
 exposes the most recent scalar snapshot.
 
-Fluid mode has a fixed domain, so its volume remains constant. In the current
-independent `FSI` mode, solid-enclosed and fluid-domain volumes are recorded
-separately; they describe different geometries until interface motion is coupled.
+Fluid mode has a fixed domain, so its volume remains constant. In FSI mode,
+the solid-enclosed cavity and moving fluid domain describe the same geometry.
+The CSV includes their volume difference, opening and wall fluxes, interface
+velocity and geometry mismatches, coupling residual, and minimum ALE Jacobian.
 
 Solid states are written and flushed at each time step. Open the XDMF series
 in ParaView, apply **Warp By Vector** using **Displacement**, and use
@@ -198,6 +254,36 @@ mpirun -n 4 build/examples/Heart/Atrium/Atrium \
   -atrium_lv_model false -atrium_kinetics false
 ```
 
+Run contraction-driven FSI on the common coarse mesh:
+
+```sh
+mpirun -n 4 build/examples/Heart/Atrium/Atrium \
+  -atrium_mode fsi \
+  -atrium_mesh resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh \
+  --output output/atrium-fsi/Solid -atrium_output output/atrium-fsi/Flow \
+  --dt 0.001 -atrium_dt 0.001 -atrium_steps 24 \
+  --cache-constitutive -atrium_output_every 1 \
+  -atrium_fluid_lag_preconditioner 5 \
+  -ksp_type gmres -ksp_rtol 1e-12 -ksp_max_it 500 \
+  -ksp_norm_type unpreconditioned -pc_type lu \
+  -pc_factor_mat_solver_type mumps -mat_mumps_icntl_20 0 \
+  -ksp_diagonal_scale false -ksp_diagonal_scale_fix false
+```
+
+`-atrium_fsi_iterations`, `-atrium_fsi_robin`, `-atrium_fsi_rtol`, and
+`-atrium_fsi_atol` configure the interface solve. The solid XDMF stores reference
+geometry and `Displacement`; the fluid XDMF stores moving physical geometry,
+`MeshDisplacement`, and `MeshVelocity`. Apply a displacement warp only to the
+solid. The common diagnostics are written to `output/atrium-fsi/Solid.csv`.
+
+```sh
+python3 examples/Heart/Atrium/Tests/FSI.py --mpiexec mpiexec
+```
+
+The coupled checks use a conforming tetrahedron/wedge tube and examine rest,
+contraction-driven flow, interface continuity, global flux balance, common
+cavity volume, MPI consistency, and fluid feedback on the solid.
+
 The fluid checks use a generated tetrahedral tube and require MPI and MUMPS:
 
 ```sh
@@ -220,7 +306,9 @@ pieces.
 
 `-atrium_fluid_lag_preconditioner N` refreshes the fluid preconditioner on the
 first step and every $N$ timesteps thereafter. Its default is one. Larger
-values require an iterative solver such as GMRES. A failed solve with retained
+values require an iterative solver such as GMRES. FSI trials at the same
+physical timestep retain the same scheduled factors; a lag of one refreshes
+every trial. A failed solve with retained
 factors is retried once with a fresh preconditioner before the timestep is
 committed. Symbolic analysis remains reusable while sparsity is unchanged.
 The policy takes precedence over `-ksp_reuse_preconditioner` for the fluid KSP.

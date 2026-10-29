@@ -15,6 +15,7 @@
 namespace Rodin::Examples::Heart::Atrium
 {
   class Output;
+  class FSI;
 
   /**
    * @brief Transient active atrial wall on a Scotch-partitioned MPI wedge mesh.
@@ -103,6 +104,17 @@ namespace Rodin::Examples::Heart::Atrium
       const CellScalarField& getActiveBeta() const noexcept;
 
     private:
+      friend class FSI;
+
+      /// @brief Freezes the previous state and Newmark predictors for one step.
+      void beginStep();
+
+      /// @brief Solves a coupling trial with the frozen history.
+      void solveStep();
+
+      /// @brief Publishes and commits the converged trial.
+      void commitStep();
+
       using PassiveMaterial =
         Rodin::Solid::KelvinVoigt<Rodin::Solid::DemirayHolzapfelGasserOgden>;
       using Material =
@@ -224,6 +236,8 @@ namespace Rodin::Examples::Heart::Atrium
       VectorSpace m_space;
       CellScalarSpace m_activeSpace;
       VectorField m_displacement, m_velocity, m_acceleration;
+      VectorField m_robinData;
+      Real m_robinCoefficient = 0;
       VectorField m_predictedDisplacement, m_predictedVelocity, m_previousDisplacement;
       CellScalarField m_extension, m_gamma, m_beta;
       CellScalarField m_previousExtension, m_previousGamma, m_previousBeta;

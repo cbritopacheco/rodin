@@ -32,12 +32,19 @@ namespace Rodin::Examples::Heart::Atrium
     m_atrium.m_osi.setName("OscillatoryShearIndex");
     m_atrium.m_wss.setName("WallShearStress");
 
-    m_xdmf.setMesh(m_atrium.m_mesh);
+    m_xdmf.setMesh(m_atrium.m_mesh,
+      m_atrium.m_coupled ? IO::XDMF::MeshPolicy::Transient
+                         : IO::XDMF::MeshPolicy::Static);
     m_xdmf.add("Velocity", m_atrium.m_u.getSolution());
     m_xdmf.add("Pressure", m_atrium.m_p.getSolution());
     m_xdmf.add("TimeAveragedWallShearStress", m_atrium.m_tawss);
     m_xdmf.add("OscillatoryShearIndex", m_atrium.m_osi);
     m_xdmf.add("WallShearStress", m_atrium.m_wss);
+    if (m_atrium.m_coupled)
+    {
+      m_xdmf.add("MeshDisplacement", m_atrium.m_meshDisplacement);
+      m_xdmf.add("MeshVelocity", m_atrium.m_meshVelocity);
+    }
     if (m_atrium.m_cfg.solveKinetics)
     {
       m_atrium.m_thCur.setName("Thrombin");

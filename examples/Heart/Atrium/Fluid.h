@@ -8,25 +8,19 @@
  * @file Fluid.h
  * @brief Distributed Oseen P1/P1 atrial flow with SUPG and PSPG stabilization.
  *
- * 3D atrium: stabilised non-Newtonian flow with four pressure inlets and one
- * outlet closed by the 0D left ventricle through a mitral diode, plus the
- * thrombin/fibrinogen/fibrin kinetics transported by that flow.
- *
- *   inlets  : p = p_pv(t)             (natural traction + impedance + damping)
- *   outlet  : p = p_v(t) from the 0D LV, with R_mv A (u.n)(v.n) assembled
- *             implicitly; R_mv switches between open and closed values.
- *   wall    : no slip, endothelial thrombin flux weighted by the cycle
- *             wall-shear indices.
- *
- * Equal order P1/P1 Oseen flow, stabilized with SUPG, PSPG, and grad-div.
- * Ventricular coupling, species, and orthogonal subscales are optional.
- * Runs on the fluid submesh of the common parent MPI partition. The child
- * coordinates are converted with Config::meshScale.
+ * Equal-order P1/P1 Oseen flow uses SUPG, PSPG, and grad-div stabilization.
+ * Standalone flow has pressure-driven openings and a fixed no-slip wall.
+ * FSI supplies interface velocity, harmonic ALE motion, and zero-pressure
+ * open boundaries. Ventricular coupling, species transport, and orthogonal
+ * subscales are optional standalone models and are disabled in FSI.
+ * The fluid submesh retains the common MPI partition and parent identities;
+ * its coordinates are converted to SI units with Parameters::meshScale.
  */
 #ifndef RODIN_ATRIUM_FLUID_H
 #define RODIN_ATRIUM_FLUID_H
 
 #include <array>
+#include <chrono>
 #include <functional>
 #include <memory>
 #include <string>
@@ -44,6 +38,7 @@
 
 namespace Rodin::Examples::Heart::Atrium
 {
+  class FSI;
   class Fluid
   {
     public:
@@ -430,6 +425,17 @@ namespace Rodin::Examples::Heart::Atrium
       }
 
     private:
+      friend class FSI;
+
+      /// @brief Freezes history and prepares the next physical time.
+      void beginStep();
+
+      /// @brief Commits the converged trial, cycle statistics, and output.
+      void commitStep();
+
+      /// @brief Adds the accepted wall shear to the cycle statistics.
+      void accumulateWallShear();
+
       static MeshType makeMesh(
         const ParentMeshType& parent, const Config& cfg, Attribute material);
       static Model::Input makeInput(const Config& cfg);
@@ -526,6 +532,10 @@ namespace Rodin::Examples::Heart::Atrium
       VectorTestFunctionType m_v;
       ScalarTestFunctionType m_q;
       VectorGridFunctionType m_uOld;
+      VectorGridFunctionType m_wallVelocity, m_wallDisplacement;
+      VectorGridFunctionType m_meshVelocity, m_meshDisplacement;
+      bool m_coupled = false;
+      std::vector<Real> m_massRatios;
 
       /// @brief Nodal speed; its maximum is exact for affine P1 tetrahedral velocity.
       ScalarGridFunctionType m_speedMagnitude;
@@ -625,6 +635,7 @@ namespace Rodin::Examples::Heart::Atrium
       /// @brief Number of completed steps, or index of the step being solved.
       int m_step = 0;
       Timing m_timing;
+      std::chrono::steady_clock::time_point m_stepStart;
   };
 }
 

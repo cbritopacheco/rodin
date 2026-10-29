@@ -190,6 +190,30 @@ int main(int argc, char** argv)
       }
       if (parameters.mode == Atrium::Mode::FSI && parameters.solid.timeStep == 0)
         parameters.solid.timeStep = cfg.dt;
+      got = PETSC_FALSE;
+      PetscOptionsGetInt(
+        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_fsi_iterations", &integer, &got);
+      if (got)
+      {
+        if (integer < 1)
+        {
+          Rodin::Alert::Exception()
+            << "FSI iteration limit must be positive" << Rodin::Alert::Raise;
+        }
+        parameters.fsi.maximumIterations = static_cast<size_t>(integer);
+      }
+      got = PETSC_FALSE;
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_fsi_robin", &real, &got);
+      if (got)
+        parameters.fsi.robinCoefficient = real;
+      got = PETSC_FALSE;
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_fsi_rtol", &real, &got);
+      if (got)
+        parameters.fsi.relativeTolerance = real;
+      got = PETSC_FALSE;
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_fsi_atol", &real, &got);
+      if (got)
+        parameters.fsi.absoluteTolerance = real;
       for (int i = 1; i < argc; ++i)
       {
         if (std::string(argv[i]).starts_with("--"))
@@ -209,6 +233,8 @@ int main(int argc, char** argv)
         Rodin::Alert::Exception()
           << "Atrium step count must be nonnegative" << Rodin::Alert::Raise;
       }
+      if (parameters.mode == Atrium::Mode::FSI && integer > 0)
+        parameters.solid.steps = static_cast<size_t>(integer);
       Atrium simulation(context, parameters);
       simulation.initialize();
       if (!(parameters.mode == Atrium::Mode::Solid && parameters.solid.fibersOnly))

@@ -53,6 +53,8 @@ namespace Rodin::Examples::Heart::Atrium
       parameters.writeCSV = false;
       m_fluid.emplace(m_mesh, parameters, cfg.fluidMaterial);
     }
+    if (cfg.mode == Mode::FSI)
+      m_fsi.emplace(*m_solid, *m_fluid, cfg.fsi);
   }
 
   Atrium::MeshType Atrium::makeMesh(const Context::MPI& context, const Parameters& cfg)
@@ -133,6 +135,8 @@ namespace Rodin::Examples::Heart::Atrium
       m_solid->initialize();
     if (m_fluid)
       m_fluid->initialize();
+    if (m_fsi)
+      m_fsi->initialize();
     std::string failure;
     const auto& comm = m_mesh.getContext().getCommunicator();
     if (comm.rank() == 0)
@@ -164,10 +168,15 @@ namespace Rodin::Examples::Heart::Atrium
   {
     initialize();
     m_failed = true;
-    if (m_solid)
-      m_solid->step();
-    if (m_fluid)
-      m_fluid->step();
+    if (m_fsi)
+      m_fsi->step();
+    else
+    {
+      if (m_solid)
+        m_solid->step();
+      if (m_fluid)
+        m_fluid->step();
+    }
     writeDiagnostics();
     ++m_steps;
     m_failed = false;
@@ -260,6 +269,37 @@ namespace Rodin::Examples::Heart::Atrium
             fluid ? Optional<Real>(fluid->preconditionerRefreshed) : Optional<Real>{}},
           {"fluid_pc_retried",
             fluid ? Optional<Real>(fluid->preconditionerRetried) : Optional<Real>{}},
+          {"fsi_iterations",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().iterations)
+                  : Optional<Real>{}},
+          {"fsi_robin_residual_pa",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().robinResidual)
+                  : Optional<Real>{}},
+          {"fsi_robin_tolerance_pa",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().robinTolerance)
+                  : Optional<Real>{}},
+          {"fsi_velocity_mismatch_m_per_s",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().velocityMismatch)
+                  : Optional<Real>{}},
+          {"fsi_displacement_mismatch_m",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().displacementMismatch)
+                  : Optional<Real>{}},
+          {"fsi_relaxation",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().relaxation)
+                  : Optional<Real>{}},
+          {"fsi_min_mesh_jacobian",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().minimumMeshJacobian)
+                  : Optional<Real>{}},
+          {"fluid_wall_flux_m3_per_s",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().wallFlux) : Optional<Real>{}},
+          {"fluid_total_flux_m3_per_s",
+            m_fsi && fluid ? Optional<Real>(fluid->inletFlux + fluid->outletFlux +
+                               m_fsi->getDiagnostics().wallFlux)
+                           : Optional<Real>{}},
+          {"fsi_cavity_volume_difference_ml",
+            m_fsi && m_solidCavityVolume && m_fluidDomainVolume
+              ? Optional<Real>(*m_fluidDomainVolume - *m_solidCavityVolume)
+              : Optional<Real>{}},
           {"fluid_max_TAWSS_pa",
             fluid ? Optional<Real>(fluid->maximumTAWSS) : Optional<Real>{}},
           {"fluid_max_OSI", fluid ? Optional<Real>(fluid->maximumOSI) : Optional<Real>{}},

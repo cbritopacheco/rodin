@@ -89,6 +89,10 @@ namespace Rodin::Examples::Heart::Atrium
       m_v(m_vh),
       m_q(m_sh),
       m_uOld(m_vh),
+      m_wallVelocity(m_vh),
+      m_wallDisplacement(m_vh),
+      m_meshVelocity(m_vh),
+      m_meshDisplacement(m_vh),
       m_speedMagnitude(m_sh),
       m_sTrial(m_sh),
       m_sTest(m_sh),
@@ -359,7 +363,7 @@ namespace Rodin::Examples::Heart::Atrium
 
   Fluid::Real Fluid::tau1At(const Point& p) const
   {
-    const auto uc = m_uOld.getValue(p);
+    const auto uc = (m_uOld - m_meshVelocity).getValue(p);
     const Real h = cellSize(p);
     const Real nu = viscosityAt(p) / m_cfg.rho;
     return 1.0 / (4.0 * nu / (h * h) + 2.0 * std::sqrt(Math::dot(uc, uc)) / h);
@@ -457,6 +461,10 @@ namespace Rodin::Examples::Heart::Atrium
     const auto zeroVector = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
 
     m_uOld = zeroVector;
+    m_wallVelocity = zeroVector;
+    m_wallDisplacement = zeroVector;
+    m_meshVelocity = zeroVector;
+    m_meshDisplacement = zeroVector;
     m_subOld = zeroVector;
     m_sub = zeroVector;
     m_convProjection = zeroVector;
@@ -515,7 +523,6 @@ namespace Rodin::Examples::Heart::Atrium
 
   void Fluid::setupFlow()
   {
-    const size_t dim = m_mesh.getSpaceDimension();
     const auto normal = BoundaryNormal(m_mesh);
     const auto& cy = m_cfg.viscosity;
     const Real deltaMu = cy.mu0 - cy.muInf;
@@ -531,9 +538,14 @@ namespace Rodin::Examples::Heart::Atrium
     const auto muLag = cy.muInf +
       deltaMu * Pow(1.0 + Pow(cy.lambda * shearLag, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
 
-    const auto convU = Mult(Jacobian(m_u), m_uOld);
-    const auto temam = Div(m_uOld) * Dot(m_u, m_v);
-    const auto streamlineTest = rho * Mult(Jacobian(m_v), m_uOld);
+    RealFunction massRatio([this](const Point& p) {
+      return m_coupled ? m_massRatios.at(p.getPolytope().getIndex()) : Real(1);
+    });
+    const auto transport = m_uOld - m_meshVelocity;
+    const auto convU = Mult(Jacobian(m_u), transport);
+    const auto geometricDivergence = Div(m_uOld) - 2.0 * Div(m_meshVelocity);
+    const auto temam = geometricDivergence * Dot(m_u, m_v);
+    const auto streamlineTest = rho * Mult(Jacobian(m_v), transport);
 
     const auto uNormal = Dot(m_u, normal) * normal;
     const auto uTangential = m_u - uNormal;
@@ -548,16 +560,20 @@ namespace Rodin::Examples::Heart::Atrium
     RealFunction pInFn = [this](const Point&) { return m_pIn; };
     RealFunction pOutFn = [this](const Point&) { return m_pOut; };
     RealFunction mitralFn = [this](const Point&) { return m_mitralZ; };
+    // The affine-tetrahedron volume ratio is constant; P1 history times P1 test is quadratic.
+    constexpr size_t MassOrder = 2;
+    auto historyMass = Integral(massRatio * m_uOld, m_v);
+    historyMass.setOrder(MassOrder);
 
-    m_flow = (rho / dt) * Integral(m_u, m_v) - (rho / dt) * Integral(m_uOld, m_v)
+    m_flow = (rho / dt) * Integral(m_u, m_v) - (rho / dt) * historyMass
 
       + rho * Integral(Dot(convU, m_v)) + 0.5 * rho * Integral(temam)
 
       // SUPG tests the complete affine-P1 momentum residual along the lagged flow.
       + (rho / dt) * Integral(m_tauFn * m_u, streamlineTest) -
-      (rho / dt) * Integral(m_tauFn * m_uOld, streamlineTest) +
+      (rho / dt) * Integral(m_tauFn * massRatio * m_uOld, streamlineTest) +
       rho * Integral(m_tauFn * convU, streamlineTest) +
-      (0.5 * rho) * Integral(m_tauFn * Div(m_uOld) * m_u, streamlineTest) +
+      (0.5 * rho) * Integral(m_tauFn * geometricDivergence * m_u, streamlineTest) +
       Integral(m_tauFn * Grad(m_p), streamlineTest) +
       VMSGradDivBilinearIntegrator(m_u, m_v, m_tauCFn)
 
@@ -567,9 +583,9 @@ namespace Rodin::Examples::Heart::Atrium
 
       // PSPG tests that same momentum residual with the pressure gradient.
       + (rho / dt) * Integral(m_tauPFn * m_u, Grad(m_q)) -
-      (rho / dt) * Integral(m_tauPFn * m_uOld, Grad(m_q)) +
+      (rho / dt) * Integral(m_tauPFn * massRatio * m_uOld, Grad(m_q)) +
       rho * Integral(m_tauPFn * convU, Grad(m_q)) +
-      (0.5 * rho) * Integral(m_tauPFn * Div(m_uOld) * m_u, Grad(m_q)) +
+      (0.5 * rho) * Integral(m_tauPFn * geometricDivergence * m_u, Grad(m_q)) +
       Integral(m_tauPFn * Grad(m_p), Grad(m_q))
 
       + BoundaryIntegral(pInFn * Dot(m_v, normal)).over(m_inletSet) +
@@ -586,7 +602,7 @@ namespace Rodin::Examples::Heart::Atrium
       + BoundaryIntegral(inletBackflow * Dot(m_u, m_v)).over(m_inletSet) +
       BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.outlet)
 
-      + DirichletBC(m_u, Zero(dim)).on(m_cfg.wall);
+      + DirichletBC(m_u, m_wallVelocity).on(m_cfg.wall);
     if (m_cfg.useVMS)
     {
       m_flow -= VMSConvectionLinearIntegrator(
@@ -811,7 +827,7 @@ namespace Rodin::Examples::Heart::Atrium
 
     const auto assemblyStart = CoronaryClock::now();
     m_flow.assemble();
-    m_timing.assembly = secondsSince(assemblyStart);
+    m_timing.assembly += secondsSince(assemblyStart);
 
     if (!m_flowFieldSplitsSet)
     {
@@ -828,10 +844,10 @@ namespace Rodin::Examples::Heart::Atrium
     }
 
     const auto solveStart = CoronaryClock::now();
-    m_preconditionerRefreshed = !m_lastPreconditionerRefreshStep ||
+    bool refreshed = m_cfg.preconditionerLag == 1 || !m_lastPreconditionerRefreshStep ||
       m_step - *m_lastPreconditionerRefreshStep >= m_cfg.preconditionerLag;
-    m_preconditionerRetried = false;
-    m_flowKSP.setReusePreconditioner(!m_preconditionerRefreshed);
+    bool retried = false;
+    m_flowKSP.setReusePreconditioner(!refreshed);
     m_flow.solve(m_flowKSP);
 
     ::KSPConvergedReason reason;
@@ -840,7 +856,7 @@ namespace Rodin::Examples::Heart::Atrium
     PetscInt iterations = 0;
     ierr = KSPGetIterationNumber(m_flowKSP.getHandle(), &iterations);
     assert(ierr == PETSC_SUCCESS);
-    m_linearIterations = static_cast<int>(iterations);
+    m_linearIterations += static_cast<int>(iterations);
 
     const char* type = nullptr;
     ierr = KSPGetType(m_flowKSP.getHandle(), &type);
@@ -852,7 +868,7 @@ namespace Rodin::Examples::Heart::Atrium
                          << Alert::Raise;
     }
 
-    if (reason <= 0 && !m_preconditionerRefreshed)
+    if (reason <= 0 && !refreshed)
     {
       // Retry the current linear system before any timestep state is committed.
       ierr = VecSet(m_flow.getLinearSystem().getSolution(), 0.0);
@@ -864,18 +880,20 @@ namespace Rodin::Examples::Heart::Atrium
       ierr = KSPGetIterationNumber(m_flowKSP.getHandle(), &iterations);
       assert(ierr == PETSC_SUCCESS);
       m_linearIterations += static_cast<int>(iterations);
-      m_preconditionerRefreshed = true;
-      m_preconditionerRetried = true;
+      refreshed = true;
+      retried = true;
     }
-    m_timing.solve = secondsSince(solveStart);
+    m_timing.solve += secondsSince(solveStart);
+    m_preconditionerRefreshed |= refreshed;
+    m_preconditionerRetried |= retried;
     (void)ierr;
 
     if (isRoot())
     {
       KSPInfo() << (reason > 0 ? "Converged" : "Did NOT converge")
-                << "  iterations = " << m_linearIterations
-                << "  PC=" << (m_preconditionerRefreshed ? "refreshed" : "retained")
-                << (m_preconditionerRetried ? " (retry)" : "") << "  (" << m_timing.solve
+                << "  iterations = " << iterations
+                << "  PC=" << (refreshed ? "refreshed" : "retained")
+                << (retried ? " (retry)" : "") << "  (" << secondsSince(solveStart)
                 << " s)" << Alert::Raise;
     }
 
@@ -885,18 +903,14 @@ namespace Rodin::Examples::Heart::Atrium
                          << static_cast<int>(reason) << Alert::Raise;
     }
 
-    if (m_preconditionerRefreshed)
+    if (refreshed)
     {
       m_lastPreconditionerRefreshStep = m_step;
       ++m_preconditionerRefreshes;
     }
 
-    m_uOld.setData(m_u.getSolution().getData());
-    if (m_cfg.useVMS)
-      m_subOld.setData(m_sub.getData());
-
-    // Reject a nonfinite or excessive velocity after a converged linear solve.
-    m_speedMagnitude = Sqrt(Dot(m_uOld, m_uOld));
+    // Observe the trial without committing the Oseen history.
+    m_speedMagnitude = Sqrt(Dot(m_u.getSolution(), m_u.getSolution()));
     m_speed = m_speedMagnitude.max();
 
     return reason > 0 && std::isfinite(m_speed) && m_speed <= m_cfg.maxVelocity;
@@ -927,6 +941,11 @@ namespace Rodin::Examples::Heart::Atrium
     m_wssProjection.solve(m_wssKSP);
     m_wss.setData(m_wssTrial.getSolution().getData());
 
+    m_timing.shear += secondsSince(shearStart);
+  }
+
+  void Fluid::accumulateWallShear()
+  {
     // Cycle accumulators. Two are needed and they are not interchangeable: the
     // vector integral measures how much net direction survives, the scalar one
     // how much shear was applied regardless of direction.
@@ -939,8 +958,6 @@ namespace Rodin::Examples::Heart::Atrium
     // negative. Interpolating the magnitude at the nodes cannot.
     m_shearMagnitude.project(Sqrt(Dot(m_wss, m_wss)));
     axpy(m_cfg.dt, m_shearMagnitude.getData(), m_absShear.getData());
-
-    m_timing.shear = secondsSince(shearStart);
   }
 
   void Fluid::closeCycle(Real elapsed)
@@ -1046,6 +1063,15 @@ namespace Rodin::Examples::Heart::Atrium
 
   void Fluid::step()
   {
+    beginStep();
+    if (!solveFlow())
+      Alert::Exception() << "Fluid trial exceeded its velocity limit" << Alert::Raise;
+    computeWallShear();
+    commitStep();
+  }
+
+  void Fluid::beginStep()
+  {
     if (m_finished || m_failed)
     {
       Alert::Exception() << "Cannot advance a finished or failed atrium" << Alert::Raise;
@@ -1072,11 +1098,13 @@ namespace Rodin::Examples::Heart::Atrium
     // A failed solve can leave partially updated state; it cannot be retried.
     m_failed = true;
     m_timing = Timing{};
-    const auto stepStart = CoronaryClock::now();
+    m_stepStart = CoronaryClock::now();
+    m_linearIterations = 0;
+    m_preconditionerRefreshed = false;
+    m_preconditionerRetried = false;
 
     m_t += m_cfg.dt;
     const int cycle = step / stepsPerCycle;
-    const bool endOfCycle = (step % stepsPerCycle == stepsPerCycle - 1);
 
     if (isRoot())
     {
@@ -1121,13 +1149,17 @@ namespace Rodin::Examples::Heart::Atrium
       m_mitralZ = m_cfg.prescribedOutletResistance * m_outletArea;
     }
 
-    if (!solveFlow())
-    {
-      Alert::Exception() << "[flow] diverged at step " << (step + 1)
-                         << ": max|u| = " << m_speed << " m/s" << Alert::Raise;
-    }
+  }
 
-    computeWallShear();
+  void Fluid::commitStep()
+  {
+    const int step = m_step;
+    const int cycle = step / m_stepsPerCycle;
+    const bool endOfCycle = step % m_stepsPerCycle == m_stepsPerCycle - 1;
+    m_uOld.setData(m_u.getSolution().getData());
+    if (m_cfg.useVMS)
+      m_subOld.setData(m_sub.getData());
+    accumulateWallShear();
     m_cycleElapsed += m_cfg.dt;
 
     const auto fluxStart = CoronaryClock::now();
@@ -1170,7 +1202,7 @@ namespace Rodin::Examples::Heart::Atrium
       m_timing.output = secondsSince(outputStart);
     }
 
-    m_timing.total = secondsSince(stepStart);
+    m_timing.total = secondsSince(m_stepStart);
 
     if (isRoot())
     {

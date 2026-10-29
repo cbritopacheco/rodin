@@ -65,6 +65,7 @@ namespace Rodin::Examples::Heart::Atrium
       m_displacement(m_space),
       m_velocity(m_space),
       m_acceleration(m_space),
+      m_robinData(m_space),
       m_predictedDisplacement(m_space),
       m_predictedVelocity(m_space),
       m_previousDisplacement(m_space),
@@ -105,6 +106,7 @@ namespace Rodin::Examples::Heart::Atrium
     m_displacement = zero;
     m_velocity = zero;
     m_acceleration = zero;
+    m_robinData = zero;
     m_predictedDisplacement = zero;
     m_predictedVelocity = zero;
     m_previousDisplacement = zero;
@@ -361,6 +363,13 @@ namespace Rodin::Examples::Heart::Atrium
 
   void Solid::step()
   {
+    beginStep();
+    solveStep();
+    commitStep();
+  }
+
+  void Solid::beginStep()
+  {
     if (m_finished || m_failed)
     {
       Alert::Exception() << "Cannot advance a finished or failed atrial solid"
@@ -388,6 +397,10 @@ namespace Rodin::Examples::Heart::Atrium
       (m_timeStep * m_timeStep * (Real(0.5) - NewmarkBeta)) * m_acceleration;
     m_predictedVelocity = m_velocity + (m_timeStep * (1 - NewmarkGamma)) * m_acceleration;
     predictActiveState();
+  }
+
+  void Solid::solveStep()
+  {
     ++m_constitutiveEpoch;
     pack();
     m_mechanics.assemble();
@@ -400,6 +413,10 @@ namespace Rodin::Examples::Heart::Atrium
     m_acceleration =
       m_accelerationCoefficient * (m_displacement - m_predictedDisplacement);
     m_velocity = m_predictedVelocity + (NewmarkGamma * m_timeStep) * m_acceleration;
+  }
+
+  void Solid::commitStep()
+  {
     m_output->write(m_time, m_newton->getIterationNumber(), m_newton->getResidualNorm());
     ++m_step;
     m_failed = false;
