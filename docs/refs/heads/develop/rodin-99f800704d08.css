@@ -744,3 +744,61 @@ main article .m-block.m-badge.rodin-license-badge > img {
   border-radius: 0;
   object-fit: contain;
 }
+
+/* CI status uses the active light/dark palette; stale results stay subdued. */
+.rodin-ci-status { font-weight: 600; }
+.rodin-ci-success { color: var(--ci-success-color); }
+.rodin-ci-danger { color: var(--ci-danger-color); }
+.rodin-ci-warning { color: var(--ci-running-color); }
+.rodin-ci-queued { color: var(--ci-queued-color); }
+.rodin-ci-cancelled { color: var(--ci-cancelled-color); }
+.rodin-ci-muted { color: var(--ci-unknown-color); }
+.rodin-site-footer { position: relative; padding-inline: 2.5rem; }
+.rodin-ci-link { position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding: .5rem; color: inherit; }
+.rodin-ci-link:hover { color: var(--link-color); }
+@supports (mask-image: url("")) {
+  .rodin-ci-mark { display: inline-block; width: 1.3rem; height: 1.3rem; vertical-align: middle; background: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%208a8.5%208.5%200%200%200-14-3L3%208m0-5v5h5M4%2016a8.5%208.5%200%200%200%2014%203l3-3m0%205v-5h-5M8%2012h8%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22black%22%3E%3Ccircle%20cx%3D%228%22%20cy%3D%2212%22%20r%3D%221.5%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%221.5%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2212%22%20r%3D%221.5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") center / contain no-repeat; }
+  .rodin-ci-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
+
+.rodin-ci-checked { margin-top: 1.5rem; }
+
+.rodin-ci-branch + .rodin-ci-branch { margin-top: 2.5rem; }
+
+/* Doxygen's bibliography keeps its citation anchors and definition-list semantics. */
+dl.m-doc:has(> dt > a[name^="CITEREF_"])
+{
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 1rem;
+}
+
+dl.m-doc:has(> dt > a[name^="CITEREF_"]) > :is(dt, dd)
+{
+  margin: 0;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--line-color);
+}
+
+dl.m-doc:has(> dt > a[name^="CITEREF_"]) > dt
+{
+  color: var(--link-color);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+dl.m-doc:has(> dt > a[name^="CITEREF_"]) > dd
+{
+  color: var(--color);
+  overflow-wrap: anywhere;
+}
+
+dl.m-doc:has(> dt > a[name^="CITEREF_"]) > dd > p
+{
+  margin: 0;
+  text-indent: 0;
+}
+
+/* Keep incoming citation links clear of the navigation bar. */
+a[name^="CITEREF_"] { scroll-margin-top: 4rem; }

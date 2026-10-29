@@ -20,6 +20,8 @@
 
 .benchmark-children > .m-frame
 {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   margin: 0;
 }
@@ -181,3 +183,38 @@
 .rodin-benchmarks #search-symbolcount { flex: 1; }
 .rodin-benchmarks .benchmark-search-close { order: 2; }
 .rodin-benchmarks .m-doc-search-content { border-top-left-radius: 0; border-top-right-radius: 0; }
+
+/* Explicit navigation actions share the documentation button styling. */
+.benchmark-actions {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: .4rem;
+  text-align: center;
+  margin-top: 1.25rem;
+}
+.benchmark-actions .m-button { margin: 0; }
+.benchmark-actions .m-button a { font-size: 1rem; padding: .5rem 1rem; }
+.benchmark-search-action { margin-bottom: 1.5rem; }
+
+.benchmark-children > .m-frame > .benchmark-actions {
+  margin-top: auto;
+  padding-top: 1.25rem;
+}
+
+.benchmark-action-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -.1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media(max-width:991px)
+{
+  /* Reserve the complete fused search hit area before the menu button. */
+  #navigation .benchmark-search-trigger { margin-right: 0; }
+}
