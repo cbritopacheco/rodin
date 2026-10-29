@@ -766,3 +766,28 @@ body
   font-weight: 600;
   text-indent: 0;
 }
+
+/* Reserve a separate home area before the main navigation links. */
+#navigation #m-navbar-brand {
+  position: relative;
+  margin-right: .75rem;
+  padding-right: 1.25rem;
+}
+#navigation #m-navbar-brand::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: .75rem;
+  width: 2px;
+  height: 1.5rem;
+  background: var(--dim-color);
+}
+@media screen and (min-width: 992px) {
+  #navigation #m-navbar-brand { left: 0; }
+  #navigation #m-navbar-collapse { margin-left: 0; }
+}
+
+/* Avoid flashing a duplicate title before in-page navigation initializes. */
+main article .m-col-l-10:has(> .rodin-main-brand) > h1 {
+  display: none;
+}

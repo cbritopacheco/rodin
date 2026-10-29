@@ -4,6 +4,11 @@
   const content = benchmark || document.querySelector('main > article > .m-container > .m-row > .m-col-l-10');
   if (!content) return;
 
+  // The homepage signature already identifies the project.
+  if (content.querySelector(':scope > .rodin-main-brand')) {
+    content.querySelector(':scope > h1')?.remove();
+  }
+
   const prepareContents = toc => {
     for (const item of toc.querySelectorAll('li')) {
       const children = item.querySelector(':scope > ul, :scope > ol');
