@@ -487,7 +487,7 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
   <em>Click on any preview to open the full video or image.</em>
 </p>
 
-### CFD
+### Computational fluid dynamics
 
 <table>
   <tr>
@@ -551,14 +551,14 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
   <tr>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI_Preview.png?v=dematted" alt="Coronary FSI" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI_Preview.png?v=dematted" alt="Coronary FSI" width="300">
       </a>
       <br />
       Fluid-structure interaction simulation of a coronary artery (by <a href="https://www.researchgate.net/profile/Oscar-Ruz-2">O. Ruz</a>)
     </td>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD_Preview.png?v=3" alt="Blood velocity in an atrium CFD simulation" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD_Preview.png?v=3" alt="Blood velocity in an atrium CFD simulation" width="300">
       </a>
       <br />
       CFD simulation of blood flow in an atrium (by <a href="https://cfdusach.cl/">CFD Lab at USACH</a>)
