@@ -77,6 +77,7 @@ DT_CONV="${DT_CONV:-0.0075}"          # initial dt, units of D/U (adaptive after
 DTMAX_CONV="${DTMAX_CONV:-0.015}"     # largest dt, units of D/U (CFL ~ 6 in the 25 % jet)
 NBATCH="${NBATCH:-6}"                 # batches for the standard error of the mean
 TEND_CLOSED="${TEND_CLOSED:-2e-3}"    # s, closed gate (hydrostatic, no ramp: a few steps)
+SOLVER="${SOLVER:-direct}"            # direct (MUMPS LU) | iterative (Schur field split + AMG, far less memory)
 EXTRA="${EXTRA:-}"                    # any other -kv_* or PETSc options
 
 MPIRUN="${MPIRUN:-mpirun}"
@@ -123,6 +124,7 @@ run_case() {  # tag dir log bc...
     $MPIRUN -n "$NPJ" "$EXE" \
       -kv_mesh "$mesh" -kv_out "$tag" \
       "${fluid[@]}" \
+      -kv_solver "$SOLVER" \
       "$@" \
       -kv_steady_tol 0 \
       -kv_output_every "$OUTPUT_EVERY" \

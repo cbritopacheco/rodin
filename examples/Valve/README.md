@@ -195,6 +195,17 @@ post-proceso es el mismo: `python3 postprocess_valves.py runs_bingham`.
   | FPC8_open100.mesh | 130 041 | 673 435 | 0.15 |
 
   ~1.7 veces las celdas de las mallas anteriores (~545 k incógnitas).
+- **Solver iterativo (por defecto en este script).** El LU de MUMPS de estas
+  mallas pide 25–30 GB (crece como N^(4/3); el MUMPS de Ubuntu sólo trae el
+  ordenamiento PORD). `-kv_solver iterative` usa FGMRES con un
+  precondicionador de complemento de Schur por bloques [u | p]
+  (`fieldsplit`, factorización `lower`, S ≈ A11 − A10 diag(A00)⁻¹ A01) y un
+  ciclo V de BoomerAMG (hypre) en cada bloque; el precondicionador se
+  reconstruye cada 20 resoluciones o cuando FGMRES pasa de 150 iteraciones.
+  Medido en una malla de 187 k celdas (1 proceso): 2.0 GB frente a 3.3 GB
+  con LU, y las mismas fuerzas (a 6 cifras) en los primeros pasos. Para
+  las mallas de la estela se estiman ~10–12 GB en total. `SOLVER=direct`
+  vuelve al LU. El log imprime la memoria por paso (`memory [GB]`).
 
 ## Cómo se calcula la fuerza (y por qué así)
 

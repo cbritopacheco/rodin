@@ -111,8 +111,10 @@
 // inlet (velocity|pressure), umean, q (m^3/s, overrides umean), profile (auto|laminar|turbulent|uniform), pin, pout,
 // ramp, tangential (inlet penalty, kg/(m^2 s)), total_pressure (bool), dt,
 // dtmin, dtmax, tend, adaptive_dt (bool), grow, shrink, easy, hard, maxit,
-// tol, tau_dt (bool), bdf (1|2), extrapolate (bool), lumped (bool), refactor_every, refactor_its, picard_monitor (bool), tavg, steady_tol, steady_window, output_every, scale.
-// Solvers: -kv_flow_ (MUMPS LU by default), -kv_proj_* (CG + Jacobi).
+// tol, tau_dt (bool), bdf (1|2), extrapolate (bool), lumped (bool), refactor_every, refactor_its, picard_monitor (bool), tavg, steady_tol, steady_window, output_every, scale,
+// solver (direct|iterative).
+// Solvers: -kv_flow_ (GMRES + MUMPS LU by default; -kv_solver iterative:
+// FGMRES + Schur field split with BoomerAMG, see main()), -kv_proj_* (CG + Jacobi).
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -123,6 +125,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+
+#include <sys/resource.h>
+#include <unistd.h>
 
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
@@ -247,6 +252,12 @@ namespace Rodin::Examples::Valve
         /// than refactorIterations iterations.
         int refactorEvery = 20;
         int refactorIterations = 15;
+        /// "direct" (GMRES + lagged MUMPS LU) or "iterative" (FGMRES +
+        /// Schur-complement field split, BoomerAMG on both blocks: a fraction
+        /// of the memory of the LU, see main()). The "refactor" rules above
+        /// then decide when the preconditioner (AMG hierarchies, Schur
+        /// approximation) is rebuilt.
+        std::string solver = "direct";
 
         // Output and stopping.
         Real tAverage = -1.0;      ///< s, start of the time average (< 0: tEnd/2)
@@ -502,6 +513,7 @@ namespace Rodin::Examples::Valve
             }
             m_avgQ += m_dt * r.Qin;
           }
+          updateMemory();
           report(n, iterations, r);
 
           // Steady state: (F, Q) frozen for steadyWindow steps after the ramp.
@@ -809,11 +821,60 @@ namespace Rodin::Examples::Valve
         }
       }
 
+      /// Velocity and pressure rows of the monolithic matrix owned by this
+      /// rank, for PCFIELDSPLIT. The block layout is [u | p] in the global
+      /// numbering (p starts at the trial offset of p) and each rank owns a
+      /// contiguous range of rows, so the owned rows of each field are the
+      /// intersection of that range with the field's range.
+      ///
+      /// The splits are given to the PC once, here, and not through
+      /// LinearSystem::setFieldSplits: Solver::KSP::solve() passes those to
+      /// PCFieldSplitSetIS at every solve, which appends two more splits
+      /// each time (2, 4, 6, ...) and crashes in PCDestroy at exit.
+      void setFieldSplits()
+      {
+        auto& system = m_flow.getLinearSystem();
+        PetscInt lo = 0, hi = 0;
+        PetscErrorCode ierr = MatGetOwnershipRange(system.getOperator(), &lo, &hi);
+        assert(ierr == PETSC_SUCCESS);
+        const PetscInt nu = static_cast<PetscInt>(m_flow.getTrialOffsets()[1]);
+        const PetscInt uEnd = std::min(hi, nu), pBegin = std::max(lo, nu);
+        ::IS isu = PETSC_NULLPTR, isp = PETSC_NULLPTR;
+        ierr = ISCreateStride(PETSC_COMM_WORLD, std::max<PetscInt>(uEnd - lo, 0), lo, 1, &isu);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = ISCreateStride(PETSC_COMM_WORLD, std::max<PetscInt>(hi - pBegin, 0), pBegin, 1, &isp);
+        assert(ierr == PETSC_SUCCESS);
+        // The prefix first: the sub-solvers take theirs (kv_flow_fieldsplit_u_,
+        // ..._p_) from the PC's prefix when the split is created.
+        ::KSP ksp = m_flowKSP.getHandle();
+        ierr = KSPSetOptionsPrefix(ksp, "kv_flow_");
+        assert(ierr == PETSC_SUCCESS);
+        ::PC pc = PETSC_NULLPTR;
+        ierr = KSPGetPC(ksp, &pc);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = PCSetType(pc, PCFIELDSPLIT);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = PCFieldSplitSetIS(pc, "u", isu);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = PCFieldSplitSetIS(pc, "p", isp);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = ISDestroy(&isu);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = ISDestroy(&isp);
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+      }
+
       void solve()
       {
         {
           Timer ta(m_timing.assemble);
           m_flow.assemble();
+        }
+        if (m_cfg.solver == "iterative" && !m_splitsSet)
+        {
+          setFieldSplits();
+          m_splitsSet = true;
         }
         Timer ts(m_timing.solve);
         // Lagged LU: the MUMPS factors of an earlier matrix precondition
@@ -1065,6 +1126,37 @@ namespace Rodin::Examples::Valve
         (void)ierr;
       }
 
+      /// Resident memory of this process in bytes: current (Linux /proc) and peak.
+      static std::array<Real, 2> residentMemory()
+      {
+        struct rusage ru;
+        getrusage(RUSAGE_SELF, &ru);
+#ifdef __APPLE__
+        const Real peak = static_cast<Real>(ru.ru_maxrss);           // bytes
+#else
+        const Real peak = 1024.0 * static_cast<Real>(ru.ru_maxrss);  // kB
+#endif
+        Real current = peak;
+        if (std::ifstream statm("/proc/self/statm"); statm)
+        {
+          long pages = 0, resident = 0;
+          if (statm >> pages >> resident)
+            current = static_cast<Real>(resident) * static_cast<Real>(sysconf(_SC_PAGESIZE));
+        }
+        return { current, peak };
+      }
+
+      /// Collective: max over ranks of the current and peak resident memory,
+      /// and the current total, in GB (printed with the step timings).
+      void updateMemory()
+      {
+        const auto m = residentMemory();
+        double local[2] = { m[0] / 1.0e9, m[1] / 1.0e9 }, mx[2] = { 0.0, 0.0 }, total = 0.0;
+        MPI_Allreduce(local, mx, 2, MPI_DOUBLE, MPI_MAX, PETSC_COMM_WORLD);
+        MPI_Allreduce(local, &total, 1, MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+        m_memory = { mx[0], mx[1], total };
+      }
+
       void report(int step, int iterations, const Result& r)
       {
         if (!isRoot())
@@ -1088,9 +1180,12 @@ namespace Rodin::Examples::Valve
                       << r.Fdyn[2] << ") N" << Alert::NewLine
                       << "   time [s]: setup " << m_timing.setup << "  coefficients " << m_timing.coefficients
                       << "  assemble " << m_timing.assemble << "  solve " << m_timing.solve
-                      << " (" << m_timing.factorizations << " LU, " << m_timing.kspIterations << " GMRES its)"
+                      << " (" << m_timing.factorizations << (m_cfg.solver == "iterative" ? " PC builds, " : " LU, ")
+                      << m_timing.kspIterations << " GMRES its)"
                       << "  forces " << m_timing.forces << "  projections " << m_timing.projections
-                      << "  output " << m_timing.output << Alert::Raise;
+                      << "  output " << m_timing.output << Alert::NewLine
+                      << "   memory [GB]: max per rank " << m_memory[0] << " (peak " << m_memory[1]
+                      << ")  all ranks " << m_memory[2] << Alert::Raise;
         m_timing = Timing{};
       }
 
@@ -1232,6 +1327,7 @@ namespace Rodin::Examples::Valve
       Real m_t = 0.0, m_dt = 0.0;
       Real m_dtPrev = 0.0;                  ///< dt of the last accepted step
       bool m_factored = false;              ///< MUMPS factors available for reuse
+      bool m_splitsSet = false;             ///< field splits given to the iterative solver
       int m_solvesSinceFactor = 0;
       int m_history = 0;                    ///< accepted steps (BDF2 and extrapolation need 1)
       Real m_bdf[3] = { 1.0, 1.0, 0.0 };    ///< (b0 u - b1 u^n + b2 u^{n-1})/dt of this step
@@ -1245,6 +1341,7 @@ namespace Rodin::Examples::Valve
       Vec3 m_flowDir{}, m_inletCentre{};
       Real m_inletRadius = 0.0, m_profileScale = 0.0, m_reynolds = 0.0;
       bool m_bingham = false;
+      std::array<Real, 3> m_memory{};  ///< GB: max current, max peak, total current
       Real m_hedstrom = 0.0, m_binghamNumber = 0.0, m_reynoldsCritical = 0.0, m_plug = 0.0;
       std::string m_profileName = "none";
       Vec3 m_lastF{}, m_avgF{}, m_avgFd{};
@@ -1267,21 +1364,54 @@ int main(int argc, char** argv)
     assert(ierr == PETSC_SUCCESS);
     (void)ierr;
   };
-  // Flow: direct (MUMPS). This MUMPS build faults in its distributed RHS
-  // scatter: keep the right-hand side and the solution centralised.
-  // GMRES preconditioned by (possibly lagged) MUMPS factors; with fresh
-  // factors it converges in one iteration. -kv_refactor_every 1 together
-  // with -kv_flow_ksp_type preonly is the plain direct solve.
-  setDefault("-kv_flow_ksp_type", "gmres");
-  setDefault("-kv_flow_ksp_rtol", "1e-9");
-  setDefault("-kv_flow_ksp_atol", "1e-14");
-  setDefault("-kv_flow_ksp_max_it", "40");
-  setDefault("-kv_flow_ksp_gmres_restart", "40");
-  setDefault("-kv_flow_pc_type", "lu");
-  setDefault("-kv_flow_pc_factor_mat_solver_type", "mumps");
-  setDefault("-kv_flow_mat_mumps_icntl_20", "0");
-  setDefault("-kv_flow_mat_mumps_icntl_21", "0");
-  setDefault("-kv_flow_mat_mumps_icntl_14", "50");
+  char solverName[64] = "direct";
+  PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR, "-kv_solver", solverName, sizeof(solverName), PETSC_NULLPTR);
+  const bool iterative = std::string(solverName) == "iterative";
+  if (iterative)
+  {
+    // Flow: FGMRES on the monolithic (u, p) system, preconditioned by the
+    // Schur-complement factorisation of the [u | p] blocks:
+    //   A00 (velocity: rho b0/dt M + convection + viscosity + OSS) by one
+    //   BoomerAMG V-cycle (mass-dominated at the CFL used: AMG is cheap
+    //   and robust), and S = A11 - A10 diag(A00)^-1 A01 (selfp: the
+    //   pressure-stabilisation Laplacian plus the discrete pressure
+    //   Laplacian; elliptic) by BoomerAMG.
+    // Memory: matrices + AMG hierarchies, ~O(N); the MUMPS LU of the same
+    // system grows like N^(4/3) (25-30 GB for 720 k cells with PORD).
+    setDefault("-kv_flow_ksp_type", "fgmres");
+    setDefault("-kv_flow_ksp_rtol", "1e-8");
+    setDefault("-kv_flow_ksp_atol", "1e-14");
+    setDefault("-kv_flow_ksp_max_it", "400");
+    setDefault("-kv_flow_ksp_gmres_restart", "100");
+    setDefault("-kv_flow_pc_type", "fieldsplit");
+    setDefault("-kv_flow_pc_fieldsplit_type", "schur");
+    setDefault("-kv_flow_pc_fieldsplit_schur_fact_type", "lower");
+    setDefault("-kv_flow_pc_fieldsplit_schur_precondition", "selfp");
+    setDefault("-kv_flow_fieldsplit_u_ksp_type", "preonly");
+    setDefault("-kv_flow_fieldsplit_u_pc_type", "hypre");
+    setDefault("-kv_flow_fieldsplit_u_pc_hypre_type", "boomeramg");
+    setDefault("-kv_flow_fieldsplit_p_ksp_type", "preonly");
+    setDefault("-kv_flow_fieldsplit_p_pc_type", "hypre");
+    setDefault("-kv_flow_fieldsplit_p_pc_hypre_type", "boomeramg");
+  }
+  else
+  {
+    // Flow: direct (MUMPS). This MUMPS build faults in its distributed RHS
+    // scatter: keep the right-hand side and the solution centralised.
+    // GMRES preconditioned by (possibly lagged) MUMPS factors; with fresh
+    // factors it converges in one iteration. -kv_refactor_every 1 together
+    // with -kv_flow_ksp_type preonly is the plain direct solve.
+    setDefault("-kv_flow_ksp_type", "gmres");
+    setDefault("-kv_flow_ksp_rtol", "1e-9");
+    setDefault("-kv_flow_ksp_atol", "1e-14");
+    setDefault("-kv_flow_ksp_max_it", "40");
+    setDefault("-kv_flow_ksp_gmres_restart", "40");
+    setDefault("-kv_flow_pc_type", "lu");
+    setDefault("-kv_flow_pc_factor_mat_solver_type", "mumps");
+    setDefault("-kv_flow_mat_mumps_icntl_20", "0");
+    setDefault("-kv_flow_mat_mumps_icntl_21", "0");
+    setDefault("-kv_flow_mat_mumps_icntl_14", "50");
+  }
   for (const char* prefix : { "-kv_proj_conv_", "-kv_proj_gradp_", "-kv_proj_div_", "-kv_proj_mu_" })
   {
     setDefault(std::string(prefix) + "ksp_type", "cg");
@@ -1366,6 +1496,11 @@ int main(int argc, char** argv)
     boolean("-kv_extrapolate", cfg.extrapolate);
     boolean("-kv_lumped", cfg.lumpedProjection);
     integer("-kv_refactor_every", cfg.refactorEvery);
+    cfg.solver = solverName;
+    if (cfg.solver != "direct" && cfg.solver != "iterative")
+      throw std::runtime_error("-kv_solver must be direct or iterative");
+    if (cfg.solver == "iterative")
+      cfg.refactorIterations = 150;  // rebuild the preconditioner when FGMRES slows down
     integer("-kv_refactor_its", cfg.refactorIterations);
     real("-kv_tavg", cfg.tAverage);
     real("-kv_steady_tol", cfg.steadyTolerance);
