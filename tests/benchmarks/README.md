@@ -85,7 +85,7 @@ not assumed to be wall time. `RANKS` preserves the required launcher counts.
 `ARGS` applies to every invocation; `MPI_ARGS` additionally applies above one
 rank.
 
-The Stokes assembly and solver registrations use `CASE_BATCH 1`: individual
+The Stokes assembly, SparseLU and GMRES/block-Schur registrations use `CASE_BATCH 1`: individual
 large cases can take many minutes outside their reported timed operations.
 Separate lanes retain every case while limiting work lost to a runner shutdown.
 The [runner resource budget](../README.md#github-runner-resource-budget) applies
@@ -94,9 +94,23 @@ to the complete invocation, including untimed setup and numerical qualification.
 Stokes assembly qualification checks the exact affine patch residual and both
 wrong-field and missing-pressure sensitivity controls without constructing a
 solver. Every repeated assembly retains its exact-field residual check. The
-solver workload additionally requires successful SparseLU factorization,
-coefficient reproduction and the solved residual; all existing thresholds are
-unchanged.
+solver workloads additionally require solver success, coefficient reproduction
+and the true solved residual; all existing thresholds are unchanged.
+
+`RodinStokesGMRESBenchmarks` uses the production native
+`Solver::GMRES<System, StokesBlockPreconditioner>` API. Its benchmark-owned
+preconditioner applies incomplete Cholesky to the velocity block and an LDLT
+pressure mass solve for the Schur approximation, including the explicit mean
+constraint. Pressure mass storage has shared immutable ownership across solver
+configuration copies; factors remain independent. Restart is 60, the iteration
+limit is 1200 and the backend tolerance is 1e-13. Each solve starts from zero,
+and timing includes preconditioner setup and the solve. Pressure mass assembly
+is untimed. This variant has no residual-correction solve, unlike SparseLU.
+Its 108 cases are separately labelled; SparseLU cases are not replaced.
+
+The largest pyramid cases currently fail the existing missing-pressure
+sensitivity floor despite passing the affine patch and linear-solver checks.
+Their failure remains explicit; changing the solver does not waive that check.
 
 Non-root display reporters must redirect their output stream as well as suppress
 measurement callbacks: Google Benchmark writes `--benchmark_list_tests` output

@@ -39,11 +39,22 @@
  *   std::cout << "Converged!\n";
  * ```
  *
+ * @par Custom native preconditioners
+ * `GMRES<LinearSystem, Preconditioner>` accepts an Eigen-compatible
+ * preconditioner and exposes its owned configuration through getPreconditioner().
+ * The default void parameter preserves the existing native diagonal
+ * preconditioner and PETSc KSP specialization. Custom types must support copy
+ * assignment of valid configuration. Types containing noncopyable numerical
+ * factors should copy settings and immutable owned inputs into a fresh state;
+ * compute rebuilds factors independently for every solver instance and solve.
+ * A failed preconditioner setup leaves the supplied solution unchanged.
+ *
  * @see <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html">GMRES</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_GMRES_H
 #define RODIN_SOLVER_GMRES_H
 
+#include <type_traits>
 #include <Eigen/Core>
 #include <unsupported/Eigen/IterativeSolvers>
 
@@ -59,8 +70,8 @@
 namespace Rodin::FormLanguage
 {
   /// @brief Form-language traits for GMRES solvers.
-  template <class LinearSystem>
-  struct Traits<Solver::GMRES<LinearSystem>>
+  template <class LinearSystem, class Preconditioner>
+  struct Traits<Solver::GMRES<LinearSystem, Preconditioner>>
   {
     /// @brief Linear system type.
     using LinearSystemType = LinearSystem;
@@ -95,14 +106,22 @@ namespace Rodin::Solver
    *
    * @tparam Scalar The scalar type (e.g., Real, Complex)
    */
-  template <class Scalar>
-  class GMRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<
+  template <class Scalar, class Preconditioner>
+  class GMRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>,
+    Preconditioner>
+    final : public LinearSolverBase<
         Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Scalar;
+
+      /// @brief Eigen-compatible preconditioner; void retains the backend default.
+      using PreconditionerType = std::conditional_t<std::is_void_v<Preconditioner>,
+        Eigen::DiagonalPreconditioner<ScalarType>, Preconditioner>;
+
+      static_assert(std::is_copy_assignable_v<PreconditionerType>,
+        "GMRES preconditioners must support copying their configuration.");
 
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
@@ -140,6 +159,8 @@ namespace Rodin::Solver
           m_maxIterations(other.m_maxIterations),
           m_restart(other.m_restart)
       {
+        if constexpr (!std::is_void_v<Preconditioner>)
+          m_solver.preconditioner() = other.m_solver.preconditioner();
         setTolerance(other.m_solver.tolerance());
         if (m_maxIterations)
           setMaxIterations(*m_maxIterations);
@@ -156,6 +177,8 @@ namespace Rodin::Solver
           m_maxIterations(other.m_maxIterations),
           m_restart(other.m_restart)
       {
+        if constexpr (!std::is_void_v<Preconditioner>)
+          m_solver.preconditioner() = other.m_solver.preconditioner();
         setTolerance(other.m_solver.tolerance());
         if (m_maxIterations)
           setMaxIterations(*m_maxIterations);
@@ -165,6 +188,26 @@ namespace Rodin::Solver
 
       /// @brief Destructor.
       ~GMRES() = default;
+
+      /**
+       * @brief Accesses the preconditioner configuration before the next solve.
+       * @returns Mutable preconditioner owned by this solver.
+       *
+       * Custom preconditioners follow Eigen's compute/solve/info protocol.
+       * Copy assignment must preserve configuration with valid ownership;
+       * expensive backend factors should be rebuilt by compute, not shared
+       * between solver copies. Every solve recomputes the preconditioner.
+       */
+      PreconditionerType& getPreconditioner()
+      {
+        return m_solver.preconditioner();
+      }
+
+      /// @brief Returns the owned preconditioner for inspection.
+      const PreconditionerType& getPreconditioner() const
+      {
+        return m_solver.preconditioner();
+      }
 
       /**
        * @brief Sets the convergence tolerance; returns a reference to this solver.
@@ -210,6 +253,8 @@ namespace Rodin::Solver
       void solve(LinearSystemType& axb) override
       {
         m_solver.compute(axb.getOperator());
+        if (m_solver.info() != Eigen::Success)
+          return;
         if (axb.getSolution().size() == axb.getVector().size())
           axb.getSolution() = m_solver.solveWithGuess(axb.getVector(), axb.getSolution());
         else
@@ -260,7 +305,7 @@ namespace Rodin::Solver
       Optional<size_t>
         m_maxIterations; ///< Explicit iteration limit; absence retains Eigen's size-dependent default.
       Optional<size_t> m_restart; ///< Explicit Krylov restart dimension.
-      Eigen::GMRES<OperatorType> m_solver;
+      Eigen::GMRES<OperatorType, PreconditionerType> m_solver;
   };
 
   /**
@@ -269,14 +314,22 @@ namespace Rodin::Solver
    *
    * @tparam Scalar The scalar type (e.g., Real, Complex)
    */
-  template <class Scalar>
-  class GMRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<
+  template <class Scalar, class Preconditioner>
+  class GMRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>,
+    Preconditioner>
+    final : public LinearSolverBase<
         Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Scalar;
+
+      /// @brief Eigen-compatible preconditioner; void retains the backend default.
+      using PreconditionerType = std::conditional_t<std::is_void_v<Preconditioner>,
+        Eigen::DiagonalPreconditioner<ScalarType>, Preconditioner>;
+
+      static_assert(std::is_copy_assignable_v<PreconditionerType>,
+        "GMRES preconditioners must support copying their configuration.");
 
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
@@ -314,6 +367,8 @@ namespace Rodin::Solver
           m_maxIterations(other.m_maxIterations),
           m_restart(other.m_restart)
       {
+        if constexpr (!std::is_void_v<Preconditioner>)
+          m_solver.preconditioner() = other.m_solver.preconditioner();
         setTolerance(other.m_solver.tolerance());
         if (m_maxIterations)
           setMaxIterations(*m_maxIterations);
@@ -330,6 +385,8 @@ namespace Rodin::Solver
           m_maxIterations(other.m_maxIterations),
           m_restart(other.m_restart)
       {
+        if constexpr (!std::is_void_v<Preconditioner>)
+          m_solver.preconditioner() = other.m_solver.preconditioner();
         setTolerance(other.m_solver.tolerance());
         if (m_maxIterations)
           setMaxIterations(*m_maxIterations);
@@ -339,6 +396,26 @@ namespace Rodin::Solver
 
       /// @brief Destructor.
       ~GMRES() = default;
+
+      /**
+       * @brief Accesses the preconditioner configuration before the next solve.
+       * @returns Mutable preconditioner owned by this solver.
+       *
+       * Custom preconditioners follow Eigen's compute/solve/info protocol.
+       * Copy assignment must preserve configuration with valid ownership;
+       * expensive backend factors should be rebuilt by compute, not shared
+       * between solver copies. Every solve recomputes the preconditioner.
+       */
+      PreconditionerType& getPreconditioner()
+      {
+        return m_solver.preconditioner();
+      }
+
+      /// @brief Returns the owned preconditioner for inspection.
+      const PreconditionerType& getPreconditioner() const
+      {
+        return m_solver.preconditioner();
+      }
 
       /**
        * @brief Sets the convergence tolerance; returns a reference to this solver.
@@ -382,6 +459,8 @@ namespace Rodin::Solver
       void solve(LinearSystemType& axb) override
       {
         m_solver.compute(axb.getOperator());
+        if (m_solver.info() != Eigen::Success)
+          return;
         if (axb.getSolution().size() == axb.getVector().size())
           axb.getSolution() = m_solver.solveWithGuess(axb.getVector(), axb.getSolution());
         else
@@ -432,7 +511,7 @@ namespace Rodin::Solver
       Optional<size_t>
         m_maxIterations; ///< Explicit iteration limit; absence retains Eigen's size-dependent default.
       Optional<size_t> m_restart; ///< Explicit Krylov restart dimension.
-      Eigen::GMRES<OperatorType> m_solver;
+      Eigen::GMRES<OperatorType, PreconditionerType> m_solver;
   };
 }
 

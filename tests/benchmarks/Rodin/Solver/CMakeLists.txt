@@ -18,4 +18,8 @@ add_executable(RodinStokesSolveBenchmarks EXCLUDE_FROM_ALL StokesSolve.cpp)
 target_link_libraries(RodinStokesSolveBenchmarks PRIVATE
   Rodin::Variational Rodin::Solver benchmark::benchmark)
 
+add_executable(RodinStokesGMRESBenchmarks EXCLUDE_FROM_ALL StokesGMRES.cpp)
+target_link_libraries(RodinStokesGMRESBenchmarks PRIVATE
+  Rodin::Variational Rodin::Solver benchmark::benchmark)
+
 include(registrations.benchmarks.cmake)

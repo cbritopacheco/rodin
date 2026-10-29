@@ -11,6 +11,8 @@
 #include <sstream>
 #include "Rodin/Assembly.h"
 #include "Rodin/Solver/SparseLU.h"
+#include "Rodin/Solver/GMRES.h"
+#include "StokesBlockPreconditioner.h"
 #include "convergence/Stokes.h"
 
 namespace Rodin::Tests::Benchmarks
@@ -32,6 +34,8 @@ namespace Rodin::Tests::Benchmarks
    * and global completion. Solve measures public SparseLU::solve(system),
    * including fresh factorization and one residual correction, but no assembly
    * or field scatter. It does not claim to isolate triangular substitution.
+   * Block GMRES instead measures preconditioner setup and the restarted solve
+   * from zero, without a correction solve. Pressure mass assembly is untimed.
    * Assembly qualification does not construct or run a solver.
    * Setup and all numerical qualifications are outside timing. Both variants
    * check the exact affine patch residual, a wrong-field control and a
@@ -40,8 +44,9 @@ namespace Rodin::Tests::Benchmarks
    *
    * @tparam K Velocity degree; pressure has degree K-1.
    * @tparam Weighted Whether explicit unit viscosity selects the weighted kernel.
+   * @tparam BlockGMRES Whether GMRES with the fixed block preconditioner replaces SparseLU.
    */
-  template <size_t K, bool Weighted = false>
+  template <size_t K, bool Weighted = false, bool BlockGMRES = false>
   class StokesWorkload
   {
     public:
@@ -140,11 +145,27 @@ namespace Rodin::Tests::Benchmarks
           (baseline.getOperator() * exact - baseline.getVector()).norm() / rhsScale;
         const Math::Vector<Real> wrong = exact.array() + Real(1);
         const Real wrongResidual = residual(wrong);
-        Optional<decltype(Solver::SparseLU(problem))> solver;
+        using System = std::remove_reference_t<decltype(system)>;
+        using SolverType = std::conditional_t<BlockGMRES,
+          Solver::GMRES<System, StokesBlockPreconditioner>, Solver::SparseLU<System>>;
+        Optional<SolverType> solver;
         if constexpr (Solve)
         {
           solver.emplace(problem);
-          solver->setRefinementSteps(1);
+          if constexpr (BlockGMRES)
+          {
+            BilinearForm pressureMass(p, q);
+            auto integrand = Integral(p, q);
+            integrand.setOrder(QuadratureOrder);
+            pressureMass = integrand;
+            pressureMass.assemble();
+            solver->getPreconditioner().configure(
+              std::move(pressureMass.getOperator()), problem.getTrialOffsets()[1]);
+            solver->setRestart(60).setMaxIterations(1200).setTolerance(1e-13);
+            system.getSolution().setZero();
+          }
+          else
+            solver->setRefinementSteps(1);
           solver->solve(system);
         }
         const auto coefficientError = [&]() {
@@ -183,7 +204,11 @@ namespace Rodin::Tests::Benchmarks
         for (auto _ : state)
         {
           if constexpr (Solve)
+          {
+            if constexpr (BlockGMRES)
+              system.getSolution().setZero();
             solver->solve(system);
+          }
           else
             problem.assemble();
           benchmark::DoNotOptimize(system.getSolution().data());
@@ -217,6 +242,12 @@ namespace Rodin::Tests::Benchmarks
         state.counters["relative_missing_pressure_residual"] = omittedResidual;
         if constexpr (Solve)
         {
+          if constexpr (BlockGMRES)
+          {
+            state.counters["iterations"] = solver->getIterationNumber();
+            state.counters["estimated_relative_error"] = solver->getError();
+            state.counters["restart"] = 60;
+          }
           state.counters["relative_coefficient_error"] = coefficientError();
           state.counters["relative_residual"] = residual(system.getSolution());
         }
@@ -237,8 +268,9 @@ namespace Rodin::Tests::Benchmarks
             Polytope::Type::Hexahedron, Polytope::Type::Wedge})
         {
           const std::string name = std::string("Stokes/") +
-            (Solve ? "SparseLU/" : "Assembly/") + (Weighted ? "WeightedViscosity/" : "") +
-            "H1/P" + std::to_string(K) + "P" + std::to_string(K - 1) + "/Real/" +
+            (Solve ? (BlockGMRES ? "GMRESBlockSchur/" : "SparseLU/") : "Assembly/") +
+            (Weighted ? "WeightedViscosity/" : "") + "H1/P" + std::to_string(K) + "P" +
+            std::to_string(K - 1) + "/Real/" +
             std::string(Convergence::UniformGrid::getGeometryName(geometry));
           benchmark::RegisterBenchmark(name.c_str(),
             [geometry, &failed](auto& state) { run<Solve>(state, geometry, failed); })
