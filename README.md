@@ -487,29 +487,41 @@ usage guidelines.
   <em>Click on any preview to open the full video or image.</em>
 </p>
 
+### Computational fluid dynamics
+
+<table>
+  <tr>
+    <td align="center" valign="bottom" width="33%">
+      <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/CFD/AtriumP1P1/AtriumP1P1.mp4">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/CFD/AtriumP1P1/Preview.png" alt="AtriumP1P1 CFD simulation" width="300">
+      </a>
+      <br />
+      CFD simulation in an atrium
+    </td>
+  </tr>
+</table>
+
 ### Shape optimization
 
 <table>
   <tr>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever2D/LevelSetCantilever2D.webm">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever2D/Preview.png?v=transparent" alt="Shape optimization of a cantilever in 2D" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever2D/Preview.png?v=transparent" alt="Shape optimization of a cantilever in 2D" width="300">
       </a>
       <br />
       Minimization of linear-elastic compliance in 2D
     </td>
-    <td align="center" valign="bottom" width="50%">
+    <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/LevelSetCantilever3D.webm?v=4x">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/Preview.png?v=transparent" alt="Shape optimization of a cantilever in 3D" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/Preview.png?v=transparent" alt="Shape optimization of a cantilever in 3D" width="300">
       </a>
       <br />
      Minimization of linear-elastic compliance in 3D
     </td>
-  </tr>
-  <tr>
-    <td align="center" valign="bottom" width="50%">
+    <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024_Preview.png" alt="Shape optimization of a cantilever in 3D" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024_Preview.png?v=stacked" alt="Translational-rotational coupling optimization in Stokes flow" width="300">
       </a>
       <br />
       Translational-rotational coupling optimization in Stokes flow (by <a href="https://kazusa000.github.io/">J. Wang</a>)
@@ -523,24 +535,10 @@ usage guidelines.
   <tr>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/TemperatureMinimization.webm">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/Preview.png?v=optimized" alt="Minimization of temperature over a 2D plaque" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/Preview.png?v=optimized" alt="Minimization of temperature over a 2D plaque" width="300">
       </a>
       <br />
       Minimization of temperature over a 2D plaque
-    </td>
-        <td align="center" valign="bottom" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
-      </a>
-      <br />
-      Placeholder
-    </td>
-        <td align="center" valign="bottom" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
-      </a>
-      <br />
-      Placeholder
     </td>
   </tr>
 </table>
@@ -551,26 +549,26 @@ usage guidelines.
   <tr>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI_Preview.png?v=dematted" alt="Coronary FSI" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI_Preview.png?v=dematted" alt="Coronary FSI" width="300">
       </a>
       <br />
       Fluid-structure interaction simulation of a coronary artery (by <a href="https://www.researchgate.net/profile/Oscar-Ruz-2">O. Ruz</a>)
     </td>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD_Preview.png?v=3" alt="Blood velocity in an atrium CFD simulation" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD_Preview.png?v=3" alt="Blood velocity in an atrium CFD simulation" width="300">
       </a>
       <br />
       CFD simulation of blood flow in an atrium (by <a href="https://cfdusach.cl/">CFD Lab at USACH</a>)
     </td>
-        <td align="center" valign="bottom" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
-      </a>
-      <br />
-      Placeholder
-    </td>
-  </tr>
+  <td align="center" valign="bottom" width="33%">
+    <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/LeftCoronaryCFD/LeftCoronaryCFD.mp4">
+      <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/LeftCoronaryCFD/Preview.png?v=selected" alt="CFD simulation of a left coronary artery" width="300">
+    </a>
+    <br />
+    CFD simulation of a left coronary artery (by <a href="https://www.researchgate.net/profile/Oscar-Ruz-2">O. Ruz</a>)
+  </td>
+</tr>
 </table>
 
 ## License
