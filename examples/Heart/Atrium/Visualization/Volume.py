@@ -80,9 +80,9 @@ def main():
     pv.ColorBy(display, ('POINTS', 'Speed'))
     lut = pv.GetColorTransferFunction('Speed')
     lut.ColorSpace = 'RGB'
-    lut.RGBPoints = [0, .02, .05, .18, .25*vmax, .08, .65, .85,
-                     .5*vmax, .96, .96, .30, .75*vmax, 1., .5, .02,
-                     vmax, .95, .12, .015]
+    lut.RGBPoints = [0, .10, .35, 1., .25*vmax, .05, 1., 1.,
+                     .5*vmax, 1., 1., .55, .75*vmax, 1., .70, .12,
+                     vmax, 1., .28, .12]
     lut.RescaleTransferFunction(0, vmax)
     opacity = pv.GetOpacityTransferFunction('Speed')
     opacity.Points = [0, 0, .5, 0, .02*vmax, .002, .5, 0,
