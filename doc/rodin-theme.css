@@ -817,18 +817,8 @@ main article .m-col-l-10:has(> .rodin-main-brand) > h1 {
   display: none;
 }
 
-/* Separate the page outline from the article on either sidebar position. */
+/* Keep space between the page outline and the article on either side. */
 @media screen and (min-width: 1200px) {
-  .rodin-page-nav.rodin-page-nav-fit::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: color-mix(in srgb, var(--line-color) 75%, var(--dim-color));
-  }
   .rodin-page-nav.rodin-page-nav-fit[data-side="left"] { padding-right: .75rem; }
-  .rodin-page-nav.rodin-page-nav-fit[data-side="left"]::before { right: calc(-1rem - .5px); }
   .rodin-page-nav.rodin-page-nav-fit[data-side="right"] { padding-left: .75rem; }
-  .rodin-page-nav.rodin-page-nav-fit[data-side="right"]::before { left: calc(-1rem - .5px); }
 }
