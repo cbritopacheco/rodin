@@ -4,14 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Solver::GMRES class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
-  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
-  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
+  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#20252d" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -36,6 +34,7 @@
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -88,13 +87,13 @@
         </table>
 <p>GMRES is an iterative method for solving non-symmetric linear systems.</p><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01_scala4b5278bcb655c78cb017b46d4f3db5ab.html"><code>Math::LinearSystem&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
 <span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
-<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01_scala4b5278bcb655c78cb017b46d4f3db5ab.html#ab5cda43ca24ed7b65c7eb1acaff42559"><span class="nc">GMRES</span></a><span class="o">&lt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01_scala4b5278bcb655c78cb017b46d4f3db5ab.html#a76f245a31c2b9bfd9b545b4d2f8f2144"><span class="nc">GMRES</span></a><span class="o">&lt;</span>
 <span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_linear_system.html"><span class="nc">LinearSystem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_matrix.html"><span class="nc">Matrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
-</pre></details></td><td>GMRES solver for dense systems.</td></tr><tr><td><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3_0488e2b3a3cd13496de41650cda062d7e.html"><code>Math::LinearSystem&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+</pre></details></td><td>Native Matrix GMRES with an owned, type-erased Eigen backend.</td></tr><tr><td><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3_0488e2b3a3cd13496de41650cda062d7e.html"><code>Math::LinearSystem&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
 <span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
-<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3_0488e2b3a3cd13496de41650cda062d7e.html#a44126252bf8b19df8522a791659a0ad0"><span class="nc">GMRES</span></a><span class="o">&lt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3_0488e2b3a3cd13496de41650cda062d7e.html#a76f245a31c2b9bfd9b545b4d2f8f2144"><span class="nc">GMRES</span></a><span class="o">&lt;</span>
 <span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_linear_system.html"><span class="nc">LinearSystem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f"><span class="nc">SparseMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
-</pre></details></td><td>GMRES solver for sparse systems.</td></tr><tr><td><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html"><code>PETSc::Math::LinearSystem</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+</pre></details></td><td>Native SparseMatrix GMRES with an owned, type-erased Eigen backend.</td></tr><tr><td><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html"><code>PETSc::Math::LinearSystem</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">GMRES</span><span class="o">&lt;</span>
 <span class="w">  </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f"><span class="nc">LinearSystem</span></a><span class="o">&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
 </pre></details></td><td>Generalized minimal residual (GMRES) solver for PETSc linear systems.</td></tr></tbody></table><aside class="m-note m-default"><h4>See also</h4><p><a href="group___g_m_r_e_s_specializations.html" class="m-doc">GMRES Template Specializations</a></p></aside>
@@ -136,7 +135,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-8869a4936c9f.js"></script>
+<script src="search-v2-27108c4bc94e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
@@ -149,6 +148,7 @@
     1.15.0 and
     <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
   </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
 </div>
       </div>
     </div>

@@ -4,14 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin/Solver/GMRES.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
-  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
-  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
+  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#20252d" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -36,6 +34,7 @@
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -115,7 +114,7 @@
 <span class="n">solver</span><span class="p">.</span><span class="n">setTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">).</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">1000</span><span class="p">).</span><span class="n">setRestart</span><span class="p">(</span><span class="mi">50</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
 
 <span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">solver</span><span class="p">.</span><span class="n">success</span><span class="p">())</span>
-<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Converged!</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html">GMRES</a> for the solver implementation</p></aside></section>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Converged!</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><aside class="m-note m-default"><h4>Custom native preconditioners</h4><p>Both GMRES(problem) and GMRES(problem, pc) produce GMRES&lt;LinearSystem&gt;. The native specialization owns a private backend whose Eigen solver retains the concrete preconditioner type throughout its numerical loop. Preconditioner configuration is copied at construction; it must own or safely share its inputs. Solver copies clone configuration into fresh, independent backends. No dispatch is added within Krylov iterations or preconditioner applications. The default diagonal preconditioner and PETSc KSP specialization are unchanged. A failed setup leaves the supplied solution unchanged.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html">GMRES</a> for the solver implementation</p></aside></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -139,12 +138,12 @@
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3_0488e2b3a3cd13496de41650cda062d7e.html" class="m-doc">Rodin::Solver::GMRES&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd>GMRES solver for sparse systems.</dd>
+            <dd>Native SparseMatrix GMRES with an owned, type-erased Eigen backend.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01_scala4b5278bcb655c78cb017b46d4f3db5ab.html" class="m-doc">Rodin::Solver::GMRES&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd>GMRES solver for dense systems.</dd>
+            <dd>Native Matrix GMRES with an owned, type-erased Eigen backend.</dd>
           </dl>
         </section>
       </div>
@@ -185,7 +184,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-8869a4936c9f.js"></script>
+<script src="search-v2-27108c4bc94e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
@@ -198,6 +197,7 @@
     1.15.0 and
     <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
   </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
 </div>
       </div>
     </div>

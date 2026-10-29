@@ -4,14 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::MMG::Adapt class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
-  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
-  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
+  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#20252d" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -36,6 +34,7 @@
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -86,9 +85,9 @@
             </li>
           </ul>
         </nav>
-<p>This class wraps MMG adaptation routines and dispatches automatically to:</p><ul><li>MMG2D for planar 2D meshes,</li><li>MMG3D for volumetric 3D meshes,</li><li>MMGS for surface meshes embedded in 3D.</li></ul><p>The scalar size-map field encodes target local edge length and is sampled at mesh vertices.</p><p>Parameters inherited from <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> (hmin/hmax/hausdorff/gradation/angle) can be configured before calling <a href="#a51b804beced77044afca46839f0c06d5" class="m-doc">adapt</a>.</p>
-        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" title="MMG5">MMG5</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Adapt</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html"><code>MMG5</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html"><span class="nc">MMG5</span></a>
-</pre></details></td><td>Base class for MMG-backed operations in Rodin.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html"><code>MMG5</code></a></td><td><details><summary>14 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a0954c0dbf0d744cf8d3be5641173c185"><code>copyMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a1ef51aa345e4d15c90c74c01a5250c8a"><code>copySolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a36251842eb23f4ecc46dc1d1114ce55f"><code>copySolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a4aa91925305a7555c662ae9a5197469e"><code>copySolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bb517cd6d646592ab60cf5b7d450d4"><code>createMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a06cb29d3f77dc8acda9887609000476b"><code>createSolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a5bded16ea18dc87c86cb1b1c1bc3fdc5"><code>destroyMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#aba26af6c43d3b4638aa99e6e65ded72c"><code>destroySolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a378ed49847c971e53116e33195f3a42c"><code>isSurfaceMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a417246fbd6a72f45ccc4274a5e6f981c"><code>meshToRodin()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bd883b7f95228226fd6f267d044287"><code>rodinToMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#afb5c3ccd7f6e8748cd36345967656fdf"><code>setParameters()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ae6667ed0cdc09787425be26a540172de"><code>sMeshVersionFormatted</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#adc10b88a081a86571f71c3ee0433c791"><code>swapSolution()</code></a></li></ul></details></td></tr></tbody></table></section>
+<p>This class wraps MMG adaptation routines and dispatches automatically to:</p><ul><li>MMG2D for planar 2D meshes,</li><li>MMG3D for volumetric 3D meshes,</li><li>MMGS for surface meshes embedded in 3D.</li></ul><p>The scalar size-map field encodes target local edge length and is sampled at mesh vertices.</p><p>Parameters inherited from <a href="class_rodin_1_1_m_m_g_1_1_base.html" class="m-doc">Base</a> (hmin/hmax/hausdorff/gradation/angle) can be configured before calling <a href="#a51b804beced77044afca46839f0c06d5" class="m-doc">adapt</a>.</p>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_m_m_g_1_1_base.html" title="Base">Base</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Adapt</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_m_m_g_1_1_base.html"><code>Base</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_m_m_g_1_1_base.html"><span class="nc">Base</span></a>
+</pre></details></td><td>Shared configuration for MMG-backed remeshing operations.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_m_m_g_1_1_base.html"><code>Base</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_m_m_g_1_1_base.html#a49bb56cd37f36cd45ec334520af766e2"><code>setParameters()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li></ul></details></td></tr></tbody></table></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -307,7 +306,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-8869a4936c9f.js"></script>
+<script src="search-v2-27108c4bc94e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
@@ -320,6 +319,7 @@
     1.15.0 and
     <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
   </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
 </div>
       </div>
     </div>

@@ -4,14 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
-  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
-  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
+  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#20252d" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -36,6 +34,7 @@
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -74,7 +73,11 @@
         <h1>
           Rodin
         </h1>
-<p><em>Modern C++20 finite element method and shape optimization framework.</em></p><section id="what-is-rodin"><h2><a href="#what-is-rodin">What is Rodin?</a></h2><p>Rodin is a lightweight and modular C++20 finite element framework designed for solving partial differential equations (PDEs) and performing shape and topology optimization.</p><img class="m-image rodin-logo-dark" src="Logo_Inverse.png" alt="Image" style="width: 210px;" /><img class="m-image rodin-logo-light" src="Logo.png" alt="Image" style="width: 210px;" /><p>It is named after the French sculptor <a href="https://en.wikipedia.org/wiki/Auguste_Rodin">Auguste Rodin</a>, considered the founder of modern sculpture.</p><div class="m-block m-success m-badge"><img class="m-image" src="Maintainer.png" alt="Carlos Brito-Pacheco's GitHub profile picture" /><h3>Active development</h3><p>The library is in active development and primarily maintained by <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a>, who is actively looking for co-maintainers.</p></div></section><section id="poisson-example-mainpage"><h2><a href="#poisson-example-mainpage">A simple example</a></h2><p>The library provides a compositional form language that lets you express variational problems in C++ code that closely mirrors the mathematical notation. For example, the Poisson problem with homogeneous Dirichlet boundary conditions, in strong form, for a domain <svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.454319 8.169366">
+<div class="rodin-main-brand">
+  <img class="rodin-logo-light" src="horizontal-color.svg" width="480" height="183" alt="Rodin" />
+  <img class="rodin-logo-dark" src="horizontal-dark.svg" width="480" height="183" alt="Rodin" />
+  <p>A modern C++ FEM library for shape and topology optimization.</p>
+</div><section id="what-is-rodin"><h2><a href="#what-is-rodin">What is Rodin?</a></h2><p>Rodin is a lightweight and modular C++20 finite element framework designed for solving partial differential equations (PDEs) and performing shape and topology optimization.</p><p>It is named after the French sculptor <a href="https://en.wikipedia.org/wiki/Auguste_Rodin">Auguste Rodin</a>, considered the founder of modern sculpture.</p><div class="m-block m-success m-badge"><img class="m-image" src="Maintainer.png" alt="Carlos Brito-Pacheco's GitHub profile picture" /><h3>Active development</h3><p>The library is in active development and primarily maintained by <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a>, who is actively looking for co-maintainers.</p></div></section><section id="poisson-example-mainpage"><h2><a href="#poisson-example-mainpage">A simple example</a></h2><p>The library provides a compositional form language that lets you express variational problems in C++ code that closely mirrors the mathematical notation. For example, the Poisson problem with homogeneous Dirichlet boundary conditions, in strong form, for a domain <svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.454319 8.169366">
 <title>
 $\Omega$
 </title>
@@ -428,7 +431,7 @@ $\Omega$
     </div>
   </div>
 </div>
-<script src="search-v2-8869a4936c9f.js"></script>
+<script src="search-v2-27108c4bc94e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
@@ -441,6 +444,7 @@ $\Omega$
     1.15.0 and
     <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
   </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
 </div>
       </div>
     </div>

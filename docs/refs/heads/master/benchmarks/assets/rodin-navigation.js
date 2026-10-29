@@ -4,6 +4,11 @@
   const content = benchmark || document.querySelector('main > article > .m-container > .m-row > .m-col-l-10');
   if (!content) return;
 
+  // The homepage signature already identifies the project.
+  if (content.querySelector(':scope > .rodin-main-brand')) {
+    content.querySelector(':scope > h1')?.remove();
+  }
+
   const prepareContents = toc => {
     for (const item of toc.querySelectorAll('li')) {
       const children = item.querySelector(':scope > ul, :scope > ol');
@@ -185,6 +190,8 @@
     const bounds = content.getBoundingClientRect();
     const gutter = side === 'left' ? bounds.left : document.documentElement.clientWidth - bounds.right;
     const width = Math.max(0, Math.min(13 * unit, gutter - 2 * unit));
+    const homeWidth = Math.max(0, Math.min(13 * unit, bounds.left - 2 * unit)) + unit;
+    document.documentElement.style.setProperty('--rodin-home-width', homeWidth + 'px');
     navigation.style.width = width + 'px';
     navigation.style.left = (side === 'left' ? bounds.left - width - unit : bounds.right + unit) + 'px';
     navigation.dataset.side = side;
