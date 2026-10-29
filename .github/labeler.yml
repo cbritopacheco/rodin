@@ -57,7 +57,6 @@ developer-tooling:
   - any-glob-to-any-file:
     - dev/**
     - .claude/**
-    - .github/agents/**
     - .github/copilot-instructions.md
     - .clang-*
     - .clangd

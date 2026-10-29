@@ -8,8 +8,11 @@
 #define RODIN_WORKLOADS_STOKESWORKLOAD_H
 
 #include <benchmark/benchmark.h>
+#include <sstream>
 #include "Rodin/Assembly.h"
 #include "Rodin/Solver/SparseLU.h"
+#include "Rodin/Solver/GMRES.h"
+#include "StokesBlockPreconditioner.h"
 #include "convergence/Stokes.h"
 
 namespace Rodin::Tests::Benchmarks
@@ -31,14 +34,19 @@ namespace Rodin::Tests::Benchmarks
    * and global completion. Solve measures public SparseLU::solve(system),
    * including fresh factorization and one residual correction, but no assembly
    * or field scatter. It does not claim to isolate triangular substitution.
-   * Setup and all numerical qualifications are outside timing. Exact affine
-   * coefficient reproduction, true residuals, a wrong-field control and a
-   * missing-pressure-gradient control qualify the mixed operator.
+   * Block GMRES instead measures preconditioner setup and the restarted solve
+   * from zero, without a correction solve. Pressure mass assembly is untimed.
+   * Assembly qualification does not construct or run a solver.
+   * Setup and all numerical qualifications are outside timing. Both variants
+   * check the exact affine patch residual, a wrong-field control and a
+   * missing-pressure-gradient control. The solver variant additionally checks
+   * solver success, coefficient reproduction and the true solved residual.
    *
    * @tparam K Velocity degree; pressure has degree K-1.
    * @tparam Weighted Whether explicit unit viscosity selects the weighted kernel.
+   * @tparam BlockGMRES Whether GMRES with the fixed block preconditioner replaces SparseLU.
    */
-  template <size_t K, bool Weighted = false>
+  template <size_t K, bool Weighted = false, bool BlockGMRES = false>
   class StokesWorkload
   {
     public:
@@ -137,31 +145,74 @@ namespace Rodin::Tests::Benchmarks
           (baseline.getOperator() * exact - baseline.getVector()).norm() / rhsScale;
         const Math::Vector<Real> wrong = exact.array() + Real(1);
         const Real wrongResidual = residual(wrong);
-        Solver::SparseLU solver(problem);
-        solver.setRefinementSteps(1);
-        solver.solve(system);
+        using System = std::remove_reference_t<decltype(system)>;
+        using SolverType =
+          std::conditional_t<BlockGMRES, Solver::GMRES<System>, Solver::SparseLU<System>>;
+        Optional<SolverType> solver;
+        if constexpr (Solve)
+        {
+          if constexpr (BlockGMRES)
+          {
+            BilinearForm pressureMass(p, q);
+            auto integrand = Integral(p, q);
+            integrand.setOrder(QuadratureOrder);
+            pressureMass = integrand;
+            pressureMass.assemble();
+            StokesBlockPreconditioner pc;
+            pc.configure(
+              std::move(pressureMass.getOperator()), problem.getTrialOffsets()[1]);
+            solver.emplace(problem, pc);
+            solver->setRestart(60).setMaxIterations(1200).setTolerance(1e-13);
+            system.getSolution().setZero();
+          }
+          else
+          {
+            solver.emplace(problem);
+            solver->setRefinementSteps(1);
+          }
+          solver->solve(system);
+        }
         const auto coefficientError = [&]() {
           return (system.getSolution() - exact).norm() / exactScale;
         };
         const auto valid = [&]() {
-          return solver.success() && std::isfinite(coefficientError()) &&
-            coefficientError() < 1e-9 && std::isfinite(residual(system.getSolution())) &&
-            residual(system.getSolution()) < 1e-11 && std::isfinite(patchResidual) &&
-            patchResidual < 1e-11 && std::isfinite(omittedResidual) &&
-            omittedResidual > 1e-4 && std::isfinite(wrongResidual) &&
-            wrongResidual > 1e-4;
+          if constexpr (Solve)
+          {
+            if (!solver->success() || !std::isfinite(coefficientError()) ||
+              coefficientError() >= 1e-9 ||
+              !std::isfinite(residual(system.getSolution())) ||
+              residual(system.getSolution()) >= 1e-11)
+              return false;
+          }
+          return std::isfinite(patchResidual) && patchResidual < 1e-11 &&
+            std::isfinite(omittedResidual) && omittedResidual > 1e-4 &&
+            std::isfinite(wrongResidual) && wrongResidual > 1e-4;
         };
         if (!valid())
         {
           failed = true;
-          state.SkipWithError("Stokes patch, solve or sensitivity qualification failed");
+          std::ostringstream message;
+          message << "Stokes qualification failed: patch=" << patchResidual
+                  << ", missing-pressure=" << omittedResidual
+                  << ", wrong-field=" << wrongResidual;
+          if constexpr (Solve)
+          {
+            message << ", solver-success=" << solver->success()
+                    << ", coefficient=" << coefficientError()
+                    << ", solved-residual=" << residual(system.getSolution());
+          }
+          state.SkipWithError(message.str().c_str());
           return;
         }
         bool repeatedValid = true;
         for (auto _ : state)
         {
           if constexpr (Solve)
-            solver.solve(system);
+          {
+            if constexpr (BlockGMRES)
+              system.getSolution().setZero();
+            solver->solve(system);
+          }
           else
             problem.assemble();
           benchmark::DoNotOptimize(system.getSolution().data());
@@ -195,6 +246,12 @@ namespace Rodin::Tests::Benchmarks
         state.counters["relative_missing_pressure_residual"] = omittedResidual;
         if constexpr (Solve)
         {
+          if constexpr (BlockGMRES)
+          {
+            state.counters["iterations"] = solver->getIterationNumber();
+            state.counters["estimated_relative_error"] = solver->getError();
+            state.counters["restart"] = 60;
+          }
           state.counters["relative_coefficient_error"] = coefficientError();
           state.counters["relative_residual"] = residual(system.getSolution());
         }
@@ -215,8 +272,9 @@ namespace Rodin::Tests::Benchmarks
             Polytope::Type::Hexahedron, Polytope::Type::Wedge})
         {
           const std::string name = std::string("Stokes/") +
-            (Solve ? "SparseLU/" : "Assembly/") + (Weighted ? "WeightedViscosity/" : "") +
-            "H1/P" + std::to_string(K) + "P" + std::to_string(K - 1) + "/Real/" +
+            (Solve ? (BlockGMRES ? "GMRESBlockSchur/" : "SparseLU/") : "Assembly/") +
+            (Weighted ? "WeightedViscosity/" : "") + "H1/P" + std::to_string(K) + "P" +
+            std::to_string(K - 1) + "/Real/" +
             std::string(Convergence::UniformGrid::getGeometryName(geometry));
           benchmark::RegisterBenchmark(name.c_str(),
             [geometry, &failed](auto& state) { run<Solve>(state, geometry, failed); })
