@@ -27,7 +27,8 @@ Start with [the visual identity board](designs/brand-board.svg).
 | Use | Reference SVG |
 | --- | --- |
 | Primary signature on a light background | [Horizontal color](logos/horizontal-color.svg) |
-| Primary signature on a dark background | [Horizontal white](logos/horizontal-white.svg) |
+| Color signature on a dark background | [Horizontal dark](logos/horizontal-dark.svg) |
+| Reversed signature on a dark background | [Horizontal white](logos/horizontal-white.svg) |
 | Single-color signature | [Horizontal navy](logos/horizontal-navy.svg) |
 | Compact color mark | [R monogram](logos/monogram-color.svg) |
 | Compact single-color mark | [R monogram in navy](logos/monogram-navy.svg) |
@@ -35,7 +36,9 @@ Start with [the visual identity board](designs/brand-board.svg).
 | Small interface mark | [Micro R](icons/favicon.svg) |
 
 The color, navy, and white R monograms share the same geometry.
-White variants have transparent backgrounds. The outline R is intended
+White variants have transparent backgrounds. The dark horizontal variant
+uses a pearl-to-cyan thinker and white wordmark on a transparent background,
+for graphite or other dark surfaces. The outline R is intended
 for larger placements. Reference SVG lettering is stored as vector
 outlines and does not require an installed font. Artwork is centered
 within its placement area; horizontal signatures align the vertical

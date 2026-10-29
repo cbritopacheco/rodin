@@ -4,7 +4,7 @@
   @htmlonly
   <div class="rodin-main-brand">
     <img class="rodin-logo-light" src="horizontal-color.svg" width="480" height="183" alt="Rodin" />
-    <img class="rodin-logo-dark" src="horizontal-white.svg" width="480" height="183" alt="Rodin" />
+    <img class="rodin-logo-dark" src="horizontal-dark.svg" width="480" height="183" alt="Rodin" />
     <p>A modern C++ FEM library for shape and topology optimization.</p>
   </div>
   @endhtmlonly
