@@ -235,6 +235,5 @@ namespace Rodin::MMG::V5::Solution
    */
   void destroy(MMG5_pSol sol);
 
-      /// @brief Default constructor.
 }
 #endif
