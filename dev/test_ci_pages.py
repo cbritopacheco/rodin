@@ -70,7 +70,7 @@ class PagesTest(unittest.TestCase):
                 deploy_pages.prepare('owner/repo', Path('checkout'))
 
     def test_every_pages_writer_deploys_its_artifact_under_same_lock(self):
-        for filename, job in [('Benchmarks.yml', 'PublishDocumentation'),
+        for filename, job in [('Documentation.yml', 'PublishDocumentation'),
                               ('Benchmarks.yml', 'Publish')]:
             workflow = yaml.safe_load((ROOT / '.github/workflows' / filename).read_text())
             definition = workflow['jobs'][job]
@@ -87,6 +87,19 @@ class PagesTest(unittest.TestCase):
         self.assertEqual(steps[2]['uses'], 'actions/deploy-pages@v4')
         self.assertIn(' prepare ', steps[0]['run'])
         self.assertIn(' verify ', steps[3]['run'])
+
+    def test_documentation_is_independent_and_pull_requests_do_not_deploy(self):
+        docs = yaml.safe_load((ROOT / '.github/workflows/Documentation.yml').read_text())
+        benchmarks = yaml.safe_load((ROOT / '.github/workflows/Benchmarks.yml').read_text())
+        events = docs.get('on', docs.get(True))
+        self.assertEqual(events['push']['branches'], ['master', 'develop'])
+        self.assertIn('pull_request', events)
+        publication = docs['jobs']['PublishDocumentation']
+        self.assertEqual(publication['needs'], 'Build-And-Deploy')
+        self.assertEqual(publication['if'], "github.event_name == 'push'")
+        self.assertNotIn('Documentation', benchmarks['jobs'])
+        self.assertNotIn('PublishDocumentation', benchmarks['jobs'])
+        self.assertEqual(benchmarks['jobs']['Publish']['needs'], 'Pool')
 
     def test_shared_apt_guard_precedes_version_resolution(self):
         action = yaml.safe_load((ROOT / '.github/actions/apt-dependencies/action.yml').read_text())

@@ -1,7 +1,7 @@
 name: CI status badges
 on:
   workflow_run:
-    workflows: [Build, Tests, Benchmarks]
+    workflows: [Build, Tests, Benchmarks, Documentation]
     types: [requested, in_progress, completed]
     branches: [develop, master]
   workflow_dispatch:

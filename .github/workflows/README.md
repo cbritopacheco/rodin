@@ -18,7 +18,7 @@ can share compilation without sharing runtime state.
 | [CoveragePublish.yml](CoveragePublish.yml) | Validate every expected lane contribution and submit an incremental production line union to Codecov. |
 | [Build.yml](Build.yml) | Independent compilation checks across build types, threading and backend configurations. |
 | [Style.yml](Style.yml) | Formatting, house-style, naming and documentation-warning checks, including their tooling regressions. |
-| [Documentation.yml](Documentation.yml) | Reusable documentation build and checks; also runs on pull requests. |
+| [Documentation.yml](Documentation.yml) | Independent documentation build and publication on master/develop pushes; build and checks only on pull requests. |
 | [Benchmarks.yml](Benchmarks.yml) | Runs and publishes performance benchmarks on pushes to the main development branches. |
 | [Preflight.yml](Preflight.yml) | Validates label metadata, matching rules and pinned labeler API behavior with read-only permissions and local fixtures. |
 | [Labeler.yml](Labeler.yml) | Maintains pull-request labels. |
@@ -427,13 +427,11 @@ MPI and PETSc ranks remain explicit benchmark registrations.
 Every enabled benchmark executable must be registered. Discovery determines all
 case partitions, and the pooling gate requires every raw report, checksum and
 current-commit receipt. Documentation generation runs in parallel using the
-same descriptions. Documentation publishes immediately after its own validated
+same descriptions in its own workflow. Cancelling benchmarks cannot cancel documentation. Documentation publishes immediately after its own validated
 build, reconnecting the new pages to the latest complete benchmark histories.
-It does not wait for benchmark builds, execution or pooling. After documentation
-publication and successful pooling, **Publish documentation and benchmarks**
+It does not wait for benchmark builds, execution or pooling. After successful pooling, **Publish documentation and benchmarks**
 updates only complete benchmark histories; it cannot replace newer documentation. Missing or failed
-benchmark contributions leave the previous complete results intact. Both
-automatic publishers and the manual documentation publisher hold the same `rodin-gh-pages-publication` lock
+benchmark contributions leave the previous complete results intact. The independent documentation and benchmark workflows hold the same `rodin-gh-pages-publication` lock
 while writing and deploying. Each publisher uploads the locked `gh-pages`
 checkout as its own Pages artifact and uses `actions/deploy-pages` in that
 same job. This avoids a second hosted-runner queue for a legacy Pages build;

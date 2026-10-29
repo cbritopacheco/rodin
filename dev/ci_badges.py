@@ -111,7 +111,6 @@ class Publisher:
     def collect(self, sha, documentation=None, source_run=None, source_sha=None):
         result = {}
         self.job_cache = {}
-        benchmark_run = None
         for label, file in WORKFLOWS.items():
             runs = self.request(f'{self.prefix}/actions/workflows/{file}/runs?branch={self.branch}&event=push&per_page=1')['workflow_runs']
             run = runs[0] if runs else None
@@ -125,22 +124,22 @@ class Publisher:
                 elif any(j['status'] in {'queued', 'waiting', 'pending', 'requested'} for j in jobs):
                     status = 'queued'
             result[label] = badge(label, status, sha)
-            if label == 'Benchmarks':
-                benchmark_run = run if run and run['head_sha'] == sha else None
         doc_status = 'unknown'
-        if benchmark_run:
-            # Documentation publication is independent of the long benchmark campaign.
-            jobs = self.jobs(benchmark_run)
+        doc_runs = self.request(f'{self.prefix}/actions/workflows/Documentation.yml/runs?branch={self.branch}&event=push&per_page=1')['workflow_runs']
+        doc_run = doc_runs[0] if doc_runs and doc_runs[0]['head_sha'] == sha else None
+        if doc_run:
+            # Only the documentation workflow's deployment establishes publication.
+            jobs = self.jobs(doc_run)
             if jobs is not None:
                 found = next((j for j in jobs if j['name'] == 'Publish documentation'), None)
                 if found:
                     doc_status = state(found['status'], found.get('conclusion'))
-                elif benchmark_run['status'] != 'completed':
+                elif doc_run['status'] != 'completed':
                     doc_status = 'queued'
             # A publication step can report deployment immediately, before its
-            # enclosing job or benchmark campaign has completed.
+            # enclosing publication job has completed.
             if (documentation in {'success', 'failure'}
-                    and str(benchmark_run['id']) == source_run
+                    and str(doc_run['id']) == source_run
                     and sha == source_sha):
                 doc_status = documentation
         result['Documentation'] = badge('Documentation', doc_status, sha)

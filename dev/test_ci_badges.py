@@ -54,6 +54,21 @@ class BadgeTest(unittest.TestCase):
         self.assertEqual(publisher.collect('abc')['Documentation']['message'], 'passing')
         self.assertEqual(publisher.collect('abc')['Benchmarks']['message'], 'cancelled')
 
+    def test_documentation_badge_uses_its_own_workflow_and_not_benchmark_jobs(self):
+        publisher, _ = self.fixture()
+        original = publisher.request
+        def independent(path, *args):
+            if '/workflows/Documentation.yml/runs?' in path:
+                return {'workflow_runs': [dict(id=20, head_sha='abc', status='in_progress', conclusion=None)]}
+            if '/actions/runs/20/jobs?' in path:
+                return {'jobs': [dict(name='Publish documentation', status='completed', conclusion='success')]}
+            return original(path, *args)
+        publisher.request = independent
+        records = publisher.collect('abc')
+        self.assertEqual(records['Documentation']['message'], 'passing')
+        self.assertEqual(records['Benchmarks']['message'], 'cancelled')
+        self.assertEqual(publisher.collect('abc', 'failure', '10', 'abc')['Documentation']['message'], 'passing')
+
     def test_verified_deployment_override_is_tied_to_source_run_and_commit(self):
         publisher, _ = self.fixture()
         self.assertEqual(publisher.collect('abc', 'success', '10', 'abc')['Documentation']['message'], 'passing')
