@@ -45,7 +45,8 @@ export POUT="${POUT:-0}"              # Pa, atmospheric outlet
 export PIN_CLOSED="${PIN_CLOSED:-1.0342e6}"   # Pa, 150 psi held by the closed gate
 export POUT_CLOSED="${POUT_CLOSED:-0}"
 
-# Iterative solver: FGMRES + Schur field split with BoomerAMG. The MUMPS LU
+# Iterative solver: FGMRES + Schur field split with BoomerAMG (ILU + GAMG if
+# PETSc was built without hypre). The MUMPS LU
 # of these meshes (550 k unknowns) needs 25-30 GB; this a fraction of it.
 # SOLVER=direct goes back to the LU.
 export SOLVER="${SOLVER:-iterative}"

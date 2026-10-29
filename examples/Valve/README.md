@@ -200,7 +200,9 @@ post-proceso es el mismo: `python3 postprocess_valves.py runs_bingham`.
   ordenamiento PORD). `-kv_solver iterative` usa FGMRES con un
   precondicionador de complemento de Schur por bloques [u | p]
   (`fieldsplit`, factorización `lower`, S ≈ A11 − A10 diag(A00)⁻¹ A01) y un
-  ciclo V de BoomerAMG (hypre) en cada bloque; el precondicionador se
+  ciclo V de BoomerAMG (hypre) en cada bloque (si PETSc no tiene hypre:
+  ILU(0) por bloques en la velocidad y GAMG en la presión, mismas
+  iteraciones en la malla gruesa); el precondicionador se
   reconstruye cada 20 resoluciones o cuando FGMRES pasa de 150 iteraciones.
   Medido en una malla de 187 k celdas (1 proceso): 2.0 GB frente a 3.3 GB
   con LU, y las mismas fuerzas (a 6 cifras) en los primeros pasos. Para

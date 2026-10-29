@@ -114,7 +114,8 @@
 // tol, tau_dt (bool), bdf (1|2), extrapolate (bool), lumped (bool), refactor_every, refactor_its, picard_monitor (bool), tavg, steady_tol, steady_window, output_every, scale,
 // solver (direct|iterative).
 // Solvers: -kv_flow_ (GMRES + MUMPS LU by default; -kv_solver iterative:
-// FGMRES + Schur field split with BoomerAMG, see main()), -kv_proj_* (CG + Jacobi).
+// FGMRES + Schur field split with BoomerAMG, or ILU + GAMG without hypre,
+// see main()), -kv_proj_* (CG + Jacobi).
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -253,7 +254,8 @@ namespace Rodin::Examples::Valve
         int refactorEvery = 20;
         int refactorIterations = 15;
         /// "direct" (GMRES + lagged MUMPS LU) or "iterative" (FGMRES +
-        /// Schur-complement field split, BoomerAMG on both blocks: a fraction
+        /// Schur-complement field split, BoomerAMG on both blocks, or ILU + GAMG
+        /// when PETSc has no hypre: a fraction
         /// of the memory of the LU, see main()). The "refactor" rules above
         /// then decide when the preconditioner (AMG hierarchies, Schur
         /// approximation) is rebuilt.
@@ -1376,6 +1378,9 @@ int main(int argc, char** argv)
     //   and robust), and S = A11 - A10 diag(A00)^-1 A01 (selfp: the
     //   pressure-stabilisation Laplacian plus the discrete pressure
     //   Laplacian; elliptic) by BoomerAMG.
+    // Without hypre in the PETSc build: block-Jacobi ILU(0) on A00 and
+    // PETSc's GAMG on S (same FGMRES iterations on the coarse FPC8 25 %
+    // mesh; GAMG on A00 too is ~2x slower than ILU).
     // Memory: matrices + AMG hierarchies, ~O(N); the MUMPS LU of the same
     // system grows like N^(4/3) (25-30 GB for 720 k cells with PORD).
     setDefault("-kv_flow_ksp_type", "fgmres");
@@ -1387,12 +1392,25 @@ int main(int argc, char** argv)
     setDefault("-kv_flow_pc_fieldsplit_type", "schur");
     setDefault("-kv_flow_pc_fieldsplit_schur_fact_type", "lower");
     setDefault("-kv_flow_pc_fieldsplit_schur_precondition", "selfp");
+    PetscBool hypre = PETSC_FALSE;
+    PetscErrorCode ierr = PetscHasExternalPackage("hypre", &hypre);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
     setDefault("-kv_flow_fieldsplit_u_ksp_type", "preonly");
-    setDefault("-kv_flow_fieldsplit_u_pc_type", "hypre");
-    setDefault("-kv_flow_fieldsplit_u_pc_hypre_type", "boomeramg");
     setDefault("-kv_flow_fieldsplit_p_ksp_type", "preonly");
-    setDefault("-kv_flow_fieldsplit_p_pc_type", "hypre");
-    setDefault("-kv_flow_fieldsplit_p_pc_hypre_type", "boomeramg");
+    if (hypre)
+    {
+      setDefault("-kv_flow_fieldsplit_u_pc_type", "hypre");
+      setDefault("-kv_flow_fieldsplit_u_pc_hypre_type", "boomeramg");
+      setDefault("-kv_flow_fieldsplit_p_pc_type", "hypre");
+      setDefault("-kv_flow_fieldsplit_p_pc_hypre_type", "boomeramg");
+    }
+    else
+    {
+      setDefault("-kv_flow_fieldsplit_u_pc_type", "bjacobi");
+      setDefault("-kv_flow_fieldsplit_u_sub_pc_type", "ilu");
+      setDefault("-kv_flow_fieldsplit_p_pc_type", "gamg");
+    }
   }
   else
   {
