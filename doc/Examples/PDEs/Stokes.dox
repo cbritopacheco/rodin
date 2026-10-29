@@ -1,0 +1,98 @@
+/**
+  @page examples-pdes-stokes Solving the Stokes equations
+  @brief Couple velocity and pressure in a lid-driven cavity.
+
+  A moving lid drags a viscous fluid around a closed square cavity. The Stokes
+  model neglects inertia, leaving a linear system in velocity and pressure.
+  This example introduces mixed finite elements and a pressure normalization
+  before the @ref examples-pdes-navierstokes "Navier–Stokes tutorial" adds
+  convection and time evolution.
+
+  @tableofcontents
+  @m_footernavigation
+
+  @section examples-pdes-stokes-model The mathematical problem
+
+  In @f$\Omega=(0,1)^2@f$, solve
+  @f[
+    -\nu\Delta u+\nabla p=0,\qquad \operatorname{div}u=0.
+  @f]
+  The velocity @f$u:\Omega\to\mathbb R^2@f$ and pressure
+  @f$p:\Omega\to\mathbb R@f$ are coupled by momentum balance and
+  incompressibility. The kinematic viscosity is @f$\nu=1@f$ in nondimensional
+  units. There is no body force.
+
+  On the lid @f$y=1@f$, prescribe @f$u=(16x^2(1-x)^2,0)@f$. The other three
+  walls have @f$u=0@f$. This regularized lid reaches unit speed at its midpoint
+  and vanishes at both corners, avoiding the discontinuous boundary data of a
+  constant-speed lid. It is therefore a cavity demonstration, not the classical
+  constant-lid benchmark.
+
+  Only the pressure gradient enters momentum balance. The condition
+  @f$\int_\Omega p\,dx=0@f$ fixes its arbitrary additive constant.
+
+  @section examples-pdes-stokes-weak The mixed weak formulation
+
+  With test velocity @f$v@f$ vanishing on the boundary, test pressure @f$q@f$,
+  and scalar test value @f$\eta@f$, the equations are
+  @f[
+    \begin{aligned}
+      \nu\int_\Omega\nabla u:\nabla v\,dx-\int_\Omega p\operatorname{div}v\,dx&=0,\\
+      \int_\Omega q\operatorname{div}u\,dx+\lambda\int_\Omega q\,dx&=0,\\
+      \eta\int_\Omega p\,dx&=0.
+    \end{aligned}
+  @f]
+  The global multiplier @f$\lambda@f$ enforces the pressure gauge. It does not
+  add a pressure penalty or replace incompressibility with a compressibility law.
+
+  @section examples-pdes-stokes-mesh 1. Construct and label the cavity
+
+  A 17-by-17 vertex grid produces 512 triangles on the unit square. Boundary
+  edges on the top are labeled `lid`; the remaining exterior edges are `walls`.
+
+  @snippet PDEs/Stokes.cpp stokes-mesh
+
+  @section examples-pdes-stokes-form 2. Choose compatible spaces
+
+  Quadratic continuous velocity and linear continuous pressure form the
+  Taylor–Hood pair. Using equal-order spaces without a suitable stabilization
+  would be a different discretization with a different stability question.
+  `P0g` supplies the single global pressure-mean multiplier.
+
+  @snippet PDEs/Stokes.cpp stokes-form
+
+  The Jacobian inner product is the componentwise velocity-gradient term.
+  The pressure term couples to the divergence of the test velocity, while the
+  continuity equation couples the trial velocity to the pressure test function.
+  The lid profile is interpolated into the quadratic velocity trace space.
+
+  @section examples-pdes-stokes-output 3. Solve and inspect the circulation
+
+  This is a saddle-point system, so CG is not applicable. Sparse LU is adequate
+  for this small demonstration; larger mixed problems call for suitable block
+  preconditioning. Solver success is checked and the algebraic residual is reported before
+  inspecting the exported fields.
+
+  @snippet PDEs/Stokes.cpp stokes-solve
+
+  @image html PDEs/Stokes.png "Computed speed and streamlines in the regularized Stokes cavity. The lid moves to the right; fluid returns through the interior." width=720px
+
+  Open `Stokes.xdmf`, color by the magnitude of **velocity**, and use ParaView's
+  **Stream Tracer** to inspect the circulation. Pressure is exported separately
+  as **pressure**. The figure uses interpolated exported velocity samples to
+  draw streamlines; it does not change the solved velocity field.
+
+  Incompressibility is enforced weakly against the pressure space. The discrete
+  velocity is not generally divergence-free at every point, and visualization
+  of a closed vortex is not a substitute for an algebraic or refinement check.
+
+  @section examples-pdes-stokes-full Complete program
+
+  @snippet PDEs/Stokes.cpp stokes-source
+
+  See @ref PDEs/Stokes.cpp "Stokes.cpp", the
+  @ref examples-pdes-navierstokes "transient cavity example", and the
+  @ref guides-solvers "solver guide".
+
+  @example PDEs/Stokes.cpp @m_examplenavigation{examples-pdes-stokes,PDEs/} @m_footernavigation
+*/

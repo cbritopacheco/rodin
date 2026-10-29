@@ -1,188 +1,100 @@
 /**
   @page examples-pdes-helmholtz Solving the Helmholtz equation
-  @brief Resolution of the complex-valued Helmholtz equation using Rodin
+  @brief Solve a complex wave problem and check it against a manufactured solution.
 
-  @image html PDEs/Helmholtz_placeholder.png width=410px
-
-  @m_keywords{Helmholtz, Wave, Complex}
+  This example extends the @ref examples-pdes-poisson "Poisson workflow" to a
+  complex-valued wave amplitude. It introduces a negative mass term, explains
+  why conjugate gradients is unsuitable here, and exports the real and imaginary
+  parts of the computed field separately.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-pdes-helmholtz-intro Introduction
+  @section examples-pdes-helmholtz-intro The mathematical problem
 
-  The Helmholtz equation models time-harmonic wave phenomena in acoustics,
-  electromagnetics, and vibration analysis. In this example we solve the
-  complex-valued Helmholtz equation with Dirichlet boundary conditions:
-
+  On @f$\Omega=(0,1)^2@f$, consider
   @f[
-  \left\{
-    \begin{aligned}
-      -\Delta u - k^2 u &= f && \mathrm{in} \ \Omega \\
-      u &= u_{\mathrm{ex}} && \mathrm{on} \ \partial \Omega
-    \end{aligned}
-   \right.
+    -\Delta u-k^2u=f\quad\text{in }\Omega,
+    \qquad u=u_{\mathrm{ex}}\quad\text{on }\partial\Omega,
+    \qquad k=4\pi.
   @f]
+  The complex amplitude may represent a time-harmonic field; a corresponding
+  real oscillation is @f$\operatorname{Re}(u e^{-i\omega t})@f$. This is a
+  bounded Dirichlet problem, not an outgoing-wave or absorbing-boundary model.
 
-  where @f$ k = 2\pi / \lambda @f$ is the **wave number**, @f$ \lambda @f$ is
-  the wavelength, @f$ f @f$ is a known source term, and @f$ u_{\mathrm{ex}} @f$
-  is a known exact solution imposed on the boundary.
-
-  This example demonstrates several important Rodin features:
-  - **Complex-valued** finite element spaces
-    (@ref Rodin::Variational::P1 "P1<Complex>")
-  - Extracting **real and imaginary parts** of complex
-    @ref Rodin::Variational::GridFunction "GridFunction" objects
-  - The Helmholtz bilinear form combining stiffness and mass terms
-
-  @section examples-pdes-helmholtz-weak Weak Formulation
-
-  The weak formulation of the Helmholtz equation is:
-
+  A manufactured solution makes the source and boundary data explicit:
   @f[
-  \text{Find } u \in H^1(\Omega) \text{ s.t. }
-  \forall v \in H^1_0(\Omega), \quad
-     \int_{\Omega} \nabla u \cdot \nabla v \ dx
-     - k^2 \int_{\Omega} u \, v \ dx
-     = \int_{\Omega} f \, v \ dx
+    u_{\mathrm{ex}}(x,y)=e^{ikx}\sin(\pi y),\qquad
+    f(x,y)=\pi^2u_{\mathrm{ex}}(x,y).
   @f]
+  Indeed, @f$-\Delta u_{\mathrm{ex}}=(k^2+\pi^2)u_{\mathrm{ex}}@f$.
+  The chosen @f$k^2@f$ is not a Dirichlet eigenvalue of the unit square.
 
-  Note the key difference from the @ref examples-pdes-poisson "Poisson equation":
-  the presence of the **mass term** @f$ -k^2 \int u v \, dx @f$, which makes
-  the bilinear form indefinite for sufficiently large @f$ k @f$.
+  @section examples-pdes-helmholtz-weak The weak formulation
 
-  @section examples-pdes-helmholtz-impl Implementation
+  For complex test functions with zero boundary trace, the weak equation is
+  @f[
+    \int_\Omega\nabla u\cdot\overline{\nabla v}\,dx
+       -k^2\int_\Omega u\overline v\,dx
+       =\int_\Omega f\overline v\,dx.
+  @f]
+  The bar denotes complex conjugation. Rodin's complex forms are linear in the
+  trial field and conjugate-linear in the test field. The negative mass term
+  makes this system indefinite, so the positive-definiteness requirement of CG
+  is not satisfied.
 
-  @subsection examples-pdes-helmholtz-includes Includes and Namespaces
+  @section examples-pdes-helmholtz-mesh 1. Resolve the wave on a mesh
 
-  We include the standard Rodin modules plus the math constants for @f$ \pi @f$:
+  The program generates a unit-square triangular mesh with 97 vertices in each
+  coordinate direction: 9409 vertices and 18432 triangles. The wavelength in the
+  horizontal direction is @f$2\pi/k=0.5@f$.
 
-  @code{.cpp}
-  #include <Rodin/Solver.h>
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Assembly.h>
-  #include <Rodin/Variational.h>
+  @snippet PDEs/Helmholtz.cpp helmholtz-mesh
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
-  @endcode
+  Resolving a wavelength is necessary but does not by itself control wave
+  dispersion or proximity to resonance. Refinement is still needed to assess
+  the error for the frequency of interest.
 
-  @subsection examples-pdes-helmholtz-mesh Mesh and Parameters
+  @section examples-pdes-helmholtz-problem 2. Define the complex problem
 
-  We use a fine mesh (@f$ 64 \times 64 @f$) to adequately resolve the wave,
-  following the rule of thumb that the mesh size @f$ h @f$ should satisfy
-  @f$ k h \lesssim 1 @f$. The mesh is created using
-  @ref Rodin::Geometry::Mesh "Mesh::UniformGrid()" and scaled
-  to the unit domain via @ref Rodin::Geometry::Mesh "Mesh::scale()":
+  `P1<Complex>` stores a complex coefficient at each mesh vertex. Both the source
+  and the boundary values come from the same manufactured solution.
 
-  @code{.cpp}
-  static constexpr Real waveLength = 0.5;
-  const Real waveNumber = 2 * Math::Constants::pi() / waveLength;
+  @snippet PDEs/Helmholtz.cpp helmholtz-form
 
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 64, 64 });
-  mesh.getConnectivity().compute(1, 2);
-  mesh.scale(1.0 / 63.0);
-  @endcode
+  As in the Poisson example, the load is subtracted to express a residual.
+  Here the additional negative mass term represents the time-harmonic wave term.
 
-  @subsection examples-pdes-helmholtz-complex Complex Finite Element Space
+  @section examples-pdes-helmholtz-solve 3. Solve the indefinite system
 
-  The Helmholtz equation naturally involves complex-valued fields. Rodin
-  supports this through template-parameterized finite element spaces. Using
-  @ref Rodin::Variational::P1 "P1<Complex>" creates a space where each DOF
-  is a complex number:
+  Sparse LU is used for this modest two-dimensional demonstration. It does not
+  require a positive definite matrix. The program checks solver success before
+  exporting the result.
 
-  @code{.cpp}
-  P1<Complex> vh(mesh);
+  @snippet PDEs/Helmholtz.cpp helmholtz-solve
 
-  TrialFunction u(vh);
-  TestFunction  v(vh);
-  @endcode
+  @section examples-pdes-helmholtz-output 4. Inspect real and imaginary parts
 
-  @subsection examples-pdes-helmholtz-exact Manufactured Exact Solution
+  The output stores two real-valued fields, avoiding ambiguity when opening a
+  complex field in a visualization application.
 
-  For verification we use a manufactured exact solution and compute the
-  corresponding right-hand side @f$ f @f$:
+  @snippet PDEs/Helmholtz.cpp helmholtz-export
 
-  @code{.cpp}
-  // Exact solution: u_ex(x,y) = exp(i k (x cos(theta) + y sin(theta)))
-  ComplexFunction u_ex =
-    [&](const Geometry::Point& p) -> Complex
-    {
-      const Real x = p.x(), y = p.y();
-      return std::exp(Complex(0, waveNumber * (x * cosTheta + y * sinTheta)));
-    };
+  @image html PDEs/Helmholtz.png "Computed real and imaginary amplitudes, using the same signed color scale." width=720px
 
-  // Right-hand side computed from u_ex
-  ComplexFunction f =
-    [&](const Geometry::Point& p) -> Complex
-    {
-      const Real x = p.x(), y = p.y();
-      return /* ... manufactured source term ... */;
-    };
-  @endcode
+  Open `Helmholtz.xdmf` in ParaView, select **Apply**, then color by **real** or
+  **imaginary**. Keep the HDF5 files beside the XDMF file. The reference fields
+  for comparison are @f$\cos(kx)\sin(\pi y)@f$ and
+  @f$\sin(kx)\sin(\pi y)@f$.
 
-  @subsection examples-pdes-helmholtz-problem Problem Definition
+  @section examples-pdes-helmholtz-full Complete program
 
-  The @ref Rodin::Variational::Problem "Problem" is assembled using the
-  same form language as for real-valued PDEs. The key terms are:
+  @snippet PDEs/Helmholtz.cpp helmholtz-source
 
-  @code{.cpp}
-  Problem helmholtz(u, v);
-  helmholtz = Integral(Grad(u), Grad(v))                   // stiffness
-            - waveNumber * waveNumber * Integral(u, v)      // mass (shift)
-            - Integral(f, v)                                // load
-            + DirichletBC(u, u_ex);                         // boundary data
-  @endcode
-
-  Here:
-  - `Integral(Grad(u), Grad(v))` is the stiffness term
-    @f$ \int_\Omega \nabla u \cdot \nabla v \, dx @f$
-  - `waveNumber * waveNumber * Integral(u, v)` is the scaled mass term
-    @f$ k^2 \int_\Omega u v \, dx @f$
-  - `Integral(f, v)` is the right-hand side
-  - `DirichletBC(u, u_ex)` imposes the exact solution on the boundary
-
-  @subsection examples-pdes-helmholtz-solve Solving the System
-
-  Because the system is complex-valued and symmetric but **not** positive-definite
-  (the bilinear form is indefinite), we use a direct solver:
-
-  @code{.cpp}
-  Solver::SparseLU(helmholtz).solve();
-  @endcode
-
-  @subsection examples-pdes-helmholtz-extract Extracting Real and Imaginary Parts
-
-  Since standard visualization tools typically work with real-valued data, we
-  extract the real and imaginary parts of the solution into separate
-  real-valued @ref Rodin::Variational::GridFunction "GridFunction" objects
-  using `Re()` and `Im()`:
-
-  @code{.cpp}
-  P1<Real> rh(mesh);
-  GridFunction uRe(rh), uIm(rh);
-
-  uRe = Re(u.getSolution());
-  uIm = Im(u.getSolution());
-
-  uRe.save("uRe.gf", IO::FileFormat::MFEM);
-  uIm.save("uIm.gf", IO::FileFormat::MFEM);
-  @endcode
-
-  @section examples-pdes-helmholtz-full Full Source Code
-
-  The complete source code is:
-  -   @ref PDEs/Helmholtz.cpp "Helmholtz.cpp"
-
-  @section examples-pdes-helmholtz-see-also See Also
-
-  - @ref examples-pdes-poisson "Poisson equation" — Simplest real-valued PDE
-  - @ref fem-spaces "Finite element spaces" — Complex-valued spaces
-  - @ref guides-variational "Variational formulations"
-  - @ref gallery "Gallery" — Visual results
+  See @ref PDEs/Helmholtz.cpp "Helmholtz.cpp" for the source and the
+  @ref guides-getting-started-installation "installation guide" for build setup.
+  The optional plotting script in `examples/PDEs/visualize.py` reproduces the
+  figure from the exported point values.
 
   @example PDEs/Helmholtz.cpp @m_examplenavigation{examples-pdes-helmholtz,PDEs/} @m_footernavigation
-  */
+*/

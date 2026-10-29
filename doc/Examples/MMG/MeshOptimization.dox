@@ -17,7 +17,7 @@
   metric-driven adaptation, where an external size map prescribes where the
   mesh should be refined or coarsened.
 
-  @section examples-mmg-meshopt-basic Basic Usage
+  @section examples-mmg-meshopt-basic Basic usage
 
   The simplest workflow is to create a mesh, mark its geometric features
   (corners and ridges), and optimize:
@@ -53,7 +53,7 @@
   }
   @endcode
 
-  @section examples-mmg-meshopt-params Optimizer Parameters
+  @section examples-mmg-meshopt-params Optimizer parameters
 
   The @ref Rodin::MMG "MMG::Optimizer" supports several parameters:
 
@@ -68,7 +68,7 @@
   @ref Rodin::MMG::Adapt "MMG::Adapt" when a computed size field should drive
   refinement and coarsening.
 
-  @section examples-mmg-meshopt-required Required Entities
+  @section examples-mmg-meshopt-required Required entities
 
   Required vertices, edges, triangles, and tetrahedra can be marked on
   @ref Rodin::MMG::Mesh "MMG::Mesh" before optimization. The Rodin wrapper
@@ -98,17 +98,17 @@
     .optimize(mesh);
   @endcode
 
-  @section examples-mmg-meshopt-full Full Source Code
+  @section examples-mmg-meshopt-full Full source code
 
   -   @ref MMG/MeshOptimization.cpp "MeshOptimization.cpp"
 
-  @section examples-mmg-meshopt-see-also See Also
+  @section examples-mmg-meshopt-see-also See also
 
   - @ref examples-mmg-simple_io "MMG I/O" - Loading and saving MMG meshes
   - @ref examples-mmg-behavior "MMG behavior and guarantees"
   - @ref examples-shapeoptimization-simple_cantilever "Shape optimization" —
     Uses MMG in an optimization loop
-  - @ref Rodin::MMG "MMG namespace"
+  - @ref Rodin::MMG "MMG::Optimizer"
 
   @example MMG/MeshOptimization.cpp
   @m_examplenavigation{examples-mmg-mesh_optimization,MMG/}

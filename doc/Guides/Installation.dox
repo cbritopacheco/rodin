@@ -1,17 +1,19 @@
 /**
-  @page guides-getting-started-installation Installation and Setup
-  @brief How to install and configure Rodin on your system
+  @page guides-getting-started-installation Installation and setup
+  @brief Configure the dependencies, install the library, and verify an application.
 
   @tableofcontents
 
   @m_footernavigation
 
-  This guide will walk you through installing Rodin and setting up your
-  development environment.
+  Installation has three stages: configure Rodin with the dependencies for the
+  desired features, build and install the library, then compile a small
+  application against the installed package. Begin with a local installation
+  before enabling additional solver or parallel backends.
 
-  @section guides-getting-started-installation-requirements System Requirements
+  @section guides-getting-started-installation-requirements System requirements
 
-  @subsection guides-getting-started-installation-required Required Dependencies
+  @subsection guides-getting-started-installation-required Required dependencies
 
   Rodin requires the following dependencies to be installed on your system:
 
@@ -19,9 +21,10 @@
   - **C++20 compatible compiler** - GCC 12+, Clang 14+, or AppleClang
   - **Boost 1.74+** - C++ libraries collection
   - **Eigen3** - Linear algebra library
+  - **HDF5 with C support** - Mesh and field storage
   - **Git LFS** - Required when building or installing resources
 
-  @subsection guides-getting-started-installation-optional Optional Dependencies
+  @subsection guides-getting-started-installation-optional Optional dependencies
 
   For additional functionality, you may want to install:
 
@@ -29,9 +32,10 @@
   - **SuiteSparse** (`libsuitesparse`) - For additional linear solvers
   - **METIS** (`libmetis`) - For graph partitioning
   - **MPI** - For distributed computing
+  - **PETSc** - For PETSc algebra and solvers (enabled by default)
   - **MMG** - For mesh optimization (included as submodule)
 
-  @section guides-getting-started-installation-packages Installing Dependencies
+  @section guides-getting-started-installation-packages Installing dependencies
 
   @subsection guides-getting-started-installation-ubuntu Ubuntu/Debian
 
@@ -39,7 +43,7 @@
 
   @code{.bash}
   sudo apt-get update
-  sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
+  sudo apt-get install cmake libboost-all-dev libeigen3-dev libhdf5-dev libomp-dev
   sudo apt-get install git-lfs  # needed for resources
   @endcode
 
@@ -54,7 +58,7 @@
   On macOS, use Homebrew to install dependencies:
 
   @code{.bash}
-  brew install cmake boost eigen libomp
+  brew install cmake boost eigen hdf5 libomp
   brew install git-lfs  # needed for resources
   @endcode
 
@@ -66,7 +70,7 @@
 
   @section guides-getting-started-installation-rodin Installing Rodin
 
-  @subsection guides-getting-started-installation-clone Clone the Repository
+  @subsection guides-getting-started-installation-clone Clone the repository
 
   First, clone the Rodin repository with all submodules:
 
@@ -91,103 +95,57 @@
   the full resource tree can skip LFS hydration by configuring with
   `-DRODIN_INSTALL_RESOURCES=OFF`.
 
-  @subsection guides-getting-started-installation-build Build and Install
+  @subsection guides-getting-started-installation-build Build and install
 
   Rodin uses CMake as its build system. There are two common installation
   methods:
 
-  @subsubsection guides-getting-started-installation-user User-Local Installation (Recommended)
+  @subsubsection guides-getting-started-installation-user User-local installation (recommended)
 
   Install Rodin to your home directory without requiring sudo:
 
   @code{.bash}
-  mkdir build && cd build
-  cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release
-  make -j4
-  make install
+  cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX="$HOME/.local" \
+    -DRODIN_USE_PETSC=OFF -DRODIN_INSTALL_RESOURCES=OFF
+  cmake --build build --parallel 4
+  cmake --install build
   @endcode
 
-  Then add to your shell profile (`~/.bashrc` or `~/.zshrc`):
+  This starting configuration disables PETSc and resource installation. PETSc
+  is enabled by default; omit the `RODIN_USE_PETSC=OFF` option only when PETSc
+  is available. Resource-dependent examples still require hydrated resources.
+  The @ref configuration "configuration reference" lists the feature switches.
+
+  To let applications find this installation, add the prefix to the CMake
+  search path in the shell profile (`~/.bashrc` or `~/.zshrc`):
 
   @code{.bash}
-  export CMAKE_PREFIX_PATH=$HOME/.local:$CMAKE_PREFIX_PATH
+  export CMAKE_PREFIX_PATH="$HOME/.local${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}"
   @endcode
 
-  @subsubsection guides-getting-started-installation-system System-Wide Installation
+  @subsubsection guides-getting-started-installation-system System-wide installation
 
   Install Rodin system-wide (requires sudo):
 
   @code{.bash}
-  mkdir build && cd build
-  cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release
-  make -j4
-  sudo make install
+  cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DRODIN_USE_PETSC=OFF -DRODIN_INSTALL_RESOURCES=OFF
+  cmake --build build --parallel 4
+  sudo cmake --install build
   @endcode
 
-  @subsection guides-getting-started-installation-verify Verifying the Installation
+  @subsection guides-getting-started-installation-verify Verify an installed application
 
-  After installation, verify that Rodin is working correctly by creating a
-  simple test project.
+  Use the complete program and CMake project in
+  @ref guides-getting-started-first-steps "First steps with Rodin". Configure it
+  in a separate application directory after installation. It creates a mesh
+  and a finite element space and reports 64 vertices, 98 triangles, and
+  64 scalar P1 degrees of freedom.
 
-  Create a directory for your test project:
-
-  @code{.bash}
-  mkdir ~/rodin-test && cd ~/rodin-test
-  @endcode
-
-  Create a `CMakeLists.txt` file:
-
-  @code{.cmake}
-  cmake_minimum_required(VERSION 3.16)
-  project(RodinTest CXX)
-  set(CMAKE_CXX_STANDARD 20)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-  find_package(Rodin REQUIRED)
-
-  add_executable(test_app main.cpp)
-  target_link_libraries(test_app PRIVATE Rodin::Geometry Rodin::Variational)
-  @endcode
-
-  Create a `main.cpp` file:
-
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
-  #include <iostream>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
-
-  int main() {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
-    mesh.getConnectivity().compute(1, 2);
-    P1 Vh(mesh);
-    std::cout << "Rodin installation verified!" << std::endl;
-    std::cout << "Mesh has " << mesh.getCellCount() << " cells." << std::endl;
-    std::cout << "FE space has " << Vh.getSize() << " DOFs." << std::endl;
-    return 0;
-  }
-  @endcode
-
-  Build and run:
-
-  @code{.bash}
-  cmake .
-  make
-  ./test_app
-  @endcode
-
-  If you see output like:
-  @code{.bash}
-  Rodin installation verified!
-  Mesh has 128 cells.
-  FE space has 81 DOFs.
-  @endcode
-
-  Then your installation is successful!
+  This checks package discovery, compilation, linkage, and a small runtime
+  operation. It does not replace the library's numerical test suite.
 
   @section guides-getting-started-installation-troubleshooting Troubleshooting
 
@@ -197,18 +155,20 @@
   `CMAKE_PREFIX_PATH` includes your installation directory:
 
   @code{.bash}
-  cmake . -DCMAKE_PREFIX_PATH=/path/to/rodin/installation
+  cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/rodin/installation
   @endcode
 
-  @subsection guides-getting-started-installation-linker-errors Linker Errors
+  @subsection guides-getting-started-installation-linker-errors Linker errors
 
-  If you encounter linker errors, make sure all required dependencies (Boost,
-  Eigen) are properly installed and visible to CMake.
+  Link applications through the imported `Rodin::` CMake targets. Include
+  targets for every module used, such as `Rodin::IO` for XDMF export. Check
+  that the installed library and the application use compatible compilers
+  and dependency installations.
 
-  @subsection guides-getting-started-installation-lfs-resources Git LFS Resources
+  @subsection guides-getting-started-installation-lfs-resources Git LFS resources
 
-  If an example fails while reading a large mesh, the checkout probably still
-  contains an unresolved Git LFS pointer. Install Git LFS and run:
+  If a mesh file begins with a Git LFS pointer instead of mesh data, hydrate
+  the resources from the repository directory:
 
   @code{.bash}
   git lfs pull
@@ -217,7 +177,7 @@
   If you do not need examples or installed resources, configure with
   `-DRODIN_INSTALL_RESOURCES=OFF`.
 
-  @subsection guides-getting-started-installation-compiler-errors Compiler Errors
+  @subsection guides-getting-started-installation-compiler-errors Compiler errors
 
   Verify that you're using a C++20 compatible compiler:
 
@@ -226,9 +186,9 @@
   clang++ --version  # Should be 14.0 or higher
   @endcode
 
-  @section guides-getting-started-installation-next What's Next?
+  @section guides-getting-started-installation-next What's next?
 
-  Now that you have Rodin installed, proceed to @ref guides-getting-started-first-steps
-  to learn the basic concepts and write your first Rodin program.
+  Continue with @ref guides-getting-started-first-steps to build the verification
+  application, then @ref guides-getting-started-first-problem for a complete solve.
 
   */

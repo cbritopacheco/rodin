@@ -1,166 +1,108 @@
 /**
   @page examples-pdes-poisson Solving the Poisson equation
-  @brief Resolution of the Poisson equation using Rodin
+  @brief From a boundary-value problem to a finite element solution and visualization.
 
-  @image html PDEs/Poisson.png width=410px
+  This example solves the Poisson equation on the unit square with a constant
+  source and zero values on the boundary. It constructs a triangular mesh,
+  expresses the weak form in Rodin, solves the resulting linear system, and
+  exports the solution for visualization.
 
   @m_keywords{Poisson}
-
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-pdes-poisson-intro Introduction
+  @section examples-pdes-poisson-intro The mathematical problem
 
-  The Poisson equation is the "Hello World!" of the finite element method.
-  It arises in many physical contexts: heat conduction, electrostatics,
-  gravitational potential, and membrane deflection. In this example we solve:
+  Let @f$\Omega = (0,1)^2@f$. The unknown scalar field @f$u@f$ satisfies
   @f[
-  \left\{
     \begin{aligned}
-      - \Delta u &= f && \mathrm{in} \ \Omega \\
-      u &= 0 && \mathrm{on} \ \partial \Omega
+      -\Delta u &= 1 &&\text{in }\Omega,\\
+      u &= 0 &&\text{on }\partial\Omega.
     \end{aligned}
-   \right.
   @f]
-  where @f$ \Omega = [0, 1]^2 @f$ is the unit square, @f$ f = 1 @f$ is a
-  constant source term, and we impose homogeneous Dirichlet boundary
-  conditions on the entire boundary @f$ \partial \Omega @f$.
+  The source is positive throughout the domain, while the homogeneous Dirichlet
+  condition fixes the field to zero along every edge. The resulting solution is
+  positive in the interior and vanishes on the boundary.
 
-  @section examples-pdes-poisson-weak Weak Formulation
-
-  To solve this PDE numerically with the finite element method, we first
-  derive its weak (variational) formulation. Multiplying by a test function
-  @f$ v \in H^1_0(\Omega) @f$ and integrating by parts:
+  To obtain the weak form, multiply the equation by a test function @f$v@f$
+  and integrate over the domain. Integration by parts transfers one derivative
+  from @f$u@f$ to @f$v@f$; the boundary term vanishes because @f$v@f$ has zero
+  trace. The problem becomes: find @f$u\in H^1_0(\Omega)@f$ such that
   @f[
-  \text{Find } u \in H^1_0(\Omega) \text{ s.t. }
-  \forall v \in H^1_0(\Omega), \quad
-     \int_{\Omega} \nabla u \cdot \nabla v \ dx = \int_{\Omega} f v \ dx
+    \int_\Omega \nabla u\cdot\nabla v\,dx = \int_\Omega v\,dx
+    \qquad\text{for every }v\in H^1_0(\Omega).
   @f]
-  The boundary term vanishes because @f$ v = 0 @f$ on @f$ \partial\Omega @f$.
+  Rodin approximates this problem in a finite-dimensional space of continuous,
+  piecewise linear functions.
 
-  @section examples-pdes-poisson-preamble Includes and Namespaces
+  @section examples-pdes-poisson-mesh 1. Construct the mesh
 
-  We need the following Rodin modules:
-  - @ref Rodin::Geometry "Geometry" — for the @ref Rodin::Geometry::Mesh "Mesh" class
-  - @ref Rodin::Variational "Variational" — for `P1`,
-    `TrialFunction`,
-    `TestFunction`, and the
-    `Problem` class
-  - @ref Rodin::Solver "Solver" — for the @ref Rodin::Solver::CG "CG" iterative solver
-  - @ref Rodin::IO::XDMF "IO::XDMF" — for exporting results to ParaView
+  A uniform grid with 16 vertices in each coordinate direction is split into
+  triangles. `UniformGrid` uses unit spacing, so the coordinates are scaled by
+  @f$1/(16-1)@f$ to obtain the unit square. The resulting mesh has 256 vertices
+  and 450 triangles.
 
-  @code{.cpp}
-  #include <Rodin/Solver.h>
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
-  #include <Rodin/IO/XDMF.h>
+  @snippet PDEs/Poisson.cpp poisson-mesh
 
-  using namespace Rodin;
-  using namespace Rodin::Solver;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
-  @endcode
+  The final line computes edge-to-cell connectivity. This allows Rodin to
+  identify the exterior edges on which the boundary condition is imposed.
 
-  @section examples-pdes-poisson-mesh Creating the Mesh
+  @section examples-pdes-poisson-problem 2. Define the finite element problem
 
-  We create a triangular mesh on the unit square using
-  @ref Rodin::Geometry::Mesh "Mesh::UniformGrid()" with a
-  @f$ 16 \times 16 @f$ grid. We also compute the face-to-cell connectivity
-  (dimension 1 to dimension 2) via
-  @ref Rodin::Geometry::Connectivity "Connectivity::compute()",
-  which is needed to identify boundary faces for imposing Dirichlet
-  conditions:
+  `P1` defines the space of functions that are continuous across the mesh and
+  affine on each triangle. The trial function `u` represents the unknown, and
+  the test function `v` represents the arbitrary test function in the weak form.
 
-  @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  mesh.getConnectivity().compute(1, 2);
-  @endcode
+  @snippet PDEs/Poisson.cpp poisson-form
 
-  This creates a mesh with @f$ 2 \times 16^2 = 512 @f$ triangular cells
-  and @f$ 17^2 = 289 @f$ vertices.
+  The first `Integral` is the stiffness term, corresponding to the left-hand
+  side of the weak form. The second is the source term with @f$f=1@f$.
+  `DirichletBC(u, Zero())` imposes zero values on the entire exterior boundary.
+  Rodin writes the equation as a residual, so the source term is subtracted
+  from the stiffness term; setting that residual to zero recovers the weak form.
 
-  @section examples-pdes-poisson-space Finite Element Space
+  @section examples-pdes-poisson-solve 3. Solve the linear system
 
-  We define a `P1` (piecewise linear, continuous)
-  finite element space on the mesh, and create the
-  `TrialFunction` and
-  `TestFunction`:
+  After the boundary values are imposed, the Poisson system is symmetric
+  positive definite. The conjugate gradient solver is therefore suitable for
+  this problem. `solve()` assembles and solves the system, and `success()`
+  checks that the solve completed successfully before the result is exported.
 
-  @code{.cpp}
-  P1 vh(mesh);
+  @snippet PDEs/Poisson.cpp poisson-solve
 
-  TrialFunction u(vh);
-  TestFunction  v(vh);
-  @endcode
+  The computed finite element field is available through `u.getSolution()`.
 
-  The trial function @f$ u @f$ represents the unknown solution, and the test
-  function @f$ v @f$ is used to express the weak formulation. After solving,
-  the computed solution coefficients are accessible via
-  `u.getSolution()`.
+  @section examples-pdes-poisson-output 4. Export and inspect the result
 
-  @section examples-pdes-poisson-problem Problem Formulation
+  The solution and its mesh are written in XDMF format. The accompanying HDF5
+  files hold the numerical data and must remain alongside `Poisson.xdmf`.
 
-  The variational problem is assembled using Rodin's form language through
-  the `Problem` class. The code closely
-  mirrors the mathematical notation:
+  @snippet PDEs/Poisson.cpp poisson-export
 
-  @code{.cpp}
-  RealFunction f = 1;
+  @m_class{m-flat}
+  @image html PDEs/Poisson.png "Computed solution on the unit square. Height and color represent the scalar field." width=360px
 
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-  @endcode
+  In ParaView:
 
-  Here:
-  - `Integral(Grad(u), Grad(v))` represents the bilinear form
-    @f$ \int_\Omega \nabla u \cdot \nabla v \ dx @f$
-  - `Integral(f, v)` represents the linear form
-    @f$ \int_\Omega f v \ dx @f$
-  - `DirichletBC(u, Zero())` enforces @f$ u = 0 @f$ on the entire boundary
+  1. Open `Poisson.xdmf` and select **Apply**.
+  2. Color the mesh by the point field **u**.
+  3. Apply **Warp By Scalar** using **u** to display the field as a surface.
+  4. Select **Surface With Edges** to make the triangulation visible.
 
-  @section examples-pdes-poisson-solve Solving
+  On this mesh, the computed nodal values range from @f$0@f$ on the boundary to
+  approximately @f$0.072862@f$ in the interior. The surface shown above uses
+  the same solution; its vertical scale is adjusted for visibility.
 
-  We solve the problem using the @ref Rodin::Solver::CG "CG" (Conjugate
-  Gradient) iterative solver, which is well-suited for symmetric positive
-  definite systems like the one arising from the Poisson equation:
+  @section examples-pdes-poisson-full Complete program
 
-  @code{.cpp}
-  CG(poisson).solve();
-  @endcode
+  The complete source combines the steps above and can be built with the other
+  Rodin examples. The output files are written to the working directory.
 
-  Alternative solvers include @ref Rodin::Solver::SparseLU "SparseLU" (direct)
-  and @ref Rodin::Solver::GMRES "GMRES" (for non-symmetric systems).
+  @snippet PDEs/Poisson.cpp poisson-source
 
-  @section examples-pdes-poisson-output Exporting to XDMF
-
-  After solving, we export the mesh and solution using the
-  @ref Rodin::IO::XDMF "IO::XDMF" class. The resulting files can be opened
-  directly in [ParaView](https://www.paraview.org/) for visualization:
-
-  @code{.cpp}
-  IO::XDMF xdmf("Poisson");
-  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
-  xdmf.write();
-  @endcode
-
-  This produces:
-  - `Poisson.xdmf` — the XML metadata file (open this in ParaView)
-  - `Poisson.*.h5` — HDF5 data files containing the mesh and solution
-
-  To visualize in ParaView:
-  1. Open `Poisson.xdmf`
-  2. Click **Apply**
-  3. Select "u" from the field dropdown
-  4. Use the **Warp By Scalar** filter for a 3D surface plot
-
-  @section examples-pdes-poisson-full Full Source Code
-
-  The complete source code is:
-  -   @ref PDEs/Poisson.cpp "Poisson.cpp"
+  See @ref PDEs/Poisson.cpp "Poisson.cpp" for the source, the
+  @ref guides-getting-started-installation "installation guide" for build setup,
+  and the @ref guides-io "I/O guide" for additional export options.
 
   @example PDEs/Poisson.cpp @m_examplenavigation{examples-pdes-poisson,PDEs/} @m_footernavigation
-  */
+*/

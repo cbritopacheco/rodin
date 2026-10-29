@@ -1,5 +1,5 @@
 /**
-  @page guides-io-xdmf XDMF Format
+  @page guides-io-xdmf XDMF format
   @brief Using the XDMF format for visualization and time series data
 
   @tableofcontents
@@ -18,7 +18,7 @@
   making it ideal for large-scale simulations. XDMF files can be directly
   opened in [ParaView](https://www.paraview.org/) for visualization.
 
-  @section guides-io-xdmf-class The XDMF Class
+  @section guides-io-xdmf-class The XDMF class
 
   The @ref Rodin::IO::XDMF class provides a high-level interface for writing
   XDMF files. It follows a grid-based approach where you:
@@ -28,7 +28,7 @@
   3. Add fields (scalar, vector, tensor) to the grid
   4. Write snapshots, optionally with time stamps
 
-  @subsection guides-io-xdmf-class-basic Basic Usage
+  @subsection guides-io-xdmf-class-basic Basic usage
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -61,7 +61,7 @@
   - `MyOutput.Grid.mesh.h5` — HDF5 file containing the mesh data
   - `MyOutput.Grid.u.0.h5` — HDF5 file containing the field data
 
-  @section guides-io-xdmf-guide-grids Working with Grids
+  @section guides-io-xdmf-guide-grids Working with grids
 
   A grid in XDMF is a named collection of a mesh and associated fields. You
   obtain a grid handle from the XDMF writer:
@@ -72,7 +72,7 @@
   auto grid = xdmf.grid("Domain");  // named grid
   @endcode
 
-  @subsection guides-io-xdmf-guide-grids-mesh Setting the Mesh
+  @subsection guides-io-xdmf-guide-grids-mesh Setting the mesh
 
   Each grid must have a mesh associated with it before writing:
 
@@ -81,7 +81,7 @@
   grid.setMesh(mesh);
   @endcode
 
-  @subsection guides-io-xdmf-guide-grids-fields Adding Fields
+  @subsection guides-io-xdmf-guide-grids-fields Adding fields
 
   Fields are added using the `add()` method. The field can be a named
   GridFunction or provided with an explicit name:
@@ -96,7 +96,7 @@
   grid.add("pressure", p);
   @endcode
 
-  @section guides-io-xdmf-static Static Output
+  @section guides-io-xdmf-static Static output
 
   For a single snapshot (no time evolution), simply call `write()` without
   a time parameter:
@@ -107,7 +107,7 @@
   xdmf.write();
   @endcode
 
-  @section guides-io-xdmf-temporal Time-Dependent Output
+  @section guides-io-xdmf-temporal Time-dependent output
 
   XDMF excels at storing time-dependent data. Call `write(t)` with a time
   value for each snapshot:
@@ -136,7 +136,7 @@
   When opened in ParaView, you can use the time controls to step through
   the evolution of the solution.
 
-  @subsection guides-io-xdmf-temporal-mesh Mesh Policy
+  @subsection guides-io-xdmf-temporal-mesh Mesh policy
 
   By default, the mesh is considered static (exported once). If your mesh
   changes over time (e.g., mesh adaptation), you can configure the writer
@@ -149,11 +149,11 @@
   grid.add(u);
   @endcode
 
-  @section guides-io-xdmf-fields Field Types
+  @section guides-io-xdmf-fields Field types
 
   XDMF supports different types of fields:
 
-  @subsection guides-io-xdmf-fields-scalar Scalar Fields
+  @subsection guides-io-xdmf-fields-scalar Scalar fields
 
   Scalar fields have one component per node:
 
@@ -165,7 +165,7 @@
   grid.add("temperature", temperature);
   @endcode
 
-  @subsection guides-io-xdmf-fields-vector Vector Fields
+  @subsection guides-io-xdmf-fields-vector Vector fields
 
   Vector fields have multiple components per node. Create the finite element
   space with the number of components:
@@ -181,7 +181,7 @@
   grid.add("velocity", velocity);
   @endcode
 
-  @section guides-io-xdmf-patterns File Patterns
+  @section guides-io-xdmf-patterns File patterns
 
   The XDMF writer uses customizable file naming patterns. The default
   patterns are:
@@ -199,7 +199,7 @@
   - `{index}` — The time step index
   - `{rank}` — The MPI rank (for distributed output)
 
-  @section guides-io-xdmf-guide-paraview Opening Files in ParaView
+  @section guides-io-xdmf-guide-paraview Opening files in ParaView
 
   To visualize XDMF output in ParaView:
 
@@ -209,7 +209,7 @@
   4. Select a field from the dropdown menu to colorize the mesh
   5. For time-dependent data, use the time controls at the top
 
-  @section guides-io-xdmf-example Complete Example
+  @section guides-io-xdmf-example Complete example
 
   Here is a complete example that solves the Poisson equation and exports
   the result using XDMF:
@@ -253,7 +253,7 @@
   }
   @endcode
 
-  @section guides-io-xdmf-see-also See Also
+  @section guides-io-xdmf-see-also See also
 
   - @ref guides-io "I/O in Rodin overview"
   - @ref Rodin::IO::XDMF "XDMF class reference"

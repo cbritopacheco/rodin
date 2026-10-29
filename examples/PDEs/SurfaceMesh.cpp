@@ -1,44 +1,58 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+//! [surfacemesh-source]
+#include <cmath>
+#include <cstdlib>
+
+#include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
-#include <Rodin/Solver.h>
 #include <Rodin/Variational.h>
+#include <Rodin/IO/XDMF.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-int main(int, char**)
+int main()
 {
-  const char* meshFile = "../resources/mfem/surface-meshes-example.mesh";
+  //! [surface-mesh]
+  constexpr size_t nodes = 11;
+  Mesh volume = Mesh().UniformGrid(Polytope::Type::Tetrahedron, {nodes, nodes, nodes});
+  volume.scale(2.0 / (nodes - 1));
+  volume.displace(VectorFunction{-1, -1, -1});
+  volume.getConnectivity().compute(2, 3);
+  Mesh mesh = volume.skin();
+  for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+  {
+    Math::SpatialPoint point = mesh.getVertexCoordinates(vertex);
+    point.normalize();
+    mesh.setVertexCoordinates(vertex, point);
+  }
+  //! [surface-mesh]
 
-  // Load mesh
-  Mesh Omega;
-  Omega.load(meshFile, IO::FileFormat::MFEM);
+  //! [surface-form]
+  P1 vh(mesh);
+  TrialFunction u(vh);
+  TestFunction v(vh);
+  RealFunction source = [](const Point& point) { return 7 * point.x() * point.y(); };
+  Problem reactionDiffusion(u, v);
+  reactionDiffusion = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(source, v);
+  //! [surface-form]
 
-  // Functions
-  H1 Vh(Omega);
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
-
-  // Right hand side
-  auto f = RealFunction(
-    [](const Point& x)
-    {
-      double l2 = x(0) * x(0) + x(1) * x(1) + x(2) * x(2);
-      return 7 * x(0) * x(1) / l2;
-    });
-
-  Solver::CG cg;
-  cg.setMaxIterations(200).setRelativeTolerance(1e-12).printIterations(true);
-
-  // Reaction-diffusion steady state
-  Problem rd(u, v);
-  rd = Integral(Grad(u), Grad(v))
-    + Integral(u, v)
-    - Integral(f, v);
-  rd.solve(cg);
-
-  // Save solution
-  u.getSolution().save("u.gf", IO::FileFormat::MFEM);
-  Omega.save("Omega.mesh", IO::FileFormat::MFEM);
+  //! [surface-solve]
+  Solver::CG solver(reactionDiffusion);
+  solver.setTolerance(1e-10).solve();
+  if (!solver.success())
+    return EXIT_FAILURE;
+  IO::XDMF xdmf("SurfaceMesh");
+  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+  xdmf.write().flush();
+  //! [surface-solve]
+  return 0;
 }
+//! [surfacemesh-source]

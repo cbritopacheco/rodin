@@ -1,5 +1,5 @@
 /**
-  @page guides-boundary-conditions Boundary Conditions
+  @page guides-boundary-conditions Boundary conditions
   @brief Guide to applying boundary conditions in Rodin
 
   @tableofcontents
@@ -41,7 +41,7 @@
   different modeling choice. See @ref guides-numerical-contracts "Numerical
   contracts" for the shared constraint contract.
 
-  @section guides-bc-dirichlet Dirichlet Boundary Conditions
+  @section guides-bc-dirichlet Dirichlet boundary conditions
 
   Dirichlet conditions specify the value of the solution on the boundary:
   @f[
@@ -59,7 +59,7 @@
           + DirichletBC(u, Zero());       // u = 0 on entire boundary
   @endcode
 
-  @subsection guides-bc-dirichlet-nonhomogeneous Non-Homogeneous Dirichlet
+  @subsection guides-bc-dirichlet-nonhomogeneous Non-homogeneous Dirichlet
 
   To prescribe a non-zero value:
 
@@ -74,7 +74,7 @@
   DirichletBC(u, g)
   @endcode
 
-  @subsection guides-bc-dirichlet-partial Partial Boundary Conditions
+  @subsection guides-bc-dirichlet-partial Partial boundary conditions
 
   To apply Dirichlet conditions only on a specific part of the boundary,
   use the `.on()` method with a boundary attribute:
@@ -94,7 +94,7 @@
   the mesh. They are typically set during mesh generation or loaded from
   a mesh file.
 
-  @subsection guides-bc-dirichlet-vector Vector Dirichlet Conditions
+  @subsection guides-bc-dirichlet-vector Vector Dirichlet conditions
 
   For vector-valued problems (e.g., elasticity), use vector functions:
 
@@ -189,7 +189,7 @@
   mixed finite-element systems. The opt-in `RodinSparseEliminationBenchmarks`
   executable measures the public operation with restoration outside timing.
 
-  @section guides-bc-neumann Neumann Boundary Conditions
+  @section guides-bc-neumann Neumann boundary conditions
 
   Neumann conditions prescribe the normal derivative (or flux) on the
   boundary:
@@ -205,7 +205,7 @@
   BoundaryIntegral(g, v).over(GammaN)
   @endcode
 
-  @subsection guides-bc-neumann-example Example: Neumann on One Side
+  @subsection guides-bc-neumann-example Example: Neumann on one side
 
   @code{.cpp}
   int GammaD = 1;  // Dirichlet boundary
@@ -220,13 +220,13 @@
           + DirichletBC(u, Zero()).on(GammaD);
   @endcode
 
-  @subsection guides-bc-neumann-natural Homogeneous Neumann (Natural)
+  @subsection guides-bc-neumann-natural Homogeneous Neumann (natural)
 
   Homogeneous Neumann conditions (@f$ \partial u / \partial n = 0 @f$) are
   the "default" — they are automatically satisfied when no boundary integral
   is added and no Dirichlet condition is imposed on that part of the boundary.
 
-  @subsection guides-bc-neumann-vector Vector Neumann (Traction)
+  @subsection guides-bc-neumann-vector Vector Neumann (traction)
 
   In elasticity, a Neumann condition corresponds to an applied traction
   (force per unit area). The traction vector @f$ \mathbf{f} @f$ is
@@ -241,7 +241,7 @@
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
   @endcode
 
-  @section guides-bc-periodic Periodic Boundary Conditions
+  @section guides-bc-periodic Periodic boundary conditions
 
   Periodic conditions enforce that the solution on one boundary equals the
   solution on the opposite boundary. They are used for problems on domains
@@ -285,7 +285,7 @@
   See the @ref examples-pdes-periodic "periodic Poisson example" for a
   complete walkthrough.
 
-  @section guides-bc-mixed Mixed Boundary Conditions
+  @section guides-bc-mixed Mixed boundary conditions
 
   In practice, different parts of the boundary often have different
   conditions. For example, in elasticity:
@@ -303,7 +303,7 @@
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
   @endcode
 
-  @section guides-bc-complete Complete Example
+  @section guides-bc-complete Complete example
 
   Here is a complete example with mixed boundary conditions:
 
@@ -345,7 +345,7 @@
   }
   @endcode
 
-  @section guides-bc-summary Summary Table
+  @section guides-bc-summary Summary table
 
   | Type | Math | Rodin Code | Appears In |
   |------|------|------------|------------|
@@ -354,7 +354,7 @@
   | Homogeneous Neumann | @f$ \partial u / \partial n = 0 @f$ | (nothing needed) | Default |
   | Periodic | @f$ u(x_L) = u(x_R) @f$ | `PeriodicBC(u, dofMap)` | System modification |
 
-  @section guides-bc-see-also See Also
+  @section guides-bc-see-also See also
 
   - @ref guides-weak-formulations "Weak formulations"
   - @ref guides-getting-started-core-concepts "Core concepts"

@@ -190,8 +190,6 @@
     const bounds = content.getBoundingClientRect();
     const gutter = side === 'left' ? bounds.left : document.documentElement.clientWidth - bounds.right;
     const width = Math.max(0, Math.min(13 * unit, gutter - 2 * unit));
-    const homeWidth = Math.max(0, Math.min(13 * unit, bounds.left - 2 * unit)) + unit;
-    document.documentElement.style.setProperty('--rodin-home-width', homeWidth + 'px');
     navigation.style.width = width + 'px';
     navigation.style.left = (side === 'left' ? bounds.left - width - unit : bounds.right + unit) + 'px';
     navigation.dataset.side = side;

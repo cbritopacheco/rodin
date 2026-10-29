@@ -27,7 +27,7 @@
   `Box` factory methods) and **unstructured** meshes loaded from files in
   MFEM, MEDIT, or HDF5 format.
 
-  @subsection guides-meshes-intro-factory Factory Methods
+  @subsection guides-meshes-intro-factory Factory methods
 
   | Method | Description |
   |--------|-------------|
@@ -35,9 +35,9 @@
   | `Mesh::Box(type, shape)` | Generate a **surface mesh** (boundary of the unit box). The `type` specifies the **face** shape (Segment for 2D boundary, Triangle for 3D boundary), and the resulting mesh has topological dimension one less than the ambient space. |
   | `Mesh::Build()` | Programmatic construction via the Builder pattern. |
 
-  @section guides-meshes-concepts Key Concepts
+  @section guides-meshes-concepts Key concepts
 
-  @subsection guides-meshes-concepts-domain Domain Partition
+  @subsection guides-meshes-concepts-domain Domain partition
 
   Mathematically, a mesh @f$ \mathcal{T}_h @f$ partitions a domain @f$ \Omega @f$:
 
@@ -59,7 +59,7 @@
   Example: A 2D surface embedded in 3D space has topological dimension 2 and
   space dimension 3.
 
-  @subsection guides-meshes-concepts-entities Mesh Entities
+  @subsection guides-meshes-concepts-entities Mesh entities
 
   Meshes consist of entities of different dimensions:
 
@@ -70,7 +70,7 @@
   | 2 | Faces (2D) or Cells (2D meshes) | Triangles, Quadrilaterals |
   | 3 | Cells (3D meshes) | Tetrahedra, Hexahedra |
 
-  @section guides-meshes-usage Basic Usage
+  @section guides-meshes-usage Basic usage
 
   Here's a simple example creating and querying a mesh:
 
@@ -95,7 +95,7 @@
   }
   @endcode
 
-  @section guides-meshes-topics Detailed Topics
+  @section guides-meshes-topics Detailed topics
 
   For detailed information on specific aspects of working with meshes, see:
 
@@ -106,7 +106,7 @@
   - @subpage guides-meshes-io - Input/output operations
   - @subpage guides-meshes-utilities - Advanced utilities and transformations
 
-  @section guides-meshes-see-also See Also
+  @section guides-meshes-see-also See also
 
   - @ref Rodin::Geometry::Mesh "Mesh class reference"
   - @ref guides-polytopes "Polytopes guide"

@@ -168,7 +168,7 @@
   inside the reference polytope because a curved transformation is not
   required to extend beyond it.
 
-  @section guides-quadrature-see-also See Also
+  @section guides-quadrature-see-also See also
 
   - @ref guides-numerical-contracts "Numerical contracts"
   - @ref guides-variational "Variational formulations"

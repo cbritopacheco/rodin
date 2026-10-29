@@ -216,6 +216,7 @@ which can be quickly implemented via the following lines of code:
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
+#include <Rodin/IO/XDMF.h>
 
 using namespace Rodin;
 using namespace Rodin::Solver;
@@ -226,6 +227,7 @@ int main(int, char**)
 {
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.scale(1.0 / 15.0);
   mesh.getConnectivity().compute(1, 2); // Compute boundary
 
   P1 vh(mesh);
@@ -242,9 +244,10 @@ int main(int, char**)
           + DirichletBC(u, Zero());
   CG(poisson).solve();
 
-  // Save solution
-  u.getSolution().save("Poisson.gf");
-  mesh.save("Poisson.mesh");
+  // Export the solution for visualization.
+  IO::XDMF xdmf("Poisson");
+  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+  xdmf.write().flush();
 
   return 0;
 }
@@ -253,7 +256,7 @@ int main(int, char**)
 <table>
   <tr>
     <td align="center">
-      <img src="doc/README/Poisson.png" alt="Poisson.png" style="width:50%;">
+      <img src="doc/README/Poisson.png" alt="Poisson solution on the unit square" width="360" style="max-width:100%;height:auto;">
     </td>
   </tr>
   <tr>

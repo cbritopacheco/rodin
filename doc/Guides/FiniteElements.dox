@@ -28,7 +28,7 @@
   @ref Rodin::Variational "Variational" module defines polynomial spaces and
   DOFs, and the @ref Rodin::Assembly "Assembly" module puts them together.
 
-  @section fem-ciarlet-definition The Ciarlet Triple
+  @section fem-ciarlet-definition The Ciarlet triple
 
   A **finite element** in the sense of Ciarlet is defined as a triple
   @f$ (K, P, \Sigma) @f$ where:
@@ -67,7 +67,7 @@
   if @f$ \sigma_i(p) = 0 @f$ for all @f$ i @f$, then @f$ p = 0 @f$.
   This property is called **unisolvence**.
 
-  @section fem-ciarlet-basis Basis Functions
+  @section fem-ciarlet-basis Basis functions
 
   Given a Ciarlet triple @f$ (K, P, \Sigma) @f$, there exists a unique set of
   basis functions @f$ \{ \phi_1, \ldots, \phi_n \} \subset P @f$ such that:
@@ -91,9 +91,9 @@
   of @f$ p @f$. In Rodin, these DOF values are stored as the coefficient
   vector of a `GridFunction`.
 
-  @section fem-ciarlet-examples Common Finite Elements
+  @section fem-ciarlet-examples Common finite elements
 
-  @subsection fem-ciarlet-p1 P1 (Piecewise Linear) Elements
+  @subsection fem-ciarlet-p1 P1 (piecewise linear) elements
 
   The simplest and most widely used finite element is the **P1 element**
   on a triangle:
@@ -121,7 +121,7 @@
   vertex, producing a space of continuous piecewise linear functions that
   is @f$ H^1 @f$-conforming.
 
-  @subsection fem-ciarlet-p0 P0 (Piecewise Constant) Elements
+  @subsection fem-ciarlet-p0 P0 (piecewise constant) elements
 
   An even simpler element is the **P0 element**, used for discontinuous
   quantities:
@@ -143,7 +143,7 @@
   cell. Functions in P0 are discontinuous across cell boundaries, making this
   space a subspace of @f$ L^2(\Omega) @f$ (not @f$ H^1 @f$).
 
-  @subsection fem-ciarlet-hk Higher-Order Elements (H1<k>)
+  @subsection fem-ciarlet-hk Higher-order elements (H1<k>)
 
   For polynomial degree @f$ k \geq 2 @f$, additional DOFs are placed on edges
   and (for @f$ k \geq 3 @f$) on cell interiors. For example, the P2 element
@@ -163,7 +163,7 @@
 
   The polynomial order @f$ k @f$ is a compile-time template parameter.
 
-  @section fem-ciarlet-global From Local to Global
+  @section fem-ciarlet-global From local to global
 
   The Ciarlet definition describes a **local** finite element on a single
   reference cell @f$ \hat{K} @f$. To construct a **global** finite element
@@ -231,10 +231,10 @@
   TestFunction  v(Vh);
   @endcode
 
-  @section fem-ciarlet-see-also See Also
+  @section fem-ciarlet-see-also See also
 
   - @ref fem-spaces "Finite element spaces" — Available spaces in Rodin
-  - @ref guides-getting-started-core-concepts "Core Concepts" — Practical
+  - @ref guides-getting-started-core-concepts "Core concepts" — Practical
     guide to using finite elements in Rodin
   - @ref guides-polytopes "Polytopes" — Geometric shapes used as reference
     elements

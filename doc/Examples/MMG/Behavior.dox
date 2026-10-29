@@ -147,7 +147,7 @@
   - cut-through characterization with `MG_REQ`, labels, adjacent tetrahedra,
     local closure requirements, and `noSplit`.
 
-  @section examples-mmg-behavior-see-also See Also
+  @section examples-mmg-behavior-see-also See also
 
   - @ref examples-mmg-simple_io "MMG I/O"
   - @ref examples-mmg-mesh_optimization "Mesh optimization"

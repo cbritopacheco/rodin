@@ -25,7 +25,7 @@
     functions, and variational problem formulation
   - @ref Rodin::IO "IO" — Input/output in MFEM, MEDIT, HDF5, and XDMF formats
   - @ref Rodin::Solver "Solver" — Linear and iterative solvers (CG, GMRES, SparseLU)
-  - @ref Rodin::Assembly "Assembly" — Assembly of stiffness matrices and load vectors
+  - @ref Rodin::Assembly "Assembly::OpenMP" — Assembly of stiffness matrices and load vectors
  */
 
 /**
@@ -33,7 +33,7 @@
   @brief Execution contexts for local and distributed computation.
 
   @ref Rodin::Context::Local "Local" selects local execution, and @ref
-  Rodin::Context::MPI "MPI" carries the environment and communicator for distributed
+  Rodin::Context::MPI "Context::MPI" carries the environment and communicator for distributed
   execution. Mesh, connectivity, and finite element specializations use these
   context types to select their data distribution and backend behavior while
   preserving the same mathematical interfaces.
@@ -62,10 +62,10 @@
   Alert::Info() << "Assembling the system..." << Alert::Raise;
   @endcode
 
-  @ref Rodin::Alert::Exception "Exception" and @ref
-  Rodin::Alert::MemberFunctionException "MemberFunctionException" report errors with
-  contextual diagnostics. @ref Rodin::Alert::Info "Info" and @ref
-  Rodin::Alert::Warning "Warning" provide nonfatal messages through the same stream
+  @ref Rodin::Alert::Exception "Alert::Exception" and @ref
+  Rodin::Alert::MemberFunctionException "Alert::MemberFunctionException" report errors with
+  contextual diagnostics. @ref Rodin::Alert::Info "Alert::Info" and @ref
+  Rodin::Alert::Warning "Alert::Warning" provide nonfatal messages through the same stream
   interface. These classes communicate invalid inputs, unavailable operations, and
   solver or mesh-processing status.
 
@@ -110,22 +110,22 @@
     \mathbf{x}=F_K(\widehat{\mathbf{x}}).
   @f]
 
-  @ref Rodin::Geometry::Mesh "Mesh" and @ref Rodin::Geometry::Connectivity
-  "Connectivity" describe mesh entities and their incidence relations. @ref
-  Rodin::Geometry::Polytope "Polytope", @ref Rodin::Geometry::Point "Point", and
+  @ref Rodin::Geometry::Mesh "Mesh<Context::MPI>" and @ref Rodin::Geometry::Connectivity
+  "getConnectivity().compute(d1, d2)" describe mesh entities and their incidence relations. @ref
+  Rodin::Geometry::Polytope "Polytope", @ref Rodin::Geometry::Point "Geometry::Point", and
   @ref Rodin::Geometry::PolytopeTransformation "PolytopeTransformation" connect
   reference elements to physical geometry for integration, field evaluation, mesh
   extraction, and deformation.
 
   Key classes include:
 
-  - @ref Rodin::Geometry::Mesh "Mesh" — The primary mesh class supporting
+  - @ref Rodin::Geometry::Mesh "Mesh<Context::MPI>" — The primary mesh class supporting
     triangular, quadrilateral, tetrahedral, and hexahedral meshes
   - @ref Rodin::Geometry::Polytope "Polytope" — Geometric entities (vertices,
     edges, faces, cells) with type enumeration
-  - @ref Rodin::Geometry::Connectivity "Connectivity" — Incidence relations
+  - @ref Rodin::Geometry::Connectivity "getConnectivity().compute(d1, d2)" — Incidence relations
     between polytopes of different dimensions
-  - @ref Rodin::Geometry::Point "Point" — Evaluation point for grid functions,
+  - @ref Rodin::Geometry::Point "Geometry::Point" — Evaluation point for grid functions,
     bundling reference coordinates, physical coordinates, Jacobian data, and
     the owning polytope
 
@@ -174,17 +174,17 @@
   mesh.getConnectivity().compute(1, 2); // Compute face-to-cell connectivity
   @endcode
 
-  @see @ref guides-meshes "Meshes Guide"
-  @see @ref guides-polytopes "Polytopes Guide"
-  @see @ref guides-connectivity "Connectivity Guide"
+  @see @ref guides-meshes "Meshes guide"
+  @see @ref guides-polytopes "Polytopes guide"
+  @see @ref guides-connectivity "Connectivity guide"
  */
 
 /**
   @namespace Rodin::Assembly
   @brief Global assembly of discrete operators.
 
-  @ref Rodin::Assembly::Sequential "Sequential" evaluates local integrals and
-  accumulates global matrices and vectors; @ref Rodin::Assembly::Default "Default"
+  @ref Rodin::Assembly::Sequential "Assembly::Sequential" evaluates local integrals and
+  accumulates global matrices and vectors; @ref Rodin::Assembly::Default "Assembly::Default"
   selects the configured assembly strategy. @ref
   Rodin::Assembly::BilinearFormAssemblyInput "BilinearFormAssemblyInput" supplies
   spaces and integrators, and @ref Rodin::Assembly::ConstraintMap "ConstraintMap"
@@ -197,7 +197,7 @@
   |----------|-------|-------------|
   | **Sequential** | @ref Rodin::Assembly::Sequential "Assembly::Sequential" | Single-threaded assembly. Iterates over mesh cells, evaluates local element matrices/vectors, and accumulates into the global system. Deterministic and reproducible. |
   | **OpenMP** | @ref Rodin::Assembly "Assembly::OpenMP" | Shared-memory parallel assembly using OpenMP. Each thread processes a subset of cells and accumulates contributions using thread-safe operations. Requires compilation with `RODIN_USE_OPENMP=ON`. |
-  | **Default** | @ref Rodin::Assembly::Default "Assembly::Default" | Compile-time policy selector. Maps to @ref Rodin::Assembly "OpenMP" when OpenMP is available, otherwise falls back to @ref Rodin::Assembly::Sequential "Sequential". Users rarely need to specify this directly. |
+  | **Default** | @ref Rodin::Assembly::Default "Assembly::Default" | Compile-time policy selector. Maps to @ref Rodin::Assembly "Assembly::OpenMP" when OpenMP is available, otherwise falls back to @ref Rodin::Assembly::Sequential "Assembly::Sequential". Users rarely need to specify this directly. |
 
   # What Gets Assembled
 
@@ -210,7 +210,7 @@
     to their prescribed values.
   - **Problem**: Orchestrates the full assembly pipeline — bilinear form,
     linear form(s), Dirichlet elimination — into a complete
-    @ref Rodin::Math::LinearSystem "LinearSystem".
+    @ref Rodin::Math::LinearSystem "LinearSystem<Operator, Vector>".
 
   # Assembly Pipeline
 
@@ -233,7 +233,7 @@
   This is used by multi-field `Problem` objects with multiple trial/test
   function pairs.
 
-  @see @ref guides-variational "Variational Formulations Guide"
+  @see @ref guides-variational "Variational formulations guide"
 
   # Representative formula
 
@@ -259,7 +259,7 @@
   "MeshPrinter" import and export meshes; @ref Rodin::IO::GridFunctionLoader
   "GridFunctionLoader" and @ref Rodin::IO::GridFunctionPrinter "GridFunctionPrinter"
   transfer discrete fields. Format-specific backends support MFEM, MEDIT, and HDF5
-  data, while @ref Rodin::IO::XDMF "XDMF" writes meshes, multiple fields, and time
+  data, while @ref Rodin::IO::XDMF "IO::XDMF" writes meshes, multiple fields, and time
   series for visualization.
 
   Supported mesh and field formats include:
@@ -268,7 +268,7 @@
   - **MEDIT** (@ref Rodin::IO::FileFormat "IO::FileFormat::MEDIT") — MEDIT format used by MMG and INRIA tools
   - **HDF5** (@ref Rodin::IO::FileFormat "IO::FileFormat::HDF5") — High-performance binary format
 
-  Additionally, the @ref Rodin::IO::XDMF "XDMF" class provides XDMF 3.0
+  Additionally, the @ref Rodin::IO::XDMF "IO::XDMF" class provides XDMF 3.0
   output for scientific visualization in [ParaView](https://www.paraview.org/),
   supporting time series and multiple fields.
 
@@ -276,7 +276,7 @@
 
   The XDMF writer uses a two-level design:
 
-  - @ref Rodin::IO::XDMF "XDMF" — Top-level writer that manages the `.xdmf` XML file and `.h5`
+  - @ref Rodin::IO::XDMF "IO::XDMF" — Top-level writer that manages the `.xdmf` XML file and `.h5`
     HDF5 data. Provides `write()`, `flush()`, `close()`, `setPadding()`.
   - @ref Rodin::IO::XDMF::Grid "XDMF::Grid" — A lightweight handle returned by `xdmf.grid()` (default)
     or `xdmf.grid("name")` (named). Provides `setMesh()`, `add()`, `hasMesh()`,
@@ -410,7 +410,7 @@
   Solver::CG(poisson).solve();
   @endcode
 
-  @see @ref guides-variational "Variational Formulations Guide"
+  @see @ref guides-variational "Variational formulations guide"
  */
 
 /**
@@ -421,9 +421,9 @@
     d(\mathbf{x},\Gamma)=\inf_{\mathbf{y}\in\Gamma}\|\mathbf{x}-\mathbf{y}\|.
   @f]
 
-  @ref Rodin::Distance::Eikonal "Eikonal" constructs distance fields through fast
-  marching, while @ref Rodin::Distance::Poisson "Poisson" and @ref
-  Rodin::Distance::SignedPoisson "SignedPoisson" provide PDE-based alternatives.
+  @ref Rodin::Distance::Eikonal "Distance::Eikonal" constructs distance fields through fast
+  marching, while @ref Rodin::Distance::Poisson "Distance::Poisson" and @ref
+  Rodin::Distance::SignedPoisson "Distance::SignedPoisson" provide PDE-based alternatives.
   These models convert boundary or level-set information into distance
   approximations for shape optimization, interface processing, and mesh adaptation.
 
@@ -437,13 +437,13 @@
   | **Rvachev** | @ref Rodin::Distance::Rvachev "Distance::Rvachev" | @f$ d = \frac{u}{\sqrt{u^2 + \lVert\nabla u\rVert^2}} @f$ | Normalizes a level-set field to approximate distance; preserves zero set and sign |
   | **SpaldingTucker** | @ref Rodin::Distance::SpaldingTucker "Distance::SpaldingTucker" | @f$ d = \frac{2u}{\lVert\nabla u\rVert + \sqrt{\lVert\nabla u\rVert^2 + 2\lvert u\rvert}} @f$ | Better gradient normalization than Rvachev; more accurate near the interface |
 
-  All methods except @ref Rodin::Distance::Rvachev "Rvachev" and @ref Rodin::Distance::SpaldingTucker "SpaldingTucker" inherit from a common CRTP
+  All methods except @ref Rodin::Distance::Rvachev "Distance::Rvachev" and @ref Rodin::Distance::SpaldingTucker "Distance::SpaldingTucker" inherit from a common CRTP
   `Base<Derived>` that provides `setInterior()` and `setInterface()` methods for
   specifying the signed-distance regions (mesh boundary attributes).
 
   # Eikonal Distance (FMM)
 
-  The @ref Rodin::Distance::Eikonal "Eikonal" class wraps the FMM solver and provides the most accurate
+  The @ref Rodin::Distance::Eikonal "Distance::Eikonal" class wraps the FMM solver and provides the most accurate
   distance computation. Seeds are automatically identified from the interface
   attributes. Calling `sign()` after `solve()` negates interior values to produce
   a signed distance field.
@@ -461,11 +461,11 @@
 
   # Poisson Distance Approximation
 
-  @ref Rodin::Distance::Poisson "Poisson" solves @f$ -\Delta u = 1 @f$ with @f$ u = 0 @f$ on
+  @ref Rodin::Distance::Poisson "Distance::Poisson" solves @f$ -\Delta u = 1 @f$ with @f$ u = 0 @f$ on
   @f$ \partial\Omega @f$ in a single linear solve. The result is smooth but
   only approximates the true distance.
 
-  @ref Rodin::Distance::SignedPoisson "SignedPoisson" extends this with region-dependent forcing: @f$ -\Delta u = 2 @f$
+  @ref Rodin::Distance::SignedPoisson "Distance::SignedPoisson" extends this with region-dependent forcing: @f$ -\Delta u = 2 @f$
   inside a specified region and @f$ -\Delta u = -1 @f$ elsewhere, with
   @f$ u = 0 @f$ on the interface. It supports both single-attribute and
   attribute-set overloads:
@@ -482,7 +482,7 @@
 
   # Level-Set Normalization
 
-  @ref Rodin::Distance::Rvachev "Rvachev" and @ref Rodin::Distance::SpaldingTucker "SpaldingTucker" are post-processing operators that normalize
+  @ref Rodin::Distance::Rvachev "Distance::Rvachev" and @ref Rodin::Distance::SpaldingTucker "Distance::SpaldingTucker" are post-processing operators that normalize
   an existing level-set field into an approximate distance function without
   solving any PDE:
 
@@ -501,7 +501,7 @@
   @namespace Rodin::Hilbert
   @brief Hilbert-space formulations and regularization.
 
-  @ref Rodin::Hilbert::H1a "H1a" solves a regularized extension problem that
+  @ref Rodin::Hilbert::H1a "getTrialFunction() / getTestFunction()" solves a regularized extension problem that
   converts a linear functional into a smooth field over the mesh. It is commonly
   used to extend boundary shape derivatives into volume descent directions, with a
   configurable length scale controlling smoothing and boundary conditions
@@ -527,7 +527,7 @@
   | @ref Rodin::Hilbert::H1a "getProblem()" | Access the underlying @ref Rodin::Variational::Problem "Problem" object |
   | @ref Rodin::Hilbert::H1a "getTrialFunction() / getTestFunction()" | Access trial/test functions |
 
-  For vector-valued problems, @ref Rodin::Hilbert::H1a "H1a" uses `Jacobian()` instead of `Grad()`.
+  For vector-valued problems, @ref Rodin::Hilbert::H1a "getTrialFunction() / getTestFunction()" uses `Jacobian()` instead of `Grad()`.
   The internal solver is `Solver::CG`.
  */
 
@@ -662,19 +662,19 @@
     \mathbf{P}=\frac{\partial W}{\partial\mathbf{F}}.
   @f]
 
-  @ref Rodin::Solid::KinematicState "KinematicState" computes deformation measures
+  @ref Rodin::Solid::KinematicState "getLogJacobian()" computes deformation measures
   for constitutive laws such as @ref Rodin::Solid::NeoHookean "NeoHookean" and @ref
   Rodin::Solid::HolzapfelOgden "HolzapfelOgden". @ref
   Rodin::Solid::InternalVirtualWork "InternalVirtualWork" assembles residuals and
   consistent tangents, and stress fields such as @ref Rodin::Solid::CauchyStress
-  "CauchyStress" support postprocessing. The module covers finite-strain elasticity
+  "CauchyStress<Law>" support postprocessing. The module covers finite-strain elasticity
   and fiber-reinforced material models.
 
   It is organized into four sub-layers:
 
   # Kinematics
 
-  @ref Rodin::Solid::KinematicState "KinematicState" encapsulates all finite-strain kinematic quantities at a
+  @ref Rodin::Solid::KinematicState "getLogJacobian()" encapsulates all finite-strain kinematic quantities at a
   quadrature point. Set the displacement gradient with
   `setDisplacementGradient(H)` and query derived tensors:
 
@@ -699,7 +699,7 @@
 
   # Constitutive Point and Input Injection
 
-  @ref Rodin::Solid::ConstitutivePoint "ConstitutivePoint" bundles a @ref Rodin::Solid::KinematicState "KinematicState" with an optional
+  @ref Rodin::Solid::ConstitutivePoint "ConstitutivePoint" bundles a @ref Rodin::Solid::KinematicState "getLogJacobian()" with an optional
   @ref Rodin::Geometry::Point "Geometry::Point" (for spatial location) and a tag-based auxiliary data store.
   Auxiliary data (fiber directions, activation values, etc.) is injected via
   typed tags:
@@ -921,11 +921,11 @@
   @namespace Rodin::Math
   @brief Spatial arithmetic, matrix operations, and sparse linear algebra.
 
-  @ref Rodin::Math::SpatialVector "SpatialVector" and @ref
-  Rodin::Math::SpatialMatrix "SpatialMatrix" support small spatial calculations
-  without heap allocation. @ref Rodin::Math::Vector "Vector", @ref
-  Rodin::Math::Matrix "Matrix", and their fixed-size counterparts provide
-  Eigen-compatible algebra; @ref Rodin::Math::LinearSystem "LinearSystem" groups
+  @ref Rodin::Math::SpatialVector "SpatialVector<T>" and @ref
+  Rodin::Math::SpatialMatrix "SpatialMatrix<T>" support small spatial calculations
+  without heap allocation. @ref Rodin::Math::Vector "Vector<T>", @ref
+  Rodin::Math::Matrix "Matrix<T>", and their fixed-size counterparts provide
+  Eigen-compatible algebra; @ref Rodin::Math::LinearSystem "LinearSystem<Operator, Vector>" groups
   system data and constraint elimination. These types support geometric mappings,
   constitutive calculations, assembly, and linear solves.
 
@@ -1172,7 +1172,7 @@
     @f$ u^{k+1} = u^k + \delta u^k @f$. Configurable via `setMaxIterations()`,
     `setAbsoluteTolerance()`, and `setRelativeTolerance()`.
 
-  @see @ref guides-solvers "Solvers Guide"
+  @see @ref guides-solvers "Solvers guide"
  */
 
 /**
@@ -1225,10 +1225,10 @@
   @namespace Rodin::MMG
   @brief Mesh adaptation through the MMG integration.
 
-  @ref Rodin::MMG::Mesh "Mesh" connects Rodin geometry to MMG. @ref
-  Rodin::MMG::Adapt "Adapt" performs metric-driven adaptation, @ref
-  Rodin::MMG::Optimizer "Optimizer" improves mesh quality, and @ref
-  Rodin::MMG::LevelSetDiscretizer "LevelSetDiscretizer" fits or extracts an
+  @ref Rodin::MMG::Mesh "MMG::Mesh::Build()" connects Rodin geometry to MMG. @ref
+  Rodin::MMG::Adapt "MMG::Adapt" performs metric-driven adaptation, @ref
+  Rodin::MMG::Optimizer "MMG::Optimizer" improves mesh quality, and @ref
+  Rodin::MMG::LevelSetDiscretizer "noSplit(ref)" fits or extracts an
   isosurface. These workflows support remeshing and interface reconstruction in
   shape optimization and evolving-geometry simulations.
 
@@ -1249,9 +1249,9 @@
 
   | Workflow | Expected behavior |
   |----------|-------------------|
-  | @ref Rodin::MMG::Optimizer "Optimizer" | Improves element quality while keeping the mesh close to the existing local size distribution. |
-  | @ref Rodin::MMG::Adapt "Adapt" | Refines, coarsens, moves, and reconnects elements according to a size field. |
-  | @ref Rodin::MMG::LevelSetDiscretizer "LevelSetDiscretizer" | Alters topology as needed to conform the output mesh to the selected level-set isovalue. |
+  | @ref Rodin::MMG::Optimizer "MMG::Optimizer" | Improves element quality while keeping the mesh close to the existing local size distribution. |
+  | @ref Rodin::MMG::Adapt "MMG::Adapt" | Refines, coarsens, moves, and reconnects elements according to a size field. |
+  | @ref Rodin::MMG::LevelSetDiscretizer "noSplit(ref)" | Alters topology as needed to conform the output mesh to the selected level-set isovalue. |
 
   All workflows convert an @ref Rodin::MMG::Mesh "MMG::Mesh" to native MMG
   structures, run MMG, and convert the result back. The output is a remeshed
@@ -1272,7 +1272,7 @@
   # Shared Configuration (Base)
 
   The MMG wrappers inherit common configuration methods from
-  @ref Rodin::MMG::Base "Base"; each returns `*this` for chaining:
+  @ref Rodin::MMG::Base "setAngleDetection(bool)"; each returns `*this` for chaining:
 
   | Method | Description |
   |--------|-------------|
@@ -1330,8 +1330,8 @@
 
   # LevelSetDiscretizer API
 
-  In addition to @ref Rodin::MMG::Base "Base" parameters,
-  @ref Rodin::MMG::LevelSetDiscretizer "LevelSetDiscretizer" provides:
+  In addition to @ref Rodin::MMG::Base "setAngleDetection(bool)" parameters,
+  @ref Rodin::MMG::LevelSetDiscretizer "noSplit(ref)" provides:
 
   | Method | Description |
   |--------|-------------|
@@ -1750,7 +1750,7 @@
 
   @ref Rodin::Location::AABB "AABB" builds a bounding-volume hierarchy to locate
   physical coordinates in a mesh and recover the containing cell and reference
-  coordinates. The resulting @ref Rodin::Geometry::Point "Point" can be used for
+  coordinates. The resulting @ref Rodin::Geometry::Point "Geometry::Point" can be used for
   field sampling and evaluation at arbitrary locations. The locator must be rebuilt
   when the mesh geometry or topology changes.
 

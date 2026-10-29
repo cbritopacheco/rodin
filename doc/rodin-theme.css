@@ -213,6 +213,32 @@ pre.m-code
   background: var(--code-background-color);
 }
 
+/* Keep blocks inside an anchored section clear of its selection indicator. */
+article .m-container-inflatable section[id]:target > :is(pre, .m-note, .m-frame, .m-block, .m-code-figure, .m-console-figure),
+article .m-container-inflatable section[id]:target section > :is(pre, .m-note, .m-frame, .m-block, .m-code-figure, .m-console-figure),
+article .m-container-inflatable section[id]:target .m-container-inflate > :is(pre, .m-note, .m-frame, .m-block, .m-code-figure, .m-console-figure)
+{
+  margin-left: 0;
+  margin-right: 0;
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+}
+
+article .m-container-inflatable section[id]:target > pre,
+article .m-container-inflatable section[id]:target section > pre,
+article .m-container-inflatable section[id]:target .m-container-inflate > pre
+{
+  border-left-width: 1px;
+  padding-left: 1rem;
+}
+
+article .m-container-inflatable section[id]:target :is(.m-code-figure, .m-console-figure)::before
+{
+  border-left-width: 0.125rem;
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+}
+
 .m-code .k,
 .m-code .kd,
 .m-code .kn,
@@ -806,11 +832,6 @@ main article .m-col-l-10:has(> .rodin-main-brand) > h1 {
   .rodin-page-nav.rodin-page-nav-fit[data-side="right"] { padding-left: .75rem; }
 }
 
-@media screen and (min-width: 1200px) {
-  #navigation #m-navbar-brand {
-    width: var(--rodin-home-width, auto);
-  }
-}
 
 @media(max-width:359px) {
   #navigation #m-navbar-brand { margin-right: .25rem; padding-right: .25rem; }
@@ -823,4 +844,45 @@ main article .m-col-l-10:has(> .rodin-main-brand) > h1 {
     width: .875rem;
     height: .875rem;
   }
+}
+
+/* Credit portraits and institutional marks retain their own proportions. */
+.rodin-credit-person img {
+  object-fit: cover;
+  object-position: 35% 35%;
+}
+.rodin-credit-person h4,
+.rodin-credit-lab h4 {
+  margin-left: 5rem;
+}
+.rodin-credit-lab img {
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
+  background: white;
+  border-radius: 0.25rem;
+}
+
+/* Keep the example figure subordinate to the tutorial text. */
+:is(#examples-pdes-poisson-output, #examples-pdes-elasticity-output,
+    #examples-pdes-helmholtz-output, #examples-pdes-periodic-output,
+    #examples-pdes-surface-output, #examples-pdes-stokes-output,
+    #examples-pdes-navierstokes-output) figure.m-figure::before {
+  border-color: transparent;
+}
+:is(#examples-pdes-poisson-output, #examples-pdes-elasticity-output,
+    #examples-pdes-helmholtz-output, #examples-pdes-periodic-output,
+    #examples-pdes-surface-output, #examples-pdes-stokes-output,
+    #examples-pdes-navierstokes-output) figure.m-figure figcaption {
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.rodin-tutorial-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: .2rem;
 }

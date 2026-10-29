@@ -1,22 +1,22 @@
 /**
   @page examples-geometry-uniformgrid Generating uniform grids
-  @brief Creating structured meshes with UniformGrid
+  @brief Control vertex counts, cell types, and physical dimensions.
 
-  @m_keywords{Mesh, UniformGrid, Triangle, Quadrilateral, Tetrahedron, Wedge}
+  `Mesh::UniformGrid` creates a structured mesh without an input file. The
+  grid parameters count vertices along each coordinate direction. Coordinates
+  initially have unit spacing; physical dimensions are set by scaling the mesh.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-geom-ug-intro Introduction
+  @section examples-geom-ug-2d Create a two-dimensional grid
 
-  The @ref Rodin::Geometry::Mesh "Mesh::UniformGrid()" method
-  creates structured grids of various polytope types. This is the quickest
-  way to get started with Rodin — no mesh files needed.
-
-  @section examples-geom-ug-2d 2D Grids
+  Sixteen vertices in each direction give fifteen intervals. Splitting each
+  rectangular grid cell into two triangles produces 450 triangles and
+  256 vertices.
 
   @code{.cpp}
+  #include <iostream>
   #include <Rodin/Geometry.h>
 
   using namespace Rodin;
@@ -24,73 +24,82 @@
 
   int main()
   {
-    Mesh mesh;
+    Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {16, 16});
+    mesh.scale(1.0 / 15.0);
 
-    // Triangular grid: 16×16 subdivisions → 512 triangles, 289 vertices
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+    Real area = 0;
+    for (auto cell = mesh.getCell(); !cell.end(); ++cell)
+      area += cell->getMeasure();
 
-    // Quadrilateral grid: 32×32 subdivisions → 1024 quads, 1089 vertices
-    mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 32, 32 });
-
+    std::cout << "Vertices: " << mesh.getVertexCount() << '\n';
+    std::cout << "Triangles: " << mesh.getCellCount() << '\n';
+    std::cout << "Area: " << area << '\n';
     return 0;
   }
   @endcode
 
-  The grid is created on the unit square @f$ [0, N_x] \times [0, N_y] @f$
-  where @f$ N_x, N_y @f$ are the subdivision counts. Use
-  @ref Rodin::Geometry::Mesh "Mesh::scale()" to rescale to a
-  different domain:
+  Before scaling, the grid occupies @f$[0,15]^2@f$. After scaling, it occupies
+  @f$[0,1]^2@f$ and has area one. Scaling changes coordinates, not entity counts.
+
+  The cell type determines how each grid rectangle is represented:
+
+  | Type and vertex counts | Vertices | Cells |
+  | :--- | ---: | ---: |
+  | `Triangle`, `{16, 16}` | 256 | 450 triangles |
+  | `Quadrilateral`, `{32, 32}` | 1024 | 961 quadrilaterals |
+
+  For unequal vertex counts @f$n_x,n_y@f$, the initial domain is
+  @f$[0,n_x-1]\times[0,n_y-1]@f$. A scalar scaling factor preserves that aspect
+  ratio. The parameters must provide at least two vertices in each direction.
+
+  @section examples-geom-ug-3d Extend to three dimensions
+
+  Supply three vertex counts and choose a volume cell type:
 
   @code{.cpp}
-  // Create grid on [0,1]^2
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 32, 32 });
-  mesh.scale(1.0 / 31.0);  // Normalize to unit square
+  Mesh tetrahedra = Mesh().UniformGrid(Polytope::Type::Tetrahedron, {8, 8, 8});
+  Mesh hexahedra = Mesh().UniformGrid(Polytope::Type::Hexahedron, {8, 8, 8});
+  Mesh wedges = Mesh().UniformGrid(Polytope::Type::Wedge, {8, 8, 8});
   @endcode
 
-  @section examples-geom-ug-3d 3D Grids
+  These grids initially occupy @f$[0,7]^3@f$. Calling `scale(1.0 / 7.0)` on
+  each mesh maps it to the unit cube. The selected type changes the cells
+  inside each grid brick; the three parameters remain vertex counts.
+
+  @section examples-geom-ug-connectivity Prepare boundary operations
+
+  Boundary algorithms require the relevant incidence relation. For exterior
+  edges in a triangular two-dimensional mesh:
 
   @code{.cpp}
-  // Tetrahedral grid: 8×8×8 subdivisions
-  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 8, 8, 8 });
-
-  // Hexahedral grid: 16×16×16 subdivisions
-  mesh = mesh.UniformGrid(Polytope::Type::Hexahedron, { 16, 16, 16 });
-
-  // Wedge (prism) grid: 4×4×4 subdivisions
-  mesh = mesh.UniformGrid(Polytope::Type::Wedge, { 4, 4, 4 });
+  mesh.getConnectivity().compute(1, 2);
   @endcode
 
-  @section examples-geom-ug-connectivity Computing Connectivity
+  For a three-dimensional volume mesh, face-to-cell connectivity is `(2, 3)`.
+  See @ref examples-geometry-connectivity for the interpretation of these queries.
 
-  After creating a mesh, compute the boundary connectivity before defining
-  boundary conditions:
+  @section examples-geom-ug-queries Check the generated geometry
 
-  @code{.cpp}
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  mesh.getConnectivity().compute(1, 2);  // edges → cells (required for BC)
-  @endcode
+  `getVertexCount()` and `getCellCount()` check topology. Summing cell
+  `getMeasure()` values checks the area of a two-dimensional mesh, as shown
+  above. `Mesh::getVolume()` instead sums three-dimensional entities and is not
+  an area query. `getDimension()` and `getSpaceDimension()` distinguish
+  topological from ambient dimension. These checks help detect an unintended
+  domain size before a field or PDE is constructed.
 
-  @section examples-geom-ug-queries Mesh Queries
+  @section examples-geom-ug-full Source example
 
-  @code{.cpp}
-  std::cout << "Vertices: " << mesh.getVertexCount() << std::endl;
-  std::cout << "Cells:    " << mesh.getCellCount() << std::endl;
-  std::cout << "Volume:   " << mesh.getVolume() << std::endl;
-  std::cout << "Perimeter: " << mesh.getPerimeter() << std::endl;
-  @endcode
+  @ref Geometry/UniformGrid.cpp "UniformGrid.cpp" generates a three-dimensional
+  wedge mesh and saves it in MEDIT format. The @ref examples-pdes-poisson
+  "Poisson tutorial" uses a scaled triangular grid in a complete solve.
 
-  @section examples-geom-ug-full Full Source Code
+  @section examples-geom-ug-see-also Further reading
 
-  -   @ref Geometry/UniformGrid.cpp "UniformGrid.cpp"
-
-  @section examples-geom-ug-see-also See Also
-
-  - @ref guides-meshes "Meshes guide" — Full mesh documentation
-  - @ref guides-polytopes "Polytopes" — Element types
-  - @ref guides-connectivity "Connectivity" — Incidence relations
-  - @ref examples-pdes-poisson "Poisson example" — Uses UniformGrid
+  - @ref guides-meshes-creation — Mesh creation and loading.
+  - @ref guides-polytopes — Reference elements and physical mappings.
+  - @ref guides-connectivity — Incidence relations and boundary queries.
 
   @example Geometry/UniformGrid.cpp
   @m_examplenavigation{examples-geometry-uniformgrid,Geometry/}
   @m_footernavigation
-  */
+*/

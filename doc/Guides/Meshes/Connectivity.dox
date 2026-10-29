@@ -1,5 +1,5 @@
 /**
-  @page guides-meshes-connectivity Mesh Connectivity
+  @page guides-meshes-connectivity Mesh connectivity
   @brief Understanding and computing connectivity relations
 
   @tableofcontents
@@ -20,7 +20,7 @@
 
   These relationships are called **incidence relations** or **connectivity**.
 
-  @section guides-meshes-connectivity-notation Mathematical Notation
+  @section guides-meshes-connectivity-notation Mathematical notation
 
   An incidence relation @f$ d \rightarrow d' @f$ maps polytopes of dimension
   @f$ d @f$ to polytopes of dimension @f$ d' @f$ that are incident to them.
@@ -30,7 +30,7 @@
   - @f$ 2 \rightarrow 1 @f$: Maps cells to their edges
   - @f$ 0 \rightarrow 2 @f$: Maps vertices to incident cells
 
-  @section guides-meshes-connectivity-computing Computing Connectivity
+  @section guides-meshes-connectivity-computing Computing connectivity
 
   Connectivity is not computed by default and must be explicitly requested:
 
@@ -51,7 +51,7 @@
   }
   @endcode
 
-  @section guides-meshes-connectivity-common Common Connectivity Relations
+  @section guides-meshes-connectivity-common Common connectivity relations
 
   @subsection guides-meshes-connectivity-common-2d 2D Meshes
 
@@ -81,7 +81,7 @@
   | 3 → 1 | Cells to edges | Edge-based operations |
   | 3 → 0 | Cells to vertices | Always available |
 
-  @section guides-meshes-connectivity-boundary Boundary Operations
+  @section guides-meshes-connectivity-boundary Boundary operations
 
   Most important: For boundary conditions and boundary iterations, you need:
   
@@ -101,7 +101,7 @@
   }
   @endcode
 
-  @section guides-meshes-connectivity-access Accessing Connectivity
+  @section guides-meshes-connectivity-access Accessing connectivity
 
   Once computed, use connectivity to query relationships:
 
@@ -121,7 +121,7 @@
   }
   @endcode
 
-  @section guides-meshes-connectivity-example Complete Example
+  @section guides-meshes-connectivity-example Complete example
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -164,9 +164,9 @@
   }
   @endcode
 
-  @section guides-meshes-connectivity-performance Performance Considerations
+  @section guides-meshes-connectivity-performance Performance considerations
 
-  @subsection guides-meshes-connectivity-performance-cost Computational Cost
+  @subsection guides-meshes-connectivity-performance-cost Computational cost
 
   Computing connectivity can be expensive for large meshes:
   
@@ -175,7 +175,7 @@
   - Some relations are computed together (e.g., @f$ d \rightarrow d' @f$ and
     @f$ d' \rightarrow d @f$)
 
-  @subsection guides-meshes-connectivity-performance-timing Timing Example
+  @subsection guides-meshes-connectivity-performance-timing Timing example
 
   @code{.cpp}
   #include <chrono>
@@ -194,7 +194,7 @@
             << duration.count() << " ms" << std::endl;
   @endcode
 
-  @section guides-meshes-connectivity-required When Is Connectivity Required?
+  @section guides-meshes-connectivity-required When is connectivity required?
 
   Many operations require specific connectivity to be computed:
 
@@ -208,7 +208,7 @@
 
   If required connectivity is missing, Rodin will raise an exception.
 
-  @section guides-meshes-connectivity-see-also See Also
+  @section guides-meshes-connectivity-see-also See also
 
   - @ref guides-meshes "Meshes overview"
   - @ref guides-connectivity "Connectivity guide (detailed)"

@@ -1,5 +1,5 @@
 /**
-  @page guides-meshes-iteration Mesh Iteration
+  @page guides-meshes-iteration Mesh iteration
   @brief Iterating over mesh entities
 
   @tableofcontents
@@ -14,9 +14,9 @@
   Mesh iterators allow you to loop over all entities of a given dimension,
   accessing their properties and performing operations.
 
-  @section guides-meshes-iteration-basic Basic Iteration
+  @section guides-meshes-iteration-basic Basic iteration
 
-  @subsection guides-meshes-iteration-basic-vertices Iterating Over Vertices
+  @subsection guides-meshes-iteration-basic-vertices Iterating over vertices
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -40,7 +40,7 @@
   }
   @endcode
 
-  @subsection guides-meshes-iteration-basic-cells Iterating Over Cells
+  @subsection guides-meshes-iteration-basic-cells Iterating over cells
 
   @code{.cpp}
   // Iterate over all cells
@@ -51,7 +51,7 @@
   }
   @endcode
 
-  @subsection guides-meshes-iteration-basic-faces Iterating Over Faces (Edges in 2D)
+  @subsection guides-meshes-iteration-basic-faces Iterating over faces (edges in 2D)
 
   @code{.cpp}
   // Iterate over all faces (edges in 2D)
@@ -60,7 +60,7 @@
   }
   @endcode
 
-  @section guides-meshes-iteration-dimension Iteration by Dimension
+  @section guides-meshes-iteration-dimension Iteration by dimension
 
   You can iterate over polytopes of any dimension:
 
@@ -81,7 +81,7 @@
   }
   @endcode
 
-  @section guides-meshes-iteration-properties Accessing Entity Properties
+  @section guides-meshes-iteration-properties Accessing entity properties
 
   @subsection guides-meshes-iteration-properties-index Index
 
@@ -111,7 +111,7 @@
   }
   @endcode
 
-  @subsection guides-meshes-iteration-properties-geometry Geometry Type
+  @subsection guides-meshes-iteration-properties-geometry Geometry type
 
   @code{.cpp}
   for (auto it = mesh.getCell(); it; ++it) {
@@ -120,7 +120,7 @@
   }
   @endcode
 
-  @section guides-meshes-iteration-specific Accessing Specific Entities
+  @section guides-meshes-iteration-specific Accessing specific entities
 
   Get iterators positioned at specific indices:
 
@@ -139,7 +139,7 @@
   auto face7 = mesh.getFace(7);
   @endcode
 
-  @section guides-meshes-iteration-neighbors Iterating Over Neighbors
+  @section guides-meshes-iteration-neighbors Iterating over neighbors
 
   With connectivity computed, iterate over adjacent polytopes:
 
@@ -153,7 +153,7 @@
   }
   @endcode
 
-  @section guides-meshes-iteration-boundary Boundary Iteration
+  @section guides-meshes-iteration-boundary Boundary iteration
 
   Iterate over only boundary faces:
 
@@ -165,7 +165,7 @@
   }
   @endcode
 
-  @section guides-meshes-iteration-interface Interface Iteration
+  @section guides-meshes-iteration-interface Interface iteration
 
   Iterate over interface faces (between different regions):
 
@@ -175,7 +175,7 @@
   }
   @endcode
 
-  @section guides-meshes-iteration-example Complete Example
+  @section guides-meshes-iteration-example Complete example
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -229,14 +229,14 @@
   }
   @endcode
 
-  @section guides-meshes-iteration-performance Performance Tips
+  @section guides-meshes-iteration-performance Performance tips
 
   - Cache results if iterating multiple times
   - Use range-based loops where appropriate
   - Avoid unnecessary coordinate lookups
   - Compute connectivity once before iterating
 
-  @section guides-meshes-iteration-see-also See Also
+  @section guides-meshes-iteration-see-also See also
 
   - @ref guides-meshes "Meshes overview"
   - @ref guides-meshes-connectivity "Connectivity"

@@ -18,7 +18,7 @@
 | @f$ \partial \Omega @f$ | Denotes the Lipschitz boundary of the domain @f$ \Omega @f$. |
 | @f$ \Gamma_D @f$  | The Dirichlet part of the boundary where essential conditions are imposed. |
 | @f$ \Gamma_N @f$  | The Neumann part of the boundary where natural conditions are imposed. |
-| @f$ \mathcal{T}_h @f$ | Denotes a polyhedral complex (mesh) which discretizes the domain @f$ \Omega @f$. The subscript @f$ h @f$ refers to the mesh size parameter. In Rodin, this is represented by the @ref Rodin::Geometry::Mesh "Mesh" class. |
+| @f$ \mathcal{T}_h @f$ | Denotes a polyhedral complex (mesh) which discretizes the domain @f$ \Omega @f$. The subscript @f$ h @f$ refers to the mesh size parameter. In Rodin, this is represented by the @ref Rodin::Geometry::Mesh "Mesh::getDimension()" class. |
 | @f$ \mathcal{F}_h @f$ | Represents the set of all faces in the mesh @f$ \mathcal{T}_h @f$. |
 | @f$ \mathcal{B}_h @f$ | Represents the boundary faces of the mesh @f$ \mathcal{T}_h @f$. A face is on the boundary if it belongs to exactly one cell. |
 | @f$ \mathcal{I}_h @f$ | Represents the interior faces (interfaces) of the mesh @f$ \mathcal{T}_h @f$. An interior face belongs to exactly two cells. |
@@ -146,7 +146,7 @@
 | @f$ [u] = u^+ - u^- @f$                         | `Jump(u)`         | Jump of @f$ u @f$ across an internal face. |
 | @f$ \{u\} = \frac{1}{2}(u^+ + u^-) @f$          | `Average(u)`      | Average of @f$ u @f$ across an internal face. |
 
-  @section notation-special Special Functions and Operators
+  @section notation-special Special functions and operators
 
 | Notation                     | Rodin code           | Description |
 | ---------------------------- | -------------------- | ----------- |

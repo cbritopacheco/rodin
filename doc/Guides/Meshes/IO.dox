@@ -1,5 +1,5 @@
 /**
-  @page guides-meshes-io Mesh Input/Output
+  @page guides-meshes-io Mesh input/output
   @brief Saving and loading meshes
 
   @tableofcontents
@@ -17,7 +17,7 @@
   - Exchange meshes with other software
   - Archive simulation data
 
-  @section guides-meshes-io-formats Supported Formats
+  @section guides-meshes-io-formats Supported formats
 
   The file format is specified explicitly via the
   @ref Rodin::IO::FileFormat "IO::FileFormat" enumeration:
@@ -28,9 +28,9 @@
   | MEDIT | `.mesh` | MEDIT format from INRIA (used by MMG) |
   | HDF5 | `.h5` | High-performance binary format |
 
-  @section guides-meshes-io-loading Loading Meshes
+  @section guides-meshes-io-loading Loading meshes
 
-  @subsection guides-meshes-io-loading-basic Basic Loading
+  @subsection guides-meshes-io-loading-basic Basic loading
 
   Use @ref Rodin::Geometry::Mesh "Mesh::load()" with an explicit
   @ref Rodin::IO::FileFormat "IO::FileFormat":
@@ -54,9 +54,9 @@
   }
   @endcode
 
-  @section guides-meshes-io-saving Saving Meshes
+  @section guides-meshes-io-saving Saving meshes
 
-  @subsection guides-meshes-io-saving-basic Basic Saving
+  @subsection guides-meshes-io-saving-basic Basic saving
 
   Use @ref Rodin::Geometry::Mesh "Mesh::save()" with an explicit format:
 
@@ -71,7 +71,7 @@
   mesh.save("output.mesh", IO::FileFormat::MEDIT);
   @endcode
 
-  @subsection guides-meshes-io-saving-medit MEDIT Format
+  @subsection guides-meshes-io-saving-medit MEDIT format
 
   The MEDIT format is commonly used with the
   @ref Rodin::MMG "MMG" mesh adaptation tools:
@@ -80,7 +80,7 @@
   mesh.save("domain.mesh", IO::FileFormat::MEDIT);
   @endcode
 
-  @section guides-meshes-io-example Complete Example
+  @section guides-meshes-io-example Complete example
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -114,7 +114,7 @@
   }
   @endcode
 
-  @section guides-meshes-io-external External Mesh Generators
+  @section guides-meshes-io-external External mesh generators
 
   @subsection guides-meshes-io-external-mmg MMG
 
@@ -123,22 +123,22 @@
   @ref Rodin::MMG "MMG" module. See the
   @ref examples-mmg-index "MMG examples" for details.
 
-  @section guides-meshes-io-paths File Paths
+  @section guides-meshes-io-paths File paths
 
-  @subsection guides-meshes-io-paths-absolute Absolute Paths
+  @subsection guides-meshes-io-paths-absolute Absolute paths
 
   @code{.cpp}
   mesh.load("/home/user/meshes/domain.mesh", IO::FileFormat::MFEM);
   @endcode
 
-  @subsection guides-meshes-io-paths-relative Relative Paths
+  @subsection guides-meshes-io-paths-relative Relative paths
 
   @code{.cpp}
   mesh.load("../data/domain.mesh", IO::FileFormat::MFEM);
   mesh.save("./output/result.mesh", IO::FileFormat::MFEM);
   @endcode
 
-  @section guides-meshes-io-considerations Format Considerations
+  @section guides-meshes-io-considerations Format considerations
 
   @subsection guides-meshes-io-considerations-compatibility Compatibility
 
@@ -153,7 +153,7 @@
   - Element attributes (region markers)
   - Boundary attributes
 
-  @section guides-meshes-io-see-also See Also
+  @section guides-meshes-io-see-also See also
 
   - @ref guides-io "I/O in Rodin" — Comprehensive I/O guide including XDMF
   - @ref guides-meshes-creation "Mesh creation"

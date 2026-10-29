@@ -52,7 +52,7 @@
   static constexpr size_t maxIterations = 5000;
   @endcode
 
-  @subsection examples-densopt-temp-setup-mesh Mesh and Initial Density
+  @subsection examples-densopt-temp-setup-mesh Mesh and initial density
 
   The mesh is loaded and optimized with @ref Rodin::MMG
   "MMG::Optimizer":
@@ -69,11 +69,11 @@
   gamma = 0.9;  // Initial density: nearly full material
   @endcode
 
-  @section examples-densopt-temp-loop Optimization Loop
+  @section examples-densopt-temp-loop Optimization loop
 
   Each iteration consists of three PDE solves:
 
-  @subsection examples-densopt-temp-loop-state Step 1 — State Equation
+  @subsection examples-densopt-temp-loop-state Step 1 — state equation
 
   The temperature field @f$ u @f$ is the solution of a Poisson problem
   with SIMP-interpolated conductivity @f$ \kappa(\gamma) @f$:
@@ -88,7 +88,7 @@
   Solver::SparseLU(poisson).solve();
   @endcode
 
-  @subsection examples-densopt-temp-loop-adjoint Step 2 — Adjoint Equation
+  @subsection examples-densopt-temp-loop-adjoint Step 2 — adjoint equation
 
   The adjoint problem is similar to the state equation but with a different
   right-hand side arising from the derivative of the objective:
@@ -103,7 +103,7 @@
   Solver::SparseLU(adjoint).solve();
   @endcode
 
-  @subsection examples-densopt-temp-loop-gradient Step 3 — Gradient and Update
+  @subsection examples-densopt-temp-loop-gradient Step 3 — gradient and update
 
   The topological gradient is smoothed via a **Hilbert extension-regularization**
   solve. The density @f$ \gamma @f$ is then updated and projected to @f$ [0, 1] @f$:
@@ -126,12 +126,12 @@
   gamma = Min(1.0, Max(0.0, gamma));
   @endcode
 
-  @section examples-densopt-temp-full Full Source Code
+  @section examples-densopt-temp-full Full source code
 
   The complete source code is:
   -   @ref DensityOptimization/TemperatureMinimization.cpp "TemperatureMinimization.cpp"
 
-  @section examples-densopt-temp-see-also See Also
+  @section examples-densopt-temp-see-also See also
 
   - @ref examples-pdes-poisson "Poisson equation" — The underlying PDE
   - @ref examples-shapeoptimization-simple_cantilever "Shape optimization" —

@@ -101,6 +101,25 @@ class PagesTest(unittest.TestCase):
         self.assertNotIn('PublishDocumentation', benchmarks['jobs'])
         self.assertEqual(benchmarks['jobs']['Publish']['needs'], 'Pool')
 
+    def test_documentation_badges_use_existing_runners_and_skip_pull_requests(self):
+        docs = yaml.safe_load((ROOT / '.github/workflows/Documentation.yml').read_text())
+        self.assertEqual(set(docs['jobs']), {'Build-And-Deploy', 'PublishDocumentation'})
+        for name, job in docs['jobs'].items():
+            steps = [step for step in job['steps'] if 'dev/ci_badges.py --documentation-only' in step.get('run', '')]
+            self.assertEqual(len(steps), 2)
+            for step in steps:
+                self.assertTrue(step['continue-on-error'])
+                self.assertEqual(step['timeout-minutes'], 2)
+                self.assertIn('--source-attempt', step['run'])
+                self.assertIn('github.run_attempt', step['env']['ATTEMPT'])
+                self.assertNotIn('gh workflow run', step['run'])
+                if name == 'Build-And-Deploy':
+                    self.assertIn("github.event_name == 'push'", step['if'])
+            self.assertEqual(job['permissions']['contents'], 'write')
+            self.assertEqual(job['permissions']['actions'], 'read')
+        checkout = docs['jobs']['Build-And-Deploy']['steps'][0]
+        self.assertFalse(checkout['with']['persist-credentials'])
+
     def test_shared_apt_guard_precedes_version_resolution(self):
         action = yaml.safe_load((ROOT / '.github/actions/apt-dependencies/action.yml').read_text())
         steps = action['runs']['steps']

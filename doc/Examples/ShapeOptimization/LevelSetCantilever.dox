@@ -76,7 +76,7 @@
   and the zero level set is re-discretized with
   @ref Rodin::MMG::LevelSetDiscretizer "MMG::LevelSetDiscretizer".
 
-  @section examples-shapeopt-ls-setup Problem Setup
+  @section examples-shapeopt-ls-setup Problem setup
 
   @subsection examples-shapeopt-ls-setup-includes Includes
 
@@ -116,11 +116,11 @@
   static Real alpha = 0.1;                               // Regularization
   @endcode
 
-  @section examples-shapeopt-ls-loop Optimization Loop
+  @section examples-shapeopt-ls-loop Optimization loop
 
   Each iteration consists of six steps:
 
-  @subsection examples-shapeopt-ls-loop-remesh Step 1 — Remesh
+  @subsection examples-shapeopt-ls-loop-remesh Step 1 — remesh
 
   At the start of each iteration, we improve the current body-fitted mesh
   using @ref Rodin::MMG::Optimizer "MMG::Optimizer":
@@ -133,7 +133,7 @@
                   .optimize(th);
   @endcode
 
-  @subsection examples-shapeopt-ls-loop-trim Step 2 — Trim the Mesh
+  @subsection examples-shapeopt-ls-loop-trim Step 2 — trim the mesh
 
   We extract the interior subdomain by trimming the exterior region. The
   resulting @ref Rodin::Geometry::SubMesh "SubMesh" inherits boundary
@@ -143,7 +143,7 @@
   SubMesh trimmed = th.trim(exterior);
   @endcode
 
-  @subsection examples-shapeopt-ls-loop-state Step 3 — Solve the State Equation
+  @subsection examples-shapeopt-ls-loop-state Step 3 — solve the state equation
 
   We solve the elasticity problem on the trimmed (interior) domain:
 
@@ -159,7 +159,7 @@
   Solver::CG(elasticity).solve();
   @endcode
 
-  @subsection examples-shapeopt-ls-loop-gradient Step 4 — Shape Gradient
+  @subsection examples-shapeopt-ls-loop-gradient Step 4 — shape gradient
 
   The shape gradient is computed on the **full** mesh (not trimmed), using
   `traceOf` to evaluate quantities from the interior side of the interface
@@ -183,7 +183,7 @@
   Solver::CG(hilbert).solve();
   @endcode
 
-  @subsection examples-shapeopt-ls-loop-advect Step 5 — Advect the Level Set
+  @subsection examples-shapeopt-ls-loop-advect Step 5 — advect the level set
 
   The signed distance function is first computed by solving the
   Eikonal equation @f$ |\nabla d| = 1 @f$. Then it is advected along the
@@ -203,7 +203,7 @@
   Advection::Lagrangian(advect, test, dist, dJ).step(dt);
   @endcode
 
-  @subsection examples-shapeopt-ls-loop-recover Step 6 — Recover the Domain
+  @subsection examples-shapeopt-ls-loop-recover Step 6 — recover the domain
 
   The new domain is recovered by applying
   @ref Rodin::MMG::LevelSetDiscretizer "MMG::LevelSetDiscretizer" to the
@@ -220,7 +220,7 @@
         .discretize(advect.getSolution());
   @endcode
 
-  @section examples-shapeopt-ls-xdmf XDMF Output
+  @section examples-shapeopt-ls-xdmf XDMF output
 
   The @ref Rodin::IO::XDMF "XDMF" class exports the evolving mesh, distance,
   and state fields at each iteration for visualization in ParaView:
@@ -239,12 +239,12 @@
   xdmf.write(i).flush();
   @endcode
 
-  @section examples-shapeopt-ls-full Full Source Code
+  @section examples-shapeopt-ls-full Full source code
 
   The complete source code is:
   -   @ref ShapeOptimization/LevelSetCantilever2D.cpp "LevelSetCantilever2D.cpp"
 
-  @section examples-shapeopt-ls-see-also See Also
+  @section examples-shapeopt-ls-see-also See also
 
   - @ref examples-shapeoptimization-simple_cantilever "Simple cantilever" —
     Boundary-variation approach

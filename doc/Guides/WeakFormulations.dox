@@ -1,5 +1,5 @@
 /**
-  @page guides-weak-formulations Weak Formulations
+  @page guides-weak-formulations Weak formulations
   @brief Understanding and implementing weak formulations in Rodin
 
   @tableofcontents
@@ -24,7 +24,7 @@
   @ref guides-numerical-contracts "Numerical contracts" for the sign convention,
   structural constraints, quadrature exactness, and nonlinear tangent checks.
 
-  @section guides-weak-procedure Derivation Procedure
+  @section guides-weak-procedure Derivation procedure
 
   Consider a general second-order PDE on a domain @f$ \Omega @f$:
 
@@ -40,9 +40,9 @@
   3. **Integrate by parts** to transfer derivatives from @f$ u @f$ to @f$ v @f$
   4. **Apply boundary conditions** (essential or natural)
 
-  @section guides-weak-poisson Example: The Poisson Equation
+  @section guides-weak-poisson Example: the Poisson equation
 
-  @subsection guides-weak-poisson-strong Strong Form
+  @subsection guides-weak-poisson-strong Strong form
 
   The Poisson equation with homogeneous Dirichlet boundary conditions:
 
@@ -71,7 +71,7 @@
     = \int_\Omega f \, v \, dx
   @f]
 
-  @subsection guides-weak-poisson-result Weak Formulation
+  @subsection guides-weak-poisson-result Weak formulation
 
   Find @f$ u \in H^1_0(\Omega) @f$ such that for all
   @f$ v \in H^1_0(\Omega) @f$:
@@ -116,9 +116,9 @@
   }
   @endcode
 
-  @section guides-weak-elasticity Example: Linearized Elasticity
+  @section guides-weak-elasticity Example: linearized elasticity
 
-  @subsection guides-weak-elasticity-strong Strong Form
+  @subsection guides-weak-elasticity-strong Strong form
 
   The linearized elasticity system governs the displacement @f$ \mathbf{u}
   : \Omega \to \mathbb{R}^d @f$ of an elastic body:
@@ -227,7 +227,7 @@
   with linear basis functions). For higher-order elements, the quadrature order
   is auto-computed as `max(lambdaOrder, muOrder) + trialOrder + testOrder`.
 
-  @subsection guides-weak-elasticity-hyperelastic Beyond Small Deformations
+  @subsection guides-weak-elasticity-hyperelastic Beyond small deformations
 
   For large deformations (finite strain), use the `Solid` module's
   hyperelastic framework with `MaterialTangent` and `InternalForce` integrators
@@ -270,7 +270,7 @@
   @ref guides-numerical-contracts "Numerical contracts" for residual/tangent
   consistency checks.
 
-  @section guides-weak-general General Structure
+  @section guides-weak-general General structure
 
   Most weak formulations in Rodin follow this pattern:
 
@@ -290,7 +290,7 @@
   problem = [bilinear terms] - [linear terms] + [boundary conditions];
   @endcode
 
-  @section guides-weak-bilinear Bilinear Forms
+  @section guides-weak-bilinear Bilinear forms
 
   A **bilinear form** @f$ a(u, v) @f$ is a mapping that is linear in both
   arguments. It involves both the trial function @f$ u @f$ and the test
@@ -305,7 +305,7 @@
   | @f$ \int_\Omega \lambda \nabla u \cdot \nabla v \, dx @f$ | `Integral(lambda * Grad(u), Grad(v))` | Weighted stiffness |
   | @f$ \int_\Omega \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v}) \, dx @f$ | `Integral(lambda * Div(u), Div(v))` | Divergence penalization |
 
-  @section guides-weak-linear Linear Forms
+  @section guides-weak-linear Linear forms
 
   A **linear form** @f$ \ell(v) @f$ is a mapping that is linear in @f$ v @f$
   only (it does not depend on the unknown @f$ u @f$). It is assembled into the
@@ -319,9 +319,9 @@
   | @f$ \int_{\Gamma_N} g \, v \, ds @f$ | `BoundaryIntegral(g, v).over(GammaN)` | Neumann load |
   | @f$ \int_\Omega \mathbf{f} \cdot \mathbf{v} \, dx @f$ | `Integral(f, v)` | Vector body force |
 
-  @section guides-weak-bc Boundary Conditions in Weak Form
+  @section guides-weak-bc Boundary conditions in weak form
 
-  @subsection guides-weak-bc-dirichlet Dirichlet (Essential) Conditions
+  @subsection guides-weak-bc-dirichlet Dirichlet (essential) conditions
 
   Dirichlet conditions are imposed directly on the function space:
 
@@ -333,7 +333,7 @@
   DirichletBC(u, g).on(boundaryAttribute)
   @endcode
 
-  @subsection guides-weak-bc-neumann Neumann (Natural) Conditions
+  @subsection guides-weak-bc-neumann Neumann (natural) conditions
 
   Neumann conditions appear as boundary integrals in the weak formulation:
 
@@ -342,7 +342,7 @@
   BoundaryIntegral(g, v).over(2)
   @endcode
 
-  @subsection guides-weak-bc-periodic Periodic Boundary Conditions
+  @subsection guides-weak-bc-periodic Periodic boundary conditions
 
   Periodic conditions tie DOFs on opposite boundary segments using an
   `IndexMap`. See the @ref examples-pdes-periodic "periodic Poisson example"
@@ -360,7 +360,7 @@
           + PeriodicBC(u, dofs);
   @endcode
 
-  @section guides-weak-mixed Mixed Formulations
+  @section guides-weak-mixed Mixed formulations
 
   Some PDEs involve multiple unknowns from different spaces. The
   @ref examples-pdes-navierstokes "Navier–Stokes example" uses
@@ -382,7 +382,7 @@
          + DirichletBC(u, uD);           // velocity BC
   @endcode
 
-  @section guides-weak-well-posedness Well-Posedness
+  @section guides-weak-well-posedness Well-posedness
 
   The **Lax-Milgram theorem** guarantees existence and uniqueness of the
   solution when:
@@ -399,7 +399,7 @@
   the inf-sup condition, making them a standard choice for Stokes-type
   problems.
 
-  @section guides-weak-see-also See Also
+  @section guides-weak-see-also See also
 
   - @ref notation-index "Notation reference"
   - @ref guides-getting-started-first-problem "Your first problem"

@@ -29,8 +29,9 @@ class Publisher:
     """Read current source runs, then atomically update isolated badge files.
 
     The badge branch holds JSON only. Before every write, the source branch is
-    checked again. One workflow-level lock serializes publishers; file SHA
-    checks also prevent silent replacement of concurrent changes.
+    checked again. File SHA checks and bounded retries handle concurrent
+    publishers. Verified documentation outcomes survive stale API snapshots
+    from the same workflow attempt.
     """
 
     def __init__(self, repository, branch, request=None):
@@ -63,7 +64,13 @@ class Publisher:
                  'content': 'Generated CI status badge data.\n'}]})
             commit = self.request(self.prefix + '/git/commits', 'POST',
                                   {'message': 'Initialize CI badge data', 'tree': tree['sha'], 'parents': []})
-            self.request(self.prefix + '/git/refs', 'POST', {'ref': 'refs/heads/ci-badges', 'sha': commit['sha']})
+            try:
+                self.request(self.prefix + '/git/refs', 'POST', {'ref': 'refs/heads/ci-badges', 'sha': commit['sha']})
+            except subprocess.CalledProcessError as conflict:
+                if not any(code in conflict.stderr for code in ('409', '422')):
+                    raise
+                # Another publisher may have initialized the branch meanwhile.
+                self.request(self.prefix + '/git/ref/heads/ci-badges')
 
     def jobs(self, run):
         key = run['id']
@@ -132,9 +139,17 @@ class Publisher:
             jobs = self.jobs(doc_run)
             if jobs is not None:
                 found = next((j for j in jobs if j['name'] == 'Publish documentation'), None)
-                if found:
-                    doc_status = state(found['status'], found.get('conclusion'))
-                elif doc_run['status'] != 'completed':
+                if any(j.get('conclusion') in {'failure', 'timed_out', 'startup_failure', 'action_required'} for j in jobs):
+                    doc_status = 'failure'
+                elif found and found.get('conclusion') == 'success':
+                    doc_status = 'success'
+                elif any(j['status'] == 'in_progress' for j in jobs):
+                    doc_status = 'running'
+                elif doc_run['status'] == 'completed':
+                    doc_status = state(doc_run['status'], doc_run.get('conclusion'))
+                    if doc_status == 'success':
+                        doc_status = 'unknown'
+                else:
                     doc_status = 'queued'
             # A publication step can report deployment immediately, before its
             # enclosing publication job has completed.
@@ -143,17 +158,32 @@ class Publisher:
                     and sha == source_sha):
                 doc_status = documentation
         result['Documentation'] = badge('Documentation', doc_status, sha)
+        if doc_run:
+            result['Documentation'].update(run=str(doc_run['id']), attempt=doc_run.get('run_attempt', 1))
         return result
 
-    def publish(self, documentation=None, source_run=None, source_sha=None):
-        sha = self.head()
-        records = self.collect(sha, documentation, source_run, source_sha)
-        self.branch_ready()
-        for label, record in records.items():
-            if self.head() != sha:
+    def documentation_run(self):
+        runs = self.request(f'{self.prefix}/actions/workflows/Documentation.yml/runs?branch={self.branch}&event=push&per_page=1')['workflow_runs']
+        return runs[0] if runs else None
+
+    def current_documentation(self, record):
+        run = self.documentation_run()
+        return (run is not None and run['head_sha'] == record['commit']
+                and str(run['id']) == record['run']
+                and run.get('run_attempt', 1) == record['attempt'])
+
+    def write_record(self, label, record):
+        # Three optimistic attempts allow a short race with another badge writer
+        # without introducing a repository-wide runner/concurrency dependency.
+        attempts = 3
+        path = f'{self.prefix}/contents/{self.branch}/{label.lower()}.json'
+        for attempt in range(attempts):
+            if self.head() != record['commit']:
                 print('Source branch advanced; leaving newer events to refresh badges.')
+                return False
+            if label == 'Documentation' and 'run' in record and not self.current_documentation(record):
+                print('Documentation run or attempt superseded; ignoring stale update.')
                 return
-            path = f'{self.prefix}/contents/{self.branch}/{label.lower()}.json'
             previous = None
             try:
                 previous = self.request(path + '?ref=ci-badges')
@@ -161,24 +191,78 @@ class Publisher:
                 if '404' not in error.stderr:
                     raise
             content = json.dumps(record, sort_keys=True) + '\n'
-            if previous and base64.b64decode(previous['content']).decode() == content:
-                continue
+            if previous:
+                old_content = base64.b64decode(previous['content']).decode()
+                if old_content == content:
+                    return
+                old = json.loads(old_content)
+                same_attempt = all(old.get(key) == record.get(key)
+                                   for key in ('commit', 'run', 'attempt'))
+                # The deployment step can finish before the Actions job API
+                # reflects it. A delayed reconciliation must not undo its proof.
+                if (label == 'Documentation' and same_attempt
+                        and old.get('verified_status') in {'success', 'failure', 'cancelled'}
+                        and (old['verified_status'] == 'success'
+                             or record.get('verified_status') != 'success')):
+                    print('Keeping verified documentation outcome for this attempt.')
+                    return
+            # Recheck after reading the destination as the source can advance
+            # during either API request. The content SHA protects the write itself.
+            if self.head() != record['commit']:
+                return False
             payload = {'message': f'Update {self.branch} {label} badge', 'branch': 'ci-badges',
                        'content': base64.b64encode(content.encode()).decode()}
             if previous:
                 payload['sha'] = previous['sha']
-            self.request(path, 'PUT', payload)
-            print(label + ': ' + record['message'])
+            try:
+                self.request(path, 'PUT', payload)
+                print(label + ': ' + record['message'])
+                return
+            except subprocess.CalledProcessError as error:
+                if attempt + 1 == attempts or not any(code in error.stderr for code in ('409', '422')):
+                    raise
+
+    def publish_documentation(self, status, source_run, source_sha, source_attempt):
+        """Publish only documentation from its existing, current push-job runner."""
+        if status not in {'queued', 'running', 'success', 'failure', 'cancelled'}:
+            raise ValueError('Unsupported direct documentation status')
+        if not source_run or not source_sha or not source_attempt:
+            raise ValueError('Direct documentation updates require source run, SHA and attempt')
+        record = badge('Documentation', status, source_sha)
+        record.update(run=str(source_run), attempt=int(source_attempt))
+        if self.head() != source_sha or not self.current_documentation(record):
+            print('Ignoring documentation update from a superseded source.')
+            return
+        if status in {'success', 'failure', 'cancelled'}:
+            record['verified_status'] = status
+        self.branch_ready()
+        self.write_record('Documentation', record)
+
+    def publish(self, documentation=None, source_run=None, source_sha=None):
+        sha = self.head()
+        records = self.collect(sha, documentation, source_run, source_sha)
+        self.branch_ready()
+        for label, record in records.items():
+            if self.write_record(label, record) is False:
+                return
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--branch', choices=['develop', 'master'], required=True)
-    parser.add_argument('--documentation', choices=['success', 'failure'])
+    parser.add_argument('--documentation', choices=['queued', 'running', 'success', 'failure', 'cancelled'])
+    parser.add_argument('--documentation-only', action='store_true')
+    parser.add_argument('--source-attempt', type=int)
     parser.add_argument('--source-run')
     parser.add_argument('--source-sha')
     args = parser.parse_args()
-    Publisher(os.environ['GITHUB_REPOSITORY'], args.branch).publish(args.documentation, args.source_run, args.source_sha)
+    publisher = Publisher(os.environ['GITHUB_REPOSITORY'], args.branch)
+    if args.documentation_only:
+        publisher.publish_documentation(args.documentation, args.source_run, args.source_sha, args.source_attempt)
+    else:
+        if args.documentation not in {None, 'success', 'failure'}:
+            parser.error('Progress updates require --documentation-only')
+        publisher.publish(args.documentation, args.source_run, args.source_sha)
 
 
 if __name__ == '__main__':

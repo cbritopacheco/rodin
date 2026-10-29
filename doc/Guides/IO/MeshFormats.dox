@@ -1,5 +1,5 @@
 /**
-  @page guides-io-meshformats Mesh File Formats
+  @page guides-io-meshformats Mesh file formats
   @brief MFEM and MEDIT mesh file formats
 
   @tableofcontents
@@ -11,7 +11,7 @@
   Rodin supports several mesh file formats for reading and writing meshes.
   Each format has its own strengths and is suited to different workflows.
 
-  @section guides-io-meshformats-mfem MFEM Format
+  @section guides-io-meshformats-mfem MFEM format
 
   The MFEM format is a text-based mesh format used by the
   [MFEM](https://mfem.org/) finite element library.
@@ -31,7 +31,7 @@
   mesh.load("input.mesh", IO::FileFormat::MFEM);
   @endcode
 
-  @section guides-io-meshformats-medit MEDIT Format
+  @section guides-io-meshformats-medit MEDIT format
 
   The MEDIT format (also known as `.mesh` format from INRIA) is commonly used
   with the [MMG](https://www.mmgtools.org/) remeshing platform and other INRIA
@@ -69,7 +69,7 @@
   mesh.save("remeshed.mesh", IO::FileFormat::MEDIT);
   @endcode
 
-  @section guides-io-meshformats-conversion Format Conversion
+  @section guides-io-meshformats-conversion Format conversion
 
   Converting between formats is straightforward — simply load in one format
   and save in another:
@@ -94,7 +94,7 @@
   | Region markers | Attributes | References | Attributes | Attributes |
   | Best for | MFEM workflows | MMG, INRIA tools | Persistence/checkpointing | ParaView visualization |
 
-  @section guides-io-meshformats-coverage Geometry Coverage
+  @section guides-io-meshformats-coverage Geometry coverage
 
   Mesh I/O tests cover every local polytope geometry used by Rodin:
 
@@ -111,7 +111,7 @@
   coordinate space so that formats with coordinate arrays can still store the
   vertex position.
 
-  @section guides-io-meshformats-see-also See Also
+  @section guides-io-meshformats-see-also See also
 
   - @ref guides-io "I/O in Rodin overview"
   - @ref guides-meshes-io "Mesh I/O operations"

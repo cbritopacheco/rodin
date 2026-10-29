@@ -19,7 +19,7 @@
   @ref Rodin::Geometry::Polytope "Polytope" class and its associated
   @ref Rodin::Geometry::Polytope::Type "Polytope::Type" enumeration.
 
-  @section guides-polytopes-dimensions Polytope Dimensions
+  @section guides-polytopes-dimensions Polytope dimensions
 
   Polytopes exist in different dimensions, each with a specific role in the
   mesh:
@@ -36,7 +36,7 @@
   In a 2D mesh, the cells are faces (triangles or quadrilaterals); in 3D,
   the cells are volumes.
 
-  @section guides-polytopes-types Available Polytope Types
+  @section guides-polytopes-types Available polytope types
 
   The @ref Rodin::Geometry::Polytope::Type "Polytope::Type" enumeration
   defines the available element types:
@@ -62,7 +62,7 @@
   - The **wedge** (triangular prism) is a hybrid: a tensor product of a
     triangle and a segment.
 
-  @section guides-polytopes-reference Reference Elements
+  @section guides-polytopes-reference Reference elements
 
   All local computations in the finite element method (basis function
   evaluation, quadrature, gradient computation) are performed on a
@@ -86,7 +86,7 @@
   auto detJ = p.getJacobianDeterminant();  // |J|
   @endcode
 
-  @section guides-polytopes-meshgen Using Polytopes for Mesh Generation
+  @section guides-polytopes-meshgen Using polytopes for mesh generation
 
   The polytope type determines the element shapes when generating uniform
   meshes via @ref Rodin::Geometry::Mesh "Mesh::UniformGrid()":
@@ -107,7 +107,7 @@
   mesh = mesh.UniformGrid(Polytope::Type::Wedge, {8, 8, 8});
   @endcode
 
-  @section guides-polytopes-sub Sub-Entities
+  @section guides-polytopes-sub Sub-entities
 
   Every polytope has **sub-entities** of lower dimension. For example, a
   triangle has 3 edges and 3 vertices; a tetrahedron has 4 faces, 6 edges,
@@ -121,7 +121,7 @@
   mesh.getConnectivity().compute(0, 2); // vertices → cells
   @endcode
 
-  @section guides-polytopes-iteration Iterating Over Polytopes
+  @section guides-polytopes-iteration Iterating over polytopes
 
   You can iterate over polytopes of a given dimension using the mesh
   iterator interface:
@@ -143,7 +143,7 @@
   }
   @endcode
 
-  @section guides-polytopes-choosing Choosing the Right Element Type
+  @section guides-polytopes-choosing Choosing the right element type
 
   | Problem | Recommended Type | Reason |
   |---------|-----------------|--------|
@@ -152,7 +152,7 @@
   | General 3D PDEs | `Tetrahedron` | Handles complex 3D geometries |
   | Structured 3D grids | `Hexahedron` | Higher accuracy per DOF |
 
-  @section guides-polytopes-see-also See Also
+  @section guides-polytopes-see-also See also
 
   - @ref guides-meshes "Meshes" — Working with meshes
   - @ref guides-connectivity "Connectivity" — Relationships between polytopes

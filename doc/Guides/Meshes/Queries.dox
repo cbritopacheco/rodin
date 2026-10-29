@@ -1,5 +1,5 @@
 /**
-  @page guides-meshes-queries Geometric Queries
+  @page guides-meshes-queries Geometric queries
   @brief Querying mesh properties and measurements
 
   @tableofcontents
@@ -14,7 +14,7 @@
   After creating or loading a mesh, you often need to query its properties:
   dimensions, entity counts, volumes, and other geometric measurements.
 
-  @section guides-meshes-queries-basic Basic Properties
+  @section guides-meshes-queries-basic Basic properties
 
   @subsection guides-meshes-queries-basic-dim Dimensions
 
@@ -38,7 +38,7 @@
   }
   @endcode
 
-  @subsection guides-meshes-queries-basic-counts Entity Counts
+  @subsection guides-meshes-queries-basic-counts Entity counts
 
   @code{.cpp}
   std::cout << "Vertices: " << mesh.getVertexCount() << std::endl;
@@ -56,7 +56,7 @@
             << mesh.getPolytopeCount(Polytope::Type::Triangle) << std::endl;
   @endcode
 
-  @subsection guides-meshes-queries-basic-empty Empty Check
+  @subsection guides-meshes-queries-basic-empty Empty check
 
   @code{.cpp}
   if (mesh.isEmpty()) {
@@ -64,7 +64,7 @@
   }
   @endcode
 
-  @section guides-meshes-queries-geometric Geometric Measurements
+  @section guides-meshes-queries-geometric Geometric measurements
 
   @subsection guides-meshes-queries-geometric-volume Volume
 
@@ -122,9 +122,9 @@
   Real combinedEdgeMeasure = mesh.getMeasure(1, attrs);
   @endcode
 
-  @section guides-meshes-queries-attributes Attribute Queries
+  @section guides-meshes-queries-attributes Attribute queries
 
-  @subsection guides-meshes-queries-attributes-get Getting Attributes
+  @subsection guides-meshes-queries-attributes-get Getting attributes
 
   @code{.cpp}
   // Get cell attribute
@@ -137,7 +137,7 @@
   Attribute attr = mesh.getAttribute(2, 7);  // Cell 7
   @endcode
 
-  @subsection guides-meshes-queries-attributes-set Setting Attributes
+  @subsection guides-meshes-queries-attributes-set Setting attributes
 
   @code{.cpp}
   // Set cell attribute
@@ -147,9 +147,9 @@
   mesh.setAttribute({1, 10}, 3);  // Set face 10 to attribute 3
   @endcode
 
-  @section guides-meshes-queries-spatial Spatial Queries
+  @section guides-meshes-queries-spatial Spatial queries
 
-  @subsection guides-meshes-queries-spatial-coords Vertex Coordinates
+  @subsection guides-meshes-queries-spatial-coords Vertex coordinates
 
   @code{.cpp}
   // Get coordinates of vertex 0
@@ -158,7 +158,7 @@
             << std::endl;
   @endcode
 
-  @subsection guides-meshes-queries-spatial-surface Surface Check
+  @subsection guides-meshes-queries-spatial-surface Surface check
 
   @code{.cpp}
   // Check if mesh is a surface mesh (codimension 1)
@@ -167,7 +167,7 @@
   }
   @endcode
 
-  @subsection guides-meshes-queries-spatial-boundary Boundary Checks
+  @subsection guides-meshes-queries-spatial-boundary Boundary checks
 
   @code{.cpp}
   mesh.getConnectivity().compute(1, 2);  // Required
@@ -183,7 +183,7 @@
   }
   @endcode
 
-  @section guides-meshes-queries-example Complete Example
+  @section guides-meshes-queries-example Complete example
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -226,7 +226,7 @@
   }
   @endcode
 
-  @section guides-meshes-queries-see-also See Also
+  @section guides-meshes-queries-see-also See also
 
   - @ref guides-meshes "Meshes overview"
   - @ref Rodin::Geometry::Mesh "Mesh class reference"

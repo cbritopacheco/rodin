@@ -115,7 +115,7 @@ def build_site(manifest, documentation, output, configuration, documentation_url
     for name in ['rodin.css', 'rodin-theme.css', 'rodin-theme.js', 'rodin-navigation.js']:
         shutil.copyfile(ROOT / 'doc' / name, assets / name)
     shutil.copyfile(documentation / 'Doxygen.svg', assets / 'Doxygen.svg')
-    for name in ['wordmark-white.svg', 'favicon.svg', 'Manrope-Regular.ttf', 'Manrope-SemiBold.ttf',
+    for name in ['wordmark-white.svg', 'favicon-monogram.svg', 'favicon-monogram-light.svg', 'favicon-monogram-dark.svg', 'Manrope-Regular.ttf', 'Manrope-SemiBold.ttf',
                  'Manrope-Bold.ttf', 'OFL.txt']:
         shutil.copyfile(documentation / name, assets / name)
     for name in ['site.css', 'charts.js']:

@@ -1,5 +1,5 @@
 /**
-  @page guides-meshes-utilities Advanced Utilities
+  @page guides-meshes-utilities Advanced utilities
   @brief Advanced mesh operations and transformations
 
   @tableofcontents
@@ -14,7 +14,7 @@
   Beyond basic mesh creation and queries, Rodin offers powerful utilities
   for mesh transformation, domain decomposition, and advanced operations.
 
-  @section guides-meshes-utilities-transform Mesh Transformations
+  @section guides-meshes-utilities-transform Mesh transformations
 
   @subsection guides-meshes-utilities-transform-scale Scaling
 
@@ -114,7 +114,7 @@
   std::cout << "Boundary elements: " << boundary.getCellCount() << std::endl;
   @endcode
 
-  @section guides-meshes-utilities-ccl Connected Component Labeling
+  @section guides-meshes-utilities-ccl Connected component labeling
 
   Find connected components in the mesh:
 
@@ -137,11 +137,11 @@
   }
   @endcode
 
-  @section guides-meshes-utilities-partition Domain Decomposition
+  @section guides-meshes-utilities-partition Domain decomposition
 
   Partition meshes for parallel computing:
 
-  @subsection guides-meshes-utilities-partition-balanced Balanced Partitioning
+  @subsection guides-meshes-utilities-partition-balanced Balanced partitioning
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -167,16 +167,16 @@
   }
   @endcode
 
-  @subsection guides-meshes-utilities-partition-greedy Greedy Partitioning
+  @subsection guides-meshes-utilities-partition-greedy Greedy partitioning
 
   @code{.cpp}
   GreedyPartitioner partitioner;
   auto shards = partitioner.partition(mesh, numParts);
   @endcode
 
-  @section guides-meshes-utilities-coord Coordinate Operations
+  @section guides-meshes-utilities-coord Coordinate operations
 
-  @subsection guides-meshes-utilities-coord-set Setting Coordinates
+  @subsection guides-meshes-utilities-coord-set Setting coordinates
 
   @code{.cpp}
   // Set coordinates of vertex 0
@@ -189,7 +189,7 @@
   mesh.setVertexCoordinates(0, coords);
   @endcode
 
-  @section guides-meshes-utilities-flush Cache Management
+  @section guides-meshes-utilities-flush Cache management
 
   Clear cached data:
 
@@ -201,7 +201,7 @@
   This is useful after modifying mesh coordinates to ensure transformations
   are recomputed.
 
-  @section guides-meshes-utilities-example Complete Example
+  @section guides-meshes-utilities-example Complete example
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -249,9 +249,9 @@
   }
   @endcode
 
-  @section guides-meshes-utilities-advanced Advanced Topics
+  @section guides-meshes-utilities-advanced Advanced topics
 
-  @subsection guides-meshes-utilities-advanced-builder Custom Builder
+  @subsection guides-meshes-utilities-advanced-builder Custom builder
 
   Use the builder for complete control:
 
@@ -275,7 +275,7 @@
   // Use transformation for geometric computations
   @endcode
 
-  @section guides-meshes-utilities-see-also See Also
+  @section guides-meshes-utilities-see-also See also
 
   - @ref guides-meshes "Meshes overview"
   - @ref Rodin::Geometry::SubMesh "SubMesh reference"
