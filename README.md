@@ -545,6 +545,20 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
   </tr>
 </table>
 
+### CFD
+
+<table>
+  <tr>
+    <td align="center" valign="bottom" width="33%">
+      <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/CFD/AtriumP1P1/AtriumP1P1.mp4">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/CFD/AtriumP1P1/Preview.png" alt="AtriumP1P1 CFD simulation" width="100%">
+      </a>
+      <br />
+      CFD simulation in an atrium (AtriumP1P1 example)
+    </td>
+  </tr>
+</table>
+
 ### Biomechanics
 
 <table>
