@@ -108,7 +108,12 @@ namespace Rodin::Examples::Heart::Atrium
         {
           const std::string text(what());
           const auto split = text.find(' ');
-          std::cout << ": " << text.substr(0, split) << " --------------- |";
+          constexpr size_t BannerWidth = 100;
+          const std::string event = text.substr(0, split);
+          const size_t used =
+            m_indent.size() + m_marker.size() + 1 + m_label.size() + 2 + event.size() + 3;
+          const size_t dashes = BannerWidth > used ? BannerWidth - used : 1;
+          std::cout << ": " << event << ' ' << std::string(dashes, '-') << " |";
           if (split != std::string::npos)
             std::cout << text.substr(split);
           std::cout << std::endl;
