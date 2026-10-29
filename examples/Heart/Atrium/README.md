@@ -241,3 +241,17 @@ solver-dependent scaling. State quantities carry physical units, real values
 use six decimal places in scientific notation, and the shared CSV retains full
 numeric precision. Fluid phase totals accumulate across coupling trials;
 its `elapsed_step` spans the staged step, including the coupled solid work.
+
+Stage markers use the terminal palette: magenta for solid, blue for fluid,
+cyan for coupling, and yellow for ALE or retries. Success and failure markers
+use green and red. Labels, status words, times, and values always use the
+terminal's default foreground; no information depends on a marker's color or
+contrast. Timestep and diagnostic headings use the default foreground, with no
+fixed white, gray, background, or dim styling. Labels are bold when styling is
+available.
+
+Redirected stage logs are plain text. `NO_COLOR=1`, `CLICOLOR=0`, or `TERM=dumb`
+disable styling. MPI launchers can forward output through pipes; set
+`CLICOLOR_FORCE=1` before `mpiexec` to retain colored markers in that case.
+`NO_COLOR=1` takes precedence over forced color. Native PETSc monitors retain
+their own formatting.

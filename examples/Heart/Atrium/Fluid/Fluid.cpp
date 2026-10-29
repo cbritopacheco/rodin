@@ -771,10 +771,10 @@ namespace Rodin::Examples::Heart::Atrium
     if (isRoot())
     {
       const auto& s = m_model.getState();
-      Log("Fluid/0D") << (rep.converged ? "converged" : "NOT converged")
-                      << "  iter=" << rep.iterations << "  |F|=" << rep.finalResidual
-                      << "  |  pv=" << s.pv << " par=" << s.par << " pd=" << s.pd << " Pa"
-                      << Alert::Raise;
+      Log("Fluid/0D", false, rep.converged ? Log::Status::Success : Log::Status::Failure)
+        << (rep.converged ? "converged" : "NOT converged") << "  iter=" << rep.iterations
+        << "  |F|=" << rep.finalResidual << "  |  pv=" << s.pv << " par=" << s.par
+        << " pd=" << s.pd << " Pa" << Alert::Raise;
     }
 
     return rep.converged;
@@ -894,7 +894,11 @@ namespace Rodin::Examples::Heart::Atrium
     assert(ierr == PETSC_SUCCESS);
     if (isRoot())
     {
-      Log("Fluid/KSP") << "iterations=" << iterations << " residual=" << residual
+      Log("Fluid/KSP", false,
+        reason <= 0 ? Log::Status::Failure
+          : retried ? Log::Status::Retry
+                    : Log::Status::Success)
+        << "iterations=" << iterations << " residual=" << residual
                        << " reason=" << KSPConvergedReasons[reason]
                        << " pc=" << (refreshed ? "refreshed" : "retained")
                        << " retry=" << (retried ? "yes" : "no")

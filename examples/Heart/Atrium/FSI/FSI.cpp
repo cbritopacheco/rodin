@@ -497,14 +497,11 @@ namespace Rodin::Examples::Heart::Atrium
     m_fluid.commitStep();
     if (m_fluid.isRoot())
     {
-      Log("FSI/State") << "converged: coupling_iterations=" << m_diagnostics.iterations
-                       << " velocity_mismatch=" << m_diagnostics.velocityMismatch
-                       << " m/s"
-                       << " displacement_mismatch=" << m_diagnostics.displacementMismatch
-                       << " m"
-                       << " min_mesh_J=" << m_diagnostics.minimumMeshJacobian
-                       << Alert::Raise;
-
+      Log("FSI/State", false, Log::Status::Success)
+        << "converged: coupling_iterations=" << m_diagnostics.iterations
+        << " velocity_mismatch=" << m_diagnostics.velocityMismatch << " m/s"
+        << " displacement_mismatch=" << m_diagnostics.displacementMismatch << " m"
+        << " min_mesh_J=" << m_diagnostics.minimumMeshJacobian << Alert::Raise;
     }
   }
 }

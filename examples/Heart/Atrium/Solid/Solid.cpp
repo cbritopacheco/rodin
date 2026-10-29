@@ -342,7 +342,8 @@ namespace Rodin::Examples::Heart::Atrium
       m_equilibriumNewton->solve();
       if (m_mesh.getContext().getCommunicator().rank() == 0)
       {
-        Log("Solid/Newton")
+        Log("Solid/Newton", false,
+          m_equilibriumNewton->converged() ? Log::Status::Success : Log::Status::Failure)
           << "passive equilibrium: iterations="
           << m_equilibriumNewton->getIterationNumber()
           << " residual=" << m_equilibriumNewton->getResidualNorm()
@@ -425,9 +426,11 @@ namespace Rodin::Examples::Heart::Atrium
     }
     if (m_mesh.getContext().getCommunicator().rank() == 0)
     {
-      Log("Solid/Newton") << "iterations=" << m_newton->getIterationNumber()
-                          << " residual=" << m_newton->getResidualNorm() << " reason="
-                          << SNESConvergedReasons[m_newton->getConvergedReason()]
+      Log("Solid/Newton", false,
+        m_newton->converged() ? Log::Status::Success : Log::Status::Failure)
+        << "iterations=" << m_newton->getIterationNumber()
+        << " residual=" << m_newton->getResidualNorm()
+        << " reason=" << SNESConvergedReasons[m_newton->getConvergedReason()]
                           << Alert::Raise;
     }
     if (!m_newton->converged())
