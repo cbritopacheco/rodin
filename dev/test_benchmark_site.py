@@ -16,6 +16,8 @@ class BenchmarkSiteTest(unittest.TestCase):
         (docs / 'theme.css').write_text(':root { --color: black; }')
         (docs / 'index.html').write_text('<header><nav id="navigation"><a id="m-navbar-brand" href="index.html">Rodin</a><a href="pages.html">Pages</a><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg viewBox="0 0 16 16"></svg></a></nav></header><footer><nav>Rodin copyright · Created with Doxygen and m.css</nav></footer>')
         (docs / 'Doxygen.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg"/>')
+        for name in ['wordmark-white.svg', 'favicon.svg', 'Manrope-Regular.ttf', 'Manrope-SemiBold.ttf', 'Manrope-Bold.ttf', 'OFL.txt']:
+            (docs / name).write_text('fixture')
         overview = {'brief': 'Matrix operations.', 'representative': '<code>Ax</code>',
                     'description': '<p><a href="class_matrix.html">Matrices</a>.</p>'}
         export_module_catalogue([('Core', [('Math', 'namespace_math')])], {'Core': 'Algebra.'},

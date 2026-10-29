@@ -1,20 +1,19 @@
 /**
   @mainpage Rodin
-* *Modern C++20 finite element method and shape optimization framework.*
+
+  @htmlonly
+  <div class="rodin-main-brand">
+    <img class="rodin-logo-light" src="horizontal-color.svg" width="480" height="183" alt="Rodin" />
+    <img class="rodin-logo-dark" src="horizontal-white.svg" width="480" height="183" alt="Rodin" />
+    <p>A modern C++ FEM library for shape and topology optimization.</p>
+  </div>
+  @endhtmlonly
 
   @section what-is-rodin What is Rodin?
 
   Rodin is a lightweight and modular C++20 finite element framework designed
   for solving partial differential equations (PDEs) and performing shape and
   topology optimization.
-
-  @m_class{rodin-logo-dark}
-
-  @image html Images/Logo_Inverse.png width=210px
-
-  @m_class{rodin-logo-light}
-
-  @image html Images/Logo.png width=210px
 
   It is named after the French sculptor [Auguste
   Rodin](https://en.wikipedia.org/wiki/Auguste_Rodin), considered the founder

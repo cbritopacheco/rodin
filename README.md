@@ -1,8 +1,21 @@
-[![Rodin](doc/Images/README_Header.png)](https://github.com/cbritopacheco/rodin/releases)
+<p align="center">
+  <a href="https://cbritopacheco.github.io/rodin/docs/refs/heads/master/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="brand/logos/horizontal-white.svg">
+      <source media="(prefers-color-scheme: light)" srcset="brand/logos/horizontal-color.svg">
+      <img src="brand/logos/horizontal-color.svg" width="520" alt="Rodin">
+    </picture>
+  </a>
+</p>
 
-# Rodin [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20Rodin-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cbritopacheco)
+<p align="center"><strong>A modern C++ FEM library for shape and topology optimization.</strong></p>
 
-Rodin is a lightweight and modular finite element framework which provides many of the associated functionalities that are needed when implementing shape and topology optimization algorithms. These functionalities range from refining and remeshing the underlying shape, to providing elegant mechanisms to specify and solve variational problems.
+<p align="center">
+  <a href="LICENSE"><img alt="Boost Software License 1.0" src="https://img.shields.io/badge/license-BSL--1.0-green"></a>
+  <a href="https://www.buymeacoffee.com/cbritopacheco"><img alt="Support Rodin" src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20Rodin-yellow?logo=buymeacoffee"></a>
+</p>
+
+Rodin is a modular C++20 finite element framework for solving partial differential equations and developing shape and topology optimization algorithms. Its compositional form language connects mathematical formulations to C++ code, with mesh refinement, remeshing and solver backends available through independent modules.
 
 It is named after the French sculptor Auguste Rodin, considered the founder of modern sculpture.
 
@@ -167,7 +180,7 @@ For detailed installation instructions, advanced configuration options, and trou
 ## Building the project
 
 ```
-git clone --recursive https://github.com/carlos-brito-pacheco/rodin
+git clone --recursive https://github.com/cbritopacheco/rodin
 cd rodin
 mkdir build && cd build
 cmake ..
@@ -348,7 +361,7 @@ Rodin provides many powerful features for finite element analysis:
 - Multiple quadrature rules for integration
 - Grundmann-Moeller quadrature
 - Gauss-Legendre quadrature
-- See the [complete list of quadrature formulas](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/group___rodin_quadrature.html)
+- See the [complete list of quadrature formulas](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/namespace_rodin_1_1_q_f.html)
 
 **Advanced Mesh Operations:**
 - SubMesh extraction for domain decomposition
@@ -460,6 +473,13 @@ manager.
 | RODIN_USE_SUITESPARSE  | Build with SuiteSparse support                    |
 | RODIN_SILENCE_WARNINGS | Silence warnings outputted by Rodin               |
 | RODIN_BUILD_PY         | Build Python bindings                             |
+
+## Development
+
+See the [testing guide](tests/README.md) for local validation and runner resource
+budgets, and the [documentation guide](doc/README.md) to build the site.
+The [brand guide](brand/README.md) provides logos, editable artwork, fonts and
+usage guidelines.
 
 ## Gallery
 

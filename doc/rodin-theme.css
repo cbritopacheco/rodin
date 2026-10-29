@@ -1,9 +1,34 @@
+/* Manrope is bundled with the brand kit under the SIL Open Font License. */
+@font-face {
+  font-family: Manrope;
+  src: url('Manrope-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: Manrope;
+  src: url('Manrope-SemiBold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: Manrope;
+  src: url('Manrope-Bold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 /* Rodin palette; the upstream m.css components retain their CSS variables. */
 :root,
 body
 {
+  --font: 'Manrope', sans-serif;
+  --code-font: ui-monospace, 'SFMono-Regular', Consolas, monospace;
   color-scheme: dark;
-  --background-color: #20252d;
+  --background-color: #111e32;
   --color: #dee3eb;
   --line-color: #414957;
   --link-color: #87b5da;
@@ -13,7 +38,7 @@ body
   --code-background-color: #191e26;
   --code-note-background-color: #252c36;
   --console-background-color: #191e26;
-  --header-background-color: #191e26;
+  --header-background-color: #071F46;
   --header-color: #dee3eb;
   --header-link-color: #dee3eb;
   --header-link-current-color: #87b5da;
@@ -63,7 +88,7 @@ body
   :root:not([data-theme]) body
   {
     color-scheme: light;
-    --background-color: #f7f8fa;
+    --background-color: #F4F8FB;
     --color: #27323f;
     --line-color: #d1d8e0;
     --link-color: #28648f;
@@ -123,7 +148,7 @@ body
 :root[data-theme="light"] body
 {
   color-scheme: light;
-  --background-color: #f7f8fa;
+  --background-color: #F4F8FB;
   --color: #27323f;
   --line-color: #d1d8e0;
   --link-color: #28648f;
@@ -293,36 +318,36 @@ pre.m-code
   color: var(--code-base);
 }
 
-img.m-image.rodin-logo-light
+.rodin-logo-light
 {
   display: none;
 }
 
-img.m-image.rodin-logo-dark
+.rodin-logo-dark
 {
   display: block;
 }
 
 @media(prefers-color-scheme:light)
 {
-  :root:not([data-theme]) img.m-image.rodin-logo-light
+  :root:not([data-theme]) .rodin-logo-light
   {
     display: block;
   }
 
-  :root:not([data-theme]) img.m-image.rodin-logo-dark
+  :root:not([data-theme]) .rodin-logo-dark
   {
     display: none;
   }
 
 }
 
-:root[data-theme="light"] img.m-image.rodin-logo-light
+:root[data-theme="light"] .rodin-logo-light
 {
   display: block;
 }
 
-:root[data-theme="light"] img.m-image.rodin-logo-dark
+:root[data-theme="light"] .rodin-logo-dark
 {
   display: none;
 }
@@ -356,8 +381,8 @@ img.m-image.rodin-logo-dark
 
 .rodin-home-icon
 {
-  width: 1cap;
-  height: 1cap;
+  width: 1.35rem;
+  height: 1.35rem;
   flex-shrink: 0;
   fill: none;
   stroke: currentColor;
@@ -715,4 +740,28 @@ body
 .rodin-page-nav li > a::before
 {
   border-color: var(--rodin-section-color, var(--line-color));
+}
+
+/* The outlined wordmark follows the navigation color in both themes. */
+.rodin-wordmark {
+  display: inline-block;
+  width: 5.2rem;
+  height: 1.82rem;
+  flex-shrink: 0;
+  background-color: currentColor;
+  -webkit-mask: url('wordmark-white.svg') center / contain no-repeat;
+  mask: url('wordmark-white.svg') center / contain no-repeat;
+  font-size: 0;
+}
+.rodin-main-brand {
+  margin: .5rem 0 2rem;
+}
+.rodin-main-brand img {
+  max-width: 100%;
+  height: auto;
+}
+.rodin-main-brand p {
+  margin: .25rem 0 0;
+  font-weight: 600;
+  text-indent: 0;
 }

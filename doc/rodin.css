@@ -10,7 +10,7 @@
 
 .defelement-name
 {
-  font-family: 'Varela Round', sans-serif;
+  font-family: 'Manrope', sans-serif;
   color: #44AAFF;
 }
 
@@ -21,7 +21,7 @@
                     #DD2299);
   -webkit-background-clip: text;
   color: transparent;
-  font-family: 'Varela Round', sans-serif;
+  font-family: 'Manrope', sans-serif;
 }
 
 /* Anchored sections must not draw a competing line between coloured blocks. */

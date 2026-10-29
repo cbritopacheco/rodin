@@ -65,6 +65,14 @@
       home.append(homePath);
       brand.prepend(home);
     }
+    for (const node of [...brand.childNodes]) {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() === 'Rodin') {
+        const wordmark = document.createElement('span');
+        wordmark.className = 'rodin-wordmark';
+        wordmark.textContent = 'Rodin';
+        node.replaceWith(wordmark);
+      }
+    }
     const github = document.querySelector('#m-navbar-collapse a[href="https://github.com/cbritopacheco/rodin"]');
     if (github) {
       const mark = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
