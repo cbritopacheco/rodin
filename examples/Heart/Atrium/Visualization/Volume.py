@@ -67,6 +67,10 @@ def main():
     volume.UseInputBounds = 1
     surface = pv.ExtractSurface(Input=merged)
     view = pv.CreateView('RenderView')
+    layout = pv.CreateLayout(name='Atrium Flow')
+    layout.AssignView(0, view)
+    pv.SetActiveView(view)
+    layout.SetSize(*args.size)
     view.ViewSize = args.size
     view.UseColorPaletteForBackground = 0
     view.Background = [.015, .025, .055]
