@@ -35,6 +35,7 @@
 #include "ForwardDecls.h"
 #include "Loss.h"
 #include "Parameters.h"
+#include "QualityCovering.h"
 #include "DirectionalNewton.h"
 #include "Distribution.h"
 #include "HingeForce.h"
@@ -2171,6 +2172,8 @@ namespace Rodin::Adaptation::SWIFT
        */
       /**
        * @brief Computes geometric discrepancies on the complete fitted interface.
+       * The maximum uses facet covering witnesses selected by sampling.subdivision.
+       * RMS and normal discrepancies retain independent diagnostic quadrature.
        * @param mesh Fixed reference mesh.
        * @param fes Displacement finite element space defining quadrature orders.
        * @param u Displacement whose deformed interface or geometry is evaluated.
@@ -2221,13 +2224,16 @@ namespace Rodin::Adaptation::SWIFT
             const auto& fe = fes.getFiniteElement(face->getDimension(), facetIndex);
             const auto& qf = getGeometricValidationQuadrature(*face, fes);
             const auto& quadrature = face->getQuadrature(qf);
-            // Endpoints/vertices contribute to the maximum, not the surface quadrature integral.
             const Geometry::Polytope::Traits traits(face->getGeometry());
-            for (std::size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+            const auto& witnesses = QualityCovering::get(face->getGeometry(),
+              m_parameters.sampling.getSubdivision(fe.getOrder(),
+                face->getTransformation().getOrder(),
+                traits.getVertexCount() == face->getDimension() + 1));
+            const auto& samples = face->getQuadrature(witnesses);
+            for (std::size_t q = 0; q < samples.getSize(); ++q)
             {
-              const Geometry::Point point(*face, traits.getVertex(vertex));
               const auto& moved =
-                deformation.setIntegrationPoint(Variational::IntegrationPoint(point))
+                deformation.setIntegrationPoint(Variational::IntegrationPoint(samples, q))
                   .getPoint();
               const Real norm = grad.getValue(moved).norm();
               const Real distance = std::abs(phi.getValue(moved)) / norm;
@@ -2331,7 +2337,6 @@ namespace Rodin::Adaptation::SWIFT
               const Real weight = qf.getWeight(q) * mappedMeasure;
               state.measure += weight;
               state.squaredDistance += weight * distance * distance;
-              state.maximumDistance = std::max(state.maximumDistance, distance);
               state.squaredNormal += weight * normalErrorSquared;
             }
           }

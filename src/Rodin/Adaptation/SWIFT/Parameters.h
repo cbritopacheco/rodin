@@ -146,7 +146,7 @@ namespace Rodin::Adaptation::SWIFT
       }
 
       /**
-       * @brief Independent geometric-validation order for an FE order.
+       * @brief Independent RMS and normal-error integration order for an FE order.
        * @param feOrder Polynomial order of the displacement finite element.
        * @returns Automatic geometric-validation sampling order.
        */
@@ -189,10 +189,11 @@ namespace Rodin::Adaptation::SWIFT
       std::size_t order = 0; ///< Zero selects automatic integration orders.
       std::size_t surface = 0; ///< Zero uses the common or automatic surface order.
       std::size_t volume = 0; ///< Zero uses the common or automatic volume order.
-      std::size_t validation = 0; ///< Zero selects an independent validation order.
+      std::size_t validation =
+        0; ///< RMS/normal and motion diagnostics; zero selects automatic order.
     };
 
-    /// @brief Shared reference witnesses for hinges and actual-quality checks.
+    /// @brief Reference coverings for cell quality/hinges and interface maximum error.
     struct Sampling
     {
       /**

@@ -366,8 +366,8 @@ maps to `--convergence-iterations-outer`. Previous flat flag names are rejected.
 
 | Displacement/geometry | Surface integration | Volume integration | Quality sampling | Geometric sampling |
 |-----------------------|---------------------|--------------------|------------------|--------------------|
-| Affine simplicial \(P_1\) | `8` | `2` | `2` covering subdivisions | `32` plus facet vertices |
-| These \(P_2/P_3\) examples | `12` | `8` | `16` covering subdivisions | `32` plus facet vertices |
+| Affine simplicial \(P_1\) | `8` | `2` | `2` covering subdivisions | Facet covering, `2` subdivisions |
+| These \(P_2/P_3\) examples | `12` | `8` | `16` covering subdivisions | Facet covering, `16` subdivisions |
 
 `quadrature.order` overrides common integration order; `quadrature.surface`
 and `quadrature.volume` override their respective integrations independently.
@@ -391,7 +391,11 @@ Actual quality checks take unweighted extrema over all witnesses. These sets
 are not degree-exact integration rules or continuous quality certificates.
 The default simplex counts are 6/10 witnesses on triangles/tetrahedra for
 affine \(P_1\), and 153/969 for \(P_2/P_3\).
-`quadrature.validation` controls independent geometric sampling.
+The interface maximum uses the same covering construction on facets, with
+resolution selected by `sampling.subdivision`. It does not add vertices or
+quadrature points. `quadrature.validation` controls the independent
+RMS and normal-error integrals and physical-motion diagnostics (automatic
+order `32` for interface integrals).
 All default to `0`, selecting the automatic policy.
 The higher-order policies are provisional, not exactness guarantees for
 non-polynomial level sets or nonlinear quality expressions.

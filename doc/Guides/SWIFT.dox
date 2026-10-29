@@ -255,8 +255,8 @@
   | @f$q@f$ | `quadrature.order` | Common integration override | Automatic (`0`) |
   | @f$q_\Gamma@f$ | `quadrature.surface` | Surface energy, force and fitting integration; overrides the common order | Automatic (`0`) |
   | @f$q_\Omega@f$ | `quadrature.volume` | Distribution integration; overrides the common order | Automatic (`0`) |
-  | @f$m_{j,Q}@f$ | `sampling.subdivision` | Generating lattice subdivisions for the shared hinge/quality covering | Automatic (`0`) |
-  | @f$q_{\mathrm{geom}}@f$ | `quadrature.validation` | Independent geometric-response sampling plus facet vertices | Automatic (`0`) |
+  | @f$m_{j,Q}@f$ | `sampling.subdivision` | Covering subdivisions for cell quality/hinges and interface maximum error | Automatic (`0`) |
+  | @f$q_{\mathrm{geom}}@f$ | `quadrature.validation` | RMS/normal integration and physical-motion diagnostics | Automatic (`0`) |
 
   MUMPS is the default when compiled in; otherwise SparseLU is selected.
   Set `linear.solver` and `linear.threads` explicitly for reproducible runs.
@@ -264,8 +264,8 @@
 
   | Entity and displacement | Surface integration | Volume integration | Quality sampling | Geometric sampling |
   |-------------------------|---------------------|--------------------|------------------|--------------------|
-  | Affine simplicial @f$P_1@f$ | @f$8@f$ | @f$2@f$ | @f$2@f$ covering subdivisions | @f$32@f$ + facet vertices |
-  | Curved or @f$P_2/P_3@f$ | @f$12@f$ | @f$8@f$ | @f$16@f$ covering subdivisions | @f$32@f$ + facet vertices |
+  | Affine simplicial @f$P_1@f$ | @f$8@f$ | @f$2@f$ | @f$2@f$ covering subdivisions | Facet covering, @f$2@f$ subdivisions |
+  | Curved or @f$P_2/P_3@f$ | @f$12@f$ | @f$8@f$ | @f$16@f$ covering subdivisions | Facet covering, @f$16@f$ subdivisions |
 
   The affine @f$P_1@f$ policy is calibrated on the tested cases. Higher-order
   policies are provisional and require refinement checks, particularly when
@@ -284,7 +284,11 @@
   nonpolynomial. Such tensors retain the nonpolynomial interface policy,
   as do the Welsch force and energy; these two use the same integration rule.
   `quadrature.validation` (`--quadrature-validation`) independently
-  controls geometric-response sampling and is not reduced by `--quadrature-order`.
+  controls RMS/normal integration and physical-motion diagnostics and is not
+  reduced by `--quadrature-order`.
+  Maximum geometric error uses covering witnesses on each interface facet,
+  controlled by `sampling.subdivision`, without supplemental vertices or
+  quadrature samples.
   The surface and volume settings use `--quadrature-surface` and
   `--quadrature-volume`. Independent quality checks use
   `--sampling-subdivision`, interpreted as generating lattice subdivisions, not
