@@ -78,7 +78,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md627">Representative use</a></li>
+            <li><a href="#autotoc_md628">Representative use</a></li>
             <li>
               Reference
               <ul>
@@ -87,7 +87,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a> builds a bounding-volume hierarchy to locate physical coordinates in a mesh and recover the containing cell and reference coordinates. The resulting <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> can be used for field sampling and evaluation at arbitrary locations. The locator must be rebuilt when the mesh geometry or topology changes.</p><section id="autotoc_md627"><h2><a href="#autotoc_md627">Representative use</a></h2><p>An AABB index first prunes candidate cells and then checks their inverse geometric maps. A query returns an optional mesh point:</p><pre class="m-code"><span class="n">Location</span><span class="o">::</span><span class="nc">AABB</span><span class="w"> </span><span class="nf">locator</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<p><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a> builds a bounding-volume hierarchy to locate physical coordinates in a mesh and recover the containing cell and reference coordinates. The resulting <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> can be used for field sampling and evaluation at arbitrary locations. The locator must be rebuilt when the mesh geometry or topology changes.</p><section id="autotoc_md628"><h2><a href="#autotoc_md628">Representative use</a></h2><p>An AABB index first prunes candidate cells and then checks their inverse geometric maps. A query returns an optional mesh point:</p><pre class="m-code"><span class="n">Location</span><span class="o">::</span><span class="nc">AABB</span><span class="w"> </span><span class="nf">locator</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">point</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">locator</span><span class="p">.</span><span class="n">locate</span><span class="p">(</span><span class="n">physicalCoordinates</span><span class="p">);</span></pre><p>The mesh must remain fixed during queries. Geometry or topology changes require rebuilding the locator.</p></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
@@ -143,7 +143,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-8869a4936c9f.js"></script>
+<script src="search-v2-27108c4bc94e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
