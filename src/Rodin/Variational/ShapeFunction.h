@@ -587,19 +587,14 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns a geometry-dependent polynomial order bound of the expression
-       *        on the reference element.
+       * @brief Recommends an integration order for the shape expression.
        *
-       * The returned value is a **safe upper bound** on the total polynomial degree
-       * of the expression in reference coordinates, ignoring the geometry map.
-       *
-       * - Used for quadrature selection and composition rules.
-       * - May depend on the reference geometry (simplex, tensor-product, wedge).
-       * - Returns std::nullopt for non-polynomial expressions.
-       * - The value is not guaranteed to be sharp.
-       *
-       * @param poly Polytope on which the order is queried.
-       * @return Polynomial order bound, or std::nullopt if not polynomial.
+       * The recommendation uses the operation, reference family and geometry.
+       * A nonpolynomial accuracy estimate does not assert exactness. Zero
+       * certifies an elementwise constant expression; an empty result means no
+       * estimate is established. Explicit integrator orders remain authoritative.
+       * @param poly Entity supplying reference geometry and coordinate mapping.
+       * @return An automatic integration recommendation, or no established estimate.
        */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {

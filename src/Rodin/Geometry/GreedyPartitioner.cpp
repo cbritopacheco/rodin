@@ -34,7 +34,7 @@ namespace Rodin::Geometry
     m_partition.resize(n);
     if (n == 0)
       return;
-    RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d)
+    RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d);
     const auto& adjacency = conn.getIncidence(d, d);
     const size_t baseSize = n / numPartitions;
     const size_t remainder = n % numPartitions;

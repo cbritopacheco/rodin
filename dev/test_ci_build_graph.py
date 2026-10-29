@@ -69,6 +69,31 @@ class BuildGraphPlanTest(unittest.TestCase):
             self.assertEqual(slow_record['selected'], targets[:1])
             self.assertEqual(json.dumps(records, sort_keys=True), frozen)
 
+    def test_oversized_optional_sanitizer_build_is_split_without_losing_targets(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            folder = root / 'tests/unit/Rodin/Variational'
+            folder.mkdir(parents=True)
+            (folder / 'CMakeLists.txt').touch()
+            targets = [{'target': f'Target{i:03}', 'owner': 'tests/unit/Rodin/Variational',
+                        'kind': 'test'} for i in range(133)]
+            first = planning.entry('unit', 'unit/Rodin/Variational', 'Release', 'ON',
+                                   asan='ON', ubsan='ON', backend='optional')
+            request = {'job': 'Ordinary', 'matrix': first}
+            entry = {'id': 'common', 'definition': graph.common_specification(graph.specification(**request))}
+            records = [{'request': request, 'selected': targets, 'configured': targets}]
+            with patch.object(graph, 'ROOT', root), patch.object(archive, 'commit', return_value='current'):
+                document = graph.directory_plan(entry, records)
+            parts = list(document['directories'].values())
+            self.assertEqual(len(parts), 6)
+            self.assertEqual([p['part'] for p in parts], list(range(1, 7)))
+            self.assertTrue(all(p['common'] == 'common' and len(p['targets']) <= 24 for p in parts))
+            self.assertTrue(all(graph.directory_common_specification(p) == entry['definition'] for p in parts))
+            self.assertEqual([t for part in parts for t in part['targets']],
+                             sorted(t['target'] for t in targets))
+            self.assertEqual(set(document['requests'][graph.request_key(**request)]['builds']),
+                             {archive.identity(part) for part in parts})
+
     def requests(self):
         native = [{'multithreaded': mt, 'suite': 'baseline', 'group': group, 'path': tests.display_group(group)}
                   for group in planning.native_convergence_groups() for mt in ['ON', 'OFF']]
@@ -79,13 +104,13 @@ class BuildGraphPlanTest(unittest.TestCase):
         # Reviewed execution partition snapshot: numerical registrations and MPI
         # ranks are independently checked by test_ci_backend_registration.py.
         for value, digest in [(ordinary, '009a23d4c5fc380bcca406302cfb7062208a2b14f3526f2ce6078cde95005c54'),
-                              (targeted, 'b7f67cd76ea3c97eb5f7ea1a6525d094b1293c3f95e0e5050ed7c5f7166dc90f')]:
+                              (targeted, '53e09f3c2a124de8430bba7f43f8f411e9ccddf47b5fe53a93d5cb610359cbd4')]:
             self.assertEqual(hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest(), digest)
         rows = graph.prepare(ordinary, targeted)
         self.assertEqual(len(rows), 46)
         requests = [r for row in rows for r in row['requests']]
-        self.assertEqual(len(requests), 1354)
-        self.assertEqual(len({graph.request_key(**r) for r in requests}), 1354)
+        self.assertEqual(len(requests), 1355)
+        self.assertEqual(len({graph.request_key(**r) for r in requests}), 1355)
         for row in rows:
             for request in row['requests']:
                 original = graph.specification(**request)
@@ -160,7 +185,7 @@ class BuildGraphPlanTest(unittest.TestCase):
             snapshot[name]['execution'] = [s for s in job['steps'] if s.get('name', '').startswith(
                 ('Run ', 'Discover ', 'Record native MPI CPU', 'Hydrate '))]
         digest = hashlib.sha256(json.dumps(snapshot, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
-        self.assertEqual(digest, '3fce779995376f36c30a94b0e5359e33a2612a3a8db047f86ca725ac0cb9606c')
+        self.assertEqual(digest, '80d3c56d83605e067ea75fa22cce0517ddd9cc426f7e1b95dfba4c77a733bba5')
 
 
 class BuildGraphExecutionTest(unittest.TestCase):
@@ -222,6 +247,9 @@ class BuildGraphExecutionTest(unittest.TestCase):
                        patch.object(graph, 'stamp_sources', side_effect=stamp),
                        patch.object(graph, 'download', side_effect=download),
                        patch.object(graph, 'DIRECTORY_BANDS', 2),
+                       patch.object(graph, 'VARIATIONAL_BUILD_PART_SIZE', 1),
+                       patch.object(graph, 'split_variational_build',
+                                    side_effect=lambda spec, group: group == 'unit/Rodin/Geometry'),
                        patch.object(graph, 'specification', side_effect=specification)]
             for p in patches:
                 p.start()
@@ -232,15 +260,24 @@ class BuildGraphExecutionTest(unittest.TestCase):
             (root / 'ci-common-plan.json').write_text(json.dumps(common))
             graph.compile_common(common[0], build, root / 'ci-common-records' / common[0]['id'])
             index, bands = graph.index_graph(root / 'ci-common-records')
-            self.assertEqual(len(index['builds']), 2)
-            self.assertEqual(next(r['definition']['targets'] for r in index['builds'].values()
-                                  if r['definition']['directory'] == 'unit/Rodin/Geometry'), ['First', 'Third'])
-            self.assertEqual(index['requests'][graph.request_key('Ordinary', first)]['builds'],
-                             index['requests'][graph.request_key('Ordinary', slow)]['builds'])
+            self.assertEqual(len(index['builds']), 3)
+            geometry_parts = [r['definition'] for r in index['builds'].values()
+                              if r['definition']['directory'] == 'unit/Rodin/Geometry']
+            self.assertEqual(sorted(t for part in geometry_parts for t in part['targets']), ['First', 'Third'])
+            self.assertEqual({part['part'] for part in geometry_parts}, {1, 2})
+            self.assertLessEqual(set(index['requests'][graph.request_key('Ordinary', slow)]['builds']),
+                                 set(index['requests'][graph.request_key('Ordinary', first)]['builds']))
             original_objects = {p.relative_to(build): archive.digest(p) for p in build.rglob('*.o')}
             self.assertTrue(original_objects)
             build.rename(root / 'common-producer-build')
             (root / 'artifacts').mkdir()
+            # A numbered directory part must still restore the unchanged common archive.
+            part = dict(next(iter(index['builds'].values()))['definition'], part=1)
+            graph.compile_directory(part, build)
+            self.assertTrue(all(archive.digest(build / p) == digest for p, digest in original_objects.items()))
+            shutil.rmtree(root / 'ci-build-artifact')
+            shutil.rmtree(root / 'ci-built-record')
+            shutil.rmtree(build)
             for key, row in index['builds'].items():
                 graph.compile_directory(row['definition'], build)
                 self.assertTrue(all(archive.digest(build / p) == digest for p, digest in original_objects.items()))

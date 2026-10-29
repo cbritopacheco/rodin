@@ -332,6 +332,7 @@ namespace
           [space] { return space->getShard().getSize(); },
           [space](Index local) { return space->getGlobalIndex(local); },
           [space] {
+            (void)space;
             if constexpr (requires { space->getLocalIndex(Index{}); })
             {
               for (Index local = 0; local < space->getShard().getSize(); ++local)

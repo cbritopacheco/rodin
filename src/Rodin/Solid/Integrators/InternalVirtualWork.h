@@ -58,6 +58,7 @@
 #ifndef RODIN_SOLID_INTEGRATORS_INTERNALVIRTUALWORK_H
 #define RODIN_SOLID_INTEGRATORS_INTERNALVIRTUALWORK_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <functional>
 #include <type_traits>
 
@@ -205,10 +206,19 @@ namespace Rodin::Solid
         {
           const auto& polytope = *it;
           const Index idx = polytope.getIndex();
-          const auto& stateFE = fes.getFiniteElement(d, idx);
 
-          const size_t effectiveOrder =
-            (m_quadOrder > 0) ? m_quadOrder : 2 * stateFE.getOrder();
+          size_t effectiveOrder = m_quadOrder;
+          if (effectiveOrder == 0)
+          {
+            const auto stateOrder = m_displacement.get().getOrder(polytope);
+            if (!stateOrder)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "No automatic constitutive quadrature order is established. "
+                << "Specify it with setQuadratureOrder()." << Alert::Raise;
+            }
+            effectiveOrder = 2 * *stateOrder;
+          }
           const auto& qf =
             QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
           const auto& quadrature = polytope.getQuadrature(qf);

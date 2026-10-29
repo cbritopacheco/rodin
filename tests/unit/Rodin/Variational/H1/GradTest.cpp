@@ -6,6 +6,8 @@
  */
 #include <gtest/gtest.h>
 #include <algorithm>
+#include <cmath>
+#include <limits>
 #include <type_traits>
 #include <vector>
 #include "Rodin/Test/Random.h"
@@ -166,18 +168,29 @@ namespace Rodin::Tests::Unit
             const Geometry::Point point(*cell, rc);
             Math::SpatialVector<Scalar> expected(dimension);
             expected.setZero();
+            Math::SpatialVector<Real> contributionScale(dimension);
+            contributionScale.setZero();
             for (size_t local = 0; local < element.getCount(); ++local)
             {
               const auto reference = element.getBasis(local).getGradient()(rc);
               expected += reference * field[closure(local)];
+              for (size_t j = 0; j < dimension; ++j)
+                contributionScale(j) += std::abs(reference(j) * field[closure(local)]);
             }
-            expected = point.getJacobianInverse().transpose() * expected;
+            const auto inverse = point.getJacobianInverse();
+            expected = inverse.transpose() * expected;
             space.begin({dimension, index});
             const auto actual = gradient.getValue(point);
             space.finish(element.getCount());
             ASSERT_EQ(actual.size(), expected.size());
             for (size_t j = 0; j < dimension; ++j)
-              ASSERT_EQ(actual(j), expected(j));
+            {
+              Real scale = 0;
+              for (size_t k = 0; k < dimension; ++k)
+                scale += std::abs(inverse(k, j)) * contributionScale(k);
+              ASSERT_LE(std::abs(actual(j) - expected(j)),
+                64 * std::numeric_limits<Real>::epsilon() * std::max(Real(1), scale));
+            }
             ASSERT_FALSE(::testing::Test::HasFailure());
           }
         }

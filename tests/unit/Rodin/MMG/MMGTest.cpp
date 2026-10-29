@@ -26,22 +26,20 @@ using namespace Rodin::Variational;
 /// @brief Unsupported positive volume dimensions reject without leaking native storage.
 TEST(MMG5Lifecycle, UnsupportedVolumeDimensionsDoNotLeak)
 {
-  using Native = MMG::MMG5;
   for (const size_t dimension :
     {size_t(1), size_t(4), std::numeric_limits<size_t>::max()})
   {
     SCOPED_TRACE(dimension);
     try
     {
-      std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> mesh(
-        Native::createMesh(2, dimension, dimension), Native::destroyMesh);
+      std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)> mesh(
+        MMG::V5::Mesh::create(2, dimension, dimension), MMG::V5::Mesh::destroy);
       FAIL() << "Unsupported MMG dimensions must be rejected.";
     }
     catch (const Alert::Exception& error)
     {
       const std::string message = error.what();
-      EXPECT_NE(
-        message.find("In createMesh of class Rodin::MMG::MMG5:"), std::string::npos);
+      EXPECT_NE(message.find("In create of class Rodin::MMG::Base:"), std::string::npos);
       EXPECT_NE(message.find("Unsupported MMG mesh dimensions"), std::string::npos);
       EXPECT_NE(message.find("topology " + std::to_string(dimension)), std::string::npos);
       EXPECT_NE(
@@ -53,22 +51,20 @@ TEST(MMG5Lifecycle, UnsupportedVolumeDimensionsDoNotLeak)
 /// @brief Invalid embeddings reject before changing the supported backend paths.
 TEST(MMG5Lifecycle, InvalidDimensionsPermitSupportedMeshRecovery)
 {
-  using Native = MMG::MMG5;
-  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
   for (const auto& [dimension, embedding] :
     {std::pair<size_t, size_t>{0, 0}, {1, 2}, {2, 0}, {2, 1}, {2, 4}, {3, 2}, {3, 4}})
   {
     SCOPED_TRACE(::testing::Message() << dimension << ':' << embedding);
     try
     {
-      Owner mesh(Native::createMesh(2, dimension, embedding), Native::destroyMesh);
+      Owner mesh(MMG::V5::Mesh::create(2, dimension, embedding), MMG::V5::Mesh::destroy);
       FAIL() << "Unsupported MMG dimensions must be rejected.";
     }
     catch (const Alert::Exception& error)
     {
       const std::string message = error.what();
-      EXPECT_NE(
-        message.find("In createMesh of class Rodin::MMG::MMG5:"), std::string::npos);
+      EXPECT_NE(message.find("In create of class Rodin::MMG::Base:"), std::string::npos);
       EXPECT_NE(message.find("Unsupported MMG mesh dimensions"), std::string::npos);
       EXPECT_NE(message.find("topology " + std::to_string(dimension)), std::string::npos);
       EXPECT_NE(
@@ -80,7 +76,7 @@ TEST(MMG5Lifecycle, InvalidDimensionsPermitSupportedMeshRecovery)
     const size_t dimension = Polytope::Traits(geometry).getDimension();
     const auto source =
       LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
-    Owner mesh(Native::rodinToMesh(source), Native::destroyMesh);
+    Owner mesh(MMG::V5::Mesh::toV5(source), MMG::V5::Mesh::destroy);
     ASSERT_NE(mesh, nullptr);
     EXPECT_EQ(mesh->dim, static_cast<int>(dimension));
     EXPECT_EQ(mesh->np, source.getVertexCount());
@@ -94,7 +90,7 @@ TEST(MMG5Lifecycle, InvalidDimensionsPermitSupportedMeshRecovery)
                          .vertex({0, 1, 1})
                          .polytope(Polytope::Type::Triangle, {0, 1, 2})
                          .finalize();
-  Owner mesh(Native::rodinToMesh(surface), Native::destroyMesh);
+  Owner mesh(MMG::V5::Mesh::toV5(surface), MMG::V5::Mesh::destroy);
   ASSERT_NE(mesh, nullptr);
   EXPECT_EQ(mesh->dim, 3);
   EXPECT_EQ(mesh->np, 3);
@@ -105,18 +101,17 @@ TEST(MMG5Lifecycle, InvalidDimensionsPermitSupportedMeshRecovery)
 /// @brief Native mesh copies own their arrays and survive source destruction.
 TEST(MMG5Lifecycle, MeshCopyIsIndependent)
 {
-  using Native = MMG::MMG5;
-  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
   for (auto type : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
   {
     const bool volume = type == Polytope::Type::Tetrahedron;
     auto mesh = volume ? LocalMesh::UniformGrid(type, {2, 2, 2})
                        : LocalMesh::UniformGrid(type, {2, 2});
-    Owner source(Native::rodinToMesh(mesh), Native::destroyMesh);
+    Owner source(MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
     Owner copy(
-      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), MMG::V5::Mesh::destroy);
     ASSERT_NE(copy, nullptr);
-    Native::copyMesh(source.get(), copy.get());
+    MMG::V5::Mesh::copy(source.get(), copy.get());
     EXPECT_EQ(copy->np, source->np);
     EXPECT_EQ(copy->nt, source->nt);
     EXPECT_EQ(copy->ne, source->ne);
@@ -136,7 +131,7 @@ TEST(MMG5Lifecycle, MeshCopyIsIndependent)
     source->point[1].c[0] += 10;
     EXPECT_EQ(copy->point[1].c[0], coordinate);
     source.reset();
-    auto restored = Native::meshToRodin(copy.get());
+    auto restored = MMG::V5::Mesh::fromV5(copy.get());
     EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
     EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
   }
@@ -145,10 +140,9 @@ TEST(MMG5Lifecycle, MeshCopyIsIndependent)
 /// @brief Mesh copies retain independently owned remeshing and material policies.
 TEST(MMG5Lifecycle, MeshCopyPreservesMaterialPoliciesAfterSourceDestruction)
 {
-  using Native = MMG::MMG5;
-  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
-  Owner source(Native::rodinToMesh(mesh), Native::destroyMesh);
+  Owner source(MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
   ASSERT_EQ(MMG3D_Set_inputMeshName(source.get(), "source.mesh"), 1);
   ASSERT_EQ(MMG3D_Set_outputMeshName(source.get(), "adapted.mesh"), 1);
   ASSERT_EQ(
@@ -164,9 +158,9 @@ TEST(MMG5Lifecycle, MeshCopyPreservesMaterialPoliciesAfterSourceDestruction)
   ASSERT_EQ(MMG3D_Set_multiMat(source.get(), nullptr, 17, MMG5_MMAT_Split, 71, 73), 1);
   ASSERT_EQ(MMG3D_Set_multiMat(source.get(), nullptr, 23, MMG5_MMAT_NoSplit, 23, 23), 1);
   Owner copy(
-    static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+    static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), MMG::V5::Mesh::destroy);
   ASSERT_NE(copy, nullptr);
-  Native::copyMesh(source.get(), copy.get());
+  MMG::V5::Mesh::copy(source.get(), copy.get());
   ASSERT_NE(source->info.par, nullptr);
   ASSERT_NE(source->info.br, nullptr);
   ASSERT_NE(source->info.mat, nullptr);
@@ -206,7 +200,7 @@ TEST(MMG5Lifecycle, MeshCopyPreservesMaterialPoliciesAfterSourceDestruction)
   EXPECT_EQ(parent, 17);
   ASSERT_EQ(MMG5_getStartRef(copy.get(), 73, &parent), 1);
   EXPECT_EQ(parent, 17);
-  const auto restored = Native::meshToRodin(copy.get());
+  const auto restored = MMG::V5::Mesh::fromV5(copy.get());
   EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
   EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
   EXPECT_NEAR(restored.getVolume(), 1, 1e-12);
@@ -215,43 +209,41 @@ TEST(MMG5Lifecycle, MeshCopyPreservesMaterialPoliciesAfterSourceDestruction)
 /// @brief Scalar/vector native solution copies and swaps preserve ownership.
 TEST(MMG5Lifecycle, SolutionCopyAndSwap)
 {
-  using Native = MMG::MMG5;
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
-  std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> native(
-    Native::rodinToMesh(mesh), Native::destroyMesh);
-  using Owner = std::unique_ptr<MMG5_Sol, decltype(&Native::destroySolution)>;
-  EXPECT_EQ(Native::createSolution(native.get(), 0), nullptr);
-  EXPECT_EQ(Native::createSolution(native.get(), 4), nullptr);
+  std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)> native(
+    MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
+  using Owner = std::unique_ptr<MMG5_Sol, decltype(&MMG::V5::Solution::destroy)>;
+  EXPECT_EQ(MMG::V5::Solution::create(native.get(), 0), nullptr);
+  EXPECT_EQ(MMG::V5::Solution::create(native.get(), 4), nullptr);
   for (size_t dimension : {1, 2, 3})
   {
     Owner source(
-      Native::createSolution(native.get(), dimension), Native::destroySolution);
+      MMG::V5::Solution::create(native.get(), dimension), MMG::V5::Solution::destroy);
     Owner copy(
-      static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), Native::destroySolution);
+      static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), MMG::V5::Solution::destroy);
     ASSERT_NE(source, nullptr);
     ASSERT_NE(copy, nullptr);
     const size_t count = dimension * (source->np + 1);
     for (size_t i = 0; i < count; ++i)
       source->m[i] = 0.25 + i;
-    Native::copySolution(source.get(), copy.get());
+    MMG::V5::Solution::copy(source.get(), copy.get());
     EXPECT_NE(copy->m, source->m);
     for (size_t i = 0; i < count; ++i)
       EXPECT_EQ(copy->m[i], source->m[i]);
     source->m[1] = -100;
     EXPECT_EQ(copy->m[1], 1.25);
-    Native::swapSolution(source.get(), copy.get());
+    MMG::V5::Solution::swap(source.get(), copy.get());
     EXPECT_EQ(source->m[1], 1.25);
     EXPECT_EQ(copy->m[1], -100);
     source.reset();
     EXPECT_EQ(copy->m[count - 1], 0.25 + count - 1);
   }
-  Native::destroySolution(nullptr);
+  MMG::V5::Solution::destroy(nullptr);
 }
 
 /// @brief Surface conversion retains coordinates, triangles and attributed edge references.
 TEST(MMG5Lifecycle, SurfaceConversionPreservesGeometryAndAttributes)
 {
-  using Native = MMG::MMG5;
   auto volume = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
   volume.getConnectivity().compute(2, 3);
   auto surface = volume.skin();
@@ -267,9 +259,9 @@ TEST(MMG5Lifecycle, SurfaceConversionPreservesGeometryAndAttributes)
       ++attributedEdges;
     }
   }
-  std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> native(
-    Native::rodinToMesh(surface), Native::destroyMesh);
-  ASSERT_TRUE(Native::isSurfaceMesh(native.get()));
+  std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)> native(
+    MMG::V5::Mesh::toV5(surface), MMG::V5::Mesh::destroy);
+  ASSERT_TRUE(MMG::V5::Mesh::isSurface(native.get()));
   EXPECT_EQ(native->np, surface.getVertexCount());
   EXPECT_EQ(native->nt, surface.getCellCount());
   EXPECT_EQ(native->na, attributedEdges);
@@ -277,7 +269,7 @@ TEST(MMG5Lifecycle, SurfaceConversionPreservesGeometryAndAttributes)
     EXPECT_EQ(native->tria[i].ref, 17);
   for (int i = 1; i <= native->na; ++i)
     EXPECT_EQ(native->edge[i].ref, 23);
-  auto restored = Native::meshToRodin(native.get());
+  auto restored = MMG::V5::Mesh::fromV5(native.get());
   EXPECT_EQ(restored.getDimension(), 2u);
   EXPECT_EQ(restored.getSpaceDimension(), 3u);
   EXPECT_EQ(restored.getVertexCount(), surface.getVertexCount());
@@ -329,20 +321,20 @@ TEST(MMG5Lifecycle, SurfaceConversionPreservesGeometryAndAttributes)
 TEST(MMG5Lifecycle, ParameterForwardingMatchesEveryBackend)
 {
   /// @brief Exposes parameter forwarding without invoking a remeshing algorithm.
-  class Parameters : public MMG::MMG5
+  class Parameters : public MMG::Base
   {
     public:
-      using MMG::MMG5::setParameters;
+      using MMG::Base::setParameters;
   };
-  using Native = MMG::MMG5;
+
   auto planar = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto volume = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
   volume.getConnectivity().compute(2, 3);
   auto surface = volume.skin();
   surface.getConnectivity().compute(1, 2);
   const auto check = [](const LocalMesh& mesh) {
-    std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> native(
-      Native::rodinToMesh(mesh), Native::destroyMesh);
+    std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)> native(
+      MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
     Parameters parameters;
     parameters.setHMin(0.125)
       .setHMax(0.75)
@@ -1209,11 +1201,11 @@ namespace Rodin::Tests::Unit
     size_t origCellCount = mesh.getCellCount();
 
     // Convert to MMG and back
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     EXPECT_EQ(result.getVertexCount(), origVertexCount);
     EXPECT_EQ(result.getCellCount(), origCellCount);
@@ -1248,11 +1240,11 @@ namespace Rodin::Tests::Unit
     mesh.setRequiredTriangle(1);
 
     // Convert to MMG and back
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     // Corners should be preserved (they live on vertices, which are always
     // converted)
@@ -1285,11 +1277,11 @@ namespace Rodin::Tests::Unit
     mesh.setRequiredTriangle(0);
     mesh.setRequiredTriangle(3);
 
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     EXPECT_EQ(result.getRequiredTriangles().size(), 2);
     EXPECT_TRUE(result.getRequiredTriangles().count(0));
@@ -1310,11 +1302,11 @@ namespace Rodin::Tests::Unit
     mesh.setRequiredEdge(requiredEdge);
     mesh.setRequiredTriangle(requiredTriangle);
 
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     EXPECT_EQ(result.getRequiredVertices().size(), 1);
     EXPECT_EQ(result.getRequiredEdges().size(), 1);
@@ -1332,11 +1324,11 @@ namespace Rodin::Tests::Unit
     const Index required = getFirstBoundaryTriangleIndex(mesh);
     mesh.setRequiredTriangle(required);
 
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     EXPECT_EQ(result.getRequiredTriangles().size(), 1);
   }
@@ -1351,11 +1343,11 @@ namespace Rodin::Tests::Unit
     const Index required = getFirstBoundaryTriangleIndex(mesh);
     mesh.setRequiredTriangle(required);
 
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     EXPECT_EQ(result.getRequiredTriangles().size(), 1);
     EXPECT_TRUE(result.getRequiredTriangles().count(0));
@@ -1378,11 +1370,11 @@ namespace Rodin::Tests::Unit
     mesh.setRequiredTriangle(requiredTriangle);
     mesh.setRequiredTetrahedron(requiredTetrahedron);
 
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     EXPECT_EQ(result.getRequiredVertices().size(), 1);
     EXPECT_EQ(result.getRequiredEdges().size(), 1);
@@ -3655,8 +3647,7 @@ TEST(Rodin_MMG_LevelSetDiscretizer, AffineSurfaceCutPreservesAreaAndContour)
 /// @brief Native copies retain cached neighbors and geometry after source destruction.
 TEST(MMG5Lifecycle, CachedAdjacencyCopiesMatchTopology)
 {
-  using Native = MMG::MMG5;
-  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
   for (const size_t configuration : {0u, 1u, 2u})
   {
     SCOPED_TRACE(configuration);
@@ -3685,7 +3676,7 @@ TEST(MMG5Lifecycle, CachedAdjacencyCopiesMatchTopology)
     mesh.getConnectivity().compute(dimension - 1, dimension);
     for (auto cell = mesh.getCell(); cell; ++cell)
       mesh.setAttribute(cell.key(), 17 + cell->getIndex());
-    Owner source(Native::rodinToMesh(mesh), Native::destroyMesh);
+    Owner source(MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
     auto neighbors = [configuration](MMG5_pMesh native, MMG5_int cell, MMG5_int* result) {
       if (configuration == 0)
         return MMG2D_Get_adjaTri(native, cell, result);
@@ -3697,9 +3688,9 @@ TEST(MMG5Lifecycle, CachedAdjacencyCopiesMatchTopology)
     ASSERT_EQ(neighbors(source.get(), 1, first.data()), 1);
     ASSERT_NE(source->adja, nullptr);
     Owner copy(
-      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), MMG::V5::Mesh::destroy);
     ASSERT_NE(copy, nullptr);
-    Native::copyMesh(source.get(), copy.get());
+    MMG::V5::Mesh::copy(source.get(), copy.get());
     ASSERT_NE(copy->adja, nullptr);
     EXPECT_NE(copy->adja, source->adja);
     const size_t faces = dimension + 1;
@@ -3732,7 +3723,7 @@ TEST(MMG5Lifecycle, CachedAdjacencyCopiesMatchTopology)
       }
       EXPECT_EQ(actual, expected);
     }
-    const auto restored = Native::meshToRodin(copy.get());
+    const auto restored = MMG::V5::Mesh::fromV5(copy.get());
     EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
     EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
     for (Index cell = 0; cell < mesh.getCellCount(); ++cell)
@@ -3749,15 +3740,14 @@ TEST(MMG5Lifecycle, CachedAdjacencyCopiesMatchTopology)
 /// @brief Copied solution payloads and file names remain owned after releasing the source.
 TEST(MMG5Lifecycle, NamedSolutionCopyOwnsPayloadAndNames)
 {
-  using Native = MMG::MMG5;
-  using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
-  using SolOwner = std::unique_ptr<MMG5_Sol, decltype(&Native::destroySolution)>;
+  using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
+  using SolOwner = std::unique_ptr<MMG5_Sol, decltype(&MMG::V5::Solution::destroy)>;
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
-  MeshOwner native(Native::rodinToMesh(mesh), Native::destroyMesh);
+  MeshOwner native(MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
   for (const size_t components : {1u, 2u, 3u})
   {
     SolOwner source(
-      Native::createSolution(native.get(), components), Native::destroySolution);
+      MMG::V5::Solution::create(native.get(), components), MMG::V5::Solution::destroy);
     ASSERT_NE(source, nullptr);
     ASSERT_EQ(MMG2D_Set_inputSolName(native.get(), source.get(), "metric.input.sol"), 1);
     ASSERT_EQ(
@@ -3766,9 +3756,9 @@ TEST(MMG5Lifecycle, NamedSolutionCopyOwnsPayloadAndNames)
     for (size_t index = 0; index < count; ++index)
       source->m[index] = Real(0.25) * index;
     SolOwner copy(
-      static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), Native::destroySolution);
+      static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), MMG::V5::Solution::destroy);
     ASSERT_NE(copy, nullptr);
-    Native::copySolution(source.get(), copy.get());
+    MMG::V5::Solution::copy(source.get(), copy.get());
     EXPECT_NE(copy->m, source->m);
     EXPECT_NE(copy->namein, source->namein);
     EXPECT_NE(copy->nameout, source->nameout);
@@ -3788,28 +3778,29 @@ TEST(MMG5Lifecycle, NamedSolutionCopyOwnsPayloadAndNames)
 /// @brief Empty optional solutions copy and exchange ownership with populated solutions.
 TEST(MMG5Lifecycle, EmptySolutionCopiesAndSwaps)
 {
-  using Native = MMG::MMG5;
-  using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
-  using SolOwner = std::unique_ptr<MMG5_Sol, decltype(&Native::destroySolution)>;
-  MeshOwner emptyMesh(Native::createMesh(2, 2), Native::destroyMesh);
-  SolOwner empty(Native::createSolution(emptyMesh.get(), 1), Native::destroySolution);
+  using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
+  using SolOwner = std::unique_ptr<MMG5_Sol, decltype(&MMG::V5::Solution::destroy)>;
+  MeshOwner emptyMesh(MMG::V5::Mesh::create(2, 2), MMG::V5::Mesh::destroy);
+  SolOwner empty(
+    MMG::V5::Solution::create(emptyMesh.get(), 1), MMG::V5::Solution::destroy);
   ASSERT_NE(empty, nullptr);
   EXPECT_EQ(empty->np, 0);
   EXPECT_EQ(empty->m, nullptr);
   SolOwner copied(
-    static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), Native::destroySolution);
-  Native::copySolution(empty.get(), copied.get());
+    static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), MMG::V5::Solution::destroy);
+  MMG::V5::Solution::copy(empty.get(), copied.get());
   EXPECT_EQ(copied->np, 0);
   EXPECT_EQ(copied->size, 1);
   EXPECT_EQ(copied->m, nullptr);
   EXPECT_EQ(copied->namein, nullptr);
   EXPECT_EQ(copied->nameout, nullptr);
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
-  MeshOwner native(Native::rodinToMesh(mesh), Native::destroyMesh);
-  SolOwner populated(Native::createSolution(native.get(), 1), Native::destroySolution);
+  MeshOwner native(MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
+  SolOwner populated(
+    MMG::V5::Solution::create(native.get(), 1), MMG::V5::Solution::destroy);
   populated->m[1] = Real(1.5);
   const auto payload = populated->m;
-  Native::swapSolution(copied.get(), populated.get());
+  MMG::V5::Solution::swap(copied.get(), populated.get());
   EXPECT_EQ(copied->m, payload);
   EXPECT_EQ(copied->np, mesh.getVertexCount());
   EXPECT_EQ(copied->m[1], Real(1.5));
@@ -3953,9 +3944,8 @@ TEST(Rodin_MMG_Mesh_Builder, MoveAssignmentReplacesGeometryAndConstraints)
 /// @brief Native hybrid cells and boundary caches are independently owned after copying.
 TEST(MMG5Lifecycle, NativeHybridPayloadCopiesOutliveSource)
 {
-  using Native = MMG::MMG5;
-  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
-  Owner source(Native::createMesh(2, 3), Native::destroyMesh);
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
+  Owner source(MMG::V5::Mesh::create(2, 3), MMG::V5::Mesh::destroy);
   ASSERT_EQ(MMG3D_Set_meshSize(source.get(), 10, 1, 1, 1, 1, 1), 1);
   const std::array<std::array<Real, 3>, 10> coordinates{{{0, 0, 0}, {1, 0, 0}, {0, 1, 0},
     {0, 0, 1}, {1, 0, 1}, {0, 1, 1}, {3, 0, 0}, {4, 0, 0}, {3, 1, 0}, {3, 0, 1}}};
@@ -3989,9 +3979,9 @@ TEST(MMG5Lifecycle, NativeHybridPayloadCopiesOutliveSource)
   source->xprism[1].edg[0] = 59;
 
   Owner copy(
-    static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+    static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), MMG::V5::Mesh::destroy);
   ASSERT_NE(copy, nullptr);
-  Native::copyMesh(source.get(), copy.get());
+  MMG::V5::Mesh::copy(source.get(), copy.get());
   ASSERT_NE(copy->prism, nullptr);
   ASSERT_NE(copy->quadra, nullptr);
   ASSERT_NE(copy->edge, nullptr);
@@ -4049,12 +4039,11 @@ TEST(MMG5Lifecycle, NativeHybridPayloadCopiesOutliveSource)
 /// @brief Copies own optional adjacency caches and geometric hash records through source destruction.
 TEST(MMG5Lifecycle, OptionalAdjacencyAndHashCachesAreIndependent)
 {
-  using Native = MMG::MMG5;
-  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
   for (bool volume : {false, true})
   {
     SCOPED_TRACE(volume);
-    Owner source(Native::createMesh(2, volume ? 3 : 2), Native::destroyMesh);
+    Owner source(MMG::V5::Mesh::create(2, volume ? 3 : 2), MMG::V5::Mesh::destroy);
     if (volume)
     {
       ASSERT_EQ(MMG3D_Set_meshSize(source.get(), 10, 1, 1, 1, 1, 1), 1);
@@ -4116,9 +4105,9 @@ TEST(MMG5Lifecycle, OptionalAdjacencyAndHashCachesAreIndependent)
       }
     }
     Owner copy(
-      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), MMG::V5::Mesh::destroy);
     ASSERT_NE(copy, nullptr);
-    Native::copyMesh(source.get(), copy.get());
+    MMG::V5::Mesh::copy(source.get(), copy.get());
     ASSERT_NE(copy->adjt, nullptr);
     EXPECT_NE(copy->adjt, source->adjt);
     const auto copiedSecondary = volume ? copy->adjapr : copy->adjq;

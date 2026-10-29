@@ -150,31 +150,35 @@ if (RODIN_USE_MPI)
     Rodin::MPI
     Rodin::PETSc)
 
-  # The named P2 matrix comparisons use most of the Debug suite's timeout.
-  # Give that case its own MPI invocation; retain all remaining and future
-  # cases in the complementary filter without increasing either timeout.
-  set(_RODIN_MPI_NAMED_FORM_CASE
-    "PETSc_MPI_Form.NamedScalarAndVectorP1AndP2MatchIntegrals")
+  # Each range/degree oracle keeps its complete mesh and matrix comparisons,
+  # with an independent Debug/coverage process budget at every existing rank.
+  set(_RODIN_MPI_NAMED_FORM_CASES
+    NamedScalarP1MatchesIntegrals NamedScalarP2MatchesIntegrals
+    NamedVectorP1MatchesIntegrals NamedVectorP2MatchesIntegrals)
+  set(_RODIN_MPI_NAMED_FORM_FILTERS "")
+  foreach(case IN LISTS _RODIN_MPI_NAMED_FORM_CASES)
+    list(APPEND _RODIN_MPI_NAMED_FORM_FILTERS "PETSc_MPI_Form.${case}")
+  endforeach()
+  list(JOIN _RODIN_MPI_NAMED_FORM_FILTERS ":" _RODIN_MPI_NAMED_FORM_FILTER)
   foreach(np 2 3 4)
-    add_test(
-      NAME RodinPETScMPINamedFormTest_np${np}
-      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-              $<TARGET_FILE:RodinPETScMPIFormTest>
-              "--gtest_filter=${_RODIN_MPI_NAMED_FORM_CASE}")
-    add_test(
-      NAME RodinPETScMPIFormTest_np${np}
-      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-              $<TARGET_FILE:RodinPETScMPIFormTest>
-              "--gtest_filter=-${_RODIN_MPI_NAMED_FORM_CASE}")
-    foreach(test RodinPETScMPINamedFormTest_np${np} RodinPETScMPIFormTest_np${np})
+    foreach(case IN LISTS _RODIN_MPI_NAMED_FORM_CASES)
+      set(test RodinPETScMPINamedFormTest_${case}_np${np})
+      add_test(NAME ${test}
+        COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+          ${_RODIN_MPI_OVERSUBSCRIBE_FLAG} $<TARGET_FILE:RodinPETScMPIFormTest>
+          "--gtest_filter=PETSc_MPI_Form.${case}" --gtest_fail_if_no_test_selected)
       set_tests_properties(${test} PROPERTIES
-        LABELS "unit;petsc;distributed"
-        TIMEOUT 120
-      )
+        LABELS "unit;petsc;distributed" TIMEOUT 120 PROCESSORS ${np})
       rodin_suppress_external_mpi_lsan_for_test(${test})
     endforeach()
+    set(test RodinPETScMPIFormTest_np${np})
+    add_test(NAME ${test}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+        ${_RODIN_MPI_OVERSUBSCRIBE_FLAG} $<TARGET_FILE:RodinPETScMPIFormTest>
+        "--gtest_filter=-${_RODIN_MPI_NAMED_FORM_FILTER}" --gtest_fail_if_no_test_selected)
+    set_tests_properties(${test} PROPERTIES
+      LABELS "unit;petsc;distributed" TIMEOUT 120 PROCESSORS ${np})
+    rodin_suppress_external_mpi_lsan_for_test(${test})
   endforeach()
 
   add_executable(RodinPETScMPIP0P0gTest MPIP0P0gTest.cpp)

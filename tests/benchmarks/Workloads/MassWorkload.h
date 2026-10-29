@@ -103,7 +103,7 @@ namespace Rodin::Tests::Benchmarks
        * Physical coordinates and Jacobian entries must agree exactly with
        * direct map evaluation at the same reference point. This is a numerical
        * equivalence check, not a geometric identity or ownership decision.
-       * Curved cells must also retain factor degree two after distribution.
+       * Curved cells must also retain the quadratic transformation after distribution.
        *
        * @tparam Mesh Local or distributed mesh type.
        * @param mesh Mesh carrying the geometry being measured.
@@ -118,7 +118,10 @@ namespace Rodin::Tests::Benchmarks
         const auto& formula = QF::QuadratureFormula::get(8, geometry);
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
-          if (curved && cell->getTransformation().getFactorOrder() != 2)
+          if (curved &&
+            !dynamic_cast<
+              const Geometry::ParametricTransformation<Variational::RealH1Element<2>>*>(
+              &cell->getTransformation()))
             return false;
           const Geometry::PolytopeQuadrature quadrature(*cell, formula);
           for (size_t qp = 0; qp < formula.getSize(); ++qp)

@@ -115,6 +115,9 @@ def build_site(manifest, documentation, output, configuration, documentation_url
     for name in ['rodin.css', 'rodin-theme.css', 'rodin-theme.js', 'rodin-navigation.js']:
         shutil.copyfile(ROOT / 'doc' / name, assets / name)
     shutil.copyfile(documentation / 'Doxygen.svg', assets / 'Doxygen.svg')
+    for name in ['wordmark-white.svg', 'favicon.svg', 'Manrope-Regular.ttf', 'Manrope-SemiBold.ttf',
+                 'Manrope-Bold.ttf', 'OFL.txt']:
+        shutil.copyfile(documentation / name, assets / name)
     for name in ['site.css', 'charts.js']:
         shutil.copyfile(ROOT / 'dev' / 'benchmarks' / name, assets / name)
     stylesheets += ['assets/rodin.css', 'assets/rodin-theme.css', 'assets/site.css']
@@ -158,12 +161,19 @@ def build_site(manifest, documentation, output, configuration, documentation_url
     for previous in output.rglob('index.html'):
         if previous not in expected:
             previous.unlink()
+    # Count browsable registered benchmark pages, not timing cases or MPI ranks.
+    counts = {}
+    for path in sorted(pages, key=lambda value: len(PurePosixPath(value).parts), reverse=True):
+        counts[path] = int(pages[path]['record'] is not None) + sum(counts[child] for child in pages[path]['children'])
+    for path, module in modules.items():
+        module['benchmark_count'] = counts[path]
     search = build_search(pages, modules, assets)
     contexts = []
     for path in sorted(child for child in pages['']['children'] if child != 'Rodin'):
         description = ROOT / 'tests' / 'benchmarks' / path / 'index.html'
         contexts.append({'path': path, 'title': PurePosixPath(path).name,
-                         'description': description.read_text() if description.is_file() else ''})
+                         'description': description.read_text() if description.is_file() else '',
+                         'benchmark_count': counts[path]})
     for value, page in pages.items():
         directory = output / value
         directory.mkdir(parents=True, exist_ok=True)
@@ -181,7 +191,8 @@ def build_site(manifest, documentation, output, configuration, documentation_url
         for child in children:
             brief = re.search(r'<p(?:\s[^>]*)?>.*?</p>', pages[child]['description'], re.S)
             cards.append({'path': child, 'title': titles.get(child, PurePosixPath(child).name),
-                          'brief': brief[0] if brief else ''})
+                          'brief': brief[0] if brief else '', 'benchmark_count': counts[child],
+                          'record': pages[child]['record'] is not None})
         rendered = template.render(
             title=title, value=value, prefix=prefix, configuration=configuration,
             breadcrumbs=breadcrumb, page=page, module=modules.get(value), groups=groups,

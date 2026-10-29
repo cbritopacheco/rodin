@@ -1050,28 +1050,88 @@ namespace Rodin::Geometry
     if (dimension == 0)
       return 1;
     const auto& transformation = getTransformation();
-    const size_t degree = transformation.getOrder();
-    const size_t factorDegree = transformation.getFactorOrder();
     const Polytope::Traits traits(getGeometry());
-    if (traits.isSimplex() && factorDegree <= 1)
-      return getMeasure(0);
-    if (dimension == transformation.getPhysicalDimension())
+    constexpr size_t MinimumCurvedMeasureOrder = 8;
+    if (transformation.isFirstOrder())
     {
       if (traits.isSimplex())
-        return getMeasure(dimension * (degree - 1));
-      if (getGeometry() == Type::Quadrilateral || getGeometry() == Type::Hexahedron ||
-        getGeometry() == Type::Wedge)
+        return getMeasure(0);
+      if (dimension == transformation.getPhysicalDimension() &&
+        (getGeometry() == Type::Quadrilateral || getGeometry() == Type::Hexahedron ||
+          getGeometry() == Type::Wedge))
+        return getMeasure(dimension - 1);
+      return getMeasure(MinimumCurvedMeasureOrder);
+    }
+    const auto degree = transformation.getDegree();
+    if (degree && dimension == transformation.getPhysicalDimension())
+    {
+      if (traits.isSimplex())
+        return getMeasure(dimension * (*degree > 0 ? *degree - 1 : 0));
+      if (getGeometry() == Type::Quadrilateral || getGeometry() == Type::Hexahedron)
       {
-        // Tensor/collapsed-wedge determinants have directional degree at most
-        // d*k-1 (the triangular total degree is at most d*k-2).
-        return getMeasure(dimension * factorDegree - 1);
+        size_t order = 0;
+        for (size_t i = 0; i < dimension; ++i)
+        {
+          const auto factor = transformation.getDegree({i});
+          if (!factor)
+            return getMeasure(dimension * (*degree > 0 ? *degree - 1 : 0));
+          if (*factor == 0)
+            return getMeasure(0);
+          order = std::max(order, dimension * *factor - 1);
+        }
+        const size_t totalOrder = dimension * (*degree > 0 ? *degree - 1 : 0);
+        return getMeasure(std::min(order, totalOrder));
+      }
+      if (getGeometry() == Type::Wedge)
+      {
+        const auto triangle = transformation.getDegree({0, 1});
+        const auto segment = transformation.getDegree({2});
+        if (triangle && segment)
+        {
+          if (*triangle == 0 || *segment == 0)
+            return getMeasure(0);
+          const size_t triangularOrder = dimension * *triangle - 2;
+          const size_t segmentOrder = dimension * *segment - 1;
+          const size_t totalOrder = dimension * (*degree > 0 ? *degree - 1 : 0);
+          return getMeasure(
+            std::min(std::max(triangularOrder, segmentOrder), totalOrder));
+        }
+        return getMeasure(dimension * (*degree > 0 ? *degree - 1 : 0));
       }
     }
     // Square roots on embedded maps and rational pyramid distortion do not
     // admit a universal polynomial exactness degree. This is an accuracy
     // policy; the explicit-order overload supports independent refinement.
-    constexpr size_t MinimumCurvedMeasureOrder = 8;
-    return getMeasure(std::max(MinimumCurvedMeasureOrder, 2 * degree + 2));
+    if (degree)
+      return getMeasure(std::max(MinimumCurvedMeasureOrder, 2 * *degree + 2));
+    if (getGeometry() == Type::Pyramid)
+    {
+      const auto xDegree = transformation.getDegree({0});
+      const auto yDegree = transformation.getDegree({1});
+      if (xDegree && yDegree)
+      {
+        // This is an accuracy heuristic, not exactness for the rational z
+        // dependence. It retains the established pyramid sampling policy.
+        return getMeasure(
+          std::max(MinimumCurvedMeasureOrder, 2 * (*xDegree + *yDegree) + 2));
+      }
+    }
+    // Rational maps have no finite polynomial exactness degree. Increase the
+    // accuracy request until consecutive positive-rule estimates agree.
+    constexpr size_t MaximumMeasureOrder = 64;
+    constexpr size_t MeasureOrderIncrement = 2;
+    constexpr Real RelativeMeasureTolerance = 1e-10;
+    Real previous = getMeasure(MinimumCurvedMeasureOrder);
+    for (size_t order = MinimumCurvedMeasureOrder + MeasureOrderIncrement;
+         order <= MaximumMeasureOrder; order += MeasureOrderIncrement)
+    {
+      const Real measure = getMeasure(order);
+      if (std::abs(measure - previous) <= RelativeMeasureTolerance *
+          std::max(std::abs(measure), std::numeric_limits<Real>::min()))
+        return measure;
+      previous = measure;
+    }
+    return previous;
   }
 
   Real Polytope::getMeasure(size_t order) const

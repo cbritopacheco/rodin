@@ -92,7 +92,7 @@ namespace Rodin::Adaptation::SWIFT
       // This is a polynomial FE field, not the composed level-set residual.
       const auto& qf = QF::QuadratureFormula::get(validationOrder > 0
           ? validationOrder
-          : std::max<size_t>(6, 2 * fe.getOrder() + 4),
+          : std::max<size_t>(6, 2 * fe.getDegree().value_or(2 * fe.getOrder()) + 4),
         cell->getGeometry());
       const auto& quadrature = cell->getQuadrature(qf);
       for (std::size_t q = 0; q < quadrature.getSize(); ++q)
@@ -908,8 +908,11 @@ namespace Rodin::Adaptation::SWIFT
           rep.reason = Report::Reason::EmptyInterface;
           return finish(rep);
         }
-        const Real geometricScale = std::pow(
-          h, fes.getFiniteElement(meshDim - 1, interfaceFacets.front()).getOrder() + 1);
+        const auto firstFacet = mesh.getPolytope(meshDim - 1, interfaceFacets.front());
+        assert(firstFacet);
+        const auto& facetFE = fes.getFiniteElement(meshDim - 1, interfaceFacets.front());
+        const Real geometricScale =
+          std::pow(h, facetFE.getDegree().value_or(2 * facetFE.getOrder()) + 1);
         const Real geometricTarget = p.convergence.tolerance.geometric > Real(0)
           ? p.convergence.tolerance.geometric
           : geometricScale;
@@ -966,8 +969,8 @@ namespace Rodin::Adaptation::SWIFT
         const Variational::Integrator::OrderType surfaceOrder =
           [&](const Geometry::Polytope& face) -> std::size_t {
           const auto& fe = fes.getFiniteElement(face.getDimension(), face.getIndex());
-          return p.quadrature.getSurfaceOrder(fe.getOrder(),
-            face.getTransformation().getOrder(),
+          return p.quadrature.getSurfaceOrder(fe.getDegree().value_or(2 * fe.getOrder()),
+            (face.getTransformation().getDegree().value_or(2)),
             Geometry::Polytope::Traits(face.getGeometry()).getVertexCount() ==
               face.getDimension() + 1);
         };
@@ -1078,7 +1081,7 @@ namespace Rodin::Adaptation::SWIFT
               const auto order = integrand.getOrder(face);
               const auto& transformation =
                 mesh.getPolytopeTransformation(face.getDimension(), face.getIndex());
-              if (order && transformation.getOrder() == 1)
+              if (order && (transformation.getDegree().value_or(2)) == 1)
                 return *order;
               return surfaceOrder(face);
             });
@@ -1106,8 +1109,11 @@ namespace Rodin::Adaptation::SWIFT
           {
             order = std::max(order,
               p.quadrature.getVolumeOrder(
-                fes.getFiniteElement(meshDim, cell->getIndex()).getOrder(),
-                cell->getTransformation().getOrder(),
+                fes.getFiniteElement(meshDim, cell->getIndex())
+                  .getDegree()
+                  .value_or(
+                    2 * fes.getFiniteElement(meshDim, cell->getIndex()).getOrder()),
+                (cell->getTransformation().getDegree().value_or(2)),
                 Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount() ==
                   meshDim + 1));
           }
@@ -1760,9 +1766,11 @@ namespace Rodin::Adaptation::SWIFT
           polytope.getDimension() + 1;
         const std::size_t order = isInterface
           ? m_parameters.quadrature.getSurfaceOrder(
-              fe.getOrder(), polytope.getTransformation().getOrder(), simplex)
+              fe.getDegree().value_or(2 * fe.getOrder()),
+              (polytope.getTransformation().getDegree().value_or(2)), simplex)
           : m_parameters.quadrature.getVolumeOrder(
-              fe.getOrder(), polytope.getTransformation().getOrder(), simplex);
+              fe.getDegree().value_or(2 * fe.getOrder()),
+              (polytope.getTransformation().getDegree().value_or(2)), simplex);
         return QF::QuadratureFormula::get(order, polytope.getGeometry());
       }
 
@@ -1780,7 +1788,8 @@ namespace Rodin::Adaptation::SWIFT
           fes.getFiniteElement(polytope.getDimension(), polytope.getIndex());
         const std::size_t order = m_parameters.quadrature.validation > 0
           ? m_parameters.quadrature.validation
-          : Parameters::Quadrature::getValidationOrder(fe.getOrder());
+          : Parameters::Quadrature::getValidationOrder(
+              fe.getDegree().value_or(2 * fe.getOrder()));
         return QF::QuadratureFormula::get(order, polytope.getGeometry());
       }
 
@@ -1905,7 +1914,11 @@ namespace Rodin::Adaptation::SWIFT
           {
             const auto cell = mesh.getCell(cells[static_cast<std::size_t>(i)]);
             const QualitySamples samples(*cell,
-              fes.getFiniteElement(dimension, cell->getIndex()).getOrder(), m_parameters);
+              fes.getFiniteElement(dimension, cell->getIndex())
+                .getDegree()
+                .value_or(
+                  2 * fes.getFiniteElement(dimension, cell->getIndex()).getOrder()),
+              m_parameters);
             samples.forEach([&](const Variational::IntegrationPoint& ip, Real) {
               deformation.setDisplacementGradient(currentJacobian.getValue(ip));
               const Hinge state(
@@ -1952,7 +1965,11 @@ namespace Rodin::Adaptation::SWIFT
           {
             const auto cell = mesh.getCell(validationCells[static_cast<std::size_t>(i)]);
             const QualitySamples samples(*cell,
-              fes.getFiniteElement(dimension, cell->getIndex()).getOrder(), m_parameters);
+              fes.getFiniteElement(dimension, cell->getIndex())
+                .getDegree()
+                .value_or(
+                  2 * fes.getFiniteElement(dimension, cell->getIndex()).getOrder()),
+              m_parameters);
             auto predictorJacobian = Variational::Jacobian(predictor);
             samples.forEachHinge(currentJacobian, predictorJacobian,
               [&](const Variational::IntegrationPoint& ip, Real weightJ, Real weightQ) {
@@ -2018,7 +2035,8 @@ namespace Rodin::Adaptation::SWIFT
             const Index cellIndex = validationCells[static_cast<std::size_t>(i)];
             const auto cell = mesh.getCell(cellIndex);
             const auto& fe = fes.getFiniteElement(dimension, cellIndex);
-            const QualitySamples samples(*cell, fe.getOrder(), m_parameters);
+            const QualitySamples samples(
+              *cell, fe.getDegree().value_or(2 * fe.getOrder()), m_parameters);
             samples.forEach([&](const Variational::IntegrationPoint& ip, Real) {
               deformation.setDisplacementGradient(displacementJacobian.getValue(ip));
               const Real j = deformation.getJacobian();

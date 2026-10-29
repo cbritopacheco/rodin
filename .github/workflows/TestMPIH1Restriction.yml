@@ -15,7 +15,7 @@ permissions:
 jobs:
   MPIH1Restriction:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: ${{ matrix.partition == 'pyramid' && matrix.np == '8' && 180 || 90 }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(inputs.matrix) }}
@@ -30,22 +30,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev lcov libomp-dev
-          mpi-default-bin mpi-default-dev
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: MPIH1Restriction
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Record native MPI CPU placement
       env:
         MPI_RANKS: ${{ matrix.np }}

@@ -18,7 +18,8 @@ runs:
         boost=libboost1.74-all-dev
         if [ "$MODE" = mpi ]; then boost=libboost-all-dev; fi
         [[ "$COMPILER" =~ ^gcc-[0-9]+$ ]] || exit 1
-        packages=("$COMPILER" "${COMPILER/gcc-/g++-}" lcov "$boost" libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev)
+        # Resolve zlib explicitly: hosted-image rollouts can change its preinstalled version.
+        packages=(zlib1g "$COMPILER" "${COMPILER/gcc-/g++-}" lcov "$boost" libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev)
         case "$MODE" in
           native) ;;
           mpi) packages+=(mpi-default-bin mpi-default-dev) ;;

@@ -15,7 +15,7 @@
 
 #include "Mesh.h"
 
-#include "MMG5.h"
+#include "V5.h"
 
 namespace Rodin::MMG
 {
@@ -30,10 +30,10 @@ namespace Rodin::MMG
    * The scalar size-map field encodes target local edge length and is sampled
    * at mesh vertices.
    *
-   * Parameters inherited from @ref MMG5 (hmin/hmax/hausdorff/gradation/angle)
+   * Parameters inherited from @ref Base (hmin/hmax/hausdorff/gradation/angle)
    * can be configured before calling @ref adapt.
    */
-  class Adapt : public MMG5
+  class Adapt : public Base
   {
     public:
       /// @brief Constructs an adaptation operator with default MMG settings.
@@ -56,7 +56,7 @@ namespace Rodin::MMG
        */
       Adapt& setAngleDetection(bool b = true)
       {
-        MMG5::setAngleDetection(b);
+        Base::setAngleDetection(b);
         return *this;
       }
 
@@ -67,7 +67,7 @@ namespace Rodin::MMG
        */
       Adapt& setHMin(double hmin)
       {
-        MMG5::setHMin(hmin);
+        Base::setHMin(hmin);
         return *this;
       }
 
@@ -78,7 +78,7 @@ namespace Rodin::MMG
        */
       Adapt& setHMax(double hmax)
       {
-        MMG5::setHMax(hmax);
+        Base::setHMax(hmax);
         return *this;
       }
 
@@ -89,7 +89,7 @@ namespace Rodin::MMG
        */
       Adapt& setHausdorff(double hausd)
       {
-        MMG5::setHausdorff(hausd);
+        Base::setHausdorff(hausd);
         return *this;
       }
 
@@ -100,7 +100,7 @@ namespace Rodin::MMG
        */
       Adapt& setGradation(double hgrad)
       {
-        MMG5::setGradation(hgrad);
+        Base::setGradation(hgrad);
         return *this;
       }
 

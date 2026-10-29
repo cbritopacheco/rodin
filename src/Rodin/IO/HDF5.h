@@ -939,18 +939,17 @@ namespace Rodin::IO
     /**
      * @brief Tests whether the mesh needs curved XDMF visualization geometry.
      * @param[in] mesh Mesh to inspect.
-     * @returns True when at least one exported cell has factor order greater than one.
+     * @returns True when an exported cell is not certified as native first-order geometry.
      *
      * Topology follows interpolation order, rather than total polynomial degree:
      * first-order product cells already have total degree greater than one.
-     * The transformation's factor-order contract retains a conservative bound
-     * when a custom transformation cannot provide a sharper interpolation order.
+     * Unknown transformations conservatively use quadratic visualization sampling.
      */
     inline bool hasCurvedXDMFGeometry(const Geometry::MeshBase& mesh)
     {
       for (auto it = mesh.getCell(); !it.end(); ++it)
       {
-        const size_t order = it->getTransformation().getFactorOrder();
+        const size_t order = (it->getTransformation().isFirstOrder() ? 1 : 2);
         if (order > 1)
           return true;
       }
@@ -1040,7 +1039,7 @@ namespace Rodin::IO
       {
         if (!isXDMFOwnedCell(shard, D, it->getIndex()))
           continue;
-        const size_t order = it->getTransformation().getFactorOrder();
+        const size_t order = (it->getTransformation().isFirstOrder() ? 1 : 2);
         count += getXDMFReferenceNodes(it->getGeometry(), order).size();
       }
       return count;
@@ -1065,7 +1064,7 @@ namespace Rodin::IO
         {
           if (!isXDMFOwnedCell(shard, D, it->getIndex()))
             continue;
-          const size_t order = it->getTransformation().getFactorOrder();
+          const size_t order = (it->getTransformation().isFirstOrder() ? 1 : 2);
           const auto nodes = getXDMFReferenceNodes(it->getGeometry(), order);
           size += 1 + nodes.size();
           if (it->getGeometry() == Geometry::Polytope::Type::Point ||
@@ -1123,7 +1122,7 @@ namespace Rodin::IO
 
         const auto geometry = connectivity.getGeometry(D, i);
         const auto& trans = localMesh.getPolytopeTransformation(D, i);
-        const size_t order = trans.getFactorOrder();
+        const size_t order = (trans.isFirstOrder() ? 1 : 2);
 
         // Uniform high-order XDMF is used only when every cell is exported
         // through the same quadratic topology. Mixed remains the robust
@@ -1448,7 +1447,7 @@ namespace Rodin::IO
 
           const auto geometry = connectivity.getGeometry(D, i);
           const auto& trans = mesh.getPolytopeTransformation(D, i);
-          const size_t order = trans.getFactorOrder();
+          const size_t order = (trans.isFirstOrder() ? 1 : 2);
           const auto nodes = getXDMFReferenceNodes(geometry, order);
 
           topology.push_back(order > 1 ? getXDMFQuadraticMixedTopologyId(geometry)
@@ -1558,7 +1557,8 @@ namespace Rodin::IO
 
           const auto geometry = connectivity.getGeometry(D, i);
           const auto& trans = localMesh.getPolytopeTransformation(D, i);
-          const auto nodes = getXDMFReferenceNodes(geometry, trans.getFactorOrder());
+          const auto nodes =
+            getXDMFReferenceNodes(geometry, (trans.isFirstOrder() ? 1 : 2));
 
           for (const auto& rc : nodes)
           {
@@ -1920,8 +1920,8 @@ namespace Rodin::IO
               continue;
             const auto visCell = visMesh.getPolytope(D, i);
             const auto gfCell = gfMesh.getPolytope(D, i);
-            const auto nodes = getXDMFReferenceNodes(
-              visCell->getGeometry(), visCell->getTransformation().getFactorOrder());
+            const auto nodes = getXDMFReferenceNodes(visCell->getGeometry(),
+              (visCell->getTransformation().isFirstOrder() ? 1 : 2));
             for (const auto& rc : nodes)
             {
               Math::SpatialPoint pc;
@@ -1949,8 +1949,8 @@ namespace Rodin::IO
               continue;
             const auto visCell = visMesh.getPolytope(D, i);
             const auto gfCell = gfMesh.getPolytope(D, i);
-            const auto nodes = getXDMFReferenceNodes(
-              visCell->getGeometry(), visCell->getTransformation().getFactorOrder());
+            const auto nodes = getXDMFReferenceNodes(visCell->getGeometry(),
+              (visCell->getTransformation().isFirstOrder() ? 1 : 2));
             for (const auto& rc : nodes)
             {
               Math::SpatialPoint pc;

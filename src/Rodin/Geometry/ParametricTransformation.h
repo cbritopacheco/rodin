@@ -27,6 +27,8 @@
 
 #include "ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Variational/H1/ForwardDecls.h"
+#include "Rodin/Variational/P1/ForwardDecls.h"
 
 namespace Rodin::Geometry
 {
@@ -145,22 +147,41 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
-      size_t getOrder() const override
+      /**
+       * @brief Returns the reference basis polynomial degree bound.
+       * @returns A coordinate degree bound, or no polynomial bound for rational bases.
+       */
+      Optional<size_t> getDegree() const override
       {
-        return m_fe.getOrder();
+        return m_fe.getDegree();
       }
 
       /**
-       * @brief Returns the element's factor degree when available, otherwise
-       * the conservative total-degree bound of the transformation interface.
-       * @returns The element's factor degree when available, otherwise the conservative total-degree bound of the transformation interface.
+       * @brief Bounds map degree in selected reference directions.
+       * @param directions Reference-coordinate indices.
+       * @returns A certified bound from the element, or no established bound.
        */
-      size_t getFactorOrder() const override
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const override
       {
-        if constexpr (requires { m_fe.getFactorOrder(); })
-          return m_fe.getFactorOrder();
+        if constexpr (requires { m_fe.getDegree(directions); })
+          return m_fe.getDegree(directions);
         else
-          return Parent::getFactorOrder();
+          return Parent::getDegree(directions);
+      }
+
+      bool isFirstOrder() const override
+      {
+        const auto degree = getEnclosureDegree(m_fe);
+        return getReferenceDimension() == 0 || (degree && *degree <= 1);
+      }
+
+      Optional<Bounds> getBounds() const override
+      {
+        if (getReferenceDimension() == 0)
+          return Bounds(*this, m_fe.getGeometry(), 0);
+        if (const auto degree = getEnclosureDegree(m_fe))
+          return Bounds(*this, m_fe.getGeometry(), *degree);
+        return std::nullopt;
       }
 
       void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
@@ -315,7 +336,7 @@ namespace Rodin::Geometry
             << "Physical coordinates have an invalid extent." << Alert::Raise;
         }
         const Polytope::Traits traits(m_fe.getGeometry());
-        if (getReferenceDimension() > 0 && traits.isSimplex() && getFactorOrder() <= 1)
+        if (getReferenceDimension() > 0 && traits.isSimplex() && isFirstOrder())
         {
           Parent::inverse(rc, pc);
           return;
@@ -469,6 +490,41 @@ namespace Rodin::Geometry
       }
 
     private:
+      /**
+       * @brief Uses polynomial containment for an otherwise unknown scalar family.
+       * @param element Scalar reference element.
+       * @returns A control-space degree bound, or no certified containment.
+       */
+      template <class Element>
+      static Optional<size_t> getEnclosureDegree(const Element& element)
+      {
+        return element.getDegree();
+      }
+
+      /**
+       * @brief Certifies the native linear Lagrange control space, including pyramids.
+       * @param element Reference element; its family fixes the containment.
+       * @returns One.
+       */
+      template <class Scalar>
+      static Optional<size_t> getEnclosureDegree(
+        [[maybe_unused]] const Variational::P1Element<Scalar>& element)
+      {
+        return 1;
+      }
+
+      /**
+       * @brief Certifies the H1 reference control space, including rational pyramids.
+       * @param element Reference element; its family fixes the containment.
+       * @returns The certified simplex, tensor, wedge or collapsed-pyramid degree.
+       */
+      template <size_t K, class Scalar>
+      static Optional<size_t> getEnclosureDegree(
+        [[maybe_unused]] const Variational::H1Element<K, Scalar>& element)
+      {
+        return K;
+      }
+
       // Boost constructs this empty state before loading all serialized fields.
       ParametricTransformation()
         : Parent(0, 0)

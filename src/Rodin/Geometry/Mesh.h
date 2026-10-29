@@ -65,13 +65,16 @@
  * @param[in] dp Target dimension
  */
 #define RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, dp)                                    \
-  if (mesh.getConnectivity().getIncidence(d, dp).size() == 0)                            \
+  do                                                                                     \
   {                                                                                      \
-    Rodin::Alert::MemberFunctionException(*this, __func__)                               \
-      << Rodin::Alert::Notation::Incidence(d, dp)                                        \
-      << " has not been computed and is required to use this function."                  \
-      << Rodin::Alert::Raise;                                                            \
-  }
+    if (mesh.getConnectivity().getIncidence(d, dp).size() == 0)                          \
+    {                                                                                    \
+      Rodin::Alert::MemberFunctionException(*this, __func__)                             \
+        << Rodin::Alert::Notation::Incidence(d, dp)                                      \
+        << " has not been computed and is required to use this function."                \
+        << Rodin::Alert::Raise;                                                          \
+    }                                                                                    \
+  } while (false)
 
 /**
  * @brief Requires connectivity @f$ d \rightarrow d' @f$ (for use in member functions).
@@ -83,13 +86,16 @@
  * @param[in] dp Target dimension
  */
 #define RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(d, dp)                                     \
-  if (this->getConnectivity().getIncidence(d, dp).size() == 0)                           \
+  do                                                                                     \
   {                                                                                      \
-    Rodin::Alert::MemberFunctionException(*this, __func__)                               \
-      << Rodin::Alert::Notation::Incidence(d, dp)                                        \
-      << " has not been computed and is required to use this function."                  \
-      << Rodin::Alert::Raise;                                                            \
-  }
+    if (this->getConnectivity().getIncidence(d, dp).size() == 0)                         \
+    {                                                                                    \
+      Rodin::Alert::MemberFunctionException(*this, __func__)                             \
+        << Rodin::Alert::Notation::Incidence(d, dp)                                      \
+        << " has not been computed and is required to use this function."                \
+        << Rodin::Alert::Raise;                                                          \
+    }                                                                                    \
+  } while (false)
 
 /**
  * @brief Requires mesh to be a SubMesh.
@@ -98,13 +104,16 @@
  * invalid downcasting operations.
  */
 #define RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH()                                            \
-  if (!this->isSubMesh())                                                                \
+  do                                                                                     \
   {                                                                                      \
-    Rodin::Alert::MemberFunctionException(*this, __func__)                               \
-      << "This instance of Mesh is not a SubMesh "                                       \
-      << Rodin::Alert::Notation::Predicate(false, "isSubMesh()")                         \
-      << ". Downcasting to SubMesh is ill-defined." << Rodin::Alert::Raise;              \
-  }
+    if (!this->isSubMesh())                                                              \
+    {                                                                                    \
+      Rodin::Alert::MemberFunctionException(*this, __func__)                             \
+        << "This instance of Mesh is not a SubMesh "                                     \
+        << Rodin::Alert::Notation::Predicate(false, "isSubMesh()")                       \
+        << ". Downcasting to SubMesh is ill-defined." << Rodin::Alert::Raise;            \
+    }                                                                                    \
+  } while (false)
 
 namespace Rodin::FormLanguage
 {

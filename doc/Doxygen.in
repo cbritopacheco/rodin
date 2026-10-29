@@ -1249,7 +1249,7 @@ HTML_EXTRA_STYLESHEET  =
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       = @CMAKE_SOURCE_DIR@/doc/Images/Doxygen.svg
+HTML_EXTRA_FILES       = @CMAKE_SOURCE_DIR@/doc/Images/Doxygen.svg @CMAKE_SOURCE_DIR@/doc/rodin-ci.js @CMAKE_SOURCE_DIR@/brand/logos/horizontal-color.svg @CMAKE_SOURCE_DIR@/brand/logos/horizontal-dark.svg @CMAKE_SOURCE_DIR@/brand/logos/wordmark-white.svg @CMAKE_SOURCE_DIR@/brand/fonts/static/Manrope-Regular.ttf @CMAKE_SOURCE_DIR@/brand/fonts/static/Manrope-SemiBold.ttf @CMAKE_SOURCE_DIR@/brand/fonts/static/Manrope-Bold.ttf @CMAKE_SOURCE_DIR@/brand/fonts/OFL.txt
 
 # The HTML_COLORSTYLE_HUE tag controls the color of the HTML output. Doxygen
 # will adjust the colors in the style sheet and background images according to

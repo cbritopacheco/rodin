@@ -82,6 +82,9 @@ namespace Rodin::IO
       /// @brief Type of object being printed.
       using ObjectType = T;
 
+      /// @brief Destroys the printer through its polymorphic interface.
+      virtual ~Printer() = default;
+
       /**
        * @brief Prints object to an output stream.
        * @param[in,out] os Output stream to write to

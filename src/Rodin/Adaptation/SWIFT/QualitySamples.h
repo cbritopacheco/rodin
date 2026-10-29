@@ -44,7 +44,8 @@ namespace Rodin::Adaptation::SWIFT
         : m_cell(cell),
           m_parameters(parameters),
           m_formula(QualityCovering::get(cell.getGeometry(),
-            parameters.sampling.getSubdivision(order, cell.getTransformation().getOrder(),
+            parameters.sampling.getSubdivision(order,
+              (cell.getTransformation().getDegree().value_or(2)),
               Geometry::Polytope::Traits(cell.getGeometry()).getVertexCount() ==
                 cell.getDimension() + 1)))
       {}

@@ -1593,19 +1593,6 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the polynomial order of the finite element space on
-       *        the given polytope.
-       * @param polytope Polytope used to construct the coordinate mapping.
-       * @returns Polynomial order on the requested polytope, or no value when unavailable.
-       */
-      constexpr Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
-      {
-        const auto& fes = this->getFiniteElementSpace();
-        return fes.getFiniteElement(polytope.getDimension(), polytope.getIndex())
-          .getOrder();
-      }
-
-      /**
        * @brief Releases all PETSc array handles and destroys the vector.
        *
        * Performs a full teardown of the PETSc resources owned by this grid

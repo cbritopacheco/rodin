@@ -11,7 +11,7 @@
  * @file
  * @brief Gradient operator specialization for P1 (piecewise linear) functions.
  *
- * For P1 functions, the gradient is constant on each element:
+ * On affine simplices, the gradient of a P1 function is constant on each element:
  * @f[
  *   \nabla u|_K = \sum_{i=1}^{n+1} u_i \nabla \phi_i
  * @f]
@@ -66,7 +66,7 @@ namespace Rodin::Variational
        * @brief Constructs the gradient of a P1 function @f$ u @f$.
        * @param[in] u P1 GridFunction (piecewise linear)
        *
-       * @note The gradient is constant on each element for P1 functions.
+       * @note The physical gradient is constant on affine simplices; it may vary on other maps.
        */
       Grad(const OperandType& u)
         : Parent(u)
@@ -215,7 +215,16 @@ namespace Rodin::Variational
        */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
-        const size_t k = P1Element<ScalarType>(geom.getGeometry()).getOrder();
+        const size_t k =
+          P1Element<ScalarType>(geom.getGeometry()).getDegree().value_or(2);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (k == 0) ? 0 : (k - 1);
       }
 
@@ -281,7 +290,7 @@ namespace Rodin::Variational
           Geometry::Polytope::Type geometry;
 
           /// @brief Order of the geometric transformation.
-          size_t transformationOrder;
+          Optional<size_t> transformationOrder;
 
           /// @brief Whether the key holds a cached entry.
           bool valid;
@@ -481,7 +490,7 @@ namespace Rodin::Variational
         m_binding.dimension = polytope.getDimension();
         m_binding.index = polytope.getIndex();
         m_binding.geometry = polytope.getGeometry();
-        m_binding.transformationOrder = polytope.getTransformation().getOrder();
+        m_binding.transformationOrder = polytope.getTransformation().getDegree();
         m_binding.valid = true;
         return *this;
       }
@@ -510,7 +519,7 @@ namespace Rodin::Variational
         const auto geom = poly.getGeometry();
 
         const auto& transformation = poly.getTransformation();
-        const size_t transformationOrder = transformation.getOrder();
+        const auto transformationOrder = transformation.getDegree();
         const auto* qf = ip.getReferenceQuadratureFormula();
 
         // ---- cell key: allocate/size once per cell
@@ -544,7 +553,8 @@ namespace Rodin::Variational
           (geom == Geometry::Polytope::Type::Pyramid) ||
           (geom == Geometry::Polytope::Type::Hexahedron);
 
-        const bool needsQp = (transformationOrder > 1) || variableReferenceDerivative;
+        const bool needsQp = (!transformationOrder || *transformationOrder > 1) ||
+          variableReferenceDerivative;
 
         typename Cache::QuadraturePointKey quadraturePointKey;
         if (needsQp)
@@ -615,6 +625,14 @@ namespace Rodin::Variational
         const auto k = getOperand().getOrder(geom);
         if (!k.has_value())
           return std::nullopt;
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (*k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (*k == 0) ? 0 : (*k - 1);
       }
 
@@ -820,6 +838,14 @@ namespace Rodin::Variational
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto order = getOperand().getOrder(poly);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (order && *order == 1)
+        {
+          const auto degree = poly.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return order ? Optional<size_t>(*order ? *order - 1 : 0) : std::nullopt;
       }
       Grad* copy() const noexcept override
@@ -1034,6 +1060,14 @@ namespace Rodin::Variational
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto order = getOperand().getOrder(poly);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (order && *order == 1)
+        {
+          const auto degree = poly.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return order ? Optional<size_t>(*order ? *order - 1 : 0) : std::nullopt;
       }
       Grad* copy() const noexcept override

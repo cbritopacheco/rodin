@@ -1,0 +1,9 @@
+/**
+  @page ci-index Continuous integration
+  @brief Branch status, workflow runs and CI reports.
+
+  CI status and reports for develop and master.
+
+  @section ci-status Current status
+
+*/

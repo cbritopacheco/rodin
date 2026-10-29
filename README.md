@@ -1,8 +1,21 @@
-[![Rodin](doc/Images/README_Header.png)](https://github.com/cbritopacheco/rodin/releases)
+<p align="center">
+  <a href="https://cbritopacheco.github.io/rodin/docs/refs/heads/master/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="brand/logos/horizontal-white.svg">
+      <source media="(prefers-color-scheme: light)" srcset="brand/logos/horizontal-color.svg">
+      <img src="brand/logos/horizontal-color.svg" width="520" alt="Rodin">
+    </picture>
+  </a>
+</p>
 
-# Rodin [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20Rodin-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cbritopacheco)
+<p align="center"><strong>A modern C++ FEM library for shape and topology optimization.</strong></p>
 
-Rodin is a lightweight and modular finite element framework which provides many of the associated functionalities that are needed when implementing shape and topology optimization algorithms. These functionalities range from refining and remeshing the underlying shape, to providing elegant mechanisms to specify and solve variational problems.
+<p align="center">
+  <a href="LICENSE"><img alt="Boost Software License 1.0" src="https://img.shields.io/badge/license-BSL--1.0-green"></a>
+  <a href="https://www.buymeacoffee.com/cbritopacheco"><img alt="Support Rodin" src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20Rodin-yellow?logo=buymeacoffee"></a>
+</p>
+
+Rodin is a modular C++20 finite element framework for solving partial differential equations and developing shape and topology optimization algorithms. Its compositional form language connects mathematical formulations to C++ code, with mesh refinement, remeshing and solver backends available through independent modules.
 
 It is named after the French sculptor Auguste Rodin, considered the founder of modern sculpture.
 
@@ -19,10 +32,10 @@ New to Rodin? Check out our comprehensive [Getting Started Guide](https://cbrito
 
 ## Status
 
-| Branch      |  Matrix  | Tests | Code Coverage | Benchmarks | Documentation |
+| Branch      |  Build   | Tests | Code Coverage | Benchmarks | Documentation |
 |:-----------:|:--------:|:-----:|:-------------:|:----------:|:-------------:|
-| master      | [![Build](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml?query=branch%3Amaster) | [![Tests](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml/badge.svg?branch=master)](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml?query=branch%3Amaster) | [![codecov](https://codecov.io/gh/cbritopacheco/rodin/branch/master/graph/badge.svg?token=gwEZOnQje1)](https://app.codecov.io/gh/cbritopacheco/rodin/tree/master)  | [![Benchmarks](https://github.com/cbritopacheco/rodin/actions/workflows/Benchmarks.yml/badge.svg?branch=master)](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/benchmarks/) | [![Documentation](https://github.com/cbritopacheco/rodin/actions/workflows/Documentation.yml/badge.svg?branch=master)](https://cbritopacheco.github.io/rodin/docs/refs/heads/master) |
-| develop     | [![Build](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml?query=branch%3Adevelop) | [![Tests](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml/badge.svg?branch=develop)](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml?query=branch%3Adevelop) | [![codecov](https://codecov.io/gh/cbritopacheco/rodin/branch/develop/graph/badge.svg?token=gwEZOnQje1)](https://app.codecov.io/gh/cbritopacheco/rodin/tree/develop) | [![Benchmarks](https://github.com/cbritopacheco/rodin/actions/workflows/Benchmarks.yml/badge.svg?branch=develop)](https://cbritopacheco.github.io/rodin/docs/refs/heads/develop/benchmarks/) | [![Documentation](https://github.com/cbritopacheco/rodin/actions/workflows/Documentation.yml/badge.svg?branch=develop)](https://cbritopacheco.github.io/rodin/docs/refs/heads/develop) |
+| master      | [![Build](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fmaster%2Fbuild.json&style=flat&label=Build&labelColor=555&cacheSeconds=60)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml?query=branch%3Amaster) | [![Tests](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fmaster%2Ftests.json&style=flat&label=Tests&labelColor=555&cacheSeconds=60)](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml?query=branch%3Amaster) | [![codecov](https://codecov.io/gh/cbritopacheco/rodin/branch/master/graph/badge.svg?token=gwEZOnQje1)](https://app.codecov.io/gh/cbritopacheco/rodin/tree/master)  | [![Benchmarks](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fmaster%2Fbenchmarks.json&style=flat&label=Benchmarks&labelColor=555&cacheSeconds=60)](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/benchmarks/) | [![Documentation](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fmaster%2Fdocumentation.json&style=flat&label=Documentation&labelColor=555&cacheSeconds=60)](https://cbritopacheco.github.io/rodin/docs/refs/heads/master) |
+| develop     | [![Build](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fdevelop%2Fbuild.json&style=flat&label=Build&labelColor=555&cacheSeconds=60)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml?query=branch%3Adevelop) | [![Tests](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fdevelop%2Ftests.json&style=flat&label=Tests&labelColor=555&cacheSeconds=60)](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml?query=branch%3Adevelop) | [![codecov](https://codecov.io/gh/cbritopacheco/rodin/branch/develop/graph/badge.svg?token=gwEZOnQje1)](https://app.codecov.io/gh/cbritopacheco/rodin/tree/develop) | [![Benchmarks](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fdevelop%2Fbenchmarks.json&style=flat&label=Benchmarks&labelColor=555&cacheSeconds=60)](https://cbritopacheco.github.io/rodin/docs/refs/heads/develop/benchmarks/) | [![Documentation](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fdevelop%2Fdocumentation.json&style=flat&label=Documentation&labelColor=555&cacheSeconds=60)](https://cbritopacheco.github.io/rodin/docs/refs/heads/develop) |
 
 ## Table of Contents
 
@@ -125,9 +138,10 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-int main() {
+int main()
+{
   Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {8, 8});
-  P1 Vh(mesh);
+  P1 vh(mesh);
   std::cout << "Rodin installation verified!" << std::endl;
   return 0;
 }
@@ -166,7 +180,7 @@ For detailed installation instructions, advanced configuration options, and trou
 ## Building the project
 
 ```
-git clone --recursive https://github.com/carlos-brito-pacheco/rodin
+git clone --recursive https://github.com/cbritopacheco/rodin
 cd rodin
 mkdir build && cd build
 cmake ..
@@ -347,7 +361,7 @@ Rodin provides many powerful features for finite element analysis:
 - Multiple quadrature rules for integration
 - Grundmann-Moeller quadrature
 - Gauss-Legendre quadrature
-- See the [complete list of quadrature formulas](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/group___rodin_quadrature.html)
+- See the [complete list of quadrature formulas](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/namespace_rodin_1_1_q_f.html)
 
 **Advanced Mesh Operations:**
 - SubMesh extraction for domain decomposition
@@ -462,24 +476,10 @@ manager.
 
 ## Development
 
-Rodin includes a GitHub Copilot custom agent called **Rodin** that assists with building and testing code changes.
-
-### Using the Rodin Agent
-
-The Rodin agent can help you:
-- Compile the Rodin codebase
-- Run unit tests, manufactured tests, and benchmarks
-- Troubleshoot build and test failures
-- Understand the build system
-
-To use the Rodin agent in GitHub Copilot Chat:
-```
-@Rodin build and test my changes
-@Rodin compile the code and run unit tests
-@Rodin help me fix this build error
-```
-
-For more information, see [.github/agents/README.md](.github/agents/README.md).
+See the [testing guide](tests/README.md) for local validation and runner resource
+budgets, and the [documentation guide](doc/README.md) to build the site.
+The [brand guide](brand/README.md) provides logos, editable artwork, fonts and
+usage guidelines.
 
 ## Gallery
 
@@ -487,29 +487,41 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
   <em>Click on any preview to open the full video or image.</em>
 </p>
 
+### Computational fluid dynamics
+
+<table>
+  <tr>
+    <td align="center" valign="bottom" width="33%">
+      <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/CFD/AtriumP1P1/AtriumP1P1.mp4">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/CFD/AtriumP1P1/Preview.png" alt="AtriumP1P1 CFD simulation" width="300">
+      </a>
+      <br />
+      CFD simulation in an atrium
+    </td>
+  </tr>
+</table>
+
 ### Shape optimization
 
 <table>
   <tr>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever2D/LevelSetCantilever2D.webm">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever2D/Preview.png?v=transparent" alt="Shape optimization of a cantilever in 2D" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever2D/Preview.png?v=transparent" alt="Shape optimization of a cantilever in 2D" width="300">
       </a>
       <br />
       Minimization of linear-elastic compliance in 2D
     </td>
-    <td align="center" valign="bottom" width="50%">
+    <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/LevelSetCantilever3D.webm?v=4x">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/Preview.png?v=transparent" alt="Shape optimization of a cantilever in 3D" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/Preview.png?v=transparent" alt="Shape optimization of a cantilever in 3D" width="300">
       </a>
       <br />
      Minimization of linear-elastic compliance in 3D
     </td>
-  </tr>
-  <tr>
-    <td align="center" valign="bottom" width="50%">
+    <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024_Preview.png" alt="Shape optimization of a cantilever in 3D" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024_Preview.png?v=stacked" alt="Translational-rotational coupling optimization in Stokes flow" width="300">
       </a>
       <br />
       Translational-rotational coupling optimization in Stokes flow (by <a href="https://kazusa000.github.io/">J. Wang</a>)
@@ -523,24 +535,10 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
   <tr>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/TemperatureMinimization.webm">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/Preview.png?v=optimized" alt="Minimization of temperature over a 2D plaque" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/Preview.png?v=optimized" alt="Minimization of temperature over a 2D plaque" width="300">
       </a>
       <br />
       Minimization of temperature over a 2D plaque
-    </td>
-        <td align="center" valign="bottom" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
-      </a>
-      <br />
-      Placeholder
-    </td>
-        <td align="center" valign="bottom" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
-      </a>
-      <br />
-      Placeholder
     </td>
   </tr>
 </table>
@@ -551,26 +549,26 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
   <tr>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI_Preview.png?v=dematted" alt="Coronary FSI" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI_Preview.png?v=dematted" alt="Coronary FSI" width="300">
       </a>
       <br />
       Fluid-structure interaction simulation of a coronary artery (by <a href="https://www.researchgate.net/profile/Oscar-Ruz-2">O. Ruz</a>)
     </td>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD_Preview.png?v=3" alt="Blood velocity in an atrium CFD simulation" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD_Preview.png?v=3" alt="Blood velocity in an atrium CFD simulation" width="300">
       </a>
       <br />
       CFD simulation of blood flow in an atrium (by <a href="https://cfdusach.cl/">CFD Lab at USACH</a>)
     </td>
-        <td align="center" valign="bottom" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
-      </a>
-      <br />
-      Placeholder
-    </td>
-  </tr>
+  <td align="center" valign="bottom" width="33%">
+    <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/LeftCoronaryCFD/LeftCoronaryCFD.mp4">
+      <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/LeftCoronaryCFD/Preview.png?v=selected" alt="CFD simulation of a left coronary artery" width="300">
+    </a>
+    <br />
+    CFD simulation of a left coronary artery (by <a href="https://www.researchgate.net/profile/Oscar-Ruz-2">O. Ruz</a>)
+  </td>
+</tr>
 </table>
 
 ## License

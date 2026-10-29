@@ -36,7 +36,7 @@ Eigen); 3D paths do.
 Wrapper over the MMG remesher: `MMG::Mesh` (Rodin mesh + MMG metadata),
 `Adapt` (metric-based adaptation), `MeshOptimizer` (quality optimization),
 `LevelSetDiscretizer` (implicit-domain discretization from a level set),
-`MMG5.h` conversion utilities, MEDIT loader/printer specializations. On
+`V5.h` conversion utilities, MEDIT loader/printer specializations. On
 this branch MMG is the remesher and implicit-domain discretizer; native
 alternatives exist only on other branches.
 
@@ -62,7 +62,7 @@ Loader/Printer class-template pattern: `MeshLoader`/`MeshPrinter`,
 - **MFEM** (`.mesh`/`.gf`) — meshes and grid functions.
 - **XDMF + HDF5** — visualization/time series: `IO::XDMF` writes a domain
   with `xdmf.grid().setMesh(mesh).add("name", gf)` per step; heavy data in
-  HDF5 side files; detects higher-order geometry through `getFactorOrder()`
+  HDF5 side files; detects native geometry through `isFirstOrder()`
   and samples it. Total polynomial degree must not classify visualization
   topology: first-order product cells retain their native shared vertices.
   This is the standard example output (open in ParaView).

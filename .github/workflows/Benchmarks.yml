@@ -24,8 +24,6 @@ jobs:
       - run: pip install -r doc/requirements.txt
       - run: python3 -m unittest discover -s dev -p 'test_benchmark_*.py' -v
       - run: node --check dev/benchmarks/charts.js
-  Documentation:
-    uses: ./.github/workflows/Documentation.yml
   Local:
     name: Local
     needs: Infrastructure
@@ -73,59 +71,13 @@ jobs:
       - run: python3 dev/benchmark_ci.py pool --artifacts benchmark-inputs --output benchmark-complete
       - uses: actions/upload-artifact@v4
         with:
+          overwrite: true
           name: benchmark-complete
           path: benchmark-complete
           if-no-files-found: error
-  PublishDocumentation:
-    name: Publish documentation
-    needs: Documentation
-    runs-on: ubuntu-24.04
-    concurrency:
-      group: rodin-gh-pages-publication
-      cancel-in-progress: false
-    permissions:
-      contents: write
-      pages: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: pip install -r doc/requirements.txt
-      - uses: actions/download-artifact@v4
-        with:
-          name: documentation
-          path: documentation-site
-      - uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: .ci-pages
-          lfs: false
-      - name: Integrate documentation with the latest complete benchmark histories
-        env:
-          REF: ${{ github.ref }}
-        run: python3 dev/benchmark_publish.py --documentation-only --site documentation-site --pages .ci-pages --ref "$REF"
-      - name: Publish documentation Pages update
-        working-directory: .ci-pages
-        env:
-          SHA: ${{ github.sha }}
-        run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "Publish documentation $SHA"
-            git push origin HEAD:gh-pages
-          fi
-      - name: Deploy and verify the published Pages commit
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 dev/deploy_pages.py --checkout .ci-pages
   Publish:
-    name: Publish complete benchmark histories
-    needs: [PublishDocumentation, Pool]
+    name: Publish documentation and benchmarks
+    needs: Pool
     if: always()
     runs-on: ubuntu-24.04
     concurrency:
@@ -134,12 +86,15 @@ jobs:
     permissions:
       contents: write
       pages: write
+      id-token: write
+    environment:
+      name: Documentation and benchmarks
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Require published documentation and complete benchmark results
+      - name: Require complete benchmark results
         env:
-          DOCUMENTATION: ${{ needs.PublishDocumentation.result }}
           POOL: ${{ needs.Pool.result }}
-        run: test "$DOCUMENTATION" = success && test "$POOL" = success
+        run: test "$POOL" = success
       - uses: actions/checkout@v4
         with:
           lfs: false
@@ -173,7 +128,9 @@ jobs:
             git commit -m "Publish complete benchmark campaign $SHA"
             git push origin HEAD:gh-pages
           fi
-      - name: Deploy and verify the published Pages commit
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 dev/deploy_pages.py --checkout .ci-pages
+      - name: Publish documentation and benchmarks
+        id: deployment
+        uses: ./.github/actions/publish-pages
+        with:
+          checkout: .ci-pages
+          artifact-name: benchmark-pages

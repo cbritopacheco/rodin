@@ -1,8 +1,15 @@
+{% macro benchmark_action(path, title, count, record=false) %}
+{% if count %}<div class="benchmark-actions">
+  <div class="m-button {{ 'm-success' if record else 'm-primary' }}"><a href="{{ prefix }}{{ path }}/index.html" aria-label="{{ 'View results for ' if record else 'Browse benchmarks in ' }}{{ title }}">{% if record %}<svg class="benchmark-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17M7 15l4-5 4 3 6-7"/></svg> View results{% else %}Browse benchmarks <span aria-hidden="true">→</span>{% endif %}</a></div>
+  <span class="m-text m-dim">{{ count }} benchmark{{ '' if count == 1 else 's' }}</span>
+</div>{% else %}<p class="m-text m-dim benchmark-actions">No benchmarks yet</p>{% endif %}
+{% endmacro %}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/svg+xml" href="{{ prefix }}assets/favicon.svg">
   <title>{{ title }} · Rodin benchmarks</title>
   {% for stylesheet in stylesheets %}<link rel="stylesheet" href="{{ stylesheet if '://' in stylesheet else prefix + stylesheet }}">
   {% endfor %}<script src="{{ prefix }}assets/rodin-theme.js"></script>
@@ -21,6 +28,7 @@
       <h1>{{ title }}</h1>
       <p class="benchmark-configuration">{{ configuration }}</p>
       {% if not value or value == 'Rodin' %}
+      <div class="m-button m-default benchmark-search-action"><a href="#search" onclick="return showSearch()">Search benchmarks</a></div>
       <p>This catalogue presents Rodin's performance benchmarks, from individual mathematical
         operations to assembled finite element problems. Each benchmark describes the operation
         measured, the inputs and the measurement conditions. Published timing histories help
@@ -37,11 +45,13 @@
           <p class="m-text m-dim"><em>{{ item.brief|safe }}</em></p>
           <div class="benchmark-representative">{{ item.representative|safe }}</div>
           <div class="m-block m-flat">{{ item.description|safe }}</div>
+          {{ benchmark_action(item.path, item.title, item.benchmark_count) }}
         </section>{% endfor %}
       </section>{% endfor %}
       <section data-category="Physical contexts"><h2>Physical contexts</h2>
       {% for context in contexts %}<section class="m-frame"><h3><a href="{{ prefix }}{{ context.path }}/index.html">{{ context.title }}</a></h3>
         <div class="m-block m-flat">{{ context.description|safe }}</div>
+        {{ benchmark_action(context.path, context.title, context.benchmark_count) }}
       </section>{% endfor %}</section>
       {% else %}
       {% if module %}<p class="m-text m-dim"><em>{{ module.brief|safe }}</em></p><div class="benchmark-representative">{{ module.representative|safe }}</div><div class="m-block m-flat">{{ module.description|safe }}</div>{% endif %}
@@ -50,6 +60,7 @@
       <div class="benchmark-children">{% for child in children %}
         <section class="m-frame"><h3><a href="{{ prefix }}{{ child.path }}/index.html">{{ child.title }}</a></h3>
           {{ child.brief|safe }}
+          {{ benchmark_action(child.path, child.title, child.benchmark_count, child.record) }}
         </section>
       {% endfor %}</div>{% endif %}
       {% if page.record %}<h2>Timing history</h2>

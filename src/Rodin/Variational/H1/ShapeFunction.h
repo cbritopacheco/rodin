@@ -255,8 +255,8 @@ namespace Rodin::Variational
        */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
-        // Uses your H1Element::getOrder() (K / 2K / 3K depending on geometry)
-        return H1Element<K, ScalarType>(geom.getGeometry()).getOrder();
+        // Retain the total-degree estimate; rational pyramids use a family accuracy policy.
+        return H1Element<K, ScalarType>(geom.getGeometry()).getDegree().value_or(2 * K);
       }
 
       ShapeFunction* copy() const noexcept override
@@ -520,7 +520,7 @@ namespace Rodin::Variational
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         // Order of the underlying scalar polynomial space (your total-degree convention)
-        return H1Element<K, ScalarType>(geom.getGeometry()).getOrder();
+        return H1Element<K, ScalarType>(geom.getGeometry()).getDegree().value_or(2 * K);
       }
 
       ShapeFunction* copy() const noexcept override
@@ -715,9 +715,9 @@ namespace Rodin::Variational
        */
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
-        return this->getFiniteElementSpace()
-          .getFiniteElement(poly.getDimension(), poly.getIndex())
-          .getOrder();
+        const auto& element = this->getFiniteElementSpace().getFiniteElement(
+          poly.getDimension(), poly.getIndex());
+        return element.getDegree().value_or(2 * K);
       }
 
       ShapeFunction* copy() const noexcept override

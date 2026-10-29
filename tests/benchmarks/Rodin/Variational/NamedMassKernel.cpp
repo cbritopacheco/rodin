@@ -169,7 +169,7 @@ namespace Rodin::Tests::Benchmarks
           state.SkipWithError("Named mass fixture has an invalid component layout");
           return;
         }
-        const size_t order = 2 * element.getOrder();
+        const size_t order = 2 * element.getDegree().value_or(2 * element.getOrder());
         QuadratureReference reference(scalarIntegral);
         reference.assemble(cell, order);
         Math::Matrix<Scalar> expected = Math::Matrix<Scalar>::Zero(count, count);
@@ -278,8 +278,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["cells"] = 1;
         state.counters["fixture_cells"] = mesh.getPolytopeCount(dimension);
         state.counters["global_dofs"] = space.getSize();
-        state.counters["geometry_factor_order"] =
-          cell.getTransformation().getFactorOrder();
+        state.counters["first_order_geometry"] = cell.getTransformation().isFirstOrder();
         state.counters["scalar_basis"] = scalarCount;
         state.counters["local_basis"] = count;
         state.counters["local_entries"] = count * count;

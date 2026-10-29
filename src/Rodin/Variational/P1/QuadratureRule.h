@@ -43,6 +43,7 @@
 #include "Rodin/Math/Common.h"
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Variational/IntegrationPoint.h"
+#include "Rodin/Variational/Integrator.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/QF/Centroid.h"
 #include "Rodin/QF/GaussLegendre.h"
@@ -185,8 +186,9 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
 
-        const size_t order = this->getOrder(polytope).value_or(
-          integrand.getOrder(polytope).value_or(fe.getOrder()));
+        const size_t order =
+          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
+            fe.getDegree().value_or(2 * fe.getOrder())));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -419,8 +421,9 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
 
-        const size_t order = this->getOrder(polytope).value_or(
-          integrand.getOrder(polytope).value_or(fe.getOrder()));
+        const size_t order =
+          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
+            fe.getDegree().value_or(2 * fe.getOrder())));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -688,7 +691,8 @@ namespace Rodin::Variational
         // to compute the same thing faster, not something else.
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
-            trialfe.getOrder() + testfe.getOrder()));
+            trialfe.getDegree().value_or(2 * trialfe.getOrder()) +
+            testfe.getDegree().value_or(2 * testfe.getOrder())));
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
 
         if (recompute)
@@ -1085,7 +1089,8 @@ namespace Rodin::Variational
 
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
-            trialfe.getOrder() + testfe.getOrder()));
+            trialfe.getDegree().value_or(2 * trialfe.getOrder()) +
+            testfe.getDegree().value_or(2 * testfe.getOrder())));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1458,8 +1463,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
@@ -1778,8 +1783,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
@@ -2149,7 +2154,8 @@ namespace Rodin::Variational
 
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
-            trialfe.getOrder() + testfe.getOrder()));
+            trialfe.getDegree().value_or(2 * trialfe.getOrder()) +
+            testfe.getDegree().value_or(2 * testfe.getOrder())));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2412,8 +2418,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
@@ -2705,8 +2711,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
@@ -3028,8 +3034,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
@@ -3349,8 +3355,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
             (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2)));
@@ -3738,8 +3744,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
@@ -4147,8 +4153,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));

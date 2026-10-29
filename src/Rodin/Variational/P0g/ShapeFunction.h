@@ -382,7 +382,7 @@ namespace Rodin::Variational
       {
         return this->getFiniteElementSpace()
           .getFiniteElement(poly.getDimension(), poly.getIndex())
-          .getOrder();
+          .getDegree();
       }
 
       ShapeFunction* copy() const noexcept override

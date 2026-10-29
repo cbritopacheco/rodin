@@ -18,9 +18,9 @@ can share compilation without sharing runtime state.
 | [CoveragePublish.yml](CoveragePublish.yml) | Validate every expected lane contribution and submit an incremental production line union to Codecov. |
 | [Build.yml](Build.yml) | Independent compilation checks across build types, threading and backend configurations. |
 | [Style.yml](Style.yml) | Formatting, house-style, naming and documentation-warning checks, including their tooling regressions. |
-| [Documentation.yml](Documentation.yml) | Builds and checks the generated documentation and handles documentation publication. |
+| [Documentation.yml](Documentation.yml) | Independent documentation build and publication on master/develop pushes; build and checks only on pull requests. |
 | [Benchmarks.yml](Benchmarks.yml) | Runs and publishes performance benchmarks on pushes to the main development branches. |
-| [StaticAnalysis.yml](StaticAnalysis.yml) | Generates and publishes the include-dependency graph on pushes to the main development branches. |
+| [Preflight.yml](Preflight.yml) | Validates label metadata, matching rules and pinned labeler API behavior with read-only permissions and local fixtures. |
 | [Labeler.yml](Labeler.yml) | Maintains pull-request labels. |
 | [copilot-setup-steps.yml](copilot-setup-steps.yml) | Provisions the GitHub coding-agent environment; it is separate from numerical test scheduling. |
 
@@ -55,13 +55,28 @@ under `runner.temp/rodin-apt-archives`, outside the system cache removed by
 `apt-get clean`. Locks and partial downloads are not cached. A missing cache
 changes performance only, never the tests or their acceptance conditions.
 
+Preinstalled transitive `Depends` and `Pre-Depends` packages are explicitly
+resolved to signed repository candidates as well. APT otherwise retains an older
+installed library whenever its version satisfies a minimum constraint. Resolution
+combines APT's simulated installation with an installed-dependency traversal
+seeded by every selected package, including new packages. This reaches libraries
+behind not-yet-installed intermediates such as MPI → hwloc → libudev. The pinned
+plan grows until stable, retaining earlier exact versions and rejecting solver
+conflicts. It excludes recommendations and unused alternative providers.
+Candidate policies are read in bounded batches, and the complete plan is logged.
+Archive keys include the expanded plan. The shared-build runtime checksum check
+remains mandatory: a repository change between jobs still fails closed instead
+of executing incompatible binaries.
+
 Shared Linux test and benchmark environments obtain their requested GCC/G++
 packages through the same signed APT plan and cached archives. They select the
 explicit compiler pair through `CC` and `CXX`, verify matching full versions and
 log the runner-provided CMake version. They do not download `setup-cpp` merely
 to select tools already present on the hosted image. This avoids an additional
 action-archive transfer at every shared producer and consumer while preserving
-the configured compiler major version and all numerical test selections.
+the configured compiler major version and all numerical test selections. All
+dedicated execution lanes request this same environment from the restored build
+definition; they do not maintain separate compiler or package setup steps.
 
 Index attempts have a 90-second budget and complete package-download attempts a
 300-second budget. GNU `timeout` terminates the privileged APT process group
@@ -210,10 +225,13 @@ hierarchy-owned executable artifacts and execution-only coordinates. The complet
 compiler/backend/build-type/threading/sanitizer configuration determines
 compatibility. Compilation stops at `Unit / Rodin / <Module>`,
 `Manufactured / Rodin / <Module>` and `Convergence / H`, `/ P`, `/ HP` or
-`/ Isoparametric`. Selected descendants share their group's single artifact;
-direct root targets retain a separate parent group. There are no automatic
-numbered subdivisions or component-specific compilation jobs. Execution lanes
-retain their existing partitions. Test enable switches register a superset
+`/ Isoparametric`. Selected descendants normally share their group's single
+artifact; direct root targets retain a separate parent group. The optional
+Release build with both sanitizers divides the oversized Variational producer
+into numbered parts of at most 24 executables. This configuration selected 133
+executables and lost its runner after four hours of compilation. Each part
+restores the same common libraries, and dependent lanes wait for the group.
+Execution lanes retain their existing partitions. Test enable switches register a superset
 without changing production ABI; original configuration-specific
 inventories and runtime selectors remain required.
 
@@ -409,18 +427,33 @@ MPI and PETSc ranks remain explicit benchmark registrations.
 Every enabled benchmark executable must be registered. Discovery determines all
 case partitions, and the pooling gate requires every raw report, checksum and
 current-commit receipt. Documentation generation runs in parallel using the
-same descriptions. Documentation publishes immediately after its own validated
+same descriptions in its own workflow. Cancelling benchmarks cannot cancel documentation. Documentation publishes immediately after its own validated
 build, reconnecting the new pages to the latest complete benchmark histories.
-It does not wait for benchmark builds, execution or pooling. After documentation
-publication and successful pooling, a separate publisher updates only complete
-benchmark histories; it cannot replace newer documentation. Missing or failed
-benchmark contributions leave the previous complete results intact. Both
-publishers and Static Analysis hold the same `rodin-gh-pages-publication` lock
-while writing and deploying. A push made with `GITHUB_TOKEN` does not trigger legacy Pages builds:
-`dev/deploy_pages.py` explicitly requests a build using `pages: write`, then waits
-for a successful build of the exact published `gh-pages` commit. A stale success,
-failed build or timeout fails publication. No personal access token is needed;
-repository Pages must remain configured to publish `gh-pages` from `/`.
+It does not wait for benchmark builds, execution or pooling. After successful pooling, **Publish documentation and benchmarks**
+updates only complete benchmark histories; it cannot replace newer documentation. Missing or failed
+benchmark contributions leave the previous complete results intact. The independent documentation and benchmark workflows hold the same `rodin-gh-pages-publication` lock
+while writing and deploying. Each publisher uploads the locked `gh-pages`
+checkout as its own Pages artifact and uses `actions/deploy-pages` in that
+same job. This avoids a second hosted-runner queue for a legacy Pages build;
+that queue delayed one deployment by almost eleven hours. A successful branch
+push alone is never treated as deployment success. After the deployment action
+succeeds, `dev/deploy_pages.py` checks the served `rodin-publication.json` marker
+against the exact published `gh-pages` commit, allowing five minutes for CDN
+propagation. Documentation and benchmark publication use distinct artifact
+names and retain both branch versions and existing complete histories.
+
+Repository setup for these publishers:
+
+- Set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**.
+- In **Settings → Environments → Documentation and benchmarks**, permit both `develop` and
+  `master` under deployment branches. Preserve the existing `gh-pages` rule if
+  other workflows need it. Publication jobs retain this protected environment
+  and require `pages: write` and `id-token: write`.
+
+The local workflow repair does not change these repository settings. A legacy
+Pages source fails preparation with an actionable diagnostic. The automatic documentation and complete-benchmark publishers, together with
+the manual documentation publisher, use the same artifact deployment path.
+The unused include-dependency-graph workflow has been removed.
 
 Component histories live
 under `benchmark-data/<ref>/`; documentation and its benchmark navigation live
@@ -441,3 +474,153 @@ workflow.
 
 The [test registration guide](../../dev/ci-testing.md) explains how to add tests,
 modules and suites, extend scheduling, and inspect selections locally.
+
+## Recovering interrupted runners
+
+`RetryInterruptedJobs.yml` inspects completed, failed **Tests** and
+**Benchmarks** push runs on `develop` and `master`. The helper
+[`ci_retry.py`](../../dev/ci_retry.py) checks the current branch SHA and job
+history, then requests one individual-job rerun only when logs explicitly
+identify a runner shutdown or loss of communication. Compilation, numerical,
+sanitizer, timeout, checksum and out-of-memory errors are not eligible.
+Intentional run cancellations, pull requests, forks and superseded commits
+are not retried. Missing logs or API errors fail inspection without requesting
+recovery.
+
+Each completion can request one retry. Any prior occurrence of the same job
+name in the run exhausts its budget, including manual or dependent reruns.
+GitHub also reruns the selected job's dependents. Successful independent jobs
+are retained; benchmark artifact uploads replace only their own named artifact
+when rerun. Pages snapshots use attempt-specific artifact names to avoid
+collisions after an interrupted deployment. Coverage publication, the complete 95% gate and benchmark pooling
+retain every mandatory contribution. A recovery request is recorded in the
+recovery job summary; a second failure requires investigation. This policy
+recovers interruptions but does not establish their cause or remedy resource
+exhaustion.
+
+The recovery workflow runs trusted default-branch code with `contents: read`
+and `actions: write`, using `GITHUB_TOKEN`; no additional secret is required.
+GitHub requires a `workflow_run` listener to exist on the repository's default
+branch before it can trigger. A develop-only change therefore remains inactive
+until that workflow and its helper reach the default branch. It does not alter
+the workflow definitions of older runs and does not create a scheduled monitor.
+
+## Inspectable reports
+
+The Actions run summary links commit-matched scheduling diagrams and job logs.
+Execution artifacts contain lane receipts, saved logs and LCOV reports;
+`ci-publication-*` contains each validated combined LCOV union and its upload
+receipt. `coverage-final-summary` is JSON for the mandatory complete line
+coverage result. Codecov provides the browsable source coverage view; no local
+LCOV HTML dashboard is currently generated by these workflows.
+
+Benchmark lanes save raw JSON or CSV measurements and validation receipts.
+Pooling produces `benchmark-complete`; publication turns complete histories
+into the browsable HTML benchmark pages alongside the generated documentation.
+The documentation workflow also saves the rendered site as the `documentation`
+artifact. These HTML sites are distinct from a test-result dashboard: there is
+currently no single generated HTML overview of every test failure.
+
+### Failure summaries and diagnostic artifacts
+
+Benchmark execution lanes save diagnostic context without adding per-lane
+summary cards. The lane
+captures console output and `/usr/bin/time -v` statistics, including elapsed
+time and reported maximum resident set size. These are lane-process statistics,
+including restore work, not an aggregate memory measurement across MPI ranks.
+Completed CSV cases are saved incrementally; no success receipt is written
+until the entire lane passes validation.
+
+On failure, `benchmark-diagnostics-<lane>-attempt-<attempt>` saves available
+console output, resource statistics, execution context and partial results.
+The summary links this artifact when upload succeeds. Diagnostic artifacts are
+not consumed by pooling and cannot satisfy a missing mandatory result. A runner
+that disappears may not execute the reporting or upload steps; inspect its
+GitHub job log and the separate recovery summary in that case.
+
+The **CI reports and recovery** summary links the source workflow and each
+inspected failed job, identifies failed steps, and records requested, deferred,
+rejected or exhausted retries with reasons. It also reports jobs that pass on a
+later attempt. Inspection/API failures remain failures and are recorded in the
+summary when the recovery runner survives. A requested retry is not a passed
+job; its eventual status is available in the source workflow's attempts.
+
+### Compact workflow reports
+
+**CI reports and recovery** renders one report after each completed Tests,
+or Benchmarks workflow. It runs separately
+after completion so interrupted runners cannot prevent reporting. Its summary
+links the source workflow and lists registered, started, passed, failed,
+cancelled and skipped job counts, with at most 30 failed jobs and
+their failed steps; additional failures remain accessible in the source run.
+
+Tests show the saved complete production line counts and the independent
+Coverage / Finalize result. A missing, expired, invalid or earlier-attempt
+coverage artifact is reported as unavailable. Benchmark reports distinguish
+passed registered execution lanes from mandatory campaign completeness.
+Publication reports show status and a site link only after successful
+publication. Build and Style retain their native checks and annotations.
+Failure-only retry decisions follow in the same reporting workflow.
+
+This listener requires deployment to the default branch before activation.
+It uses trusted default-branch code; source artifacts are parsed only as JSON,
+never executed or extracted into the checkout. No scheduled monitor is created.
+
+### Policies displayed in each report
+
+Each report starts with a visible **Policies** section: recovery runs after
+completion, selects at most one interrupted job per attempt, and allows one
+retry per job for current develop/master push commits. GitHub reruns dependent
+jobs too. Compilation, numerical, sanitizer, timeout, checksum and reported
+out-of-memory failures are excluded, as are intentional cancellations and
+superseded commits. Missing logs prevent recovery.
+
+The section also states the workflow's completeness requirement: all benchmark
+cases and ranks before pooling/publication, or all mandatory test and coverage
+contributions with a complete production line result of at least 95%.
+
+## API-backed README badges
+
+`CIBadges.yml` reads actual Actions run conclusions for current develop/master
+push commits and writes Shields endpoint JSON to the isolated `ci-badges` branch.
+It never redeploys Pages or changes source branches. The README uses these
+endpoints for Build, Tests, Benchmarks and Documentation; Codecov is unchanged.
+
+Success is green; failure/timeout red; queued blue; running amber; cancelled and
+skipped orange; unknown grey. For unfinished workflows, active matrix jobs take
+precedence over a queued parent status. Waiting jobs with no active job show
+queued. If the job-list endpoint fails, the publisher reads check results and
+discards older attempts. If both read paths fail, the badge shows unknown. Older-commit results are unknown for the new head.
+Publishers serialize through `rodin-ci-badges`, reread live state rather than
+trusting event order, and recheck the source head before each file update.
+
+Initial queue, start and completion events trigger refreshes. GitHub does not
+emit `workflow_run: requested` for reruns, so automatic recovery explicitly
+requests a badge refresh. A manually requeued run may retain its old badge until
+it starts; **CI status badges → Run workflow** provides a manual refresh.
+Shields caching and the publisher's own queue also delay visible updates.
+
+Documentation uses the actual `Publish documentation` job, with an explicit
+refresh after deployment so it does not wait for benchmark completion. The
+listener must reach the default branch before activation. No new secret is
+needed: `GITHUB_TOKEN` has read access to Actions and write access only within
+the repository. Badge endpoints are public JSON on raw.githubusercontent.com;
+missing endpoints remain unavailable until the first publisher initializes them.
+
+### Artifact-client bootstrap resilience
+
+The exact-name downloader and its Plan regression checks install the unchanged
+lockfile-pinned client through `dev/ci_artifact_client.py`. Successful installs
+are reused on the runner only when the lockfile marker and installed package
+are present. A failed invocation is retried at most twice for recognized
+network resets, DNS failures, timeouts or registry 502/503/504 responses.
+Lockfile, dependency-resolution, integrity and engine errors fail immediately.
+The success marker is written only after npm succeeds and the package exists.
+Install scripts remain disabled.
+
+Benchmark execution also emits memory readings every minute to its live job
+log and `benchmark-diagnostics/memory.log`. Host availability and cgroup limits
+and OOM counters are recorded where exposed. Missing counters remain unknown.
+The monitor is stopped when the lane exits. These measurements help distinguish
+resource exhaustion from hosted runner interruptions; they do not prevent a
+runner shutdown or replace the existing single-retry policy.

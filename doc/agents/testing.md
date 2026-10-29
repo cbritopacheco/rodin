@@ -123,7 +123,7 @@ Two rules that make the difference between coverage and theatre:
 `Build.yml`, `Tests.yml` (unit, manufactured, convergence, installation and
 coverage jobs), `TestGroup.yml` (the reusable directory-group runner),
 `Benchmarks.yml` (published to the benchmarks site), `Documentation.yml`
-(Doxygen site), `StaticAnalysis.yml`, `Labeler.yml`. Branches
+(Doxygen site), `Labeler.yml`. Branches
 `master` and `develop` both gate.
 
 All test checks use the `Tests /` umbrella. Test group paths follow their

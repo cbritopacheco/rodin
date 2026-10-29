@@ -1,6 +1,7 @@
 """Check optional-backend headers and concrete CMake test registrations."""
 
 from collections import Counter
+import fnmatch
 import importlib.util
 import itertools
 import os
@@ -26,7 +27,7 @@ class BackendRegistrationTest(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         source = Path(temporary.name)
         targets = ["GTest::gtest", "GTest::gtest_main", "Rodin::Geometry", "Rodin::Variational",
-                   "Rodin::MPI", "Rodin::PETSc", "Rodin::Solver", "Rodin::Assembly",
+                   "Rodin::MPI", "Rodin::PETSc", "Rodin::Solver", "Rodin::Assembly", "Rodin::IO",
                    "RodinConvergence", "RodinConvergenceH"]
         directories = [directory] if isinstance(directory, str) else directory
         folders = ["cases"] if len(directories) == 1 else [f"cases{i}" for i in range(len(directories))]
@@ -48,6 +49,80 @@ class BackendRegistrationTest(unittest.TestCase):
             commands = ci.commands((build / folder / "CTestTestfile.cmake").read_text())
             tests.update({args[0]: args[1:] for command, args, *_ in commands if command == "add_test"})
         return tests, build
+
+    def test_pyramid_elasticity_split_preserves_cases_ranks_and_coverage_budgets(self):
+        source = (ROOT / "tests/convergence/h/PETScLinearElasticity/LinearElasticity.cpp").read_text()
+        local = re.findall(r'TEST_P\(PETScLinearElasticityLocalTest,\s*(\w+)\)', source)
+        mpi = re.findall(r'TEST_P\(PETScLinearElasticityMPITest,\s*(\w+)\)', source)
+        self.assertEqual(len(local), 6)
+        self.assertEqual(len(mpi), 7)
+        expected = Counter((context, rank, geometry, case)
+                           for context, ranks, cases in [("Local", [0], local), ("MPI", [1, 2, 3, 4], mpi)]
+                           for rank, geometry, case in itertools.product(ranks, GEOMETRIES, cases))
+        for coverage in [False, True]:
+            tests, build = self.configure("tests/convergence/h/PETScLinearElasticity", coverage=coverage)
+            properties = self.properties(build)
+            actual = Counter()
+            for name, command in tests.items():
+                if not any(arg.endswith("/RodinConvergenceHPETScLinearElasticity") for arg in command):
+                    continue
+                selected = next(arg.split("=", 1)[1] for arg in command if arg.startswith("--gtest_filter="))
+                context = "MPI" if "PETScLinearElasticityMPITest" in selected else "Local"
+                rank = int(command[command.index("-n") + 1]) if context == "MPI" else 0
+                cases = mpi if context == "MPI" else local
+                matched = [(geometry, case) for geometry, case in itertools.product(GEOMETRIES, cases)
+                           if fnmatch.fnmatchcase(f"AllGeometries/PETScLinearElasticity{context}Test.{case}/{geometry}", selected)]
+                self.assertTrue(matched, name)
+                for geometry, case in matched:
+                    actual[context, rank, geometry, case] += 1
+                if matched[0][0] == "Pyramid":
+                    self.assertEqual(len(matched), 1)
+                    self.assertEqual(properties[name]["RESOURCE_LOCK"], "petsc_refinement_pyramid")
+                timeout = 10800 if coverage and matched[0][0] == "Pyramid" and matched[0][1] in ["P1OptimalRates", "P2OptimalRates"] else 600
+                self.assertEqual(properties[name]["TIMEOUT"], str(timeout), name)
+                self.assertIn("--gtest_fail_if_no_test_selected", command)
+                if rank:
+                    self.assertEqual(properties[name]["PROCESSORS"], str(rank))
+            self.assertEqual(actual, expected)
+
+    def test_named_mpi_oracles_are_disjoint_and_keep_every_rank(self):
+        source = (ROOT / "tests/unit/Rodin/PETSc/MPIFormTest.cpp").read_text()
+        cases = re.findall(r'TEST\(PETSc_MPI_Form,\s*(\w+)\)', source)
+        named = {"NamedScalarP1MatchesIntegrals", "NamedScalarP2MatchesIntegrals",
+                 "NamedVectorP1MatchesIntegrals", "NamedVectorP2MatchesIntegrals"}
+        self.assertTrue(named.issubset(cases))
+        tests, build = self.configure("tests/unit/Rodin/PETSc")
+        properties = self.properties(build)
+        for rank in [2, 3, 4]:
+            counts = Counter()
+            for name, command in tests.items():
+                if not name.startswith(("RodinPETScMPINamedFormTest_", "RodinPETScMPIFormTest_")) or not name.endswith(f"np{rank}"):
+                    continue
+                self.assertEqual(command[command.index("-n") + 1], str(rank))
+                self.assertEqual(properties[name]["PROCESSORS"], str(rank))
+                self.assertEqual(properties[name]["TIMEOUT"], "120")
+                selected = next(arg.split("=", 1)[1] for arg in command if arg.startswith("--gtest_filter="))
+                positive, _, negative = selected.partition("-")
+                matches = [case for case in cases
+                           if any(fnmatch.fnmatchcase("PETSc_MPI_Form." + case, pattern) for pattern in (positive or "*").split(":"))
+                           and not any(fnmatch.fnmatchcase("PETSc_MPI_Form." + case, pattern) for pattern in negative.split(":") if pattern)]
+                if name.startswith("RodinPETScMPINamedFormTest_"):
+                    self.assertEqual(len(matches), 1)
+                    self.assertIn(matches[0], named)
+                counts.update(matches)
+                self.assertIn("--gtest_fail_if_no_test_selected", command)
+            self.assertEqual(counts, Counter(cases))
+
+    @staticmethod
+    def properties(build):
+        result = {}
+        for command, args, *_ in ci.commands((build / "cases/CTestTestfile.cmake").read_text()):
+            if command == "set_tests_properties":
+                boundary = args.index("PROPERTIES")
+                row = dict(zip(args[boundary + 1::2], args[boundary + 2::2]))
+                for name in args[:boundary]:
+                    result.setdefault(name, {}).update(row)
+        return result
 
     def test_native_hp_stokes_cases_have_independent_time_budgets(self):
         tests, build = self.configure("tests/convergence/hp/Stokes")
@@ -100,6 +175,58 @@ class BackendRegistrationTest(unittest.TestCase):
             subprocess.run([compiler, "-std=c++20", "-I" + str(source),
                             "-I" + str(ROOT / "src"), str(source / "main.cpp"),
                             "-o", str(source / "header")], check=True, capture_output=True, text=True)
+
+    def test_curved_elasticity_boundary_enables_curved_workload(self):
+        _, build = self.configure("tests/convergence/isoparametric/LinearElasticity")
+        target = "RodinConvergenceIsoparametricPETScLinearElasticityBoundary"
+        flags = (build / f"cases/CMakeFiles/{target}.dir/flags.make").read_text()
+        self.assertIn("-DRODIN_ELASTICITY_BOUNDARY_CURVED", flags)
+
+    def test_local_curved_p3_pyramid_coverage_budget_preserves_other_commands(self):
+        baseline, build = self.configure("tests/convergence/isoparametric/LinearElasticity", coverage=False)
+        original = self.properties(build)
+        baseline_build = str(build)
+        covered, build = self.configure("tests/convergence/isoparametric/LinearElasticity", coverage=True)
+        properties = self.properties(build)
+        self.assertEqual(covered.keys(), baseline.keys())
+        selected = "RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MixedTractionP3Rates_Pyramid"
+        for name in covered:
+            self.assertEqual([arg.replace(str(build), "<build>") for arg in covered[name]],
+                             [arg.replace(baseline_build, "<build>") for arg in baseline[name]], name)
+            expected = dict(original[name])
+            if name == selected:
+                self.assertEqual(expected["TIMEOUT"], "1800")
+                expected["TIMEOUT"] = "3600"
+            self.assertEqual(properties[name], expected, name)
+        for rank in [1, 2, 3, 4]:
+            name = f"RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MPI_np{rank}_MixedTractionP3Rates_Pyramid"
+            self.assertEqual(properties[name]["TIMEOUT"], "1800")
+            self.assertEqual(properties[name]["PROCESSORS"], str(rank))
+
+    def test_curved_traction_budgets_preserve_studies_and_ranks(self):
+        tests, build = self.configure("tests/convergence/isoparametric/LinearElasticity")
+        prefix = "RodinConvergenceIsoparametricPETScLinearElasticityBoundary"
+        properties = {}
+        for command, args, *_ in ci.commands((build / "cases/CTestTestfile.cmake").read_text()):
+            if command == "set_tests_properties":
+                boundary = args.index("PROPERTIES")
+                values = dict(zip(args[boundary + 1::2], args[boundary + 2::2]))
+                for name in args[:boundary]:
+                    properties.setdefault(name, {}).update(values)
+        for rank, degree, geometry in itertools.product(range(5), range(1, 4), GEOMETRIES):
+            suffix = f"_MPI_np{rank}" if rank else ""
+            name = f"{prefix}{suffix}_MixedTractionP{degree}Rates_{geometry}"
+            command = tests[name]
+            self.assertIn("--gtest_fail_if_no_test_selected", command)
+            suite = "MPITest" if rank else "LocalTest"
+            self.assertIn(f"--gtest_filter=AllGeometries/{suite}.MixedTractionP{degree}Rates/{geometry}", command)
+            expected = 14400 if degree == 1 else 7200
+            self.assertEqual(properties[name]["TIMEOUT"], str(expected if geometry == "Tetrahedron" else 1800))
+            if rank:
+                self.assertIn(str(rank), command)
+                self.assertEqual(properties[name]["PROCESSORS"], str(rank))
+        job = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]["PETScCurvedBoundaryConvergence"]
+        self.assertIn("(matrix.physics == 'LinearElasticity' && matrix.geometry == 'tetrahedron') && 360", job["timeout-minutes"])
 
     def test_curved_elasticity_studies_have_exactly_one_process_each(self):
         tests, _ = self.configure("tests/convergence/isoparametric/LinearElasticity")
@@ -255,6 +382,27 @@ class BackendRegistrationTest(unittest.TestCase):
                     self.assertTrue(selected, row)
                     counts.update(selected)
                 self.assertEqual(counts, Counter({n: 1 for n in names}))
+
+    def test_nonlinear_tetrahedron_budget_preserves_every_study_and_rank(self):
+        tests, build = self.configure('tests/convergence/h/PETScNonlinearPoisson')
+        properties = {}
+        for command, args, *_ in ci.commands((build / 'cases/CTestTestfile.cmake').read_text()):
+            if command == 'set_tests_properties':
+                boundary = args.index('PROPERTIES')
+                values = dict(zip(args[boundary + 1::2], args[boundary + 2::2]))
+                for name in args[:boundary]:
+                    properties.setdefault(name, {}).update(values)
+        prefix = 'RodinConvergenceHPETScNonlinearPoissonBoundary'
+        for rank, kind, degree, geometry in itertools.product(
+                range(5), ['MixedNeumann', 'Robin', 'PureNeumann'], range(1, 4), GEOMETRIES):
+            context = f'_MPI_np{rank}' if rank else ''
+            name = f'{prefix}{context}_{kind}P{degree}Rates_{geometry}'
+            self.assertIn(name, tests)
+            timeout = 18000 if (geometry, kind, degree) == ('Tetrahedron', 'PureNeumann', 1) else (
+                10800 if geometry in ['Tetrahedron', 'Pyramid'] else 1800)
+            self.assertEqual(properties[name]['TIMEOUT'], str(timeout))
+            if rank:
+                self.assertEqual(properties[name]['PROCESSORS'], str(rank))
 
     def test_petsc_timeout_overrides_preserve_commands_ranks_and_other_budgets(self):
         modules = ["p/PETScNonlinearPoisson", "hp/PETScNonlinearPoisson",

@@ -98,7 +98,7 @@ namespace Rodin::Tests::Unit
     auto nearby = node;
     nearby.x() = std::nextafter(node.x(), node.x() + Real(1));
     EXPECT_FALSE(element.getNodeIndex(nearby));
-    EXPECT_FALSE(element.getNodeIndex(Math::SpatialPoint{{0}}));
+    EXPECT_FALSE(element.getNodeIndex(Math::SpatialPoint{Real(0)}));
     EXPECT_EQ(element.getNodeIndex(Math::SpatialPoint{{node.x(), node.y(), 3}}),
       Optional<size_t>(0));
     const H1Element<2, Real> point(Polytope::Type::Point);
