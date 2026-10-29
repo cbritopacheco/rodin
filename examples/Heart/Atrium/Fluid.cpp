@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstring>
 #include <iostream>
 #include <numbers>
 #include <limits>
@@ -406,9 +407,10 @@ namespace Rodin::Examples::Heart::Atrium
     }
     if (m_initialized)
       return *this;
-    if (!std::isfinite(m_cfg.dt) || m_cfg.dt <= 0 || !std::isfinite(m_cfg.period) ||
-      m_cfg.period <= 0 || m_cfg.period / m_cfg.dt < 0.5 || m_cfg.flowCycles < 0 ||
-      m_cfg.speciesCycles < 0 || !std::isfinite(m_cfg.prescribedOutletPressure) ||
+    if (m_cfg.preconditionerLag < 1 || !std::isfinite(m_cfg.dt) || m_cfg.dt <= 0 ||
+      !std::isfinite(m_cfg.period) || m_cfg.period <= 0 ||
+      m_cfg.period / m_cfg.dt < 0.5 || m_cfg.flowCycles < 0 || m_cfg.speciesCycles < 0 ||
+      !std::isfinite(m_cfg.prescribedOutletPressure) ||
       !std::isfinite(m_cfg.prescribedOutletResistance) ||
       m_cfg.prescribedOutletResistance < 0 ||
       m_cfg.period / m_cfg.dt > std::numeric_limits<int>::max() - 0.5 ||
@@ -826,8 +828,11 @@ namespace Rodin::Examples::Heart::Atrium
     }
 
     const auto solveStart = CoronaryClock::now();
+    m_preconditionerRefreshed = !m_lastPreconditionerRefreshStep ||
+      m_step - *m_lastPreconditionerRefreshStep >= m_cfg.preconditionerLag;
+    m_preconditionerRetried = false;
+    m_flowKSP.setReusePreconditioner(!m_preconditionerRefreshed);
     m_flow.solve(m_flowKSP);
-    m_timing.solve = secondsSince(solveStart);
 
     ::KSPConvergedReason reason;
     PetscErrorCode ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
@@ -835,19 +840,55 @@ namespace Rodin::Examples::Heart::Atrium
     PetscInt iterations = 0;
     ierr = KSPGetIterationNumber(m_flowKSP.getHandle(), &iterations);
     assert(ierr == PETSC_SUCCESS);
+    m_linearIterations = static_cast<int>(iterations);
+
+    const char* type = nullptr;
+    ierr = KSPGetType(m_flowKSP.getHandle(), &type);
+    assert(ierr == PETSC_SUCCESS);
+    if (m_cfg.preconditionerLag > 1 && type && std::strcmp(type, KSPPREONLY) == 0)
+    {
+      Alert::Exception() << "Fluid preconditioner lag greater than one requires "
+                            "an iterative KSP, such as GMRES"
+                         << Alert::Raise;
+    }
+
+    if (reason <= 0 && !m_preconditionerRefreshed)
+    {
+      // Retry the current linear system before any timestep state is committed.
+      ierr = VecSet(m_flow.getLinearSystem().getSolution(), 0.0);
+      assert(ierr == PETSC_SUCCESS);
+      m_flowKSP.setReusePreconditioner(false);
+      m_flow.solve(m_flowKSP);
+      ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = KSPGetIterationNumber(m_flowKSP.getHandle(), &iterations);
+      assert(ierr == PETSC_SUCCESS);
+      m_linearIterations += static_cast<int>(iterations);
+      m_preconditionerRefreshed = true;
+      m_preconditionerRetried = true;
+    }
+    m_timing.solve = secondsSince(solveStart);
     (void)ierr;
 
     if (isRoot())
     {
       KSPInfo() << (reason > 0 ? "Converged" : "Did NOT converge")
-                << "  iterations = " << iterations << "  (" << m_timing.solve << " s)"
-                << Alert::Raise;
+                << "  iterations = " << m_linearIterations
+                << "  PC=" << (m_preconditionerRefreshed ? "refreshed" : "retained")
+                << (m_preconditionerRetried ? " (retry)" : "") << "  (" << m_timing.solve
+                << " s)" << Alert::Raise;
     }
 
     if (reason <= 0)
     {
       Alert::Exception() << "Oseen linear solve did not converge, reason "
                          << static_cast<int>(reason) << Alert::Raise;
+    }
+
+    if (m_preconditionerRefreshed)
+    {
+      m_lastPreconditionerRefreshStep = m_step;
+      ++m_preconditionerRefreshes;
     }
 
     m_uOld.setData(m_u.getSolution().getData());

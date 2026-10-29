@@ -67,7 +67,8 @@ namespace Rodin::Examples::Heart::Atrium
   void Fluid::Output::writeCSVHeader()
   {
     m_csv << "t,cycle,pIn,pv,par,pd,valveOpen,qIn,qOut,maxU,"
-          << "maxTAWSS,maxOSI,maxActivation,maxThrombin,minFibrinogen,maxFibrin\n";
+          << "maxTAWSS,maxOSI,maxActivation,maxThrombin,minFibrinogen,maxFibrin,"
+          << "linearIterations,pcAgeTimesteps,pcRefreshes,pcRefreshed,pcRetried\n";
   }
 
   void Fluid::Output::writeCSVRow(int cycle)
@@ -85,7 +86,12 @@ namespace Rodin::Examples::Heart::Atrium
       m_atrium.m_cfg.useVentricularModel ? Optional<Real>(s.par) : Optional<Real>{},
       m_atrium.m_cfg.useVentricularModel ? Optional<Real>(s.pd) : Optional<Real>{},
       m_atrium.m_valveOpen, m_atrium.m_qIn, m_atrium.m_qOut, m_atrium.m_speed, tawss, osi,
-      activation, th, fg, fn};
+      activation, th, fg, fn, m_atrium.m_linearIterations,
+      m_atrium.m_lastPreconditionerRefreshStep
+        ? m_atrium.m_step - *m_atrium.m_lastPreconditionerRefreshStep
+        : 0,
+      m_atrium.m_preconditionerRefreshes, m_atrium.m_preconditionerRefreshed,
+      m_atrium.m_preconditionerRetried};
     if (!m_atrium.isRoot() || !m_csv.is_open())
       return;
 
@@ -98,7 +104,12 @@ namespace Rodin::Examples::Heart::Atrium
           << outletPressure << ',' << arterialPressure << ',' << distalPressure << ','
           << (m_atrium.m_valveOpen ? 1 : 0) << ',' << m_atrium.m_qIn << ','
           << m_atrium.m_qOut << ',' << m_atrium.m_speed << ',' << tawss << ',' << osi
-          << ',' << activation << ',' << th << ',' << fg << ',' << fn << '\n';
+          << ',' << activation << ',' << th << ',' << fg << ',' << fn << ','
+          << m_atrium.m_linearIterations << ','
+          << m_atrium.m_diagnostics->preconditionerAge << ','
+          << m_atrium.m_preconditionerRefreshes << ','
+          << m_atrium.m_preconditionerRefreshed << ',' << m_atrium.m_preconditionerRetried
+          << '\n';
     m_csv.flush();
   }
 

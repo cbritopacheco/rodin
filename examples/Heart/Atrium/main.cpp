@@ -8,6 +8,7 @@
 #include <cassert>
 #include <exception>
 #include <iostream>
+#include <limits>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
 #include <Rodin/PETSc.h>
@@ -88,6 +89,19 @@ int main(int argc, char** argv)
         cfg.inletPressureMean = real;
 
       PetscInt integer = 0;
+      got = PETSC_FALSE;
+      PetscOptionsGetInt(
+        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_fluid_lag_preconditioner", &integer, &got);
+      if (got)
+      {
+        if (integer < 1 || integer > std::numeric_limits<int>::max())
+        {
+          Rodin::Alert::Exception()
+            << "Fluid preconditioner lag must be a positive integer"
+            << Rodin::Alert::Raise;
+        }
+        cfg.preconditionerLag = static_cast<int>(integer);
+      }
       got = PETSC_FALSE;
       PetscOptionsGetInt(
         PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_flow_cycles", &integer, &got);

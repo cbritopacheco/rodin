@@ -208,6 +208,8 @@ namespace Rodin::Examples::Heart::Atrium
         Real inletFlux, outletFlux, maximumVelocity;
         Real maximumTAWSS, maximumOSI, maximumActivation;
         Real maximumThrombin, minimumFibrinogen, maximumFibrin;
+        int linearIterations, preconditionerAge, preconditionerRefreshes;
+        bool preconditionerRefreshed, preconditionerRetried;
       };
 
       struct Parameters
@@ -270,6 +272,10 @@ namespace Rodin::Examples::Heart::Atrium
         Real prescribedOutletResistance = 0.0;
 
         Real dt = 1.0e-3;
+
+        /// @brief Numeric preconditioner refresh interval in timesteps; one refreshes every step.
+        int preconditionerLag = 1;
+
         Real period = 0.85;
 
         /// @brief Cycles solved before the species are switched on.
@@ -599,6 +605,13 @@ namespace Rodin::Examples::Heart::Atrium
       Real m_speed = 0.0;
       bool m_valveOpen = true;
       bool m_flowFieldSplitsSet = false;
+
+      /// @brief Step at which the retained flow preconditioner was last refreshed.
+      Optional<int> m_lastPreconditionerRefreshStep;
+      int m_preconditionerRefreshes = 0;
+      int m_linearIterations = 0;
+      bool m_preconditionerRefreshed = false;
+      bool m_preconditionerRetried = false;
       bool m_initialized = false;
       bool m_finished = false;
       bool m_failed = false;

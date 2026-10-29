@@ -268,6 +268,51 @@ namespace Rodin::Tests::Unit::KSPFactorizationReuse
     }
   }
 
+  TEST(Rodin_PETSc_KSPFactorizationReuse, ExplicitReuseAndRefreshOverrideOptions)
+  {
+    if (!loggingActive())
+      GTEST_SKIP() << "PETSc event logging is unavailable.";
+
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
+    mesh.getConnectivity().compute(1, 2);
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction v(fes);
+    Real alpha = 2;
+    RealFunction coefficient([&alpha](const Point&) { return alpha; });
+    Problem mass(u, v);
+    mass = Integral(coefficient * u, v) - Integral(RealFunction(6), v);
+    Rodin::Solver::KSP solver(mass);
+    solver.setPrefix(std::string("reuse_explicit_"));
+    ASSERT_EQ(PetscOptionsSetValue(nullptr, "-reuse_explicit_ksp_type", "gmres"), 0);
+    ASSERT_EQ(PetscOptionsSetValue(nullptr, "-reuse_explicit_pc_type", "lu"), 0);
+    ASSERT_EQ(
+      PetscOptionsSetValue(nullptr, "-reuse_explicit_ksp_reuse_preconditioner", "true"),
+      0);
+
+    solver.setReusePreconditioner(false);
+    mass.solve(solver);
+    const auto first = factorCounts();
+    EXPECT_NEAR(maxDeviation(u.getSolution(), 3), 0, tolerance);
+
+    alpha = 3;
+    mass.assemble();
+    solver.setReusePreconditioner(true);
+    mass.solve(solver);
+    const auto reused = factorCounts();
+    EXPECT_EQ(reused.numeric, first.numeric);
+    EXPECT_NEAR(maxDeviation(u.getSolution(), 2), 0, tolerance);
+
+    alpha = 4;
+    mass.assemble();
+    solver.setReusePreconditioner(false);
+    mass.solve(solver);
+    const auto refreshed = factorCounts();
+    EXPECT_EQ(refreshed.symbolic, first.symbolic);
+    EXPECT_EQ(refreshed.numeric, first.numeric + 1);
+    EXPECT_NEAR(maxDeviation(u.getSolution(), 1.5), 0, tolerance);
+  }
+
   /**
    * Handing a KSP a genuinely different operator must re-run the whole setup
    * and solve the new system, not the old one.

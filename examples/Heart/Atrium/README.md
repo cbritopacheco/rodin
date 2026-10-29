@@ -218,6 +218,15 @@ Schwarz, local ILU, and diagonal scaling with matrix restoration, configurable
 through PETSc options. Output consists of a master XDMF file and per-rank HDF5
 pieces.
 
+`-atrium_fluid_lag_preconditioner N` refreshes the fluid preconditioner on the
+first step and every $N$ timesteps thereafter. Its default is one. Larger
+values require an iterative solver such as GMRES. A failed solve with retained
+factors is retried once with a fresh preconditioner before the timestep is
+committed. Symbolic analysis remains reusable while sparsity is unchanged.
+The policy takes precedence over `-ksp_reuse_preconditioner` for the fluid KSP.
+The common CSV records Krylov iterations, preconditioner age, refresh count,
+and whether a refresh or retry occurred.
+
 Fluid arrays use PascalCase names: `Velocity`, `Pressure`, `WallShearStress`,
 `TimeAveragedWallShearStress`, and `OscillatoryShearIndex`. The last two are
 cycle statistics, updated after a completed cycle. `Thrombin`, `Fibrinogen`,

@@ -169,6 +169,15 @@ namespace Rodin::Solver
       KSP& setPreconditioner(OperatorType P) noexcept;
 
       /**
+       * @brief Controls preconditioner reuse for the next and subsequent solves.
+       * @param[in] reuse Reuse decision, or empty to defer to PETSc options.
+       * @returns This solver.
+       * @note An explicit decision is applied after PETSc options so an outer
+       * algorithm can request a refresh without changing the options database.
+       */
+      KSP& setReusePreconditioner(Optional<bool> reuse) noexcept;
+
+      /**
        * @brief Sets the PETSc options prefix used by this KSP object.
        * @param[in] prefix Optional prefix, without PETSc's leading hyphen.
        * @returns Reference to `*this`.
@@ -205,6 +214,7 @@ namespace Rodin::Solver
       PetscInt m_maxIt; ///< Maximum iteration count.
       Optional<OperatorType> m_preconditioner; ///< Optional preconditioner matrix.
       Optional<std::string> m_prefix; ///< Optional prefix for PETSc options.
+      Optional<bool> m_reusePreconditioner; ///< Explicit outer-algorithm reuse decision.
   };
 } // namespace Rodin::Solver
 

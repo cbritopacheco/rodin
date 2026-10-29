@@ -7,6 +7,7 @@ import csv
 import json
 import math
 import os
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -73,7 +74,7 @@ def main():
                VECLIB_MAXIMUM_THREADS='1')
 
     def run(name, ranks, pressure, outlet=0, dt=.001, steps=3, amplitude=0,
-            kinetics=False):
+            kinetics=False, lag=1, max_it=100000):
         folder = output/name
         folder.mkdir(exist_ok=True)
         cmd = [args.mpiexec, '-n', str(ranks), str(args.executable.resolve()),
@@ -83,9 +84,14 @@ def main():
                '-atrium_pin', str(pressure), '-atrium_pin_amplitude', str(amplitude),
                '-atrium_outlet_pressure', str(outlet), '-atrium_lv_model', 'false',
                '-atrium_kinetics', str(kinetics).lower(),
-               '-atrium_flow_cycles', '0', '-ksp_type', 'preonly', '-pc_type', 'lu',
+               '-atrium_flow_cycles', '0', '-atrium_fluid_lag_preconditioner', str(lag),
+               '-ksp_type', 'gmres' if lag > 1 else 'preonly',
+               '-ksp_max_it', str(max_it), '-ksp_rtol', '1e-12', '-pc_type', 'lu',
                '-pc_factor_mat_solver_type', 'mumps', '-mat_mumps_icntl_20', '0',
                '-ksp_diagonal_scale', 'false', '-ksp_diagonal_scale_fix', 'false']
+        if lag > 1:
+            cmd += ['-ksp_norm_type', 'unpreconditioned',
+                    '-ksp_reuse_preconditioner', 'true', '-log_view', f':{folder}/PETSc.log']
         with (folder/'run.log').open('w') as log:
             subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, env=env,
                            cwd=output, check=True)
@@ -115,6 +121,20 @@ def main():
     gauge = run('gauge', 2, 1001, outlet=1000, steps=1)
     speed = 'fluid_max_velocity_m_per_s'
     inlet, outlet = 'fluid_inlet_flux_m3_per_s', 'fluid_outlet_flux_m3_per_s'
+    refreshed = run('refresh', 2, 1, steps=12, lag=5)
+    fresh = run('refresh-fresh', 2, 1, steps=12)
+    assert [int(r['fluid_pc_refreshed']) for r in refreshed] == [1,0,0,0,0,1,0,0,0,0,1,0]
+    assert [int(r['fluid_pc_age_timesteps']) for r in refreshed] == [0,1,2,3,4,0,1,2,3,4,0,1]
+    assert int(refreshed[-1]['fluid_pc_refreshes']) == 3
+    log = (output/'refresh/PETSc.log').read_text()
+    for event, expected in [('MatLUFactorSym', 1), ('MatLUFactorNum', 3)]:
+        assert int(re.search(r'^'+event+r'\s+(\d+)', log, re.M)[1]) == expected
+    for a, b in zip(refreshed, fresh):
+        for key in (speed, inlet, outlet):
+            assert abs(float(a[key])-float(b[key])) <= 1e-7 * max(abs(float(b[key])), 1e-12)
+    retried = run('refresh-retry', 2, 1, steps=3, lag=5, max_it=1)
+    assert [int(r['fluid_pc_retried']) for r in retried] == [0,1,1]
+    assert int(retried[-1]['fluid_pc_refreshes']) == 3
     for a, b in zip(forward, serial):
         for key in (speed, inlet, outlet):
             assert abs(float(a[key])-float(b[key])) <= 1e-9 * max(abs(float(a[key])), 1e-12)
