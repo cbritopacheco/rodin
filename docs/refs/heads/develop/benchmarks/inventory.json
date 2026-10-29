@@ -720,12 +720,12 @@
     "case_batch": "256"
   },
   {
-    "target": "RodinStokesSolveBenchmarks",
+    "target": "RodinStokesGMRESBenchmarks",
     "owner": "",
     "executable": "",
     "state": "registered",
-    "path": "Rodin/Solver/Stokes",
-    "description": "/home/runner/work/rodin/rodin/tests/benchmarks/Rodin/Solver/RodinStokesSolveBenchmarks.html",
+    "path": "Rodin/Solver/Stokes/GMRESBlockSchur",
+    "description": "/home/runner/work/rodin/rodin/tests/benchmarks/Rodin/Solver/RodinStokesGMRESBenchmarks.html",
     "format": "googlecpp",
     "profile": "slow",
     "metric": "auto",
