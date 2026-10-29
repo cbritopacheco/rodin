@@ -148,26 +148,26 @@ namespace Rodin::Solver
         Real error;
       };
 
-      struct Backend
+      struct BackendBase
       {
-        virtual ~Backend() = default;
-        virtual std::unique_ptr<Backend> cloneConfiguration() const = 0;
+        virtual ~BackendBase() = default;
+        virtual std::unique_ptr<BackendBase> cloneConfiguration() const = 0;
         virtual Result solve(LinearSystemType& system, const Settings& settings) = 0;
       };
 
       template <class Preconditioner>
-      class EigenBackend final : public Backend
+      class Backend final : public BackendBase
       {
         public:
-          explicit EigenBackend(const Preconditioner& configuration)
+          explicit Backend(const Preconditioner& configuration)
             : m_configuration(configuration)
           {
             m_solver.preconditioner() = m_configuration;
           }
 
-          std::unique_ptr<Backend> cloneConfiguration() const override
+          std::unique_ptr<BackendBase> cloneConfiguration() const override
           {
-            return std::make_unique<EigenBackend>(m_configuration);
+            return std::make_unique<Backend>(m_configuration);
           }
 
           Result solve(LinearSystemType& system, const Settings& settings) override
@@ -210,7 +210,7 @@ namespace Rodin::Solver
       template <class Preconditioner>
       GMRES(ProblemBaseType& problem, const Preconditioner& pc)
         : Parent(problem),
-          m_backend(std::make_unique<EigenBackend<Preconditioner>>(pc)),
+          m_backend(std::make_unique<Backend<Preconditioner>>(pc)),
           m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
       {
         static_assert(std::is_copy_constructible_v<Preconditioner> &&
@@ -286,7 +286,7 @@ namespace Rodin::Solver
       }
 
     private:
-      std::unique_ptr<Backend> m_backend;
+      std::unique_ptr<BackendBase> m_backend;
       Settings m_settings;
       Result m_result;
   };
@@ -340,26 +340,26 @@ namespace Rodin::Solver
         Real error;
       };
 
-      struct Backend
+      struct BackendBase
       {
-        virtual ~Backend() = default;
-        virtual std::unique_ptr<Backend> cloneConfiguration() const = 0;
+        virtual ~BackendBase() = default;
+        virtual std::unique_ptr<BackendBase> cloneConfiguration() const = 0;
         virtual Result solve(LinearSystemType& system, const Settings& settings) = 0;
       };
 
       template <class Preconditioner>
-      class EigenBackend final : public Backend
+      class Backend final : public BackendBase
       {
         public:
-          explicit EigenBackend(const Preconditioner& configuration)
+          explicit Backend(const Preconditioner& configuration)
             : m_configuration(configuration)
           {
             m_solver.preconditioner() = m_configuration;
           }
 
-          std::unique_ptr<Backend> cloneConfiguration() const override
+          std::unique_ptr<BackendBase> cloneConfiguration() const override
           {
-            return std::make_unique<EigenBackend>(m_configuration);
+            return std::make_unique<Backend>(m_configuration);
           }
 
           Result solve(LinearSystemType& system, const Settings& settings) override
@@ -402,7 +402,7 @@ namespace Rodin::Solver
       template <class Preconditioner>
       GMRES(ProblemBaseType& problem, const Preconditioner& pc)
         : Parent(problem),
-          m_backend(std::make_unique<EigenBackend<Preconditioner>>(pc)),
+          m_backend(std::make_unique<Backend<Preconditioner>>(pc)),
           m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
       {
         static_assert(std::is_copy_constructible_v<Preconditioner> &&
@@ -478,7 +478,7 @@ namespace Rodin::Solver
       }
 
     private:
-      std::unique_ptr<Backend> m_backend;
+      std::unique_ptr<BackendBase> m_backend;
       Settings m_settings;
       Result m_result;
   };
