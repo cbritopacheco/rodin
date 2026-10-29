@@ -73,7 +73,7 @@ def main():
                VECLIB_MAXIMUM_THREADS='1')
 
     def run(name, ranks, pressure, outlet=0, dt=.001, steps=3, amplitude=0,
-            kinetics=False, vms=False):
+            kinetics=False):
         folder = output/name
         folder.mkdir(exist_ok=True)
         cmd = [args.mpiexec, '-n', str(ranks), str(args.executable.resolve()),
@@ -83,7 +83,6 @@ def main():
                '-atrium_pin', str(pressure), '-atrium_pin_amplitude', str(amplitude),
                '-atrium_outlet_pressure', str(outlet), '-atrium_lv_model', 'false',
                '-atrium_kinetics', str(kinetics).lower(),
-               '-atrium_vms', str(vms).lower(),
                '-atrium_flow_cycles', '0', '-ksp_type', 'preonly', '-pc_type', 'lu',
                '-pc_factor_mat_solver_type', 'mumps', '-mat_mumps_icntl_20', '0',
                '-ksp_diagonal_scale', 'false', '-ksp_diagonal_scale_fix', 'false']
@@ -108,11 +107,8 @@ def main():
         return rows[1:]
 
     rest = run('rest', 2, 0)
-    vms_rest = run('vms-rest', 2, 0, vms=True)
-    run('vms-forward', 2, 1, vms=True)
     run('kinetics', 2, 1, steps=1, kinetics=True)
     assert all(float(row['fluid_max_velocity_m_per_s']) == 0 for row in rest)
-    assert all(float(row['fluid_max_velocity_m_per_s']) == 0 for row in vms_rest)
     forward = run('forward', 2, 1)
     serial = run('serial', 1, 1)
     reverse = run('reverse', 2, -1, steps=1)

@@ -752,7 +752,9 @@ namespace Rodin::Examples::Heart::Atrium
     const Real rho = m_cfg.rho;
     const Real dt = m_cfg.dt;
 
-    // Trace the optional VMS projection phases during startup.
+    // The first steps are traced projection by projection: each of these
+    // assembles a mass matrix over the whole mesh, so on a fine mesh they are
+    // where the time goes, and a stall must be visible where it happens.
     const bool trace = isRoot() && m_step < 3;
     const auto phase = [trace](const char* what) {
       if (trace)
@@ -880,13 +882,7 @@ namespace Rodin::Examples::Heart::Atrium
                     Component(Jacobian(uSol), 2, 1), Component(Jacobian(uSol), 2, 2)),
       m_gradRec2);
 
-    if (m_wallShearProjectionAssembled)
-      m_wssProjection.assemble(AssemblyTarget::RHS);
-    else
-    {
-      m_wssProjection.assemble();
-      m_wallShearProjectionAssembled = true;
-    }
+    m_wssProjection.assemble();
     m_wssProjection.solve(m_wssKSP);
     m_wss.setData(m_wssTrial.getSolution().getData());
 
