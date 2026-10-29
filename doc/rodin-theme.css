@@ -794,21 +794,36 @@ body
     padding-right: 1rem;
   }
   #navigation #m-navbar-brand::after { right: -1px; }
-  #navigation .rodin-wordmark {
-    width: 3.75rem;
-    height: 1.3125rem;
-  }
   #navigation #m-navbar-collapse { margin-left: calc(100% / 12 + 1rem); }
 }
 
 @media screen and (min-width: 992px) and (max-width: 1199px) {
-  #navigation .rodin-wordmark {
-    width: 3rem;
-    height: 1.05rem;
+  /* Keep room for the full-size home link in the narrow desktop gutter. */
+  main article > .m-container > .m-row > .m-col-l-10.m-push-l-1 {
+    left: calc(100% / 12 + 1.5rem);
+    width: calc(10 * 100% / 12 - 1.5rem);
   }
+  #navigation #m-navbar-brand { left: calc(100% / 12 + 1.5rem); }
+  #navigation #m-navbar-collapse { margin-left: calc(100% / 12 + 2.5rem); }
 }
 
 /* Avoid flashing a duplicate title before in-page navigation initializes. */
 main article .m-col-l-10:has(> .rodin-main-brand) > h1 {
   display: none;
+}
+
+/* Separate the page outline from the article on either sidebar position. */
+@media screen and (min-width: 1200px) {
+  .rodin-page-nav.rodin-page-nav-fit::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--line-color);
+  }
+  .rodin-page-nav.rodin-page-nav-fit[data-side="left"] { padding-right: .75rem; }
+  .rodin-page-nav.rodin-page-nav-fit[data-side="left"]::before { right: calc(-1rem - .5px); }
+  .rodin-page-nav.rodin-page-nav-fit[data-side="right"] { padding-left: .75rem; }
+  .rodin-page-nav.rodin-page-nav-fit[data-side="right"]::before { left: calc(-1rem - .5px); }
 }
