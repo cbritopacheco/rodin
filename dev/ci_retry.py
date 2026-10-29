@@ -17,7 +17,7 @@ FAILURE = re.compile(
     r"AddressSanitizer|UndefinedBehaviorSanitizer|runtime error:|"
     r"out of memory|oom.kill|killed process|segmentation fault|"
     r"assertion.*failed|tests failed|benchmark.*failed|checksum mismatch|"
-    r"Process completed with exit code [1-9][0-9]*|Traceback \(most recent call last\)",
+    r"Process completed with exit code (?!143\b)[1-9][0-9]*\b|Traceback \(most recent call last\)",
     re.I,
 )
 
@@ -63,6 +63,8 @@ class Recovery:
 
     @staticmethod
     def interrupted(job, logs):
+        # SIGTERM (128 + 15) accompanies runner shutdown; the explicit runner
+        # marker is still mandatory and every other failure veto remains.
         return (job.get("conclusion") in {"failure", "cancelled"}
                 and bool(INTERRUPTION.search(logs))
                 and not FAILURE.search(logs))

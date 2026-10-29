@@ -51,6 +51,26 @@ class RecoveryTest(unittest.TestCase):
         self.recovery.execute()
         self.assertFalse(self.posted())
 
+    def test_shutdown_sigterm_can_retry_but_exit_code_alone_cannot(self):
+        for marker, code, allowed in [(True, 143, True), (False, 143, False),
+                                      (True, 1, False), (True, 137, False),
+                                      (True, 1430, False)]:
+            with self.subTest(marker=marker, code=code):
+                self.calls.clear()
+                self.logs = ("The runner has received a shutdown signal.\n" if marker else "")
+                self.logs += f"Process completed with exit code {code}."
+                self.recovery.execute()
+                self.assertEqual(bool(self.posted()), allowed)
+
+    def test_shutdown_sigterm_keeps_numerical_and_resource_vetoes(self):
+        for failure in ("out of memory", "Killed process 123", "[ FAILED ] Stokes", "***Timeout"):
+            with self.subTest(failure=failure):
+                self.calls.clear()
+                self.logs = (failure + "\nThe runner has received a shutdown signal.\n"
+                             "Process completed with exit code 143.")
+                self.recovery.execute()
+                self.assertFalse(self.posted())
+
     def test_repeat_failure_exhausts_retry_budget(self):
         self.jobs.append(dict(self.jobs[0], id=13))
         self.recovery.execute()
