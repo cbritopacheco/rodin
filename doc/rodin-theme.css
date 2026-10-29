@@ -783,8 +783,22 @@ body
   background: var(--dim-color);
 }
 @media screen and (min-width: 992px) {
-  #navigation #m-navbar-brand { left: 0; }
-  #navigation #m-navbar-collapse { margin-left: 0; }
+  #navigation > .m-container > .m-row { position: relative; }
+  #navigation #m-navbar-brand {
+    position: absolute;
+    top: 0;
+    left: calc(100% / 12 + 1rem);
+    transform: translateX(-100%);
+    margin: 0;
+    padding-left: 0;
+    padding-right: 1rem;
+  }
+  #navigation #m-navbar-brand::after { right: -1px; }
+  #navigation .rodin-wordmark {
+    width: 3.75rem;
+    height: 1.3125rem;
+  }
+  #navigation #m-navbar-collapse { margin-left: calc(100% / 12 + 1rem); }
 }
 
 /* Avoid flashing a duplicate title before in-page navigation initializes. */
