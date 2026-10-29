@@ -13,14 +13,15 @@ with `-atrium_mode`:
 |---|---|
 | `solid` | Active solid mechanics with passive initialization and Newmark integration |
 | `fluid` | Fixed-domain stabilized P1–P1 Oseen flow; the default mode |
-| `fsi` | Solid and fluid with ALE motion and converged Robin–Robin transmission |
+| `fsi` | Solid and fluid with ALE motion and budgeted Robin–Robin transmission |
 
 `Atrium` owns the common MPI mesh, selected `Solid` and `Fluid` components,
 the optional `FSI` coupling object, cavity-volume measurements, and one CSV
 writer. `initialize()` prepares the components, `step()` advances one accepted
 physical timestep, and `finish()` flushes final states and closes outputs.
 These operations are collective. FSI freezes both previous states during
-coupling iterations and commits only after interface convergence.
+coupling iterations and commits the last completed sweep at convergence or
+budget exhaustion.
 
 | Location | Responsibility |
 |---|---|
@@ -73,7 +74,7 @@ there are no separate solid/fluid timestep or output-path options.
 Component options use `-atrium_solid_*`, `-atrium_fluid_*`, and `-atrium_fsi_*`.
 For example, `-atrium_solid_contractility 20` sets the active stress source in
 kPa, `-atrium_fluid_pin 1200` sets mean inlet pressure in Pa, and
-`-atrium_fsi_atol 1e-4` sets the interface residual tolerance in Pa. The apex is
+`-atrium_fsi_rtol 1e-6` sets the relative solid displacement-change tolerance. The apex is
 specified as three comma-separated coordinates in mm:
 `-atrium_solid_apex 46.39638367,187.44307667,-205.03317767`.
 `-help` describes the full option set without loading the mesh.
@@ -234,7 +235,7 @@ adds no MPI synchronization.
 
 Indented component messages retain `[Solid/Newton]`, `[Fluid/KSP]`, and
 `[FSI/Coupling]` labels for solver iterations, residuals, convergence reasons,
-preconditioner status, and interface tolerances. Native PETSc monitors enabled
+preconditioner status, and displacement-change tolerances. Native PETSc monitors enabled
 with `-snes_monitor` or `-ksp_monitor` appear between the corresponding timed
 solve separators and retain PETSc's own formatting. Residual norms retain the
 solver-dependent scaling. State quantities carry physical units, real values

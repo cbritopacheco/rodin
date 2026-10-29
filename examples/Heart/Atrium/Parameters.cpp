@@ -139,16 +139,8 @@ namespace Rodin::Examples::Heart::Atrium
       real("-atrium_fsi_robin",
         "Reference-area Robin impedance (Pa s/m); zero selects automatic scale",
         out.fsi.robinCoefficient);
-      real("-atrium_fsi_atol", "Absolute Robin residual tolerance (Pa)",
-        out.fsi.absoluteTolerance);
-      real("-atrium_fsi_rtol", "Relative Robin residual tolerance",
+      real("-atrium_fsi_rtol", "Relative solid displacement-change tolerance",
         out.fsi.relativeTolerance);
-      real(
-        "-atrium_fsi_relaxation", "Initial Aitken relaxation", out.fsi.initialRelaxation);
-      real("-atrium_fsi_min_relaxation", "Minimum Aitken relaxation",
-        out.fsi.minimumRelaxation);
-      real("-atrium_fsi_max_relaxation", "Maximum Aitken relaxation",
-        out.fsi.maximumRelaxation);
       PetscReal apex[3] = {out.solid.appendageApex(0), out.solid.appendageApex(1),
         out.solid.appendageApex(2)};
       PetscInt count = 3;

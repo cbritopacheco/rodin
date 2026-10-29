@@ -84,3 +84,18 @@ opacity settings.
    and reduce its opacity to show the cavity outline.
 4. Add **Annotate Time Filter**, choose the camera, and use
    **File > Save Animation** to export the selected time range.
+
+## Solid displacement in FSI
+
+When `Solid.xdmf` exists beside the fluid series, both views also render the
+complete deformed wedge wall. `--solid /path/to/Solid.xdmf` selects it explicitly.
+The pipeline applies `Displacement` with scale factor 1 in mm, then converts
+geometry to metres to align with the ALE fluid. The wall is translucent and
+colored by displacement magnitude in mm, with a separate legend from fluid
+speed. Fluid geometry is displayed directly. Cameras fit the union of fluid
+and deformed-solid bounds over the selected saved states.
+
+Only times saved by both components are included when the scene is generated.
+For a running calculation, reload both XDMF readers in ParaView to discover new
+states. Existing scenes must be regenerated to add the solid pipeline. No
+visual displacement amplification is applied.

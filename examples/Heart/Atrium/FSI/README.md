@@ -51,35 +51,66 @@ Robin data to the moving fluid surface. The second integral is the weakly
 consistent interface convective correction. Fluid velocity is not constrained
 by an interface Dirichlet condition.
 
-After the fluid solve, the unrelaxed transmission update is
+After each fluid solve, the three rows of $\nabla u_f$ are recovered by
+volume mass projections. Their symmetric part $D_h$ supplies the current
+Carreau–Yasuda viscosity and the physical traction on the solid,
 
 $$
-\widehat T^{k+1}=T^k+\alpha_0(u_f^{k+1}-v_\Gamma^{k+1}),\qquad
-\widehat g^{k+1}=\widehat T^{k+1}+\alpha_0u_f^{k+1}.
+t_h=p_hn_f-2\mu(D_h)D_hn_f.
 $$
 
-This is the reference fluid variational reaction, including interface
-stabilization. Matching P1 traces permit this update directly in their nodal
-space. It does not reconstruct traction from recovered output gradients.
-This construction follows the discrete Robin stress update in
-[Burman et al. (2025), equations (13), (16)–(19)](https://discovery.ucl.ac.uk/id/eprint/10210489/).
-The paper's energy-stability result is not asserted for the present active,
-viscous, Newmark solid discretization.
-
-The pair $(g,T)$ is relaxed with the same bounded Aitken factor. Both unrelaxed
-updates must satisfy a componentwise maximum-norm criterion,
+Face-dependent tractions are projected to nodal values with lumped trace
+mass, giving one area-weighted value at shared corners independent of MPI
+partitioning. For trace basis $\varphi_i$, the reference nodal
+traction is
 
 $$
-\max(\|\widehat g-g\|_\infty,\|\widehat T-T\|_\infty)
-\leq\epsilon_a+\epsilon_r
-\max(\|\widehat g\|_\infty,\|\widehat T\|_\infty).
+T_i=\frac{\int_\Gamma\varphi_i t_h\,dS}
+{\int_\Gamma\varphi_i/J_\Gamma\,dS}.
 $$
 
-All quantities in this criterion use Pa. In particular, its traction update
-bounds the interface velocity jump componentwise by the pressure tolerance
-divided by $\alpha_0$. A loose sweep can leave slip; both histories are committed
-only after the configured criterion is met. Exhausting the iteration budget
-terminates the step.
+The denominator is the lumped reference trace mass. It implements the
+area pullback and preserves the assembled resultant. These boundary forms are
+reassembled on each moved geometry. Matching parent vertices transfer the
+reference traction and fluid velocity to the solid. The next Robin datum is
+
+$$
+g^{k+1}=T^{k+1}+\alpha_0u_f^{k+1}.
+$$
+
+This is recovered physical-stress exchange, following the coronary example.
+It is not the algebraic variational-reaction update, and there is no Aitken
+relaxation. The fluid receives the lagged reference traction divided by area
+stretch. Both transmission velocities retain BDF1; the solid Robin tangent
+uses $\alpha_0/\Delta t$.
+
+### Displacement stopping test and sweep budget
+
+After a complete solid/ALE/fluid sweep, define
+
+$$
+r_d=\frac{\|d_s^{k+1}-d_s^k\|_2}{\|d_s^{k+1}\|_2}.
+$$
+
+The norm is the global Euclidean norm of the complete solid displacement
+coefficient vector, not a surface-weighted interface norm. If the denominator
+is zero, the absolute increment norm in metres is used instead. Starting with
+the second sweep, $r_d<\varepsilon_d$ terminates the correction loop. Defaults
+are `-atrium_fsi_rtol 1e-6` and `-atrium_fsi_iterations 5`. A zero
+tolerance disables early termination and uses the complete sweep budget.
+
+Budget exhaustion accepts the last completed sweep. `fsi_converged` and
+`fsi_budget_exhausted` in the common CSV distinguish criterion satisfaction
+from acceptance at the budget. Inner solver failures, invalid constitutive
+states, and mesh inversion still reject the step. A small budget does not
+establish interface continuity; velocity slip, traction-data change, and
+geometry mismatch remain diagnostics. Unlike the reference's early exit
+before its fluid solve, each accepted Atrium sweep includes ALE and fluid
+updates, so both exported geometries correspond to the accepted solid state.
+
+No wall-face ring band is introduced. Existing solid opening cut faces remain
+fixed, ALE caps remain fixed, and fluid opening interiors remain open. The
+interface is not given an additional strong velocity constraint.
 
 The automatic impedance uses the coronary scaling with a matrix-based isotropic
 small-strain modulus:
@@ -113,10 +144,11 @@ SUPG and PSPG use this residual and the relative advecting velocity. Previous
 fluid velocity and solid internal states remain fixed through coupling trials.
 Mesh motion invalidates Rodin's geometric caches through its coordinate API.
 The same spaces, Problems, solvers, and MPI trace scatter plan are retained.
-Recovered gradients and wall-shear projections are computed once per accepted
-physical step and remain output/statistics operations.
+Recovered velocity gradients are recomputed at every coupling sweep for
+traction exchange. Wall-shear projection is computed once per accepted step.
 
-The common CSV records the Robin coefficient, update residual and tolerance,
+The common CSV records the Robin coefficient, traction-data update,
+displacement-change metric and tolerance, criterion and budget status,
 fluid/BDF1 interface velocity mismatch, fluid/Newmark endpoint mismatch, and
 shared-geometry mismatch separately. Fluid `MeshVelocity` gives the BDF1 target
 at the wall; solid `Velocity` gives the Newmark endpoint velocity. The two fields
@@ -136,7 +168,8 @@ scatter plans, interface data, harmonic mesh-motion Problem, and solver. It
 owns the coupling iteration; each component owns its assembly and physical
 state. The shared `Parameters::timeStep` is used for both components. Previous
 states remain frozen through coupling trials, and output and time histories
-are committed only after convergence.
+are committed after the displacement criterion is satisfied or the sweep
+budget is exhausted.
 
 ```sh
 cmake --build build --target Atrium -j4
@@ -156,6 +189,6 @@ mpirun -n 4 build/examples/Heart/Atrium/Atrium \
 `Solid.xdmf` stores reference coordinates and `Displacement`; apply **Warp By
 Vector** to visualize deformation. `Fluid.xdmf` stores moving coordinates and
 must be viewed directly. `Diagnostics.csv` combines both component diagnostics
-and interface convergence. The run saves 25 states including the initial one.
+and coupling status. The run saves 25 states including the initial one.
 The [shared configuration](../README.md#configuration) lists the component
-option prefixes; `-help` includes coupling tolerances and relaxation bounds.
+option prefixes; `-help` includes displacement-change tolerance and sweep budget.

@@ -925,18 +925,11 @@ namespace Rodin::Examples::Heart::Atrium
     return reason > 0 && std::isfinite(m_speed) && m_speed <= m_cfg.maxVelocity;
   }
 
-  void Fluid::computeWallShear()
+  void Fluid::recoverGradient()
   {
-    Stage stage("Wall shear recovery", isRoot());
-    const auto shearStart = CoronaryClock::now();
+    Stage stage("Velocity gradient recovery", isRoot());
+    const auto start = CoronaryClock::now();
     const auto& uSol = m_u.getSolution();
-
-    if (isRoot() && m_step < 3)
-    {
-      Log("Fluid") << "Recovering the wall shear stress ..." << Alert::Raise;
-      std::cout.flush();
-    }
-
     projectVector(VectorFunction(Component(Jacobian(uSol), 0, 0),
                     Component(Jacobian(uSol), 0, 1), Component(Jacobian(uSol), 0, 2)),
       m_gradRec0);
@@ -946,6 +939,19 @@ namespace Rodin::Examples::Heart::Atrium
     projectVector(VectorFunction(Component(Jacobian(uSol), 2, 0),
                     Component(Jacobian(uSol), 2, 1), Component(Jacobian(uSol), 2, 2)),
       m_gradRec2);
+
+    m_timing.shear += secondsSince(start);
+  }
+
+  void Fluid::computeWallShear()
+  {
+    Stage stage("Wall shear recovery", isRoot());
+    const auto shearStart = CoronaryClock::now();
+    if (isRoot() && m_step < 3)
+    {
+      Log("Fluid") << "Recovering the wall shear stress ..." << Alert::Raise;
+      std::cout.flush();
+    }
 
     m_wssProjection.assemble();
     m_wssProjection.solve(m_wssKSP);
@@ -1078,6 +1084,7 @@ namespace Rodin::Examples::Heart::Atrium
     beginStep();
     if (!solveFlow())
       Alert::Exception() << "Fluid trial exceeded its velocity limit" << Alert::Raise;
+    recoverGradient();
     computeWallShear();
     commitStep();
   }

@@ -32,7 +32,7 @@ def main():
                               env=env, text=True, capture_output=True, timeout=60)
     assert help_run.returncode == 0, help_run.stdout + help_run.stderr
     for flag in ('-atrium_mode', '-atrium_dt', '-atrium_solid_contractility',
-                 '-atrium_fluid_pin', '-atrium_fsi_atol'):
+                 '-atrium_fluid_pin', '-atrium_fsi_rtol'):
         assert flag in help_run.stdout, flag
     solver = ['-ksp_type', 'gmres', '-ksp_rtol', '1e-12', '-pc_type', 'lu',
               '-pc_factor_mat_solver_type', 'mumps', '-mat_mumps_icntl_20', '0',

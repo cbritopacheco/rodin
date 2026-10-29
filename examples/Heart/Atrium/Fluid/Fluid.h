@@ -444,6 +444,10 @@ namespace Rodin::Examples::Heart::Atrium
       bool advance0D();
       bool solveFlow();
       void solveSpecies();
+
+      /// @brief Reassembles and solves the three retained gradient-recovery projections.
+      void recoverGradient();
+
       void computeWallShear();
       void closeCycle(Real elapsed);
       void computeFluxes();

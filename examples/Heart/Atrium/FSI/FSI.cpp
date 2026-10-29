@@ -140,29 +140,22 @@ namespace Rodin::Examples::Heart::Atrium
       m_motionTest(fluid.m_vh),
       m_motion(m_motionTrial, m_motionTest),
       m_motionSolver(m_motion),
+      m_tractionLoad(fluid.m_v),
+      m_tractionWeights(fluid.m_v),
       m_previousMeshDisplacement(fluid.m_vh),
       m_importedTraction(solid.m_space),
       m_trialTraction(solid.m_space),
       m_importedVelocity(solid.m_space),
       m_interfaceVelocity(solid.m_space),
       m_previousRobinData(solid.m_space),
-      m_previousResidual(solid.m_space),
+      m_previousDisplacementIteration(solid.m_space),
       m_residualDifference(solid.m_space),
       m_tractionResidual(solid.m_space),
-      m_previousTractionResidual(solid.m_space),
-      m_tractionResidualDifference(solid.m_space),
       m_robinCoefficient(parameters.robinCoefficient)
   {
     if (parameters.maximumIterations < 1 ||
-      !std::isfinite(parameters.relativeTolerance) || parameters.relativeTolerance <= 0 ||
-      !std::isfinite(parameters.absoluteTolerance) || parameters.absoluteTolerance <= 0 ||
-      !std::isfinite(m_robinCoefficient) || m_robinCoefficient < 0 ||
-      !std::isfinite(parameters.initialRelaxation) ||
-      !std::isfinite(parameters.minimumRelaxation) ||
-      !std::isfinite(parameters.maximumRelaxation) || parameters.minimumRelaxation <= 0 ||
-      parameters.minimumRelaxation > parameters.initialRelaxation ||
-      parameters.initialRelaxation > parameters.maximumRelaxation ||
-      parameters.maximumRelaxation > 1)
+      !std::isfinite(parameters.relativeTolerance) || parameters.relativeTolerance < 0 ||
+      !std::isfinite(m_robinCoefficient) || m_robinCoefficient < 0)
       Alert::Exception() << "Invalid FSI parameters" << Alert::Raise;
     if (fluid.m_cfg.useVentricularModel || fluid.m_cfg.useVMS ||
       fluid.m_cfg.solveKinetics)
@@ -237,11 +230,9 @@ namespace Rodin::Examples::Heart::Atrium
     m_trialTraction = zero;
     m_interfaceVelocity = zero;
     m_tractionResidual = zero;
-    m_previousTractionResidual = zero;
-    m_tractionResidualDifference = zero;
     m_importedVelocity = zero;
     m_previousRobinData = zero;
-    m_previousResidual = zero;
+    m_previousDisplacementIteration = zero;
     m_residualDifference = zero;
     m_solidToFluid = makeScatter(
       solid.m_mesh, solid.m_displacement, fluid.m_mesh, fluid.m_wallDisplacement);
@@ -334,10 +325,75 @@ namespace Rodin::Examples::Heart::Atrium
       SCATTER_REVERSE);
     transfer(
       m_solidToFluid, m_fluid.m_wallVelocity, m_interfaceVelocity, 1e3, SCATTER_REVERSE);
-    // The Robin stress update is the fluid variational reaction, including
-    // the interface convective correction. All three traces are P1.
-    m_trialTraction = m_importedTraction +
-      m_solid.m_robinCoefficient * (m_importedVelocity - m_interfaceVelocity);
+    m_fluid.recoverGradient();
+    const auto normal = BoundaryNormal(m_fluid.m_mesh);
+    const auto& cy = m_fluid.m_cfg.viscosity;
+    const VectorFunction traction(3, [&](const Point& point) {
+      Math::SpatialMatrix<Real> gradient(3, 3);
+      const auto g0 = m_fluid.m_gradRec0(point);
+      const auto g1 = m_fluid.m_gradRec1(point);
+      const auto g2 = m_fluid.m_gradRec2(point);
+      for (Index j = 0; j < 3; ++j)
+      {
+        gradient(0, j) = g0(j);
+        gradient(1, j) = g1(j);
+        gradient(2, j) = g2(j);
+      }
+      const Math::SpatialMatrix<Real> strain = .5 * (gradient + gradient.transpose());
+      const Real shear = std::sqrt(
+        cy.gammaRegularization * cy.gammaRegularization + 2 * strain.squaredNorm());
+      const Real viscosity = cy.muInf +
+        (cy.mu0 - cy.muInf) *
+          std::pow(1 + std::pow(cy.lambda * shear, cy.yasuda), (cy.n - 1) / cy.yasuda);
+      const Math::SpatialVector<Real> n = normal.getValue(point);
+      Math::SpatialVector<Real> value =
+        m_fluid.m_p.getSolution()(point) * n - 2 * viscosity * strain * n;
+      for (Index j = 0; j < 3; ++j)
+      {
+        if (!std::isfinite(value(j)))
+          Alert::Exception() << "Non-finite recovered interface traction" << Alert::Raise;
+      }
+      return value;
+    });
+    const VectorFunction ones(
+      3, [](const Point&) { return Math::SpatialVector<Real>{1, 1, 1}; });
+    const RealFunction inverseStretch([&](const Point& point) {
+      return m_fluid.m_inverseInterfaceStretches.at(point.getPolytope().getIndex());
+    });
+    m_tractionWeights =
+      BoundaryIntegral(inverseStretch * ones, m_fluid.m_v).over(m_fluid.m_cfg.wall);
+    m_tractionWeights.assemble();
+    // Lumped reference trace mass averages corner normals across ranks and
+    // preserves the assembled current-area resultant on the solid reference wall.
+    auto& target = m_fluid.m_wallTraction;
+    auto load = BoundaryIntegral(traction, m_fluid.m_v);
+    load.setOrder(4);
+    m_tractionLoad = load.over(m_fluid.m_cfg.wall);
+    m_tractionLoad.assemble();
+    target.flush();
+    const PetscScalar *weights = nullptr, *values = nullptr;
+    PetscScalar* result = nullptr;
+    PetscInt size = 0;
+    PetscErrorCode ierr = VecGetLocalSize(target.getData(), &size);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecGetArrayRead(m_tractionWeights.getVector(), &weights);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecGetArrayRead(m_tractionLoad.getVector(), &values);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecGetArray(target.getData(), &result);
+    assert(ierr == PETSC_SUCCESS);
+    for (PetscInt i = 0; i < size; ++i)
+      result[i] = PetscRealPart(weights[i]) > 0 ? values[i] / weights[i] : 0;
+    ierr = VecRestoreArray(target.getData(), &result);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecRestoreArrayRead(m_tractionLoad.getVector(), &values);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecRestoreArrayRead(m_tractionWeights.getVector(), &weights);
+    assert(ierr == PETSC_SUCCESS);
+    target *= Real(1);
+    (void)ierr;
+    transfer(
+      m_solidToFluid, m_fluid.m_wallTraction, m_trialTraction, 1e-3, SCATTER_REVERSE);
     m_solid.m_robinData =
       m_trialTraction + m_solid.m_robinCoefficient * m_importedVelocity;
   }
@@ -352,97 +408,53 @@ namespace Rodin::Examples::Heart::Atrium
       m_previousCellMeasures[cell->getIndex()] = cell->getMeasure();
     m_solid.beginStep();
     m_fluid.beginStep();
-    bool converged = false;
-    Real relaxation = m_parameters.initialRelaxation;
+    m_previousDisplacementIteration.setData(m_solid.m_displacement.getData());
     for (size_t iteration = 1; iteration <= m_parameters.maximumIterations; ++iteration)
     {
       Stage coupling("Coupling iteration " + std::to_string(iteration), m_fluid.isRoot());
       if (m_fluid.isRoot())
       {
         Log("FSI/Coupling") << "iteration=" << iteration << '/'
-                            << m_parameters.maximumIterations
-                            << " relaxation=" << relaxation << Alert::Raise;
+                            << m_parameters.maximumIterations << Alert::Raise;
       }
       m_previousRobinData.setData(m_solid.m_robinData.getData());
       m_solid.solveStep();
+      m_residualDifference = m_solid.m_displacement - m_previousDisplacementIteration;
+      const Real change = m_residualDifference.norm(NORM_2);
+      const Real state = m_solid.m_displacement.norm(NORM_2);
+      m_diagnostics.displacementChange = state > 0 ? change / state : 1e-3 * change;
+      m_previousDisplacementIteration.setData(m_solid.m_displacement.getData());
       moveFluidMesh();
       if (!m_fluid.solveFlow())
         Alert::Exception() << "FSI fluid velocity exceeded its limit" << Alert::Raise;
       updateTraction();
-      Stage interface("Interface convergence and relaxation", m_fluid.isRoot());
-      PetscReal difference = 0, norm = 0, tractionDifference = 0, tractionNorm = 0;
+      Stage interface("Interface convergence and traction diagnostics", m_fluid.isRoot());
+      PetscReal difference = 0, tractionDifference = 0;
       m_tractionResidual = m_importedTraction - m_trialTraction;
       m_previousRobinData.axpy(-1, m_solid.m_robinData);
       PetscErrorCode ierr =
         VecNorm(m_previousRobinData.getData(), NORM_INFINITY, &difference);
       assert(ierr == PETSC_SUCCESS);
-      ierr = VecNorm(m_solid.m_robinData.getData(), NORM_INFINITY, &norm);
-      assert(ierr == PETSC_SUCCESS);
       ierr = VecNorm(m_tractionResidual.getData(), NORM_INFINITY, &tractionDifference);
-      assert(ierr == PETSC_SUCCESS);
-      ierr = VecNorm(m_trialTraction.getData(), NORM_INFINITY, &tractionNorm);
       assert(ierr == PETSC_SUCCESS);
       (void)ierr;
       m_diagnostics.iterations = iteration;
-      m_diagnostics.robinResidual = 1e3 * std::max(difference, tractionDifference);
-      m_diagnostics.robinTolerance = m_parameters.absoluteTolerance +
-        m_parameters.relativeTolerance * 1e3 * std::max(norm, tractionNorm);
+      m_diagnostics.tractionDataUpdate = 1e3 * std::max(difference, tractionDifference);
+      m_importedTraction.setData(m_trialTraction.getData());
+      m_diagnostics.converged = iteration > 1 &&
+        m_diagnostics.displacementChange < m_parameters.relativeTolerance;
       if (m_fluid.isRoot())
       {
         Log("FSI/Coupling") << "iteration=" << iteration
-                            << " Robin residual=" << m_diagnostics.robinResidual
-                            << " Pa tolerance=" << m_diagnostics.robinTolerance << " Pa"
-                            << Alert::Raise;
+                            << " displacement_change=" << m_diagnostics.displacementChange
+                            << " tolerance=" << m_parameters.relativeTolerance
+                            << " traction_data_update="
+                            << m_diagnostics.tractionDataUpdate << " Pa" << Alert::Raise;
       }
-      if (m_diagnostics.robinResidual <= m_diagnostics.robinTolerance)
-      {
-        m_importedTraction.setData(m_trialTraction.getData());
-        transfer(m_solidToFluid, m_importedTraction, m_fluid.m_wallTraction, 1e3);
-        converged = true;
+      if (m_diagnostics.converged)
         break;
-      }
-      if (iteration > 1)
-      {
-        m_residualDifference.setData(m_previousRobinData.getData());
-        m_residualDifference.axpy(-1, m_previousResidual);
-        m_tractionResidualDifference = m_tractionResidual - m_previousTractionResidual;
-        PetscScalar numerator = 0, denominator = 0, tractionNumerator = 0,
-                    tractionDenominator = 0;
-        ierr = VecDot(
-          m_previousResidual.getData(), m_residualDifference.getData(), &numerator);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecDot(
-          m_residualDifference.getData(), m_residualDifference.getData(), &denominator);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecDot(m_previousTractionResidual.getData(),
-          m_tractionResidualDifference.getData(), &tractionNumerator);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecDot(m_tractionResidualDifference.getData(),
-          m_tractionResidualDifference.getData(), &tractionDenominator);
-        assert(ierr == PETSC_SUCCESS);
-        numerator += tractionNumerator;
-        denominator += tractionDenominator;
-        if (PetscRealPart(denominator) > 0)
-        {
-          const Real proposal =
-            -relaxation * PetscRealPart(numerator) / PetscRealPart(denominator);
-          if (std::isfinite(proposal))
-          {
-            relaxation = std::clamp(
-              proposal, m_parameters.minimumRelaxation, m_parameters.maximumRelaxation);
-          }
-        }
-      }
-      m_previousResidual.setData(m_previousRobinData.getData());
-      m_previousTractionResidual.setData(m_tractionResidual.getData());
-      m_solid.m_robinData.axpy(1 - relaxation, m_previousRobinData);
-      m_trialTraction.axpy(1 - relaxation, m_tractionResidual);
-      m_importedTraction.setData(m_trialTraction.getData());
-      transfer(m_solidToFluid, m_importedTraction, m_fluid.m_wallTraction, 1e3);
-      m_diagnostics.relaxation = relaxation;
     }
-    if (!converged)
-      Alert::Exception() << "Atrium interface iteration did not converge" << Alert::Raise;
+    m_diagnostics.budgetExhausted = !m_diagnostics.converged;
     {
       Stage stage("Accepted interface checks", m_fluid.isRoot());
     Real velocityMismatch = 0, displacementMismatch = 0, newmarkMismatch = 0;
@@ -497,8 +509,11 @@ namespace Rodin::Examples::Heart::Atrium
     m_fluid.commitStep();
     if (m_fluid.isRoot())
     {
-      Log("FSI/State", false, Log::Status::Success)
-        << "converged: coupling_iterations=" << m_diagnostics.iterations
+      Log("FSI/State", false,
+        m_diagnostics.converged ? Log::Status::Success : Log::Status::Retry)
+        << (m_diagnostics.converged ? "converged"
+                                    : "budget exhausted; last sweep accepted")
+        << ": coupling_iterations=" << m_diagnostics.iterations
         << " velocity_mismatch=" << m_diagnostics.velocityMismatch << " m/s"
         << " displacement_mismatch=" << m_diagnostics.displacementMismatch << " m"
         << " min_mesh_J=" << m_diagnostics.minimumMeshJacobian << Alert::Raise;

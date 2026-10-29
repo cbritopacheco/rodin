@@ -269,11 +269,19 @@ namespace Rodin::Examples::Heart::Atrium
           {"fsi_iterations",
             m_fsi ? Optional<Real>(m_fsi->getDiagnostics().iterations)
                   : Optional<Real>{}},
-          {"fsi_robin_residual_pa",
-            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().robinResidual)
+          {"fsi_traction_data_update_pa",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().tractionDataUpdate)
                   : Optional<Real>{}},
-          {"fsi_robin_tolerance_pa",
-            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().robinTolerance)
+          {"fsi_displacement_change",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().displacementChange)
+                  : Optional<Real>{}},
+          {"fsi_displacement_tolerance",
+            m_fsi ? Optional<Real>(m_parameters.fsi.relativeTolerance)
+                  : Optional<Real>{}},
+          {"fsi_converged",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().converged) : Optional<Real>{}},
+          {"fsi_budget_exhausted",
+            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().budgetExhausted)
                   : Optional<Real>{}},
           {"fsi_velocity_mismatch_m_per_s",
             m_fsi ? Optional<Real>(m_fsi->getDiagnostics().velocityMismatch)
@@ -286,9 +294,6 @@ namespace Rodin::Examples::Heart::Atrium
                   : Optional<Real>{}},
           {"fsi_displacement_mismatch_m",
             m_fsi ? Optional<Real>(m_fsi->getDiagnostics().displacementMismatch)
-                  : Optional<Real>{}},
-          {"fsi_relaxation",
-            m_fsi ? Optional<Real>(m_fsi->getDiagnostics().relaxation)
                   : Optional<Real>{}},
           {"fsi_min_mesh_jacobian",
             m_fsi ? Optional<Real>(m_fsi->getDiagnostics().minimumMeshJacobian)
