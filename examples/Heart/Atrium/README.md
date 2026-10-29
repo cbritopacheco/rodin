@@ -28,6 +28,14 @@ problem and passive-equilibrium problem. The fluid retains its Oseen problem,
 wall-shear problem, and projection problems. Assembly reuses the fixed mesh and
 Rodin's transformation and quadrature machinery across time steps.
 
+Scalar and vector mass projections and the wall-shear projection retain their
+operators after the first assembly. Later projections assemble only the
+right-hand side through `AssemblyTarget::RHS`, preserving the matrix and its
+preconditioner. This reuse assumes the component's fixed mesh, finite-element
+spaces, and wall boundary; a new mesh requires a new component. The Oseen
+operator is reassembled each step because velocity, viscosity, and stabilization
+coefficients evolve.
+
 `Atrium::Parameters::mode` selects `Solid`, `Fluid`, or `FSI`.
 `initialize()` prepares the selected components, `step()` advances each once,
 and `finish()` closes their outputs. These operations are collective on the

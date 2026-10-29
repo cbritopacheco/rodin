@@ -443,6 +443,13 @@ namespace Rodin::Examples::Heart::Atrium
       {
         m_scalarProjection = Rodin::Variational::Integral(m_sTrial, m_sTest) -
           Rodin::Variational::Integral(expr, m_sTest);
+        if (m_scalarProjectionAssembled)
+          m_scalarProjection.assemble(Rodin::Variational::AssemblyTarget::RHS);
+        else
+        {
+          m_scalarProjection.assemble();
+          m_scalarProjectionAssembled = true;
+        }
         m_scalarProjection.solve(m_scalarProjectionKSP);
         out.setData(m_sTrial.getSolution().getData());
       }
@@ -453,6 +460,13 @@ namespace Rodin::Examples::Heart::Atrium
       {
         m_vectorProjection = Rodin::Variational::Integral(m_wTrial, m_wTest) -
           Rodin::Variational::Integral(expr, m_wTest);
+        if (m_vectorProjectionAssembled)
+          m_vectorProjection.assemble(Rodin::Variational::AssemblyTarget::RHS);
+        else
+        {
+          m_vectorProjection.assemble();
+          m_vectorProjectionAssembled = true;
+        }
         m_vectorProjection.solve(m_vectorProjectionKSP);
         out.setData(m_wTrial.getSolution().getData());
       }
@@ -599,6 +613,12 @@ namespace Rodin::Examples::Heart::Atrium
       Real m_speed = 0.0;
       bool m_valveOpen = true;
       bool m_flowFieldSplitsSet = false;
+
+      /// @brief Fixed-mesh projection operators retained after their first assembly.
+      bool m_scalarProjectionAssembled = false;
+      bool m_vectorProjectionAssembled = false;
+      bool m_wallShearProjectionAssembled = false;
+
       bool m_initialized = false;
       bool m_finished = false;
       bool m_failed = false;
