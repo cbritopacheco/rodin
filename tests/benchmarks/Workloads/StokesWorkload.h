@@ -8,6 +8,7 @@
 #define RODIN_WORKLOADS_STOKESWORKLOAD_H
 
 #include <benchmark/benchmark.h>
+#include <sstream>
 #include "Rodin/Assembly.h"
 #include "Rodin/Solver/SparseLU.h"
 #include "convergence/Stokes.h"
@@ -31,9 +32,11 @@ namespace Rodin::Tests::Benchmarks
    * and global completion. Solve measures public SparseLU::solve(system),
    * including fresh factorization and one residual correction, but no assembly
    * or field scatter. It does not claim to isolate triangular substitution.
-   * Setup and all numerical qualifications are outside timing. Exact affine
-   * coefficient reproduction, true residuals, a wrong-field control and a
-   * missing-pressure-gradient control qualify the mixed operator.
+   * Assembly qualification does not construct or run a solver.
+   * Setup and all numerical qualifications are outside timing. Both variants
+   * check the exact affine patch residual, a wrong-field control and a
+   * missing-pressure-gradient control. The solver variant additionally checks
+   * solver success, coefficient reproduction and the true solved residual.
    *
    * @tparam K Velocity degree; pressure has degree K-1.
    * @tparam Weighted Whether explicit unit viscosity selects the weighted kernel.
@@ -137,31 +140,50 @@ namespace Rodin::Tests::Benchmarks
           (baseline.getOperator() * exact - baseline.getVector()).norm() / rhsScale;
         const Math::Vector<Real> wrong = exact.array() + Real(1);
         const Real wrongResidual = residual(wrong);
-        Solver::SparseLU solver(problem);
-        solver.setRefinementSteps(1);
-        solver.solve(system);
+        Optional<decltype(Solver::SparseLU(problem))> solver;
+        if constexpr (Solve)
+        {
+          solver.emplace(problem);
+          solver->setRefinementSteps(1);
+          solver->solve(system);
+        }
         const auto coefficientError = [&]() {
           return (system.getSolution() - exact).norm() / exactScale;
         };
         const auto valid = [&]() {
-          return solver.success() && std::isfinite(coefficientError()) &&
-            coefficientError() < 1e-9 && std::isfinite(residual(system.getSolution())) &&
-            residual(system.getSolution()) < 1e-11 && std::isfinite(patchResidual) &&
-            patchResidual < 1e-11 && std::isfinite(omittedResidual) &&
-            omittedResidual > 1e-4 && std::isfinite(wrongResidual) &&
-            wrongResidual > 1e-4;
+          if constexpr (Solve)
+          {
+            if (!solver->success() || !std::isfinite(coefficientError()) ||
+              coefficientError() >= 1e-9 ||
+              !std::isfinite(residual(system.getSolution())) ||
+              residual(system.getSolution()) >= 1e-11)
+              return false;
+          }
+          return std::isfinite(patchResidual) && patchResidual < 1e-11 &&
+            std::isfinite(omittedResidual) && omittedResidual > 1e-4 &&
+            std::isfinite(wrongResidual) && wrongResidual > 1e-4;
         };
         if (!valid())
         {
           failed = true;
-          state.SkipWithError("Stokes patch, solve or sensitivity qualification failed");
+          std::ostringstream message;
+          message << "Stokes qualification failed: patch=" << patchResidual
+                  << ", missing-pressure=" << omittedResidual
+                  << ", wrong-field=" << wrongResidual;
+          if constexpr (Solve)
+          {
+            message << ", solver-success=" << solver->success()
+                    << ", coefficient=" << coefficientError()
+                    << ", solved-residual=" << residual(system.getSolution());
+          }
+          state.SkipWithError(message.str().c_str());
           return;
         }
         bool repeatedValid = true;
         for (auto _ : state)
         {
           if constexpr (Solve)
-            solver.solve(system);
+            solver->solve(system);
           else
             problem.assemble();
           benchmark::DoNotOptimize(system.getSolution().data());
