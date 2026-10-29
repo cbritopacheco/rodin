@@ -37,6 +37,27 @@ class BenchmarkSiteTest(unittest.TestCase):
             writer.writeheader()
             writer.writerows(records)
 
+    def test_explicit_navigation_actions_count_registered_pages_and_mark_empty_modules(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            docs, manifest, record = self.fixture(root)
+            catalogue = json.loads((docs / 'rodin-module-catalogue.json').read_text())
+            empty = dict(catalogue['groups'][0]['modules'][0], title='Empty', path='Rodin/Empty')
+            catalogue['groups'][0]['modules'].append(empty)
+            (docs / 'rodin-module-catalogue.json').write_text(json.dumps(catalogue))
+            self.write_manifest(manifest, [record, dict(record, target='StokesBenchmark', path='Stokes/Solve')])
+            output = root / 'site'
+            build_site(manifest, docs, output, 'Release', '../')
+            index = (output / 'index.html').read_text()
+            self.assertIn('Search benchmarks</a>', index)
+            self.assertIn('aria-label="Browse benchmarks in Math"', index)
+            self.assertIn('aria-label="Browse benchmarks in Stokes"', index)
+            self.assertIn('No benchmarks yet', index)
+            self.assertNotIn('aria-label="Browse benchmarks in Empty"', index)
+            module = (output / 'Rodin/Math/index.html').read_text()
+            self.assertIn('aria-label="View results for SpatialMatrix"', module)
+            self.assertIn('1 benchmark</span>', module)
+
     def test_canonical_module_export_contains_rendered_content_and_no_build_paths(self):
         with tempfile.TemporaryDirectory() as folder:
             docs, _, _ = self.fixture(Path(folder))

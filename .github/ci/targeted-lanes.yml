@@ -250,7 +250,10 @@ jobs:
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }})
   MPIH1Restriction:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    # The 72-case np8 pyramid partition passed 70 cases before the 90-minute
+    # job limit; its K6 matrix cases each take about 19 minutes. Preserve the
+    # per-test watchdogs and leave time to finish and capture coverage.
+    timeout-minutes: ${{ matrix.partition == 'pyramid' && matrix.np == '8' && 180 || 90 }}
     strategy:
       fail-fast: false
       matrix:

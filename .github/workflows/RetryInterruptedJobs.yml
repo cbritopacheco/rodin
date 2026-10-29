@@ -7,6 +7,7 @@ on:
     branches: [develop, master]
 permissions:
   contents: read
+  checks: read
   actions: write
 concurrency:
   group: recover-ci-${{ github.event.workflow_run.id }}

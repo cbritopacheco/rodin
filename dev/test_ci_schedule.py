@@ -129,6 +129,19 @@ class HierarchicalScheduleTest(unittest.TestCase):
             self.assertIn('/blob/exact-commit/.github/workflows/TestConfiguration_mpi.yml', text)
             self.assertNotIn('```mermaid', text)
 
+    def test_eight_rank_pyramid_job_has_time_for_all_cases_and_coverage(self):
+        jobs = yaml.safe_load((tests.ROOT / '.github/ci/targeted-lanes.yml').read_text())['jobs']
+        job = jobs['MPIH1Restriction']
+        self.assertEqual(job['timeout-minutes'], "${{ matrix.partition == 'pyramid' && matrix.np == '8' && 180 || 90 }}")
+        generated = schedule.generated()['TestMPIH1Restriction.yml']['jobs']['MPIH1Restriction']
+        self.assertEqual(generated['timeout-minutes'], job['timeout-minutes'])
+        self.assertEqual(generated['env'], job['env'])
+        self.assertEqual(generated['steps'], job['steps'])
+        rows = job['strategy']['matrix']['include']
+        self.assertEqual({row['np'] for row in rows}, {'1', '2', '3', '4', '8'})
+        self.assertEqual(len(rows), 20)
+        self.assertEqual(sum(row['partition'] == 'pyramid' and row['np'] == '8' for row in rows), 2)
+
     def test_preloaded_artifacts_never_fall_back_to_network(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -51,6 +51,26 @@ class RecoveryTest(unittest.TestCase):
         self.recovery.execute()
         self.assertFalse(self.posted())
 
+    def test_shutdown_sigterm_can_retry_but_exit_code_alone_cannot(self):
+        for marker, code, allowed in [(True, 143, True), (False, 143, False),
+                                      (True, 1, False), (True, 137, False),
+                                      (True, 1430, False)]:
+            with self.subTest(marker=marker, code=code):
+                self.calls.clear()
+                self.logs = ("The runner has received a shutdown signal.\n" if marker else "")
+                self.logs += f"Process completed with exit code {code}."
+                self.recovery.execute()
+                self.assertEqual(bool(self.posted()), allowed)
+
+    def test_shutdown_sigterm_keeps_numerical_and_resource_vetoes(self):
+        for failure in ("out of memory", "Killed process 123", "[ FAILED ] Stokes", "***Timeout"):
+            with self.subTest(failure=failure):
+                self.calls.clear()
+                self.logs = (failure + "\nThe runner has received a shutdown signal.\n"
+                             "Process completed with exit code 143.")
+                self.recovery.execute()
+                self.assertFalse(self.posted())
+
     def test_repeat_failure_exhausts_retry_budget(self):
         self.jobs.append(dict(self.jobs[0], id=13))
         self.recovery.execute()
@@ -95,6 +115,38 @@ class RecoveryTest(unittest.TestCase):
             self.recovery.execute()
         self.assertFalse(self.posted())
 
+    def test_unavailable_logs_do_not_block_other_verified_interruptions(self):
+        for missing_name, eligible_name in [("A missing", "Z eligible"), ("Z missing", "A eligible")]:
+            with self.subTest(missing=missing_name):
+                self.calls.clear()
+                self.jobs = [dict(self.jobs[0], id=12, name=missing_name),
+                             dict(self.jobs[0], id=14, name=eligible_name)]
+                original = self.api
+                def missing(endpoint, **kwargs):
+                    if endpoint.endswith("/jobs/12/logs"):
+                        raise RuntimeError("Logs unavailable")
+                    return original(endpoint, **kwargs)
+                recovery = ci_retry.Recovery("owner/repo", {"workflow_run": {"id": 8}}, missing)
+                self.assertIn("single retry", recovery.execute())
+                self.assertEqual(self.posted(), ["repos/owner/repo/actions/jobs/14/rerun"])
+                decisions = {job['id']: state for job, state, _ in recovery.rows}
+                self.assertEqual(decisions[12], "Inspection failed")
+                self.assertEqual(decisions[14], "Retry requested")
+                self.assertIn("Logs unavailable; no retry requested", recovery.summary())
+
+    def test_all_missing_logs_are_reported_before_inspection_fails(self):
+        self.jobs.append(dict(self.jobs[0], id=14, name="Other lane"))
+        original = self.api
+        def missing(endpoint, **kwargs):
+            if endpoint.endswith("/logs"):
+                raise RuntimeError("Logs unavailable")
+            return original(endpoint, **kwargs)
+        self.recovery.api = missing
+        with self.assertRaisesRegex(RuntimeError, "Logs unavailable"):
+            self.recovery.execute()
+        self.assertFalse(self.posted())
+        self.assertEqual({job['id'] for job, _, _ in self.recovery.rows}, {12, 14})
+
     def test_summary_reports_every_failure_and_exact_log_links(self):
         self.jobs += [dict(self.jobs[0], id=14, name="Other | <lane>")]
         self.recovery.message = self.recovery.execute()
@@ -120,7 +172,7 @@ class RecoveryTest(unittest.TestCase):
         import yaml
         root = Path(__file__).resolve().parents[1]
         workflow = yaml.safe_load((root / ".github/workflows/RetryInterruptedJobs.yml").read_text())
-        self.assertEqual(workflow["permissions"], {"contents": "read", "actions": "write"})
+        self.assertEqual(workflow["permissions"], {"contents": "read", "checks": "read", "actions": "write"})
         steps = workflow["jobs"]["Recover"]["steps"]
         self.assertEqual(steps[0]["with"]["ref"], "${{ github.sha }}")
         self.assertNotIn("secrets.", str(steps))

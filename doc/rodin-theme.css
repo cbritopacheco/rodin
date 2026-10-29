@@ -375,6 +375,8 @@ img.m-image.rodin-logo-dark
   vertical-align: -.125em;
 }
 
+#navigation #m-navbar-brand,
+#navigation .m-doc-search-icon,
 #navigation #m-navbar-collapse > .m-row > ol > li > a
 {
   display: inline-flex;
@@ -421,9 +423,9 @@ img.m-image.rodin-logo-dark
 {
   position: absolute;
   right: max(0.75rem,env(safe-area-inset-right));
-  top: 0.125rem;
+  top: 0;
   width: 2.75rem;
-  height: 2.75rem;
+  height: 3rem;
   margin: 0;
   padding: 0;
   z-index: 2;
@@ -516,10 +518,13 @@ img.m-image.rodin-logo-dark
   color: var(--link-color);
 }
 
-@media(max-width:767px)
+/* Collapse before the icon-and-text links would wrap onto a second row. */
+@media(max-width:991px)
 {
   #navigation > .m-container > .m-row > .m-hide-m
   {
+    display: flex;
+    align-items: center;
     width: auto;
     margin-left: auto;
     flex: 0 0 auto;
@@ -527,7 +532,60 @@ img.m-image.rodin-logo-dark
 
   #navigation #m-navbar-collapse
   {
-    flex: 0 0 100%;
+    display: none;
+    flex: 0 0 calc(100% + 3.5rem);
+    width: calc(100% + 3.5rem);
+    padding-bottom: 1rem;
+  }
+
+  #navigation:target #m-navbar-collapse { display: block; }
+  #navigation #m-navbar-show,
+  #navigation #m-navbar-hide
+  {
+    align-items: center;
+    min-height: 3rem;
+    line-height: 3rem;
+  }
+
+  #navigation #m-navbar-show { display: inline-flex; }
+  #navigation #m-navbar-hide,
+  #navigation:target #m-navbar-show { display: none; }
+  #navigation:target #m-navbar-hide { display: inline-flex; }
+  #navigation #m-navbar-collapse .m-show-m { display: none; }
+
+  #navigation #m-navbar-collapse > .m-row > ol
+  {
+    width: 50%;
+    padding-inline: 1rem;
+  }
+
+  #navigation #m-navbar-collapse > .m-row > ol > li
+  {
+    float: none;
+    margin-left: -1rem;
+    border-width: 0 0 0 .25rem;
+  }
+
+  #navigation #m-navbar-collapse li a
+  {
+    white-space: normal;
+    line-height: 1.5rem;
+    margin-left: -.25rem;
+    padding-inline: .75rem;
+    border-width: 0 0 0 .25rem;
+  }
+
+  #navigation #m-navbar-collapse ol ol
+  {
+    position: static;
+    visibility: visible;
+    padding-left: 1.5rem;
+  }
+
+  #navigation #m-navbar-collapse ol ol li
+  {
+    margin-left: -1rem;
+    border-left-width: .25rem;
   }
 
 }

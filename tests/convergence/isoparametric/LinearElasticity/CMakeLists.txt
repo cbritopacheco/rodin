@@ -98,6 +98,15 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
       endforeach()
     endif()
   endforeach()
+  if(RODIN_CODE_COVERAGE)
+    # The isolated local P3 pyramid history reached its final n=9 level after
+    # 27 + 212 seconds, then hit the 1800-second watchdog. Give that complete
+    # history the same one-hour allowance as the other curved pyramid rates.
+    # MPI ranks 1--4 completed within their existing 1800-second allowances.
+    set_tests_properties(
+      RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MixedTractionP3Rates_Pyramid
+      PROPERTIES TIMEOUT 3600)
+  endif()
   add_executable(RodinConvergenceIsoparametricPETScLinearElasticity LinearElasticity.cpp)
   target_compile_definitions(RodinConvergenceIsoparametricPETScLinearElasticity
     PRIVATE RODIN_CURVED_ELASTICITY_PETSC)

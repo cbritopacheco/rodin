@@ -1,6 +1,8 @@
 """Compact reports distinguish complete evidence from partial progress."""
 import unittest
-from ci_workflow_summary import render
+import subprocess
+from unittest.mock import patch
+from ci_workflow_summary import render, workflow_jobs
 
 
 class WorkflowSummaryTest(unittest.TestCase):
@@ -8,6 +10,39 @@ class WorkflowSummaryTest(unittest.TestCase):
         self.run = dict(name='Tests', id=7, head_sha='abc', head_branch='develop', run_attempt=2, conclusion='failure')
         self.jobs = [dict(id=9, name='Geometry <Compile>|Debug', status='completed', conclusion='failure',
                           steps=[dict(name='Compile', conclusion='failure')])]
+
+    def test_rest_inventory_keeps_every_page(self):
+        with patch('ci_workflow_summary.api', return_value=[{'jobs': self.jobs}, {'jobs': [dict(id=10)]}]):
+            self.assertEqual(len(workflow_jobs(self.run, 'owner/repo')), 2)
+
+    def test_large_matrix_fallback_preserves_latest_ids_and_start_times(self):
+        self.run['check_suite_node_id'] = 'suite'
+        pages = iter([
+            {'nodes': [dict(databaseId=8, name='Compile', status='COMPLETED', conclusion='FAILURE', startedAt='old')],
+             'pageInfo': {'hasNextPage': True, 'endCursor': 'next'}},
+            {'nodes': [dict(databaseId=9, name='Compile', status='COMPLETED', conclusion='SUCCESS', startedAt='new'),
+                       dict(databaseId=10, name='Coverage / Finalize', status='COMPLETED', conclusion='FAILURE', startedAt='new')],
+             'pageInfo': {'hasNextPage': False}}])
+        cursors = []
+        def request(endpoint, method, data):
+            cursors.append(data['variables']['cursor'])
+            return {'data': {'node': {'checkRuns': next(pages)}}}
+        error = subprocess.CalledProcessError(1, ['gh'])
+        with patch('ci_workflow_summary.api', side_effect=error), patch('ci_badges.Publisher.github', side_effect=request):
+            jobs = workflow_jobs(self.run, 'owner/repo')
+        self.assertEqual(cursors, [None, 'next'])
+        self.assertEqual([j['id'] for j in jobs], [9, 10])
+        self.assertEqual(jobs[0]['started_at'], 'new')
+        text = render(self.run, jobs, 'owner/repo')
+        self.assertIn('| 2 | 2 | 1 | 1 |', text)
+        self.assertIn('/job/10', text)
+        self.assertIn('**Coverage / Finalize:** failure', text)
+
+    def test_unavailable_inventories_do_not_report_zero_jobs(self):
+        error = subprocess.CalledProcessError(1, ['gh'])
+        with patch('ci_workflow_summary.api', side_effect=error), patch('ci_badges.Publisher.checks', return_value=None):
+            with self.assertRaises(subprocess.CalledProcessError):
+                workflow_jobs(self.run, 'owner/repo')
 
     def test_failure_has_log_link_and_does_not_invent_coverage(self):
         text = render(self.run, self.jobs, 'owner/repo')
