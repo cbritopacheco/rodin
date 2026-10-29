@@ -10,7 +10,7 @@
 
   @section examples-geom-ug-intro Introduction
 
-  The @ref Rodin::Geometry::Mesh "Mesh::UniformGrid()" method
+  The @ref Rodin::Geometry::Mesh "Mesh::scale()" method
   creates structured grids of various polytope types. This is the quickest
   way to get started with Rodin — no mesh files needed.
 
@@ -60,7 +60,7 @@
   mesh = mesh.UniformGrid(Polytope::Type::Wedge, { 4, 4, 4 });
   @endcode
 
-  @section examples-geom-ug-connectivity Computing Connectivity
+  @section examples-geom-ug-connectivity Computing connectivity
 
   After creating a mesh, compute the boundary connectivity before defining
   boundary conditions:
@@ -70,7 +70,7 @@
   mesh.getConnectivity().compute(1, 2);  // edges → cells (required for BC)
   @endcode
 
-  @section examples-geom-ug-queries Mesh Queries
+  @section examples-geom-ug-queries Mesh queries
 
   @code{.cpp}
   std::cout << "Vertices: " << mesh.getVertexCount() << std::endl;
@@ -79,11 +79,11 @@
   std::cout << "Perimeter: " << mesh.getPerimeter() << std::endl;
   @endcode
 
-  @section examples-geom-ug-full Full Source Code
+  @section examples-geom-ug-full Full source code
 
   -   @ref Geometry/UniformGrid.cpp "UniformGrid.cpp"
 
-  @section examples-geom-ug-see-also See Also
+  @section examples-geom-ug-see-also See also
 
   - @ref guides-meshes "Meshes guide" — Full mesh documentation
   - @ref guides-polytopes "Polytopes" — Element types

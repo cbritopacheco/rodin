@@ -1,5 +1,5 @@
 /**
-  @page guides-getting-started-installation Installation and Setup
+  @page guides-getting-started-installation Installation and setup
   @brief How to install and configure Rodin on your system
 
   @tableofcontents
@@ -9,9 +9,9 @@
   This guide will walk you through installing Rodin and setting up your
   development environment.
 
-  @section guides-getting-started-installation-requirements System Requirements
+  @section guides-getting-started-installation-requirements System requirements
 
-  @subsection guides-getting-started-installation-required Required Dependencies
+  @subsection guides-getting-started-installation-required Required dependencies
 
   Rodin requires the following dependencies to be installed on your system:
 
@@ -21,7 +21,7 @@
   - **Eigen3** - Linear algebra library
   - **Git LFS** - Required when building or installing resources
 
-  @subsection guides-getting-started-installation-optional Optional Dependencies
+  @subsection guides-getting-started-installation-optional Optional dependencies
 
   For additional functionality, you may want to install:
 
@@ -31,7 +31,7 @@
   - **MPI** - For distributed computing
   - **MMG** - For mesh optimization (included as submodule)
 
-  @section guides-getting-started-installation-packages Installing Dependencies
+  @section guides-getting-started-installation-packages Installing dependencies
 
   @subsection guides-getting-started-installation-ubuntu Ubuntu/Debian
 
@@ -66,7 +66,7 @@
 
   @section guides-getting-started-installation-rodin Installing Rodin
 
-  @subsection guides-getting-started-installation-clone Clone the Repository
+  @subsection guides-getting-started-installation-clone Clone the repository
 
   First, clone the Rodin repository with all submodules:
 
@@ -91,12 +91,12 @@
   the full resource tree can skip LFS hydration by configuring with
   `-DRODIN_INSTALL_RESOURCES=OFF`.
 
-  @subsection guides-getting-started-installation-build Build and Install
+  @subsection guides-getting-started-installation-build Build and install
 
   Rodin uses CMake as its build system. There are two common installation
   methods:
 
-  @subsubsection guides-getting-started-installation-user User-Local Installation (Recommended)
+  @subsubsection guides-getting-started-installation-user User-local installation (recommended)
 
   Install Rodin to your home directory without requiring sudo:
 
@@ -113,7 +113,7 @@
   export CMAKE_PREFIX_PATH=$HOME/.local:$CMAKE_PREFIX_PATH
   @endcode
 
-  @subsubsection guides-getting-started-installation-system System-Wide Installation
+  @subsubsection guides-getting-started-installation-system System-wide installation
 
   Install Rodin system-wide (requires sudo):
 
@@ -124,7 +124,7 @@
   sudo make install
   @endcode
 
-  @subsection guides-getting-started-installation-verify Verifying the Installation
+  @subsection guides-getting-started-installation-verify Verifying the installation
 
   After installation, verify that Rodin is working correctly by creating a
   simple test project.
@@ -200,12 +200,12 @@
   cmake . -DCMAKE_PREFIX_PATH=/path/to/rodin/installation
   @endcode
 
-  @subsection guides-getting-started-installation-linker-errors Linker Errors
+  @subsection guides-getting-started-installation-linker-errors Linker errors
 
   If you encounter linker errors, make sure all required dependencies (Boost,
   Eigen) are properly installed and visible to CMake.
 
-  @subsection guides-getting-started-installation-lfs-resources Git LFS Resources
+  @subsection guides-getting-started-installation-lfs-resources Git LFS resources
 
   If an example fails while reading a large mesh, the checkout probably still
   contains an unresolved Git LFS pointer. Install Git LFS and run:
@@ -217,7 +217,7 @@
   If you do not need examples or installed resources, configure with
   `-DRODIN_INSTALL_RESOURCES=OFF`.
 
-  @subsection guides-getting-started-installation-compiler-errors Compiler Errors
+  @subsection guides-getting-started-installation-compiler-errors Compiler errors
 
   Verify that you're using a C++20 compatible compiler:
 
@@ -226,7 +226,7 @@
   clang++ --version  # Should be 14.0 or higher
   @endcode
 
-  @section guides-getting-started-installation-next What's Next?
+  @section guides-getting-started-installation-next What's next?
 
   Now that you have Rodin installed, proceed to @ref guides-getting-started-first-steps
   to learn the basic concepts and write your first Rodin program.

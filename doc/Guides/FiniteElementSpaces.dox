@@ -26,7 +26,7 @@
   P1 Vh(mesh);  // Creates a P1 finite element space
   @endcode
 
-  @section fem-spaces-available Available Spaces
+  @section fem-spaces-available Available spaces
 
   Rodin provides several standard finite element spaces:
 
@@ -37,7 +37,7 @@
   | `P1` | 1 (linear) | @f$ C^0 @f$ (continuous) | Most PDEs: Poisson, elasticity, heat |
   | `H1` | Arbitrary (order @f$ k @f$) | @f$ C^0 @f$ (continuous) | Higher-order methods, mixed problems (e.g. Taylor-Hood for Navier-Stokes) |
 
-  @section fem-spaces-p0 P0: Piecewise Constant Space
+  @section fem-spaces-p0 P0: piecewise constant space
 
   The `P0` space consists of functions that are
   constant on each cell of the mesh. Functions in P0 are generally
@@ -79,7 +79,7 @@
   In a DG formulation, jump and average operators are used across cell
   interfaces. See @ref guides-variational-dg "DG formulations" for details.
 
-  @section fem-spaces-p0g P0g: Global Constant Space
+  @section fem-spaces-p0g P0g: global constant space
 
   The `P0g` space is a **global constant**
   finite element space — it consists of functions that are constant over the
@@ -98,7 +98,7 @@
   P0g is useful for representing globally constant fields (e.g., a uniform
   property or a Lagrange multiplier for a global constraint).
 
-  @section fem-spaces-p1 P1: Piecewise Linear Space
+  @section fem-spaces-p1 P1: piecewise linear space
 
   The `P1` space is the most commonly used finite
   element space. It consists of **continuous** functions that are **linear** on
@@ -133,7 +133,7 @@
   TestFunction  v(Vh);
   @endcode
 
-  @section fem-spaces-h1 H1: Higher-Order Space
+  @section fem-spaces-h1 H1: higher-order space
 
   The `H1` space provides @f$ H^1 @f$-conforming
   finite elements of **arbitrary polynomial order** @f$ k @f$. The polynomial
@@ -173,7 +173,7 @@
   @note P1 and H1<1> are equivalent mathematically, but `P1` is a specialized
   class optimized for the linear case. Use `P1` when you only need order 1.
 
-  @section fem-spaces-vector Vector-Valued Spaces
+  @section fem-spaces-vector Vector-valued spaces
 
   P0, P1, and H1 all support **vector-valued** function spaces by specifying
   the number of components. This is essential for problems involving vector
@@ -204,7 +204,7 @@
   TestFunction  v(Vh);  // v is a vector function
   @endcode
 
-  @section fem-spaces-complex Complex-Valued Spaces
+  @section fem-spaces-complex Complex-valued spaces
 
   Rodin supports complex-valued finite element spaces using C++ complex types.
   This is useful for problems in wave propagation, acoustics, and
@@ -226,13 +226,13 @@
   gfIm = Im(gf);
   @endcode
 
-  @section fem-spaces-gridfunctions Grid Functions
+  @section fem-spaces-gridfunctions Grid functions
 
   A `GridFunction` is a concrete
   function living in a finite element space. It stores the coefficients
   (DOF values) and can be evaluated, saved, and loaded.
 
-  @subsection fem-spaces-gf-creation Creating and Assigning
+  @subsection fem-spaces-gf-creation Creating and assigning
 
   Grid functions are created by associating them with a finite element
   space. They can be initialized from lambda functions, constants, or
@@ -266,7 +266,7 @@
   };
   @endcode
 
-  @subsection fem-spaces-gf-gradient Computing Gradients
+  @subsection fem-spaces-gf-gradient Computing gradients
 
   The gradient of a scalar grid function can be assigned into a vector-valued
   space:
@@ -296,7 +296,7 @@
   trace.project(Region::Faces, Grad(temperature).traceOf(1));
   @endcode
 
-  @subsection fem-spaces-gf-solution Accessing Solutions
+  @subsection fem-spaces-gf-solution Accessing solutions
 
   After solving a problem, the solution is stored as a grid function
   accessible via the trial function:
@@ -313,7 +313,7 @@
   auto& solution = u.getSolution();
   @endcode
 
-  @subsection fem-spaces-gf-boolean Boolean Operations on Grid Functions
+  @subsection fem-spaces-gf-boolean Boolean operations on grid functions
 
   Grid functions support boolean comparison operators, which produce
   piecewise constant (0 or 1) results useful for indicator functions:
@@ -331,7 +331,7 @@
   gf = (f > g) && (f < g);  // Logical AND (always 0 here)
   @endcode
 
-  @subsection fem-spaces-gf-io Saving and Loading
+  @subsection fem-spaces-gf-io Saving and loading
 
   Grid functions can be saved and loaded in MFEM format:
 
@@ -390,7 +390,7 @@
   and Derivative selects one physical derivative direction. See
   @ref guides-spatial-matrix for tensor coefficients and backend details.
 
-  @section fem-spaces-choosing Choosing the Right Space
+  @section fem-spaces-choosing Choosing the right space
 
   | Problem type | Recommended space | Reason |
   |-------------|-------------------|--------|
@@ -406,10 +406,10 @@
   better accuracy per DOF or when the PDE's solution is smooth enough to
   benefit from higher polynomial approximation.
 
-  @section fem-spaces-see-also See Also
+  @section fem-spaces-see-also See also
 
   - @ref fem-ciarlet "Ciarlet's definition" — Mathematical foundations
-  - @ref guides-getting-started-core-concepts "Core Concepts" — Practical
+  - @ref guides-getting-started-core-concepts "Core concepts" — Practical
     guide
   - @ref guides-mpi "MPI distributed computing" — Distributed P1 on
     `Mesh<Context::MPI>` with local↔global DOF index maps

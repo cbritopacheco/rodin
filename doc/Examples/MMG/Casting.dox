@@ -11,7 +11,7 @@
   @section examples-mmg-cast-intro Introduction
 
   The @ref Rodin::MMG "MMG::Mesh" class extends
-  @ref Rodin::Geometry::Mesh "Mesh<Context::Local>" and can be used wherever
+  @ref Rodin::Geometry::Mesh "Geometry::Mesh" and can be used wherever
   a regular mesh is expected. This section explains how to work with both
   types interchangeably.
 
@@ -20,7 +20,7 @@
   metadata, because the base mesh does not carry corners, ridges, or required
   entity sets.
 
-  @section examples-mmg-cast-create Creating an MMG Mesh
+  @section examples-mmg-cast-create Creating an MMG mesh
 
   An `MMG::Mesh` is created the same way as a standard mesh:
 
@@ -34,9 +34,9 @@
   mmgMesh = mmgMesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
   @endcode
 
-  @section examples-mmg-cast-fes Using MMG Meshes with FE Spaces
+  @section examples-mmg-cast-fes Using MMG meshes with FE spaces
 
-  Since `MMG::Mesh` inherits from @ref Rodin::Geometry::Mesh "Mesh",
+  Since `MMG::Mesh` inherits from @ref Rodin::Geometry::Mesh "Geometry::Mesh",
   finite element spaces and all variational tools work transparently:
 
   @code{.cpp}
@@ -59,7 +59,7 @@
   MMG::Optimizer().setHMax(0.1).optimize(mesh);
   @endcode
 
-  @section examples-mmg-cast-io Loading and Saving
+  @section examples-mmg-cast-io Loading and saving
 
   Both mesh types support the same I/O formats. The format must be specified
   explicitly via @ref Rodin::IO::FileFormat "IO::FileFormat":
@@ -76,11 +76,11 @@
   loaded.load("output.medit.mesh", IO::FileFormat::MEDIT);
   @endcode
 
-  @section examples-mmg-cast-see-also See Also
+  @section examples-mmg-cast-see-also See also
 
   - @ref examples-mmg-simple_io "MMG I/O" - File I/O details
   - @ref examples-mmg-mesh_optimization "Mesh optimization" - Remeshing
   - @ref examples-mmg-behavior "MMG behavior and guarantees"
-  - @ref Rodin::MMG "MMG namespace"
+  - @ref Rodin::MMG "MMG::Mesh"
 
   */

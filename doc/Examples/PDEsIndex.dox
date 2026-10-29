@@ -1,12 +1,22 @@
 /**
   @page examples-pdes-index Partial differential equations
-  @brief Showcases how to use Rodin to solve PDEs
+  @brief Guided solves from scalar diffusion to coupled systems.
 
-  - @subpage examples-pdes-poisson
-  - @subpage examples-pdes-elasticity
-  - @subpage examples-pdes-helmholtz
-  - @subpage examples-pdes-navierstokes
-  - @subpage examples-pdes-periodic
-  - @subpage examples-pdes-surfacemesh
+  Start with @ref examples-pdes-poisson "Poisson". It introduces the full
+  sequence of mesh creation, weak formulation, linear solution, and visualization.
+  The remaining tutorials extend one or more parts of that sequence.
 
-  */
+  | Tutorial | Main idea |
+  | :--- | :--- |
+  | @subpage examples-pdes-poisson | Scalar diffusion and homogeneous Dirichlet data |
+  | @subpage examples-pdes-elasticity | Vector displacement and boundary traction |
+  | @subpage examples-pdes-helmholtz | Wave propagation and complex-valued fields |
+  | @subpage examples-pdes-navierstokes | Coupled velocity and pressure |
+  | @subpage examples-pdes-periodic | Periodic boundary identification |
+  | @subpage examples-pdes-surfacemesh | Differential operators on an embedded surface |
+
+  For the derivation of the forms, see @ref guides-weak-formulations.
+  For solver requirements, see @ref guides-solvers.
+
+  @m_footernavigation
+*/

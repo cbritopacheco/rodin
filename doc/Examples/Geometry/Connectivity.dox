@@ -14,7 +14,7 @@
   to each other. This example demonstrates computing various incidence
   relations and measuring the performance.
 
-  @section examples-geom-conn-compute Computing Connectivity
+  @section examples-geom-conn-compute Computing connectivity
 
   The @ref Rodin::Geometry::Connectivity "Connectivity::compute(d1, d2)"
   method computes the incidence mapping from polytopes of dimension @f$ d_1 @f$
@@ -40,7 +40,7 @@
   }
   @endcode
 
-  @section examples-geom-conn-common Common Relations
+  @section examples-geom-conn-common Common relations
 
   | Relation | Use Case |
   |----------|----------|
@@ -49,7 +49,7 @@
   | `compute(2, 1)` | Cell-to-edge: enumerate edges of each cell |
   | `compute(1, 1)` | Edge adjacency: which edges share a vertex |
 
-  @section examples-geom-conn-boundary Why Boundary Detection Needs Connectivity
+  @section examples-geom-conn-boundary Why boundary detection needs connectivity
 
   The @f$ (d{-}1, d) @f$ connectivity tells us which faces belong to
   exactly one cell — those are the boundary faces. This is why you must
@@ -69,11 +69,11 @@
   Solver::CG(poisson).solve();
   @endcode
 
-  @section examples-geom-conn-full Full Source Code
+  @section examples-geom-conn-full Full source code
 
   -   @ref Geometry/Connectivity.cpp "Connectivity.cpp"
 
-  @section examples-geom-conn-see-also See Also
+  @section examples-geom-conn-see-also See also
 
   - @ref guides-connectivity "Connectivity guide"
   - @ref guides-polytopes "Polytopes"

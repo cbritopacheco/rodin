@@ -14,9 +14,9 @@
   framework. Each entry links to the corresponding example or tutorial page
   where you can find the full source code and step-by-step explanations.
 
-  @section gallery-pdes Partial Differential Equations
+  @section gallery-pdes Partial differential equations
 
-  @subsection gallery-pdes-poisson Poisson Equation
+  @subsection gallery-pdes-poisson Poisson equation
 
   @image html PDEs/Poisson.png width=360px
 
@@ -26,7 +26,7 @@
   `P1` finite elements and the
   @ref Rodin::Solver::CG "CG" solver.
 
-  @subsection gallery-pdes-elasticity Linear Elasticity
+  @subsection gallery-pdes-elasticity Linear elasticity
 
   @image html Elasticity.png width=360px
 
@@ -36,7 +36,7 @@
   vector-valued `P1` spaces and the
   `LinearElasticityIntegral` bilinear form.
 
-  @subsection gallery-pdes-helmholtz Helmholtz Equation
+  @subsection gallery-pdes-helmholtz Helmholtz equation
 
   @image html PDEs/Helmholtz_placeholder.png width=360px
 
@@ -45,7 +45,7 @@
   `P1<Complex>` finite element spaces.
   This demonstrates Rodin's support for complex-valued computations.
 
-  @subsection gallery-pdes-navierstokes Navier–Stokes Equations
+  @subsection gallery-pdes-navierstokes Navier–Stokes equations
 
   @image html PDEs/NavierStokes_placeholder.png width=360px
 
@@ -54,14 +54,14 @@
   (`H1` order 2 for velocity, order 1 for
   pressure) with PETSc SNES.
 
-  @subsection gallery-pdes-periodic Periodic Poisson Equation
+  @subsection gallery-pdes-periodic Periodic Poisson equation
 
   The @ref examples-pdes-periodic "periodic Poisson" example demonstrates
   how to impose periodic boundary conditions using `PeriodicBC` and a DOF
   correspondence map. The solution on opposite edges of the domain is
   constrained to be equal, simulating a tiling pattern.
 
-  @subsection gallery-pdes-surface Reaction-Diffusion on a Surface
+  @subsection gallery-pdes-surface Reaction-diffusion on a surface
 
   The @ref examples-pdes-surfacemesh "surface mesh" example solves a
   reaction-diffusion equation @f$ -\Delta_\Gamma u + u = f @f$ on a
@@ -71,7 +71,7 @@
 
   @section gallery-optimization Optimization
 
-  @subsection gallery-shapeopt-cantilever Shape Optimization: Cantilever
+  @subsection gallery-shapeopt-cantilever Shape optimization: cantilever
 
   @image html SimpleCantilever.png width=360px
 
@@ -82,7 +82,7 @@
   Hilbert extension-regularization procedure, and the mesh is updated using
   the @ref Rodin::MMG "MMG" remesher.
 
-  @subsection gallery-shapeopt-levelset Level-Set Shape Optimization
+  @subsection gallery-shapeopt-levelset Level-set shape optimization
 
   @image html LevelSetCantilever.png width=360px
 
@@ -92,7 +92,7 @@
   the implicit domain at each iteration using the
   @ref Rodin::MMG "MMG" level-set discretizer.
 
-  @subsection gallery-density-temp Density Optimization: Temperature
+  @subsection gallery-density-temp Density optimization: temperature
 
   @image html SIMPTemperatureMinimization.png width=360px
 
@@ -101,7 +101,7 @@
   Material with Penalization) approach to find an optimal material
   distribution that minimizes the average temperature in a domain.
 
-  @section gallery-geometry Mesh Geometry and Utilities
+  @section gallery-geometry Mesh geometry and utilities
 
   Rodin provides a rich set of geometric operations for creating,
   transforming, and querying meshes:
@@ -132,7 +132,7 @@
   - **MEDIT** (`IO::FileFormat::MEDIT`): Native for MMG/INRIA tools
   - **HDF5** (`IO::FileFormat::HDF5`): Binary, for large-scale simulations
 
-  @section gallery-see-also See Also
+  @section gallery-see-also See also
 
   - @ref examples-index "Examples and tutorials"
   - @ref guides-io "I/O in Rodin"

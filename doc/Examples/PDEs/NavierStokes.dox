@@ -36,7 +36,7 @@
   with quadratic H1 elements and pressure with linear H1 elements, giving the
   Taylor-Hood pair.
 
-  @section examples-pdes-navierstokes-weak Weak Formulation
+  @section examples-pdes-navierstokes-weak Weak formulation
 
   Backward Euler gives the nonlinear residual at every time step:
 
@@ -114,7 +114,7 @@
   - `NavierStokes_pressure.gf`
   - `NavierStokes.xdmf`
 
-  @section examples-pdes-navierstokes-oseen Related Oseen Examples
+  @section examples-pdes-navierstokes-oseen Related Oseen examples
 
   The older semi-implicit examples now use Oseen names to reflect that they
   freeze the transport velocity and solve one linearized problem per step:
@@ -122,7 +122,7 @@
   - [Seq_OseenFlow.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_OseenFlow.cpp)
   - [Seq_OseenLidDrivenCavity.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_OseenLidDrivenCavity.cpp)
 
-  @section examples-pdes-navierstokes-see-also See Also
+  @section examples-pdes-navierstokes-see-also See also
 
   - @ref examples-pdes-poisson "Poisson equation"
   - @ref examples-pdes-elasticity "Linear elasticity"

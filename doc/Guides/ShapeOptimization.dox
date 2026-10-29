@@ -184,7 +184,7 @@
   - @ref guides-variational — assembling the state problem
   - @ref guides-solvers — solving the state and extension systems
   - @ref Rodin::Hilbert "Hilbert" — extension-regularization
-  - @ref Rodin::Distance "Distance", @ref Rodin::Eikonal "Eikonal" —
+  - @ref Rodin::Distance "Distance", @ref Rodin::Eikonal "Eikonal::FMM" —
     redistancing
   - @ref Rodin::MMG "MMG" — remeshing and implicit-domain discretization
   - @ref examples-shapeoptimization-index "Shape optimization examples"

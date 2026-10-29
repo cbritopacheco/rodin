@@ -1,293 +1,139 @@
 /**
-  @page guides-getting-started-first-problem Your First Problem: Solving the Poisson Equation
-  @brief A complete walkthrough of solving a PDE with Rodin
+  @page guides-getting-started-first-problem Your first problem
+  @brief Build, run, and inspect a complete Poisson solve.
+
+  This guide turns the mesh-and-space setup from
+  @ref guides-getting-started-first-steps "First steps" into a complete
+  application. It uses the same executable as the
+  @ref examples-pdes-poisson "Poisson tutorial", which develops the weak form
+  and explains the code step by step.
 
   @tableofcontents
-
   @m_footernavigation
 
-  In this section, we'll solve a complete partial differential equation using
-  Rodin: the Poisson equation. This is often the "Hello World" of finite
-  element methods.
+  @section guides-getting-started-first-problem-math The problem being solved
 
-  @section guides-getting-started-first-problem-math The Mathematical Problem
-
-  We want to solve the following boundary value problem:
-
+  On the unit square @f$\Omega=(0,1)^2@f$, the scalar field satisfies
   @f[
-  \left\{
-  \begin{aligned}
-    -\Delta u &= f && \text{in } \Omega \\
-    u &= 0 && \text{on } \partial\Omega
-  \end{aligned}
-  \right.
+    -\Delta u = 1 \quad\text{in }\Omega,
+    \qquad u=0 \quad\text{on }\partial\Omega.
   @f]
+  Continuous, piecewise linear finite elements approximate the field on a
+  mesh of 256 vertices and 450 triangles. The boundary values are prescribed;
+  the solve determines the interior field.
 
-  where:
-  - @f$ \Omega @f$ is our domain (a square [0,1] × [0,1])
-  - @f$ u @f$ is the unknown function we're solving for
-  - @f$ f = 1 @f$ is a known source term
-  - @f$ \partial\Omega @f$ is the boundary of the domain
+  @section guides-getting-started-first-problem-code The application source
 
-  @subsection guides-getting-started-first-problem-weak Weak Formulation
+  Save the following program as `poisson.cpp`. The mesh is scaled onto the
+  unit square before the problem is assembled. The solver status is checked
+  before the solution is exported.
 
-  The weak (or variational) formulation of this problem is:
+  @snippet PDEs/Poisson.cpp poisson-source
 
-  Find @f$ u \in H^1_0(\Omega) @f$ such that for all @f$ v \in H^1_0(\Omega) @f$:
+  @section guides-getting-started-first-problem-build Build and run
 
-  @f[
-    \int_{\Omega} \nabla u \cdot \nabla v \, dx = \int_{\Omega} f v \, dx
-  @f]
-
-  This is the form that finite element methods work with, and it's exactly
-  what we'll implement in Rodin.
-
-  @section guides-getting-started-first-problem-code The Complete Code
-
-  Here's the complete program to solve the Poisson equation:
-
-  @code{.cpp}
-  #include <Rodin/Solver.h>
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
-  #include <Rodin/IO/XDMF.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Solver;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
-
-  int main() {
-    // 1. Create a mesh
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-
-    // 2. Compute connectivity for boundary operations
-    mesh.getConnectivity().compute(1, 2);
-
-    // 3. Create P1 finite element space
-    P1 Vh(mesh);
-
-    // 4. Define trial and test functions
-    TrialFunction u(Vh);
-    TestFunction v(Vh);
-
-    // 5. Define the source term f = 1
-    RealFunction f = 1;
-
-    // 6. Define the problem
-    Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
-
-    // 7. Solve the problem
-    CG(poisson).solve();
-
-    // 8. Export results using XDMF (open in ParaView)
-    IO::XDMF xdmf("Poisson");
-    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
-    xdmf.write();
-
-    return 0;
-  }
-  @endcode
-
-  @section guides-getting-started-first-problem-breakdown Code Breakdown
-
-  Let's understand each part of the code:
-
-  @subsection guides-getting-started-first-problem-mesh Step 1-2: Create the Mesh
-
-  @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-  mesh.getConnectivity().compute(1, 2);
-  @endcode
-
-  - Creates a 2D triangular mesh with a 16×16 grid
-  - Computes face-to-cell connectivity (dimension 1 to dimension 2)
-  - This connectivity is needed to identify boundary elements
-
-  @subsection guides-getting-started-first-problem-space Step 3-4: Define Function Space
-
-  @code{.cpp}
-  P1 Vh(mesh);
-  TrialFunction u(Vh);
-  TestFunction v(Vh);
-  @endcode
-
-  - `P1` creates a space of piecewise linear functions
-  - `u` is the unknown function (trial function)
-  - `v` is the test function for the weak formulation
-
-  @subsection guides-getting-started-first-problem-source Step 5: Define Source Term
-
-  @code{.cpp}
-  RealFunction f = 1.0;
-  @endcode
-
-  - Creates a constant function @f$ f = 1 @f$
-  - Could also be a more complex function: `RealFunction f([](const Point& p) { return p.x() * p.y(); })`
-
-  @subsection guides-getting-started-first-problem-formulation Step 6: Formulate the Problem
-
-  @code{.cpp}
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-  @endcode
-
-  This directly translates the weak formulation:
-
-  - `Integral(Grad(u), Grad(v))` represents @f$ \int_{\Omega} \nabla u \cdot \nabla v \, dx @f$
-  - `Integral(f, v)` represents @f$ \int_{\Omega} f v \, dx @f$
-  - `DirichletBC(u, Zero())` enforces @f$ u = 0 @f$ on the boundary
-
-  Note how the code closely resembles the mathematical notation!
-
-  @subsection guides-getting-started-first-problem-solve Step 7: Solve the System
-
-  @code{.cpp}
-  CG(poisson).solve();
-  @endcode
-
-  - Constructs a Conjugate Gradient (CG) iterative solver bound to the
-    problem, then solves the resulting linear system
-    @f$ A\mathbf{x} = \mathbf{b} @f$
-  - CG is appropriate for **symmetric positive definite** (SPD) systems, which
-    the Poisson equation produces
-  - Alternative: `Solver::SparseLU(poisson).solve()` for a direct solver
-  - You can also pass a standalone solver to the problem:
-    `poisson.solve(solver)` (see @ref guides-solvers "Solvers Guide")
-
-  @subsection guides-getting-started-first-problem-output Step 8: Export Results
-
-  @code{.cpp}
-  IO::XDMF xdmf("Poisson");
-  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
-  xdmf.write();
-  @endcode
-
-  - Creates an XDMF writer with base filename "Poisson"
-  - Calls `grid()` to obtain the default grid handle, then sets the mesh
-    and adds the solution grid function via method chaining
-  - `write()` produces `Poisson.xdmf` (XML metadata) and `.h5` data files
-  - Can be visualized with [ParaView](https://www.paraview.org/)
-
-  @section guides-getting-started-first-problem-build Building and Running
-
-  Save the code as `poisson.cpp` and create a `CMakeLists.txt`:
+  Save this `CMakeLists.txt` alongside `poisson.cpp`. The IO target is needed
+  for XDMF and its HDF5 data files.
 
   @code{.cmake}
   cmake_minimum_required(VERSION 3.16)
-  project(PoissonExample CXX)
-
-  set(CMAKE_CXX_STANDARD 20)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  project(PoissonExample LANGUAGES CXX)
 
   find_package(Rodin REQUIRED)
 
   add_executable(poisson poisson.cpp)
+  target_compile_features(poisson PRIVATE cxx_std_20)
   target_link_libraries(poisson PRIVATE
     Rodin::Geometry
+    Rodin::Assembly
     Rodin::Variational
     Rodin::Solver
     Rodin::IO
   )
   @endcode
 
-  Build and run:
+  Configure and build from the application directory:
 
   @code{.bash}
-  cmake .
-  make
-  ./poisson
+  cmake -S . -B build
+  cmake --build build
   @endcode
 
-  @section guides-getting-started-first-problem-visualize Visualizing the Solution
+  Run from a separate directory to keep generated data together:
 
-  Open the generated `Poisson.xdmf` file in
-  [ParaView](https://www.paraview.org/):
+  @code{.bash}
+  mkdir -p results
+  cd results
+  ../build/poisson
+  @endcode
 
-  1. **File → Open** and select `Poisson.xdmf`
-  2. Click **Apply**
-  3. Select "u" from the field dropdown
-  4. Optionally, apply the **Warp By Scalar** filter for a 3D surface view
+  A successful run writes `Poisson.xdmf` and its referenced HDF5 files into
+  `results`. A failed solver returns `EXIT_FAILURE` before export.
 
-  You should see a smooth solution that represents the deflection of a
-  membrane under uniform load.
+  @section guides-getting-started-first-problem-visualize Inspect the solution
 
-  @section guides-getting-started-first-problem-variations Common Variations
+  Open `Poisson.xdmf` in ParaView, select **Apply**, and color the mesh by **u**.
+  The boundary values should be zero and the interior values positive. On this
+  mesh the computed nodal maximum is approximately @f$0.072862@f$.
 
-  @subsection guides-getting-started-first-problem-non-homogeneous Non-Homogeneous Boundary Conditions
+  The @ref examples-pdes-poisson-output "visualization section of the tutorial"
+  shows the computed field and explains how to display it as a surface.
+  The XDMF file describes the data; the HDF5 files contain it, so the files
+  must remain together.
 
-  To set @f$ u = g @f$ on the boundary instead of @f$ u = 0 @f$:
+  @section guides-getting-started-first-problem-variations Modify one part of the problem
+
+  Once the baseline solve runs, change one ingredient at a time. The weak form,
+  boundary data, and solver must remain compatible.
+
+  @subsection guides-getting-started-first-problem-non-homogeneous Prescribed nonzero values
+
+  Replace the zero boundary data with a function @f$g(x,y)=x^2@f$:
 
   @code{.cpp}
-  RealFunction g([](const Point& p) {
-    return p.x() * p.x();
-  });
-
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, g);
+  RealFunction g([](const Point& p) { return p.x() * p.x(); });
+  poisson = Integral(Grad(u), Grad(v)) - Integral(f, v)
+             + DirichletBC(u, g);
   @endcode
 
-  @subsection guides-getting-started-first-problem-partial-bc Partial Boundary Conditions
+  @subsection guides-getting-started-first-problem-partial-bc Selected boundary regions
 
-  To apply boundary conditions only on specific boundaries:
+  `DirichletBC(u, Zero()).on(boundaryAttribute)` restricts the condition to
+  boundary entities carrying that attribute. The mesh must already have the
+  intended boundary attributes; choosing an integer does not mark the mesh.
+  Boundary regions without prescribed values retain the natural condition
+  implied by the weak form. See @ref guides-boundary-conditions.
+
+  @subsection guides-getting-started-first-problem-variable-source A spatially varying source
+
+  Replace the constant source with a coordinate-dependent function, for example
+  @f$f(x,y)=xy@f$:
 
   @code{.cpp}
-  // Mark boundary with attribute 1
-  int boundaryAttribute = 1;
-
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero()).on(boundaryAttribute);
+  RealFunction f([](const Point& p) { return p.x() * p.y(); });
   @endcode
 
-  @subsection guides-getting-started-first-problem-variable-source Variable Source Term
+  Rebuild the problem expression using this source before solving it.
 
-  For a spatially varying source:
+  @subsection guides-getting-started-first-problem-different-solver Solver controls
+
+  For this symmetric positive definite problem, CG exposes an iteration budget
+  and a tolerance:
 
   @code{.cpp}
-  RealFunction f([](const Point& p) {
-    return std::sin(M_PI * p.x()) * std::sin(M_PI * p.y());
-  });
-
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
+  CG solver(poisson);
+  solver.setMaxIterations(1000).setTolerance(1e-10).solve();
   @endcode
 
-  @subsection guides-getting-started-first-problem-different-solver Using Different Solvers
+  These values illustrate configuration, rather than a required setting for
+  every mesh. Check `solver.success()` after the solve. A direct alternative is
+  `SparseLU`; a standalone solver can also be passed to `poisson.solve(solver)`.
+  The @ref guides-solvers "solver guide" explains the supported interfaces.
 
-  @code{.cpp}
-  // Sparse LU direct solver (for small to medium problems)
-  Solver::SparseLU(poisson).solve();
+  @section guides-getting-started-first-problem-next Continue learning
 
-  // Conjugate Gradient with tuned parameters
-  Solver::CG solver(poisson);
-  solver.setMaxIterations(1000);
-  solver.setTolerance(1e-10);
-  solver.solve();
-
-  // Or, pass a standalone solver to the problem
-  Solver::SparseLU lu;
-  poisson.solve(lu);
-  @endcode
-
-  @section guides-getting-started-first-problem-next What's Next?
-
-  Congratulations! You've solved your first PDE with Rodin. To deepen your
-  understanding, proceed to @ref guides-getting-started-core-concepts to learn more
-  about the underlying concepts.
-
-  You can also explore:
-  - @ref examples-pdes-poisson for a more detailed Poisson example
-  - @ref examples-pdes-elasticity for a vector-valued problem
-  - @ref guides-index for in-depth conceptual guides
-
-  */
+  Read the @ref examples-pdes-poisson "Poisson tutorial" for the derivation and
+  the role of each form-language expression. Then continue with
+  @ref guides-getting-started-core-concepts "Core concepts" or
+  @ref examples-pdes-elasticity "linear elasticity" for a vector-valued problem.
+*/

@@ -11,11 +11,11 @@
   @section examples-mmg-io-intro Introduction
 
   The @ref Rodin::MMG "MMG" module provides a mesh class
-  (`MMG::Mesh`) that extends the standard @ref Rodin::Geometry::Mesh "Mesh"
+  (`MMG::Mesh`) that extends the standard @ref Rodin::Geometry::Mesh "UniformGrid()"
   with remeshing capabilities. This example shows how to load and save
   MMG meshes in the supported formats.
 
-  @section examples-mmg-io-create Creating an MMG Mesh
+  @section examples-mmg-io-create Creating an MMG mesh
 
   An `MMG::Mesh` can be created using the same
   @ref Rodin::Geometry::Mesh "UniformGrid()" method as a
@@ -55,7 +55,7 @@
   }
   @endcode
 
-  @section examples-mmg-io-save Saving in MEDIT Format
+  @section examples-mmg-io-save Saving in MEDIT format
 
   The MEDIT format (`.mesh`) is the native format for MMG. Use
   @ref Rodin::IO::FileFormat "IO::FileFormat::MEDIT":
@@ -68,7 +68,7 @@
   `RequiredEdges`, `RequiredTriangles`, and `RequiredTetrahedra` sections when
   they are present.
 
-  @section examples-mmg-io-load Loading and Re-saving
+  @section examples-mmg-io-load Loading and re-saving
 
   Loading is symmetric:
 
@@ -81,11 +81,11 @@
   @note The file format must always be specified explicitly — there is no
   default format parameter.
 
-  @section examples-mmg-io-full Full Source Code
+  @section examples-mmg-io-full Full source code
 
   -   @ref MMG/MeshIO.cpp "MeshIO.cpp"
 
-  @section examples-mmg-io-see-also See Also
+  @section examples-mmg-io-see-also See also
 
   - @ref examples-mmg-mesh_optimization "Mesh optimization" - Remeshing with MMG
   - @ref examples-mmg-behavior "MMG behavior and guarantees"

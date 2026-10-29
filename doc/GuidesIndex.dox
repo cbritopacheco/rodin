@@ -1,141 +1,93 @@
 /**
   @page guides-index General concepts
-  @brief Conceptual guides to understanding Rodin's design and features.
+  @brief How meshes, finite element fields, weak forms, and solvers fit together.
+
+  The guides explain the mathematical objects used by Rodin and connect them
+  to the corresponding C++ interfaces. The @ref examples-index "examples and
+  tutorials" apply these ideas to complete problems; the
+  <a href="modules.html">module reference</a> documents individual APIs.
 
   @tableofcontents
 
-  @section guides-getting-started-index Getting started with Rodin
+  @section guides-getting-started-index Start with a complete problem
 
-  New to Rodin? Start here. These guides take you from installation to
-  solving your first PDE:
+  The introductory sequence assumes basic C++ and familiarity with calculus
+  and linear algebra. Detailed finite element background is introduced in
+  the guides below.
 
-  - @subpage guides-getting-started-installation — Install Rodin and set up
-    your development environment
+  1. @subpage guides-getting-started-installation — Configure the dependencies,
+     build Rodin, and verify the installation.
+  2. @subpage guides-getting-started-first-steps — Build a small program and
+     identify the roles of a mesh, a finite element space, and symbolic fields.
+  3. @subpage guides-getting-started-first-problem — Build and run a Poisson
+     solve, then inspect the exported solution.
+  4. @subpage guides-getting-started-core-concepts — Follow the complete path
+     from geometric data to the assembled algebraic system.
 
-  - @subpage guides-getting-started-first-steps — Learn the basic Rodin
-    classes (@ref Rodin::Geometry::Mesh "Mesh",
-    `P1`,
-    `TrialFunction`,
-    `TestFunction`) and write your first
-    program
+  @section guides-geometry-index Describe the domain
 
-  - @subpage guides-getting-started-first-problem — Solve a complete PDE
-    (the Poisson equation) step by step
+  A mesh records both geometric coordinates and topological relations. These
+  guides establish the distinction before introducing integration and fields.
 
-  - @subpage guides-getting-started-core-concepts — Deeper dive into meshes,
-    finite element spaces, operators, and variational formulations
+  - @subpage guides-meshes — Create, load, inspect, and traverse a mesh.
+  - @subpage guides-polytopes — Cells, faces, reference elements, and mappings.
+  - @subpage guides-connectivity — Incidence relations between vertices,
+    edges, faces, and cells.
 
-  - @subpage guides-numerical-contracts — Interpolation vs projection,
-    `Problem` sign conventions, quadrature, constraints, and solver lifetimes
+  @section guides-fem-index Approximate fields on the mesh
 
-  @subsection guides-getting-started-prerequisites Prerequisites
+  A finite element specifies local approximation and degrees of freedom;
+  assembling compatible elements produces a finite element space.
 
-  Before starting, you should have:
-  - Basic knowledge of C++17/C++20 (templates, lambdas, auto)
-  - Some familiarity with calculus and linear algebra
-  - Familiarity with finite element methods is helpful but not required —
-    the guides introduce the necessary theory
-  - A Linux or macOS system with a C++20 compatible compiler (GCC 12+)
+  - @subpage fem-ciarlet — The finite element triple and local degrees of freedom.
+  - @subpage fem-spaces — Scalar, vector, and complex spaces and grid functions.
+  - @subpage guides-quadrature — Numerical integration, exactness, and curved cells.
+  - @subpage guides-ordering — Component numbering, tensor indexing, and storage.
 
-  @section guides-geometry-index Geometry
+  @section guides-variational-index Express and solve equations
 
-  The @ref Rodin::Geometry "Geometry" module handles meshes, polytopes,
-  connectivity, and geometric transformations:
+  The continuous weak problem determines the forms, boundary conditions, and
+  algebraic properties that a solver must respect.
 
-  - @subpage guides-meshes — Creating, loading, and querying meshes
+  - @subpage guides-weak-formulations — Derive weak forms from Poisson and
+    elasticity equations.
+  - @subpage guides-variational — Express bilinear and linear forms in C++.
+  - @subpage guides-boundary-conditions — Essential, natural, periodic, and
+    mixed boundary conditions.
+  - @subpage guides-solvers — Choose and configure linear and nonlinear solvers.
+  - @subpage guides-numerical-contracts — Signs, projection versus interpolation,
+    constraints, quadrature, and solver lifetimes.
+  - @subpage guides-interfaces-dg — Traces, facet integrals, jumps, and averages.
 
-  - @subpage guides-polytopes — Geometric elements (triangles, tetrahedra,
-    etc.) and the reference element @f$ \hat{K} @f$
+  @section guides-io-index Inspect and exchange results
 
-  - @subpage guides-connectivity — Topological incidence relations between
-    polytopes of different dimensions
+  - @subpage guides-io — Select mesh and field formats, export to ParaView,
+    and write time series.
 
-  @section guides-fem-index The finite element method
+  @section guides-applications-index Build application models
 
-  Mathematical foundations and their realization in Rodin:
+  These guides combine the preceding concepts into larger numerical workflows.
 
-  - @subpage fem-ciarlet — Ciarlet's formal definition of a finite element:
-    the triple @f$ (K, P, \Sigma) @f$
+  - @subpage guides-swift — Fit meshes to marked interfaces and inspect quality.
+  - @subpage guides-shape-optimization — Shape derivatives, regularization,
+    and boundary evolution.
+  - @subpage guides-solid-mechanics — Finite-strain kinematics, constitutive
+    laws, residuals, and consistent tangents.
 
-  - @subpage fem-spaces — Available finite element spaces (P0, P0g, P1, H1),
-    vector-valued and complex-valued variants, and the
-    `GridFunction` class
+  @section guides-parallel-index Choose an execution backend
 
-  - @subpage guides-quadrature — Quadrature families, exactness ranges,
-    positive arbitrary-order fallbacks, and curved-element considerations
+  The local workflow provides the starting point. Parallel execution adds
+  ownership, communication, and synchronization requirements.
 
-  - @subpage guides-ordering — Matrix storage, tensor indexing and
-    finite-element component numbering
+  - @subpage guides-backends — Local, OpenMP, MPI, and PETSc execution paths.
+  - @subpage guides-mpi — Distributed meshes, partitioning, and reconciliation.
+  - @subpage guides-petsc — Distributed algebra, KSP/SNES, and multi-field problems.
+  - @subpage guides-thread-safety — Shared state and synchronization requirements.
 
-  @section guides-variational-index Weak formulations and variational problems
+  @section guides-getting-started-help Further reference
 
-  From continuous PDEs to discrete linear systems:
-
-  - @subpage guides-variational — Defining problems using bilinear forms,
-    linear forms, and boundary conditions
-
-  - @subpage guides-weak-formulations — Deriving weak formulations from
-    strong-form PDEs (Poisson, elasticity)
-
-  - @subpage guides-boundary-conditions — Dirichlet, Neumann, periodic,
-    and mixed boundary conditions
-
-  - @subpage guides-solvers — Direct solvers (SparseLU, UMFPack, CHOLMOD),
-    iterative solvers (CG, GMRES, BiCGSTAB), and the Newton solver
-
-  - @subpage guides-numerical-contracts — Cross-module numerical contracts
-    for forms, projections, constraints, quadrature, and nonlinear tangents
-
-  - @subpage guides-interfaces-dg — Facet integrals, traces, jump and
-    average operators, interface tagging, and discontinuous Galerkin
-    formulations
-
-  @section guides-applications-index Application modules
-
-  Higher-level functionality built on the variational core:
-
-  - @subpage guides-swift - Marked-interface mesh fitting, quality budgets,
-    solver controls, diagnostics, and metric extension points
-
-  - @subpage guides-shape-optimization — Shape derivatives, Hilbertian
-    regularization (@ref Rodin::Hilbert::H1a "H1a"), level-set evolution,
-    redistancing, and the shape optimization loop
-
-  - @subpage guides-solid-mechanics — Finite-strain kinematics,
-    hyperelastic constitutive laws, the internal virtual work
-    residual/tangent pair, and active contraction
-
-  @section guides-io-index I/O in Rodin
-
-  Reading and writing meshes, grid functions, and simulation data:
-
-  - @subpage guides-io — Supported formats (MFEM, MEDIT, HDF5, XDMF),
-    ParaView visualization, and time-series output
-
-  @section guides-parallel-index Parallel and Distributed Computing
-
-  Using MPI and PETSc for large-scale problems:
-
-  - @subpage guides-backends — Local, OpenMP, MPI, and PETSc backend choices
-    and what complete support means for each path
-
-  - @subpage guides-mpi — Distributed mesh partitioning, sharding, and
-    reconciliation with @ref Rodin::Context::MPI "Context::MPI",
-    @ref Rodin::Geometry::MPIMesh "Mesh\<Context::MPI\>",
-    and @ref Rodin::Geometry::Sharder<Context::MPI> "Sharder"
-
-  - @subpage guides-petsc — PETSc-backed variational forms, distributed
-    linear algebra, KSP/SNES solvers, and multi-field problems
-
-  - @subpage guides-thread-safety — The thread-safety model, synchronization requirements, and how parallel assembly scales
-
-  @section guides-getting-started-help Getting Help
-
-  - Check the [GitHub repository](https://github.com/cbritopacheco/rodin)
-    for the latest code and issues
-  - Browse the @ref examples-index "examples and tutorials" for common
-    use cases
-  - Consult the @ref notation-index "notation reference" for mathematical
-    symbols used in the documentation
-
-  */
+  The @ref notation-index "notation reference" defines mathematical symbols.
+  The <a href="modules.html">module reference</a> provides API declarations,
+  and the [project repository](https://github.com/cbritopacheco/rodin) hosts
+  source code and issue discussions.
+*/

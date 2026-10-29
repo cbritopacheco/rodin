@@ -66,7 +66,7 @@
   @f$, @f$ \mu @f$ are the <em> Lamé parameters </em> of the constituent
   material, satisfying @f$ \mu > 0 @f$ and @f$ \lambda + 2\mu / d > 0 @f$.
 
-  @section examples-pdes-elasticity-weak Weak Formulation
+  @section examples-pdes-elasticity-weak Weak formulation
 
   As with the @ref examples-pdes-poisson "Poisson example", we work with the
   variational formulation. We seek to solve:
@@ -124,7 +124,7 @@
   VectorFunction f{0, -1};
   @endcode
 
-  @subsection examples-pdes-elasticity-impl-problem Problem Formulation
+  @subsection examples-pdes-elasticity-impl-problem Problem formulation
 
   The variational problem is expressed through the
   @ref Rodin::Variational::Problem "Problem" class. The
@@ -143,7 +143,7 @@
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
   @endcode
 
-  @subsection examples-pdes-elasticity-impl-solve Solving and Output
+  @subsection examples-pdes-elasticity-impl-solve Solving and output
 
   We solve with the @ref Rodin::Solver::CG "CG" solver and save the results
   using @ref Rodin::IO::FileFormat "IO::FileFormat::MFEM":

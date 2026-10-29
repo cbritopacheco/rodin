@@ -22,7 +22,7 @@
   `Problem` sign convention and the distinction between interpolation and
   `L2` projection.
 
-  @section guides-variational-weak From Strong to Weak Form
+  @section guides-variational-weak From strong to weak form
 
   Consider a generic second-order PDE in its strong form:
 
@@ -48,7 +48,7 @@
   where @f$ a(u, v) @f$ is a **bilinear form** and @f$ \ell(v) @f$ is a
   linear form.
 
-  @subsection guides-variational-weak-example Example: The Poisson Equation
+  @subsection guides-variational-weak-example Example: the Poisson equation
 
   The Poisson equation @f$ -\Delta u = f @f$ with @f$ u = 0 @f$ on
   @f$ \partial\Omega @f$ has the weak form:
@@ -68,7 +68,7 @@
 
   @section guides-variational-forms Forms in Rodin
 
-  @subsection guides-variational-forms-bilinear Bilinear Forms
+  @subsection guides-variational-forms-bilinear Bilinear forms
 
   A bilinear form @f$ a(u, v) @f$ involves both the trial function @f$ u @f$
   and the test function @f$ v @f$. In Rodin, bilinear forms are created using
@@ -110,7 +110,7 @@
   with @c .over(attribute). The elasticity form is declared by
   @c Rodin/Solid.h; the other three are declared by @c Rodin/Variational.h.
 
-  @subsection guides-variational-forms-linear Linear Forms
+  @subsection guides-variational-forms-linear Linear forms
 
   A linear form @f$ \ell(v) @f$ involves only the test function @f$ v @f$:
 
@@ -122,7 +122,7 @@
   BoundaryIntegral(g, v).over(GammaN)
   @endcode
 
-  @subsection guides-variational-forms-assembly Problem Assembly
+  @subsection guides-variational-forms-assembly Problem assembly
 
   The `Problem` class assembles bilinear
   and linear forms into a linear system @f$ A\mathbf{x} = \mathbf{b} @f$:
@@ -156,7 +156,7 @@
   only the test function), and routes them to the matrix @f$ A @f$ or vector
   @f$ \mathbf{b} @f$ accordingly.
 
-  @section guides-variational-operators Differential Operators
+  @section guides-variational-operators Differential operators
 
   Rodin provides standard differential operators that work on trial and
   test functions. These are **expression templates**: they are not evaluated
@@ -185,9 +185,9 @@
            Jacobian(v) + Transpose(Jacobian(v)))
   @endcode
 
-  @section guides-variational-bc Boundary Conditions
+  @section guides-variational-bc Boundary conditions
 
-  @subsection guides-variational-bc-dirichlet Dirichlet Conditions
+  @subsection guides-variational-bc-dirichlet Dirichlet conditions
 
   Dirichlet (essential) boundary conditions fix the value of the solution
   on part of the boundary:
@@ -206,7 +206,7 @@
   DirichletBC(u, VectorFunction{0, 0}).on(GammaD)
   @endcode
 
-  @subsection guides-variational-bc-neumann Neumann Conditions
+  @subsection guides-variational-bc-neumann Neumann conditions
 
   Neumann (natural) boundary conditions specify the flux or traction on
   part of the boundary. They appear as boundary integrals in the variational
@@ -220,7 +220,7 @@
   BoundaryIntegral(f, v).over(GammaN)
   @endcode
 
-  @section guides-variational-solvers Solving the Problem
+  @section guides-variational-solvers Solving the problem
 
   After defining a problem, use a solver from the @ref Rodin::Solver "Solver"
   module to solve the resulting linear system:
@@ -244,7 +244,7 @@
   auto& solution = u.getSolution();
   @endcode
 
-  @section guides-variational-output Saving and Visualizing Results
+  @section guides-variational-output Saving and visualizing results
 
   After solving, export the results using XDMF for visualization in
   ParaView:
@@ -258,7 +258,7 @@
   xdmf.write();
   @endcode
 
-  @section guides-variational-complete Complete Example
+  @section guides-variational-complete Complete example
 
   Here is a complete example that defines and solves the Poisson equation,
   then exports the result using XDMF:
@@ -307,7 +307,7 @@
   }
   @endcode
 
-  @section guides-variational-mixed Mixed Formulations
+  @section guides-variational-mixed Mixed formulations
 
   Some problems require solving for multiple unknowns simultaneously, such as
   velocity and pressure in the
@@ -334,20 +334,20 @@
          + DirichletBC(u, g);
   @endcode
 
-  @section guides-variational-dg Discontinuous Galerkin Formulations
+  @section guides-variational-dg Discontinuous Galerkin formulations
 
   For problems with **discontinuous** finite element spaces (or when penalty
   methods are needed across element interfaces), Rodin provides specialized
   integral types and operators:
 
-  @subsection guides-variational-dg-operators DG Operators
+  @subsection guides-variational-dg-operators DG operators
 
   | Operator | Description | Code |
   |----------|------------|------|
   | `Jump` | Jump across a face: @f$ [u] = u^+ - u^- @f$ | `Jump(u)` |
   | `Average` | Average across a face: @f$ \{u\} = \frac{1}{2}(u^+ + u^-) @f$ | `Average(u)` |
 
-  @subsection guides-variational-dg-integrals DG Integral Types
+  @subsection guides-variational-dg-integrals DG integral types
 
   | Integral type | Region | Description |
   |---------------|--------|-------------|
@@ -356,7 +356,7 @@
   | `FaceIntegral(...)` | All faces @f$ \mathcal{F}_h @f$ | Interior + boundary faces |
   | `InterfaceIntegral(...)` | Interior faces @f$ \mathcal{F}_h^i @f$ | Interior faces only |
 
-  @subsection guides-variational-dg-example DG Poisson Example
+  @subsection guides-variational-dg-example DG Poisson example
 
   The simplest DG approach uses `P0` (piecewise constant) functions. The
   actual [DG Poisson example](https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp)
@@ -403,7 +403,7 @@
   See the [DG Poisson example](https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp)
   for a complete working implementation.
 
-  @section guides-variational-see-also See Also
+  @section guides-variational-see-also See also
 
   - @ref fem-spaces "Finite element spaces" — Available spaces (P0, P0g, P1, H1)
   - @ref fem-ciarlet "Ciarlet's definition" — Mathematical foundations

@@ -1,5 +1,5 @@
 /**
-  @page guides-mpi MPI: Distributed Computing
+  @page guides-mpi MPI: distributed computing
   @brief Guide to distributed-memory parallel computing with Rodin's MPI module
 
   @tableofcontents
@@ -31,7 +31,7 @@
   For a comparison of local, OpenMP, MPI, and PETSc execution/storage paths,
   see @ref guides-backends "Backends".
 
-  @section guides-mpi-context Execution Context
+  @section guides-mpi-context Execution context
 
   The @ref Rodin::Context::MPI "Context::MPI" class wraps a
   `boost::mpi::environment` and `boost::mpi::communicator`:
@@ -57,7 +57,7 @@
   The context is passed to distributed mesh constructors and sharders.  It
   does not own the Boost.MPI objects — they must outlive the context.
 
-  @section guides-mpi-mesh Distributed Mesh
+  @section guides-mpi-mesh Distributed mesh
 
   @ref Rodin::Geometry::MPIMesh "Mesh\<Context::MPI\>" (aliased as
   `Geometry::MPIMesh`) stores a rank-local
@@ -75,7 +75,7 @@
       mpi, Polytope::Type::Tetrahedron, {16, 16, 16});
   @endcode
 
-  @subsection guides-mpi-mesh-sharder Explicit Partitioning with Sharder
+  @subsection guides-mpi-mesh-sharder Explicit partitioning with sharder
 
   For more control, use the
   @ref Rodin::Geometry::Sharder<Context::MPI> "Sharder" with an explicit
@@ -113,7 +113,7 @@
   auto mesh = sharder.distribute(partitioner, 0);
   @endcode
 
-  @section guides-mpi-shard Shard: Rank-Local View
+  @section guides-mpi-shard Shard: rank-local view
 
   A @ref Rodin::Geometry::Shard "Shard" is a local mesh enriched with
   distributed metadata.  It classifies every polytope into one of three
@@ -149,7 +149,7 @@
   bool local  = shard.isLocal(d, localIdx);  // Owned || Shared
   @endcode
 
-  @section guides-mpi-connectivity Connectivity and Reconciliation
+  @section guides-mpi-connectivity Connectivity and reconciliation
 
   After receiving a shard, you must compute local connectivity for the
   incidence relations you need.  However, entities discovered independently
@@ -168,7 +168,7 @@
   mesh.reconcile(2);
   @endcode
 
-  @subsection guides-mpi-reconcile-details How Reconciliation Works
+  @subsection guides-mpi-reconcile-details How reconciliation works
 
   Reconciliation is an iterative peer-to-peer convergence algorithm:
 
@@ -197,7 +197,7 @@
   lower-dimensional entities (edges in 3D), unbounded rounds are the safe
   default since the holder graph diameter depends on mesh topology.
 
-  @section guides-mpi-queries Global Queries
+  @section guides-mpi-queries Global queries
 
   Global geometric queries on the distributed mesh automatically perform MPI
   reductions.  Each rank accumulates contributions from its **owned** entities,
@@ -243,7 +243,7 @@
   xdmf.close();
   @endcode
 
-  @section guides-mpi-fes Distributed Finite Element Spaces
+  @section guides-mpi-fes Distributed finite element spaces
 
   The P1 finite element space is specialized for MPI meshes.  It wraps a
   local shard P1 space and augments it with distributed global indexing:
@@ -256,7 +256,7 @@
   synchronized from their owner ranks.  The space provides bidirectional
   local↔global DOF index maps.
 
-  @section guides-mpi-example Complete Example
+  @section guides-mpi-example Complete example
 
   This example solves the Poisson equation on a distributed mesh using MPI
   and PETSc:
@@ -326,7 +326,7 @@
   }
   @endcode
 
-  @section guides-mpi-see-also See Also
+  @section guides-mpi-see-also See also
 
   - @ref Rodin::MPI "MPI namespace reference"
   - @ref Rodin::Context::MPI "Context::MPI"

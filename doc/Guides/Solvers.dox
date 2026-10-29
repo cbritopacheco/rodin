@@ -25,13 +25,13 @@
   @ref guides-numerical-contracts "Numerical contracts". Backend-specific
   solver/storage choices are summarized in @ref guides-backends "Backends".
 
-  @section guides-solvers-available Available Solvers
+  @section guides-solvers-available Available solvers
 
   Rodin provides a wide range of solvers. They are organized into direct
   solvers (exact up to floating-point precision), iterative solvers
   (approximate via successive refinement), and nonlinear solvers.
 
-  @subsection guides-solvers-available-direct Direct Solvers
+  @subsection guides-solvers-available-direct Direct solvers
 
   | Solver | Class | Matrix requirement | Notes |
   |--------|-------|-------------------|-------|
@@ -45,7 +45,7 @@
   | @ref Rodin::Solver::SparseQR "SparseQR" | `Solver::SparseQR` | Any | Sparse QR factorization |
   | `SPQR` | `Solver::SPQR` | Any | SuiteSparse sparse QR |
 
-  @subsection guides-solvers-available-iterative Iterative Solvers
+  @subsection guides-solvers-available-iterative Iterative solvers
 
   | Solver | Class | Matrix requirement | Notes |
   |--------|-------|-------------------|-------|
@@ -58,7 +58,7 @@
   | @ref Rodin::Solver::IDRSTABL "IDRSTABL" | `Solver::IDRSTABL` | Any | IDR(s) with higher-order stabilization |
   | @ref Rodin::Solver::LeastSquaresCG "LeastSquaresCG" | `Solver::LeastSquaresCG` | Any | Least-squares CG for rectangular systems |
 
-  @section guides-solvers-direct Direct Solvers
+  @section guides-solvers-direct Direct solvers
 
   Direct solvers compute the exact solution (up to floating-point precision)
   by factoring the system matrix. They are reliable but can be expensive
@@ -125,12 +125,12 @@
   - Coupled multi-physics problems
   - Systems where SparseLU is too slow
 
-  @section guides-solvers-iterative Iterative Solvers
+  @section guides-solvers-iterative Iterative solvers
 
   Iterative solvers approximate the solution through successive iterations.
   They are more efficient for large systems but may require tuning.
 
-  @subsection guides-solvers-iterative-cg Conjugate Gradient (CG)
+  @subsection guides-solvers-iterative-cg Conjugate gradient (CG)
 
   The @ref Rodin::Solver::CG "CG" method is optimal for **symmetric positive
   definite** (SPD) systems, which arise from many common PDEs (Poisson,
@@ -162,7 +162,7 @@
   not symmetric or not positive definite. For non-SPD systems, use a
   direct solver instead.
 
-  @section guides-solvers-nonlinear Newton Solver
+  @section guides-solvers-nonlinear Newton solver
 
   For nonlinear variational problems (e.g.\ hyperelasticity, Navier–Stokes),
   Rodin provides a `NewtonSolver<LinearSolver>` that wraps a linear solver
@@ -198,7 +198,7 @@
 
   Convergence is declared when **either** criterion is satisfied (not both).
 
-  @subsection guides-solvers-nonlinear-hyperelastic Hyperelastic Example
+  @subsection guides-solvers-nonlinear-hyperelastic Hyperelastic example
 
   For hyperelastic problems, the Newton system is built from
   `Solid::MaterialTangent` (tangent stiffness) and `Solid::InternalForce`
@@ -235,11 +235,11 @@
   - Nonlinear PDEs (Navier–Stokes, nonlinear diffusion)
   - Any problem where the bilinear form depends on the current solution
 
-  @section guides-solvers-usage Usage Patterns
+  @section guides-solvers-usage Usage patterns
 
   Rodin solvers support two main usage patterns.
 
-  @subsection guides-solvers-usage-inline Inline Solving
+  @subsection guides-solvers-usage-inline Inline solving
 
   For quick one-shot use, construct the solver with the problem and call
   `solve()` in a single expression. This is the most common pattern in
@@ -250,7 +250,7 @@
   Solver::SparseLU(elasticity).solve();
   @endcode
 
-  @subsection guides-solvers-usage-configured Configured Solving
+  @subsection guides-solvers-usage-configured Configured solving
 
   When you need to tune parameters, construct the solver object first,
   configure it, then call `solve()`:
@@ -262,7 +262,7 @@
   solver.solve();
   @endcode
 
-  @subsection guides-solvers-usage-reuse Solver Reuse via problem.solve()
+  @subsection guides-solvers-usage-reuse Solver reuse via problem.solve()
 
   You can also pass a pre-configured solver to `problem.solve()`. This
   is useful when the same solver is applied to multiple problems (e.g.\
@@ -277,7 +277,7 @@
   }
   @endcode
 
-  @section guides-solvers-choosing Choosing a Solver
+  @section guides-solvers-choosing Choosing a solver
 
   | Criterion | Recommended solver | Why |
   |-----------|-------------------|-----|
@@ -291,7 +291,7 @@
   | Memory-constrained large system | CG (if SPD), GMRES (otherwise) | Matrix-free possible |
   | Nonlinear PDE | Newton + any linear solver | Successive linearization |
 
-  @section guides-solvers-example Complete Example
+  @section guides-solvers-example Complete example
 
   @code{.cpp}
   #include <Rodin/Solver.h>
@@ -333,7 +333,7 @@
   }
   @endcode
 
-  @section guides-solvers-petsc PETSc Solvers
+  @section guides-solvers-petsc PETSc solvers
 
   When Rodin is built with PETSc support (`RODIN_USE_PETSC=ON`), additional
   solvers become available that support both sequential and MPI-distributed
@@ -343,7 +343,7 @@
   `PETSc::Variational::TestFunction` instead of the standard trial/test
   functions.
 
-  @subsection guides-solvers-petsc-ksp KSP (Krylov Subspace)
+  @subsection guides-solvers-petsc-ksp KSP (Krylov subspace)
 
   @ref Rodin::Solver::KSP "KSP" is the base PETSc linear solver wrapper.
   It provides access to the full PETSc Krylov solver library and can be
@@ -394,7 +394,7 @@
   Solver::GMRES(stokes).solve();
   @endcode
 
-  @subsection guides-solvers-petsc-snes SNES (Nonlinear)
+  @subsection guides-solvers-petsc-snes SNES (nonlinear)
 
   @ref Rodin::Solver::SNES "SNES" wraps the PETSc Scalable Nonlinear Equations
   Solver for Newton-type methods.  It uses an associated KSP for the inner
@@ -411,7 +411,7 @@
   snes.solve(x);
   @endcode
 
-  @subsection guides-solvers-petsc-multifield Multi-Field Problems
+  @subsection guides-solvers-petsc-multifield Multi-field problems
 
   PETSc solvers support block systems with multiple trial/test function pairs.
   The resulting linear system can be solved with field-split preconditioning
@@ -435,7 +435,7 @@
   // Run with: -ksp_type gmres -pc_type fieldsplit -ksp_monitor
   @endcode
 
-  @subsection guides-solvers-petsc-table PETSc Solver Summary
+  @subsection guides-solvers-petsc-table PETSc solver summary
 
   | Solver | Class | System type | Notes |
   |--------|-------|-------------|-------|
@@ -456,7 +456,7 @@
     residual history.  Try `-pc_type gamg` for AMG preconditioning or
     `-ksp_type gmres -pc_type ilu` for non-SPD systems.
 
-  @section guides-solvers-see-also See Also
+  @section guides-solvers-see-also See also
 
   - @ref Rodin::Solver "Solver namespace reference"
   - @ref Rodin::PETSc "PETSc module"

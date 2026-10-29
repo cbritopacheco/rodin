@@ -24,12 +24,12 @@
   where @f$ u @f$ solves the linearized elasticity system on @f$ \Omega @f$
   and @f$ \ell @f$ is a Lagrange multiplier penalizing the volume.
 
-  @section examples-shapeopt-sc-setup Problem Setup
+  @section examples-shapeopt-sc-setup Problem setup
 
   @subsection examples-shapeopt-sc-setup-includes Includes
 
   We need the core Rodin modules plus the linear-elasticity helper and the
-  @ref Rodin::MMG "MMG" remesher:
+  @ref Rodin::MMG "MMG::Optimizer" remesher:
 
   @code{.cpp}
   #include <Rodin/Solver.h>
@@ -68,10 +68,10 @@
   static constexpr Real alpha  = 4 * hmax;    // Regularization
   @endcode
 
-  @subsection examples-shapeopt-sc-setup-mesh Loading the Mesh
+  @subsection examples-shapeopt-sc-setup-mesh Loading the mesh
 
   The initial cantilever mesh is loaded from an MFEM file using the
-  @ref Rodin::MMG "MMG::Mesh" class, which extends
+  @ref Rodin::MMG "MMG::Optimizer" class, which extends
   @ref Rodin::Geometry::Mesh "Mesh" with remeshing capabilities:
 
   @code{.cpp}
@@ -79,7 +79,7 @@
   Omega.load(meshFile, IO::FileFormat::MFEM);
   @endcode
 
-  @section examples-shapeopt-sc-loop Optimization Loop
+  @section examples-shapeopt-sc-loop Optimization loop
 
   Each iteration consists of four steps:
   1. Solve the **state equation** (linearized elasticity)
@@ -87,7 +87,7 @@
   3. Move the mesh along the descent direction
   4. **Remesh** the deformed domain with MMG
 
-  @subsection examples-shapeopt-sc-loop-state Step 1 — State Equation
+  @subsection examples-shapeopt-sc-loop-state Step 1 — state equation
 
   We solve the elasticity problem on the current domain. The
   `LinearElasticityIntegral` assembles the bilinear form for the Hooke tensor
@@ -109,7 +109,7 @@
   Solver::SparseLU(elasticity).solve();
   @endcode
 
-  @subsection examples-shapeopt-sc-loop-gradient Step 2 — Shape Gradient
+  @subsection examples-shapeopt-sc-loop-gradient Step 2 — shape gradient
 
   The shape derivative of the compliance is a boundary integral involving the
   Cauchy stress tensor @f$ \sigma = Ae @f$. We compute a smooth descent
@@ -132,7 +132,7 @@
   Solver::SparseLU(hilbert).solve();
   @endcode
 
-  @subsection examples-shapeopt-sc-loop-move Step 3 — Mesh Displacement
+  @subsection examples-shapeopt-sc-loop-move Step 3 — mesh displacement
 
   The descent direction is normalized and the mesh is displaced:
 
@@ -143,7 +143,7 @@
   Omega.displace(g.getSolution());
   @endcode
 
-  @subsection examples-shapeopt-sc-loop-remesh Step 4 — Remeshing with MMG
+  @subsection examples-shapeopt-sc-loop-remesh Step 4 — remeshing with MMG
 
   After displacing the mesh, we remesh with the
   @ref Rodin::MMG "MMG::Optimizer" to maintain good element quality:
@@ -152,12 +152,12 @@
   MMG::Optimizer().setHMax(hmax).setHMin(hmin).optimize(Omega);
   @endcode
 
-  @section examples-shapeopt-sc-full Full Source Code
+  @section examples-shapeopt-sc-full Full source code
 
   The complete source code is:
   -   @ref ShapeOptimization/SimpleCantilever2D.cpp "SimpleCantilever2D.cpp"
 
-  @section examples-shapeopt-sc-see-also See Also
+  @section examples-shapeopt-sc-see-also See also
 
   - @ref examples-pdes-elasticity "Linear elasticity" — The state equation
   - @ref examples-shapeoptimization-levelset_cantilever "Level-set cantilever"

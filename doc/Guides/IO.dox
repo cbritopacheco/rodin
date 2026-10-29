@@ -20,7 +20,7 @@
   - **Checkpointing**: Saving and restoring simulation state
   - **Data exchange**: Converting between file formats
 
-  @section guides-io-formats Supported File Formats
+  @section guides-io-formats Supported file formats
 
   Rodin supports several file formats for meshes and grid functions. The
   format is specified explicitly via the @ref Rodin::IO::FileFormat "IO::FileFormat"
@@ -35,7 +35,7 @@
 
   @section guides-io-mesh-io Mesh I/O
 
-  @subsection guides-io-mesh-loading Loading Meshes
+  @subsection guides-io-mesh-loading Loading meshes
 
   Meshes can be loaded from files in supported formats using the
   @ref Rodin::Geometry::Mesh "Mesh::load()" method. The file format
@@ -61,7 +61,7 @@
   }
   @endcode
 
-  @subsection guides-io-mesh-saving Saving Meshes
+  @subsection guides-io-mesh-saving Saving meshes
 
   Meshes can be saved in any of the supported formats:
 
@@ -76,7 +76,7 @@
   mesh.save("output.mesh", IO::FileFormat::MEDIT);
   @endcode
 
-  @subsection guides-io-mesh-conversion Format Conversion
+  @subsection guides-io-mesh-conversion Format conversion
 
   A common workflow is to convert meshes between formats. For example, loading
   a MEDIT mesh (from MMG) and saving it in MFEM format:
@@ -87,7 +87,7 @@
   mesh.save("output.mesh", IO::FileFormat::MFEM);
   @endcode
 
-  @section guides-io-gf Grid Function I/O
+  @section guides-io-gf Grid function I/O
 
   Grid functions (finite element solutions) can also be saved and loaded:
 
@@ -116,15 +116,15 @@
   }
   @endcode
 
-  @section guides-io-xdmf-overview XDMF Output for Visualization
+  @section guides-io-xdmf-overview XDMF output for visualization
 
-  The @ref Rodin::IO::XDMF "XDMF" class provides a powerful and modern way to
+  The @ref Rodin::IO::XDMF "IO::XDMF" class provides a powerful and modern way to
   export simulation data for visualization in tools like
   [ParaView](https://www.paraview.org/). XDMF (eXtensible Data Model and
   Format) stores heavy data (coordinates, connectivity, field values) in HDF5
   files and lightweight metadata in an XML file.
 
-  @subsection guides-io-xdmf-overview-why Why Use XDMF?
+  @subsection guides-io-xdmf-overview-why Why use XDMF?
 
   XDMF has several advantages over other formats:
 
@@ -175,7 +175,7 @@
   | `close()` | Finalize XML; also called by destructor |
   | `setPadding(digits)` | Set zero-padding for file indices |
 
-  @subsection guides-io-xdmf-overview-basic Basic XDMF Usage
+  @subsection guides-io-xdmf-overview-basic Basic XDMF usage
 
   The simplest use case is to export a mesh and solution at a single time step:
 
@@ -225,7 +225,7 @@
   Both produce identical output; `xdmf.setMesh(mesh)` internally calls
   `xdmf.grid().setMesh(mesh)`.
 
-  @subsection guides-io-xdmf-overview-time Time-Dependent Output
+  @subsection guides-io-xdmf-overview-time Time-dependent output
 
   One of the most powerful features of XDMF is its ability to record
   time-evolving data. Use `write(time)` to record snapshots at different
@@ -292,7 +292,7 @@
   When opened in ParaView, this produces a time slider that lets you animate
   the field evolution.
 
-  @subsection guides-io-xdmf-overview-multiple Multiple Fields
+  @subsection guides-io-xdmf-overview-multiple Multiple fields
 
   You can export several fields (scalar, vector) at once:
 
@@ -306,7 +306,7 @@
   xdmf.write(t);
   @endcode
 
-  @subsection guides-io-xdmf-overview-grids Multiple Grids
+  @subsection guides-io-xdmf-overview-grids Multiple grids
 
   You can also work with multiple named grids, each with its own mesh and
   attributes:
@@ -325,7 +325,7 @@
   xdmf.write(t);
   @endcode
 
-  @subsection guides-io-xdmf-overview-paraview Viewing XDMF Files in ParaView
+  @subsection guides-io-xdmf-overview-paraview Viewing XDMF files in ParaView
 
   To visualize XDMF output in [ParaView](https://www.paraview.org/):
 
@@ -335,7 +335,7 @@
   4. Select the field to display from the dropdown menu
   5. For time-dependent data, use the play/timeline controls to animate
 
-  @section guides-io-external External Mesh Generators
+  @section guides-io-external External mesh generators
 
   @subsection guides-io-external-mmg Using MMG
 
@@ -350,7 +350,7 @@
   See the @ref examples-mmg-index "MMG examples" for more details on using
   Rodin's @ref Rodin::MMG "MMG" integration.
 
-  @section guides-io-workflow Recommended Workflow
+  @section guides-io-workflow Recommended workflow
 
   For a typical simulation workflow, we recommend using XDMF for output:
 
@@ -399,7 +399,7 @@
   This workflow produces files that can be directly opened in ParaView for
   visualization and analysis.
 
-  @section guides-io-detailed Detailed Format Guides
+  @section guides-io-detailed Detailed format guides
 
   For in-depth information on each format, see:
 
@@ -407,11 +407,11 @@
   - @subpage guides-io-gridfunctions - Saving and loading grid functions
   - @subpage guides-io-meshformats - MFEM and MEDIT mesh file formats
 
-  @section guides-io-see-also See Also
+  @section guides-io-see-also See also
 
-  - @ref guides-meshes-io "Mesh Input/Output" — Detailed mesh I/O guide
+  - @ref guides-meshes-io "Mesh input/output" — Detailed mesh I/O guide
   - @ref Rodin::IO "IO namespace reference"
-  - @ref Rodin::IO::XDMF "XDMF class reference"
+  - @ref Rodin::IO::XDMF "IO::XDMF"
   - @ref examples-io-xdmf "XDMF time-evolution example"
   - @ref examples-pdes-poisson "Poisson example (uses XDMF)"
 

@@ -132,7 +132,7 @@
   @parblock
   <h2>2. Build your first program</h2>
 
-  Follow @ref guides-getting-started-first-steps "First Steps" to learn how
+  Follow @ref guides-getting-started-first-steps "First steps" to learn how
   meshes, finite element spaces, trial and test functions, and solvers fit together.
   @endparblock
 
@@ -141,7 +141,7 @@
   @parblock
   <h2>3. Solve and visualize a problem</h2>
 
-  Work through @ref guides-getting-started-first-problem "Your First Problem"
+  Work through @ref guides-getting-started-first-problem "Your first problem"
   to solve the Poisson equation, then use the
   @ref guides-io "I/O and visualization guide" to export the solution for
   inspection in ParaView.

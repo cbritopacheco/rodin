@@ -18,7 +18,7 @@
   The @ref Rodin::MMG "MMG" module supports metric-based mesh
   adaptation where a solution field or metric tensor guides the remesher.
 
-  @section examples-mmg-adapt-workflow Typical Workflow
+  @section examples-mmg-adapt-workflow Typical workflow
 
   A typical solve–adapt cycle looks like:
 
@@ -64,7 +64,7 @@
   }
   @endcode
 
-  @section examples-mmg-adapt-behavior Expected Behavior
+  @section examples-mmg-adapt-behavior Expected behavior
 
   `MMG::Adapt` is intended for size-map-driven remeshing. It may insert,
   remove, and move vertices to match the requested metric subject to the
@@ -77,7 +77,7 @@
   @ref examples-mmg-behavior-required "Required entity behavior" for the
   distinction between uncut entities, optimization, and level-set cuts.
 
-  @section examples-mmg-adapt-see-also See Also
+  @section examples-mmg-adapt-see-also See also
 
   - @ref examples-mmg-mesh_optimization "Mesh optimization"
   - @ref examples-mmg-behavior "MMG behavior and guarantees"

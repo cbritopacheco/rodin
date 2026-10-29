@@ -10,7 +10,7 @@
   precise numerical contracts. This page collects the rules that affect
   accuracy and solver behavior across modules.
 
-  @section guides-numerical-contracts-interpolation Interpolation vs Projection
+  @section guides-numerical-contracts-interpolation Interpolation vs projection
 
   Assigning an expression to a `GridFunction` applies the finite element
   space's degree-of-freedom functionals to that expression:
@@ -28,7 +28,7 @@
   @ref Rodin::Variational::GridFunction "GridFunction" at a
   @ref Rodin::Geometry::Point "Point" instead.
 
-  @subsection guides-numerical-contracts-l2 L2 Projection
+  @subsection guides-numerical-contracts-l2 L2 projection
 
   When the mathematical operation is the @f$ L^2 @f$ projection, assemble the
   mass problem:
@@ -55,7 +55,7 @@
   projection workflows, or whenever the variational definition of the
   projection matters.
 
-  @section guides-numerical-contracts-signs Problem Sign Convention
+  @section guides-numerical-contracts-signs Problem sign convention
 
   A `Problem` assignment writes the residual equation with all terms on the
   left-hand side. The Poisson weak form
@@ -85,7 +85,7 @@
   Do not write a second manual negation around a residual term that the
   `Problem` assembly already moves to the right-hand side.
 
-  @section guides-numerical-contracts-linearsystem LinearSystem Lifetime
+  @section guides-numerical-contracts-linearsystem LinearSystem lifetime
 
   A @ref Rodin::Math::LinearSystem "LinearSystem" is tied to the finite
   element spaces and block layout that created it. If the mesh, finite element
@@ -96,7 +96,7 @@
   assembled, it cannot be resized in place. Reassembly may reuse storage when
   sizes and sparsity structure match, but changed structure is a new system.
 
-  @section guides-numerical-contracts-quadrature Quadrature Exactness
+  @section guides-numerical-contracts-quadrature Quadrature exactness
 
   Quadrature order controls the mathematical form being assembled. For
   polynomial integrands on affine elements, choose a rule exact for the
@@ -109,7 +109,7 @@
   assembled values, convergence rates, and any invariants the form is expected
   to satisfy.
 
-  @section guides-numerical-contracts-tangent Residual and Tangent Consistency
+  @section guides-numerical-contracts-tangent Residual and tangent consistency
 
   Nonlinear residual/tangent pairs must be consistent. For a residual
   @f$ R(x) @f$ and tangent @f$ J(x) @f$, the check is:
@@ -130,7 +130,7 @@
   expanded algebraically. Use penalty terms only when the model is explicitly
   a penalty method.
 
-  @section guides-numerical-contracts-see-also See Also
+  @section guides-numerical-contracts-see-also See also
 
   - @ref guides-getting-started-core-concepts "Core concepts"
   - @ref guides-variational "Variational formulations"

@@ -16,7 +16,7 @@
 
   Use @ref Rodin::IO::FileFormat "IO::FileFormat::MFEM" when saving or loading.
 
-  @section examples-io-mfem-builder Building a Mesh Programmatically
+  @section examples-io-mfem-builder Building a mesh programmatically
 
   The @ref Rodin::Geometry::Mesh "Mesh::Builder" API lets you construct a
   mesh from scratch by specifying vertices and polytopes:
@@ -50,7 +50,7 @@
   }
   @endcode
 
-  @section examples-io-mfem-gf Saving a Grid Function
+  @section examples-io-mfem-gf Saving a grid function
 
   A @ref Rodin::Variational::GridFunction "GridFunction" stores DOF values
   in a finite element space. It can be saved alongside the mesh:
@@ -69,11 +69,11 @@
   gf.save("output.gf", IO::FileFormat::MFEM);
   @endcode
 
-  @section examples-io-mfem-full Full Source Code
+  @section examples-io-mfem-full Full source code
 
   -   @ref IO/MFEM.cpp "MFEM.cpp"
 
-  @section examples-io-mfem-see-also See Also
+  @section examples-io-mfem-see-also See also
 
   - @ref examples-io-medit "MEDIT format" — Alternative text format
   - @ref examples-io-xdmf "XDMF format" — Recommended for visualization

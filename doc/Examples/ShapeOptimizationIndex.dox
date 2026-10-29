@@ -1,8 +1,19 @@
 /**
   @page examples-shapeoptimization-index Shape optimization examples
-  @brief Implementation of shape optimization algorithms
+  @brief Use a state solve and a shape derivative to evolve a design boundary.
 
-  - @subpage examples-shapeoptimization-simple_cantilever
-  - @subpage examples-shapeoptimization-levelset_cantilever
+  These examples combine elasticity, a shape derivative, and a regularized
+  deformation field. Start with the boundary-deformation workflow before
+  moving to a level-set representation.
 
-  */
+  1. @subpage examples-shapeoptimization-simple_cantilever — A cantilever
+     optimization workflow based on a shape gradient.
+  2. @subpage examples-shapeoptimization-levelset_cantilever — A cantilever
+     workflow using a level-set description.
+
+  The @ref guides-shape-optimization "shape optimization guide" explains the
+  mathematical ingredients. The @ref examples-pdes-elasticity "elasticity
+  tutorial" supplies the state-problem background.
+
+  @m_footernavigation
+*/

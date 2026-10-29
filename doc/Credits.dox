@@ -6,6 +6,9 @@
 
   @section credits-index-people People
 
+  Rodin grows through scientific exchange and collaboration. The people
+  acknowledged here are part of the community supporting that work.
+
   @m_class{m-block m-info m-badge rodin-credit-person}
 
   @parblock
@@ -18,6 +21,10 @@
 
   @section credits-index-laboratories Laboratories
 
+  Research laboratories connect Rodin with applications and developments in
+  numerical methods. The groups acknowledged here contribute to this wider
+  scientific community.
+
   @m_class{m-block m-info m-badge rodin-credit-lab}
 
   @parblock
@@ -29,7 +36,7 @@
   interaction.
   @endparblock
 
-  @section credits-index-3rd-party Third-party Software
+  @section credits-index-3rd-party Third-party software
 
   @subsection credits-index-boost Boost
 

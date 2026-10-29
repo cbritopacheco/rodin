@@ -41,7 +41,7 @@
 
   @section examples-pdes-surface-impl Implementation
 
-  @subsection examples-pdes-surface-mesh Loading the Surface Mesh
+  @subsection examples-pdes-surface-mesh Loading the surface mesh
 
   The surface mesh is loaded from an MFEM file. The mesh has topological
   dimension 2 (triangles) but space dimension 3 (vertices live in
@@ -61,7 +61,7 @@
   Omega.load("surface-meshes-example.mesh", IO::FileFormat::MFEM);
   @endcode
 
-  @subsection examples-pdes-surface-space Finite Element Space
+  @subsection examples-pdes-surface-space Finite element space
 
   We use `H1` elements (higher-order continuous
   Lagrange elements) to better approximate the solution on the curved
@@ -73,7 +73,7 @@
   TestFunction  v(Vh);
   @endcode
 
-  @subsection examples-pdes-surface-rhs Right-Hand Side
+  @subsection examples-pdes-surface-rhs Right-hand side
 
   The source term is defined in terms of the 3D coordinates of points on
   the surface:
@@ -87,7 +87,7 @@
     });
   @endcode
 
-  @subsection examples-pdes-surface-problem Problem Assembly
+  @subsection examples-pdes-surface-problem Problem assembly
 
   The problem is assembled exactly as in the planar case. The
   `Integral(Grad(u), Grad(v))` automatically uses the surface gradient:
@@ -109,14 +109,14 @@
   @f$ \Gamma @f$ has no boundary (it is a closed manifold). The mass term
   @f$ \int u \, v \, ds @f$ makes the bilinear form coercive.
 
-  @subsection examples-pdes-surface-save Saving Results
+  @subsection examples-pdes-surface-save Saving results
 
   @code{.cpp}
   u.getSolution().save("u.gf", IO::FileFormat::MFEM);
   Omega.save("Omega.mesh", IO::FileFormat::MFEM);
   @endcode
 
-  @section examples-pdes-surface-key Key Observations
+  @section examples-pdes-surface-key Key observations
 
   - **No special operators needed**: Rodin automatically computes the
     surface gradient @f$ \nabla_\Gamma @f$ from the mesh geometry. The
@@ -129,12 +129,12 @@
   - **Surface integrals**: The `Integral(...)` operator automatically
     uses the surface measure @f$ ds @f$ instead of @f$ dx @f$.
 
-  @section examples-pdes-surface-full Full Source Code
+  @section examples-pdes-surface-full Full source code
 
   The complete source code is:
   -   @ref PDEs/SurfaceMesh.cpp "SurfaceMesh.cpp"
 
-  @section examples-pdes-surface-see-also See Also
+  @section examples-pdes-surface-see-also See also
 
   - @ref examples-pdes-poisson "Poisson equation" — Planar equivalent
   - @ref fem-spaces "Finite element spaces" — H1 elements

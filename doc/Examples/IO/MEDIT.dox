@@ -17,7 +17,7 @@
 
   Use @ref Rodin::IO::FileFormat "IO::FileFormat::MEDIT" when saving or loading.
 
-  @section examples-io-medit-load Loading a MEDIT Mesh
+  @section examples-io-medit-load Loading a MEDIT mesh
 
   A mesh in MEDIT format can be loaded into either a standard
   @ref Rodin::Geometry::Mesh "Mesh" or an @ref Rodin::MMG
@@ -42,7 +42,7 @@
   }
   @endcode
 
-  @section examples-io-medit-convert Format Conversion
+  @section examples-io-medit-convert Format conversion
 
   A common workflow is to convert a MEDIT mesh produced by MMG into MFEM
   format for use with other tools:
@@ -55,7 +55,7 @@
 
   @section examples-io-medit-mmg Using with MMG
 
-  When working with the @ref Rodin::MMG "MMG" module, MEDIT is the
+  When working with the @ref Rodin::MMG "MMG::Mesh" module, MEDIT is the
   recommended format because it preserves MMG-specific metadata:
 
   @code{.cpp}
@@ -69,11 +69,11 @@
   mesh.save("optimized.medit.mesh", IO::FileFormat::MEDIT);
   @endcode
 
-  @section examples-io-medit-full Full Source Code
+  @section examples-io-medit-full Full source code
 
   -   @ref IO/MEDIT.cpp "MEDIT.cpp"
 
-  @section examples-io-medit-see-also See Also
+  @section examples-io-medit-see-also See also
 
   - @ref examples-io-mfem "MFEM format" — Alternative text format
   - @ref examples-io-xdmf "XDMF format" — Recommended for visualization

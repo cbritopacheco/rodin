@@ -33,7 +33,7 @@
 
   @section examples-pdes-periodic-implementation Implementation
 
-  @subsection examples-pdes-periodic-mesh Mesh Creation
+  @subsection examples-pdes-periodic-mesh Mesh creation
 
   We build a fine triangular mesh on a grid of @f$ n \times n @f$ points,
   then scale it to the domain @f$ [0, 2\pi]^2 @f$:
@@ -56,7 +56,7 @@
   mesh.scale(2 * M_PI);         // Stretch to [0, 2π]^2
   @endcode
 
-  @subsection examples-pdes-periodic-source Source Term
+  @subsection examples-pdes-periodic-source Source term
 
   We use a smooth source function:
 
@@ -68,7 +68,7 @@
     };
   @endcode
 
-  @subsection examples-pdes-periodic-dofmap Building the DOF Correspondence Map
+  @subsection examples-pdes-periodic-dofmap Building the DOF correspondence map
 
   The key step for periodic conditions is building an `IndexMap` that pairs
   the DOF indices on opposite boundaries. For a uniform @f$ n \times n @f$
@@ -93,7 +93,7 @@
     dofs[i].insert(i + n * (n - 1));
   @endcode
 
-  @subsection examples-pdes-periodic-solve Problem Assembly and Solving
+  @subsection examples-pdes-periodic-solve Problem assembly and solving
 
   The problem is assembled identically to a standard Poisson equation,
   except that `PeriodicBC` replaces `DirichletBC`:
@@ -115,19 +115,19 @@
   the system to be positive definite, which periodic problems are not
   without additional constraints.
 
-  @subsection examples-pdes-periodic-save Saving Results
+  @subsection examples-pdes-periodic-save Saving results
 
   @code{.cpp}
   u.getSolution().save("Periodic.gf", IO::FileFormat::MFEM);
   mesh.save("Periodic.mesh", IO::FileFormat::MFEM);
   @endcode
 
-  @section examples-pdes-periodic-full Full Source Code
+  @section examples-pdes-periodic-full Full source code
 
   The complete source code is:
   -   @ref PDEs/Periodic.cpp "Periodic.cpp"
 
-  @section examples-pdes-periodic-see-also See Also
+  @section examples-pdes-periodic-see-also See also
 
   - @ref examples-pdes-poisson "Poisson equation" — Standard Dirichlet version
   - @ref guides-boundary-conditions "Boundary conditions guide"

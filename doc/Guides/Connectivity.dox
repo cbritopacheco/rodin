@@ -12,7 +12,7 @@
 
   Connectivity (or incidence) information describes how the polytopes
   (vertices, edges, faces, cells) in a mesh relate to each other. In Rodin,
-  this is managed by the @ref Rodin::Geometry::Connectivity "Connectivity"
+  this is managed by the @ref Rodin::Geometry::Connectivity "compute()"
   class, which is accessed through
   @ref Rodin::Geometry::Mesh "Mesh::getConnectivity()".
 
@@ -41,7 +41,7 @@
   | @f$ (2, 0) @f$ | Cells → Vertices | Cell vertex lookup |
   | @f$ (2, 1) @f$ | Cells → Edges | Cell edge lookup |
 
-  @section guides-connectivity-compute Computing Connectivity
+  @section guides-connectivity-compute Computing connectivity
 
   Connectivity relations are computed on demand using the
   @ref Rodin::Geometry::Connectivity "compute()" method:
@@ -58,7 +58,7 @@
   faces → cells in 3D) is required before imposing `DirichletBC`, since
   boundary detection relies on finding entities that belong to only one cell.
 
-  @subsection guides-connectivity-compute-modes Computation Modes
+  @subsection guides-connectivity-compute-modes Computation modes
 
   The `compute()` method accepts an optional **mode** parameter that controls
   how sub-entities are handled:
@@ -78,7 +78,7 @@
 
   In most workflows, the default `Discover` mode is what you want.
 
-  @section guides-connectivity-boundary Boundary Detection
+  @section guides-connectivity-boundary Boundary detection
 
   Once the @f$ (d-1, d) @f$ connectivity is computed (where @f$ d @f$ is the
   mesh dimension), Rodin can identify boundary entities — those that are
@@ -100,7 +100,7 @@
           + DirichletBC(u, Zero());  // Automatically detects boundary
   @endcode
 
-  @section guides-connectivity-attributes Boundary Attributes
+  @section guides-connectivity-attributes Boundary attributes
 
   Different parts of the boundary can be distinguished by **attributes**
   (integer labels). This is useful when different boundary conditions are
@@ -119,10 +119,10 @@
   Boundary attributes are typically set when loading a mesh from a file or
   when building a mesh programmatically.
 
-  @section guides-connectivity-see-also See Also
+  @section guides-connectivity-see-also See also
 
   - @ref guides-polytopes "Polytopes" — The geometric entities
   - @ref guides-meshes "Meshes" — Working with meshes
-  - @ref Rodin::Geometry::Connectivity "Connectivity class reference"
+  - @ref Rodin::Geometry::Connectivity "compute()"
 
   */

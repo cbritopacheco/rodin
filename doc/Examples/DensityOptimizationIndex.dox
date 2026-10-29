@@ -1,7 +1,16 @@
 /**
   @page examples-density_optimization-index Density optimization examples
-  @brief Implementation of density optimization algorithms
+  @brief Optimize a material distribution constrained by a state equation.
 
-  - @subpage examples-density_optimization-simp_temperature_minimization
+  Density methods represent the design through a material field. The state
+  equation, material interpolation, and update rule together determine the
+  optimization problem.
 
-  */
+  - @subpage examples-density_optimization-simp_temperature_minimization —
+    A thermal optimization problem using a SIMP material interpolation.
+
+  Familiarity with the @ref examples-pdes-poisson "Poisson tutorial" provides
+  the starting point for the scalar state solve.
+
+  @m_footernavigation
+*/

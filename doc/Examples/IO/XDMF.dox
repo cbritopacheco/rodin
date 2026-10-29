@@ -42,7 +42,7 @@
   Note the call to `setName("u")` — this name is used as the attribute label
   in the XDMF file, and will appear as the field name in ParaView.
 
-  @section examples-io-xdmf-writer Setting Up the XDMF Writer
+  @section examples-io-xdmf-writer Setting up the XDMF writer
 
   The @ref Rodin::IO::XDMF "XDMF" object is created with a stem name that
   determines the output file names. A **grid** is configured with the mesh
@@ -59,7 +59,7 @@
   The `grid()` method returns a handle to the default grid. You can register
   multiple fields with `add()` — they will all be exported at each time step.
 
-  @section examples-io-xdmf-timeloop Time Loop
+  @section examples-io-xdmf-timeloop Time loop
 
   At each time step, we update the grid function and call `write(t)` with the
   current simulation time:
@@ -89,7 +89,7 @@
   functions at time @f$ t @f$. The XDMF writer automatically manages the
   underlying HDF5 files.
 
-  @section examples-io-xdmf-output Output Files
+  @section examples-io-xdmf-output Output files
 
   Running this example produces:
   - `TimeEvolution.xdmf` — XML metadata file describing the temporal
@@ -109,7 +109,7 @@
      coloring mode
   6. Use the **Play** button or timeline slider to animate through time steps
 
-  @section examples-io-xdmf-full Full Source Code
+  @section examples-io-xdmf-full Full source code
 
   The complete source code is:
   -   @ref IO/XDMF.cpp "XDMF.cpp"

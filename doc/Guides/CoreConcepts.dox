@@ -1,5 +1,5 @@
 /**
-  @page guides-getting-started-core-concepts Understanding Core Concepts
+  @page guides-getting-started-core-concepts Understanding core concepts
   @brief Deep dive into meshes, finite elements, and variational formulations
 
   @tableofcontents
@@ -14,9 +14,9 @@
   contracts". It explains where interpolation, `L2` projection, assembly signs,
   and solver lifetimes differ.
 
-  @section guides-getting-started-core-concepts-geometry Geometry and Meshes
+  @section guides-getting-started-core-concepts-geometry Geometry and meshes
 
-  @subsection guides-getting-started-core-concepts-mesh The Mesh Object
+  @subsection guides-getting-started-core-concepts-mesh The mesh object
 
   A @ref Rodin::Geometry::Mesh "Mesh" is the fundamental geometric object in
   Rodin. It represents a discretization of your domain into simple shapes
@@ -82,7 +82,7 @@
   - `(0, d)`: Vertices to cells - for vertex-based operations
   - `(d, d)`: Cell-to-cell adjacency
 
-  @subsection guides-getting-started-core-concepts-iterators Mesh Iteration
+  @subsection guides-getting-started-core-concepts-iterators Mesh iteration
 
   You can iterate over polytopes of a specific dimension:
 
@@ -108,9 +108,9 @@
   }
   @endcode
 
-  @section guides-getting-started-core-concepts-variational Variational Formulations
+  @section guides-getting-started-core-concepts-variational Variational formulations
 
-  @subsection guides-getting-started-core-concepts-fe-spaces Finite Element Spaces
+  @subsection guides-getting-started-core-concepts-fe-spaces Finite element spaces
 
   A **finite element space** @f$ V_h @f$ is a finite-dimensional subspace of a
   function space (such as @f$ H^1(\Omega) @f$ or @f$ L^2(\Omega) @f$), built by
@@ -146,7 +146,7 @@
   std::cout << "H1<2> DOFs: " << Qh.getSize() << std::endl;
   @endcode
 
-  @subsection guides-getting-started-core-concepts-trial-test Trial and Test Functions
+  @subsection guides-getting-started-core-concepts-trial-test Trial and test functions
 
   In the finite element method, we express problems in **weak form** using
   trial and test functions. These are abstract symbolic objects that represent
@@ -184,7 +184,7 @@
     = \ell(\phi_i) @f$, yielding the linear system @f$ A\mathbf{x}
     = \mathbf{b} @f$.
 
-  @subsection guides-getting-started-core-concepts-operators Differential Operators
+  @subsection guides-getting-started-core-concepts-operators Differential operators
 
   Rodin provides differential operators that work on trial and test functions.
   These operators are **expression templates**: they are not evaluated
@@ -236,7 +236,7 @@
   auto inner_product = Integral(Grad(u), Grad(v));
   @endcode
 
-  @subsection guides-getting-started-core-concepts-bc Boundary Conditions
+  @subsection guides-getting-started-core-concepts-bc Boundary conditions
 
   Rodin supports different types of boundary conditions:
 
@@ -260,9 +260,9 @@
   auto neumann = Integral(g, v).over(BoundaryAttribute(2));
   @endcode
 
-  @section guides-getting-started-core-concepts-problem Defining Problems
+  @section guides-getting-started-core-concepts-problem Defining problems
 
-  @subsection guides-getting-started-core-concepts-problem-assembly Problem Assembly
+  @subsection guides-getting-started-core-concepts-problem-assembly Problem assembly
 
   The `Problem` class represents a complete
   variational problem:
@@ -322,7 +322,7 @@
   The solution is stored in the `GridFunction` associated with the trial function. You can evaluate it at
   any point, compute norms, or export it for visualization.
 
-  @section guides-getting-started-core-concepts-workflow Typical Workflow
+  @section guides-getting-started-core-concepts-workflow Typical workflow
 
   Here's a summary of the typical workflow for solving a PDE with Rodin.
   Each step corresponds to one of the core abstractions:
@@ -365,7 +365,7 @@
      xdmf.write();
      @endcode
 
-  @section guides-getting-started-core-concepts-gridfunctions Grid Functions
+  @section guides-getting-started-core-concepts-gridfunctions Grid functions
 
   A `GridFunction` represents a discrete
   function in a finite element space — it stores the actual coefficient values
@@ -376,7 +376,7 @@
   an `L2` projection, which is a variational problem solved through a mass
   matrix; see @ref guides-numerical-contracts "Numerical contracts".
 
-  @subsection guides-getting-started-core-concepts-gf-create Creating Grid Functions
+  @subsection guides-getting-started-core-concepts-gf-create Creating grid functions
 
   @code{.cpp}
   P1 Vh(mesh);
@@ -393,7 +393,7 @@
   v.project(f);
   @endcode
 
-  @subsection guides-getting-started-core-concepts-gf-access Accessing Values
+  @subsection guides-getting-started-core-concepts-gf-access Accessing values
 
   Individual degrees of freedom can be read or written using `operator[]`:
 
@@ -409,7 +409,7 @@
   auto& coeffs = u.getData();  // Returns Math::Vector<Real>&
   @endcode
 
-  @subsection guides-getting-started-core-concepts-gf-eval Evaluating at Points
+  @subsection guides-getting-started-core-concepts-gf-eval Evaluating at points
 
   A grid function can be evaluated at any @ref Rodin::Geometry::Point "Point"
   on the mesh. The `getValue()` method performs finite element interpolation
@@ -433,7 +433,7 @@
   auto uy = u.y();             // Component 1 as scalar function
   @endcode
 
-  @subsection guides-getting-started-core-concepts-gf-io Saving and Loading
+  @subsection guides-getting-started-core-concepts-gf-io Saving and loading
 
   Grid functions can be saved and loaded in MFEM format:
 
@@ -442,7 +442,7 @@
   u.load("solution.gf", IO::FileFormat::MFEM);
   @endcode
 
-  @subsection guides-getting-started-core-concepts-gf-name Naming Grid Functions
+  @subsection guides-getting-started-core-concepts-gf-name Naming grid functions
 
   Assigning a name is required when adding grid functions to XDMF output:
 
@@ -457,7 +457,7 @@
   xdmf.write();
   @endcode
 
-  @section guides-getting-started-core-concepts-functions Function Classes
+  @section guides-getting-started-core-concepts-functions Function classes
 
   Rodin provides several function classes for defining source terms,
   boundary data, and coefficients. All are expression templates that compose
@@ -509,7 +509,7 @@
   DirichletBC(u, Zero(3))     // Zero vector in 3D
   @endcode
 
-  @subsection guides-getting-started-core-concepts-functions-math Mathematical Functions
+  @subsection guides-getting-started-core-concepts-functions-math Mathematical functions
 
   Rodin provides pointwise mathematical function operators that compose with
   any scalar function expression:
@@ -534,7 +534,7 @@
   // auto u_exact = Sin(RealFunction([](const Geometry::Point& p) { ... }));
   @endcode
 
-  @subsection guides-getting-started-core-concepts-functions-coords Coordinate Functions
+  @subsection guides-getting-started-core-concepts-functions-coords Coordinate functions
 
   The `F` namespace provides built-in coordinate projection functions that
   extract spatial coordinates at evaluation points. These are particularly
@@ -557,7 +557,7 @@
   gf = F::x > 0.5;  // 1 where x > 0.5, 0 elsewhere
   @endcode
 
-  @subsection guides-getting-started-core-concepts-functions-complex Complex Functions
+  @subsection guides-getting-started-core-concepts-functions-complex Complex functions
 
   For complex-valued problems (e.g.\ Helmholtz, electromagnetics):
 
@@ -579,14 +579,14 @@
   im = Im(gf);
   @endcode
 
-  @section guides-getting-started-core-concepts-dg Discontinuous Galerkin Operators
+  @section guides-getting-started-core-concepts-dg Discontinuous Galerkin operators
 
   Rodin supports discontinuous Galerkin (DG) methods through several
   specialized operators and integral types. These are designed for problems
   where the finite element space is discontinuous across element boundaries
   (e.g.\ P0, or DG formulations with penalty terms).
 
-  @subsection guides-getting-started-core-concepts-dg-ops Jump and Average
+  @subsection guides-getting-started-core-concepts-dg-ops Jump and average
 
   The `Jump` and
   `Average` operators act on inter-element
@@ -598,7 +598,7 @@
   | Jump | @f$ [u] = u^+ - u^- @f$ | `Jump(u)` |
   | Average | @f$ \{u\} = \frac{1}{2}(u^+ + u^-) @f$ | `Average(u)` |
 
-  @subsection guides-getting-started-core-concepts-dg-integrals Face and Interface Integrals
+  @subsection guides-getting-started-core-concepts-dg-integrals Face and interface integrals
 
   In addition to `Integral` (cell interior) and `BoundaryIntegral`
   (boundary faces), Rodin provides:
@@ -627,12 +627,12 @@
           + DirichletBC(u, Zero());
   @endcode
 
-  @section guides-getting-started-core-concepts-advanced Advanced Operators
+  @section guides-getting-started-core-concepts-advanced Advanced operators
 
   Beyond the basic differential operators, Rodin provides several specialized
   operators for more advanced applications.
 
-  @subsection guides-getting-started-core-concepts-flow Flow Operator
+  @subsection guides-getting-started-core-concepts-flow Flow operator
 
   The `Flow` operator computes the composition
   @f$ u \circ \Phi @f$, where @f$ \Phi @f$ is the flow map generated by a
@@ -653,7 +653,7 @@
   auto departure = Flow(-dt, phi, velocity);  // backward trace
   @endcode
 
-  @subsection guides-getting-started-core-concepts-potential Potential Operator
+  @subsection guides-getting-started-core-concepts-potential Potential operator
 
   The `Potential` operator computes integral
   convolutions of the form:
@@ -691,7 +691,7 @@
   auto u_boundary = TraceOperator(u, boundaryAttribute);
   @endcode
 
-  @section guides-getting-started-core-concepts-next What's Next?
+  @section guides-getting-started-core-concepts-next What's next?
 
   You now have a solid understanding of Rodin's core concepts! Here are some
   suggestions for continuing your journey:
