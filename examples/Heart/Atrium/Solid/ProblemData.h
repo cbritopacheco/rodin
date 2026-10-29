@@ -7,6 +7,7 @@
 #ifndef RODIN_ATRIUM_SOLID_PROBLEMDATA_H
 #define RODIN_ATRIUM_SOLID_PROBLEMDATA_H
 
+#include "Parameters.h"
 #include <array>
 #include <limits>
 #include <string>
@@ -21,7 +22,6 @@
 
 namespace Rodin::Examples::Heart::Atrium
 {
-  using Vec = Eigen::Matrix<Real, 3, 1>;
   using MeshType = Geometry::Mesh<Context::MPI>;
   using SubMeshType = Geometry::SubMesh<Context::MPI>;
   using VectorSpace = Variational::P1<Math::SpatialVector<Real>, MeshType>;
@@ -42,58 +42,12 @@ namespace Rodin::Examples::Heart::Atrium
     Real minimumExtension, maximumExtension, maximumStress;
   };
 
-  struct Options
-  {
-    std::string output = "output/atrium-contraction/Contraction";
-
-    /// @brief Writes a standalone component CSV; the coordinator owns the run CSV.
-    bool writeCSV = true;
-    size_t steps = 24;
-    size_t stopAfter = 0;
-    Real timeStep = 0; // Zero uses the wave-duration time step.
-    Geometry::Attribute baseLabel = 6;
-    Vec appendageApex = Vec(46.39638367, 187.44307667, -205.03317767);
-    Real apexRadius = 3;
-    bool fibersOnly = false;
-
-    /// @brief Reuses active constitutive blocks within a synchronized Newton state.
-    bool cacheConstitutive = false;
-    Real activation = 20; // Positive electrical peak, in 1/s.
-    Real relaxation = 10; // Magnitude of the resting electrical drive, in 1/s.
-    Real speed = 200;
-    Real width = 6;
-    /// @brief Literature-based atrial passive coefficients; see the solid README.
-    Rodin::Solid::DemirayHolzapfelGasserOgden::Parameters passive{
-      .matrixScale = 2.92,
-      .matrixExponent = 5.6,
-      .fiberScale = 11.84,
-      .fiberExponent = 17.95,
-      .volumePenalty = 500
-    };
-    Real viscosity = 0.2; // Tissue viscosity, in kPa s.
-    Real activeStiffness = 20; // Serial elastic stiffness, in kPa.
-    Real activeDamping = 3; // Contractile dashpot, in kPa s.
-    Real crossBridgeStiffness = 100; // Cross-bridge stiffness source, in kPa.
-    Real contractility = 20; // Cross-bridge stress source, in kPa.
-    Real destructionRate = 0.4; // Dimensionless strain-rate destruction factor.
-    Real density = 1060; // Reference mass density in kg/m^3.
-  };
-
-  /**
-   * @brief Parses the example configuration.
-   * @param argc Argument count.
-   * @param argv Argument values.
-   * @param meshPath Common parent mesh path selected by the command line.
-   * @returns Validated input configuration.
-   */
-  Options readOptions(int argc, char** argv, std::string& meshPath);
-
   /**
    * @brief Validates a programmatic configuration.
    * @param cfg Material, wave, and time parameters.
    * @returns Validated configuration.
    */
-  Options validateOptions(const Options& cfg);
+  SolidParameters validateParameters(const SolidParameters& cfg);
 
   /**
    * @brief Computes the minimum six-node wedge determinant on its reference cell.
@@ -116,7 +70,7 @@ namespace Rodin::Examples::Heart::Atrium
   struct ProblemData
   {
     MeshType& mesh;
-    const Options& cfg;
+    const SolidParameters& cfg;
     ScalarSpace scalarSpace;
     CellVectorSpace fiberSpace;
     CellScalarSpace diagnosticSpace;
@@ -139,7 +93,7 @@ namespace Rodin::Examples::Heart::Atrium
      * @param wall Supporting wall mesh.
      * @param options Prescribed input configuration.
      */
-    ProblemData(MeshType& wall, const Options& options);
+    ProblemData(MeshType& wall, const SolidParameters& options);
 
     /**
      * @brief Evaluates the material fiber direction.
@@ -184,9 +138,7 @@ namespace Rodin::Examples::Heart::Atrium
       /// @brief Collectively validates the wall and identifies its basal plane.
       void inspectGeometry();
 
-      /**
-       * @brief Pointwise orthonormal reference material frame.
-       */
+      /// @brief Pointwise orthonormal reference material frame.
       struct Frame
       {
         Vec normal, longitudinal, fiber;

@@ -47,202 +47,31 @@ int main(int argc, char** argv)
     int status = 0;
 
     {
-      Rodin::Examples::Heart::Atrium::Atrium::Parameters parameters;
-      Rodin::Examples::Heart::Atrium::Fluid::Config cfg;
-
-      char buffer[512];
-      PetscBool got = PETSC_FALSE;
-      PetscOptionsGetString(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_mesh", buffer, sizeof(buffer), &got);
-      if (got)
-        parameters.meshPath = buffer;
-
-      got = PETSC_FALSE;
-      PetscOptionsGetString(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_output", buffer, sizeof(buffer), &got);
-      if (got)
-      {
-        cfg.xdmfBasename = buffer;
-        cfg.csvPath = std::string(buffer) + ".csv";
-      }
-      PetscReal real = 0.0;
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_mesh_scale", &real, &got);
-      if (got)
-        cfg.meshScale = real;
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_dt", &real, &got);
-      if (got)
-        cfg.dt = real;
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_pin_amplitude", &real, &got);
-      if (got)
-        cfg.inletPressureAmplitude = real;
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_pin", &real, &got);
-      if (got)
-        cfg.inletPressureMean = real;
-
-      PetscInt integer = 0;
-      got = PETSC_FALSE;
-      PetscOptionsGetInt(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_fluid_lag_preconditioner", &integer, &got);
-      if (got)
-      {
-        if (integer < 1 || integer > std::numeric_limits<int>::max())
-        {
-          Rodin::Alert::Exception()
-            << "Fluid preconditioner lag must be a positive integer"
-            << Rodin::Alert::Raise;
-        }
-        cfg.preconditionerLag = static_cast<int>(integer);
-      }
-      got = PETSC_FALSE;
-      PetscOptionsGetInt(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_flow_cycles", &integer, &got);
-      if (got)
-        cfg.flowCycles = static_cast<int>(integer);
-
-      got = PETSC_FALSE;
-      PetscOptionsGetInt(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_species_cycles", &integer, &got);
-      if (got)
-        cfg.speciesCycles = static_cast<int>(integer);
-
-      got = PETSC_FALSE;
-      PetscOptionsGetInt(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_output_every", &integer, &got);
-      if (got)
-        cfg.outputEvery = static_cast<int>(integer);
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_vms_scale", &real, &got);
-      if (got)
-        cfg.vmsScale = real;
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_graddiv_scale", &real, &got);
-      if (got)
-        cfg.gradDivScale = real;
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_pspg_scale", &real, &got);
-      if (got)
-        cfg.pspgScale = real;
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_outlet_pressure", &real, &got);
-      if (got)
-        cfg.prescribedOutletPressure = real;
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_outlet_resistance", &real, &got);
-      if (got)
-        cfg.prescribedOutletResistance = real;
-
-      PetscBool flag = PETSC_FALSE;
-      got = PETSC_FALSE;
-      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_lv_model", &flag, &got);
-      if (got)
-        cfg.useVentricularModel = (flag == PETSC_TRUE);
-
-      got = PETSC_FALSE;
-      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_vms", &flag, &got);
-      if (got)
-        cfg.useVMS = (flag == PETSC_TRUE);
-
-      got = PETSC_FALSE;
-      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_kinetics", &flag, &got);
-      if (got)
-        cfg.solveKinetics = (flag == PETSC_TRUE);
-
       using Atrium = Rodin::Examples::Heart::Atrium::Atrium;
-      parameters.mode = Atrium::Mode::Fluid;
-      parameters.fluid = cfg;
-      parameters.solid = Rodin::Examples::Heart::Atrium::readOptions(
-        argc, argv, parameters.meshPath);
-      got = PETSC_FALSE;
-      PetscOptionsGetString(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_mode", buffer, sizeof(buffer), &got);
-      if (got)
-      {
-        const std::string mode(buffer);
-        if (mode == "solid")
-          parameters.mode = Atrium::Mode::Solid;
-        else if (mode == "fluid")
-          parameters.mode = Atrium::Mode::Fluid;
-        else if (mode == "fsi")
-          parameters.mode = Atrium::Mode::FSI;
-        else
-        {
-          Rodin::Alert::Exception()
-            << "Unknown atrium mode " << mode << Rodin::Alert::Raise;
-        }
-      }
-      if (parameters.mode == Atrium::Mode::FSI && parameters.solid.timeStep == 0)
-        parameters.solid.timeStep = cfg.dt;
-      got = PETSC_FALSE;
-      PetscOptionsGetInt(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_fsi_iterations", &integer, &got);
-      if (got)
-      {
-        if (integer < 1)
-        {
-          Rodin::Alert::Exception()
-            << "FSI iteration limit must be positive" << Rodin::Alert::Raise;
-        }
-        parameters.fsi.maximumIterations = static_cast<size_t>(integer);
-      }
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_fsi_robin", &real, &got);
-      if (got)
-        parameters.fsi.robinCoefficient = real;
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_fsi_rtol", &real, &got);
-      if (got)
-        parameters.fsi.relativeTolerance = real;
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_fsi_atol", &real, &got);
-      if (got)
-        parameters.fsi.absoluteTolerance = real;
       for (int i = 1; i < argc; ++i)
       {
         if (std::string(argv[i]).starts_with("--"))
-          PetscOptionsClearValue(PETSC_NULLPTR, argv[i]);
+        {
+          Rodin::Alert::Exception()
+            << "Unknown option " << argv[i]
+            << "; use -help for the unified -atrium_* options" << Rodin::Alert::Raise;
+        }
       }
-      size_t count = parameters.mode == Atrium::Mode::Fluid
-        ? static_cast<size_t>((cfg.flowCycles + cfg.speciesCycles) *
-            static_cast<int>(cfg.period / cfg.dt + 0.5))
-        : parameters.solid.steps;
-      if (parameters.mode != Atrium::Mode::Fluid && parameters.solid.stopAfter)
-        count = std::min(count, parameters.solid.stopAfter);
-      integer = static_cast<PetscInt>(count);
-      PetscOptionsGetInt(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_steps", &integer, nullptr);
-      if (integer < 0)
+      const auto parameters = Atrium::Parameters::fromOptions();
+      PetscBool help = PETSC_FALSE;
+      const auto ierr = PetscOptionsHasName(nullptr, nullptr, "-help", &help);
+      assert(ierr == PETSC_SUCCESS);
+      if (!help)
       {
-        Rodin::Alert::Exception()
-          << "Atrium step count must be nonnegative" << Rodin::Alert::Raise;
+        Atrium simulation(context, parameters);
+        simulation.initialize();
+        if (!(parameters.mode == Atrium::Mode::Solid && parameters.solid.fibersOnly))
+        {
+          for (size_t step = 0; step < parameters.steps; ++step)
+            simulation.step();
+        }
+        simulation.finish();
       }
-      if (parameters.mode == Atrium::Mode::FSI && integer > 0)
-        parameters.solid.steps = static_cast<size_t>(integer);
-      Atrium simulation(context, parameters);
-      simulation.initialize();
-      if (!(parameters.mode == Atrium::Mode::Solid && parameters.solid.fibersOnly))
-      {
-        for (PetscInt step = 0; step < integer; ++step)
-          simulation.step();
-      }
-      simulation.finish();
     }
 
     PetscFinalize();
@@ -250,7 +79,8 @@ int main(int argc, char** argv)
   }
   catch (const std::exception& e)
   {
-    std::cerr << "Fatal error: " << e.what() << "\n";
+    if (world.rank() == 0)
+      std::cerr << "Fatal error: " << e.what() << "\n";
     PetscFinalize();
     return 1;
   }

@@ -11,10 +11,10 @@
 #include <Rodin/Solid.h>
 #include <Rodin/PETSc/Solver/SNES.h>
 #include "ProblemData.h"
+#include "../RunParameters.h"
 
 namespace Rodin::Examples::Heart::Atrium
 {
-  class Output;
   class FSI;
 
   /**
@@ -31,7 +31,8 @@ namespace Rodin::Examples::Heart::Atrium
   class Solid
   {
     public:
-      using Parameters = Options;
+      class Output;
+      using Parameters = SolidParameters;
       using Diagnostics = DiagnosticState;
 
       /// @brief Returns cached scalar diagnostics, or empty before a mechanical state is written.
@@ -44,10 +45,11 @@ namespace Rodin::Examples::Heart::Atrium
        * @brief Constructs the wall component and prescribed material inputs.
        * @param parent Combined parent mesh, already distributed by the coordinator.
        * @param material Solid volume label to extract.
+       * @param run Shared time and output configuration.
        * @param parameters Validated wall, material, wave, and time configuration.
        */
       Solid(const MeshType& parent, const Parameters& parameters,
-        Geometry::Attribute material = 4);
+        const RunParameters& run, Geometry::Attribute material = 4);
       ~Solid();
       Solid(const Solid&) = delete;
       Solid& operator=(const Solid&) = delete;
@@ -66,9 +68,6 @@ namespace Rodin::Examples::Heart::Atrium
 
       /// @brief Finalizes output; no further time steps may be taken.
       void finish();
-
-      /// @brief Advances the configured number of intervals and finalizes output.
-      void run();
 
       /// @brief Current physical time in seconds.
       Real getTime() const noexcept;
@@ -231,6 +230,7 @@ namespace Rodin::Examples::Heart::Atrium
       bool isAdmissible() const;
 
       Parameters m_parameters;
+      const RunParameters m_run;
       SubMeshType m_mesh;
       ProblemData m_data;
       VectorSpace m_space;

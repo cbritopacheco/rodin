@@ -16,8 +16,8 @@
  * The fluid submesh retains the common MPI partition and parent identities;
  * its coordinates are converted to SI units with Parameters::meshScale.
  */
-#ifndef RODIN_ATRIUM_FLUID_H
-#define RODIN_ATRIUM_FLUID_H
+#ifndef RODIN_ATRIUM_FLUID_FLUID_H
+#define RODIN_ATRIUM_FLUID_FLUID_H
 
 #include <array>
 #include <chrono>
@@ -33,8 +33,10 @@
 #include <Rodin/Types.h>
 #include <Rodin/Variational.h>
 
-#include "CoronaryArtery/ThrombosisModel.h"
-#include "CoronaryArtery/VMSConvectionIntegrator.h"
+#include "../../CoronaryArtery/ThrombosisModel.h"
+#include "../../CoronaryArtery/VMSConvectionIntegrator.h"
+
+#include "../RunParameters.h"
 
 namespace Rodin::Examples::Heart::Atrium
 {
@@ -209,12 +211,6 @@ namespace Rodin::Examples::Heart::Atrium
 
       struct Parameters
       {
-        std::string xdmfBasename = "Atrium";
-        std::string csvPath = "Atrium.csv";
-
-        /// @brief Standalone CSV output; coordinated runs use the common run CSV.
-        bool writeCSV = true;
-
         /// @brief No-slip wall.
         Attribute wall = 4;
 
@@ -266,8 +262,6 @@ namespace Rodin::Examples::Heart::Atrium
         /// @brief Outlet resistance when the ventricle is disabled, in Pa s/m^3.
         Real prescribedOutletResistance = 0.0;
 
-        Real dt = 1.0e-3;
-
         /// @brief Numeric preconditioner refresh interval in timesteps; one refreshes every step.
         int preconditionerLag = 1;
 
@@ -275,13 +269,6 @@ namespace Rodin::Examples::Heart::Atrium
 
         /// @brief Cycles solved before the species are switched on.
         int flowCycles = 2;
-        int speciesCycles = 10;
-
-        /**
-         * @brief XDMF output period, in steps. Every cycle boundary is
-         * written regardless, so 0 keeps only those.
-         */
-        int outputEvery = 10;
 
         /**
          * @brief Per-term stabilisation scales, so each can be dialled down
@@ -312,7 +299,6 @@ namespace Rodin::Examples::Heart::Atrium
       };
 
       /// @brief Backward-compatible name for the atrium parameters.
-      using Config = Parameters;
 
       /// @brief Wall-clock cost of each phase of one step.
       struct Timing
@@ -328,8 +314,8 @@ namespace Rodin::Examples::Heart::Atrium
         Real total = 0.0;
       };
 
-      Fluid(
-        const ParentMeshType& parent, const Config& cfg, Attribute material = 1);
+      Fluid(const ParentMeshType& parent, const Parameters& cfg, const RunParameters& run,
+        Attribute material = 1);
       ~Fluid();
 
       Fluid(const Fluid&) = delete;
@@ -338,8 +324,8 @@ namespace Rodin::Examples::Heart::Atrium
       /**
        * @brief Initializes retained mesh-dependent fields, forms, solvers, and output.
        * @returns This simulation.
-       * @note Collective on the atrium communicator. Parameters that determine
-       *   construction, since some coefficients are captured by the constructor.
+       * @note Collective on the atrium communicator. Configuration remains fixed
+       *   after construction because forms retain their coefficients.
        */
       Fluid& initialize();
 
@@ -355,14 +341,6 @@ namespace Rodin::Examples::Heart::Atrium
        * @note Collective on the atrium communicator. No steps may follow.
        */
       void finish();
-
-      /**
-       * @brief Advances through the configured cycles and finalizes output.
-       * @returns Zero on completion; solver failures raise an exception.
-       * @note Collective on the atrium communicator. Previously completed
-       *   calls to step() are included in the configured cycle count.
-       */
-      int run();
 
       /// @brief Current physical time in seconds.
       Real getTime() const noexcept
@@ -415,15 +393,6 @@ namespace Rodin::Examples::Heart::Atrium
         return m_cfg;
       }
 
-      Config& getConfig() noexcept
-      {
-        return m_cfg;
-      }
-      const Config& getConfig() const noexcept
-      {
-        return m_cfg;
-      }
-
     private:
       friend class FSI;
 
@@ -437,8 +406,8 @@ namespace Rodin::Examples::Heart::Atrium
       void accumulateWallShear();
 
       static MeshType makeMesh(
-        const ParentMeshType& parent, const Config& cfg, Attribute material);
-      static Model::Input makeInput(const Config& cfg);
+        const ParentMeshType& parent, const Parameters& cfg, Attribute material);
+      static Model::Input makeInput(const Parameters& cfg);
       static Real activationWave(const Activation& cfg, Real t);
       static Real atrialWave(const AtrialPressure& cfg, Real t);
 
@@ -514,7 +483,8 @@ namespace Rodin::Examples::Heart::Atrium
         const Rodin::Math::SpatialVector<Real>& gradient, Real diffusivity,
         Real reaction) const;
 
-      Config m_cfg;
+      Parameters m_cfg;
+      const RunParameters m_run;
       Optional<Diagnostics> m_diagnostics;
       Model::Input m_input;
       Model m_model;

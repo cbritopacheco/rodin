@@ -91,10 +91,10 @@ def main():
         folder.mkdir(exist_ok=True)
         cmd = [args.mpiexec, '-n', str(ranks), str(args.executable.resolve()),
                '-atrium_mode', mode, '-atrium_mesh', str(mesh),
-               '-atrium_output', str(folder/'Flow'), '--output', str(folder/'Solid'),
-               '-atrium_steps', str(steps), '-atrium_dt', str(dt), '--dt', str(dt),
-               '--steps', str(steps), '-atrium_fsi_atol', str(atol), '--apex', *map(str,apex), '--apex-radius', '3',
-               '--contractility', str(contractility), '--cache-constitutive',
+               '-atrium_output', str(folder),
+               '-atrium_steps', str(steps), '-atrium_dt', str(dt),
+               '-atrium_fsi_atol', str(atol), '-atrium_solid_apex', ','.join(map(str,apex)), '-atrium_solid_apex_radius', '3',
+               '-atrium_solid_contractility', str(contractility), '-atrium_solid_cache_constitutive',
                '-atrium_output_every', '1', '-atrium_fluid_lag_preconditioner', str(lag),
                '-ksp_type', 'gmres', '-ksp_rtol', '1e-12', '-ksp_max_it', '500',
                '-pc_type', 'lu', '-pc_factor_mat_solver_type', 'mumps',
@@ -103,7 +103,7 @@ def main():
         with (folder/'run.log').open('w') as log:
             subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT,
                            env=env, check=True, cwd=root)
-        with (folder/'Solid.csv').open() as stream:
+        with (folder/'Diagnostics.csv').open() as stream:
             return list(csv.DictReader(stream))
     rest = run('rest', 2, 0)
     assert all(float(r['max_displacement_mm']) == 0 for r in rest)

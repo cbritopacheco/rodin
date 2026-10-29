@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <chrono>
 #include <cmath>
 #include <limits>
 #include <boost/mpi/collectives.hpp>
@@ -11,6 +12,8 @@
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/vector.hpp>
 #include "FSI.h"
+#include "../Fluid/Output.h"
+#include "../Log.h"
 
 namespace Rodin::Examples::Heart::Atrium
 {
@@ -260,6 +263,7 @@ namespace Rodin::Examples::Heart::Atrium
     m_previousMeshDisplacement.setData(m_fluid.m_meshDisplacement.getData());
     m_fluid.m_meshVelocity = Math::SpatialVector<Real>{0, 0, 0};
     m_fluid.m_wallVelocity = Math::SpatialVector<Real>{0, 0, 0};
+    m_fluid.m_output->write(0);
   }
 
   void FSI::restoreReference()
@@ -270,6 +274,7 @@ namespace Rodin::Examples::Heart::Atrium
 
   void FSI::moveFluidMesh()
   {
+    Stage stage("ALE mesh motion", m_fluid.isRoot());
     transfer(m_solidToFluid, m_solid.m_displacement, m_fluid.m_wallDisplacement, 1e-3);
     restoreReference();
     m_motion.assemble();
@@ -283,7 +288,7 @@ namespace Rodin::Examples::Heart::Atrium
       Alert::Exception() << "Harmonic ALE extension did not converge" << Alert::Raise;
     m_fluid.m_meshDisplacement.setData(m_motionTrial.getSolution().getData());
     m_fluid.m_meshVelocity =
-      (m_fluid.m_meshDisplacement - m_previousMeshDisplacement) / m_fluid.m_cfg.dt;
+      (m_fluid.m_meshDisplacement - m_previousMeshDisplacement) / m_fluid.m_run.timeStep;
     m_fluid.m_wallVelocity.setData(m_fluid.m_meshVelocity.getData());
     std::vector<Math::SpatialPoint> moved(m_referenceVertices.size());
     const Polytope::Traits vertexTraits(Polytope::Type::Point);
@@ -324,6 +329,7 @@ namespace Rodin::Examples::Heart::Atrium
 
   void FSI::updateTraction()
   {
+    Stage stage("Interface traction exchange", m_fluid.isRoot());
     transfer(m_solidToFluid, m_fluid.m_u.getSolution(), m_importedVelocity, 1e3,
       SCATTER_REVERSE);
     transfer(
@@ -338,6 +344,7 @@ namespace Rodin::Examples::Heart::Atrium
 
   void FSI::step()
   {
+    Stage stage("FSI", m_fluid.isRoot());
     m_diagnostics = Diagnostics{};
     m_diagnostics.robinCoefficient = m_robinCoefficient;
     m_previousMeshDisplacement.setData(m_fluid.m_meshDisplacement.getData());
@@ -349,12 +356,20 @@ namespace Rodin::Examples::Heart::Atrium
     Real relaxation = m_parameters.initialRelaxation;
     for (size_t iteration = 1; iteration <= m_parameters.maximumIterations; ++iteration)
     {
+      Stage coupling("Coupling iteration " + std::to_string(iteration), m_fluid.isRoot());
+      if (m_fluid.isRoot())
+      {
+        Log("FSI/Coupling") << "iteration=" << iteration << '/'
+                            << m_parameters.maximumIterations
+                            << " relaxation=" << relaxation << Alert::Raise;
+      }
       m_previousRobinData.setData(m_solid.m_robinData.getData());
       m_solid.solveStep();
       moveFluidMesh();
       if (!m_fluid.solveFlow())
         Alert::Exception() << "FSI fluid velocity exceeded its limit" << Alert::Raise;
       updateTraction();
+      Stage interface("Interface convergence and relaxation", m_fluid.isRoot());
       PetscReal difference = 0, norm = 0, tractionDifference = 0, tractionNorm = 0;
       m_tractionResidual = m_importedTraction - m_trialTraction;
       m_previousRobinData.axpy(-1, m_solid.m_robinData);
@@ -374,9 +389,10 @@ namespace Rodin::Examples::Heart::Atrium
         m_parameters.relativeTolerance * 1e3 * std::max(norm, tractionNorm);
       if (m_fluid.isRoot())
       {
-        Alert::Info() << "FSI iteration " << iteration
-                      << ": Robin residual=" << m_diagnostics.robinResidual << " Pa"
-                      << Alert::Raise;
+        Log("FSI/Coupling") << "iteration=" << iteration
+                            << " Robin residual=" << m_diagnostics.robinResidual
+                            << " Pa tolerance=" << m_diagnostics.robinTolerance << " Pa"
+                            << Alert::Raise;
       }
       if (m_diagnostics.robinResidual <= m_diagnostics.robinTolerance)
       {
@@ -427,6 +443,8 @@ namespace Rodin::Examples::Heart::Atrium
     }
     if (!converged)
       Alert::Exception() << "Atrium interface iteration did not converge" << Alert::Raise;
+    {
+      Stage stage("Accepted interface checks", m_fluid.isRoot());
     Real velocityMismatch = 0, displacementMismatch = 0, newmarkMismatch = 0;
     transfer(m_solidToFluid, m_fluid.m_meshDisplacement, m_residualDifference, 1e3,
       SCATTER_REVERSE);
@@ -473,8 +491,20 @@ namespace Rodin::Examples::Heart::Atrium
         .over(m_fluid.m_cfg.wall);
     m_fluid.m_flux.assemble();
     m_diagnostics.wallFlux = m_fluid.m_flux(m_fluid.m_one);
+    }
     m_fluid.computeWallShear();
     m_solid.commitStep();
     m_fluid.commitStep();
+    if (m_fluid.isRoot())
+    {
+      Log("FSI/State") << "converged: coupling_iterations=" << m_diagnostics.iterations
+                       << " velocity_mismatch=" << m_diagnostics.velocityMismatch
+                       << " m/s"
+                       << " displacement_mismatch=" << m_diagnostics.displacementMismatch
+                       << " m"
+                       << " min_mesh_J=" << m_diagnostics.minimumMeshJacobian
+                       << Alert::Raise;
+
+    }
   }
 }

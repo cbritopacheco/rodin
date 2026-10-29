@@ -21,118 +21,10 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Examples::Heart::Atrium
 {
-  Options readOptions(int argc, char** argv, std::string& meshPath)
-  {
-    Options out;
-    for (int i = 1; i < argc; ++i)
-    {
-      const std::string key(argv[i]);
-      // PETSc consumes single-dash solver options; double-dash model options
-      // remain owned by this parser.
-      if (key.size() > 1 && key[0] == '-' && key[1] != '-')
-      {
-        while (i + 1 < argc && argv[i + 1][0] != '-')
-          ++i;
-        continue;
-      }
-      if (key == "--help")
-      {
-        std::cout << "AtriumContraction [--mesh path] [--output stem] [--steps 24]\n"
-                     "  [--activation 20] [--relaxation 10] (1/s)\n"
-                     "  [--matrix-scale 2.92] [--matrix-exponent 5.6]\n"
-                     "  [--fiber-scale 11.84] [--fiber-exponent 17.95] [--volume-penalty 500]\n"
-                     "  [--viscosity .2] [--active-damping 3] (kPa s)\n"
-                     "  [--active-stiffness 20] [--cross-bridge-stiffness 100]\n"
-                     "  [--contractility 20] [--destruction-rate .4]\n"
-                     "  [--density 1060] (kg/m^3) [--speed 200] [--width 6]\n"
-                     "  [--stop-after n] [--dt seconds] [--base-label 6] [--apex x y z]\n"
-                     "  [--apex-radius 3] [--fibers-only] [--cache-constitutive]\n";
-        std::exit(0);
-      }
-      if (key == "--cache-constitutive")
-      {
-        out.cacheConstitutive = true;
-        continue;
-      }
-      if (key == "--fibers-only")
-      {
-        out.fibersOnly = true;
-        continue;
-      }
-      if (key == "--apex")
-      {
-        if (i + 3 >= argc)
-        {
-          Alert::Exception() << "--apex requires three coordinates in mm" << Alert::Raise;
-        }
-        for (size_t j = 0; j < 3; ++j)
-          out.appendageApex(j) = std::stod(argv[++i]);
-        continue;
-      }
-      if (++i == argc)
-      {
-        Alert::Exception() << "Missing value for " + key << Alert::Raise;
-      }
-      const std::string value(argv[i]);
-      if (key == "--mesh")
-        meshPath = value;
-      else if (key == "--output")
-        out.output = value;
-      else if (key == "--steps")
-        out.steps = std::stoul(value);
-      else if (key == "--stop-after")
-        out.stopAfter = std::stoul(value);
-      else if (key == "--dt")
-        out.timeStep = std::stod(value);
-      else if (key == "--base-label")
-        out.baseLabel = std::stoul(value);
-      else if (key == "--apex-radius")
-        out.apexRadius = std::stod(value);
-      else if (key == "--activation")
-        out.activation = std::stod(value);
-      else if (key == "--relaxation")
-        out.relaxation = std::stod(value);
-      else if (key == "--speed")
-        out.speed = std::stod(value);
-      else if (key == "--width")
-        out.width = std::stod(value);
-      else if (key == "--matrix-scale")
-        out.passive.matrixScale = std::stod(value);
-      else if (key == "--matrix-exponent")
-        out.passive.matrixExponent = std::stod(value);
-      else if (key == "--fiber-scale")
-        out.passive.fiberScale = std::stod(value);
-      else if (key == "--fiber-exponent")
-        out.passive.fiberExponent = std::stod(value);
-      else if (key == "--volume-penalty")
-        out.passive.volumePenalty = std::stod(value);
-      else if (key == "--viscosity")
-        out.viscosity = std::stod(value);
-      else if (key == "--active-damping")
-        out.activeDamping = std::stod(value);
-      else if (key == "--cross-bridge-stiffness")
-        out.crossBridgeStiffness = std::stod(value);
-      else if (key == "--contractility")
-        out.contractility = std::stod(value);
-      else if (key == "--destruction-rate")
-        out.destructionRate = std::stod(value);
-      else if (key == "--density")
-        out.density = std::stod(value);
-      else if (key == "--active-stiffness")
-        out.activeStiffness = std::stod(value);
-      else
-      {
-        Alert::Exception() << "Unknown option " + key << Alert::Raise;
-      }
-    }
-    return validateOptions(out);
-  }
-
-  Options validateOptions(const Options& cfg)
+  SolidParameters validateParameters(const SolidParameters& cfg)
   {
     (void)Rodin::Solid::DemirayHolzapfelGasserOgden(cfg.passive);
-    if (cfg.steps == 0 || !std::isfinite(cfg.timeStep) || cfg.timeStep < 0 ||
-      !std::isfinite(cfg.activation) || cfg.activation < 0 ||
+    if (!std::isfinite(cfg.activation) || cfg.activation < 0 ||
       !std::isfinite(cfg.relaxation) || cfg.relaxation < 0 ||
       !std::isfinite(cfg.viscosity) || cfg.viscosity < 0 ||
       !std::isfinite(cfg.activeDamping) || cfg.activeDamping < 0 ||
@@ -183,7 +75,7 @@ namespace Rodin::Examples::Heart::Atrium
     return minimum;
   }
 
-  ProblemData::ProblemData(MeshType& wall, const Options& options)
+  ProblemData::ProblemData(MeshType& wall, const SolidParameters& options)
     : mesh(wall),
       cfg(options),
       scalarSpace(mesh),
@@ -360,11 +252,15 @@ namespace Rodin::Examples::Heart::Atrium
     }
     bool reserved = false;
     for (auto face = mesh.getFace(); face; ++face)
+    {
       reserved = reserved || face->getAttribute() == Endocardium ||
         face->getAttribute() == Epicardium;
+    }
     if (boost::mpi::all_reduce(comm, reserved, std::logical_or<bool>()))
+    {
       Alert::Exception() << "Boundary labels 8 and 9 are reserved for coordinate solves"
                          << Alert::Raise;
+    }
     std::vector<std::pair<Index, Optional<Attribute>>> labels;
     for (auto face = mesh.getFace(); face; ++face)
     {
@@ -390,8 +286,10 @@ namespace Rodin::Examples::Heart::Atrium
     for (const auto& item : labels)
       mesh.setAttribute({2, item.first}, item.second);
     if (!std::isfinite(transmuralResidual) || transmuralResidual > 1e-8)
+    {
       Alert::Exception() << "The transmural-coordinate Laplace solve failed: "
                          << transmuralResidual << Alert::Raise;
+    }
     transmuralCoordinate = m_coordinate.getSolution();
     transmuralCoordinate.setName("TransmuralCoordinate");
     m_coordinate.getSolution() = Real(0);
@@ -403,8 +301,10 @@ namespace Rodin::Examples::Heart::Atrium
     const auto transverse = Grad(transmuralCoordinate).getValue(point);
     frame.normal = Vec(transverse(0), transverse(1), transverse(2));
     if (!frame.normal.allFinite() || !(frame.normal.norm() > 0))
+    {
       Alert::Exception() << "The transmural coordinate has an invalid gradient"
                          << Alert::Raise;
+    }
     frame.normal.normalize();
     const auto gradient = Grad(fiberCoordinate).getValue(point);
     frame.longitudinal = Vec(gradient(0), gradient(1), gradient(2));
@@ -495,7 +395,7 @@ namespace Rodin::Examples::Heart::Atrium
     if (apexPatchFaces == 0)
     {
       Alert::Exception() << "No wall triangles lie in the appendage-apex patch; check "
-                            "--apex and --apex-radius"
+                            "-atrium_solid_apex and -atrium_solid_apex_radius"
                          << Alert::Raise;
     }
     bool overlaps = false;
@@ -555,8 +455,10 @@ namespace Rodin::Examples::Heart::Atrium
     epicardialTangencyError = boost::mpi::all_reduce(
       comm, epicardialTangencyError, boost::mpi::maximum<Real>());
     if (std::max(endocardialTangencyError, epicardialTangencyError) > 1e-8)
+    {
       Alert::Exception() << "The fiber frame is not tangent to both wall surfaces"
                          << Alert::Raise;
+    }
     fallbackCells = boost::mpi::all_reduce(comm, fallbackCells, std::plus<size_t>());
     const auto vectorField = [&](const std::vector<Vec>& values) {
       return VectorFunction(3, [&values](const Point& point) {

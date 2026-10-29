@@ -13,53 +13,38 @@
 #include <iomanip>
 #include <Rodin/Alert.h>
 #include "Atrium.h"
+#include "Log.h"
 #include <boost/mpi/collectives.hpp>
 #include <Rodin/Scotch/MeshPartitioner.h>
 
 namespace Rodin::Examples::Heart::Atrium
 {
   Atrium::Atrium(const Context::MPI& context, const Parameters& cfg)
-    : m_mesh(makeMesh(context, cfg)),
-      m_cavity(m_mesh, cfg.fluidMaterial),
-      m_csvPath(cfg.mode == Mode::Fluid ? cfg.fluid.csvPath : cfg.solid.output + ".csv")
+    : m_parameters(cfg.validated()),
+      m_mesh(makeMesh(context, m_parameters)),
+      m_cavity(m_mesh, m_parameters.fluidMaterial),
+      m_csvPath(m_parameters.outputDirectory + "/Diagnostics.csv")
   {
-    if (cfg.mode != Mode::Solid && cfg.mode != Mode::Fluid && cfg.mode != Mode::FSI)
-      Alert::Exception() << "Invalid atrium mode" << Alert::Raise;
-    const bool hasSolid = cfg.mode != Mode::Fluid;
-    const bool hasFluid = cfg.mode != Mode::Solid;
-    if (cfg.mode == Mode::FSI)
+    if (m_parameters.mode != Mode::Fluid)
     {
-      const auto dt = cfg.solid.timeStep;
-      const auto fluidDt = cfg.fluid.dt;
-      const auto tolerance = 64 * std::numeric_limits<Real>::epsilon() *
-        std::max(std::abs(dt), std::abs(fluidDt));
-      if (cfg.solid.fibersOnly || !std::isfinite(dt) || !std::isfinite(fluidDt) ||
-        dt <= 0 || fluidDt <= 0 || std::abs(dt - fluidDt) > tolerance)
-      {
-        Alert::Exception() << "FSI components require matching positive "
-                              "time steps and an active solid mechanics problem"
-                           << Alert::Raise;
-      }
+      Stage stage("Construct solid", context.getCommunicator().rank() == 0);
+      m_solid.emplace(
+        m_mesh, m_parameters.solid, m_parameters, m_parameters.solidMaterial);
     }
-    if (hasSolid)
+    if (m_parameters.mode != Mode::Solid)
     {
-      auto parameters = cfg.solid;
-      parameters.writeCSV = false;
-      m_solid.emplace(m_mesh, parameters, cfg.solidMaterial);
+      Stage stage("Construct fluid", context.getCommunicator().rank() == 0);
+      m_fluid.emplace(
+        m_mesh, m_parameters.fluid, m_parameters, m_parameters.fluidMaterial);
     }
-    if (hasFluid)
-    {
-      auto parameters = cfg.fluid;
-      parameters.writeCSV = false;
-      m_fluid.emplace(m_mesh, parameters, cfg.fluidMaterial);
-    }
-    if (cfg.mode == Mode::FSI)
-      m_fsi.emplace(*m_solid, *m_fluid, cfg.fsi);
+    if (m_parameters.mode == Mode::FSI)
+      m_fsi.emplace(*m_solid, *m_fluid, m_parameters.fsi);
   }
 
   Atrium::MeshType Atrium::makeMesh(const Context::MPI& context, const Parameters& cfg)
   {
     const auto& comm = context.getCommunicator();
+    Stage stage("Mesh loading and Scotch partitioning", comm.rank() == 0);
     constexpr int Root = 0;
     Geometry::LocalMesh local;
     std::string failure;
@@ -130,6 +115,7 @@ namespace Rodin::Examples::Heart::Atrium
     }
     if (m_initialized)
       return *this;
+    Stage stage("Initialization", m_mesh.getContext().getCommunicator().rank() == 0);
     m_failed = true;
     if (m_solid)
       m_solid->initialize();
@@ -167,6 +153,15 @@ namespace Rodin::Examples::Heart::Atrium
   void Atrium::step()
   {
     initialize();
+    const bool root = m_mesh.getContext().getCommunicator().rank() == 0;
+    Stage stage("Timestep " + std::to_string(m_steps + 1) + "/" +
+        std::to_string(m_parameters.steps),
+      root);
+    if (root)
+    {
+      Log("Time") << "time=" << getTime() + m_parameters.timeStep
+                  << " s dt=" << m_parameters.timeStep << " s" << Alert::Raise;
+    }
     m_failed = true;
     if (m_fsi)
       m_fsi->step();
@@ -197,6 +192,8 @@ namespace Rodin::Examples::Heart::Atrium
 
   void Atrium::writeDiagnostics()
   {
+    Stage stage("Cavity volume and CSV diagnostics",
+      m_mesh.getContext().getCommunicator().rank() == 0);
     const Real reference = m_cavity.getReferenceVolume() * CubicMillimetresToMillilitres;
     if (m_solid)
     {

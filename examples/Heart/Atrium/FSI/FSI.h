@@ -4,11 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ATRIUM_FSI_H
-#define RODIN_ATRIUM_FSI_H
+#ifndef RODIN_ATRIUM_FSI_FSI_H
+#define RODIN_ATRIUM_FSI_FSI_H
 
-#include "Solid/Solid.h"
-#include "Fluid.h"
+#include "../Solid/Solid.h"
+#include "../Fluid/Fluid.h"
 
 namespace Rodin::Examples::Heart::Atrium
 {

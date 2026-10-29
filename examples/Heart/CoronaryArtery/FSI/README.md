@@ -104,7 +104,7 @@ transmission data. In particular, the sequential drivers can target the BDF1
 wall rate $\widetilde v_s=(d_s^{n+1}-d_s^n)/\Delta t$ instead of the Newmark
 endpoint velocity. These two velocities differ at finite time step.
 
-The [atrium FSI](../../Atrium/README.md#contraction-driven-fsi) also uses
+The [atrium FSI](../../Atrium/FSI/README.md) also uses
 Robin–Robin transmission and the BDF1 interface rate. Its two Robin forms use
 one reference-area impedance, and its traction is updated from the discrete
 Robin equation rather than reconstructed from output stress gradients. Its

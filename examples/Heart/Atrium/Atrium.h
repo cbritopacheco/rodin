@@ -10,9 +10,10 @@
 #include <memory>
 #include <fstream>
 #include "CavityVolume.h"
+#include "Parameters.h"
 #include "Solid/Solid.h"
-#include "Fluid.h"
-#include "FSI.h"
+#include "Fluid/Fluid.h"
+#include "FSI/FSI.h"
 
 namespace Rodin::Examples::Heart::Atrium
 {
@@ -28,24 +29,8 @@ namespace Rodin::Examples::Heart::Atrium
       using MeshType = Geometry::Mesh<Context::MPI>;
       using Solid = ::Rodin::Examples::Heart::Atrium::Solid;
       using Fluid = ::Rodin::Examples::Heart::Atrium::Fluid;
-      enum class Mode
-      {
-        Solid,
-        Fluid,
-        FSI
-      };
-
-      struct Parameters
-      {
-        Mode mode = Mode::Solid;
-        std::string meshPath =
-          "resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh";
-        Geometry::Attribute solidMaterial = 4;
-        Geometry::Attribute fluidMaterial = 1;
-        Solid::Parameters solid;
-        Fluid::Parameters fluid;
-        FSI::Parameters fsi;
-      };
+      using Mode = ::Rodin::Examples::Heart::Atrium::Mode;
+      using Parameters = ::Rodin::Examples::Heart::Atrium::Parameters;
 
       /// @brief Constructs the selected model using the shared MPI context.
       Atrium(const Context::MPI& context, const Parameters& parameters);
@@ -98,6 +83,7 @@ namespace Rodin::Examples::Heart::Atrium
       // Source geometry uses mm; fluid component geometry uses m.
       static constexpr Real CubicMillimetresToMillilitres = 1e-3;
       static constexpr Real CubicMetresToMillilitres = 1e6;
+      Parameters m_parameters;
       MeshType m_mesh;
       CavityVolume m_cavity;
       std::string m_csvPath;

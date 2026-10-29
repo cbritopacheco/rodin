@@ -79,12 +79,12 @@ def main():
         folder.mkdir(exist_ok=True)
         cmd = [args.mpiexec, '-n', str(ranks), str(args.executable.resolve()),
                '-atrium_mode', 'fluid', '-atrium_mesh', str(mesh),
-               '-atrium_output', str(folder/'Flow'), '-atrium_steps', str(steps),
+               '-atrium_output', str(folder), '-atrium_steps', str(steps),
                '-atrium_output_every', '0', '-atrium_dt', str(dt),
-               '-atrium_pin', str(pressure), '-atrium_pin_amplitude', str(amplitude),
-               '-atrium_outlet_pressure', str(outlet), '-atrium_lv_model', 'false',
-               '-atrium_kinetics', str(kinetics).lower(),
-               '-atrium_flow_cycles', '0', '-atrium_fluid_lag_preconditioner', str(lag),
+               '-atrium_fluid_pin', str(pressure), '-atrium_fluid_pin_amplitude', str(amplitude),
+               '-atrium_fluid_outlet_pressure', str(outlet), '-atrium_fluid_lv_model', 'false',
+               '-atrium_fluid_kinetics', str(kinetics).lower(),
+               '-atrium_fluid_flow_cycles', '0', '-atrium_fluid_lag_preconditioner', str(lag),
                '-ksp_type', 'gmres' if lag > 1 else 'preonly',
                '-ksp_max_it', str(max_it), '-ksp_rtol', '1e-12', '-pc_type', 'lu',
                '-pc_factor_mat_solver_type', 'mumps', '-mat_mumps_icntl_20', '0',
@@ -95,10 +95,10 @@ def main():
         with (folder/'run.log').open('w') as log:
             subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, env=env,
                            cwd=output, check=True)
-        with (folder/'Flow.csv').open() as stream:
+        with (folder/'Diagnostics.csv').open() as stream:
             rows = list(csv.DictReader(stream))
         fields = {a.attrib['Name'] for a in
-                  ET.parse(folder/'Flow.xdmf').iter('Attribute')}
+                  ET.parse(folder/'Fluid.xdmf').iter('Attribute')}
         expected = {'Attribute', 'Velocity', 'Pressure', 'WallShearStress',
                     'TimeAveragedWallShearStress', 'OscillatoryShearIndex'}
         if kinetics:

@@ -9,7 +9,7 @@
 
 #include <fstream>
 #include <Rodin/IO/XDMF.h>
-#include "ProblemData.h"
+#include "Solid.h"
 
 namespace Rodin::Examples::Heart::Atrium
 {
@@ -20,17 +20,18 @@ namespace Rodin::Examples::Heart::Atrium
    *
    * The writer observes the mechanical fields and owns the scalar activation
    * fields used for visualization. Each write validates the deformed wedges,
-   * exports the state, and updates cached scalar diagnostics. Standalone CSV
-   * output is optional; coordinated runs use the common CSV. Metadata describes the
+   * exports at the common interval, and updates cached scalar diagnostics for
+   * the coordinator CSV. Metadata describes the
    * prescribed data and integration parameters. Observed inputs must outlive
    * this object; close() finalizes the XDMF document.
    */
-  class Output
+  class Solid::Output
   {
     public:
       /**
        * @brief Binds the mechanical state and configures output.
-       * @param cfg Output and model configuration.
+       * @param cfg Physical model configuration.
+       * @param run Shared time and output configuration.
        * @param data Prescribed mesh and fields.
        * @param diagnostics Destination for cached scalar diagnostics.
        * @param displacement Current displacement.
@@ -44,12 +45,12 @@ namespace Rodin::Examples::Heart::Atrium
        * @param beta Newmark displacement parameter.
        * @param gamma Newmark velocity parameter.
        */
-      Output(const Options& cfg, const ProblemData& data,
-        Optional<DiagnosticState>& diagnostics, const VectorField& displacement,
-        const VectorField& velocity, const VectorField& acceleration,
-        const CellScalarField& extension, const CellScalarField& gammaField,
-        const CellScalarField& betaField, Real timeStep, Real density, Real beta,
-        Real gamma);
+      Output(const SolidParameters& cfg, const RunParameters& run,
+        const ProblemData& data, Optional<DiagnosticState>& diagnostics,
+        const VectorField& displacement, const VectorField& velocity,
+        const VectorField& acceleration, const CellScalarField& extension,
+        const CellScalarField& gammaField, const CellScalarField& betaField,
+        Real timeStep, Real density, Real beta, Real gamma);
 
       /**
        * @brief Writes a mechanical state and its diagnostics.
@@ -63,7 +64,8 @@ namespace Rodin::Examples::Heart::Atrium
       void close();
 
     private:
-      const Options& m_cfg;
+      const SolidParameters& m_cfg;
+      const RunParameters& m_run;
       const ProblemData& m_data;
       Optional<DiagnosticState>& m_diagnostics;
       const VectorField& m_displacement;
@@ -74,8 +76,9 @@ namespace Rodin::Examples::Heart::Atrium
       const CellScalarField& m_beta;
       ScalarField m_activation, m_electrical;
       CellScalarField m_contractileStress, m_contractileStiffness;
-      std::ofstream m_log;
       IO::XDMF m_output;
+      Real m_time = 0;
+      bool m_pendingOutput = false;
   };
 }
 

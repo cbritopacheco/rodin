@@ -9,9 +9,10 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <iostream>
+#include <chrono>
 #include <Rodin/Alert.h>
 #include "Output.h"
+#include "../Log.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -55,9 +56,10 @@ namespace Rodin::Examples::Heart::Atrium
       Rodin::Solid::ActiveFiberLaw(active));
   }
 
-  Solid::Solid(
-    const MeshType& parent, const Parameters& parameters, Geometry::Attribute material)
-    : m_parameters(validateOptions(parameters)),
+  Solid::Solid(const MeshType& parent, const Parameters& parameters,
+    const RunParameters& run, Geometry::Attribute material)
+    : m_parameters(validateParameters(parameters)),
+      m_run(run),
       m_mesh(makeMesh(parent, material)),
       m_data(m_mesh, m_parameters),
       m_space(m_mesh, 3),
@@ -75,8 +77,7 @@ namespace Rodin::Examples::Heart::Atrium
       m_previousExtension(m_activeSpace),
       m_previousGamma(m_activeSpace),
       m_previousBeta(m_activeSpace),
-      m_timeStep(m_parameters.timeStep > 0 ? m_parameters.timeStep
-                                           : m_data.endTime / m_parameters.steps),
+      m_timeStep(m_run.timeStep),
       m_density(m_parameters.density * DensityConversion),
       m_accelerationCoefficient(1 / (NewmarkBeta * m_timeStep * m_timeStep)),
       m_massCoefficient(m_density * m_accelerationCoefficient),
@@ -321,6 +322,8 @@ namespace Rodin::Examples::Heart::Atrium
     Real residual = 0;
     if (!m_parameters.fibersOnly)
     {
+      Stage stage(
+        "Passive solid equilibrium", m_mesh.getContext().getCommunicator().rank() == 0);
       m_increment.getSolution() = m_displacement;
       m_equilibrium.assemble();
       m_equilibriumNewton.emplace(m_equilibriumSolver);
@@ -334,7 +337,18 @@ namespace Rodin::Examples::Heart::Atrium
           const auto minimum = m_data.minimumDeformedJacobian(m_displacement);
           return minimum && *minimum > 0;
         });
+      if (m_mesh.getContext().getCommunicator().rank() == 0)
+        Log("Solid/Newton") << "solve: passive equilibrium" << Alert::Raise;
       m_equilibriumNewton->solve();
+      if (m_mesh.getContext().getCommunicator().rank() == 0)
+      {
+        Log("Solid/Newton")
+          << "passive equilibrium: iterations="
+          << m_equilibriumNewton->getIterationNumber()
+          << " residual=" << m_equilibriumNewton->getResidualNorm()
+          << " reason=" << SNESConvergedReasons[m_equilibriumNewton->getConvergedReason()]
+          << Alert::Raise;
+      }
       if (!m_equilibriumNewton->converged())
       {
         Alert::Exception() << "Passive atrial equilibrium did not converge"
@@ -352,7 +366,7 @@ namespace Rodin::Examples::Heart::Atrium
     m_previousGamma = m_gamma;
     m_previousBeta = m_beta;
     m_predictedDisplacement = m_displacement;
-    m_output = std::make_unique<Output>(m_parameters, m_data, m_diagnostics,
+    m_output = std::make_unique<Output>(m_parameters, m_run, m_data, m_diagnostics,
       m_displacement, m_velocity, m_acceleration, m_extension, m_gamma, m_beta,
       m_timeStep, m_density, NewmarkBeta, NewmarkGamma);
     m_output->write(0, 0, residual);
@@ -382,17 +396,13 @@ namespace Rodin::Examples::Heart::Atrium
       Alert::Exception() << "Fiber inspection mode does not advance mechanics"
                          << Alert::Raise;
     }
+    Stage stage("Solid predictor", m_mesh.getContext().getCommunicator().rank() == 0);
     m_failed = true;
     m_previousDisplacement = m_displacement;
     m_previousExtension = m_extension;
     m_previousGamma = m_gamma;
     m_previousBeta = m_beta;
     m_time = (m_step + 1) * m_timeStep;
-    if (m_mesh.getContext().getCommunicator().rank() == 0)
-    {
-      std::cout << "Step " << (m_step + 1) << '/' << m_parameters.steps
-              << " time=" << m_time << std::endl;
-    }
     m_predictedDisplacement = m_displacement + m_timeStep * m_velocity +
       (m_timeStep * m_timeStep * (Real(0.5) - NewmarkBeta)) * m_acceleration;
     m_predictedVelocity = m_velocity + (m_timeStep * (1 - NewmarkGamma)) * m_acceleration;
@@ -401,10 +411,25 @@ namespace Rodin::Examples::Heart::Atrium
 
   void Solid::solveStep()
   {
-    ++m_constitutiveEpoch;
-    pack();
-    m_mechanics.assemble();
-    m_newton->solve();
+    const bool root = m_mesh.getContext().getCommunicator().rank() == 0;
+    Stage stage("Solid mechanics", root);
+    {
+      Stage assembly("Solid initial assembly", root);
+      ++m_constitutiveEpoch;
+      pack();
+      m_mechanics.assemble();
+    }
+    {
+      Stage newton("Solid Newton solve (including reassembly)", root);
+      m_newton->solve();
+    }
+    if (m_mesh.getContext().getCommunicator().rank() == 0)
+    {
+      Log("Solid/Newton") << "iterations=" << m_newton->getIterationNumber()
+                          << " residual=" << m_newton->getResidualNorm() << " reason="
+                          << SNESConvergedReasons[m_newton->getConvergedReason()]
+                          << Alert::Raise;
+    }
     if (!m_newton->converged())
     {
       Alert::Exception() << "Coupled atrial solid Newton solve did not converge"
@@ -417,6 +442,8 @@ namespace Rodin::Examples::Heart::Atrium
 
   void Solid::commitStep()
   {
+    Stage stage(
+      "Solid diagnostics and export", m_mesh.getContext().getCommunicator().rank() == 0);
     m_output->write(m_time, m_newton->getIterationNumber(), m_newton->getResidualNorm());
     ++m_step;
     m_failed = false;
@@ -430,26 +457,12 @@ namespace Rodin::Examples::Heart::Atrium
       m_output->close();
     if (m_mesh.getContext().getCommunicator().rank() == 0)
     {
-      std::cout << "Constitutive preparation (rank 0): requests=" << m_prepareRequests
+      Log("Solid/Cache") << "rank=0 requests=" << m_prepareRequests
                 << "; evaluations=" << m_prepareEvaluations
                 << "; cache=" << (m_parameters.cacheConstitutive ? "on" : "off")
-                << std::endl;
+                         << Alert::Raise;
     }
     m_finished = true;
-  }
-
-  void Solid::run()
-  {
-    initialize();
-    const size_t count = m_parameters.stopAfter
-      ? std::min(m_parameters.steps, m_parameters.stopAfter)
-      : m_parameters.steps;
-    if (!m_parameters.fibersOnly)
-    {
-      while (m_step < count)
-        step();
-    }
-    finish();
   }
 
   Real Solid::getTime() const noexcept

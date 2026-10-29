@@ -10,7 +10,7 @@
 #include <cmath>
 #include <filesystem>
 #include <iomanip>
-#include <iostream>
+#include "../Log.h"
 #include <Rodin/Alert.h>
 #include <boost/mpi/collectives.hpp>
 
@@ -20,12 +20,14 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Examples::Heart::Atrium
 {
-  Output::Output(const Options& cfg, const ProblemData& data,
-    Optional<DiagnosticState>& diagnostics, const VectorField& displacement,
-    const VectorField& velocity, const VectorField& acceleration,
-    const CellScalarField& extension, const CellScalarField& gammaField,
-    const CellScalarField& betaField, Real timeStep, Real density, Real beta, Real gamma)
+  Solid::Output::Output(const SolidParameters& cfg, const RunParameters& run,
+    const ProblemData& data, Optional<DiagnosticState>& diagnostics,
+    const VectorField& displacement, const VectorField& velocity,
+    const VectorField& acceleration, const CellScalarField& extension,
+    const CellScalarField& gammaField, const CellScalarField& betaField, Real timeStep,
+    Real density, Real beta, Real gamma)
     : m_cfg(cfg),
+      m_run(run),
       m_data(data),
       m_diagnostics(diagnostics),
       m_displacement(displacement),
@@ -38,9 +40,11 @@ namespace Rodin::Examples::Heart::Atrium
       m_electrical(data.scalarSpace),
       m_contractileStress(data.diagnosticSpace),
       m_contractileStiffness(data.diagnosticSpace),
-      m_output(data.mesh.getContext().getCommunicator(), cfg.output, 0)
+      m_output(
+        data.mesh.getContext().getCommunicator(), (run.outputDirectory + "/Solid"), 0)
   {
-    const auto parent = std::filesystem::path(cfg.output).parent_path();
+    const auto parent =
+      std::filesystem::path((run.outputDirectory + "/Solid")).parent_path();
     if (!parent.empty())
       std::filesystem::create_directories(parent);
     m_activation.setName("Activation");
@@ -50,7 +54,7 @@ namespace Rodin::Examples::Heart::Atrium
     const bool isRoot = data.mesh.getContext().getCommunicator().rank() == 0;
     if (isRoot)
     {
-    std::ofstream metadata(m_cfg.output + ".geometry.json");
+      std::ofstream metadata((m_run.outputDirectory + "/Solid") + ".geometry.json");
     metadata << std::setprecision(17) << "{\n  \"base_label\": " << m_cfg.baseLabel
              << ",\n  \"base_origin_mm\": [" << m_data.baseOrigin(0) << ','
              << m_data.baseOrigin(1) << ',' << m_data.baseOrigin(2)
@@ -87,7 +91,7 @@ namespace Rodin::Examples::Heart::Atrium
              << ",\n  \"time_step_s\": " << timeStep << ",\n  \"newmark_beta\": " << beta
              << ",\n  \"newmark_gamma\": " << gamma << "\n}\n";
     metadata.close();
-    std::cout << "Base label " << m_cfg.baseLabel
+      Log("Solid/Fibers") << "base_label=" << m_cfg.baseLabel
               << ": origin=" << m_data.baseOrigin.transpose()
               << "; inward normal=" << m_data.waveDirection.transpose()
               << "; appendage projection="
@@ -96,7 +100,7 @@ namespace Rodin::Examples::Heart::Atrium
               << "; fiber fallback cells=" << m_data.fallbackCells
               << "; transmural residual=" << m_data.transmuralResidual
               << "; tangency (endo, epi)=" << m_data.endocardialTangencyError
-              << ", " << m_data.epicardialTangencyError << std::endl;
+                          << ", " << m_data.epicardialTangencyError << Alert::Raise;
     }
     auto grid = m_output.grid();
     grid.setMesh(m_data.mesh);
@@ -124,27 +128,20 @@ namespace Rodin::Examples::Heart::Atrium
       m_data.transmuralCoordinate, IO::XDMF::Center::Node, IO::XDMF::AttributePolicy::Static);
     grid.add(
       m_data.waveCoordinate, IO::XDMF::Center::Node, IO::XDMF::AttributePolicy::Static);
-    if (!cfg.fibersOnly && cfg.writeCSV && isRoot)
-    {
-      m_log.open(cfg.output + ".csv");
-      m_log << "time_s,max_displacement_mm,activation_max,newton_iterations,residual,min_"
-               "scaled_jacobian_mm,max_velocity_mm_per_s,max_acceleration_mm_per_s2,"
-               "min_active_extension,max_active_extension,max_contractile_stress_kPa\n";
-      m_log.flush();
-    }
     const size_t cells = m_data.mesh.getCellCount(),
                  vertices = m_data.mesh.getVertexCount();
     if (isRoot)
     {
-      std::cout << std::setprecision(9) << "Wall: " << cells << " wedges, " << vertices
+      Log("Solid/Mesh") << "wall: " << cells << " wedges, " << vertices
               << " vertices; fixed rim faces=" << m_data.rimFaces
-              << "; minimum reference scaled Jacobian=" << m_data.minimumReferenceJacobian
-              << "; dt=" << timeStep << "; run end=" << timeStep * cfg.steps
-              << "; wave end=" << m_data.endTime << std::endl;
+                        << "; minimum reference scaled Jacobian="
+                        << m_data.minimumReferenceJacobian << "; dt=" << timeStep
+                        << " s; run end=" << timeStep * run.steps << " s"
+                        << "; wave end=" << m_data.endTime << " s" << Alert::Raise;
     }
   }
 
-  void Output::write(Real time, size_t iterations, Real residual)
+  void Solid::Output::write(Real time, size_t iterations, Real residual)
   {
     m_activation = [&](const Point& point) { return m_data.activationAt(point, time); };
     m_electrical = [&](const Point& point) { return m_data.electricalAt(point, time); };
@@ -181,7 +178,12 @@ namespace Rodin::Examples::Heart::Atrium
     if (!minimum || *minimum <= 0)
       Alert::Exception() << "The contraction produced a folded wedge" << Alert::Raise;
     const Real minimumCurrentJacobian = *minimum;
-    m_output.write(time).flush();
+    m_time = time;
+    const size_t step = static_cast<size_t>(std::llround(time / m_run.timeStep));
+    m_pendingOutput =
+      step != 0 && (m_run.outputEvery == 0 || step % m_run.outputEvery != 0);
+    if (!m_pendingOutput)
+      m_output.write(time).flush();
     Index index;
     const Real activationMax = m_activation.max(index);
     const Real extensionMin = m_extension.min(index),
@@ -192,20 +194,14 @@ namespace Rodin::Examples::Heart::Atrium
       extensionMax, stressMax};
     if (comm.rank() == 0)
     {
-      if (m_log.is_open())
-      {
-        m_log << std::setprecision(17) << time << ',' << maximum << ',' << activationMax
-              << ',' << iterations << ',' << residual << ',' << minimumCurrentJacobian
-              << ',' << maximumVelocity << ',' << maximumAcceleration << ','
-              << extensionMin << ',' << extensionMax << ',' << stressMax << '\n';
-        m_log.flush();
-      }
-      std::cout << "  max displacement=" << maximum << " mm" << std::endl;
+      Log("Solid/State") << "max_displacement=" << maximum << " mm" << Alert::Raise;
     }
   }
 
-  void Output::close()
+  void Solid::Output::close()
   {
+    if (m_pendingOutput)
+      m_output.write(m_time).flush();
     m_output.close();
   }
 }

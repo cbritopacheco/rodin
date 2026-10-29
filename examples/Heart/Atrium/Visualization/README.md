@@ -37,7 +37,7 @@ From the repository root:
 ```sh
 pvpython --force-offscreen-rendering \
   examples/Heart/Atrium/Visualization/Volume.py \
-  output/atrium-fluid/Flow.xdmf \
+  output/atrium-fluid/Fluid.xdmf \
   output/atrium-fluid/Volume.mp4 \
   --units cm/s --resolution 128 --fps 12
 ```
@@ -49,7 +49,7 @@ To generate an interactive scene without rendering a movie or requiring
 
 ```sh
 pvpython examples/Heart/Atrium/Visualization/Volume.py \
-  output/atrium-fluid/Flow.xdmf \
+  output/atrium-fluid/Fluid.xdmf \
   output/atrium-fluid/Volume.pvsm --state-only
 ```
 

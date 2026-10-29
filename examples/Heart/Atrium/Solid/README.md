@@ -9,7 +9,7 @@ cellwise constants. The coupled Newton problem retains its spaces, forms,
 fields, and solvers across time steps.
 
 In the standalone solid problem the opening rims are fixed and the outer wall
-is unloaded. In [FSI mode](../README.md#contraction-driven-fsi), fluid traction
+is unloaded. In [FSI mode](../FSI/README.md), fluid traction
 and a Robin interface term enter the same retained mechanical problem; the
 passive and active constitutive equations below are retained.
 
@@ -139,15 +139,16 @@ volume quadrature as the residual: stiffness is the mean squared-gamma update,
 while transformed stress uses the mean beta update. The active fields remain
 independent unknowns in the global Newton solve.
 
-The pulse traversal time is $T=(\max_X s(X)+3w)/v$. By default, `--steps N`
-sets $\Delta t=T/N$ and writes $N+1$ states including initialization.
-`--dt` instead sets the physical time increment in seconds. `--stop-after`
-limits completed intervals without changing the chosen time step. Temporal,
-spatial, and quadrature refinement are needed for quantitative dynamics.
+The pulse traversal time is $T=(\max_X s(X)+3w)/v$. The common
+`-atrium_dt` sets the physical time increment in seconds, and `-atrium_steps N`
+advances $N$ intervals. The run duration is independent of the pulse traversal
+time; with an export interval of one it writes $N+1$ states including
+initialization. Temporal, spatial, and quadrature refinement are needed for
+quantitative dynamics.
 
 ## Parameters and units
 
-Coordinates are in mm, time in seconds, and stresses in kPa. `--density`
+Coordinates are in mm, time in seconds, and stresses in kPa. `-atrium_solid_density`
 accepts reference density in $\mathrm{kg/m^3}$ and converts it using
 
 $$
@@ -172,38 +173,37 @@ solid example.
 
 | Parameter | Default | Option |
 |---|---:|---|
-| Matrix scale $a$ | $2.92\,\mathrm{kPa}$ | `--matrix-scale` |
-| Matrix exponent $b$ | $5.6$ | `--matrix-exponent` |
-| Fiber scale $a_f$ | $11.84\,\mathrm{kPa}$ | `--fiber-scale` |
-| Fiber exponent $b_f$ | $17.95$ | `--fiber-exponent` |
-| Volume penalty $\mu_v$ | $500\,\mathrm{kPa}$ | `--volume-penalty` |
-| Tissue viscosity $\nu$ | $0.2\,\mathrm{kPa\,s}$ | `--viscosity` |
-| Serial stiffness $E_s$ | $20\,\mathrm{kPa}$ | `--active-stiffness` |
-| Contractile viscosity $\mu_c$ | $3\,\mathrm{kPa\,s}$ | `--active-damping` |
-| Cross-bridge stiffness source $k_0$ | $100\,\mathrm{kPa}$ | `--cross-bridge-stiffness` |
-| Contractility source $\sigma_0$ | $20\,\mathrm{kPa}$ | `--contractility` |
-| Destruction factor $\alpha$ | $0.4$ | `--destruction-rate` |
-| Positive electrical peak $A_+$ | $20\,\mathrm{s^{-1}}$ | `--activation` |
-| Resting drive magnitude $A_-$ | $10\,\mathrm{s^{-1}}$ | `--relaxation` |
-| Reference density | $1060\,\mathrm{kg/m^3}$ | `--density` |
+| Matrix scale $a$ | $2.92\,\mathrm{kPa}$ | `-atrium_solid_matrix_scale` |
+| Matrix exponent $b$ | $5.6$ | `-atrium_solid_matrix_exponent` |
+| Fiber scale $a_f$ | $11.84\,\mathrm{kPa}$ | `-atrium_solid_fiber_scale` |
+| Fiber exponent $b_f$ | $17.95$ | `-atrium_solid_fiber_exponent` |
+| Volume penalty $\mu_v$ | $500\,\mathrm{kPa}$ | `-atrium_solid_volume_penalty` |
+| Tissue viscosity $\nu$ | $0.2\,\mathrm{kPa\,s}$ | `-atrium_solid_viscosity` |
+| Serial stiffness $E_s$ | $20\,\mathrm{kPa}$ | `-atrium_solid_active_stiffness` |
+| Contractile viscosity $\mu_c$ | $3\,\mathrm{kPa\,s}$ | `-atrium_solid_active_damping` |
+| Cross-bridge stiffness source $k_0$ | $100\,\mathrm{kPa}$ | `-atrium_solid_cross_bridge_stiffness` |
+| Contractility source $\sigma_0$ | $20\,\mathrm{kPa}$ | `-atrium_solid_contractility` |
+| Destruction factor $\alpha$ | $0.4$ | `-atrium_solid_destruction_rate` |
+| Positive electrical peak $A_+$ | $20\,\mathrm{s^{-1}}$ | `-atrium_solid_activation` |
+| Resting drive magnitude $A_-$ | $10\,\mathrm{s^{-1}}$ | `-atrium_solid_relaxation` |
+| Reference density | $1060\,\mathrm{kg/m^3}$ | `-atrium_solid_density` |
 
-`--contractility` controls stress generation. Active extension is a solved
+`-atrium_solid_contractility` controls stress generation. Active extension is a solved
 field and has no prescribed target-strain amplitude option. Setting
-`--activation 0` supplies no positive electrical drive for a resting-state check.
+`-atrium_solid_activation 0` supplies no positive electrical drive for a resting-state check.
 
 ## Architecture and geometry
 
 - [`Solid.h`](Solid.h) and [`Solid.cpp`](Solid.cpp): directly owned mechanical
   and active fields, constitutive inputs, retained coupled problem, nonlinear
   solve, passive initialization, and Newmark updates.
-- [`AtriumContraction.cpp`](AtriumContraction.cpp): solid-only driver selecting
-  `Atrium::Mode::Solid` and advancing the `Atrium` coordinator.
+- [`Parameters.h`](Parameters.h): passive, active, viscous, and prescribed-field coefficients.
 - [`ProblemData.h`](ProblemData.h) and [`ProblemData.cpp`](ProblemData.cpp):
   mesh checks, reference fibers, basal plane, and electrical source.
 - [`Output.h`](Output.h) and [`Output.cpp`](Output.cpp): observation of solved
   fields, XDMF export, metadata, and mechanical diagnostics.
 
-The reusable `Atrium::Solid` component exposes `initialize()`, `step()`, and
+The `Atrium::Solid` component exposes `initialize()`, `step()`, and
 `finish()`. The coordinator partitions the combined fluid–solid parent once with
 Scotch, then the component extracts its material-4 MPI submesh. Its mesh,
 problems, fields, and solvers are retained across steps. The mesh resources are in `resources/examples/Heart/Atrium/`:
@@ -318,23 +318,27 @@ From the repository root with a configured build tree:
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
   -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON -DRODIN_USE_SCOTCH=ON \
   -DRODIN_CODE_COVERAGE=OFF
-cmake --build build --target AtriumContraction -j4
-mpirun -n 4 build/examples/Heart/Atrium/Solid/AtriumContraction \
-  --mesh resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh \
-  --output output/atrium-active/Contraction \
-  --base-label 6 --apex 46.39638367 187.44307667 -205.03317767 \
-  --apex-radius 3 --steps 24 --activation 20 --relaxation 10 \
-  --contractility 20 --viscosity 0.2 --active-damping 3
+cmake --build build --target Atrium -j4
+mpirun -n 4 build/examples/Heart/Atrium/Atrium \
+  -atrium_mode solid \
+  -atrium_mesh resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh \
+  -atrium_output output/atrium-solid \
+  -atrium_dt 0.001 -atrium_steps 24 -atrium_output_every 1 \
+  -atrium_solid_base_label 6 \
+  -atrium_solid_apex 46.39638367,187.44307667,-205.03317767 \
+  -atrium_solid_apex_radius 3 -atrium_solid_activation 20 \
+  -atrium_solid_relaxation 10 -atrium_solid_contractility 20 \
+  -atrium_solid_viscosity 0.2 -atrium_solid_active_damping 3
 ```
 
-`--fibers-only` exports reference geometry and fiber diagnostics without advancing
-mechanics. `--help` lists all model and source parameters. Output geometry checks
+`-atrium_solid_fibers_only` exports reference geometry and fiber diagnostics without advancing
+mechanics. `-help` lists all model and source parameters. Output geometry checks
 use the exact minimum of each six-node wedge's Jacobian determinant over its
 reference cell, including possible thickness-interior minima.
 
 ## ParaView
 
-Open `<stem>.xdmf` with its companion HDF5 files in the same directory. Apply
+Open `<output-directory>/Solid.xdmf` with its companion HDF5 files in the same directory. Apply
 **Warp By Vector**, select `Displacement`, and use scale factor 1 for physical
 motion in mm. `Velocity` and `Acceleration` use mm/s and mm/s². `Activation`
 is the dimensionless Gaussian shape; `ElectricalActivation` is the signed
@@ -352,7 +356,7 @@ active-extension extrema, contractile stress, Newton residuals, and minimum
 scaled Jacobian. Metadata records geometry, material coefficients, electrical
 source parameters, density, and time-integration coefficients.
 
-The coordinator writes one `<output>.csv` after initialization and each completed
+The coordinator writes one `<output-directory>/Diagnostics.csv` after initialization and each completed
 step. It combines the mechanical and convergence diagnostics with cavity volume
 in mL, measured using the moving inner wall and fixed inlet/outlet caps. The [common model documentation](../README.md#enclosed-cavity-volume)
 defines the volume calculation and the separate solid/fluid quantities in `FSI`
@@ -361,7 +365,7 @@ mode. Existing ParaView readers can discover flushed states through
 
 ## Constitutive reuse
 
-`--cache-constitutive` enables experimental rank-local reuse of the active
+`-atrium_solid_cache_constitutive` enables experimental rank-local reuse of the active
 residual, internal tangent, and displacement-coupling blocks across coefficient
 expressions at the same reference material point. Entries are invalidated after
 every synchronized Newton trial state and before assembly of a new time step.

@@ -4,10 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ATRIUM_OUTPUT_H
-#define RODIN_ATRIUM_OUTPUT_H
+#ifndef RODIN_ATRIUM_FLUID_OUTPUT_H
+#define RODIN_ATRIUM_FLUID_OUTPUT_H
 
-#include <fstream>
 #include <Rodin/IO/XDMF.h>
 #include "Fluid.h"
 
@@ -19,7 +18,7 @@ namespace Rodin::Examples::Heart::Atrium
    * ## Architecture
    *
    * The output observes the owning atrium's mesh and fields, writes its
-   * distributed XDMF series, and records scalar cycle diagnostics on rank zero.
+   * distributed XDMF series, and collects scalar diagnostics for the coordinator.
    * The atrium and its MPI context outlive this object.
    */
   class Fluid::Output
@@ -35,15 +34,12 @@ namespace Rodin::Examples::Heart::Atrium
       /// @brief Registers the mesh and observed fields with XDMF.
       void bind();
 
-      /// @brief Opens the CSV diagnostics on the root rank.
-      void openCSV();
-
       /**
-       * @brief Collects cycle diagnostics and writes the standalone CSV when enabled.
+       * @brief Collects scalar diagnostics for the coordinator CSV.
        * @param cycle Zero-based cycle index.
        * @note Collective on the atrium communicator.
        */
-      void writeCSVRow(int cycle);
+      void collectDiagnostics(int cycle);
 
       /**
        * @brief Writes and flushes a transient state.
@@ -56,10 +52,8 @@ namespace Rodin::Examples::Heart::Atrium
       void close();
 
     private:
-      void writeCSVHeader();
       Fluid& m_atrium;
       IO::XDMF m_xdmf;
-      std::ofstream m_csv;
   };
 }
 
