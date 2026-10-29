@@ -75,18 +75,7 @@
           } else commit.textContent = '—';
           const title = run && 'CI report · ' + name + ' · ' + selected + ' · ' + run.head_sha + ' · attempt ' + run.run_attempt;
           const report = title && reports.workflow_runs.find(item => item.display_title === title && item.conclusion === 'success');
-          const links = row.insertCell();
-          if (run) links.append(link('Workflow run', run.html_url));
-          if (report) {
-            // Reports have one reporting job; its check-run ID identifies the
-            // generated summary on GitHub's workflow overview.
-            const jobs = await read('/actions/runs/' + report.id + '/jobs?filter=latest&per_page=100')
-              .catch(() => ({jobs: []}));
-            const job = jobs.jobs.find(item => item.name === 'Inspect interruptions and request one bounded retry');
-            if (job && Number.isSafeInteger(job.id)) {
-              links.append(' · ', link('Report', report.html_url + '/attempts/' + report.run_attempt + '#summary-' + job.id));
-            }
-          }
+          row.insertCell().append(report ? link('Open report', report.html_url) : link('Summary', run?.html_url));
         }
         const actionsLink = document.createElement('p');
         actionsLink.style.textAlign = 'center';
