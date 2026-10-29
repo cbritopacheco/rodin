@@ -1,7 +1,7 @@
-# Atrial solid electromechanics
+# Atrium solid component
 
-This example couples finite-strain atrial wall motion to independent active
-fiber variables. An exponential Demiray matrix with single-family Holzapfel–Gasser–Ogden-type reinforcement and Green–Lagrange strain-rate
+`Atrium::Solid` couples finite-strain atrial wall motion to independent active
+fiber variables within the [Atrium model](../README.md). An exponential Demiray matrix with single-family Holzapfel–Gasser–Ogden-type reinforcement and Green–Lagrange strain-rate
 viscosity form the passive tissue response. Rodin's `ActiveFiberLaw` supplies
 the Hill–Maxwell equations. Displacement uses continuous linear wedge shape
 functions; active extension, stiffness, and stress variables use discontinuous

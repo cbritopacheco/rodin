@@ -23,7 +23,6 @@ imply that the examples share the same material or coupling algorithm.
 | Example | Unknowns and driving data | Numerical model |
 |---|---|---|
 | [Atrium](Atrium/README.md) | Active wall, cavity flow, or both; contraction-driven FSI has open zero-pressure boundaries and no 0D driver. | MPI/Scotch, linear wedges and stabilized linear tetrahedral flow; Robin–Dirichlet FSI. |
-| [Atrial solid](Atrium/Solid/README.md) | Displacement and contractile internal variables, driven by a prescribed electrical wave. | Demiray–HGO passive tissue, finite-strain Kelvin–Voigt dissipation, Newmark integration. |
 | [Ventricle](Ventricle/CCMLC2014_0D/README.md) | Chamber radius, pressures, and active variables. | Lumped CCMLC2014 model and two-compliance arterial circulation. |
 | [Coronary artery](CoronaryArtery/README.md) | Rigid-wall flow, wall mechanics, or ALE FSI, with lumped heart/circulation loading. | Distinct local and PETSc/MPI formulations; coupling is specified per example. |
 | [Ectatic tube](Thrombosis/EctaticTube/README.md) | Flow, coagulation concentrations, and a washout tracer. | Fixed-wall stabilized flow and one-way reaction–transport. |
