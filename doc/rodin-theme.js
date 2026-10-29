@@ -35,6 +35,11 @@
       'files.html': 'M6 3h9l4 4v14H6z M14 3v5h5'
     };
     for (const link of document.querySelectorAll('#m-navbar-collapse > .m-row > ol > li > a')) {
+      const label = link.textContent.trim() || link.getAttribute('title');
+      if (label) {
+        link.setAttribute('aria-label', label);
+        link.setAttribute('title', label);
+      }
       const drawing = paths[link.getAttribute('href')?.split('/').pop()];
       if (!drawing || link.querySelector('svg')) continue;
       const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
