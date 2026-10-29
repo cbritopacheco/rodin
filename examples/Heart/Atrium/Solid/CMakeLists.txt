@@ -3,3 +3,6 @@ target_include_directories(AtriumSolid PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(AtriumSolid
   PUBLIC Rodin::Solid Rodin::Variational Rodin::IO Rodin::Solver
     Rodin::PETSc Rodin::MPI Rodin::Scotch)
+
+add_executable(AtriumContraction AtriumContraction.cpp)
+target_link_libraries(AtriumContraction PRIVATE AtriumModels)

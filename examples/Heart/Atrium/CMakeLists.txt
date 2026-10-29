@@ -17,7 +17,3 @@ target_link_libraries(AtriumModels PUBLIC AtriumSolid AtriumFluid)
 
 add_executable(Atrium main.cpp)
 target_link_libraries(Atrium PRIVATE AtriumModels)
-
-add_executable(AtriumContraction Solid/AtriumContraction.cpp)
-target_link_libraries(AtriumContraction PRIVATE AtriumModels)
-set_target_properties(AtriumContraction PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Solid")

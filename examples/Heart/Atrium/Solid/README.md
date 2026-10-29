@@ -196,7 +196,8 @@ field and has no prescribed target-strain amplitude option. Setting
 - [`Solid.h`](Solid.h) and [`Solid.cpp`](Solid.cpp): directly owned mechanical
   and active fields, constitutive inputs, retained coupled problem, nonlinear
   solve, passive initialization, and Newmark updates.
-- [`AtriumContraction.cpp`](AtriumContraction.cpp): command-line entry point.
+- [`AtriumContraction.cpp`](AtriumContraction.cpp): solid-only driver selecting
+  `Atrium::Mode::Solid` and advancing the `Atrium` coordinator.
 - [`ProblemData.h`](ProblemData.h) and [`ProblemData.cpp`](ProblemData.cpp):
   mesh checks, reference fibers, basal plane, and electrical source.
 - [`Output.h`](Output.h) and [`Output.cpp`](Output.cpp): observation of solved
