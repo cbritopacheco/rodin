@@ -505,6 +505,27 @@ branch before it can trigger. A develop-only change therefore remains inactive
 until that workflow and its helper reach the default branch. It does not alter
 the workflow definitions of older runs and does not create a scheduled monitor.
 
+## Documentation status badges
+
+Documentation push jobs update only their own branch's documentation badge
+from their existing runners. The build reports running, then queued while
+publication is waiting; the publication job reports running and the verified
+Pages deployment outcome. Failed or cancelled builds report their outcome
+when the final step can execute. These updates are best effort, with a
+two-minute step limit, so badge availability does not block documentation.
+
+Each update checks the current source SHA, documentation run and rerun attempt.
+Content-SHA conflicts are retried at most three times. A deployment result
+reported directly by its job is retained against delayed API snapshots from
+that same attempt; a newer attempt can replace it. Unrelated badge files are
+not rewritten by documentation jobs.
+
+`CIBadges.yml` remains the fallback for initial queued states, cancellations
+that prevent final steps from running, and failed direct updates. Its
+`workflow_run` listener and reconciliation code use the default branch; the
+same-attempt protection must also reach that branch to apply to that fallback.
+The existing `GITHUB_TOKEN` is used; no additional secret or runner is needed.
+
 ## Inspectable reports
 
 The Actions run summary links commit-matched scheduling diagrams and job logs.

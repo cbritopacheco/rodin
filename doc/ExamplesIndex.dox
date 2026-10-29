@@ -37,6 +37,7 @@
   | @ref examples-pdes-poisson | A scalar elliptic equation, Dirichlet data, and XDMF export |
   | @ref examples-pdes-elasticity | Vector displacement, strain, and boundary traction |
   | @ref examples-pdes-helmholtz | A wave equation and complex-valued fields |
+  | @ref examples-pdes-stokes | Viscous cavity flow and pressure normalization |
   | @ref examples-pdes-navierstokes | Coupled velocity and pressure in incompressible flow |
   | @ref examples-pdes-periodic | Periodic identification of boundary degrees of freedom |
   | @ref examples-pdes-surfacemesh | An equation posed on a surface mesh |

@@ -14,7 +14,7 @@
   The simplest way to create a mesh is using the `UniformGrid` static method,
   which generates structured grids of various polytope types.
 
-  @subsection guides-meshes-creation-uniform-2d 2D Uniform grids
+  @subsection guides-meshes-creation-uniform-2d Two-dimensional grids
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -35,7 +35,7 @@
   }
   @endcode
 
-  @subsection guides-meshes-creation-uniform-3d 3D Uniform grids
+  @subsection guides-meshes-creation-uniform-3d Three-dimensional grids
 
   @code{.cpp}
   Mesh mesh;
@@ -52,9 +52,11 @@
 
   @subsection guides-meshes-creation-uniform-domain Domain
 
-  By default, `UniformGrid` generates meshes on the unit square @f$ [0,1]^2 @f$
-  or unit cube @f$ [0,1]^3 @f$. The grid parameters specify the number of
-  subdivisions in each direction.
+  `UniformGrid` uses unit spacing and counts vertices in each direction.
+  Parameters @f$(n_x,n_y)@f$ therefore produce the domain
+  @f$[0,n_x-1]\times[0,n_y-1]@f$, with the analogous convention in three
+  dimensions. Scale the coordinates explicitly when a unit domain is intended.
+  See @ref examples-geometry-uniformgrid for checked counts and scaling examples.
 
   @section guides-meshes-creation-files Loading from files
 

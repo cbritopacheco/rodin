@@ -11,7 +11,7 @@
   @section examples-mmg-cast-intro Introduction
 
   The @ref Rodin::MMG "MMG::Mesh" class extends
-  @ref Rodin::Geometry::Mesh "Geometry::Mesh" and can be used wherever
+  @ref Rodin::Geometry::Mesh "Mesh<Context::Local>" and can be used wherever
   a regular mesh is expected. This section explains how to work with both
   types interchangeably.
 

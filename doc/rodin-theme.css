@@ -864,12 +864,25 @@ main article .m-col-l-10:has(> .rodin-main-brand) > h1 {
 }
 
 /* Keep the example figure subordinate to the tutorial text. */
-#examples-pdes-poisson-output figure.m-figure::before {
+:is(#examples-pdes-poisson-output, #examples-pdes-elasticity-output,
+    #examples-pdes-helmholtz-output, #examples-pdes-periodic-output,
+    #examples-pdes-surface-output, #examples-pdes-stokes-output,
+    #examples-pdes-navierstokes-output) figure.m-figure::before {
   border-color: transparent;
 }
-#examples-pdes-poisson-output figure.m-figure figcaption {
+:is(#examples-pdes-poisson-output, #examples-pdes-elasticity-output,
+    #examples-pdes-helmholtz-output, #examples-pdes-periodic-output,
+    #examples-pdes-surface-output, #examples-pdes-stokes-output,
+    #examples-pdes-navierstokes-output) figure.m-figure figcaption {
   font-size: 0.9rem;
   font-weight: 400;
   line-height: 1.5;
   text-align: center;
+}
+
+.rodin-tutorial-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: .2rem;
 }

@@ -71,7 +71,7 @@
   @subsection examples-shapeopt-sc-setup-mesh Loading the mesh
 
   The initial cantilever mesh is loaded from an MFEM file using the
-  @ref Rodin::MMG "MMG::Optimizer" class, which extends
+  @ref Rodin::MMG "MMG::Mesh" class, which extends
   @ref Rodin::Geometry::Mesh "Mesh" with remeshing capabilities:
 
   @code{.cpp}

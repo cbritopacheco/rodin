@@ -1,174 +1,150 @@
 /**
   @page examples-pdes-elasticity Solving the elasticity equation
-  @brief Showcases the resolution of the elasticity system
+  @brief Compute and visualize the displacement of a clamped beam under traction.
 
-  @image html Elasticity.png width=410px
+  A cantilever is held at one end and pulled downward at the other. This example
+  constructs its mesh, assigns boundary labels, solves a vector-valued linear
+  elasticity problem, and exports the displacement for visualization.
+
+  The @ref examples-pdes-poisson "Poisson example" introduces the same workflow
+  for a scalar field. Here, the unknown has two components, and different parts
+  of the boundary carry different conditions.
 
   @m_keywords{Elasticity}
-
   @tableofcontents
-
   @m_footernavigation
 
-  In this example we will seek to solve the linearized elasticity system. Most
-  of the reference material in the introduction is taken from
-  @cite allaire2021shape.
+  @section examples-pdes-elasticity-intro The mathematical problem
 
-  @section examples-pdes-elasticity-intro Introduction
+  The beam occupies the rectangle @f$\Omega=(0,4)\times(0,1)@f$. Its displacement
+  @f$u:\Omega\to\mathbb{R}^2@f$ describes how each point moves from its original
+  position. The boundary is divided into three parts:
 
-  In the elasticity setting, we are most typically interested in characterizing
-  the <em> elastic displacement </em> @f$ u_\Omega : \Omega \rightarrow
-  \mathbb{R}^d @f$ of a mechanical structure @f$ \Omega \subset \mathbb{R}^d
-  @f$, which in the mathematical setting is most usually defined as a bounded,
-  Lipschitz domain, whose boundary is decomposed into three disjoint pieces:
-  @f$ \Gamma_D \cup \Gamma_N \cup \Gamma_0@f$. Each piece of the boundary has
-  the following semantic meanings:
+  - **Fixed end:** @f$\Gamma_D=\{0\}\times[0,1]@f$, where @f$u=0@f$.
+  - **Loaded end:** @f$\Gamma_N=\{4\}\times[0,1]@f$, with the uniform traction
+    @f$g=(0,-10^{-4})@f$.
+  - **Free sides:** the top and bottom edges, denoted by @f$\Gamma_0@f$, with
+    zero traction.
 
-  - on the segment @f$ \Gamma_D \neq \emptyset @f$ is where the structure is
-  "fixed" or "attached", which is to say that the structure cannot be displaced
-  or moved
-  - on the segment @f$ \Gamma_N @f$ is where the <em> traction loads </em>
-  @f$ g : \Gamma_N \rightarrow \mathbb{R}^d @f$ are applied
-  - the remaining segment @f$ \Gamma_0 @f$ corresponds to a traction-free
-  boundary; this is the region where the shape is free to move about
-
-  Additionally, @f$ \Omega @f$ can be subjected to body forces @f$ f : \Omega
-  \rightarrow \mathbb{R}^d @f$. In general, this framework gives rise to the
-  <em> linearized elasticity system
-  </em>:
-
+  There is no body force. In the small-strain, isotropic model, the strain and
+  stress are
   @f[
-  \left\{
+    \varepsilon(u)=\tfrac12\bigl(\nabla u+\nabla u^T\bigr),
+    \qquad
+    \sigma(u)=\lambda\,\operatorname{div}(u)I+2\mu\varepsilon(u).
+  @f]
+  The Lamé parameters are @f$\lambda=0.5769@f$ and @f$\mu=0.3846@f$.
+  These are used directly in a two-dimensional plane-strain model; the geometry
+  and material data are illustrative nondimensional values. The small applied
+  load keeps the displacement small relative to the beam dimensions.
+
+  With @f$n@f$ the outward unit normal, equilibrium requires
+  @f[
     \begin{aligned}
-      - \nabla \cdot \sigma (u_\Omega) &= 0 && \mathrm{in} \ \Omega \\
-      u_\Omega &= 0 && \mathrm{on} \ \Gamma_D \\
-      \sigma(u_\Omega) \cdot n &= 0 && \mathrm{on} \ \Gamma_0 \\
-      \sigma(u_\Omega) \cdot n &= f && \mathrm{on} \ \Gamma_N
+      -\operatorname{div}\sigma(u)&=0 &&\text{in }\Omega,\\
+      u&=0 &&\text{on }\Gamma_D,\\
+      \sigma(u)n&=g &&\text{on }\Gamma_N,\\
+      \sigma(u)n&=0 &&\text{on }\Gamma_0.
     \end{aligned}
-   \right. ,
   @f]
-  where @f$ \sigma(u_\Omega) @f$ is known as the <em> stress tensor </em> of
-  the displacement field @f$ u_\Omega @f$. Furthermore, this stress tensor is
-  related to the <em> strain tensor </em>
+  This formulation describes linear elastic response; it does not model large
+  rotations or nonlinear material behavior. See @cite allaire2021shape for
+  further background on elasticity and its variational formulation.
+
+  @section examples-pdes-elasticity-weak The weak formulation
+
+  Let @f$V=\{v\in H^1(\Omega)^2:v=0\text{ on }\Gamma_D\}@f$. Multiplying
+  equilibrium by a test displacement and integrating by parts gives: find
+  @f$u\in V@f$ such that, for every @f$v\in V@f$,
   @f[
-    e(u_\Omega) := \dfrac{1}{2}\left( \nabla u + \nabla u^T \right)
+    \int_\Omega \lambda\,\operatorname{div}(u)\operatorname{div}(v)
+      +2\mu\,\varepsilon(u):\varepsilon(v)\,dx
+    =\int_{\Gamma_N}g\cdot v\,ds.
   @f]
-  via Hooke's law
-  @f[
-    \sigma(u_\Omega) = Ae(u_\Omega) \ ,
-  @f]
-  where for any @f$ e @f$ in the set @f$ \mathbb{R}^{d \times d}_s @f$ of
-  symmetric @f$ d \times d @f$ matrices,
-  @f[
-    Ae = 2 \mu e + \lambda \mathrm{tr}(e) I \ .
-  @f]
-  Here @f$ I @f$ is the identity @f$ d \times d @f$ matrix, and @f$ \lambda
-  @f$, @f$ \mu @f$ are the <em> Lamé parameters </em> of the constituent
-  material, satisfying @f$ \mu > 0 @f$ and @f$ \lambda + 2\mu / d > 0 @f$.
+  The colon denotes the componentwise inner product of two tensors. The left
+  side is the elastic stiffness; the right side is the work of the applied
+  traction. The free sides contribute no load. Fixing the entire left edge
+  removes rigid-body motions and makes the discrete stiffness positive definite
+  for these material parameters.
 
-  @section examples-pdes-elasticity-weak Weak formulation
+  @section examples-pdes-elasticity-impl-setup 1. Construct and label the mesh
 
-  As with the @ref examples-pdes-poisson "Poisson example", we work with the
-  variational formulation. We seek to solve:
-  @f[
-  \text{Find } u_\Omega \in H^1_{\Gamma_D}(\Omega)^d \text{ s.t. }
-  \forall v \in H^1_{\Gamma_D}(\Omega)^d, \quad
-     \int_{\Omega} Ae(u_\Omega) : e(v) \ dx = \int_{\Gamma_N} g \cdot v \ dx \ ,
-  @f]
-  where @f$ H^1_{\Gamma_D}(\Omega)^d := \{ u \in H^1(\Omega)^d, \ u = 0
-  \text{ on } \Gamma_D \} @f$. This problem is well-posed by the Lax-Milgram
-  theorem (Korn's inequality provides coercivity).
+  `UniformGrid` takes vertex counts and initially uses unit spacing. A grid
+  with 41 vertices horizontally and 11 vertically, scaled by @f$0.1@f$, therefore
+  covers the required rectangle with 451 vertices and 800 triangles.
 
-  For implementation, the bilinear form can be expanded as:
-  @f[
-     \int_{\Omega} \lambda (\mathrm{div} \ u) \  (\mathrm{div} \ v)  \ dx
-     + \int_{\Omega} \mu \, e(u) : e(v) \ dx
-     = \int_{\Gamma_N} g \cdot v \ dx \ .
-  @f]
+  @snippet PDEs/Elasticity.cpp elasticity-mesh
 
-  @section examples-pdes-elasticity-impl Implementation
+  Edge-to-cell connectivity identifies exterior edges. The loop labels an edge
+  as `fixed` when both endpoints lie on the left end, `loaded` when both lie on
+  the right end, and `free` otherwise. The coordinate tolerance is only used
+  to recognize these boundaries on this generated grid. The numerical label
+  values have no physical meaning; the form below gives them their roles.
 
-  @subsection examples-pdes-elasticity-impl-setup Setup
+  @section examples-pdes-elasticity-impl-problem 2. Express the finite element problem
 
-  We load the mesh using @ref Rodin::Geometry::Mesh "Mesh::load()",
-  define a vector-valued @ref Rodin::Variational::P1 "P1" finite element
-  space with @f$ d @f$ components (one per spatial dimension), and set the
-  material parameters:
+  The vector-valued `P1` space uses continuous, piecewise affine displacements
+  with two components per vertex: 902 degrees of freedom before imposing the
+  boundary values. `u` is the trial displacement and `v` is the test function.
 
-  @code{.cpp}
-  #include <Rodin/Solver.h>
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
-  #include <Rodin/Solid.h>
+  @snippet PDEs/Elasticity.cpp elasticity-form
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
+  `LinearElasticityIntegral` includes both stiffness terms in the weak form,
+  including the factor @f$2\mu@f$ multiplying the strain inner product.
+  `BoundaryIntegral(...).over(loaded)` restricts the traction to the right end;
+  `DirichletBC(...).on(fixed)` fixes both displacement components on the left.
+  No boundary integral is needed on the free sides: zero traction is the
+  natural condition there.
 
-  // Define boundary attributes
-  Attribute Gamma = 1, GammaD = 2, GammaN = 3, Gamma0 = 4;
+  Rodin expresses the equation as a residual, so the external work is subtracted
+  from the stiffness term. The boundary condition completes the problem.
 
-  // Load mesh
-  Mesh mesh;
-  mesh.load(meshFile, IO::FileFormat::MFEM);
-  mesh.getConnectivity().compute(1, 2);
+  @section examples-pdes-elasticity-impl-solve 3. Solve and check convergence
 
-  // Vector-valued P1 space (d components)
-  size_t d = mesh.getSpaceDimension();
-  P1 fes(mesh, d);
+  Conjugate gradients is suitable for the constrained symmetric positive
+  definite system. The solver assembles the problem, solves to the requested
+  relative tolerance, and checks success before exporting any result.
 
-  // Lamé coefficients
-  const Real lambda = 0.5769, mu = 0.3846;
+  @snippet PDEs/Elasticity.cpp elasticity-solve
 
-  // Applied traction force
-  VectorFunction f{0, -1};
-  @endcode
+  The computed displacement field is available through `u.getSolution()`.
+  Solver convergence checks the algebraic solve; a mesh refinement study would
+  be needed to assess discretization error for a chosen quantity of interest.
 
-  @subsection examples-pdes-elasticity-impl-problem Problem formulation
+  @section examples-pdes-elasticity-output 4. Export and visualize the displacement
 
-  The variational problem is expressed through the
-  @ref Rodin::Variational::Problem "Problem" class. The
-  `LinearElasticityIntegral` provides a convenient shorthand for the full
-  elasticity bilinear form. `BoundaryIntegral` applies the traction load
-  on boundary segment @f$ \Gamma_N @f$, and `DirichletBC` fixes the
-  displacement on @f$ \Gamma_D @f$:
+  XDMF stores the mesh and vector field together. Keep the accompanying HDF5
+  files alongside `Elasticity.xdmf`, as they contain the numerical data.
 
-  @code{.cpp}
-  TrialFunction u(fes);
-  TestFunction  v(fes);
+  @snippet PDEs/Elasticity.cpp elasticity-export
 
-  Problem elasticity(u, v);
-  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-             - BoundaryIntegral(f, v).over(GammaN)
-             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-  @endcode
+  @m_class{m-flat}
+  @image html PDEs/Elasticity.png "Computed beam displacement, amplified ten times. Color shows the unscaled displacement magnitude; the dashed outline marks the original beam." width=720px
 
-  @subsection examples-pdes-elasticity-impl-solve Solving and output
+  In ParaView:
 
-  We solve with the @ref Rodin::Solver::CG "CG" solver and save the results
-  using @ref Rodin::IO::FileFormat "IO::FileFormat::MFEM":
+  1. Open `Elasticity.xdmf` and select **Apply**.
+  2. Apply **Warp By Vector**, using **displacement** and a scale factor of **10**.
+  3. Color by the **Magnitude** of **displacement**.
+  4. Select **Surface With Edges** to inspect the triangular mesh.
 
-  @code{.cpp}
-  Solver::CG(elasticity).solve();
+  The clamped end remains stationary and the free end bends downward. For this
+  mesh and load, the maximum nodal displacement magnitude is approximately
+  @f$0.023787@f$, and the vertical displacement at the loaded end is approximately
+  @f$-0.0234@f$. The amplification in the figure changes only the displayed
+  geometry, not the computed field or its color scale.
 
-  // Save in MFEM format
-  u.getSolution().save("Elasticity.gf", IO::FileFormat::MFEM);
-  mesh.save("Elasticity.mesh", IO::FileFormat::MFEM);
-  @endcode
+  @section examples-pdes-elasticity-full Complete program
 
-  For visualization in ParaView, export using
-  @ref Rodin::IO::XDMF "IO::XDMF":
+  Build the `Elasticity` target with the Rodin examples enabled, then run it from
+  the directory in which the output should be written. The program generates
+  its own mesh and requires no external mesh file.
 
-  @code{.cpp}
-  #include <Rodin/IO/XDMF.h>
+  @snippet PDEs/Elasticity.cpp elasticity-source
 
-  IO::XDMF xdmf("Elasticity");
-  xdmf.grid().setMesh(mesh).add("displacement", u.getSolution());
-  xdmf.write();
-  @endcode
-
-  The full source code may be found below:
-  -   @ref PDEs/Elasticity.cpp "Elasticity.cpp"
+  See @ref PDEs/Elasticity.cpp "Elasticity.cpp" for the source,
+  the @ref guides-getting-started-installation "installation guide" for build
+  setup, and the @ref guides-io "I/O guide" for further export options.
 
   @example PDEs/Elasticity.cpp @m_examplenavigation{examples-pdes-elasticity,PDEs/} @m_footernavigation
-  */
+*/

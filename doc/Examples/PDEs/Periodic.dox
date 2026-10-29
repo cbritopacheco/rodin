@@ -1,139 +1,92 @@
 /**
   @page examples-pdes-periodic Poisson equation with periodic boundary conditions
-  @brief Solving the Poisson equation on a periodic domain
+  @brief Identify opposite boundaries and impose a zero-mean normalization.
 
-  @m_keywords{Poisson, Periodic, Boundary Conditions, PeriodicBC}
+  Periodic boundaries identify opposite edges of a computational cell. Unlike
+  the @ref examples-pdes-poisson "Dirichlet Poisson problem", this problem has
+  no fixed boundary value: the solution is only determined up to a constant.
+  This example handles both the periodic identification and that remaining
+  freedom explicitly.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-pdes-periodic-intro Introduction
+  @section examples-pdes-periodic-intro The mathematical problem
 
-  This example solves the Poisson equation on the square
-  @f$ [0, 2\pi]^2 @f$ with **periodic boundary conditions** instead of
-  the usual Dirichlet conditions. Periodicity means the solution on the
-  left edge equals the solution on the right edge, and similarly for the
-  top and bottom edges:
-
+  On @f$\Omega=(0,2\pi)^2@f$, solve
   @f[
-    \left\{
-    \begin{aligned}
-      -\Delta u &= f && \text{in } (0, 2\pi)^2 \\
-      u(0, y)   &= u(2\pi, y) && \text{for all } y \\
-      u(x, 0)   &= u(x, 2\pi) && \text{for all } x
-    \end{aligned}
-    \right.
+    -\Delta u=2\sin x\cos y,
+    \qquad u\text{ and }\nabla u\text{ are periodic across opposite edges},
+    \qquad \int_\Omega u\,dx=0.
   @f]
+  The source has zero integral, as required by compatibility of a periodic
+  Poisson problem. The zero-mean normalization selects the unique solution
+  @f$u_{\mathrm{ex}}(x,y)=\sin x\cos y@f$.
 
-  Periodic boundary conditions are fundamental in:
-  - **Homogenization** of composite materials (solving cell problems)
-  - **Wave propagation** in periodic media (photonic/phononic crystals)
-  - **Computational physics** (periodic unit cells)
+  In the periodic finite element space, a global multiplier @f$\lambda\in\mathbb R@f$
+  enforces the mean condition. The weak problem is
+  @f[
+    \int_\Omega\nabla u\cdot\nabla v\,dx+\lambda\int_\Omega v\,dx
+      =\int_\Omega f v\,dx,
+    \qquad \eta\int_\Omega u\,dx=0
+  @f]
+  for every periodic test function @f$v@f$ and scalar test value @f$\eta@f$.
+  This removes the constant nullspace without changing the PDE on compatible
+  data. A direct solver alone would not resolve a singular system reliably.
 
-  @section examples-pdes-periodic-implementation Implementation
+  @section examples-pdes-periodic-mesh 1. Construct the periodic cell
 
-  @subsection examples-pdes-periodic-mesh Mesh creation
+  The square is discretized with 33 vertices per direction, giving 1089 vertices
+  and 2048 triangles before periodic identification.
 
-  We build a fine triangular mesh on a grid of @f$ n \times n @f$ points,
-  then scale it to the domain @f$ [0, 2\pi]^2 @f$:
+  @snippet PDEs/Periodic.cpp periodic-mesh
 
-  @code{.cpp}
-  #include <Rodin/Solver.h>
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
+  @section examples-pdes-periodic-dofmap 2. Pair boundary degrees of freedom
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
+  For scalar `P1`, each vertex has one degree of freedom. The map below obtains
+  its index from the space, then uses the vertex coordinates to find its periodic
+  representative. It does not assume a global row-major DOF ordering.
 
-  const size_t n = 200;
+  @snippet PDEs/Periodic.cpp periodic-map
 
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
-  mesh.getConnectivity().compute(1, 2);
-  mesh.scale(1.0 / (n - 1));    // Normalize to [0, 1]^2
-  mesh.scale(2 * M_PI);         // Stretch to [0, 2π]^2
-  @endcode
+  Vertices on the right edge map to the left edge, and those on the top map to
+  the bottom. The top-right corner maps directly to the bottom-left corner, so
+  no cyclic chain is introduced. Each entry means “this slave DOF equals this
+  master DOF.” This pairing is specific to this matching scalar P1 grid; higher
+  order spaces also require edge and possibly face DOFs to be paired.
 
-  @subsection examples-pdes-periodic-source Source term
+  @section examples-pdes-periodic-problem 3. Impose periodicity and the mean
 
-  We use a smooth source function:
+  `P0g` provides one global constant, not one constant per cell. Its trial
+  function is the multiplier, while its test function imposes the mean equation.
 
-  @code{.cpp}
-  RealFunction f =
-    [](const Point& p)
-    {
-      return sin(p.x() + M_PI / 4) * cos(p.y() + M_PI / 4);
-    };
-  @endcode
+  @snippet PDEs/Periodic.cpp periodic-form
 
-  @subsection examples-pdes-periodic-dofmap Building the DOF correspondence map
+  The periodic constraints identify both trial and test variations during
+  assembly. Flux periodicity is the natural boundary condition of this weak
+  formulation; no independent Dirichlet data are prescribed.
 
-  The key step for periodic conditions is building an `IndexMap` that pairs
-  the DOF indices on opposite boundaries. For a uniform @f$ n \times n @f$
-  grid, the DOF layout is row-major. We pair:
+  @section examples-pdes-periodic-output 4. Solve and inspect the result
 
-  - **Left ↔ Right**: DOF @f$ i \cdot n @f$ with DOF @f$ i \cdot n + (n-1) @f$,
-    for each row @f$ i @f$.
-  - **Bottom ↔ Top**: DOF @f$ j @f$ with DOF @f$ j + n(n-1) @f$, for each
-    column @f$ j @f$.
+  The multiplier gives a nonsingular saddle-point system, solved here with
+  sparse LU. The result is exported on the original square mesh, with matching
+  values on the paired edges.
 
-  @code{.cpp}
-  P1 vh(mesh);
+  @snippet PDEs/Periodic.cpp periodic-solve
 
-  IndexMap<IndexSet> dofs;
+  @image html PDEs/Periodic.png "Computed zero-mean solution. Opposite edges carry matching values." width=480px
 
-  // Left ↔ Right (pair first DOF in each row with last DOF in same row)
-  for (Index i = 0; i < vh.getSize(); i += n)
-    dofs[i].insert(i + n - 1);
+  Open `Periodic.xdmf` and color by **u**. A useful numerical check is to compare
+  each paired boundary value, compute the discrete integral, and compare the
+  field with @f$\sin x\cos y@f$. A smooth image alone cannot establish that
+  periodic constraints were applied.
 
-  // Bottom ↔ Top (pair DOF j in first row with DOF j in last row)
-  for (Index i = 0; i < n; i++)
-    dofs[i].insert(i + n * (n - 1));
-  @endcode
+  @section examples-pdes-periodic-full Complete program
 
-  @subsection examples-pdes-periodic-solve Problem assembly and solving
+  @snippet PDEs/Periodic.cpp periodic-source
 
-  The problem is assembled identically to a standard Poisson equation,
-  except that `PeriodicBC` replaces `DirichletBC`:
+  See @ref PDEs/Periodic.cpp "Periodic.cpp" and the
+  @ref guides-boundary-conditions "boundary conditions guide".
 
-  @code{.cpp}
-  TrialFunction u(vh);
-  TestFunction  v(vh);
-
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + PeriodicBC(u, dofs);
-
-  Solver::SparseLU(poisson).solve();
-  @endcode
-
-  @note A direct solver (SparseLU) is used here because the resulting
-  system is singular (the constant function is in the kernel). CG requires
-  the system to be positive definite, which periodic problems are not
-  without additional constraints.
-
-  @subsection examples-pdes-periodic-save Saving results
-
-  @code{.cpp}
-  u.getSolution().save("Periodic.gf", IO::FileFormat::MFEM);
-  mesh.save("Periodic.mesh", IO::FileFormat::MFEM);
-  @endcode
-
-  @section examples-pdes-periodic-full Full source code
-
-  The complete source code is:
-  -   @ref PDEs/Periodic.cpp "Periodic.cpp"
-
-  @section examples-pdes-periodic-see-also See also
-
-  - @ref examples-pdes-poisson "Poisson equation" — Standard Dirichlet version
-  - @ref guides-boundary-conditions "Boundary conditions guide"
-  - @ref guides-weak-formulations "Weak formulations"
-
-  @example PDEs/Periodic.cpp
-  @m_examplenavigation{examples-pdes-periodic,PDEs/}
-  @m_footernavigation
-  */
+  @example PDEs/Periodic.cpp @m_examplenavigation{examples-pdes-periodic,PDEs/} @m_footernavigation
+*/

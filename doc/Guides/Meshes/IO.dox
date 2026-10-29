@@ -32,7 +32,7 @@
 
   @subsection guides-meshes-io-loading-basic Basic loading
 
-  Use @ref Rodin::Geometry::Mesh "Mesh::save()" with an explicit
+  Use @ref Rodin::Geometry::Mesh "Mesh::load()" with an explicit
   @ref Rodin::IO::FileFormat "IO::FileFormat":
 
   @code{.cpp}

@@ -1,95 +1,65 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+//! [helmholtz-source]
+#include <cmath>
+#include <cstdlib>
+
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
+#include <Rodin/IO/XDMF.h>
 
 using namespace Rodin;
-using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-static constexpr Real waveLength = 0.5;
-static constexpr Real pi = Math::Constants::pi();
-const Real waveNumber = 2 * Math::Constants::pi() / waveLength;
-
-int main(int, char**)
+int main()
 {
-  // Build a mesh
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 64, 64 });
+  //! [helmholtz-mesh]
+  constexpr size_t nodes = 97;
+  const Real pi = Math::Constants::pi();
+  const Real waveNumber = 4 * pi;
+  Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {nodes, nodes});
+  mesh.scale(1.0 / (nodes - 1));
   mesh.getConnectivity().compute(1, 2);
-  mesh.scale(1.0 / 63.0);
+  //! [helmholtz-mesh]
 
-  // Functions
+  //! [helmholtz-form]
   P1<Complex> vh(mesh);
-
-  GridFunction gf(vh);
-  gf = [&](const Point& p)
-  {
-    return
-      Complex(p.x(), p.x() * p.y());// * cos(waveNumber * p.x()) * cos(waveNumber * p.y());
-  };
-
-  P1<Real> rh(mesh);
-  GridFunction gfRe(rh);
-  GridFunction gfIm(rh);
-  gfRe = Re(gf);
-  gfIm = Im(gf);
-  gfRe.save("gfRe.gf", IO::FileFormat::MFEM);
-  gfIm.save("gfIm.gf", IO::FileFormat::MFEM);
-  mesh.save("Grid.mesh", IO::FileFormat::MFEM);
-
-  ComplexFunction f =
-    [&](const Point& p)
-    {
-      return Complex(p.x(), 1) * waveNumber * waveNumber * cos(waveNumber * p.x()
-          ) * cos(waveNumber * p.y());
-    };
-
   TrialFunction u(vh);
-  TestFunction  v(vh);
-
-  ComplexFunction u_ex =
-    [&](const Point& p)
-    {
-      auto x = p.x();
-      auto y = p.y();
-      return
-        (Complex(x, 1)
-           * cos(waveNumber * x)
-           * cos(waveNumber * y)
-           - Complex(2.0 / waveNumber, 0.0)
-           * sin(waveNumber * x)
-           * cos(waveNumber * y));
-    };
+  TestFunction v(vh);
+  ComplexFunction exact = [=](const Point& point) {
+    return std::exp(Complex(0, waveNumber * point.x())) * std::sin(pi * point.y());
+  };
+  auto source = pi * pi * exact;
 
   Problem helmholtz(u, v);
-  helmholtz = Integral(Grad(u), Grad(v))
-            - waveNumber * waveNumber * Integral(u, v)
-            - Integral(f, v)
-            + DirichletBC(u, u_ex)
-            ;
+  helmholtz = Integral(Grad(u), Grad(v)) - waveNumber * waveNumber * Integral(u, v) -
+    Integral(source, v) + DirichletBC(u, exact);
+  //! [helmholtz-form]
 
-  CG(helmholtz).solve();
+  //! [helmholtz-solve]
+  Solver::SparseLU solver(helmholtz);
+  solver.solve();
+  if (!solver.success())
+    return EXIT_FAILURE;
+  //! [helmholtz-solve]
 
-  GridFunction uRe(rh);
-  GridFunction uIm(rh);
-
-  uRe = Re(u.getSolution());
-  uIm = Im(u.getSolution());
-
-  // Save solution
-  uRe.save("uRe.gf", IO::FileFormat::MFEM);
-  uIm.save("uIm.gf", IO::FileFormat::MFEM);
-
-  mesh.save("Grid.mesh", IO::FileFormat::MFEM);
-
+  //! [helmholtz-export]
+  P1 realSpace(mesh);
+  GridFunction realPart(realSpace);
+  GridFunction imaginaryPart(realSpace);
+  realPart = Re(u.getSolution());
+  imaginaryPart = Im(u.getSolution());
+  IO::XDMF xdmf("Helmholtz");
+  xdmf.grid().setMesh(mesh).add("real", realPart).add("imaginary", imaginaryPart);
+  xdmf.write().flush();
+  //! [helmholtz-export]
   return 0;
 }
-
+//! [helmholtz-source]

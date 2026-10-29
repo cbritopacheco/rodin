@@ -11,6 +11,7 @@
   | @subpage examples-pdes-poisson | Scalar diffusion and homogeneous Dirichlet data |
   | @subpage examples-pdes-elasticity | Vector displacement and boundary traction |
   | @subpage examples-pdes-helmholtz | Wave propagation and complex-valued fields |
+  | @subpage examples-pdes-stokes | Incompressibility, mixed spaces, and pressure normalization |
   | @subpage examples-pdes-navierstokes | Coupled velocity and pressure |
   | @subpage examples-pdes-periodic | Periodic boundary identification |
   | @subpage examples-pdes-surfacemesh | Differential operators on an embedded surface |

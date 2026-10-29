@@ -38,23 +38,32 @@
 
   @subsection gallery-pdes-helmholtz Helmholtz equation
 
-  @image html PDEs/Helmholtz_placeholder.png width=360px
+  @image html PDEs/Helmholtz.png width=360px
 
   The @ref examples-pdes-helmholtz "Helmholtz equation" example solves
   the complex-valued PDE @f$ -\Delta u - k^2 u = f @f$ using
   `P1<Complex>` finite element spaces.
   This demonstrates Rodin's support for complex-valued computations.
 
+  @subsection gallery-pdes-stokes Stokes equations
+
+  @image html PDEs/Stokes.png width=360px
+
+  The @ref examples-pdes-stokes "Stokes tutorial" introduces mixed velocity–pressure
+  spaces and a zero-mean pressure constraint through a regularized lid-driven cavity.
+
   @subsection gallery-pdes-navierstokes Navier–Stokes equations
 
-  @image html PDEs/NavierStokes_placeholder.png width=360px
+  @image html PDEs/NavierStokes.png width=360px
 
   The @ref examples-pdes-navierstokes "Navier–Stokes" tutorial covers the
   transient incompressible Navier–Stokes equations using Taylor–Hood elements
   (`H1` order 2 for velocity, order 1 for
-  pressure) with PETSc SNES.
+  pressure), semi-implicit Oseen stepping, and a computed cavity animation.
 
   @subsection gallery-pdes-periodic Periodic Poisson equation
+
+  @image html PDEs/Periodic.png width=360px
 
   The @ref examples-pdes-periodic "periodic Poisson" example demonstrates
   how to impose periodic boundary conditions using `PeriodicBC` and a DOF
@@ -62,6 +71,8 @@
   constrained to be equal, simulating a tiling pattern.
 
   @subsection gallery-pdes-surface Reaction-diffusion on a surface
+
+  @image html PDEs/SurfaceMesh.png width=360px
 
   The @ref examples-pdes-surfacemesh "surface mesh" example solves a
   reaction-diffusion equation @f$ -\Delta_\Gamma u + u = f @f$ on a

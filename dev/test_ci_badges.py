@@ -173,6 +173,145 @@ class BadgeTest(unittest.TestCase):
         self.assertEqual(next(j for j in jobs if j['name'] == 'Retried')['status'], 'completed')
         self.assertEqual(next(j for j in jobs if j['name'] == 'Active')['status'], 'in_progress')
 
+    def test_direct_documentation_updates_only_its_file_without_matrix_inventory(self):
+        for status in ['queued', 'running', 'success', 'failure', 'cancelled']:
+            with self.subTest(status=status):
+                publisher, calls = self.fixture()
+                publisher.publish_documentation(status, '10', 'abc', 1)
+                writes = [(path, data) for path, method, data in calls if method == 'PUT']
+                self.assertEqual(len(writes), 1)
+                self.assertTrue(writes[0][0].endswith('/develop/documentation.json'))
+                record = json.loads(base64.b64decode(writes[0][1]['content']))
+                self.assertEqual(record['message'], badge('Documentation', status, 'abc')['message'])
+                self.assertEqual((record['run'], record['attempt']), ('10', 1))
+                self.assertFalse(any('/jobs?' in path or 'Tests.yml' in path for path, _, _ in calls))
+
+    def test_direct_documentation_rejects_stale_commit_run_and_attempt(self):
+        for run, sha, attempt in [('10', 'old', 1), ('9', 'abc', 1), ('10', 'abc', 2)]:
+            with self.subTest(run=run, sha=sha, attempt=attempt):
+                publisher, calls = self.fixture()
+                publisher.publish_documentation('success', run, sha, attempt)
+                self.assertFalse(any(method == 'PUT' for _, method, _ in calls))
+
+    def test_direct_documentation_requires_complete_source_identity(self):
+        publisher, _ = self.fixture()
+        for run, sha, attempt in [(None, 'abc', 1), ('10', None, 1), ('10', 'abc', None)]:
+            with self.assertRaises(ValueError):
+                publisher.publish_documentation('success', run, sha, attempt)
+
+    def test_reconciler_cannot_downgrade_verified_outcome_in_same_attempt(self):
+        for status in ['success', 'failure', 'cancelled']:
+            with self.subTest(status=status):
+                publisher, calls = self.fixture()
+                original = publisher.request
+                old = dict(badge('Documentation', status, 'abc'), run='10', attempt=1, verified_status=status)
+                def response(path, method='GET', data=None):
+                    if '/contents/develop/documentation.json' in path and method == 'GET':
+                        return {'sha': 'proof', 'content': base64.b64encode(json.dumps(old).encode()).decode()}
+                    return original(path, method, data)
+                publisher.request = response
+                publisher.publish()
+                self.assertFalse(any(method == 'PUT' and path.endswith('documentation.json')
+                                     for path, method, _ in calls))
+
+    def test_new_attempt_can_replace_previous_verified_outcome(self):
+        publisher, calls = self.fixture()
+        original = publisher.request
+        old = dict(badge('Documentation', 'success', 'abc'), run='10', attempt=1, verified_status='success')
+        def response(path, method='GET', data=None):
+            if '/workflows/Documentation.yml/' in path:
+                return {'workflow_runs': [dict(id=10, head_sha='abc', run_attempt=2)]}
+            if '/contents/' in path and method == 'GET':
+                return {'sha': 'old', 'content': base64.b64encode(json.dumps(old).encode()).decode()}
+            return original(path, method, data)
+        publisher.request = response
+        publisher.publish_documentation('running', '10', 'abc', 2)
+        self.assertEqual(sum(method == 'PUT' for _, method, _ in calls), 1)
+
+    def test_confirmed_deployment_can_replace_failure_but_not_be_downgraded(self):
+        for previous, requested, writes in [('failure', 'success', 1), ('success', 'failure', 0)]:
+            with self.subTest(previous=previous, requested=requested):
+                publisher, calls = self.fixture()
+                original = publisher.request
+                old = dict(badge('Documentation', previous, 'abc'), run='10', attempt=1, verified_status=previous)
+                def response(path, method='GET', data=None):
+                    if '/contents/' in path and method == 'GET':
+                        return {'sha': 'old', 'content': base64.b64encode(json.dumps(old).encode()).decode()}
+                    return original(path, method, data)
+                publisher.request = response
+                publisher.publish_documentation(requested, '10', 'abc', 1)
+                self.assertEqual(sum(method == 'PUT' for _, method, _ in calls), writes)
+
+    def test_concurrent_write_refetches_content_sha_before_retry(self):
+        publisher, calls = self.fixture()
+        original = publisher.request
+        puts = []
+        def response(path, method='GET', data=None):
+            if '/contents/' in path and method == 'GET':
+                return {'sha': 'new' if puts else 'old', 'content': base64.b64encode(b'{}').decode()}
+            if method == 'PUT':
+                puts.append(data)
+                if len(puts) == 1:
+                    raise subprocess.CalledProcessError(1, ['gh'], stderr='HTTP 409')
+                return {}
+            return original(path, method, data)
+        publisher.request = response
+        publisher.publish_documentation('success', '10', 'abc', 1)
+        self.assertEqual([data['sha'] for data in puts], ['old', 'new'])
+
+    def test_conflict_reread_preserves_a_concurrently_verified_deployment(self):
+        publisher, calls = self.fixture()
+        original = publisher.request
+        puts = []
+        old = dict(badge('Documentation', 'success', 'abc'), run='10', attempt=1, verified_status='success')
+        def response(path, method='GET', data=None):
+            if '/contents/' in path and method == 'GET':
+                content = json.dumps(old).encode() if puts else b'{}'
+                return {'sha': 'new' if puts else 'old', 'content': base64.b64encode(content).decode()}
+            if method == 'PUT':
+                puts.append(data)
+                raise subprocess.CalledProcessError(1, ['gh'], stderr='HTTP 409')
+            return original(path, method, data)
+        publisher.request = response
+        publisher.publish_documentation('running', '10', 'abc', 1)
+        self.assertEqual(len(puts), 1)
+
+    def test_badge_branch_initialization_tolerates_a_concurrent_creator(self):
+        publisher, _ = self.fixture()
+        lookups = []
+        def response(path, method='GET', data=None):
+            if path.endswith('/git/ref/heads/ci-badges'):
+                lookups.append(path)
+                if len(lookups) == 1:
+                    raise subprocess.CalledProcessError(1, ['gh'], stderr='HTTP 404')
+                return {'object': {'sha': 'concurrent'}}
+            if path.endswith('/git/trees'):
+                return {'sha': 'tree'}
+            if path.endswith('/git/commits'):
+                return {'sha': 'initial'}
+            if path.endswith('/git/refs'):
+                raise subprocess.CalledProcessError(1, ['gh'], stderr='HTTP 422 Reference already exists')
+            raise AssertionError(path)
+        publisher.request = response
+        publisher.branch_ready()
+        self.assertEqual(len(lookups), 2)
+
+    def test_write_retries_are_bounded_and_other_errors_propagate(self):
+        for code, count in [('409', 3), ('422', 3), ('403', 1)]:
+            with self.subTest(code=code):
+                publisher, _ = self.fixture()
+                original = publisher.request
+                puts = []
+                def response(path, method='GET', data=None):
+                    if method == 'PUT':
+                        puts.append(data)
+                        raise subprocess.CalledProcessError(1, ['gh'], stderr='HTTP ' + code)
+                    return original(path, method, data)
+                publisher.request = response
+                with self.assertRaises(subprocess.CalledProcessError):
+                    publisher.publish_documentation('success', '10', 'abc', 1)
+                self.assertEqual(len(puts), count)
+
     def test_non_branch_inputs_are_rejected(self):
         with self.assertRaises(ValueError):
             Publisher('owner/repo', '../other')
