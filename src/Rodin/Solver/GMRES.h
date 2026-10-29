@@ -73,6 +73,7 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::GMRES<LinearSystem>>
   {
+    /// @brief Assembled system associated with the solver.
     using LinearSystemType = LinearSystem;
   };
 }
@@ -87,6 +88,8 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief Deduces the linear system when selecting the default backend.
+   * @tparam LinearSystem Assembled system type.
+   * @param problem Associated variational problem.
    */
   template <class LinearSystem>
   GMRES(Variational::ProblemBase<LinearSystem>& problem) -> GMRES<LinearSystem>;
@@ -94,6 +97,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief Deduces the linear system; the preconditioner type remains private.
+   * @tparam LinearSystem Assembled system type.
+   * @tparam Preconditioner Eigen-compatible preconditioner.
+   * @param problem Associated variational problem.
+   * @param pc Owned preconditioner configuration source.
    */
   template <class LinearSystem, class Preconditioner>
   GMRES(Variational::ProblemBase<LinearSystem>& problem, const Preconditioner& pc)
@@ -197,13 +204,17 @@ namespace Rodin::Solver
       };
 
     public:
-      /// @brief Constructs the existing default-preconditioned native solver.
+      /**
+       * @brief Constructs the existing default-preconditioned native solver.
+       * @param problem Associated variational problem.
+       */
       explicit GMRES(ProblemBaseType& problem)
         : GMRES(problem, Eigen::DiagonalPreconditioner<Scalar>{})
       {}
 
       /**
        * @brief Copies a configured preconditioner into the private typed backend.
+       * @tparam Preconditioner Eigen-compatible, copy-configurable preconditioner.
        * @param problem Problem whose system is solved.
        * @param pc Eigen-compatible, copy-configurable preconditioner.
        */
@@ -218,7 +229,10 @@ namespace Rodin::Solver
           "GMRES preconditioners must support copying their configuration.");
       }
 
-      /// @brief Copies the problem and settings into fresh independent factors.
+      /**
+       * @brief Copies the problem and settings into fresh independent factors.
+       * @param other Solver whose configuration is copied.
+       */
       GMRES(const GMRES& other)
         : Parent(other),
           m_backend(other.m_backend->clone()),
@@ -226,7 +240,10 @@ namespace Rodin::Solver
           m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
       {}
 
-      /// @brief Transfers the problem while rebuilding an independent backend.
+      /**
+       * @brief Transfers the problem while rebuilding an independent backend.
+       * @param other Solver whose configuration is transferred.
+       */
       GMRES(GMRES&& other)
         : Parent(std::move(other)),
           m_backend(other.m_backend->clone()),
@@ -234,52 +251,79 @@ namespace Rodin::Solver
           m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
       {}
 
-      /// @brief Sets the relative backend tolerance.
+      /**
+       * @brief Sets the relative backend tolerance.
+       * @param tolerance Requested relative tolerance.
+       * @returns This solver.
+       */
       GMRES& setTolerance(const Real& tolerance)
       {
         m_settings.tolerance = tolerance;
         return *this;
       }
 
-      /// @brief Sets the explicit iteration limit.
+      /**
+       * @brief Sets the explicit iteration limit.
+       * @param count Maximum number of iterations.
+       * @returns This solver.
+       */
       GMRES& setMaxIterations(size_t count)
       {
         m_settings.maximumIterations = count;
         return *this;
       }
 
-      /// @brief Sets the restart dimension controlling Krylov storage.
+      /**
+       * @brief Sets the restart dimension controlling Krylov storage.
+       * @param count Krylov restart dimension.
+       * @returns This solver.
+       */
       GMRES& setRestart(size_t count)
       {
         m_settings.restart = count;
         return *this;
       }
 
-      /// @brief Solves the system, preserving the supplied initial-guess behavior.
+      /**
+       * @brief Solves the system, preserving the supplied initial-guess behavior.
+       * @param system System and initial solution guess.
+       */
       void solve(LinearSystemType& system) override
       {
         m_result = m_backend->solve(system, m_settings);
       }
 
-      /// @brief Returns whether the last setup and solve succeeded.
+      /**
+       * @brief Returns whether the last setup and solve succeeded.
+       * @returns True after a successful setup and solve.
+       */
       Boolean success() const
       {
         return m_result.status == Eigen::Success;
       }
 
-      /// @brief Returns the last backend iteration count.
+      /**
+       * @brief Returns the last backend iteration count.
+       * @returns Number of completed Krylov iterations.
+       */
       size_t getIterationNumber() const
       {
         return m_result.iterations;
       }
 
-      /// @brief Returns the backend error estimate, not the true residual.
+      /**
+       * @brief Returns the backend error estimate, not the true residual.
+       * @returns Estimated relative residual from Eigen.
+       */
       Real getError() const
       {
         return m_result.error;
       }
 
-      /// @brief Copies configuration into a newly allocated solver owned by the caller.
+      /**
+       * @brief Copies configuration into a newly allocated solver owned by the caller.
+       * @returns A new solver whose ownership transfers to the caller.
+       */
       GMRES* copy() const noexcept override
       {
         return new GMRES(*this);
@@ -389,13 +433,17 @@ namespace Rodin::Solver
       };
 
     public:
-      /// @brief Constructs the existing default-preconditioned native solver.
+      /**
+       * @brief Constructs the existing default-preconditioned native solver.
+       * @param problem Associated variational problem.
+       */
       explicit GMRES(ProblemBaseType& problem)
         : GMRES(problem, Eigen::DiagonalPreconditioner<Scalar>{})
       {}
 
       /**
        * @brief Copies a configured preconditioner into the private typed backend.
+       * @tparam Preconditioner Eigen-compatible, copy-configurable preconditioner.
        * @param problem Problem whose system is solved.
        * @param pc Eigen-compatible, copy-configurable preconditioner.
        */
@@ -410,7 +458,10 @@ namespace Rodin::Solver
           "GMRES preconditioners must support copying their configuration.");
       }
 
-      /// @brief Copies the problem and settings into fresh independent factors.
+      /**
+       * @brief Copies the problem and settings into fresh independent factors.
+       * @param other Solver whose configuration is copied.
+       */
       GMRES(const GMRES& other)
         : Parent(other),
           m_backend(other.m_backend->clone()),
@@ -418,7 +469,10 @@ namespace Rodin::Solver
           m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
       {}
 
-      /// @brief Transfers the problem while rebuilding an independent backend.
+      /**
+       * @brief Transfers the problem while rebuilding an independent backend.
+       * @param other Solver whose configuration is transferred.
+       */
       GMRES(GMRES&& other)
         : Parent(std::move(other)),
           m_backend(other.m_backend->clone()),
@@ -426,52 +480,79 @@ namespace Rodin::Solver
           m_result{Eigen::InvalidInput, 0, std::numeric_limits<Real>::infinity()}
       {}
 
-      /// @brief Sets the relative backend tolerance.
+      /**
+       * @brief Sets the relative backend tolerance.
+       * @param tolerance Requested relative tolerance.
+       * @returns This solver.
+       */
       GMRES& setTolerance(const Real& tolerance)
       {
         m_settings.tolerance = tolerance;
         return *this;
       }
 
-      /// @brief Sets the explicit iteration limit.
+      /**
+       * @brief Sets the explicit iteration limit.
+       * @param count Maximum number of iterations.
+       * @returns This solver.
+       */
       GMRES& setMaxIterations(size_t count)
       {
         m_settings.maximumIterations = count;
         return *this;
       }
 
-      /// @brief Sets the restart dimension controlling Krylov storage.
+      /**
+       * @brief Sets the restart dimension controlling Krylov storage.
+       * @param count Krylov restart dimension.
+       * @returns This solver.
+       */
       GMRES& setRestart(size_t count)
       {
         m_settings.restart = count;
         return *this;
       }
 
-      /// @brief Solves the system, preserving the supplied initial-guess behavior.
+      /**
+       * @brief Solves the system, preserving the supplied initial-guess behavior.
+       * @param system System and initial solution guess.
+       */
       void solve(LinearSystemType& system) override
       {
         m_result = m_backend->solve(system, m_settings);
       }
 
-      /// @brief Returns whether the last setup and solve succeeded.
+      /**
+       * @brief Returns whether the last setup and solve succeeded.
+       * @returns True after a successful setup and solve.
+       */
       Boolean success() const
       {
         return m_result.status == Eigen::Success;
       }
 
-      /// @brief Returns the last backend iteration count.
+      /**
+       * @brief Returns the last backend iteration count.
+       * @returns Number of completed Krylov iterations.
+       */
       size_t getIterationNumber() const
       {
         return m_result.iterations;
       }
 
-      /// @brief Returns the backend error estimate, not the true residual.
+      /**
+       * @brief Returns the backend error estimate, not the true residual.
+       * @returns Estimated relative residual from Eigen.
+       */
       Real getError() const
       {
         return m_result.error;
       }
 
-      /// @brief Copies configuration into a newly allocated solver owned by the caller.
+      /**
+       * @brief Copies configuration into a newly allocated solver owned by the caller.
+       * @returns A new solver whose ownership transfers to the caller.
+       */
       GMRES* copy() const noexcept override
       {
         return new GMRES(*this);

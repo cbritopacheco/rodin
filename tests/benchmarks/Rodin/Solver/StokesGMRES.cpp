@@ -13,12 +13,12 @@ int main(int argc, char** argv)
 {
   using namespace Rodin::Tests::Benchmarks;
   bool failed = false;
-  StokesWorkload<2, false, true>::registerCases<true>(failed);
-  StokesWorkload<3, false, true>::registerCases<true>(failed);
-  StokesWorkload<4, false, true>::registerCases<true>(failed);
-  StokesWorkload<2, true, true>::registerCases<true>(failed);
-  StokesWorkload<3, true, true>::registerCases<true>(failed);
-  StokesWorkload<4, true, true>::registerCases<true>(failed);
+  StokesWorkload<2, false>::registerCases<true>(failed);
+  StokesWorkload<3, false>::registerCases<true>(failed);
+  StokesWorkload<4, false>::registerCases<true>(failed);
+  StokesWorkload<2, true>::registerCases<true>(failed);
+  StokesWorkload<3, true>::registerCases<true>(failed);
+  StokesWorkload<4, true>::registerCases<true>(failed);
   benchmark::Initialize(&argc, argv);
   if (benchmark::ReportUnrecognizedArguments(argc, argv))
     return 1;

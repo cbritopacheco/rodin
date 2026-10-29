@@ -85,7 +85,7 @@ not assumed to be wall time. `RANKS` preserves the required launcher counts.
 `ARGS` applies to every invocation; `MPI_ARGS` additionally applies above one
 rank.
 
-The Stokes assembly, SparseLU and GMRES/block-Schur registrations use `CASE_BATCH 1`: individual
+The Stokes assembly and GMRES/block-Schur registrations use `CASE_BATCH 1`: individual
 large cases can take many minutes outside their reported timed operations.
 Separate lanes retain every case while limiting work lost to a runner shutdown.
 The [runner resource budget](../README.md#github-runner-resource-budget) applies
@@ -107,12 +107,24 @@ constraint. Pressure mass storage has shared immutable ownership across solver
 configuration copies; factors remain independent. Restart is 60, the iteration
 limit is 1200 and the backend tolerance is 1e-13. Each solve starts from zero,
 and timing includes preconditioner setup and the solve. Pressure mass assembly
-is untimed. This variant has no residual-correction solve, unlike SparseLU.
-Its 108 cases are separately labelled; SparseLU cases are not replaced.
+is untimed. This operation has no residual-correction solve. Its 108 discretizations retain
+the original fields, geometries, degrees, meshes, ranks and tolerances.
 
-The largest pyramid cases currently fail the existing missing-pressure
-sensitivity floor despite passing the affine patch and linear-solver checks.
-Their failure remains explicit; changing the solver does not waive that check.
+The Stokes solver campaign uses block-GMRES for all 108 discretizations.
+The memory-intensive SparseLU benchmark path has been removed. Benchmark names
+explicitly identify GMRESBlockSchur so results are not compared as SparseLU timings.
+
+The pressure-omission control is normalized by the independently assembled
+forcing load restricted to unconstrained velocity test DOFs. For this affine
+unit-viscosity patch, the forcing equals the pressure gradient: the omitted
+residual must reproduce the negative load within the same full-RHS-normalized
+1e-11 residual tolerance as the exact patch, and
+its relative magnitude must exceed the unchanged 1e-4 sensitivity floor.
+The full RHS also contains Dirichlet-elimination terms, so normalizing this
+control by its norm gave a mesh-dependent value below that floor for the
+largest pyramids. The historical full-RHS-normalized counter is retained;
+separate counters report load-normalized sensitivity and agreement. Exact
+patch, solved-residual and coefficient tolerances are unchanged.
 
 Non-root display reporters must redirect their output stream as well as suppress
 measurement callbacks: Google Benchmark writes `--benchmark_list_tests` output
