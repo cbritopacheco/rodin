@@ -15,6 +15,8 @@ target_link_libraries(RodinKokkos
   INTERFACE
     Rodin::Geometry
     Rodin::Context
+    Rodin::Variational
+    Rodin::Assembly
     Kokkos::kokkos
 )
 
@@ -25,11 +27,16 @@ target_sources(RodinKokkos INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Context/Kokkos.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Geometry.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly/Kokkos.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly/KokkosIteration.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Utility.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Geometry/Connectivity.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Geometry/Mesh.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Geometry/MeshView.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/DeviceView.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Integral.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/P1.h>
 )
 
 install(TARGETS RodinKokkos EXPORT RodinTargets)

@@ -17,6 +17,7 @@
 #include "Kokkos/ForwardDecls.h"
 #include "Kokkos/Context.h"
 #include "Kokkos/Geometry.h"
+#include "Kokkos/Variational.h"
 #include "Kokkos/Assembly.h"
 
 #endif

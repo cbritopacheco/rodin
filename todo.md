@@ -21,25 +21,31 @@ coeurs).
 
 ## 1. Vérifier l'environnement demeter
 
-- [ ] `g++-14 --version`, `gfortran-14 --version` (gfortran requis pour MUMPS
-      et ScaLAPACK).
-- [ ] GPU et CUDA: `nvidia-smi`, `nvcc --version`. Noter l'arch
-      (sm_XX) pour `Kokkos_ARCH_*` et `--with-cuda-arch`.
-- [ ] MPI: quelle implémentation, quelle version, CUDA-aware ou non
-      (`ompi_info --parsable --all | grep mpi_built_with_cuda_support`).
-      Un seul MPI dans le PATH, sinon FindMPI de Rodin et PETSc divergent.
-- [ ] CMake: si CMake 4, exporter `CMAKE_POLICY_VERSION_MINIMUM=3.5`
-      (sinon METIS ne configure pas).
-- [ ] `nproc` et RAM: choisir les `-j` (Rodin consomme beaucoup de RAM par
-      unité de compilation, compter environ 3-4 Go par job).
+- [x] `g++-14 --version`, `gfortran-14 --version`: GCC 14.3.0
+      (14.3.0-14ubuntu1). gcc 15 est le défaut sur demeter: toujours
+      nommer `gcc-14`/`g++-14`/`gfortran-14` explicitement.
+- [x] GPU et CUDA: RTX 2080 Ti, compute capability 7.5 (sm_75), driver
+      595.99.02. CUDA 13.1 (V13.1.115) dans `/usr/local/cuda-13.1`, a mettre
+      en tête du PATH. Ne pas utiliser `/usr/bin/nvcc` (CUDA 12.4, refuse
+      gcc 14). `Kokkos_ARCH_TURING75=ON`, `--with-cuda-arch=75`.
+- [x] MPI: OpenMPI 5.0.10 (apt, `/usr/bin/mpicc`, seul MPI; `/bin` est un
+      lien vers `/usr/bin`). Pas CUDA-aware
+      (`opal_built_with_cuda_support:value:false`).
+- [x] CMake 4.2.3: exporter `CMAKE_POLICY_VERSION_MINIMUM=3.5`.
+- [x] 112 coeurs, 750 Go de RAM: `-j64`.
 
 ## 2. Kokkos (build partagé, PIC)
 
 PETSc en bibliothèque partagée exige un Kokkos partagé. Rodin doit utiliser
 exactement le même Kokkos que PETSc (sinon deux runtimes Kokkos).
 
+Kokkos 4.7.04 (tag `4.7.04`): CUDA 13 supporté depuis 4.7.01, fix de
+compilation CUDA 13.1 dans 4.7.03 (kokkos#9020). Kokkos Kernels 4.7.04
+correspondant pour PETSc.
+
 ```sh
-K=$HOME/kokkos-src   # cloner kokkos 4.7.x ici
+K=$HOME/Documents/kokkos-src   # kokkos 4.7.04 cloné dans $K/kokkos
+export PATH=/usr/local/cuda-13.1/bin:$PATH
 export NVCC_WRAPPER_DEFAULT_COMPILER=g++-14
 cmake -S $K/kokkos -B $K/build-shared \
   -DCMAKE_BUILD_TYPE=Release \
@@ -48,47 +54,72 @@ cmake -S $K/kokkos -B $K/build-shared \
   -DCMAKE_INSTALL_PREFIX=$K/install-shared \
   -DBUILD_SHARED_LIBS=ON \
   -DKokkos_ENABLE_CUDA=ON -DKokkos_ENABLE_SERIAL=ON \
-  -DKokkos_ARCH_<ARCH>=ON \
+  -DKokkos_ARCH_TURING75=ON \
   -DKokkos_ENABLE_IMPL_VIEW_LEGACY=ON \
   -DKokkos_ENABLE_COMPLEX_ALIGN=ON \
   -DKokkos_ENABLE_DEPRECATION_WARNINGS=ON
-cmake --build $K/build-shared -j && cmake --install $K/build-shared
+cmake --build $K/build-shared -j64 && cmake --install $K/build-shared
 ```
 
-- [ ] Build et install de Kokkos partagé.
-- [ ] Optionnel: même chose en statique (`build`/`install`) pour les builds
-      Rodin sans PETSc.
+- [x] Build et install de Kokkos partagé: `$K/install-shared`
+      (`libkokkoscore.so.4.7.4`), sans warning.
+- [x] Optionnel: même chose en statique (`build`/`install`, sans
+      `BUILD_SHARED_LIBS`, avec `CMAKE_POSITION_INDEPENDENT_CODE=ON`):
+      `$K/install`.
 
 ## 3. PETSc 3.26 avec Kokkos, CUDA, hypre, SuperLU_DIST, MUMPS
 
 PETSc 3.19 ne supporte pas Kokkos 4.7: prendre 3.26 avec Kokkos Kernels
-4.7.04. PETSc n'a pas d'interface cuDSS (même en 3.26).
+4.7.04. PETSc n'a pas d'interface cuDSS (même en 3.26). PETSc 3.26.0
+télécharge par défaut Kokkos et Kokkos Kernels 5.2.2 (minimum 4.3.00): le
+`--download-kokkos-kernels-commit=4.7.04` est indispensable pour rester
+aligné sur le Kokkos 4.7.04 partagé.
+
+Source: `~/Documents/petsc-3.26` (tag `v3.26.0`).
 
 ```sh
-export OMPI_CC=gcc-14 OMPI_CXX=g++-14 OMPI_FC=gfortran-14   # si OpenMPI
+export PATH=/usr/local/cuda-13.1/bin:$PATH
+export OMPI_CC=gcc-14 OMPI_CXX=g++-14 OMPI_FC=gfortran-14
+export CMAKE_POLICY_VERSION_MINIMUM=3.5
 ./configure PETSC_ARCH=arch-cuda-kokkos \
-  --prefix=$HOME/petsc-kokkos-install \
+  --prefix=$HOME/Documents/petsc-kokkos-install \
   --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif90 \
   --with-cxx-dialect=20 --with-debugging=0 \
   COPTFLAGS=-O3 CXXOPTFLAGS=-O3 FOPTFLAGS=-O3 \
-  --with-cuda=1 --with-cuda-dir=<CUDA_DIR> --with-cuda-arch=<SM> \
-  --with-kokkos-dir=$K/install-shared \
+  --with-cuda=1 --with-cuda-dir=/usr/local/cuda-13.1 --with-cuda-arch=75 \
+  --with-kokkos-dir=$HOME/Documents/kokkos-src/install-shared \
   --download-kokkos-kernels --download-kokkos-kernels-commit=4.7.04 \
   --download-fblaslapack --download-scalapack --download-mumps \
   --download-metis --download-parmetis --download-superlu_dist \
-  --download-hypre
+  --download-hypre --with-make-np=64
 make PETSC_DIR=$PWD PETSC_ARCH=arch-cuda-kokkos all
 make PETSC_DIR=$PWD PETSC_ARCH=arch-cuda-kokkos install
 ```
 
-- [ ] Configure + build + install.
-- [ ] Si MPI n'est pas CUDA-aware: `export PETSC_OPTIONS=-use_gpu_aware_mpi 0`
-      (sinon `make check` et tout run GPU abortent).
-- [ ] Vérifier sur `src/snes/tutorials/ex19`:
-  - `-dm_mat_type aijkokkos -dm_vec_type kokkos -pc_type gamg`
-  - `-dm_mat_type aijcusparse -dm_vec_type cuda -pc_type hypre`
-  - `-pc_type lu -pc_factor_mat_solver_type superlu_dist`
-  - `-pc_type lu -pc_factor_mat_solver_type mumps`
+- [x] Configure + build + install dans `~/Documents/petsc-kokkos-install`.
+      Versions: Kokkos 4.7.4, Kokkos Kernels 4.7.4, hypre 3.2.0 (GPU, sans
+      Umpire), SuperLU_DIST 9.2.1, MUMPS 5.9.1, METIS 5.1.0, ParMETIS 4.0.3,
+      fblaslapack, ScaLAPACK. nvcc 13.1 avec `-ccbin mpicxx` (g++-14 via
+      `OMPI_CXX`).
+      Warning attendu: `mpi.mod` introuvable. Le `mpi.mod` d'OpenMPI apt est
+      compilé par gfortran 15 et illisible par gfortran-14; PETSc se rabat
+      sur `mpif.h`, sans conséquence.
+- [x] MPI pas CUDA-aware: `export PETSC_OPTIONS="-use_gpu_aware_mpi 0"`
+      pour tout run GPU. Attention, `make check` écrase `PETSC_OPTIONS`
+      (makefile:133): passer l'option par
+      `make ... EXTRA_OPTIONS="-use_gpu_aware_mpi 0" check`. Ainsi, tout le
+      `make check` passe (ex19 1 et 2 procs, HYPRE/CUDA, CUDA, ex3k Kokkos
+      Kernels, MUMPS, SuperLU_DIST, ex5f).
+- [x] Vérifier sur `src/snes/tutorials/ex19` (2 procs, `-da_refine 3`):
+  - `-dm_mat_type aijkokkos -dm_vec_type kokkos -pc_type gamg`: tourne sur
+    GPU, mais KSP diverge (`DIVERGED_ITS`). Même divergence en `aij` CPU et
+    en `aijcusparse`: c'est GAMG par défaut sur ce système non symétrique a
+    4 composantes, pas Kokkos. Sans `-da_refine`, les trois types
+    convergent identiquement (7 puis 6 itérations).
+  - `-dm_mat_type aijcusparse -dm_vec_type cuda -pc_type hypre`: OK (3
+    Newton, 18/24/28 itérations).
+  - `-pc_type lu -pc_factor_mat_solver_type superlu_dist`: OK.
+  - `-pc_type lu -pc_factor_mat_solver_type mumps`: OK.
 
 ## 4. Rodin avec PETSc + Kokkos
 
@@ -112,10 +143,19 @@ cmake --build rodin/build-petsc -j<N>
   `Kokkos::kokkos` passent par `nvcc_wrapper` (voir `doc/Guides/Kokkos.dox`).
 - `cmake/FindPETSc.cmake` lit `PETSc_DIR` ou la variable d'env `PETSC_DIR`.
 
-- [ ] Configure + build.
-- [ ] Revert de `SpatialComplexTest.cpp` si inutile avec gcc 14.
-- [ ] `ctest --test-dir rodin/build-petsc/tests -R '^Kokkos_'` (29 tests).
-- [ ] Tests PETSc et suite unitaire complète, noter les échecs restants.
+- Prérequis apt installés: Boost 1.90, Eigen 3.4.0, HDF5 1.14.6, plus
+  `git submodule update --init --recursive`.
+- `ctest --test-dir build-petsc` ne trouve aucun test: utiliser
+  `--test-dir build-petsc/tests`.
+
+- [x] Configure + build (`-j36`): rc=0, 0 erreur, 224 warnings non bloquants
+  (202 `-Wsign-compare`, 8 `-Wmaybe-uninitialized`, le reste divers).
+- [x] Revert de `SpatialComplexTest.cpp`: inutile, le test compile et passe
+  avec gcc 14.
+- [x] `ctest --test-dir rodin/build-petsc/tests -R '^Kokkos_'`: 29/29.
+- [x] Suite unitaire complète (dont 18 tests PETSc): 4958/4958, 1 skip
+  attendu (`NamedFormConsistency.LinearElasticity/Segment`), 102 s en
+  `-j36`. Aucun échec restant.
 
 ## 5. Prototype Oseen GPU (hors repo)
 
@@ -134,7 +174,69 @@ A copier sur demeter.
 - Le mur est le solveur, pas le GPU: les itérations croissent comme 1/h et
   avec le CFL, et fp32 demande plus d'itérations que fp64.
 
+- Demeter (RTX 2080 Ti sm_75, CUDA 13.1, Kokkos 4.7.04 partagé, g++-14),
+  build: `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+  -DCMAKE_CXX_COMPILER=g++-14 -DKokkos_DIR=$HOME/Documents/kokkos-src/install-shared/lib/cmake/Kokkos`
+  (avec `NVCC_WRAPPER_DEFAULT_COMPILER=g++-14` et CUDA 13.1 dans le PATH).
+  Temps de référence, `oseen <mesh> 100`, moyenne après warm-up, ms/step:
+
+  | maillage (inconnues)   | fp32 step | iters | fp64 step | iters |
+  |------------------------|-----------|-------|-----------|-------|
+  | AtriumCoarse (41 416)  | 2.4-2.5   | 15    | 17.4-18.2 | 105   |
+  | AtriumFine (114 448)   | 7.1-8.2   | 22-27 | 54.5-55.0 | 146   |
+
+  Ms par itération: coarse 0.13 (fp32) et 0.16 (fp64), fine 0.22 et 0.35.
+  Le fp64 est relativement cher sur Turing (débit fp64 au 1/32), et
+  l'écart avec la 5090 est de x2.5 (coarse) a x3.4 (fine) en fp32.
+- [ ] Bug du prototype: BiCGStab sans détection de breakdown. Sur
+      AtriumCoarse fp64 (rtol 1e-8), environ 1 run sur 3 tombe sur
+      `(rh, r) = 0` a l'arrondi près (valeur exacte 1e-27 pour
+      |rh||r| = 4e-10), `alpha = 0` puis `beta = rho/rhoOld` divise par 0
+      a l'itération suivante: NaN dans x, propagé a tous les steps par le
+      warm start (95 a 100 steps en échec). Non déterministe car l'ordre des
+      `atomic_add` de l'assemblage change les arrondis. Pas un bug de
+      réduction Kokkos (stress test de 600k réductions sans erreur). Fix
+      proposé (non appliqué): redémarrer BiCGStab avec `rh = r`, `p = v = 0`
+      quand `|rho| <= 1e-14 |rh| |r|` ou `omega == 0`. Validé sur 20 runs
+      coarse (0 échec, même coût) et 3 runs fine.
 - [ ] Brancher le prototype (ou le module Kokkos de Rodin) sur PETSc:
       GAMG ou hypre BoomerAMG, ou fieldsplit vitesse/pression.
 - [ ] Refaire l'étude de raffinement (REFINE=1, 2) avec multigrille.
 - [ ] Comparer avec SuperLU_DIST GPU et MUMPS (CPU, MPI) en direct.
+
+## 6. DSL device (Kokkos/CUDA), jalon 1: formes bilinéaires P1 scalaires
+
+Conception: artefact https://claude.ai/artifact/9F2T6hSwb8KHXrrxQEX7J1.
+La syntaxe utilisateur est inchangée: même code `P1 fes(mesh)`,
+`TrialFunction`, `Integral(Grad(u), Grad(v))`, `BilinearForm::assemble()`,
+seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
+
+- [x] `Kokkos/Variational/Integral.h`: spécialisation
+      `Integral<Dot<SFB<., DeviceP1>, SFB<., DeviceP1>>>` qui implémente
+      `DeviceBilinearFormIntegrator::assemble()`: un kernel par intégrale,
+      matrice locale dans un `Kokkos::Array`, triplets en mémoire device.
+      Tables de quadrature aplaties par géométrie, filtrage par attributs.
+      `integrate()`/`getPolytope()` lèvent une exception (pas d'évaluation
+      hôte).
+- [x] `Kokkos/Assembly/Kokkos.h`: `Assembly::Kokkos` sélectionné par
+      `Assembly::Default<Context::Kokkos, Context::Kokkos>`, rapatrie les
+      triplets et fait `setFromTriplets` (pas encore de COO PETSc).
+- [x] `RealFunction` accepte un `KOKKOS_LAMBDA` sur `PointView`; son
+      évaluation hôte lève une exception.
+- [x] Ordre de quadrature aligné sur l'hôte, y compris le repli
+      `k_tr + k_te - 2` des spécialisations P1 Grad.Grad et f Grad.Grad.
+- [x] `Variational/P1/P1.h`: `static constexpr ElementType` devient
+      `static const` (nvcc refuse le type non littéral). `P0.h` a le même
+      motif, non touché.
+- [x] Tests `RodinKokkosVariationalBilinearFormTest` (comparaison a l'hôte,
+      tolérance relative 1e-12): masse, rigidité, somme, coefficient f,
+      attributs, sur triangles, tétraèdres et maillage mixte quad/tri.
+- [x] Règle d'ordre de l'hôte, reproduite sur le device: les handlers P1
+      spécialisés avec dérivée (Grad.Grad, f Grad.Grad, Div(u).q, p.Div(v),
+      Jac:Jac, f Jac:Jac, ...) prennent `k_u + k_v - 2`, ceux de type masse
+      `k_u + k_v`, le handler générique la somme des ordres des feuilles. Le
+      `-2` de Div(u).q n'est pas un bug: l'ordre 0 (point milieu) est exact
+      sur simplexe pour P1 fois constante.
+- [ ] Jalons suivants: P1 vectoriel, Div, GridFunction sur device,
+      LinearForm, Problem et DirichletBC, assemblage COO PETSc, puis le
+      benchmark Oseen.

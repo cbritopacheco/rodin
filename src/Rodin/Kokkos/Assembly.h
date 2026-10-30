@@ -9,9 +9,10 @@
 
 /**
  * @file
- * @brief Kokkos assembly traversal interfaces.
+ * @brief Kokkos assembly traversal and device assembly.
  */
 
 #include "Assembly/KokkosIteration.h"
+#include "Assembly/Kokkos.h"
 
 #endif

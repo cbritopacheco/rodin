@@ -703,6 +703,7 @@ namespace Rodin::Kokkos::Geometry
           m_reference(reference)
       {
         KOKKOS_ASSERT(reference.size() == polytope.getDimension());
+        m_physical = computePhysicalCoordinates();
       }
 
       /// @brief Returns the bound entity. @return Borrowed polytope handle.
@@ -720,39 +721,52 @@ namespace Rodin::Kokkos::Geometry
       }
 
       /**
-       * @brief Evaluates the geometric map.
-       * @return Physical coordinates @f$ F_K(r) @f$.
+       * @brief Returns the image of the reference tuple under the geometric map.
+       * @return Physical coordinates @f$ F_K(r) @f$, evaluated at construction.
        */
       KOKKOS_INLINE_FUNCTION
-      Vector getPhysicalCoordinates() const
+      const Vector& getPhysicalCoordinates() const
       {
-        const auto& mesh = m_polytope.mesh;
-        const Index entity = mesh.entityOffsets[m_polytope.dimension] + m_polytope.index;
-        if (mesh.geometryKinds[entity] == GeometryKind::Identity)
-          return m_reference;
-        Vector result(mesh.spatialDimension);
-        const bool vertexMap = mesh.geometryKinds[entity] == GeometryKind::VertexP1;
-        const Index begin =
-          vertexMap ? mesh.vertexOffsets[entity] : mesh.controlOffsets[entity];
-        const Index count = vertexMap ? mesh.vertexOffsets[entity + 1] - begin
-                                      : mesh.controlOffsets[entity + 1] - begin;
-        for (Index a = 0; a < count; ++a)
-        {
-          Real value;
-          Vector gradient(m_reference.size());
-          evaluateBasis(a, value, gradient);
-          for (Index c = 0; c < mesh.spatialDimension; ++c)
-          {
-            result(c) +=
-              (vertexMap
-                  ? mesh
-                      .coordinates[mesh.vertexIndices[begin + a] * mesh.spatialDimension +
-                        c]
-                  : mesh.controls[(begin + a) * mesh.spatialDimension + c]) *
-              value;
-          }
-        }
-        return result;
+        return m_physical;
+      }
+
+      /// @brief Returns physical coordinates. @return Physical coordinate tuple.
+      KOKKOS_INLINE_FUNCTION
+      const Vector& getCoordinates() const
+      {
+        return m_physical;
+      }
+
+      /**
+       * @brief Reads one physical coordinate.
+       * @param i Coordinate index below the spatial dimension.
+       * @return Physical coordinate @f$ F_K(r)_i @f$.
+       */
+      KOKKOS_INLINE_FUNCTION
+      Real operator()(Index i) const
+      {
+        return m_physical(i);
+      }
+
+      /// @brief Returns the first physical coordinate. @return @f$ x @f$.
+      KOKKOS_INLINE_FUNCTION
+      Real x() const
+      {
+        return m_physical(0);
+      }
+
+      /// @brief Returns the second physical coordinate. @return @f$ y @f$.
+      KOKKOS_INLINE_FUNCTION
+      Real y() const
+      {
+        return m_physical(1);
+      }
+
+      /// @brief Returns the third physical coordinate. @return @f$ z @f$.
+      KOKKOS_INLINE_FUNCTION
+      Real z() const
+      {
+        return m_physical(2);
       }
 
       /**
@@ -891,12 +905,14 @@ namespace Rodin::Kokkos::Geometry
         return ::Kokkos::sqrt(det >= 0 ? det : Real(0));
       }
 
-    private:
       /**
-       * @brief Evaluates one geometry basis function and its first derivatives.
-       * @param a Ordered P1 control-point index.
+       * @brief Evaluates one P1 basis function and its first derivatives.
+       * @param a Local vertex index, ordered as the reference vertices.
        * @param value Basis value at the owned reference tuple.
-       * @param gradient Reference gradient at the owned reference tuple.
+       * @param gradient Reference gradient, sized to the reference dimension.
+       *
+       * The basis coincides with Rodin's host P1 Lagrange basis, so it serves
+       * both as the geometric map of P1 meshes and as the P1 shape functions.
        */
       KOKKOS_INLINE_FUNCTION
       void evaluateBasis(Index a, Real& value, Vector& gradient) const
@@ -991,8 +1007,43 @@ namespace Rodin::Kokkos::Geometry
         gradient(2) = a == 0 ? -1 + u * v : a == 2 ? u * v : -u * v;
       }
 
+    private:
+      /// @brief Evaluates the geometric map. @return @f$ F_K(r) @f$.
+      KOKKOS_INLINE_FUNCTION
+      Vector computePhysicalCoordinates() const
+      {
+        const auto& mesh = m_polytope.mesh;
+        const Index entity = mesh.entityOffsets[m_polytope.dimension] + m_polytope.index;
+        if (mesh.geometryKinds[entity] == GeometryKind::Identity)
+          return m_reference;
+        Vector result(mesh.spatialDimension);
+        const bool vertexMap = mesh.geometryKinds[entity] == GeometryKind::VertexP1;
+        const Index begin =
+          vertexMap ? mesh.vertexOffsets[entity] : mesh.controlOffsets[entity];
+        const Index count = vertexMap ? mesh.vertexOffsets[entity + 1] - begin
+                                      : mesh.controlOffsets[entity + 1] - begin;
+        for (Index a = 0; a < count; ++a)
+        {
+          Real value;
+          Vector gradient(m_reference.size());
+          evaluateBasis(a, value, gradient);
+          for (Index c = 0; c < mesh.spatialDimension; ++c)
+          {
+            result(c) +=
+              (vertexMap
+                  ? mesh
+                      .coordinates[mesh.vertexIndices[begin + a] * mesh.spatialDimension +
+                        c]
+                  : mesh.controls[(begin + a) * mesh.spatialDimension + c]) *
+              value;
+          }
+        }
+        return result;
+      }
+
       PolytopeView m_polytope;
       Vector m_reference;
+      Vector m_physical;
   };
 
   KOKKOS_INLINE_FUNCTION

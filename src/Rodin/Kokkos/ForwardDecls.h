@@ -26,6 +26,18 @@ namespace Rodin::Assembly
    */
   template <class Mesh>
   class KokkosIteration;
+
+  /**
+   * @brief Device assembly on resident Kokkos meshes.
+   * @tparam LinearAlgebraType Target linear algebra type.
+   * @tparam Object Variational form type to assemble.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Kokkos "Kokkos<Math::SparseMatrix<Real>, BilinearForm<...>>" | Device assembly of one sparse bilinear form. |
+   */
+  template <class LinearAlgebraType, class Object>
+  class Kokkos;
 }
 
 namespace Rodin::Kokkos::Geometry

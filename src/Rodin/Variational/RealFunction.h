@@ -14,8 +14,11 @@
 #ifndef RODIN_VARIATIONAL_REALFUNCTION_H
 #define RODIN_VARIATIONAL_REALFUNCTION_H
 
+#include <cstdlib>
 #include <memory>
 #include <type_traits>
+
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "ForwardDecls.h"
 
@@ -23,6 +26,23 @@
 
 namespace Rodin::FormLanguage
 {
+  /**
+   * @brief Indicates whether a callable is evaluated by a device backend.
+   *
+   * RealFunction accepts callables invocable on a host Geometry::Point. A
+   * backend whose evaluation points live in device memory specializes this
+   * trait for the callables it lowers itself, such as Kokkos lambdas taking a
+   * device point. Such functions are not evaluated by the host assembly.
+   *
+   * @tparam F Callable type.
+   */
+  template <class F, class Enable = void>
+  struct IsDevicePointCallable
+  {
+    /// @brief False unless a backend claims the callable.
+    static constexpr bool Value = false;
+  };
+
   /// @brief Traits for the CRTP base of real-valued functions.
   template <class Derived>
   struct Traits<Variational::RealFunctionBase<Derived>>
@@ -360,6 +380,12 @@ namespace Rodin::Variational
         return new RealFunction(*this);
       }
 
+      /// @brief Returns the constant value. @return Constant real value.
+      constexpr Real getValue() const noexcept
+      {
+        return m_x;
+      }
+
     private:
       const Real m_x;
   };
@@ -464,7 +490,8 @@ namespace Rodin::Variational
   template <class F>
   class RealFunction<F> final : public RealFunctionBase<RealFunction<F>>
   {
-    static_assert(std::is_invocable_r_v<Real, F, const Geometry::Point&>);
+    static_assert(std::is_invocable_r_v<Real, F, const Geometry::Point&> ||
+      FormLanguage::IsDevicePointCallable<F>::Value);
 
     public:
       /// @brief Scalar value type.
@@ -506,7 +533,16 @@ namespace Rodin::Variational
        */
       constexpr Real getValue(const Geometry::Point& v) const
       {
-        return m_f(v);
+        if constexpr (std::is_invocable_v<const F&, const Geometry::Point&>)
+        {
+          return m_f(v);
+        }
+        else
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Device functions are only evaluated on Kokkos meshes." << Alert::Raise;
+          std::abort();
+        }
       }
 
       /**
@@ -518,8 +554,10 @@ namespace Rodin::Variational
       {
         if constexpr (std::is_invocable_r_v<Real, F, const IntegrationPoint&>)
           return m_f(ip);
-        else
+        else if constexpr (std::is_invocable_v<const F&, const Geometry::Point&>)
           return m_f(ip.getPoint());
+        else
+          return getValue(ip.getPoint());
       }
 
       /**
@@ -549,16 +587,24 @@ namespace Rodin::Variational
         return new RealFunction(*this);
       }
 
+      /// @brief Returns the wrapped callable. @return Callable reference.
+      const F& getFunction() const noexcept
+      {
+        return m_f;
+      }
+
     private:
       const F m_f;
   };
 
   /**
    * @brief CTAD for RealFunction.
-   * @param f Callable returning a Real from a Geometry::Point
+   * @param f Callable returning a Real from a Geometry::Point, or a callable
+   * claimed by a device backend through FormLanguage::IsDevicePointCallable.
    */
   template <class F,
-    typename = std::enable_if_t<std::is_invocable_v<F, const Geometry::Point&>>>
+    typename = std::enable_if_t<std::is_invocable_v<F, const Geometry::Point&> ||
+      FormLanguage::IsDevicePointCallable<F>::Value>>
   RealFunction(F f) -> RealFunction<F>;
 }
 
