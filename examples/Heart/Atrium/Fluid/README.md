@@ -16,25 +16,7 @@ free. Carreau–Yasuda viscosity is evaluated at the lagged strain rate and is
 constant within each affine linear tetrahedron. The elementwise strong viscous
 divergence therefore vanishes in the stabilization residual.
 
-The default equal-order stabilization is the orthogonal-subscale VMS of the
-coronary example. With $\Pi_h$ the $L^2$ projection onto continuous P1 and
-$u'$ the dynamic convective subscale,
-
-$$
-\sum_K\int_K\tau_s\rho^2\left[(\nabla u^{n+1})w-\Pi_h[(\nabla w)w]\right]
-\cdot(\nabla v)w\,dX
--\sum_K\int_K\rho\,u'\cdot(\nabla v)w\,dX
-+\sum_K\int_K\tau_C\left[\nabla\cdot u^{n+1}
--\tau_C^{-1/2}\Pi_h[\tau_C^{1/2}\nabla\cdot u^n]\right]\nabla\cdot v\,dX
-+\sum_K\int_K\frac{\tau_1}{\rho}\nabla p^{n+1}\cdot\nabla q\,dX,
-$$
-
-with $u'^{\,n+1}=\tau_s\rho\,(u'^{\,n}/\Delta t-(\nabla w)w+\Pi_h[(\nabla w)w])$,
-$\tau_C=\rho h_K^2/(4\tau_1)$ and $h_K$ the longest cell edge. In FSI,
-$w=u^n-a$ with the ALE mesh velocity $a$. `-atrium_fluid_vms false` selects the
-residual-based alternative below.
-
-The residual-based alternative adds SUPG and PSPG terms
+The equal-order method adds SUPG and PSPG terms
 
 $$
 \sum_K\int_K R_m\cdot
@@ -42,8 +24,7 @@ $$
 $$
 
 and a grad-div term. The same time, advection, Temam, and pressure contributions
-enter both stabilization residuals. With element size $h_K=|K|^{1/3}$, the
-parameters are
+enter both stabilization residuals. With element size $h_K$, the parameters are
 
 $$
 \tau_1=\left(\frac{4\mu_n}{\rho h_K^2}
@@ -56,8 +37,8 @@ Backward Euler advances time. Boundary labels 1, 2, 3, and 5 are pressure-driven
 inlets, label 6 is the outlet, and the extracted material-4 interface is the
 fixed no-slip wall. Pressure penalties, boundary impedance, and backflow terms
 are retained in the flow problem. The default uses a prescribed outlet pressure.
-Ventricular coupling and species transport are optional parameters, disabled
-by default.
+Ventricular coupling, species transport, and orthogonal-subscale corrections are
+optional parameters, disabled by default.
 
 All reported opening fluxes use the outward fluid normal: inflow is negative
 and outflow is positive. For pressure-penalty coefficient $\epsilon_p$, the
@@ -87,8 +68,9 @@ belong to `Fluid::Parameters`; common time and output settings are defined by
 `OscillatoryShearIndex` are exported in `Fluid.xdmf`. The latter two are updated
 at completed statistics cycles. Optional coagulation transport exports
 `Thrombin`, `Fibrinogen`, `Fibrin`, and `ThrombosisActivation`; it is disabled by
-default and is separate from solid activation. The 0D ventricular driver is also disabled by default and available only in
-fluid mode.
+default and is separate from solid activation. The 0D ventricular driver and
+orthogonal subscales are also disabled by default and available only in fluid
+mode.
 
 ## Run
 

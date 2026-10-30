@@ -12,7 +12,6 @@
 #include <numbers>
 #include <limits>
 #include <stdexcept>
-#include <vector>
 
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
@@ -96,7 +95,6 @@ namespace Rodin::Examples::Heart::Atrium
       m_sqrtTauCFn([this](const Point& p) { return sqrtTauCAt(p); }),
       m_tauPFn([this](const Point& p) { return tauPAt(p); }),
       m_piTilde(m_sh),
-      m_uConv(m_vh),
       m_convProjection(m_vh),
       m_sub(m_vh),
       m_subOld(m_vh),
@@ -340,27 +338,6 @@ namespace Rodin::Examples::Heart::Atrium
     return std::pow(p.getPolytope().getMeasure(), 1.0 / p.getPolytope().getDimension());
   }
 
-  Fluid::Real Fluid::cellDiameter(const Point& p)
-  {
-    const auto& cell = p.getPolytope();
-    const auto& mesh = cell.getMesh();
-    std::vector<Math::SpatialPoint> x;
-    for (const Index vertex : cell.getVertices())
-      x.push_back(mesh.getVertexCoordinates(vertex));
-    Real h = 0;
-    for (size_t a = 0; a < x.size(); ++a)
-    {
-      for (size_t b = a + 1; b < x.size(); ++b)
-        h = std::max(h, Real((x[a] - x[b]).norm()));
-    }
-    return h;
-  }
-
-  Fluid::Real Fluid::stabilizationLength(const Point& p) const
-  {
-    return m_cfg.useVMS ? cellDiameter(p) : cellSize(p);
-  }
-
   Fluid::Real Fluid::viscosityAt(const Point& p) const
   {
     const auto& cy = m_cfg.viscosity;
@@ -379,7 +356,7 @@ namespace Rodin::Examples::Heart::Atrium
   Fluid::Real Fluid::tau1At(const Point& p) const
   {
     const auto uc = (m_uOld - m_meshVelocity).getValue(p);
-    const Real h = stabilizationLength(p);
+    const Real h = cellSize(p);
     const Real nu = viscosityAt(p) / m_cfg.rho;
     return 1.0 / (4.0 * nu / (h * h) + 2.0 * std::sqrt(Math::dot(uc, uc)) / h);
   }
@@ -391,7 +368,7 @@ namespace Rodin::Examples::Heart::Atrium
 
   Fluid::Real Fluid::sqrtTauCAt(const Point& p) const
   {
-    const Real h = stabilizationLength(p);
+    const Real h = cellSize(p);
     return std::sqrt(m_cfg.gradDivScale * m_cfg.rho * h * h / (4.0 * tau1At(p)));
   }
 
@@ -403,8 +380,6 @@ namespace Rodin::Examples::Heart::Atrium
 
   Fluid::Real Fluid::tauPAt(const Point& p) const
   {
-    if (m_cfg.useVMS)
-      return m_cfg.pspgScale * tau1At(p) / m_cfg.rho;
     return m_cfg.pspgScale / (m_cfg.rho / m_run.timeStep + m_cfg.rho / tau1At(p));
   }
 
@@ -483,7 +458,6 @@ namespace Rodin::Examples::Heart::Atrium
     m_meshDisplacement = zeroVector;
     m_subOld = zeroVector;
     m_sub = zeroVector;
-    m_uConv = zeroVector;
     m_convProjection = zeroVector;
     m_wss = zeroVector;
     m_netShear = zeroVector;
@@ -585,12 +559,27 @@ namespace Rodin::Examples::Heart::Atrium
 
     m_flow = (rho / dt) * Integral(m_u, m_v) - (rho / dt) * historyMass
 
-      + rho * Integral(Dot(convU, m_v)) + 0.5 * rho * Integral(temam) +
+      + rho * Integral(Dot(convU, m_v)) +
+      0.5 * rho * Integral(temam)
+
+      // SUPG tests the complete affine-P1 momentum residual along the lagged flow.
+      + (rho / dt) * Integral(m_tauFn * m_u, streamlineTest) -
+      (rho / dt) * Integral(m_tauFn * massRatio * m_uOld, streamlineTest) +
+      rho * Integral(m_tauFn * convU, streamlineTest) +
+      (0.5 * rho) * Integral(m_tauFn * geometricDivergence * m_u, streamlineTest) +
+      Integral(m_tauFn * Grad(m_p), streamlineTest) +
       VMSGradDivBilinearIntegrator(m_u, m_v, m_tauCFn)
 
       + 2.0 * Integral(muLag * symU, symV) - Integral(m_p, Div(m_v)) +
       Integral(Div(m_u), m_q) +
       m_cfg.pressurePenalty * Integral(m_p, m_q)
+
+      // PSPG tests that same momentum residual with the pressure gradient.
+      + (rho / dt) * Integral(m_tauPFn * m_u, Grad(m_q)) -
+      (rho / dt) * Integral(m_tauPFn * massRatio * m_uOld, Grad(m_q)) +
+      rho * Integral(m_tauPFn * convU, Grad(m_q)) +
+      (0.5 * rho) * Integral(m_tauPFn * geometricDivergence * m_u, Grad(m_q)) +
+      Integral(m_tauPFn * Grad(m_p), Grad(m_q))
 
       + BoundaryIntegral(pInFn * Dot(m_v, normal)).over(m_inletSet) +
       BoundaryIntegral(pOutFn * Dot(m_v, normal)).over(m_cfg.outlet)
@@ -605,34 +594,6 @@ namespace Rodin::Examples::Heart::Atrium
 
       + BoundaryIntegral(inletBackflow * Dot(m_u, m_v)).over(m_inletSet) +
       BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.outlet);
-    if (m_cfg.useVMS)
-    {
-      // Orthogonal-subscale VMS of the coronary example: convective subscale
-      // along u^n - w, its orthogonal projection and dynamic history, the
-      // projected grad-div remainder, and PSPG tau_1/rho on grad p.
-      m_flow += VMSConvectionBilinearIntegrator(m_u, m_v, m_uConv, m_tauFn, rho);
-      m_flow -= VMSConvectionLinearIntegrator(
-        m_v, m_sub, m_uConv, m_convProjection, m_tauFn, rho, dt);
-      m_flow -= VMSGradDivLinearIntegrator(m_v, m_piTilde, m_sqrtTauCFn);
-      m_flow += Integral(m_tauPFn * Grad(m_p), Grad(m_q));
-    }
-    else
-    {
-      // SUPG tests the complete affine-P1 momentum residual along the lagged flow.
-      m_flow += (rho / dt) * Integral(m_tauFn * m_u, streamlineTest);
-      m_flow -= (rho / dt) * Integral(m_tauFn * massRatio * m_uOld, streamlineTest);
-      m_flow += rho * Integral(m_tauFn * convU, streamlineTest);
-      m_flow +=
-        (0.5 * rho) * Integral(m_tauFn * geometricDivergence * m_u, streamlineTest);
-      m_flow += Integral(m_tauFn * Grad(m_p), streamlineTest);
-
-      // PSPG tests that same momentum residual with the pressure gradient.
-      m_flow += (rho / dt) * Integral(m_tauPFn * m_u, Grad(m_q));
-      m_flow -= (rho / dt) * Integral(m_tauPFn * massRatio * m_uOld, Grad(m_q));
-      m_flow += rho * Integral(m_tauPFn * convU, Grad(m_q));
-      m_flow += (0.5 * rho) * Integral(m_tauPFn * geometricDivergence * m_u, Grad(m_q));
-      m_flow += Integral(m_tauPFn * Grad(m_p), Grad(m_q));
-    }
     if (m_coupled)
     {
       // Robin data live per reference area; integrate on the moving fluid wall.
@@ -653,20 +614,15 @@ namespace Rodin::Examples::Heart::Atrium
       m_flow -= m_robinCoefficient * velocity.over(m_cfg.wall);
       m_flow += traction.over(m_cfg.wall);
       m_flow -= (0.5 * rho) * convection.over(m_cfg.wall);
-
-      // Time-derivative stabilization of Burman et al. (2025, eq. 15),
-      //   -rho/(2 dt) (int_{Omega^{n+1}} - int_{Omega^n}) u.v + rho/2 int div(w) u.v,
-      // with int_{K^n} u.v = r_K int_{K^{n+1}} u.v on affine cells. It closes
-      // the discrete energy balance of the conservative ALE mass term.
-      RealFunction geometricRate([this, dt](const Point& p) {
-        return (m_massRatios.at(p.getPolytope().getIndex()) - 1) / dt;
-      });
-      auto gcl = Integral((geometricRate + Div(m_meshVelocity)) * Dot(m_u, m_v));
-      gcl.setOrder(MassOrder);
-      m_flow += (0.5 * rho) * gcl;
     }
     else
       m_flow += DirichletBC(m_u, m_wallVelocity).on(m_cfg.wall);
+    if (m_cfg.useVMS)
+    {
+      m_flow -= VMSConvectionLinearIntegrator(
+        m_v, m_sub, m_uOld, m_convProjection, m_tauFn, rho, dt);
+      m_flow -= VMSGradDivLinearIntegrator(m_v, m_piTilde, m_sqrtTauCFn);
+    }
   }
 
   Fluid::Real Fluid::crosswind(const Point& p, Real cur, Real prev,
@@ -839,15 +795,12 @@ namespace Rodin::Examples::Heart::Atrium
     if (m_cfg.useVMS)
     {
       Stage stage("VMS projections", isRoot());
-      // ALE convecting velocity u^n - w, refreshed after every mesh motion.
-      m_uConv.setData(m_uOld.getData());
-      axpy(-1, m_meshVelocity.getData(), m_uConv.getData());
-      projectVector(Mult(Jacobian(m_uConv), m_uConv), m_convProjection);
+      projectVector(Mult(Jacobian(m_uOld), m_uOld), m_convProjection);
 
       const size_t dim = m_mesh.getSpaceDimension();
       projectVector(VectorFunction(dim,
                       [this, rho, dt, dim](const Point& p) -> Math::SpatialVector<Real> {
-                        const auto conv = Mult(Jacobian(m_uConv), m_uConv).getValue(p);
+                        const auto conv = Mult(Jacobian(m_uOld), m_uOld).getValue(p);
                         const auto proj = m_convProjection.getValue(p);
                         const auto old = m_subOld.getValue(p);
                         const Real tau = vmsTauAt(p);

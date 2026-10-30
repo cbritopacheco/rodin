@@ -130,7 +130,7 @@ namespace Rodin::Examples::Heart::Atrium
         "Cycles before optional species transport begins", out.fluid.flowCycles);
       boolean("-atrium_fluid_lv_model", "Enable 0D ventricular driver (fluid mode only)",
         out.fluid.useVentricularModel);
-      boolean("-atrium_fluid_vms", "Orthogonal-subscale VMS; false selects SUPG/PSPG",
+      boolean("-atrium_fluid_vms", "Enable orthogonal subscales (fluid mode only)",
         out.fluid.useVMS);
       boolean("-atrium_fluid_kinetics", "Enable coagulation transport (fluid mode only)",
         out.fluid.solveKinetics);
@@ -139,14 +139,7 @@ namespace Rodin::Examples::Heart::Atrium
       real("-atrium_fsi_robin",
         "Reference-area Robin impedance (Pa s/m); zero selects automatic scale",
         out.fsi.robinCoefficient);
-      boolean("-atrium_fsi_iqn", "Interface quasi-Newton (IQN-ILS) acceleration",
-        out.fsi.quasiNewton);
-      integer("-atrium_fsi_iqn_columns", "IQN-ILS secant pairs retained per step",
-        out.fsi.quasiNewtonColumns);
-      integer("-atrium_fsi_iqn_reuse", "Previous steps whose IQN-ILS pairs are reused",
-        out.fsi.quasiNewtonReuse);
-      real("-atrium_fsi_rtol",
-        "Sweep change of the solid displacement relative to the step increment",
+      real("-atrium_fsi_rtol", "Relative solid displacement-change tolerance",
         out.fsi.relativeTolerance);
       PetscReal apex[3] = {out.solid.appendageApex(0), out.solid.appendageApex(1),
         out.solid.appendageApex(2)};
