@@ -1,545 +1,163 @@
 /**
   @page fem-spaces Finite element spaces
-  @brief Overview of the finite element spaces available in Rodin
+  @brief Choose a field representation, count its DOFs, and evaluate a discrete field.
 
-  @m_keywords{Finite Element Space, P0, P1, FES, DOF, Function Space}
+  A finite element space combines local elements over a mesh. Its choice
+  determines the allowed fields and continuity, while a grid function holds one
+  particular field in that space. The @ref fem-ciarlet "Ciarlet guide" explains
+  the local construction; this guide follows a runnable comparison of the
+  principal scalar spaces.
 
   @tableofcontents
-
   @m_footernavigation
-
-  @section fem-spaces-intro Introduction
-
-  A **finite element space** @f$ V_h @f$ is a finite-dimensional subspace of
-  a function space (such as @f$ H^1(\Omega) @f$ or @f$ L^2(\Omega) @f$) that
-  is constructed by assembling local finite elements on a mesh. In Rodin,
-  finite element spaces are the bridge between the mesh geometry and the
-  variational formulation of a PDE.
-
-  Every finite element computation in Rodin begins by choosing a mesh and a
-  finite element space defined on that mesh:
-
-  @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-
-  P1 Vh(mesh);  // Creates a P1 finite element space
-  @endcode
 
   @section fem-spaces-available Available spaces
 
-  Rodin provides several standard finite element spaces:
-
-  | Space | Polynomial Degree | Continuity | Typical Use |
-  |-------|------------------|------------|-------------|
-  | `P0` | 0 (constant) | Discontinuous | Piecewise constant quantities, indicators |
-  | `P0g` | 0 (global constant) | Continuous | Globally constant functions (1 DOF for scalar, vdim for vector) |
-  | `P1` | 1 (linear) | @f$ C^0 @f$ (continuous) | Most PDEs: Poisson, elasticity, heat |
-  | `H1` | Arbitrary (order @f$ k @f$) | @f$ C^0 @f$ (continuous) | Higher-order methods, mixed problems (e.g. Taylor-Hood for Navier-Stokes) |
-
-  @section fem-spaces-p0 P0: piecewise constant space
-
-  The `P0` space consists of functions that are
-  constant on each cell of the mesh. Functions in P0 are generally
-  discontinuous across cell boundaries.
-
-  @f[
-    V_h^0 = \{ v \in L^2(\Omega) : v|_K \in \mathbb{P}_0(K), \
-    \forall K \in \mathcal{T}_h \}
-  @f]
-
-  Properties:
-  - One DOF per cell (the constant value on that cell)
-  - Number of DOFs = number of cells (retrieved by `Wh.getSize()`)
-  - Discontinuous across cell boundaries — this is an @f$ L^2 @f$ space,
-    not @f$ H^1 @f$-conforming
-  - Used for piecewise constant approximations such as material properties,
-    indicator functions, and cell-based data
-  - The `Grad` operator applied to a P0 function is identically zero
-    within each cell
-
-  @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
-
-  P0 Wh(mesh);
-  std::cout << "P0 DOFs: " << Wh.getSize() << std::endl;
-  // For an 8×8 grid of triangles: 128 DOFs (= 128 cells)
-
-  // Assign a function: each cell stores the function value at its centroid
-  GridFunction indicator(Wh);
-  indicator = [](const Geometry::Point& p) {
-    return (p.x() < 0.5) ? 1.0 : 0.0;
-  };
-  @endcode
-
-  @subsection fem-spaces-p0-dg Discontinuous Galerkin with P0
-
-  Because P0 functions are discontinuous, they are natural for DG methods.
-  In a DG formulation, jump and average operators are used across cell
-  interfaces. See @ref guides-variational-dg "DG formulations" for details.
-
-  @section fem-spaces-p0g P0g: global constant space
-
-  The `P0g` space is a **global constant**
-  finite element space — it consists of functions that are constant over the
-  entire mesh (not per-cell like P0).
-
-  Properties:
-  - Scalar P0g: **1 DOF** total (the single global constant)
-  - Vector P0g: **vdim DOFs** total (one per component)
-  - Continuous everywhere (trivially, since the function is constant)
-
-  @code{.cpp}
-  P0g Wh(mesh);           // scalar: 1 DOF
-  P0g Vh(mesh, d);        // vector: d DOFs
-  @endcode
-
-  P0g is useful for representing globally constant fields (e.g., a uniform
-  property or a Lagrange multiplier for a global constraint).
-
-  @section fem-spaces-p1 P1: piecewise linear space
-
-  The `P1` space is the most commonly used finite
-  element space. It consists of **continuous** functions that are **linear** on
-  each cell.
-
-  @f[
-    V_h^1 = \{ v \in H^1(\Omega) : v|_K \in \mathbb{P}_1(K), \
-    \forall K \in \mathcal{T}_h \}
-  @f]
-
-  Properties:
-  - One DOF per vertex (the function value at that vertex)
-  - Number of DOFs = number of vertices (retrieved by `Vh.getSize()`)
-  - Continuous across cell boundaries (@f$ H^1 @f$-conforming): values at
-    shared vertices are identified, ensuring global continuity
-  - The gradient `Grad(u)` is **constant** within each cell (since a linear
-    function has constant derivatives)
-  - Approximation error for smooth solutions:
-    - @f$ L^2 @f$ norm: @f$ \|u - u_h\|_{L^2} = O(h^2) @f$
-    - @f$ H^1 @f$ seminorm: @f$ |u - u_h|_{H^1} = O(h) @f$
-
-  @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
-
-  P1 Vh(mesh);
-  std::cout << "P1 DOFs: " << Vh.getSize() << std::endl;
-  // For an 8×8 grid: 81 DOFs (= 9×9 = 81 vertices)
-
-  // P1 is the standard choice for most scalar PDEs
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
-  @endcode
+  | Space | Scalar representation | Continuity and role |
+  | :--- | :--- | :--- |
+  | `P0` | One constant per cell | Discontinuous cellwise data |
+  | `P0g` | One constant over the entire mesh | A global parameter or multiplier |
+  | `P1` | Vertex-based first-order family | Continuous; affine on affine simplices |
+  | `H1` | Prescribed compile-time degree | Continuous higher-order approximation |
 
-  @section fem-spaces-h1 H1: higher-order space
+  `P0` supplies independent cell values; `P0g` supplies one scalar over the mesh. A
+  DG formulation additionally specifies the numerical fluxes and stabilization;
+  see @ref guides-variational-dg "DG formulations".
 
-  The `H1` space provides @f$ H^1 @f$-conforming
-  finite elements of **arbitrary polynomial order** @f$ k @f$. The polynomial
-  order is specified as a **compile-time constant** via
-  `std::integral_constant`:
+  @section fem-spaces-mesh Construct the spaces on one mesh
 
-  @code{.cpp}
-  #include <Rodin/Variational/H1.h>
+  The comparison uses a unit square with eight vertices in each direction.
+  `UniformGrid` takes vertex counts, so the mesh has 64 vertices and 98 triangles.
+  Its edge-to-cell and cell-to-edge relations are computed before constructing
+  spaces that use edge DOFs.
 
-  // Quadratic scalar space (order 2)
-  H1 Vh(std::integral_constant<size_t, 2>{}, mesh);
+  @snippet Variational/FiniteElementSpaces.cpp spaces-setup
 
-  // Quadratic vector space (order 2, d components)
-  H1 Uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
-  @endcode
+  The scalar quadratic space has one DOF at every vertex and every edge on this
+  triangular mesh. There are 161 edges, giving @f$64+161=225@f$ scalar DOFs.
+  The counts printed by the program are:
 
-  The number of DOFs per element depends on the polynomial degree @f$ k @f$
-  and the element type:
+  | Space | Global scalar coefficients |
+  | :--- | ---: |
+  | `P0` | 98 |
+  | `P0g` | 1 |
+  | `P1` | 64 |
+  | Quadratic `H1` | 225 |
+  | Two-component `P1` | 128 real coefficients |
+  | Complex scalar `P1` | 64 complex coefficients |
 
-  | Element | DOFs per element | Formula |
-  |---------|-----------------|---------|
-  | Segment | @f$ k + 1 @f$ | — |
-  | Triangle | @f$ \frac{(k+1)(k+2)}{2} @f$ | e.g., 6 for @f$ k = 2 @f$ |
-  | Quadrilateral | @f$ (k+1)^2 @f$ | e.g., 9 for @f$ k = 2 @f$ |
-  | Tetrahedron | @f$ \frac{(k+1)(k+2)(k+3)}{6} @f$ | e.g., 10 for @f$ k = 2 @f$ |
+  @snippet Variational/FiniteElementSpaces.cpp spaces-counts
 
-  Convergence rates for smooth solutions:
-  - @f$ L^2 @f$ norm: @f$ \|u - u_h\|_{L^2} = O(h^{k+1}) @f$
-  - @f$ H^1 @f$ seminorm: @f$ |u - u_h|_{H^1} = O(h^k) @f$
+  These are counts before essential boundary conditions or other constraints.
+  A local cell's basis count differs from the global space's `getSize()`.
 
-  A common application is the **Taylor-Hood** pair for incompressible flow,
-  which uses different polynomial orders for velocity and pressure to satisfy
-  the inf-sup stability condition:
-  - P2 velocity (order 2): `H1 uh(std::integral_constant<size_t, 2>{}, mesh, d)`
-  - P1 pressure (order 1): `H1 ph(std::integral_constant<size_t, 1>{}, mesh)`
+  @section fem-spaces-p0 P0 interpolation
 
-  @note P1 and H1<1> are equivalent mathematically, but `P1` is a specialized
-  class optimized for the linear case. Use `P1` when you only need order 1.
+  `P0` stores an independent constant on each cell. Its cellwise gradient is zero,
+  while the field can jump across interfaces. In the implementation used here,
+  assignment applies point evaluation at the mapped reference-cell center.
+  On these affine triangles that point is the cell centroid.
 
-  @section fem-spaces-vector Vector-valued spaces
+  For P0, interpolation evaluates the function at the centroid, while an @f$L^2@f$
+  projection assigns its cell average. Both reproduce constants; their values can
+  differ for quadratic and non-polynomial data.
 
-  P0, P1, and H1 all support **vector-valued** function spaces by specifying
-  the number of components. This is essential for problems involving vector
-  fields such as displacement (elasticity) or velocity (fluid dynamics).
-
-  @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-
-  // Scalar space (default, 1 component)
-  P1 scalarVh(mesh);
-
-  // 2D vector space (2 components)
-  P1 vectorVh(mesh, 2);
+  @section fem-spaces-p1 Polynomial degree
 
-  // 3D vector space (3 components)
-  P1 vector3Vh(mesh, 3);
-  @endcode
+  On an affine triangle, scalar P1 has three local basis functions and represents
+  affine functions. On a quadrilateral the vertex-based family is bilinear on
+  the reference cell; its physical gradient depends on the reference basis and geometric mapping. Cell
+  type and geometry mapping therefore remain part of the approximation contract.
 
-  For the elasticity equation, a vector-valued P1 space represents the
-  displacement field @f$ u : \Omega \to \mathbb{R}^d @f$:
-
-  @code{.cpp}
-  size_t d = mesh.getSpaceDimension();
-  P1 Vh(mesh, d);
+  The `H1` constructor takes its degree through `std::integral_constant`. On
+  simplices it uses total-degree polynomial spaces, while tensor-product cells
+  use the corresponding tensor-product construction.
 
-  TrialFunction u(Vh);  // u is a vector function
-  TestFunction  v(Vh);  // v is a vector function
-  @endcode
+  | Cell | Scalar local DOFs at degree @f$k@f$ |
+  | :--- | :--- |
+  | Segment | @f$k+1@f$ |
+  | Triangle | @f$(k+1)(k+2)/2@f$ |
+  | Quadrilateral | @f$(k+1)^2@f$ |
+  | Tetrahedron | @f$(k+1)(k+2)(k+3)/6@f$ |
+  | Hexahedron | @f$(k+1)^3@f$ |
 
-  @section fem-spaces-complex Complex-valued spaces
+  Field degree and geometric representation are chosen independently. Error
+  estimates depend on solution regularity, mesh quality, formulation stability,
+  and the consistency of geometry and quadrature.
 
-  Rodin supports complex-valued finite element spaces using C++ complex types.
-  This is useful for problems in wave propagation, acoustics, and
-  electromagnetics:
+  @section fem-spaces-gridfunctions Assign and evaluate a field
 
-  @code{.cpp}
-  // Complex-valued P1 space
-  P1<Complex> Vh(mesh);
+  The comparison interpolates @f$f(x,y)=x^2+y^2@f$ into P0, P1, and quadratic H1:
 
-  GridFunction gf(Vh);
-  gf = [](const Geometry::Point& p) {
-    return Complex(p.x(), p.y());  // real + imaginary
-  };
+  @snippet Variational/FiniteElementSpaces.cpp spaces-fields
 
-  // Extract real and imaginary parts for output
-  P1<Real> realVh(mesh);
-  GridFunction gfRe(realVh), gfIm(realVh);
-  gfRe = Re(gf);
-  gfIm = Im(gf);
-  @endcode
+  Assignment applies the DOF functionals of the selected space to the prescribed
+  function. In particular, the quadratic field should
+  reproduce this polynomial on the affine triangular mesh, up to roundoff.
 
-  @section fem-spaces-gridfunctions Grid functions
+  Evaluation goes through `Geometry::Point`, so the reference location and its
+  physical cell are supplied together:
 
-  A `GridFunction` is a concrete
-  function living in a finite element space. It stores the coefficients
-  (DOF values) and can be evaluated, saved, and loaded.
+  @snippet Variational/FiniteElementSpaces.cpp spaces-sampling
 
-  @subsection fem-spaces-gf-creation Creating and assigning
+  The additional points refine the sampling of each existing field while preserving
+  its DOFs. The CSV records evaluations at the corresponding physical points.
 
-  Grid functions are created by associating them with a finite element
-  space. They can be initialized from lambda functions, constants, or
-  other grid functions:
+  @section fem-spaces-visualization Inspect interpolation error
 
-  @code{.cpp}
-  P1 Vh(mesh);
+  @image html Images/SpaceInterpolation.png "Sampled interpolation errors for the same quadratic function and mesh. Each panel has its own stated color scale; the quadratic result is at roundoff level." width=720px
 
-  // Create a grid function in the P1 space
-  GridFunction gf(Vh);
+  For this mesh and sampling grid, the largest sampled errors are approximately
+  @f$0.186@f$ for P0, @f$0.0102@f$ for P1, and below @f$3\times10^{-15}@f$ for
+  quadratic H1. These maxima are measured over the exported sample points with the mesh and
+  prescribed function held fixed. Integrated error norms and convergence rates
+  require integration and a sequence of refined meshes.
 
-  // Interpolate a smooth function into the FE space
-  gf = [](const Geometry::Point& p) {
-    return std::sin(M_PI * p.x()) * std::sin(M_PI * p.y());
-  };
+  An @f$L^2@f$ projection is defined by finding @f$w_h\in V_h@f$ with
+  @f$\int_\Omega w_hv_h=\int_\Omega fv_h@f$ for every test function. The coefficients are obtained from the resulting mass-matrix problem. See
+  @ref guides-numerical-contracts "numerical contracts".
 
-  // Assign from a constant
-  GridFunction constant(Vh);
-  constant = 1.0;
-  @endcode
+  @section fem-spaces-vector Field range and coefficient ordering
 
-  Assignment applies the finite element space's DOF functionals; it is not an
-  `L2` projection. For P0 (piecewise constant) spaces, assignment computes the
-  cellwise P0 coefficients:
+  Scalar, vector, matrix, and complex ranges are distinct from the spatial
+  dimension. A two-dimensional mesh can carry a vector field with another
+  component count; the model decides whether that choice is meaningful.
+  A vector displacement in the @ref examples-pdes-elasticity "beam example"
+  uses one component per spatial direction.
 
-  @code{.cpp}
-  P0 Wh(mesh);
-  GridFunction indicator(Wh);
-  indicator = [](const Point& p) {
-    return p.x() * p.x() + p.y() * p.y();
-  };
-  @endcode
+  Entity DOFs and local-to-global indices are obtained from the space. These maps
+  specify coefficient ordering for scalar, vector and higher-order fields.
 
-  @subsection fem-spaces-gf-gradient Computing gradients
+  @section fem-spaces-matrix Extend the field range to matrices
 
-  The gradient of a scalar grid function can be assigned into a vector-valued
-  space:
+  P0, P0g, P1, and H1 also have componentwise matrix-valued specializations.
+  Matrix rows and columns are separate from mesh dimension; symmetry and Voigt scaling are specified by the formulation. These details, tensor
+  derivatives, persistence, and backend support are retained in the
+  @subpage guides-spatial-matrix "matrix solutions and spatial tensors reference".
 
-  @code{.cpp}
-  P1 scalarVh(mesh);
-  GridFunction temperature(scalarVh);
-  temperature = [](const Point& p) {
-    return 1 - (p.x() - 0.5) * (p.x() - 0.5)
-             - (p.y() - 0.5) * (p.y() - 0.5);
-  };
+  @section fem-spaces-complex Represent complex fields
 
-  // Interpolate the gradient into a vector P1 space
-  size_t d = mesh.getSpaceDimension();
-  P1 vectorVh(mesh, d);
-
-  GridFunction grad(vectorVh);
-  grad = Grad(temperature);
-  @endcode
-
-  The `Grad()` operator computes the element-wise gradient. For
-  face-based trace evaluation (needed in shape optimization), use
-  `traceOf()`:
-
-  @code{.cpp}
-  GridFunction trace(vectorVh);
-  trace.project(Region::Faces, Grad(temperature).traceOf(1));
-  @endcode
-
-  @subsection fem-spaces-gf-solution Accessing solutions
-
-  After solving a problem, the solution is stored as a grid function
-  accessible via the trial function:
-
-  @code{.cpp}
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
-
-  Problem poisson(u, v);
-  // ... define problem ...
-  Solver::CG(poisson).solve();
-
-  // Access the solution grid function
-  auto& solution = u.getSolution();
-  @endcode
-
-  @subsection fem-spaces-gf-boolean Boolean operations on grid functions
-
-  Grid functions support boolean comparison operators, which produce
-  piecewise constant (0 or 1) results useful for indicator functions:
-
-  @code{.cpp}
-  P1 Vh(mesh);
-
-  auto f = cos(2 * pi() * F::x + pi() / 2) * sin(2 * pi() * F::y);
-  auto g = sin(2 * pi() * F::x) * sin(2 * pi() * F::y);
-
-  GridFunction gf(Vh);
-  gf = f > g;         // 1 where f > g, 0 otherwise
-  gf = f < g;         // 1 where f < g, 0 otherwise
-  gf = (f > g) || (f < g);  // Logical OR
-  gf = (f > g) && (f < g);  // Logical AND (always 0 here)
-  @endcode
-
-  @subsection fem-spaces-gf-io Saving and loading
-
-  Grid functions can be saved and loaded in MFEM format:
-
-  @code{.cpp}
-  // Save
-  gf.save("temperature.gf", IO::FileFormat::MFEM);
-
-  // Load
-  GridFunction loaded(Vh);
-  loaded.load("temperature.gf", IO::FileFormat::MFEM);
-  @endcode
-
-  For visualization, use the @ref Rodin::IO::XDMF "XDMF" format:
-
-  @code{.cpp}
-  IO::XDMF xdmf("output");
-  xdmf.grid().setMesh(mesh).add("temperature", gf);
-  xdmf.write();
-  @endcode
-
-  @section fem-spaces-matrix Matrix-valued solution spaces
-
-  The local and MPI variants of P0, P0g, P1, and H1 support
-  @ref Rodin::Math::SpatialMatrix as their range. Specify the row and column
-  counts independently; each must lie between one and three.
-
-  @code{.cpp}
-  P0 cellStress(mesh, 3, 3);
-  P0g constantStress(mesh, 3, 3);
-  P1 stressSpace(mesh, 3, 3);
-  H1 higherOrderStress(std::integral_constant<size_t, 3>{}, mesh, 3, 3);
-
-  GridFunction stress(stressSpace);
-  Math::SpatialMatrix<Real> initial(3, 3);
-  initial.setZero();
-  stress = initial;
-
-  TrialFunction sigma(stressSpace);
-  TestFunction tau(stressSpace);
-  auto mass = Integral(sigma, tau);
-  auto entryMass = Integral(Component(sigma, 0, 1), Component(tau, 0, 1));
-  @endcode
-
-  Each scalar basis function is replicated for every matrix entry. For a range
-  with @f$ r @f$ rows and @f$ c @f$ columns, the basis is
-  @f$ \phi_a E_{ij} @f$, the component index is @f$ ic+j @f$, and the global
-  DOF index is @f$ (rc)g_a+ic+j @f$. No symmetry or Voigt scaling is imposed.
-  Matrix contractions use the Frobenius product (conjugating the second
-  operand for complex entries). The scalar solver coefficients remain flat,
-  while basis and grid-function evaluations return matrices of the specified
-  shape. Transpose and matrix-component expressions can be used in forms.
-
-  All four families support real and complex matrix entries. Matrix gradients
-  and Jacobians return rank-three SpatialTensor values with the derivative
-  axis last. Matrix divergence contracts the column and derivative indices,
-  and Derivative selects one physical derivative direction. See
-  @ref guides-spatial-matrix for tensor coefficients and backend details.
-
-  @section fem-spaces-choosing Choosing the right space
-
-  | Problem type | Recommended space | Reason |
-  |-------------|-------------------|--------|
-  | Scalar PDE (Poisson, heat) | `P1` | Standard @f$ H^1 @f$-conforming, 1 DOF/vertex |
-  | Vector PDE (elasticity) | `P1(mesh, d)` | Vector-valued @f$ H^1 @f$, d components |
-  | Wave problems (Helmholtz) | `P1<Complex>` | Complex-valued fields |
-  | Material indicators, cell data | `P0` | Piecewise constant, 1 DOF/cell |
-  | Higher accuracy for smooth solutions | `H1` with order @f$ k \geq 2 @f$ | @f$ O(h^{k+1}) @f$ @f$ L^2 @f$ convergence |
-  | Incompressible flow (Stokes) | `H1` order 2 (velocity) + `H1` order 1 (pressure) | Taylor-Hood pair, satisfies inf-sup |
-
-  Rule of thumb: Start with P1 for scalar problems. Use vector-valued P1
-  for elasticity and fluid dynamics. Move to higher-order H1 when you need
-  better accuracy per DOF or when the PDE's solution is smooth enough to
-  benefit from higher polynomial approximation.
-
-  @section fem-spaces-see-also See also
-
-  - @ref fem-ciarlet "Ciarlet's definition" — Mathematical foundations
-  - @ref guides-getting-started-core-concepts "Core concepts" — Practical
-    guide
-  - @ref guides-mpi "MPI distributed computing" — Distributed P1 on
-    `Mesh<Context::MPI>` with local↔global DOF index maps
-  - @ref guides-petsc "PETSc integration" — PETSc-backed grid functions
-    with ghost-layer synchronization
-  - @ref examples-pdes-poisson "Poisson example" — Using P1 in practice
-  - @ref examples-pdes-elasticity "Elasticity example" — Vector-valued spaces
-
-  */
-
-/**
- * @page guides-spatial-matrix Matrix solutions and spatial tensors
- *
- * @section spatial-matrix-model Mathematical range and ordering
- *
- * P0, P0g, P1 and H1 accept @c Math::SpatialMatrix<Scalar> ranges for
- * @c Real and @c Complex entries. Rows and columns are explicit, independently
- * between one and @c RODIN_MAXIMAL_SPACE_DIMENSION. Symmetry is not imposed.
- * A matrix space is the tensor product of its scalar space with the matrix
- * units: @f$ V_h^{m\times n}=V_h\otimes\mathbb{K}^{m\times n} @f$.
- * Matrix specializations live beside the scalar and vector specializations
- * in each space family. Reference bases, physical mappings and DOF distribution
- * belong to that family. The componentwise construction here describes P0,
- * P0g, P1 and H1; future @f$H(\mathrm{div})@f$ and @f$H(\mathrm{curl})@f$
- * families must supply their own conforming bases and Piola mappings.
- * Local and global coefficient indices are interleaved in row-major order:
- * @f$ a(mn)+in+j @f$. No Voigt scaling or symmetry reduction is applied.
- * This coefficient numbering is independent of matrix memory storage;
- * @ref guides-ordering "Matrix storage and finite-element component ordering"
- * describes both conventions and their consequences for assembly.
- *
- * @code{.cpp}
- * H1 stressSpace(std::integral_constant<size_t, 3>{}, mesh, 3, 3);
- * GridFunction stress(stressSpace);
- * TrialFunction sigma(stressSpace);
- * TestFunction tau(stressSpace);
- * BilinearForm mass(sigma, tau);
- * mass = Integral(sigma, tau);
- * @endcode
- *
- * @section spatial-matrix-operators Differential and constitutive operators
- *
- * Inner products use @f$ A:B=\sum_{ij}A_{ij}\overline{B_{ij}} @f$.
- * Grad and Jacobian return @c SpatialTensor<Scalar,3> with
- * @f$ G_{ijk}=\partial_k A_{ij} @f$. Derivative selects its last axis.
- * Div uses row-wise divergence @f$ (\operatorname{div}A)_i=\sum_j\partial_jA_{ij} @f$
- * and requires the column count to match the ambient spatial dimension.
- * A matrix coefficient multiplying a matrix solution acts on its rows;
- * a fourth-order tensor coefficient couples arbitrary matrix entries:
- * @f$ (\mathcal C A)_{ij}=\sum_{kl}\mathcal C_{ijkl}A_{kl} @f$.
- * TensorFunction wraps constant or callable tensor coefficients. Tensor rank
- * is a compile-time parameter; extents are runtime values with stack storage.
- * Tensor-valued solution spaces are not introduced by this matrix-range API.
- * A linear form must have a scalar integrand. Bare @c Integral(v) is therefore
- * rejected for vector- and matrix-valued test functions; @c Integral(F,v)
- * contracts a matching coefficient with the test function to form a scalar.
- *
- * Matrix Jacobians have rank three. The vector-only P1 Jacobian handlers and
- * the weighted, rank-one and advection H1 handlers are restricted to their
- * supported ranges. Matrix expressions use the existing generic quadrature
- * rule for these forms; the componentwise unweighted H1 Jacobian handler
- * supports matrix ranges directly. An explicit quadrature order remains
- * appropriate for rational pyramid bases and curved mappings.
- *
- * @section spatial-matrix-nonlocal Nonlocal P1 forms
- *
- * The existing P1 potential quadrature handler accepts matrix trial and test
- * functions. A kernel returning a scalar multiplies every component. A kernel
- * filling a @c SpatialMatrix acts on rows, while a kernel filling a
- * @c SpatialTensor<Scalar,4> couples all entries:
- * @f[
- *   (K A)_{ij}(x)=\int_\Omega
- *      \sum_{kl}\mathcal K_{ijkl}(x,y)A_{kl}(y)\,dy.
- * @f]
- * The callback signatures are @c kernel(x,y), @c kernel(matrix,x,y) and
- * @c kernel(tensor,x,y), respectively. Output extents must match the field
- * dimensions. The existing collapsed quadrature on coincident triangles and
- * centroid rules on other panel pairs are retained; nonsingular constant
- * kernels do not establish accuracy for arbitrary singular kernels. This
- * handler is specific to P1; nonlocal handlers for the other space families
- * are not introduced here. The nonlocal regressions cover local Eigen and
- * OpenMP assembly; distributed nonlocal assembly is not validated by the
- * Jacobian and reaction-diffusion MPI tests.
- *
- * @code{.cpp}
- * Math::SpatialTensor<Real, 4> elasticity(3, 3, 3, 3);
- * elasticity.setZero();
- * // Fill the constitutive entries, then assemble without a Voigt conversion.
- * auto constitutive = Integral(TensorFunction(elasticity) * sigma, tau);
- * @endcode
- *
- * Callable MatrixFunction coefficients accept explicit dimensions and
- * @c setOrder for polynomial quadrature selection. Integrator @c setOrder
- * specifies the integration degree. Rational pyramid bases and curved
- * transformations require quadrature chosen for the mapped integrand;
- * polynomial reference-degree defaults alone do not guarantee exactness.
- * Grid-function derivatives on interfaces require a @c traceOf domain, as
- * for scalar fields. Shape-function derivatives on a boundary are derivatives
- * of the boundary element, matching the scalar finite element semantics.
- *
- * @section spatial-matrix-backends Backend and format support
- *
- * The same range and DOF maps are consumed by Eigen dense/sparse sequential
- * and OpenMP assembly and by local/distributed PETSc assembly. MPI spaces
- * expand scalar ownership and ghost maps component-wise. They cache collective
- * global sizes at construction so local evaluations do not enter collectives.
- *
- * HDF5 persistence preserves raw coefficients, matrix rows/columns and complex
- * imaginary parts. PETSc persistence stores the owned portion per shard.
- * XDMF writes full matrix-valued arrays, including nonsymmetric entries.
- * MFEM uses the scalar family's node conversion for each matrix entry; matrix
- * dimensions must be supplied by the destination space because MFEM records
- * only component count. Its existing unsupported collections remain unsupported
- * (in particular the global constant P0g collection).
- * MEDIT uses separate scalar vertex fields for every entry. Vertex formats
- * interpolate higher-order fields from vertices and cannot preserve their
- * arbitrary interior coefficients; use HDF5 for exact persistence.
- *
- * @section spatial-matrix-validation Validation coverage
- *
- * Native tests exercise all eight reference geometries, every matrix shape
- * between one and three axes, nodal duality through cubic H1 and additional
- * fourth/fifth-order representatives. Assembly and differential tests cover
- * every non-point cell geometry, P0/P0g/P1/H1, rectangular and square ranges,
- * complex entries, fourth-order material coupling, physical finite differences,
- * curved and embedded triangles, boundary traces, cache lifetime, and Dirichlet
- * data. Manufactured reaction-diffusion tests exercise complete solve paths.
- * MPI/PETSc tests exercise ownership, ghosts, assembly and solves at one through
- * four ranks. IO tests check real/complex HDF5, MEDIT vertex fields, MFEM node
- * permutations and XDMF matrix metadata. This is finite regression coverage,
- * rather than an assertion that arbitrary order, geometry and coefficient
- * combinations have all been enumerated.
- */
+  `P1<Complex>` assigns complex scalar coefficients to the geometric DOF locations
+  of P1.
+  The @ref examples-pdes-helmholtz "Helmholtz tutorial" shows a complex solve and
+  exports real and imaginary parts as separate real fields.
+
+  @section fem-spaces-mixed Mixed spaces
+
+  The @ref examples-pdes-stokes "Stokes tutorial" uses quadratic velocity,
+  linear pressure, and a global P0g multiplier for the pressure mean. The velocity–pressure pairing is selected to satisfy the stability requirements of
+  the mixed formulation.
+
+  @section fem-spaces-complete Complete program
+
+  Build the `FiniteElementSpaces` example target. It prints the counts above and
+  writes `FiniteElementSpaces.csv` and `ReferenceP1.csv` in the working directory.
+
+  @snippet Variational/FiniteElementSpaces.cpp spaces-source
+
+  See @ref Variational/FiniteElementSpaces.cpp "FiniteElementSpaces.cpp" and the
+  @ref guides-variational "variational guide" for the next step from a known
+  field to an unknown field in a weak problem.
+
+  @example Variational/FiniteElementSpaces.cpp
+*/

@@ -38,7 +38,7 @@
   context types to select their data distribution and backend behavior while
   preserving the same mathematical interfaces.
 
-  # Supported Contexts
+  # Supported contexts
   - **Local Context**: Single-machine execution with shared memory
   - **Distributed Context**: Multi-node execution with message passing (MPI)
 
@@ -69,7 +69,7 @@
   interface. These classes communicate invalid inputs, unavailable operations, and
   solver or mesh-processing status.
 
-  # Alert Types
+  # Alert types
 
   | Type | Color | Behavior |
   |------|-------|----------|
@@ -80,7 +80,7 @@
   | @ref Rodin::Alert::MemberFunctionException "Alert::MemberFunctionException" | Red | Exception with class/method context |
   | @ref Rodin::Alert::MemberFunctionWarning "Alert::MemberFunctionWarning" | Yellow | Warning with class/method context |
 
-  # Usage Pattern
+  # Usage pattern
 
   All alerts use the stream insertion operator `<<` and terminate with
   `Alert::Raise`:
@@ -150,13 +150,14 @@
   | @ref Rodin::Geometry::Mesh "getSpaceDimension()" | Ambient space dimension (>= topological dimension) |
   | @ref Rodin::Geometry::Mesh "getVertexCount()" | Number of vertices |
   | @ref Rodin::Geometry::Mesh "getCellCount()" | Number of cells |
-  | @ref Rodin::Geometry::Mesh "getVolume()" | Total volume (or area) of the domain |
+  | @ref Rodin::Geometry::Mesh "getVolume()" | Sum of measures of the three-dimensional entities |
+  | @ref Rodin::Geometry::Mesh "getArea()" | Sum of measures of the two-dimensional entities |
   | @ref Rodin::Geometry::Mesh "getPerimeter()" | Total perimeter (or surface area) of the domain boundary |
   | @ref Rodin::Geometry::Mesh "getVertex() / getCell() / getBoundary()" | Polytope iterators |
   | @ref Rodin::Geometry::Mesh "getVertexCoordinates(idx)" | Get coordinates of a vertex |
   | @ref Rodin::Geometry::Mesh "setAttribute({dim, idx}, attr)" | Set attribute of a polytope (for BC labeling) |
 
-  # Polytope Types
+  # Polytope types
 
   | Type | Dimension | Description |
   |------|-----------|-------------|
@@ -167,6 +168,7 @@
   | @ref Rodin::Geometry::Polytope "Tetrahedron" | 3 | 4-vertex cell |
   | @ref Rodin::Geometry::Polytope "Hexahedron" | 3 | 8-vertex cell |
   | @ref Rodin::Geometry::Polytope "Wedge" | 3 | Triangular prism (6 vertices) |
+  | @ref Rodin::Geometry::Polytope "Pyramid" | 3 | Square-base pyramid (5 vertices) |
 
   @code{.cpp}
   Mesh mesh;
@@ -191,7 +193,7 @@
   expands degree-of-freedom constraints when assembling constrained or coupled
   problems.
 
-  # Assembly Strategies
+  # Assembly strategies
 
   | Strategy | Class | Description |
   |----------|-------|-------------|
@@ -199,7 +201,7 @@
   | **OpenMP** | @ref Rodin::Assembly "Assembly::OpenMP" | Shared-memory parallel assembly using OpenMP. Each thread processes a subset of cells and accumulates contributions using thread-safe operations. Requires compilation with `RODIN_USE_OPENMP=ON`. |
   | **Default** | @ref Rodin::Assembly::Default "Assembly::Default" | Compile-time policy selector. Maps to @ref Rodin::Assembly "Assembly::OpenMP" when OpenMP is available, otherwise falls back to @ref Rodin::Assembly::Sequential "Assembly::Sequential". Users rarely need to specify this directly. |
 
-  # What Gets Assembled
+  # What gets assembled
 
   - **Bilinear Form** @f$ a(u,v) @f$: Assembles into a sparse matrix
     @f$ A_{ij} = a(\phi_j, \psi_i) @f$ where @f$ \phi_j @f$ are trial basis
@@ -212,10 +214,10 @@
     linear form(s), Dirichlet elimination — into a complete
     @ref Rodin::Math::LinearSystem "LinearSystem<Operator, Vector>".
 
-  # Assembly Pipeline
+  # Assembly pipeline
 
-  Assembly is normally triggered automatically when `Problem::solve()` is
-  called. The pipeline is:
+  Calling a solver on a `Problem` normally triggers assembly. Explicit
+  `Problem::assemble()` updates the system without solving it. The pipeline is:
 
   1. Assemble the bilinear form into a sparse matrix @f$ A @f$
   2. Assemble the linear form into a vector @f$ b @f$
@@ -225,7 +227,7 @@
   Users can also trigger assembly manually by calling `BilinearForm::assemble()`
   or `LinearForm::assemble()`.
 
-  # Multi-Field Assembly
+  # Multiple-field assembly
 
   For saddle-point problems (e.g.\ Stokes), the Assembly module supports
   block-structured systems via `Tuple<BilinearForm...>` and
@@ -272,7 +274,7 @@
   output for scientific visualization in [ParaView](https://www.paraview.org/),
   supporting time series and multiple fields.
 
-  # XDMF Architecture
+  # XDMF architecture
 
   The XDMF writer uses a two-level design:
 
@@ -294,7 +296,7 @@
   IO::XDMF xdmf("distributed_output", MPI_COMM_WORLD);
   @endcode
 
-  # File Format Summary
+  # File format summary
 
   | Format | Extensions | Key Classes | Notes |
   |--------|-----------|-------------|-------|
@@ -318,7 +320,7 @@
   Rodin::Variational::Problem "Problem" express weak forms, boundary conditions, and
   the algebraic problems used to solve PDEs.
 
-  # Finite Element Spaces
+  # Finite element spaces
 
   - `P0` — Piecewise constant (discontinuous)
     finite element space
@@ -337,7 +339,7 @@
   - `GridFunction` — A concrete function
     storing DOF values in a finite element space
 
-  # Variational Forms
+  # Variational forms
 
   The module supports building variational problems of the form:
   @f[
@@ -415,86 +417,90 @@
 
 /**
   @namespace Rodin::Distance
-  @brief Distance-field computations.
+  @brief Distance propagation and Poisson-based level-set approximations.
 
+  The unsigned distance to a geometric set @f$\Gamma@f$ is
   @f[
-    d(\mathbf{x},\Gamma)=\inf_{\mathbf{y}\in\Gamma}\|\mathbf{x}-\mathbf{y}\|.
+    d(x,\Gamma)=\inf_{y\in\Gamma}\lVert x-y\rVert.
   @f]
+  Rodin provides fast-marching propagation, auxiliary Poisson fields and
+  algebraic normalization. Their outputs and boundary data have distinct
+  meanings; select and check the construction required by the application.
 
-  @ref Rodin::Distance::Eikonal "Distance::Eikonal" constructs distance fields through fast
-  marching, while @ref Rodin::Distance::Poisson "Distance::Poisson" and @ref
-  Rodin::Distance::SignedPoisson "Distance::SignedPoisson" provide PDE-based alternatives.
-  These models convert boundary or level-set information into distance
-  approximations for shape optimization, interface processing, and mesh adaptation.
+  # Propagation from an attributed interface
 
-  # Available Methods
-
-  | Method | Class | Equation | Properties |
-  |--------|-------|----------|------------|
-  | **Eikonal** | @ref Rodin::Distance::Eikonal "Distance::Eikonal" | @f$ \lVert\nabla d\rVert = 1 @f$ | Exact distances via FMM; supports signed distance with interior/interface regions |
-  | **Poisson** | @ref Rodin::Distance::Poisson "Distance::Poisson" | @f$ -\Delta u = 1, \; u\vert_{\partial\Omega} = 0 @f$ | Smooth approximation; fast (one linear solve); does not give exact distances |
-  | **SignedPoisson** | @ref Rodin::Distance::SignedPoisson "Distance::SignedPoisson" | @f$ -\Delta u = 2\chi_\Omega - 1, \; u\vert_\Gamma = 0 @f$ | Region-dependent forcing yields a signed smooth distance |
-  | **Rvachev** | @ref Rodin::Distance::Rvachev "Distance::Rvachev" | @f$ d = \frac{u}{\sqrt{u^2 + \lVert\nabla u\rVert^2}} @f$ | Normalizes a level-set field to approximate distance; preserves zero set and sign |
-  | **SpaldingTucker** | @ref Rodin::Distance::SpaldingTucker "Distance::SpaldingTucker" | @f$ d = \frac{2u}{\lVert\nabla u\rVert + \sqrt{\lVert\nabla u\rVert^2 + 2\lvert u\rvert}} @f$ | Better gradient normalization than Rvachev; more accurate near the interface |
-
-  All methods except @ref Rodin::Distance::Rvachev "Distance::Rvachev" and @ref Rodin::Distance::SpaldingTucker "Distance::SpaldingTucker" inherit from a common CRTP
-  `Base<Derived>` that provides `setInterior()` and `setInterface()` methods for
-  specifying the signed-distance regions (mesh boundary attributes).
-
-  # Eikonal Distance (FMM)
-
-  The @ref Rodin::Distance::Eikonal "Distance::Eikonal" class wraps the FMM solver and provides the most accurate
-  distance computation. Seeds are automatically identified from the interface
-  attributes. Calling `sign()` after `solve()` negates interior values to produce
-  a signed distance field.
+  @ref Rodin::Distance::Eikonal wraps unit-speed fast marching. Facets carrying
+  the configured interface attributes supply zero-time seed vertices.
+  `solve()` propagates nonnegative arrival values. `sign()` subsequently
+  negates values at vertices belonging to cells with the interior attributes.
+  The interface should separate those regions consistently.
 
   @code{.cpp}
-  P1 Vh(mesh);
-  GridFunction d(Vh);
-
-  Distance::Eikonal eikonal(d);
+  P1 space(mesh);
+  GridFunction distance(space);
+  Distance::Eikonal eikonal(distance);
   eikonal.setInterface(interfaceAttr)
          .setInterior(interiorAttr)
          .solve()
          .sign();
   @endcode
 
-  # Poisson Distance Approximation
+  Prepare vertex adjacency and vertex/cell incidence before solving. The
+  underlying local FMM uses scalar P1 storage. Its discrete arrival times
+  approximate distance; geometry and stencil error require assessment.
+  @ref examples-eikonal-fmm supplies an analytic point-source comparison.
 
-  @ref Rodin::Distance::Poisson "Distance::Poisson" solves @f$ -\Delta u = 1 @f$ with @f$ u = 0 @f$ on
-  @f$ \partial\Omega @f$ in a single linear solve. The result is smooth but
-  only approximates the true distance.
+  # Auxiliary Poisson fields
 
-  @ref Rodin::Distance::SignedPoisson "Distance::SignedPoisson" extends this with region-dependent forcing: @f$ -\Delta u = 2 @f$
-  inside a specified region and @f$ -\Delta u = -1 @f$ elsewhere, with
-  @f$ u = 0 @f$ on the interface. It supports both single-attribute and
-  attribute-set overloads:
+  @ref Rodin::Distance::Poisson solves @f$-\Delta u=1@f$ with zero data on
+  the exterior boundary. Its scalar output is a Poisson potential. It is often
+  used as input to a distance normalization.
 
-  @code{.cpp}
-  // Unsigned Poisson distance
-  Distance::Poisson poisson;
-  auto d1 = poisson(Vh);
-
-  // Signed Poisson distance with interface/region attributes
-  Distance::SignedPoisson signedPoisson;
-  auto d2 = signedPoisson(interfaceAttr, regionAttr, Vh);
-  @endcode
-
-  # Level-Set Normalization
-
-  @ref Rodin::Distance::Rvachev "Distance::Rvachev" and @ref Rodin::Distance::SpaldingTucker "Distance::SpaldingTucker" are post-processing operators that normalize
-  an existing level-set field into an approximate distance function without
-  solving any PDE:
+  @ref Rodin::Distance::SignedPoisson has two call forms. The full-domain
+  overload solves @f$-\Delta u=-1@f$ with zero exterior data. The attributed
+  overload uses an interior cell region @f$\Omega_-@f$ and an interface
+  @f$\Gamma@f$:
+  @f[
+    -\Delta u=1-2\chi_{\Omega_-},\qquad u|_\Gamma=0.
+  @f]
+  Thus the forcing is negative inside and positive outside. Remaining exterior
+  boundary portions have the natural condition of the weak problem. These
+  classes take a finite element space when invoked:
 
   @code{.cpp}
-  Distance::Rvachev rvachev;
-  auto dR = rvachev(phi);
-
-  Distance::SpaldingTucker st;
-  auto dST = st(phi);
+  auto positivePotential = Distance::Poisson()(space);
+  auto negativePotential = Distance::SignedPoisson()(space);
+  auto signedPotential = Distance::SignedPoisson()(interfaceAttr, interiorAttr, space);
   @endcode
 
-  @see @ref Rodin::Eikonal "Eikonal module" for the underlying FMM solver.
+  The attributed overload also accepts sets of attributes. The mesh must
+  resolve and label the interface before the solve. The convenience operators
+  use CG internally; application-level convergence diagnostics may require
+  explicitly constructing the corresponding variational problem.
+
+  # Algebraic normalization
+
+  @ref Rodin::Distance::Rvachev and @ref Rodin::Distance::SpaldingTucker
+  evaluate, respectively,
+  @f[
+    d_R=\frac{u}{\sqrt{u^2+\lVert\nabla u\rVert^2}},\qquad
+    d_{ST}=\frac{2u}{\lVert\nabla u\rVert+
+      \sqrt{\lVert\nabla u\rVert^2+2|u|}}.
+  @f]
+  The operators interpolate these expressions into a grid function on the
+  input space. A nonzero denominator preserves the sign pointwise before
+  interpolation. Both expressions are undefined where the field and gradient
+  vanish together. An approximate distance interpretation requires suitable
+  scaling of the input and comparison against the geometry of interest.
+  Neither formula by itself establishes unit gradient throughout the domain.
+
+  @code{.cpp}
+  auto normalized = Distance::SpaldingTucker()(signedPotential);
+  @endcode
+
+  Gradients of piecewise fields need a consistent one-sided interpretation at
+  interfaces. See @ref guides-interfaces-dg for traces, and
+  @ref guides-shape-optimization for the role of redistancing in transport.
  */
 
 /**
@@ -527,7 +533,7 @@
   | @ref Rodin::Hilbert::H1a "getProblem()" | Access the underlying @ref Rodin::Variational::Problem "Problem" object |
   | @ref Rodin::Hilbert::H1a "getTrialFunction() / getTestFunction()" | Access trial/test functions |
 
-  For vector-valued problems, @ref Rodin::Hilbert::H1a "getTrialFunction() / getTestFunction()" uses `Jacobian()` instead of `Grad()`.
+  For vector-valued problems, @ref Rodin::Hilbert::H1a "H1a" uses `Jacobian()` instead of `Grad()`.
   The internal solver is `Solver::CG`.
  */
 
@@ -561,7 +567,7 @@
   where @f$ \mathbf{X} @f$ is the departure point traced backward along
   @f$ \mathbf{v} @f$.
 
-  # Time Stepping and Boundary Policies
+  # Time stepping and boundary policies
 
   The characteristic tracing uses configurable time-stepping schemes. The
   default is Runge-Kutta 4 (`Math::RungeKutta::RK4`); custom steppers can
@@ -577,7 +583,7 @@
   The `Lagrangian` class tracks time internally (`m_t`) and switches between
   the initial condition (first step) and the current solution (later steps).
 
-  # Typical Usage
+  # Typical usage
 
   @code{.cpp}
   P1 Vh(mesh);
@@ -612,12 +618,10 @@
   distance-field construction, with a priority queue controlling the order of vertex
   updates.
   @f[
-    |\nabla u| = F(x)
-  @f]
-  where @f$ F(x) @f$ is a speed function. When @f$ F = 1 @f$, the solution
-  represents the distance function.
+    F(x)\lVert\nabla u\rVert = 1
+  @f] where @f$F(x)>0@f$ is propagation speed. When @f$ F = 1 @f$, the solution represents the distance function.
 
-  # Fast Marching Method (FMM)
+  # Fast marching method (FMM)
 
   The primary solver is @ref Rodin::Eikonal::FMM "FMM", which implements the
   Fast Marching Method on unstructured simplicial meshes. The algorithm
@@ -628,14 +632,14 @@
   |-------|-------------|
   | **Far** | Not yet visited |
   | **Considered** | In the priority queue, tentative value computed |
-  | **Accepted** | Finalized — arrival time is correct |
+  | **Accepted** | Finalized by the discrete propagation scheme |
 
   The FMM specialization for P1 finite elements on local meshes supports:
-  - Arbitrary spatial dimension (2D triangular, 3D tetrahedral, surface meshes)
+  - Local triangular and tetrahedral meshes, including embedded triangular surfaces
   - User-defined speed functions @f$ F(x) @f$
   - Seed interface specification (initial zero-distance vertices)
 
-  # Typical Usage
+  # Typical usage
 
   @code{.cpp}
   P1 Vh(mesh);
@@ -648,6 +652,9 @@
   fmm.seed(interfaceVertices).solve();
   @endcode
 
+  See @ref examples-eikonal-fmm for a complete point-source example with
+  analytic errors and a speed-scaling check.
+
   @note The module is header-only.
 
   @see @ref Rodin::Distance "Distance module" for higher-level distance
@@ -656,265 +663,198 @@
 
 /**
   @namespace Rodin::Solid
-  @brief Constitutive laws, kinematics, and solid-mechanics integration.
+  @brief Finite-strain kinematics, constitutive responses and virtual-work forms.
 
+  A total-Lagrangian hyperelastic model uses a reference domain
+  @f$\Omega_0@f$, displacement @f$u@f$ and deformation gradient
+  @f$F=I+\nabla_0u@f$. The stored energy determines the first Piola–Kirchhoff
+  stress and tangent action:
   @f[
-    \mathbf{P}=\frac{\partial W}{\partial\mathbf{F}}.
+    P(F)=\frac{\partial W}{\partial F},\qquad
+    DP(F)[H]=\frac{\partial^2 W}{\partial F^2}:H.
   @f]
+  The @ref guides-solid-mechanics "solid mechanics guide" derives the weak
+  equations and explains the reference/current configurations.
 
-  @ref Rodin::Solid::KinematicState "getLogJacobian()" computes deformation measures
-  for constitutive laws such as @ref Rodin::Solid::NeoHookean "NeoHookean" and @ref
-  Rodin::Solid::HolzapfelOgden "HolzapfelOgden". @ref
-  Rodin::Solid::InternalVirtualWork "InternalVirtualWork" assembles residuals and
-  consistent tangents, and stress fields such as @ref Rodin::Solid::CauchyStress
-  "CauchyStress<Law>" support postprocessing. The module covers finite-strain elasticity
-  and fiber-reinforced material models.
+  # Kinematics and constitutive input
 
-  It is organized into four sub-layers:
+  @ref Rodin::Solid::KinematicState accepts a displacement gradient and
+  exposes the deformation measures used by a law:
 
-  # Kinematics
+  | Getter | Quantity |
+  | :--- | :--- |
+  | `getDeformationGradient()` | @f$F=I+\nabla_0u@f$ |
+  | `getDeformationGradientInverse()` | @f$F^{-1}@f$ |
+  | `getDeformationGradientInverseTranspose()` | @f$F^{-T}@f$ |
+  | `getRightCauchyGreenTensor()` | @f$C=F^TF@f$ |
+  | `getLeftCauchyGreenTensor()` | @f$b=FF^T@f$ |
+  | `getJacobian()` | @f$J=\det F@f$ |
+  | `getLogJacobian()` | @f$\log J@f$ |
 
-  @ref Rodin::Solid::KinematicState "getLogJacobian()" encapsulates all finite-strain kinematic quantities at a
-  quadrature point. Set the displacement gradient with
-  `setDisplacementGradient(H)` and query derived tensors:
+  Constitutive models involving @f$\log J@f$ and inverse deformation
+  gradients require an admissible deformation, including @f$J>0@f$.
+  @ref Rodin::Solid::ConstitutivePoint combines the kinematics, optional
+  spatial location and tagged auxiliary inputs such as reference fibers and
+  activation. Integrator input callbacks populate those values at quadrature
+  points.
 
-  | Getter | Returns | Definition |
-  |--------|---------|------------|
-  | @ref Rodin::Solid::KinematicState "getDisplacementGradient()" | @f$ \nabla\mathbf{u} @f$ | Input gradient |
-  | @ref Rodin::Solid::KinematicState "getDeformationGradient()" | @f$ \mathbf{F} @f$ | @f$ \mathbf{I} + \nabla\mathbf{u} @f$ |
-  | @ref Rodin::Solid::KinematicState "getDeformationGradientInverse()" | @f$ \mathbf{F}^{-1} @f$ | Inverse |
-  | @ref Rodin::Solid::KinematicState "getDeformationGradientInverseTranspose()" | @f$ \mathbf{F}^{-T} @f$ | Inverse transpose |
-  | @ref Rodin::Solid::KinematicState "getRightCauchyGreenTensor()" | @f$ \mathbf{C} @f$ | @f$ \mathbf{F}^T\mathbf{F} @f$ |
-  | @ref Rodin::Solid::KinematicState "getLeftCauchyGreenTensor()" | @f$ \mathbf{b} @f$ | @f$ \mathbf{F}\mathbf{F}^T @f$ |
-  | @ref Rodin::Solid::KinematicState "getJacobian()" | @f$ J @f$ | @f$ \det\mathbf{F} @f$ |
-  | @ref Rodin::Solid::KinematicState "getLogJacobian()" | @f$ \ln J @f$ | Natural log of Jacobian |
+  # Prepare and evaluate a law
 
-  Invariant classes compute derived quantities from the kinematic state:
-  - @ref Rodin::Solid::IsotropicInvariants "IsotropicInvariants" — @f$ I_1 = \operatorname{tr}\mathbf{C} @f$,
-    @f$ I_2 = \tfrac{1}{2}[\operatorname{tr}(\mathbf{C})^2 - \operatorname{tr}(\mathbf{C}^2)] @f$,
-    @f$ I_3 = \det\mathbf{C} = J^2 @f$
-  - @ref Rodin::Solid::FiberInvariants "FiberInvariants" — @f$ I_4 = \mathbf{a}_0 \cdot \mathbf{C}\mathbf{a}_0 @f$,
-    @f$ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2\mathbf{a}_0 @f$
-    (for anisotropic materials; constructed with a fiber direction vector)
+  @ref Rodin::Solid::HyperElasticLaw defines the common constitutive interface.
+  Bind a constitutive point through `setConstitutivePoint(point)`, then read
+  `getStrainEnergyDensity()`, `getFirstPiolaKirchhoffStress(P)` and
+  `getMaterialTangent(dP,dF)`. Binding captures the inputs needed by the law.
+  Each assembly worker uses its own prepared law; concurrent rebinding of
+  the same object requires synchronization.
 
-  # Constitutive Point and Input Injection
-
-  @ref Rodin::Solid::ConstitutivePoint "ConstitutivePoint" bundles a @ref Rodin::Solid::KinematicState "getLogJacobian()" with an optional
-  @ref Rodin::Geometry::Point "Geometry::Point" (for spatial location) and a tag-based auxiliary data store.
-  Auxiliary data (fiber directions, activation values, etc.) is injected via
-  typed tags:
-
-  @code{.cpp}
-  cp.set<Solid::Tags::FiberDirection>(fiberVec);
-  auto& f = cp.get<Solid::Tags::FiberDirection>();
-  bool has = cp.has<Solid::Tags::Activation>();
-  @endcode
-
-  The @ref Rodin::Solid::Input "Input<Derived>" CRTP base and @ref Rodin::Solid::InputFunction "InputFunction" callable allow the user to
-  inject auxiliary data at each quadrature point during assembly. Integrators
-  accept input via `setInput()`.
-
-  # Constitutive Laws
-
-  Each law derives from @ref Rodin::Solid::HyperElasticLaw "HyperElasticLaw<Derived>" (CRTP base) and provides:
-  - A `Cache` struct for precomputed invariant data
-  - `setCache(cache, cp)` — populate the cache from a `ConstitutivePoint`
-  - `getFirstPiolaKirchhoffStress(P, cache, cp)` — @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$
-  - `getMaterialTangent(dP, cache, cp, dF)` — directional derivative @f$ D\mathbf{P}[\delta\mathbf{F}] @f$
-  - `getStrainEnergyDensity(cache, cp)` — returns @f$ W(\mathbf{F}) @f$
-
-  | Law | Constructor | Energy density @f$ W @f$ |
-  |-----|-------------|--------------------------|
-  | @ref Rodin::Solid::Hooke "Hooke" | `Hooke(lambda, mu)` | @f$ \boldsymbol{\sigma} = \lambda(\operatorname{tr}\boldsymbol{\varepsilon})\mathbf{I} + 2\mu\boldsymbol{\varepsilon} @f$ (linear stress-strain; not hyperelastic) |
-  | @ref Rodin::Solid::NeoHookean "NeoHookean" | `NeoHookean(lambda, mu)` | @f$ \frac{\mu}{2}(I_1 - d) - \mu\ln J + \frac{\lambda}{2}(\ln J)^2 @f$ |
-  | @ref Rodin::Solid::SaintVenantKirchhoff "SaintVenantKirchhoff" | `SaintVenantKirchhoff(lambda, mu)` | @f$ \frac{\lambda}{2}(\operatorname{tr}\mathbf{E})^2 + \mu\,\mathbf{E}:\mathbf{E} @f$ |
-  | @ref Rodin::Solid::MooneyRivlin "MooneyRivlin" | `MooneyRivlin(c1, c2, kappa)` | @f$ c_1(\bar{I}_1 - d) + c_2(\bar{I}_2 - d) + \frac{\kappa}{2}(J-1)^2 @f$ |
-
-  where @f$ \mathbf{E} = \tfrac{1}{2}(\mathbf{C} - \mathbf{I}) @f$ is the
-  Green-Lagrange strain, @f$ \bar{I}_k = J^{-2k/d} I_k @f$ are modified
-  invariants, and @f$ \kappa @f$ is the bulk modulus.
-
-  All Lamé-parameter constructors accept @f$ \lambda @f$ and @f$ \mu @f$ computed
-  from Young's modulus @f$ E @f$ and Poisson's ratio @f$ \nu @f$:
+  For example, @ref Rodin::Solid::NeoHookean implements
   @f[
-    \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)}, \quad
-    \mu = \frac{E}{2(1+\nu)}
+    W(F)=\frac{\mu}{2}(\operatorname{tr}(F^TF)-d)
+      -\mu\log J+\frac{\lambda}{2}(\log J)^2.
   @f]
+  The checked constitutive-response example varies
+  @f$F=\operatorname{diag}(s,1,1)@f$ and compares a centered energy derivative
+  with @f$P_{11}@f$ over 71 stretches. Its largest scaled discrepancy was
+  @f$1.92\times10^{-10}@f$ with finite-difference increment @f$10^{-6}@f$.
 
-  # Integrators
+  @snippet Solid/ConstitutiveResponse.cpp constitutive-bind
 
-  Both integrators use `setDisplacement()` to set the linearization point and
-  `setInput()` for auxiliary data injection. Quadrature order is auto-selected
-  (2× FE order) unless overridden with `setQuadratureOrder()`.
+  Other laws include @ref Rodin::Solid::SaintVenantKirchhoff,
+  @ref Rodin::Solid::MooneyRivlin and @ref Rodin::Solid::HolzapfelOgden.
+  Their class pages specify energy, dimensions, parameters and auxiliary inputs.
+  Choose units consistently for the geometry, material parameters and loads.
 
-  | Integrator | Form type | Assembles | Mathematical expression |
-  |------------|-----------|-----------|-------------------------|
-  | @ref Rodin::Solid::InternalVirtualWorkResidual "InternalForce<Law, FES>" | Linear (residual) | Internal force vector | @f$ R_i = \int_\Omega \mathbf{P} : \nabla\phi_i \, dX @f$ |
-  | @ref Rodin::Solid::InternalVirtualWorkTangent "MaterialTangent<Law, Solution, FES>" | Bilinear (tangent) | Tangent stiffness matrix | @f$ K_{ij} = \int_\Omega D\mathbf{P}[\nabla\phi_j] : \nabla\phi_i \, dX @f$ |
+  # Assemble internal virtual work
 
-  Constructor signatures (CTAD-deduced):
-
-  @code{.cpp}
-  Solid::InternalForce residual(law, v);       // (law, TestFunction)
-  residual.setDisplacement(u);                  // set linearization point
-
-  Solid::MaterialTangent tangent(law, du, v);  // (law, TrialFunction, TestFunction)
-  tangent.setDisplacement(u);                   // set linearization point
-  @endcode
-
-  # Derived Fields
-
-  - @ref Rodin::Solid::FirstPiolaKirchhoffStress "FirstPiolaKirchhoffStress<Law>" — Post-process @f$ \mathbf{P} @f$ field
-  - @ref Rodin::Solid::CauchyStress "CauchyStress<Law>" — Post-process @f$ \boldsymbol{\sigma} = J^{-1}\mathbf{P}\mathbf{F}^T @f$
-  - @ref Rodin::Solid::GreenLagrangeStrain "GreenLagrangeStrain" — Post-process @f$ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) @f$
-
-  # Typical Usage
-
-  A quasi-static hyperelastic block under gravity using `NeoHookean`
-  (from `examples/Solid/BlockGravity.cpp`):
+  @ref Rodin::Solid::InternalVirtualWork binds a material law to the current
+  displacement. Its residual and tangent represent
+  @f[
+    R(u;v)=\int_{\Omega_0}P(F):\nabla_0v\,dX,\qquad
+    K(u;\delta u,v)=\int_{\Omega_0}
+      DP(F)[\nabla_0\delta u]:\nabla_0v\,dX.
+  @f]
+  The façade supplies `Residual(v)`, `Tangent(du,v)` and their combined form:
 
   @code{.cpp}
-  #include <Rodin/Solid.h>
-  #include <Rodin/Solver/NewtonSolver.h>
-  #include <Rodin/Solver/SparseLU.h>
-
-  // Material from Young's modulus and Poisson's ratio
-  const Real E = 200.0, nu = 0.3;
-  const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
-  const Real mu     = E / (2.0 * (1.0 + nu));
-  Solid::NeoHookean law(lambda, mu);
-
-  P1 Vh(mesh, mesh.getSpaceDimension());  // vector P1 space
-  TrialFunction du(Vh);
-  TestFunction  v(Vh);
-  GridFunction  u(Vh);  // accumulated displacement
-
-  // Build Newton system: K δu = -F_int(u) + F_body
-  Solid::MaterialTangent tangent(law, du, v);
-  tangent.setDisplacement(u);
-
-  Solid::InternalForce residual(law, v);
-  residual.setDisplacement(u);
-
-  auto bodyForce = VectorFunction{ Zero(), RealFunction(-10.0) };
-
+  auto internal = Solid::InternalVirtualWork(law, displacement);
   Problem newton(du, v);
-  newton = tangent
-         + residual
-         - Integral(bodyForce, v)
-         + DirichletBC(du, VectorFunction{ Zero(), Zero() }).on(bottomBC);
-
-  SparseLU linearSolver(newton);
-  NewtonSolver solver(linearSolver);
-  solver.setMaxIterations(50)
-        .setAbsoluteTolerance(1e-10)
-        .setRelativeTolerance(1e-8);
-  solver.solve(u);
+  newton = internal(du, v) - Integral(bodyForce, v)
+         + DirichletBC(du, Zero()).on(fixedBoundary);
   @endcode
 
-  @note The module is header-only (`Rodin::Solid` INTERFACE library).
+  Here `displacement` is the current state, `du` is its trial increment and
+  `v` is the matching test function. Problem assembly negates the physical
+  residual when placing linear forms on the right-hand side, giving
+  @f$K\delta u=\ell-R@f$. Keep the state and forms valid throughout Newton
+  updates. Nonpolynomial laws and curved geometry require quadrature assessed
+  against the intended accuracy.
 
-  @see @ref Rodin::Variational::LinearElasticityIntegral "Linear elasticity" for small-deformation problems.
+  # Postprocess stresses and strain
+
+  @ref Rodin::Solid::FirstPiolaKirchhoffStress,
+  @ref Rodin::Solid::CauchyStress and @ref Rodin::Solid::GreenLagrangeStrain
+  expose constitutive fields. In particular,
+  @f$\sigma=J^{-1}PF^T@f$ and @f$E=(F^TF-I)/2@f$.
+  Interpolate or project these fields into an output space appropriate for
+  their regularity, then export with @ref Rodin::IO::XDMF.
+
+  @see @ref guides-solid-mechanics, @ref guides-solvers,
+  @ref Rodin::Variational::LinearElasticityIntegral
  */
 
 /**
-  * @namespace Rodin::QF
-  * @brief Module for defining quadrature formulae over reference polytopes.
+  @namespace Rodin::QF
+  @brief Reference integration formulas selected by geometry and exactness.
 
-  * @ref Rodin::QF::QuadratureFormula "QuadratureFormula" selects
-  * persistent reference integration rules by geometry and exactness. @ref
-  * Rodin::QF::GaussLegendre "GaussLegendre", @ref
-  * Rodin::QF::TensorProduct "TensorProduct", and the simplex rule families supply
-  * points and weights for element integration and reference-basis tabulation.
-  * @f[
-  *   \int_{\hat{K}} f(\hat{x}) \, d\hat{x} \approx \sum_{i=1}^n w_i \, f(\hat{x}_i)
-  * @f]
-  * where @f$ \hat{K} @f$ is a reference polytope, @f$ \hat{x}_i @f$ are the
-  * quadrature points, and @f$ w_i @f$ are the associated weights.
-  *
-  * # Available Quadrature Rules
-  *
-  * | Rule | Class | Polytopes | Exactness |
-  * |------|-------|-----------|-----------|
-  * | **Centroid** | @ref Rodin::QF::Centroid "QF::Centroid" | All types | Degree 1 (linear). Single point at barycenter. |
-  * | **Gauss-Legendre** | @ref Rodin::QF::GaussLegendre "QF::GaussLegendre" | All types | Degree @f$ 2n-1 @f$ for @f$ n @f$ points (1D). Tensor-product or Duffy transform for higher dimensions. |
-  * | **Gauss-Lobatto** | @ref Rodin::QF::GaussLobatto "QF::GaussLobatto" | Segments | Degree @f$ 2n-3 @f$ for @f$ n @f$ points. Includes endpoints (useful for spectral methods). |
-  * | **Grundmann-Möller** | @ref Rodin::QF::GrundmannMoller "QF::GrundmannMoller" | Simplices only | Degree @f$ 2s+1 @f$ for parameter @f$ s \geq 0 @f$. Designed specifically for simplicial elements. |
-  *
-  * # Automatic Selection
-  *
-  * During assembly, the quadrature order is automatically chosen based on the
-  * polynomial degree of the finite element space and the integrands. Users can
-  * also specify a quadrature rule explicitly:
-  *
-  * @code{.cpp}
-  * QF::GaussLegendre qf(Polytope::Type::Triangle, 5); // order 5 on triangles
-  * @endcode
-  *
-  * # Higher-Dimensional Construction
-  *
-  * - **Tensor-product geometries** (quadrilaterals, hexahedra): constructed via
-  *   tensor products of 1D Gauss-Legendre rules.
-  * - **Simplicial geometries** (triangles, tetrahedra): the Duffy transformation
-  *   maps tensor-product rules to the simplex, or Grundmann-Möller rules are
-  *   used natively.
-  *
-  * Rodin provides quadrature rules for all supported polytope types
-  * (segments, triangles, quadrilaterals, tetrahedra, hexahedra, wedges).
+  A reference rule consists of sites @f$\widehat x_q@f$ and weights @f$w_q@f$:
+  @f[
+    \int_{\widehat K}f(\widehat x)\,d\widehat x
+      \approx\sum_qw_qf(\widehat x_q).
+  @f]
+  @ref Rodin::QF::QuadratureFormula::get selects a persistent formula for a
+  requested polynomial exactness and reference geometry. The
+  @ref guides-quadrature "quadrature guide" explains mapping to physical
+  cells, ownership, exactness ranges and refinement checks.
+
+  # Select a formula
+
+  @code{.cpp}
+  const auto& formula = QF::QuadratureFormula::get(4, Polytope::Type::Triangle);
+  const auto& quadrature = cell.getQuadrature(formula);
+  @endcode
+
+  The request is an exactness degree. Concrete family constructors may use a
+  different parameter: for example, `GaussLegendre(Segment,n)` takes a point
+  count and integrates univariate polynomials through degree @f$2n-1@f$.
+
+  # Formula families
+
+  | Family | Role |
+  | :--- | :--- |
+  | @ref Rodin::QF::XiaoGimbutas | Native tabulated simplex rules within their available ranges |
+  | @ref Rodin::QF::WitherdenVincent | Native tabulated pyramid rules within their available range |
+  | @ref Rodin::QF::GaussLegendre | Segment rules and positive collapsed-coordinate constructions |
+  | @ref Rodin::QF::TensorProduct | Products for quadrilaterals, hexahedra and wedges |
+  | @ref Rodin::QF::GaussLobatto | Endpoint-inclusive segment rules |
+  | @ref Rodin::QF::GrundmannMoller | A separately selectable simplex family |
+  | @ref Rodin::QF::Centroid | A one-site reference rule, also used for point geometry |
+
+  Default selection uses native tables when available and the configured
+  positive conical-product fallback beyond them. Product cells combine the
+  corresponding factor rules. Pyramid collapse contributes its Jacobian to
+  the Gauss–Jacobi weight. Point, segment, triangle, quadrilateral,
+  tetrahedron, hexahedron, wedge and pyramid geometries are supported.
+
+  Polynomial exactness applies to the complete reference integrand. Curved
+  mappings, rational bases and nonpolynomial coefficients require attention
+  to the mapped integrand and numerical refinement. The checked
+  `Geometry/Quadrature.cpp` example in @ref guides-quadrature integrates both
+  a reference polynomial and its mapped physical counterpart.
  */
 
 /**
   @namespace Rodin::FormLanguage
   @brief Typed expressions for constructing variational forms.
 
+  An expression's C++ type records its operands and algebraic role. Function
+  expressions represent known fields; shape-function expressions carry a
+  trial or test slot; bilinear integrators pair those slots. Traits propagate
+  scalar type, range and finite element space through composition.
+
   @code{.cpp}
   auto stiffness = Integral(Grad(u), Grad(v));
+  auto load = Integral(f, v);
+  Problem problem(u, v);
+  problem = stiffness - load + DirichletBC(u, Zero());
   @endcode
 
-  @ref Rodin::FormLanguage::Base "Base" supplies the common expression-node
-  interface, @ref Rodin::FormLanguage::Traits "Traits" describes ranges and
-  algebraic properties, and @ref Rodin::FormLanguage::List "List" groups polymorphic
-  nodes. They underpin the typed variational expressions used to compose integrals
-  and operators, and provide extension points for new function and form types.
+  # Identity, copying and ownership
 
-  # Key Classes
+  @ref Rodin::FormLanguage::Base supplies identity and polymorphic copying.
+  Expression nodes generally own copies of their child expressions, created
+  with `copy()`. @ref Rodin::FormLanguage::List stores polymorphic elements
+  with value semantics through owned pointers. Each owned child is
+  released with its owning expression.
 
-  - `FormLanguage::Base` — Root base class for all form language objects.
-    Provides unique identification (UUID), object lifetime management via
-    shared ownership, and polymorphic `copy()`. **Not thread-safe**: use
-    `thread_local` caching for per-thread output in evaluation methods.
+  Copying an expression does not necessarily copy its underlying mesh or
+  solution coefficients. A grid-function expression can still refer to its
+  finite element space and field storage. Keep those objects alive while the
+  assembled forms use them; rebuilding a mesh or space requires reviewing
+  dependent expressions and systems.
 
-  - `FormLanguage::Traits<T>` — Type trait template. Each form language type
-    provides a specialization defining associated types (`ScalarType`,
-    `RangeType`, `FESType`, etc.). Always specialize `Traits` for new types.
+  # Evaluation and assembly
 
-  - `FormLanguage::List` — Container for variational form components (integrals,
-    boundary conditions) that makes up the body of a `Problem`.
+  @ref Rodin::FormLanguage::Traits describes the associated types of each
+  node family. CRTP dispatch evaluates known-field expressions at geometric
+  points; assembly supplies basis functions and quadrature to realize linear
+  and bilinear forms. Constructing a form records that composition. A solver
+  assembles and evaluates it according to the selected backend.
 
-  # Expression Template Pattern
+  Evaluation and assembly may use mutable working state. Follow the
+  @ref guides-thread-safety "thread-safety guide" when sharing expressions
+  across workers.
 
-  Operators like `Grad`, `Div`, `Dot` are CRTP-based expression templates:
-
-  @code{.cpp}
-  auto stiffness = Integral(Grad(u), Grad(v)); // expression, not yet evaluated
-  auto load = Integral(f, v);                   // another expression
-  Problem p(u, v);
-  p = stiffness - load + DirichletBC(u, Zero()); // combined expression
-  @endcode
-
-  Expressions store operands via `std::reference_wrapper` (non-owning) or
-  `std::unique_ptr` (owning, for temporaries). No computation occurs until
-  assembly iterates over mesh cells and evaluates the expression at quadrature
-  points.
-
-  # Object Lifetime
-
-  The `Base::object()` helpers manage temporary object lifetimes. When an
-  expression captures a temporary (e.g.\ a lambda-constructed `RealFunction`),
-  the temporary is stored in a `shared_ptr` table within the expression,
-  ensuring it lives as long as the expression does.
-
-  @see @ref Rodin::Variational "Variational module" for the user-facing form language.
+  @see @ref guides-variational, @ref guides-numerical-contracts
  */
 
 /**
@@ -951,7 +891,7 @@
   |--------|----------|-------------|
   | @f$ \pi @f$ | @ref Rodin::Math::Constants::pi() "Constants::pi()" | Ratio of a circle's circumference to its diameter. |
 
-  # Mathematical Functions
+  # Mathematical functions
 
   | Symbol | Function | Domain | Description |
   |--------|----------|--------|-------------|
@@ -977,27 +917,27 @@
   | @f$ \max(a, b) @f$ | @ref Rodin::Math "max(a, b)" | Comparable values | Larger of two values |
   | @f$ \operatorname{clamp}(x, lo, hi) @f$ | @ref Rodin::Math "clamp(x, lo, hi)" | Comparable values | Restricts a value to the given bounds |
 
-  # Unit Types
+  # Unit types
 
   | Symbol | Type | Description |
   |--------|------|-------------|
   | @f$ \theta\,\mathrm{rad} @f$ | @ref Rodin::Math::Rad "Rad" | Radian wrapper with explicit conversion to `Real` |
   | @f$ \theta^{\circ} @f$ | @ref Rodin::Math::Deg "Deg" | Degree wrapper with conversion to `Rad` |
 
-  # Runge-Kutta Schemes
+  # Runge–Kutta schemes
 
   | Symbol | Method | Order | Description |
   |--------|--------|-------|-------------|
   | @f$ q_{n+1}=q_n+\Delta t\,k_2 @f$ | @ref Rodin::Math::RungeKutta::RK2 "RungeKutta::RK2" | 2 | Midpoint method |
   | @f$ q_{n+1}=q_n+\frac{\Delta t}{6}(k_1+2k_2+2k_3+k_4) @f$ | @ref Rodin::Math::RungeKutta::RK4 "RungeKutta::RK4" | 4 | Classical Runge-Kutta method |
 
-  # Root Finding
+  # Root finding
 
   | Symbol | Method | Description |
   |--------|--------|-------------|
   | @f$ x_{n+1}=x_n-\frac{f(x_n)}{f'(x_n)} @f$ | @ref Rodin::Math::RootFinding::NewtonRaphson "RootFinding::NewtonRaphson<Scalar>" | Finds scalar roots with a safeguarded Newton iteration, interval bracketing, and bisection fallback |
 
-  # Linear Algebra Utilities
+  # Linear algebra utilities
 
   | Operation | Function | Description |
   |-----------|----------|-------------|
@@ -1225,14 +1165,14 @@
   @namespace Rodin::MMG
   @brief Mesh adaptation through the MMG integration.
 
-  @ref Rodin::MMG::Mesh "MMG::Mesh::Build()" connects Rodin geometry to MMG. @ref
+  @ref Rodin::MMG::Mesh "MMG::Mesh" connects Rodin geometry to MMG. @ref
   Rodin::MMG::Adapt "MMG::Adapt" performs metric-driven adaptation, @ref
   Rodin::MMG::Optimizer "MMG::Optimizer" improves mesh quality, and @ref
-  Rodin::MMG::LevelSetDiscretizer "noSplit(ref)" fits or extracts an
+  Rodin::MMG::LevelSetDiscretizer "LevelSetDiscretizer" fits or extracts an
   isosurface. These workflows support remeshing and interface reconstruction in
   shape optimization and evolving-geometry simulations.
 
-  # Key Classes
+  # Key classes
 
   | Class | Purpose |
   |-------|---------|
@@ -1242,7 +1182,7 @@
   | @ref Rodin::MMG::LevelSetDiscretizer "MMG::LevelSetDiscretizer" | Level-set meshing: cuts a background mesh along an isovalue or extracts the isosurface. |
   | @ref Rodin::MMG::Base "MMG::Base" | Shared MMG remeshing configuration inherited by the workflow classes. |
 
-  # Workflow Semantics
+  # Workflow semantics
 
   `Optimizer`, `Adapt`, and `LevelSetDiscretizer` are intentionally different
   operations:
@@ -1258,7 +1198,7 @@
   object; input element indices should be treated as stable only where the
   wrapper or tests explicitly document preservation.
 
-  # Auto-Dispatch
+  # Backend selection
 
   The wrappers auto-dispatch to the appropriate MMG backend based on the mesh
   type:
@@ -1269,7 +1209,7 @@
   | 3D volumetric | MMG3D |
   | Surface in 3D | MMGS |
 
-  # Shared Configuration (Base)
+  # Shared configuration
 
   The MMG wrappers inherit common configuration methods from
   @ref Rodin::MMG::Base "setAngleDetection(bool)"; each returns `*this` for chaining:
@@ -1294,7 +1234,7 @@
   | @ref Rodin::MMG::V5::Mesh | `create`, `copy`, `isSurface`, `destroy`, `toV5`, `fromV5` |
   | @ref Rodin::MMG::V5::Solution | `create`, `copy`, `swap`, `destroy` |
 
-  # Required Entities
+  # Required entities
 
   @ref Rodin::MMG::Mesh "MMG::Mesh" stores MMG-specific metadata:
 
@@ -1320,8 +1260,8 @@
   - required entities not crossed by the level set retain their required
     metadata and original geometry in the 2D/3D cases covered by the test
     suite;
-  - required entities crossed by the level set are not guaranteed to remain
-    intact. MMG may replace them to conform the mesh to the isovalue, even when
+  - MMG may replace required entities crossed by the level set to conform the mesh to
+  the isovalue, even when
     `MG_REQ`, individual labels, adjacent tetrahedron labels, local closure
     requirements, or `noSplit(ref)` are used.
 
@@ -1343,9 +1283,8 @@
   | @ref Rodin::MMG::LevelSetDiscretizer "split(ref, split)" | Split one material reference into inside/outside references |
   | @ref Rodin::MMG::LevelSetDiscretizer "noSplit(ref)" | Keep one material reference from being split by the material policy |
 
-  `noSplit(ref)` is a material-reference splitting policy. It is not an
-  element-integrity guarantee for an individual edge, triangle, or tetrahedron
-  that the level set cuts.
+  `noSplit(ref)` controls material-reference splitting. MMG can modify intersected
+  edges, triangles and tetrahedra to construct the level-set interface.
 
   @code{.cpp}
   MMG::Mesh cut = MMG::LevelSetDiscretizer()
@@ -1358,7 +1297,8 @@
   Use @ref Rodin::MMG::Mesh "MMG::Mesh::Build()" to construct meshes
   programmatically via the builder pattern.
 
-  @note Requires the MMG library and Rodin configured with `RODIN_USE_MMG=ON`.
+  The MMG dependency is configured by Rodin’s bundled dependency setup.
+  See @ref examples-swift-background for adaptation followed by interface fitting.
 
   @see @ref examples-mmg-index "MMG examples"
   @see @ref examples-mmg-behavior "MMG behavior and guarantees"
@@ -1409,7 +1349,7 @@
   location, and assembly build on these components for multi-process PDE
   calculations.
 
-  # Key Components
+  # Key components
 
   - @ref Rodin::Context::MPI "Context::MPI" — Wraps a `boost::mpi::environment`
     and `boost::mpi::communicator` to provide a uniform execution context.
@@ -1428,7 +1368,7 @@
     dimension @p d across ranks so that shared entities have consistent
     distributed IDs and ownership.
 
-  # Typical Workflow
+  # Typical workflow
 
   @code{.cpp}
   #include <Rodin/MPI.h>
@@ -1475,136 +1415,80 @@
 
 /**
   @namespace Rodin::PETSc
-  @brief PETSc integration module for Rodin.
+  @brief PETSc storage, assembly and linear/nonlinear solver adapters.
+
+  PETSc-backed trial/test functions connect Rodin variational forms to PETSc
+  matrices, vectors, Krylov solvers and nonlinear solvers. The mesh execution
+  context determines whether those objects are local or distributed.
+  @ref guides-backends describes the relationship between context, assembly
+  strategy and algebraic storage.
+
+  # Object lifetime
+
+  Initialize PETSc before constructing its objects. Destroy Rodin objects
+  owning PETSc matrices, vectors and solver contexts before finalization:
 
   @code{.cpp}
-  Solver::KSP(poisson).solve();
+  PetscErrorCode ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+  assert(ierr == PETSC_SUCCESS);
+  {
+    // Construct and use PETSc-backed spaces, fields, forms and solvers here.
+  }
+  ierr = PetscFinalize();
+  assert(ierr == PETSC_SUCCESS);
   @endcode
 
-  @ref Rodin::PETSc::Math::LinearSystem "PETSc::Math::LinearSystem" groups PETSc
-  matrix and vector handles, while @ref Rodin::Solver::KSP "KSP" and @ref
-  Rodin::Solver::SNES "SNES" expose linear and nonlinear solvers. PETSc-backed
-  variational and assembly specializations connect the same weak-form interfaces to
-  distributed algebra, preconditioning, and solver configuration for larger PDE
-  systems.
+  In distributed programs, the MPI environment and communicator must also
+  outlive their borrowers. Collective operations require participation in
+  the same order on all ranks. See @ref guides-mpi for partitioning,
+  ownership, ghost data and collective queries.
 
-  PETSc-specific linear algebra, solver, variational, and assembly adapters
-  are documented in their corresponding headers.
+  # Variational storage and solvers
+
+  Construct PETSc trial and test functions on a compatible finite element space:
+
+  @code{.cpp}
+  P1 space(mesh);
+  PETSc::Variational::TrialFunction u(space);
+  PETSc::Variational::TestFunction v(space);
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v)) - Integral(f, v)
+          + DirichletBC(u, Zero());
+  PETSc::Solver::KSP solver(poisson);
+  solver.solve();
+  @endcode
+
+  This fragment assumes the mesh, right-hand side and required connectivity
+  have already been prepared. It must execute within the initialized scope.
+  Select KSP and preconditioner settings for the actual matrix properties and
+  inspect convergence status. @ref guides-petsc contains a complete Poisson
+  program and explicit command-line configuration.
+
+  Multiple trial/test pairs represent coupled systems, including velocity,
+  pressure and pressure-mean constraints for Stokes flow. The field-split
+  preconditioner must use the corresponding field index sets and block
+  names. Its configuration depends on the formulation and block ordering;
+  see the multivariable examples linked from @ref examples-index and the
+  field-split discussion in @ref guides-petsc.
+
+  @ref Rodin::PETSc::Solver::SNES handles nonlinear residual and Jacobian
+  callbacks. Their state updates, assembly and convergence criteria must be
+  consistent with the nonlinear weak problem.
 
   # Submodules
 
-  - @ref Rodin::PETSc::Math "Math" — PETSc vector, matrix, and linear
-    system wrappers
-  - @ref Rodin::PETSc::Solver "Solver" — @ref Rodin::Solver::KSP "KSP",
-    @ref Rodin::Solver::SNES "SNES", CG, and GMRES solver aliases
-  - @ref Rodin::PETSc::Assembly "Assembly" — Assembly strategies for PETSc
-    objects (sequential, MPI, OpenMP)
-  - @ref Rodin::PETSc::Variational "Variational" — Trial/test functions,
-    forms, grid functions, and problems backed by PETSc
+  | Module | Role |
+  | :--- | :--- |
+  | @ref Rodin::PETSc::Math | Matrix, vector and linear-system handles |
+  | @ref Rodin::PETSc::Variational | PETSc-backed fields, forms and problems |
+  | @ref Rodin::PETSc::Assembly | Sequential, OpenMP and distributed assembly specializations |
+  | @ref Rodin::PETSc::Solver | Linear and nonlinear solver adapters |
 
-  @note Available only when Rodin is configured with PETSc support.
+  Configure Rodin with `RODIN_USE_PETSC=ON`; distributed execution additionally
+  requires its MPI configuration. Availability of a particular solver,
+  factorization or preconditioner depends on the PETSc installation.
 
-  @see <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html">Rodin::PETSc::Math</a>
-  @see <a href="namespace_rodin_1_1_p_e_t_sc_1_1_solver.html">Rodin::PETSc::Solver</a>
-
-  # Typical Usage (Sequential)
-
-  @code{.cpp}
-  #include <Rodin/PETSc.h>
-
-  PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
-
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-  mesh.getConnectivity().compute(1, 2);
-
-  P1 Vh(mesh);
-  PETSc::Variational::TrialFunction u(Vh);
-  PETSc::Variational::TestFunction  v(Vh);
-
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-
-  Solver::CG(poisson).solve();
-
-  PetscFinalize();
-  @endcode
-
-  # Typical Usage (MPI + PETSc)
-
-  @code{.cpp}
-  #include <Rodin/MPI.h>
-  #include <Rodin/PETSc.h>
-
-  boost::mpi::environment env(argc, argv);
-  boost::mpi::communicator world;
-  Context::MPI mpi(env, world);
-  PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
-
-  // Partition and distribute mesh
-  MPI::Sharder sharder(mpi);
-  // ... (see MPI module documentation)
-  auto mesh = sharder.gather(0);
-  mesh.getConnectivity().compute(2, 3);
-  mesh.reconcile(2);
-
-  P1 Vh(mesh);
-  PETSc::Variational::TrialFunction u(Vh);
-  PETSc::Variational::TestFunction  v(Vh);
-
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-
-  Solver::CG(poisson).solve();
-
-  PetscFinalize();
-  @endcode
-
-  # Multi-Field Problems (Stokes)
-
-  PETSc problems support an arbitrary number of coupled trial/test function
-  pairs for saddle-point systems:
-
-  @code{.cpp}
-  H1  uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
-  H1  ph(std::integral_constant<size_t, 1>{}, mesh);
-  P0g lh(mesh);
-
-  PETSc::Variational::TrialFunction u(uh);
-  PETSc::Variational::TrialFunction p(ph);
-  PETSc::Variational::TrialFunction l(lh);
-
-  PETSc::Variational::TestFunction v(uh);
-  PETSc::Variational::TestFunction q(ph);
-  PETSc::Variational::TestFunction m(lh);
-
-  Problem stokes(u, p, l, v, q, m);
-  stokes = Integral(Jacobian(u), Jacobian(v))
-         - Integral(p, Div(v))
-         + Integral(Div(u), q)
-         + Integral(l, q)
-         + Integral(p, m)
-         - Integral(f, v)
-         + DirichletBC(u, u_exact);
-
-  Solver::KSP(stokes).solve();
-  @endcode
-
-  PETSc command-line options can be used to configure field-split
-  preconditioning:
-  @code
-  ./Stokes -ksp_type gmres -pc_type fieldsplit -ksp_rtol 1e-8
-  @endcode
-
-  @note Requires PETSc to be available and Rodin configured with
-  `RODIN_USE_PETSC=ON`.
-
-  @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
-  @see <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html">Rodin::Solver::SNES</a>
+  @see @ref guides-petsc, @ref guides-mpi, @ref guides-numerical-contracts
  */
 
 /**

@@ -1,0 +1,171 @@
+/**
+  @page examples-swift-background Adapting and fitting an implicit interface
+  @brief Prepare a graded background with MMG, classify a circle, and fit its interface with SWIFT.
+
+  @tableofcontents
+  @m_footernavigation
+
+  @section examples-swift-background-question Geometry and workflow
+
+  Consider a circle of radius @f$R=0.25@f$ centered at
+  @f$c=(0.5,0.5)@f$ inside the unit square. Its signed distance and gradient are
+  @f[
+    \phi(x)=\lVert x-c\rVert-R,
+    \qquad \nabla\phi(x)=\frac{x-c}{\lVert x-c\rVert}.
+  @f]
+  The negative phase is the disk. The gradient is undefined at the center;
+  the callable returns zero there, away from the interface being fitted.
+
+  A background mesh must provide enough resolution near the circle and a
+  set of facets that can represent its boundary. The example uses three stages:
+
+  1. MMG changes the background mesh according to a positive size field.
+  2. MinSTCut assigns inside/outside cell labels and marks separating facets.
+  3. SWIFT displaces those facets towards the circle while holding the outer
+     square fixed and checking its sampled mesh-quality budget.
+
+  This sequence is also used in the Kelvin ball application. Here the analytic
+  target isolates geometry fitting from PDE solves, level-set transport and
+  field transfer. The @ref examples-mmg-mesh_adaptation "size-field tutorial"
+  supplies the remeshing background; @ref guides-swift explains the fitting model.
+
+  @section examples-swift-background-size Prepare the background
+
+  The initial grid has 13 vertices per axis and 288 triangles. Let
+  @f$h_0=1/12@f$ be its spacing. The target edge size is
+  @f[
+    s(x)=s_{\mathrm{far}}-
+      (s_{\mathrm{far}}-s_{\mathrm{near}})
+      \exp\!\left[-\frac{\phi(x)^2}{w^2}\right],
+  @f]
+  with @f$s_{\mathrm{near}}=0.035@f$,
+  @f$s_{\mathrm{far}}=0.14@f$ and @f$w=0.10@f$ in unit-square coordinates.
+  Thus the requested mesh is fine near the circle and coarser away from it.
+  These are chosen mesh-design parameters. The exponential is the weight
+  supplied by @ref Rodin::Adaptation::SWIFT::Loss.
+
+  @snippet Adaptation/SWIFT/BackgroundFitting.cpp background-adapt
+
+  MMG receives scalar nodal sizes, lower/upper size limits and a gradation
+  parameter of @f$1.3@f$. The four box corners are marked before adaptation.
+  The size field is scoped to that call. All subsequent spaces and solvers
+  are constructed on the adapted topology.
+
+  @section examples-swift-background-classification Label the phases
+
+  On each adapted cell @f$K@f$, define the local scale
+  @f$h_K=\sqrt{|K|}@f$ and approximate the cell average
+  @f[
+    m_K=\frac{1}{|K|}\int_K
+       \tanh\!\left(\frac{\phi(x)}{1.25h_K}\right)\,dx.
+  @f]
+  MinSTCut combines fidelity to these averages with a separating-facet cost.
+  The facet weight is @f$0.01\min(h_{K^-},h_{K^+})@f$ on an interior facet.
+  Second-order quadrature approximates the nonpolynomial phase average.
+  The phase width and smoothing coefficient are classification choices.
+
+  @snippet Adaptation/SWIFT/BackgroundFitting.cpp background-classify
+
+  Cells receive attributes 1 and 2, separating edges receive attribute 10,
+  and exterior edges receive attribute 20. Classification changes labels.
+  The resulting polygonal interface follows existing mesh edges.
+
+  @section examples-swift-background-fit Fit the marked interface
+
+  The local @ref Rodin::Adaptation::SWIFT::Adapt workflow owns a vector-valued
+  continuous @f$P_1@f$ displacement space. Its increment is zero on the outer
+  square. The analytic distance and gradient supply the target throughout the
+  solve.
+
+  @snippet Adaptation/SWIFT/BackgroundFitting.cpp background-target
+  @snippet Adaptation/SWIFT/BackgroundFitting.cpp background-fit
+
+  Here `model.h` is fixed at the requested near-interface size, @f$0.035@f$.
+  It scales the fitting model throughout this solve. An explicit geometric
+  tolerance of @f$2.5\times10^{-3}@f$ replaces the automatic stopping target.
+  The local SparseLU backend is selected explicitly. Other model and work-budget
+  settings retain their defaults.
+
+  `execute()` applies the accepted displacement to the mesh when the sampled
+  quality budget is satisfied. A quality-valid best-effort result may still
+  miss the geometric tolerance; this tutorial additionally requires
+  `geometricTargetReached` before returning success. The fitting stage preserves
+  the adapted connectivity and cell labels.
+
+  @section examples-swift-background-result Inspect the result
+
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+
+  @image html SWIFTBackgroundFitting-uniform.png "Uniform background."
+  @image html SWIFTBackgroundFitting-classified.png "Adapted background with inside cells in cyan."
+  @image html SWIFTBackgroundFitting-fitted.png "Fitted interface with the exact circle in navy."
+
+  @endparblock
+
+  These are the actual meshes written by the program. Edges remain visible to
+  show where fitting compresses elements. The navy circle supplies the same
+  analytic reference in every panel.
+
+  The checked local run produced the following measurements:
+
+  | Quantity | Result |
+  | :--- | ---: |
+  | Uniform background | 169 vertices, 288 triangles |
+  | Adapted background | 288 vertices, 540 triangles |
+  | Classified interface | 49 edges |
+  | Accepted fitting steps | 5 |
+  | Maximum radial error on the complete polygonal interface | @f$2.45685\times10^{-3}@f$ |
+  | Minimum relative Jacobian | @f$0.05149@f$ |
+  | Maximum relative distortion | @f$8.97282@f$ |
+  | Outer-boundary displacement | @f$0@f$ |
+
+  For a straight interface segment, the radial distance is largest at an
+  endpoint and smallest at the orthogonal projection of the center, clamped
+  to that segment. Evaluating these locations gives an independent maximum
+  radial error on every complete segment. It agrees with the solver's
+  sampled maximum to floating-point precision in this run. This checks the
+  distance from the reconstructed interface to the circle; a two-sided
+  Hausdorff calculation would also examine distances from the circle back
+  to the polygon.
+
+  Every triangle has a positive signed Jacobian, the square retains unit
+  area, and fitting leaves its vertex and cell counts unchanged. The relative
+  Jacobian and distortion values also show substantial local compression.
+  Passing the configured budget permits this deformation. A subsequent PDE
+  application should assess element conditioning and its own approximation
+  error before choosing these mesh parameters.
+
+  @section examples-swift-background-run Build, run and visualize
+
+  Build and execute the `SWIFT_BackgroundFitting` target in a scratch directory:
+
+  @code{.sh}
+  cmake --build build --target SWIFT_BackgroundFitting
+  mkdir -p results/background-fitting
+  cd results/background-fitting
+  ../../build/examples/Adaptation/SWIFT/SWIFT_BackgroundFitting
+  @endcode
+
+  `BackgroundFitting.xdmf` contains the named blocks `uniform`, `classified`
+  and `fitted`. Keep its HDF5 companions alongside it. In ParaView, use
+  <strong>Extract Block</strong> to select a stage, then <strong>Surface With Edges</strong>. On the last
+  two blocks, threshold the cell array `Attribute` at 1 to show the disk.
+  `BackgroundFitting.csv` records accepted-step diagnostics; the final monitor
+  notification may repeat the last accepted step.
+
+  @section examples-swift-background-full Complete program
+
+  @snippet Adaptation/SWIFT/BackgroundFitting.cpp background-source
+
+  @section examples-swift-background-next Continue
+
+  The shared `SWIFT_ReconstructionP1`, `SWIFT_ReconstructionP2` and
+  `SWIFT_ReconstructionP3` examples extend fitting to lobed targets and curved
+  geometry. They retain an unchanged reference mesh while evaluating the
+  displacement at all geometry nodes. See @ref guides-swift for ownership,
+  higher-order geometry updates and diagnostic definitions.
+
+  @example Adaptation/SWIFT/BackgroundFitting.cpp
+*/

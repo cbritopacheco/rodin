@@ -15,7 +15,7 @@
 
   @subsection guides-getting-started-installation-required Required dependencies
 
-  Rodin requires the following dependencies to be installed on your system:
+  The following dependencies are required:
 
   - **CMake 3.16.0+** - Build system generator
   - **C++20 compatible compiler** - GCC 12+, Clang 14+, or AppleClang
@@ -26,7 +26,7 @@
 
   @subsection guides-getting-started-installation-optional Optional dependencies
 
-  For additional functionality, you may want to install:
+  Optional modules use the following dependencies:
 
   - **OpenMP** (`libomp`) - For parallel execution
   - **SuiteSparse** (`libsuitesparse`) - For additional linear solvers
@@ -79,12 +79,12 @@
   cd rodin
   @endcode
 
-  @note The `--recursive` flag is important as it clones third-party dependencies
-  included as git submodules. If you forgot this flag, run:
+  The `--recursive` flag clones the third-party submodules. An existing checkout can
+  be initialized with:
   `git submodule update --init --recursive`
 
-  All files under @c resources/ are stored with Git LFS. If you need those
-  resources, hydrate them after cloning:
+  Files under @c resources/ are stored with Git LFS. Resource-dependent examples use
+  the files hydrated after cloning:
 
   @code{.bash}
   git lfs install
@@ -102,7 +102,7 @@
 
   @subsubsection guides-getting-started-installation-user User-local installation (recommended)
 
-  Install Rodin to your home directory without requiring sudo:
+  For a user-local installation, set the install prefix to the home directory:
 
   @code{.bash}
   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
@@ -145,14 +145,14 @@
   64 scalar P1 degrees of freedom.
 
   This checks package discovery, compilation, linkage, and a small runtime
-  operation. It does not replace the library's numerical test suite.
+  operation. The numerical test suite provides the separate verification of library algorithms.
 
   @section guides-getting-started-installation-troubleshooting Troubleshooting
 
   @subsection guides-getting-started-installation-cmake-not-found CMake can't find Rodin
 
   If CMake reports that it cannot find the Rodin package, ensure that
-  `CMAKE_PREFIX_PATH` includes your installation directory:
+  `CMAKE_PREFIX_PATH` includes the Rodin installation directory:
 
   @code{.bash}
   cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/rodin/installation
@@ -174,7 +174,7 @@
   git lfs pull
   @endcode
 
-  If you do not need examples or installed resources, configure with
+  For a library-only installation, configure with
   `-DRODIN_INSTALL_RESOURCES=OFF`.
 
   @subsection guides-getting-started-installation-compiler-errors Compiler errors

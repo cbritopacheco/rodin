@@ -1,289 +1,125 @@
 /**
-  @page guides-meshes-utilities Advanced utilities
-  @brief Advanced mesh operations and transformations
+  @page guides-meshes-utilities Mesh operations
+  @brief Change coordinates, extract submeshes and group cells.
 
   @tableofcontents
-
   @m_footernavigation
 
-  Rodin provides advanced utilities for mesh manipulation, transformation,
-  and analysis.
+  @section guides-meshes-utilities-intro Choose the operation
 
-  @section guides-meshes-utilities-intro Introduction
+  Coordinate changes modify the geometric map. Extraction selects entities
+  into a submesh. Component labeling and partitioning assign groups to the
+  existing cells. Establish the required connectivity before each operation
+  and retain a parent mesh while a submesh refers to it.
 
-  Beyond basic mesh creation and queries, Rodin offers powerful utilities
-  for mesh transformation, domain decomposition, and advanced operations.
-
-  @section guides-meshes-utilities-transform Mesh transformations
+  @section guides-meshes-utilities-transform Coordinate transformations
 
   @subsection guides-meshes-utilities-transform-scale Scaling
 
-  Scale all mesh coordinates by a factor:
-
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-
-  int main() {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-
-    // Scale mesh by factor of 2.0
-    mesh.scale(2.0);
-
-    // Domain is now [0, 2] x [0, 2]
-    std::cout << "Volume after scaling: " << mesh.getVolume() << std::endl;
-
-    return 0;
-  }
-  @endcode
+  `mesh.scale(a)` multiplies coordinates by `a`. Length, area and volume
+  consequently scale by @f$|a|@f$, @f$a^2@f$ and @f$|a|^3@f$. A grid with
+  16 vertices per axis initially spans zero to 15; scaling by two gives side
+  length 30. Normalize by @f$1/15@f$ first when a unit-square baseline is needed.
 
   @subsection guides-meshes-utilities-transform-displace Displacement
 
-  Displace mesh nodes using a vector-valued function:
+  `mesh.displace(displacement)` evaluates a vector-valued displacement on the
+  mesh geometry and updates the coordinates. Supply one component for each
+  embedding-space coordinate. The small
+  @ref Geometry/Displace.cpp "Displace.cpp example" writes its original and
+  deformed meshes. Changes to geometry must preserve the cell regularity
+  required by subsequent integration and solution procedures.
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
+  @section guides-meshes-utilities-submesh Extract a submesh
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
+  @subsection guides-meshes-utilities-submesh-create Keep a region
 
-  int main() {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  `mesh.keep(attribute)` extracts cells carrying the requested label. The
+  result is a `SubMesh` with parent associations. `getParent()` gives access
+  to the parent mesh; use the submesh mappings when corresponding indices
+  between the two are needed.
 
-    P1 Vh(mesh);
+  @subsection guides-meshes-utilities-submesh-boundary Extract the boundary
 
-    // Define displacement field
-    VectorFunction displacement(
-      [](const Point& p) {
-        Math::Vector<Real> u(2);
-        u(0) = 0.1 * std::sin(2 * M_PI * p.x());
-        u(1) = 0.1 * std::sin(2 * M_PI * p.y());
-        return u;
-      }, mesh.getSpaceDimension());
+  `mesh.skin()` extracts boundary facets after facet-to-cell connectivity
+  has been prepared. A planar rectangle gives a one-dimensional curve.
 
-    // Displace mesh
-    mesh.displace(displacement);
+  @section guides-meshes-utilities-ccl Connected components
 
-    return 0;
-  }
-  @endcode
+  `mesh.ccl(predicate)` groups adjacent cells accepted by the binary predicate.
+  `getComponents()` returns those groups as collections of cell indices.
+  In the example, equality of cell attributes gives one component for each
+  of two connected regions.
 
-  @section guides-meshes-utilities-submesh SubMeshes
+  @snippet Geometry/MeshBasics.cpp mesh-basics-extract
 
-  Create submeshes representing subregions:
+  `trace()` assigns facet attributes from neighboring region labels. Region
+  extraction uses `keep()`; the @ref guides-interfaces-dg "interface guide"
+  describes the trace-labeling operation.
 
-  @subsection guides-meshes-utilities-submesh-create Creating SubMeshes
-
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-
-  int main() {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-
-    // Create submesh from attribute 1
-    SubMesh submesh = mesh.trace(1);
-
-    std::cout << "Parent mesh cells: " << mesh.getCellCount() << std::endl;
-    std::cout << "SubMesh cells: " << submesh.getCellCount() << std::endl;
-
-    // Access parent mesh
-    const Mesh& parent = submesh.getParent();
-
-    return 0;
-  }
-  @endcode
-
-  @subsection guides-meshes-utilities-submesh-boundary Boundary SubMesh
-
-  @code{.cpp}
-  mesh.getConnectivity().compute(1, 2);
-
-  // Create submesh of boundary
-  SubMesh boundary = mesh.skin();
-
-  std::cout << "Boundary elements: " << boundary.getCellCount() << std::endl;
-  @endcode
-
-  @section guides-meshes-utilities-ccl Connected component labeling
-
-  Find connected components in the mesh:
-
-  @code{.cpp}
-  mesh.getConnectivity().compute(2, 2);
-
-  // Find connected components
-  auto ccl = mesh.ccl(
-    [](const Polytope& p1, const Polytope& p2) {
-      // Define adjacency criterion
-      return true;  // All adjacent cells are connected
-    });
-
-  std::cout << "Found " << ccl.getCount() 
-            << " connected components" << std::endl;
-
-  for (const auto& component : ccl) {
-    std::cout << "Component with " << component.size() 
-              << " cells" << std::endl;
-  }
-  @endcode
-
-  @section guides-meshes-utilities-partition Domain decomposition
-
-  Partition meshes for parallel computing:
+  @section guides-meshes-utilities-partition Partition cell indices
 
   @subsection guides-meshes-utilities-partition-balanced Balanced partitioning
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
+  Construct the partitioner with the mesh, call `partition(count)` and query
+  the resulting partition for each cell index. The mesh and its prepared
+  adjacency remain alive during this procedure.
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
+  @snippet Geometry/MeshBasics.cpp mesh-basics-partition
 
-  int main() {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {64, 64});
-
-    // Partition into 4 subdomains
-    size_t numParts = 4;
-    BalancedCompactPartitioner partitioner;
-    auto shards = partitioner.partition(mesh, numParts);
-
-    for (size_t i = 0; i < shards.size(); ++i) {
-      std::cout << "Shard " << i << " has " 
-                << shards[i].getCellCount() << " cells" << std::endl;
-    }
-
-    return 0;
-  }
-  @endcode
+  The partition labels can be used by later distribution operations.
+  @ref guides-mpi "MPI mesh distribution" also establishes rank ownership,
+  ghosts and communication state.
 
   @subsection guides-meshes-utilities-partition-greedy Greedy partitioning
 
-  @code{.cpp}
-  GreedyPartitioner partitioner;
-  auto shards = partitioner.partition(mesh, numParts);
-  @endcode
+  `GreedyPartitioner` provides another partitioning policy. Consult its
+  constructor and partition interface in the API reference when selecting
+  that policy for an application.
 
-  @section guides-meshes-utilities-coord Coordinate operations
+  @section guides-meshes-utilities-coord Direct coordinate edits
 
-  @subsection guides-meshes-utilities-coord-set Setting coordinates
+  @subsection guides-meshes-utilities-coord-set Set coordinates
 
-  @code{.cpp}
-  // Set coordinates of vertex 0
-  mesh.setVertexCoordinates(0, 1.5, 0);  // x-coordinate
-  mesh.setVertexCoordinates(0, 2.5, 1);  // y-coordinate
+  `setVertexCoordinates(index, value, component)` changes one coordinate;
+  the vector overload changes the complete coordinate tuple. Coordinate
+  edits affect any geometric quantities derived from the edited vertices.
 
-  // Or set all at once
-  Math::SpatialPoint coords(2);
-  coords << 1.5, 2.5;
-  mesh.setVertexCoordinates(0, coords);
-  @endcode
+  @section guides-meshes-utilities-flush Geometry cache lifetime
 
-  @section guides-meshes-utilities-flush Cache management
+  `mesh.flush()` clears the transformation and quadrature indices. Subsequent
+  geometry queries construct default maps from vertex coordinates. Retain and
+  reinstall the intended higher-order transformations when preserving curved
+  geometry through an explicit flush.
+  Follow the chosen mutation API's cache contract. Reacquire borrowed geometry
+  after invalidation, and rebuild spaces and algebraic problems after topology
+  changes. See @ref guides-numerical-contracts.
 
-  Clear cached data:
+  @section guides-meshes-utilities-example Checked source
 
-  @code{.cpp}
-  // Flush cached transformations and derived data
-  mesh.flush();
-  @endcode
+  The `MeshBasics` target checks region extraction, boundary extraction,
+  component counts and analytic areas, and exercises balanced partitioning.
+  Its complete source is @ref Geometry/MeshBasics.cpp.
 
-  This is useful after modifying mesh coordinates to ensure transformations
-  are recomputed.
+  @section guides-meshes-utilities-advanced Lower-level control
 
-  @section guides-meshes-utilities-example Complete example
+  @subsection guides-meshes-utilities-advanced-builder Builder
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-
-  int main() {
-    // Create mesh
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {32, 32});
-
-    std::cout << "Original mesh:" << std::endl;
-    std::cout << "  Volume: " << mesh.getVolume() << std::endl;
-
-    // Scale mesh
-    mesh.scale(2.0);
-    std::cout << "\nAfter scaling by 2.0:" << std::endl;
-    std::cout << "  Volume: " << mesh.getVolume() << std::endl;
-
-    // Create boundary submesh
-    mesh.getConnectivity().compute(1, 2);
-    SubMesh boundary = mesh.skin();
-    std::cout << "\nBoundary:" << std::endl;
-    std::cout << "  Elements: " << boundary.getCellCount() << std::endl;
-    std::cout << "  Perimeter: " << boundary.getMeasure(1) << std::endl;
-
-    // Find connected components
-    mesh.getConnectivity().compute(2, 2);
-    auto ccl = mesh.ccl(
-      [](const Polytope& p1, const Polytope& p2) { return true; });
-    std::cout << "\nConnected components: " << ccl.getCount() << std::endl;
-
-    // Partition mesh
-    BalancedCompactPartitioner partitioner;
-    auto shards = partitioner.partition(mesh, 4);
-    std::cout << "\nPartitioned into " << shards.size() 
-              << " shards" << std::endl;
-    for (size_t i = 0; i < shards.size(); ++i) {
-      std::cout << "  Shard " << i << ": " 
-                << shards[i].getCellCount() << " cells" << std::endl;
-    }
-
-    return 0;
-  }
-  @endcode
-
-  @section guides-meshes-utilities-advanced Advanced topics
-
-  @subsection guides-meshes-utilities-advanced-builder Custom builder
-
-  Use the builder for complete control:
-
-  @code{.cpp}
-  auto builder = Mesh::Build();
-  builder.initialize(2)
-         .reserve(2, 100)  // Reserve space for 100 cells
-         .nodes(50);       // 50 vertices
-
-  // Add vertices and cells...
-
-  Mesh mesh = builder.finalize();
-  @endcode
+  The @ref guides-meshes-creation "creation guide" explains explicit vertex,
+  cell and attribute construction. Builder reservation can reduce repeated
+  allocation when the expected entity counts are known.
 
   @subsection guides-meshes-utilities-advanced-trans Transformations
 
-  Access and modify polytope transformations:
+  Mesh polytopes provide their geometric transformations. A
+  @ref Rodin::Geometry::Point "Point" is the usual interface for evaluating
+  physical coordinates and Jacobians at reference coordinates.
 
-  @code{.cpp}
-  const auto& trans = mesh.getPolytopeTransformation(2, 0);  // Cell 0
-  // Use transformation for geometric computations
-  @endcode
+  @section guides-meshes-utilities-see-also Continue
 
-  @section guides-meshes-utilities-see-also See also
+  - @ref guides-meshes-queries "Geometric measures"
+  - @ref guides-meshes-connectivity "Connectivity prerequisites"
+  - @ref guides-mpi "Distributed meshes"
 
-  - @ref guides-meshes "Meshes overview"
-  - @ref Rodin::Geometry::SubMesh "SubMesh reference"
-  - @ref Rodin::Geometry::BalancedCompactPartitioner "Partitioner reference"
-  - Examples:
-    - [Displace.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/Displace.cpp)
-    - [Skin.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/Skin.cpp)
-    - [CCL.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/CCL.cpp)
-    - [BalancedCompactPartitioner.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/BalancedCompactPartitioner.cpp)
-
-  */
+  @example Geometry/Displace.cpp
+*/

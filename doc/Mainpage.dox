@@ -27,14 +27,14 @@
 
   The library is in active development and primarily maintained by
   [Carlos Brito-Pacheco](https://cbritopacheco.github.io/), who is actively looking for
-  co-maintainers.
+  co-maintainers. Contributions and supporting institutions are acknowledged
+  in the @ref credits-index "credits".
   @endparblock
 
-  @section poisson-example-mainpage A simple example
+  @section poisson-example-mainpage Poisson example
 
-  The library provides a compositional form language that lets
-  you express variational problems in C++ code that closely mirrors the
-  mathematical notation. For example, the Poisson problem with homogeneous Dirichlet boundary
+  The compositional form language expresses variational problems in C++ using the
+  mathematical notation of their weak formulations. For example, the Poisson problem with homogeneous Dirichlet boundary
   conditions, in strong form, for a domain @f$\Omega@f$ with boundary
   @f$\partial\Omega@f$ is
 
@@ -53,26 +53,12 @@
       \qquad \forall v \in H^1_0(\Omega).
   @f]
 
-  In the code one can implement it as such:
+  The variational formulation and solve are written as follows. The
+  @ref examples-pdes-poisson "complete tutorial" supplies the mesh, explains
+  each term and exports the computed field.
 
-  @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-  mesh.scale(1.0 / 15.0);
-  mesh.getConnectivity().compute(1, 2);
-
-  P1 vh(mesh);
-  TrialFunction u(vh);
-  TestFunction  v(vh);
-  RealFunction f = 1;
-
-  Problem problem(u, v);
-  problem = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-
-  Solver::CG(problem).solve();
-  @endcode
+  @snippet PDEs/Poisson.cpp poisson-form
+  @snippet PDEs/Poisson.cpp poisson-solve
 
   @section rodin-architecture Architecture
 
@@ -108,7 +94,7 @@
   @parblock
   <h2>Git LFS</h2>
 
-  If you only need the library and headers, configure with
+  For a library-and-headers installation, configure with
   `-DRODIN_INSTALL_RESOURCES=OFF` and skip hydrating the Git LFS resources.
   @endparblock
 
@@ -130,7 +116,7 @@
   @m_class{m-block m-default}
 
   @parblock
-  <h2>2. Build your first program</h2>
+  <h2>2. Build a first program</h2>
 
   Follow @ref guides-getting-started-first-steps "First steps" to learn how
   meshes, finite element spaces, trial and test functions, and solvers fit together.
@@ -141,7 +127,7 @@
   @parblock
   <h2>3. Solve and visualize a problem</h2>
 
-  Work through @ref guides-getting-started-first-problem "Your first problem"
+  Work through @ref guides-getting-started-first-problem "A first problem"
   to solve the Poisson equation, then use the
   @ref guides-io "I/O and visualization guide" to export the solution for
   inspection in ParaView.
@@ -149,11 +135,10 @@
 
   For examples of results produced with Rodin, visit the @ref gallery "Gallery".
 
-  @section rodin-philosophy Philosophy behind Rodin
+  @section rodin-philosophy Design
 
-  The architecture follows [mosra](https://mosra.cz/)'s
-  ["batteries included, but screws not glued in"](https://magnum.graphics/)
-  philosophy from the Magnum Engine project. For Rodin it means meshes, finite
+  The architecture draws on the modular design of [mosra](https://mosra.cz/)'s
+  [Magnum Engine](https://magnum.graphics/). For Rodin it means meshes, finite
   element spaces, forms, assembly, and solvers work together, while their
   interfaces remain accessible for extensions. A custom solver, constitutive
   law, or integrator can reuse the surrounding components.
@@ -175,7 +160,7 @@
   these responsibilities, allowing new models to reuse existing geometry,
   evaluation, and algebra.
 
-  @section who-can-use-it Who can use it?
+  @section who-can-use-it License and use
 
   <strong>Anyone.</strong> Rodin is distributed under the
   [Boost Software License 1.0](https://github.com/cbritopacheco/rodin/blob/master/LICENSE),
@@ -191,17 +176,15 @@
   <img src="Images/Boost.svg" alt="Boost logo" />
 
   <strong>Software that uses or links against Rodin can retain its own license,
-  including a proprietary one.</strong> The
-  [Boost Software License](https://www.boost.org/doc/user-guide/bsl.html) is not copyleft:
-  it does not require the source code of that software to be released or its
-  license to be changed. When redistributing Rodin source code or modified
+  including a proprietary one.</strong> The [Boost Software License](https://www.boost.org/doc/user-guide/bsl.html)
+  permits that software to retain its source-distribution policy and license. When redistributing Rodin source code or modified
   portions of it, retain the original copyright notices and the complete
   license statement. This obligation applies to the redistributed Rodin code.
   @endparblock
 
   @subsection rodin-acknowledgement Acknowledgement
 
-  Acknowledgement is appreciated, but is not a licensing requirement.
+  Acknowledgement is optional and appreciated.
 
   @m_class{m-block m-info}
 

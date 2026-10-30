@@ -25,8 +25,7 @@
   On the lid @f$y=1@f$, prescribe @f$u=(16x^2(1-x)^2,0)@f$. The other three
   walls have @f$u=0@f$. This regularized lid reaches unit speed at its midpoint
   and vanishes at both corners, avoiding the discontinuous boundary data of a
-  constant-speed lid. It is therefore a cavity demonstration, not the classical
-  constant-lid benchmark.
+  constant-speed lid. Reference comparisons require the same regularized boundary profile.
 
   Only the pressure gradient enters momentum balance. The condition
   @f$\int_\Omega p\,dx=0@f$ fixes its arbitrary additive constant.
@@ -42,8 +41,7 @@
       \eta\int_\Omega p\,dx&=0.
     \end{aligned}
   @f]
-  The global multiplier @f$\lambda@f$ enforces the pressure gauge. It does not
-  add a pressure penalty or replace incompressibility with a compressibility law.
+  The global multiplier @f$\lambda@f$ enforces the pressure gauge. The integral constraint fixes the additive pressure constant.
 
   @section examples-pdes-stokes-mesh 1. Construct and label the cavity
 
@@ -68,7 +66,7 @@
 
   @section examples-pdes-stokes-output 3. Solve and inspect the circulation
 
-  This is a saddle-point system, so CG is not applicable. Sparse LU is adequate
+  The mixed formulation gives an indefinite saddle-point system. Sparse LU is adequate
   for this small demonstration; larger mixed problems call for suitable block
   preconditioning. Solver success is checked and the algebraic residual is reported before
   inspecting the exported fields.
@@ -79,12 +77,10 @@
 
   Open `Stokes.xdmf`, color by the magnitude of **velocity**, and use ParaView's
   **Stream Tracer** to inspect the circulation. Pressure is exported separately
-  as **pressure**. The figure uses interpolated exported velocity samples to
-  draw streamlines; it does not change the solved velocity field.
+  as **pressure**. ParaView integrates the displayed streamlines through the exported velocity field.
 
-  Incompressibility is enforced weakly against the pressure space. The discrete
-  velocity is not generally divergence-free at every point, and visualization
-  of a closed vortex is not a substitute for an algebraic or refinement check.
+  Incompressibility is imposed in the pressure test space. Algebraic residuals and
+  mesh refinement assess the numerical solution.
 
   @section examples-pdes-stokes-full Complete program
 

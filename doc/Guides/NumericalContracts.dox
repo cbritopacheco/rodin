@@ -20,13 +20,13 @@
   uh = f;        // interpolate f in the DOF sense of Vh
   @endcode
 
-  This is interpolation, not an @f$ L^2 @f$-orthogonal projection. For nodal
+  Assignment applies the interpolation functionals of the selected space. An @f$ L^2
+  @f$-orthogonal projection requires a variational mass-matrix solve. For nodal
   @ref Rodin::Variational::P1 "P1" spaces, the DOF functionals are vertex
   evaluations, so the assignment stores nodal values. For higher-order
-  `H1<K>` spaces, Rodin uses higher-order bases and DOF machinery; coefficients
-  should not be read as nodal values. Evaluate the
-  @ref Rodin::Variational::GridFunction "GridFunction" at a
-  @ref Rodin::Geometry::Point "Point" instead.
+  `H1<K>` spaces, Rodin uses higher-order bases and DOF machinery; coefficient interpretation follows the space's DOF map. Point values are obtained
+  by evaluating the @ref Rodin::Variational::GridFunction "GridFunction" at a @ref
+  Rodin::Geometry::Point "Point".
 
   @subsection guides-numerical-contracts-l2 L2 projection
 
@@ -82,8 +82,7 @@
     J(x^k)\,\delta x^k = -F(x^k).
   @f]
 
-  Do not write a second manual negation around a residual term that the
-  `Problem` assembly already moves to the right-hand side.
+  `Problem` assembly applies the residual-to-right-hand-side sign convention once.
 
   @section guides-numerical-contracts-linearsystem LinearSystem lifetime
 

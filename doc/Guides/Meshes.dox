@@ -31,8 +31,8 @@
 
   | Method | Description |
   |--------|-------------|
-  | `Mesh::UniformGrid(type, shape)` | Generate a uniform grid filling the unit hypercube @f$ [0, N_1{-}1] \times \cdots @f$. The `type` specifies the cell shape (Triangle, Tetrahedron, etc.) and `shape` gives the number of subdivisions per axis. |
-  | `Mesh::Box(type, shape)` | Generate a **surface mesh** (boundary of the unit box). The `type` specifies the **face** shape (Segment for 2D boundary, Triangle for 3D boundary), and the resulting mesh has topological dimension one less than the ambient space. |
+  | `Mesh::UniformGrid(type, shape)` | Generate a uniform grid on @f$ [0, N_1{-}1] \times \cdots @f$. The `type` specifies the cell shape (Triangle, Tetrahedron, etc.) and `shape` gives the number of vertices per axis. |
+  | `Mesh::Box(type, shape)` | Generate a **surface mesh** (boundary of an axis-aligned box; `shape` gives interval counts). The `type` specifies the **face** shape (Segment for 2D boundary, Triangle for 3D boundary), and the resulting mesh has topological dimension one less than the ambient space. |
   | `Mesh::Build()` | Programmatic construction via the Builder pattern. |
 
   @section guides-meshes-concepts Key concepts
@@ -49,7 +49,7 @@
 
   @subsection guides-meshes-concepts-dimensions Dimensions
 
-  A mesh has two important dimensions:
+  A mesh has two dimensions:
   
   - **Topological dimension** (`getDimension()`): The dimension of the highest
     dimensional polytopes (e.g., 2 for triangular meshes, 3 for tetrahedral)
@@ -72,7 +72,8 @@
 
   @section guides-meshes-usage Basic usage
 
-  Here's a simple example creating and querying a mesh:
+  A triangular mesh with 16 vertices per direction has 256 vertices and
+  450 triangles. The following query measures its area:
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -80,7 +81,8 @@
   using namespace Rodin;
   using namespace Rodin::Geometry;
 
-  int main() {
+  int main()
+  {
     // Create a 2D triangular mesh
     Mesh mesh;
     mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
@@ -89,7 +91,7 @@
     std::cout << "Dimension: " << mesh.getDimension() << std::endl;
     std::cout << "Vertices: " << mesh.getVertexCount() << std::endl;
     std::cout << "Cells: " << mesh.getCellCount() << std::endl;
-    std::cout << "Volume: " << mesh.getVolume() << std::endl;
+    std::cout << "Area: " << mesh.getArea() << std::endl;
 
     return 0;
   }

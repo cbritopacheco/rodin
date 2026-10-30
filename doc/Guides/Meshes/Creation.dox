@@ -1,263 +1,109 @@
 /**
   @page guides-meshes-creation Mesh creation
-  @brief How to create and load meshes in Rodin
+  @brief Construct a grid, build a tagged mesh or load an existing mesh.
 
   @tableofcontents
-
   @m_footernavigation
 
-  Rodin provides multiple ways to create meshes: loading from files,
-  programmatic generation, or building custom meshes from scratch.
+  A mesh must specify its embedding coordinates and cell connectivity. Region
+  and boundary attributes attach integer labels to selected entities. This
+  page introduces the three construction paths used in the examples.
 
-  @section guides-meshes-creation-uniform Generating uniform grids
+  @section guides-meshes-creation-uniform Generate a uniform grid
 
-  The simplest way to create a mesh is using the `UniformGrid` static method,
-  which generates structured grids of various polytope types.
+  `UniformGrid` takes a cell type and a vertex count for each coordinate axis.
+  Its initial spacing is one. A triangular grid with 16 vertices per axis has
+  256 vertices, 450 triangles and domain @f$[0,15]^2@f$. Scaling by @f$1/15@f$
+  produces the unit square.
+
+  @code{.cpp}
+  Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {16, 16});
+  mesh.scale(1.0 / 15.0);
+  @endcode
 
   @subsection guides-meshes-creation-uniform-2d Two-dimensional grids
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-
-  int main() {
-    Mesh mesh;
-
-    // Triangular mesh with 16x16 grid
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-
-    // Quadrilateral mesh with 32x32 grid
-    mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, {32, 32});
-
-    return 0;
-  }
-  @endcode
+  Triangular and quadrilateral grids share this coordinate convention.
+  Each rectangular grid block gives two triangles or one quadrilateral.
 
   @subsection guides-meshes-creation-uniform-3d Three-dimensional grids
 
-  @code{.cpp}
-  Mesh mesh;
+  The shape argument has three entries for tetrahedra, pyramids, hexahedra
+  and wedges. See @ref examples-geometry-uniformgrid for supported types and
+  the resulting counts.
 
-  // Tetrahedral mesh with 8x8x8 grid
-  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {8, 8, 8});
+  @subsection guides-meshes-creation-uniform-domain Domain scaling
 
-  // Hexahedral mesh with 16x16x16 grid
-  mesh = mesh.UniformGrid(Polytope::Type::Hexahedron, {16, 16, 16});
+  An axis with @f$n_i@f$ vertices spans @f$[0,n_i-1]@f$. Uniform scaling
+  changes all axes by the same factor. For anisotropic domains, supply
+  coordinates through the builder or apply an appropriate coordinate map.
 
-  // Wedge (prism) mesh with 10x10x10 grid
-  mesh = mesh.UniformGrid(Polytope::Type::Wedge, {10, 10, 10});
-  @endcode
+  @section guides-meshes-creation-files Load a mesh
 
-  @subsection guides-meshes-creation-uniform-domain Domain
+  @subsection guides-meshes-creation-files-formats File format
 
-  `UniformGrid` uses unit spacing and counts vertices in each direction.
-  Parameters @f$(n_x,n_y)@f$ therefore produce the domain
-  @f$[0,n_x-1]\times[0,n_y-1]@f$, with the analogous convention in three
-  dimensions. Scale the coordinates explicitly when a unit domain is intended.
-  See @ref examples-geometry-uniformgrid for checked counts and scaling examples.
+  MFEM and MEDIT both use the `.mesh` extension. Pass the format explicitly.
+  @ref examples-io-medit "The conversion example" writes its own input file
+  and checks the loaded mesh counts.
 
-  @section guides-meshes-creation-files Loading from files
+  @subsection guides-meshes-creation-files-loading Loading
 
-  Rodin supports loading meshes from various file formats.
+  @snippet IO/MEDIT.cpp medit-convert
 
-  @subsection guides-meshes-creation-files-formats Supported formats
+  @section guides-meshes-creation-builder Build vertices and cells
 
-  - **MFEM** (`.mesh`) - MFEM native format
-  - **MEDIT** (`.mesh`) - MEDIT format from INRIA (used by MMG)
+  The builder records vertex coordinates first, then cells using zero-based
+  vertex indices. `initialize(2)` selects a two-dimensional embedding space.
+  The following rectangle combines two triangles with one quadrilateral.
+  Attributes one and two label its left and right regions.
 
-  @subsection guides-meshes-creation-files-loading Loading meshes
+  @subsection guides-meshes-creation-builder-simple Connectivity
 
-  Use @ref Rodin::Geometry::Mesh "Mesh::load()" with an explicit
-  @ref Rodin::IO::FileFormat "IO::FileFormat":
+  @snippet Geometry/MeshBasics.cpp mesh-basics-build
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
+  @subsection guides-meshes-creation-builder-attributes Region attributes
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
+  `.attribute({dimension, index}, value)` labels an entity already inserted
+  into the builder. Cell index and vertex index belong to different dimensions.
+  The constructed rectangle has area two; each tagged region has area one.
 
-  int main() {
-    Mesh mesh;
+  @subsection guides-meshes-creation-builder-mixed Mixed cell types
 
-    // Load from MFEM format
-    mesh.load("domain.mesh", IO::FileFormat::MFEM);
+  Mixed meshes share vertex indices across adjacent cells. Their local vertex
+  order must follow the reference-element convention. The
+  @ref guides-polytopes "polytope guide" describes the supported shapes.
 
-    // Load from MEDIT format
-    mesh.load("domain.mesh", IO::FileFormat::MEDIT);
+  @section guides-meshes-creation-box Construct a box boundary
 
-    return 0;
-  }
-  @endcode
+  `Box` takes a face type and an interval count for each embedding-space axis.
+  With triangular faces, three interval counts describe a two-dimensional surface
+  embedded in three dimensions. The following surface encloses the unit cube
+  after scaling by one third and has area six. In this factory, three intervals
+  span coordinates zero to three before scaling:
 
-  @section guides-meshes-creation-builder Building custom meshes
-
-  For complete control, use the `Mesh::Builder` to construct meshes
-  programmatically.
-
-  @subsection guides-meshes-creation-builder-simple Simple example
-
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-
-  int main() {
-    // Create a simple triangular mesh
-    Mesh mesh = Mesh::Build()
-      .initialize(2)           // 2D space
-      .nodes(4)                // 4 vertices
-      .vertex({0.0, 0.0})     // Vertex 0
-      .vertex({1.0, 0.0})     // Vertex 1
-      .vertex({1.0, 1.0})     // Vertex 2
-      .vertex({0.0, 1.0})     // Vertex 3
-      .triangle({0, 1, 2})    // Triangle 1
-      .triangle({0, 2, 3})    // Triangle 2
-      .finalize();
-
-    std::cout << "Created mesh with " << mesh.getCellCount()
-              << " cells" << std::endl;
-
-    return 0;
-  }
-  @endcode
-
-  @subsection guides-meshes-creation-builder-attributes Setting attributes
-
-  Attributes are used to mark different regions or boundaries:
-
-  @code{.cpp}
-  Mesh mesh = Mesh::Build()
-    .initialize(2)
-    .nodes(6)
-    .vertex({0.0, 0.0})
-    .vertex({1.0, 0.0})
-    .vertex({2.0, 0.0})
-    .vertex({0.0, 1.0})
-    .vertex({1.0, 1.0})
-    .vertex({2.0, 1.0})
-    .triangle({0, 1, 4})
-    .attribute({2, 0}, 1)     // Set triangle 0 attribute to 1
-    .triangle({0, 4, 3})
-    .attribute({2, 1}, 1)     // Set triangle 1 attribute to 1
-    .triangle({1, 2, 5})
-    .attribute({2, 2}, 2)     // Set triangle 2 attribute to 2
-    .triangle({1, 5, 4})
-    .attribute({2, 3}, 2)     // Set triangle 3 attribute to 2
-    .finalize();
-
-  // Query volumes by attribute
-  std::cout << "Volume of region 1: " << mesh.getVolume(1) << std::endl;
-  std::cout << "Volume of region 2: " << mesh.getVolume(2) << std::endl;
-  @endcode
-
-  @subsection guides-meshes-creation-builder-mixed Mixed element types
-
-  The builder supports meshes with different element types:
-
-  @code{.cpp}
-  Mesh mesh = Mesh::Build()
-    .initialize(2)
-    .nodes(6)
-    .vertex({0.0, 0.0})
-    .vertex({1.0, 0.0})
-    .vertex({2.0, 0.0})
-    .vertex({0.0, 1.0})
-    .vertex({1.0, 1.0})
-    .vertex({2.0, 1.0})
-    // Left region: triangles
-    .triangle({0, 1, 4})
-    .triangle({0, 4, 3})
-    // Right region: quadrilateral
-    .quadrilateral({1, 2, 5, 4})
-    .finalize();
-  @endcode
-
-  @section guides-meshes-creation-box Box meshes
-
-  The `Box` method is similar to `UniformGrid` but allows specifying
-  the domain bounds:
-
-  @code{.cpp}
-  // Create mesh on domain [0, 2] x [0, 3]
-  // Implementation depends on Rodin version
-  Mesh mesh = Mesh::Box(Polytope::Type::Triangle, {16, 16});
-  @endcode
+  @snippet Geometry/MeshBasics.cpp mesh-basics-box
 
   @section guides-meshes-creation-empty Empty meshes
 
-  Create an empty mesh and populate it later:
+  Default construction creates an empty mesh. `load()` replaces it with file
+  data; a builder's `finalize()` produces a constructed mesh.
+  `mesh.isEmpty()` can be checked before operations requiring cells.
 
-  @code{.cpp}
-  Mesh mesh;  // Empty mesh
+  @section guides-meshes-creation-copy Mesh and field lifetimes
 
-  if (mesh.isEmpty()) {
-    std::cout << "Mesh is empty" << std::endl;
-  }
+  Meshes can be copied and moved. Finite element spaces and grid functions
+  borrow their mesh; retain that mesh and its topology for their lifetime.
+  Rebuild dependent spaces and problems after changing topology. See
+  @ref guides-numerical-contracts for the corresponding algebraic lifetimes.
 
-  // Load or build the mesh later
-  mesh.load("domain.mesh");
-  @endcode
+  @section guides-meshes-creation-example Checked program
 
-  @section guides-meshes-creation-copy Copying meshes
+  The `MeshBasics` target validates counts, region measures, boundary extraction
+  and the box surface. Its source is @ref Geometry/MeshBasics.cpp.
 
-  @code{.cpp}
-  Mesh mesh1;
-  mesh1 = mesh1.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  @section guides-meshes-creation-see-also Continue
 
-  // Copy constructor
-  Mesh mesh2(mesh1);
-
-  // Move constructor
-  Mesh mesh3(std::move(mesh1));
-  @endcode
-
-  @note After moving, `mesh1` will be in a valid but unspecified state.
-
-  @section guides-meshes-creation-example Complete example
-
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-  #include <Rodin/IO.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-
-  int main() {
-    // Method 1: Generate uniform grid
-    Mesh mesh1;
-    mesh1 = mesh1.UniformGrid(Polytope::Type::Triangle, {32, 32});
-    mesh1.save("grid.mesh", IO::FileFormat::MEDIT);
-
-    // Method 2: Load from file
-    Mesh mesh2;
-    mesh2.load("domain.mesh", IO::FileFormat::MFEM);
-
-    // Method 3: Build programmatically
-    Mesh mesh3 = Mesh::Build()
-      .initialize(2)
-      .nodes(3)
-      .vertex({0.0, 0.0})
-      .vertex({1.0, 0.0})
-      .vertex({0.5, 0.866})
-      .triangle({0, 1, 2})
-      .finalize();
-
-    std::cout << "Mesh 1 cells: " << mesh1.getCellCount() << std::endl;
-    std::cout << "Mesh 2 cells: " << mesh2.getCellCount() << std::endl;
-    std::cout << "Mesh 3 cells: " << mesh3.getCellCount() << std::endl;
-
-    return 0;
-  }
-  @endcode
-
-  @section guides-meshes-creation-see-also See also
-
-  - @ref guides-meshes-io "Mesh I/O"
-  - @ref guides-meshes "Meshes overview"
-  - @ref Rodin::Geometry::Mesh "Mesh::load()"
-  - @ref examples-geometry-uniformgrid "UniformGrid example"
-
-  */
+  - @ref guides-meshes-queries "Dimensions, counts and measures"
+  - @ref guides-meshes-iteration "Traverse the constructed mesh"
+  - @ref guides-meshes-io "Mesh storage"
+*/

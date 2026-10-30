@@ -1,0 +1,150 @@
+/**
+  @page examples-pdes-dg-poisson Solving diffusion with discontinuous Galerkin
+  @brief Assemble and validate a symmetric interior-penalty method on triangles.
+
+  @tableofcontents
+  @m_footernavigation
+
+  @section examples-dg-setting Problem and discrete space
+
+  On @f$\Omega=(0,1)^2@f$, solve
+  @f[
+    -\Delta u=f\quad\text{in }\Omega,\qquad u=g\quad\text{on }\partial\Omega.
+  @f]
+  The discontinuous space is
+  @f[
+    V_h=\{v\in L^2(\Omega):v|_K\in\mathbb P_1(K)
+      \text{ for every }K\in\mathcal T_h\}.
+  @f]
+  Each triangle owns three affine coefficients. Neighboring triangles have
+  independent values at a shared geometric vertex. Thus a mesh with
+  @f$N_K@f$ cells has @f$3N_K@f$ unknowns.
+
+  This example assembles the cell and facet matrices explicitly using Rodin
+  meshes, mapped quadrature and sparse algebra. The implementation is scoped
+  to affine two-dimensional triangles. Making every local block visible
+  connects the consistency and penalty terms to their actual matrix entries.
+
+  @section examples-dg-fluxes Interior flux and penalty
+
+  For each interior facet, order the cells as @f$K^+,K^-@f$ and choose
+  @f$n_F@f$ outward from @f$K^+@f$. Define
+  @f[
+    [\![v]\!]=v^+-v^-,\qquad
+    \{\nabla v\}=\tfrac12(\nabla v^++\nabla v^-).
+  @f]
+  With facet length @f$h_F@f$ and @f$\sigma_F=20/h_F@f$, the symmetric form is
+  @f[
+  \begin{aligned}
+    a_h(u,v)={}&\sum_K\int_K\nabla u\cdot\nabla v\\
+      &-\sum_{F\in\mathcal F_i}\int_F\{\nabla u\}\cdot n_F[\![v]\!]
+       -\sum_{F\in\mathcal F_i}\int_F\{\nabla v\}\cdot n_F[\![u]\!]\\
+      &+\sum_{F\in\mathcal F_i}\int_F\sigma_F[\![u]\!][\![v]\!]\\
+      &-\int_{\partial\Omega}(\nabla u\cdot n)v
+       -\int_{\partial\Omega}(\nabla v\cdot n)u
+       +\int_{\partial\Omega}\sigma_Fuv.
+  \end{aligned}
+  @f]
+  The right-hand side is
+  @f[
+    \ell_h(v)=\int_\Omega fv
+       -\int_{\partial\Omega}(\nabla v\cdot n)g
+       +\int_{\partial\Omega}\sigma_Fgv.
+  @f]
+  Boundary coefficients remain unknown. The boundary terms impose the data
+  weakly. The penalty value is a fixed choice for the degree-one,
+  shape-regular meshes studied here; other degrees or cell shapes require
+  an appropriate penalty analysis.
+
+  @section examples-dg-assembly Cell and facet matrices
+
+  On the reference triangle, the basis is
+  @f$(1-r-s,r,s)@f$. Its physical gradients are obtained with
+  @f$DF_K^{-T}@f$. Index @f$3k+i@f$ identifies local basis function @f$i@f$
+  in cell @f$k@f$.
+
+  @snippet DG/Poisson.cpp dg-local-space
+  @snippet DG/Poisson.cpp dg-cells
+
+  An interior facet contributes a six-by-six block over both cells. A boundary
+  facet contributes a three-by-three block and a load vector. The implementation
+  uses the same normal and cell ordering in every jump and flux term.
+
+  @snippet DG/Poisson.cpp dg-facets
+
+  Degree-ten quadrature integrates the polynomial stiffness and penalty
+  terms exactly on these affine cells. It also resolves the smooth prescribed
+  source and error integrals used in the refinement study.
+
+  @section examples-dg-solve Solve and check the algebra
+
+  The assembled matrix is checked for relative symmetry. A sparse LDLT
+  factorization checks positive pivots, solves the system and reports the
+  relative algebraic residual. These checks concern each actual assembled
+  system in the study.
+
+  @snippet DG/Poisson.cpp dg-solve
+
+  Stability and optimal error estimates for consistent interior-penalty
+  methods are developed by Arnold, Brezzi, Cockburn and Marini
+  @cite arnold2002unified.
+
+  @section examples-dg-validation Patch test and refinement study
+
+  The first case is @f$u=1+x+2y@f$, with zero source and nonzero Dirichlet
+  data. It is exactly representable in the discontinuous affine space. The
+  measured @f$L^2@f$ error is @f$5.10\times10^{-15}@f$ and the broken-gradient
+  error is @f$3.05\times10^{-14}@f$.
+
+  The second case uses
+  @f[
+    u=1+x+2y+\sin(\pi x)\sin(\pi y),\qquad
+    f=2\pi^2\sin(\pi x)\sin(\pi y).
+  @f]
+  The program refines the mesh while retaining the degree, penalty convention,
+  source, boundary data and quadrature order.
+
+  | Intervals per axis | Unknowns | @f$\|u-u_h\|_{L^2}@f$ | @f$|u-u_h|_{H^1(\mathcal T_h)}@f$ |
+  | ---: | ---: | ---: | ---: |
+  | 4 | 96 | @f$6.0663\times10^{-2}@f$ | @f$7.4403\times10^{-1}@f$ |
+  | 8 | 384 | @f$1.7217\times10^{-2}@f$ | @f$3.8657\times10^{-1}@f$ |
+  | 16 | 1,536 | @f$4.5076\times10^{-3}@f$ | @f$1.9561\times10^{-1}@f$ |
+  | 32 | 6,144 | @f$1.1471\times10^{-3}@f$ | @f$9.8211\times10^{-2}@f$ |
+
+  @image html DGConvergence.png "Measured errors and reference slopes for the SIPG refinement study."
+
+  The final refinement gives observed orders approximately 1.97 and 0.99.
+  The unweighted interior jump norm decreases from 0.02846 to 0.001506.
+  The relative matrix-symmetry discrepancy stays below
+  @f$2.3\times10^{-17}@f$ and the relative solution residual below
+  @f$1.7\times10^{-15}@f$. Positive LDLT pivots are checked at every level.
+
+  @section examples-dg-output Preserve separate traces in visualization
+
+  @image html DGPoisson.png "Computed DG fields on coarse and fine meshes. Each cell retains its own exported vertex values."
+
+  The XDMF output duplicates geometric vertices for each cell so ParaView
+  retains the cell-local values. Open `DGCoarse.xdmf` or `DGPoisson.xdmf`,
+  select **Apply**, then color by **u**. Keep the original cell-local
+  representation when inspecting jumps.
+
+  @section examples-dg-run Build and run
+
+  Build `DGPoisson` and run it in a scratch directory. It executes the patch
+  test and all four refinement levels serially, writes `DGConvergence.csv`
+  and exports the coarse and finest smooth-case fields. It returns
+  `EXIT_FAILURE` if factorization, patch accuracy, symmetry, residual,
+  decreasing jumps or the required refinement ratios fail.
+
+  @ref DG/Poisson.cpp "Complete source code" contains the assembly,
+  numerical checks and visualization export.
+
+  @section examples-dg-next Continue
+
+  - @ref examples-interface-traces "Inspect two-sided values directly"
+  - @ref guides-interfaces-dg "Facet vocabulary and assumptions"
+  - @ref examples-pdes-poisson "Conforming diffusion formulation"
+
+  @example DG/Poisson.cpp
+  @m_footernavigation
+*/

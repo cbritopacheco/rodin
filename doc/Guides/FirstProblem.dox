@@ -1,5 +1,5 @@
 /**
-  @page guides-getting-started-first-problem Your first problem
+  @page guides-getting-started-first-problem A first problem
   @brief Build, run, and inspect a complete Poisson solve.
 
   This guide turns the mesh-and-space setup from
@@ -100,7 +100,7 @@
 
   `DirichletBC(u, Zero()).on(boundaryAttribute)` restricts the condition to
   boundary entities carrying that attribute. The mesh must already have the
-  intended boundary attributes; choosing an integer does not mark the mesh.
+  intended boundary attributes before the condition is constructed.
   Boundary regions without prescribed values retain the natural condition
   implied by the weak form. See @ref guides-boundary-conditions.
 
@@ -125,8 +125,8 @@
   solver.setMaxIterations(1000).setTolerance(1e-10).solve();
   @endcode
 
-  These values illustrate configuration, rather than a required setting for
-  every mesh. Check `solver.success()` after the solve. A direct alternative is
+  The solver settings are selected according to the algebraic convergence
+  requirements of the discretization. Check `solver.success()` after the solve. A direct alternative is
   `SparseLU`; a standalone solver can also be passed to `poisson.solve(solver)`.
   The @ref guides-solvers "solver guide" explains the supported interfaces.
 

@@ -54,9 +54,12 @@
 
   with a scalar density @f$ g @f$ computed from the state (and, for
   non-self-adjoint objectives, an adjoint state). For compliance with a
-  traction-free optimizable boundary, @f$ g = Ae(u):e(u) - \ell @f$.
+  traction-free optimizable boundary with fixed loads and supports,
+  @f$g=\ell-Ae(u):e(u)@f$. A descent load therefore contains
+  @f$Ae(u):e(u)-\ell@f$.
 
-  Two equivalent discrete realizations exist, and the choice matters:
+  Boundary and distributed forms represent the continuous differential.
+  Their discrete realizations can differ:
 
   - **Boundary (Hadamard) form.** Assemble
     @f$ \int_\Gamma g\, \theta\cdot n @f$ on the interface facets. Exact in
@@ -79,9 +82,8 @@
 
   @section guides-shapeopt-hilbertian From derivative to velocity: Hilbertian regularization
 
-  @f$ J'(\Omega) @f$ is a linear functional, not a vector field. To
-  descend, compute its Riesz representative in an @f$ H^1 @f$-type inner
-  product — this simultaneously *extends* the boundary information into
+  The linear functional @f$ J'(\Omega) @f$ is represented by a vector field through
+  a Riesz problem in an @f$ H^1 @f$-type inner product — this simultaneously *extends* the boundary information into
   the bulk and *smooths* it. This is the
   @ref Rodin::Hilbert::H1a "Hilbert::H1a" operator, which solves
 
@@ -93,10 +95,21 @@
   and returns @f$ \theta @f$:
 
   @code{.cpp}
-  Hilbert::H1a extension(vectorFes);
-  extension.setAlpha(alpha);                  // regularization length scale
-  auto theta = extension(dJ);                 // dJ: the assembled shape differential
+  using Space = decltype(vectorFes);
+  using Field = GridFunction<Space, Math::Vector<Real>>;
+  Hilbert::H1a<Field, Space> extension(vectorFes);
+  extension.setAlpha(alpha);
+  const auto& test = extension.getTestFunction();
+  auto descentLoad = BoundaryIntegral(
+    energy - ell, Dot(BoundaryNormal(mesh), test)).over(freeBoundary);
+  auto theta = extension(descentLoad);
   @endcode
+
+  Here `energy` is the elastic strain-energy contraction
+  @f$Ae(u):e(u)@f$ and `freeBoundary` labels the optimizable boundary.
+  The extension operator solves for the supplied load; the descent sign is
+  supplied when that load is constructed.
+
 
   The parameter @f$ \alpha @f$ has units of length and is the
   *smoothing radius* of the descent direction:
@@ -120,8 +133,8 @@
     \partial_t \phi + \theta \cdot \nabla\phi = 0.
   @f]
 
-  Two maintenance obligations follow from the mathematics, not from
-  implementation taste:
+  The numerical transport procedure also determines the distance-field
+  maintenance and step-size controls:
 
   1. **Redistancing.** Transport degrades the signed-distance property
      (@f$ |\nabla\phi| = 1 @f$); normals, band widths, and step-size
@@ -139,17 +152,17 @@
 
   @section guides-shapeopt-discretization Getting a computable domain from the level set
 
-  The state equation needs a domain to integrate over. Two strategies:
+  The state equation needs a domain to integrate over. The following
+  representations supply it:
 
   - **Body-fitted discretization.** Cut the zero set into the mesh so
     that @f$ \Gamma @f$ becomes a set of interface facets:
     MMG's `LevelSetDiscretizer` produces the
-    body-fitted mesh, `MMG::Adapt` and `MMG::MeshOptimizer` maintain
+    body-fitted mesh, `MMG::Adapt` and `MMG::Optimizer` maintain
     metric conformity and element quality across iterations. Accurate
     domain and interface integrals; the cost is remeshing every
     iteration.
-  - **Interface registration (SWIFT).** Instead of remeshing, displace
-    the existing mesh so its interface tracks @f$ \{\phi=0\} @f$: the
+  - **Interface registration (SWIFT).** Displace the existing mesh so its interface tracks @f$ \{\phi=0\} @f$: the
     @ref Rodin::Adaptation "Adaptation" module's SWIFT solver. Keeps the
     mesh topology and connectivity stable between iterations.
   - **Ersatz material / density.** Keep a fixed mesh and interpolate
@@ -173,8 +186,8 @@
   // 7. Redistance phi (every few iterations).
   @endcode
 
-  Judge a run by measured quantities: a monotone objective history (the
-  line search guarantees it), the volume tracking its multiplier target,
+  Judge a run by measured quantities: objective history, the directional
+  derivative check, volume and its specified penalty or constraint,
   interface quality (no inverted elements), and — after changes to any
   derivative — the finite-difference check of
   @ref guides-shapeopt-derivative "the shape derivative".

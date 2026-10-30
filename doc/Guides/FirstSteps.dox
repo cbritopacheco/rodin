@@ -67,7 +67,7 @@
   }
   @endcode
 
-  `UniformGrid` takes vertex counts, rather than subdivision counts. Eight
+  `UniformGrid` takes the vertex count in each direction. Eight
   vertices per direction give seven intervals, so scaling by @f$1/7@f$ places
   the mesh on the unit square. There are @f$8^2=64@f$ vertices and
   @f$2(8-1)^2=98@f$ triangles. Scalar `P1` has one degree of freedom per vertex.
@@ -139,7 +139,7 @@
 
   @section guides-getting-started-first-steps-next Continue with a solve
 
-  Proceed to @ref guides-getting-started-first-problem "Your first problem"
+  Proceed to @ref guides-getting-started-first-problem "A first problem"
   to build and run a Poisson solve. The @ref examples-pdes-poisson "Poisson
   tutorial" explains the mathematical formulation and each stage of the code.
 */

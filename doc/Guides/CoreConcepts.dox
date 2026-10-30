@@ -50,8 +50,7 @@
   @endcode
 
   The arguments are entity dimensions. In a three-dimensional volume mesh,
-  the corresponding face-to-cell relation is `(2, 3)`. Computing one relation
-  does not mean every possible relation is available. The
+  the corresponding face-to-cell relation is `(2, 3)`. Each required incidence relation is computed explicitly. The
   @ref guides-connectivity "connectivity guide" explains the supported queries.
 
   @subsection guides-getting-started-core-concepts-iterators Traverse mesh entities
@@ -78,19 +77,16 @@
   P1 vh(mesh);
   @endcode
 
-  Scalar `P1` has one degree of freedom per vertex. This is a property of that
-  space, not a universal rule for finite elements. Higher-order and vector
-  spaces have their own numbering and degrees of freedom. The
+  Scalar `P1` has one degree of freedom per vertex. Higher-order and vector spaces
+  use their own DOF maps and numbering. The
   @ref fem-ciarlet "finite element definition" and @ref fem-spaces "space guide"
-  develop this distinction. Quadratic elements use `H1` with order two;
-  there is no separate `P2` class.
+  develop this distinction. Quadratic elements are constructed with `H1` of order two.
 
   @section guides-getting-started-core-concepts-gridfunctions Distinguish fields from symbolic unknowns
 
   A `GridFunction` stores coefficients in a finite element space. For the
-  scalar nodal `P1` space, these coefficients are vertex values. Other spaces
-  may use different degrees of freedom, so coefficients must not generally
-  be interpreted as sampled point values.
+  scalar nodal `P1` space, these coefficients are vertex values. For other spaces, the DOF functionals determine the meaning of each coefficient;
+  field values are obtained by evaluation.
 
   @subsection guides-getting-started-core-concepts-gf-create Interpolate a known field
 
@@ -101,9 +97,8 @@
   field = [](const Geometry::Point& p) { return p.x() * p.y(); };
   @endcode
 
-  This interpolates a known function; it does not solve a PDE. It is also
-  distinct from an L2 projection, which requires a variational mass-matrix
-  problem. See @ref guides-numerical-contracts.
+  This assignment interpolates the prescribed function. An @f$L^2@f$ projection is
+  obtained from a variational mass-matrix problem. See @ref guides-numerical-contracts.
 
   @subsection guides-getting-started-core-concepts-gf-access Coefficients and evaluation
 
@@ -190,8 +185,8 @@
   @endcode
 
   Check `solver.success()` before treating `u.getSolution()` as a completed
-  result. Matrix properties determine solver choice; CG is not a general
-  solver for nonsymmetric or indefinite systems. See @ref guides-solvers.
+  result. CG requires a symmetric or Hermitian positive definite system; solver selection
+  follows the assembled matrix properties. See @ref guides-solvers.
 
   @section guides-getting-started-core-concepts-workflow Interpret and export the solution
 

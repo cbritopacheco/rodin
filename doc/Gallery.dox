@@ -1,18 +1,13 @@
 /**
   @page gallery Gallery
-  @brief A visual showcase of simulations and results produced with Rodin
+  @brief Computed fields, evolving designs and fitted meshes.
 
-  @m_keywords{Gallery, Showcase, Visualization, Results, Examples}
+  The figures link to tutorials with the mathematical problem, executable
+  source, output files and numerical checks. Colors and geometry come from
+  the computed output described on those pages.
 
   @tableofcontents
-
   @m_footernavigation
-
-  @section gallery-intro Overview
-
-  This gallery showcases results from simulations built with the Rodin
-  framework. Each entry links to the corresponding example or tutorial page
-  where you can find the full source code and step-by-step explanations.
 
   @section gallery-pdes Partial differential equations
 
@@ -20,134 +15,140 @@
 
   @image html PDEs/Poisson.png width=360px
 
-  The @ref examples-pdes-poisson "Poisson equation" example solves the
-  classic scalar PDE @f$ -\Delta u = f @f$ on the unit square with
-  homogeneous Dirichlet boundary conditions, using
-  `P1` finite elements and the
-  @ref Rodin::Solver::CG "CG" solver.
+  Scalar diffusion on the unit square with homogeneous Dirichlet data.
+  Continuous @f$P_1@f$ elements supply the field, and CG solves the symmetric
+  positive-definite system.
+
+  @ref examples-pdes-poisson "Open tutorial →"
 
   @subsection gallery-pdes-elasticity Linear elasticity
 
   @image html Elasticity.png width=360px
 
-  The @ref examples-pdes-elasticity "elasticity" example solves the
-  linearized elasticity system @f$ -\nabla \cdot \sigma(u) = 0 @f$
-  with mixed Dirichlet/Neumann boundary conditions. It demonstrates
-  vector-valued `P1` spaces and the
-  `LinearElasticityIntegral` bilinear form.
+  A clamped beam with end traction, vector-valued @f$P_1@f$ displacement and
+  the linear elastic strain–stress relation. The displayed deformation is
+  amplified for inspection.
+
+  @ref examples-pdes-elasticity "Open tutorial →"
 
   @subsection gallery-pdes-helmholtz Helmholtz equation
 
   @image html PDEs/Helmholtz.png width=360px
 
-  The @ref examples-pdes-helmholtz "Helmholtz equation" example solves
-  the complex-valued PDE @f$ -\Delta u - k^2 u = f @f$ using
-  `P1<Complex>` finite element spaces.
-  This demonstrates Rodin's support for complex-valued computations.
+  A manufactured complex wave field with prescribed boundary values.
+  Real and imaginary parts are displayed separately after the complex solve.
+
+  @ref examples-pdes-helmholtz "Open tutorial →"
 
   @subsection gallery-pdes-stokes Stokes equations
 
   @image html PDEs/Stokes.png width=360px
 
-  The @ref examples-pdes-stokes "Stokes tutorial" introduces mixed velocity–pressure
-  spaces and a zero-mean pressure constraint through a regularized lid-driven cavity.
+  Viscous cavity flow with a regularized lid, mixed velocity–pressure spaces
+  and a zero-mean pressure constraint.
+
+  @ref examples-pdes-stokes "Open tutorial →"
 
   @subsection gallery-pdes-navierstokes Navier–Stokes equations
 
   @image html PDEs/NavierStokes.png width=360px
 
-  The @ref examples-pdes-navierstokes "Navier–Stokes" tutorial covers the
-  transient incompressible Navier–Stokes equations using Taylor–Hood elements
-  (`H1` order 2 for velocity, order 1 for
-  pressure), semi-implicit Oseen stepping, and a computed cavity animation.
+  Transient flow driven by a horizontally moving lid patch. Taylor–Hood
+  elements and semi-implicit Oseen steps resolve the velocity and pressure.
+  The tutorial includes the computed animation.
+
+  @ref examples-pdes-navierstokes "Open tutorial and video →"
 
   @subsection gallery-pdes-periodic Periodic Poisson equation
 
   @image html PDEs/Periodic.png width=360px
 
-  The @ref examples-pdes-periodic "periodic Poisson" example demonstrates
-  how to impose periodic boundary conditions using `PeriodicBC` and a DOF
-  correspondence map. The solution on opposite edges of the domain is
-  constrained to be equal, simulating a tiling pattern.
+  A periodic scalar field with identified boundary degrees of freedom and
+  a mean-value constraint fixing the constant mode.
 
-  @subsection gallery-pdes-surface Reaction-diffusion on a surface
+  @ref examples-pdes-periodic "Open tutorial →"
+
+  @subsection gallery-pdes-surface Reaction–diffusion on a surface
 
   @image html PDEs/SurfaceMesh.png width=360px
 
-  The @ref examples-pdes-surfacemesh "surface mesh" example solves a
-  reaction-diffusion equation @f$ -\Delta_\Gamma u + u = f @f$ on a
-  curved 3D manifold. It demonstrates that Rodin handles surface PDEs
-  transparently — the same `Integral(Grad(u), Grad(v))` syntax
-  automatically computes the surface gradient.
+  A reaction–diffusion field on a triangulated approximation of the unit
+  sphere. Tangential gradients and surface measure enter the variational form.
+
+  @ref examples-pdes-surfacemesh "Open tutorial →"
+
+  @subsection gallery-pdes-dg Discontinuous Galerkin diffusion
+
+  @image html DGPoisson.png width=360px
+
+  A symmetric interior-penalty method with independent affine coefficients
+  on each triangle. The tutorial checks a nonzero Dirichlet patch and
+  measured convergence under refinement.
+
+  @ref examples-pdes-dg-poisson "Open tutorial →"
 
   @section gallery-optimization Optimization
 
-  @subsection gallery-shapeopt-cantilever Shape optimization: cantilever
+  @subsection gallery-shapeopt-cantilever Boundary-deformation cantilever
 
   @image html SimpleCantilever.png width=360px
 
-  The @ref examples-shapeoptimization-simple_cantilever "simple cantilever"
-  example performs boundary-variation shape optimization of a cantilever
-  beam, minimizing the compliance (structural stiffness) subject to a
-  volume constraint. The shape gradient is computed and regularized via the
-  Hilbert extension-regularization procedure, and the mesh is updated using
-  the @ref Rodin::MMG "MMG" remesher.
+  Initial and updated domains for compliance minimization with an area
+  penalty. A regularized shape derivative drives boundary displacement and
+  MMG maintains the mesh between updates.
 
-  @subsection gallery-shapeopt-levelset Level-set shape optimization
+  @ref examples-shapeoptimization-simple_cantilever "Open tutorial →"
+
+  @subsection gallery-shapeopt-levelset Level-set cantilever
 
   @image html LevelSetCantilever.png width=360px
 
-  The @ref examples-shapeoptimization-levelset_cantilever "level-set cantilever"
-  example combines body-fitted meshing with level-set
-  techniques. The optimizer advects a signed-distance function and recovers
-  the implicit domain at each iteration using the
-  @ref Rodin::MMG "MMG" level-set discretizer.
+  A transported level set and body-fitted elasticity solve. The page records
+  the fixed-step objective history and the measured mesh-quality limitation.
 
-  @subsection gallery-density-temp Density optimization: temperature
+  @ref examples-shapeoptimization-levelset_cantilever "Open tutorial →"
+
+  @subsection gallery-density-temp Thermal material distribution
 
   @image html SIMPTemperatureMinimization.png width=360px
 
-  The @ref examples-density_optimization-simp_temperature_minimization
-  "temperature minimization" example uses the SIMP (Solid Isotropic
-  Material with Penalization) approach to find an optimal material
-  distribution that minimizes the average temperature in a domain.
+  A SIMP conductivity field updated using the state, adjoint and regularized
+  design gradient. The objective combines mean temperature and a material penalty.
 
-  @section gallery-geometry Mesh geometry and utilities
+  @ref examples-density_optimization-simp_temperature_minimization "Open tutorial →"
 
-  Rodin provides a rich set of geometric operations for creating,
-  transforming, and querying meshes:
+  @section gallery-fitting Geometry and distance fields
 
-  - **UniformGrid**: Generate structured meshes of triangles, quads,
-    tetrahedra, hexahedra, or wedges in any dimension. See
-    @ref examples-geometry-uniformgrid "UniformGrid example".
-  - **Scale and displace**: Transform mesh coordinates with
-    `mesh.scale()` and `mesh.displace()`.
-  - **Trim**: Remove cells by attribute to extract subdomains.
-  - **Skin**: Extract the boundary surface of a volumetric mesh.
-  - **CCL**: Connected component labeling for domain decomposition.
-  - **Connectivity**: Compute topological incidence relations between
-    mesh entities of any dimension. See
-    @ref examples-geometry-connectivity "Connectivity example".
+  @subsection gallery-fitting-swift Interface fitting
 
-  @section gallery-io Visualization and I/O
+  @image html SWIFTCurvedFitting-moved.png width=360px
 
-  Rodin supports exporting simulation data in the
-  @ref Rodin::IO::XDMF "XDMF" format, which can be opened directly in
-  [ParaView](https://www.paraview.org/) for advanced 3D visualization
-  including time-series animation, vector glyphs, and surface warping.
+  Quadratic fitting of a four-lobe target. The reference mesh is retained
+  while all output geometry nodes receive the solved displacement.
 
-  See the @ref examples-io-xdmf "XDMF example" for a complete guide.
+  @ref guides-swift "Open SWIFT guide →"
 
-  The supported mesh file formats are:
-  - **MFEM** (`IO::FileFormat::MFEM`): Text-based, used by the MFEM library
-  - **MEDIT** (`IO::FileFormat::MEDIT`): Native for MMG/INRIA tools
-  - **HDF5** (`IO::FileFormat::HDF5`): Binary, for large-scale simulations
+  @subsection gallery-fitting-fmm Arrival-time propagation
 
-  @section gallery-see-also See also
+  @image html FMMArrival.png width=360px
 
-  - @ref examples-index "Examples and tutorials"
-  - @ref guides-io "I/O in Rodin"
-  - @ref guides-weak-formulations "Weak formulations"
-  - @ref notation-index "Notation reference"
+  Unit-speed propagation from a central vertex. The tutorial compares the
+  computed field with analytic distance at three mesh resolutions.
 
-  */
+  @ref examples-eikonal-fmm "Open tutorial →"
+
+  @subsection gallery-fitting-distance Distance normalization
+
+  @image html DistanceNormalization-normalized.png width=360px
+
+  A signed Poisson potential normalized around three disks. An analytic
+  reference exposes the geometric and normalization errors.
+
+  @ref examples-distance-normalization "Open tutorial →"
+
+  @section gallery-see-also Continue
+
+  - @ref examples-index — Choose a numerical problem.
+  - @ref guides-io — Export and inspect computed fields.
+  - @ref examples-mmg-index — Prepare and adapt mesh geometry.
+*/

@@ -19,14 +19,22 @@
   @f]
   Initially @f$u=0@f$. The bottom and side walls are stationary. On the top,
   @f[
-    u(x,1,t)=\bigl(r(t)16x^2(1-x)^2,0\bigr),\qquad
-    r(t)=\min(t,1).
+    u(x,1,t)=\bigl(r(t)[1-((x-c(t))/w)^2]_+^2,0\bigr),
+    \qquad r(t)=\min(t,1),
   @f]
-  The lid is ramped linearly over one time unit. Its final peak speed and the
+  where @f$[a]_+=\max(a,0)@f$, @f$w=0.25@f$, and
+  @f[
+    c(t)=0.5-0.22\cos(2\pi t/8).
+  @f]
+  The smooth driving patch travels horizontally between @f$x=0.28@f$ and
+  @f$x=0.72@f$, completing one round trip in eight time units. Its support
+  stays away from the side walls, and its velocity points to the right even
+  when the patch itself travels left. The amplitude ramps over one time unit.
+  Its peak speed after the ramp and the
   cavity width are both one. With @f$\nu=0.01@f$, the Reynolds number based on
   those scales is @f$\mathrm{Re}=100@f$.
 
-  The lid profile vanishes at the corners, avoiding the conflicting corner
+  The compact lid profile vanishes at the corners, avoiding the conflicting corner
   values of a constant-speed lid. Comparisons with classical cavity reference
   data would require matching that boundary profile as well as the Reynolds
   number. Pressure is normalized by @f$\int_\Omega p\,dx=0@f$.
@@ -35,15 +43,15 @@
 
   One Oseen solve is performed per time step: the transport velocity is taken
   from the previous step, while the transported velocity is implicit. With
-  @f$\Delta t=0.05@f$,
+  @f$\Delta t=0.01@f$,
   @f[
     \frac{u^{n+1}-u^n}{\Delta t}
       +(u^n\cdot\nabla)u^{n+1}-\nu\Delta u^{n+1}+\nabla p^{n+1}=0,
     \qquad \operatorname{div}u^{n+1}=0.
   @f]
-  This is a first-order, semi-implicit approximation to Navier–Stokes. It does
-  not perform a fully nonlinear Newton solve at every step. The 200 steps reach
-  @f$t=10@f$; the final frame is a transient result, not a certified steady state.
+  The method is first order in time and uses a semi-implicit Oseen linearization.
+  The 1,000 steps reach @f$t=10@f$. The resulting transient can be assessed
+  through time-step and mesh refinement.
 
   Multiplication by test velocity @f$v@f$ gives the momentum equation
   @f[
@@ -59,8 +67,9 @@
 
   @section examples-pdes-navierstokes-mesh 1. Prepare the cavity
 
-  The same 512-triangle unit-square mesh and boundary labels are used as in
-  the Stokes example.
+  The unit square is refined to 2,048 triangles (33 by 33 mesh vertices),
+  retaining the Stokes example's boundary labels. Quadratic velocity and linear
+  pressure give 9,539 velocity and pressure DOFs, plus one pressure-mean multiplier.
 
   @snippet PDEs/NavierStokes.cpp navierstokes-mesh
 
@@ -69,7 +78,8 @@
   The Taylor–Hood pair uses quadratic velocity and linear pressure. The stored
   `velocity` holds the previous time step during assembly; after a successful
   solve, it is replaced with the new solution. The XDMF time series starts with
-  the fluid at rest.
+  the fluid at rest. A snapshot is exported every five time steps, giving a
+  visualization interval of @f$0.05@f$ without enlarging the solver time step.
 
   @snippet PDEs/NavierStokes.cpp navierstokes-fields
 
@@ -77,42 +87,42 @@
 
   `Mult(Jacobian(u), velocity)` expresses
   @f$(u^n\cdot\nabla)u^{n+1}@f$. The convection term makes the linear system
-  nonsymmetric, so it is solved with sparse LU rather than CG. Each time step
+  nonsymmetric and is solved with sparse LU. Each time step
   checks solver success before updating or writing the fields.
 
   @snippet PDEs/NavierStokes.cpp navierstokes-step
 
-  The form is built with the current previous-step field and lid value. There
-  is no additional nonlinear iteration hidden inside this loop.
+  Each iteration assembles the Oseen form using the previous velocity and current
+  lid data, solves the resulting linear system, and updates the stored fields.
 
-  @section examples-pdes-navierstokes-output 4. Watch the vortex develop
+  @section examples-pdes-navierstokes-output 4. Flow visualization
 
   @htmlonly
   <figure class="m-figure rodin-tutorial-video">
     <video controls playsinline preload="metadata" poster="NavierStokes.png"
-           aria-label="Computed lid-driven cavity flow at Reynolds number 100">
-      <source src="NavierStokes.mp4" type="video/mp4" />
-      <a href="NavierStokes.mp4">Watch the cavity animation</a>
+           aria-label="Computed cavity flow with horizontally traveling lid forcing at Reynolds number 100">
+      <source src="NavierStokes.webm" type="video/webm" />
+      <a href="NavierStokes.webm">Watch the cavity animation</a>
     </video>
     <figcaption>Computed speed and instantaneous streamlines from rest to time 10.
-      The lid drives a clockwise recirculation; the displayed time is simulation time.</figcaption>
+      The cyan trace follows the computed top-wall speed as the driving patch travels
+      horizontally. The displayed time is simulation time.</figcaption>
   </figure>
   @endhtmlonly
 
-  The right panel makes the primary vortex visible without relying on a color
-  gradient alone. These are instantaneous streamlines, not particle trajectories
-  accumulated through the transient flow. They are drawn from an interpolation
-  of the exported velocity samples. No analytic or illustrative flow is added
-  to the computed result.
+  The right panel shows instantaneous streamlines integrated by ParaView through
+  each exported velocity field. Their evolution displays the displacement of the
+  primary recirculation as the driving patch travels along the lid.
 
   Open `NavierStokes.xdmf` in ParaView and select **Apply**. Color by the magnitude
   of **velocity**, then use the time controls to inspect the evolution. Add the <strong>Stream Tracer</strong> filter to examine circulation and color by **pressure** to inspect
   the pressure field. Keep all referenced HDF5 snapshots next to the XDMF file.
 
-  The optional `examples/PDEs/visualize.py` script produces the poster and MP4
+  The `examples/PDEs/visualize_paraview.py` script uses ParaView to produce
+  transparent PNG frames, then FFmpeg encodes the WebM
   from the same time series. A still image of the final frame is also available:
 
-  @image html PDEs/NavierStokes.png "Velocity magnitude and clockwise circulation at time 10." width=720px
+  @image html PDEs/NavierStokes.png "Velocity magnitude and instantaneous circulation at time 10 with the moving lid forcing." width=720px
 
   @section examples-pdes-navierstokes-full Complete program
 

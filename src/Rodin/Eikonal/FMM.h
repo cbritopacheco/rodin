@@ -33,7 +33,8 @@ namespace Rodin::Eikonal
    * @brief Fast marching method for solving the Eikonal equation.
    *
    * The Fast Marching Method (FMM) is an efficient algorithm for solving
-   * the Eikonal equation @f$ |\nabla u| = F(x) @f$ on unstructured meshes.
+   * the Eikonal equation @f$ F(x)|\nabla u| = 1 @f$ for positive propagation
+   * speed @f$F@f$ on unstructured meshes.
    * It propagates a wavefront from initial seed points, updating arrival
    * times in a manner that ensures causality.
    *

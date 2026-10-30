@@ -9,6 +9,7 @@
   | Tutorial | Main idea |
   | :--- | :--- |
   | @subpage examples-pdes-poisson | Scalar diffusion and homogeneous Dirichlet data |
+  | @subpage examples-pdes-dg-poisson | Discontinuous affine space, SIPG fluxes and convergence checks |
   | @subpage examples-pdes-elasticity | Vector displacement and boundary traction |
   | @subpage examples-pdes-helmholtz | Wave propagation and complex-valued fields |
   | @subpage examples-pdes-stokes | Incompressibility, mixed spaces, and pressure normalization |

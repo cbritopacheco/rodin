@@ -19,8 +19,7 @@
     \qquad k=4\pi.
   @f]
   The complex amplitude may represent a time-harmonic field; a corresponding
-  real oscillation is @f$\operatorname{Re}(u e^{-i\omega t})@f$. This is a
-  bounded Dirichlet problem, not an outgoing-wave or absorbing-boundary model.
+  real oscillation is @f$\operatorname{Re}(u e^{-i\omega t})@f$. The boundary data define a bounded-domain Dirichlet problem.
 
   A manufactured solution makes the source and boundary data explicit:
   @f[
@@ -39,9 +38,7 @@
        =\int_\Omega f\overline v\,dx.
   @f]
   The bar denotes complex conjugation. Rodin's complex forms are linear in the
-  trial field and conjugate-linear in the test field. The negative mass term
-  makes this system indefinite, so the positive-definiteness requirement of CG
-  is not satisfied.
+  trial field and conjugate-linear in the test field. The negative mass term gives an indefinite system requiring an appropriate solver.
 
   @section examples-pdes-helmholtz-mesh 1. Resolve the wave on a mesh
 
@@ -51,9 +48,8 @@
 
   @snippet PDEs/Helmholtz.cpp helmholtz-mesh
 
-  Resolving a wavelength is necessary but does not by itself control wave
-  dispersion or proximity to resonance. Refinement is still needed to assess
-  the error for the frequency of interest.
+  Mesh refinement is used to assess wave dispersion and the error at the chosen
+  frequency, with the distance to resonance included in the assessment.
 
   @section examples-pdes-helmholtz-problem 2. Define the complex problem
 
@@ -67,9 +63,8 @@
 
   @section examples-pdes-helmholtz-solve 3. Solve the indefinite system
 
-  Sparse LU is used for this modest two-dimensional demonstration. It does not
-  require a positive definite matrix. The program checks solver success before
-  exporting the result.
+  Sparse LU solves the indefinite system for this two-dimensional discretization.
+  The program checks solver success before export.
 
   @snippet PDEs/Helmholtz.cpp helmholtz-solve
 
@@ -93,7 +88,7 @@
 
   See @ref PDEs/Helmholtz.cpp "Helmholtz.cpp" for the source and the
   @ref guides-getting-started-installation "installation guide" for build setup.
-  The optional plotting script in `examples/PDEs/visualize.py` reproduces the
+  The optional plotting script in `examples/PDEs/visualize_paraview.py` reproduces the
   figure from the exported point values.
 
   @example PDEs/Helmholtz.cpp @m_examplenavigation{examples-pdes-helmholtz,PDEs/} @m_footernavigation

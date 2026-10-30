@@ -1,10 +1,40 @@
-# Reconstruction
+# Interface reconstruction
 
 These self-contained examples demonstrate the Strain-distributed Welsch
 Implicit-interface Fitting Technique (SWIFT). A classified mesh interface is
 fitted to a circle or lobed circle in two dimensions, or a sphere or lobed
 sphere in three dimensions. The
 mesh topology is retained; the outer box boundary is free to move.
+
+`BackgroundFitting.cpp` adds a step-by-step MMG–MinSTCut–SWIFT example with
+the outer square held fixed. MMG prepares a graded background before
+classification; SWIFT then retains its topology while fitting the circle.
+The generated documentation's **Adapting and fitting an implicit interface**
+tutorial explains the formulas, ownership and measured results.
+
+```sh
+cmake --build build --target SWIFT_BackgroundFitting
+mkdir -p results/background-fitting
+cd results/background-fitting
+../../build/examples/Adaptation/SWIFT/SWIFT_BackgroundFitting
+```
+
+It writes three named mesh blocks to `BackgroundFitting.xdmf`, HDF5 companion
+files and `BackgroundFitting.csv`. The program requires a geometric target hit,
+a valid sampled quality budget, positive signed triangle Jacobians, unit area,
+fixed exterior vertices and unchanged counts during fitting. An independent
+segment-to-circle calculation checks the entire polygonal interface against
+the geometric tolerance. Outputs belong in a scratch directory.
+
+Render the actual mesh comparison from the repository root:
+
+```sh
+pvpython examples/Adaptation/SWIFT/visualize_background.py \
+  results/background-fitting doc/Images/SWIFTBackgroundFitting.png
+```
+
+The figure uses Manrope, the Rodin palette and a transparent background. The
+navy circle is an analytic reference over the computed meshes.
 
 ## Examples
 
@@ -15,11 +45,9 @@ mesh topology is retained; the outer box boundary is free to move.
 | `Reconstruction.cpp` | `SWIFT_ReconstructionP3` | \(P_3\) |
 
 All three examples support both spatial dimensions. The polynomial degree
-controls the displacement space and resulting geometric transformations,
-not the target geometry. CMake compiles the same source three times with a
-different `RODIN_SWIFT_RECONSTRUCTION_DEGREE`. Parsing, classification,
-`SWIFT::Problem`, geometry application and diagnostics are shared; no separate
-degree-specific driver is maintained.
+selects the displacement space and resulting geometric transformations. CMake compiles the same source three times with a
+different `RODIN_SWIFT_RECONSTRUCTION_DEGREE`. Parsing, classification, `SWIFT::Problem`, geometry application and
+diagnostics share one implementation.
 
 ## Build
 
@@ -43,8 +71,7 @@ for general build procedures.
 For optional MUMPS support, add `-DRODIN_USE_MUMPS=ON` when configuring, with
 MUMPS and its dependencies installed. SWIFT selects MUMPS when compiled in;
 otherwise its default direct solver is SparseLU. Add `-DRODIN_USE_OPENMP=ON`
-for an OpenMP-enabled build. Thread environment variables do not enable
-features absent from the configured build.
+for an OpenMP-enabled build. Thread environment variables control the features enabled at configuration.
 
 An existing configured build can be reused by replacing `build` in the
 commands. Only the three named targets need to be built.
@@ -61,7 +88,7 @@ SWIFT_ReconstructionP3 [--name=value | --name value]...
 
 | Flag | Meaning | Default |
 |------|---------|---------|
-| `--n` | Grid points per axis, not cells; integer at least `4` | `16` |
+| `--n` | Grid points per axis; integer at least `4` | `16` |
 | `--dimension` | Spatial dimension: `2` or `3` | `2` |
 | `--lobes` | Angular frequency; nonnegative and integer in 2D | `0`: circle/sphere |
 | `--amp` | Radial perturbation amplitude, ignored when lobes is zero | `0.05` |
@@ -147,9 +174,7 @@ third axis by the negative phase, denoted by \(\widehat n\), and
 \phi(x)=r-R_0-\frac{a}{3}\sum_{i=1}^{3}\cos(\ell\widehat n_i).
 \]
 
-Both supply analytic gradients. In 3D, `--lobes` controls directional
-frequency, not an exact count of visible lobes. Lobed targets are implicit
-radial functions rather than exact signed distances. Keep the target inside
+Both supply analytic gradients. In 3D, `--lobes` controls the directional frequency of the implicit radial target. Keep the target inside
 the background box for a closed reconstruction.
 
 `Geometry::MinSTCut` is the canonical classifier. Its data are cell averages
@@ -183,9 +208,9 @@ s=h\widehat s,\qquad h=\frac{1}{n-1}.
 
 MinSTCut itself performs no mesh scaling: it uses the supplied facet function
 directly. Increasing \(\widehat s\) relative to fidelity regularizes the
-classified interface more strongly. This scaling balances the cell and facet
-costs for mesh-scale label changes; it does not guarantee feature retention.
-Excessive smoothing can still remove small regions entirely.
+classified interface more strongly. This scaling balances cell and facet costs for mesh-scale label changes. The
+  smoothing weight must be chosen to retain the features of interest; larger
+  values can remove small regions.
 
 The flag previously supplied the physical weight \(s\). To reproduce an old
 run at the same resolution, now pass \(\widehat s=s/h\). For example, the
@@ -194,8 +219,7 @@ the successful weight \(0.001\) at that resolution becomes
 `--classification-smoothing=0.015`. Fidelity defaults to \(1\); dimensionless
 smoothing defaults to \(0.01\). MinSTCut's own default facet function remains one.
 
-The phase average is approximated by quadrature; the
-nonpolynomial integrand is not integrated exactly. Smoothing is a facet
+Quadrature approximates the phase average of the nonpolynomial integrand. Smoothing is a facet
 function in the MinSTCut API; these examples use a constant function.
 
 | Attribute | Value | Role |
@@ -227,8 +251,7 @@ const auto& displacement = u.getSolution(); // mesh has not been modified.
 ```
 
 The mesh, space, trial and test functions must outlive the problem. The
-supplied gradient must differentiate the level set; its Hessian is not
-required. No Dirichlet condition is imposed by this example: exterior mesh
+solver uses the supplied level set and its exact gradient. No Dirichlet condition is imposed by this example: exterior mesh
 facets move with the computed displacement. Applications may explicitly add
 boundary conditions to the problem when their geometry requires them.
 
@@ -249,15 +272,13 @@ M=F+D.
 
 Fitting observes motion along the target gradient. Distribution penalizes
 variation of current strain about its **global domain average**, with separate
-deviatoric and divergence weights. It is not centered independently in each
-element. Compatible global affine motions are free in the distribution term;
+deviatoric and divergence weights. The centering uses the full current domain. Compatible global affine motions are free in the distribution term;
 shared finite-element degrees of freedom couple neighboring elements.
 
 The force and outer merit use robust Welsch fitting energy. Directional Newton
 scales the quadratic model before affine quadratic quality hinges recover the
 direction. Armijo backtracking accepts a trial only when energy decrease and
-the actual sampled Jacobian/distortion checks both pass. Quality is not a
-separate shape term in the metric.
+the actual sampled Jacobian/distortion checks both pass. The sampled quality budget is enforced during trial acceptance.
 
 The reference scale `model.h` is derived from `--n` and held fixed. All other
 values below start from production defaults and can be overridden by the
@@ -285,7 +306,7 @@ named flags. The complete model/control mapping is:
 | C++ parameter | What it controls | Default |
 |---------------|------------------|---------|
 | `model.h` | Fixed background reference spacing | Required; set to \(1/(n-1)\) |
-| `model.fit` | Target-normal fitting stiffness, not a force multiplier | `1` |
+| `model.fit` | Target-normal fitting stiffness | `1` |
 | `model.distribution.deviatoric` | Globally centered deviatoric-strain stiffness | `1e-4` |
 | `model.distribution.divergence` | Globally centered divergence stiffness, normalized by dimension | `1e-4` |
 | `model.distortion` | Spendable relative-distortion budget | `10` |
@@ -341,12 +362,11 @@ parameters.linear.solver = Adaptation::SWIFT::Parameters::LinearSolver::SparseLU
 | `convergence.tolerance.stepOverH` | Accepted-motion/reference-spacing stagnation threshold | `5e-4` |
 | `convergence.iterations.outer` | Outer fitting cap | `30` |
 | `convergence.iterations.inner` | Newton-correction cap per outer iteration | `15` |
-| `convergence.iterations.linear` | Iteration cap per CG solve; does not cap direct solves | `1000` |
+| `convergence.iterations.linear` | Iteration cap per CG solve | `1000` |
 | `convergence.iterations.backtracks` | Outer trial-halving cap | `32` |
 | `convergence.iterations.stagnation` | Consecutive small steps or energy changes before a best-effort exit | `5` |
 
-A positive geometric tolerance overrides the automatic target. Zero does not
-disable geometric stopping. Stagnation and iteration-limit exits are distinct
+A positive geometric tolerance overrides the automatic target. Zero selects the automatic geometric target. Stagnation and iteration-limit exits are distinct
 from geometric success.
 
 ### Quadrature and Sampling
@@ -373,12 +393,13 @@ maps to `--convergence-iterations-outer`. Previous flat flag names are rejected.
 and `quadrature.volume` override their respective integrations independently.
 `sampling.subdivision` selects the shared inner-hinge and actual-quality witnesses:
 closed-form shifted/contracted reference lattices, without supplemental points.
-The setting counts subdivisions of the generating lattice, not polynomial
-degree. Point counts are unchanged, but the covering does not retain vertices.
+The setting specifies subdivisions of the generating lattice. Shifting and
+  contracting the lattice preserves its point count and places its witnesses in
+  the interior.
 Except on tetrahedra, sites are \((I+\tfrac12\boldsymbol1)/(m+1)\).
 Tetrahedra use \((I+a\boldsymbol1)/(m+3a)\), with \(a=1/3\) for \(m=1\)
-and \(a=1/(2\sqrt2)\) otherwise. These structured sets have known reference
-covering radii, not a general optimality or continuous-quality guarantee.
+and \(a=1/(2\sqrt2)\) otherwise. These structured sets have known reference covering radii. Continuous quality
+  between witnesses requires further analysis.
 Equal positive reference
 weights sum to reference volume; mapped weights determine each cell's discrete
 mass. Separate adaptive Jacobian and distortion measures mix equal mass with
@@ -387,14 +408,14 @@ at the current and full-predictor geometries. These positive measures preserve
 cell mass and remain frozen throughout the inner solve, with the same weights
 in its energy, residual and tangent. The equal fraction is one half, risks are
 capped at 100, and an inverted predictor receives maximal distortion risk.
-Actual quality checks take unweighted extrema over all witnesses. These sets
-are not degree-exact integration rules or continuous quality certificates.
+Actual quality checks take unweighted extrema over all witnesses. These sets define the sample points for nonlinear quality checks.
 The default simplex counts are 6/10 witnesses on triangles/tetrahedra for
 affine \(P_1\), and 153/969 for \(P_2/P_3\).
 `quadrature.validation` controls independent geometric sampling.
 All default to `0`, selecting the automatic policy.
-The higher-order policies are provisional, not exactness guarantees for
-non-polynomial level sets or nonlinear quality expressions.
+The higher-order policies are provisional integration and sampling choices. Their
+  accuracy for nonpolynomial level sets and nonlinear quality expressions is
+  assessed by refinement.
 
 ## Diagnostics and Output
 
@@ -416,9 +437,8 @@ Each run prints one summary with the following fields:
 | `max_Q` | Maximum sampled relative distortion |
 
 For this signed-distance target, the normalized level-set discrepancy measures
-distance to the circle or sphere at sampled points. It is not a certified
-continuous supremum or two-sided Hausdorff distance. A single target hit does
-not establish a refinement order.
+distance to the circle or sphere at sampled points. A continuous supremum or two-sided Hausdorff bound requires additional geometric
+  analysis. Refinement order is measured over a sequence of meshes.
 
 The program returns `1` for invalid arguments, caught solver/runtime errors or an unsatisfied quality
 budget. A quality-valid best-effort result is written and returns `0`, even if
@@ -437,8 +457,7 @@ all its HDF5 companions alongside it, including the field files. It contains
 two named blocks: `background` is the unchanged reference mesh, and `moved` is
 the fitted isoparametric mesh. Use **Extract Block** to select either one,
 then **Threshold** on `cell_label` (or `Attribute`) with value `1` for the
-inside domain or `2` for the outside domain. Classification is retained from
-the background; it is not recomputed after fitting.
+inside domain or `2` for the outside domain. The moved mesh retains the background classification.
 
 | Field on both blocks | Location | Interpretation |
 |----------------------|----------|----------------|
@@ -448,17 +467,16 @@ the background; it is not recomputed after fitting.
 | `j` | Cell | Relative deformation Jacobian at the cell centroid |
 | `q_rel` | Cell | Relative deformation distortion at the cell centroid |
 
-The displacement on `moved` is the transported background field, not an
-additional deformation to apply. Both blocks carry the final deformation
-diagnostics. The cell-centered quality fields are centroid samples, not
-cellwise extrema or the solver's validation certificate. The examples do not
-write a campaign CSV or trajectory archive.
+The displacement on `moved` is the background field transported to the fitted
+  geometry. Both blocks carry the final deformation
+diagnostics. Cell-centered quality fields record centroid samples; the solver report records
+  extrema over its quality witnesses.
 
 ## Further Documentation
 
 - [Reference witness generator](Witness/README.md): offline numerical covering
   sets for every Rodin reference geometry, with configurable point counts and
-  SVG comparisons. This tool does not change SWIFT's production witnesses.
+  SVG comparisons. The production solver retains its configured witness sets.
 
 - [SWIFT guide source](../../../doc/Guides/SWIFT.dox): mathematical model,
   solver stages, supported contexts, and extension points.

@@ -35,9 +35,8 @@
   | @c RODIN_USE_MCSS | The styled documentation renderer. |
 
   Dependency availability and the requested options determine the configured
-  build. Inspect @c build/CMakeCache.txt for its selected CMake values. Optional
-  backends have their own dependency requirements; enabling an option does not
-  install the corresponding system library.
+  build. Inspect @c build/CMakeCache.txt for its selected CMake values. Optional backends require their corresponding system libraries to be installed
+  before configuration.
 
   # Inspect configuration in C++
 
@@ -56,8 +55,8 @@
   targets to retain their compile definitions and dependencies.
 
   @c Configure.h.in is the source template, and @c Configure.h is the generated
-  include. Regenerate the build after changing CMake selections rather than
-  editing the generated header or manually enabling a backend in consumer code.
+  include. After changing CMake selections, regenerate the build so the header and exported
+  targets receive the selected configuration.
 
   # Module-specific controls
 

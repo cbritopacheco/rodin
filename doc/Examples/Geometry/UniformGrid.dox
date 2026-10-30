@@ -39,7 +39,7 @@
   @endcode
 
   Before scaling, the grid occupies @f$[0,15]^2@f$. After scaling, it occupies
-  @f$[0,1]^2@f$ and has area one. Scaling changes coordinates, not entity counts.
+  @f$[0,1]^2@f$ and has area one. Scaling preserves the mesh connectivity and entity counts.
 
   The cell type determines how each grid rectangle is represented:
 
@@ -82,8 +82,7 @@
 
   `getVertexCount()` and `getCellCount()` check topology. Summing cell
   `getMeasure()` values checks the area of a two-dimensional mesh, as shown
-  above. `Mesh::getVolume()` instead sums three-dimensional entities and is not
-  an area query. `getDimension()` and `getSpaceDimension()` distinguish
+  above. `Mesh::getVolume()` sums the measures of three-dimensional entities. `getDimension()` and `getSpaceDimension()` distinguish
   topological from ambient dimension. These checks help detect an unintended
   domain size before a field or PDE is constructed.
 

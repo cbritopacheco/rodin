@@ -6,56 +6,55 @@
  */
 /**
  * @file H1.h
- * @brief H1-conforming Lagrange finite element space.
+ * @brief Positive-degree continuous Lagrange spaces and reference elements.
  *
- * This header provides access to the H1-conforming Lagrange finite element
- * family. These are high-order-stable elements with continuous (H¹) basis
- * functions across element boundaries.
+ * H1 constructs a conforming field from degree-@f$k@f$ reference elements,
+ * with @f$k\geq1@f$. Vertex, edge, face and cell degrees of freedom are
+ * shared according to the mesh incidence and the family trace maps.
+ * Scalar, vector and matrix ranges use the corresponding range specialization.
  *
- * # Mathematical Foundation
- * The H1-conforming Lagrange space of degree k is defined as:
- * @f[
- *   V_h^k = \{u \in H^1(\Omega) : u|_K \in \mathbb{P}_k(K) \, \forall K \in \mathcal{T}_h\}
- * @f]
- * where @f$ \mathbb{P}_k(K) @f$ denotes polynomials of degree at most k on element @f$ K @f$.
+ * ## Approximation spaces
  *
- * # Features
- * - Supports arbitrary polynomial degree k (K=0, 1, 2, 3, 4, 5, 6, ...)
- * - H¹-conforming (continuous across element boundaries)
- * - Lagrange nodal basis functions: @f$ \phi_i(x_j) = \delta_{ij} @f$
- * - Optimal convergence: @f$ O(h^{k+1}) @f$ in @f$ L^2 @f$ norm, @f$ O(h^k) @f$ in @f$ H^1 @f$ norm
- * - Supports all standard geometries: Segment, Triangle, Quadrilateral, Tetrahedron, Wedge
- * - High-order-stable implementation
+ * On affine simplices the reference space is @f$\mathbb P_k@f$; on tensor
+ * cells it is @f$\mathbb Q_k@f$. Wedges combine triangular and segment
+ * factors, while pyramids use their compatible rational construction.
+ * The physical basis is transported by the geometric map,
+ * @f$\phi_i=\widehat\phi_i\circ F_K^{-1}@f$.
  *
- * # Degree of Freedom (DOF) Formulas
- * - Segment: @f$ k+1 @f$
- * - Triangle: @f$ \frac{(k+1)(k+2)}{2} @f$
- * - Quadrilateral: @f$ (k+1)^2 @f$
- * - Tetrahedron: @f$ \frac{(k+1)(k+2)(k+3)}{6} @f$
- * - Wedge: @f$ (k+1) \cdot \frac{(k+1)(k+2)}{2} @f$
+ * For scalar elements the local counts are:
  *
- * # Usage Example
- * ```cpp
- * // H1 element of degree 2 (quadratic)
- * RealH1Element<2> h1_2(Polytope::Type::Triangle);
- * std::cout << "DOFs: " << h1_2.getCount() << std::endl;  // 6
- * 
- * // H1 element of degree 3 (cubic)
- * RealH1Element<3> h1_3(Polytope::Type::Segment);
- * auto basis = h1_3.getBasis(0);
- * auto value = basis(Math::Vector<Real>{{0.5}});
- * 
- * // Complex-valued H1 element of degree 4
- * ComplexH1Element<4> h1_c(Polytope::Type::Quadrilateral);
- * 
- * // Vector-valued H1 element for elasticity
- * VectorH1Element<2> h1_v(Polytope::Type::Tetrahedron, 3);
+ * | Geometry | Scalar degrees of freedom |
+ * | :--- | :--- |
+ * | Segment | @f$k+1@f$ |
+ * | Triangle | @f$(k+1)(k+2)/2@f$ |
+ * | Quadrilateral | @f$(k+1)^2@f$ |
+ * | Tetrahedron | @f$(k+1)(k+2)(k+3)/6@f$ |
+ * | Wedge | @f$(k+1)^2(k+2)/2@f$ |
+ * | Hexahedron | @f$(k+1)^3@f$ |
+ * | Pyramid | @f$(k+1)(k+2)(2k+3)/6@f$ |
  *
- * // H1 finite element space of degree 2
- * H1<2> Vh(mesh);
- * TrialFunction u(Vh);
- * TestFunction v(Vh);
- * ```
+ * Reference nodal duality, geometric mapping and global coefficient numbering
+ * are separate objects. Use the element and space accessors when evaluating
+ * fields or transferring their coefficients. Polynomial approximation rates
+ * depend on solution regularity, mesh quality, geometry and quadrature.
+ *
+ * ## Usage
+ *
+ * A quadratic scalar space on a prepared mesh is constructed by selecting
+ * its degree at compile time:
+ * @code{.cpp}
+ * H1 quadratic(std::integral_constant<size_t, 2>{}, mesh);
+ * TrialFunction u(quadratic);
+ * TestFunction v(quadratic);
+ * @endcode
+ *
+ * @ref Variational/FiniteElementSpaces.cpp "The finite element space example"
+ * constructs and samples constant, linear and quadratic fields on one mesh.
+ * @ref Rodin::Variational::RealH1Element "RealH1Element<K>" exposes a scalar
+ * reference element; range-specific aliases and space specializations provide
+ * the other supported field types.
+ *
+ * @see @ref fem-ciarlet, @ref fem-spaces, @ref guides-ordering
  */
 #ifndef RODIN_VARIATIONAL_H1_H
 #define RODIN_VARIATIONAL_H1_H

@@ -10,6 +10,8 @@
   - @subpage examples-mmg-casting — Work with MMG and Geometry mesh interfaces.
   - @subpage examples-mmg-mesh_optimization — Improve element quality.
   - @subpage examples-mmg-mesh_adaptation — Adapt to a field or metric.
+  - @subpage examples-swift-background — Adapt a background, classify an
+    implicit circle and fit its interface with SWIFT.
   - @subpage examples-mmg-behavior — Required entities, level-set cuts, and
     preservation guarantees.
 

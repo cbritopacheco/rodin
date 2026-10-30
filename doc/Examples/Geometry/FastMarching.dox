@@ -1,0 +1,107 @@
+/**
+  @page examples-eikonal-fmm Computing arrival times with fast marching
+  @brief Propagate from one exact seed, compare with an analytic distance and check refinement.
+
+  @tableofcontents
+  @m_footernavigation
+
+  @section examples-eikonal-fmm-equation Arrival time and speed
+
+  A front propagates through the unit square with positive speed @f$F(x)@f$.
+  The arrival time @f$T@f$ satisfies
+  @f[
+    F(x)\lVert\nabla T(x)\rVert=1,
+    \qquad T(c)=0,\qquad c=(0.5,0.5).
+  @f]
+  For constant speed @f$F=s@f$, the exact solution is
+  @f[
+    T(x)=\frac{\lVert x-c\rVert}{s}.
+  @f]
+  Unit speed produces distance; doubling the speed halves every arrival time.
+  This provides a direct check of the speed convention used by
+  @ref Rodin::Eikonal::FMM.
+
+  @section examples-eikonal-fmm-geometry Choose an exact seed
+
+  The program uses triangular grids with 16, 32 and 64 intervals per axis.
+  Each count is even, so the center is a mesh vertex at every refinement.
+  Seeding a neighborhood around the center would prescribe zero time on a
+  larger source set and change the reference problem.
+
+  @snippet Models/Eikonal/FMM.cpp fmm-mesh
+
+  Vertex-to-cell incidence supplies the local simplicial stencils.
+  Vertex-to-vertex incidence supplies neighboring trial vertices. Both are
+  prepared before seeding and propagation.
+
+  @section examples-eikonal-fmm-propagation Propagate the front
+
+  A scalar continuous @f$P_1@f$ field stores nodal arrival times. The source
+  contains exactly one vertex. `seed()` sets its value to zero and initializes
+  neighboring trial values; `solve()` repeatedly accepts the smallest trial
+  arrival time and updates its neighbors.
+
+  @snippet Models/Eikonal/FMM.cpp fmm-solve
+
+  The callable returns propagation speed in distance per unit time. Supply
+  finite, strictly positive values. Its reciprocal is the local slowness.
+  This example uses constant speeds 1 and 2, with identical grids and seeds.
+
+  @section examples-eikonal-fmm-result Compare with the analytic field
+
+  @image html FMMArrival.png "Computed unit-speed arrival time on the 64-interval grid. Contours show equal arrival times. The dense triangle edges are omitted so that they do not obscure the field."
+
+  For the nodal set @f$\mathcal V_h@f$, the program records
+  @f[
+    e_\infty=\max_{a\in\mathcal V_h}|T_h(a)-T(a)|,
+    \qquad
+    e_{\mathrm{mean}}=\frac{1}{|\mathcal V_h|}
+        \sum_{a\in\mathcal V_h}|T_h(a)-T(a)|.
+  @f]
+  These are nodal error measures. The arithmetic mean is independent of cell
+  areas and differs from an integrated error norm.
+
+  @snippet Models/Eikonal/FMM.cpp fmm-error
+
+  The checked local results for unit speed are:
+
+  | Intervals per axis | Vertices | Maximum nodal error | Mean nodal error |
+  | ---: | ---: | ---: | ---: |
+  | 16 | 289 | @f$0.0474507@f$ | @f$0.0158231@f$ |
+  | 32 | 1089 | @f$0.0299216@f$ | @f$0.0102179@f$ |
+  | 64 | 4225 | @f$0.0182986@f$ | @f$0.00634955@f$ |
+
+  Both errors decrease under refinement. With speed 2, every tabulated error
+  is halved to printed precision. The point-source solution has a singular
+  gradient at the center; this sequence supplies measured convergence for
+  this setup, without assuming the interpolation order of a smooth field.
+
+  The executable requires finite nonnegative arrival times, a unique source,
+  strictly decreasing maximum errors and the loose regression envelope
+  @f$e_\infty\leq 2h/s@f$. That envelope is a check for this example's grids.
+  Assess other geometries and variable-speed fields against their own reference
+  solutions or refinement studies.
+
+  @section examples-eikonal-fmm-run Build and inspect
+
+  Build the `Eikonal_FMM` target and run it in a scratch directory. It needs no
+  input mesh. `FMMErrors.csv` contains all six refinement/speed results.
+  `FMMArrival.xdmf` and its HDF5 companions contain the finest unit-speed
+  computed field `arrival` and interpolated analytic nodal field `reference`.
+  Open the XDMF in ParaView and select **Contour** on `arrival` to inspect
+  the advancing fronts.
+
+  @section examples-eikonal-fmm-full Complete program
+
+  @snippet Models/Eikonal/FMM.cpp fmm-source
+
+  @section examples-eikonal-fmm-next Distance fields in applications
+
+  A zero-time vertex set defines an unsigned arrival-time problem. Signed
+  level-set reconstruction additionally needs an inside/outside convention.
+  The @ref guides-shape-optimization "shape optimization guide" describes
+  transport and redistancing; @ref examples-swift-background shows how an
+  analytic signed distance can drive mesh-interface fitting.
+
+  @example Models/Eikonal/FMM.cpp
+*/

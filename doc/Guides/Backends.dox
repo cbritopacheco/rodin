@@ -18,7 +18,7 @@
   | Mesh | `Mesh<Context::Local>` | same | `Mesh<Context::MPI>` | same mesh contexts |
   | Assembly | `Assembly::Sequential` | `Assembly::OpenMP` | `Assembly::MPI` | PETSc assembly specializations |
   | Linear algebra | `Math::SparseMatrix`, `Math::Matrix`, `Math::Vector` | same | usually PETSc for distributed solves | PETSc `Mat`/`Vec` wrappers |
-  | Solvers | Eigen and SuiteSparse wrappers | same after assembly | usually PETSc KSP/SNES | `Solver::KSP`, PETSc `CG`, `GMRES`, `SNES` |
+  | Solvers | Eigen and SuiteSparse wrappers | same after assembly | usually PETSc KSP/SNES | `PETSc::Solver::KSP`, PETSc `CG`, `GMRES`, `SNES` |
   | I/O | MFEM, MEDIT, HDF5, XDMF | same | HDF5/XDMF shard-aware paths | PETSc grid-function data paths |
 
   @section guides-backends-local Local Eigen path
@@ -29,15 +29,14 @@
   @ref Rodin::Math "Math" matrices and vectors, and the native
   @ref Rodin::Solver "Solver" wrappers.
 
-  This is the best path for examples, small and medium problems, unit tests,
-  and backend-independent feature development.
+  The local path is used for examples, small and medium problems, unit tests and
+  backend-independent feature development.
 
   @section guides-backends-openmp OpenMP assembly
 
   When Rodin is built with OpenMP support, `Assembly::Default` can select
-  shared-memory assembly for local meshes. OpenMP changes the assembly
-  iteration strategy, not the mathematical problem or the linear algebra
-  objects.
+  shared-memory assembly for local meshes. OpenMP distributes assembly iteration across threads. The problem formulation and
+  linear-algebra objects retain their configured definitions.
 
   OpenMP support should preserve deterministic results within floating-point
   accumulation expectations. A feature that supports local assembly should be
@@ -76,8 +75,8 @@
 
   @section guides-backends-support What complete support means
 
-  A feature may support only part of the backend matrix. That is fine, but the
-  documentation and tests should say so explicitly.
+  Supported configurations are specified per feature and specialization.
+  The corresponding tests establish the advertised mesh, storage and assembly paths.
 
   | Feature | Minimum support to claim it |
   |---------|-----------------------------|

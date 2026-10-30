@@ -47,8 +47,8 @@
       \sigma(u)n&=0 &&\text{on }\Gamma_0.
     \end{aligned}
   @f]
-  This formulation describes linear elastic response; it does not model large
-  rotations or nonlinear material behavior. See @cite allaire2021shape for
+  The formulation assumes small strains and rotations and a linear elastic
+  constitutive law. See @cite allaire2021shape for
   further background on elasticity and its variational formulation.
 
   @section examples-pdes-elasticity-weak The weak formulation
@@ -119,7 +119,7 @@
   @snippet PDEs/Elasticity.cpp elasticity-export
 
   @m_class{m-flat}
-  @image html PDEs/Elasticity.png "Computed beam displacement, amplified ten times. Color shows the unscaled displacement magnitude; the dashed outline marks the original beam." width=720px
+  @image html PDEs/Elasticity.png "Computed beam displacement, amplified ten times. Color shows the unscaled displacement magnitude; the gray outline marks the original beam." width=720px
 
   In ParaView:
 
@@ -132,13 +132,14 @@
   mesh and load, the maximum nodal displacement magnitude is approximately
   @f$0.023787@f$, and the vertical displacement at the loaded end is approximately
   @f$-0.0234@f$. The amplification in the figure changes only the displayed
-  geometry, not the computed field or its color scale.
+  displayed geometry; the field and color scale retain the computed displacement
+  values.
 
   @section examples-pdes-elasticity-full Complete program
 
   Build the `Elasticity` target with the Rodin examples enabled, then run it from
   the directory in which the output should be written. The program generates
-  its own mesh and requires no external mesh file.
+  its own mesh at startup.
 
   @snippet PDEs/Elasticity.cpp elasticity-source
 

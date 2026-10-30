@@ -8,19 +8,22 @@
   Technique. Robust Welsch fitting drives the marked interface towards the
   target, while centered strain distributes the displacement through the mesh.
 
+  Start with @ref examples-swift-background "the background adaptation and
+  fitting tutorial" for a complete runnable MMG–MinSTCut–SWIFT sequence,
+  its actual meshes and independently checked circle-fitting error.
+
   The shared `Reconstruction.cpp` example in `examples/Adaptation/SWIFT` is
   compiled as `SWIFT_ReconstructionP1`, `SWIFT_ReconstructionP2` and
   `SWIFT_ReconstructionP3`. Only the displacement degree changes; named flags,
   lobed circle/sphere targets, diagnostics and XDMF output share one implementation.
   Use `--help` to list controls and `--n=16 --dimension=2 --lobes=4` for a 2D target.
-  Calibration uses these same reconstruction executables and named controls;
-  there is no separate fitting implementation for parameter studies.
+  Calibration uses the reconstruction executables with the same named controls.
 
   @section guides-swift-setup Setup and ownership
 
   @ref Rodin::Adaptation::SWIFT::Problem fits marked mesh facets to a supplied zero level
-  set. It writes accumulated displacement into the constructor's trial-function
-  solution. It does not move vertices, replace mesh transformations, or remesh.
+  set. It writes the accumulated displacement into the constructor's trial-function
+  solution. Applying that displacement to mesh geometry is an application step.
   The mesh is obtained from the displacement finite element space.
 
   The mesh, finite element space, trial and test functions must outlive the
@@ -33,8 +36,7 @@
   reconstruction examples. It balances cell-average phase fidelity against
   the measure of separating facets. Apply its @c inside and @c outside sets
   to cell attributes and its @c cut set to interface facets before fitting.
-  Classification remains an explicit preparation step, not part of the SWIFT
-  optimization or a boundary condition.
+  Classification prepares the interface labels before the SWIFT optimization.
 
   @code{.cpp}
   // mesh already has its interface facets marked with Interface.
@@ -61,16 +63,15 @@
   const auto& displacement = u.getSolution();
   @endcode
 
-  Homogeneous boundary conditions hold the current boundary position fixed:
-  they constrain each increment, not the accumulated displacement to zero.
+  Homogeneous boundary conditions constrain each increment to zero, holding the
+  current boundary position fixed.
   Nonzero increment values and identification conditions are rejected.
   For another solve on the same space, retain the solver and update its
   parameters or target. The existing displacement is the next initial guess.
   Create a new solver when replacing the mesh or finite element space.
 
   Applying the result is a separate application decision. Vertex displacement
-  is appropriate for a linear geometric mesh. Higher-order geometry requires
-  updating its transformations, not merely moving its corner vertices.
+  is appropriate for a linear geometric mesh. Higher-order geometry is updated through its transformations.
 
   For an affine simplicial mesh, @ref Rodin::Adaptation::SWIFT::Adapt owns the
   vector P1 space and fitting problem and applies valid displacements in place:
@@ -103,18 +104,16 @@
   | `SWIFT::Problem(u, v)` | PETSc trial/test storage | Explicitly unsupported |
   | `SWIFT::Adapt(mesh)` | MPI mesh, requiring PETSc | Construction disabled pending distributed implementation |
 
-  Backend selection follows storage and mesh context, not a runtime conversion.
+  Storage and mesh context determine backend selection.
   An MPI mesh will use PETSc when that specialization is implemented; it never
-  falls back to Eigen. Renaming the API does not provide distributed assembly.
+  falls back to Eigen. Distributed assembly requires the corresponding backend implementation.
 
   @section guides-swift-model Mathematical model
 
   The displacement metric is @f$M=F+D@f$: fitting observes normal motion on
   the marked interface, while distribution couples that motion to the volume.
-  The metric defines the quadratic direction problem; it is not an additional
-  energy minimized over the accumulated deformation. Quality is recovered
-  through affine squared hinges on the increment and nonlinear checks on the
-  accepted mesh, not through a separate shape-curvature term in the metric.
+  The metric defines the quadratic problem for each displacement increment. Quality is controlled by affine squared hinges on the increment and nonlinear
+  checks on the accepted mesh.
 
   For the current map @f$T_k(x)=x+u_k(x)@f$, set
   @f$A_k=I+\nabla u_k@f$, @f$j_k=\det A_k@f$ and
@@ -144,8 +143,7 @@
     \qquad f_k=-DE(u_k).
   @f]
   The reference measure and robust scale @f$\sigma@f$ are held fixed during a
-  solve. Thus the quadratic metric preconditions the robust descent; it does
-  not replace the robust objective with a least-squares objective.
+  solve. The quadratic metric preconditions descent of the robust fitting objective.
 
   Directional Newton scales the predictor before the affine hinge solve:
   @f$\bar p_k=a_kp_k@f$ and @f$\bar M_k=M_k/a_k@f$. The inner model is
@@ -155,19 +153,19 @@
   @f]
   where @f$B_k@f$ is the squared-hinge penalty on frozen Jacobian and distortion
   slacks. The penalty and actual-quality checks use the same cached closed-form
-  reference covering. The generating lattice is shifted and contracted without
-  changing its point count; vertices are not retained as supplemental points.
-  A known reference covering radius does not certify continuous mesh quality.
+  reference covering. The generating lattice is shifted and contracted while preserving its point count.
+  The resulting reference covering determines the quality witnesses; continuous
+  quality between witnesses requires further analysis.
   Separate positive Jacobian and
   distortion weights mix equal mass with normalized nonlinear guard penetration
   at the current and full-predictor geometries. Each family preserves mapped
   cell mass, and its weights stay fixed during the inner solve. The equal
   fraction is one half and dimensionless risks are capped at 100. Inverted
   predictor points receive maximal distortion risk without evaluating distortion.
-  Validation checks every witness without weights. Equal reference weights,
-  normalized to reference volume and mapped to each cell, determine cell mass,
-  not individual adaptive penalty weights. Coverings are not degree-exact
-  quadrature rules and do not certify nonlinear quality between witnesses.
+  Validation checks every witness without weights. Equal reference weights, normalized to reference volume and mapped to each cell,
+  determine cell mass. Adaptive penalty weights are assigned within that mass.
+  Coverings sample nonlinear quality, while integration rules provide polynomial
+  exactness.
   Its stationarity residual controls inner convergence. The outer
   Armijo search then decreases @f$E@f$ while enforcing the actual sampled
   quality budget. See the @ref Rodin::Adaptation::SWIFT::Problem "SWIFT class reference"
@@ -176,7 +174,7 @@
 
   For current-coordinate fields, @f$\varepsilon(v)=\operatorname{sym}\nabla_yv@f$;
   the overbars are averages over the entire current domain @f$\Omega_k@f$.
-  They are not per-element means. Both distribution coefficients are independent.
+  Both distribution coefficients are independent.
 
   @section guides-swift-stages What the solver does
 
@@ -186,8 +184,8 @@
      Fitting makes motion responsive to the target normal. Distribution couples
      neighboring elements through variation of current strain about its global
      mean. Coherent affine motions are free, including shear and anisotropic
-     stretching. Spatial strain variation is resisted. This does not permit
-     independent incompatible element motions; shared DOFs transmit motion.
+     stretching. Spatial strain variation is resisted, and shared DOFs transmit compatible motion
+  between elements.
   2. Solve for an unconstrained predictor. Directional Newton rescales the
      physical predictor and its quadratic metric before applying the hinges.
   3. Use native @ref Rodin::Solver::NewtonSolver to solve the frozen quadratic
@@ -208,6 +206,63 @@
   H1 modulo global affine motions on a fixed connected bounded Lipschitz domain.
   The mesh-scale factor and changing domain preclude an unconditional uniform bound.
 
+  @section guides-swift-curved Higher-order fitting and curved geometry
+
+  The shared reconstruction program uses a displacement space of degree
+  @f$p\in\{1,2,3\}@f$ on the same classified simplicial mesh. Trial and test
+  functions define the fitting problem directly:
+
+  @snippet Adaptation/SWIFT/Reconstruction.cpp swift-problem
+
+  After solving, the displacement is still a field on the reference mesh.
+  Construct a separate output mesh and evaluate that field at every geometry
+  node while retaining the reference geometry for evaluation. The program
+  installs new transformations on every positive-dimensional entity:
+
+  @snippet Adaptation/SWIFT/Reconstruction.cpp swift-geometry
+
+  Updating the corner vertices alone would discard the higher-order geometric
+  information. Keeping the reference mesh unchanged also prevents later
+  displacement evaluations from using already displaced coordinates.
+
+  @m_class{rodin-mesh-stages rodin-mesh-stages-pair}
+
+  @parblock
+
+  @image html SWIFTCurvedFitting-background.png "Reference classification."
+  @image html SWIFTCurvedFitting-moved.png "Actual quadratic fitted mesh."
+
+  @endparblock
+
+  Cyan identifies the inside cells; the navy curve is the analytic zero level
+  set of the four-lobe target.
+
+  The illustrated run uses 16 grid points per axis, 450 triangles and the
+  quadratic executable with its default model and classification settings:
+
+  @code{.sh}
+  SWIFT_ReconstructionP2 --n=16 --dimension=2 --lobes=4 \
+    --linear-solver=sparse-lu --output=lobed
+  @endcode
+
+  Its target in polar coordinates about @f$(0.5,0.5)@f$ is
+  @f$\phi=r-0.25-0.05\cos(4\theta)@f$. The checked local run reached the
+  sampled geometric target in two outer steps and five inner corrections:
+
+  | Response | Measured value |
+  | :--- | ---: |
+  | Sampled maximum normalized residual | @f$1.87068\times10^{-4}@f$ |
+  | Automatic target, @f$(1/15)^3@f$ | @f$2.96296\times10^{-4}@f$ |
+  | Minimum sampled relative Jacobian | @f$0.25846@f$ |
+  | Maximum sampled relative distortion | @f$3.61738@f$ |
+
+  Unlike the fixed-box background tutorial, this program leaves the exterior
+  box unconstrained. Its exterior therefore moves with the displacement.
+  These are single-run sampled diagnostics. The lobed level-set residual is
+  normalized by the target gradient and estimates local geometric distance;
+  a refinement study and independent geometric checks are needed to measure
+  approximation order and behavior between quality witnesses.
+
   @section guides-swift-controls Main controls
 
   Model coefficients are grouped under `parameters.model`. Accuracy settings
@@ -217,7 +272,8 @@
   defaults except the required reference size.
 
   The model defaults follow the current shared leader of the ongoing 2D
-  calibration. They are provisional, not a completed 3D calibration. The
+  calibration. The defaults are provisional pending completion of the three-dimensional
+  calibration. The
   reconstruction examples use dimensionless classifier smoothing
   @f$\widehat s=0.01@f$, supplied to MinSTCut as the physical weight
   @f$h\widehat s@f$; MinSTCut's own default facet function remains one.
@@ -225,7 +281,7 @@
   | Parameter | C++ | Description | Value |
   |-----------|-----|-------------|-------|
   | @f$h@f$ | `model.h` | Fixed background reference size | Required |
-  | @f$\kappa_F@f$ | `model.fit` | Target-normal motion stiffness, not a force multiplier | @f$1@f$ |
+  | @f$\kappa_F@f$ | `model.fit` | Target-normal motion stiffness | @f$1@f$ |
   | @f$\kappa_{\rm dev}@f$ | `model.distribution.deviatoric` | Cost of deviatoric-strain variation about its global mean | @f$10^{-4}@f$ |
   | @f$\kappa_{\rm div}@f$ | `model.distribution.divergence` | Cost of divergence variation about its global mean, normalized by @f$d@f$ | @f$10^{-4}@f$ |
   | @f$\mu_j@f$ | `model.hinge.jacobian` | Jacobian recovery strength | @f$10@f$ |
@@ -264,8 +320,8 @@
 
   The affine @f$P_1@f$ policy is calibrated on the tested cases. Higher-order
   policies are provisional and require refinement checks, particularly when
-  hinges are active. Orders grow for degrees beyond this table; those floors
-  are heuristic policies, not exactness guarantees for nonlinear integrands.
+  hinges are active. Orders grow for degrees beyond this table; those floors provide a heuristic starting point for nonlinear integration, to be
+  assessed through refinement.
   Selection is per entity. Nonsimplicial volume elements use the higher-order
   volume and quality policies even at degree one; surface integration uses
   the facet's geometry and trace degree.
@@ -279,16 +335,15 @@
   nonpolynomial. Such tensors retain the nonpolynomial interface policy,
   as do the Welsch force and energy; these two use the same integration rule.
   `quadrature.validation` (`--quadrature-validation`) independently
-  controls geometric-response sampling and is not reduced by `--quadrature-order`.
+  controls geometric-response sampling separately from `--quadrature-order`.
   The surface and volume settings use `--quadrature-surface` and
   `--quadrature-volume`. Independent quality checks use
-  `--sampling-subdivision`, interpreted as generating lattice subdivisions, not
-  polynomial exactness. Tensor cells use Cartesian grids, wedges use triangular
+  `--sampling-subdivision`, which specifies generating-lattice subdivisions. Tensor cells use Cartesian grids, wedges use triangular
   grids times segments, and pyramids use shrinking square layers.
   Default triangle/tetrahedron counts are @f$6/10@f$ for affine @f$P_1@f$ and
   @f$153/969@f$ for @f$P_2/P_3@f$. Cell vertices are always checked, and common
-  integration overrides do not change independent quality sampling.
-  These checks remain sampling, not an everywhere certificate on curved cells.
+  quality sampling is configured independently of integration overrides.
+  On curved cells, these checks establish quality at the sampled points.
   Example flags follow the C++ parameter hierarchy: dots become hyphens and
   camel-case words are separated by hyphens. Thus `sampling.subdivision`
   maps to `--sampling-subdivision`. Model flags include `--model-fit`,
@@ -300,18 +355,19 @@
 
   @section guides-swift-results Reading results
 
-  Use `report.reason` rather than parsing a message. A geometric target hit is
-  `SWIFT::Report::Reason::GeometricTarget`. Budget, small-step and small-energy
-  exits are best-effort results, not geometric convergence. The stable text
+  `report.reason` identifies the termination condition. A geometric target hit is
+  `SWIFT::Report::Reason::GeometricTarget`. Budget, small-step and small-energy exits return the current iterate with their
+  respective termination reason. The stable text
   token is available through `report.getReasonString()`.
 
   The main geometric response is `geometricSup`, the maximum sampled normalized
   level-set residual on the complete interface, including its vertices.
   Normalization divides the absolute level-set value by the local target-gradient
-  magnitude, giving a local distance estimate rather than a raw level-set value.
+  magnitude to give a local distance estimate.
   The automatic target is @f$h^{p+1}@f$, using the reference spacing and the
-  interface finite element order. This is not a certified Hausdorff error;
-  a single target hit does not establish a refinement order.
+  interface finite element order. `geometricSup` is a sampled residual estimate. Hausdorff bounds require additional
+  geometric analysis, and convergence order is measured over a refinement
+  sequence.
 
   The report's `geometricConstant` is the dimensionless sampled score
   @f[
@@ -330,10 +386,9 @@
   energy. Energy and maximum error answer different questions; neither should
   silently replace the other as a stopping certificate.
 
-  The quality budget is available to spend while fitting. A larger final
-  distortion is not itself failure if it remains below the configured limit.
-  `qualityBudgetSatisfied` records the sampled checks, not an everywhere-valid
-  certificate for a curved element. Inspect the reason and quality fields even
+  The quality budget permits distortion up to its configured limit.
+  `qualityBudgetSatisfied` records whether the sampled Jacobian and distortion
+  checks satisfy that budget. Inspect the reason and quality fields even
   when the target was not reached.
 
   @code{.cpp}
@@ -344,13 +399,14 @@
 
   The monitor receives one snapshot per accepted step and one final report,
   including early returns. The final snapshot may repeat the last accepted
-  step. It must not modify the problem or throw. `getReport()` holds the last
+  step. The callback is observational and must complete without modifying the problem or
+  throwing an exception. `getReport()` holds the last
   completed solve. `trace` additionally enables the examples' diagnostic logs.
 
   @section guides-swift-extension Adding metric terms
 
-  `getMetric()` exposes a native additional bilinear form, not the internal
-  scratch problem or a replacement for the canonical fitting and distribution.
+  `getMetric()` exposes an additional native bilinear form that augments the fitting
+  and distribution metric.
   Both local and global bilinear integrators use Rodin's normal form interface.
 
   @code{.cpp}
@@ -358,11 +414,11 @@
   fitting.getMetric() -= Integral(Dot(u, v));
   @endcode
 
-  Added terms are assembled again at each outer iteration. They change the
-  quadratic direction model, not the robust energy or its fitting force.
+  Added terms are assembled again at each outer iteration. They augment the quadratic direction model; the robust energy and fitting force
+  retain their definitions.
   Maintain symmetry, nonnegative curvature and compatible unresolved modes.
-  Arbitrary linear loads are deliberately not exposed: a load without a
-  corresponding fitting energy would invalidate Armijo's descent model.
+  The fitting force is derived from the robust energy so that the direction model
+  remains consistent with Armijo's descent test.
 
   @section guides-swift-layout Implementation layout
 

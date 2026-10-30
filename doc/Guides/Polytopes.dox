@@ -1,162 +1,106 @@
 /**
   @page guides-polytopes Polytopes
-  @brief Understanding the geometric elements in Rodin
-
-  @m_keywords{Polytope, Triangle, Quadrilateral, Tetrahedron, Hexahedron,
-    Wedge, Segment, Point, Element}
+  @brief Reference shapes, physical cells and their lower-dimensional entities.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section guides-polytopes-intro Introduction
+  @section guides-polytopes-intro Cells and their geometry
 
-  In finite element analysis, a **polytope** is a geometric primitive that
-  forms the building block of a mesh. A mesh is a collection of polytopes
-  of various dimensions that together partition a domain @f$ \Omega @f$.
+  A mesh combines vertices, edges, faces and cells through incidence relations.
+  The cells have the mesh's topological dimension; their coordinates lie in
+  the embedding space. A triangular surface mesh therefore has dimension two
+  even when its vertices have three coordinates.
 
-  In Rodin, polytopes are represented by the
-  @ref Rodin::Geometry::Polytope "Polytope" class and its associated
-  @ref Rodin::Geometry::Polytope::Type "Polytope::Type" enumeration.
+  `Polytope::Type` identifies a reference shape. A concrete
+  @ref Rodin::Geometry::Polytope "Polytope" also identifies an entity in a mesh,
+  with its connectivity, attribute and geometric transformation.
 
-  @section guides-polytopes-dimensions Polytope dimensions
+  @section guides-polytopes-dimensions Dimension and role
 
-  Polytopes exist in different dimensions, each with a specific role in the
-  mesh:
+  | Dimension | Entities | Role |
+  | :--- | :--- | :--- |
+  | 0 | Points | Vertices |
+  | 1 | Segments | Edges; cells of a curve mesh |
+  | 2 | Triangles and quadrilaterals | Faces; cells of a surface mesh |
+  | 3 | Tetrahedra, pyramids, hexahedra and wedges | Volume cells |
 
-  | Dimension | Name | Role | Example |
-  |-----------|------|------|---------|
-  | 0 | **Vertex** (Point) | Mesh nodes | Corner of a triangle |
-  | 1 | **Edge** (Segment) | Connections between vertices | Side of a triangle, boundary in 2D |
-  | 2 | **Face** | Surface elements | Triangle, Quadrilateral |
-  | 3 | **Cell** | Volume elements | Tetrahedron, Hexahedron, Wedge |
+  A **facet** is an entity of dimension one less than a cell. Facets are edges
+  in a two-dimensional mesh and faces in a three-dimensional mesh.
 
-  The **cells** are the highest-dimensional polytopes in a mesh and correspond
-  to the elements over which the finite element approximation is constructed.
-  In a 2D mesh, the cells are faces (triangles or quadrilaterals); in 3D,
-  the cells are volumes.
+  @section guides-polytopes-types Supported reference shapes
 
-  @section guides-polytopes-types Available polytope types
+  | `Polytope::Type` | Dimension | Vertices | Reference construction |
+  | :--- | :--- | :--- | :--- |
+  | `Point` | 0 | 1 | A point |
+  | `Segment` | 1 | 2 | Unit interval |
+  | `Triangle` | 2 | 3 | Unit simplex |
+  | `Quadrilateral` | 2 | 4 | Product of two unit intervals |
+  | `Tetrahedron` | 3 | 4 | Unit simplex |
+  | `Pyramid` | 3 | 5 | Collapsed square cross-sections |
+  | `Hexahedron` | 3 | 8 | Product of three unit intervals |
+  | `Wedge` | 3 | 6 | Triangle times unit interval |
 
-  The @ref Rodin::Geometry::Polytope::Type "Polytope::Type" enumeration
-  defines the available element types:
+  @image html ReferencePolytopes.png "Reference vertices obtained from Polytope::Traits. The pyramid apex is above its first base vertex."
 
-  | Type | Dimension | Vertices | Simplicial? | Description |
-  |------|-----------|----------|-------------|-------------|
-  | `Polytope::Type::Point` | 0 | 1 | — | A single vertex |
-  | `Polytope::Type::Segment` | 1 | 2 | Yes | A line segment (edge) |
-  | `Polytope::Type::Triangle` | 2 | 3 | Yes | A triangular element |
-  | `Polytope::Type::Quadrilateral` | 2 | 4 | No | A quadrilateral (tensor-product) element |
-  | `Polytope::Type::Tetrahedron` | 3 | 4 | Yes | A tetrahedral element |
-  | `Polytope::Type::Hexahedron` | 3 | 8 | No | A hexahedral (brick, tensor-product) element |
-  | `Polytope::Type::Wedge` | 3 | 6 | No | A prismatic (wedge) element |
+  @section guides-polytopes-reference Reference and physical coordinates
 
-  Simplicial vs. tensor-product elements:
-  - **Simplicial** elements (triangle, tetrahedron) are the simplest shapes
-    in their dimension. They are flexible for meshing complex geometries
-    because any domain can be triangulated.
-  - **Tensor-product** elements (quadrilateral, hexahedron) are formed as
-    Cartesian products of lower-dimensional elements. They often provide
-    higher accuracy per DOF on structured domains but are harder to fit to
-    complex geometries.
-  - The **wedge** (triangular prism) is a hybrid: a tensor product of a
-    triangle and a segment.
+  A geometric map @f$F_K:\widehat K\to K@f$ sends a reference point to a
+  physical point. Reference coordinates determine basis values and reference
+  quadrature samples; the map supplies physical coordinates and derivatives.
+  On a curved cell, the map also depends on its geometric control points.
 
-  @section guides-polytopes-reference Reference elements
-
-  All local computations in the finite element method (basis function
-  evaluation, quadrature, gradient computation) are performed on a
-  reference element @f$ \hat{K} @f$, then mapped to each physical cell
-  via a geometric transformation @f$ F_K : \hat{K} \to K @f$. The reference
-  element vertices for the standard types are:
-
-  | Type | Reference vertices |
-  |------|-------------------|
-  | Segment | @f$ (0), (1) @f$ |
-  | Triangle | @f$ (0,0), (1,0), (0,1) @f$ |
-  | Quadrilateral | @f$ (0,0), (1,0), (1,1), (0,1) @f$ |
-  | Tetrahedron | @f$ (0,0,0), (1,0,0), (0,1,0), (0,0,1) @f$ |
-
-  The Jacobian of @f$ F_K @f$ and its determinant are available at any
-  quadrature point through the @ref Rodin::Geometry::Point "Point" class:
+  Reference vertices can be obtained directly from the library:
 
   @code{.cpp}
-  // At a quadrature point p on element K:
-  auto J = p.getJacobian();              // d×d Jacobian matrix
-  auto detJ = p.getJacobianDeterminant();  // |J|
-  @endcode
-
-  @section guides-polytopes-meshgen Using polytopes for mesh generation
-
-  The polytope type determines the element shapes when generating uniform
-  meshes via @ref Rodin::Geometry::Mesh "Mesh::UniformGrid()":
-
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-  using namespace Rodin::Geometry;
-
-  Mesh mesh;
-
-  // 2D meshes
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-  mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, {16, 16});
-
-  // 3D meshes
-  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {8, 8, 8});
-  mesh = mesh.UniformGrid(Polytope::Type::Hexahedron, {8, 8, 8});
-  mesh = mesh.UniformGrid(Polytope::Type::Wedge, {8, 8, 8});
-  @endcode
-
-  @section guides-polytopes-sub Sub-entities
-
-  Every polytope has **sub-entities** of lower dimension. For example, a
-  triangle has 3 edges and 3 vertices; a tetrahedron has 4 faces, 6 edges,
-  and 4 vertices. These relationships are captured by the
-  @ref Rodin::Geometry::Connectivity "Connectivity" class.
-
-  To access sub-entity relationships, first compute the connectivity:
-
-  @code{.cpp}
-  mesh.getConnectivity().compute(1, 2); // edges → cells
-  mesh.getConnectivity().compute(0, 2); // vertices → cells
-  @endcode
-
-  @section guides-polytopes-iteration Iterating over polytopes
-
-  You can iterate over polytopes of a given dimension using the mesh
-  iterator interface:
-
-  @code{.cpp}
-  // Iterate over cells (highest dimension)
-  for (auto it = mesh.getCell(); !it.end(); ++it)
+  const Polytope::Traits traits(Polytope::Type::Pyramid);
+  for (size_t i = 0; i < traits.getVertexCount(); ++i)
   {
-    auto idx = it->getIndex();
-    auto attr = it->getAttribute();
-    // ... process cell ...
-  }
-
-  // Iterate over vertices
-  for (auto it = mesh.getVertex(); !it.end(); ++it)
-  {
-    auto coords = it->getCoordinates();
-    // ... process vertex ...
+    const auto& reference = traits.getVertex(i);
+    // Use reference coordinates in the order defined by the element.
   }
   @endcode
 
-  @section guides-polytopes-choosing Choosing the right element type
+  A `Geometry::Point` combines a cell with reference coordinates. Its Jacobian
+  has embedding dimension rows and cell dimension columns. For surface meshes
+  it is rectangular. The @ref guides-quadrature "quadrature guide" explains the
+  corresponding measure factors in a complete checked example.
 
-  | Problem | Recommended Type | Reason |
-  |---------|-----------------|--------|
-  | General 2D PDEs | `Triangle` | Flexible, good for complex geometries |
-  | Structured 2D grids | `Quadrilateral` | Better accuracy on rectangular domains |
-  | General 3D PDEs | `Tetrahedron` | Handles complex 3D geometries |
-  | Structured 3D grids | `Hexahedron` | Higher accuracy per DOF |
+  @section guides-polytopes-meshgen Generate a mesh
 
-  @section guides-polytopes-see-also See also
+  @ref examples-geometry-uniformgrid "Uniform grids" are available for supported
+  volume-cell shapes. Axis counts specify vertices; coordinates initially have
+  unit spacing. Selecting a reference shape and selecting the physical domain
+  are separate choices. Scale the generated coordinates to obtain a unit domain.
 
-  - @ref guides-meshes "Meshes" — Working with meshes
-  - @ref guides-connectivity "Connectivity" — Relationships between polytopes
-  - @ref fem-ciarlet "Ciarlet's definition" — The reference element @f$ K @f$
-  - @ref Rodin::Geometry::Polytope "Polytope class reference"
+  @section guides-polytopes-sub Lower-dimensional entities
 
-  */
+  A triangle has three edges and three vertices; a tetrahedron has four faces,
+  six edges and four vertices. The mesh stores these incidences through
+  @ref Rodin::Geometry::Connectivity "Connectivity". Relations are computed
+  on demand. For example, `compute(1, 2)` discovers edges and associates each
+  edge with its incident cells in a triangular mesh.
+
+  @section guides-polytopes-iteration Traverse mesh entities
+
+  The @ref guides-meshes-iteration "iteration guide" describes the cell,
+  vertex and facet iterators. Entity indices belong to their own dimension;
+  edge index zero and cell index zero identify different objects.
+
+  @section guides-polytopes-choosing Select a cell family
+
+  Cell shape, geometric mapping, finite element family and polynomial degree
+  jointly determine approximation properties. Triangles and tetrahedra are
+  simplices; quadrilaterals and hexahedra support tensor-product constructions;
+  wedges combine a triangular section with an interval. Pyramids connect
+  quadrilateral and triangular faces and require their own reference basis.
+  Accuracy comparisons should keep the problem, degrees of freedom, quadrature
+  and mesh quality explicit.
+
+  @section guides-polytopes-see-also Continue
+
+  - @ref guides-meshes "Mesh organization"
+  - @ref guides-connectivity "Incidence and boundary detection"
+  - @ref fem-ciarlet "Finite element definition"
+  - @ref guides-quadrature "Reference and mapped quadrature"
+*/

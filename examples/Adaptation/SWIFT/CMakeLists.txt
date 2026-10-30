@@ -7,3 +7,7 @@ foreach(degree IN ITEMS 1 2 3)
 endforeach()
 
 add_subdirectory(Witness)
+
+add_executable(SWIFT_BackgroundFitting BackgroundFitting.cpp)
+target_link_libraries(SWIFT_BackgroundFitting
+  PRIVATE Rodin::Geometry Rodin::Solver Rodin::Variational Rodin::MMG)

@@ -32,7 +32,7 @@
   @f]
   for every periodic test function @f$v@f$ and scalar test value @f$\eta@f$.
   This removes the constant nullspace without changing the PDE on compatible
-  data. A direct solver alone would not resolve a singular system reliably.
+  data. The normalization removes the constant kernel before factorization.
 
   @section examples-pdes-periodic-mesh 1. Construct the periodic cell
 
@@ -45,7 +45,7 @@
 
   For scalar `P1`, each vertex has one degree of freedom. The map below obtains
   its index from the space, then uses the vertex coordinates to find its periodic
-  representative. It does not assume a global row-major DOF ordering.
+  representative. The indices are obtained from the finite element space.
 
   @snippet PDEs/Periodic.cpp periodic-map
 
@@ -57,7 +57,7 @@
 
   @section examples-pdes-periodic-problem 3. Impose periodicity and the mean
 
-  `P0g` provides one global constant, not one constant per cell. Its trial
+  `P0g` provides one constant over the entire mesh. Its trial
   function is the multiplier, while its test function imposes the mean equation.
 
   @snippet PDEs/Periodic.cpp periodic-form
@@ -76,10 +76,9 @@
 
   @image html PDEs/Periodic.png "Computed zero-mean solution. Opposite edges carry matching values." width=480px
 
-  Open `Periodic.xdmf` and color by **u**. A useful numerical check is to compare
-  each paired boundary value, compute the discrete integral, and compare the
-  field with @f$\sin x\cos y@f$. A smooth image alone cannot establish that
-  periodic constraints were applied.
+  Open `Periodic.xdmf` and color by **u**. Periodic constraints are checked by comparing paired boundary values. The discrete
+  integral verifies the zero-mean normalization, and comparison with
+  @f$\sin x\cos y@f$ measures the field error.
 
   @section examples-pdes-periodic-full Complete program
 

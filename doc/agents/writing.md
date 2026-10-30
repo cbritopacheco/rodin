@@ -21,6 +21,16 @@ should therefore be explicit without replacing technical content with analogy.
 - Keep attribution visible. A citation must support the statement to which it
   is attached.
 
+## Functional tone
+
+State the mathematical object, operation, conditions and result directly.
+Use concise, explanatory prose and sentence-case headings. Repeated contrasts
+of the form “this is X, not Y”, conversational warnings and commentary about
+what the page does not claim should be replaced by a positive definition,
+an explicit scope or an actionable requirement. Keep necessary mathematical
+negations, assumptions, failure conditions and supported-backend limits.
+State a qualification once, where it affects the construction or result.
+
 ## Exposition
 
 Organize arguments around the mathematical need:
@@ -85,6 +95,16 @@ documentation throughout the project:
 Retain Doxygen mathematical delimiters for rendered expressions and explicit
 links to public concepts. A layout change must not discard assumptions,
 contracts, mathematical content, or existing cross-references.
+
+## Figure typography
+
+Use the site's bundled Manrope font for figure titles, captions, axes and
+legends. Write mathematical expressions in TeX, including labels inside
+figures. Mathematical glyphs retain mathematical typography; prose retains
+Manrope. Use `examples/plot_style.py` for Matplotlib figures and the shared
+ParaView renderer's Manrope font file for scientific field plots. Keep
+backgrounds transparent, include mesh edges when they clarify the field,
+and reserve space for labels and color bars.
 
 ## Editing checklist
 

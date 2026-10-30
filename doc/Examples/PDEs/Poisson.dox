@@ -91,7 +91,7 @@
 
   On this mesh, the computed nodal values range from @f$0@f$ on the boundary to
   approximately @f$0.072862@f$ in the interior. The surface shown above uses
-  the same solution; its vertical scale is adjusted for visibility.
+  the same solution; ParaView amplifies its height by a factor of eight for visibility.
 
   @section examples-pdes-poisson-full Complete program
 

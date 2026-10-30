@@ -1,170 +1,114 @@
 /**
   @page examples-shapeoptimization-simple_cantilever Shape optimization of a cantilever
-  @brief Shows how to optimize the shape of a cantilever
-
-  @image html SimpleCantilever.png width=410px
-
-  @m_keywords{Cantilever, Shape Optimization, Compliance, Elasticity}
+  @brief Compute and inspect a boundary-variation compliance descent.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-shapeopt-sc-intro Introduction
+  @section examples-shapeopt-sc-intro Objective and design boundary
 
-  This example performs **boundary-variation shape optimization** of a 2D
-  cantilever beam. The goal is to find a shape @f$ \Omega @f$ that minimizes
-  the structural compliance (i.e.\ maximizes stiffness) subject to a volume
-  constraint:
-
+  The elastic body occupies a planar domain @f$\Omega@f$. Its boundary has
+  a clamped part @f$\Gamma_D@f$, a loaded part @f$\Gamma_N@f$ and an
+  optimizable traction-free part @f$\Gamma_0@f$. The objective is
   @f[
-    \min_\Omega \; J(\Omega) = \int_\Omega A e(u) : e(u)\,dx + \ell\,|\Omega|
+    J(\Omega)=C(\Omega)+\ell|\Omega|,\qquad
+    C(\Omega)=\int_\Omega\sigma(u):\varepsilon(u)\,dx.
   @f]
+  A fixed positive weight @f$\ell=5@f$ penalizes material area. The program
+  performs 50 boundary-displacement updates with remeshing. The measured
+  history describes those iterations; an optimality or volume-constraint
+  stopping criterion would require additional controls.
 
-  where @f$ u @f$ solves the linearized elasticity system on @f$ \Omega @f$
-  and @f$ \ell @f$ is a Lagrange multiplier penalizing the volume.
+  @section examples-shapeopt-sc-setup Input and parameters
 
-  @section examples-shapeopt-sc-setup Problem setup
+  @subsection examples-shapeopt-sc-setup-includes Modules
 
-  @subsection examples-shapeopt-sc-setup-includes Includes
+  The program uses local vector-valued `P1` spaces, elasticity assembly,
+  sparse direct solves, MMG remeshing and XDMF output.
 
-  We need the core Rodin modules plus the linear-elasticity helper and the
-  @ref Rodin::MMG "MMG::Optimizer" remesher:
+  @subsection examples-shapeopt-sc-setup-params Physical and numerical data
 
-  @code{.cpp}
-  #include <Rodin/Solver.h>
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Assembly.h>
-  #include <Rodin/Variational.h>
-  #include <Rodin/Solid.h>
-  #include <Rodin/MMG.h>
+  | Parameter | Value | Role |
+  | :--- | :--- | :--- |
+  | @f$\lambda@f$ | 0.5769 | First Lamé coefficient |
+  | @f$\mu@f$ | 0.3846 | Shear modulus |
+  | @f$\ell@f$ | 5 | Area penalty |
+  | @f$h_{\max}@f$ | 0.1 | MMG upper size setting |
+  | @f$h_{\min}@f$ | 0.01 | MMG lower size setting and displacement scale |
+  | @f$\alpha@f$ | 0.4 | Gradient regularization coefficient |
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
-  @endcode
+  @subsection examples-shapeopt-sc-setup-mesh Supply the mesh
 
-  @subsection examples-shapeopt-sc-setup-params Parameters
+  Hydrate the repository's Git LFS resources, build `SimpleCantilever2D`,
+  and pass `resources/examples/ShapeOptimization/SimpleCantilever2D.mfem.mesh`
+  as the executable's input argument. Run from a scratch directory so the
+  exported fields and meshes are kept separate from the sources. The mesh
+  carries boundary labels one, two and three for the free, clamped and loaded
+  boundary parts respectively.
 
-  The boundary is decomposed into three parts:
-  - @f$ \Gamma_0 @f$: traction-free (the shape boundary to be optimized)
-  - @f$ \Gamma_D @f$: clamped (homogeneous Dirichlet)
-  - @f$ \Gamma_N @f$: loaded (Neumann, downward force)
+  @section examples-shapeopt-sc-loop One iteration
 
-  @code{.cpp}
-  static constexpr Geometry::Attribute Gamma0 = 1; // Traction-free boundary
-  static constexpr Geometry::Attribute GammaD = 2; // Clamped (Dirichlet)
-  static constexpr Geometry::Attribute GammaN = 3; // Loaded (Neumann)
+  @subsection examples-shapeopt-sc-loop-state Solve the elastic state
 
-  // Lamé coefficients for the material
-  static constexpr Real mu     = 0.3846;
-  static constexpr Real lambda = 0.5769;
+  The displacement satisfies the small-strain elasticity weak form with
+  zero displacement on the clamp and a downward unit traction on the loaded
+  boundary. The program checks sparse factorization and solution status.
 
-  // Optimization parameters
-  static constexpr size_t maxIt = 50;         // Max iterations
-  static constexpr Real hmax   = 0.1;         // Mesh size (max)
-  static constexpr Real hmin   = 0.1 * hmax;  // Mesh size (min)
-  static constexpr Real ell    = 5.0;         // Volume penalty
-  static constexpr Real alpha  = 4 * hmax;    // Regularization
-  @endcode
+  @snippet ShapeOptimization/SimpleCantilever2D.cpp shape-state
 
-  @subsection examples-shapeopt-sc-setup-mesh Loading the mesh
+  @subsection examples-shapeopt-sc-loop-gradient Compute a regularized descent
 
-  The initial cantilever mesh is loaded from an MFEM file using the
-  @ref Rodin::MMG "MMG::Mesh" class, which extends
-  @ref Rodin::Geometry::Mesh "Mesh" with remeshing capabilities:
+  For the fixed load and support boundary, the free-boundary derivative
+  density is @f$\ell-\sigma(u):\varepsilon(u)@f$. Its negative supplies the
+  load in the regularized descent problem. Zero velocity on the clamped and
+  loaded parts retains their positions.
 
-  @code{.cpp}
-  MMG::Mesh Omega;
-  Omega.load(meshFile, IO::FileFormat::MFEM);
-  @endcode
+  @snippet ShapeOptimization/SimpleCantilever2D.cpp shape-gradient
 
-  @section examples-shapeopt-sc-loop Optimization loop
+  The gradient term in this program has coefficient @f$\alpha@f$; the
+  corresponding smoothing length is @f$\sqrt{\alpha}@f$. This convention is
+  explicit in the assembled expression.
 
-  Each iteration consists of four steps:
-  1. Solve the **state equation** (linearized elasticity)
-  2. Compute the **shape gradient** via the Hilbert extension-regularization
-  3. Move the mesh along the descent direction
-  4. **Remesh** the deformed domain with MMG
+  @subsection examples-shapeopt-sc-loop-move Normalize the displacement
 
-  @subsection examples-shapeopt-sc-loop-state Step 1 — state equation
+  The field is scaled so its sampled maximum norm gives a displacement scale
+  @f$h_{\min}@f$. Non-finite norms fail the run; a zero norm ends the updates.
 
-  We solve the elasticity problem on the current domain. The
-  `LinearElasticityIntegral` assembles the bilinear form for the Hooke tensor
-  with Lamé parameters @f$ \lambda @f$ and @f$ \mu @f$:
+  @subsection examples-shapeopt-sc-loop-remesh Move and remesh
 
-  @code{.cpp}
-  int d = Omega.getSpaceDimension();
-  P1 sh(Omega);           // Scalar P1 space
-  P1 vh(Omega, d);        // Vector P1 space (d components)
+  @snippet ShapeOptimization/SimpleCantilever2D.cpp shape-update
 
-  VectorFunction f{0, -1};  // Downward force
+  The fixed step is a demonstration policy. Inspect the recorded objective
+  history when changing meshes, loads or material parameters; an objective-
+  controlled line search can be introduced for a specified optimization policy.
+  New spaces and problems are constructed on each remeshed domain.
 
-  TrialFunction u(vh);
-  TestFunction  v(vh);
-  Problem elasticity(u, v);
-  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-             - BoundaryIntegral(f, v).over(GammaN)
-             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-  Solver::SparseLU(elasticity).solve();
-  @endcode
+  @section examples-shapeopt-sc-results Inspect the computed run
 
-  @subsection examples-shapeopt-sc-loop-gradient Step 2 — shape gradient
+  @image html SimpleCantilever.png "Solved initial domain and the domain at the last recorded iteration, colored by displacement magnitude."
+  @image html SimpleCantileverHistory.png "Objective values recorded before each boundary update."
 
-  The shape derivative of the compliance is a boundary integral involving the
-  Cauchy stress tensor @f$ \sigma = Ae @f$. We compute a smooth descent
-  direction @f$ g @f$ using the **Hilbert extension-regularization** method:
+  The checked 50-state run reduced the objective from approximately 3.56181
+  to 2.28789. Every recorded increment decreased the objective in this run.
+  Both the elastic state and regularization solve succeeded at every state.
 
-  @code{.cpp}
-  TrialFunction g(vh);
-  TestFunction  w(vh);
+  `SimpleCantilever.csv` records compliance, area and their weighted sum.
+  `SimpleCantilever.xdmf` records the transient mesh and displacement at the
+  same iteration. Open the XDMF file in ParaView and select **Apply** to
+  inspect that history.
 
-  // Strain and stress from the state equation
-  auto e  = 0.5 * (Jacobian(u.getSolution()) + Jacobian(u.getSolution()).T());
-  auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
+  @section examples-shapeopt-sc-full Complete source
 
-  Problem hilbert(g, w);
-  hilbert = Integral(alpha * Jacobian(g), Jacobian(w))
-          + Integral(g, w)
-          - BoundaryIntegral(Dot(Ae, e) - ell,
-                             Dot(BoundaryNormal(Omega), w)).over(Gamma0)
-          + DirichletBC(g, VectorFunction{0, 0}).on({GammaD, GammaN});
-  Solver::SparseLU(hilbert).solve();
-  @endcode
+  @ref ShapeOptimization/SimpleCantilever2D.cpp "SimpleCantilever2D.cpp"
+  contains the input checks, solves, diagnostics and geometry updates.
 
-  @subsection examples-shapeopt-sc-loop-move Step 3 — mesh displacement
+  @section examples-shapeopt-sc-see-also Continue
 
-  The descent direction is normalized and the mesh is displaced:
-
-  @code{.cpp}
-  GridFunction norm(sh);
-  norm = Frobenius(dJ);
-  g.getSolution() *= hmin / norm.max();
-  Omega.displace(g.getSolution());
-  @endcode
-
-  @subsection examples-shapeopt-sc-loop-remesh Step 4 — remeshing with MMG
-
-  After displacing the mesh, we remesh with the
-  @ref Rodin::MMG "MMG::Optimizer" to maintain good element quality:
-
-  @code{.cpp}
-  MMG::Optimizer().setHMax(hmax).setHMin(hmin).optimize(Omega);
-  @endcode
-
-  @section examples-shapeopt-sc-full Full source code
-
-  The complete source code is:
-  -   @ref ShapeOptimization/SimpleCantilever2D.cpp "SimpleCantilever2D.cpp"
-
-  @section examples-shapeopt-sc-see-also See also
-
-  - @ref examples-pdes-elasticity "Linear elasticity" — The state equation
-  - @ref examples-shapeoptimization-levelset_cantilever "Level-set cantilever"
-    — Topology changes via level sets
-  - @ref gallery "Gallery"
+  - @ref examples-pdes-elasticity "The elastic state equation"
+  - @ref guides-shape-optimization "Shape derivatives and descent conventions"
+  - @ref examples-shapeoptimization-levelset_cantilever "Level-set representation"
 
   @example ShapeOptimization/SimpleCantilever2D.cpp
   @m_examplenavigation{examples-shapeoptimization-simple_cantilever,ShapeOptimization/}
   @m_footernavigation
-  */
+*/

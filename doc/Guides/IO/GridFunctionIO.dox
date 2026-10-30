@@ -9,12 +9,12 @@
   @section guides-io-gridfunctions-intro Introduction
 
   Grid functions represent the discrete solution of a finite element problem.
-  They associate numerical values (degrees of freedom) with a finite element
-  space. Saving and loading grid functions is essential for:
+  Their coefficients are interpreted through a finite element space, its
+  basis and its mesh. Saving and loading grid functions is essential for:
 
   - Storing computed solutions
   - Post-processing and visualization
-  - Checkpoint/restart of simulations
+  - Saving field data needed by application-defined restart logic
   - Transferring data between different analyses
 
   @section guides-io-gridfunctions-save Saving grid functions
@@ -23,30 +23,7 @@
 
   The MFEM format stores grid functions as text files:
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
-
-  int main()
-  {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-
-    P1 Vh(mesh);
-    GridFunction u(Vh);
-    u = [](const Geometry::Point& p) { return p.x() * p.y(); };
-
-    // Save grid function and mesh
-    u.save("solution.gf", IO::FileFormat::MFEM);
-    mesh.save("mesh.mesh", IO::FileFormat::MFEM);
-
-    return 0;
-  }
-  @endcode
+  @snippet IO/MFEM.cpp mfem-save
 
   @subsection guides-io-gridfunctions-save-xdmf XDMF format (recommended)
 
@@ -59,28 +36,20 @@
   // After computing the solution...
   IO::XDMF xdmf("Output");
   xdmf.grid().setMesh(mesh).add("solution", u);
-  xdmf.write();
+  xdmf.write().flush();
   @endcode
 
   @section guides-io-gridfunctions-load Loading grid functions
 
   @subsection guides-io-gridfunctions-load-mfem From MFEM format
 
-  To load a grid function from MFEM format, you need the mesh and finite
+  Loading a grid function from MFEM requires the mesh and finite
   element space already set up:
 
-  @code{.cpp}
-  // Load mesh
-  Mesh mesh;
-  mesh.load("mesh.mesh", IO::FileFormat::MFEM);
+  @snippet IO/MFEM.cpp mfem-load
 
-  // Create FE space on loaded mesh
-  P1 Vh(mesh);
-
-  // Load grid function
-  GridFunction u(Vh);
-  u.load("solution.gf", IO::FileFormat::MFEM);
-  @endcode
+  The @ref examples-io-mfem "complete round-trip example" evaluates the loaded
+  field at cell centroids and compares it with the prescribed affine field.
 
   @section guides-io-gridfunctions-coverage Format coverage
 
@@ -98,12 +67,27 @@
   MFEM vector orderings. P0 scalar grid functions are tested on Point, Segment,
   Triangle, Quadrilateral, Tetrahedron, Hexahedron, and Wedge meshes. P1 and H1
   vector grid functions use the vector finite element spaces provided by Rodin;
-  P0 currently exposes a scalar finite element space even though vector P0
-  elements exist internally.
+  The listed P0 round-trip tests use scalar fields. Other range and format
+  combinations follow their loader/printer specialization contracts.
+
+  @subsection guides-io-gridfunctions-precision Preserve mesh coordinates in high-order round trips
+
+  A field is interpreted on its loaded geometry. Text mesh streams need enough
+  digits to retain non-binary coordinates such as @f$1/7@f$. The checked
+  degree-five scalar/vector example writes the mesh through a stream with
+  `max_digits10` precision, then rebuilds the required incidence relations
+  before constructing the restored high-order spaces.
+
+  @snippet IO/H1MFEMGridFunction.cpp h1-mfem-mesh
+
+  The example supplies all three vector components, reloads both fields and
+  compares their cell-center values with the prescribed polynomials.
+  Build `RodinIOH1MFEMGridFunction`; its source is
+  @ref IO/H1MFEMGridFunction.cpp.
 
   @section guides-io-gridfunctions-multiple Multiple fields
 
-  When dealing with multiple fields, you can export them all in one XDMF
+  Several fields can be registered in one XDMF
   file:
 
   @code{.cpp}
@@ -113,7 +97,7 @@
   grid.add("temperature", temperature);
   grid.add("velocity", velocity);
   grid.add("pressure", pressure);
-  xdmf.write();
+  xdmf.write().flush();
   @endcode
 
   All fields will be available for selection in ParaView.
@@ -125,8 +109,8 @@
 
   @code{.cpp}
   // Create a vector P1 space (2 components)
-  P1 Vh(mesh, 2);
-  GridFunction velocity(Vh);
+  P1 vh(mesh, 2);
+  GridFunction velocity(vh);
   velocity = [](const Geometry::Point& p)
   {
     return Math::Vector<Real>{{ -p.y(), p.x() }};
@@ -134,7 +118,7 @@
 
   IO::XDMF xdmf("VectorField");
   xdmf.grid().setMesh(mesh).add("velocity", velocity);
-  xdmf.write();
+  xdmf.write().flush();
   @endcode
 
   @section guides-io-gridfunctions-see-also See also
@@ -143,4 +127,5 @@
   - @ref guides-io-xdmf "XDMF format guide"
   - @ref examples-io-index "I/O examples"
 
+  @example IO/H1MFEMGridFunction.cpp
   */

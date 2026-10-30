@@ -22,7 +22,7 @@ using namespace Rodin::Variational;
 int main()
 {
   //! [navierstokes-mesh]
-  constexpr size_t nodes = 17;
+  constexpr size_t nodes = 33;
   constexpr Attribute lid = 2;
   constexpr Attribute walls = 3;
   constexpr Real boundaryTolerance = 1e-12; // Coordinate tolerance on this unit grid.
@@ -52,9 +52,14 @@ int main()
   TestFunction meanTest(meanSpace);
   constexpr Real viscosity =
     0.01; // Reynolds number 100 for unit length and peak lid speed.
-  constexpr Real dt = 0.05;
-  constexpr size_t steps = 200; // Final time 10, for the transient demonstration.
+  constexpr Real dt = 0.01;
+  constexpr size_t steps = 1000; // Final time 10, for the transient demonstration.
+  constexpr size_t outputEvery = 5; // Export every 0.05 time units for visualization.
   constexpr Real rampTime = 1; // Ramp the lid over one convective time unit.
+  constexpr Real travelAmplitude = 0.22; // Center travels between x=0.28 and x=0.72.
+  constexpr Real travelPeriod = 8; // One horizontal round trip in simulation time.
+  constexpr Real halfWidth = 0.25; // Compact support stays clear of both corners.
+  const Real pi = Math::Constants::pi();
   GridFunction velocity(velocitySpace);
   GridFunction pressure(pressureSpace);
   velocity = Zero(2);
@@ -69,7 +74,13 @@ int main()
   {
     const Real time = step * dt;
     const Real ramp = std::min<Real>(1, time / rampTime);
-    VectorFunction lidVelocity{ramp * 16 * Pow(F::x, 2) * Pow(1 - F::x, 2), Zero()};
+    const Real center = 0.5 - travelAmplitude * std::cos(2 * pi * time / travelPeriod);
+    RealFunction lidSpeed = [=](const Point& point) {
+      const Real offset = (point.x() - center) / halfWidth;
+      const Real profile = std::max<Real>(0, 1 - offset * offset);
+      return ramp * profile * profile;
+    };
+    VectorFunction lidVelocity{lidSpeed, Zero()};
     Problem flow(u, p, multiplier, v, q, meanTest);
     flow = (1 / dt) * Integral(u, v) + Integral(Dot(Mult(Jacobian(u), velocity), v)) +
       viscosity * Integral(Jacobian(u), Jacobian(v)) - Integral(p, Div(v)) +
@@ -82,8 +93,10 @@ int main()
       return EXIT_FAILURE;
     velocity.setData(u.getSolution().getData());
     pressure.setData(p.getSolution().getData());
-    xdmf.write(time).flush();
-    std::cout << "Step " << step << " / " << steps << ", time " << time << std::endl;
+    if (step % outputEvery == 0)
+      xdmf.write(time).flush();
+    std::cout << "Step " << step << " / " << steps << ", time " << time << ", lid center "
+              << center << std::endl;
   }
   //! [navierstokes-step]
   return 0;

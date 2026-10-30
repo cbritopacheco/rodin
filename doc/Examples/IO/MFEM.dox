@@ -1,85 +1,65 @@
 /**
-  @page examples-io-mfem MFEM format
-  @brief How to read and write meshes and grid functions in MFEM format
-
-  @m_keywords{MFEM, Mesh, GridFunction, I/O, Save, Load}
+  @page examples-io-mfem Saving and reloading an MFEM field
+  @brief Check a mesh and scalar field after a file round trip.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-io-mfem-intro Introduction
+  @section examples-io-mfem-intro Mesh, space and field
 
-  The MFEM format is a simple text-based format for meshes (`.mesh`) and
-  grid functions (`.gf`). It is useful for debugging, archiving, and
-  interoperability with MFEM-based tools.
+  A finite element field is interpreted through its mesh and finite element
+  space. The MFEM mesh file stores the geometry and connectivity; the grid
+  function file stores the finite element collection, vector dimension,
+  ordering and coefficients.
 
-  Use @ref Rodin::IO::FileFormat "IO::FileFormat::MFEM" when saving or loading.
+  This example saves the affine field @f$u(x,y)=x+y@f$ on the unit square,
+  reloads both files and evaluates the restored field at cell centroids.
+  A scalar @f$P_1@f$ space represents this field exactly up to floating-point
+  arithmetic.
 
-  @section examples-io-mfem-builder Building a mesh programmatically
+  @section examples-io-mfem-builder Construct the mesh
 
-  The @ref Rodin::Geometry::Mesh "Mesh::Builder" API lets you construct a
-  mesh from scratch by specifying vertices and polytopes:
+  Four vertices and two triangles describe the square. The explicit builder
+  makes the element connectivity visible in this small example.
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
+  @snippet IO/MFEM.cpp mfem-mesh
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
+  @section examples-io-mfem-gf Save and reload the field
 
-  int main()
-  {
-    // Build a simple two-triangle mesh on the unit square
-    Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-        .initialize(2)                                         // 2D
-        .nodes(4)                                              // 4 vertices
-        .vertex({0, 0})
-        .vertex({1, 0})
-        .vertex({0, 1})
-        .vertex({1, 1})
-        .polytope(Polytope::Type::Triangle, {0, 1, 2})         // lower-left
-        .polytope(Polytope::Type::Triangle, {1, 3, 2})         // upper-right
-        .finalize();
+  Interpolation supplies the coefficients in the selected space. Save the mesh
+  and field as a pair, then construct the restored space on the loaded mesh
+  before loading its coefficients.
 
-    mesh.save("square.mesh", IO::FileFormat::MFEM);
+  @snippet IO/MFEM.cpp mfem-save
+  @snippet IO/MFEM.cpp mfem-load
 
-    return 0;
-  }
-  @endcode
+  The check evaluates the restored field through physical points. Its tolerance
+  is @f$10^{-12}@f$ for this exactly representable affine field.
 
-  @section examples-io-mfem-gf Saving a grid function
+  @snippet IO/MFEM.cpp mfem-check
 
-  A @ref Rodin::Variational::GridFunction "GridFunction" stores DOF values
-  in a finite element space. It can be saved alongside the mesh:
+  `Square.xdmf` also exports the restored field for ParaView. Open that file,
+  select **Apply**, color by **u** and use **Surface With Edges** to inspect
+  the two triangles. The field ranges from zero to two.
 
-  @code{.cpp}
-  P1 fes(mesh);
-  GridFunction gf(fes);
+  @image html MFEM.png "Restored affine field on the two-triangle mesh."
 
-  // Interpolate a function onto the FE space
-  gf = RealFunction([](const Geometry::Point& p) {
-    return p.x() + p.y();
-  });
+  @section examples-io-mfem-full Build and run
 
-  // Save mesh and grid function in MFEM format
-  mesh.save("output.mesh", IO::FileFormat::MFEM);
-  gf.save("output.gf", IO::FileFormat::MFEM);
-  @endcode
+  Build the `RodinIOMFEM` target and run it in a scratch directory. The program
+  writes `Square.mfem.mesh`, `Square.mfem.gf` and the XDMF/HDF5 visualization
+  files. It returns `EXIT_FAILURE` if the mesh counts or sampled field values
+  fail their checks.
 
-  @section examples-io-mfem-full Full source code
+  @snippet IO/MFEM.cpp mfem-source
 
-  -   @ref IO/MFEM.cpp "MFEM.cpp"
+  @section examples-io-mfem-see-also Next steps
 
-  @section examples-io-mfem-see-also See also
-
-  - @ref examples-io-medit "MEDIT format" — Alternative text format
-  - @ref examples-io-xdmf "XDMF format" — Recommended for visualization
-  - @ref guides-io "I/O in Rodin" — Comprehensive I/O guide
+  - @ref examples-io-medit "Convert a MEDIT mesh"
+  - @ref examples-io-xdmf "Export a time-dependent vector field"
+  - @ref guides-io-gridfunctions "Grid-function storage and compatibility"
 
   @example IO/MFEM.cpp
   @m_examplenavigation{examples-io-mfem,IO/}
   @m_footernavigation
-  */
+*/

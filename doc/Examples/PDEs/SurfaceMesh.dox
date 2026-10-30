@@ -36,23 +36,21 @@
 
   @snippet PDEs/SurfaceMesh.cpp surface-mesh
 
-  The result has 602 vertices and 1200 triangular facets. Its topological
-  dimension is two and its embedding dimension is three. The facets are flat:
-  this is a polyhedral approximation @f$\Gamma_h@f$ to the sphere, not an exact
-  curved sphere. Interior points of a facet generally lie inside the sphere.
+  The default result has 602 vertices and 1200 triangular facets. Its topological
+  dimension is two and its embedding dimension is three. The flat facets define a polyhedral approximation @f$\Gamma_h@f$ to the sphere. Interior points of a facet generally lie inside the sphere.
 
   @section examples-pdes-surface-problem 2. Define the surface problem
 
   `P1` defines a continuous field affine on each facet. Rodin uses the
   rectangular geometric Jacobian to evaluate the tangential gradient and the
-  area measure, so no manually projected gradient is needed.
+  surface measure used by the weak form.
 
   @snippet PDEs/SurfaceMesh.cpp surface-form
 
   The formula is assembled on @f$\Gamma_h@f$, with the source evaluated at
   its integration points. Comparing with @f$xy@f$ therefore includes both
-  finite element error and geometric approximation error. Raising only the
-  field degree would not make a flat geometric mesh exactly spherical.
+  finite element error and geometric approximation error. Higher geometric accuracy requires refinement or a curved representation of the
+  mesh.
 
   @section examples-pdes-surface-output 3. Solve and visualize the field
 
@@ -62,15 +60,56 @@
 
   @snippet PDEs/SurfaceMesh.cpp surface-solve
 
-  @image html PDEs/SurfaceMesh.png "Computed reaction–diffusion field on the triangulated sphere. Color represents u; the geometry is not displaced." width=480px
+  After the error and residual checks below pass, export the field:
+
+  @snippet PDEs/SurfaceMesh.cpp surface-export
+
+  @image html PDEs/SurfaceMesh.png "Computed reaction–diffusion field on the triangulated sphere. Color represents the scalar field on the original triangulated geometry." width=480px
 
   Open `SurfaceMesh.xdmf` in ParaView, color by **u**, and select **Surface With
   Edges** to inspect the geometry. Positive and negative lobes reflect the sign
-  of @f$xy@f$. No warp filter is required: the mesh is already embedded in 3D.
+  of @f$xy@f$. The surface is displayed in its three-dimensional embedding.
+
+  @section examples-pdes-surface-error 4. Check geometry and field refinement
+
+  The executable records the relative algebraic residual and the field error
+  @f[
+    e_h=\frac{\lVert u_h-xy\rVert_{L^2(\Gamma_h)}}
+                 {\lVert xy\rVert_{L^2(\Gamma_h)}}.
+  @f]
+  Here @f$xy@f$ is the ambient polynomial evaluated on each flat facet.
+  The norm is therefore taken on the actual mesh surface, using that
+  extension of the smooth-sphere solution. It includes the effect of both
+  field discretization and approximate geometry. Sixth-order triangle
+  quadrature evaluates the squared-error polynomial.
+
+  @snippet PDEs/SurfaceMesh.cpp surface-error
+
+  An optional positive integer argument selects the number of background
+  vertices per axis, with at least three required. The following checked
+  sequence halves the original cube-grid spacing at each step:
+
+  | Vertices per axis | Surface vertices | Triangles | Surface area | Relative field error |
+  | ---: | ---: | ---: | ---: | ---: |
+  | 6 | 152 | 300 | @f$12.27686@f$ | @f$0.0940273@f$ |
+  | 11 | 602 | 1200 | @f$12.49211@f$ | @f$0.0251292@f$ |
+  | 21 | 2402 | 4800 | @f$12.54768@f$ | @f$0.00640798@f$ |
+
+  @image html SurfaceMeshConvergence.png "Measured relative field error and relative surface-area error against the analytic sphere area. The dashed curve is a quadratic reference anchored at the finest field error."
+
+  The field errors decrease by factors @f$3.74@f$ and @f$3.92@f$,
+  approaching quadratic behavior on this sequence. The area approaches
+  @f$4\pi@f$. Every assembled residual is below @f$6.1\times10^{-11}@f$
+  after normalization by @f$\max(1,\lVert b\rVert_2)@f$.
+
+  Run the three cases one at a time in separate directories to retain their
+  XDMF/HDF5 output and `SurfaceMesh.csv` statistics. The executable checks
+  solver success, finite measurements and a relative residual below
+  @f$10^{-9}@f$ before writing the field.
 
   @section examples-pdes-surface-full Complete program
 
-  The program generates its mesh and needs no resource file.
+  The program generates its mesh at startup.
 
   @snippet PDEs/SurfaceMesh.cpp surfacemesh-source
 

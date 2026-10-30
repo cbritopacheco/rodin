@@ -5,7 +5,7 @@ Doxygen configuration, narrative guide pages, examples index pages, generated
 site styling, bibliography, image assets, and the agent knowledge base used by
 AI coding assistants.
 
-This directory is for source documentation, not generated output. Build
+This directory contains the documentation sources. Build
 artifacts are written under the CMake build tree.
 
 ## Directory Map
@@ -128,8 +128,7 @@ Useful conventions:
   supported set for the family.
 - In `@see` blocks and prose lists that name public classes, templates,
   specialization groups, or generated file pages, write explicit `@ref`
-  references or HTML links. Do not rely on m.css to autolink bare comma-
-  separated names such as `MeshBase, Mesh.h`.
+  references or HTML links. Do not rely on m.css to autolink bare comma-separated names such as `MeshBase, Mesh.h`.
 - Prefer plain code text over `@ref` for names that are intentionally not part
   of the generated public reference.
 - Keep generated files and local build output out of `doc/`.

@@ -55,7 +55,7 @@
   @endcode
 
   The context is passed to distributed mesh constructors and sharders.  It
-  does not own the Boost.MPI objects — they must outlive the context.
+  borrows the Boost.MPI objects, which must outlive the context.
 
   @section guides-mpi-mesh Distributed mesh
 
@@ -137,7 +137,7 @@
   const auto& shard = mesh.getShard();
 
   // Local → distributed
-  Index globalIdx = shard.getPolytopeMap(d).left[localIdx];
+  Index globalIdx = shard.getPolytopeMap(d).left.at(localIdx);
 
   // Distributed → local
   Index localIdx = shard.getPolytopeMap(d).right.at(globalIdx);
@@ -151,8 +151,8 @@
 
   @section guides-mpi-connectivity Connectivity and reconciliation
 
-  After receiving a shard, you must compute local connectivity for the
-  incidence relations you need.  However, entities discovered independently
+  After receiving a shard, compute the local incidence relations required by
+  subsequent operations.  However, entities discovered independently
   on neighboring shards may not yet have consistent distributed indices or
   ownership.  The `reconcile()` method resolves this:
 
@@ -177,8 +177,8 @@
   2. Matching entities are identified; distributed IDs and ownership are
      propagated iteratively until global convergence (checked via MPI
      all-reduce).
-  3. Communication is restricted to K face-adjacent neighbors (K is O(1)),
-     making the algorithm weak-scalable.
+  3. Communication follows the face-adjacent rank graph. The number of
+     neighbors and rounds depends on the partition and shared-entity topology.
 
   @subsection guides-mpi-reconcile-options ReconcileOptions
 
@@ -201,7 +201,9 @@
 
   Global geometric queries on the distributed mesh automatically perform MPI
   reductions.  Each rank accumulates contributions from its **owned** entities,
-  then the results are summed across ranks:
+  then the results are summed across ranks. Every participating rank calls
+  these collective queries in the same order. Use `mesh.getShard()` for
+  rank-local counts and geometry:
 
   @code{.cpp}
   // Total number of cells across all ranks
@@ -280,47 +282,49 @@
     Context::MPI mpi(env, world);
     PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
 
-    // Partition and distribute mesh from root
-    MPI::Sharder sharder(mpi);
-    if (world.rank() == 0)
     {
-      LocalMesh mesh;
-      mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {16, 16, 16});
-      mesh.scale(1.0 / 15);
-      const size_t cellDim = mesh.getDimension();
-      mesh.getConnectivity().compute(cellDim, cellDim);
+      // Partition and distribute mesh from root
+      MPI::Sharder sharder(mpi);
+      if (world.rank() == 0)
+      {
+        LocalMesh mesh;
+        mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {16, 16, 16});
+        mesh.scale(1.0 / 15);
+        const size_t cellDim = mesh.getDimension();
+        mesh.getConnectivity().compute(cellDim, cellDim);
 
-      BalancedCompactPartitioner partitioner(mesh);
-      partitioner.partition(world.size());
-      sharder.shard(partitioner);
-      sharder.scatter(0);
+        BalancedCompactPartitioner partitioner(mesh);
+        partitioner.partition(world.size());
+        sharder.shard(partitioner);
+        sharder.scatter(0);
+      }
+      auto mesh = sharder.gather(0);
+
+      // Compute distributed connectivity
+      mesh.getConnectivity().compute(2, 3);
+      mesh.reconcile(2);
+
+      // Build FE space and define problem
+      P1 Vh(mesh);
+      RealFunction f = 1;
+
+      PETSc::Variational::TrialFunction u(Vh);
+      PETSc::Variational::TestFunction  v(Vh);
+
+      Problem poisson(u, v);
+      poisson = Integral(Grad(u), Grad(v))
+              - Integral(f, v)
+              + DirichletBC(u, Zero());
+
+      Solver::CG(poisson).solve();
+
+      // Write XDMF output for ParaView
+      IO::XDMF xdmf(MPI_COMM_WORLD, "Poisson");
+      xdmf.setMesh(mesh);
+      xdmf.add("u", u.getSolution());
+      xdmf.write();
+      xdmf.close();
     }
-    auto mesh = sharder.gather(0);
-
-    // Compute distributed connectivity
-    mesh.getConnectivity().compute(2, 3);
-    mesh.reconcile(2);
-
-    // Build FE space and define problem
-    P1 Vh(mesh);
-    RealFunction f = 1;
-
-    PETSc::Variational::TrialFunction u(Vh);
-    PETSc::Variational::TestFunction  v(Vh);
-
-    Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
-
-    Solver::CG(poisson).solve();
-
-    // Write XDMF output for ParaView
-    IO::XDMF xdmf(MPI_COMM_WORLD, "Poisson");
-    xdmf.setMesh(mesh);
-    xdmf.add("u", u.getSolution());
-    xdmf.write();
-    xdmf.close();
 
     PetscFinalize();
   }

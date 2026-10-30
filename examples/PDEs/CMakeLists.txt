@@ -55,3 +55,6 @@ target_link_libraries(Stokes PUBLIC Rodin::Solver Rodin::Geometry Rodin::Assembl
 
 add_executable(NavierStokes NavierStokes.cpp)
 target_link_libraries(NavierStokes PUBLIC Rodin::Solver Rodin::Geometry Rodin::Assembly Rodin::Variational Rodin::IO)
+
+add_executable(MixedBoundary MixedBoundary.cpp)
+target_link_libraries(MixedBoundary PUBLIC Rodin::Solver Rodin::Geometry Rodin::Assembly Rodin::Variational Rodin::IO)

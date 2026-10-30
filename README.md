@@ -19,16 +19,18 @@ Rodin is a modular C++20 finite element framework for solving partial differenti
 
 It is named after the French sculptor Auguste Rodin, considered the founder of modern sculpture.
 
-Any contributors are warmly encouraged and any help or comments are always appreciated!
+Contributions, issue reports and documentation improvements are welcome.
 
-## Getting Started
+## Getting started
 
-New to Rodin? Check out our comprehensive [Getting Started Guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html) which covers:
+The [getting started
+  guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html) covers installation, a first solve and the
+  main library objects:
 
-- **[Installation and Setup](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html)** - Platform-specific installation instructions and verification
-- **[First Steps](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-steps.html)** - Basic concepts, project structure, and your first Rodin program
-- **[Your First Problem](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-problem.html)** - Complete walkthrough solving the Poisson equation
-- **[Core Concepts](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-core-concepts.html)** - Deep dive into meshes, finite elements, and variational formulations
+- **[Installation and setup](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html)** - Platform-specific installation instructions and verification
+- **[First steps](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-steps.html)** - Project structure and a first Rodin program
+- **[A first problem](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-problem.html)** - Complete walkthrough solving the Poisson equation
+- **[Core concepts](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-core-concepts.html)** - Meshes, finite element spaces and variational formulations
 
 ## Status
 
@@ -91,7 +93,7 @@ make -j4
 sudo make install
 ```
 
-If you only need the library and headers, skip resource hydration with
+For a library-and-headers installation, configure resource handling with
 `-DRODIN_INSTALL_RESOURCES=OFF`.
 
 All files under `resources/` are tracked through Git LFS, including test and
@@ -115,7 +117,8 @@ export CMAKE_PREFIX_PATH=$HOME/.local:$CMAKE_PREFIX_PATH
 
 ### Verifying Installation
 
-After installation, you can verify it works by creating a simple test project:
+The following test project checks the installed headers, library and CMake
+  package:
 
 **CMakeLists.txt:**
 ```cmake
@@ -382,8 +385,8 @@ Rodin provides comprehensive documentation covering all aspects of the library:
 
 **Getting Started:**
 - Installation and setup instructions
-- Your first Rodin program
-- Solving your first PDE (Poisson equation)
+- A first Rodin program
+- Solving a first PDE (Poisson equation)
 - Understanding core concepts
 
 **Mesh Guide:**
@@ -578,21 +581,19 @@ usage guidelines.
 
 Rodin is distributed under the [Boost Software License 1.0](LICENSE), a permissive open-source license.
 
-The choice of this license is intentional. Rodin is intended to be useful both as a research code and as a general-purpose finite element framework. The Boost Software License allows Rodin to be freely used, modified, and redistributed, including in academic, industrial, commercial, and proprietary projects.
+The license permits use, modification and redistribution in academic,
+industrial, commercial and proprietary projects. Software using or linking
+against Rodin can retain its own license and source-distribution policy.
 
-**Using Rodin does not mean that your own project must be licensed under the Boost Software License.** In particular, software that uses or links against Rodin may be distributed under a different open-source license or under a proprietary license. The Boost Software License is not a copyleft license and does not require you to release the source code of software built using Rodin.
-
-If Rodin source code, or modified portions of it, are redistributed in source form, the original copyright notices and the Boost Software License notice must be preserved as required by the license. This requirement applies to the Rodin code being redistributed; it does not require the rest of your project to adopt the Boost Software License.
-
-The aim of this choice is to place as few restrictions as possible on how Rodin may be used, while allowing it to be incorporated into research software, other open-source projects, and proprietary applications.
+Redistribution of Rodin source code or modified portions must preserve the
+original copyright notices and the complete Boost Software License notice.
 
 ### Acknowledgement
 
-The license does not require users to acknowledge Rodin in publications or projects. Nevertheless, if Rodin contributes to your research, software, or other work, an acknowledgement is greatly appreciated.
+Acknowledgement is optional and appreciated. Publications and software using
+Rodin can cite the software reference and link to the
+[project repository](https://github.com/cbritopacheco/rodin).
 
-Please consider mentioning that your project uses **Rodin** and, where appropriate, providing a link to the project repository. For academic work, citing the corresponding Rodin publication (coming soon!) or software reference, is also appreciated.
-
-Such acknowledgements are not a licensing requirement, but they help make the use of Rodin visible and support the continued development of the project.
 
 ## Support Rodin
 

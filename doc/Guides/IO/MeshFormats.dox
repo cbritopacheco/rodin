@@ -57,7 +57,7 @@
   exchange:
 
   @code{.cpp}
-  #include <RodinExternal/MMG.h>
+  #include <Rodin/MMG.h>
 
   // Load mesh in MEDIT format
   MMG::Mesh mesh;
@@ -71,14 +71,10 @@
 
   @section guides-io-meshformats-conversion Format conversion
 
-  Converting between formats is straightforward — simply load in one format
-  and save in another:
+  The checked conversion program writes a MEDIT mesh, loads it, saves MFEM
+  output and reloads that output:
 
-  @code{.cpp}
-  Mesh mesh;
-  mesh.load("input.mesh", IO::FileFormat::MEDIT);
-  mesh.save("output.mesh", IO::FileFormat::MFEM);
-  @endcode
+  @snippet IO/MEDIT.cpp medit-convert
 
   @section guides-io-meshformats-comparison Comparison
 
@@ -103,7 +99,7 @@
   | 0D | Point |
   | 1D | Segment |
   | 2D | Triangle, Quadrilateral |
-  | 3D | Tetrahedron, Hexahedron, Wedge |
+  | 3D | Tetrahedron, Pyramid, Hexahedron, Wedge |
 
   MEDIT and MFEM are tested with string round trips for all of these
   geometries. HDF5 persistence and XDMF visualization output are tested over

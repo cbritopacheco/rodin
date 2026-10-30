@@ -32,15 +32,8 @@
   Begin with Poisson, then select a tutorial according to the field type,
   boundary conditions, or geometry needed for the problem.
 
-  | Tutorial | What it introduces |
-  | :--- | :--- |
-  | @ref examples-pdes-poisson | A scalar elliptic equation, Dirichlet data, and XDMF export |
-  | @ref examples-pdes-elasticity | Vector displacement, strain, and boundary traction |
-  | @ref examples-pdes-helmholtz | A wave equation and complex-valued fields |
-  | @ref examples-pdes-stokes | Viscous cavity flow and pressure normalization |
-  | @ref examples-pdes-navierstokes | Coupled velocity and pressure in incompressible flow |
-  | @ref examples-pdes-periodic | Periodic identification of boundary degrees of freedom |
-  | @ref examples-pdes-surfacemesh | An equation posed on a surface mesh |
+  - @subpage examples-pdes-index — Scalar diffusion, elasticity, waves,
+    incompressible flow, periodic conditions, surface equations and DG.
 
   @section examples-index-io Input/output
 
@@ -91,14 +84,14 @@
 
   @section examples-index-eikonal Distance and Eikonal
 
-  The @ref Rodin::Eikonal "Eikonal" module solves @f$ |\nabla u| = F(x) @f$
+  The @ref Rodin::Eikonal "Eikonal" module solves @f$ F(x)|\nabla u| = 1 @f$ for positive propagation speed @f$F@f$
   via the Fast Marching Method, and the @ref Rodin::Distance "Distance" module
   wraps several distance-function computation strategies:
 
   | Method | Description | Example |
   |--------|-------------|---------|
-  | FMM | Numerical arrival-time and distance computation | [FMM.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Models/Eikonal/FMM.cpp) |
-  | Spalding-Tucker | Boundary-layer wall distance | [SpaldingTucker.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Models/Distance/SpaldingTucker.cpp) |
+  | FMM | Arrival times, exact point-source comparison and mesh refinement | @ref examples-eikonal-fmm |
+  | Spalding–Tucker | Signed auxiliary Poisson field and normalization error | @ref examples-distance-normalization |
 
   @section examples-index-petsc PETSc source examples
 
@@ -118,15 +111,13 @@
 
   @section examples-index-dg Discontinuous Galerkin
 
-  The DG example solves the Poisson equation using the Symmetric Interior
-  Penalty (SIP) method with DG-specific operators (`Jump`, `Average`,
-  `FaceIntegral`, `InterfaceIntegral`):
+  The @ref examples-pdes-dg-poisson "SIPG diffusion tutorial" assembles
+  independent cell-local affine unknowns, interior consistency and penalty
+  terms, and weak Dirichlet data. It includes an affine patch test and a
+  four-level refinement study.
 
-  | Equation | Method | Example |
-  |----------|--------|---------|
-  | @f$ -\Delta u = f @f$ | SIP-DG | [Poisson.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp) |
-
-  @see @ref guides-variational "Variational formulations guide" for the DG section.
+  The @ref examples-interface-traces "trace tutorial" first evaluates the
+  two one-sided values, jump and average on a two-cell mesh.
 
   @section examples-index-integral Integral equation source examples
 

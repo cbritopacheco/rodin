@@ -543,8 +543,8 @@ namespace Rodin::Geometry
       virtual size_t getSpaceDimension() const = 0;
 
       /**
-       * @brief Gets the total mesh volume.
-       * @returns Sum of all cell volumes
+       * @brief Sums the measures of three-dimensional mesh entities.
+       * @returns Total three-dimensional volume; use getArea() for surface cells.
        */
       virtual Real getVolume() const = 0;
 
@@ -1253,7 +1253,7 @@ namespace Rodin::Geometry
        * @param[in] g Face geometry type (e.g., Point for 1D box,
        * Segment for 2D box boundary, Triangle or Quadrilateral for 3D
        * box boundary)
-       * @param[in] l Number of nodes in each coordinate direction
+       * @param[in] l Number of unit intervals in each embedding-space direction
        * (must have @f$ d+1 @f$ entries)
        * @returns Mesh of the requested box.
        */
@@ -1286,7 +1286,7 @@ namespace Rodin::Geometry
        * with faces of type @p g.
        *
        * @param[in] g Face geometry type
-       * @param[in] shape Number of nodes in each coordinate direction
+       * @param[in] shape Number of unit intervals in each embedding-space direction
        * @returns Mesh of the requested box.
        */
       static Mesh Box(Polytope::Type g, const Array<size_t>& shape);

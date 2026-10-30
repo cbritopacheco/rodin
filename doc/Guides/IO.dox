@@ -11,10 +11,10 @@
 
   @section guides-io-formats Choose a format
 
-  Select the format according to the operation rather than the filename alone.
+  Select the format according to the required mesh, field or visualization
+  operation.
   MFEM and MEDIT both use `.mesh`, so mesh loading requires an explicit format.
-  XDMF output is written through a dedicated writer, not an `IO::FileFormat`
-  enumeration value.
+  XDMF output uses the dedicated `IO::XDMF` writer.
 
   | Task | Starting point | Files |
   | :--- | :--- | :--- |
@@ -26,8 +26,8 @@
   Format support depends on the data being stored. See the
   @ref guides-io-meshformats "mesh-format guide" and
   @ref guides-io-gridfunctions "grid-function guide" for the relevant interfaces.
-  Saving a field is not, by itself, a checkpoint of a complete simulation:
-  application state and restart logic must also be accounted for.
+  A complete simulation checkpoint includes the saved fields, application state and
+  restart logic.
 
   @section guides-io-xdmf-overview Export a field for visualization
 
@@ -111,9 +111,8 @@
   mesh.save("output.mesh", IO::FileFormat::MFEM);
   @endcode
 
-  Conversion does not constitute remeshing. It transfers the mesh through the
-  selected file interfaces; format-specific metadata may have different
-  representations. See @subpage guides-io-meshformats.
+  Conversion transfers the existing mesh through the selected file interfaces.
+  Format-specific metadata are mapped to the target representation. See @subpage guides-io-meshformats.
 
   @section guides-io-gf Store a finite element field
 

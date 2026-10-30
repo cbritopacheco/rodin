@@ -1,125 +1,99 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2025.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Geometry/GeometryIndexed.h"
-#include "Rodin/Geometry/Point.h"
-#include <Rodin/Math.h>
-#include <Rodin/Geometry.h>
-#include <Rodin/Variational.h>
+//! [fmm-source]
 #include <Rodin/Eikonal/FMM.h>
+#include <Rodin/Geometry.h>
+#include <Rodin/IO/XDMF.h>
+#include <Rodin/Variational.h>
+
+#include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-int main(int, char**)
+int main()
 {
-  std::cout << "=== Fast Marching Method - Enhanced Version ===" << std::endl;
-  std::cout << "Supporting surface meshes and curved elements" << std::endl;
-
-  // Example 1: 2D triangular mesh (surface in 2D space)
-  std::cout << "\n--- Example 1: 2D Triangular Mesh ---" << std::endl;
+  std::ofstream errors("FMMErrors.csv");
+  errors << std::setprecision(17) << "intervals,speed,max_error,mean_error\n";
+  bool valid = true;
+  for (const Real propagationSpeed : {Real(1), Real(2)})
   {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 32, 32 });
-    mesh.scale(1.0 / 31.0);
-    mesh.getConnectivity().compute(2, 0);
-    mesh.getConnectivity().compute(0, 0);
-
-    P1 vh(mesh);
-    GridFunction u(vh);
-
-    std::cout << "Mesh dimension: " << mesh.getDimension() << std::endl;
-    std::cout << "Space dimension: " << mesh.getSpaceDimension() << std::endl;
-    std::cout << "Degrees of freedom: " << u.getSize() << std::endl;
-
-    // Define speed function (constant speed = 1)
-    auto f = [](const Geometry::Point& p) -> Real { return 1.0; };
-
-    Eikonal::FMM fmm(u, f);
-
-    // Set interface: center point as source
-    std::vector<Index> interface;
-    for (auto it = mesh.getVertex(); !it.end(); ++it)
+    Real previousError = std::numeric_limits<Real>::infinity();
+    for (const size_t intervals : {16, 32, 64})
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
-      Real distance = (coord - Math::SpatialVector<Real>{{0.5, 0.5}}).norm();
-      if (distance < 0.05)
-        interface.push_back(it->getIndex());
-    }
-
-    fmm.seed(interface).solve();
-
-    u.save("eikonal_2d.gf", IO::FileFormat::MFEM);
-    mesh.save("eikonal_2d.mesh", IO::FileFormat::MFEM);
-    std::cout << "2D example completed successfully!" << std::endl;
-  }
-
-  // Example 2: Surface mesh with varying speed function
-  std::cout << "\n--- Example 2: Surface Mesh with Varying Speed ---" << std::endl;
-  {
-    Mesh volume;
-    // mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 24, 24 });
-    // mesh.scale(2.0 / 23.0);
-    // mesh.displace(VectorFunction{ -1.0, -1.0 });
-    volume.load("../resources/mmg/MechanicalPiece_1.mesh", IO::FileFormat::MEDIT);
-
-    volume.getConnectivity().compute(2, 3);
-    volume.getConnectivity().compute(2, 0);
-    volume.getConnectivity().compute(0, 0);
-    volume.getConnectivity().compute(0, 2);
-    volume.getConnectivity().compute(2, 1); // For edge-based computations
-    volume.getConnectivity().compute(0, 1); // For edge-based computations
-
-    Mesh mesh = volume.skin();
-    mesh.save("skin.mesh", IO::FileFormat::MEDIT);
-
-    P1 vh(mesh);
-    GridFunction u(vh);
-
-    std::cout << "Surface mesh with " << mesh.getVertexCount() << " vertices" << std::endl;
-
-    // Define varying speed function (slower in center, faster at edges)
-    auto varying_speed = [](const Geometry::Point& p) -> Real
-    {
-      Real r = p.norm();
-      return 0.5 + 1.5 * std::exp(-2.0 * r * r); // Gaussian speed profile
-    };
-
-    Eikonal::FMM fmm(u, varying_speed);
-
-    // Set interface: corner point as source
-    std::set<Index> s;
-    for (auto it = mesh.getFace(); !it.end(); ++it)
-    {
-      if (it->getAttribute() == 118)
+      //! [fmm-mesh]
+      const size_t n = intervals + 1;
+      const Real h = Real(1) / intervals;
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
+      mesh.scale(h);
+      mesh.getConnectivity().compute(2, 0);
+      mesh.getConnectivity().compute(0, 2);
+      mesh.getConnectivity().compute(0, 0);
+      //! [fmm-mesh]
+      //! [fmm-solve]
+      P1 space(mesh);
+      GridFunction arrival(space);
+      IndexVector seeds;
+      for (auto vertex = mesh.getVertex(); vertex; ++vertex)
       {
-        for (const auto& v : it->getVertices())
-          s.insert(v);
+        const auto& x = vertex->getCoordinates();
+        if (x(0) == Real(0.5) && x(1) == Real(0.5))
+          seeds.push_back(vertex->getIndex());
       }
+      if (seeds.size() != 1)
+        return EXIT_FAILURE;
+      const auto speed = [propagationSpeed](const Point&) { return propagationSpeed; };
+      Eikonal::FMM marching(arrival, speed);
+      marching.seed(seeds).solve();
+      //! [fmm-solve]
+      //! [fmm-error]
+      Real maximum = 0, mean = 0;
+      for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+      {
+        const auto& x = vertex->getCoordinates();
+        const auto& dofs = space.getDOFs(0, vertex->getIndex());
+        const Real computed = arrival.getData()(dofs[0]);
+        const Real exact =
+          std::hypot(x(0) - Real(0.5), x(1) - Real(0.5)) / propagationSpeed;
+        const Real error = std::abs(computed - exact);
+        valid = valid && std::isfinite(computed) && computed >= 0;
+        maximum = std::max(maximum, error);
+        mean += error;
+      }
+      mean /= mesh.getVertexCount();
+      // A deliberately loose O(h) regression envelope on this mesh sequence.
+      // Measured errors, rather than this bound, characterize the observed rate.
+      valid =
+        valid && maximum < previousError && maximum <= Real(2) * h / propagationSpeed;
+      previousError = maximum;
+      errors << intervals << ',' << propagationSpeed << ',' << maximum << ',' << mean
+             << '\n';
+      //! [fmm-error]
+      if (intervals == 64 && propagationSpeed == 1)
+      {
+        GridFunction reference(space);
+        reference = [](const Point& point) {
+          return std::hypot(point.x() - Real(0.5), point.y() - Real(0.5));
+        };
+        IO::XDMF output("FMMArrival");
+        output.grid().setMesh(mesh).add("arrival", arrival).add("reference", reference);
+        output.write().close();
+      }
+      std::cout << "intervals=" << intervals << " speed=" << propagationSpeed
+                << " max_error=" << maximum << " mean_error=" << mean << '\n';
     }
-
-    std::vector<Index> interface;
-    interface.reserve(s.size());
-    for (const auto& v : s)
-      interface.push_back(v);
-
-    std::cout << "Interface size: " << interface.size() << std::endl;
-
-    fmm.seed(interface).solve();
-
-    u.save("eikonal_surface.gf", IO::FileFormat::MFEM);
-    mesh.save("eikonal_surface.mesh", IO::FileFormat::MFEM);
-    std::cout << "Surface example completed successfully!" << std::endl;
   }
-
-  std::cout << "\n=== All examples completed successfully! ===" << std::endl;
-  std::cout << "Results saved to:" << std::endl;
-  std::cout << "  - eikonal_2d.gf, eikonal_2d.mesh" << std::endl;
-  std::cout << "  - eikonal_surface.gf, eikonal_surface.mesh" << std::endl;
-
-  return 0;
+  errors.flush();
+  return valid && bool(errors) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+//! [fmm-source]

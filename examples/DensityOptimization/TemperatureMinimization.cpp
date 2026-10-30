@@ -6,122 +6,23 @@
  */
 
 /**
- * @file TemperatureOptimization.cpp
- * @brief Density-based topology optimization with Hilbert gradient regularization.
+ * @file TemperatureMinimization.cpp
+ * @brief State, adjoint and projected regularized density updates for heat conduction.
  *
- * @details
- * This example implements a density-based topology optimization problem for a
- * scalar Poisson equation using the Rodin finite element framework.
+ * The conductivity is @f$a(\gamma)=10^{-4}+(1-10^{-4})\gamma^3@f$.
+ * The objective combines mean temperature with the fixed material penalty
+ * @f$4\int_\Omega\gamma\,dx@f$. State, adjoint and descent fields are exported
+ * for the same density before each projected update.
  *
- * The optimization problem consists in minimizing a compliance-like functional
- * penalized by material usage:
- *
- * @f[
- *   J(\gamma, u) =
- *   \frac{1}{|\Omega|} \int_\Omega u \, dx
- *   + \ell \int_\Omega \gamma \, dx,
- * @f]
- *
- * subject to the state equation:
- *
- * @f[
- *   -\nabla \cdot \big(a(\gamma)\nabla u\big) = 1 \quad \text{in } \Omega,
- * @f]
- *
- * with Dirichlet boundary conditions on @f$\Gamma_D@f$. The material
- * interpolation is defined by:
- *
- * @f[
- *   a(\gamma) = g_{\min} + (g_{\max} - g_{\min}) \gamma^3.
- * @f]
- *
- * The design variable @f$\gamma \in [0,1]@f$ represents a material density.
- *
- * ---
- *
- * ## Adjoint formulation
- *
- * The adjoint variable @f$p@f$ solves:
- *
- * @f[
- *   -\nabla \cdot \big(a(\gamma)\nabla p\big) = -\frac{1}{|\Omega|}.
- * @f]
- *
- * The gradient of the objective with respect to @f$\gamma@f$ is:
- *
- * @f[
- *   \frac{\partial J}{\partial \gamma}
- *   =
- *   \ell
- *   + 3(g_{\max}-g_{\min}) \gamma^2 \nabla u \cdot \nabla p.
- * @f]
- *
- * ---
- *
- * ## Hilbert gradient regularization
- *
- * To obtain a smooth descent direction, the gradient is filtered through a
- * Hilbert space operator:
- *
- * @f[
- *   \alpha (\nabla g, \nabla w) + (g, w)
- *   =
- *   \left(
- *     \ell
- *     + 3(g_{\max}-g_{\min}) \gamma^2 \nabla u \cdot \nabla p,
- *     w
- *   \right).
- * @f]
- *
- * The resulting function @f$g@f$ is a regularized gradient.
- *
- * ---
- *
- * ## Optimization algorithm
- *
- * The design is updated via a projected gradient descent:
- *
- * @f[
- *   \gamma^{k+1}
- *   =
- *   \Pi_{[0,1]}\left(
- *     \gamma^k - \mu g
- *   \right),
- * @f]
- *
- * where @f$\Pi_{[0,1]}@f$ denotes pointwise projection onto the admissible
- * interval.
- *
- * ---
- *
- * ## Numerical setup
- *
- * - Domain: unit square @f$[0,1]^2@f$
- * - Mesh: structured triangular grid
- * - FE spaces: @f$P_1@f$ Lagrange for state, adjoint, and design
- * - Solver: sparse direct solver (LU)
- *
- * ---
- *
- * ## Output
- *
- * Results are written in XDMF format for visualization in ParaView:
- *
- * - `u`     : state solution
- * - `p`     : adjoint solution
- * - `g`     : regularized gradient
- * - `gamma` : density field
- * - `step`  : descent step
- *
- * ---
- *
- * @note
- * This formulation uses a penalized objective instead of a strict volume
- * constraint. Replacing the term @f$\ell \int \gamma@f$ by a constraint
- * @f$\int \gamma \leq V_0@f$ would require a different optimization strategy
- * (e.g., augmented Lagrangian or projection methods).
+ * @see examples-density_optimization-simp_temperature_minimization
  */
 
+//! [density-source]
+#include <charconv>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
 #include "Rodin/Context/Local.h"
 #include <Rodin/IO.h>
 #include <Rodin/Solver.h>
@@ -146,8 +47,22 @@ static constexpr Real alpha = 0.05;
 static constexpr size_t maxIterations = 5000;
 static constexpr Real radius = 0.1;
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
+  size_t iterations = maxIterations;
+  if (argc > 2)
+  {
+    std::cerr << "Usage: " << argv[0] << " [positive-iteration-count]" << std::endl;
+    return EXIT_FAILURE;
+  }
+  if (argc == 2)
+  {
+    const auto end = argv[1] + std::strlen(argv[1]);
+    const auto result = std::from_chars(argv[1], end, iterations);
+    if (result.ec != std::errc{} || result.ptr != end || iterations == 0)
+      return EXIT_FAILURE;
+  }
+  //! [density-mesh]
   constexpr size_t n = 32;
   constexpr Geometry::Polytope::Type g = Geometry::Polytope::Type::Triangle;
 
@@ -175,6 +90,8 @@ int main(int, char**)
     }
     mesh.setAttribute(it.key(), onGammaD ? GammaD : Gamma0);
   }
+
+  //! [density-mesh]
 
   IO::XDMF xdmf("TemperatureMinimization");
   xdmf.grid().setMesh(mesh);
@@ -205,31 +122,50 @@ int main(int, char**)
 
   const Real vol = mesh.getMeasure(mesh.getDimension());
 
-  for (size_t i = 0; i < maxIterations; i++)
+  std::ofstream history("TemperatureMinimization.csv");
+  history.precision(17);
+  history << "iteration,mean_temperature,material,objective\n";
+  for (size_t i = 0; i < iterations; i++)
   {
     Alert::Info() << "Iteration: " << i << Alert::Raise;
 
     const RealFunction f(1.0);
     const auto a = gmin + (gmax - gmin) * Pow(gamma, 3);
 
+    //! [density-state]
     Problem poisson(u, v);
     poisson = Integral(a * Grad(u), Grad(v))
             - Integral(f * v)
             + DirichletBC(u, RealFunction(0.0)).on(GammaD);
-    Solver::SparseLU(poisson).solve();
+    Solver::SparseLU stateSolver(poisson);
+    stateSolver.solve();
+    if (!stateSolver.success())
+      return EXIT_FAILURE;
+
+    //! [density-state]
 
     const Real Ju = Integral(u.getSolution()).compute();
     const Real Jg = Integral(gamma).compute();
     const Real J = Ju / vol + ell * Jg;
 
+    if (!std::isfinite(J))
+      return EXIT_FAILURE;
+    history << i << ',' << Ju / vol << ',' << Jg << ',' << J << '\n';
     Alert::Info() << "Objective: " << J << Alert::Raise;
 
+    //! [density-adjoint]
     Problem adjoint(p, q);
     adjoint = Integral(a * Grad(p), Grad(q))
             + Integral(RealFunction(1.0 / vol), q)
             + DirichletBC(p, RealFunction(0.0)).on(GammaD);
-    Solver::SparseLU(adjoint).solve();
+    Solver::SparseLU adjointSolver(adjoint);
+    adjointSolver.solve();
+    if (!adjointSolver.success())
+      return EXIT_FAILURE;
 
+    //! [density-adjoint]
+
+    //! [density-gradient]
     Problem hilbert(gfun, w);
     hilbert = Integral(alpha * Grad(gfun), Grad(w))
             + Integral(gfun, w)
@@ -239,16 +175,25 @@ int main(int, char**)
                   * Dot(Grad(u.getSolution()), Grad(p.getSolution())),
                 w)
             + DirichletBC(gfun, RealFunction(0.0)).on(GammaD);
-    Solver::SparseLU(hilbert).solve();
+    Solver::SparseLU gradientSolver(hilbert);
+    gradientSolver.solve();
+    if (!gradientSolver.success())
+      return EXIT_FAILURE;
 
+    //! [density-gradient]
+
+    //! [density-update]
     step = mu * gfun.getSolution();
 
+    // Snapshot the state, adjoint and descent computed for this same density.
+    xdmf.write(Real(i)).flush();
     gamma -= step;
     gamma = Min(1.0, Max(0.0, gamma));
-
-    xdmf.write().flush();
+    //! [density-update]
   }
 
   xdmf.close();
-  return 0;
+  history.flush();
+  return history ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+//! [density-source]

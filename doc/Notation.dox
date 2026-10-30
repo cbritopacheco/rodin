@@ -18,7 +18,7 @@
 | @f$ \partial \Omega @f$ | Denotes the Lipschitz boundary of the domain @f$ \Omega @f$. |
 | @f$ \Gamma_D @f$  | The Dirichlet part of the boundary where essential conditions are imposed. |
 | @f$ \Gamma_N @f$  | The Neumann part of the boundary where natural conditions are imposed. |
-| @f$ \mathcal{T}_h @f$ | Denotes a polyhedral complex (mesh) which discretizes the domain @f$ \Omega @f$. The subscript @f$ h @f$ refers to the mesh size parameter. In Rodin, this is represented by the @ref Rodin::Geometry::Mesh "Mesh::getDimension()" class. |
+| @f$ \mathcal{T}_h @f$ | Denotes a polyhedral complex (mesh) which discretizes the domain @f$ \Omega @f$. The subscript @f$ h @f$ refers to the mesh size parameter. In Rodin, this is represented by the @ref Rodin::Geometry::Mesh "Mesh" class. |
 | @f$ \mathcal{F}_h @f$ | Represents the set of all faces in the mesh @f$ \mathcal{T}_h @f$. |
 | @f$ \mathcal{B}_h @f$ | Represents the boundary faces of the mesh @f$ \mathcal{T}_h @f$. A face is on the boundary if it belongs to exactly one cell. |
 | @f$ \mathcal{I}_h @f$ | Represents the interior faces (interfaces) of the mesh @f$ \mathcal{T}_h @f$. An interior face belongs to exactly two cells. |
@@ -39,8 +39,8 @@
 | @f$ V_h @f$               | A finite element space built on the mesh @f$ \mathcal{T}_h @f$. Subscript @f$ h @f$ indicates discrete. In Rodin, created by instantiating `P0`, `P1`, or `H1`. |
 | @f$ \mathbb{P}_k @f$      | The space of polynomials of total degree at most @f$ k @f$. |
 | @f$ P_0 @f$               | Piecewise constant functions on each cell. In Rodin: `P0`. One DOF per cell, discontinuous across cell boundaries. |
-| @f$ P_1 @f$               | Piecewise linear, globally continuous functions. In Rodin: `P1`. One DOF per vertex, @f$ H^1 @f$-conforming. |
-| @f$ H^1_k @f$             | Continuous piecewise polynomials of degree @f$ k @f$. In Rodin: `H1<k>`. DOFs on vertices, edges, and cell interiors. |
+| @f$ P_1 @f$               | Continuous vertex-based family. On affine simplices its scalar fields are piecewise affine; product cells and pyramids use their corresponding reference spaces. In Rodin: `P1`, with one scalar DOF per vertex. |
+| @f$ H^1_k @f$             | Continuous degree-@f$k@f$ reference family transported by the cell maps, with @f$k\geq1@f$. In Rodin: `H1` with a compile-time degree. DOFs lie on the relevant vertices, edges, faces and cell interiors. See @ref fem-ciarlet for the geometry-dependent reference spaces. |
 
   @section notation-variational Notation regarding variational methods
 
@@ -103,9 +103,8 @@
 
   The class names `LinearForm` and `BilinearForm` are retained for the common
   real and complex APIs. Over real-valued spaces conjugation is the identity,
-  so the forms reduce to ordinary linear and bilinear forms. Sesquilinearity
-  alone does not imply that @f$ A @f$ is Hermitian; @f$ A = A^* @f$ is a
-  separate property of a particular form.
+  so the forms reduce to ordinary linear and bilinear forms. Hermitian symmetry is the additional property @f$ A = A^* @f$, determined by the
+  form and its coefficients.
 
   @section notation-operators Notation regarding differential operators
 
@@ -113,7 +112,7 @@
 | ----------------- | ---------- | -------------------------------------------- |
 | @f$ \nabla u @f$  | `Grad(u)`  | Gradient of a scalar field. Returns a vector of dimension @f$ d @f$. |
 | @f$ \nabla \cdot \mathbf{u} @f$ | `Div(u)` | Divergence of a vector field. Returns a scalar. |
-| @f$ \Delta u @f$  | —          | Laplacian. Not used directly; appears via integration by parts as `Integral(Grad(u), Grad(v))`. |
+| @f$ \Delta u @f$  | —          | Laplacian, represented after integration by parts by `Integral(Grad(u), Grad(v))`. |
 | @f$ \nabla \mathbf{u} @f$ | `Jacobian(u)` | Jacobian (gradient) of a vector field. Returns a @f$ d \times d @f$ matrix. |
 | @f$ \nabla \mathbf{u}^T @f$ | `Transpose(Jacobian(u))` | Transpose of the Jacobian. |
 | @f$ \varepsilon(\mathbf{u}) @f$ | See below | Symmetric gradient (linearized strain tensor): @f$ \frac{1}{2}(\nabla \mathbf{u} + \nabla \mathbf{u}^T) @f$. |
