@@ -373,6 +373,9 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
+      /// @brief Destroys the finite element while retaining constexpr construction.
+      constexpr ~P1Element() override = default;
+
       /**
        * @brief Copy assignment.
        * @param other Object to copy from.
