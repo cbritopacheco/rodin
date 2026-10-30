@@ -4,11 +4,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-monogram.svg">
   <title>Benchmarks · Rodin benchmarks</title>
   <link rel="stylesheet" href="assets/mcss-22c93d2587ab.css">
-  <link rel="stylesheet" href="assets/rodin-fe7b0e2c871a.css">
-  <link rel="stylesheet" href="assets/rodin-theme-27c0d1929b3f.css">
+  <link rel="stylesheet" href="assets/rodin-62701ba7f0b9.css">
+  <link rel="stylesheet" href="assets/rodin-theme-cb2530ea8c22.css">
   <link rel="stylesheet" href="assets/rodin.css">
   <link rel="stylesheet" href="assets/rodin-theme.css">
   <link rel="stylesheet" href="assets/site.css">
@@ -39,7 +39,7 @@
                 <li><a href="../guides-index.html">General concepts</a></li>
                 <li><a href="../examples-index.html">Examples and tutorials</a></li>
                 <li><a href="../gallery.html">Gallery</a></li>
-                <li><a href="../guides-io.html">I/O in Rodin</a></li>
+                <li><a href="../guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="../configuration.html">Configuration</a></li>
                 <li><a href="../ci-index.html">Continuous integration</a></li>
                 <li><a href="../notation-index.html">Notation</a></li>
@@ -140,7 +140,7 @@
 <use x='269.070682' y='-3.343009' xlink:href='#namespace_rodin_1_1_assembly-representative-eq11-g1-58'/>
 </g>
 </svg></div></div>
-          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> evaluates local integrals and accumulates global matrices and vectors; <a href="../class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Default</a> selects the configured assembly strategy. <a href="../class_rodin_1_1_assembly_1_1_bilinear_form_assembly_input.html" class="m-doc">BilinearFormAssemblyInput</a> supplies spaces and integrators, and <a href="../class_rodin_1_1_assembly_1_1_constraint_map.html" class="m-doc">ConstraintMap</a> expands degree-of-freedom constraints when assembling constrained or coupled problems.</p></div>
+          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Assembly::<wbr />Sequential</a> evaluates local integrals and accumulates global matrices and vectors; <a href="../class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a> selects the configured assembly strategy. <a href="../class_rodin_1_1_assembly_1_1_bilinear_form_assembly_input.html" class="m-doc">BilinearFormAssemblyInput</a> supplies spaces and integrators, and <a href="../class_rodin_1_1_assembly_1_1_constraint_map.html" class="m-doc">ConstraintMap</a> expands degree-of-freedom constraints when assembling constrained or coupled problems.</p></div>
           
 <div class="benchmark-actions">
   <div class="m-button m-primary"><a href="Rodin/Assembly/index.html" aria-label="Browse benchmarks in Assembly">Browse benchmarks <span aria-hidden="true">→</span></a></div>
@@ -183,7 +183,7 @@
 <use x='220.05974' y='-2.988792' xlink:href='#namespace_rodin_1_1_geometry-representative-eq1-g3-58'/>
 </g>
 </svg></div></div>
-          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> and <a href="../class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> describe mesh entities and their incidence relations. <a href="../class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>, <a href="../class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>, and <a href="../class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a> connect reference elements to physical geometry for integration, field evaluation, mesh extraction, and deformation.</p></div>
+          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> and <a href="../class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">getConnectivity().compute(d1, d2)</a> describe mesh entities and their incidence relations. <a href="../class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>, <a href="../class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>, and <a href="../class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a> connect reference elements to physical geometry for integration, field evaluation, mesh extraction, and deformation.</p></div>
           
 <div class="benchmark-actions">
   <div class="m-button m-primary"><a href="Rodin/Geometry/index.html" aria-label="Browse benchmarks in Geometry">Browse benchmarks <span aria-hidden="true">→</span></a></div>
@@ -195,7 +195,7 @@
           <div class="benchmark-representative"><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">"output"</span><span class="p">);</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">().</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">).</span><span class="n">add</span><span class="p">(</span><span class="s">"u"</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">());</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span></pre></div>
-          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_i_o_1_1_mesh_loader.html" class="m-doc">MeshLoader</a> and <a href="../class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a> import and export meshes; <a href="../class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader</a> and <a href="../class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a> transfer discrete fields. Format-specific backends support MFEM, MEDIT, and HDF5 data, while <a href="../class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writes meshes, multiple fields, and time series for visualization.</p></div>
+          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_i_o_1_1_mesh_loader.html" class="m-doc">MeshLoader</a> and <a href="../class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a> import and export meshes; <a href="../class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader</a> and <a href="../class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a> transfer discrete fields. Format-specific backends support MFEM, MEDIT, and HDF5 data, while <a href="../class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">IO::<wbr />XDMF</a> writes meshes, multiple fields, and time series for visualization.</p></div>
           
 <div class="benchmark-actions">
   <div class="m-button m-primary"><a href="Rodin/IO/index.html" aria-label="Browse benchmarks in IO">Browse benchmarks <span aria-hidden="true">→</span></a></div>
@@ -209,7 +209,7 @@
 <span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">product</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span><span class="w">       </span><span class="c1">// 32</span>
 <span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">cross</span><span class="p">(</span><span class="n">b</span><span class="p">);</span><span class="w">      </span><span class="c1">// {-3, 6, -3}</span>
 <span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">norm</span><span class="p">();</span><span class="w">        </span><span class="c1">// sqrt(14)</span></pre></div>
-          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> and <a href="../class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> support small spatial calculations without heap allocation. <a href="../class_rodin_1_1_math_1_1_vector.html" class="m-doc">Vector</a>, <a href="../class_rodin_1_1_math_1_1_matrix.html" class="m-doc">Matrix</a>, and their fixed-size counterparts provide Eigen-compatible algebra; <a href="../class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a> groups system data and constraint elimination. These types support geometric mappings, constitutive calculations, assembly, and linear solves.</p></div>
+          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector&lt;T&gt;</a> and <a href="../class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix&lt;T&gt;</a> support small spatial calculations without heap allocation. <a href="../class_rodin_1_1_math_1_1_vector.html" class="m-doc">Vector&lt;T&gt;</a>, <a href="../class_rodin_1_1_math_1_1_matrix.html" class="m-doc">Matrix&lt;T&gt;</a>, and their fixed-size counterparts provide Eigen-compatible algebra; <a href="../class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem&lt;Operator, Vector&gt;</a> groups system data and constraint elimination. These types support geometric mappings, constitutive calculations, assembly, and linear solves.</p></div>
           
 <div class="benchmark-actions">
   <div class="m-button m-primary"><a href="Rodin/Math/index.html" aria-label="Browse benchmarks in Math">Browse benchmarks <span aria-hidden="true">→</span></a></div>
@@ -399,7 +399,7 @@
         <section class="m-frame"><h3><a href="Rodin/Alert/index.html">Alert</a></h3>
           <p class="m-text m-dim"><em>Contextual exceptions and diagnostic reporting.</em></p>
           <div class="benchmark-representative"><pre class="m-code"><span class="n">Alert</span><span class="o">::</span><span class="nc">Info</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Assembling the system..."</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span></pre></div>
-          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> and <a href="../class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">MemberFunctionException</a> report errors with contextual diagnostics. <a href="../class_rodin_1_1_alert_1_1_info.html" class="m-doc">Info</a> and <a href="../class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> provide nonfatal messages through the same stream interface. These classes communicate invalid inputs, unavailable operations, and solver or mesh-processing status.</p></div>
+          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Alert::<wbr />Exception</a> and <a href="../class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">Alert::<wbr />MemberFunctionException</a> report errors with contextual diagnostics. <a href="../class_rodin_1_1_alert_1_1_info.html" class="m-doc">Alert::<wbr />Info</a> and <a href="../class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Alert::<wbr />Warning</a> provide nonfatal messages through the same stream interface. These classes communicate invalid inputs, unavailable operations, and solver or mesh-processing status.</p></div>
           
 <p class="m-text m-dim benchmark-actions">No benchmarks yet</p>
 
@@ -407,7 +407,7 @@
           <p class="m-text m-dim"><em>Execution contexts for local and distributed computation.</em></p>
           <div class="benchmark-representative"><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="nc">LocalMesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Mesh</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">LocalMesh</span><span class="o">::</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">});</span></pre></div>
-          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_context_1_1_local.html" class="m-doc">Local</a> selects local execution, and <a href="../class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> carries the environment and communicator for distributed execution. Mesh, connectivity, and finite element specializations use these context types to select their data distribution and backend behavior while preserving the same mathematical interfaces.</p></div>
+          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_context_1_1_local.html" class="m-doc">Local</a> selects local execution, and <a href="../class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> carries the environment and communicator for distributed execution. Mesh, connectivity, and finite element specializations use these context types to select their data distribution and backend behavior while preserving the same mathematical interfaces.</p></div>
           
 <p class="m-text m-dim benchmark-actions">No benchmarks yet</p>
 
@@ -415,7 +415,7 @@
           <p class="m-text m-dim"><em>Spatial indexing and geometric search.</em></p>
           <div class="benchmark-representative"><pre class="m-code"><span class="n">Location</span><span class="o">::</span><span class="nc">AABB</span><span class="w"> </span><span class="nf">locator</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">point</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">locator</span><span class="p">.</span><span class="n">locate</span><span class="p">(</span><span class="n">physicalCoordinates</span><span class="p">);</span></pre></div>
-          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a> builds a bounding-volume hierarchy to locate physical coordinates in a mesh and recover the containing cell and reference coordinates. The resulting <a href="../class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> can be used for field sampling and evaluation at arbitrary locations. The locator must be rebuilt when the mesh geometry or topology changes.</p></div>
+          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a> builds a bounding-volume hierarchy to locate physical coordinates in a mesh and recover the containing cell and reference coordinates. The resulting <a href="../class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a> can be used for field sampling and evaluation at arbitrary locations. The locator must be rebuilt when the mesh geometry or topology changes.</p></div>
           
 <div class="benchmark-actions">
   <div class="m-button m-primary"><a href="Rodin/Location/index.html" aria-label="Browse benchmarks in Location">Browse benchmarks <span aria-hidden="true">→</span></a></div>
@@ -615,7 +615,7 @@
 <use x='247.523751' y='-10.184024' xlink:href='#namespace_rodin_1_1_distance-representative-eq1-g4-58'/>
 </g>
 </svg></div></div>
-          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> constructs distance fields through fast marching, while <a href="../class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> and <a href="../class_rodin_1_1_distance_1_1_signed_poisson.html" class="m-doc">SignedPoisson</a> provide PDE-based alternatives. These models convert boundary or level-set information into distance approximations for shape optimization, interface processing, and mesh adaptation.</p></div>
+          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Distance::<wbr />Eikonal</a> constructs distance fields through fast marching, while <a href="../class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Distance::<wbr />Poisson</a> and <a href="../class_rodin_1_1_distance_1_1_signed_poisson.html" class="m-doc">Distance::<wbr />SignedPoisson</a> provide PDE-based alternatives. These models convert boundary or level-set information into distance approximations for shape optimization, interface processing, and mesh adaptation.</p></div>
           
 <p class="m-text m-dim benchmark-actions">No benchmarks yet</p>
 
@@ -711,7 +711,7 @@
 <use x='283.929907' y='-10.793007' xlink:href='#namespace_rodin_1_1_hilbert-representative-eq1-g4-41'/>
 </g>
 </svg></div></div>
-          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a</a> solves a regularized extension problem that converts a linear functional into a smooth field over the mesh. It is commonly used to extend boundary shape derivatives into volume descent directions, with a configurable length scale controlling smoothing and boundary conditions constraining the extension.</p></div>
+          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">getTrialFunction() / getTestFunction()</a> solves a regularized extension problem that converts a linear functional into a smooth field over the mesh. It is commonly used to extend boundary shape derivatives into volume descent directions, with a configurable length scale controlling smoothing and boundary conditions constraining the extension.</p></div>
           
 <p class="m-text m-dim benchmark-actions">No benchmarks yet</p>
 
@@ -741,7 +741,7 @@
 <use x='216.061812' y='-8.200662' xlink:href='#namespace_rodin_1_1_solid-representative-eq1-g1-58'/>
 </g>
 </svg></div></div>
-          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a> computes deformation measures for constitutive laws such as <a href="../class_rodin_1_1_solid_1_1_neo_hookean.html" class="m-doc">NeoHookean</a> and <a href="../class_rodin_1_1_solid_1_1_holzapfel_ogden.html" class="m-doc">HolzapfelOgden</a>. <a href="../class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a> assembles residuals and consistent tangents, and stress fields such as <a href="../class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress</a> support postprocessing. The module covers finite-strain elasticity and fiber-reinforced material models.</p></div>
+          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">getLogJacobian()</a> computes deformation measures for constitutive laws such as <a href="../class_rodin_1_1_solid_1_1_neo_hookean.html" class="m-doc">NeoHookean</a> and <a href="../class_rodin_1_1_solid_1_1_holzapfel_ogden.html" class="m-doc">HolzapfelOgden</a>. <a href="../class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a> assembles residuals and consistent tangents, and stress fields such as <a href="../class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress&lt;Law&gt;</a> support postprocessing. The module covers finite-strain elasticity and fiber-reinforced material models.</p></div>
           
 <div class="benchmark-actions">
   <div class="m-button m-primary"><a href="Rodin/Solid/index.html" aria-label="Browse benchmarks in Solid">Browse benchmarks <span aria-hidden="true">→</span></a></div>
@@ -757,7 +757,7 @@
 <span class="w">  </span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">interior</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">interior</span><span class="p">,</span><span class="w"> </span><span class="n">exterior</span><span class="w"> </span><span class="p">})</span>
 <span class="w">  </span><span class="p">.</span><span class="n">setBoundaryReference</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span>
 <span class="w">  </span><span class="p">.</span><span class="n">discretize</span><span class="p">(</span><span class="n">phi</span><span class="p">);</span></pre></div>
-          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> connects Rodin geometry to MMG. <a href="../class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a> performs metric-driven adaptation, <a href="../class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a> improves mesh quality, and <a href="../class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a> fits or extracts an isosurface. These workflows support remeshing and interface reconstruction in shape optimization and evolving-geometry simulations.</p></div>
+          <div class="m-block m-flat"><p><a href="../class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh::<wbr />Build()</a> connects Rodin geometry to MMG. <a href="../class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">MMG::<wbr />Adapt</a> performs metric-driven adaptation, <a href="../class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">MMG::<wbr />Optimizer</a> improves mesh quality, and <a href="../class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">noSplit(ref)</a> fits or extracts an isosurface. These workflows support remeshing and interface reconstruction in shape optimization and evolving-geometry simulations.</p></div>
           
 <p class="m-text m-dim benchmark-actions">No benchmarks yet</p>
 
@@ -845,7 +845,7 @@ discretization must preserve this coupling to give a stable approximation.</p>
   </div></div></div>
 </div>
 <script src="assets/search-57e2ce511c71.js"></script>
-<script src="assets/searchdata-45522af048f6.js"></script>
+<script src="assets/searchdata-002d6b9fc803.js"></script>
   <footer><nav>
   <div class="m-container">
     <div class="m-row">

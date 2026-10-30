@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <title>General concepts &raquo; Quadrature formulas | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
   <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -84,7 +84,7 @@
             <li><a href="#guides-quadrature-fallback">Conical-product fallback</a></li>
             <li><a href="#guides-quadrature-api">API and caching</a></li>
             <li><a href="#guides-quadrature-curved">Curved elements</a></li>
-            <li><a href="#guides-quadrature-see-also">See Also</a></li>
+            <li><a href="#guides-quadrature-see-also">See also</a></li>
           </ul>
         </nav>
 <section id="guides-quadrature-contract"><h2><a href="#guides-quadrature-contract">Contract</a></h2><p>A quadrature formula on a reference polytope <svg class="m-math" style="width: 1.127em; height: 1.214em; vertical-align: -0.000em;" viewBox="0 -11.656309 10.817691 11.656309">
@@ -480,7 +480,7 @@ $ (1-z)^2 $
 <span class="w">  </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Tetrahedron</span><span class="p">);</span>
 
 <span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">explicitFamily</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">QF</span><span class="o">::</span><span class="nc">QuadratureFormula</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="n">QF</span><span class="o">::</span><span class="nc">XiaoGimbutas</span><span class="o">&gt;</span><span class="p">(</span>
-<span class="w">  </span><span class="kt">size_t</span><span class="p">{</span><span class="mi">8</span><span class="p">},</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Tetrahedron</span><span class="p">);</span></pre><p><code>QuadratureFormula::get</code> returns a process-wide canonical formula. Repeated per-thread requests are served by a small thread-local cache. Published formulas are immutable and cannot be copied or moved. Concrete family constructors remain available for locally owned formulas. <code>XiaoGimbutas</code>, <code>WitherdenVincent</code>, <code>GaussLegendre</code>, <code>GaussLobatto</code>, and <code>GrundmannMoller</code> can also be selected explicitly. Grundmann&ndash;Moller is not a default because its weights are signed above degree one.</p></section><section id="guides-quadrature-curved"><h2><a href="#guides-quadrature-curved">Curved elements</a></h2><p>The rule order applies on the reference polytope. On a physical cell, the mapped integrand also contains the determinant of the geometric Jacobian. Non-affine transformations can therefore require an order above the degree suggested by the finite-element fields alone. A quadrature point must remain inside the reference polytope because a curved transformation is not required to extend beyond it.</p></section><section id="guides-quadrature-see-also"><h2><a href="#guides-quadrature-see-also">See Also</a></h2><ul><li><a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a></li><li><a href="guides-variational.html" class="m-doc">Variational formulations</a></li></ul></section>
+<span class="w">  </span><span class="kt">size_t</span><span class="p">{</span><span class="mi">8</span><span class="p">},</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Tetrahedron</span><span class="p">);</span></pre><p><code>QuadratureFormula::get</code> returns a process-wide canonical formula. Repeated per-thread requests are served by a small thread-local cache. Published formulas are immutable and cannot be copied or moved. Concrete family constructors remain available for locally owned formulas. <code>XiaoGimbutas</code>, <code>WitherdenVincent</code>, <code>GaussLegendre</code>, <code>GaussLobatto</code>, and <code>GrundmannMoller</code> can also be selected explicitly. Grundmann&ndash;Moller is not a default because its weights are signed above degree one.</p></section><section id="guides-quadrature-curved"><h2><a href="#guides-quadrature-curved">Curved elements</a></h2><p>The rule order applies on the reference polytope. On a physical cell, the mapped integrand also contains the determinant of the geometric Jacobian. Non-affine transformations can therefore require an order above the degree suggested by the finite-element fields alone. A quadrature point must remain inside the reference polytope because a curved transformation is not required to extend beyond it.</p></section><section id="guides-quadrature-see-also"><h2><a href="#guides-quadrature-see-also">See also</a></h2><ul><li><a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a></li><li><a href="guides-variational.html" class="m-doc">Variational formulations</a></li></ul></section>
       </div>
     </div>
   </div>

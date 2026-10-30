@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <title>General concepts &raquo; Ciarlet&#x27;s definition of a finite element | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <link rel="prev" href="guides-connectivity.html" />
   <link rel="next" href="fem-spaces.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,7 +34,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -81,23 +81,23 @@
           <h3>Contents</h3>
           <ul>
             <li><a href="#fem-ciarlet-intro">Introduction</a></li>
-            <li><a href="#fem-ciarlet-definition">The Ciarlet Triple</a></li>
-            <li><a href="#fem-ciarlet-basis">Basis Functions</a></li>
+            <li><a href="#fem-ciarlet-definition">The Ciarlet triple</a></li>
+            <li><a href="#fem-ciarlet-basis">Basis functions</a></li>
             <li>
-              <a href="#fem-ciarlet-examples">Common Finite Elements</a>
+              <a href="#fem-ciarlet-examples">Common finite elements</a>
               <ul>
-                <li><a href="#fem-ciarlet-p1">P1 (Piecewise Linear) Elements</a></li>
-                <li><a href="#fem-ciarlet-p0">P0 (Piecewise Constant) Elements</a></li>
-                <li><a href="#fem-ciarlet-hk">Higher-Order Elements (H1&lt;k&gt;)</a></li>
+                <li><a href="#fem-ciarlet-p1">P1 (piecewise linear) elements</a></li>
+                <li><a href="#fem-ciarlet-p0">P0 (piecewise constant) elements</a></li>
+                <li><a href="#fem-ciarlet-hk">Higher-order elements (H1&lt;k&gt;)</a></li>
               </ul>
             </li>
-            <li><a href="#fem-ciarlet-global">From Local to Global</a></li>
+            <li><a href="#fem-ciarlet-global">From local to global</a></li>
             <li><a href="#fem-ciarlet-conformity">Conformity</a></li>
             <li><a href="#fem-ciarlet-rodin">Connection to Rodin</a></li>
-            <li><a href="#fem-ciarlet-see-also">See Also</a></li>
+            <li><a href="#fem-ciarlet-see-also">See also</a></li>
           </ul>
         </nav>
-<section id="fem-ciarlet-intro"><h2><a href="#fem-ciarlet-intro">Introduction</a></h2><p>The finite element method (FEM) is a powerful technique for numerically solving partial differential equations. At its heart lies the concept of a finite element, which provides a systematic way to construct piecewise-polynomial approximations on a mesh.</p><p>The most widely used formal definition of a finite element was introduced by Philippe G. Ciarlet. This definition provides a clean mathematical framework that separates three concerns:</p><ol><li><strong>Geometry</strong>: on which shape is the element defined?</li><li><strong>Approximation</strong>: which polynomial space is used?</li><li><strong>Degrees of freedom</strong>: how are functions in the space uniquely determined?</li></ol><p>This separation is precisely mirrored in Rodin&#x27;s architecture: the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> module handles shapes, the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module defines polynomial spaces and DOFs, and the <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> module puts them together.</p></section><section id="fem-ciarlet-definition"><h2><a href="#fem-ciarlet-definition">The Ciarlet Triple</a></h2><p>A <strong>finite element</strong> in the sense of Ciarlet is defined as a triple <svg class="m-math" style="width: 4.801em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.08507 11.955168">
+<section id="fem-ciarlet-intro"><h2><a href="#fem-ciarlet-intro">Introduction</a></h2><p>The finite element method (FEM) is a powerful technique for numerically solving partial differential equations. At its heart lies the concept of a finite element, which provides a systematic way to construct piecewise-polynomial approximations on a mesh.</p><p>The most widely used formal definition of a finite element was introduced by Philippe G. Ciarlet. This definition provides a clean mathematical framework that separates three concerns:</p><ol><li><strong>Geometry</strong>: on which shape is the element defined?</li><li><strong>Approximation</strong>: which polynomial space is used?</li><li><strong>Degrees of freedom</strong>: how are functions in the space uniquely determined?</li></ol><p>This separation is precisely mirrored in Rodin&#x27;s architecture: the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> module handles shapes, the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module defines polynomial spaces and DOFs, and the <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> module puts them together.</p></section><section id="fem-ciarlet-definition"><h2><a href="#fem-ciarlet-definition">The Ciarlet triple</a></h2><p>A <strong>finite element</strong> in the sense of Ciarlet is defined as a triple <svg class="m-math" style="width: 4.801em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.08507 11.955168">
 <title>
 $ (K, P, \Sigma) $
 </title>
@@ -592,7 +592,7 @@ $ p = 0 $
 <use x='9.195972' y='0' xlink:href='#eq26-g1-61'/>
 <use x='21.621453' y='0' xlink:href='#eq26-g1-48'/>
 </g>
-</svg>. This property is called <strong>unisolvence</strong>.</p></section><section id="fem-ciarlet-basis"><h2><a href="#fem-ciarlet-basis">Basis Functions</a></h2><p>Given a Ciarlet triple <svg class="m-math" style="width: 4.801em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.08507 11.955168">
+</svg>. This property is called <strong>unisolvence</strong>.</p></section><section id="fem-ciarlet-basis"><h2><a href="#fem-ciarlet-basis">Basis functions</a></h2><p>Given a Ciarlet triple <svg class="m-math" style="width: 4.801em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.08507 11.955168">
 <title>
 $ (K, P, \Sigma) $
 </title>
@@ -760,7 +760,7 @@ $ p $
 <g id='eq34-page1'>
 <use x='0' y='0' xlink:href='#eq34-g0-112'/>
 </g>
-</svg>. In Rodin, these DOF values are stored as the coefficient vector of a <code>GridFunction</code>.</p></section><section id="fem-ciarlet-examples"><h2><a href="#fem-ciarlet-examples">Common Finite Elements</a></h2><section id="fem-ciarlet-p1"><h3><a href="#fem-ciarlet-p1">P1 (Piecewise Linear) Elements</a></h3><p>The simplest and most widely used finite element is the <strong>P1 element</strong> on a triangle:</p><ul><li><svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+</svg>. In Rodin, these DOF values are stored as the coefficient vector of a <code>GridFunction</code>.</p></section><section id="fem-ciarlet-examples"><h2><a href="#fem-ciarlet-examples">Common finite elements</a></h2><section id="fem-ciarlet-p1"><h3><a href="#fem-ciarlet-p1">P1 (piecewise linear) elements</a></h3><p>The simplest and most widely used finite element is the <strong>P1 element</strong> on a triangle:</p><ul><li><svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -974,7 +974,7 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq44-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq44-g1-49'/>
 </g>
-</svg>-conforming.</p></section><section id="fem-ciarlet-p0"><h3><a href="#fem-ciarlet-p0">P0 (Piecewise Constant) Elements</a></h3><p>An even simpler element is the <strong>P0 element</strong>, used for discontinuous quantities:</p><ul><li><svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+</svg>-conforming.</p></section><section id="fem-ciarlet-p0"><h3><a href="#fem-ciarlet-p0">P0 (piecewise constant) elements</a></h3><p>An even simpler element is the <strong>P0 element</strong>, used for discontinuous quantities:</p><ul><li><svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -1086,7 +1086,7 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq51-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq51-g1-49'/>
 </g>
-</svg>).</p></section><section id="fem-ciarlet-hk"><h3><a href="#fem-ciarlet-hk">Higher-Order Elements (H1&lt;k&gt;)</a></h3><p>For polynomial degree <svg class="m-math" style="width: 2.946em; height: 1.034em; vertical-align: -0.170em;" viewBox="0 -8.302191 28.28265 9.927748">
+</svg>).</p></section><section id="fem-ciarlet-hk"><h3><a href="#fem-ciarlet-hk">Higher-order elements (H1&lt;k&gt;)</a></h3><p>For polynomial degree <svg class="m-math" style="width: 2.946em; height: 1.034em; vertical-align: -0.170em;" viewBox="0 -8.302191 28.28265 9.927748">
 <title>
 $ k \geq 2 $
 </title>
@@ -1167,7 +1167,7 @@ $ k $
 <g id='eq57-page1'>
 <use x='0' y='0' xlink:href='#eq57-g0-107'/>
 </g>
-</svg> is a compile-time template parameter.</p></section></section><section id="fem-ciarlet-global"><h2><a href="#fem-ciarlet-global">From Local to Global</a></h2><p>The Ciarlet definition describes a <strong>local</strong> finite element on a single reference cell <svg class="m-math" style="width: 1.127em; height: 1.180em; vertical-align: -0.000em;" viewBox="0 -11.324184 10.817691 11.324184">
+</svg> is a compile-time template parameter.</p></section></section><section id="fem-ciarlet-global"><h2><a href="#fem-ciarlet-global">From local to global</a></h2><p>The Ciarlet definition describes a <strong>local</strong> finite element on a single reference cell <svg class="m-math" style="width: 1.127em; height: 1.180em; vertical-align: -0.000em;" viewBox="0 -11.324184 10.817691 11.324184">
 <title>
 $ \hat{K} $
 </title>
@@ -1444,7 +1444,7 @@ $ v $
 
 <span class="c1">// Trial and test functions live in this global space</span>
 <span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
-<span class="nc">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre></section><section id="fem-ciarlet-see-also"><h2><a href="#fem-ciarlet-see-also">See Also</a></h2><ul><li><a href="fem-spaces.html" class="m-doc">Finite element spaces</a> — Available spaces in Rodin</li><li><a href="guides-getting-started-core-concepts.html" class="m-doc">Core Concepts</a> — Practical guide to using finite elements in Rodin</li><li><a href="guides-polytopes.html" class="m-doc">Polytopes</a> — Geometric shapes used as reference elements</li><li><a href="notation-index.html" class="m-doc">Notation</a> — Mathematical notation reference</li></ul></section>
+<span class="nc">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre></section><section id="fem-ciarlet-see-also"><h2><a href="#fem-ciarlet-see-also">See also</a></h2><ul><li><a href="fem-spaces.html" class="m-doc">Finite element spaces</a> — Available spaces in Rodin</li><li><a href="guides-getting-started-core-concepts.html" class="m-doc">Core concepts</a> — Practical guide to using finite elements in Rodin</li><li><a href="guides-polytopes.html" class="m-doc">Polytopes</a> — Geometric shapes used as reference elements</li><li><a href="notation-index.html" class="m-doc">Notation</a> — Mathematical notation reference</li></ul></section>
         <div class="m-note m-dim m-thin m-text-center"><a href="guides-connectivity.html" class="m-doc">&laquo; Connectivity</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="fem-spaces.html" class="m-doc">Finite element spaces &raquo;</a></div>
       </div>
     </div>

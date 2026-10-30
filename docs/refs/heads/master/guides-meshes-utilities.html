@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>General concepts &raquo; Meshes &raquo; Advanced Utilities | Rodin</title>
+  <title>General concepts &raquo; Meshes &raquo; Advanced utilities | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <link rel="prev" href="guides-meshes-io.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
@@ -33,7 +33,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -74,7 +74,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
           <span class="m-breadcrumb"><a href="guides-meshes.html">Meshes</a> &raquo;</span>
-          Advanced Utilities
+          Advanced utilities
         </h1>
         <p>Advanced mesh operations and transformations.</p>
         <nav class="m-block m-default">
@@ -82,7 +82,7 @@
           <ul>
             <li><a href="#guides-meshes-utilities-intro">Introduction</a></li>
             <li>
-              <a href="#guides-meshes-utilities-transform">Mesh Transformations</a>
+              <a href="#guides-meshes-utilities-transform">Mesh transformations</a>
               <ul>
                 <li><a href="#guides-meshes-utilities-transform-scale">Scaling</a></li>
                 <li><a href="#guides-meshes-utilities-transform-displace">Displacement</a></li>
@@ -95,33 +95,33 @@
                 <li><a href="#guides-meshes-utilities-submesh-boundary">Boundary SubMesh</a></li>
               </ul>
             </li>
-            <li><a href="#guides-meshes-utilities-ccl">Connected Component Labeling</a></li>
+            <li><a href="#guides-meshes-utilities-ccl">Connected component labeling</a></li>
             <li>
-              <a href="#guides-meshes-utilities-partition">Domain Decomposition</a>
+              <a href="#guides-meshes-utilities-partition">Domain decomposition</a>
               <ul>
-                <li><a href="#guides-meshes-utilities-partition-balanced">Balanced Partitioning</a></li>
-                <li><a href="#guides-meshes-utilities-partition-greedy">Greedy Partitioning</a></li>
+                <li><a href="#guides-meshes-utilities-partition-balanced">Balanced partitioning</a></li>
+                <li><a href="#guides-meshes-utilities-partition-greedy">Greedy partitioning</a></li>
               </ul>
             </li>
             <li>
-              <a href="#guides-meshes-utilities-coord">Coordinate Operations</a>
+              <a href="#guides-meshes-utilities-coord">Coordinate operations</a>
               <ul>
-                <li><a href="#guides-meshes-utilities-coord-set">Setting Coordinates</a></li>
+                <li><a href="#guides-meshes-utilities-coord-set">Setting coordinates</a></li>
               </ul>
             </li>
-            <li><a href="#guides-meshes-utilities-flush">Cache Management</a></li>
-            <li><a href="#guides-meshes-utilities-example">Complete Example</a></li>
+            <li><a href="#guides-meshes-utilities-flush">Cache management</a></li>
+            <li><a href="#guides-meshes-utilities-example">Complete example</a></li>
             <li>
-              <a href="#guides-meshes-utilities-advanced">Advanced Topics</a>
+              <a href="#guides-meshes-utilities-advanced">Advanced topics</a>
               <ul>
-                <li><a href="#guides-meshes-utilities-advanced-builder">Custom Builder</a></li>
+                <li><a href="#guides-meshes-utilities-advanced-builder">Custom builder</a></li>
                 <li><a href="#guides-meshes-utilities-advanced-trans">Transformations</a></li>
               </ul>
             </li>
-            <li><a href="#guides-meshes-utilities-see-also">See Also</a></li>
+            <li><a href="#guides-meshes-utilities-see-also">See also</a></li>
           </ul>
         </nav>
-<p>Rodin provides advanced utilities for mesh manipulation, transformation, and analysis.</p><section id="guides-meshes-utilities-intro"><h2><a href="#guides-meshes-utilities-intro">Introduction</a></h2><p>Beyond basic mesh creation and queries, Rodin offers powerful utilities for mesh transformation, domain decomposition, and advanced operations.</p></section><section id="guides-meshes-utilities-transform"><h2><a href="#guides-meshes-utilities-transform">Mesh Transformations</a></h2><section id="guides-meshes-utilities-transform-scale"><h3><a href="#guides-meshes-utilities-transform-scale">Scaling</a></h3><p>Scale all mesh coordinates by a factor:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<p>Rodin provides advanced utilities for mesh manipulation, transformation, and analysis.</p><section id="guides-meshes-utilities-intro"><h2><a href="#guides-meshes-utilities-intro">Introduction</a></h2><p>Beyond basic mesh creation and queries, Rodin offers powerful utilities for mesh transformation, domain decomposition, and advanced operations.</p></section><section id="guides-meshes-utilities-transform"><h2><a href="#guides-meshes-utilities-transform">Mesh transformations</a></h2><section id="guides-meshes-utilities-transform-scale"><h3><a href="#guides-meshes-utilities-transform-scale">Scaling</a></h3><p>Scale all mesh coordinates by a factor:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
@@ -187,7 +187,7 @@
 <span class="c1">// Create submesh of boundary</span>
 <span class="nc">SubMesh</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">skin</span><span class="p">();</span>
 
-<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Boundary elements: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">boundary</span><span class="p">.</span><span class="n">getCellCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre></section></section><section id="guides-meshes-utilities-ccl"><h2><a href="#guides-meshes-utilities-ccl">Connected Component Labeling</a></h2><p>Find connected components in the mesh:</p><pre class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Boundary elements: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">boundary</span><span class="p">.</span><span class="n">getCellCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre></section></section><section id="guides-meshes-utilities-ccl"><h2><a href="#guides-meshes-utilities-ccl">Connected component labeling</a></h2><p>Find connected components in the mesh:</p><pre class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
 
 <span class="c1">// Find connected components</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">ccl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">ccl</span><span class="p">(</span>
@@ -202,7 +202,7 @@
 <span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">component</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">ccl</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Component with "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">component</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span>
 <span class="w">            </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" cells"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="p">}</span></pre></section><section id="guides-meshes-utilities-partition"><h2><a href="#guides-meshes-utilities-partition">Domain Decomposition</a></h2><p>Partition meshes for parallel computing:</p><section id="guides-meshes-utilities-partition-balanced"><h3><a href="#guides-meshes-utilities-partition-balanced">Balanced Partitioning</a></h3><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="p">}</span></pre></section><section id="guides-meshes-utilities-partition"><h2><a href="#guides-meshes-utilities-partition">Domain decomposition</a></h2><p>Partition meshes for parallel computing:</p><section id="guides-meshes-utilities-partition-balanced"><h3><a href="#guides-meshes-utilities-partition-balanced">Balanced partitioning</a></h3><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
@@ -222,16 +222,16 @@
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre></section><section id="guides-meshes-utilities-partition-greedy"><h3><a href="#guides-meshes-utilities-partition-greedy">Greedy Partitioning</a></h3><pre class="m-code"><span class="nc">GreedyPartitioner</span><span class="w"> </span><span class="n">partitioner</span><span class="p">;</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">shards</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">partitioner</span><span class="p">.</span><span class="n">partition</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">numParts</span><span class="p">);</span></pre></section></section><section id="guides-meshes-utilities-coord"><h2><a href="#guides-meshes-utilities-coord">Coordinate Operations</a></h2><section id="guides-meshes-utilities-coord-set"><h3><a href="#guides-meshes-utilities-coord-set">Setting Coordinates</a></h3><pre class="m-code"><span class="c1">// Set coordinates of vertex 0</span>
+<span class="p">}</span></pre></section><section id="guides-meshes-utilities-partition-greedy"><h3><a href="#guides-meshes-utilities-partition-greedy">Greedy partitioning</a></h3><pre class="m-code"><span class="nc">GreedyPartitioner</span><span class="w"> </span><span class="n">partitioner</span><span class="p">;</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">shards</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">partitioner</span><span class="p">.</span><span class="n">partition</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">numParts</span><span class="p">);</span></pre></section></section><section id="guides-meshes-utilities-coord"><h2><a href="#guides-meshes-utilities-coord">Coordinate operations</a></h2><section id="guides-meshes-utilities-coord-set"><h3><a href="#guides-meshes-utilities-coord-set">Setting coordinates</a></h3><pre class="m-code"><span class="c1">// Set coordinates of vertex 0</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">setVertexCoordinates</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">  </span><span class="c1">// x-coordinate</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">setVertexCoordinates</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.5</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w">  </span><span class="c1">// y-coordinate</span>
 
 <span class="c1">// Or set all at once</span>
 <span class="n">Math</span><span class="o">::</span><span class="nc">SpatialPoint</span><span class="w"> </span><span class="nf">coords</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
 <span class="n">coords</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span><span class="w"> </span><span class="mf">2.5</span><span class="p">;</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">setVertexCoordinates</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">coords</span><span class="p">);</span></pre></section></section><section id="guides-meshes-utilities-flush"><h2><a href="#guides-meshes-utilities-flush">Cache Management</a></h2><p>Clear cached data:</p><pre class="m-code"><span class="c1">// Flush cached transformations and derived data</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">flush</span><span class="p">();</span></pre><p>This is useful after modifying mesh coordinates to ensure transformations are recomputed.</p></section><section id="guides-meshes-utilities-example"><h2><a href="#guides-meshes-utilities-example">Complete Example</a></h2><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">setVertexCoordinates</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">coords</span><span class="p">);</span></pre></section></section><section id="guides-meshes-utilities-flush"><h2><a href="#guides-meshes-utilities-flush">Cache management</a></h2><p>Clear cached data:</p><pre class="m-code"><span class="c1">// Flush cached transformations and derived data</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">flush</span><span class="p">();</span></pre><p>This is useful after modifying mesh coordinates to ensure transformations are recomputed.</p></section><section id="guides-meshes-utilities-example"><h2><a href="#guides-meshes-utilities-example">Complete example</a></h2><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
@@ -273,7 +273,7 @@
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre></section><section id="guides-meshes-utilities-advanced"><h2><a href="#guides-meshes-utilities-advanced">Advanced Topics</a></h2><section id="guides-meshes-utilities-advanced-builder"><h3><a href="#guides-meshes-utilities-advanced-builder">Custom Builder</a></h3><p>Use the builder for complete control:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">builder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Mesh</span><span class="o">::</span><span class="n">Build</span><span class="p">();</span>
+<span class="p">}</span></pre></section><section id="guides-meshes-utilities-advanced"><h2><a href="#guides-meshes-utilities-advanced">Advanced topics</a></h2><section id="guides-meshes-utilities-advanced-builder"><h3><a href="#guides-meshes-utilities-advanced-builder">Custom builder</a></h3><p>Use the builder for complete control:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">builder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Mesh</span><span class="o">::</span><span class="n">Build</span><span class="p">();</span>
 <span class="n">builder</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 <span class="w">       </span><span class="p">.</span><span class="n">reserve</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="w">  </span><span class="c1">// Reserve space for 100 cells</span>
 <span class="w">       </span><span class="p">.</span><span class="n">nodes</span><span class="p">(</span><span class="mi">50</span><span class="p">);</span><span class="w">       </span><span class="c1">// 50 vertices</span>
@@ -281,8 +281,8 @@
 <span class="c1">// Add vertices and cells...</span>
 
 <span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre></section><section id="guides-meshes-utilities-advanced-trans"><h3><a href="#guides-meshes-utilities-advanced-trans">Transformations</a></h3><p>Access and modify polytope transformations:</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">trans</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getPolytopeTransformation</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Cell 0</span>
-<span class="c1">// Use transformation for geometric computations</span></pre></section></section><section id="guides-meshes-utilities-see-also"><h2><a href="#guides-meshes-utilities-see-also">See Also</a></h2><ul><li><a href="guides-meshes.html" class="m-doc">Meshes overview</a></li><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh reference</a></li><li><a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html" class="m-doc">Partitioner reference</a></li><li>Examples:<ul><li><a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/Displace.cpp">Displace.cpp</a></li><li><a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/Skin.cpp">Skin.cpp</a></li><li><a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/CCL.cpp">CCL.cpp</a></li><li><a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/BalancedCompactPartitioner.cpp">BalancedCompactPartitioner.cpp</a></li></ul></li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="guides-meshes-io.html" class="m-doc">&laquo; Mesh Input/Output</a> | <a href="guides-meshes.html" class="m-doc">Meshes</a></div>
+<span class="c1">// Use transformation for geometric computations</span></pre></section></section><section id="guides-meshes-utilities-see-also"><h2><a href="#guides-meshes-utilities-see-also">See also</a></h2><ul><li><a href="guides-meshes.html" class="m-doc">Meshes overview</a></li><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh reference</a></li><li><a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html" class="m-doc">Partitioner reference</a></li><li>Examples:<ul><li><a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/Displace.cpp">Displace.cpp</a></li><li><a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/Skin.cpp">Skin.cpp</a></li><li><a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/CCL.cpp">CCL.cpp</a></li><li><a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/BalancedCompactPartitioner.cpp">BalancedCompactPartitioner.cpp</a></li></ul></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-meshes-io.html" class="m-doc">&laquo; Mesh input/output</a> | <a href="guides-meshes.html" class="m-doc">Meshes</a></div>
       </div>
     </div>
   </div>

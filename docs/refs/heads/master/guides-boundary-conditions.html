@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>General concepts &raquo; Boundary Conditions | Rodin</title>
+  <title>General concepts &raquo; Boundary conditions | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="prev" href="guides-weak-formulations.html" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <link rel="prev" href="guides-variational.html" />
   <link rel="next" href="guides-solvers.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
@@ -34,7 +34,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -74,7 +74,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
-          Boundary Conditions
+          Boundary conditions
         </h1>
         <p>Guide to applying boundary conditions in Rodin.</p>
         <nav class="m-block m-default">
@@ -82,30 +82,30 @@
           <ul>
             <li><a href="#guides-bc-intro">Introduction</a></li>
             <li>
-              <a href="#guides-bc-dirichlet">Dirichlet Boundary Conditions</a>
+              <a href="#guides-bc-dirichlet">Dirichlet boundary conditions</a>
               <ul>
                 <li><a href="#guides-bc-dirichlet-homogeneous">Homogeneous Dirichlet ( </a></li>
-                <li><a href="#guides-bc-dirichlet-nonhomogeneous">Non-Homogeneous Dirichlet</a></li>
-                <li><a href="#guides-bc-dirichlet-partial">Partial Boundary Conditions</a></li>
-                <li><a href="#guides-bc-dirichlet-vector">Vector Dirichlet Conditions</a></li>
+                <li><a href="#guides-bc-dirichlet-nonhomogeneous">Non-homogeneous Dirichlet</a></li>
+                <li><a href="#guides-bc-dirichlet-partial">Partial boundary conditions</a></li>
+                <li><a href="#guides-bc-dirichlet-vector">Vector Dirichlet conditions</a></li>
                 <li><a href="#guides-bc-elimination">Sparse algebraic elimination</a></li>
               </ul>
             </li>
             <li><a href="#autotoc_md553">Architecture</a></li>
             <li><a href="#autotoc_md554">Implementation</a></li>
             <li>
-              <a href="#guides-bc-neumann">Neumann Boundary Conditions</a>
+              <a href="#guides-bc-neumann">Neumann boundary conditions</a>
               <ul>
-                <li><a href="#guides-bc-neumann-example">Example: Neumann on One Side</a></li>
-                <li><a href="#guides-bc-neumann-natural">Homogeneous Neumann (Natural)</a></li>
-                <li><a href="#guides-bc-neumann-vector">Vector Neumann (Traction)</a></li>
+                <li><a href="#guides-bc-neumann-example">Example: Neumann on one side</a></li>
+                <li><a href="#guides-bc-neumann-natural">Homogeneous Neumann (natural)</a></li>
+                <li><a href="#guides-bc-neumann-vector">Vector Neumann (traction)</a></li>
               </ul>
             </li>
-            <li><a href="#guides-bc-periodic">Periodic Boundary Conditions</a></li>
-            <li><a href="#guides-bc-mixed">Mixed Boundary Conditions</a></li>
-            <li><a href="#guides-bc-complete">Complete Example</a></li>
-            <li><a href="#guides-bc-summary">Summary Table</a></li>
-            <li><a href="#guides-bc-see-also">See Also</a></li>
+            <li><a href="#guides-bc-periodic">Periodic boundary conditions</a></li>
+            <li><a href="#guides-bc-mixed">Mixed boundary conditions</a></li>
+            <li><a href="#guides-bc-complete">Complete example</a></li>
+            <li><a href="#guides-bc-summary">Summary table</a></li>
+            <li><a href="#guides-bc-see-also">See also</a></li>
           </ul>
         </nav>
 <section id="guides-bc-intro"><h2><a href="#guides-bc-intro">Introduction</a></h2><p>Boundary conditions specify the behavior of the solution on the boundary <svg class="m-math" style="width: 1.592em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 15.284187 8.302191">
@@ -200,7 +200,7 @@ $ \partial u / \partial n = 0 $
 <use x='36.483601' y='0' xlink:href='#eq6-g1-61'/>
 <use x='48.909082' y='0' xlink:href='#eq6-g1-48'/>
 </g>
-</svg>) are the &quot;default&quot; boundary condition. If no Dirichlet or Neumann condition is imposed on a boundary segment, homogeneous Neumann is automatically satisfied by the weak formulation.</p><p>Dirichlet and periodic conditions are structural constraints: Rodin enforces them algebraically in the assembled system. Penalty terms are a different modeling choice. See <a href="guides-numerical-contracts.html" class="m-doc">Numericalcontracts</a> for the shared constraint contract.</p></aside></section><section id="guides-bc-dirichlet"><h2><a href="#guides-bc-dirichlet">Dirichlet Boundary Conditions</a></h2><p>Dirichlet conditions specify the value of the solution on the boundary:</p><div class="m-math"><svg style="width: 10.579em; height: 1.107em;" viewBox="143.49081 -10.626787 101.561383 10.626798">
+</svg>) are the &quot;default&quot; boundary condition. If no Dirichlet or Neumann condition is imposed on a boundary segment, homogeneous Neumann is automatically satisfied by the weak formulation.</p><p>Dirichlet and periodic conditions are structural constraints: Rodin enforces them algebraically in the assembled system. Penalty terms are a different modeling choice. See <a href="guides-numerical-contracts.html" class="m-doc">Numericalcontracts</a> for the shared constraint contract.</p></aside></section><section id="guides-bc-dirichlet"><h2><a href="#guides-bc-dirichlet">Dirichlet boundary conditions</a></h2><p>Dirichlet conditions specify the value of the solution on the boundary:</p><div class="m-math"><svg style="width: 10.579em; height: 1.107em;" viewBox="143.49081 -10.626787 101.561383 10.626798">
 <title>
 \[  u = g \quad \text{on } \Gamma_D \subseteq \partial\Omega
 \]
@@ -232,21 +232,21 @@ $ \partial u / \partial n = 0 $
 </svg></div><section id="guides-bc-dirichlet-homogeneous"><h3><a href="#guides-bc-dirichlet-homogeneous">Homogeneous Dirichlet ( </a></h3><p>The most common case sets the solution to zero on the boundary:</p><pre class="m-code"><span class="nc">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 <span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
-<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span><span class="w">       </span><span class="c1">// u = 0 on entire boundary</span></pre></section><section id="guides-bc-dirichlet-nonhomogeneous"><h3><a href="#guides-bc-dirichlet-nonhomogeneous">Non-Homogeneous Dirichlet</a></h3><p>To prescribe a non-zero value:</p><pre class="m-code"><span class="c1">// Using a constant</span>
+<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span><span class="w">       </span><span class="c1">// u = 0 on entire boundary</span></pre></section><section id="guides-bc-dirichlet-nonhomogeneous"><h3><a href="#guides-bc-dirichlet-nonhomogeneous">Non-homogeneous Dirichlet</a></h3><p>To prescribe a non-zero value:</p><pre class="m-code"><span class="c1">// Using a constant</span>
 <span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">RealFunction</span><span class="p">(</span><span class="mf">1.0</span><span class="p">))</span>
 
 <span class="c1">// Using a spatial function</span>
 <span class="nc">RealFunction</span><span class="w"> </span><span class="n">g</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">();</span>
 <span class="p">});</span>
-<span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">)</span></pre></section><section id="guides-bc-dirichlet-partial"><h3><a href="#guides-bc-dirichlet-partial">Partial Boundary Conditions</a></h3><p>To apply Dirichlet conditions only on a specific part of the boundary, use the <code>.on()</code> method with a boundary attribute:</p><pre class="m-code"><span class="c1">// Apply u = 0 only on boundary with attribute 1</span>
+<span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">)</span></pre></section><section id="guides-bc-dirichlet-partial"><h3><a href="#guides-bc-dirichlet-partial">Partial boundary conditions</a></h3><p>To apply Dirichlet conditions only on a specific part of the boundary, use the <code>.on()</code> method with a boundary attribute:</p><pre class="m-code"><span class="c1">// Apply u = 0 only on boundary with attribute 1</span>
 <span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">()).</span><span class="n">on</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1">// Apply u = g only on boundary with attribute 2</span>
 <span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">).</span><span class="n">on</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1">// Apply on multiple boundary attributes at once</span>
-<span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">()).</span><span class="n">on</span><span class="p">({</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">})</span></pre><p>Boundary attributes are integers associated with boundary elements in the mesh. They are typically set during mesh generation or loaded from a mesh file.</p></section><section id="guides-bc-dirichlet-vector"><h3><a href="#guides-bc-dirichlet-vector">Vector Dirichlet Conditions</a></h3><p>For vector-valued problems (e.g., elasticity), use vector functions:</p><pre class="m-code"><span class="c1">// Fix displacement to zero (clamped boundary)</span>
+<span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">()).</span><span class="n">on</span><span class="p">({</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">})</span></pre><p>Boundary attributes are integers associated with boundary elements in the mesh. They are typically set during mesh generation or loaded from a mesh file.</p></section><section id="guides-bc-dirichlet-vector"><h3><a href="#guides-bc-dirichlet-vector">Vector Dirichlet conditions</a></h3><p>For vector-valued problems (e.g., elasticity), use vector functions:</p><pre class="m-code"><span class="c1">// Fix displacement to zero (clamped boundary)</span>
 <span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">VectorFunction</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">}).</span><span class="n">on</span><span class="p">(</span><span class="n">GammaD</span><span class="p">)</span>
 
 <span class="c1">// Prescribe a specific displacement</span>
@@ -661,7 +661,7 @@ $O(n+k)$
 <use x='35.229158' y='0' xlink:href='#eq29-g0-107'/>
 <use x='41.718662' y='0' xlink:href='#eq29-g1-41'/>
 </g>
-</svg> temporary storage. Pruning adds up to two binary searches per overlapping free column. Operator storage grows only for absent constrained diagonals. It remains compressed, with sorted row indices, after the call. The solution vector is untouched, preserving warm starts. Repeating the same constraints is idempotent up to floating-point rounding. An empty constraint map only validates dimensions and compresses storage.</p><p>This algorithm is serial and constructs no persistent transpose index or parallel worker pool. Its linear scan replaces repeated transpose searches; it does not make a stronger asymptotic claim than linear stored-entry work. Tests compare the matrix and load against independent projector constructions, including asymmetric storage, missing diagonals, complex data, offsets and mixed finite-element systems. The opt-in <code>RodinSparseEliminationBenchmarks</code> executable measures the public operation with restoration outside timing.</p></section><section id="guides-bc-neumann"><h2><a href="#guides-bc-neumann">Neumann Boundary Conditions</a></h2><p>Neumann conditions prescribe the normal derivative (or flux) on the boundary:</p><div class="m-math"><svg style="width: 8.185em; height: 2.562em;" viewBox="155.3316 -24.590612 78.57715 24.590612">
+</svg> temporary storage. Pruning adds up to two binary searches per overlapping free column. Operator storage grows only for absent constrained diagonals. It remains compressed, with sorted row indices, after the call. The solution vector is untouched, preserving warm starts. Repeating the same constraints is idempotent up to floating-point rounding. An empty constraint map only validates dimensions and compresses storage.</p><p>This algorithm is serial and constructs no persistent transpose index or parallel worker pool. Its linear scan replaces repeated transpose searches; it does not make a stronger asymptotic claim than linear stored-entry work. Tests compare the matrix and load against independent projector constructions, including asymmetric storage, missing diagonals, complex data, offsets and mixed finite-element systems. The opt-in <code>RodinSparseEliminationBenchmarks</code> executable measures the public operation with restoration outside timing.</p></section><section id="guides-bc-neumann"><h2><a href="#guides-bc-neumann">Neumann boundary conditions</a></h2><p>Neumann conditions prescribe the normal derivative (or flux) on the boundary:</p><div class="m-math"><svg style="width: 8.185em; height: 2.562em;" viewBox="155.3316 -24.590612 78.57715 24.590612">
 <title>
 \[  \frac{\partial u}{\partial n} = g \quad \text{on } \Gamma_N
 \]
@@ -691,7 +691,7 @@ $O(n+k)$
 <use x='226.338445' y='-6.407399' xlink:href='#eq30-g0-78'/>
 </g>
 </svg></div><p>These arise naturally from integration by parts in the weak formulation and appear as <strong>boundary integrals</strong>:</p><pre class="m-code"><span class="c1">// \int_\GammaN g v ds</span>
-<span class="nc">BoundaryIntegral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span></pre><section id="guides-bc-neumann-example"><h3><a href="#guides-bc-neumann-example">Example: Neumann on One Side</a></h3><pre class="m-code"><span class="kt">int</span><span class="w"> </span><span class="n">GammaD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">// Dirichlet boundary</span>
+<span class="nc">BoundaryIntegral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span></pre><section id="guides-bc-neumann-example"><h3><a href="#guides-bc-neumann-example">Example: Neumann on one side</a></h3><pre class="m-code"><span class="kt">int</span><span class="w"> </span><span class="n">GammaD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">// Dirichlet boundary</span>
 <span class="kt">int</span><span class="w"> </span><span class="n">GammaN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">// Neumann boundary</span>
 
 <span class="nc">RealFunction</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w">  </span><span class="c1">// Prescribed flux</span>
@@ -700,7 +700,7 @@ $O(n+k)$
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 <span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
 <span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nc">BoundaryIntegral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span>
-<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">()).</span><span class="n">on</span><span class="p">(</span><span class="n">GammaD</span><span class="p">);</span></pre></section><section id="guides-bc-neumann-natural"><h3><a href="#guides-bc-neumann-natural">Homogeneous Neumann (Natural)</a></h3><p>Homogeneous Neumann conditions ( <svg class="m-math" style="width: 5.704em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 54.762072 11.955168">
+<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">()).</span><span class="n">on</span><span class="p">(</span><span class="n">GammaD</span><span class="p">);</span></pre></section><section id="guides-bc-neumann-natural"><h3><a href="#guides-bc-neumann-natural">Homogeneous Neumann (natural)</a></h3><p>Homogeneous Neumann conditions ( <svg class="m-math" style="width: 5.704em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 54.762072 11.955168">
 <title>
 $ \partial u / \partial n = 0 $
 </title>
@@ -721,7 +721,7 @@ $ \partial u / \partial n = 0 $
 <use x='36.483601' y='0' xlink:href='#eq31-g1-61'/>
 <use x='48.909082' y='0' xlink:href='#eq31-g1-48'/>
 </g>
-</svg>) are the &quot;default&quot; — they are automatically satisfied when no boundary integral is added and no Dirichlet condition is imposed on that part of the boundary.</p></section><section id="guides-bc-neumann-vector"><h3><a href="#guides-bc-neumann-vector">Vector Neumann (Traction)</a></h3><p>In elasticity, a Neumann condition corresponds to an applied traction (force per unit area). The traction vector <svg class="m-math" style="width: 0.556em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 5.334172 8.302191">
+</svg>) are the &quot;default&quot; — they are automatically satisfied when no boundary integral is added and no Dirichlet condition is imposed on that part of the boundary.</p></section><section id="guides-bc-neumann-vector"><h3><a href="#guides-bc-neumann-vector">Vector Neumann (traction)</a></h3><p>In elasticity, a Neumann condition corresponds to an applied traction (force per unit area). The traction vector <svg class="m-math" style="width: 0.556em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 5.334172 8.302191">
 <title>
 $ \mathbf{f} $
 </title>
@@ -736,7 +736,7 @@ $ \mathbf{f} $
 <span class="nc">Problem</span><span class="w"> </span><span class="nf">elasticity</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">elasticity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">LinearElasticityIntegral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">)</span>
 <span class="w">           </span><span class="o">-</span><span class="w"> </span><span class="nc">BoundaryIntegral</span><span class="p">(</span><span class="n">traction</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span>
-<span class="w">           </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">VectorFunction</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">}).</span><span class="n">on</span><span class="p">(</span><span class="n">GammaD</span><span class="p">);</span></pre></section></section><section id="guides-bc-periodic"><h2><a href="#guides-bc-periodic">Periodic Boundary Conditions</a></h2><p>Periodic conditions enforce that the solution on one boundary equals the solution on the opposite boundary. They are used for problems on domains that tile (e.g. unit cells in homogenization):</p><div class="m-math"><svg style="width: 20.403em; height: 1.245em;" viewBox="96.339031 -11.955168 195.864925 11.955168">
+<span class="w">           </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">VectorFunction</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">}).</span><span class="n">on</span><span class="p">(</span><span class="n">GammaD</span><span class="p">);</span></pre></section></section><section id="guides-bc-periodic"><h2><a href="#guides-bc-periodic">Periodic boundary conditions</a></h2><p>Periodic conditions enforce that the solution on one boundary equals the solution on the opposite boundary. They are used for problems on domains that tile (e.g. unit cells in homogenization):</p><div class="m-math"><svg style="width: 20.403em; height: 1.245em;" viewBox="96.339031 -11.955168 195.864925 11.955168">
 <title>
 \[  u(0, y) = u(2\pi, y), \quad
   u(x, 0) = u(x, 2\pi)
@@ -807,7 +807,7 @@ $ \mathbf{f} $
 <span class="nc">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 <span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
-<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">PeriodicBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">dofs</span><span class="p">);</span></pre><p>See the <a href="examples-pdes-periodic.html" class="m-doc">periodic Poisson example</a> for a complete walkthrough.</p></section><section id="guides-bc-mixed"><h2><a href="#guides-bc-mixed">Mixed Boundary Conditions</a></h2><p>In practice, different parts of the boundary often have different conditions. For example, in elasticity:</p><pre class="m-code"><span class="kt">int</span><span class="w"> </span><span class="n">GammaD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">// Clamped (fixed) boundary</span>
+<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">PeriodicBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">dofs</span><span class="p">);</span></pre><p>See the <a href="examples-pdes-periodic.html" class="m-doc">periodic Poisson example</a> for a complete walkthrough.</p></section><section id="guides-bc-mixed"><h2><a href="#guides-bc-mixed">Mixed boundary conditions</a></h2><p>In practice, different parts of the boundary often have different conditions. For example, in elasticity:</p><pre class="m-code"><span class="kt">int</span><span class="w"> </span><span class="n">GammaD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">// Clamped (fixed) boundary</span>
 <span class="kt">int</span><span class="w"> </span><span class="n">GammaN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">// Loaded boundary</span>
 <span class="c1">// Remaining boundary: traction-free (homogeneous Neumann)</span>
 
@@ -816,7 +816,7 @@ $ \mathbf{f} $
 <span class="nc">Problem</span><span class="w"> </span><span class="nf">elasticity</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">elasticity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">LinearElasticityIntegral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">)</span>
 <span class="w">           </span><span class="o">-</span><span class="w"> </span><span class="nc">BoundaryIntegral</span><span class="p">(</span><span class="n">load</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span>
-<span class="w">           </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">VectorFunction</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">}).</span><span class="n">on</span><span class="p">(</span><span class="n">GammaD</span><span class="p">);</span></pre></section><section id="guides-bc-complete"><h2><a href="#guides-bc-complete">Complete Example</a></h2><p>Here is a complete example with mixed boundary conditions:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
+<span class="w">           </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">VectorFunction</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">}).</span><span class="n">on</span><span class="p">(</span><span class="n">GammaD</span><span class="p">);</span></pre></section><section id="guides-bc-complete"><h2><a href="#guides-bc-complete">Complete example</a></h2><p>Here is a complete example with mixed boundary conditions:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
@@ -850,7 +850,7 @@ $ \mathbf{f} $
 <span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre></section><section id="guides-bc-summary"><h2><a href="#guides-bc-summary">Summary Table</a></h2><table class="m-table"><thead><tr><th>Type</th><th>Math</th><th>Rodin Code</th><th>Appears In</th></tr></thead><tbody><tr><td>Dirichlet</td><td><svg class="m-math" style="width: 2.963em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 28.44301 7.47198">
+<span class="p">}</span></pre></section><section id="guides-bc-summary"><h2><a href="#guides-bc-summary">Summary table</a></h2><table class="m-table"><thead><tr><th>Type</th><th>Math</th><th>Rodin Code</th><th>Appears In</th></tr></thead><tbody><tr><td>Dirichlet</td><td><svg class="m-math" style="width: 2.963em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 28.44301 7.47198">
 <title>
 $ u = g $
 </title>
@@ -956,8 +956,8 @@ $ u(x_L) = u(x_R) $
 <use x='62.289516' y='1.793263' xlink:href='#eq39-g0-82'/>
 <use x='69.215007' y='0' xlink:href='#eq39-g2-41'/>
 </g>
-</svg></td><td><code>PeriodicBC(u, dofMap)</code></td><td>System modification</td></tr></tbody></table></section><section id="guides-bc-see-also"><h2><a href="#guides-bc-see-also">See Also</a></h2><ul><li><a href="guides-weak-formulations.html" class="m-doc">Weak formulations</a></li><li><a href="guides-getting-started-core-concepts.html" class="m-doc">Core concepts</a></li><li><a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a></li><li><a href="examples-pdes-poisson.html" class="m-doc">Poisson example</a></li><li><a href="examples-pdes-elasticity.html" class="m-doc">Elasticity example</a></li><li><a href="examples-pdes-periodic.html" class="m-doc">Periodic Poisson example</a></li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="guides-weak-formulations.html" class="m-doc">&laquo; Weak Formulations</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-solvers.html" class="m-doc">Solvers &raquo;</a></div>
+</svg></td><td><code>PeriodicBC(u, dofMap)</code></td><td>System modification</td></tr></tbody></table></section><section id="guides-bc-see-also"><h2><a href="#guides-bc-see-also">See also</a></h2><ul><li><a href="guides-weak-formulations.html" class="m-doc">Weak formulations</a></li><li><a href="guides-getting-started-core-concepts.html" class="m-doc">Core concepts</a></li><li><a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a></li><li><a href="examples-pdes-poisson.html" class="m-doc">Poisson example</a></li><li><a href="examples-pdes-elasticity.html" class="m-doc">Elasticity example</a></li><li><a href="examples-pdes-periodic.html" class="m-doc">Periodic Poisson example</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-variational.html" class="m-doc">&laquo; Variational formulations in Rodin</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-solvers.html" class="m-doc">Solvers &raquo;</a></div>
       </div>
     </div>
   </div>

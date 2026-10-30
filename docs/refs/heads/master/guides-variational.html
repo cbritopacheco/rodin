@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <title>General concepts &raquo; Variational formulations in Rodin | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="prev" href="guides-ordering.html" />
-  <link rel="next" href="guides-weak-formulations.html" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <link rel="prev" href="guides-weak-formulations.html" />
+  <link rel="next" href="guides-boundary-conditions.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
   <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
@@ -34,7 +34,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -82,44 +82,44 @@
           <ul>
             <li><a href="#guides-variational-intro">Introduction</a></li>
             <li>
-              <a href="#guides-variational-weak">From Strong to Weak Form</a>
+              <a href="#guides-variational-weak">From strong to weak form</a>
               <ul>
-                <li><a href="#guides-variational-weak-example">Example: The Poisson Equation</a></li>
+                <li><a href="#guides-variational-weak-example">Example: the Poisson equation</a></li>
               </ul>
             </li>
             <li>
               <a href="#guides-variational-forms">Forms in Rodin</a>
               <ul>
-                <li><a href="#guides-variational-forms-bilinear">Bilinear Forms</a></li>
+                <li><a href="#guides-variational-forms-bilinear">Bilinear forms</a></li>
                 <li><a href="#guides-variational-forms-named">Named cell forms</a></li>
-                <li><a href="#guides-variational-forms-linear">Linear Forms</a></li>
-                <li><a href="#guides-variational-forms-assembly">Problem Assembly</a></li>
+                <li><a href="#guides-variational-forms-linear">Linear forms</a></li>
+                <li><a href="#guides-variational-forms-assembly">Problem assembly</a></li>
               </ul>
             </li>
-            <li><a href="#guides-variational-operators">Differential Operators</a></li>
+            <li><a href="#guides-variational-operators">Differential operators</a></li>
             <li>
-              <a href="#guides-variational-bc">Boundary Conditions</a>
+              <a href="#guides-variational-bc">Boundary conditions</a>
               <ul>
-                <li><a href="#guides-variational-bc-dirichlet">Dirichlet Conditions</a></li>
-                <li><a href="#guides-variational-bc-neumann">Neumann Conditions</a></li>
+                <li><a href="#guides-variational-bc-dirichlet">Dirichlet conditions</a></li>
+                <li><a href="#guides-variational-bc-neumann">Neumann conditions</a></li>
               </ul>
             </li>
-            <li><a href="#guides-variational-solvers">Solving the Problem</a></li>
-            <li><a href="#guides-variational-output">Saving and Visualizing Results</a></li>
-            <li><a href="#guides-variational-complete">Complete Example</a></li>
-            <li><a href="#guides-variational-mixed">Mixed Formulations</a></li>
+            <li><a href="#guides-variational-solvers">Solving the problem</a></li>
+            <li><a href="#guides-variational-output">Saving and visualizing results</a></li>
+            <li><a href="#guides-variational-complete">Complete example</a></li>
+            <li><a href="#guides-variational-mixed">Mixed formulations</a></li>
             <li>
-              <a href="#guides-variational-dg">Discontinuous Galerkin Formulations</a>
+              <a href="#guides-variational-dg">Discontinuous Galerkin formulations</a>
               <ul>
-                <li><a href="#guides-variational-dg-operators">DG Operators</a></li>
-                <li><a href="#guides-variational-dg-integrals">DG Integral Types</a></li>
-                <li><a href="#guides-variational-dg-example">DG Poisson Example</a></li>
+                <li><a href="#guides-variational-dg-operators">DG operators</a></li>
+                <li><a href="#guides-variational-dg-integrals">DG integral types</a></li>
+                <li><a href="#guides-variational-dg-example">DG Poisson example</a></li>
               </ul>
             </li>
-            <li><a href="#guides-variational-see-also">See Also</a></li>
+            <li><a href="#guides-variational-see-also">See also</a></li>
           </ul>
         </nav>
-<section id="guides-variational-intro"><h2><a href="#guides-variational-intro">Introduction</a></h2><p>The finite element method works by converting a partial differential equation (PDE) from its <strong>strong form</strong> into a <strong>weak (variational) form</strong>. Rodin&#x27;s <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module provides a form language that lets you express these variational formulations in C++ code that closely mirrors the mathematical notation.</p><p>The cross-module rules behind these examples are summarized in <a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a>, including the <code>Problem</code> sign convention and the distinction between interpolation and <code>L2</code> projection.</p></section><section id="guides-variational-weak"><h2><a href="#guides-variational-weak">From Strong to Weak Form</a></h2><p>Consider a generic second-order PDE in its strong form:</p><div class="m-math"><svg style="width: 7.333em; height: 1.107em;" viewBox="159.071314 -10.626787 70.400363 10.626798">
+<section id="guides-variational-intro"><h2><a href="#guides-variational-intro">Introduction</a></h2><p>The finite element method works by converting a partial differential equation (PDE) from its <strong>strong form</strong> into a <strong>weak (variational) form</strong>. Rodin&#x27;s <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module provides a form language that lets you express these variational formulations in C++ code that closely mirrors the mathematical notation.</p><p>The cross-module rules behind these examples are summarized in <a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a>, including the <code>Problem</code> sign convention and the distinction between interpolation and <code>L2</code> projection.</p></section><section id="guides-variational-weak"><h2><a href="#guides-variational-weak">From strong to weak form</a></h2><p>Consider a generic second-order PDE in its strong form:</p><div class="m-math"><svg style="width: 7.333em; height: 1.107em;" viewBox="159.071314 -10.626787 70.400363 10.626798">
 <title>
 \[  \mathcal{L} u = f \quad \text{in } \Omega
 \]
@@ -275,7 +275,7 @@ $ \ell(v) $
 <use x='9.464432' y='0' xlink:href='#eq8-g0-118'/>
 <use x='15.552651' y='0' xlink:href='#eq8-g1-41'/>
 </g>
-</svg> is a linear form.</p><section id="guides-variational-weak-example"><h3><a href="#guides-variational-weak-example">Example: The Poisson Equation</a></h3><p>The Poisson equation <svg class="m-math" style="width: 5.053em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 48.508667 10.626798">
+</svg> is a linear form.</p><section id="guides-variational-weak-example"><h3><a href="#guides-variational-weak-example">Example: the Poisson equation</a></h3><p>The Poisson equation <svg class="m-math" style="width: 5.053em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 48.508667 10.626798">
 <title>
 $ -\Delta u = f $
 </title>
@@ -357,7 +357,7 @@ $ \partial\Omega $
 </svg></div><p>In Rodin, this translates directly to:</p><pre class="m-code"><span class="nc">Problem</span><span class="w"> </span><span class="nf">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w">   </span><span class="c1">// a(u,v) = integral of grad(u) . grad(v)</span>
 <span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w">                </span><span class="c1">// l(v)   = integral of f * v</span>
-<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span><span class="w">       </span><span class="c1">// u = 0 on the boundary</span></pre></section></section><section id="guides-variational-forms"><h2><a href="#guides-variational-forms">Forms in Rodin</a></h2><section id="guides-variational-forms-bilinear"><h3><a href="#guides-variational-forms-bilinear">Bilinear Forms</a></h3><p>A bilinear form <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
+<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span><span class="w">       </span><span class="c1">// u = 0 on the boundary</span></pre></section></section><section id="guides-variational-forms"><h2><a href="#guides-variational-forms">Forms in Rodin</a></h2><section id="guides-variational-forms-bilinear"><h3><a href="#guides-variational-forms-bilinear">Bilinear forms</a></h3><p>A bilinear form <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
 <title>
 $ a(u, v) $
 </title>
@@ -407,7 +407,7 @@ $ v $
 <span class="nc">Integral</span><span class="p">(</span><span class="n">k</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span></pre></section><section id="guides-variational-forms-named"><h3><a href="#guides-variational-forms-named">Named cell forms</a></h3><p>For repeated assembly of common cell operators, Rodin provides <a href="class_rodin_1_1_variational_1_1_mass_form.html" class="m-doc">MassForm</a>, <a href="class_rodin_1_1_variational_1_1_diffusion_form.html" class="m-doc">DiffusionForm</a>, <a href="class_rodin_1_1_variational_1_1_helmholtz_form.html" class="m-doc">HelmholtzForm</a>, and <a href="class_rodin_1_1_variational_1_1_linear_elasticity_form.html" class="m-doc">LinearElasticityForm</a>. They assemble the same discrete operators, including quadrature orders, as the corresponding integrals. The first assembly constructs the sparse pattern; later assemblies reuse its map to matrix values. The named forms currently use local sparse matrices with Sequential or OpenMP assembly.</p><pre class="m-code"><span class="nc">MassForm</span><span class="w"> </span><span class="nf">mass</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w">                 </span><span class="c1">// Integral(c * u, v)</span>
 <span class="nc">DiffusionForm</span><span class="w"> </span><span class="nf">diffusion</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w">       </span><span class="c1">// Integral(a * Grad(u), Grad(v))</span>
 <span class="nc">HelmholtzForm</span><span class="w"> </span><span class="nf">helmholtz</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w">    </span><span class="c1">// Diffusion and mass terms</span>
-<span class="nc">LinearElasticityForm</span><span class="w"> </span><span class="nf">elasticity</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">);</span></pre><p>Here <code>u</code> and <code>v</code> use scalar spaces for diffusion and Helmholtz; mass also accepts vector spaces. Elasticity uses vector-valued <code>w</code> and <code>z</code> whose dimension matches the mesh. Each form can restrict its cell integral with .over(attribute). The elasticity form is declared by <code>Rodin/Solid.h</code>; the other three are declared by <code>Rodin/Variational.h</code>.</p></section><section id="guides-variational-forms-linear"><h3><a href="#guides-variational-forms-linear">Linear Forms</a></h3><p>A linear form <svg class="m-math" style="width: 2.094em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 20.104977 11.955168">
+<span class="nc">LinearElasticityForm</span><span class="w"> </span><span class="nf">elasticity</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">);</span></pre><p>Here <code>u</code> and <code>v</code> use scalar spaces for diffusion and Helmholtz; mass also accepts vector spaces. Elasticity uses vector-valued <code>w</code> and <code>z</code> whose dimension matches the mesh. Each form can restrict its cell integral with .over(attribute). The elasticity form is declared by <code>Rodin/Solid.h</code>; the other three are declared by <code>Rodin/Variational.h</code>.</p></section><section id="guides-variational-forms-linear"><h3><a href="#guides-variational-forms-linear">Linear forms</a></h3><p>A linear form <svg class="m-math" style="width: 2.094em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 20.104977 11.955168">
 <title>
 $ \ell(v) $
 </title>
@@ -437,7 +437,7 @@ $ v $
 <span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
 
 <span class="c1">// Boundary load: integral of g * v over a boundary</span>
-<span class="nc">BoundaryIntegral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span></pre></section><section id="guides-variational-forms-assembly"><h3><a href="#guides-variational-forms-assembly">Problem Assembly</a></h3><p>The <code>Problem</code> class assembles bilinear and linear forms into a linear system <svg class="m-math" style="width: 4.072em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 39.092018 8.302191">
+<span class="nc">BoundaryIntegral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span></pre></section><section id="guides-variational-forms-assembly"><h3><a href="#guides-variational-forms-assembly">Problem assembly</a></h3><p>The <code>Problem</code> class assembles bilinear and linear forms into a linear system <svg class="m-math" style="width: 4.072em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 39.092018 8.302191">
 <title>
 $ A\mathbf{x} = \mathbf{b} $
 </title>
@@ -569,7 +569,7 @@ $ \mathbf{b} $
 <g id='eq25-page1'>
 <use x='0' y='0' xlink:href='#eq25-g0-98'/>
 </g>
-</svg> accordingly.</p></section></section><section id="guides-variational-operators"><h2><a href="#guides-variational-operators">Differential Operators</a></h2><p>Rodin provides standard differential operators that work on trial and test functions. These are <strong>expression templates</strong>: they are not evaluated immediately, but recorded as symbolic expressions and evaluated later during assembly.</p><table class="m-table"><thead><tr><th>Operator</th><th>Mathematical meaning</th><th>Result</th><th>Code</th></tr></thead><tbody><tr><td>Gradient</td><td><svg class="m-math" style="width: 1.732em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 16.62511 8.169354">
+</svg> accordingly.</p></section></section><section id="guides-variational-operators"><h2><a href="#guides-variational-operators">Differential operators</a></h2><p>Rodin provides standard differential operators that work on trial and test functions. These are <strong>expression templates</strong>: they are not evaluated immediately, but recorded as symbolic expressions and evaluated later during assembly.</p><table class="m-table"><thead><tr><th>Operator</th><th>Mathematical meaning</th><th>Result</th><th>Code</th></tr></thead><tbody><tr><td>Gradient</td><td><svg class="m-math" style="width: 1.732em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 16.62511 8.169354">
 <title>
 $ \nabla u $
 </title>
@@ -738,7 +738,7 @@ $ \mathbf{u} $
 
 <span class="c1">// Elasticity: symmetric gradient ε(u) : ε(v)</span>
 <span class="nc">Integral</span><span class="p">(</span><span class="nc">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">Transpose</span><span class="p">(</span><span class="nc">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span>
-<span class="w">         </span><span class="nc">Jacobian</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">Transpose</span><span class="p">(</span><span class="nc">Jacobian</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span></pre></section><section id="guides-variational-bc"><h2><a href="#guides-variational-bc">Boundary Conditions</a></h2><section id="guides-variational-bc-dirichlet"><h3><a href="#guides-variational-bc-dirichlet">Dirichlet Conditions</a></h3><p>Dirichlet (essential) boundary conditions fix the value of the solution on part of the boundary:</p><pre class="m-code"><span class="c1">// Homogeneous: u = 0 on entire boundary</span>
+<span class="w">         </span><span class="nc">Jacobian</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">Transpose</span><span class="p">(</span><span class="nc">Jacobian</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span></pre></section><section id="guides-variational-bc"><h2><a href="#guides-variational-bc">Boundary conditions</a></h2><section id="guides-variational-bc-dirichlet"><h3><a href="#guides-variational-bc-dirichlet">Dirichlet conditions</a></h3><p>Dirichlet (essential) boundary conditions fix the value of the solution on part of the boundary:</p><pre class="m-code"><span class="c1">// Homogeneous: u = 0 on entire boundary</span>
 <span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">())</span>
 
 <span class="c1">// Non-homogeneous: u = g on entire boundary</span>
@@ -748,11 +748,11 @@ $ \mathbf{u} $
 <span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">()).</span><span class="n">on</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1">// Vector-valued: u = (0, 0) on a segment</span>
-<span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">VectorFunction</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">}).</span><span class="n">on</span><span class="p">(</span><span class="n">GammaD</span><span class="p">)</span></pre></section><section id="guides-variational-bc-neumann"><h3><a href="#guides-variational-bc-neumann">Neumann Conditions</a></h3><p>Neumann (natural) boundary conditions specify the flux or traction on part of the boundary. They appear as boundary integrals in the variational formulation:</p><pre class="m-code"><span class="c1">// Scalar Neumann: integral of g * v over boundary segment</span>
+<span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">VectorFunction</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">}).</span><span class="n">on</span><span class="p">(</span><span class="n">GammaD</span><span class="p">)</span></pre></section><section id="guides-variational-bc-neumann"><h3><a href="#guides-variational-bc-neumann">Neumann conditions</a></h3><p>Neumann (natural) boundary conditions specify the flux or traction on part of the boundary. They appear as boundary integrals in the variational formulation:</p><pre class="m-code"><span class="c1">// Scalar Neumann: integral of g * v over boundary segment</span>
 <span class="nc">BoundaryIntegral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span>
 
 <span class="c1">// Vector Neumann (traction): integral of f . v over boundary segment</span>
-<span class="nc">BoundaryIntegral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span></pre></section></section><section id="guides-variational-solvers"><h2><a href="#guides-variational-solvers">Solving the Problem</a></h2><p>After defining a problem, use a solver from the <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> module to solve the resulting linear system:</p><pre class="m-code"><span class="c1">// Conjugate Gradient (for SPD systems)</span>
+<span class="nc">BoundaryIntegral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span></pre></section></section><section id="guides-variational-solvers"><h2><a href="#guides-variational-solvers">Solving the problem</a></h2><p>After defining a problem, use a solver from the <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> module to solve the resulting linear system:</p><pre class="m-code"><span class="c1">// Conjugate Gradient (for SPD systems)</span>
 <span class="n">Solver</span><span class="o">::</span><span class="nc">CG</span><span class="p">(</span><span class="n">problem</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
 
 <span class="c1">// Direct sparse LU factorization</span>
@@ -761,12 +761,12 @@ $ \mathbf{u} $
 <span class="c1">// Or pass a standalone solver to the problem</span>
 <span class="n">Solver</span><span class="o">::</span><span class="nc">CG</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
 <span class="n">solver</span><span class="p">.</span><span class="n">setTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">);</span>
-<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span></pre><p>The solution is then accessible via the trial function:</p><pre class="m-code"><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">solution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">();</span></pre></section><section id="guides-variational-output"><h2><a href="#guides-variational-output">Saving and Visualizing Results</a></h2><p>After solving, export the results using XDMF for visualization in ParaView:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
+<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span></pre><p>The solution is then accessible via the trial function:</p><pre class="m-code"><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">solution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">();</span></pre></section><section id="guides-variational-output"><h2><a href="#guides-variational-output">Saving and visualizing results</a></h2><p>After solving, export the results using XDMF for visualization in ParaView:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
 
 <span class="c1">// Export to XDMF</span>
 <span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">"Results"</span><span class="p">);</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">().</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">).</span><span class="n">add</span><span class="p">(</span><span class="s">"u"</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">());</span>
-<span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span></pre></section><section id="guides-variational-complete"><h2><a href="#guides-variational-complete">Complete Example</a></h2><p>Here is a complete example that defines and solves the Poisson equation, then exports the result using XDMF:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span></pre></section><section id="guides-variational-complete"><h2><a href="#guides-variational-complete">Complete example</a></h2><p>Here is a complete example that defines and solves the Poisson equation, then exports the result using XDMF:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
@@ -806,7 +806,7 @@ $ \mathbf{u} $
 <span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre></section><section id="guides-variational-mixed"><h2><a href="#guides-variational-mixed">Mixed Formulations</a></h2><p>Some problems require solving for multiple unknowns simultaneously, such as velocity and pressure in the <a href="examples-pdes-navierstokes.html" class="m-doc">Navier-Stokes equations</a>. Rodin&#x27;s <code>Problem</code> class supports mixed formulations with multiple trial/test function pairs:</p><pre class="m-code"><span class="c1">// Taylor-Hood finite element spaces</span>
+<span class="p">}</span></pre></section><section id="guides-variational-mixed"><h2><a href="#guides-variational-mixed">Mixed formulations</a></h2><p>Some problems require solving for multiple unknowns simultaneously, such as velocity and pressure in the <a href="examples-pdes-navierstokes.html" class="m-doc">Navier-Stokes equations</a>. Rodin&#x27;s <code>Problem</code> class supports mixed formulations with multiple trial/test function pairs:</p><pre class="m-code"><span class="c1">// Taylor-Hood finite element spaces</span>
 <span class="nc">H1</span><span class="w"> </span><span class="nf">uh</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="p">{},</span><span class="w"> </span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">);</span><span class="w">  </span><span class="c1">// P2 velocity</span>
 <span class="nc">H1</span><span class="w"> </span><span class="nf">ph</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span><span class="p">{},</span><span class="w"> </span><span class="n">mesh</span><span class="p">);</span><span class="w">      </span><span class="c1">// P1 pressure</span>
 
@@ -821,7 +821,7 @@ $ \mathbf{u} $
 <span class="w">       </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="nc">Div</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 <span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Div</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">q</span><span class="p">)</span>
 <span class="w">       </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
-<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span></pre></section><section id="guides-variational-dg"><h2><a href="#guides-variational-dg">Discontinuous Galerkin Formulations</a></h2><p>For problems with <strong>discontinuous</strong> finite element spaces (or when penalty methods are needed across element interfaces), Rodin provides specialized integral types and operators:</p><section id="guides-variational-dg-operators"><h3><a href="#guides-variational-dg-operators">DG Operators</a></h3><table class="m-table"><thead><tr><th>Operator</th><th>Description</th><th>Code</th></tr></thead><tbody><tr><td><code>Jump</code></td><td>Jump across a face: <svg class="m-math" style="width: 7.346em; height: 1.265em; vertical-align: -0.312em;" viewBox="0 -9.153753 70.519921 12.142545">
+<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span></pre></section><section id="guides-variational-dg"><h2><a href="#guides-variational-dg">Discontinuous Galerkin formulations</a></h2><p>For problems with <strong>discontinuous</strong> finite element spaces (or when penalty methods are needed across element interfaces), Rodin provides specialized integral types and operators:</p><section id="guides-variational-dg-operators"><h3><a href="#guides-variational-dg-operators">DG operators</a></h3><table class="m-table"><thead><tr><th>Operator</th><th>Description</th><th>Code</th></tr></thead><tbody><tr><td><code>Jump</code></td><td>Jump across a face: <svg class="m-math" style="width: 7.346em; height: 1.265em; vertical-align: -0.312em;" viewBox="0 -9.153753 70.519921 12.142545">
 <title>
 $ [u] = u^+ - u^- $
 </title>
@@ -878,7 +878,7 @@ $ \{u\} = \frac{1}{2}(u^+ + u^-) $
 <use x='80.368996' y='-4.338437' xlink:href='#eq39-g0-0'/>
 <use x='87.453635' y='0' xlink:href='#eq39-g4-41'/>
 </g>
-</svg></td><td><code>Average(u)</code></td></tr></tbody></table></section><section id="guides-variational-dg-integrals"><h3><a href="#guides-variational-dg-integrals">DG Integral Types</a></h3><table class="m-table"><thead><tr><th>Integral type</th><th>Region</th><th>Description</th></tr></thead><tbody><tr><td><code>Integral(...)</code></td><td>Cell interiors <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+</svg></td><td><code>Average(u)</code></td></tr></tbody></table></section><section id="guides-variational-dg-integrals"><h3><a href="#guides-variational-dg-integrals">DG integral types</a></h3><table class="m-table"><thead><tr><th>Integral type</th><th>Region</th><th>Description</th></tr></thead><tbody><tr><td><code>Integral(...)</code></td><td>Cell interiors <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -926,7 +926,7 @@ $ \mathcal{F}_h^i $
 <use x='9.779968' y='-4.338437' xlink:href='#eq43-g1-105'/>
 <use x='8.592754' y='3.109114' xlink:href='#eq43-g1-104'/>
 </g>
-</svg></td><td>Interior faces only</td></tr></tbody></table></section><section id="guides-variational-dg-example"><h3><a href="#guides-variational-dg-example">DG Poisson Example</a></h3><p>The simplest DG approach uses <code>P0</code> (piecewise constant) functions. The actual <a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp">DG Poisson example</a> uses this pattern:</p><pre class="m-code"><span class="nc">P0</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">           </span><span class="c1">// Discontinuous piecewise-constant space</span>
+</svg></td><td>Interior faces only</td></tr></tbody></table></section><section id="guides-variational-dg-example"><h3><a href="#guides-variational-dg-example">DG Poisson example</a></h3><p>The simplest DG approach uses <code>P0</code> (piecewise constant) functions. The actual <a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp">DG Poisson example</a> uses this pattern:</p><pre class="m-code"><span class="nc">P0</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">           </span><span class="c1">// Discontinuous piecewise-constant space</span>
 <span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="nc">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
@@ -1047,8 +1047,8 @@ $ \mathcal{F}_h^i $
 <span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="nc">InterfaceIntegral</span><span class="p">(</span><span class="nc">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Average</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
 <span class="w">   </span><span class="o">+</span><span class="w"> </span><span class="nc">InterfaceIntegral</span><span class="p">(</span><span class="n">sigma</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nc">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 <span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
-<span class="w">   </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span></pre><p>See the <a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp">DG Poisson example</a> for a complete working implementation.</p></section></section><section id="guides-variational-see-also"><h2><a href="#guides-variational-see-also">See Also</a></h2><ul><li><a href="fem-spaces.html" class="m-doc">Finite element spaces</a> — Available spaces (P0, P0g, P1, H1)</li><li><a href="fem-ciarlet.html" class="m-doc">Ciarlet&#x27;s definition</a> — Mathematical foundations</li><li><a href="guides-io.html" class="m-doc">I/O in Rodin</a> — Saving and visualizing results</li><li><a href="examples-pdes-poisson.html" class="m-doc">Poisson example</a></li><li><a href="examples-pdes-elasticity.html" class="m-doc">Elasticity example</a></li><li><a href="examples-pdes-navierstokes.html" class="m-doc">Navier-Stokes example</a> — Mixed formulation</li><li><a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid module</a> — Hyperelastic constitutive laws and Newton solvers</li><li><a href="namespace_rodin_1_1_advection.html" class="m-doc">Advection module</a> — Semi-Lagrangian transport</li><li><a href="guides-solvers.html" class="m-doc">Solvers guide</a> — Direct, iterative, and nonlinear solvers</li><li><a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a> — Projection, assembly signs, quadrature, constraints, and tangent consistency</li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="guides-ordering.html" class="m-doc">&laquo; Matrix storage and finite-element component ordering</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-weak-formulations.html" class="m-doc">Weak Formulations &raquo;</a></div>
+<span class="w">   </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span></pre><p>See the <a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp">DG Poisson example</a> for a complete working implementation.</p></section></section><section id="guides-variational-see-also"><h2><a href="#guides-variational-see-also">See also</a></h2><ul><li><a href="fem-spaces.html" class="m-doc">Finite element spaces</a> — Available spaces (P0, P0g, P1, H1)</li><li><a href="fem-ciarlet.html" class="m-doc">Ciarlet&#x27;s definition</a> — Mathematical foundations</li><li><a href="guides-io.html" class="m-doc">I/O in Rodin</a> — Saving and visualizing results</li><li><a href="examples-pdes-poisson.html" class="m-doc">Poisson example</a></li><li><a href="examples-pdes-elasticity.html" class="m-doc">Elasticity example</a></li><li><a href="examples-pdes-navierstokes.html" class="m-doc">Navier-Stokes example</a> — Mixed formulation</li><li><a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid module</a> — Hyperelastic constitutive laws and Newton solvers</li><li><a href="namespace_rodin_1_1_advection.html" class="m-doc">Advection module</a> — Semi-Lagrangian transport</li><li><a href="guides-solvers.html" class="m-doc">Solvers guide</a> — Direct, iterative, and nonlinear solvers</li><li><a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a> — Projection, assembly signs, quadrature, constraints, and tangent consistency</li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-weak-formulations.html" class="m-doc">&laquo; Weak formulations</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-boundary-conditions.html" class="m-doc">Boundary conditions &raquo;</a></div>
       </div>
     </div>
   </div>

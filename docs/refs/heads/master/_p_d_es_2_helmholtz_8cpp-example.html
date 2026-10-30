@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <title>Partial differential equations &raquo; Solving the Helmholtz equation &raquo; Helmholtz.cpp source | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <link rel="prev" href="_p_d_es_2_elasticity_8cpp-example.html" />
-  <link rel="next" href="_p_d_es_2_periodic_8cpp-example.html" />
+  <link rel="next" href="_p_d_es_2_navier_stokes_8cpp-example.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
   <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
@@ -34,7 +34,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -78,100 +78,61 @@
           Helmholtz.cpp <span class="m-thin">source</span>
         </h1>
 <pre class="m-code"><span class="cm">/*</span>
-<span class="cm"> *          Copyright Carlos BRITO PACHECO 2021 - 2022.</span>
+<span class="cm"> *          Copyright Carlos BRITO PACHECO 2021 - 2026.</span>
 <span class="cm"> * Distributed under the Boost Software License, Version 1.0.</span>
 <span class="cm"> *       (See accompanying file LICENSE or copy at</span>
 <span class="cm"> *          https://www.boost.org/LICENSE_1_0.txt)</span>
 <span class="cm"> */</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cmath&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdlib&gt;</span>
+
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Assembly.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
-<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Solver</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
 
-<span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">waveLength</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span>
-<span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">pi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="n">Constants</span><span class="o">::</span><span class="n">pi</span><span class="p">();</span>
-<span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">waveNumber</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="n">Constants</span><span class="o">::</span><span class="n">pi</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">waveLength</span><span class="p">;</span>
-
-<span class="kt">int</span><span class="w"> </span><span class="fm">main</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="p">)</span>
+<span class="kt">int</span><span class="w"> </span><span class="fm">main</span><span class="p">()</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="c1">// Build a mesh</span>
-<span class="w">  </span><span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
-<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nodes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">97</span><span class="p">;</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">pi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="n">Constants</span><span class="o">::</span><span class="n">pi</span><span class="p">();</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">waveNumber</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">pi</span><span class="p">;</span>
+<span class="w">  </span><span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Mesh</span><span class="p">().</span><span class="n">UniformGrid</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">nodes</span><span class="p">,</span><span class="w"> </span><span class="n">nodes</span><span class="p">});</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">nodes</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
 <span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">63.0</span><span class="p">);</span>
 
-<span class="w">  </span><span class="c1">// Functions</span>
 <span class="w">  </span><span class="nc">P1</span><span class="o">&lt;</span><span class="nc">Complex</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-
-<span class="w">  </span><span class="nc">GridFunction</span><span class="w"> </span><span class="n">gf</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
-<span class="w">  </span><span class="n">gf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="nc">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span>
-<span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span>
-<span class="w">      </span><span class="nc">Complex</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">(),</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">());</span><span class="c1">// * cos(waveNumber * p.x()) * cos(waveNumber * p.y());</span>
-<span class="w">  </span><span class="p">};</span>
-
-<span class="w">  </span><span class="nc">P1</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="w">  </span><span class="nc">GridFunction</span><span class="w"> </span><span class="n">gfRe</span><span class="p">(</span><span class="n">rh</span><span class="p">);</span>
-<span class="w">  </span><span class="nc">GridFunction</span><span class="w"> </span><span class="n">gfIm</span><span class="p">(</span><span class="n">rh</span><span class="p">);</span>
-<span class="w">  </span><span class="n">gfRe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Re</span><span class="p">(</span><span class="n">gf</span><span class="p">);</span>
-<span class="w">  </span><span class="n">gfIm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Im</span><span class="p">(</span><span class="n">gf</span><span class="p">);</span>
-<span class="w">  </span><span class="n">gfRe</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"gfRe.gf"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span>
-<span class="w">  </span><span class="n">gfIm</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"gfIm.gf"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span>
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"Grid.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span>
-
-<span class="w">  </span><span class="nc">ComplexFunction</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span>
-<span class="w">    </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="nc">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nc">Complex</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">(),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">()</span>
-<span class="w">          </span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">());</span>
-<span class="w">    </span><span class="p">};</span>
-
 <span class="w">  </span><span class="nc">TrialFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
-<span class="w">  </span><span class="nc">TestFunction</span><span class="w">  </span><span class="n">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
-
-<span class="w">  </span><span class="nc">ComplexFunction</span><span class="w"> </span><span class="n">u_ex</span><span class="w"> </span><span class="o">=</span>
-<span class="w">    </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="nc">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="k">auto</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">();</span>
-<span class="w">      </span><span class="k">auto</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">();</span>
-<span class="w">      </span><span class="k">return</span>
-<span class="w">        </span><span class="p">(</span><span class="nc">Complex</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
-<span class="w">           </span><span class="o">*</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="p">)</span>
-<span class="w">           </span><span class="o">*</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">y</span><span class="p">)</span>
-<span class="w">           </span><span class="o">-</span><span class="w"> </span><span class="nc">Complex</span><span class="p">(</span><span class="mf">2.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">waveNumber</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span>
-<span class="w">           </span><span class="o">*</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="p">)</span>
-<span class="w">           </span><span class="o">*</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">y</span><span class="p">));</span>
-<span class="w">    </span><span class="p">};</span>
+<span class="w">  </span><span class="nc">TestFunction</span><span class="w"> </span><span class="n">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
+<span class="w">  </span><span class="nc">ComplexFunction</span><span class="w"> </span><span class="n">exact</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">=</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="nc">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">point</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">exp</span><span class="p">(</span><span class="nc">Complex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">point</span><span class="p">.</span><span class="n">x</span><span class="p">()))</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">sin</span><span class="p">(</span><span class="n">pi</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">point</span><span class="p">.</span><span class="n">y</span><span class="p">());</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pi</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">pi</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">exact</span><span class="p">;</span>
 
 <span class="w">  </span><span class="nc">Problem</span><span class="w"> </span><span class="n">helmholtz</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="w">  </span><span class="n">helmholtz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
-<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
-<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
-<span class="w">            </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">u_ex</span><span class="p">)</span>
-<span class="w">            </span><span class="p">;</span>
+<span class="w">  </span><span class="n">helmholtz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">waveNumber</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span>
+<span class="w">    </span><span class="nc">Integral</span><span class="p">(</span><span class="n">source</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">exact</span><span class="p">);</span>
 
-<span class="w">  </span><span class="nc">CG</span><span class="p">(</span><span class="n">helmholtz</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
+<span class="w">  </span><span class="n">Solver</span><span class="o">::</span><span class="nc">SparseLU</span><span class="w"> </span><span class="n">solver</span><span class="p">(</span><span class="n">helmholtz</span><span class="p">);</span>
+<span class="w">  </span><span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">solver</span><span class="p">.</span><span class="n">success</span><span class="p">())</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
 
-<span class="w">  </span><span class="nc">GridFunction</span><span class="w"> </span><span class="n">uRe</span><span class="p">(</span><span class="n">rh</span><span class="p">);</span>
-<span class="w">  </span><span class="nc">GridFunction</span><span class="w"> </span><span class="n">uIm</span><span class="p">(</span><span class="n">rh</span><span class="p">);</span>
-
-<span class="w">  </span><span class="n">uRe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Re</span><span class="p">(</span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">());</span>
-<span class="w">  </span><span class="n">uIm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Im</span><span class="p">(</span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">());</span>
-
-<span class="w">  </span><span class="c1">// Save solution</span>
-<span class="w">  </span><span class="n">uRe</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"uRe.gf"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span>
-<span class="w">  </span><span class="n">uIm</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"uIm.gf"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span>
-
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"Grid.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span>
-
+<span class="w">  </span><span class="nc">P1</span><span class="w"> </span><span class="n">realSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">  </span><span class="nc">GridFunction</span><span class="w"> </span><span class="n">realPart</span><span class="p">(</span><span class="n">realSpace</span><span class="p">);</span>
+<span class="w">  </span><span class="nc">GridFunction</span><span class="w"> </span><span class="n">imaginaryPart</span><span class="p">(</span><span class="n">realSpace</span><span class="p">);</span>
+<span class="w">  </span><span class="n">realPart</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Re</span><span class="p">(</span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">());</span>
+<span class="w">  </span><span class="n">imaginaryPart</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Im</span><span class="p">(</span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">());</span>
+<span class="w">  </span><span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">"Helmholtz"</span><span class="p">);</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">().</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">).</span><span class="n">add</span><span class="p">(</span><span class="s">"real"</span><span class="p">,</span><span class="w"> </span><span class="n">realPart</span><span class="p">).</span><span class="n">add</span><span class="p">(</span><span class="s">"imaginary"</span><span class="p">,</span><span class="w"> </span><span class="n">imaginaryPart</span><span class="p">);</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">().</span><span class="n">flush</span><span class="p">();</span>
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></pre>
-        <div class="m-note m-dim m-thin m-text-center"><a href="_p_d_es_2_elasticity_8cpp-example.html" class="m-doc">&laquo; Elasticity.cpp</a> | <a href="examples-pdes-helmholtz.html" class="m-doc">Solving the Helmholtz equation</a> | <a href="_p_d_es_2_periodic_8cpp-example.html" class="m-doc">Periodic.cpp &raquo;</a></div>
+        <div class="m-note m-dim m-thin m-text-center"><a href="_p_d_es_2_elasticity_8cpp-example.html" class="m-doc">&laquo; Elasticity.cpp</a> | <a href="examples-pdes-helmholtz.html" class="m-doc">Solving the Helmholtz equation</a> | <a href="_p_d_es_2_navier_stokes_8cpp-example.html" class="m-doc">NavierStokes.cpp &raquo;</a></div>
       </div>
     </div>
   </div>

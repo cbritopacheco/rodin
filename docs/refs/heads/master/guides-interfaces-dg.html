@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <title>General concepts &raquo; Interfaces, traces, and discontinuous Galerkin | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="prev" href="guides-solvers.html" />
-  <link rel="next" href="guides-swift.html" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <link rel="prev" href="guides-numerical-contracts.html" />
+  <link rel="next" href="guides-io.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
   <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
@@ -34,7 +34,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -318,8 +318,8 @@ $ \eta $
 <g id='eq8-page1'>
 <use x='0' y='0' xlink:href='#eq8-g0-17'/>
 </g>
-</svg> large enough (growing with the polynomial degree) is what makes the form coercive — omitting or under-sizing it is the standard DG instability, and it manifests as an indefinite system, not a crash;</li><li>the two consistency terms must be <em>transposes</em> of each other for symmetry (SIPG); flipping one sign gives the nonsymmetric NIPG variant with different penalty requirements;</li><li>assembled DG systems are not SPD in general — see <a href="guides-solvers.html" class="m-doc">Solvers</a> for appropriate solvers.</li></ul><p>See <a href="https://github.com/cbritopacheco/rodin/tree/develop/examples/DG">examples/<wbr />DG</a> for a starting point, and the <code>Jump</code>/<code>Average</code> unit tests (<a href="https://github.com/cbritopacheco/rodin/blob/develop/tests/unit/Rodin/Variational/JumpTest.cpp">JumpTest.cpp</a>, <a href="https://github.com/cbritopacheco/rodin/blob/develop/tests/unit/Rodin/Variational/AverageTest.cpp">AverageTest.cpp</a>) for the precise operational semantics.</p></section><section id="guides-ifdg-seealso"><h2><a href="#guides-ifdg-seealso">See also</a></h2><ul><li><a href="guides-boundary-conditions.html" class="m-doc">Boundary Conditions</a> — strong (eliminated) boundary conditions, as opposed to the weak impositions here</li><li><a href="guides-connectivity.html" class="m-doc">Connectivity</a> — computing the facet incidences these integrals require</li><li><a href="guides-variational.html" class="m-doc">Variational formulations in Rodin</a> — the general problem-composition machinery</li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="guides-solvers.html" class="m-doc">&laquo; Solvers</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-swift.html" class="m-doc">Fitting a mesh interface with SWIFT &raquo;</a></div>
+</svg> large enough (growing with the polynomial degree) is what makes the form coercive — omitting or under-sizing it is the standard DG instability, and it manifests as an indefinite system, not a crash;</li><li>the two consistency terms must be <em>transposes</em> of each other for symmetry (SIPG); flipping one sign gives the nonsymmetric NIPG variant with different penalty requirements;</li><li>assembled DG systems are not SPD in general — see <a href="guides-solvers.html" class="m-doc">Solvers</a> for appropriate solvers.</li></ul><p>See <a href="https://github.com/cbritopacheco/rodin/tree/develop/examples/DG">examples/<wbr />DG</a> for a starting point, and the <code>Jump</code>/<code>Average</code> unit tests (<a href="https://github.com/cbritopacheco/rodin/blob/develop/tests/unit/Rodin/Variational/JumpTest.cpp">JumpTest.cpp</a>, <a href="https://github.com/cbritopacheco/rodin/blob/develop/tests/unit/Rodin/Variational/AverageTest.cpp">AverageTest.cpp</a>) for the precise operational semantics.</p></section><section id="guides-ifdg-seealso"><h2><a href="#guides-ifdg-seealso">See also</a></h2><ul><li><a href="guides-boundary-conditions.html" class="m-doc">Boundary conditions</a> — strong (eliminated) boundary conditions, as opposed to the weak impositions here</li><li><a href="guides-connectivity.html" class="m-doc">Connectivity</a> — computing the facet incidences these integrals require</li><li><a href="guides-variational.html" class="m-doc">Variational formulations in Rodin</a> — the general problem-composition machinery</li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-numerical-contracts.html" class="m-doc">&laquo; Numerical contracts</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-io.html" class="m-doc">Input, output, and visualization &raquo;</a></div>
       </div>
     </div>
   </div>

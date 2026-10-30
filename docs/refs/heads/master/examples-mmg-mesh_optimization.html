@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <title>Examples and tutorials &raquo; Working with MMG &raquo; Optimizing the mesh | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="prev" href="examples-mmg-simple_io.html" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <link rel="prev" href="examples-mmg-casting.html" />
   <link rel="next" href="examples-mmg-mesh_adaptation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
@@ -34,7 +34,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -82,14 +82,14 @@
           <h3>Contents</h3>
           <ul>
             <li><a href="#examples-mmg-meshopt-intro">Introduction</a></li>
-            <li><a href="#examples-mmg-meshopt-basic">Basic Usage</a></li>
-            <li><a href="#examples-mmg-meshopt-params">Optimizer Parameters</a></li>
-            <li><a href="#examples-mmg-meshopt-required">Required Entities</a></li>
-            <li><a href="#examples-mmg-meshopt-full">Full Source Code</a></li>
-            <li><a href="#examples-mmg-meshopt-see-also">See Also</a></li>
+            <li><a href="#examples-mmg-meshopt-basic">Basic usage</a></li>
+            <li><a href="#examples-mmg-meshopt-params">Optimizer parameters</a></li>
+            <li><a href="#examples-mmg-meshopt-required">Required entities</a></li>
+            <li><a href="#examples-mmg-meshopt-full">Full source code</a></li>
+            <li><a href="#examples-mmg-meshopt-see-also">See also</a></li>
           </ul>
         </nav>
-<section id="examples-mmg-meshopt-intro"><h2><a href="#examples-mmg-meshopt-intro">Introduction</a></h2><p>Mesh quality is critical for accurate finite element solutions. The <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG::<wbr />Optimizer</a> wraps MMG optimization mode: it improves poorly shaped elements while keeping the mesh close to the local size distribution already present in the input mesh. This is different from metric-driven adaptation, where an external size map prescribes where the mesh should be refined or coarsened.</p></section><section id="examples-mmg-meshopt-basic"><h2><a href="#examples-mmg-meshopt-basic">Basic Usage</a></h2><p>The simplest workflow is to create a mesh, mark its geometric features (corners and ridges), and optimize:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<section id="examples-mmg-meshopt-intro"><h2><a href="#examples-mmg-meshopt-intro">Introduction</a></h2><p>Mesh quality is critical for accurate finite element solutions. The <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG::<wbr />Optimizer</a> wraps MMG optimization mode: it improves poorly shaped elements while keeping the mesh close to the local size distribution already present in the input mesh. This is different from metric-driven adaptation, where an external size map prescribes where the mesh should be refined or coarsened.</p></section><section id="examples-mmg-meshopt-basic"><h2><a href="#examples-mmg-meshopt-basic">Basic usage</a></h2><p>The simplest workflow is to create a mesh, mark its geometric features (corners and ridges), and optimize:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MMG.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
@@ -116,7 +116,7 @@
 <span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"Optimized.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre></section><section id="examples-mmg-meshopt-params"><h2><a href="#examples-mmg-meshopt-params">Optimizer Parameters</a></h2><p>The <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG::<wbr />Optimizer</a> supports several parameters:</p><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>setHMax(h)</code></td><td>Upper edge-size bound passed to MMG</td></tr><tr><td><code>setHMin(h)</code></td><td>Lower edge-size bound passed to MMG</td></tr><tr><td><code>setHausdorff(h)</code></td><td>Hausdorff distance for curved boundaries</td></tr><tr><td><code>setAngleDetection(b)</code></td><td>Enable/disable automatic ridge detection</td></tr></tbody></table><aside class="m-note m-info"><h4>Note</h4><p><code>MMG::Optimizer</code> is a quality-improvement operator. Use <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">MMG::<wbr />Adapt</a> when a computed size field should drive refinement and coarsening.</p></aside></section><section id="examples-mmg-meshopt-required"><h2><a href="#examples-mmg-meshopt-required">Required Entities</a></h2><p>Required vertices, edges, triangles, and tetrahedra can be marked on <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> before optimization. The Rodin wrapper passes them to MMG as required entities and restores the required index sets after optimization when the corresponding indices still exist in the output:</p><pre class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">setRequiredVertex</span><span class="p">(</span><span class="n">vertexIndex</span><span class="p">);</span>
+<span class="p">}</span></pre></section><section id="examples-mmg-meshopt-params"><h2><a href="#examples-mmg-meshopt-params">Optimizer parameters</a></h2><p>The <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG::<wbr />Optimizer</a> supports several parameters:</p><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>setHMax(h)</code></td><td>Upper edge-size bound passed to MMG</td></tr><tr><td><code>setHMin(h)</code></td><td>Lower edge-size bound passed to MMG</td></tr><tr><td><code>setHausdorff(h)</code></td><td>Hausdorff distance for curved boundaries</td></tr><tr><td><code>setAngleDetection(b)</code></td><td>Enable/disable automatic ridge detection</td></tr></tbody></table><aside class="m-note m-info"><h4>Note</h4><p><code>MMG::Optimizer</code> is a quality-improvement operator. Use <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">MMG::<wbr />Adapt</a> when a computed size field should drive refinement and coarsening.</p></aside></section><section id="examples-mmg-meshopt-required"><h2><a href="#examples-mmg-meshopt-required">Required entities</a></h2><p>Required vertices, edges, triangles, and tetrahedra can be marked on <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> before optimization. The Rodin wrapper passes them to MMG as required entities and restores the required index sets after optimization when the corresponding indices still exist in the output:</p><pre class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">setRequiredVertex</span><span class="p">(</span><span class="n">vertexIndex</span><span class="p">);</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">setRequiredEdge</span><span class="p">(</span><span class="n">edgeIndex</span><span class="p">);</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">setRequiredTriangle</span><span class="p">(</span><span class="n">triangleIndex</span><span class="p">);</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">setRequiredTetrahedron</span><span class="p">(</span><span class="n">tetrahedronIndex</span><span class="p">);</span>
@@ -126,8 +126,8 @@
 <span class="w">  </span><span class="p">.</span><span class="n">setHMin</span><span class="p">(</span><span class="mf">0.005</span><span class="p">)</span>
 <span class="w">  </span><span class="p">.</span><span class="n">setHausdorff</span><span class="p">(</span><span class="mf">0.0025</span><span class="p">)</span>
 <span class="w">  </span><span class="p">.</span><span class="n">setAngleDetection</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span></pre></section><section id="examples-mmg-meshopt-full"><h2><a href="#examples-mmg-meshopt-full">Full Source Code</a></h2><ul><li><a href="_m_m_g_2_mesh_optimization_8cpp-example.html" class="m-doc">MeshOptimization.cpp</a></li></ul></section><section id="examples-mmg-meshopt-see-also"><h2><a href="#examples-mmg-meshopt-see-also">See Also</a></h2><ul><li><a href="examples-mmg-simple_io.html" class="m-doc">MMG I/O</a> - Loading and saving MMG meshes</li><li><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a></li><li><a href="examples-shapeoptimization-simple_cantilever.html" class="m-doc">Shape optimization</a> — Uses MMG in an optimization loop</li><li><a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG namespace</a></li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="examples-mmg-simple_io.html" class="m-doc">&laquo; Simple input/output of MMG objects</a> | <a href="examples-mmg-index.html" class="m-doc">Working with MMG</a> | <a href="examples-mmg-mesh_adaptation.html" class="m-doc">Adapting the mesh &raquo;</a></div>
+<span class="w">  </span><span class="p">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span></pre></section><section id="examples-mmg-meshopt-full"><h2><a href="#examples-mmg-meshopt-full">Full source code</a></h2><ul><li><a href="_m_m_g_2_mesh_optimization_8cpp-example.html" class="m-doc">MeshOptimization.cpp</a></li></ul></section><section id="examples-mmg-meshopt-see-also"><h2><a href="#examples-mmg-meshopt-see-also">See also</a></h2><ul><li><a href="examples-mmg-simple_io.html" class="m-doc">MMG I/O</a> - Loading and saving MMG meshes</li><li><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a></li><li><a href="examples-shapeoptimization-simple_cantilever.html" class="m-doc">Shape optimization</a> — Uses MMG in an optimization loop</li><li><a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG::<wbr />Optimizer</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="examples-mmg-casting.html" class="m-doc">&laquo; Casting between MMG and Rodin</a> | <a href="examples-mmg-index.html" class="m-doc">Working with MMG</a> | <a href="examples-mmg-mesh_adaptation.html" class="m-doc">Adapting the mesh &raquo;</a></div>
       </div>
     </div>
   </div>

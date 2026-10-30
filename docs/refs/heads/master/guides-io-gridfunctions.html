@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>General concepts &raquo; I/O in Rodin &raquo; Grid Function I/O | Rodin</title>
+  <title>General concepts &raquo; Input, output, and visualization &raquo; Grid function I/O | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="prev" href="guides-io-xdmf.html" />
-  <link rel="next" href="guides-io-meshformats.html" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <link rel="prev" href="guides-io-meshformats.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
   <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
@@ -34,7 +33,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -74,8 +73,8 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
-          <span class="m-breadcrumb"><a href="guides-io.html">I/O in Rodin</a> &raquo;</span>
-          Grid Function I/O
+          <span class="m-breadcrumb"><a href="guides-io.html">Input, output, and visualization</a> &raquo;</span>
+          Grid function I/O
         </h1>
         <p>Saving and loading grid functions in Rodin.</p>
         <nav class="m-block m-default">
@@ -83,25 +82,25 @@
           <ul>
             <li><a href="#guides-io-gridfunctions-intro">Introduction</a></li>
             <li>
-              <a href="#guides-io-gridfunctions-save">Saving Grid Functions</a>
+              <a href="#guides-io-gridfunctions-save">Saving grid functions</a>
               <ul>
-                <li><a href="#guides-io-gridfunctions-save-mfem">MFEM Format</a></li>
-                <li><a href="#guides-io-gridfunctions-save-xdmf">XDMF Format (Recommended)</a></li>
+                <li><a href="#guides-io-gridfunctions-save-mfem">MFEM format</a></li>
+                <li><a href="#guides-io-gridfunctions-save-xdmf">XDMF format (recommended)</a></li>
               </ul>
             </li>
             <li>
-              <a href="#guides-io-gridfunctions-load">Loading Grid Functions</a>
+              <a href="#guides-io-gridfunctions-load">Loading grid functions</a>
               <ul>
-                <li><a href="#guides-io-gridfunctions-load-mfem">From MFEM Format</a></li>
+                <li><a href="#guides-io-gridfunctions-load-mfem">From MFEM format</a></li>
               </ul>
             </li>
-            <li><a href="#guides-io-gridfunctions-coverage">Format Coverage</a></li>
-            <li><a href="#guides-io-gridfunctions-multiple">Multiple Fields</a></li>
-            <li><a href="#guides-io-gridfunctions-vector">Vector-Valued Fields</a></li>
-            <li><a href="#guides-io-gridfunctions-see-also">See Also</a></li>
+            <li><a href="#guides-io-gridfunctions-coverage">Format coverage</a></li>
+            <li><a href="#guides-io-gridfunctions-multiple">Multiple fields</a></li>
+            <li><a href="#guides-io-gridfunctions-vector">Vector-valued fields</a></li>
+            <li><a href="#guides-io-gridfunctions-see-also">See also</a></li>
           </ul>
         </nav>
-<section id="guides-io-gridfunctions-intro"><h2><a href="#guides-io-gridfunctions-intro">Introduction</a></h2><p>Grid functions represent the discrete solution of a finite element problem. They associate numerical values (degrees of freedom) with a finite element space. Saving and loading grid functions is essential for:</p><ul><li>Storing computed solutions</li><li>Post-processing and visualization</li><li>Checkpoint/restart of simulations</li><li>Transferring data between different analyses</li></ul></section><section id="guides-io-gridfunctions-save"><h2><a href="#guides-io-gridfunctions-save">Saving Grid Functions</a></h2><section id="guides-io-gridfunctions-save-mfem"><h3><a href="#guides-io-gridfunctions-save-mfem">MFEM Format</a></h3><p>The MFEM format stores grid functions as text files:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<section id="guides-io-gridfunctions-intro"><h2><a href="#guides-io-gridfunctions-intro">Introduction</a></h2><p>Grid functions represent the discrete solution of a finite element problem. They associate numerical values (degrees of freedom) with a finite element space. Saving and loading grid functions is essential for:</p><ul><li>Storing computed solutions</li><li>Post-processing and visualization</li><li>Checkpoint/restart of simulations</li><li>Transferring data between different analyses</li></ul></section><section id="guides-io-gridfunctions-save"><h2><a href="#guides-io-gridfunctions-save">Saving grid functions</a></h2><section id="guides-io-gridfunctions-save-mfem"><h3><a href="#guides-io-gridfunctions-save-mfem">MFEM format</a></h3><p>The MFEM format stores grid functions as text files:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
@@ -122,12 +121,12 @@
 <span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"mesh.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre></section><section id="guides-io-gridfunctions-save-xdmf"><h3><a href="#guides-io-gridfunctions-save-xdmf">XDMF Format (Recommended)</a></h3><p>For visualization, the XDMF format is recommended. It stores both mesh and field data together and can be opened directly in ParaView:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
+<span class="p">}</span></pre></section><section id="guides-io-gridfunctions-save-xdmf"><h3><a href="#guides-io-gridfunctions-save-xdmf">XDMF format (recommended)</a></h3><p>For visualization, the XDMF format is recommended. It stores both mesh and field data together and can be opened directly in ParaView:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
 
 <span class="c1">// After computing the solution...</span>
 <span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">"Output"</span><span class="p">);</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">().</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">).</span><span class="n">add</span><span class="p">(</span><span class="s">"solution"</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">);</span>
-<span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span></pre></section></section><section id="guides-io-gridfunctions-load"><h2><a href="#guides-io-gridfunctions-load">Loading Grid Functions</a></h2><section id="guides-io-gridfunctions-load-mfem"><h3><a href="#guides-io-gridfunctions-load-mfem">From MFEM Format</a></h3><p>To load a grid function from MFEM format, you need the mesh and finite element space already set up:</p><pre class="m-code"><span class="c1">// Load mesh</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span></pre></section></section><section id="guides-io-gridfunctions-load"><h2><a href="#guides-io-gridfunctions-load">Loading grid functions</a></h2><section id="guides-io-gridfunctions-load-mfem"><h3><a href="#guides-io-gridfunctions-load-mfem">From MFEM format</a></h3><p>To load a grid function from MFEM format, you need the mesh and finite element space already set up:</p><pre class="m-code"><span class="c1">// Load mesh</span>
 <span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">"mesh.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span>
 
@@ -136,13 +135,13 @@
 
 <span class="c1">// Load grid function</span>
 <span class="nc">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
-<span class="n">u</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">"solution.gf"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span></pre></section></section><section id="guides-io-gridfunctions-coverage"><h2><a href="#guides-io-gridfunctions-coverage">Format Coverage</a></h2><p>Grid function I/O coverage depends on the role of the format:</p><table class="m-table"><thead><tr><th>Format</th><th>Tested grid function role</th></tr></thead><tbody><tr><td>MFEM</td><td>P0, P1, and H1 finite element grid functions</td></tr><tr><td>MEDIT</td><td>Vertex-based solution files (<code>SolAtVertices</code>)</td></tr><tr><td>HDF5</td><td>Raw degree-of-freedom persistence</td></tr><tr><td>XDMF</td><td>Evaluated visualization attributes</td></tr></tbody></table><p>MFEM H1 grid functions are tested against fixture files generated by MFEM for degrees <code>K = 1, 2, 3, 4, 5, 6</code>, for scalar and vector data, and for both MFEM vector orderings. P0 scalar grid functions are tested on Point, Segment, Triangle, Quadrilateral, Tetrahedron, Hexahedron, and Wedge meshes. P1 and H1 vector grid functions use the vector finite element spaces provided by Rodin; P0 currently exposes a scalar finite element space even though vector P0 elements exist internally.</p></section><section id="guides-io-gridfunctions-multiple"><h2><a href="#guides-io-gridfunctions-multiple">Multiple Fields</a></h2><p>When dealing with multiple fields, you can export them all in one XDMF file:</p><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">"MultiField"</span><span class="p">);</span>
+<span class="n">u</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">"solution.gf"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span></pre></section></section><section id="guides-io-gridfunctions-coverage"><h2><a href="#guides-io-gridfunctions-coverage">Format coverage</a></h2><p>Grid function I/O coverage depends on the role of the format:</p><table class="m-table"><thead><tr><th>Format</th><th>Tested grid function role</th></tr></thead><tbody><tr><td>MFEM</td><td>P0, P1, and H1 finite element grid functions</td></tr><tr><td>MEDIT</td><td>Vertex-based solution files (<code>SolAtVertices</code>)</td></tr><tr><td>HDF5</td><td>Raw degree-of-freedom persistence</td></tr><tr><td>XDMF</td><td>Evaluated visualization attributes</td></tr></tbody></table><p>MFEM H1 grid functions are tested against fixture files generated by MFEM for degrees <code>K = 1, 2, 3, 4, 5, 6</code>, for scalar and vector data, and for both MFEM vector orderings. P0 scalar grid functions are tested on Point, Segment, Triangle, Quadrilateral, Tetrahedron, Hexahedron, and Wedge meshes. P1 and H1 vector grid functions use the vector finite element spaces provided by Rodin; P0 currently exposes a scalar finite element space even though vector P0 elements exist internally.</p></section><section id="guides-io-gridfunctions-multiple"><h2><a href="#guides-io-gridfunctions-multiple">Multiple fields</a></h2><p>When dealing with multiple fields, you can export them all in one XDMF file:</p><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">"MultiField"</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">();</span>
 <span class="n">grid</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">grid</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">"temperature"</span><span class="p">,</span><span class="w"> </span><span class="n">temperature</span><span class="p">);</span>
 <span class="n">grid</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">"velocity"</span><span class="p">,</span><span class="w"> </span><span class="n">velocity</span><span class="p">);</span>
 <span class="n">grid</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">"pressure"</span><span class="p">,</span><span class="w"> </span><span class="n">pressure</span><span class="p">);</span>
-<span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span></pre><p>All fields will be available for selection in ParaView.</p></section><section id="guides-io-gridfunctions-vector"><h2><a href="#guides-io-gridfunctions-vector">Vector-Valued Fields</a></h2><p>Vector-valued grid functions are defined on finite element spaces with multiple components:</p><pre class="m-code"><span class="c1">// Create a vector P1 space (2 components)</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span></pre><p>All fields will be available for selection in ParaView.</p></section><section id="guides-io-gridfunctions-vector"><h2><a href="#guides-io-gridfunctions-vector">Vector-valued fields</a></h2><p>Vector-valued grid functions are defined on finite element spaces with multiple components:</p><pre class="m-code"><span class="c1">// Create a vector P1 space (2 components)</span>
 <span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
 <span class="nc">GridFunction</span><span class="w"> </span><span class="nf">velocity</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">velocity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span>
@@ -152,8 +151,8 @@
 
 <span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">"VectorField"</span><span class="p">);</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">().</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">).</span><span class="n">add</span><span class="p">(</span><span class="s">"velocity"</span><span class="p">,</span><span class="w"> </span><span class="n">velocity</span><span class="p">);</span>
-<span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span></pre></section><section id="guides-io-gridfunctions-see-also"><h2><a href="#guides-io-gridfunctions-see-also">See Also</a></h2><ul><li><a href="guides-io.html" class="m-doc">I/O in Rodin overview</a></li><li><a href="guides-io-xdmf.html" class="m-doc">XDMF format guide</a></li><li><a href="examples-io-index.html" class="m-doc">I/O examples</a></li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="guides-io-xdmf.html" class="m-doc">&laquo; XDMF Format</a> | <a href="guides-io.html" class="m-doc">I/O in Rodin</a> | <a href="guides-io-meshformats.html" class="m-doc">Mesh File Formats &raquo;</a></div>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span></pre></section><section id="guides-io-gridfunctions-see-also"><h2><a href="#guides-io-gridfunctions-see-also">See also</a></h2><ul><li><a href="guides-io.html" class="m-doc">I/O in Rodin overview</a></li><li><a href="guides-io-xdmf.html" class="m-doc">XDMF format guide</a></li><li><a href="examples-io-index.html" class="m-doc">I/O examples</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-io-meshformats.html" class="m-doc">&laquo; Mesh file formats</a> | <a href="guides-io.html" class="m-doc">Input, output, and visualization</a></div>
       </div>
     </div>
   </div>

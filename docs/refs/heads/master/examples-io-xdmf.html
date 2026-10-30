@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Examples and tutorials &raquo; Input/Output examples &raquo; XDMF time-evolution output | Rodin</title>
+  <title>Examples and tutorials &raquo; Input/output examples &raquo; XDMF time-evolution output | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <link rel="next" href="examples-io-mfem.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
@@ -33,7 +33,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -73,7 +73,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="examples-index.html">Examples and tutorials</a> &raquo;</span>
-          <span class="m-breadcrumb"><a href="examples-io-index.html">Input/Output examples</a> &raquo;</span>
+          <span class="m-breadcrumb"><a href="examples-io-index.html">Input/output examples</a> &raquo;</span>
           XDMF time-evolution output
         </h1>
         <p>Exporting time-dependent data with XDMF for visualization in ParaView.</p>
@@ -82,11 +82,11 @@
           <ul>
             <li><a href="#examples-io-xdmf-intro">Introduction</a></li>
             <li><a href="#examples-io-xdmf-setup">Setup</a></li>
-            <li><a href="#examples-io-xdmf-writer">Setting Up the XDMF Writer</a></li>
-            <li><a href="#examples-io-xdmf-timeloop">Time Loop</a></li>
-            <li><a href="#examples-io-xdmf-output">Output Files</a></li>
+            <li><a href="#examples-io-xdmf-writer">Setting up the XDMF writer</a></li>
+            <li><a href="#examples-io-xdmf-timeloop">Time loop</a></li>
+            <li><a href="#examples-io-xdmf-output">Output files</a></li>
             <li><a href="#examples-io-xdmf-paraview">Viewing in ParaView</a></li>
-            <li><a href="#examples-io-xdmf-full">Full Source Code</a></li>
+            <li><a href="#examples-io-xdmf-full">Full source code</a></li>
           </ul>
         </nav>
 <section id="examples-io-xdmf-intro"><h2><a href="#examples-io-xdmf-intro">Introduction</a></h2><p>This example demonstrates how to use the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> class to export time-dependent simulation data. XDMF (eXtensible Data Model and Format) is a widely-used format for scientific visualization that combines lightweight XML metadata with efficient HDF5 binary storage.</p><p>The output files can be opened directly in <a href="https://www.paraview.org/">ParaView</a> to animate the time evolution of the field.</p></section><section id="examples-io-xdmf-setup"><h2><a href="#examples-io-xdmf-setup">Setup</a></h2><p>We create a triangular mesh on the unit square and define a vector-valued P1 finite element space with 2 components:</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.05</span><span class="p">;</span>
@@ -100,11 +100,11 @@
 <span class="nc">P1</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">   </span><span class="c1">// vector-valued, 2 components</span>
 
 <span class="nc">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span>
-<span class="n">u</span><span class="p">.</span><span class="n">setName</span><span class="p">(</span><span class="s">"u"</span><span class="p">);</span><span class="w">     </span><span class="c1">// name appears in ParaView</span></pre><p>Note the call to <code>setName(&quot;u&quot;)</code> — this name is used as the attribute label in the XDMF file, and will appear as the field name in ParaView.</p></section><section id="examples-io-xdmf-writer"><h2><a href="#examples-io-xdmf-writer">Setting Up the XDMF Writer</a></h2><p>The <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> object is created with a stem name that determines the output file names. A <strong>grid</strong> is configured with the mesh and the grid function to export:</p><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">"TimeEvolution"</span><span class="p">);</span>
+<span class="n">u</span><span class="p">.</span><span class="n">setName</span><span class="p">(</span><span class="s">"u"</span><span class="p">);</span><span class="w">     </span><span class="c1">// name appears in ParaView</span></pre><p>Note the call to <code>setName(&quot;u&quot;)</code> — this name is used as the attribute label in the XDMF file, and will appear as the field name in ParaView.</p></section><section id="examples-io-xdmf-writer"><h2><a href="#examples-io-xdmf-writer">Setting up the XDMF writer</a></h2><p>The <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> object is created with a stem name that determines the output file names. A <strong>grid</strong> is configured with the mesh and the grid function to export:</p><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">"TimeEvolution"</span><span class="p">);</span>
 
 <span class="k">auto</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">();</span>
 <span class="n">grid</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="n">grid</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">u</span><span class="p">);</span></pre><p>The <code>grid()</code> method returns a handle to the default grid. You can register multiple fields with <code>add()</code> — they will all be exported at each time step.</p></section><section id="examples-io-xdmf-timeloop"><h2><a href="#examples-io-xdmf-timeloop">Time Loop</a></h2><p>At each time step, we update the grid function and call <code>write(t)</code> with the current simulation time:</p><pre class="m-code"><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">Nt</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">k</span><span class="p">)</span>
+<span class="n">grid</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">u</span><span class="p">);</span></pre><p>The <code>grid()</code> method returns a handle to the default grid. You can register multiple fields with <code>add()</code> — they will all be exported at each time step.</p></section><section id="examples-io-xdmf-timeloop"><h2><a href="#examples-io-xdmf-timeloop">Time loop</a></h2><p>At each time step, we update the grid function and call <code>write(t)</code> with the current simulation time:</p><pre class="m-code"><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">Nt</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">k</span><span class="p">)</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="p">;</span>
 
@@ -131,8 +131,8 @@ $ t $
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-116'/>
 </g>
-</svg>. The XDMF writer automatically manages the underlying HDF5 files.</p></section><section id="examples-io-xdmf-output"><h2><a href="#examples-io-xdmf-output">Output Files</a></h2><p>Running this example produces:</p><ul><li><code>TimeEvolution.xdmf</code> — XML metadata file describing the temporal collection of grids</li><li><code>TimeEvolution.*.h5</code> — HDF5 files containing mesh geometry, topology, and field data for each snapshot</li></ul></section><section id="examples-io-xdmf-paraview"><h2><a href="#examples-io-xdmf-paraview">Viewing in ParaView</a></h2><p>To visualize the time evolution:</p><ol><li>Open ParaView</li><li><strong>File → Open</strong> and select <code>TimeEvolution.xdmf</code></li><li>Click <strong>Apply</strong> in the Properties panel</li><li>Select &quot;u&quot; from the field dropdown (it appears as a vector field)</li><li>Apply <strong>Glyph</strong> filter to display arrows, or use the magnitude coloring mode</li><li>Use the <strong>Play</strong> button or timeline slider to animate through time steps</li></ol></section><section id="examples-io-xdmf-full"><h2><a href="#examples-io-xdmf-full">Full Source Code</a></h2><p>The complete source code is:</p><ul><li><a href="_i_o_2_x_d_m_f_8cpp-example.html" class="m-doc">XDMF.cpp</a></li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="examples-io-index.html" class="m-doc">Input/Output examples</a> | <a href="examples-io-mfem.html" class="m-doc">MFEM format &raquo;</a></div>
+</svg>. The XDMF writer automatically manages the underlying HDF5 files.</p></section><section id="examples-io-xdmf-output"><h2><a href="#examples-io-xdmf-output">Output files</a></h2><p>Running this example produces:</p><ul><li><code>TimeEvolution.xdmf</code> — XML metadata file describing the temporal collection of grids</li><li><code>TimeEvolution.*.h5</code> — HDF5 files containing mesh geometry, topology, and field data for each snapshot</li></ul></section><section id="examples-io-xdmf-paraview"><h2><a href="#examples-io-xdmf-paraview">Viewing in ParaView</a></h2><p>To visualize the time evolution:</p><ol><li>Open ParaView</li><li><strong>File → Open</strong> and select <code>TimeEvolution.xdmf</code></li><li>Click <strong>Apply</strong> in the Properties panel</li><li>Select &quot;u&quot; from the field dropdown (it appears as a vector field)</li><li>Apply <strong>Glyph</strong> filter to display arrows, or use the magnitude coloring mode</li><li>Use the <strong>Play</strong> button or timeline slider to animate through time steps</li></ol></section><section id="examples-io-xdmf-full"><h2><a href="#examples-io-xdmf-full">Full source code</a></h2><p>The complete source code is:</p><ul><li><a href="_i_o_2_x_d_m_f_8cpp-example.html" class="m-doc">XDMF.cpp</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="examples-io-index.html" class="m-doc">Input/output examples</a> | <a href="examples-io-mfem.html" class="m-doc">MFEM format &raquo;</a></div>
       </div>
     </div>
   </div>
