@@ -35,8 +35,7 @@ int main()
   RealFunction f = 1;
 
   Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v)) - Integral(f, v)
-             + DirichletBC(u, Zero());
+  poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero());
   //! [poisson-form]
 
   //! [poisson-solve]
