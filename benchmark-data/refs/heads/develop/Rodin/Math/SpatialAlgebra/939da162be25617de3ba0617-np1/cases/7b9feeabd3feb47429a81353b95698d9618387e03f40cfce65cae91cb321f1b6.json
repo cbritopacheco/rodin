@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "component": "Rodin/Math/SpatialAlgebra",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "SpatialTensor3/Real/Scale/3/2/3",
+  "metric": "cpu_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "SpatialTensor3/Real/Scale/3/2/3",
+          "value": 16.509450085849398,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            16.509450085849398
+          ],
+          "records": [
+            {
+              "name": "SpatialTensor3/Real/Scale/3/2/3",
+              "family_index": 17,
+              "per_family_instance_index": 5,
+              "run_name": "SpatialTensor3/Real/Scale/3/2/3",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 17247674,
+              "real_time": 16.50979198702367,
+              "cpu_time": 16.509450085849398,
+              "time_unit": "ns",
+              "entries": 18.0,
+              "items_per_second": 1090284649.482552,
+              "object_bytes": 248.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T13:55:42+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinMathBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 4328,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": false,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.880371,
+              0.280762,
+              0.100098
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

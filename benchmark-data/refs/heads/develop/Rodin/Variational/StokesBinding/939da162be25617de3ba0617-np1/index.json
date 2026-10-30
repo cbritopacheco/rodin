@@ -1,0 +1,3518 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBasisScalingBenchmarks",
+      "RodinFieldContractionBenchmarks",
+      "RodinFieldDerivativeBenchmarks",
+      "RodinFieldOperationBenchmarks",
+      "RodinGridFunctionBenchmarks",
+      "RodinH1BasisLifecycleBenchmarks",
+      "RodinH1ConvectionBenchmarks",
+      "RodinH1MassBindingBenchmarks",
+      "RodinH1MassOperandOrderBenchmarks",
+      "RodinH1PreparedBasisBenchmarks",
+      "RodinH1PyramidBenchmarks",
+      "RodinH1PyramidNodalBenchmarks",
+      "RodinNamedFormBenchmarks",
+      "RodinNamedMassKernelBenchmarks",
+      "RodinP1QuadratureBindingBenchmarks",
+      "RodinPhysicalGradientBenchmarks",
+      "RodinProblemLifecycleBenchmarks",
+      "RodinQuadratureBindingBenchmarks",
+      "RodinQuadratureExpressionBenchmarks",
+      "RodinReferenceElementBenchmarks",
+      "RodinStokesBindingBenchmarks",
+      "RodinVariationalCoefficientEvaluationBenchmarks",
+      "RodinVariationalGridFunctionBenchmarks",
+      "RodinVariationalIntegratorsBenchmarks",
+      "RodinVariationalNamedFormsBenchmarks",
+      "RodinVariationalP1Benchmarks",
+      "RodinVariationalRankOneJacobianBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "dabee70937001865237515c09678ed3ee7a2cbc733953ca0b39f17c4fa5eb1da",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/dabee70937001865237515c09678ed3ee7a2cbc733953ca0b39f17c4fa5eb1da.json"
+    },
+    {
+      "id": "d676ada832db79b186c13c8eb9e9d6a86f26c24721a06f08e85ac3384b630de8",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d676ada832db79b186c13c8eb9e9d6a86f26c24721a06f08e85ac3384b630de8.json"
+    },
+    {
+      "id": "d6511dea9a66eeb1e0349509fa25001dd055feed1fe91911306428e479bfc2a1",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d6511dea9a66eeb1e0349509fa25001dd055feed1fe91911306428e479bfc2a1.json"
+    },
+    {
+      "id": "9fd5cd177a4d876b7684e57e2cd636cdb3b8ed2f3ba4b1d755af6949cda8de9a",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Hexahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/9fd5cd177a4d876b7684e57e2cd636cdb3b8ed2f3ba4b1d755af6949cda8de9a.json"
+    },
+    {
+      "id": "0bb10b1e034d5568282b01f76cb86976dbc5a3eaccbac8a12ce7571ef802c443",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Hexahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/0bb10b1e034d5568282b01f76cb86976dbc5a3eaccbac8a12ce7571ef802c443.json"
+    },
+    {
+      "id": "5f961b1a9d431881fbd76ad06d07f4e81c1560a047ab364313ddc86102c2b259",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Hexahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/5f961b1a9d431881fbd76ad06d07f4e81c1560a047ab364313ddc86102c2b259.json"
+    },
+    {
+      "id": "780cd271bed4c7e3ca67d31b5cf28c73748ef9f7ec3c68949fcce9e67cf18077",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/780cd271bed4c7e3ca67d31b5cf28c73748ef9f7ec3c68949fcce9e67cf18077.json"
+    },
+    {
+      "id": "5986f621d2ec92c65594b6d68cd362de15e6cdc66b71b3caceed096203d0f8bc",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5986f621d2ec92c65594b6d68cd362de15e6cdc66b71b3caceed096203d0f8bc.json"
+    },
+    {
+      "id": "e7e61316fcddfd5db845908d55f04ca86c7d7e95ca0d387642e78f954c8f8a7a",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e7e61316fcddfd5db845908d55f04ca86c7d7e95ca0d387642e78f954c8f8a7a.json"
+    },
+    {
+      "id": "353617210ce05d05033fc5f97fc54e91946325385a3b0feb373ba871632991b7",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/10/real_time",
+      "metric": "real_time",
+      "url": "cases/353617210ce05d05033fc5f97fc54e91946325385a3b0feb373ba871632991b7.json"
+    },
+    {
+      "id": "a6846f320a91fc65afd54c7f9d0c3500d8d059d776820772326decd845d3d5d7",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/11/real_time",
+      "metric": "real_time",
+      "url": "cases/a6846f320a91fc65afd54c7f9d0c3500d8d059d776820772326decd845d3d5d7.json"
+    },
+    {
+      "id": "24e3f8d2b7cb6fe4272e54895de56100a6c6a5a79557ea55605111d25ac149d8",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/24e3f8d2b7cb6fe4272e54895de56100a6c6a5a79557ea55605111d25ac149d8.json"
+    },
+    {
+      "id": "b1daec57f6fe3b6ef370967c46ae1ab04c4a3ffd8c12e9862896522daaf92a98",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b1daec57f6fe3b6ef370967c46ae1ab04c4a3ffd8c12e9862896522daaf92a98.json"
+    },
+    {
+      "id": "4677bb66f325781cacdd2a78ce64c84322d44bf2f2e34288492006e88d723c13",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/4677bb66f325781cacdd2a78ce64c84322d44bf2f2e34288492006e88d723c13.json"
+    },
+    {
+      "id": "65caf17f9e3cb3ad4cd5526b0784e7e1c5b99515eecd9b90fdf0c6c8592ab2e4",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/65caf17f9e3cb3ad4cd5526b0784e7e1c5b99515eecd9b90fdf0c6c8592ab2e4.json"
+    },
+    {
+      "id": "26056659105669fabbf22226d62e51c93d10fb802d87942556d028dbf4591965",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/26056659105669fabbf22226d62e51c93d10fb802d87942556d028dbf4591965.json"
+    },
+    {
+      "id": "956ea9973b18f0f5c2579c3edeb0ab4acf4c8c5c4d7672da876fc95ab0ae6911",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/956ea9973b18f0f5c2579c3edeb0ab4acf4c8c5c4d7672da876fc95ab0ae6911.json"
+    },
+    {
+      "id": "7a03382154ac56c8a0d4b52ef3613bed13ed0db7effdddba58e1910dc430f6da",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Quadrilateral/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/7a03382154ac56c8a0d4b52ef3613bed13ed0db7effdddba58e1910dc430f6da.json"
+    },
+    {
+      "id": "e90a3be1040594ad04b506ae71ad97921c593321f5eff38132d8ccf1628f97b4",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Quadrilateral/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e90a3be1040594ad04b506ae71ad97921c593321f5eff38132d8ccf1628f97b4.json"
+    },
+    {
+      "id": "cbb80e18611cbf44696190b20b8cc6bbf7db0a9f219821d4fe0c1718ef90caa9",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Quadrilateral/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/cbb80e18611cbf44696190b20b8cc6bbf7db0a9f219821d4fe0c1718ef90caa9.json"
+    },
+    {
+      "id": "8e0a6fcc99434c84b00ac9270551bf05fe8729a5b653deb95a19dd32b79e60d0",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8e0a6fcc99434c84b00ac9270551bf05fe8729a5b653deb95a19dd32b79e60d0.json"
+    },
+    {
+      "id": "1ed6751b91f3f72c2b1287104657e4d01bb40ed2de0619aa270136958f6089bf",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1ed6751b91f3f72c2b1287104657e4d01bb40ed2de0619aa270136958f6089bf.json"
+    },
+    {
+      "id": "5b34b924552479e5772e3c2349515671c3b99ec541a96df9ea23848f527d9532",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5b34b924552479e5772e3c2349515671c3b99ec541a96df9ea23848f527d9532.json"
+    },
+    {
+      "id": "49a6dac8d9789442e88fc9c57ebfee58184e1942a4cd1bac8ca7971c421b907f",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/14/real_time",
+      "metric": "real_time",
+      "url": "cases/49a6dac8d9789442e88fc9c57ebfee58184e1942a4cd1bac8ca7971c421b907f.json"
+    },
+    {
+      "id": "adf4dd2159bf418d4d4d2fe32affd920167079c96df089e819ce046c41d32db4",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/adf4dd2159bf418d4d4d2fe32affd920167079c96df089e819ce046c41d32db4.json"
+    },
+    {
+      "id": "b82cff2aecf03aef2ea2a684fb64b492c9edbf456b2581571ff0b79d90074094",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b82cff2aecf03aef2ea2a684fb64b492c9edbf456b2581571ff0b79d90074094.json"
+    },
+    {
+      "id": "94205eff95a8d54cfb3e18852499ac1fc8b9fe00f347d34a70406a3867189c37",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/94205eff95a8d54cfb3e18852499ac1fc8b9fe00f347d34a70406a3867189c37.json"
+    },
+    {
+      "id": "7642b1cf233988af0e4513db79f3679721f0bd44d30aaf4039cd3b25f8c87909",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7642b1cf233988af0e4513db79f3679721f0bd44d30aaf4039cd3b25f8c87909.json"
+    },
+    {
+      "id": "b9b07840acb9ddaa0dacb2b6c5b2a145fc0e87b950ef69e83361a2d77cfe1cd9",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b9b07840acb9ddaa0dacb2b6c5b2a145fc0e87b950ef69e83361a2d77cfe1cd9.json"
+    },
+    {
+      "id": "ea689c0faea9d6c259ee148046b6f3075a34e4c6e7aa01486661cc58b24bd894",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ea689c0faea9d6c259ee148046b6f3075a34e4c6e7aa01486661cc58b24bd894.json"
+    },
+    {
+      "id": "7831db0172952ab80eb0cce5587733066e7141f0137a2f33b5e0c4c9902b1d36",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Triangle/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/7831db0172952ab80eb0cce5587733066e7141f0137a2f33b5e0c4c9902b1d36.json"
+    },
+    {
+      "id": "19e97d8b683f560cc49d9b06b8f27884f1ac46808e8ea9b3478f038f08bf076f",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Triangle/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/19e97d8b683f560cc49d9b06b8f27884f1ac46808e8ea9b3478f038f08bf076f.json"
+    },
+    {
+      "id": "e6ff4df1b5c878e6eb980ec96c3409af5442b715aac9aef1f7bc490cb980703a",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Triangle/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/e6ff4df1b5c878e6eb980ec96c3409af5442b715aac9aef1f7bc490cb980703a.json"
+    },
+    {
+      "id": "7f9d9d7341382a1d38b4b80bc3ab5b158ebda4b33b434bb3e7c7b17b7e59396e",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7f9d9d7341382a1d38b4b80bc3ab5b158ebda4b33b434bb3e7c7b17b7e59396e.json"
+    },
+    {
+      "id": "cda2c6937079dce476a0ad02516af12b3942f26bc9716d345bc159210c2894e0",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/cda2c6937079dce476a0ad02516af12b3942f26bc9716d345bc159210c2894e0.json"
+    },
+    {
+      "id": "2c3cf7aa9b99f828753f7a900d143ef4a738fa0acdd10afdd433c6d4c2f74acc",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2c3cf7aa9b99f828753f7a900d143ef4a738fa0acdd10afdd433c6d4c2f74acc.json"
+    },
+    {
+      "id": "91664209338153e8a4d2b58051e3e31eac1b613d7bcba920cc834e87afe766c8",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Wedge/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/91664209338153e8a4d2b58051e3e31eac1b613d7bcba920cc834e87afe766c8.json"
+    },
+    {
+      "id": "d48024d8b1441e9cdbf41a69303a81e3d7bfc918fd31a0f1bab11265c5728956",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Wedge/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/d48024d8b1441e9cdbf41a69303a81e3d7bfc918fd31a0f1bab11265c5728956.json"
+    },
+    {
+      "id": "4cd0f583208a2a9fb24ef334c0731517ba5117adec4477d5534fdaf09608f49d",
+      "name": "Stokes/Binding/Divergence/H1/P2P1/Real/Wedge/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/4cd0f583208a2a9fb24ef334c0731517ba5117adec4477d5534fdaf09608f49d.json"
+    },
+    {
+      "id": "17c21ea5f8eb84a24df4f4a524ee4efa35ddc50dceea427126c6a0f1f56a6580",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/17c21ea5f8eb84a24df4f4a524ee4efa35ddc50dceea427126c6a0f1f56a6580.json"
+    },
+    {
+      "id": "ad767d99c75987158741d9c818c9841c31a5afda1b5a9d0b01140aab0fa1a611",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ad767d99c75987158741d9c818c9841c31a5afda1b5a9d0b01140aab0fa1a611.json"
+    },
+    {
+      "id": "70c89687eee0e12bd3dd2ba8df106d6b78dd7ae485a0112e3e22a255f17d3c20",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/70c89687eee0e12bd3dd2ba8df106d6b78dd7ae485a0112e3e22a255f17d3c20.json"
+    },
+    {
+      "id": "5d8cacb50e958a3f2409296fd95d087bf8848f90269115dd2031fc014348fa98",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Hexahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/5d8cacb50e958a3f2409296fd95d087bf8848f90269115dd2031fc014348fa98.json"
+    },
+    {
+      "id": "c65d32058118844404912ef30af810a966b4155332a95e3aa3ff8388248fa8e7",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Hexahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c65d32058118844404912ef30af810a966b4155332a95e3aa3ff8388248fa8e7.json"
+    },
+    {
+      "id": "e844f7000fdbc91161702a219f46aa4359f2ea8e1f5293adfe4a8729ca36dfbc",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Hexahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/e844f7000fdbc91161702a219f46aa4359f2ea8e1f5293adfe4a8729ca36dfbc.json"
+    },
+    {
+      "id": "31b3d13fdff796e8e0723582045a69c3a410ded4a30bdb67dff4e6463d4045a8",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/31b3d13fdff796e8e0723582045a69c3a410ded4a30bdb67dff4e6463d4045a8.json"
+    },
+    {
+      "id": "70ff1d080d4b64a8bc2061091d97e882bbdec460b89e2b7ee476890b189ea3ac",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/70ff1d080d4b64a8bc2061091d97e882bbdec460b89e2b7ee476890b189ea3ac.json"
+    },
+    {
+      "id": "af4008d30c9f8a39586db0048d41e0520e846e5e9afe4b5ab6e277b21dd7e998",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/af4008d30c9f8a39586db0048d41e0520e846e5e9afe4b5ab6e277b21dd7e998.json"
+    },
+    {
+      "id": "cae3c94b33891f1459d43963cac7612f5d84eeb0fff556d9f2b41bf267f1bd02",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/10/real_time",
+      "metric": "real_time",
+      "url": "cases/cae3c94b33891f1459d43963cac7612f5d84eeb0fff556d9f2b41bf267f1bd02.json"
+    },
+    {
+      "id": "8f061fcc5bf72c114d1414e33185aa711430806a5b58d20c262f9fe7037926ff",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/11/real_time",
+      "metric": "real_time",
+      "url": "cases/8f061fcc5bf72c114d1414e33185aa711430806a5b58d20c262f9fe7037926ff.json"
+    },
+    {
+      "id": "d84ddf25b6be4ffbc1773275af72166d60f7b62dc20a685387beef01544617a1",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d84ddf25b6be4ffbc1773275af72166d60f7b62dc20a685387beef01544617a1.json"
+    },
+    {
+      "id": "ed0c70891ee3ce439a32b61d91739a7d49ac3ad89e82bceaa297ab6109eb1947",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ed0c70891ee3ce439a32b61d91739a7d49ac3ad89e82bceaa297ab6109eb1947.json"
+    },
+    {
+      "id": "92cafe1215711fad89a6110f48dcee124415931820251f5f823e98131fdf527f",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/92cafe1215711fad89a6110f48dcee124415931820251f5f823e98131fdf527f.json"
+    },
+    {
+      "id": "a1142b76d6b980b75cf7b8f2c87defd80237c8e14a44e6667f76c0e94b944c49",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a1142b76d6b980b75cf7b8f2c87defd80237c8e14a44e6667f76c0e94b944c49.json"
+    },
+    {
+      "id": "f9281ad5e93350a105c3cd71fd934968cca0c7cb5967bbc03b2f8f9d5d6ffaca",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f9281ad5e93350a105c3cd71fd934968cca0c7cb5967bbc03b2f8f9d5d6ffaca.json"
+    },
+    {
+      "id": "caf898c17ea3c5922bd7c55bdefb578610ae00431782bee11c035214cc627946",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/caf898c17ea3c5922bd7c55bdefb578610ae00431782bee11c035214cc627946.json"
+    },
+    {
+      "id": "75229d3d5b8b847b074a7b05e747a1f2024d449a6b50957d1fe5e665d6cc3c95",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Quadrilateral/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/75229d3d5b8b847b074a7b05e747a1f2024d449a6b50957d1fe5e665d6cc3c95.json"
+    },
+    {
+      "id": "f8e9ced7a2ff3426aacce8f661e54f2b3c677b49d122bb8a8d706b2de7d23ad5",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Quadrilateral/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f8e9ced7a2ff3426aacce8f661e54f2b3c677b49d122bb8a8d706b2de7d23ad5.json"
+    },
+    {
+      "id": "b62aaffb7509c2148f2216c68d49f5e0ca71c5e987551d6778dda95e6136f554",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Quadrilateral/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/b62aaffb7509c2148f2216c68d49f5e0ca71c5e987551d6778dda95e6136f554.json"
+    },
+    {
+      "id": "427d6255381db661868d228a0f061e64417943cfaf2b78616b085b82dfe581a7",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/427d6255381db661868d228a0f061e64417943cfaf2b78616b085b82dfe581a7.json"
+    },
+    {
+      "id": "fa6373f8ee0f727dc603ada58395f753d0316afc6e995a82723f212b77bbd037",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/fa6373f8ee0f727dc603ada58395f753d0316afc6e995a82723f212b77bbd037.json"
+    },
+    {
+      "id": "1c70c32cf593d178cc9de8e43bf8689284a0fd14b042cd6a8758e90b40ae09e2",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1c70c32cf593d178cc9de8e43bf8689284a0fd14b042cd6a8758e90b40ae09e2.json"
+    },
+    {
+      "id": "78e7962ad6e17e90c4aeacb4c0e6b66ac0ca4974e3cf3bd58325238d69ac6f4f",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/14/real_time",
+      "metric": "real_time",
+      "url": "cases/78e7962ad6e17e90c4aeacb4c0e6b66ac0ca4974e3cf3bd58325238d69ac6f4f.json"
+    },
+    {
+      "id": "0aee45cdb5f7fc0b9f8d3b8a5291e33433638b543b3f03c9970a2005973d106b",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/0aee45cdb5f7fc0b9f8d3b8a5291e33433638b543b3f03c9970a2005973d106b.json"
+    },
+    {
+      "id": "2bed110dc2da6a57af9d5fe280a239a316f8638eb99111e0c98162846b7280ac",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2bed110dc2da6a57af9d5fe280a239a316f8638eb99111e0c98162846b7280ac.json"
+    },
+    {
+      "id": "dba20eac9662942082f50dcde93806285311d13fd2546c24c560fe8a7d60ee16",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/dba20eac9662942082f50dcde93806285311d13fd2546c24c560fe8a7d60ee16.json"
+    },
+    {
+      "id": "fd8c2dc0d555eaaeedb0a34de3776d3136b7723f60086cb3139a0c648805dc90",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/fd8c2dc0d555eaaeedb0a34de3776d3136b7723f60086cb3139a0c648805dc90.json"
+    },
+    {
+      "id": "9a4e193e0dc25fd795795abdddb82e3b292b8cc28d7cf67c8da922efa95a6778",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9a4e193e0dc25fd795795abdddb82e3b292b8cc28d7cf67c8da922efa95a6778.json"
+    },
+    {
+      "id": "26cdab7d54d8b68aa9f5b4002447411d73ddefd901d4415bb44822050d3082e5",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/26cdab7d54d8b68aa9f5b4002447411d73ddefd901d4415bb44822050d3082e5.json"
+    },
+    {
+      "id": "5f67a9b83befe31d69ade12fac979e653b304c0bbc0341e751d991c8890cb807",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Triangle/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/5f67a9b83befe31d69ade12fac979e653b304c0bbc0341e751d991c8890cb807.json"
+    },
+    {
+      "id": "633dbb33f36b4728c7abbbc050c7aee01b9f59430b7faa69f3a365c1e81e41a9",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Triangle/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/633dbb33f36b4728c7abbbc050c7aee01b9f59430b7faa69f3a365c1e81e41a9.json"
+    },
+    {
+      "id": "dcd54c28c6614d7934416bb7f77335acbadf64b7e644ca29016baf6eea0e57a8",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Triangle/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/dcd54c28c6614d7934416bb7f77335acbadf64b7e644ca29016baf6eea0e57a8.json"
+    },
+    {
+      "id": "02f0f1cea3417af28c395e5d090ffed00372ea1a291e9860328ebad18f6a7102",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/02f0f1cea3417af28c395e5d090ffed00372ea1a291e9860328ebad18f6a7102.json"
+    },
+    {
+      "id": "ba02de65970705efc7162e64679972165212f4f522f9ca40c49a9d4b6cf7c624",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ba02de65970705efc7162e64679972165212f4f522f9ca40c49a9d4b6cf7c624.json"
+    },
+    {
+      "id": "e032d7561a625f50e8e1cc1f87adfb977061bfee15a46d83e9b9dd7c8764406c",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e032d7561a625f50e8e1cc1f87adfb977061bfee15a46d83e9b9dd7c8764406c.json"
+    },
+    {
+      "id": "f9f8c3a2512a4dd303a30ae12f5ea0fff36cdfc4a0e2d9a4a1fcc0f12ceda233",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Wedge/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/f9f8c3a2512a4dd303a30ae12f5ea0fff36cdfc4a0e2d9a4a1fcc0f12ceda233.json"
+    },
+    {
+      "id": "4d8eca0a78a311f64a4a18874799866ef77729c51408c7e0894a5423542e7d3d",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Wedge/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4d8eca0a78a311f64a4a18874799866ef77729c51408c7e0894a5423542e7d3d.json"
+    },
+    {
+      "id": "c25ad75d71767eda7e0ccf47df7297a88c1330c4303a2085b7dee488e9b31907",
+      "name": "Stokes/Binding/Divergence/H1/P3P2/Real/Wedge/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/c25ad75d71767eda7e0ccf47df7297a88c1330c4303a2085b7dee488e9b31907.json"
+    },
+    {
+      "id": "a22d875d259819ad2e57ad75549f4459dad0b96873e30278f25acc03f758dd73",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a22d875d259819ad2e57ad75549f4459dad0b96873e30278f25acc03f758dd73.json"
+    },
+    {
+      "id": "04dfdc720eefc27c1ca8493ecafb66ab543df9991a813ceeaabbc1637433b82d",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/04dfdc720eefc27c1ca8493ecafb66ab543df9991a813ceeaabbc1637433b82d.json"
+    },
+    {
+      "id": "6b781ea30ed70ca205b8095af1cb98778d0a72bc021c5c495a39e9bc4f3a42ca",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6b781ea30ed70ca205b8095af1cb98778d0a72bc021c5c495a39e9bc4f3a42ca.json"
+    },
+    {
+      "id": "8a6e17f81a9dd63a4482583fdf8e203a6395145c9bb8decec818d9d39570305a",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Hexahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/8a6e17f81a9dd63a4482583fdf8e203a6395145c9bb8decec818d9d39570305a.json"
+    },
+    {
+      "id": "4ab2501ec967b1dc2e1a4776fa3e67201c13bee6fba94944069d30ce4fb2ef5c",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Hexahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4ab2501ec967b1dc2e1a4776fa3e67201c13bee6fba94944069d30ce4fb2ef5c.json"
+    },
+    {
+      "id": "091fbcf6eb6c8f6ac70e2d298f2c74bc8bd0f17e24cdc9a961a4f258b722b783",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Hexahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/091fbcf6eb6c8f6ac70e2d298f2c74bc8bd0f17e24cdc9a961a4f258b722b783.json"
+    },
+    {
+      "id": "48e81ebb40714adddbbc3bc540d44ad70868102722feb7d361fa1c3da190ade8",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/48e81ebb40714adddbbc3bc540d44ad70868102722feb7d361fa1c3da190ade8.json"
+    },
+    {
+      "id": "a57667c9114ea0dbb96ca05497d830ec16ec9f93e762c6e73d5b55d5e6dcb8ff",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a57667c9114ea0dbb96ca05497d830ec16ec9f93e762c6e73d5b55d5e6dcb8ff.json"
+    },
+    {
+      "id": "a8115c4761261fe1698c4108b66ec1a03f5f3b2f19ced5b971a6acb6d6780a7c",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a8115c4761261fe1698c4108b66ec1a03f5f3b2f19ced5b971a6acb6d6780a7c.json"
+    },
+    {
+      "id": "b39c7dfb4a427030fb4d012deccfdcf8a3e10dd20087ef7b87f8d307d4b9a42f",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/10/real_time",
+      "metric": "real_time",
+      "url": "cases/b39c7dfb4a427030fb4d012deccfdcf8a3e10dd20087ef7b87f8d307d4b9a42f.json"
+    },
+    {
+      "id": "2202d4dafb8ca7450b29de19aebbc66477602bbb2522a1daa7300fed713401f4",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/11/real_time",
+      "metric": "real_time",
+      "url": "cases/2202d4dafb8ca7450b29de19aebbc66477602bbb2522a1daa7300fed713401f4.json"
+    },
+    {
+      "id": "d092993ffc430dcb15d267b61cc61b1b22af7710490a9ab5b4035637d091d867",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d092993ffc430dcb15d267b61cc61b1b22af7710490a9ab5b4035637d091d867.json"
+    },
+    {
+      "id": "241e7bcfce755302e46c430c45525bcf77e90294125db79c3ce424334cac3a2e",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/241e7bcfce755302e46c430c45525bcf77e90294125db79c3ce424334cac3a2e.json"
+    },
+    {
+      "id": "25d453e9b90a708b2fc6f4302c8c5e543b25d64e3727fd9adb650324092be3cc",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/25d453e9b90a708b2fc6f4302c8c5e543b25d64e3727fd9adb650324092be3cc.json"
+    },
+    {
+      "id": "489a9baff23f35ebeac797686a73513284ad70d3daadd5e381f929ff669dee00",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/489a9baff23f35ebeac797686a73513284ad70d3daadd5e381f929ff669dee00.json"
+    },
+    {
+      "id": "c3543933c9b27dd547e2c3e60cf263824ae23bbe92f863fc140c22ffa384fe91",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c3543933c9b27dd547e2c3e60cf263824ae23bbe92f863fc140c22ffa384fe91.json"
+    },
+    {
+      "id": "753cf1ba290b52c5be40fa9538b799bbc18393af26f181b83f4266408f692aca",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/753cf1ba290b52c5be40fa9538b799bbc18393af26f181b83f4266408f692aca.json"
+    },
+    {
+      "id": "e59b6fdabcec5d5b037bda5c2febef1c466fd46beefc0be47851111b884ff529",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Quadrilateral/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/e59b6fdabcec5d5b037bda5c2febef1c466fd46beefc0be47851111b884ff529.json"
+    },
+    {
+      "id": "aca53145b8031e98c3fc8bfb8cc4594975f5a417b5ac100a9e9cb8f9c4518473",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Quadrilateral/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/aca53145b8031e98c3fc8bfb8cc4594975f5a417b5ac100a9e9cb8f9c4518473.json"
+    },
+    {
+      "id": "01df8e20f8a04333786a59b58c21d22c1800082ba41e3b4845172de957b5f78e",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Quadrilateral/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/01df8e20f8a04333786a59b58c21d22c1800082ba41e3b4845172de957b5f78e.json"
+    },
+    {
+      "id": "420052389b14899d15c842a70ecedf75f24c810a14da069a2fe1f03df01e613b",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/420052389b14899d15c842a70ecedf75f24c810a14da069a2fe1f03df01e613b.json"
+    },
+    {
+      "id": "9fdbc57f6bf28ecbd0f3d7a5f8cc92e1defcfeb2519f41768bf43fa9fb657862",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9fdbc57f6bf28ecbd0f3d7a5f8cc92e1defcfeb2519f41768bf43fa9fb657862.json"
+    },
+    {
+      "id": "3c041c16ea7f38d865675b7b9888a48dc7bfe1bfe3c1f4ca445f8124f12d4731",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/3c041c16ea7f38d865675b7b9888a48dc7bfe1bfe3c1f4ca445f8124f12d4731.json"
+    },
+    {
+      "id": "b2cd710e44c3c25e2c4dd7d73b749cc4edcee63ab7356b38d44035d331c1d645",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/14/real_time",
+      "metric": "real_time",
+      "url": "cases/b2cd710e44c3c25e2c4dd7d73b749cc4edcee63ab7356b38d44035d331c1d645.json"
+    },
+    {
+      "id": "912b3d3727f55cef76e94609c3ae868a371ff04dd137295937c164551312024b",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/912b3d3727f55cef76e94609c3ae868a371ff04dd137295937c164551312024b.json"
+    },
+    {
+      "id": "1386af406f3f18b34582352ae6668c253dc1dd94e6dded65540d4d440468de25",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/1386af406f3f18b34582352ae6668c253dc1dd94e6dded65540d4d440468de25.json"
+    },
+    {
+      "id": "ebb6252a8540bacf458261e3f3321654b05ac09f0fc64649c2a426d5ecb367dd",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/ebb6252a8540bacf458261e3f3321654b05ac09f0fc64649c2a426d5ecb367dd.json"
+    },
+    {
+      "id": "dbbb479f86f099566c6612f94c3aeb67286a10df0298989522bc936e1e47d549",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/dbbb479f86f099566c6612f94c3aeb67286a10df0298989522bc936e1e47d549.json"
+    },
+    {
+      "id": "e87008eb415c0f6a35fba86b12e8457c549a8d7d164e19265046ed0ddf14459e",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e87008eb415c0f6a35fba86b12e8457c549a8d7d164e19265046ed0ddf14459e.json"
+    },
+    {
+      "id": "69f64d4d3f5ae5554409505888a3ed635a48803d04b9da24c9afca796e9c8534",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/69f64d4d3f5ae5554409505888a3ed635a48803d04b9da24c9afca796e9c8534.json"
+    },
+    {
+      "id": "14655105d92a7ffac779453f21c4b34c0634ef5b98f02d822f2b102eb801aa84",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Triangle/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/14655105d92a7ffac779453f21c4b34c0634ef5b98f02d822f2b102eb801aa84.json"
+    },
+    {
+      "id": "b16a2a80a55457b836e6aca429fca61199363b386c7ebf17ae26797ff12ec854",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Triangle/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b16a2a80a55457b836e6aca429fca61199363b386c7ebf17ae26797ff12ec854.json"
+    },
+    {
+      "id": "c5caa1a69f355abacb77c3825737634a90991ef76a1f20b60fb1c9c6278ad912",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Triangle/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/c5caa1a69f355abacb77c3825737634a90991ef76a1f20b60fb1c9c6278ad912.json"
+    },
+    {
+      "id": "599ccf5025d9b9adbf2fa8d337433fa5604017d292535fe2a1b342dfac97a2a3",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/599ccf5025d9b9adbf2fa8d337433fa5604017d292535fe2a1b342dfac97a2a3.json"
+    },
+    {
+      "id": "5b069217693bbd457cdbfb8e8abefe71ea767e93430b1efc7c58fb213ece0457",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5b069217693bbd457cdbfb8e8abefe71ea767e93430b1efc7c58fb213ece0457.json"
+    },
+    {
+      "id": "d887b29a457a6f2b6e8ea5c50917b508fd907855ffeac9ff5181cd9de7ab1709",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d887b29a457a6f2b6e8ea5c50917b508fd907855ffeac9ff5181cd9de7ab1709.json"
+    },
+    {
+      "id": "103f45027a1f455234a4011fabd38637dd8ad2ce144d5d489bd29aec7ac609ab",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Wedge/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/103f45027a1f455234a4011fabd38637dd8ad2ce144d5d489bd29aec7ac609ab.json"
+    },
+    {
+      "id": "1eef515292020ee5ab281417c6524b27c56f9ad7f2f29a775c5e5fadb939742d",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Wedge/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/1eef515292020ee5ab281417c6524b27c56f9ad7f2f29a775c5e5fadb939742d.json"
+    },
+    {
+      "id": "5164c47c64c054b2c8e5b6b125f8d3ce55f9c320d72d817f240e2e3c9a47512e",
+      "name": "Stokes/Binding/Divergence/H1/P4P3/Real/Wedge/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/5164c47c64c054b2c8e5b6b125f8d3ce55f9c320d72d817f240e2e3c9a47512e.json"
+    },
+    {
+      "id": "8fb03e2cfdfa91f151e0c22fd138b0077c67d83219525586a266d758d5ec901e",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8fb03e2cfdfa91f151e0c22fd138b0077c67d83219525586a266d758d5ec901e.json"
+    },
+    {
+      "id": "30b459a5cedba91135719d607c674a91bc28802cfe88ded189025b7ad5ebbb43",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/30b459a5cedba91135719d607c674a91bc28802cfe88ded189025b7ad5ebbb43.json"
+    },
+    {
+      "id": "0a143d6b84b5e66c729c19446d8b041ba770e0783306a66b1e9b75abea3d7308",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0a143d6b84b5e66c729c19446d8b041ba770e0783306a66b1e9b75abea3d7308.json"
+    },
+    {
+      "id": "a588316294e9ff8888c11f0f5d3d3d7523e9df64a6950b7fd987e7bbb85bf0b7",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Hexahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/a588316294e9ff8888c11f0f5d3d3d7523e9df64a6950b7fd987e7bbb85bf0b7.json"
+    },
+    {
+      "id": "22963d9be368f43527b6a8b19265957c5703e24b99d847bccf4c58ee74cc79ad",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Hexahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/22963d9be368f43527b6a8b19265957c5703e24b99d847bccf4c58ee74cc79ad.json"
+    },
+    {
+      "id": "2d39e8aebca7a56da6977c57fa781655c5ed3ff91aced8e7c2b39382089b3877",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Hexahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/2d39e8aebca7a56da6977c57fa781655c5ed3ff91aced8e7c2b39382089b3877.json"
+    },
+    {
+      "id": "bef10f3f3eccaa3b53d0d8d329f04b43887ae01e4460c309ff42e59611bc729c",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/bef10f3f3eccaa3b53d0d8d329f04b43887ae01e4460c309ff42e59611bc729c.json"
+    },
+    {
+      "id": "25111e15fcfba79e7d55b660bccb33aca68f83aed5a5ebe7422f013587abcf5f",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/25111e15fcfba79e7d55b660bccb33aca68f83aed5a5ebe7422f013587abcf5f.json"
+    },
+    {
+      "id": "738a67d376c3293664848a2e09969a3c002885b77e0e7d3d321305f3716faa49",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/738a67d376c3293664848a2e09969a3c002885b77e0e7d3d321305f3716faa49.json"
+    },
+    {
+      "id": "80e52b9dc9527fa035937bad0239449f0f4679757bcd3588eafc5edaeab7fabb",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/10/real_time",
+      "metric": "real_time",
+      "url": "cases/80e52b9dc9527fa035937bad0239449f0f4679757bcd3588eafc5edaeab7fabb.json"
+    },
+    {
+      "id": "e5451903f76f24d7e82767f10eeb7b99bd370c96f1a1e49b8c32ad0e1ad108de",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/11/real_time",
+      "metric": "real_time",
+      "url": "cases/e5451903f76f24d7e82767f10eeb7b99bd370c96f1a1e49b8c32ad0e1ad108de.json"
+    },
+    {
+      "id": "d0ba7600b68c620e007838409180f079467a39764ce63a5e7db7c28367a1f002",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d0ba7600b68c620e007838409180f079467a39764ce63a5e7db7c28367a1f002.json"
+    },
+    {
+      "id": "2324d2a69347a5d0e64f71fecb5a096b0f3b2442255f16cf768c1aa64a8453b4",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2324d2a69347a5d0e64f71fecb5a096b0f3b2442255f16cf768c1aa64a8453b4.json"
+    },
+    {
+      "id": "5c4930c9393e92a8bc400727d42df57e0a0321ed63309c83e95f054bbe377e1d",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/5c4930c9393e92a8bc400727d42df57e0a0321ed63309c83e95f054bbe377e1d.json"
+    },
+    {
+      "id": "b6d6656f4c449ec0ae3da1d4bca096e3bb968d90432bcfefc719cfd512842149",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b6d6656f4c449ec0ae3da1d4bca096e3bb968d90432bcfefc719cfd512842149.json"
+    },
+    {
+      "id": "5100a2762c0e586bcdfcf538462bfcec3befac3003bab019441d2a926b174160",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5100a2762c0e586bcdfcf538462bfcec3befac3003bab019441d2a926b174160.json"
+    },
+    {
+      "id": "8e79a2bd892f640169da68ad8c416bc2871ea9aa39dc0a0c39f501f90cbc5aaa",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8e79a2bd892f640169da68ad8c416bc2871ea9aa39dc0a0c39f501f90cbc5aaa.json"
+    },
+    {
+      "id": "699305802a2e06f8db9ee8dc3eb8ef0a9fe086440ca21cdc51c1e4fa75ab66bd",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Quadrilateral/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/699305802a2e06f8db9ee8dc3eb8ef0a9fe086440ca21cdc51c1e4fa75ab66bd.json"
+    },
+    {
+      "id": "d1c51f3b48d0c3cec62a54e95eec30e63c65b45dc40b51be7a43d11089552dfa",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Quadrilateral/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/d1c51f3b48d0c3cec62a54e95eec30e63c65b45dc40b51be7a43d11089552dfa.json"
+    },
+    {
+      "id": "3e4867238452635becdd46834666fde6466f704c8cecfd31e0ea7c5282bc2e3a",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Quadrilateral/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/3e4867238452635becdd46834666fde6466f704c8cecfd31e0ea7c5282bc2e3a.json"
+    },
+    {
+      "id": "8e9c2a8459bcead5e904b3e98f13076ba271a87ec9c70fae01d54e0b3d6f5275",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8e9c2a8459bcead5e904b3e98f13076ba271a87ec9c70fae01d54e0b3d6f5275.json"
+    },
+    {
+      "id": "9e011a809770c28e468da7c4d083ba24cc9b048c036a00ff34317292b5fa950b",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9e011a809770c28e468da7c4d083ba24cc9b048c036a00ff34317292b5fa950b.json"
+    },
+    {
+      "id": "29725305fb0b0d59e8f2d5145b1245770170953df1da4d618d6dd0842369c3f4",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/29725305fb0b0d59e8f2d5145b1245770170953df1da4d618d6dd0842369c3f4.json"
+    },
+    {
+      "id": "397288e9a43617769635736bf385ba0a1896edcd81f28c27167c182ba15326d2",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/14/real_time",
+      "metric": "real_time",
+      "url": "cases/397288e9a43617769635736bf385ba0a1896edcd81f28c27167c182ba15326d2.json"
+    },
+    {
+      "id": "c71b197afb76f5f7150e99f2aca58a7de79b1ca0cee3b9634d72406be4f7982d",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/c71b197afb76f5f7150e99f2aca58a7de79b1ca0cee3b9634d72406be4f7982d.json"
+    },
+    {
+      "id": "73decb66801c131b71afe309af7aede66bc771580bdf403b21d2ebc3d7e3fddb",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/73decb66801c131b71afe309af7aede66bc771580bdf403b21d2ebc3d7e3fddb.json"
+    },
+    {
+      "id": "034d92bba6b9c0a0f0af1150b554443b93a842127174679c62007d1f9b5f62ad",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/034d92bba6b9c0a0f0af1150b554443b93a842127174679c62007d1f9b5f62ad.json"
+    },
+    {
+      "id": "c1885a54fc405a87312ce04902768fa9c724b1a4437ec233cb18f558981530f4",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c1885a54fc405a87312ce04902768fa9c724b1a4437ec233cb18f558981530f4.json"
+    },
+    {
+      "id": "dc6909b39cfddb86e84d2624faa3b72dd13ebf2952f35a0b37033308be990b28",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/dc6909b39cfddb86e84d2624faa3b72dd13ebf2952f35a0b37033308be990b28.json"
+    },
+    {
+      "id": "70a415cfa7832ecc5d71e3363be1a12e4c4dceb39518ae1f7adee4c3ace51207",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/70a415cfa7832ecc5d71e3363be1a12e4c4dceb39518ae1f7adee4c3ace51207.json"
+    },
+    {
+      "id": "2783bf7a1aeb177cb8095e1183dcd822d85b22b443e5d2d5572082f737499995",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Triangle/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/2783bf7a1aeb177cb8095e1183dcd822d85b22b443e5d2d5572082f737499995.json"
+    },
+    {
+      "id": "6dbfbf18e62887cc35c0289be483c9de98fe14fd1293c53337a42c0f56c74e21",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Triangle/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6dbfbf18e62887cc35c0289be483c9de98fe14fd1293c53337a42c0f56c74e21.json"
+    },
+    {
+      "id": "b10651e272483ada7f22b34a4b3a1cac91095c841f39a50fa98d81e41d3245ff",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Triangle/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/b10651e272483ada7f22b34a4b3a1cac91095c841f39a50fa98d81e41d3245ff.json"
+    },
+    {
+      "id": "0de30d6630e237d711d7fccac2a6fa7eba438299363ed2272004841ca17c8ca8",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0de30d6630e237d711d7fccac2a6fa7eba438299363ed2272004841ca17c8ca8.json"
+    },
+    {
+      "id": "2e274f07e1d176e48a864ce752191fba669985a4aecdccdcb63b5fd4468a15c1",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2e274f07e1d176e48a864ce752191fba669985a4aecdccdcb63b5fd4468a15c1.json"
+    },
+    {
+      "id": "4834c3c0c33ccff3dc0f3e7ebda793f95fb43897887d1852ff93de28a2c7b780",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4834c3c0c33ccff3dc0f3e7ebda793f95fb43897887d1852ff93de28a2c7b780.json"
+    },
+    {
+      "id": "5c1cc4846ece2c4e0cbb40b8b7f5e1947834717a671d2af5f52e5e576a2f44f0",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Wedge/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/5c1cc4846ece2c4e0cbb40b8b7f5e1947834717a671d2af5f52e5e576a2f44f0.json"
+    },
+    {
+      "id": "7216cb2cbc3cc6a25455866f90950494dcb947a9b3bdc8d44846d0155cfe11a8",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Wedge/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7216cb2cbc3cc6a25455866f90950494dcb947a9b3bdc8d44846d0155cfe11a8.json"
+    },
+    {
+      "id": "829e748701fbf4409c51245f8122cd1ddc020433edb5e040d0fcbef743390f48",
+      "name": "Stokes/Binding/Pressure/H1/P2P1/Real/Wedge/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/829e748701fbf4409c51245f8122cd1ddc020433edb5e040d0fcbef743390f48.json"
+    },
+    {
+      "id": "cdc6d84dfb7291e5660a0e189efad00c49fccf90bc7bf643d949e7caa958e927",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/cdc6d84dfb7291e5660a0e189efad00c49fccf90bc7bf643d949e7caa958e927.json"
+    },
+    {
+      "id": "a7ec00ce006bf8095efbc51f94d664e6510a62942faabd7289d4ba10a0cf9824",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a7ec00ce006bf8095efbc51f94d664e6510a62942faabd7289d4ba10a0cf9824.json"
+    },
+    {
+      "id": "2d671c9eece08a42c8999de4f8f603995a11d1ce0ca981f444f912e4c96b69fb",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2d671c9eece08a42c8999de4f8f603995a11d1ce0ca981f444f912e4c96b69fb.json"
+    },
+    {
+      "id": "4b95dfdedbfd84a2e357ce9b4154c2412be3bbd2e8adbce573268f324146dde6",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Hexahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/4b95dfdedbfd84a2e357ce9b4154c2412be3bbd2e8adbce573268f324146dde6.json"
+    },
+    {
+      "id": "62f93ed031438494f820653b26fd546e3c1752dd8b38478b8ea5316b30888422",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Hexahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/62f93ed031438494f820653b26fd546e3c1752dd8b38478b8ea5316b30888422.json"
+    },
+    {
+      "id": "e51b3d62c5a9b175b08fa3ca34124ca76a7cba1e712c14f28988fb0184767823",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Hexahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/e51b3d62c5a9b175b08fa3ca34124ca76a7cba1e712c14f28988fb0184767823.json"
+    },
+    {
+      "id": "6337562047e57469bc76dce09f1c4363568a195da1d10aa5b53b15e7f280d117",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6337562047e57469bc76dce09f1c4363568a195da1d10aa5b53b15e7f280d117.json"
+    },
+    {
+      "id": "7897016cdbedc7842f6efddbf016fa33f08507336fa186d0f9e04079595058ea",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7897016cdbedc7842f6efddbf016fa33f08507336fa186d0f9e04079595058ea.json"
+    },
+    {
+      "id": "b961ceb462efc456e4737412f1c136c6d99871f30959c78b7f4a8b8c8acf3d00",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b961ceb462efc456e4737412f1c136c6d99871f30959c78b7f4a8b8c8acf3d00.json"
+    },
+    {
+      "id": "2e673feee70f858e968ac9a3b867d29d35ee272b2c6e89c92b230796fc834ee5",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/10/real_time",
+      "metric": "real_time",
+      "url": "cases/2e673feee70f858e968ac9a3b867d29d35ee272b2c6e89c92b230796fc834ee5.json"
+    },
+    {
+      "id": "780969bc201b46844087bcc750627c8b9c146a38f070730cabf551f18ff389a3",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/11/real_time",
+      "metric": "real_time",
+      "url": "cases/780969bc201b46844087bcc750627c8b9c146a38f070730cabf551f18ff389a3.json"
+    },
+    {
+      "id": "91bc22c807a26bea720c8f03d3bf61c7aba457889731a7279b0fb80b835e9388",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/91bc22c807a26bea720c8f03d3bf61c7aba457889731a7279b0fb80b835e9388.json"
+    },
+    {
+      "id": "fd9829a396c10d4af78c1b3c67395296615180e909146c4a41943217717e9525",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/fd9829a396c10d4af78c1b3c67395296615180e909146c4a41943217717e9525.json"
+    },
+    {
+      "id": "71ae531e21950cc2d33f91308abfb5828d07f3b9186e621ff0426e7ad42528e1",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/71ae531e21950cc2d33f91308abfb5828d07f3b9186e621ff0426e7ad42528e1.json"
+    },
+    {
+      "id": "644c1cbed33d2c556361406531e49f79a943350bb662d5448453530e65e257e3",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/644c1cbed33d2c556361406531e49f79a943350bb662d5448453530e65e257e3.json"
+    },
+    {
+      "id": "ba0fc92aaaa05797bfcfde4f011ecf79e415da1988046dfdf1e4c70c5e6fa408",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ba0fc92aaaa05797bfcfde4f011ecf79e415da1988046dfdf1e4c70c5e6fa408.json"
+    },
+    {
+      "id": "be3cdbe9d6256703bbb3203c5605077e645deb7d497b530608e80e535c640499",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/be3cdbe9d6256703bbb3203c5605077e645deb7d497b530608e80e535c640499.json"
+    },
+    {
+      "id": "e93dd7ff4ae08a466c28051ebcefb29e41b55e42ff2321e5d432effce8d63dc8",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Quadrilateral/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/e93dd7ff4ae08a466c28051ebcefb29e41b55e42ff2321e5d432effce8d63dc8.json"
+    },
+    {
+      "id": "099a7163778784b31ffb3da56f10853e2bbc09b31b638b72e0770335559cfbae",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Quadrilateral/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/099a7163778784b31ffb3da56f10853e2bbc09b31b638b72e0770335559cfbae.json"
+    },
+    {
+      "id": "26f74a027c03baf347e178b2312d029e0b0bc783d3cb945afbbb4bd755dacf55",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Quadrilateral/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/26f74a027c03baf347e178b2312d029e0b0bc783d3cb945afbbb4bd755dacf55.json"
+    },
+    {
+      "id": "ecb2f2f4278e7f033c9d953fe4aa69fffd1446ef69ce60bcca5efeb5e79d6a2b",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ecb2f2f4278e7f033c9d953fe4aa69fffd1446ef69ce60bcca5efeb5e79d6a2b.json"
+    },
+    {
+      "id": "ee07defb9476746f2b02cbebe17878d2ba494799f5f761a4b3252bd342ad4fe2",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ee07defb9476746f2b02cbebe17878d2ba494799f5f761a4b3252bd342ad4fe2.json"
+    },
+    {
+      "id": "5d4f0e5b9652472adbd10b3930a36ca65c0ea7d661bb4421a904e7d06cf8dcec",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5d4f0e5b9652472adbd10b3930a36ca65c0ea7d661bb4421a904e7d06cf8dcec.json"
+    },
+    {
+      "id": "3320f886d5021cf6492bdba4dcfb3c01fd80ceab783378a8067017a2f0a2ff8b",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/14/real_time",
+      "metric": "real_time",
+      "url": "cases/3320f886d5021cf6492bdba4dcfb3c01fd80ceab783378a8067017a2f0a2ff8b.json"
+    },
+    {
+      "id": "7b9a085ff3f445ccd49e495ca2924afe891519796c46175aca43e08046302012",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/7b9a085ff3f445ccd49e495ca2924afe891519796c46175aca43e08046302012.json"
+    },
+    {
+      "id": "f2399a672ce9ab450aadd26d6856b3b83310ccac6db515aa231b24dcb3b1a241",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f2399a672ce9ab450aadd26d6856b3b83310ccac6db515aa231b24dcb3b1a241.json"
+    },
+    {
+      "id": "6188672ba85ee3dc65daf14fcfe08c642a9e7edee3aa2f74c7ddc3c35059ab65",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/6188672ba85ee3dc65daf14fcfe08c642a9e7edee3aa2f74c7ddc3c35059ab65.json"
+    },
+    {
+      "id": "ab1c7fc892a92cf0710b5c2e2c3c784a0fbceaf6cd08fcc3fee234b5566f01e1",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ab1c7fc892a92cf0710b5c2e2c3c784a0fbceaf6cd08fcc3fee234b5566f01e1.json"
+    },
+    {
+      "id": "2e8cb85fda11be6839fcc36131991791caba73d42add276b0beb6817b7aa5373",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2e8cb85fda11be6839fcc36131991791caba73d42add276b0beb6817b7aa5373.json"
+    },
+    {
+      "id": "dbc1e77a6069a9e0641e4b950cab7b7ab551eeebb1bf7fe00df6058e34cba204",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/dbc1e77a6069a9e0641e4b950cab7b7ab551eeebb1bf7fe00df6058e34cba204.json"
+    },
+    {
+      "id": "164fd2f53a4ee2129450aace947c678eff0dc44bd6d3416446be5525b9351395",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Triangle/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/164fd2f53a4ee2129450aace947c678eff0dc44bd6d3416446be5525b9351395.json"
+    },
+    {
+      "id": "015a4de24e67fa39636a71a9f7ff88203f67900133c2582e917c3de14fb440cf",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Triangle/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/015a4de24e67fa39636a71a9f7ff88203f67900133c2582e917c3de14fb440cf.json"
+    },
+    {
+      "id": "0971a7f1354981d798d58b8c0e6b679263946f895366f8ea1bcfd5f31bf5ef04",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Triangle/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/0971a7f1354981d798d58b8c0e6b679263946f895366f8ea1bcfd5f31bf5ef04.json"
+    },
+    {
+      "id": "087ea64eeb1fde3d8357eaf793f57cf25cfd17e1e487e9fff0bcaf3bbf27347b",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/087ea64eeb1fde3d8357eaf793f57cf25cfd17e1e487e9fff0bcaf3bbf27347b.json"
+    },
+    {
+      "id": "403efb8c55d81d3d403dbfb64cae10c3876445ece21d237bf3dbb15380357678",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/403efb8c55d81d3d403dbfb64cae10c3876445ece21d237bf3dbb15380357678.json"
+    },
+    {
+      "id": "002d47b599082bcab3df79cbfae04f1622cbfd20442b093c086b0adfaba41deb",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/002d47b599082bcab3df79cbfae04f1622cbfd20442b093c086b0adfaba41deb.json"
+    },
+    {
+      "id": "a789d28d3bd297fe8f1baedb12db7f9b9455e86757be05b80c103a1bf5075c05",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Wedge/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/a789d28d3bd297fe8f1baedb12db7f9b9455e86757be05b80c103a1bf5075c05.json"
+    },
+    {
+      "id": "6788fc89e52ff949d53261eef323f0d561d6a15ccffe5d55392a90b0134653f5",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Wedge/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6788fc89e52ff949d53261eef323f0d561d6a15ccffe5d55392a90b0134653f5.json"
+    },
+    {
+      "id": "2c6a9b2b9b96a9243cc73e5d7a5a9116ea637529f4590b157299e62579dfef05",
+      "name": "Stokes/Binding/Pressure/H1/P3P2/Real/Wedge/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/2c6a9b2b9b96a9243cc73e5d7a5a9116ea637529f4590b157299e62579dfef05.json"
+    },
+    {
+      "id": "1b6eaaf4e8c522049aa5f01d5a66d6723bbb227cca67a6134120d37d11132e46",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1b6eaaf4e8c522049aa5f01d5a66d6723bbb227cca67a6134120d37d11132e46.json"
+    },
+    {
+      "id": "a49b25b4dad4abdd27c6a8f93ed88eb085e9da4617d3b2ac7585fdc52e8cd0a2",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a49b25b4dad4abdd27c6a8f93ed88eb085e9da4617d3b2ac7585fdc52e8cd0a2.json"
+    },
+    {
+      "id": "ca77b3a29126952435a7dc5dc6114d64743197fa467e5a1d33c8d14da53c44d8",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ca77b3a29126952435a7dc5dc6114d64743197fa467e5a1d33c8d14da53c44d8.json"
+    },
+    {
+      "id": "71be6caf95dcfcc67b802b9468d2bcfa0d577afbb4aede145d7a613c187f7356",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Hexahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/71be6caf95dcfcc67b802b9468d2bcfa0d577afbb4aede145d7a613c187f7356.json"
+    },
+    {
+      "id": "f3ae784a58f3b89ce5a7718b41f7f6b98e2a612f51af3983bbcf25026ee3127d",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Hexahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f3ae784a58f3b89ce5a7718b41f7f6b98e2a612f51af3983bbcf25026ee3127d.json"
+    },
+    {
+      "id": "c67949b14a95b047445d3439d2fce48740709747ffcf2b127c27ec29359c90d3",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Hexahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/c67949b14a95b047445d3439d2fce48740709747ffcf2b127c27ec29359c90d3.json"
+    },
+    {
+      "id": "3488569d7eaecfdb7166ec3d8602bbb907f112e6f91c0326b2e0b520b0ef2108",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/3488569d7eaecfdb7166ec3d8602bbb907f112e6f91c0326b2e0b520b0ef2108.json"
+    },
+    {
+      "id": "ce1963dca5688bc40b4cbb742cf1b765cc3c054b9d7c6209a00d9a3a2e0d2180",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ce1963dca5688bc40b4cbb742cf1b765cc3c054b9d7c6209a00d9a3a2e0d2180.json"
+    },
+    {
+      "id": "cc4d5b127e5ad79639e924d978e4c0846039d49898cc9b67a003a83186ee3718",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/cc4d5b127e5ad79639e924d978e4c0846039d49898cc9b67a003a83186ee3718.json"
+    },
+    {
+      "id": "f5907b46960b407fa7931a80ea8012579b96d86d2b16d753c8ec8afbd204d83c",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/10/real_time",
+      "metric": "real_time",
+      "url": "cases/f5907b46960b407fa7931a80ea8012579b96d86d2b16d753c8ec8afbd204d83c.json"
+    },
+    {
+      "id": "45512235d89059d459cd849defb0e0ccd1dfd5ab75d02f066fc56ea74c83f412",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/11/real_time",
+      "metric": "real_time",
+      "url": "cases/45512235d89059d459cd849defb0e0ccd1dfd5ab75d02f066fc56ea74c83f412.json"
+    },
+    {
+      "id": "77585d8edf95d35c388513cf86c14de2d1589219466c1e0287d3a177ada5da69",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/77585d8edf95d35c388513cf86c14de2d1589219466c1e0287d3a177ada5da69.json"
+    },
+    {
+      "id": "1de91b380b5ca30eacb4954b7c84d929237c36ae88cc799375d1d07b2317ce2f",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/1de91b380b5ca30eacb4954b7c84d929237c36ae88cc799375d1d07b2317ce2f.json"
+    },
+    {
+      "id": "5b48a657cd8599950567f3a601a5488cf0c0bf3f6a3bbb8c5124ab6668eba216",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/5b48a657cd8599950567f3a601a5488cf0c0bf3f6a3bbb8c5124ab6668eba216.json"
+    },
+    {
+      "id": "91ae09299a0c4070d7bd9dacb3e1d71d38ca500a41911b98612446a4a366b505",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/91ae09299a0c4070d7bd9dacb3e1d71d38ca500a41911b98612446a4a366b505.json"
+    },
+    {
+      "id": "5eca8f825f0a29834cdbae74e4e38c436e097066dbdba1cd2fb7641f73594f84",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5eca8f825f0a29834cdbae74e4e38c436e097066dbdba1cd2fb7641f73594f84.json"
+    },
+    {
+      "id": "3d3d50e72e979bbdbb6dfe7d4c89da47cc6543473fb415389bedb23cdc9e5fd2",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/3d3d50e72e979bbdbb6dfe7d4c89da47cc6543473fb415389bedb23cdc9e5fd2.json"
+    },
+    {
+      "id": "ea8035be0fb5981708f0a1a32c43b5b866f6755518b59ba8953edbbff97aa535",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Quadrilateral/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/ea8035be0fb5981708f0a1a32c43b5b866f6755518b59ba8953edbbff97aa535.json"
+    },
+    {
+      "id": "14ca3d4ea66aadb57def53803ffb4257a803da4f698fd433b5da1f644e515e24",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Quadrilateral/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/14ca3d4ea66aadb57def53803ffb4257a803da4f698fd433b5da1f644e515e24.json"
+    },
+    {
+      "id": "0900378d12c02bc914383aa22c86c073b14c3c7e902b913b935b08f34300c6a3",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Quadrilateral/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/0900378d12c02bc914383aa22c86c073b14c3c7e902b913b935b08f34300c6a3.json"
+    },
+    {
+      "id": "813b6252cc902def72ee72415439bf4903ccf273395ba9dc92d8a6e98e245981",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/813b6252cc902def72ee72415439bf4903ccf273395ba9dc92d8a6e98e245981.json"
+    },
+    {
+      "id": "3ae0d0ea05483710763e45745a0391bec3cd829c11e319bafc2d6959f9184b1e",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3ae0d0ea05483710763e45745a0391bec3cd829c11e319bafc2d6959f9184b1e.json"
+    },
+    {
+      "id": "f609b763277372c407af958d13c2a1a2d57b09efa97609f6835d8d38ce363c16",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f609b763277372c407af958d13c2a1a2d57b09efa97609f6835d8d38ce363c16.json"
+    },
+    {
+      "id": "51b2665bcc1919547a5f3cd5e5d6df209f6e4793c178cd482d6d861693542ef9",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/14/real_time",
+      "metric": "real_time",
+      "url": "cases/51b2665bcc1919547a5f3cd5e5d6df209f6e4793c178cd482d6d861693542ef9.json"
+    },
+    {
+      "id": "fa1d1a3a571ed17d7b3eb2eb2bcd1dbc10e71485ea94aa2eef4ce3cfc9e157fb",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/fa1d1a3a571ed17d7b3eb2eb2bcd1dbc10e71485ea94aa2eef4ce3cfc9e157fb.json"
+    },
+    {
+      "id": "768183d1f3f0e4dc307af444418faee99123233b071c228836c7a15e16c31398",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/768183d1f3f0e4dc307af444418faee99123233b071c228836c7a15e16c31398.json"
+    },
+    {
+      "id": "346f5f3e534603841080626b699298f9a829c5274be1a8e796403a30a02786ab",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/346f5f3e534603841080626b699298f9a829c5274be1a8e796403a30a02786ab.json"
+    },
+    {
+      "id": "9b3192c9da5e19507f5aa00c70f23ae63e72c3378c54b3b6a8adc26b52a48bb9",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9b3192c9da5e19507f5aa00c70f23ae63e72c3378c54b3b6a8adc26b52a48bb9.json"
+    },
+    {
+      "id": "93d53515cb8001648650d5abe9a606168b43492f0552ea0fd648ec0fcef6d64b",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/93d53515cb8001648650d5abe9a606168b43492f0552ea0fd648ec0fcef6d64b.json"
+    },
+    {
+      "id": "1d4662080274ff3f40c8142eea74ebea7a7661ccfbf9102250c255db0aad1060",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1d4662080274ff3f40c8142eea74ebea7a7661ccfbf9102250c255db0aad1060.json"
+    },
+    {
+      "id": "3dee897dad3126906020b963f31039de292afd49e58af84d02d54483c84842ce",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Triangle/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/3dee897dad3126906020b963f31039de292afd49e58af84d02d54483c84842ce.json"
+    },
+    {
+      "id": "2d18947aba485c49d1e2b6533bbb3c7360716e4097bd494e70c134a487ab3fc0",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Triangle/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2d18947aba485c49d1e2b6533bbb3c7360716e4097bd494e70c134a487ab3fc0.json"
+    },
+    {
+      "id": "a9b5f150ee25cdd39bb5eb429347f30b8d6cadf33eff3729342279251cd7f772",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Triangle/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/a9b5f150ee25cdd39bb5eb429347f30b8d6cadf33eff3729342279251cd7f772.json"
+    },
+    {
+      "id": "c7be6e4485e6062d2ff4074ce4388e9007d58fc9a52a3ddefa61f23bea53f6a4",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c7be6e4485e6062d2ff4074ce4388e9007d58fc9a52a3ddefa61f23bea53f6a4.json"
+    },
+    {
+      "id": "a438ba67e30761e3e98792ee6813c63341867a92b42761721877e82cbfa0fb8c",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a438ba67e30761e3e98792ee6813c63341867a92b42761721877e82cbfa0fb8c.json"
+    },
+    {
+      "id": "5bbe3651526b911298ba544257476afb96936cb331a93618faa1bd3d824a5256",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5bbe3651526b911298ba544257476afb96936cb331a93618faa1bd3d824a5256.json"
+    },
+    {
+      "id": "41dd626ccb46359cfcc64fe3e092dbd7a518e368a90485c990747456276b5ab9",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Wedge/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/41dd626ccb46359cfcc64fe3e092dbd7a518e368a90485c990747456276b5ab9.json"
+    },
+    {
+      "id": "78fc11680e775d31431fdda3a237c583348a46d25b300caf0b8e012c2ef996a2",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Wedge/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/78fc11680e775d31431fdda3a237c583348a46d25b300caf0b8e012c2ef996a2.json"
+    },
+    {
+      "id": "85d594dac21c7378ca665681183f03dc1a88b1f1ed82fb2029df1c7e9bcae15c",
+      "name": "Stokes/Binding/Pressure/H1/P4P3/Real/Wedge/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/85d594dac21c7378ca665681183f03dc1a88b1f1ed82fb2029df1c7e9bcae15c.json"
+    },
+    {
+      "id": "ca842ffbf23de81a8e4635b8ee5fec3b10b00ad6aabf8cbd120bd5d53ac42cde",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ca842ffbf23de81a8e4635b8ee5fec3b10b00ad6aabf8cbd120bd5d53ac42cde.json"
+    },
+    {
+      "id": "3795f51c81c413d37e6e5b05a930a0f73a4783cebda50819679ff4d687854425",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3795f51c81c413d37e6e5b05a930a0f73a4783cebda50819679ff4d687854425.json"
+    },
+    {
+      "id": "4473a8e1095d32a9849e032e0d964b11997aaee9318f39798c4150566fd16ba5",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4473a8e1095d32a9849e032e0d964b11997aaee9318f39798c4150566fd16ba5.json"
+    },
+    {
+      "id": "a54895a15fea5f6713b19ac54b2289cb2f0d4155130ba2f3dc7510c5805f7250",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Hexahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/a54895a15fea5f6713b19ac54b2289cb2f0d4155130ba2f3dc7510c5805f7250.json"
+    },
+    {
+      "id": "357aca50b0882d8d13b878bef560ff37d2d978f9076762bff1353fa84e58e065",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Hexahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/357aca50b0882d8d13b878bef560ff37d2d978f9076762bff1353fa84e58e065.json"
+    },
+    {
+      "id": "b6e4afb74e3317d2e06c946876ab2adb8b500df1a49c3939498edb5d80e67cb9",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Hexahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/b6e4afb74e3317d2e06c946876ab2adb8b500df1a49c3939498edb5d80e67cb9.json"
+    },
+    {
+      "id": "7592473ad39785d8da5bbbef4301463518c50f3806ef6a8c89b9ab162aee4e3e",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Hexahedron/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/7592473ad39785d8da5bbbef4301463518c50f3806ef6a8c89b9ab162aee4e3e.json"
+    },
+    {
+      "id": "1e016e75bd65638416f53fbb014ca2d0f6bb455c6277125f88197c69bec987f8",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Hexahedron/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/1e016e75bd65638416f53fbb014ca2d0f6bb455c6277125f88197c69bec987f8.json"
+    },
+    {
+      "id": "194a0007a35c2178aafb31db4b477fe885f5416cd6447f21ad2d721f1ff74555",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Hexahedron/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/194a0007a35c2178aafb31db4b477fe885f5416cd6447f21ad2d721f1ff74555.json"
+    },
+    {
+      "id": "6ad81fa3fdcc2ec0af77dc3cfaa5385ee37f4792e1a77867c85c1d8590a18303",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6ad81fa3fdcc2ec0af77dc3cfaa5385ee37f4792e1a77867c85c1d8590a18303.json"
+    },
+    {
+      "id": "6c2044ee3dd93b6f80b360a5060e4c8a6d5daf68d9749df1d20f6598d2255a0e",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6c2044ee3dd93b6f80b360a5060e4c8a6d5daf68d9749df1d20f6598d2255a0e.json"
+    },
+    {
+      "id": "940a623e7abb7bc0ccd322b8b1d565e83f54ad3e7d409fc049878e85d34c0738",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/940a623e7abb7bc0ccd322b8b1d565e83f54ad3e7d409fc049878e85d34c0738.json"
+    },
+    {
+      "id": "423f972e3e2dc05a0f69cf36a740ac05152f955c9dfb20c523d3ad54d337556a",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/10/real_time",
+      "metric": "real_time",
+      "url": "cases/423f972e3e2dc05a0f69cf36a740ac05152f955c9dfb20c523d3ad54d337556a.json"
+    },
+    {
+      "id": "9d3ecce5e3ee9264d7453daa647d9675df1afc6751785505e15c2c05c44da9c7",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/11/real_time",
+      "metric": "real_time",
+      "url": "cases/9d3ecce5e3ee9264d7453daa647d9675df1afc6751785505e15c2c05c44da9c7.json"
+    },
+    {
+      "id": "2cf7e60e4f40b4081bafcb72ff1f4a7e0d54f6119fea264390a8eb8cbd62c7ba",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/2cf7e60e4f40b4081bafcb72ff1f4a7e0d54f6119fea264390a8eb8cbd62c7ba.json"
+    },
+    {
+      "id": "7b2fa9a6cc38551ff8e39dc350189a912a8aa9a1727adb6811f84820c7fcfce7",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7b2fa9a6cc38551ff8e39dc350189a912a8aa9a1727adb6811f84820c7fcfce7.json"
+    },
+    {
+      "id": "9c642819825f24c0f8f758c9ff03d96789b8634a6a7af8935e32b3946e17ec11",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/9c642819825f24c0f8f758c9ff03d96789b8634a6a7af8935e32b3946e17ec11.json"
+    },
+    {
+      "id": "9c8634f7d9240800420e96006260f105c80b4ef8529bbb26bee60167a5685983",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Pyramid/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/9c8634f7d9240800420e96006260f105c80b4ef8529bbb26bee60167a5685983.json"
+    },
+    {
+      "id": "50eb61aed6fd9f054dde24dd98ba5752f08fdf42a3cd7c58e74219ba62b0966e",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Pyramid/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/50eb61aed6fd9f054dde24dd98ba5752f08fdf42a3cd7c58e74219ba62b0966e.json"
+    },
+    {
+      "id": "9869316112394225a88a818a54b53cbe6be3789583740b97cc329e5aec26db4a",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Pyramid/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/9869316112394225a88a818a54b53cbe6be3789583740b97cc329e5aec26db4a.json"
+    },
+    {
+      "id": "1202749e5463bdcab9c8898d904b1e048b891221384d26c98e83c04563d4d446",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1202749e5463bdcab9c8898d904b1e048b891221384d26c98e83c04563d4d446.json"
+    },
+    {
+      "id": "a18e64e55a1e54f5fe15ee4e8631b90131910551110547454e713248d948ee8f",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a18e64e55a1e54f5fe15ee4e8631b90131910551110547454e713248d948ee8f.json"
+    },
+    {
+      "id": "20f0fc49c039e3576e59d58ad24f1ef2b8cca9cd5bd3d72576f1a4c8aae383b0",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/20f0fc49c039e3576e59d58ad24f1ef2b8cca9cd5bd3d72576f1a4c8aae383b0.json"
+    },
+    {
+      "id": "bd7bf048bc85a56ab440ea656bde10af5c8f731e664f7a87a8cc9291f8baee4e",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Quadrilateral/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/bd7bf048bc85a56ab440ea656bde10af5c8f731e664f7a87a8cc9291f8baee4e.json"
+    },
+    {
+      "id": "a3d11f10bd5eba5bb77a42333ccc02eab8d550af20e5eb1446f5311b829f4085",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Quadrilateral/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a3d11f10bd5eba5bb77a42333ccc02eab8d550af20e5eb1446f5311b829f4085.json"
+    },
+    {
+      "id": "354114572ab21cde28d82eaec6e40771a8bc7c13d34dd2e7aea9ba5af452714d",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Quadrilateral/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/354114572ab21cde28d82eaec6e40771a8bc7c13d34dd2e7aea9ba5af452714d.json"
+    },
+    {
+      "id": "b5a2b4bca3c4a89ff861526a29e9576b7e693ee76fd5df64997213bb27eff85e",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Quadrilateral/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/b5a2b4bca3c4a89ff861526a29e9576b7e693ee76fd5df64997213bb27eff85e.json"
+    },
+    {
+      "id": "d47b04206805acd2c42069d78fbd5a855afbab98481d1caff150efaee7d2a60d",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Quadrilateral/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/d47b04206805acd2c42069d78fbd5a855afbab98481d1caff150efaee7d2a60d.json"
+    },
+    {
+      "id": "c55fb39229177e631f3b5890efa11871dcd3dadbcb444c5238e8a46d8043b4a2",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Quadrilateral/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c55fb39229177e631f3b5890efa11871dcd3dadbcb444c5238e8a46d8043b4a2.json"
+    },
+    {
+      "id": "af37f19dd51798a4197290bfa0f69b6d880ecd63792ce945143f9b1dc86db2c7",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/af37f19dd51798a4197290bfa0f69b6d880ecd63792ce945143f9b1dc86db2c7.json"
+    },
+    {
+      "id": "c6174c1a4dfd7b7a1940bd6499acdf19a5d3c9ed250750cd64115e91a3facfa3",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c6174c1a4dfd7b7a1940bd6499acdf19a5d3c9ed250750cd64115e91a3facfa3.json"
+    },
+    {
+      "id": "2ebfc2e1a8ab64054c408877c911e01d5fb98c4559a4956bb56b9a5399c2b6a5",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2ebfc2e1a8ab64054c408877c911e01d5fb98c4559a4956bb56b9a5399c2b6a5.json"
+    },
+    {
+      "id": "be7c21b28a914a8bc0e744fd3988cf28f34ecdb35f6d8aa3319aa28b54843fe1",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/14/real_time",
+      "metric": "real_time",
+      "url": "cases/be7c21b28a914a8bc0e744fd3988cf28f34ecdb35f6d8aa3319aa28b54843fe1.json"
+    },
+    {
+      "id": "b4cb67770630e27195aca666e31e1ba06d1a8c2d83cc49c078a37397efc7d2b6",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/b4cb67770630e27195aca666e31e1ba06d1a8c2d83cc49c078a37397efc7d2b6.json"
+    },
+    {
+      "id": "7828fdece6d2f4d1e9186477f78947e0369e7fc54f885b9520629f5f8c3fe340",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7828fdece6d2f4d1e9186477f78947e0369e7fc54f885b9520629f5f8c3fe340.json"
+    },
+    {
+      "id": "ab7e6cfd5a973ee38b9df7fb3aee0c30a8a37cc20189fba4fdccd0f5b273f98f",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/ab7e6cfd5a973ee38b9df7fb3aee0c30a8a37cc20189fba4fdccd0f5b273f98f.json"
+    },
+    {
+      "id": "9cb4d552fa257cdb1f73a0b22140bef57d96e3f18f7e7a0b2b0d5431511285f9",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Tetrahedron/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/9cb4d552fa257cdb1f73a0b22140bef57d96e3f18f7e7a0b2b0d5431511285f9.json"
+    },
+    {
+      "id": "821c9f53e967b16d309512d400d75ad9667d0f82bca7253968da138863434118",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Tetrahedron/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/821c9f53e967b16d309512d400d75ad9667d0f82bca7253968da138863434118.json"
+    },
+    {
+      "id": "b0f9e295d2d75eaf0c0513018012987d1b6bd629758779cfd723eafacf38d5af",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Tetrahedron/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b0f9e295d2d75eaf0c0513018012987d1b6bd629758779cfd723eafacf38d5af.json"
+    },
+    {
+      "id": "6a628baf0fbd659105146d8a449b65154b4acd240cdef263a2b94d3917db3999",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6a628baf0fbd659105146d8a449b65154b4acd240cdef263a2b94d3917db3999.json"
+    },
+    {
+      "id": "987be4e0827e600e632d620bae4eec3ca452e68ddee7a1d3cfe318697706d7cf",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/987be4e0827e600e632d620bae4eec3ca452e68ddee7a1d3cfe318697706d7cf.json"
+    },
+    {
+      "id": "0256a75eb3ec885efe1cafe805ec9e722fb9aa1301598b6275c2bdf799da89c5",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0256a75eb3ec885efe1cafe805ec9e722fb9aa1301598b6275c2bdf799da89c5.json"
+    },
+    {
+      "id": "099ca00861ceed9eb029380c8343f98b044317c354286a0162d952fe824677c5",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Triangle/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/099ca00861ceed9eb029380c8343f98b044317c354286a0162d952fe824677c5.json"
+    },
+    {
+      "id": "c86567fb67e0bdf54e3684b5fe0648bc7f620ef894adf00253dff9b9b79a8b7c",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Triangle/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c86567fb67e0bdf54e3684b5fe0648bc7f620ef894adf00253dff9b9b79a8b7c.json"
+    },
+    {
+      "id": "62e1d7fd017877ae68d7d1a33cb215cf12bfe211607fda4a68d04dd596e26241",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Triangle/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/62e1d7fd017877ae68d7d1a33cb215cf12bfe211607fda4a68d04dd596e26241.json"
+    },
+    {
+      "id": "cd582a6a5195da7921b0a2c126c5b032a9defcbae35eb597bd555b453655937b",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Triangle/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/cd582a6a5195da7921b0a2c126c5b032a9defcbae35eb597bd555b453655937b.json"
+    },
+    {
+      "id": "9453f10406f8310ec54283f1d260f344319e36952e129d5bc9f9c6ca6f68c9c5",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Triangle/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/9453f10406f8310ec54283f1d260f344319e36952e129d5bc9f9c6ca6f68c9c5.json"
+    },
+    {
+      "id": "cd7af9c5c9e157f1bf8ff1c23ca00789a76cbbf8c5fb9abc8e21df8ca6bd73b6",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Triangle/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/cd7af9c5c9e157f1bf8ff1c23ca00789a76cbbf8c5fb9abc8e21df8ca6bd73b6.json"
+    },
+    {
+      "id": "6f89d57cbcfe6d18e3020894166ec21745bce03a087a2dd28ddc2a3107a491ee",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6f89d57cbcfe6d18e3020894166ec21745bce03a087a2dd28ddc2a3107a491ee.json"
+    },
+    {
+      "id": "73c0c416cc050b39daa6a0635326ca6731feeea81dd1287a99d52fe73f2d8e58",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/73c0c416cc050b39daa6a0635326ca6731feeea81dd1287a99d52fe73f2d8e58.json"
+    },
+    {
+      "id": "21c714560c7d8a64558b39eb3889e7da7dd59aef66b7c2b109439137c0d3c0c5",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/21c714560c7d8a64558b39eb3889e7da7dd59aef66b7c2b109439137c0d3c0c5.json"
+    },
+    {
+      "id": "4713bcdb37a2769d69bc0b0b4c400c891d590377ca87ff4a0d2a9e0a04c750ea",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Wedge/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/4713bcdb37a2769d69bc0b0b4c400c891d590377ca87ff4a0d2a9e0a04c750ea.json"
+    },
+    {
+      "id": "cf815e067bb3cd406edb4a9575cf41470ee2facf8518aa7b48de2fc271ba3270",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Wedge/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/cf815e067bb3cd406edb4a9575cf41470ee2facf8518aa7b48de2fc271ba3270.json"
+    },
+    {
+      "id": "57e36df639a6bb7da89d8526d4f7a178d919333382da40decaa740d011641f6d",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Wedge/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/57e36df639a6bb7da89d8526d4f7a178d919333382da40decaa740d011641f6d.json"
+    },
+    {
+      "id": "bb29c9ca9c86896471bd60cb9c4ccbd83620574c41f33ce1795e4bf767600649",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Wedge/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/bb29c9ca9c86896471bd60cb9c4ccbd83620574c41f33ce1795e4bf767600649.json"
+    },
+    {
+      "id": "98dcd7667788bd75bf8f2c02d2c83466f4f68f5e1839b7c9acbbddce775800ab",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Wedge/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/98dcd7667788bd75bf8f2c02d2c83466f4f68f5e1839b7c9acbbddce775800ab.json"
+    },
+    {
+      "id": "47e029b9aa2f175835fbe4261ae074c016ead4abbdca0fe1316b73aadb0fccca",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P2P1/Real/Wedge/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/47e029b9aa2f175835fbe4261ae074c016ead4abbdca0fe1316b73aadb0fccca.json"
+    },
+    {
+      "id": "61723b6eb8d37ece078c7477187ae3bb66a46eea319f84e96317bbfe79cbe970",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/61723b6eb8d37ece078c7477187ae3bb66a46eea319f84e96317bbfe79cbe970.json"
+    },
+    {
+      "id": "59620a43c9bb620234be62983a14b72eec76466ee35e7eb3557dcb4e8a1ed7e4",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/59620a43c9bb620234be62983a14b72eec76466ee35e7eb3557dcb4e8a1ed7e4.json"
+    },
+    {
+      "id": "3ce168a6e0da1ccc883af27a9e315e86bf9f3bea06fdf4f22a12fa7b535296ee",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/3ce168a6e0da1ccc883af27a9e315e86bf9f3bea06fdf4f22a12fa7b535296ee.json"
+    },
+    {
+      "id": "f8d86948f7b523a711494321534a1620dad3b89118d34b659b1f940c6d811fa7",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Hexahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/f8d86948f7b523a711494321534a1620dad3b89118d34b659b1f940c6d811fa7.json"
+    },
+    {
+      "id": "37c9e471e7495b81fdf069cc2ee5ca38f7669631d4878a9aee59e4d6e415d5e8",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Hexahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/37c9e471e7495b81fdf069cc2ee5ca38f7669631d4878a9aee59e4d6e415d5e8.json"
+    },
+    {
+      "id": "a2ecee7ac2e22f3a36abdfedabc3443fd6c80a6b77367600752d20ec271ee1b9",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Hexahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/a2ecee7ac2e22f3a36abdfedabc3443fd6c80a6b77367600752d20ec271ee1b9.json"
+    },
+    {
+      "id": "a84f7978b0b14f2367e72eb060096c5df73711a8679a4ca0ab1c210f0257c223",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Hexahedron/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/a84f7978b0b14f2367e72eb060096c5df73711a8679a4ca0ab1c210f0257c223.json"
+    },
+    {
+      "id": "2e75aacb36ff1e17c78109bd9ccaa3fe6dc7cb2daba693dd6625bc9f59401e7a",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Hexahedron/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/2e75aacb36ff1e17c78109bd9ccaa3fe6dc7cb2daba693dd6625bc9f59401e7a.json"
+    },
+    {
+      "id": "bb57a27cc763d1ef79ce3fd9cf3dceb1a6de4446356b5a05761d818cfcc3b7e8",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Hexahedron/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/bb57a27cc763d1ef79ce3fd9cf3dceb1a6de4446356b5a05761d818cfcc3b7e8.json"
+    },
+    {
+      "id": "7b3a537ca1e1ebbbbe0339131e7f35a0ab57350264924cdb3667710f10a7476e",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7b3a537ca1e1ebbbbe0339131e7f35a0ab57350264924cdb3667710f10a7476e.json"
+    },
+    {
+      "id": "fe9a125fccc1cfb166d8130ce0de8c343ec64e91e62f642161fba9b15227fe7b",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/fe9a125fccc1cfb166d8130ce0de8c343ec64e91e62f642161fba9b15227fe7b.json"
+    },
+    {
+      "id": "8c5594e9c0ad9ddb99d1ececacfef7e4aec5d366bcc32bbe079e27787f9befad",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8c5594e9c0ad9ddb99d1ececacfef7e4aec5d366bcc32bbe079e27787f9befad.json"
+    },
+    {
+      "id": "c2c6683864ea06f2ad5137dd9a91924fa1eba0a4f88a0c6561abb1e21bf7010d",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/10/real_time",
+      "metric": "real_time",
+      "url": "cases/c2c6683864ea06f2ad5137dd9a91924fa1eba0a4f88a0c6561abb1e21bf7010d.json"
+    },
+    {
+      "id": "7e82ce99a014c7cc5d119993db5245c12e0995979b3f36a5970f2078ecfbb9f0",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/11/real_time",
+      "metric": "real_time",
+      "url": "cases/7e82ce99a014c7cc5d119993db5245c12e0995979b3f36a5970f2078ecfbb9f0.json"
+    },
+    {
+      "id": "0bf54dbbff92a06b5a43302939431ef126e3c85dbffb2e312d8ac0007a55cfb8",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/0bf54dbbff92a06b5a43302939431ef126e3c85dbffb2e312d8ac0007a55cfb8.json"
+    },
+    {
+      "id": "67abc3eb06097c1269a478d83e3c8456951374ca7ba20c84cc222bd0d941d410",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/67abc3eb06097c1269a478d83e3c8456951374ca7ba20c84cc222bd0d941d410.json"
+    },
+    {
+      "id": "274128d7eede17cb4be3eeaa698cdcdd4fd188237ba6a1b24e5e297f0476b5bc",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/274128d7eede17cb4be3eeaa698cdcdd4fd188237ba6a1b24e5e297f0476b5bc.json"
+    },
+    {
+      "id": "e420e31beb394345c8171d96ba20e97f1868f74661625c3a813395a22710331f",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Pyramid/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/e420e31beb394345c8171d96ba20e97f1868f74661625c3a813395a22710331f.json"
+    },
+    {
+      "id": "26e6b7f33ef531650092a019b1162de3f2b481f46ec668abefe0a6062263af70",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Pyramid/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/26e6b7f33ef531650092a019b1162de3f2b481f46ec668abefe0a6062263af70.json"
+    },
+    {
+      "id": "a45a7b1d56dfa6c3e66ddc9c2a18a50b109a765788457093d04bf679b646e97a",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Pyramid/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/a45a7b1d56dfa6c3e66ddc9c2a18a50b109a765788457093d04bf679b646e97a.json"
+    },
+    {
+      "id": "b811ed2a26aa751e383078be2c4c178a9462a283edab6d2b3d29e71b93878ef5",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b811ed2a26aa751e383078be2c4c178a9462a283edab6d2b3d29e71b93878ef5.json"
+    },
+    {
+      "id": "7430358d53c766328c352b6e85c3282f8720428e71617d177fc5bde937f4df9a",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7430358d53c766328c352b6e85c3282f8720428e71617d177fc5bde937f4df9a.json"
+    },
+    {
+      "id": "8a9694bb9cb639aa50e98fcb31414a57a6e622955db18ad7a60a2dd6848c3b53",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8a9694bb9cb639aa50e98fcb31414a57a6e622955db18ad7a60a2dd6848c3b53.json"
+    },
+    {
+      "id": "e4c17d94ed9cca0f0c17d240e898b0e6aa8957cb41f0defbeff892caf52056d6",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Quadrilateral/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/e4c17d94ed9cca0f0c17d240e898b0e6aa8957cb41f0defbeff892caf52056d6.json"
+    },
+    {
+      "id": "e9e9113332376bf1de8cf26e82870bf4c821b4a1616a24e3dbf66fd973dc2d26",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Quadrilateral/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e9e9113332376bf1de8cf26e82870bf4c821b4a1616a24e3dbf66fd973dc2d26.json"
+    },
+    {
+      "id": "be3449e3362fec7059c3b00d785ff348540e68ab8cf2e2320859959b87c93c0e",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Quadrilateral/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/be3449e3362fec7059c3b00d785ff348540e68ab8cf2e2320859959b87c93c0e.json"
+    },
+    {
+      "id": "45307fb5e9fda62394f30f06d26ed79b51e1dd819ea8d0a7a9986c753b3d1b02",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Quadrilateral/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/45307fb5e9fda62394f30f06d26ed79b51e1dd819ea8d0a7a9986c753b3d1b02.json"
+    },
+    {
+      "id": "f96c5547383dd1bdfe86dce00edebe5fb3b06f9ea6f114936a55d50c14411eb4",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Quadrilateral/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/f96c5547383dd1bdfe86dce00edebe5fb3b06f9ea6f114936a55d50c14411eb4.json"
+    },
+    {
+      "id": "5600ed29888dda40fe196474448005c9d7cd1a6479b03d8bce89cfa15fa00f98",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Quadrilateral/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/5600ed29888dda40fe196474448005c9d7cd1a6479b03d8bce89cfa15fa00f98.json"
+    },
+    {
+      "id": "b0d63067a75697d480b8b86398d5954024184c5f61adde8617836f20d84ae8a2",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b0d63067a75697d480b8b86398d5954024184c5f61adde8617836f20d84ae8a2.json"
+    },
+    {
+      "id": "ea2dbfec058e56daf09be38ae5a4e2e20e8fd7bb6eb02def7358fb5bd6a318a9",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ea2dbfec058e56daf09be38ae5a4e2e20e8fd7bb6eb02def7358fb5bd6a318a9.json"
+    },
+    {
+      "id": "c92f772b227035df1c8be1d42b9c078e442f647018a6c537bed3df0ed288565b",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c92f772b227035df1c8be1d42b9c078e442f647018a6c537bed3df0ed288565b.json"
+    },
+    {
+      "id": "1dcb49ffad3671aca41da5ed5e73442f4ea75b88e4535ad0443aea81f9dcac41",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/14/real_time",
+      "metric": "real_time",
+      "url": "cases/1dcb49ffad3671aca41da5ed5e73442f4ea75b88e4535ad0443aea81f9dcac41.json"
+    },
+    {
+      "id": "9e6be4cb3354fa3a380aecf7bef6d71043369b553e1b8a06bb65713e3bd79d3b",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/9e6be4cb3354fa3a380aecf7bef6d71043369b553e1b8a06bb65713e3bd79d3b.json"
+    },
+    {
+      "id": "a6db3199b6221c585d1880d55ebd2a80c444315b28de2cefb38b7fcb5db2254b",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a6db3199b6221c585d1880d55ebd2a80c444315b28de2cefb38b7fcb5db2254b.json"
+    },
+    {
+      "id": "91d3d6dc4d32f297fbc187f323475e05f43e6491bb4d9a92c9c0abc20aefa788",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/91d3d6dc4d32f297fbc187f323475e05f43e6491bb4d9a92c9c0abc20aefa788.json"
+    },
+    {
+      "id": "d2c36ea6a47b64b13ce2ece8e9d2c7e1930ba64fa7d90db8f1dfe2f68b491b14",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Tetrahedron/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/d2c36ea6a47b64b13ce2ece8e9d2c7e1930ba64fa7d90db8f1dfe2f68b491b14.json"
+    },
+    {
+      "id": "2ba8dd3dddb1d3eb9b42c9399c15f661794c55c43d60fcde550c9c2ccefe7058",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Tetrahedron/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/2ba8dd3dddb1d3eb9b42c9399c15f661794c55c43d60fcde550c9c2ccefe7058.json"
+    },
+    {
+      "id": "8ac086e0f927b5a612b9c0410e4d03b0ab8966e737586672c0820b27986d9ff3",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Tetrahedron/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/8ac086e0f927b5a612b9c0410e4d03b0ab8966e737586672c0820b27986d9ff3.json"
+    },
+    {
+      "id": "dfed66e24c594ef384a3ee20ca0836a0f16407bddf066bcd4648a3bddaa93a6c",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/dfed66e24c594ef384a3ee20ca0836a0f16407bddf066bcd4648a3bddaa93a6c.json"
+    },
+    {
+      "id": "5fd39775232f0fd49032ab2a2b7a9dc469bbd573815772d0be2497e59f65f35c",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5fd39775232f0fd49032ab2a2b7a9dc469bbd573815772d0be2497e59f65f35c.json"
+    },
+    {
+      "id": "55ef5c4a7231f05f3de8cd7e9e51d06f19eda7475981b2d051892ee63316d719",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/55ef5c4a7231f05f3de8cd7e9e51d06f19eda7475981b2d051892ee63316d719.json"
+    },
+    {
+      "id": "e39d886ee5c67029cdcd437f02925da2d59637ef5dbe95515c9fdd3b60d11fb0",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Triangle/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/e39d886ee5c67029cdcd437f02925da2d59637ef5dbe95515c9fdd3b60d11fb0.json"
+    },
+    {
+      "id": "5124a30d97eb9f4efd232aae09c0e646fcc1f7342486c49242b4b761760a52e8",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Triangle/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/5124a30d97eb9f4efd232aae09c0e646fcc1f7342486c49242b4b761760a52e8.json"
+    },
+    {
+      "id": "794574626faa6f4092950597ae8f4c06b19ba7f3d4d8237a58dc8915c442ce42",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Triangle/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/794574626faa6f4092950597ae8f4c06b19ba7f3d4d8237a58dc8915c442ce42.json"
+    },
+    {
+      "id": "9fc0893732c2386c96b3e875486dd1ae0ad7a1a9a917af6c5edc615b5b1c94e7",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Triangle/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/9fc0893732c2386c96b3e875486dd1ae0ad7a1a9a917af6c5edc615b5b1c94e7.json"
+    },
+    {
+      "id": "bdf253a3afc0da004782445d6390d3cfb6432042bfdcaceb5afc771207c60f9d",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Triangle/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/bdf253a3afc0da004782445d6390d3cfb6432042bfdcaceb5afc771207c60f9d.json"
+    },
+    {
+      "id": "6d47434224469dea91a49861666fdfa46bf62f0aeca56261eed4196d6e6338c7",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Triangle/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/6d47434224469dea91a49861666fdfa46bf62f0aeca56261eed4196d6e6338c7.json"
+    },
+    {
+      "id": "96c43bfe7e5aec748fbd45e1aab84c0f8b048cf3d05abaf4e33530e8af418b38",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/96c43bfe7e5aec748fbd45e1aab84c0f8b048cf3d05abaf4e33530e8af418b38.json"
+    },
+    {
+      "id": "0d812299a8786269d917ad0a56dcb0de325ab53b70768363d9ab12bede602d41",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0d812299a8786269d917ad0a56dcb0de325ab53b70768363d9ab12bede602d41.json"
+    },
+    {
+      "id": "fcc716749d1c1975a8b47c8c7c19b1cab0bed833051f286bad9b1adeca7149b3",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fcc716749d1c1975a8b47c8c7c19b1cab0bed833051f286bad9b1adeca7149b3.json"
+    },
+    {
+      "id": "453f2c345d33d803448da0f9b8db4df89c8c3e7bbab081512b561cbaaeb3f45d",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Wedge/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/453f2c345d33d803448da0f9b8db4df89c8c3e7bbab081512b561cbaaeb3f45d.json"
+    },
+    {
+      "id": "e4e42b6cf7fe25875b04a099e359da05a64ea904ad05925fdca4b15b0a3fdfd5",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Wedge/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e4e42b6cf7fe25875b04a099e359da05a64ea904ad05925fdca4b15b0a3fdfd5.json"
+    },
+    {
+      "id": "54b6a7fd7f872a90fa04c4bdfce97577ff56c6740acbc653b1c212ca381a6484",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Wedge/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/54b6a7fd7f872a90fa04c4bdfce97577ff56c6740acbc653b1c212ca381a6484.json"
+    },
+    {
+      "id": "9e9f470199366b37dffd36d179fe0fb2f60057b8b9d4913b7dcc278f238017ca",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Wedge/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/9e9f470199366b37dffd36d179fe0fb2f60057b8b9d4913b7dcc278f238017ca.json"
+    },
+    {
+      "id": "284de6f3ba4a621c5357eca06b2a06757a1ddddbe2ddeea90e8429631e7f4c75",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Wedge/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/284de6f3ba4a621c5357eca06b2a06757a1ddddbe2ddeea90e8429631e7f4c75.json"
+    },
+    {
+      "id": "9b26cdd5277f59224403b2fe3a16124ba6d06a4591df23d1246c7e772fd5841e",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P3P2/Real/Wedge/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/9b26cdd5277f59224403b2fe3a16124ba6d06a4591df23d1246c7e772fd5841e.json"
+    },
+    {
+      "id": "ca31d61991cee1495407b0fe4a0ec38f892d23fa6c157caa4f6d77d768f88f93",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ca31d61991cee1495407b0fe4a0ec38f892d23fa6c157caa4f6d77d768f88f93.json"
+    },
+    {
+      "id": "8ab8c3fb1e5aa6f0ddc9cb442eb3ee9ecb31b5c91bc9c14ee636e4c11a9c9487",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8ab8c3fb1e5aa6f0ddc9cb442eb3ee9ecb31b5c91bc9c14ee636e4c11a9c9487.json"
+    },
+    {
+      "id": "1b5f7b63f82e1fe1886b2eca48f6b673912b3b629c1fe55d6d7071452e29d5fd",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1b5f7b63f82e1fe1886b2eca48f6b673912b3b629c1fe55d6d7071452e29d5fd.json"
+    },
+    {
+      "id": "0acc5f6457bda12f77ba7040533bbb22dc2c7e4b0bccdcea3bc45a07297a7b8e",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Hexahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/0acc5f6457bda12f77ba7040533bbb22dc2c7e4b0bccdcea3bc45a07297a7b8e.json"
+    },
+    {
+      "id": "e0d852985a2da629d4c4e99e6472522b0598374ed863112b1c148423fcdc4a90",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Hexahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e0d852985a2da629d4c4e99e6472522b0598374ed863112b1c148423fcdc4a90.json"
+    },
+    {
+      "id": "99d34ebb0911a171905a225a94408470929acb0ed4f369dadb7915b748e0ced2",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Hexahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/99d34ebb0911a171905a225a94408470929acb0ed4f369dadb7915b748e0ced2.json"
+    },
+    {
+      "id": "5302eb397833023d7328159c7023dfa7d10ace096b98727e15c9efad475120de",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Hexahedron/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/5302eb397833023d7328159c7023dfa7d10ace096b98727e15c9efad475120de.json"
+    },
+    {
+      "id": "94ef6917e9da44792ef873467dcca8e7bb43edafa9ee663d141c53f862d9046c",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Hexahedron/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/94ef6917e9da44792ef873467dcca8e7bb43edafa9ee663d141c53f862d9046c.json"
+    },
+    {
+      "id": "850cf3762014d7797415eb047bd5771e03d2332979ac29c6760c8aadce5ad2f1",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Hexahedron/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/850cf3762014d7797415eb047bd5771e03d2332979ac29c6760c8aadce5ad2f1.json"
+    },
+    {
+      "id": "693217639f58e99212d044a94120c2c79ffc9aa5a21d9188d26ec2697eee8d8c",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/693217639f58e99212d044a94120c2c79ffc9aa5a21d9188d26ec2697eee8d8c.json"
+    },
+    {
+      "id": "807bcb2f133d757084660580e77f8656d8e614aff6e836c0b6a9d9292b5d9e9e",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/807bcb2f133d757084660580e77f8656d8e614aff6e836c0b6a9d9292b5d9e9e.json"
+    },
+    {
+      "id": "607ca4dad756ca2164ce1205c42d8f923179a8c501ad38b491694d4b0a431c86",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/607ca4dad756ca2164ce1205c42d8f923179a8c501ad38b491694d4b0a431c86.json"
+    },
+    {
+      "id": "5029b954bfc3b87febb11ec33261b552942f36762d8c43aae9054ef7313958a3",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/10/real_time",
+      "metric": "real_time",
+      "url": "cases/5029b954bfc3b87febb11ec33261b552942f36762d8c43aae9054ef7313958a3.json"
+    },
+    {
+      "id": "266059817bdd0948b8e215624019aa645383963e47f7d8b6586deccd0a3db174",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/11/real_time",
+      "metric": "real_time",
+      "url": "cases/266059817bdd0948b8e215624019aa645383963e47f7d8b6586deccd0a3db174.json"
+    },
+    {
+      "id": "0662a9e617cafa027688f73a9fc209af62dba48452a1708e31e29f1376c09ea6",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/0662a9e617cafa027688f73a9fc209af62dba48452a1708e31e29f1376c09ea6.json"
+    },
+    {
+      "id": "5a16507518698581cde6b367c1b7bd978182f1eb3c988ebf684fa9260449f3b4",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/5a16507518698581cde6b367c1b7bd978182f1eb3c988ebf684fa9260449f3b4.json"
+    },
+    {
+      "id": "785430cd66a2ec68873fe351bce85bc38d609b7a8e530e726fc52f3645c35a49",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/785430cd66a2ec68873fe351bce85bc38d609b7a8e530e726fc52f3645c35a49.json"
+    },
+    {
+      "id": "aca0e6d8580757c7f3754aeec34dfac52c3a65e75750c83106ed81059acf3a40",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Pyramid/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/aca0e6d8580757c7f3754aeec34dfac52c3a65e75750c83106ed81059acf3a40.json"
+    },
+    {
+      "id": "fcabb9c801545c605507947385faebcad3d60d51cf29d3fdccb8cb073e0cf763",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Pyramid/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/fcabb9c801545c605507947385faebcad3d60d51cf29d3fdccb8cb073e0cf763.json"
+    },
+    {
+      "id": "48ca338e0c2873553046b13b89474ad9dd2e391376c0e4de30d5bcec55b3af8c",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Pyramid/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/48ca338e0c2873553046b13b89474ad9dd2e391376c0e4de30d5bcec55b3af8c.json"
+    },
+    {
+      "id": "5056525abcab7edda372fb808e88f2c1cce013820f7562deb4391546194a9604",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5056525abcab7edda372fb808e88f2c1cce013820f7562deb4391546194a9604.json"
+    },
+    {
+      "id": "812a547bb9eae354dc30f841fc0513e7d741bd32354c7aa3f2c095981a845dd7",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/812a547bb9eae354dc30f841fc0513e7d741bd32354c7aa3f2c095981a845dd7.json"
+    },
+    {
+      "id": "03d72eb394adb69f540bf2949b2d3145905d60c30562eb5a2790c50851a2e5a4",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/03d72eb394adb69f540bf2949b2d3145905d60c30562eb5a2790c50851a2e5a4.json"
+    },
+    {
+      "id": "ad99e80672e7d9ef637275b6aaeb85027a56c049205b3808edbce42931a774c6",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Quadrilateral/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/ad99e80672e7d9ef637275b6aaeb85027a56c049205b3808edbce42931a774c6.json"
+    },
+    {
+      "id": "2dc270bebc5bd64cb716bcaaa639431556fc5a1e7ee17d6794aae8bc11894991",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Quadrilateral/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2dc270bebc5bd64cb716bcaaa639431556fc5a1e7ee17d6794aae8bc11894991.json"
+    },
+    {
+      "id": "e3891fc063645b30e1931fd4ddf298799a4da155f500f6858e9ba350f06fa1e4",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Quadrilateral/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/e3891fc063645b30e1931fd4ddf298799a4da155f500f6858e9ba350f06fa1e4.json"
+    },
+    {
+      "id": "d76d4a118b472a11ad14e12a4d51e1c1eb31053754d80dd3c21a995578bd5f20",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Quadrilateral/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/d76d4a118b472a11ad14e12a4d51e1c1eb31053754d80dd3c21a995578bd5f20.json"
+    },
+    {
+      "id": "66b81ae6ce80f849395114af198cb7affafafb53468305faeb26056ff8b6dc1d",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Quadrilateral/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/66b81ae6ce80f849395114af198cb7affafafb53468305faeb26056ff8b6dc1d.json"
+    },
+    {
+      "id": "3d5f7535da238b582d4b733125295eb51d5356e4d386cd18c623945e81bf2aa3",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Quadrilateral/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3d5f7535da238b582d4b733125295eb51d5356e4d386cd18c623945e81bf2aa3.json"
+    },
+    {
+      "id": "02aa1ff5cac411abbed2ff08c67f015db3427cea1f05a7788d9908e09e1bfe67",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/02aa1ff5cac411abbed2ff08c67f015db3427cea1f05a7788d9908e09e1bfe67.json"
+    },
+    {
+      "id": "db6c67f73fd002740e4ab188dad68b34bf41697660561e16bba658db0b762c67",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/db6c67f73fd002740e4ab188dad68b34bf41697660561e16bba658db0b762c67.json"
+    },
+    {
+      "id": "4c76ad5e819b0deda1de2adbdc139b9e1b070f9b45dccbf98fc3d950a738ac6a",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4c76ad5e819b0deda1de2adbdc139b9e1b070f9b45dccbf98fc3d950a738ac6a.json"
+    },
+    {
+      "id": "258f0192dcee7e9ae6cfdb7558c02bb76b9d6debc0e3b669867bd549ad140066",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/14/real_time",
+      "metric": "real_time",
+      "url": "cases/258f0192dcee7e9ae6cfdb7558c02bb76b9d6debc0e3b669867bd549ad140066.json"
+    },
+    {
+      "id": "bf2f5252a9c72309e6953dc42ae09d2d3acbbec01681e4fe3aa8f0e0f24cab51",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/bf2f5252a9c72309e6953dc42ae09d2d3acbbec01681e4fe3aa8f0e0f24cab51.json"
+    },
+    {
+      "id": "2518175a3e2759e3e1dfb8a342fefa01e851cfbda5a75702ae37d9a768885a8f",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2518175a3e2759e3e1dfb8a342fefa01e851cfbda5a75702ae37d9a768885a8f.json"
+    },
+    {
+      "id": "3a6ce528f2f1596d5741ffa6651a41ec19563113ac78c7558dc0a7db19497597",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/3a6ce528f2f1596d5741ffa6651a41ec19563113ac78c7558dc0a7db19497597.json"
+    },
+    {
+      "id": "64fdbbdbdb4e766fbc8f4e24c4a3c4b18be7fc1d23b9becd2bd60d4583e56873",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Tetrahedron/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/64fdbbdbdb4e766fbc8f4e24c4a3c4b18be7fc1d23b9becd2bd60d4583e56873.json"
+    },
+    {
+      "id": "bd575293c9febc6dff7b6d0c56d8678119bdd6ba6ff07eb1b661975bb7d0859a",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Tetrahedron/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/bd575293c9febc6dff7b6d0c56d8678119bdd6ba6ff07eb1b661975bb7d0859a.json"
+    },
+    {
+      "id": "121b9d8cf79507d4aec82e257b31570354f2440c0b4362c25df0712586a1a01c",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Tetrahedron/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/121b9d8cf79507d4aec82e257b31570354f2440c0b4362c25df0712586a1a01c.json"
+    },
+    {
+      "id": "9867e973237998a52b47bd6b9a547b9b98116a248c3b0a4218f68247ca97c7ea",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9867e973237998a52b47bd6b9a547b9b98116a248c3b0a4218f68247ca97c7ea.json"
+    },
+    {
+      "id": "ac7afcec2dadba6acccb0dcf2ec6f2438f87a8cec967a6f48324128c7f796034",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ac7afcec2dadba6acccb0dcf2ec6f2438f87a8cec967a6f48324128c7f796034.json"
+    },
+    {
+      "id": "73d3b94ba7da29411469e4933e58557b74acdcd684d56ee17e303533f7609258",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/73d3b94ba7da29411469e4933e58557b74acdcd684d56ee17e303533f7609258.json"
+    },
+    {
+      "id": "d91c9f0911c299567dcdcabff9448abc0b2797759b38ba3cd34ca16866d735a4",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Triangle/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d91c9f0911c299567dcdcabff9448abc0b2797759b38ba3cd34ca16866d735a4.json"
+    },
+    {
+      "id": "18e6320c7b279aea61db1c28f0971ac5fc1e62038f65113767a33b2f48808c79",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Triangle/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/18e6320c7b279aea61db1c28f0971ac5fc1e62038f65113767a33b2f48808c79.json"
+    },
+    {
+      "id": "93dc4277bc83d2cf1dcb02d49bea31003fedcb189493ca23c5f14eb9313f2e57",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Triangle/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/93dc4277bc83d2cf1dcb02d49bea31003fedcb189493ca23c5f14eb9313f2e57.json"
+    },
+    {
+      "id": "76ea6b846704c79828dab0b7f84fdb2b6618717d46dca0d26612f95bb6c12089",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Triangle/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/76ea6b846704c79828dab0b7f84fdb2b6618717d46dca0d26612f95bb6c12089.json"
+    },
+    {
+      "id": "060aff140f00f26cab158167d8530c9b827b13193f21c202cd58586625056924",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Triangle/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/060aff140f00f26cab158167d8530c9b827b13193f21c202cd58586625056924.json"
+    },
+    {
+      "id": "ff289a078b9d0e8a230da147ffb8a5f3ebce5f5d1b3809c0fe197bfc949aec9f",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Triangle/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/ff289a078b9d0e8a230da147ffb8a5f3ebce5f5d1b3809c0fe197bfc949aec9f.json"
+    },
+    {
+      "id": "cf4e69227b2dcf8b369e3b90399802fb707fa19e4243f5e0ca7301ea3cd99224",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/cf4e69227b2dcf8b369e3b90399802fb707fa19e4243f5e0ca7301ea3cd99224.json"
+    },
+    {
+      "id": "073822239c838253c25a5e58da94a675d96c1117605a8664d95af9d8423b39fe",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/073822239c838253c25a5e58da94a675d96c1117605a8664d95af9d8423b39fe.json"
+    },
+    {
+      "id": "d6bb813e89f5a3cd4cac57f18440e6e07829f06b3a3f660317bdcb7126a05dee",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d6bb813e89f5a3cd4cac57f18440e6e07829f06b3a3f660317bdcb7126a05dee.json"
+    },
+    {
+      "id": "176dfa9b269894a32d340fe0a2b7d15e5578d0df88f7cdf8e667f3e0bf8eaba3",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Wedge/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/176dfa9b269894a32d340fe0a2b7d15e5578d0df88f7cdf8e667f3e0bf8eaba3.json"
+    },
+    {
+      "id": "925328ee50ec312dff455b45bf08274fbab3f8173622276610bef87fb409d0b2",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Wedge/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/925328ee50ec312dff455b45bf08274fbab3f8173622276610bef87fb409d0b2.json"
+    },
+    {
+      "id": "32d63f2fef85e3de294413d36f0e76e92c28a83e42f7e85f99b6badef88f8802",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Wedge/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/32d63f2fef85e3de294413d36f0e76e92c28a83e42f7e85f99b6badef88f8802.json"
+    },
+    {
+      "id": "ec83008f294baf3e35e3b3947d82594fedd24a9b4736beca572ae40bcbec4c2a",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Wedge/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/ec83008f294baf3e35e3b3947d82594fedd24a9b4736beca572ae40bcbec4c2a.json"
+    },
+    {
+      "id": "a10feee61ca4cc6ff0464368e64f4c44b94269a39488cf340c340dbe6a56ea09",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Wedge/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/a10feee61ca4cc6ff0464368e64f4c44b94269a39488cf340c340dbe6a56ea09.json"
+    },
+    {
+      "id": "afb1393eec5f65a4f05a24577d3b5f79770b65537cb45ddd480e1e2569b14a21",
+      "name": "Stokes/Binding/VectorDiffusion/H1/P4P3/Real/Wedge/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/afb1393eec5f65a4f05a24577d3b5f79770b65537cb45ddd480e1e2569b14a21.json"
+    },
+    {
+      "id": "d668df4e5bf2da290c7fd22363e2a10bd1bc68aaa51116162d0fdea3cb958dd3",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d668df4e5bf2da290c7fd22363e2a10bd1bc68aaa51116162d0fdea3cb958dd3.json"
+    },
+    {
+      "id": "1fcec3ee7da3f572be5119533e331606e10c86df3c0a5402fc26bf5e54a367cc",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1fcec3ee7da3f572be5119533e331606e10c86df3c0a5402fc26bf5e54a367cc.json"
+    },
+    {
+      "id": "92cf949d3f5a275175d63d316ed64546352ee7f8cc947f93dddaf7ef702fc19c",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/92cf949d3f5a275175d63d316ed64546352ee7f8cc947f93dddaf7ef702fc19c.json"
+    },
+    {
+      "id": "feeb4aff73cfa67d34fc8ab2aef9d951c753ae0cd78d4f90d9441aa3588daa4f",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Hexahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/feeb4aff73cfa67d34fc8ab2aef9d951c753ae0cd78d4f90d9441aa3588daa4f.json"
+    },
+    {
+      "id": "175907a6b6e21a70937b72faf1301a2e7caa9028a2b388dd51c6e26b47e64bcf",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Hexahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/175907a6b6e21a70937b72faf1301a2e7caa9028a2b388dd51c6e26b47e64bcf.json"
+    },
+    {
+      "id": "d0fbbcac4cb394e65664cd0cac1aee72bcfc34bd3c78409fde9e43aeb3420ce7",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Hexahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/d0fbbcac4cb394e65664cd0cac1aee72bcfc34bd3c78409fde9e43aeb3420ce7.json"
+    },
+    {
+      "id": "4a7d74f5ac05ca4b966ece116ff71bdb6dc878996dcb3c219f5449b718580b86",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Hexahedron/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/4a7d74f5ac05ca4b966ece116ff71bdb6dc878996dcb3c219f5449b718580b86.json"
+    },
+    {
+      "id": "16930af228003ed2e766a34469371062291d2d8c1dc2af9cdba2d8309b726825",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Hexahedron/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/16930af228003ed2e766a34469371062291d2d8c1dc2af9cdba2d8309b726825.json"
+    },
+    {
+      "id": "b322ac2810fa03cafa7d503ed8cb400c27ec26ab428c4386cd4c9ae5baae13a2",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Hexahedron/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b322ac2810fa03cafa7d503ed8cb400c27ec26ab428c4386cd4c9ae5baae13a2.json"
+    },
+    {
+      "id": "1bbd16db70b04155468e4ffa21635bedf2b519499803336d8b3f5cddabae227e",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1bbd16db70b04155468e4ffa21635bedf2b519499803336d8b3f5cddabae227e.json"
+    },
+    {
+      "id": "72bc29eb6ab9769411beb109b9853eed3f84cb7afcdaf8b321ae3cf018ae1da7",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/72bc29eb6ab9769411beb109b9853eed3f84cb7afcdaf8b321ae3cf018ae1da7.json"
+    },
+    {
+      "id": "b2ef5b87fd9c8f4f709ed53c80f5ecedfc8cb88859eba138dc5f354a7d631e69",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b2ef5b87fd9c8f4f709ed53c80f5ecedfc8cb88859eba138dc5f354a7d631e69.json"
+    },
+    {
+      "id": "409c6885a737cbbee7d8801c224aa94123a2d485e4679cb738e24bd970581003",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/10/real_time",
+      "metric": "real_time",
+      "url": "cases/409c6885a737cbbee7d8801c224aa94123a2d485e4679cb738e24bd970581003.json"
+    },
+    {
+      "id": "b24326b7bfe8900d539e51e19faca5f5ba6e99905804c91900b6579f758ce35f",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/11/real_time",
+      "metric": "real_time",
+      "url": "cases/b24326b7bfe8900d539e51e19faca5f5ba6e99905804c91900b6579f758ce35f.json"
+    },
+    {
+      "id": "61f65b9efaad3e66b22326cec8092c19ffdbb0c88d4e186bbc1830d9b26f6d3c",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/61f65b9efaad3e66b22326cec8092c19ffdbb0c88d4e186bbc1830d9b26f6d3c.json"
+    },
+    {
+      "id": "573b3932b923ad78a440132099d4ef6effc04f491bfe007c978a706037d78ef4",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/573b3932b923ad78a440132099d4ef6effc04f491bfe007c978a706037d78ef4.json"
+    },
+    {
+      "id": "524e0feb5b593ffe85a6dbc2377a2b5735bb8bb6cf039d60e1a333d4ad8faf51",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Pyramid/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/524e0feb5b593ffe85a6dbc2377a2b5735bb8bb6cf039d60e1a333d4ad8faf51.json"
+    },
+    {
+      "id": "8a318653368a08169088d4f8d62b721f5856ed57f139af69ea6f89a81d7e2d34",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Pyramid/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/8a318653368a08169088d4f8d62b721f5856ed57f139af69ea6f89a81d7e2d34.json"
+    },
+    {
+      "id": "3803932beeddb85762bca43ece483c9c7bfddb954468795fe0fb4268939ec90c",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Pyramid/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/3803932beeddb85762bca43ece483c9c7bfddb954468795fe0fb4268939ec90c.json"
+    },
+    {
+      "id": "b6cf40a7f2e7715e071b8db8c5b09988660b3289ddd00d54ef7cd49ab2e1fea7",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Pyramid/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b6cf40a7f2e7715e071b8db8c5b09988660b3289ddd00d54ef7cd49ab2e1fea7.json"
+    },
+    {
+      "id": "40f6133652e2f0aa5718cf76fb9ab348de14d84a9b62c9fb0e9571b334bbca5b",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/40f6133652e2f0aa5718cf76fb9ab348de14d84a9b62c9fb0e9571b334bbca5b.json"
+    },
+    {
+      "id": "785753b812604ea597e5bd3427d66862fc2a3d40561b018946edfa647e143bc2",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/785753b812604ea597e5bd3427d66862fc2a3d40561b018946edfa647e143bc2.json"
+    },
+    {
+      "id": "de00544afc18e16b728bf1bba18a7488a10fa3e9338ced606d9ab07369ef3ffa",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/de00544afc18e16b728bf1bba18a7488a10fa3e9338ced606d9ab07369ef3ffa.json"
+    },
+    {
+      "id": "409fd9f2a3476cb14096c17a1b1542af4624e505840861dabaef836902d028e6",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Quadrilateral/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/409fd9f2a3476cb14096c17a1b1542af4624e505840861dabaef836902d028e6.json"
+    },
+    {
+      "id": "1a8e61a0dc90424d136c8e6fe96acda1de1984275acacf44b1a03671291c3a63",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Quadrilateral/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/1a8e61a0dc90424d136c8e6fe96acda1de1984275acacf44b1a03671291c3a63.json"
+    },
+    {
+      "id": "ea5443601ce87ba975afcd389eb47487f11012e6ec348093d309c5bce9b63ba5",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Quadrilateral/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/ea5443601ce87ba975afcd389eb47487f11012e6ec348093d309c5bce9b63ba5.json"
+    },
+    {
+      "id": "efe28a748cb3037e9927bd5b02dbae9fd4bd452d55937c800b0fa9539121f56a",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Quadrilateral/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/efe28a748cb3037e9927bd5b02dbae9fd4bd452d55937c800b0fa9539121f56a.json"
+    },
+    {
+      "id": "95c8c89b6bccb80c89aaf3e05c1489eb7c57ee4bf8ac24656d3fa6f973454088",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Quadrilateral/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/95c8c89b6bccb80c89aaf3e05c1489eb7c57ee4bf8ac24656d3fa6f973454088.json"
+    },
+    {
+      "id": "2073c986fb3dc7b9b81b45c893fc2d49369e56667e98365747456d223d809b28",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Quadrilateral/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/2073c986fb3dc7b9b81b45c893fc2d49369e56667e98365747456d223d809b28.json"
+    },
+    {
+      "id": "1dbaa88482712fe0943a4c1272775f9a9be048935b6d46538b7a62b6de46079a",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1dbaa88482712fe0943a4c1272775f9a9be048935b6d46538b7a62b6de46079a.json"
+    },
+    {
+      "id": "ae7620b77b7b329e7db9c8ea99d0dae9e1e9de48df8a2c6032440fc032691874",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ae7620b77b7b329e7db9c8ea99d0dae9e1e9de48df8a2c6032440fc032691874.json"
+    },
+    {
+      "id": "36632173c42ab929901908b7dfbcbcd8ad61db18ffd596c329103bc4caeddc0a",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/36632173c42ab929901908b7dfbcbcd8ad61db18ffd596c329103bc4caeddc0a.json"
+    },
+    {
+      "id": "bdbc6074e6fcb278833aacf1d59a68793b28f97cc4f3a69736d7c1f5894a20ea",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/14/real_time",
+      "metric": "real_time",
+      "url": "cases/bdbc6074e6fcb278833aacf1d59a68793b28f97cc4f3a69736d7c1f5894a20ea.json"
+    },
+    {
+      "id": "e97b52112f6c3b15bcaa2ec5ba7d18a4ec8fa455e40904e79b1e0befc8966cdc",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/e97b52112f6c3b15bcaa2ec5ba7d18a4ec8fa455e40904e79b1e0befc8966cdc.json"
+    },
+    {
+      "id": "b30798af4f56035d26a3a04066537de670e9c26f75434bd865b3bc65da12b9e0",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b30798af4f56035d26a3a04066537de670e9c26f75434bd865b3bc65da12b9e0.json"
+    },
+    {
+      "id": "679dd08e4b3520f3413f3f979e7a3d7caadb48c6bc6d49206169c48f21c9a4c4",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Tetrahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/679dd08e4b3520f3413f3f979e7a3d7caadb48c6bc6d49206169c48f21c9a4c4.json"
+    },
+    {
+      "id": "2b61258765b9776fadc82ee1ce74df65a38f0a87230bb0c15242eb9e2dd97fc3",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Tetrahedron/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/2b61258765b9776fadc82ee1ce74df65a38f0a87230bb0c15242eb9e2dd97fc3.json"
+    },
+    {
+      "id": "eb073e9f9554cc2558b48ac072682066575adf3e9aa1330dae34a4a01784d249",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Tetrahedron/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/eb073e9f9554cc2558b48ac072682066575adf3e9aa1330dae34a4a01784d249.json"
+    },
+    {
+      "id": "e2d4cf86c8649e10da2bfd8f67cc874d8e28eeb777472d8449899cbdf8868b7d",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Tetrahedron/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e2d4cf86c8649e10da2bfd8f67cc874d8e28eeb777472d8449899cbdf8868b7d.json"
+    },
+    {
+      "id": "dded1c14f8050e8e98dd047c48f4920fe23606e3817ff1016cbfaf6734c389f4",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/dded1c14f8050e8e98dd047c48f4920fe23606e3817ff1016cbfaf6734c389f4.json"
+    },
+    {
+      "id": "e2b0731cc5e4892df4c61fd69d75a3e7edbc033adb76e8853b021ecc64b804e2",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e2b0731cc5e4892df4c61fd69d75a3e7edbc033adb76e8853b021ecc64b804e2.json"
+    },
+    {
+      "id": "9a71f0f936e386212a5a17db5faf0672789338575a95262d0f40749091e967f1",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9a71f0f936e386212a5a17db5faf0672789338575a95262d0f40749091e967f1.json"
+    },
+    {
+      "id": "28a53dd1f1cd81c28696fba99859746b44e17ce5d278f637bfa270177cf1763e",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Triangle/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/28a53dd1f1cd81c28696fba99859746b44e17ce5d278f637bfa270177cf1763e.json"
+    },
+    {
+      "id": "76a272669556c621f86a6e1f6fbfe0454d5474ea2b2c8fadff20b37fa5182b77",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Triangle/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/76a272669556c621f86a6e1f6fbfe0454d5474ea2b2c8fadff20b37fa5182b77.json"
+    },
+    {
+      "id": "f9cd87bc5d9bc0407ed02987e704e6bc99500504371e673d8d090598b5598c32",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Triangle/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/f9cd87bc5d9bc0407ed02987e704e6bc99500504371e673d8d090598b5598c32.json"
+    },
+    {
+      "id": "d62ba6f90b4558517c32d44d0cc1e8e0b8d8e076ec3933e16f7606e87d5e7242",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Triangle/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/d62ba6f90b4558517c32d44d0cc1e8e0b8d8e076ec3933e16f7606e87d5e7242.json"
+    },
+    {
+      "id": "1ae9059038fb16bf236aa4f61c864331313addeec198e907d341655252f852b8",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Triangle/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/1ae9059038fb16bf236aa4f61c864331313addeec198e907d341655252f852b8.json"
+    },
+    {
+      "id": "3ef0f4b914a125ff4e9c7d1d7b920db11c1c1fbbc13bfb18c1ef561d3f902390",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Triangle/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3ef0f4b914a125ff4e9c7d1d7b920db11c1c1fbbc13bfb18c1ef561d3f902390.json"
+    },
+    {
+      "id": "d4a951b4ccfce4d8a5932166fef72417bc9c584f8b6fbbf46c881d3f9733b169",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d4a951b4ccfce4d8a5932166fef72417bc9c584f8b6fbbf46c881d3f9733b169.json"
+    },
+    {
+      "id": "41d2e5e313adc7d7e00a98e72eba1a132f851fd1766a06ff74b16e7ad901dac8",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/41d2e5e313adc7d7e00a98e72eba1a132f851fd1766a06ff74b16e7ad901dac8.json"
+    },
+    {
+      "id": "8a1ca5fce4f72e3d9993c0fda3e6a8e5dabb421972bfaa367139b704739fb116",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8a1ca5fce4f72e3d9993c0fda3e6a8e5dabb421972bfaa367139b704739fb116.json"
+    },
+    {
+      "id": "a5fde615f6fb581011bf99fb9b13bfbef1af9d348726c36bd71b79d8974674b0",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Wedge/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/a5fde615f6fb581011bf99fb9b13bfbef1af9d348726c36bd71b79d8974674b0.json"
+    },
+    {
+      "id": "24c472de5bba1bb9941981b54ddec18955e07b0c34f6f35855377de0f0aed4ce",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Wedge/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/24c472de5bba1bb9941981b54ddec18955e07b0c34f6f35855377de0f0aed4ce.json"
+    },
+    {
+      "id": "23623c40c81a57644528222d7d75a01f0fe7754c528e316fba194d22ac303cf8",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Wedge/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/23623c40c81a57644528222d7d75a01f0fe7754c528e316fba194d22ac303cf8.json"
+    },
+    {
+      "id": "86770221e937be53bd7cb9242c6e4718260db7ac8b9db2214924d20979dc40d1",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Wedge/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/86770221e937be53bd7cb9242c6e4718260db7ac8b9db2214924d20979dc40d1.json"
+    },
+    {
+      "id": "988a7c82c6b95d5a2659a72d17bab8e30f9e4f169934783baf9be13114ae63e8",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Wedge/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/988a7c82c6b95d5a2659a72d17bab8e30f9e4f169934783baf9be13114ae63e8.json"
+    },
+    {
+      "id": "efb32cb0fecb945f75ca42513b1b55dbbc6a71e6e04cfc5db0fa988d8a6e28a8",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P2P1/Real/Wedge/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/efb32cb0fecb945f75ca42513b1b55dbbc6a71e6e04cfc5db0fa988d8a6e28a8.json"
+    },
+    {
+      "id": "c5fae5769fbe70132406cc7aa757ad66baf0b1ab2a86d6f5dc855bc975243bfe",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c5fae5769fbe70132406cc7aa757ad66baf0b1ab2a86d6f5dc855bc975243bfe.json"
+    },
+    {
+      "id": "db8090b28d924eaad06801189535d76d8dfe7f35bc8a792788304be3c9ed14b5",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/db8090b28d924eaad06801189535d76d8dfe7f35bc8a792788304be3c9ed14b5.json"
+    },
+    {
+      "id": "46b8be2a1c0c2e700d965a635eea74d5556fe694c4c98c4e443535cad5d9eb79",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/46b8be2a1c0c2e700d965a635eea74d5556fe694c4c98c4e443535cad5d9eb79.json"
+    },
+    {
+      "id": "d03378a3c5231d6f9cf04133dc20fd8c19ab2eeaca6ab5824fcd76220c156925",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Hexahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d03378a3c5231d6f9cf04133dc20fd8c19ab2eeaca6ab5824fcd76220c156925.json"
+    },
+    {
+      "id": "acf0c687504d7aa936cc706af2cacbb725aa0335a88819455cc1525009446eeb",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Hexahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/acf0c687504d7aa936cc706af2cacbb725aa0335a88819455cc1525009446eeb.json"
+    },
+    {
+      "id": "eed0ecf996dee4cddf8a90cef1ad6540602f2b279fa9acb6f3593d11d413f2bc",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Hexahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/eed0ecf996dee4cddf8a90cef1ad6540602f2b279fa9acb6f3593d11d413f2bc.json"
+    },
+    {
+      "id": "41340143aec7d383d5bc12b2a0ba01dbb3ad626507d41dd7c89f82189eb0a15c",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Hexahedron/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/41340143aec7d383d5bc12b2a0ba01dbb3ad626507d41dd7c89f82189eb0a15c.json"
+    },
+    {
+      "id": "634849061e4770eff92ae9f5064717424604d5b4dec355bb1d7f6f5ad61e58cf",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Hexahedron/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/634849061e4770eff92ae9f5064717424604d5b4dec355bb1d7f6f5ad61e58cf.json"
+    },
+    {
+      "id": "9524a9bce7c2ab543265da4c9b8c8cd413e85f445b9c121da7f378a04efcc25f",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Hexahedron/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/9524a9bce7c2ab543265da4c9b8c8cd413e85f445b9c121da7f378a04efcc25f.json"
+    },
+    {
+      "id": "0bce760931ee0b8bdd9803dfe94058953e12cb5df4371868b2c6ba88616ce120",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0bce760931ee0b8bdd9803dfe94058953e12cb5df4371868b2c6ba88616ce120.json"
+    },
+    {
+      "id": "2c0f21e5d35c725844e7d65aefd777ceda43420ffc26d426be87a504abf10adb",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2c0f21e5d35c725844e7d65aefd777ceda43420ffc26d426be87a504abf10adb.json"
+    },
+    {
+      "id": "86b842155999023d640b3fe5bd9c23519459201ffe49c814e801b555b5c34283",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/86b842155999023d640b3fe5bd9c23519459201ffe49c814e801b555b5c34283.json"
+    },
+    {
+      "id": "da918f398e60f5f276e047a324d29ae49420bb1d3816a46e6ade83160b4d8f7e",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/10/real_time",
+      "metric": "real_time",
+      "url": "cases/da918f398e60f5f276e047a324d29ae49420bb1d3816a46e6ade83160b4d8f7e.json"
+    },
+    {
+      "id": "c0dc9a2b921baafee8933d4c9483f9d46e449b5eab10f3e47eae4dcb8bde1bb2",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/11/real_time",
+      "metric": "real_time",
+      "url": "cases/c0dc9a2b921baafee8933d4c9483f9d46e449b5eab10f3e47eae4dcb8bde1bb2.json"
+    },
+    {
+      "id": "817cc02a4e5211d67c499a475b5f77f9b5d491acdf4ede505853f41d5c9d412d",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/817cc02a4e5211d67c499a475b5f77f9b5d491acdf4ede505853f41d5c9d412d.json"
+    },
+    {
+      "id": "a95cb04621dd7740649428c17ca289e93561ad753d6f9993685072d7106a1937",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a95cb04621dd7740649428c17ca289e93561ad753d6f9993685072d7106a1937.json"
+    },
+    {
+      "id": "58a7618ee2a34ecbc8fb622b7c9f2b144ea00c23c157bac2ade426191528f498",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Pyramid/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/58a7618ee2a34ecbc8fb622b7c9f2b144ea00c23c157bac2ade426191528f498.json"
+    },
+    {
+      "id": "1d1ddf38b2e549a932c8a63abf4833950f08772348799caac0fb5f576e078aac",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Pyramid/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/1d1ddf38b2e549a932c8a63abf4833950f08772348799caac0fb5f576e078aac.json"
+    },
+    {
+      "id": "f4da28671a47a67d09ac08fe263fd9cbde121d1f788a8e043e538d94ef63e664",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Pyramid/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/f4da28671a47a67d09ac08fe263fd9cbde121d1f788a8e043e538d94ef63e664.json"
+    },
+    {
+      "id": "b158ddd79a9b285e1f5bb746a60fc1a46c2522dc5ff9d841424fe57432b8e812",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Pyramid/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b158ddd79a9b285e1f5bb746a60fc1a46c2522dc5ff9d841424fe57432b8e812.json"
+    },
+    {
+      "id": "fe62a85c6ea014f272e74a694874b0f1c57eb4e5e24692117be149ebe325f7b3",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/fe62a85c6ea014f272e74a694874b0f1c57eb4e5e24692117be149ebe325f7b3.json"
+    },
+    {
+      "id": "24296e37c040c2c8308167e4ede46c9bf400b1f83014c3b9bf20d1802e7fcb57",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/24296e37c040c2c8308167e4ede46c9bf400b1f83014c3b9bf20d1802e7fcb57.json"
+    },
+    {
+      "id": "3fbda40d1cd75919441a4edff01ac3c9506393c07f939d444b9895dc43f678b7",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/3fbda40d1cd75919441a4edff01ac3c9506393c07f939d444b9895dc43f678b7.json"
+    },
+    {
+      "id": "a2b93dab2d5004a38c9ac7025b460dfc048096d96cb5132f8eab3dbbe0b44a65",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Quadrilateral/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/a2b93dab2d5004a38c9ac7025b460dfc048096d96cb5132f8eab3dbbe0b44a65.json"
+    },
+    {
+      "id": "a37eb5a51120f7d0ba189249f0806e4e116cb72f6994b73428d238ee7254b5de",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Quadrilateral/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a37eb5a51120f7d0ba189249f0806e4e116cb72f6994b73428d238ee7254b5de.json"
+    },
+    {
+      "id": "70cb255b52b80372888bb3a911da15f1db69082df276686256a84cc1c685f717",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Quadrilateral/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/70cb255b52b80372888bb3a911da15f1db69082df276686256a84cc1c685f717.json"
+    },
+    {
+      "id": "6453c42ea603fcbecc07327a51fb4216a0410011bb9bce3d01a8224d0b445793",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Quadrilateral/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/6453c42ea603fcbecc07327a51fb4216a0410011bb9bce3d01a8224d0b445793.json"
+    },
+    {
+      "id": "342e7bf5b70623b6f27514d3a1128e99b39e43702483b9ba62d72b2addeab580",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Quadrilateral/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/342e7bf5b70623b6f27514d3a1128e99b39e43702483b9ba62d72b2addeab580.json"
+    },
+    {
+      "id": "c0db3cef4b70dd462af4c19c88df3ec9aa843039eec56a449dd9a29a41b87734",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Quadrilateral/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c0db3cef4b70dd462af4c19c88df3ec9aa843039eec56a449dd9a29a41b87734.json"
+    },
+    {
+      "id": "028ede10c04160f1bc89baa7f01851dd575ab7f298d517bbe1adfaedcac286c3",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/028ede10c04160f1bc89baa7f01851dd575ab7f298d517bbe1adfaedcac286c3.json"
+    },
+    {
+      "id": "71e6a551711b9758cbb2a14ff9d6d0b23af823dd009386452e048d97a767bb86",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/71e6a551711b9758cbb2a14ff9d6d0b23af823dd009386452e048d97a767bb86.json"
+    },
+    {
+      "id": "d1b7544c45816088679874257a3404ef6c0e900b4dcb825e2a293040e52af91a",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d1b7544c45816088679874257a3404ef6c0e900b4dcb825e2a293040e52af91a.json"
+    },
+    {
+      "id": "320a5c74b0402296540010c132359eed6e079545bd9b0dd54ad8958a57a40266",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/14/real_time",
+      "metric": "real_time",
+      "url": "cases/320a5c74b0402296540010c132359eed6e079545bd9b0dd54ad8958a57a40266.json"
+    },
+    {
+      "id": "efe7eee01d3b99dac5861b2933168bd9eb8ed3ee77c5f74f1734cdc606095ae5",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/efe7eee01d3b99dac5861b2933168bd9eb8ed3ee77c5f74f1734cdc606095ae5.json"
+    },
+    {
+      "id": "74832341ede579531a605d21f11687cca9e673e95c0b523e4cb19fb31ceb9983",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/74832341ede579531a605d21f11687cca9e673e95c0b523e4cb19fb31ceb9983.json"
+    },
+    {
+      "id": "057a69366529b43de47b0394e450ef6e0b96fa8d8bbe8627a02608f178fc4b41",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Tetrahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/057a69366529b43de47b0394e450ef6e0b96fa8d8bbe8627a02608f178fc4b41.json"
+    },
+    {
+      "id": "e7195adaf5162cedf78bd5efdaa77041294ccd7dd24026ae2286c2fbee71b340",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Tetrahedron/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/e7195adaf5162cedf78bd5efdaa77041294ccd7dd24026ae2286c2fbee71b340.json"
+    },
+    {
+      "id": "3ee08f3d26e2c7943635bd62a3b8145edbabdfbc4ef99028aac8993fb26af06b",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Tetrahedron/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/3ee08f3d26e2c7943635bd62a3b8145edbabdfbc4ef99028aac8993fb26af06b.json"
+    },
+    {
+      "id": "bed897554e4e790027d709033b04445b4d5b40b970107c37650460ea61414b62",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Tetrahedron/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/bed897554e4e790027d709033b04445b4d5b40b970107c37650460ea61414b62.json"
+    },
+    {
+      "id": "82d62e72de1f4d027fdae277f9982f870cc8ee755d00b78124bba5f094b2db16",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/82d62e72de1f4d027fdae277f9982f870cc8ee755d00b78124bba5f094b2db16.json"
+    },
+    {
+      "id": "cd58599d00946589b391a200d2f0ed39edcdc1acdaa876da2d8df7733573ecd3",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/cd58599d00946589b391a200d2f0ed39edcdc1acdaa876da2d8df7733573ecd3.json"
+    },
+    {
+      "id": "6e7c613936d590a1d41fadbbc2f16643b45ca2d8ad26c1f7d846736532d4ffbb",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6e7c613936d590a1d41fadbbc2f16643b45ca2d8ad26c1f7d846736532d4ffbb.json"
+    },
+    {
+      "id": "57e80438ee23344fd5daed987366743bdf51ee8048260f71d8c3b2647d8a1f87",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Triangle/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/57e80438ee23344fd5daed987366743bdf51ee8048260f71d8c3b2647d8a1f87.json"
+    },
+    {
+      "id": "471e6e5a07bc1278a5086ce8a0cb3b5e0d8a7f3faaa2f6944f76a480f9c00e72",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Triangle/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/471e6e5a07bc1278a5086ce8a0cb3b5e0d8a7f3faaa2f6944f76a480f9c00e72.json"
+    },
+    {
+      "id": "64f33017ea9ae2e4ade128ce1cf6ce7941e6e97687b7a145b3d228f79631a937",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Triangle/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/64f33017ea9ae2e4ade128ce1cf6ce7941e6e97687b7a145b3d228f79631a937.json"
+    },
+    {
+      "id": "b29e2ff9d8605a5fae668d3fcf516c62cafba9439bf47a228e5b8124ca7a909c",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Triangle/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/b29e2ff9d8605a5fae668d3fcf516c62cafba9439bf47a228e5b8124ca7a909c.json"
+    },
+    {
+      "id": "625cee08f191b2bae188e128c2f239c08c555171da33cbb800050f2fde2fb84d",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Triangle/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/625cee08f191b2bae188e128c2f239c08c555171da33cbb800050f2fde2fb84d.json"
+    },
+    {
+      "id": "b7a2167437bcd0099a6d7bd30bb4b3ea2d153e2f6cb8979bf2de1b83fc00a5e5",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Triangle/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b7a2167437bcd0099a6d7bd30bb4b3ea2d153e2f6cb8979bf2de1b83fc00a5e5.json"
+    },
+    {
+      "id": "2a6328c7c8db07d985a8367c1211a8d6e63abfd88e4e4660b39bb779619d7b1a",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2a6328c7c8db07d985a8367c1211a8d6e63abfd88e4e4660b39bb779619d7b1a.json"
+    },
+    {
+      "id": "cf4ad37e4f73f2e5876183a1c9752037048acf1e5bfccb109642d98dd6c88134",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/cf4ad37e4f73f2e5876183a1c9752037048acf1e5bfccb109642d98dd6c88134.json"
+    },
+    {
+      "id": "d3c5707d426dbdada6d1df756e7601056865585b57bd31ddba4132f5bd30dc53",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d3c5707d426dbdada6d1df756e7601056865585b57bd31ddba4132f5bd30dc53.json"
+    },
+    {
+      "id": "c9768511159f8251fa76fd698105e00b119a7a2cd9991f19fe3a601242d3effa",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Wedge/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/c9768511159f8251fa76fd698105e00b119a7a2cd9991f19fe3a601242d3effa.json"
+    },
+    {
+      "id": "7280b3ac22ce9251b029f12b293e49f00e47da3dd6fcca26035fdc6b37657c15",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Wedge/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7280b3ac22ce9251b029f12b293e49f00e47da3dd6fcca26035fdc6b37657c15.json"
+    },
+    {
+      "id": "9580c1a6e503fa1ca5b01e807f53fb3557613f92f664b9ec00b98867a2f4b173",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Wedge/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/9580c1a6e503fa1ca5b01e807f53fb3557613f92f664b9ec00b98867a2f4b173.json"
+    },
+    {
+      "id": "5329e8a3ce0e3835f8456d9d8768d2ab4d9d8e02b503d60af389d7e31a286561",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Wedge/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/5329e8a3ce0e3835f8456d9d8768d2ab4d9d8e02b503d60af389d7e31a286561.json"
+    },
+    {
+      "id": "06e87d520a7f6ba21b5831a9d740ec228bb1548765cedf49a2596ee207d7c6a4",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Wedge/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/06e87d520a7f6ba21b5831a9d740ec228bb1548765cedf49a2596ee207d7c6a4.json"
+    },
+    {
+      "id": "9d7d1dc5977dc9791f8c3da189ad1f3f5f4542cedbe33d5e541a05c13f3e660f",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P3P2/Real/Wedge/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/9d7d1dc5977dc9791f8c3da189ad1f3f5f4542cedbe33d5e541a05c13f3e660f.json"
+    },
+    {
+      "id": "1ac67f4386f9c9b6217c35fb952ff1abb29d38e3d57a08c3f4c697ce068c5fe7",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1ac67f4386f9c9b6217c35fb952ff1abb29d38e3d57a08c3f4c697ce068c5fe7.json"
+    },
+    {
+      "id": "4bf75a3e31bb053c5e7dd9f6d41cf8bd1903effe1c634fae1e59b280edae10b8",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/4bf75a3e31bb053c5e7dd9f6d41cf8bd1903effe1c634fae1e59b280edae10b8.json"
+    },
+    {
+      "id": "805e28a9c5ec84de041cb807cdab96f68944ac1ec44023b7a8ed4ad0173d6e2b",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/805e28a9c5ec84de041cb807cdab96f68944ac1ec44023b7a8ed4ad0173d6e2b.json"
+    },
+    {
+      "id": "d6d7b999c4958e3defffb66b1f802e1f1a38eb61088a76f9ede5a40c5afcab78",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Hexahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d6d7b999c4958e3defffb66b1f802e1f1a38eb61088a76f9ede5a40c5afcab78.json"
+    },
+    {
+      "id": "a4fe3eaefcbd80b2b999abbbdaf7fcee2db0bde8c1c65ee38255d59206c99e0c",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Hexahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a4fe3eaefcbd80b2b999abbbdaf7fcee2db0bde8c1c65ee38255d59206c99e0c.json"
+    },
+    {
+      "id": "c7f37622dc3d6b5ccaca93c106095786829bb2e5b573df20cd85fba8aae4608a",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Hexahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/c7f37622dc3d6b5ccaca93c106095786829bb2e5b573df20cd85fba8aae4608a.json"
+    },
+    {
+      "id": "2a1ff5e639c8dcf1b98a081a5647611e607b330c65e9083fe497606784022242",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Hexahedron/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/2a1ff5e639c8dcf1b98a081a5647611e607b330c65e9083fe497606784022242.json"
+    },
+    {
+      "id": "14b19f3bc50e53ad7c02ffd9c633c87f91a07007c4fe082f46d656973bb8a657",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Hexahedron/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/14b19f3bc50e53ad7c02ffd9c633c87f91a07007c4fe082f46d656973bb8a657.json"
+    },
+    {
+      "id": "36effe6492c903d719469922d449e450e6ab30dacf89fa993259fdab87296de7",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Hexahedron/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/36effe6492c903d719469922d449e450e6ab30dacf89fa993259fdab87296de7.json"
+    },
+    {
+      "id": "8091cec48609561b774020b28a631caf91c277d315cff02a5fc403820ea5d160",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8091cec48609561b774020b28a631caf91c277d315cff02a5fc403820ea5d160.json"
+    },
+    {
+      "id": "1308b034908848030f145435f812ec88ae27960d783baf260b548dd9e7015653",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1308b034908848030f145435f812ec88ae27960d783baf260b548dd9e7015653.json"
+    },
+    {
+      "id": "b4d910b7785dc3eb068e23fec397253cd75b918158b379a557eee0b7e0d9bec9",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b4d910b7785dc3eb068e23fec397253cd75b918158b379a557eee0b7e0d9bec9.json"
+    },
+    {
+      "id": "6b7e389449556766b7de9ed384de41312539856d82dec9c7eb80762a38086f9e",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/10/real_time",
+      "metric": "real_time",
+      "url": "cases/6b7e389449556766b7de9ed384de41312539856d82dec9c7eb80762a38086f9e.json"
+    },
+    {
+      "id": "6d3402d2dc856786b635e31ab090f6147912a1c6f5f102560e81f769264613aa",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/11/real_time",
+      "metric": "real_time",
+      "url": "cases/6d3402d2dc856786b635e31ab090f6147912a1c6f5f102560e81f769264613aa.json"
+    },
+    {
+      "id": "e784d0e8dc5b7803190b49a80966f7ee07001b0ba4d6b56d0ad7646f50a9b56e",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/e784d0e8dc5b7803190b49a80966f7ee07001b0ba4d6b56d0ad7646f50a9b56e.json"
+    },
+    {
+      "id": "e5cb30ecabc33b01a5026d95b8eb731acbc5a104615b5c9c17ae88cff2070d4d",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e5cb30ecabc33b01a5026d95b8eb731acbc5a104615b5c9c17ae88cff2070d4d.json"
+    },
+    {
+      "id": "f03ece132048ff79701348493b92e6ee3bec2e4ac3a6f0a9b52a384ee286ac72",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Pyramid/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/f03ece132048ff79701348493b92e6ee3bec2e4ac3a6f0a9b52a384ee286ac72.json"
+    },
+    {
+      "id": "bd9d2baa34de560cffa433e5f977703ad0e5834270390f92c7f3791f2cfec452",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Pyramid/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/bd9d2baa34de560cffa433e5f977703ad0e5834270390f92c7f3791f2cfec452.json"
+    },
+    {
+      "id": "bed5d4e18c899f35ee20b546bbf0d794e8b7ccb01af3bec5e825e4850efc34a8",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Pyramid/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/bed5d4e18c899f35ee20b546bbf0d794e8b7ccb01af3bec5e825e4850efc34a8.json"
+    },
+    {
+      "id": "4949df2407e09b1020a7cf00c35ceb42b0296208563339f5e4078903c2b7df8f",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Pyramid/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/4949df2407e09b1020a7cf00c35ceb42b0296208563339f5e4078903c2b7df8f.json"
+    },
+    {
+      "id": "a82d3cf2315773c9bf3332cda728860cbe398a1a6180d421cea605f6253d00fe",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a82d3cf2315773c9bf3332cda728860cbe398a1a6180d421cea605f6253d00fe.json"
+    },
+    {
+      "id": "10dc19a42caf80148b36101205c6f1af9a8e44ff7129657e2f1dcbf6dce0b8bd",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/10dc19a42caf80148b36101205c6f1af9a8e44ff7129657e2f1dcbf6dce0b8bd.json"
+    },
+    {
+      "id": "906931d082ee07ffb0623888237ebee7c8f7837b6a9e70e007e3b5bb2083ac18",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/906931d082ee07ffb0623888237ebee7c8f7837b6a9e70e007e3b5bb2083ac18.json"
+    },
+    {
+      "id": "a5687ed96bcfbc212f2539aa9e4d899876e25047d55d467df4fa5bc30932723b",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Quadrilateral/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/a5687ed96bcfbc212f2539aa9e4d899876e25047d55d467df4fa5bc30932723b.json"
+    },
+    {
+      "id": "66d5c9b84c94d3c1f0d3e94e5f50539ccb79dec69db4103644b71cd7c28fbf55",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Quadrilateral/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/66d5c9b84c94d3c1f0d3e94e5f50539ccb79dec69db4103644b71cd7c28fbf55.json"
+    },
+    {
+      "id": "7b6050efb15596cc5d5b97538fb03ef4ca6fd49bfbf88c691675a320e85975c3",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Quadrilateral/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/7b6050efb15596cc5d5b97538fb03ef4ca6fd49bfbf88c691675a320e85975c3.json"
+    },
+    {
+      "id": "c09cb4e383976be184480ebdcc8c5f27971b55abb31eb20471deae448b223265",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Quadrilateral/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/c09cb4e383976be184480ebdcc8c5f27971b55abb31eb20471deae448b223265.json"
+    },
+    {
+      "id": "31a3e1f5de0254553382993c859abef6100b46986befad12a3ed928a4a6d73f3",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Quadrilateral/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/31a3e1f5de0254553382993c859abef6100b46986befad12a3ed928a4a6d73f3.json"
+    },
+    {
+      "id": "1b1a6f18c1d83186179880c39ca04798665df0917170484baae269b7daaef3a7",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Quadrilateral/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/1b1a6f18c1d83186179880c39ca04798665df0917170484baae269b7daaef3a7.json"
+    },
+    {
+      "id": "4fd3ef9fec7954a3da363bd5279e55dc4fd77c0ccf60125efbcfeb005756a69f",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4fd3ef9fec7954a3da363bd5279e55dc4fd77c0ccf60125efbcfeb005756a69f.json"
+    },
+    {
+      "id": "c9128dad74526205e2f135c8ab494ad8ef1b78de38e5b673e5c9ca9214ac8bbb",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c9128dad74526205e2f135c8ab494ad8ef1b78de38e5b673e5c9ca9214ac8bbb.json"
+    },
+    {
+      "id": "1da79345b1dba691e2693884a4050fe4e70bd9e96365033f70875c7ede439a2b",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1da79345b1dba691e2693884a4050fe4e70bd9e96365033f70875c7ede439a2b.json"
+    },
+    {
+      "id": "ba57368cd048d5a5efc07f6d62e5704edce5a732c772870a2e6a434409ba6c5b",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/14/real_time",
+      "metric": "real_time",
+      "url": "cases/ba57368cd048d5a5efc07f6d62e5704edce5a732c772870a2e6a434409ba6c5b.json"
+    },
+    {
+      "id": "0c8877e1944d8306ddc05cc04cc737d426139cd1eae854c9608a632b8110a0e4",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/0c8877e1944d8306ddc05cc04cc737d426139cd1eae854c9608a632b8110a0e4.json"
+    },
+    {
+      "id": "645a29a0b00f1577e298816cdb8b04896388fd594b1949c79fccb0afe3c1371a",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/645a29a0b00f1577e298816cdb8b04896388fd594b1949c79fccb0afe3c1371a.json"
+    },
+    {
+      "id": "0b2057493eefdacf3d86cd777101b0ebedaa9cc391580989f3ab9b51a2a21eb4",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/0b2057493eefdacf3d86cd777101b0ebedaa9cc391580989f3ab9b51a2a21eb4.json"
+    },
+    {
+      "id": "09ec16c05c84cfad37501bb2a2a1d474ceace126d65b0618f3763f850e61326b",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/09ec16c05c84cfad37501bb2a2a1d474ceace126d65b0618f3763f850e61326b.json"
+    },
+    {
+      "id": "44d96aba9115abea99e962b0e1c7aab44a0fc60fd42e8714ee76d6953fe161b5",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/44d96aba9115abea99e962b0e1c7aab44a0fc60fd42e8714ee76d6953fe161b5.json"
+    },
+    {
+      "id": "e1a0750bf8ee8be3637a2d59a5ebccc3b7a6bdbf6fc403af8af3a65d8e3edb0c",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e1a0750bf8ee8be3637a2d59a5ebccc3b7a6bdbf6fc403af8af3a65d8e3edb0c.json"
+    },
+    {
+      "id": "06524baf7c01ba77ddf4563f0ef25bd5e379c589de2414d965f2f5b0b9b93018",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/06524baf7c01ba77ddf4563f0ef25bd5e379c589de2414d965f2f5b0b9b93018.json"
+    },
+    {
+      "id": "6c7cd9982fd88e0cb60e65adcd2ae0a36683ea5cc9d99ed3447c7b0624e6521e",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6c7cd9982fd88e0cb60e65adcd2ae0a36683ea5cc9d99ed3447c7b0624e6521e.json"
+    },
+    {
+      "id": "a75c964dc47dd43910584b6af18881bf5a394575a789e67b207fc26f0cc0f0b5",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a75c964dc47dd43910584b6af18881bf5a394575a789e67b207fc26f0cc0f0b5.json"
+    },
+    {
+      "id": "712bc27610217045f508bd680c7611836cfede89220f1b8fbac22681859ce6cb",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Triangle/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/712bc27610217045f508bd680c7611836cfede89220f1b8fbac22681859ce6cb.json"
+    },
+    {
+      "id": "af057afcd2aa87391ed994e64d5b78943ffce549dd9b20d5564c83b932a4524b",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Triangle/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/af057afcd2aa87391ed994e64d5b78943ffce549dd9b20d5564c83b932a4524b.json"
+    },
+    {
+      "id": "355b08e0ddb822c46573fda3e9e23856d3456e62e3cae0db40d859f469ae4bca",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Triangle/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/355b08e0ddb822c46573fda3e9e23856d3456e62e3cae0db40d859f469ae4bca.json"
+    },
+    {
+      "id": "2dc92fb70d8f6a6a4f7563d7c3c408400d9f43f9c86f5489f6cf200e2a7f0d4e",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Triangle/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/2dc92fb70d8f6a6a4f7563d7c3c408400d9f43f9c86f5489f6cf200e2a7f0d4e.json"
+    },
+    {
+      "id": "6203311de5cb4f15e9765713f1bcae285219921fe90303ca192256db366199fc",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Triangle/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/6203311de5cb4f15e9765713f1bcae285219921fe90303ca192256db366199fc.json"
+    },
+    {
+      "id": "cbbb7646927e05b368b9f84084ad4e17059824a544237946a85b047b23f89e6b",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Triangle/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/cbbb7646927e05b368b9f84084ad4e17059824a544237946a85b047b23f89e6b.json"
+    },
+    {
+      "id": "53e6e61d3df4ce534444109f41919f99549ca5691ab693016b423178799124ea",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/53e6e61d3df4ce534444109f41919f99549ca5691ab693016b423178799124ea.json"
+    },
+    {
+      "id": "efcb562144077ce23e86b2923c9158dfe8b8dd863919da455f72b896c058c126",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/efcb562144077ce23e86b2923c9158dfe8b8dd863919da455f72b896c058c126.json"
+    },
+    {
+      "id": "5a8caaf21685e18439e76f7d395fa4264e580a84ea659c4d0a8ef3da5afa27c4",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5a8caaf21685e18439e76f7d395fa4264e580a84ea659c4d0a8ef3da5afa27c4.json"
+    },
+    {
+      "id": "590d926f8e8b78303b93fcacc791dbadb02699b80f5783c08441f32eef54885e",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Wedge/QuadratureBoundary/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/590d926f8e8b78303b93fcacc791dbadb02699b80f5783c08441f32eef54885e.json"
+    },
+    {
+      "id": "e75dd4d30fd3986f64dfbce1a2a498d5b12e7a2ed9281f039292b567a45c6be0",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Wedge/QuadratureBoundary/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e75dd4d30fd3986f64dfbce1a2a498d5b12e7a2ed9281f039292b567a45c6be0.json"
+    },
+    {
+      "id": "61b26dff4e851eb9d0a90c17b28af5c6fc62342a940915d194b575dc4b52a154",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Wedge/QuadratureBoundary/2/17/real_time",
+      "metric": "real_time",
+      "url": "cases/61b26dff4e851eb9d0a90c17b28af5c6fc62342a940915d194b575dc4b52a154.json"
+    },
+    {
+      "id": "eaa84d5bfcb1835fd3d1e9cbeff3512f036bd2c0d26afe615ee589c3d4059656",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Wedge/ScalarBlockScaling/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/eaa84d5bfcb1835fd3d1e9cbeff3512f036bd2c0d26afe615ee589c3d4059656.json"
+    },
+    {
+      "id": "9c41d84ce43f6771450cd35631dfa32c712efbe659c985d3f5d2662ac23c8c4e",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Wedge/ScalarBlockScaling/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/9c41d84ce43f6771450cd35631dfa32c712efbe659c985d3f5d2662ac23c8c4e.json"
+    },
+    {
+      "id": "e02fb802f564436efbc5f82300039cd7b280312e0707f99de577c69bf515d84e",
+      "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Wedge/ScalarBlockScaling/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e02fb802f564436efbc5f82300039cd7b280312e0707f99de577c69bf515d84e.json"
+    }
+  ]
+}

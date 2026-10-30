@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "component": "Rodin/Assembly/MatrixMass",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Assembly/MatrixMass/LeftScalarWeighted/H1/P2/Complex/Hexahedron/CurvedQ2/Operator/5/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "Assembly/MatrixMass/LeftScalarWeighted/H1/P2/Complex/Hexahedron/CurvedQ2/Operator/5/real_time",
+          "value": 45104242.33333766,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            45104242.33333766
+          ],
+          "records": [
+            {
+              "name": "Assembly/MatrixMass/LeftScalarWeighted/H1/P2/Complex/Hexahedron/CurvedQ2/Operator/5/real_time",
+              "family_index": 80,
+              "per_family_instance_index": 2,
+              "run_name": "Assembly/MatrixMass/LeftScalarWeighted/H1/P2/Complex/Hexahedron/CurvedQ2/Operator/5/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 6,
+              "real_time": 45104242.33333766,
+              "cpu_time": 45099727.666666925,
+              "time_unit": "ns",
+              "ambient_dimension": 3.0,
+              "cells": 64.0,
+              "components": 6.0,
+              "degree": 2.0,
+              "dimension": 3.0,
+              "dofs": 4374.0,
+              "domain_measure": 1.0,
+              "field_columns": 3.0,
+              "field_rows": 2.0,
+              "geometry_amplitude": 0.1,
+              "geometry_degree": 2.0,
+              "local_basis": 162.0,
+              "local_entries": 26244.0,
+              "nnz": 215622.0,
+              "points_per_axis": 5.0,
+              "quadrature_order": 8.0,
+              "quadrature_points_per_cell": 125.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T14:55:20+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinMatrixMassAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2442,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.05615,
+              0.438965,
+              0.163086
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

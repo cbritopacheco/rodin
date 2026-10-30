@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "component": "Rodin/Math/SparseAlgebra",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "SparseAlgebra/TransposeProduct/Poisson/H1/P3/Complex/Hexahedron/9/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "SparseAlgebra/TransposeProduct/Poisson/H1/P3/Complex/Hexahedron/9/real_time",
+          "value": 1890594.253333499,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            1890594.253333499
+          ],
+          "records": [
+            {
+              "name": "SparseAlgebra/TransposeProduct/Poisson/H1/P3/Complex/Hexahedron/9/real_time",
+              "family_index": 74,
+              "per_family_instance_index": 2,
+              "run_name": "SparseAlgebra/TransposeProduct/Poisson/H1/P3/Complex/Hexahedron/9/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 150,
+              "real_time": 1890594.253333499,
+              "cpu_time": 1890462.186666658,
+              "time_unit": "ns",
+              "cells": 512.0,
+              "compressed_storage_bytes": 24632524.0,
+              "degree": 3.0,
+              "dimension": 3.0,
+              "dot_relative_error": 7.44227911229263e-15,
+              "nnz": 1228501.0,
+              "norm_relative_error": 9.80244359502914e-15,
+              "product_relative_error": 8.722204826799008e-17,
+              "reference_mantissa_bits": 64.0,
+              "rows": 15625.0,
+              "scalar_bytes": 16.0,
+              "vector_entries": 15625.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T13:46:04+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinSparseAlgebraBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2577,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.71582,
+              0.367188,
+              0.14209
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "Math product/reduction; assembly excluded"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

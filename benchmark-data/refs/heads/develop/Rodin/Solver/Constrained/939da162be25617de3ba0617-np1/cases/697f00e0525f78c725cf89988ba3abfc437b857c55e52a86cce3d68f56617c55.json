@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "component": "Rodin/Solver/Constrained",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Conductivity/Constrained/H1/P3/Real/Wedge/3/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "Conductivity/Constrained/H1/P3/Real/Wedge/3/real_time",
+          "value": 123661.25408798775,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            123661.25408798775
+          ],
+          "records": [
+            {
+              "name": "Conductivity/Constrained/H1/P3/Real/Wedge/3/real_time",
+              "family_index": 41,
+              "per_family_instance_index": 0,
+              "run_name": "Conductivity/Constrained/H1/P3/Real/Wedge/3/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 2263,
+              "real_time": 123661.25408798775,
+              "cpu_time": 123708.96509079926,
+              "time_unit": "ns",
+              "cells": 16.0,
+              "degree": 3.0,
+              "dofs": 343.0,
+              "initial_relative_residual": 1.0,
+              "local_entries_per_operator_term": 25600.0,
+              "nnz": 4111.0,
+              "quadrature_order": 12.0,
+              "quadrature_points_per_cell": 224.0,
+              "relative_coefficient_error": 1.2118909577637597e-14,
+              "relative_residual": 2.697349092912126e-14,
+              "solver_reported_iterations": 34.0,
+              "system_rows": 343.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T13:30:37+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinConstrainedSolveBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3251,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.464844,
+              0.193848,
+              0.0737305
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "CG setup and solve; zero initial guess"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

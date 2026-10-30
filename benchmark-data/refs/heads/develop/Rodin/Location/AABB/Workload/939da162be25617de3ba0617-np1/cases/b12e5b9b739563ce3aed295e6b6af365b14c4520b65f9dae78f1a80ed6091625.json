@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "component": "Rodin/Location/AABB/Workload",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Quadrilateral/1/4/0/1/shared/0",
+  "metric": "process_cpu_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "Quadrilateral/1/4/0/1/shared/0",
+          "value": 358.165646113,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            358.165646113
+          ],
+          "records": [
+            {
+              "geometry": "Quadrilateral",
+              "degree": "1",
+              "resolution": "4",
+              "cells": "9",
+              "distortion": "0.000000",
+              "warp_degree": "1",
+              "query": "shared",
+              "pruning": "0",
+              "samples": "9",
+              "ns": "358.165646113"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "format": "csv",
+  "window": 20
+}

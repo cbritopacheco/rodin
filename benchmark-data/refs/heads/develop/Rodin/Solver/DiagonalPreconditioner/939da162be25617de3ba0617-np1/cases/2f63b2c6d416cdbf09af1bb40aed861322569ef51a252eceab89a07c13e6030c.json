@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "component": "Rodin/Solver/DiagonalPreconditioner",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "DiagonalPreconditioner/RetainedCompute/ReactionDiffusion/H1/P3/Real/Quadrilateral/9/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "DiagonalPreconditioner/RetainedCompute/ReactionDiffusion/H1/P3/Real/Quadrilateral/9/real_time",
+          "value": 1567.0490748562445,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            1567.0490748562445
+          ],
+          "records": [
+            {
+              "name": "DiagonalPreconditioner/RetainedCompute/ReactionDiffusion/H1/P3/Real/Quadrilateral/9/real_time",
+              "family_index": 16,
+              "per_family_instance_index": 2,
+              "run_name": "DiagonalPreconditioner/RetainedCompute/ReactionDiffusion/H1/P3/Real/Quadrilateral/9/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 172838,
+              "real_time": 1567.0490748562445,
+              "cpu_time": 1566.910743007907,
+              "time_unit": "ns",
+              "cells": 64.0,
+              "degree": 3.0,
+              "diagonal_search_entries": 6085.0,
+              "dimension": 2.0,
+              "inverse_diagonal_bytes": 5000.0,
+              "nnz": 11545.0,
+              "relative_error": 2.0641151889654888e-17,
+              "rows": 625.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T13:26:02+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinDiagonalPreconditionerBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2596,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.65771,
+              0.613281,
+              0.220703
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "Eigen CG diagonal setup/apply; assembly excluded"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

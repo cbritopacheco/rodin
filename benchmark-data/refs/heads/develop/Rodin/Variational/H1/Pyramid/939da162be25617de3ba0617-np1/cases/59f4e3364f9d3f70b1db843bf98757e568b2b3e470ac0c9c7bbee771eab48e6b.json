@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "component": "Rodin/Variational/H1/Pyramid",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "H1/Pyramid/ModalValues/P3/2/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "H1/Pyramid/ModalValues/P3/2/real_time",
+          "value": 1286.261828550386,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            1286.261828550386
+          ],
+          "records": [
+            {
+              "name": "H1/Pyramid/ModalValues/P3/2/real_time",
+              "family_index": 16,
+              "per_family_instance_index": 0,
+              "run_name": "H1/Pyramid/ModalValues/P3/2/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 217440,
+              "real_time": 1286.261828550386,
+              "cpu_time": 1286.0931015452527,
+              "time_unit": "ns",
+              "degree": 3.0,
+              "modes": 30.0,
+              "output_entries": 150.0,
+              "quadrature_points": 5.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T18:13:28+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinH1PyramidBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2905,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.587402,
+              0.168457,
+              0.0581055
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

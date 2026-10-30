@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBulkP1JacobianBenchmarks",
+      "RodinGeometryConnectivityBenchmarks",
+      "RodinGeometryParametricTransformationBenchmarks",
+      "RodinGeometryUniformGridBenchmarks",
+      "RodinMappedPointBenchmarks",
+      "RodinMappedQuadratureCacheBenchmarks",
+      "RodinReferenceGeometryBenchmarks",
+      "RodinTransformationLifecycleBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "d061476c9bb1fa29f9035571566ea306d1230276621563c7f8e8b0d978c70800",
+      "name": "TransformationLifecycle/Identity/Construct/0/real_time",
+      "metric": "real_time",
+      "url": "cases/d061476c9bb1fa29f9035571566ea306d1230276621563c7f8e8b0d978c70800.json"
+    },
+    {
+      "id": "26ee2838cb35dbf6a08a3946ba8bdacc35a6fcc92d5388ee0a325d283d0e5f10",
+      "name": "TransformationLifecycle/Identity/Construct/1/real_time",
+      "metric": "real_time",
+      "url": "cases/26ee2838cb35dbf6a08a3946ba8bdacc35a6fcc92d5388ee0a325d283d0e5f10.json"
+    },
+    {
+      "id": "25b2581d2472dd0dbec41f62c8d17bcc3af26f90f222666bae0340b9034af6fd",
+      "name": "TransformationLifecycle/Identity/Construct/2/real_time",
+      "metric": "real_time",
+      "url": "cases/25b2581d2472dd0dbec41f62c8d17bcc3af26f90f222666bae0340b9034af6fd.json"
+    },
+    {
+      "id": "c3b8d0696d67edee5071c4664a7a6bc6bfe81060f58be1ae1b80e335fe54a6e7",
+      "name": "TransformationLifecycle/Identity/Construct/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c3b8d0696d67edee5071c4664a7a6bc6bfe81060f58be1ae1b80e335fe54a6e7.json"
+    },
+    {
+      "id": "9a9506b243daf5a2aa4c346ac12354bbd7030ec343fb9b04a37b7ffdd347560d",
+      "name": "TransformationLifecycle/Identity/ConstructCopy/0/real_time",
+      "metric": "real_time",
+      "url": "cases/9a9506b243daf5a2aa4c346ac12354bbd7030ec343fb9b04a37b7ffdd347560d.json"
+    },
+    {
+      "id": "3eedcba7a08b6dcdde62f9eeca7992006376ea3952191dce89cb8bf6c4e79f0b",
+      "name": "TransformationLifecycle/Identity/ConstructCopy/1/real_time",
+      "metric": "real_time",
+      "url": "cases/3eedcba7a08b6dcdde62f9eeca7992006376ea3952191dce89cb8bf6c4e79f0b.json"
+    },
+    {
+      "id": "cdb4941bd38c752af36407afe650ae751367a5f66fb1888c40ca807229e22403",
+      "name": "TransformationLifecycle/Identity/ConstructCopy/2/real_time",
+      "metric": "real_time",
+      "url": "cases/cdb4941bd38c752af36407afe650ae751367a5f66fb1888c40ca807229e22403.json"
+    },
+    {
+      "id": "d152c1373df9d55ad5e22d6ec8b2c9235afff9bbed6fc7a815817834e97642dc",
+      "name": "TransformationLifecycle/Identity/ConstructCopy/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d152c1373df9d55ad5e22d6ec8b2c9235afff9bbed6fc7a815817834e97642dc.json"
+    },
+    {
+      "id": "7c3dd7b07c9cc232dc58185829495ce19029cb88c40189095ce6087570e82aa9",
+      "name": "TransformationLifecycle/Identity/ConstructMove/0/real_time",
+      "metric": "real_time",
+      "url": "cases/7c3dd7b07c9cc232dc58185829495ce19029cb88c40189095ce6087570e82aa9.json"
+    },
+    {
+      "id": "4a97523973ecf430370b17dcf7f6f82ab33b55244722c59b1de8de53e729d49d",
+      "name": "TransformationLifecycle/Identity/ConstructMove/1/real_time",
+      "metric": "real_time",
+      "url": "cases/4a97523973ecf430370b17dcf7f6f82ab33b55244722c59b1de8de53e729d49d.json"
+    },
+    {
+      "id": "cbc9580e99ec56d26b264eba26a4e29d3061c2438ff54f9e592c56ad90e65aac",
+      "name": "TransformationLifecycle/Identity/ConstructMove/2/real_time",
+      "metric": "real_time",
+      "url": "cases/cbc9580e99ec56d26b264eba26a4e29d3061c2438ff54f9e592c56ad90e65aac.json"
+    },
+    {
+      "id": "133e35c82fa8ce2f9ca27100ee7a3ba3971feea3540b02667ba27b370d6009a7",
+      "name": "TransformationLifecycle/Identity/ConstructMove/3/real_time",
+      "metric": "real_time",
+      "url": "cases/133e35c82fa8ce2f9ca27100ee7a3ba3971feea3540b02667ba27b370d6009a7.json"
+    }
+  ]
+}

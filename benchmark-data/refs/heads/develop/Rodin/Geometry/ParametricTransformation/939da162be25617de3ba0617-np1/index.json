@@ -1,0 +1,619 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBulkP1JacobianBenchmarks",
+      "RodinGeometryConnectivityBenchmarks",
+      "RodinGeometryParametricTransformationBenchmarks",
+      "RodinGeometryUniformGridBenchmarks",
+      "RodinMappedPointBenchmarks",
+      "RodinMappedQuadratureCacheBenchmarks",
+      "RodinReferenceGeometryBenchmarks",
+      "RodinTransformationLifecycleBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "b2d08947fa2aaeec26b30237c2a1618f2c823e9089f26b7c1958f33e3596c62c",
+      "name": "Parametric/Jacobian/P1/Hexahedron/6/3",
+      "metric": "cpu_time",
+      "url": "cases/b2d08947fa2aaeec26b30237c2a1618f2c823e9089f26b7c1958f33e3596c62c.json"
+    },
+    {
+      "id": "a4005d936a3d3846edaef304da52b6a13cff5e0b28ca317d51c944191e7f4d07",
+      "name": "Parametric/Jacobian/P1/Point/0/3",
+      "metric": "cpu_time",
+      "url": "cases/a4005d936a3d3846edaef304da52b6a13cff5e0b28ca317d51c944191e7f4d07.json"
+    },
+    {
+      "id": "3d321d7d98c874625d40694b067d228e7f86e749e847fa670c002a25f9938e0a",
+      "name": "Parametric/Jacobian/P1/Pyramid/5/3",
+      "metric": "cpu_time",
+      "url": "cases/3d321d7d98c874625d40694b067d228e7f86e749e847fa670c002a25f9938e0a.json"
+    },
+    {
+      "id": "1829c8c750e0f272cadf9f4a19ae30825bde212c4d22127efee3f2e0a8c75f7c",
+      "name": "Parametric/Jacobian/P1/Quadrilateral/3/3",
+      "metric": "cpu_time",
+      "url": "cases/1829c8c750e0f272cadf9f4a19ae30825bde212c4d22127efee3f2e0a8c75f7c.json"
+    },
+    {
+      "id": "83f764f159cf93f296a543a351f47aae027189dc0bcad6780f243093a9283769",
+      "name": "Parametric/Jacobian/P1/Segment/1/3",
+      "metric": "cpu_time",
+      "url": "cases/83f764f159cf93f296a543a351f47aae027189dc0bcad6780f243093a9283769.json"
+    },
+    {
+      "id": "b5ab8a97eef7110eb2354cf3b6e62d9e9358d8c9b0db121745464bbef8de7a9c",
+      "name": "Parametric/Jacobian/P1/Tetrahedron/4/3",
+      "metric": "cpu_time",
+      "url": "cases/b5ab8a97eef7110eb2354cf3b6e62d9e9358d8c9b0db121745464bbef8de7a9c.json"
+    },
+    {
+      "id": "379dcad54555e2f1b9651c9b7dd9c478f7e73d21b309d066fdca42f88718cd58",
+      "name": "Parametric/Jacobian/P1/Triangle/2/3",
+      "metric": "cpu_time",
+      "url": "cases/379dcad54555e2f1b9651c9b7dd9c478f7e73d21b309d066fdca42f88718cd58.json"
+    },
+    {
+      "id": "7627da30961e43c44fbb110e3e7666ea2fc0d793c213dbdc13f6ac3426d0a28f",
+      "name": "Parametric/Jacobian/P1/Wedge/7/3",
+      "metric": "cpu_time",
+      "url": "cases/7627da30961e43c44fbb110e3e7666ea2fc0d793c213dbdc13f6ac3426d0a28f.json"
+    },
+    {
+      "id": "7e4b53591da792376373dabf8a7dd6038ec24b5df6cd28dca5078f2be74c2ead",
+      "name": "Parametric/Jacobian/P2/Hexahedron/6/3",
+      "metric": "cpu_time",
+      "url": "cases/7e4b53591da792376373dabf8a7dd6038ec24b5df6cd28dca5078f2be74c2ead.json"
+    },
+    {
+      "id": "a2d69dfad660a610742bda6d8e9fdbe651e2d338d7ffe89c5bce792eabc405b6",
+      "name": "Parametric/Jacobian/P2/Point/0/3",
+      "metric": "cpu_time",
+      "url": "cases/a2d69dfad660a610742bda6d8e9fdbe651e2d338d7ffe89c5bce792eabc405b6.json"
+    },
+    {
+      "id": "c3a1f592df851a328e8729629505ea7c15e83d3d84c51f3e07c777cb39a217ca",
+      "name": "Parametric/Jacobian/P2/Pyramid/5/3",
+      "metric": "cpu_time",
+      "url": "cases/c3a1f592df851a328e8729629505ea7c15e83d3d84c51f3e07c777cb39a217ca.json"
+    },
+    {
+      "id": "6ac6a43c62f1bea89605b91d64f397b7403bbcb0debfa3b6e866fc971a1b34d9",
+      "name": "Parametric/Jacobian/P2/Quadrilateral/3/3",
+      "metric": "cpu_time",
+      "url": "cases/6ac6a43c62f1bea89605b91d64f397b7403bbcb0debfa3b6e866fc971a1b34d9.json"
+    },
+    {
+      "id": "0001a7b532f46bda7ad28d51b7190bb93511a159f2f9ac6392d6ecbf55d43264",
+      "name": "Parametric/Jacobian/P2/Segment/1/3",
+      "metric": "cpu_time",
+      "url": "cases/0001a7b532f46bda7ad28d51b7190bb93511a159f2f9ac6392d6ecbf55d43264.json"
+    },
+    {
+      "id": "1023ae18d7b22e96ce104e864caf6c7ecdac9be4ead7e55767c99b047e97161b",
+      "name": "Parametric/Jacobian/P2/Tetrahedron/4/3",
+      "metric": "cpu_time",
+      "url": "cases/1023ae18d7b22e96ce104e864caf6c7ecdac9be4ead7e55767c99b047e97161b.json"
+    },
+    {
+      "id": "3b9cbc7b1396d7535aa8ea1549c7eb50c2660824290c0039c57663edbfa3cbbc",
+      "name": "Parametric/Jacobian/P2/Triangle/2/3",
+      "metric": "cpu_time",
+      "url": "cases/3b9cbc7b1396d7535aa8ea1549c7eb50c2660824290c0039c57663edbfa3cbbc.json"
+    },
+    {
+      "id": "6f3cf93f5904347eb108331a189cf9c325f40bae15b1f325797427569104a493",
+      "name": "Parametric/Jacobian/P2/Wedge/7/3",
+      "metric": "cpu_time",
+      "url": "cases/6f3cf93f5904347eb108331a189cf9c325f40bae15b1f325797427569104a493.json"
+    },
+    {
+      "id": "2338f73044dc14de7fc1c1be0a79a3c508ec7a002e807d6f4d17d96dc2344867",
+      "name": "Parametric/Jacobian/P3/Hexahedron/6/3",
+      "metric": "cpu_time",
+      "url": "cases/2338f73044dc14de7fc1c1be0a79a3c508ec7a002e807d6f4d17d96dc2344867.json"
+    },
+    {
+      "id": "b6dbcca1d80a375e577587da2eb1286f1797dace216d1bcd8e5d05c5599862a0",
+      "name": "Parametric/Jacobian/P3/Point/0/3",
+      "metric": "cpu_time",
+      "url": "cases/b6dbcca1d80a375e577587da2eb1286f1797dace216d1bcd8e5d05c5599862a0.json"
+    },
+    {
+      "id": "0c8bd1b0da280fe78b7a91d5ad6566df83518b3c479f31f3e0e6966018c8a2ff",
+      "name": "Parametric/Jacobian/P3/Pyramid/5/3",
+      "metric": "cpu_time",
+      "url": "cases/0c8bd1b0da280fe78b7a91d5ad6566df83518b3c479f31f3e0e6966018c8a2ff.json"
+    },
+    {
+      "id": "486182b26df3d19ad6032b0dcaf6b886a835848326cea2bdbc2e7456f5905827",
+      "name": "Parametric/Jacobian/P3/Quadrilateral/3/3",
+      "metric": "cpu_time",
+      "url": "cases/486182b26df3d19ad6032b0dcaf6b886a835848326cea2bdbc2e7456f5905827.json"
+    },
+    {
+      "id": "330a8db2e20fb05165e2f4a74b0a4a33cf260e01d5d8b84e95f3fb676a53a23f",
+      "name": "Parametric/Jacobian/P3/Segment/1/3",
+      "metric": "cpu_time",
+      "url": "cases/330a8db2e20fb05165e2f4a74b0a4a33cf260e01d5d8b84e95f3fb676a53a23f.json"
+    },
+    {
+      "id": "c8d7c7bfd924ee3338916e6f1a608bcdadf5c84de6923c3ebb05196fba08ed24",
+      "name": "Parametric/Jacobian/P3/Tetrahedron/4/3",
+      "metric": "cpu_time",
+      "url": "cases/c8d7c7bfd924ee3338916e6f1a608bcdadf5c84de6923c3ebb05196fba08ed24.json"
+    },
+    {
+      "id": "0b9fc31d4d5f0ed29b3e9307ea36ce0070f81bc664b0781ed908774bb4f621c4",
+      "name": "Parametric/Jacobian/P3/Triangle/2/3",
+      "metric": "cpu_time",
+      "url": "cases/0b9fc31d4d5f0ed29b3e9307ea36ce0070f81bc664b0781ed908774bb4f621c4.json"
+    },
+    {
+      "id": "b59dafbacac3930c2c19deb150c4e9c02dcf98f9fb19a04fe71f965c1dee21b7",
+      "name": "Parametric/Jacobian/P3/Wedge/7/3",
+      "metric": "cpu_time",
+      "url": "cases/b59dafbacac3930c2c19deb150c4e9c02dcf98f9fb19a04fe71f965c1dee21b7.json"
+    },
+    {
+      "id": "d7a62828927356334dd072365aa5c23357f5e509e6d32fcd0d00ca5da337fe63",
+      "name": "Parametric/Jacobian/P4/Hexahedron/6/3",
+      "metric": "cpu_time",
+      "url": "cases/d7a62828927356334dd072365aa5c23357f5e509e6d32fcd0d00ca5da337fe63.json"
+    },
+    {
+      "id": "f6d7b04fe279937f2e355645a6a33edd590904ea950ea8dc040223ea93f707b1",
+      "name": "Parametric/Jacobian/P4/Point/0/3",
+      "metric": "cpu_time",
+      "url": "cases/f6d7b04fe279937f2e355645a6a33edd590904ea950ea8dc040223ea93f707b1.json"
+    },
+    {
+      "id": "3631914ecc00f4f567b98c811894326aef37f72aa4c5672334ad383ce4b01f35",
+      "name": "Parametric/Jacobian/P4/Pyramid/5/3",
+      "metric": "cpu_time",
+      "url": "cases/3631914ecc00f4f567b98c811894326aef37f72aa4c5672334ad383ce4b01f35.json"
+    },
+    {
+      "id": "7bd8836bdfad720b410a74a32bd593e79537daaac2fd3e3224d1246352383023",
+      "name": "Parametric/Jacobian/P4/Quadrilateral/3/3",
+      "metric": "cpu_time",
+      "url": "cases/7bd8836bdfad720b410a74a32bd593e79537daaac2fd3e3224d1246352383023.json"
+    },
+    {
+      "id": "39a9a086ee2f5d849e2728a382bbb9c49470cf6b8fb43253174c04466e6f6aa3",
+      "name": "Parametric/Jacobian/P4/Segment/1/3",
+      "metric": "cpu_time",
+      "url": "cases/39a9a086ee2f5d849e2728a382bbb9c49470cf6b8fb43253174c04466e6f6aa3.json"
+    },
+    {
+      "id": "7eec0ecbc736abbeaf08150c1e474b9d40999a8cedb074f18246bfd376e2d87c",
+      "name": "Parametric/Jacobian/P4/Tetrahedron/4/3",
+      "metric": "cpu_time",
+      "url": "cases/7eec0ecbc736abbeaf08150c1e474b9d40999a8cedb074f18246bfd376e2d87c.json"
+    },
+    {
+      "id": "5f393a7c26370225488729cd0c751c671ad3067ccdc021eaa114bf65f005d9eb",
+      "name": "Parametric/Jacobian/P4/Triangle/2/3",
+      "metric": "cpu_time",
+      "url": "cases/5f393a7c26370225488729cd0c751c671ad3067ccdc021eaa114bf65f005d9eb.json"
+    },
+    {
+      "id": "ae772b4b24d1057bd36c87e13806305e4bff895b0110d5322e1552cbb6c6984e",
+      "name": "Parametric/Jacobian/P4/Wedge/7/3",
+      "metric": "cpu_time",
+      "url": "cases/ae772b4b24d1057bd36c87e13806305e4bff895b0110d5322e1552cbb6c6984e.json"
+    },
+    {
+      "id": "0d6821d022ca985bbf8585863ba6e0313b92b65e83d0f234930405a93b29cdde",
+      "name": "Parametric/Transform/P1/Hexahedron/6/3",
+      "metric": "cpu_time",
+      "url": "cases/0d6821d022ca985bbf8585863ba6e0313b92b65e83d0f234930405a93b29cdde.json"
+    },
+    {
+      "id": "819a93f01089a0467daf1426b8b85dfef4af67219e0918f0fdb290306fbb4849",
+      "name": "Parametric/Transform/P1/Point/0/3",
+      "metric": "cpu_time",
+      "url": "cases/819a93f01089a0467daf1426b8b85dfef4af67219e0918f0fdb290306fbb4849.json"
+    },
+    {
+      "id": "1a10f2f6c5032092f6d3609837449957a8fa0d2b01a8e049dcc605f50ed7ffdc",
+      "name": "Parametric/Transform/P1/Pyramid/5/3",
+      "metric": "cpu_time",
+      "url": "cases/1a10f2f6c5032092f6d3609837449957a8fa0d2b01a8e049dcc605f50ed7ffdc.json"
+    },
+    {
+      "id": "d03e722af8665f3e1e502e0aa24942b3989eb20b51ae1739e42027d7896eb239",
+      "name": "Parametric/Transform/P1/Quadrilateral/3/3",
+      "metric": "cpu_time",
+      "url": "cases/d03e722af8665f3e1e502e0aa24942b3989eb20b51ae1739e42027d7896eb239.json"
+    },
+    {
+      "id": "c236db00d252a872d46f53b1e5cc2689b1aa468b6d3595630185ce08a2e54126",
+      "name": "Parametric/Transform/P1/Segment/1/3",
+      "metric": "cpu_time",
+      "url": "cases/c236db00d252a872d46f53b1e5cc2689b1aa468b6d3595630185ce08a2e54126.json"
+    },
+    {
+      "id": "718941458ba62f71cad9676eb925f016ce81f7d1edccb927c1ab37c1beec2e3c",
+      "name": "Parametric/Transform/P1/Tetrahedron/4/3",
+      "metric": "cpu_time",
+      "url": "cases/718941458ba62f71cad9676eb925f016ce81f7d1edccb927c1ab37c1beec2e3c.json"
+    },
+    {
+      "id": "95e68c8b962e119d903a252610df2d59199bc22ec3e582415bc9e860707e9d0d",
+      "name": "Parametric/Transform/P1/Triangle/2/3",
+      "metric": "cpu_time",
+      "url": "cases/95e68c8b962e119d903a252610df2d59199bc22ec3e582415bc9e860707e9d0d.json"
+    },
+    {
+      "id": "9c13afa5b124ecb1379fe3dd61c5f71f4c4f64f7bd679b893d16de5b91decf89",
+      "name": "Parametric/Transform/P1/Wedge/7/3",
+      "metric": "cpu_time",
+      "url": "cases/9c13afa5b124ecb1379fe3dd61c5f71f4c4f64f7bd679b893d16de5b91decf89.json"
+    },
+    {
+      "id": "3b731f28ee31cf7fa3b293203dd4ed3192c1e60576090ac7a234d7a08301d71b",
+      "name": "Parametric/Transform/P2/Hexahedron/6/3",
+      "metric": "cpu_time",
+      "url": "cases/3b731f28ee31cf7fa3b293203dd4ed3192c1e60576090ac7a234d7a08301d71b.json"
+    },
+    {
+      "id": "db2bda8aae228e782498c13aed8280643cfcf8f1367d24b943b239188e5874a7",
+      "name": "Parametric/Transform/P2/Point/0/3",
+      "metric": "cpu_time",
+      "url": "cases/db2bda8aae228e782498c13aed8280643cfcf8f1367d24b943b239188e5874a7.json"
+    },
+    {
+      "id": "b3f356ada77b82b7477455aa2fab87364d23358ac1c162d9c493119fba62aaba",
+      "name": "Parametric/Transform/P2/Pyramid/5/3",
+      "metric": "cpu_time",
+      "url": "cases/b3f356ada77b82b7477455aa2fab87364d23358ac1c162d9c493119fba62aaba.json"
+    },
+    {
+      "id": "0537bf99b284a35bbb21e9b509985168e8f1125fd7feda0cd6549d9d760e0707",
+      "name": "Parametric/Transform/P2/Quadrilateral/3/3",
+      "metric": "cpu_time",
+      "url": "cases/0537bf99b284a35bbb21e9b509985168e8f1125fd7feda0cd6549d9d760e0707.json"
+    },
+    {
+      "id": "26cd2dc7fd087727137482eac20370ab136daf2374cc91310fe4dd536e664ff0",
+      "name": "Parametric/Transform/P2/Segment/1/3",
+      "metric": "cpu_time",
+      "url": "cases/26cd2dc7fd087727137482eac20370ab136daf2374cc91310fe4dd536e664ff0.json"
+    },
+    {
+      "id": "a376b5f29bb753c99c71cae35ef9c1716566ba8688af2199095c7b4d950dfeb4",
+      "name": "Parametric/Transform/P2/Tetrahedron/4/3",
+      "metric": "cpu_time",
+      "url": "cases/a376b5f29bb753c99c71cae35ef9c1716566ba8688af2199095c7b4d950dfeb4.json"
+    },
+    {
+      "id": "37f80c67637a7801b67cd47328fbda9061495d27a6ea012cc44cb4112c050230",
+      "name": "Parametric/Transform/P2/Triangle/2/3",
+      "metric": "cpu_time",
+      "url": "cases/37f80c67637a7801b67cd47328fbda9061495d27a6ea012cc44cb4112c050230.json"
+    },
+    {
+      "id": "62d7218bb5622ee42c6de0cd7d9efb192acdb186ce7fb31dc7952cea5b4e7e98",
+      "name": "Parametric/Transform/P2/Wedge/7/3",
+      "metric": "cpu_time",
+      "url": "cases/62d7218bb5622ee42c6de0cd7d9efb192acdb186ce7fb31dc7952cea5b4e7e98.json"
+    },
+    {
+      "id": "342ee63e12f68d72adeb6305199a86d6afbf6bf5c6d3b90d336031d61342a5f8",
+      "name": "Parametric/Transform/P3/Hexahedron/6/3",
+      "metric": "cpu_time",
+      "url": "cases/342ee63e12f68d72adeb6305199a86d6afbf6bf5c6d3b90d336031d61342a5f8.json"
+    },
+    {
+      "id": "c8d655ebcc3b0f97668625a0590ec4655f9bf58a88a7f16f09b14bebb0e9aed3",
+      "name": "Parametric/Transform/P3/Point/0/3",
+      "metric": "cpu_time",
+      "url": "cases/c8d655ebcc3b0f97668625a0590ec4655f9bf58a88a7f16f09b14bebb0e9aed3.json"
+    },
+    {
+      "id": "dc67b782c333b490a03a0b803d64fbee67b71d3169bc2dde7d46b2ebe63d9778",
+      "name": "Parametric/Transform/P3/Pyramid/5/3",
+      "metric": "cpu_time",
+      "url": "cases/dc67b782c333b490a03a0b803d64fbee67b71d3169bc2dde7d46b2ebe63d9778.json"
+    },
+    {
+      "id": "82cbd07f0372c3d3b4dd12941e952e8f95566de009f073d583532a12b88d9f16",
+      "name": "Parametric/Transform/P3/Quadrilateral/3/3",
+      "metric": "cpu_time",
+      "url": "cases/82cbd07f0372c3d3b4dd12941e952e8f95566de009f073d583532a12b88d9f16.json"
+    },
+    {
+      "id": "debae1237e4c8f9f9e9a48b206e2df48bc9f185ea3008b17e08f9752737dd2d6",
+      "name": "Parametric/Transform/P3/Segment/1/3",
+      "metric": "cpu_time",
+      "url": "cases/debae1237e4c8f9f9e9a48b206e2df48bc9f185ea3008b17e08f9752737dd2d6.json"
+    },
+    {
+      "id": "9b16af1d33b5fa633fca0df7d4248a2c1abc45312f89fcafd37e99e95cdef8a4",
+      "name": "Parametric/Transform/P3/Tetrahedron/4/3",
+      "metric": "cpu_time",
+      "url": "cases/9b16af1d33b5fa633fca0df7d4248a2c1abc45312f89fcafd37e99e95cdef8a4.json"
+    },
+    {
+      "id": "dd8550fa8d3329ad59128f650a84207f2c08e2a396fda1611d25551871e8eb7f",
+      "name": "Parametric/Transform/P3/Triangle/2/3",
+      "metric": "cpu_time",
+      "url": "cases/dd8550fa8d3329ad59128f650a84207f2c08e2a396fda1611d25551871e8eb7f.json"
+    },
+    {
+      "id": "ae5ca4f2d42385b7b5940e892b69bca7abd5605c31408c5e0ede81c934116aba",
+      "name": "Parametric/Transform/P3/Wedge/7/3",
+      "metric": "cpu_time",
+      "url": "cases/ae5ca4f2d42385b7b5940e892b69bca7abd5605c31408c5e0ede81c934116aba.json"
+    },
+    {
+      "id": "ed8aff089486d84b5a4492a25ff2e92c853b3ed45ca064b8557e2eb52b3bdcb4",
+      "name": "Parametric/Transform/P4/Hexahedron/6/3",
+      "metric": "cpu_time",
+      "url": "cases/ed8aff089486d84b5a4492a25ff2e92c853b3ed45ca064b8557e2eb52b3bdcb4.json"
+    },
+    {
+      "id": "7340717c6f53ad9b2c38c9d5089342cbcd532e31399d2ce26fd31d20d464b432",
+      "name": "Parametric/Transform/P4/Point/0/3",
+      "metric": "cpu_time",
+      "url": "cases/7340717c6f53ad9b2c38c9d5089342cbcd532e31399d2ce26fd31d20d464b432.json"
+    },
+    {
+      "id": "2c1dab7914cefb28aef3f2eda50463a5fbc21f41e45cd0247f0d0671170551a1",
+      "name": "Parametric/Transform/P4/Pyramid/5/3",
+      "metric": "cpu_time",
+      "url": "cases/2c1dab7914cefb28aef3f2eda50463a5fbc21f41e45cd0247f0d0671170551a1.json"
+    },
+    {
+      "id": "a267fde4e1efccc4120217836e02d41c08eac57e9cf50f7632cfce32202f9f6f",
+      "name": "Parametric/Transform/P4/Quadrilateral/3/3",
+      "metric": "cpu_time",
+      "url": "cases/a267fde4e1efccc4120217836e02d41c08eac57e9cf50f7632cfce32202f9f6f.json"
+    },
+    {
+      "id": "fc8d9f161ab1f3f2aa3ea23d95cc581a2d5fe4d21bd509ce9a03841b228375d8",
+      "name": "Parametric/Transform/P4/Segment/1/3",
+      "metric": "cpu_time",
+      "url": "cases/fc8d9f161ab1f3f2aa3ea23d95cc581a2d5fe4d21bd509ce9a03841b228375d8.json"
+    },
+    {
+      "id": "3c0a0c7e321420b0764d706a630b1e09dba46ed34532df665e7b3ceb279cf936",
+      "name": "Parametric/Transform/P4/Tetrahedron/4/3",
+      "metric": "cpu_time",
+      "url": "cases/3c0a0c7e321420b0764d706a630b1e09dba46ed34532df665e7b3ceb279cf936.json"
+    },
+    {
+      "id": "7ea398fdc9404cb21f34afa060df163f45d53a08958d79165feceda2ac15c59d",
+      "name": "Parametric/Transform/P4/Triangle/2/3",
+      "metric": "cpu_time",
+      "url": "cases/7ea398fdc9404cb21f34afa060df163f45d53a08958d79165feceda2ac15c59d.json"
+    },
+    {
+      "id": "6f29b65e2acfa89e2fd56447ba94e1f1516a41ddeda56d4084edd53f336ffe12",
+      "name": "Parametric/Transform/P4/Wedge/7/3",
+      "metric": "cpu_time",
+      "url": "cases/6f29b65e2acfa89e2fd56447ba94e1f1516a41ddeda56d4084edd53f336ffe12.json"
+    },
+    {
+      "id": "ffa0f4feef3f053d80c4c0b18cfe24fdd38ed1e8a26245fe596b4d1f24f2bdfd",
+      "name": "ParametricNative/Jacobian/P1/Point/0/1",
+      "metric": "cpu_time",
+      "url": "cases/ffa0f4feef3f053d80c4c0b18cfe24fdd38ed1e8a26245fe596b4d1f24f2bdfd.json"
+    },
+    {
+      "id": "5ee6a78946c29b903015c5625e40a43bdf833bfbda450ead7e82e3506c477273",
+      "name": "ParametricNative/Jacobian/P1/Quadrilateral/3/2",
+      "metric": "cpu_time",
+      "url": "cases/5ee6a78946c29b903015c5625e40a43bdf833bfbda450ead7e82e3506c477273.json"
+    },
+    {
+      "id": "1fbf2c7409954543a7699f817e31f24716de3c818b2d535212d2617fb348f0d4",
+      "name": "ParametricNative/Jacobian/P1/Segment/1/1",
+      "metric": "cpu_time",
+      "url": "cases/1fbf2c7409954543a7699f817e31f24716de3c818b2d535212d2617fb348f0d4.json"
+    },
+    {
+      "id": "8bde7b78c7535546c8bc84a4bd305fee6331cd2a2ef4b9ca62f466307ce7b3bc",
+      "name": "ParametricNative/Jacobian/P1/Triangle/2/2",
+      "metric": "cpu_time",
+      "url": "cases/8bde7b78c7535546c8bc84a4bd305fee6331cd2a2ef4b9ca62f466307ce7b3bc.json"
+    },
+    {
+      "id": "9cebf68fe51956497234212f7a28eabb4c8a2818970315a3ea19c4692bb2f251",
+      "name": "ParametricNative/Jacobian/P2/Point/0/1",
+      "metric": "cpu_time",
+      "url": "cases/9cebf68fe51956497234212f7a28eabb4c8a2818970315a3ea19c4692bb2f251.json"
+    },
+    {
+      "id": "4dbc60e28ef2de722e9fa30e27843ee84f25e50667ec1163e5621529ef646070",
+      "name": "ParametricNative/Jacobian/P2/Quadrilateral/3/2",
+      "metric": "cpu_time",
+      "url": "cases/4dbc60e28ef2de722e9fa30e27843ee84f25e50667ec1163e5621529ef646070.json"
+    },
+    {
+      "id": "f0cd88becd17011f422a2b22d5bb6af2e834f7c7bfcb05b9c21a07c0de820448",
+      "name": "ParametricNative/Jacobian/P2/Segment/1/1",
+      "metric": "cpu_time",
+      "url": "cases/f0cd88becd17011f422a2b22d5bb6af2e834f7c7bfcb05b9c21a07c0de820448.json"
+    },
+    {
+      "id": "f67da813d06ba22bdc0315858edaa19e90e677acb1ec77d043c61ac06531d4d7",
+      "name": "ParametricNative/Jacobian/P2/Triangle/2/2",
+      "metric": "cpu_time",
+      "url": "cases/f67da813d06ba22bdc0315858edaa19e90e677acb1ec77d043c61ac06531d4d7.json"
+    },
+    {
+      "id": "61876085dee9119f0cc31cfbe33fe89a7f2a945caf24135a4192efb629bb7944",
+      "name": "ParametricNative/Jacobian/P3/Point/0/1",
+      "metric": "cpu_time",
+      "url": "cases/61876085dee9119f0cc31cfbe33fe89a7f2a945caf24135a4192efb629bb7944.json"
+    },
+    {
+      "id": "e40f6d6886888cf5f805ee1189449bc8519275ccd2bbbecc0dacf295dfa70e86",
+      "name": "ParametricNative/Jacobian/P3/Quadrilateral/3/2",
+      "metric": "cpu_time",
+      "url": "cases/e40f6d6886888cf5f805ee1189449bc8519275ccd2bbbecc0dacf295dfa70e86.json"
+    },
+    {
+      "id": "6a44c3da8cd733acd81ebef39b882c6a47c1b4c46b45a33236adf1b40cb56f89",
+      "name": "ParametricNative/Jacobian/P3/Segment/1/1",
+      "metric": "cpu_time",
+      "url": "cases/6a44c3da8cd733acd81ebef39b882c6a47c1b4c46b45a33236adf1b40cb56f89.json"
+    },
+    {
+      "id": "7d6e03464f9fb9e36f3f31b35ba6c857f3e0f23fc6a4eccb860cd2c9e3fcab54",
+      "name": "ParametricNative/Jacobian/P3/Triangle/2/2",
+      "metric": "cpu_time",
+      "url": "cases/7d6e03464f9fb9e36f3f31b35ba6c857f3e0f23fc6a4eccb860cd2c9e3fcab54.json"
+    },
+    {
+      "id": "b1977dedba18fccad08cb7dfbfeff6f7bc633b345f59f32e1cbdedf6c7068462",
+      "name": "ParametricNative/Jacobian/P4/Point/0/1",
+      "metric": "cpu_time",
+      "url": "cases/b1977dedba18fccad08cb7dfbfeff6f7bc633b345f59f32e1cbdedf6c7068462.json"
+    },
+    {
+      "id": "f2a2e7c5e90a90af4e2f2d66124660a09170f42c3dc7d154b210d94b029c7fdc",
+      "name": "ParametricNative/Jacobian/P4/Quadrilateral/3/2",
+      "metric": "cpu_time",
+      "url": "cases/f2a2e7c5e90a90af4e2f2d66124660a09170f42c3dc7d154b210d94b029c7fdc.json"
+    },
+    {
+      "id": "b420253e8be6fa469acd0893a98a94c287507fe4fe627bcfdbafc485f01ebd8a",
+      "name": "ParametricNative/Jacobian/P4/Segment/1/1",
+      "metric": "cpu_time",
+      "url": "cases/b420253e8be6fa469acd0893a98a94c287507fe4fe627bcfdbafc485f01ebd8a.json"
+    },
+    {
+      "id": "b8b2573b58fafb4c720ebecd00a92a25773c8b61eaffdd4b676b79f3fae4dbbb",
+      "name": "ParametricNative/Jacobian/P4/Triangle/2/2",
+      "metric": "cpu_time",
+      "url": "cases/b8b2573b58fafb4c720ebecd00a92a25773c8b61eaffdd4b676b79f3fae4dbbb.json"
+    },
+    {
+      "id": "b378106f534333a6571e00bb55d8fb68e53a24d25127c43595b308087055e499",
+      "name": "ParametricNative/Transform/P1/Point/0/1",
+      "metric": "cpu_time",
+      "url": "cases/b378106f534333a6571e00bb55d8fb68e53a24d25127c43595b308087055e499.json"
+    },
+    {
+      "id": "5c46c3d5e8d88780be06f9980594d3847b4f252242faf88be3154a2dd3ebbf94",
+      "name": "ParametricNative/Transform/P1/Quadrilateral/3/2",
+      "metric": "cpu_time",
+      "url": "cases/5c46c3d5e8d88780be06f9980594d3847b4f252242faf88be3154a2dd3ebbf94.json"
+    },
+    {
+      "id": "79d0b872dda444f0c42d700344e17e9afc4a8ed81fcce4fadde3eeb0f397cddf",
+      "name": "ParametricNative/Transform/P1/Segment/1/1",
+      "metric": "cpu_time",
+      "url": "cases/79d0b872dda444f0c42d700344e17e9afc4a8ed81fcce4fadde3eeb0f397cddf.json"
+    },
+    {
+      "id": "2b4b0e69d3b7d7ca9d2b3cc46d06acb92adcb978c3babe98ede931c5479cf0ab",
+      "name": "ParametricNative/Transform/P1/Triangle/2/2",
+      "metric": "cpu_time",
+      "url": "cases/2b4b0e69d3b7d7ca9d2b3cc46d06acb92adcb978c3babe98ede931c5479cf0ab.json"
+    },
+    {
+      "id": "ed8522505d25a0736a3b9153ac203113fb6bf9691e852c70abf17ad6a1399692",
+      "name": "ParametricNative/Transform/P2/Point/0/1",
+      "metric": "cpu_time",
+      "url": "cases/ed8522505d25a0736a3b9153ac203113fb6bf9691e852c70abf17ad6a1399692.json"
+    },
+    {
+      "id": "0cd7c8eb9557df08a96c67810fada7cca5bf9fd0bf6a67aa968a6812a45f3aa8",
+      "name": "ParametricNative/Transform/P2/Quadrilateral/3/2",
+      "metric": "cpu_time",
+      "url": "cases/0cd7c8eb9557df08a96c67810fada7cca5bf9fd0bf6a67aa968a6812a45f3aa8.json"
+    },
+    {
+      "id": "d36bec4de0cd459b46760c7a233c6e0921534a8a8beb29c6cb57c2b6c48532ae",
+      "name": "ParametricNative/Transform/P2/Segment/1/1",
+      "metric": "cpu_time",
+      "url": "cases/d36bec4de0cd459b46760c7a233c6e0921534a8a8beb29c6cb57c2b6c48532ae.json"
+    },
+    {
+      "id": "a8325af84ea4c24904169e8d0a44e366aa989ad5ef491248c321f487bbb847fb",
+      "name": "ParametricNative/Transform/P2/Triangle/2/2",
+      "metric": "cpu_time",
+      "url": "cases/a8325af84ea4c24904169e8d0a44e366aa989ad5ef491248c321f487bbb847fb.json"
+    },
+    {
+      "id": "686e8fa8ab4c531a25adad2f4d477e8b536e9ca57fad404d2ab96bd97a699713",
+      "name": "ParametricNative/Transform/P3/Point/0/1",
+      "metric": "cpu_time",
+      "url": "cases/686e8fa8ab4c531a25adad2f4d477e8b536e9ca57fad404d2ab96bd97a699713.json"
+    },
+    {
+      "id": "173be98841a9611deb3f34be7945c541ad8c78ee1d1801589b1600f7d9c359b4",
+      "name": "ParametricNative/Transform/P3/Quadrilateral/3/2",
+      "metric": "cpu_time",
+      "url": "cases/173be98841a9611deb3f34be7945c541ad8c78ee1d1801589b1600f7d9c359b4.json"
+    },
+    {
+      "id": "af1e87cf28ca899a5d9658360374ef00f9db53870e6fe8cba88390ba9468b3b3",
+      "name": "ParametricNative/Transform/P3/Segment/1/1",
+      "metric": "cpu_time",
+      "url": "cases/af1e87cf28ca899a5d9658360374ef00f9db53870e6fe8cba88390ba9468b3b3.json"
+    },
+    {
+      "id": "d18eb497ef03969c599826944bba6912d38f350e0d9f39ba463f56af8579a7f9",
+      "name": "ParametricNative/Transform/P3/Triangle/2/2",
+      "metric": "cpu_time",
+      "url": "cases/d18eb497ef03969c599826944bba6912d38f350e0d9f39ba463f56af8579a7f9.json"
+    },
+    {
+      "id": "ab3598f24eaa03fb2daa484f96293b396c431691fb392e9ac52a0121354f6a86",
+      "name": "ParametricNative/Transform/P4/Point/0/1",
+      "metric": "cpu_time",
+      "url": "cases/ab3598f24eaa03fb2daa484f96293b396c431691fb392e9ac52a0121354f6a86.json"
+    },
+    {
+      "id": "17f6a24d9846a9360bdb28fce2c0320999d04631f9a1d1fa817b7fa9aa6211e7",
+      "name": "ParametricNative/Transform/P4/Quadrilateral/3/2",
+      "metric": "cpu_time",
+      "url": "cases/17f6a24d9846a9360bdb28fce2c0320999d04631f9a1d1fa817b7fa9aa6211e7.json"
+    },
+    {
+      "id": "b4f060cac1e92d1b03903c1a503d46d2732a6fe5848c359c242a4b6bfc20d3e8",
+      "name": "ParametricNative/Transform/P4/Segment/1/1",
+      "metric": "cpu_time",
+      "url": "cases/b4f060cac1e92d1b03903c1a503d46d2732a6fe5848c359c242a4b6bfc20d3e8.json"
+    },
+    {
+      "id": "f0a3c904906063136c31a8c0c213091b39fb7d84a34d4204df6b872a471dc17f",
+      "name": "ParametricNative/Transform/P4/Triangle/2/2",
+      "metric": "cpu_time",
+      "url": "cases/f0a3c904906063136c31a8c0c213091b39fb7d84a34d4204df6b872a471dc17f.json"
+    }
+  ]
+}

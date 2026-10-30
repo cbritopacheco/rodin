@@ -1,0 +1,3450 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinAssemblyBenchmarks",
+      "RodinConstrainedAssemblyBenchmarks",
+      "RodinConvectionAssemblyBenchmarks",
+      "RodinCoupledReactionDiffusionAssemblyBenchmarks",
+      "RodinHelmholtzAssemblyBenchmarks",
+      "RodinMassAssemblyBenchmarks",
+      "RodinMassOperandOrderAssemblyBenchmarks",
+      "RodinMatrixMassAssemblyBenchmarks",
+      "RodinNonlinearPoissonAssemblyBenchmarks",
+      "RodinPhysicsAssemblyBenchmarks",
+      "RodinPhysicsStageBenchmarks",
+      "RodinSpatialMatrixBenchmarks",
+      "RodinStokesAssemblyBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "491dd4491687ef6c6c8db1f81f406f97862fd01a0c7fa5c5a8598b6d50037d9e",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Hexahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/491dd4491687ef6c6c8db1f81f406f97862fd01a0c7fa5c5a8598b6d50037d9e.json"
+    },
+    {
+      "id": "ea3f487f3b65af0ebe3282f5795f3e6d81b6cb2c72892a7130ea664ec05f0ddd",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Hexahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ea3f487f3b65af0ebe3282f5795f3e6d81b6cb2c72892a7130ea664ec05f0ddd.json"
+    },
+    {
+      "id": "234a32b469c750736cda1bc6c92939c359ad3cf5a780588d8944140b77553ee0",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Hexahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/234a32b469c750736cda1bc6c92939c359ad3cf5a780588d8944140b77553ee0.json"
+    },
+    {
+      "id": "bc0e65ec76f1fa8d2656a3b93602a5750c3d6a5fd40ddd2b450d5c3e9c1a19ea",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Hexahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/bc0e65ec76f1fa8d2656a3b93602a5750c3d6a5fd40ddd2b450d5c3e9c1a19ea.json"
+    },
+    {
+      "id": "e0841eb28a676d170e91072a27e4bba28458a84a325f365d7a9976efdf4dc278",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Hexahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e0841eb28a676d170e91072a27e4bba28458a84a325f365d7a9976efdf4dc278.json"
+    },
+    {
+      "id": "2603334104980dbcc8072a4d51cff8e203b927790694f24015c9ee43b152043d",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Hexahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/2603334104980dbcc8072a4d51cff8e203b927790694f24015c9ee43b152043d.json"
+    },
+    {
+      "id": "e41f13119b89fc6bb63944522ab3847d9f647a1c76c7a6eba7595ab964c5d4dd",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Hexahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e41f13119b89fc6bb63944522ab3847d9f647a1c76c7a6eba7595ab964c5d4dd.json"
+    },
+    {
+      "id": "eb9947c8a62b0892a9fd63fb9dfbd13b0d9ff412e835c6ebc07de590abe0fd6c",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Hexahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/eb9947c8a62b0892a9fd63fb9dfbd13b0d9ff412e835c6ebc07de590abe0fd6c.json"
+    },
+    {
+      "id": "604510a91d32ee9770e6020c5af07b2f0a642bad9b106764a53d89548a7fb56b",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Hexahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/604510a91d32ee9770e6020c5af07b2f0a642bad9b106764a53d89548a7fb56b.json"
+    },
+    {
+      "id": "7fce538deb46e4e92d50e10302623ec08bad0225bcb4b8a822eb9bc6a6c32345",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Pyramid/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7fce538deb46e4e92d50e10302623ec08bad0225bcb4b8a822eb9bc6a6c32345.json"
+    },
+    {
+      "id": "103f8da86ddc9a31fb6feaa9550b7e28e6fe73e1243cd5dab0d418759408ee99",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Pyramid/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/103f8da86ddc9a31fb6feaa9550b7e28e6fe73e1243cd5dab0d418759408ee99.json"
+    },
+    {
+      "id": "dc5c8a7cd900e66e839674fa830cd1276568c681316a5b95eb2aa43afb87e27d",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Pyramid/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/dc5c8a7cd900e66e839674fa830cd1276568c681316a5b95eb2aa43afb87e27d.json"
+    },
+    {
+      "id": "5f3debc2b3613b85d50b285f3b88839d56bef1ed659203a03fbe7c348bf1e28c",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Pyramid/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5f3debc2b3613b85d50b285f3b88839d56bef1ed659203a03fbe7c348bf1e28c.json"
+    },
+    {
+      "id": "dab9d5fb5e0f00a0b98bc8cd243fba38ba79ac1460be37117ff968320fbbc84e",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Pyramid/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/dab9d5fb5e0f00a0b98bc8cd243fba38ba79ac1460be37117ff968320fbbc84e.json"
+    },
+    {
+      "id": "6130841c4958530addb7f65ca9d10ec88320b285a790ea2e4bcd7af283fd3c2a",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Pyramid/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6130841c4958530addb7f65ca9d10ec88320b285a790ea2e4bcd7af283fd3c2a.json"
+    },
+    {
+      "id": "fde9e2681bd7b454f990ac08fc2ad8a7f66b7dbcdf623731e98145c31688f289",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Pyramid/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fde9e2681bd7b454f990ac08fc2ad8a7f66b7dbcdf623731e98145c31688f289.json"
+    },
+    {
+      "id": "bf30e4d222dd69014b49ba656f2f635c802a0da00c349bae6ec8d39b5e0e9b45",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Pyramid/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/bf30e4d222dd69014b49ba656f2f635c802a0da00c349bae6ec8d39b5e0e9b45.json"
+    },
+    {
+      "id": "cedb20306ace6b4bf4276691b6e4c00e4d36cf856ae8ba1c7440c8b140ecdf1b",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Pyramid/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/cedb20306ace6b4bf4276691b6e4c00e4d36cf856ae8ba1c7440c8b140ecdf1b.json"
+    },
+    {
+      "id": "3b4ee8f0261f600525c348da000b1fd4e5a10dd235f230b6be97b0b2fe6b74a3",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Quadrilateral/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3b4ee8f0261f600525c348da000b1fd4e5a10dd235f230b6be97b0b2fe6b74a3.json"
+    },
+    {
+      "id": "a85dc37c46272140d144e0042f0992fcd1cfa60def99a99eacea50a2c361254b",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Quadrilateral/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a85dc37c46272140d144e0042f0992fcd1cfa60def99a99eacea50a2c361254b.json"
+    },
+    {
+      "id": "644394880696b3d95a43265bf5a879f5178279d2f1419905f393d9da5ff6537b",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Quadrilateral/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/644394880696b3d95a43265bf5a879f5178279d2f1419905f393d9da5ff6537b.json"
+    },
+    {
+      "id": "298146db7a97b9141c2ac86eb51b5e5423c7b7e47b8e928884827cc5a41c4516",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Quadrilateral/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/298146db7a97b9141c2ac86eb51b5e5423c7b7e47b8e928884827cc5a41c4516.json"
+    },
+    {
+      "id": "5170d6ead4c53a3f2ccb6a017552bf60472bb701bb4f754e1e1858ac9b365e63",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Quadrilateral/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5170d6ead4c53a3f2ccb6a017552bf60472bb701bb4f754e1e1858ac9b365e63.json"
+    },
+    {
+      "id": "d88063b655fa1647ad03e64d0a400d8c70d1df44e2b0bd9eba68daba56d4c475",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Quadrilateral/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d88063b655fa1647ad03e64d0a400d8c70d1df44e2b0bd9eba68daba56d4c475.json"
+    },
+    {
+      "id": "3d3f5783c0b272d67873a03f3d9ddd1887d0ec3c8731f1ba6c501f41cfb28451",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Quadrilateral/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3d3f5783c0b272d67873a03f3d9ddd1887d0ec3c8731f1ba6c501f41cfb28451.json"
+    },
+    {
+      "id": "506eee23b50754058d64b6e8eb0818385a6c558a368fcf07cb95c362791da58b",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Quadrilateral/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/506eee23b50754058d64b6e8eb0818385a6c558a368fcf07cb95c362791da58b.json"
+    },
+    {
+      "id": "72d7d668c1ef20aa5b1a7b3003b16e2b178f766aeae7a2a21e10345594ce2168",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Quadrilateral/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/72d7d668c1ef20aa5b1a7b3003b16e2b178f766aeae7a2a21e10345594ce2168.json"
+    },
+    {
+      "id": "f5a43e5c984ce98e2d8f1bd4ee76442cd6343acf7c1cf382d125b1f7b08fe247",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Segment/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f5a43e5c984ce98e2d8f1bd4ee76442cd6343acf7c1cf382d125b1f7b08fe247.json"
+    },
+    {
+      "id": "d2ab356faafb30122ed552940a49d45a51135acc406e0e605e838eb283724a97",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Segment/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d2ab356faafb30122ed552940a49d45a51135acc406e0e605e838eb283724a97.json"
+    },
+    {
+      "id": "b5b2dcec16c4c3be1bf724db450e95d9bfd13a793bb8fd3e233468efb4175910",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Segment/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b5b2dcec16c4c3be1bf724db450e95d9bfd13a793bb8fd3e233468efb4175910.json"
+    },
+    {
+      "id": "281659cd5e9bb68a4fe7e7a94a26b0e09f525111f5f7f9c8c122bbc478481ecc",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Segment/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/281659cd5e9bb68a4fe7e7a94a26b0e09f525111f5f7f9c8c122bbc478481ecc.json"
+    },
+    {
+      "id": "7b2d60da3bcf28e669318d0ecc9d5ea4431a7fc2801f0ab844fbe13b1356961b",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Segment/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7b2d60da3bcf28e669318d0ecc9d5ea4431a7fc2801f0ab844fbe13b1356961b.json"
+    },
+    {
+      "id": "de89569c81bf334721b554586b9c2d870ed5ace88681104b65c09b7176800131",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Segment/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/de89569c81bf334721b554586b9c2d870ed5ace88681104b65c09b7176800131.json"
+    },
+    {
+      "id": "bc17ecd6c39dc91241c3f13f65bef7e6c2a91e2c4364de9c53ffe7deb002f874",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Segment/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/bc17ecd6c39dc91241c3f13f65bef7e6c2a91e2c4364de9c53ffe7deb002f874.json"
+    },
+    {
+      "id": "528fa111bd5618681dd011791e5dafbad830fe96a23e229c2f28a15572377a40",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Segment/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/528fa111bd5618681dd011791e5dafbad830fe96a23e229c2f28a15572377a40.json"
+    },
+    {
+      "id": "c96de40b0391fc09f63365090755f0de8e0d6693803b36b81751e069c63c4051",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Segment/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c96de40b0391fc09f63365090755f0de8e0d6693803b36b81751e069c63c4051.json"
+    },
+    {
+      "id": "28170e0edeade7abc9a4e87160b4b1e3d61c1f0a7977914868ae7feb125267b6",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Tetrahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/28170e0edeade7abc9a4e87160b4b1e3d61c1f0a7977914868ae7feb125267b6.json"
+    },
+    {
+      "id": "c7b4b176a0a9edee13549ad31a056df17d9458bd12d157fe4503db25e4c7d58c",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Tetrahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c7b4b176a0a9edee13549ad31a056df17d9458bd12d157fe4503db25e4c7d58c.json"
+    },
+    {
+      "id": "bd5e490135f8b483ff9e46da0a47a6dee39fa7d48dad62e65b42d19b3859e152",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Tetrahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/bd5e490135f8b483ff9e46da0a47a6dee39fa7d48dad62e65b42d19b3859e152.json"
+    },
+    {
+      "id": "da341795ec2d4602905bf0802bceb2ad07b9ea7f18f628b3f854d517bb154c0c",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Tetrahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/da341795ec2d4602905bf0802bceb2ad07b9ea7f18f628b3f854d517bb154c0c.json"
+    },
+    {
+      "id": "2199a17c0afd9c15b83dc4384e02117c47060f856b3ed275c068eeccef89296f",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Tetrahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/2199a17c0afd9c15b83dc4384e02117c47060f856b3ed275c068eeccef89296f.json"
+    },
+    {
+      "id": "f7ba1b426a14dd5e60b13e815557b7b59d315279174a040d619b18ba244433b2",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Tetrahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f7ba1b426a14dd5e60b13e815557b7b59d315279174a040d619b18ba244433b2.json"
+    },
+    {
+      "id": "6912db54e57acc88e69838eb5af10b3759ba3f2c7652778f491cbbd9f0dd1678",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Tetrahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6912db54e57acc88e69838eb5af10b3759ba3f2c7652778f491cbbd9f0dd1678.json"
+    },
+    {
+      "id": "9d45bf3de5e2ade27195bc677c265c0d4b671c73093a0a9b60eebec82b65347e",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Tetrahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/9d45bf3de5e2ade27195bc677c265c0d4b671c73093a0a9b60eebec82b65347e.json"
+    },
+    {
+      "id": "34f2a9b778d6e1215bb7319c4911e144d0a17eedc8af6055caf992d8453b57de",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Tetrahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/34f2a9b778d6e1215bb7319c4911e144d0a17eedc8af6055caf992d8453b57de.json"
+    },
+    {
+      "id": "eafb683438822dea5215ab0a6702081cc97386d0f6be7d8b15aadb0d87d3ec11",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Triangle/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/eafb683438822dea5215ab0a6702081cc97386d0f6be7d8b15aadb0d87d3ec11.json"
+    },
+    {
+      "id": "e3dc37462199866e37f2d48d5d7150e30248de79ddaeb0ec821b6313f04c9a85",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Triangle/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e3dc37462199866e37f2d48d5d7150e30248de79ddaeb0ec821b6313f04c9a85.json"
+    },
+    {
+      "id": "9c370cfab9cc25e20be485f444c5e8da4b25f0e885b555621b573742d4c73a28",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Triangle/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/9c370cfab9cc25e20be485f444c5e8da4b25f0e885b555621b573742d4c73a28.json"
+    },
+    {
+      "id": "13016f34eeb9da395b0094ca1c8fc0be0353cb8b8d50cbfa2ccdd9d5393869cc",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Triangle/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/13016f34eeb9da395b0094ca1c8fc0be0353cb8b8d50cbfa2ccdd9d5393869cc.json"
+    },
+    {
+      "id": "01323e00feead5468dcbc816a0e77922c160cdaad50cd63962345939f191ba36",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Triangle/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/01323e00feead5468dcbc816a0e77922c160cdaad50cd63962345939f191ba36.json"
+    },
+    {
+      "id": "e4ce537a6830b25c5e1401d70ba203515103337b49bdf0d176dbb5da1ca3f5c0",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Triangle/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e4ce537a6830b25c5e1401d70ba203515103337b49bdf0d176dbb5da1ca3f5c0.json"
+    },
+    {
+      "id": "4e712cb6465ecb28b8e2d6e22065951f306bbd5e14168b84de0f0e77e6a4f364",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Triangle/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4e712cb6465ecb28b8e2d6e22065951f306bbd5e14168b84de0f0e77e6a4f364.json"
+    },
+    {
+      "id": "3d5ab3d1ecd1f26ca02a5736c1ca7a443a7fadfe8ece05ab4927c343dfb19c18",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Triangle/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3d5ab3d1ecd1f26ca02a5736c1ca7a443a7fadfe8ece05ab4927c343dfb19c18.json"
+    },
+    {
+      "id": "a1cd39a7cecb74b30ffc7c0c83f9f73672b09b6fa3b0889ac2959ae215102c07",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Triangle/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a1cd39a7cecb74b30ffc7c0c83f9f73672b09b6fa3b0889ac2959ae215102c07.json"
+    },
+    {
+      "id": "dc137d52ebba9a096a8da09fed9c5cfb019caeaf6c35e10947e69bd7dfd2cffc",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Wedge/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/dc137d52ebba9a096a8da09fed9c5cfb019caeaf6c35e10947e69bd7dfd2cffc.json"
+    },
+    {
+      "id": "b0a166af7b5ebc88b3f9c6e696240c02b8c2a2ef6fae8b33b3b704e49f9361df",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Wedge/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b0a166af7b5ebc88b3f9c6e696240c02b8c2a2ef6fae8b33b3b704e49f9361df.json"
+    },
+    {
+      "id": "023fbb2c75e7f986f046a403f422828092d79b5cd9163b36c4ccc00d5b312cbe",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Wedge/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/023fbb2c75e7f986f046a403f422828092d79b5cd9163b36c4ccc00d5b312cbe.json"
+    },
+    {
+      "id": "3c36200a481d8f0ae559400dddd6f44091ec2893b82e0fe8c9da6d4b8fb84d7f",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Wedge/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3c36200a481d8f0ae559400dddd6f44091ec2893b82e0fe8c9da6d4b8fb84d7f.json"
+    },
+    {
+      "id": "483ae5e0cc941de01a8ab614e74505dc65baa36ede66ba863876bb2e51853d4b",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Wedge/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/483ae5e0cc941de01a8ab614e74505dc65baa36ede66ba863876bb2e51853d4b.json"
+    },
+    {
+      "id": "03e4aea778ceeb8b23dbb52f25461f2862a4dd934d3e9176b42957d60d7cee0e",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Wedge/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/03e4aea778ceeb8b23dbb52f25461f2862a4dd934d3e9176b42957d60d7cee0e.json"
+    },
+    {
+      "id": "12e020790daf2a49197715942f701cb0c0134233a65a4a5c29e19b5646592df7",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Wedge/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/12e020790daf2a49197715942f701cb0c0134233a65a4a5c29e19b5646592df7.json"
+    },
+    {
+      "id": "19717a1afdea0ed7ae3a079941d8f523d52daa1663eae8209065e673022ec598",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Wedge/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/19717a1afdea0ed7ae3a079941d8f523d52daa1663eae8209065e673022ec598.json"
+    },
+    {
+      "id": "a361d18a4738d92aed72eab120b560f5171488e59f74dece41e52f9932d35042",
+      "name": "Convection/Assembly/H1/P1/ComplexField/ComplexDirection/Wedge/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a361d18a4738d92aed72eab120b560f5171488e59f74dece41e52f9932d35042.json"
+    },
+    {
+      "id": "700ac88cb87ff18daedf82320d34f27a19bfe64c9416c2e2ce2a7d1685d1eaee",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Hexahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/700ac88cb87ff18daedf82320d34f27a19bfe64c9416c2e2ce2a7d1685d1eaee.json"
+    },
+    {
+      "id": "ccd803522ab6df96f91e9f9df3da5cb3e6a29e17979e92e50b6382b5a175ceea",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Hexahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ccd803522ab6df96f91e9f9df3da5cb3e6a29e17979e92e50b6382b5a175ceea.json"
+    },
+    {
+      "id": "b6bc750595960c2d0d62613eec8ab542f64f3ea4f526d208ad923a2f6a4951f1",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Hexahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b6bc750595960c2d0d62613eec8ab542f64f3ea4f526d208ad923a2f6a4951f1.json"
+    },
+    {
+      "id": "83a097166e8801f45af81f1e8411777651c70d62a99a0f9e29284332d19bf1d1",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Hexahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/83a097166e8801f45af81f1e8411777651c70d62a99a0f9e29284332d19bf1d1.json"
+    },
+    {
+      "id": "55af59a446606e4f3ca4c68e6df1a1e377683c2069d7e669b45345f5eb07ffcb",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Hexahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/55af59a446606e4f3ca4c68e6df1a1e377683c2069d7e669b45345f5eb07ffcb.json"
+    },
+    {
+      "id": "97b985c44d04d25ede9bd3c00fa49343a3fe502a2d752d746c4ad421897295ab",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Hexahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/97b985c44d04d25ede9bd3c00fa49343a3fe502a2d752d746c4ad421897295ab.json"
+    },
+    {
+      "id": "a1cb3bad9e13af0943ece78ae472a22a0226ea1cb60108883a1d5411c18f3450",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Hexahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a1cb3bad9e13af0943ece78ae472a22a0226ea1cb60108883a1d5411c18f3450.json"
+    },
+    {
+      "id": "72f51b28224e801f5555cad46ba6a4f57c36684127f83b21e7accffab423ed9f",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Hexahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/72f51b28224e801f5555cad46ba6a4f57c36684127f83b21e7accffab423ed9f.json"
+    },
+    {
+      "id": "b5db5093a5852de41368f28c43e6f18e788bddb3808eb1ef5d4ba4fd375e2692",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Hexahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b5db5093a5852de41368f28c43e6f18e788bddb3808eb1ef5d4ba4fd375e2692.json"
+    },
+    {
+      "id": "77f180bc1f48a8311c37cd4cca8a00bcad1029896b0b8d5acebc715f92368fda",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Pyramid/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/77f180bc1f48a8311c37cd4cca8a00bcad1029896b0b8d5acebc715f92368fda.json"
+    },
+    {
+      "id": "c456a50376484a8f90e2df9e6effdc464a387567f09f085ce34e305929ea73fa",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Pyramid/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c456a50376484a8f90e2df9e6effdc464a387567f09f085ce34e305929ea73fa.json"
+    },
+    {
+      "id": "81dc4d50d28ed8734d26013a7b5c20e088f7f19e9e13f4746e989c1a32056fe9",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Pyramid/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/81dc4d50d28ed8734d26013a7b5c20e088f7f19e9e13f4746e989c1a32056fe9.json"
+    },
+    {
+      "id": "b9243554c0a1701ef185de2bda6a87325a7d05763582186d8f078e4d8700c94f",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Pyramid/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b9243554c0a1701ef185de2bda6a87325a7d05763582186d8f078e4d8700c94f.json"
+    },
+    {
+      "id": "0c35621a42321cdac5089465e5945e1cbf45aae36fd3917124eb8ad69701c048",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Pyramid/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0c35621a42321cdac5089465e5945e1cbf45aae36fd3917124eb8ad69701c048.json"
+    },
+    {
+      "id": "f27102f4db678af74a8f5fd732cf63f7e002bccb00b7b511ff9f2e484622adf3",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Pyramid/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f27102f4db678af74a8f5fd732cf63f7e002bccb00b7b511ff9f2e484622adf3.json"
+    },
+    {
+      "id": "0e9d59505cd1ab764468853a0938f695dd726166f736724e9fddef0adf4732e9",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Pyramid/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0e9d59505cd1ab764468853a0938f695dd726166f736724e9fddef0adf4732e9.json"
+    },
+    {
+      "id": "0ade94fc2a3a856d0cc6474aa60e31b8f58feeace8b5c4e262c6d05a636fa91d",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Pyramid/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0ade94fc2a3a856d0cc6474aa60e31b8f58feeace8b5c4e262c6d05a636fa91d.json"
+    },
+    {
+      "id": "fff9778ab316af8eac0fece15cc382b779db258a9bf1dc14074c191a5d829afe",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Pyramid/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fff9778ab316af8eac0fece15cc382b779db258a9bf1dc14074c191a5d829afe.json"
+    },
+    {
+      "id": "77087e362e886e9f3e75178692fef1ececf6a5038ae0e05a75c3367a71800597",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Quadrilateral/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/77087e362e886e9f3e75178692fef1ececf6a5038ae0e05a75c3367a71800597.json"
+    },
+    {
+      "id": "ad167510ec3b105c544113d5352c10c7741de7ea2efd8b70bd7c50566b819def",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Quadrilateral/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ad167510ec3b105c544113d5352c10c7741de7ea2efd8b70bd7c50566b819def.json"
+    },
+    {
+      "id": "7c33f86b178c9b2e05587b414dd1f6c62d8ef582d7b41baa16e4f722be9050ee",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Quadrilateral/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7c33f86b178c9b2e05587b414dd1f6c62d8ef582d7b41baa16e4f722be9050ee.json"
+    },
+    {
+      "id": "79fe0324fcd586b36593a35e14cd9144f7e076a48e4e56204087ad5e810241da",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Quadrilateral/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/79fe0324fcd586b36593a35e14cd9144f7e076a48e4e56204087ad5e810241da.json"
+    },
+    {
+      "id": "48471c87c7c9449b30c8a93bde373684d5b0c6da6a6155af472a174ab0a12e72",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Quadrilateral/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/48471c87c7c9449b30c8a93bde373684d5b0c6da6a6155af472a174ab0a12e72.json"
+    },
+    {
+      "id": "057379975b9908d71cc668d72af018f43b1a5b51ecc1b702d182add817433744",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Quadrilateral/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/057379975b9908d71cc668d72af018f43b1a5b51ecc1b702d182add817433744.json"
+    },
+    {
+      "id": "254b2a48c5dd614b5103da1ee595d4fbe6372aaba4021c590c78ee9113a674bd",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Quadrilateral/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/254b2a48c5dd614b5103da1ee595d4fbe6372aaba4021c590c78ee9113a674bd.json"
+    },
+    {
+      "id": "82c5ba208fc70cbdd6c8d721a2fc666c43150700bed6485c544ceffb9a0963f0",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Quadrilateral/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/82c5ba208fc70cbdd6c8d721a2fc666c43150700bed6485c544ceffb9a0963f0.json"
+    },
+    {
+      "id": "969681e315be757f7cc22fb56df66f5595c797a9e1f7bbc708fb930dc22eb105",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Quadrilateral/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/969681e315be757f7cc22fb56df66f5595c797a9e1f7bbc708fb930dc22eb105.json"
+    },
+    {
+      "id": "1e1fe118290467d7bdc77bdb9d39258af39557a648ab0db6348787911067c3b4",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Segment/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1e1fe118290467d7bdc77bdb9d39258af39557a648ab0db6348787911067c3b4.json"
+    },
+    {
+      "id": "18c07877d9a122cbdd62829cdb429171959d4d90a9ceb9e06bcbeafc8178c864",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Segment/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/18c07877d9a122cbdd62829cdb429171959d4d90a9ceb9e06bcbeafc8178c864.json"
+    },
+    {
+      "id": "6addb4c4672f2929d9ff40879e32073d9f2bdc5eda0a1fc6d94552402c94766e",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Segment/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6addb4c4672f2929d9ff40879e32073d9f2bdc5eda0a1fc6d94552402c94766e.json"
+    },
+    {
+      "id": "32617c349312f208c5cd07fb70d6e1ef19b2f53addcd66edf86ccced44fec1fe",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Segment/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/32617c349312f208c5cd07fb70d6e1ef19b2f53addcd66edf86ccced44fec1fe.json"
+    },
+    {
+      "id": "e42856cc109442852ce94549b29d3a29685318bf9091205e9ae65e2d82861f4f",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Segment/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e42856cc109442852ce94549b29d3a29685318bf9091205e9ae65e2d82861f4f.json"
+    },
+    {
+      "id": "3795acfb0529bacf045e303eb8ec37576e77ec01c0bcbfdcdf2d07cd77413319",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Segment/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3795acfb0529bacf045e303eb8ec37576e77ec01c0bcbfdcdf2d07cd77413319.json"
+    },
+    {
+      "id": "82d9ffe6cfc8c80fe19932001e3977d730d048a88baa160e3690e24166c2dc17",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Segment/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/82d9ffe6cfc8c80fe19932001e3977d730d048a88baa160e3690e24166c2dc17.json"
+    },
+    {
+      "id": "49316cef224bd47593ce4090f717c3f16fd071f97ae54a52d9eea4d75dde704f",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Segment/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/49316cef224bd47593ce4090f717c3f16fd071f97ae54a52d9eea4d75dde704f.json"
+    },
+    {
+      "id": "cbe897f01571047f3ca8d9d44e53026d8eabff8e0783651be13811d3acf6cd99",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Segment/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/cbe897f01571047f3ca8d9d44e53026d8eabff8e0783651be13811d3acf6cd99.json"
+    },
+    {
+      "id": "533c3ae9f7075df8e116b72d3781726ba3d59179326623ae97a480869c08949c",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Tetrahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/533c3ae9f7075df8e116b72d3781726ba3d59179326623ae97a480869c08949c.json"
+    },
+    {
+      "id": "5d4ae05009259b5555d33b44e5f43fbaa9a555150f90baacd5caed15f2ed97df",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Tetrahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5d4ae05009259b5555d33b44e5f43fbaa9a555150f90baacd5caed15f2ed97df.json"
+    },
+    {
+      "id": "5e3c0df19125d59546155add411f7c76c0a6c2c6c50fa994f22f01816735571b",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Tetrahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5e3c0df19125d59546155add411f7c76c0a6c2c6c50fa994f22f01816735571b.json"
+    },
+    {
+      "id": "b3200f186808cb6badd90574620c2df34a024e4b7ca115398d9176dad02eea94",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Tetrahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b3200f186808cb6badd90574620c2df34a024e4b7ca115398d9176dad02eea94.json"
+    },
+    {
+      "id": "4e77a1c8ca8e89ca118f3de85b9a8b1e78928083cd1bf98f36be2797d346f7f5",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Tetrahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4e77a1c8ca8e89ca118f3de85b9a8b1e78928083cd1bf98f36be2797d346f7f5.json"
+    },
+    {
+      "id": "304bdd62c4a17d9458fca876bccba343ef8acb9aab95cf56cc82b12e023c5bcb",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Tetrahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/304bdd62c4a17d9458fca876bccba343ef8acb9aab95cf56cc82b12e023c5bcb.json"
+    },
+    {
+      "id": "e696b7dfca523e91f913fb164cba0ff77ddf7f38da9187467d6555c48bf7180f",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Tetrahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e696b7dfca523e91f913fb164cba0ff77ddf7f38da9187467d6555c48bf7180f.json"
+    },
+    {
+      "id": "fcf0b3237c01da75c5a223afa29627e0e587a78d6c6bb74ab34e758466afbe3a",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Tetrahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fcf0b3237c01da75c5a223afa29627e0e587a78d6c6bb74ab34e758466afbe3a.json"
+    },
+    {
+      "id": "5cbd03d32813857406ab3ec917fc0cf908278aca6f921cf9753e7a392cd6519b",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Tetrahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5cbd03d32813857406ab3ec917fc0cf908278aca6f921cf9753e7a392cd6519b.json"
+    },
+    {
+      "id": "fdd3add82727abc55e8b8f1ef78ab8e2213ae66212a3821279c476ac709d43f4",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Triangle/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fdd3add82727abc55e8b8f1ef78ab8e2213ae66212a3821279c476ac709d43f4.json"
+    },
+    {
+      "id": "0000531d08f18aa26c84225973973504db08fe1faa21ed749a4e3496ceb48933",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Triangle/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0000531d08f18aa26c84225973973504db08fe1faa21ed749a4e3496ceb48933.json"
+    },
+    {
+      "id": "4ba0cf16424a20ed661a799727e81fc697fc7351ab2668dd95d2b4e2131f87ce",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Triangle/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4ba0cf16424a20ed661a799727e81fc697fc7351ab2668dd95d2b4e2131f87ce.json"
+    },
+    {
+      "id": "9776c070d7686bbfe3d152903048f437ff1fc8002cce76cca3bfa292738ae003",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Triangle/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/9776c070d7686bbfe3d152903048f437ff1fc8002cce76cca3bfa292738ae003.json"
+    },
+    {
+      "id": "ffe386e0aae131c3c9d8a17074f659ebd12b6de50f171aaf801478937c14fffa",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Triangle/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ffe386e0aae131c3c9d8a17074f659ebd12b6de50f171aaf801478937c14fffa.json"
+    },
+    {
+      "id": "10f2a666f350683d66a8900c055e84c5342d3d5c17d1be8e7330fbab08fa4ebc",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Triangle/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/10f2a666f350683d66a8900c055e84c5342d3d5c17d1be8e7330fbab08fa4ebc.json"
+    },
+    {
+      "id": "93e5be164b6a471e699511cb97143f54c6575dbd3cb6c2e4c5e6abe38fb619cf",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Triangle/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/93e5be164b6a471e699511cb97143f54c6575dbd3cb6c2e4c5e6abe38fb619cf.json"
+    },
+    {
+      "id": "539399b4e9a57116ce08e6eb74248ca96131b06be0692c36d12e3dffc5d1a242",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Triangle/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/539399b4e9a57116ce08e6eb74248ca96131b06be0692c36d12e3dffc5d1a242.json"
+    },
+    {
+      "id": "512da6a735a76452402a087980c4943809537af900cd50c1e62ae7f7a42a12f9",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Triangle/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/512da6a735a76452402a087980c4943809537af900cd50c1e62ae7f7a42a12f9.json"
+    },
+    {
+      "id": "4bffa914de99cbe932d83537693fcea792c5f47df1d60d82b476af037e9645f6",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Wedge/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4bffa914de99cbe932d83537693fcea792c5f47df1d60d82b476af037e9645f6.json"
+    },
+    {
+      "id": "dc179acf42d487deeda51a62754387d26f1a6e4afe1c5d1dba563127e37c9a06",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Wedge/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/dc179acf42d487deeda51a62754387d26f1a6e4afe1c5d1dba563127e37c9a06.json"
+    },
+    {
+      "id": "2d8cfbb01f382f5a0afdd696515c44506b02894b93b6d1856047b91ecc11d48d",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Wedge/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/2d8cfbb01f382f5a0afdd696515c44506b02894b93b6d1856047b91ecc11d48d.json"
+    },
+    {
+      "id": "04d0613d350d5ad35778be4a56bef1fc8123585d7dff38b19513c87a2f85bb18",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Wedge/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/04d0613d350d5ad35778be4a56bef1fc8123585d7dff38b19513c87a2f85bb18.json"
+    },
+    {
+      "id": "aaf383f3a21f70a4c4ea6a550566e9f7a224a9b931afb156f5b3f814f112f1d0",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Wedge/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/aaf383f3a21f70a4c4ea6a550566e9f7a224a9b931afb156f5b3f814f112f1d0.json"
+    },
+    {
+      "id": "63ebf58b5135f2478bcaacfa45b3fea73722caf2de9a5bc7838fc5828812acb6",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Wedge/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/63ebf58b5135f2478bcaacfa45b3fea73722caf2de9a5bc7838fc5828812acb6.json"
+    },
+    {
+      "id": "72d887ad9c8346a78f8b11a9d3d0f340bcf2f25a111d8d69ef1ab27a30cc63a7",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Wedge/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/72d887ad9c8346a78f8b11a9d3d0f340bcf2f25a111d8d69ef1ab27a30cc63a7.json"
+    },
+    {
+      "id": "d1eac110d21d81fbf590accdf3ba8d50c1daad9d7a0130e814ae05b16980f3e2",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Wedge/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d1eac110d21d81fbf590accdf3ba8d50c1daad9d7a0130e814ae05b16980f3e2.json"
+    },
+    {
+      "id": "666588ac387ebec8d60764aec9982a9e40e1901a7703719b2ac1c900c861328e",
+      "name": "Convection/Assembly/H1/P1/ComplexField/RealDirection/Wedge/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/666588ac387ebec8d60764aec9982a9e40e1901a7703719b2ac1c900c861328e.json"
+    },
+    {
+      "id": "04c0d9106fc24ddb18bbdb43c51d84eaa6d9f34d3eb4f0de97762a6b309609d7",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Hexahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/04c0d9106fc24ddb18bbdb43c51d84eaa6d9f34d3eb4f0de97762a6b309609d7.json"
+    },
+    {
+      "id": "5b3c2ef984e2c10c303a729cc35f8df2388a6d951b659762acfaf81cc385b89c",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Hexahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5b3c2ef984e2c10c303a729cc35f8df2388a6d951b659762acfaf81cc385b89c.json"
+    },
+    {
+      "id": "d3b7eedcc142034bcb54d397d589ea3a4e9e2f90969b343dc2435b5ee45503c5",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Hexahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d3b7eedcc142034bcb54d397d589ea3a4e9e2f90969b343dc2435b5ee45503c5.json"
+    },
+    {
+      "id": "9016c3648d1d59b32c9cff1d7b483b7da7b368ae6e35808980ae3753ba77d63f",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Hexahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/9016c3648d1d59b32c9cff1d7b483b7da7b368ae6e35808980ae3753ba77d63f.json"
+    },
+    {
+      "id": "56be95e248fcafa558d5206be8934fd109ee0ffa8ec94aa04cf90b752f29bf29",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Hexahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/56be95e248fcafa558d5206be8934fd109ee0ffa8ec94aa04cf90b752f29bf29.json"
+    },
+    {
+      "id": "6c9adbe19d9ebaec18fbb94401a93ac1c42866e31db5e3f9023603a23f0f4b3e",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Hexahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6c9adbe19d9ebaec18fbb94401a93ac1c42866e31db5e3f9023603a23f0f4b3e.json"
+    },
+    {
+      "id": "dc417bc009d63c420db75a8d1b73467581509557900c7972d82a498f442be56b",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Hexahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/dc417bc009d63c420db75a8d1b73467581509557900c7972d82a498f442be56b.json"
+    },
+    {
+      "id": "b013459a51ab2118dab5664df3f473ee657aa2eec0f4bd14e435e2765becab8c",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Hexahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b013459a51ab2118dab5664df3f473ee657aa2eec0f4bd14e435e2765becab8c.json"
+    },
+    {
+      "id": "615ed9edcd2bf39cde676e15b559dc96c81c2213ca1fd3af3bacf76afa6fc0ba",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Hexahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/615ed9edcd2bf39cde676e15b559dc96c81c2213ca1fd3af3bacf76afa6fc0ba.json"
+    },
+    {
+      "id": "cfc6da20f552c68cef3dbb35047f52d152e58e546092d7db4e1a8f66d086475f",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Pyramid/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/cfc6da20f552c68cef3dbb35047f52d152e58e546092d7db4e1a8f66d086475f.json"
+    },
+    {
+      "id": "ed034ee1b585b7fb9973e8314570c251564c349645fbae2a3008076914a7aeeb",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Pyramid/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ed034ee1b585b7fb9973e8314570c251564c349645fbae2a3008076914a7aeeb.json"
+    },
+    {
+      "id": "f34ef0ad8a9ea21eef578aad2220d15a29c8d7a66c6946e9215d587328d88132",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Pyramid/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f34ef0ad8a9ea21eef578aad2220d15a29c8d7a66c6946e9215d587328d88132.json"
+    },
+    {
+      "id": "d13ba9f019901815bfe8af4a227e5dc9088e418455d8c43e69647ee79b0bbce4",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Pyramid/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d13ba9f019901815bfe8af4a227e5dc9088e418455d8c43e69647ee79b0bbce4.json"
+    },
+    {
+      "id": "2d18b26ae66d5699a55eb0750a1f8b2df2959329f1ca23116fb438251b434c9d",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Pyramid/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/2d18b26ae66d5699a55eb0750a1f8b2df2959329f1ca23116fb438251b434c9d.json"
+    },
+    {
+      "id": "057ba0d8a42aa69b989503545290672766acd7ca3ba7779f647d3123e82eff9e",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Pyramid/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/057ba0d8a42aa69b989503545290672766acd7ca3ba7779f647d3123e82eff9e.json"
+    },
+    {
+      "id": "711b3aea025a8df80dda6ce1ae6c4f0992e87080cbf568c9c3b9aa569ba7d75f",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Pyramid/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/711b3aea025a8df80dda6ce1ae6c4f0992e87080cbf568c9c3b9aa569ba7d75f.json"
+    },
+    {
+      "id": "d0260512cb71a194c6745fd818628a4b2658bf5fa139c8e820698e94d4aa32ed",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Pyramid/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d0260512cb71a194c6745fd818628a4b2658bf5fa139c8e820698e94d4aa32ed.json"
+    },
+    {
+      "id": "71e1ae56d93745c413c80739ea2c9f767a61da869b78b27bdb9ab8892da59663",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Pyramid/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/71e1ae56d93745c413c80739ea2c9f767a61da869b78b27bdb9ab8892da59663.json"
+    },
+    {
+      "id": "420f56cd31566b8db05a41551163e0fd382af0ac39d5c0bf0b7491664d1a8894",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Quadrilateral/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/420f56cd31566b8db05a41551163e0fd382af0ac39d5c0bf0b7491664d1a8894.json"
+    },
+    {
+      "id": "080ef19e08c5916550f23b6312872af750b993ca9d1d53bfb90fe6aeeaf3d54d",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Quadrilateral/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/080ef19e08c5916550f23b6312872af750b993ca9d1d53bfb90fe6aeeaf3d54d.json"
+    },
+    {
+      "id": "94f408df8973156f1e6e9e69ef600c9055719ee75e159af23c9f0c51b99997f5",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Quadrilateral/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/94f408df8973156f1e6e9e69ef600c9055719ee75e159af23c9f0c51b99997f5.json"
+    },
+    {
+      "id": "e1b578db9473480ad80e97614c135a1d07c34e8a2bfb09874571382346a4e8cf",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Quadrilateral/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e1b578db9473480ad80e97614c135a1d07c34e8a2bfb09874571382346a4e8cf.json"
+    },
+    {
+      "id": "8226d4d15a134fe5c8e80d4bf44a04373281dd85d6dc8bb3754d2ebe4dd01abe",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Quadrilateral/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8226d4d15a134fe5c8e80d4bf44a04373281dd85d6dc8bb3754d2ebe4dd01abe.json"
+    },
+    {
+      "id": "6673a12a7b9d9575464a62c6c020d9a6a5b17b9123ba45e1dba924328c6165ca",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Quadrilateral/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6673a12a7b9d9575464a62c6c020d9a6a5b17b9123ba45e1dba924328c6165ca.json"
+    },
+    {
+      "id": "bb306792ae11eea99c5b21c773a2b6a31f1d99a9aab1d42afa2e814bc1670e6c",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Quadrilateral/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/bb306792ae11eea99c5b21c773a2b6a31f1d99a9aab1d42afa2e814bc1670e6c.json"
+    },
+    {
+      "id": "704825592c7501138a6071ba9a69009bc9d095c2707f6e48b90fb91a66e68f71",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Quadrilateral/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/704825592c7501138a6071ba9a69009bc9d095c2707f6e48b90fb91a66e68f71.json"
+    },
+    {
+      "id": "7738602126a20bda82f4e93ad10d7b1733865cbe0e37d07747fdaaec495493e4",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Quadrilateral/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7738602126a20bda82f4e93ad10d7b1733865cbe0e37d07747fdaaec495493e4.json"
+    },
+    {
+      "id": "1e19c62f5b75f4969b7a580d3feb39086bfc4d569272eb60f01ce9708da5a907",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Segment/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1e19c62f5b75f4969b7a580d3feb39086bfc4d569272eb60f01ce9708da5a907.json"
+    },
+    {
+      "id": "ea1b2258818a1fe0dc0f02a03a44ba7ba2e5f8dcb7fd695a31b4c246fe38750a",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Segment/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ea1b2258818a1fe0dc0f02a03a44ba7ba2e5f8dcb7fd695a31b4c246fe38750a.json"
+    },
+    {
+      "id": "7f30f97e9fcb748cd17e1243f9674f235c8f7507c6848e0cda56c05e73616b87",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Segment/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7f30f97e9fcb748cd17e1243f9674f235c8f7507c6848e0cda56c05e73616b87.json"
+    },
+    {
+      "id": "6ebb6db3ab2b40dc9d4ff2d660c8ab7b533a5a344c92631967d37b9bc24bc942",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Segment/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6ebb6db3ab2b40dc9d4ff2d660c8ab7b533a5a344c92631967d37b9bc24bc942.json"
+    },
+    {
+      "id": "d7f7b012df67e2e384398bc857bc7c807f5ff7472a7742a0fa1196d9c7c9ffec",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Segment/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d7f7b012df67e2e384398bc857bc7c807f5ff7472a7742a0fa1196d9c7c9ffec.json"
+    },
+    {
+      "id": "0ae6f23fa2fce4e5f2af280aa16185b2aca46f0c85d814e688d07e1b76d6a1c3",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Segment/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0ae6f23fa2fce4e5f2af280aa16185b2aca46f0c85d814e688d07e1b76d6a1c3.json"
+    },
+    {
+      "id": "b2db313d93fb1e1f2d0de12d78fb237185540b4df8483cfc47a8e17102f4ca32",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Segment/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b2db313d93fb1e1f2d0de12d78fb237185540b4df8483cfc47a8e17102f4ca32.json"
+    },
+    {
+      "id": "8de6ea04c4d0ec0117ce56e87f09dd366263059def79a468828c419a4b5c8f02",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Segment/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8de6ea04c4d0ec0117ce56e87f09dd366263059def79a468828c419a4b5c8f02.json"
+    },
+    {
+      "id": "66be5f9f9e2fc3b6ff47c61867b731b4b7e98872f0938d69e113a1425d4c7e9d",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Segment/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/66be5f9f9e2fc3b6ff47c61867b731b4b7e98872f0938d69e113a1425d4c7e9d.json"
+    },
+    {
+      "id": "daab4a185864991b587c516ed0d1ad3e87f9595713f5378a703ccbf29b8b148d",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Tetrahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/daab4a185864991b587c516ed0d1ad3e87f9595713f5378a703ccbf29b8b148d.json"
+    },
+    {
+      "id": "3c01cf72b66c5bf5086ed1d69d9b05cabd50565dd2b7597991671b407fce1158",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Tetrahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3c01cf72b66c5bf5086ed1d69d9b05cabd50565dd2b7597991671b407fce1158.json"
+    },
+    {
+      "id": "53411f8323943bdd554b88e81176b307390606f22ad4d0bc71f15206f437e881",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Tetrahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/53411f8323943bdd554b88e81176b307390606f22ad4d0bc71f15206f437e881.json"
+    },
+    {
+      "id": "7b1856072749c31363d79a440e9e9fc9a34be6dbd52570cd615da426f891d89e",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Tetrahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7b1856072749c31363d79a440e9e9fc9a34be6dbd52570cd615da426f891d89e.json"
+    },
+    {
+      "id": "c1aff4030f3c62e6f37ae5d240c130dfe275a47b1b489e37544d03c661a9e44b",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Tetrahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c1aff4030f3c62e6f37ae5d240c130dfe275a47b1b489e37544d03c661a9e44b.json"
+    },
+    {
+      "id": "70605bc40123b6c1bf576148681a92ab53189a3bb84362d69fbfc36dcd43ecd7",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Tetrahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/70605bc40123b6c1bf576148681a92ab53189a3bb84362d69fbfc36dcd43ecd7.json"
+    },
+    {
+      "id": "f34fec656f31334c40085a8262f8a76ad2db9c915cfebf0dc6ad618d33f3b3ef",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Tetrahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f34fec656f31334c40085a8262f8a76ad2db9c915cfebf0dc6ad618d33f3b3ef.json"
+    },
+    {
+      "id": "c3d77e142b47dfd93b9648ab5ebde66b343215313826f1e8d0e319b12a4c501a",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Tetrahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c3d77e142b47dfd93b9648ab5ebde66b343215313826f1e8d0e319b12a4c501a.json"
+    },
+    {
+      "id": "05048f24c25900baa1c60b256991bc4caf58167317954965bfe1bfa223684937",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Tetrahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/05048f24c25900baa1c60b256991bc4caf58167317954965bfe1bfa223684937.json"
+    },
+    {
+      "id": "d6668b137c1aa1be200ff8939ea9f3cd14cd6df870fc8d654cda90ee644ff344",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Triangle/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d6668b137c1aa1be200ff8939ea9f3cd14cd6df870fc8d654cda90ee644ff344.json"
+    },
+    {
+      "id": "90e4efbdf915201780c9e6c2668ebdaae998358cf305f459d57e048d773a0344",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Triangle/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/90e4efbdf915201780c9e6c2668ebdaae998358cf305f459d57e048d773a0344.json"
+    },
+    {
+      "id": "d0956834976c35beb3b950088d196279d7fc5c8396d3933b467cb3720de0d143",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Triangle/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d0956834976c35beb3b950088d196279d7fc5c8396d3933b467cb3720de0d143.json"
+    },
+    {
+      "id": "73be16fe8a32eb4fcbd94fc3e17150f99e72c880548406a3bc44b9c220ac1d25",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Triangle/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/73be16fe8a32eb4fcbd94fc3e17150f99e72c880548406a3bc44b9c220ac1d25.json"
+    },
+    {
+      "id": "a519cdeea479d97559da5987430b7b4a9b325d279786baabb512d390b068dc83",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Triangle/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a519cdeea479d97559da5987430b7b4a9b325d279786baabb512d390b068dc83.json"
+    },
+    {
+      "id": "720df10e073ac10ead20be787ba95250b4d67fbb5e4298740a93cf0b1a3b98cc",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Triangle/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/720df10e073ac10ead20be787ba95250b4d67fbb5e4298740a93cf0b1a3b98cc.json"
+    },
+    {
+      "id": "171c0b07d40146110853fac7f97af047114985ed442da93c4baa5a51cd4551fa",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Triangle/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/171c0b07d40146110853fac7f97af047114985ed442da93c4baa5a51cd4551fa.json"
+    },
+    {
+      "id": "dfb47b931137b58ccdb03a811bf499d15f13907363d333210541054bd41e6a56",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Triangle/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/dfb47b931137b58ccdb03a811bf499d15f13907363d333210541054bd41e6a56.json"
+    },
+    {
+      "id": "c2e95b2d57ffe57d0abdee6e386f022d5c3db2f5e3e06da5613e3d2817e32988",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Triangle/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c2e95b2d57ffe57d0abdee6e386f022d5c3db2f5e3e06da5613e3d2817e32988.json"
+    },
+    {
+      "id": "3c5fd4c783ccb7a28184ad9df596cdb4fde7f1f205805a0e67a8e7445435235a",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Wedge/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3c5fd4c783ccb7a28184ad9df596cdb4fde7f1f205805a0e67a8e7445435235a.json"
+    },
+    {
+      "id": "ad61ed7b58c9cfeade807a2a591022be3c693e81b92457d5993fa0274da78aba",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Wedge/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ad61ed7b58c9cfeade807a2a591022be3c693e81b92457d5993fa0274da78aba.json"
+    },
+    {
+      "id": "381bb27f74250b81f1f809c3ef88d035afb993ae121d415d419b4d95d01e0d41",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Wedge/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/381bb27f74250b81f1f809c3ef88d035afb993ae121d415d419b4d95d01e0d41.json"
+    },
+    {
+      "id": "e41fb2cd84f48986379f29d430acfe8ed50621550907b9c88d9be5c8c90aea75",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Wedge/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e41fb2cd84f48986379f29d430acfe8ed50621550907b9c88d9be5c8c90aea75.json"
+    },
+    {
+      "id": "9f447cf4c878c99e793895d465ff04b236a6d45b23f52303f763defaa36e75a4",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Wedge/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/9f447cf4c878c99e793895d465ff04b236a6d45b23f52303f763defaa36e75a4.json"
+    },
+    {
+      "id": "25d68f499d16f2a1eba7246f35970f85683e37ab358327b97adaa427e616791f",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Wedge/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/25d68f499d16f2a1eba7246f35970f85683e37ab358327b97adaa427e616791f.json"
+    },
+    {
+      "id": "18afea2093733d34b1079c9f1ae3d2f78acd7bfca5e21fbf3f90aea78e18ceb4",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Wedge/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/18afea2093733d34b1079c9f1ae3d2f78acd7bfca5e21fbf3f90aea78e18ceb4.json"
+    },
+    {
+      "id": "4575924c82d5c96b176da6f6ea3c6d25212c551c85fc6817bec6624f2b697e0e",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Wedge/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4575924c82d5c96b176da6f6ea3c6d25212c551c85fc6817bec6624f2b697e0e.json"
+    },
+    {
+      "id": "0766481dbf43c24201c5b6a5147f81cbbb9dc78974f51fdd129f619f0a9929f2",
+      "name": "Convection/Assembly/H1/P1/RealField/RealDirection/Wedge/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0766481dbf43c24201c5b6a5147f81cbbb9dc78974f51fdd129f619f0a9929f2.json"
+    },
+    {
+      "id": "b6722d4fbd848051b05182b523ffd1972ed26b3d4dd98012084e53dd042bb2b6",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Hexahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b6722d4fbd848051b05182b523ffd1972ed26b3d4dd98012084e53dd042bb2b6.json"
+    },
+    {
+      "id": "b89ebefc79dd123138a40605da0082758eed7b361e37fd0a28873b958596bb23",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Hexahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b89ebefc79dd123138a40605da0082758eed7b361e37fd0a28873b958596bb23.json"
+    },
+    {
+      "id": "50295316f6b778f5c8c218b6d720ca0bcdb1f81a78c6ec80480514e6497362c8",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Hexahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/50295316f6b778f5c8c218b6d720ca0bcdb1f81a78c6ec80480514e6497362c8.json"
+    },
+    {
+      "id": "ef4a64f667e7043eea611f2b3da8920bf2b704b4f3d09af767f776ce5eac527d",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Hexahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ef4a64f667e7043eea611f2b3da8920bf2b704b4f3d09af767f776ce5eac527d.json"
+    },
+    {
+      "id": "aa58b683eaf0b17e5f7075414231bf5616e7647705e86727394ee14dcc2ad083",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Hexahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/aa58b683eaf0b17e5f7075414231bf5616e7647705e86727394ee14dcc2ad083.json"
+    },
+    {
+      "id": "afd5c7e21bdceefc5a0cc5cd4ec388477fc52a9f950178b83c7fcd11f0a84894",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Hexahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/afd5c7e21bdceefc5a0cc5cd4ec388477fc52a9f950178b83c7fcd11f0a84894.json"
+    },
+    {
+      "id": "413370c9933ca7f300195d27f15bbe75546ab7c7e108be39fa9cd579fef1c019",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Hexahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/413370c9933ca7f300195d27f15bbe75546ab7c7e108be39fa9cd579fef1c019.json"
+    },
+    {
+      "id": "f41a222a6f07118ecce6b66e41171b1b5b49572c05b91f64d3c65aa273af3cb1",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Hexahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f41a222a6f07118ecce6b66e41171b1b5b49572c05b91f64d3c65aa273af3cb1.json"
+    },
+    {
+      "id": "00a4c1fde33ace0d9c0f41ec011af90c1acb6eb4ae152089b7d0a5f9f5b0f9b9",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Hexahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/00a4c1fde33ace0d9c0f41ec011af90c1acb6eb4ae152089b7d0a5f9f5b0f9b9.json"
+    },
+    {
+      "id": "04363c21196261a390e02d3c29eb3a4f28ef362b34ff269cea6b29ca7ef39d2b",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Pyramid/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/04363c21196261a390e02d3c29eb3a4f28ef362b34ff269cea6b29ca7ef39d2b.json"
+    },
+    {
+      "id": "594448379575e3030610d8410742165cbf598ba0b413bef571a79e89cd2b0c9c",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Pyramid/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/594448379575e3030610d8410742165cbf598ba0b413bef571a79e89cd2b0c9c.json"
+    },
+    {
+      "id": "831f684772184a2d19ce8cbbabe5ae7b00c46ee1f89c6301e2229916de96952f",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Pyramid/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/831f684772184a2d19ce8cbbabe5ae7b00c46ee1f89c6301e2229916de96952f.json"
+    },
+    {
+      "id": "3770dfccc5f10079ebb480d37390dce088b9912676a3ba1c908019af8d944c60",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Pyramid/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3770dfccc5f10079ebb480d37390dce088b9912676a3ba1c908019af8d944c60.json"
+    },
+    {
+      "id": "0b507ca280c45d9ad6ebe1ee94117431e428c8dfa54761bee0f0c2dbef9b9259",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Pyramid/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0b507ca280c45d9ad6ebe1ee94117431e428c8dfa54761bee0f0c2dbef9b9259.json"
+    },
+    {
+      "id": "4b7ccb5474c8edafeaf526604d14f35f72014577df5f32c48852478baa314580",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Pyramid/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4b7ccb5474c8edafeaf526604d14f35f72014577df5f32c48852478baa314580.json"
+    },
+    {
+      "id": "2ab3f5c3890f9fd40ee6fe5ef7fa2620c56e25e5ee446e18daf2c6d0ce44df73",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Pyramid/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/2ab3f5c3890f9fd40ee6fe5ef7fa2620c56e25e5ee446e18daf2c6d0ce44df73.json"
+    },
+    {
+      "id": "22c777135b8ce01fc0b87d500187749e38d462187764d1fec0f4b1b214975c24",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Pyramid/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/22c777135b8ce01fc0b87d500187749e38d462187764d1fec0f4b1b214975c24.json"
+    },
+    {
+      "id": "6a973c2ca0eedf22e8bdc0532c0cf91ca164f1b9b676fa7f894099b3faaa317d",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Pyramid/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6a973c2ca0eedf22e8bdc0532c0cf91ca164f1b9b676fa7f894099b3faaa317d.json"
+    },
+    {
+      "id": "efa145cf2632034fc69f77452b83c1953fb5a93efa492b5db5a619ae064c85bd",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Quadrilateral/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/efa145cf2632034fc69f77452b83c1953fb5a93efa492b5db5a619ae064c85bd.json"
+    },
+    {
+      "id": "662e9ffda9e2944620d74cc95fef693317cf97fa84febfbc9bad9c27ae1ae0fc",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Quadrilateral/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/662e9ffda9e2944620d74cc95fef693317cf97fa84febfbc9bad9c27ae1ae0fc.json"
+    },
+    {
+      "id": "c86cd159aebcd7047eb27b2efe01f5d8dbf383dd6f8a0a2a3da8c03453e5531b",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Quadrilateral/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c86cd159aebcd7047eb27b2efe01f5d8dbf383dd6f8a0a2a3da8c03453e5531b.json"
+    },
+    {
+      "id": "c027d3c9835543854b9a7f8c1efae6057a04d126cd0290271c80846a27136c32",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Quadrilateral/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c027d3c9835543854b9a7f8c1efae6057a04d126cd0290271c80846a27136c32.json"
+    },
+    {
+      "id": "5f31b9a69c04f41c61365f1f79ddb61e3f97b3cd653b05afa0d842a6df454948",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Quadrilateral/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5f31b9a69c04f41c61365f1f79ddb61e3f97b3cd653b05afa0d842a6df454948.json"
+    },
+    {
+      "id": "c827a13d27190194bed33e47bce54cb70df9ed56db66b281ef36e84bcbc03a00",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Quadrilateral/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c827a13d27190194bed33e47bce54cb70df9ed56db66b281ef36e84bcbc03a00.json"
+    },
+    {
+      "id": "850f0da0b8d793eb05e93adbf3eb30643d8ed1de67b0a9408212670125dea7e0",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Quadrilateral/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/850f0da0b8d793eb05e93adbf3eb30643d8ed1de67b0a9408212670125dea7e0.json"
+    },
+    {
+      "id": "1f6df259c5acc25e0a5bb422989655793fc91375bfbfbcfcea3db38a92262cce",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Quadrilateral/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1f6df259c5acc25e0a5bb422989655793fc91375bfbfbcfcea3db38a92262cce.json"
+    },
+    {
+      "id": "561281d7a2862cc113ab447cc517c18753f89bf23380d5beafa1d65030f5ebf3",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Quadrilateral/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/561281d7a2862cc113ab447cc517c18753f89bf23380d5beafa1d65030f5ebf3.json"
+    },
+    {
+      "id": "20a8e539e1c322a2792fc4b7524d73fa00c7054986e79f062087bf0b86dce3ad",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Segment/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/20a8e539e1c322a2792fc4b7524d73fa00c7054986e79f062087bf0b86dce3ad.json"
+    },
+    {
+      "id": "f346409472de3069540ae2229c836fe331a3e7289ee2025f620635749ccf291b",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Segment/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f346409472de3069540ae2229c836fe331a3e7289ee2025f620635749ccf291b.json"
+    },
+    {
+      "id": "ba89c727baccdb46f654b636792e92e54b12d82121fe00af29b39cc019bc1e8f",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Segment/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ba89c727baccdb46f654b636792e92e54b12d82121fe00af29b39cc019bc1e8f.json"
+    },
+    {
+      "id": "5c984070eebfe2d828a5b07a329831677590f7270aaf6180cd94fd4c53c13fca",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Segment/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5c984070eebfe2d828a5b07a329831677590f7270aaf6180cd94fd4c53c13fca.json"
+    },
+    {
+      "id": "e5128d94473842358822267be02aeca9c912f8be91aac6962fe65351b71a997d",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Segment/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e5128d94473842358822267be02aeca9c912f8be91aac6962fe65351b71a997d.json"
+    },
+    {
+      "id": "e3686e817f5a129f02bb35cc7298384dc652dcd8d4a71a1c5bad1e07e330a01b",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Segment/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e3686e817f5a129f02bb35cc7298384dc652dcd8d4a71a1c5bad1e07e330a01b.json"
+    },
+    {
+      "id": "1b7ca62e3cbb33887bd163a6c6e66f634e99ef364f2c3a31da44467705d16015",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Segment/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1b7ca62e3cbb33887bd163a6c6e66f634e99ef364f2c3a31da44467705d16015.json"
+    },
+    {
+      "id": "3e16199332f4774d613eaaabc0c51e424f60d0db5adfccb09dcad2d4f4611106",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Segment/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3e16199332f4774d613eaaabc0c51e424f60d0db5adfccb09dcad2d4f4611106.json"
+    },
+    {
+      "id": "3479985fac95c2f18200a58b900fc416c086fd572f82cabe7e0e2dbf68f99fe0",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Segment/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3479985fac95c2f18200a58b900fc416c086fd572f82cabe7e0e2dbf68f99fe0.json"
+    },
+    {
+      "id": "5c98afdceb5720ce48c3244e7e30c01a1194a42b22c7c2f3652962aa74b31553",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Tetrahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5c98afdceb5720ce48c3244e7e30c01a1194a42b22c7c2f3652962aa74b31553.json"
+    },
+    {
+      "id": "23e759da52aae7032ad844130365daa1dee45ad223263ffbc3ab04ffd1925b9c",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Tetrahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/23e759da52aae7032ad844130365daa1dee45ad223263ffbc3ab04ffd1925b9c.json"
+    },
+    {
+      "id": "a3318aa3e511093b850016122b92e0c6f24cc7777a0537ab7dc83d85cd2e1494",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Tetrahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a3318aa3e511093b850016122b92e0c6f24cc7777a0537ab7dc83d85cd2e1494.json"
+    },
+    {
+      "id": "274b105f989931f5116e06a37cf5b00167f8c417cb3eda21b8d41b1dbfe988d0",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Tetrahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/274b105f989931f5116e06a37cf5b00167f8c417cb3eda21b8d41b1dbfe988d0.json"
+    },
+    {
+      "id": "06162dcc993cb8a8867f901b0f701ea4954db4a06d05c5073d5298add741105f",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Tetrahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/06162dcc993cb8a8867f901b0f701ea4954db4a06d05c5073d5298add741105f.json"
+    },
+    {
+      "id": "79f14eeab3cf7ea23b66f89089fbe4c2f5f0dd2ebd677286fa68ad9b14dddbb6",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Tetrahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/79f14eeab3cf7ea23b66f89089fbe4c2f5f0dd2ebd677286fa68ad9b14dddbb6.json"
+    },
+    {
+      "id": "59b39d23d6fd784bcce3d8691b08caa3ea0929a973e5d96c1f923b9e8047e651",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Tetrahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/59b39d23d6fd784bcce3d8691b08caa3ea0929a973e5d96c1f923b9e8047e651.json"
+    },
+    {
+      "id": "8121604ee3f1398dd48811679af78481ec17bee170529d448a3443d58e1a2ac2",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Tetrahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8121604ee3f1398dd48811679af78481ec17bee170529d448a3443d58e1a2ac2.json"
+    },
+    {
+      "id": "e2ef2ffb2f7ccf441973af171330f034710625af2526009f0b5f6893e199072b",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Tetrahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e2ef2ffb2f7ccf441973af171330f034710625af2526009f0b5f6893e199072b.json"
+    },
+    {
+      "id": "42768f1e6f701f6ff9b47f234b3830b6739a25cdd9bb165879e3c8dfa08ae303",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Triangle/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/42768f1e6f701f6ff9b47f234b3830b6739a25cdd9bb165879e3c8dfa08ae303.json"
+    },
+    {
+      "id": "9911fe08003f9c98357995f67ac5502eb5db6750289471f2c0870aec0151ff94",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Triangle/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/9911fe08003f9c98357995f67ac5502eb5db6750289471f2c0870aec0151ff94.json"
+    },
+    {
+      "id": "5846e1983d9331d6d25e6a7c7c6c6deca0abdeb24c0446d3d5d0787b340e9d73",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Triangle/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5846e1983d9331d6d25e6a7c7c6c6deca0abdeb24c0446d3d5d0787b340e9d73.json"
+    },
+    {
+      "id": "b19c7562a7c280b04d67279aa4f07a78a72a9941d27cbbc7de6ad82b656db5fd",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Triangle/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b19c7562a7c280b04d67279aa4f07a78a72a9941d27cbbc7de6ad82b656db5fd.json"
+    },
+    {
+      "id": "58073a0b068942c631da723659b46d4a9623b695d879f1ada3a27cff7ea10cbf",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Triangle/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/58073a0b068942c631da723659b46d4a9623b695d879f1ada3a27cff7ea10cbf.json"
+    },
+    {
+      "id": "90f29b3af878bcb98268e7b3bc52ee188405c86df8465a0e583955e4b78c04cd",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Triangle/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/90f29b3af878bcb98268e7b3bc52ee188405c86df8465a0e583955e4b78c04cd.json"
+    },
+    {
+      "id": "e9e13fe1699a3ed74757ce3e6cb4d210fbaa478d2fe668a7434737ed9098ed1e",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Triangle/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e9e13fe1699a3ed74757ce3e6cb4d210fbaa478d2fe668a7434737ed9098ed1e.json"
+    },
+    {
+      "id": "915f401417966d9601f6950b71923ca3175a25e72e2b0bfce2be2b376fa2b6a4",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Triangle/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/915f401417966d9601f6950b71923ca3175a25e72e2b0bfce2be2b376fa2b6a4.json"
+    },
+    {
+      "id": "120e2ad5e05aeb358a7b6b4a28a9e4ffb565ed94c86e6825200f61812b882f03",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Triangle/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/120e2ad5e05aeb358a7b6b4a28a9e4ffb565ed94c86e6825200f61812b882f03.json"
+    },
+    {
+      "id": "d35776a4c812fe7950f3a4badea57c72ee3854fbde6868304e335566e5dd1715",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Wedge/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d35776a4c812fe7950f3a4badea57c72ee3854fbde6868304e335566e5dd1715.json"
+    },
+    {
+      "id": "dbbba71bbd45350d7b18451a0a5e609b192f07214c34750fac22dee8afa507ce",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Wedge/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/dbbba71bbd45350d7b18451a0a5e609b192f07214c34750fac22dee8afa507ce.json"
+    },
+    {
+      "id": "ddbda08a2c8b42d495c4e424cfc171ff957236e623b5ab14d22385729d1b6407",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Wedge/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ddbda08a2c8b42d495c4e424cfc171ff957236e623b5ab14d22385729d1b6407.json"
+    },
+    {
+      "id": "3d0bfe509b890b6be95ae4503c63808e7aa7993ba3a24000a3d04de2dd6a9e77",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Wedge/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3d0bfe509b890b6be95ae4503c63808e7aa7993ba3a24000a3d04de2dd6a9e77.json"
+    },
+    {
+      "id": "55ccdb4c53ba3ae9ba47485d8f88bf49dcbcaf9dfd73ca200d8c1e3eae7364bb",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Wedge/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/55ccdb4c53ba3ae9ba47485d8f88bf49dcbcaf9dfd73ca200d8c1e3eae7364bb.json"
+    },
+    {
+      "id": "16c4da60ac4a8eb63f2019ec4382c0c0d44f458f9a3e783c2fccfcb556b840aa",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Wedge/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/16c4da60ac4a8eb63f2019ec4382c0c0d44f458f9a3e783c2fccfcb556b840aa.json"
+    },
+    {
+      "id": "a980f3a67e5338dac110552657ee6965cca353a860e04ac8d93128fb8203b225",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Wedge/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a980f3a67e5338dac110552657ee6965cca353a860e04ac8d93128fb8203b225.json"
+    },
+    {
+      "id": "2461af45a13a348be54e6e7b270e11cee86d085e06061c43045a0ec8451d4fa2",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Wedge/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/2461af45a13a348be54e6e7b270e11cee86d085e06061c43045a0ec8451d4fa2.json"
+    },
+    {
+      "id": "10551691d50b3588aa1026d6dc6e98a4fcf49e12a3af2f3fddeed5453382b9a5",
+      "name": "Convection/Assembly/H1/P2/ComplexField/ComplexDirection/Wedge/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/10551691d50b3588aa1026d6dc6e98a4fcf49e12a3af2f3fddeed5453382b9a5.json"
+    },
+    {
+      "id": "0ea9c8b4104bc9c3384849a2df76a228cf1b33d988d31afb1cd9de167216167a",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Hexahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0ea9c8b4104bc9c3384849a2df76a228cf1b33d988d31afb1cd9de167216167a.json"
+    },
+    {
+      "id": "d27662fd20d56511f10dd58d74c6058251049975bc48070cd8040199e479b841",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Hexahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d27662fd20d56511f10dd58d74c6058251049975bc48070cd8040199e479b841.json"
+    },
+    {
+      "id": "618f0230332c3dad7537ab7f4132f38d70a1ccb95c94a96c65c484eae41635c6",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Hexahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/618f0230332c3dad7537ab7f4132f38d70a1ccb95c94a96c65c484eae41635c6.json"
+    },
+    {
+      "id": "98180791c42d7c401aa2592462d78dc7d7c011b29f222d787f3c16c60e6cd68a",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Hexahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/98180791c42d7c401aa2592462d78dc7d7c011b29f222d787f3c16c60e6cd68a.json"
+    },
+    {
+      "id": "90ba03d343d4f18348eb1b9e6577c71de39435e77de5734f23a2248ebf90913e",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Hexahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/90ba03d343d4f18348eb1b9e6577c71de39435e77de5734f23a2248ebf90913e.json"
+    },
+    {
+      "id": "6fba0f9f8d327f1d8894b2b6252cd7db06fe676a43d6450b4cdb48d9aeed82fd",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Hexahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6fba0f9f8d327f1d8894b2b6252cd7db06fe676a43d6450b4cdb48d9aeed82fd.json"
+    },
+    {
+      "id": "584386d78c82a34d02220abdbbf8ad7d5f61b63851b0dec0ccda690fdc4ae37b",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Hexahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/584386d78c82a34d02220abdbbf8ad7d5f61b63851b0dec0ccda690fdc4ae37b.json"
+    },
+    {
+      "id": "8c55b84d9741da360e208f6218713e1a2f464ecf46d4cd453f5faa17200222db",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Hexahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8c55b84d9741da360e208f6218713e1a2f464ecf46d4cd453f5faa17200222db.json"
+    },
+    {
+      "id": "c582cca7b616bf349b9bf3e9be21e414dd856c186f8a109c1259b7b95a837e81",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Hexahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c582cca7b616bf349b9bf3e9be21e414dd856c186f8a109c1259b7b95a837e81.json"
+    },
+    {
+      "id": "36e0ed11b103dbbd4632de3c1d8829bc775bfccb0e146ab29e88e449bdd0a088",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Pyramid/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/36e0ed11b103dbbd4632de3c1d8829bc775bfccb0e146ab29e88e449bdd0a088.json"
+    },
+    {
+      "id": "ba53ff242db0f3065fa1be581a9cad3ac301e23376c3d03dfe6c54bb55fb59b6",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Pyramid/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ba53ff242db0f3065fa1be581a9cad3ac301e23376c3d03dfe6c54bb55fb59b6.json"
+    },
+    {
+      "id": "d7724fcb7de19f7b93a9caedc2e973ce05542732f48a5453274c9e533f312f4d",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Pyramid/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d7724fcb7de19f7b93a9caedc2e973ce05542732f48a5453274c9e533f312f4d.json"
+    },
+    {
+      "id": "b4bcfefdcba7c5f26c95f04a899afab6360cd41b01d6d5186aa0010b3340b597",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Pyramid/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b4bcfefdcba7c5f26c95f04a899afab6360cd41b01d6d5186aa0010b3340b597.json"
+    },
+    {
+      "id": "2fcfb4518b781e7203f978bfc60460d52f551abcd6174c4a0e212774e17f441b",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Pyramid/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/2fcfb4518b781e7203f978bfc60460d52f551abcd6174c4a0e212774e17f441b.json"
+    },
+    {
+      "id": "c7a29fee653bee01c2a83447b8dcfabbb045cbd769db84af3baa6368e56f5aea",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Pyramid/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c7a29fee653bee01c2a83447b8dcfabbb045cbd769db84af3baa6368e56f5aea.json"
+    },
+    {
+      "id": "98931363ee90e088a5515fa492890218773054c9ddf44b2caf95e7f64d282f2f",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Pyramid/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/98931363ee90e088a5515fa492890218773054c9ddf44b2caf95e7f64d282f2f.json"
+    },
+    {
+      "id": "14bbad43114bc8303cc7fa141bae07b5be224c259f25b01e93b8f508b89b73b4",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Pyramid/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/14bbad43114bc8303cc7fa141bae07b5be224c259f25b01e93b8f508b89b73b4.json"
+    },
+    {
+      "id": "d4c8b43b184dd471ded8a8b7e14da9069bb89f866f7e21696197d7f6ba6c1a32",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Pyramid/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d4c8b43b184dd471ded8a8b7e14da9069bb89f866f7e21696197d7f6ba6c1a32.json"
+    },
+    {
+      "id": "1c7d2c8a0a4e5d8e87f131e56b31c887c7f535ea5a24703c5e312727b1b8da49",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Quadrilateral/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1c7d2c8a0a4e5d8e87f131e56b31c887c7f535ea5a24703c5e312727b1b8da49.json"
+    },
+    {
+      "id": "3a3e86e3d72027070bde54dd13be8d468eebf0f58af57503bfe875e60efda9d1",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Quadrilateral/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3a3e86e3d72027070bde54dd13be8d468eebf0f58af57503bfe875e60efda9d1.json"
+    },
+    {
+      "id": "3a19c9ff49252173c080ca6f509b519949acfaf8bcb2d53e80e061d60027253e",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Quadrilateral/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3a19c9ff49252173c080ca6f509b519949acfaf8bcb2d53e80e061d60027253e.json"
+    },
+    {
+      "id": "90cbf17187d3effffe6fff1532434b7973d5651d470f6caaa250cd48a364b3fa",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Quadrilateral/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/90cbf17187d3effffe6fff1532434b7973d5651d470f6caaa250cd48a364b3fa.json"
+    },
+    {
+      "id": "03a304a749a74fc9f44a38af7b08e11386b17c8f531980914efbfb64b47dcf6e",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Quadrilateral/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/03a304a749a74fc9f44a38af7b08e11386b17c8f531980914efbfb64b47dcf6e.json"
+    },
+    {
+      "id": "49a74fcb0a4e987dda83ab7469af62852702d845341ec334c1af6bd39655109d",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Quadrilateral/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/49a74fcb0a4e987dda83ab7469af62852702d845341ec334c1af6bd39655109d.json"
+    },
+    {
+      "id": "f68332217d6a5aed63d784bf192845d381941cb735f75e58c2a73aa9fab4335e",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Quadrilateral/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f68332217d6a5aed63d784bf192845d381941cb735f75e58c2a73aa9fab4335e.json"
+    },
+    {
+      "id": "dd56c424ac08c5cfb66220801bce7ec3ae11dafca2693418cde4aa153f126ac9",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Quadrilateral/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/dd56c424ac08c5cfb66220801bce7ec3ae11dafca2693418cde4aa153f126ac9.json"
+    },
+    {
+      "id": "49937fc88ed0954ea8cb9b8cb0cd3372259f706bb6ca3532be506f538cbbe222",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Quadrilateral/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/49937fc88ed0954ea8cb9b8cb0cd3372259f706bb6ca3532be506f538cbbe222.json"
+    },
+    {
+      "id": "f383dd91da62002c56a08f601dd87cbeb6ab4ea9d636b05ab39c03ffa0112922",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Segment/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f383dd91da62002c56a08f601dd87cbeb6ab4ea9d636b05ab39c03ffa0112922.json"
+    },
+    {
+      "id": "fc7435f98ea8c509079c1314f13b3ad49a07c30b5d99ed1ea0592cb07a7955dd",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Segment/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fc7435f98ea8c509079c1314f13b3ad49a07c30b5d99ed1ea0592cb07a7955dd.json"
+    },
+    {
+      "id": "913785e99cd9f893589fb8f6dbe85470ba19f3a8c580e44f8a7fcd06f2493601",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Segment/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/913785e99cd9f893589fb8f6dbe85470ba19f3a8c580e44f8a7fcd06f2493601.json"
+    },
+    {
+      "id": "f3befe83ee8b540903e4da4d44cdcdc8b3b8fb2e270ce9d1ee16555bdfa8bef8",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Segment/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f3befe83ee8b540903e4da4d44cdcdc8b3b8fb2e270ce9d1ee16555bdfa8bef8.json"
+    },
+    {
+      "id": "f19f94229e90e5473840c0eea986ff0de444c419bd056ab91f8351218ef13bec",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Segment/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f19f94229e90e5473840c0eea986ff0de444c419bd056ab91f8351218ef13bec.json"
+    },
+    {
+      "id": "5028ac3ab8edf25da2af3f405050cd017c4c9e337b3c18c11d8ef2944dc2e66c",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Segment/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5028ac3ab8edf25da2af3f405050cd017c4c9e337b3c18c11d8ef2944dc2e66c.json"
+    },
+    {
+      "id": "5a30c37508cbb5c347843fcb3ee9f703f72ed57093e12aa9182dffba4288b7bb",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Segment/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5a30c37508cbb5c347843fcb3ee9f703f72ed57093e12aa9182dffba4288b7bb.json"
+    },
+    {
+      "id": "bbfc074c000a2dd269a7e01917b7c73288d012721fd4b53722c25d79631dbc62",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Segment/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/bbfc074c000a2dd269a7e01917b7c73288d012721fd4b53722c25d79631dbc62.json"
+    },
+    {
+      "id": "d9284befdb0ffe9682c997b80e46697b811d106c003d229c8ff882e3b411ddf5",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Segment/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d9284befdb0ffe9682c997b80e46697b811d106c003d229c8ff882e3b411ddf5.json"
+    },
+    {
+      "id": "e6b75d63547b2b55d99deb342451a15b1b691fc6968f6e0b785b417f05d908ed",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Tetrahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e6b75d63547b2b55d99deb342451a15b1b691fc6968f6e0b785b417f05d908ed.json"
+    },
+    {
+      "id": "e104959d0d9c144bf78e0d1606d1b9d1b7bbf93bec84057c77b91f187211dfa6",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Tetrahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e104959d0d9c144bf78e0d1606d1b9d1b7bbf93bec84057c77b91f187211dfa6.json"
+    },
+    {
+      "id": "13f8d39fcbea5e23821451e6ae0902e4ac1885f738e271da11b510396f138c41",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Tetrahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/13f8d39fcbea5e23821451e6ae0902e4ac1885f738e271da11b510396f138c41.json"
+    },
+    {
+      "id": "6b02a168af693d8ae22e6595e161aaad1888123da3db2d4c8498541925605098",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Tetrahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6b02a168af693d8ae22e6595e161aaad1888123da3db2d4c8498541925605098.json"
+    },
+    {
+      "id": "35f1fd0b40c51146bc77ecb288b8331da596646ad435fff8c4a629cf7df01e9a",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Tetrahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/35f1fd0b40c51146bc77ecb288b8331da596646ad435fff8c4a629cf7df01e9a.json"
+    },
+    {
+      "id": "bff0a5bc5735e2aa04d5276874ceb897b3259216195c3e585b7fe65b8dec6f7e",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Tetrahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/bff0a5bc5735e2aa04d5276874ceb897b3259216195c3e585b7fe65b8dec6f7e.json"
+    },
+    {
+      "id": "cdb0cb7bdd6fa8f251fa745f2815204b31fd90190172a88879a88bc0772c3b7e",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Tetrahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/cdb0cb7bdd6fa8f251fa745f2815204b31fd90190172a88879a88bc0772c3b7e.json"
+    },
+    {
+      "id": "fb2d9c467ffe14618acb97b63772fa70cd338129389a967a4685e32cbd7811ef",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Tetrahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fb2d9c467ffe14618acb97b63772fa70cd338129389a967a4685e32cbd7811ef.json"
+    },
+    {
+      "id": "b00e8a864e12d768f96fd28381ee649bb517f55d0b1ccf82e6bc5fef2865634b",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Tetrahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b00e8a864e12d768f96fd28381ee649bb517f55d0b1ccf82e6bc5fef2865634b.json"
+    },
+    {
+      "id": "c2211c2eff402e1723de5b045c03dbc5917f388463a4ca42530f4bfc3f4ad55a",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Triangle/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c2211c2eff402e1723de5b045c03dbc5917f388463a4ca42530f4bfc3f4ad55a.json"
+    },
+    {
+      "id": "04bc23da44171ab43f434c3976db7238e4133e1e66961e78f0d52af0a2ad4e11",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Triangle/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/04bc23da44171ab43f434c3976db7238e4133e1e66961e78f0d52af0a2ad4e11.json"
+    },
+    {
+      "id": "3c2018c24354f84dda847b92462ca8502e286c414414bc58bb5a27e98eb8f1ee",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Triangle/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3c2018c24354f84dda847b92462ca8502e286c414414bc58bb5a27e98eb8f1ee.json"
+    },
+    {
+      "id": "6973c85ae48a06419499f61b252051fd48d02b9f8aa4d5a573e663b5babeda5c",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Triangle/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6973c85ae48a06419499f61b252051fd48d02b9f8aa4d5a573e663b5babeda5c.json"
+    },
+    {
+      "id": "58f377e8347bf04338662d48e02027c3eca61d7e75dbbe25cf71fa95db6324ac",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Triangle/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/58f377e8347bf04338662d48e02027c3eca61d7e75dbbe25cf71fa95db6324ac.json"
+    },
+    {
+      "id": "7e01122ce9e97f00379d2d248783e9db8c3239bf24cc2d1d36009dc3ee7883e8",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Triangle/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7e01122ce9e97f00379d2d248783e9db8c3239bf24cc2d1d36009dc3ee7883e8.json"
+    },
+    {
+      "id": "142823537f0dc260add4b7128f611dacbb1adf91b28f7bdf60283c39e18eda3d",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Triangle/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/142823537f0dc260add4b7128f611dacbb1adf91b28f7bdf60283c39e18eda3d.json"
+    },
+    {
+      "id": "e2e9297302d1dbac99d12a8db6635753d26136e7afaf3f5749edc66f8a2f62e5",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Triangle/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e2e9297302d1dbac99d12a8db6635753d26136e7afaf3f5749edc66f8a2f62e5.json"
+    },
+    {
+      "id": "76f0a4fb8a06ab717b264fa3c792a88737d1c7238f628088d402efdaff359d9d",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Triangle/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/76f0a4fb8a06ab717b264fa3c792a88737d1c7238f628088d402efdaff359d9d.json"
+    },
+    {
+      "id": "950f4d8a07ccfbff06ae13b1c7385cc2d4ece29129ed50337837c38a423e10bf",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Wedge/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/950f4d8a07ccfbff06ae13b1c7385cc2d4ece29129ed50337837c38a423e10bf.json"
+    },
+    {
+      "id": "9854eb9b5e68a29eaf6b20ba219ef091ba1ee1c773019891f9d5eeef42988531",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Wedge/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/9854eb9b5e68a29eaf6b20ba219ef091ba1ee1c773019891f9d5eeef42988531.json"
+    },
+    {
+      "id": "c0c3fe342e821cc32c87ac0b2855fad3ff4fed169f98cdd465e477a49d2c1c65",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Wedge/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c0c3fe342e821cc32c87ac0b2855fad3ff4fed169f98cdd465e477a49d2c1c65.json"
+    },
+    {
+      "id": "75ea8ddc95c31d8aeddf808030e5f0026159ee98ffc574dacf02027c0d604661",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Wedge/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/75ea8ddc95c31d8aeddf808030e5f0026159ee98ffc574dacf02027c0d604661.json"
+    },
+    {
+      "id": "c6cb7ef1cce005b54e6d40857ae648e7b614f2ef8d008af1d26f9522b4539850",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Wedge/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c6cb7ef1cce005b54e6d40857ae648e7b614f2ef8d008af1d26f9522b4539850.json"
+    },
+    {
+      "id": "6438f127c01ea8b1293706dce4b76c0b69b2aa8ded20c834cf5f1df55df42b62",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Wedge/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6438f127c01ea8b1293706dce4b76c0b69b2aa8ded20c834cf5f1df55df42b62.json"
+    },
+    {
+      "id": "a76345b79d0be676b5df27a057ed37bb4d2fc9347b641457dc6b6374740aad31",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Wedge/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a76345b79d0be676b5df27a057ed37bb4d2fc9347b641457dc6b6374740aad31.json"
+    },
+    {
+      "id": "4575c7c0cdedf861d0626a191f7dc3515ecbe54bc7b1c60bd8b30b2a023a80ee",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Wedge/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4575c7c0cdedf861d0626a191f7dc3515ecbe54bc7b1c60bd8b30b2a023a80ee.json"
+    },
+    {
+      "id": "1239e1694bd004f046f276d0f313601da42d3ca918269dc6170a8ba0e9fe976d",
+      "name": "Convection/Assembly/H1/P2/ComplexField/RealDirection/Wedge/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1239e1694bd004f046f276d0f313601da42d3ca918269dc6170a8ba0e9fe976d.json"
+    },
+    {
+      "id": "3455e2467a2928fb80ad425a0d9277d755b7cdd56daa7f9f057c5b84ccc776de",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Hexahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3455e2467a2928fb80ad425a0d9277d755b7cdd56daa7f9f057c5b84ccc776de.json"
+    },
+    {
+      "id": "4dfb2ceacbf769c13cd9051806d87340446330cbecba98ad1e360741d8e8e8f5",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Hexahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4dfb2ceacbf769c13cd9051806d87340446330cbecba98ad1e360741d8e8e8f5.json"
+    },
+    {
+      "id": "270d2d4efa610b96b99e6fddfc47fd7c1886f419cf785b76b5a9210efde2b22c",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Hexahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/270d2d4efa610b96b99e6fddfc47fd7c1886f419cf785b76b5a9210efde2b22c.json"
+    },
+    {
+      "id": "5f8f4fd6f3eff26ba4d245d3aa728f37375bed6b3bd6ec43213f7aefea26faea",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Hexahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5f8f4fd6f3eff26ba4d245d3aa728f37375bed6b3bd6ec43213f7aefea26faea.json"
+    },
+    {
+      "id": "4e22a89329aea58301e6c57e6733d6930b3912b261fd1e25225117495070e041",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Hexahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4e22a89329aea58301e6c57e6733d6930b3912b261fd1e25225117495070e041.json"
+    },
+    {
+      "id": "e4a478f40c0602d0cbd28513fd64d9c08e7a7f30e2765310d632d098ee8dae20",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Hexahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e4a478f40c0602d0cbd28513fd64d9c08e7a7f30e2765310d632d098ee8dae20.json"
+    },
+    {
+      "id": "d505c3d8453ac274d37f455bdd6fc56db38729cf3759bdc03a4d5af4f128091b",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Hexahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d505c3d8453ac274d37f455bdd6fc56db38729cf3759bdc03a4d5af4f128091b.json"
+    },
+    {
+      "id": "ae94d4d4205d384a481eafa1558d3965293bde45def83571dfc0e0bc45a0f4ed",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Hexahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ae94d4d4205d384a481eafa1558d3965293bde45def83571dfc0e0bc45a0f4ed.json"
+    },
+    {
+      "id": "3b969b5dc270ef19695f2761bff25a9e5426b985233bce7254de1da1399ab83a",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Hexahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3b969b5dc270ef19695f2761bff25a9e5426b985233bce7254de1da1399ab83a.json"
+    },
+    {
+      "id": "3f9758b23dc60269feb8985503de6aa8d860dd22067c4f68b593fae2126fd892",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Pyramid/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3f9758b23dc60269feb8985503de6aa8d860dd22067c4f68b593fae2126fd892.json"
+    },
+    {
+      "id": "4f4301774dac477424e349954459c7e062e800646367584a6ff9c7ff928453ad",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Pyramid/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4f4301774dac477424e349954459c7e062e800646367584a6ff9c7ff928453ad.json"
+    },
+    {
+      "id": "3b44cca0658bdcdd260f3a23cf1ac579492d4eac0fc756ce2b3c91f62868b2a0",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Pyramid/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3b44cca0658bdcdd260f3a23cf1ac579492d4eac0fc756ce2b3c91f62868b2a0.json"
+    },
+    {
+      "id": "8369aa142b45694a7848f7f65d462ce41ac0dd16500ebbceb5fc58dd44264616",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Pyramid/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8369aa142b45694a7848f7f65d462ce41ac0dd16500ebbceb5fc58dd44264616.json"
+    },
+    {
+      "id": "5d8a3db2299bbaea7ccddf462bc44e6d31aaed792287182db87ce2466bf3f7f3",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Pyramid/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5d8a3db2299bbaea7ccddf462bc44e6d31aaed792287182db87ce2466bf3f7f3.json"
+    },
+    {
+      "id": "8fb56e4043eaddf6059e9843e82915ebba558ad6f14759f92d6317082f8703a8",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Pyramid/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8fb56e4043eaddf6059e9843e82915ebba558ad6f14759f92d6317082f8703a8.json"
+    },
+    {
+      "id": "3c157b255c65150d277d3a8386ac5b68923e29a40a7528edbb97992d19d14e24",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Pyramid/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3c157b255c65150d277d3a8386ac5b68923e29a40a7528edbb97992d19d14e24.json"
+    },
+    {
+      "id": "96cac2d57a1560690ffdc490b7b73c5e5273e939226b4e58267494c960e121b9",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Pyramid/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/96cac2d57a1560690ffdc490b7b73c5e5273e939226b4e58267494c960e121b9.json"
+    },
+    {
+      "id": "4700c0757403283f0477dd23645a47d9f8024437e6776e8afd2e2caa92bb9f90",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Pyramid/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4700c0757403283f0477dd23645a47d9f8024437e6776e8afd2e2caa92bb9f90.json"
+    },
+    {
+      "id": "894c005fa9e375b32ffadde4ddaa89103fc42694fe3ed046d2cc6de6b29bcd88",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Quadrilateral/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/894c005fa9e375b32ffadde4ddaa89103fc42694fe3ed046d2cc6de6b29bcd88.json"
+    },
+    {
+      "id": "33ec6a3c78ae77eecfd3fb2e856fe5273f751cd39e1a3eaf3342b824f0517ce3",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Quadrilateral/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/33ec6a3c78ae77eecfd3fb2e856fe5273f751cd39e1a3eaf3342b824f0517ce3.json"
+    },
+    {
+      "id": "f2f09ca92f6b895aa1fd0576c678d7bb2decb91ef20fee445351c9af2951a5f4",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Quadrilateral/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f2f09ca92f6b895aa1fd0576c678d7bb2decb91ef20fee445351c9af2951a5f4.json"
+    },
+    {
+      "id": "32715024dade52ce493534fd6204663d878af1d8416876f45e149a7209ad9c4b",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Quadrilateral/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/32715024dade52ce493534fd6204663d878af1d8416876f45e149a7209ad9c4b.json"
+    },
+    {
+      "id": "de7112939246e803616a19b915e2dbfe9caabe61c8ac29191e5ce37741e7c7f5",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Quadrilateral/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/de7112939246e803616a19b915e2dbfe9caabe61c8ac29191e5ce37741e7c7f5.json"
+    },
+    {
+      "id": "d121355c2d772fbef49535d8680416854985d5f963a77bb101c956da78365aec",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Quadrilateral/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d121355c2d772fbef49535d8680416854985d5f963a77bb101c956da78365aec.json"
+    },
+    {
+      "id": "5ca762abfbe8bbf1088f1545cbc79624cb70550c172d4ffae769109bfe6c72d5",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Quadrilateral/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5ca762abfbe8bbf1088f1545cbc79624cb70550c172d4ffae769109bfe6c72d5.json"
+    },
+    {
+      "id": "b413fc873ab2907c4db91e83fbf8201058be31fae59a885c63f7e1cd7aee8537",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Quadrilateral/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b413fc873ab2907c4db91e83fbf8201058be31fae59a885c63f7e1cd7aee8537.json"
+    },
+    {
+      "id": "9e24ed29d6797f288b19c64601443c653177945046dbe3ebc953ecdb24b233c5",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Quadrilateral/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/9e24ed29d6797f288b19c64601443c653177945046dbe3ebc953ecdb24b233c5.json"
+    },
+    {
+      "id": "c417bd6fde417e80caabec65e6a34631c5b31a3df0bbc4a4ca958ca16803b504",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Segment/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c417bd6fde417e80caabec65e6a34631c5b31a3df0bbc4a4ca958ca16803b504.json"
+    },
+    {
+      "id": "f38b92175539bc0960b84ad353cae8e49d71fb206ae2d19cbb665982c2ab2944",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Segment/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f38b92175539bc0960b84ad353cae8e49d71fb206ae2d19cbb665982c2ab2944.json"
+    },
+    {
+      "id": "64948f453134d592bbbf5d1ef0615fa163e53ee15a958c6f38c311a34b7027c6",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Segment/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/64948f453134d592bbbf5d1ef0615fa163e53ee15a958c6f38c311a34b7027c6.json"
+    },
+    {
+      "id": "fac18db13c5650aa1fec234245720b4844b61823cc49c23fc5474b56cad9964b",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Segment/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fac18db13c5650aa1fec234245720b4844b61823cc49c23fc5474b56cad9964b.json"
+    },
+    {
+      "id": "f75f6e7374bf553612cacc8dde33763fd1432018b69ca189a6344a7ed09f6c32",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Segment/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f75f6e7374bf553612cacc8dde33763fd1432018b69ca189a6344a7ed09f6c32.json"
+    },
+    {
+      "id": "caad4a48bea044b7289190370d4028e5998f0e4a0d41b5b1a52b47541df20c42",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Segment/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/caad4a48bea044b7289190370d4028e5998f0e4a0d41b5b1a52b47541df20c42.json"
+    },
+    {
+      "id": "85a5964f45b8fdd4a34a374e15d5e16f23bec9bad1ab829ab170dcda89764317",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Segment/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/85a5964f45b8fdd4a34a374e15d5e16f23bec9bad1ab829ab170dcda89764317.json"
+    },
+    {
+      "id": "08c4bd6de7662a697cd664b20294c81e9953df730cc738452724c0542a187531",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Segment/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/08c4bd6de7662a697cd664b20294c81e9953df730cc738452724c0542a187531.json"
+    },
+    {
+      "id": "af2eba8e2487757f4bdbb947f7b43e2596b80bb4b66c030ee4f28e36a5adc00b",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Segment/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/af2eba8e2487757f4bdbb947f7b43e2596b80bb4b66c030ee4f28e36a5adc00b.json"
+    },
+    {
+      "id": "711e7776ab2c1193ec296fa0f3919596e07d756bc174549db831c9803d2cce47",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Tetrahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/711e7776ab2c1193ec296fa0f3919596e07d756bc174549db831c9803d2cce47.json"
+    },
+    {
+      "id": "efd7e99b280d5f0089f5275b5ed9038411697bf526b8b4fc455eff5fd2940e0a",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Tetrahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/efd7e99b280d5f0089f5275b5ed9038411697bf526b8b4fc455eff5fd2940e0a.json"
+    },
+    {
+      "id": "92dc8bed281c938f8190a1c74d92c0b65d858fac890951b3efe181dfd8f5027c",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Tetrahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/92dc8bed281c938f8190a1c74d92c0b65d858fac890951b3efe181dfd8f5027c.json"
+    },
+    {
+      "id": "79fbd50f583e9ff5eb44fad10cc8b260111eddba2b12fde43f088dcc2bf7058b",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Tetrahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/79fbd50f583e9ff5eb44fad10cc8b260111eddba2b12fde43f088dcc2bf7058b.json"
+    },
+    {
+      "id": "122cdde8ca89389207bd9426ac4f5c092a885b682ee660c389670c41dc995bfc",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Tetrahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/122cdde8ca89389207bd9426ac4f5c092a885b682ee660c389670c41dc995bfc.json"
+    },
+    {
+      "id": "b5e0d27b00592b805750fba9970c6d5cd3e40b85c78460a020686d56ed8d1ef0",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Tetrahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b5e0d27b00592b805750fba9970c6d5cd3e40b85c78460a020686d56ed8d1ef0.json"
+    },
+    {
+      "id": "71654014a87068df68fa4cd9943cc9323305b7bcbb5db889bdaa655dcb02645b",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Tetrahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/71654014a87068df68fa4cd9943cc9323305b7bcbb5db889bdaa655dcb02645b.json"
+    },
+    {
+      "id": "8c30fd035efffd0240d978c896840dfcc60d081442e73686cb9818f7ce84e23b",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Tetrahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8c30fd035efffd0240d978c896840dfcc60d081442e73686cb9818f7ce84e23b.json"
+    },
+    {
+      "id": "2d88dacc41cc066eff86d06de3fea10b92ccf99a203b86f442edd17f64464c76",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Tetrahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/2d88dacc41cc066eff86d06de3fea10b92ccf99a203b86f442edd17f64464c76.json"
+    },
+    {
+      "id": "4d6af98d85b81df076667965bdc59ae8be5900e26b7be411ef230220ce7fe6dc",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Triangle/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4d6af98d85b81df076667965bdc59ae8be5900e26b7be411ef230220ce7fe6dc.json"
+    },
+    {
+      "id": "0df67b06a344f1e1520c3fe29184327af832f9359b497aa7cdce6b64431bfbcf",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Triangle/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0df67b06a344f1e1520c3fe29184327af832f9359b497aa7cdce6b64431bfbcf.json"
+    },
+    {
+      "id": "05c64a782180983a01cfc551ba43cb1c9af7b117ba0e6bee11f3d50325f748ef",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Triangle/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/05c64a782180983a01cfc551ba43cb1c9af7b117ba0e6bee11f3d50325f748ef.json"
+    },
+    {
+      "id": "1b359f6619254e3b9b59229aba405db1b92f715fa17443757643aa51b364d4ce",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Triangle/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1b359f6619254e3b9b59229aba405db1b92f715fa17443757643aa51b364d4ce.json"
+    },
+    {
+      "id": "513d228f638de34cde72416a211588d9d902d23cabb6b23080c3a6588e1e91c5",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Triangle/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/513d228f638de34cde72416a211588d9d902d23cabb6b23080c3a6588e1e91c5.json"
+    },
+    {
+      "id": "8c744882f97d8c5e53297831be85c2cc2c1ba8fa182797efe11be878030562d9",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Triangle/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8c744882f97d8c5e53297831be85c2cc2c1ba8fa182797efe11be878030562d9.json"
+    },
+    {
+      "id": "a39fe7b4343954eb34a7f6b75ef7dc623f5fa7d59bcd9217b1cf716472d86b43",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Triangle/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a39fe7b4343954eb34a7f6b75ef7dc623f5fa7d59bcd9217b1cf716472d86b43.json"
+    },
+    {
+      "id": "020cbb5479ef72f69a9f27149056bb5915593a837d21f8188d5328a10d446894",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Triangle/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/020cbb5479ef72f69a9f27149056bb5915593a837d21f8188d5328a10d446894.json"
+    },
+    {
+      "id": "086ac548c2a69f53465597b44f6a0cdf0fa49927007733baed4ffaebe9d83b75",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Triangle/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/086ac548c2a69f53465597b44f6a0cdf0fa49927007733baed4ffaebe9d83b75.json"
+    },
+    {
+      "id": "8b0cd678ca2b11958338832d2dd86610d7a82d597b05de3ca108f934cb997901",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Wedge/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8b0cd678ca2b11958338832d2dd86610d7a82d597b05de3ca108f934cb997901.json"
+    },
+    {
+      "id": "eb3dde494d822fbbd5f5db29c6e9b0b6c1c1beaae454190ceccf3d10c8d87c5a",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Wedge/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/eb3dde494d822fbbd5f5db29c6e9b0b6c1c1beaae454190ceccf3d10c8d87c5a.json"
+    },
+    {
+      "id": "f475f08a25204f9b75c6ff7c4247bfee4c223d6ec498b787756ad16f46a34e66",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Wedge/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f475f08a25204f9b75c6ff7c4247bfee4c223d6ec498b787756ad16f46a34e66.json"
+    },
+    {
+      "id": "6e3d1c5ad88d9bdc22c37e6946957d309c86e26329b4c24f99dd1a7beb6ffc80",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Wedge/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6e3d1c5ad88d9bdc22c37e6946957d309c86e26329b4c24f99dd1a7beb6ffc80.json"
+    },
+    {
+      "id": "389ca07f22f25e6d53699924113fb4662bc275acac3d9a21d36a073ed6d2458b",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Wedge/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/389ca07f22f25e6d53699924113fb4662bc275acac3d9a21d36a073ed6d2458b.json"
+    },
+    {
+      "id": "ecd3e0ff4f174b7f45f0aec1ffbef39b5bffb7d2e08b5ea44f8226887dc1a2b4",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Wedge/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ecd3e0ff4f174b7f45f0aec1ffbef39b5bffb7d2e08b5ea44f8226887dc1a2b4.json"
+    },
+    {
+      "id": "683f8f50e524e85915f6688d51164a021e8ecd4c21ccacb84546f793821f3333",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Wedge/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/683f8f50e524e85915f6688d51164a021e8ecd4c21ccacb84546f793821f3333.json"
+    },
+    {
+      "id": "901df956b22a1d4ec3e6e12d656ed65373420e3163cc5ab574d58f526308d597",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Wedge/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/901df956b22a1d4ec3e6e12d656ed65373420e3163cc5ab574d58f526308d597.json"
+    },
+    {
+      "id": "f60381087878b92d3e56601effd2694f299f290248d0986474f3bb9419a48434",
+      "name": "Convection/Assembly/H1/P2/RealField/RealDirection/Wedge/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f60381087878b92d3e56601effd2694f299f290248d0986474f3bb9419a48434.json"
+    },
+    {
+      "id": "9b84dfb8d9e3ddb98b4af5ec53031dc90ff94e967146586faf2af61e2eb4e40c",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Hexahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/9b84dfb8d9e3ddb98b4af5ec53031dc90ff94e967146586faf2af61e2eb4e40c.json"
+    },
+    {
+      "id": "58f5debf8f972639b3a6f22674299a5298506795e9f2e0a3192cbe834088f5e0",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Hexahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/58f5debf8f972639b3a6f22674299a5298506795e9f2e0a3192cbe834088f5e0.json"
+    },
+    {
+      "id": "3da285a3a6469cb343f31e77c81386b98dc192887b34450ba5ac5a0c49039aca",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Hexahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3da285a3a6469cb343f31e77c81386b98dc192887b34450ba5ac5a0c49039aca.json"
+    },
+    {
+      "id": "1220bb5d05a39f2a5cca6bfed9dc46bb9c4618816fd3b44bab638d8d52cf6ee6",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Hexahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1220bb5d05a39f2a5cca6bfed9dc46bb9c4618816fd3b44bab638d8d52cf6ee6.json"
+    },
+    {
+      "id": "0cbfcbb890171997be2cedd3c4ea71dc6a828f83c57d124c6e9b17a70395bba7",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Hexahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0cbfcbb890171997be2cedd3c4ea71dc6a828f83c57d124c6e9b17a70395bba7.json"
+    },
+    {
+      "id": "f20bdbb5255576cbbd5d96bd9ad43eaed84137a6578a85dd1107818a89bf44c1",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Hexahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f20bdbb5255576cbbd5d96bd9ad43eaed84137a6578a85dd1107818a89bf44c1.json"
+    },
+    {
+      "id": "06318f15be801a0f8136f99984d0857bf58eae727138683b2257514dcf0cdc9d",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Hexahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/06318f15be801a0f8136f99984d0857bf58eae727138683b2257514dcf0cdc9d.json"
+    },
+    {
+      "id": "bd697776f5b8ac1ddbdd770cc568f6c451bc15d8a2b9d239c73baee24828fd64",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Hexahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/bd697776f5b8ac1ddbdd770cc568f6c451bc15d8a2b9d239c73baee24828fd64.json"
+    },
+    {
+      "id": "18f0aae257883d15172562387aeab53a13c7ce3e433989cf4e921a504d707971",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Hexahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/18f0aae257883d15172562387aeab53a13c7ce3e433989cf4e921a504d707971.json"
+    },
+    {
+      "id": "da64860a17642292baa2c41200db279dc85930dbd04e0fd05febb7a6d9a6e167",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Pyramid/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/da64860a17642292baa2c41200db279dc85930dbd04e0fd05febb7a6d9a6e167.json"
+    },
+    {
+      "id": "30d9f2b2b10bf559e544a78ab46faa62ab247394f7c06d3e19bb98e117c1f879",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Pyramid/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/30d9f2b2b10bf559e544a78ab46faa62ab247394f7c06d3e19bb98e117c1f879.json"
+    },
+    {
+      "id": "ea90334c357bd26faebce5251dd830fcba0e9da2c3c76b51f133ce7d15169201",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Pyramid/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ea90334c357bd26faebce5251dd830fcba0e9da2c3c76b51f133ce7d15169201.json"
+    },
+    {
+      "id": "a9fb03ccdc656f5dec910b92f86ef0874b868ee473c840563e867639ee1d3070",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Pyramid/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a9fb03ccdc656f5dec910b92f86ef0874b868ee473c840563e867639ee1d3070.json"
+    },
+    {
+      "id": "8e3802322323e46130aa77a7f4718ef433f99c157e0fbebb377e7e3d5a9f6138",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Pyramid/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8e3802322323e46130aa77a7f4718ef433f99c157e0fbebb377e7e3d5a9f6138.json"
+    },
+    {
+      "id": "7645659528b527715dff52cb761fd794f4b83af3c8b7c8fcf76a2f2c9d4a0411",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Pyramid/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7645659528b527715dff52cb761fd794f4b83af3c8b7c8fcf76a2f2c9d4a0411.json"
+    },
+    {
+      "id": "2a5196c71eb84e192cb021d678cf403fb192019ba35aa086f412d90632474f9c",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Pyramid/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/2a5196c71eb84e192cb021d678cf403fb192019ba35aa086f412d90632474f9c.json"
+    },
+    {
+      "id": "649c431d678cf4dba2edc007cf4f729e732fb317f244b76e177dfa3c96828925",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Pyramid/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/649c431d678cf4dba2edc007cf4f729e732fb317f244b76e177dfa3c96828925.json"
+    },
+    {
+      "id": "fbaaa6908c29d8a15d95f72b1357d4542eefd4652853522fee13a2874b6702af",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Pyramid/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fbaaa6908c29d8a15d95f72b1357d4542eefd4652853522fee13a2874b6702af.json"
+    },
+    {
+      "id": "16898f86a619d1d320e76d61e813142c51c54db5229e5a177c194809c9cefbee",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Quadrilateral/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/16898f86a619d1d320e76d61e813142c51c54db5229e5a177c194809c9cefbee.json"
+    },
+    {
+      "id": "1a4f5b57f5fc6c195547e9458ace35d6eccf6e500112a7186f0d3c280b094ba9",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Quadrilateral/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1a4f5b57f5fc6c195547e9458ace35d6eccf6e500112a7186f0d3c280b094ba9.json"
+    },
+    {
+      "id": "1f6c38d2463f5d9db86d12d02b1c7ba1c36be07ddb5d8282c4f15ab0ed991eef",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Quadrilateral/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1f6c38d2463f5d9db86d12d02b1c7ba1c36be07ddb5d8282c4f15ab0ed991eef.json"
+    },
+    {
+      "id": "ca3047546673257e48021183aa4588837c30a415bd014a4b973e723ce19bb387",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Quadrilateral/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ca3047546673257e48021183aa4588837c30a415bd014a4b973e723ce19bb387.json"
+    },
+    {
+      "id": "ffdc58a2623c5312d27f95bf9679360937ac2ee6187df931ab4f4c080530dfde",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Quadrilateral/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ffdc58a2623c5312d27f95bf9679360937ac2ee6187df931ab4f4c080530dfde.json"
+    },
+    {
+      "id": "e444d55deb5c94429deedc74786d7e4037a81a4f4166a6f403aa89600cd2eb07",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Quadrilateral/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e444d55deb5c94429deedc74786d7e4037a81a4f4166a6f403aa89600cd2eb07.json"
+    },
+    {
+      "id": "56feedf2d0a917d61e9da5ce79b3699e605e4983ebf7d6668648a155eda2d530",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Quadrilateral/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/56feedf2d0a917d61e9da5ce79b3699e605e4983ebf7d6668648a155eda2d530.json"
+    },
+    {
+      "id": "0c544cb43cf6c61a2d3211cd9c78ef717c21906d2d57208a31c5aaccc9424a9f",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Quadrilateral/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0c544cb43cf6c61a2d3211cd9c78ef717c21906d2d57208a31c5aaccc9424a9f.json"
+    },
+    {
+      "id": "41f303dff37965227a21b0d87fbd60cc2fb1b9e6625ba728078cbf4c40750c03",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Quadrilateral/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/41f303dff37965227a21b0d87fbd60cc2fb1b9e6625ba728078cbf4c40750c03.json"
+    },
+    {
+      "id": "a9792c86347fbb916117680512e39cd0cdc5cdd65c01d98c2541e55d75e79874",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Segment/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a9792c86347fbb916117680512e39cd0cdc5cdd65c01d98c2541e55d75e79874.json"
+    },
+    {
+      "id": "05614a39d86a1775c0b54c175964e9802da7ef4a08eb3ba6121057f65174241f",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Segment/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/05614a39d86a1775c0b54c175964e9802da7ef4a08eb3ba6121057f65174241f.json"
+    },
+    {
+      "id": "463fbac0f8ba8740dfb8139d1fe4965bedd2ef00e6d6654ebcf2af7ec6b9722b",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Segment/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/463fbac0f8ba8740dfb8139d1fe4965bedd2ef00e6d6654ebcf2af7ec6b9722b.json"
+    },
+    {
+      "id": "a344a3d8fe4a5281147e81bc4226a9ac704cd1cbdf427b3f6963d51d35c5457c",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Segment/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a344a3d8fe4a5281147e81bc4226a9ac704cd1cbdf427b3f6963d51d35c5457c.json"
+    },
+    {
+      "id": "b20a691f49f8baddea707f7094c97cd57c9ceba7b423c0dfeff854f107a54554",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Segment/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b20a691f49f8baddea707f7094c97cd57c9ceba7b423c0dfeff854f107a54554.json"
+    },
+    {
+      "id": "be62926d9c8e599c26856fba937715bd4b9e1521b699a9628795390cafe2b9a7",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Segment/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/be62926d9c8e599c26856fba937715bd4b9e1521b699a9628795390cafe2b9a7.json"
+    },
+    {
+      "id": "36590941ddb89c9531b0c014afe7bab9ba1f0fa6c74517d8b2665cdf74fe2f34",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Segment/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/36590941ddb89c9531b0c014afe7bab9ba1f0fa6c74517d8b2665cdf74fe2f34.json"
+    },
+    {
+      "id": "ba075dd7ddfd010008d21758bdc4aadbd3b5a319e6c68137021d4d4f06aa8e70",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Segment/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ba075dd7ddfd010008d21758bdc4aadbd3b5a319e6c68137021d4d4f06aa8e70.json"
+    },
+    {
+      "id": "3eaec34f5d3429b1eded2f7e447a68dc34de45f1f95eeaed6119b32aa4fccfaa",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Segment/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3eaec34f5d3429b1eded2f7e447a68dc34de45f1f95eeaed6119b32aa4fccfaa.json"
+    },
+    {
+      "id": "80cca99cdda2386cd74e69c7c66407f84d6287f6d0de58c977e8be28f0bf38e9",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Tetrahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/80cca99cdda2386cd74e69c7c66407f84d6287f6d0de58c977e8be28f0bf38e9.json"
+    },
+    {
+      "id": "2d79105b0832dce9dc21f054b3f5e118c3dad0f64d81b6234279ca16903f14d1",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Tetrahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/2d79105b0832dce9dc21f054b3f5e118c3dad0f64d81b6234279ca16903f14d1.json"
+    },
+    {
+      "id": "fdf569ef8e11053cf7a1dacf55f0ec210bb8324921e819fab2b30d83ad56d056",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Tetrahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fdf569ef8e11053cf7a1dacf55f0ec210bb8324921e819fab2b30d83ad56d056.json"
+    },
+    {
+      "id": "892e444da33be4228ad2cbd78dd24b4a7c0601ee30d12ad23e27c392069881ff",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Tetrahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/892e444da33be4228ad2cbd78dd24b4a7c0601ee30d12ad23e27c392069881ff.json"
+    },
+    {
+      "id": "657ed2797d05141aa8829e81fac899eb59d7639eee682825a4a66a6751a05aca",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Tetrahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/657ed2797d05141aa8829e81fac899eb59d7639eee682825a4a66a6751a05aca.json"
+    },
+    {
+      "id": "ae000b0d02245613094fb71b88311872bce8ea1a54e1713909587782970052c0",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Tetrahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ae000b0d02245613094fb71b88311872bce8ea1a54e1713909587782970052c0.json"
+    },
+    {
+      "id": "6c3b0cb05fb0ab311bb69389a79132b5ec5546dbaf94c259b79beb9e74bf8909",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Tetrahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6c3b0cb05fb0ab311bb69389a79132b5ec5546dbaf94c259b79beb9e74bf8909.json"
+    },
+    {
+      "id": "fbf0ebd69b4d03d8cfd2bb26cb1f79edfec681e868d70f1f60e1c88b3d1a3b9a",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Tetrahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fbf0ebd69b4d03d8cfd2bb26cb1f79edfec681e868d70f1f60e1c88b3d1a3b9a.json"
+    },
+    {
+      "id": "89b012a8ad97ee012d562cd77a29bc64d2a2c1136db5ed6a07e2b3b543349d62",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Tetrahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/89b012a8ad97ee012d562cd77a29bc64d2a2c1136db5ed6a07e2b3b543349d62.json"
+    },
+    {
+      "id": "792c93cd6c6b67b0c67996ea160af9b7382f6346a0525db043025959135794e5",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Triangle/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/792c93cd6c6b67b0c67996ea160af9b7382f6346a0525db043025959135794e5.json"
+    },
+    {
+      "id": "887a34ef023a8b3623be9454db95036720c00d4800c709a8c100f7cd1a583b07",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Triangle/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/887a34ef023a8b3623be9454db95036720c00d4800c709a8c100f7cd1a583b07.json"
+    },
+    {
+      "id": "edf4897d598db9324bfb0b24a8b0b7f5c5330d7cfa0d7c629fde790b88466204",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Triangle/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/edf4897d598db9324bfb0b24a8b0b7f5c5330d7cfa0d7c629fde790b88466204.json"
+    },
+    {
+      "id": "7a304ef446433d58c1c2bd595653a700cbae53a4a7f6aa90d08a61f5ae02955e",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Triangle/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7a304ef446433d58c1c2bd595653a700cbae53a4a7f6aa90d08a61f5ae02955e.json"
+    },
+    {
+      "id": "7c0c0b4a030a5d71a485933ff705a2c0a897757654ae30c55f9bde6f064ba9e4",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Triangle/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7c0c0b4a030a5d71a485933ff705a2c0a897757654ae30c55f9bde6f064ba9e4.json"
+    },
+    {
+      "id": "e58ec2757e85ebf6ecf6921853395c0c005c33058008a953d34cfd2e9c5fd7cd",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Triangle/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e58ec2757e85ebf6ecf6921853395c0c005c33058008a953d34cfd2e9c5fd7cd.json"
+    },
+    {
+      "id": "f7b5ac9dac510e7f37dda7c1428a6b99c4a81f2c2190f71f4b8c46d2b86440f8",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Triangle/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f7b5ac9dac510e7f37dda7c1428a6b99c4a81f2c2190f71f4b8c46d2b86440f8.json"
+    },
+    {
+      "id": "e810421ba3de4034d97f4416d302a902f054a0e68e737e9fa76b3b07ca823051",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Triangle/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e810421ba3de4034d97f4416d302a902f054a0e68e737e9fa76b3b07ca823051.json"
+    },
+    {
+      "id": "822dc69ed90902c0b097a4a1fb8f165e640c79306e42cf88a4a96b98e0fe6f3d",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Triangle/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/822dc69ed90902c0b097a4a1fb8f165e640c79306e42cf88a4a96b98e0fe6f3d.json"
+    },
+    {
+      "id": "288ed3cd06f46ddf41edb7721e8c37e71188d3d0895ce88754bf5b151166423f",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Wedge/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/288ed3cd06f46ddf41edb7721e8c37e71188d3d0895ce88754bf5b151166423f.json"
+    },
+    {
+      "id": "8d57c8c9b53e559d634ad313bc2c14e4762730a44d2a30cf5bd0efb0f9cb368c",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Wedge/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8d57c8c9b53e559d634ad313bc2c14e4762730a44d2a30cf5bd0efb0f9cb368c.json"
+    },
+    {
+      "id": "dc501e8c2e0436603a8261e21c7fe3b858d6e114755d60e1fb4cf4b0cf8d2d32",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Wedge/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/dc501e8c2e0436603a8261e21c7fe3b858d6e114755d60e1fb4cf4b0cf8d2d32.json"
+    },
+    {
+      "id": "fc1a058d0d3a30ada4d38a6482f57e6a81e55f9f8743ae9067f7a89261480bb6",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Wedge/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fc1a058d0d3a30ada4d38a6482f57e6a81e55f9f8743ae9067f7a89261480bb6.json"
+    },
+    {
+      "id": "7a57c3545788d9bdd4d813c3057b9fcb60f4e9dd3880afdff9dff86b00151760",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Wedge/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7a57c3545788d9bdd4d813c3057b9fcb60f4e9dd3880afdff9dff86b00151760.json"
+    },
+    {
+      "id": "a81115df2f97bad2cf04036b03d7126ce8e0ebb7d454d1e90fce247e561d3f6c",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Wedge/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a81115df2f97bad2cf04036b03d7126ce8e0ebb7d454d1e90fce247e561d3f6c.json"
+    },
+    {
+      "id": "1af1e6598c5ed0c34b211ce55410bcebe4f3362fc4788317b88bbffd6c1458da",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Wedge/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1af1e6598c5ed0c34b211ce55410bcebe4f3362fc4788317b88bbffd6c1458da.json"
+    },
+    {
+      "id": "43321030246eb780bcf212dfe4522d229219058677637d9977c66d5c4754f5e6",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Wedge/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/43321030246eb780bcf212dfe4522d229219058677637d9977c66d5c4754f5e6.json"
+    },
+    {
+      "id": "b9ee81b5bf61820ae03e6e1fc739821f6ef0429078e4208222acb51fea18b34c",
+      "name": "Convection/Assembly/H1/P3/ComplexField/ComplexDirection/Wedge/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b9ee81b5bf61820ae03e6e1fc739821f6ef0429078e4208222acb51fea18b34c.json"
+    },
+    {
+      "id": "488e844da4e4d2c890838e018b40b03859e4c8fe4ea1c52fa533886a3a8dfbf4",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Hexahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/488e844da4e4d2c890838e018b40b03859e4c8fe4ea1c52fa533886a3a8dfbf4.json"
+    },
+    {
+      "id": "25abdcd17eba7ed44eb1e97a5ab09759ae5c486a26862a22c44c185fb0d80583",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Hexahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/25abdcd17eba7ed44eb1e97a5ab09759ae5c486a26862a22c44c185fb0d80583.json"
+    },
+    {
+      "id": "81a4455bea45b5770eb9876cd76c367e89102c3b8c23fe1362a65b2423f4016f",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Hexahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/81a4455bea45b5770eb9876cd76c367e89102c3b8c23fe1362a65b2423f4016f.json"
+    },
+    {
+      "id": "b719aa08b5c15ddd6ed294e071cd82125151515d345180b94fac21f8e0f65943",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Hexahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b719aa08b5c15ddd6ed294e071cd82125151515d345180b94fac21f8e0f65943.json"
+    },
+    {
+      "id": "4f056ebca568d369b700f5fd4254006b7bfaec799effef5ac1ac3e6c982c487b",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Hexahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4f056ebca568d369b700f5fd4254006b7bfaec799effef5ac1ac3e6c982c487b.json"
+    },
+    {
+      "id": "069451a3de49ffe4bef0955f762e7abf709ff2fd97b8d699f83f074d9fa48025",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Hexahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/069451a3de49ffe4bef0955f762e7abf709ff2fd97b8d699f83f074d9fa48025.json"
+    },
+    {
+      "id": "826a683775ed1add292023848863abb0eb675ae825684961769f2ae994fc9351",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Hexahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/826a683775ed1add292023848863abb0eb675ae825684961769f2ae994fc9351.json"
+    },
+    {
+      "id": "c1029c07c3ac66073860b958031943f743ea5a349aadb9472dd003acd9e11d00",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Hexahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c1029c07c3ac66073860b958031943f743ea5a349aadb9472dd003acd9e11d00.json"
+    },
+    {
+      "id": "44c0d7156239a4eb92bee44ca0910ff89e7d7705025ccac1bd7cdeb62742da2a",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Hexahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/44c0d7156239a4eb92bee44ca0910ff89e7d7705025ccac1bd7cdeb62742da2a.json"
+    },
+    {
+      "id": "7fc596815b310ea1a330d03f44e8fa069f061c824460be851f4e71eb6770fb7f",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Pyramid/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7fc596815b310ea1a330d03f44e8fa069f061c824460be851f4e71eb6770fb7f.json"
+    },
+    {
+      "id": "7e14a08382c4745373bd6b6d6e59d08a6dd1ac43473670ad4e4191199b8020f9",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Pyramid/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7e14a08382c4745373bd6b6d6e59d08a6dd1ac43473670ad4e4191199b8020f9.json"
+    },
+    {
+      "id": "660c90928e0e454ee4d3d504502b1d5ad2f094e6741383e248262530fb6c018f",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Pyramid/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/660c90928e0e454ee4d3d504502b1d5ad2f094e6741383e248262530fb6c018f.json"
+    },
+    {
+      "id": "6d2490af5cd973afa015715cffdc7175e1f917c9ceb5712de84c45e94e6c989e",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Pyramid/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6d2490af5cd973afa015715cffdc7175e1f917c9ceb5712de84c45e94e6c989e.json"
+    },
+    {
+      "id": "c1e99ad61561e2cd46d3fc2ab0457b8561965efd68dc8817371463548cec606f",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Pyramid/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c1e99ad61561e2cd46d3fc2ab0457b8561965efd68dc8817371463548cec606f.json"
+    },
+    {
+      "id": "aac675e592638a1214bd164941eda06e05097eaaf23b1741c494606bc99afe6a",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Pyramid/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/aac675e592638a1214bd164941eda06e05097eaaf23b1741c494606bc99afe6a.json"
+    },
+    {
+      "id": "38331481471da903b8c50b09ad69c526ae6f35efa72cb525bef095cae869fdb6",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Pyramid/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/38331481471da903b8c50b09ad69c526ae6f35efa72cb525bef095cae869fdb6.json"
+    },
+    {
+      "id": "a7f6c96b35edb647fc5b12588f11a8ab102503013aaf70b0e5c6f9a291da8e65",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Pyramid/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a7f6c96b35edb647fc5b12588f11a8ab102503013aaf70b0e5c6f9a291da8e65.json"
+    },
+    {
+      "id": "7a5c53053e7ee0b33c48b7858a0aadeaa2aeab939066f19d42ac3530d0d23495",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Pyramid/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7a5c53053e7ee0b33c48b7858a0aadeaa2aeab939066f19d42ac3530d0d23495.json"
+    },
+    {
+      "id": "2a1ad7da06f6fd650f96bdcca8e76e7ce295bf1651ea46f0f8e5fb6db12bd1cb",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Quadrilateral/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/2a1ad7da06f6fd650f96bdcca8e76e7ce295bf1651ea46f0f8e5fb6db12bd1cb.json"
+    },
+    {
+      "id": "ff6fdc8f5a15dfd07f2ee75ee7aaea1e520ed532962a0125f59c73cd9c9b12f3",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Quadrilateral/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ff6fdc8f5a15dfd07f2ee75ee7aaea1e520ed532962a0125f59c73cd9c9b12f3.json"
+    },
+    {
+      "id": "ca1683545b38897357dd621f0b016c7a399ffcaa410555871077058089fbe95f",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Quadrilateral/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ca1683545b38897357dd621f0b016c7a399ffcaa410555871077058089fbe95f.json"
+    },
+    {
+      "id": "5ad57455620edfeed164874a21abc7f212eee560de384e307bb06cd51aa2335d",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Quadrilateral/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5ad57455620edfeed164874a21abc7f212eee560de384e307bb06cd51aa2335d.json"
+    },
+    {
+      "id": "df31eb31f9738067a8c554bedba35a4840cc2766665ae34e45174910a738c27c",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Quadrilateral/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/df31eb31f9738067a8c554bedba35a4840cc2766665ae34e45174910a738c27c.json"
+    },
+    {
+      "id": "118281b18e4c7856d86640e9ff7e9a43da18b1792c14c66ead39d5f651cce601",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Quadrilateral/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/118281b18e4c7856d86640e9ff7e9a43da18b1792c14c66ead39d5f651cce601.json"
+    },
+    {
+      "id": "f78ee88b692da67f410fd688d6ade662c06d5ab39d9c267bf5715b3cf18d7462",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Quadrilateral/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f78ee88b692da67f410fd688d6ade662c06d5ab39d9c267bf5715b3cf18d7462.json"
+    },
+    {
+      "id": "f2f6e11363775d9f48c351e0698f23992b4951200ec6f14871c916d84927116f",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Quadrilateral/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f2f6e11363775d9f48c351e0698f23992b4951200ec6f14871c916d84927116f.json"
+    },
+    {
+      "id": "0433b1decb948902a9a61fdb4e22b148247f9eb2172eeaa3fb00334044562871",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Quadrilateral/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0433b1decb948902a9a61fdb4e22b148247f9eb2172eeaa3fb00334044562871.json"
+    },
+    {
+      "id": "ca490d0a99aac5cc72df42b86233053863b857f577c52636625d2d1725849e1a",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Segment/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ca490d0a99aac5cc72df42b86233053863b857f577c52636625d2d1725849e1a.json"
+    },
+    {
+      "id": "5e8f581883b8d9f1406f44803e6e6d81f1648e213e493bb6f0cb4645d7198a99",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Segment/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5e8f581883b8d9f1406f44803e6e6d81f1648e213e493bb6f0cb4645d7198a99.json"
+    },
+    {
+      "id": "a1129127abed32ff028bbfc12335c325843c8f4ad4724988b2924a9f21fb020c",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Segment/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a1129127abed32ff028bbfc12335c325843c8f4ad4724988b2924a9f21fb020c.json"
+    },
+    {
+      "id": "bf8dd1fcbcd35872a98fe5e360911665412eca945e13f8968ca1a4ce30134aca",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Segment/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/bf8dd1fcbcd35872a98fe5e360911665412eca945e13f8968ca1a4ce30134aca.json"
+    },
+    {
+      "id": "90f4f2b07398ce75c30a25d6f22e2dd2886e731f4c49ef944dbb0715bbe851eb",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Segment/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/90f4f2b07398ce75c30a25d6f22e2dd2886e731f4c49ef944dbb0715bbe851eb.json"
+    },
+    {
+      "id": "427dd70e2a8d68ffafbcd5815a525a948b29a12b9197da345a6816c0397a0790",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Segment/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/427dd70e2a8d68ffafbcd5815a525a948b29a12b9197da345a6816c0397a0790.json"
+    },
+    {
+      "id": "9ac7d2402e7d9a0290100fba95b3708150c5799c56cfcdf622d52e8f081caacc",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Segment/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/9ac7d2402e7d9a0290100fba95b3708150c5799c56cfcdf622d52e8f081caacc.json"
+    },
+    {
+      "id": "6d6e9312161c678ad02b2bcc6502bcb3239f0f86dc0d07f2f2de91e164da8546",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Segment/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6d6e9312161c678ad02b2bcc6502bcb3239f0f86dc0d07f2f2de91e164da8546.json"
+    },
+    {
+      "id": "7495e642062393a57d5ad7b24f8cfdd879850d739f14e86d88612cb49618ea48",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Segment/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7495e642062393a57d5ad7b24f8cfdd879850d739f14e86d88612cb49618ea48.json"
+    },
+    {
+      "id": "292dc2ba653b1d5b5289395628de9cba760a18fa981c78091ddb20407f395986",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Tetrahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/292dc2ba653b1d5b5289395628de9cba760a18fa981c78091ddb20407f395986.json"
+    },
+    {
+      "id": "ef6a141b01a665e30afd13407dcbc5d9c5834d8fe244cb1943fe2e37ca8dc890",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Tetrahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ef6a141b01a665e30afd13407dcbc5d9c5834d8fe244cb1943fe2e37ca8dc890.json"
+    },
+    {
+      "id": "4eade4193ddbddf217a4295420a8f2a53155977d053d4e2aad17510fe19d955e",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Tetrahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4eade4193ddbddf217a4295420a8f2a53155977d053d4e2aad17510fe19d955e.json"
+    },
+    {
+      "id": "3892b749490ed5100407fde562dae86218553f98cb0e973d53a06725365b301e",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Tetrahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3892b749490ed5100407fde562dae86218553f98cb0e973d53a06725365b301e.json"
+    },
+    {
+      "id": "1131a0594c0caacbcf67f6bbaa3a28e6c8491f8f22c6af6b4a8f3af836c3e8a3",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Tetrahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1131a0594c0caacbcf67f6bbaa3a28e6c8491f8f22c6af6b4a8f3af836c3e8a3.json"
+    },
+    {
+      "id": "c24bfb12e026320cfc5e938695d2c494bd1b2cf8d013a4a189e0e2b006491255",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Tetrahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c24bfb12e026320cfc5e938695d2c494bd1b2cf8d013a4a189e0e2b006491255.json"
+    },
+    {
+      "id": "fa14c3913abb966d9e604b778280d771757b9d732dc32b5f662df0bf2300cf98",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Tetrahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fa14c3913abb966d9e604b778280d771757b9d732dc32b5f662df0bf2300cf98.json"
+    },
+    {
+      "id": "62fd602596ec8b8a17ea542839e0c47d6235b940b143810721708be7af4e2ac1",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Tetrahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/62fd602596ec8b8a17ea542839e0c47d6235b940b143810721708be7af4e2ac1.json"
+    },
+    {
+      "id": "3da3cb1a5a4051412aa836ef3b63d3a9f0e0a619febe96841010a4674b77fb21",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Tetrahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3da3cb1a5a4051412aa836ef3b63d3a9f0e0a619febe96841010a4674b77fb21.json"
+    },
+    {
+      "id": "6bdc0cc442cfc6f74c9110370db89f4f06857b73b8631ec3d282157a2a95fa2c",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Triangle/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6bdc0cc442cfc6f74c9110370db89f4f06857b73b8631ec3d282157a2a95fa2c.json"
+    },
+    {
+      "id": "0ce3b66c2af355943f211a47f26d537d9312b0730b0b7a3c215019ddd56e6ec9",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Triangle/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0ce3b66c2af355943f211a47f26d537d9312b0730b0b7a3c215019ddd56e6ec9.json"
+    },
+    {
+      "id": "1096937a7eac9dd60b7d68fbd176097e7d6b8a41db95e7f1e72c713516e800c9",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Triangle/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/1096937a7eac9dd60b7d68fbd176097e7d6b8a41db95e7f1e72c713516e800c9.json"
+    },
+    {
+      "id": "784fe95775b755fa9d33bb7fa7e93dc652ff35ec26e3cc3fb0b495abe17bb197",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Triangle/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/784fe95775b755fa9d33bb7fa7e93dc652ff35ec26e3cc3fb0b495abe17bb197.json"
+    },
+    {
+      "id": "4929c5f92726adafb70d4e4f61979dd449cbf10820af2239b2377fde3542b2ec",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Triangle/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4929c5f92726adafb70d4e4f61979dd449cbf10820af2239b2377fde3542b2ec.json"
+    },
+    {
+      "id": "7dbfffa61a3bacc3b449a2ba43f4e28d11c94c601f9d2d713310168680c3a009",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Triangle/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7dbfffa61a3bacc3b449a2ba43f4e28d11c94c601f9d2d713310168680c3a009.json"
+    },
+    {
+      "id": "31085934fea76900e53ea519aa303238c0f0623043c9e2834c70c960fce08e4a",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Triangle/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/31085934fea76900e53ea519aa303238c0f0623043c9e2834c70c960fce08e4a.json"
+    },
+    {
+      "id": "a739a6b8005920cb62484124981e37e9dfca8a6bb8bb9ddfe76e0fcd2a3b9de4",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Triangle/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a739a6b8005920cb62484124981e37e9dfca8a6bb8bb9ddfe76e0fcd2a3b9de4.json"
+    },
+    {
+      "id": "6a0cdf123579bebe25312cddd1dcfb7b9b8f03215ffa4e77e554fee3c27d9117",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Triangle/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6a0cdf123579bebe25312cddd1dcfb7b9b8f03215ffa4e77e554fee3c27d9117.json"
+    },
+    {
+      "id": "8e1f019c428912061c734435cd01264cd5dc691890bfd128a30673027a8f1bde",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Wedge/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8e1f019c428912061c734435cd01264cd5dc691890bfd128a30673027a8f1bde.json"
+    },
+    {
+      "id": "8d5643f56cf995d0c345b0997f3c13fbe8fdc64322a2658758f50dcc9e8b1169",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Wedge/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8d5643f56cf995d0c345b0997f3c13fbe8fdc64322a2658758f50dcc9e8b1169.json"
+    },
+    {
+      "id": "49217f7f743a2b2f6649d9b83cb236b7e5f2f5d195dfd251ed6c110b961207c7",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Wedge/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/49217f7f743a2b2f6649d9b83cb236b7e5f2f5d195dfd251ed6c110b961207c7.json"
+    },
+    {
+      "id": "b81c15878ad398796ceed75eb7d802e8adf47d24335b545fbfa97a09241e93f9",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Wedge/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b81c15878ad398796ceed75eb7d802e8adf47d24335b545fbfa97a09241e93f9.json"
+    },
+    {
+      "id": "c0cda17bbc68b97dfe854de19cc7123897bef201ab3fdf1d7637af0efa4f812e",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Wedge/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c0cda17bbc68b97dfe854de19cc7123897bef201ab3fdf1d7637af0efa4f812e.json"
+    },
+    {
+      "id": "9d75117bd41798361885333d3bf07a162452595b8f49a03d6e38ff5a5d22569d",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Wedge/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/9d75117bd41798361885333d3bf07a162452595b8f49a03d6e38ff5a5d22569d.json"
+    },
+    {
+      "id": "e7bba6480d29f7c2642f0ddf5a8b830beeef65efe438837b85e6ebc52fae2fb5",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Wedge/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e7bba6480d29f7c2642f0ddf5a8b830beeef65efe438837b85e6ebc52fae2fb5.json"
+    },
+    {
+      "id": "bd734c7fcd20c33c8bccabd02cc5de1377f9263e89a0979af976644d9f54e4c6",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Wedge/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/bd734c7fcd20c33c8bccabd02cc5de1377f9263e89a0979af976644d9f54e4c6.json"
+    },
+    {
+      "id": "3f1b4a9647fff332262c11a5639075aec71678155c16be5964ccf25712604b3b",
+      "name": "Convection/Assembly/H1/P3/ComplexField/RealDirection/Wedge/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3f1b4a9647fff332262c11a5639075aec71678155c16be5964ccf25712604b3b.json"
+    },
+    {
+      "id": "ee75eddd25701f53b004e30fc4a2493172e0bb8893e66760f2f92da0d99a5f75",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Hexahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/ee75eddd25701f53b004e30fc4a2493172e0bb8893e66760f2f92da0d99a5f75.json"
+    },
+    {
+      "id": "fad29aca56e6941116d580f79518d88d96427f67687f4acc6e8e770073791e84",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Hexahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fad29aca56e6941116d580f79518d88d96427f67687f4acc6e8e770073791e84.json"
+    },
+    {
+      "id": "15281236068cfeaec5f7c45ddb599f7da774e4671b75082f4f1e1badc8bc92be",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Hexahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/15281236068cfeaec5f7c45ddb599f7da774e4671b75082f4f1e1badc8bc92be.json"
+    },
+    {
+      "id": "188fd8d36bd90c1e61e2daf7f996387afae3c5180e94fe503dbba235bb29b32e",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Hexahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/188fd8d36bd90c1e61e2daf7f996387afae3c5180e94fe503dbba235bb29b32e.json"
+    },
+    {
+      "id": "89b1513b84c99b00c349a9fc9aaf2af5d6065ee2e282b22e5ea99a97f435745f",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Hexahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/89b1513b84c99b00c349a9fc9aaf2af5d6065ee2e282b22e5ea99a97f435745f.json"
+    },
+    {
+      "id": "97fd784b4c68982f70ea950407a044e480d2940963c994dc12cd9421587c869b",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Hexahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/97fd784b4c68982f70ea950407a044e480d2940963c994dc12cd9421587c869b.json"
+    },
+    {
+      "id": "c89c5fc422b508ed7a4050ea21c801ff1dc78633ca89d8c1564a0c69236aad13",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Hexahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c89c5fc422b508ed7a4050ea21c801ff1dc78633ca89d8c1564a0c69236aad13.json"
+    },
+    {
+      "id": "141ce465c67f4ebed184220d09ac6ae5c36f8b044ecbc817a627ad5d030387d5",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Hexahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/141ce465c67f4ebed184220d09ac6ae5c36f8b044ecbc817a627ad5d030387d5.json"
+    },
+    {
+      "id": "c6969a8fddf5174562439236186caf68f2b7667a1fe3028a67d969caa6f9f195",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Hexahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c6969a8fddf5174562439236186caf68f2b7667a1fe3028a67d969caa6f9f195.json"
+    },
+    {
+      "id": "90d8965b79683353871c240253f4a07bda324413d8a4101bc29b4734ace07ca2",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Pyramid/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/90d8965b79683353871c240253f4a07bda324413d8a4101bc29b4734ace07ca2.json"
+    },
+    {
+      "id": "8c31834087c741731d33124c3c29fce9c1bef6b93d4b97b524da1a40d8398a40",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Pyramid/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8c31834087c741731d33124c3c29fce9c1bef6b93d4b97b524da1a40d8398a40.json"
+    },
+    {
+      "id": "48e516a1fb75cab4a71732e2c4f1eb5f68b8c038cb8cdcc8b3923b33c54d7553",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Pyramid/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/48e516a1fb75cab4a71732e2c4f1eb5f68b8c038cb8cdcc8b3923b33c54d7553.json"
+    },
+    {
+      "id": "fb5cba4109d560f437e0f4fa425a1bd92a0d9a97363bc2be958b83c7b7bb3ef1",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Pyramid/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fb5cba4109d560f437e0f4fa425a1bd92a0d9a97363bc2be958b83c7b7bb3ef1.json"
+    },
+    {
+      "id": "486435c0410c7b47bfb0a3cba34f640dff2fec94098565b5069c2ad3abf92dbd",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Pyramid/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/486435c0410c7b47bfb0a3cba34f640dff2fec94098565b5069c2ad3abf92dbd.json"
+    },
+    {
+      "id": "42d1ff151d1afebc98b3a628f2c28823f1c754b688c13b02f5f568789fd058cb",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Pyramid/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/42d1ff151d1afebc98b3a628f2c28823f1c754b688c13b02f5f568789fd058cb.json"
+    },
+    {
+      "id": "0718b48a71e284b1e78876300bb30b1befae8a2ff94e4093f1a788fa01a55909",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Pyramid/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0718b48a71e284b1e78876300bb30b1befae8a2ff94e4093f1a788fa01a55909.json"
+    },
+    {
+      "id": "b31d8ccdb0873ce1f59c3d7a1141eea8049174a655217a4ada91d5b2fcc7ecef",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Pyramid/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b31d8ccdb0873ce1f59c3d7a1141eea8049174a655217a4ada91d5b2fcc7ecef.json"
+    },
+    {
+      "id": "d188fa15a2bd434c28b909f54197f252f351a372d3db03adf05c4720a6705fa4",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Pyramid/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/d188fa15a2bd434c28b909f54197f252f351a372d3db03adf05c4720a6705fa4.json"
+    },
+    {
+      "id": "7778d9ae24a97ed4064b4caa0177a13de27ba79f19cdb887a30246cc51dedb33",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Quadrilateral/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/7778d9ae24a97ed4064b4caa0177a13de27ba79f19cdb887a30246cc51dedb33.json"
+    },
+    {
+      "id": "50a04f3a55c18a10e42b849460acb7eb488b68150c5c4f32885b80158237da82",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Quadrilateral/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/50a04f3a55c18a10e42b849460acb7eb488b68150c5c4f32885b80158237da82.json"
+    },
+    {
+      "id": "08b9ebde665776965fac8fd8d9085758d42274ee1f38108d60be96dfc4e86e4f",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Quadrilateral/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/08b9ebde665776965fac8fd8d9085758d42274ee1f38108d60be96dfc4e86e4f.json"
+    },
+    {
+      "id": "3af19ec2120aabdf9c46291d93ba9f805321438bc6aaf066b9239f8fb71c5694",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Quadrilateral/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3af19ec2120aabdf9c46291d93ba9f805321438bc6aaf066b9239f8fb71c5694.json"
+    },
+    {
+      "id": "aac4c5cf3a324b3ea008503b9356c9716d96c33c7f5198e35bc31fd58de4fab8",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Quadrilateral/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/aac4c5cf3a324b3ea008503b9356c9716d96c33c7f5198e35bc31fd58de4fab8.json"
+    },
+    {
+      "id": "dd969246a7b5aa9c1dae8740289fa9bf0046462e4103b2560c9fbab15711772e",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Quadrilateral/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/dd969246a7b5aa9c1dae8740289fa9bf0046462e4103b2560c9fbab15711772e.json"
+    },
+    {
+      "id": "066fd8346cfcf81d83049b308c936af7bffdadce3733c100142464a1a45d725e",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Quadrilateral/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/066fd8346cfcf81d83049b308c936af7bffdadce3733c100142464a1a45d725e.json"
+    },
+    {
+      "id": "812bbf921fa6500d9210d20e6731c734e0af8ed7e03fd1395a40fc6859130af0",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Quadrilateral/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/812bbf921fa6500d9210d20e6731c734e0af8ed7e03fd1395a40fc6859130af0.json"
+    },
+    {
+      "id": "df1bbd45d259d48397d1a83e11717f1c45bbf8c23e45fdadb0aa82b90376dc10",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Quadrilateral/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/df1bbd45d259d48397d1a83e11717f1c45bbf8c23e45fdadb0aa82b90376dc10.json"
+    },
+    {
+      "id": "da518a792267f4d9fe3c5e7f535f3bbccf8c10b6b8c8392839d0a88816e6379d",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Segment/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/da518a792267f4d9fe3c5e7f535f3bbccf8c10b6b8c8392839d0a88816e6379d.json"
+    },
+    {
+      "id": "8a95dd5930c889cef16fab614bdd55fe47f533abe66e40ba53ff8ecfbe53139a",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Segment/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/8a95dd5930c889cef16fab614bdd55fe47f533abe66e40ba53ff8ecfbe53139a.json"
+    },
+    {
+      "id": "cbb36ca23cc1015e3b25761f724f034c6dfada9368c6bbb516341c7e21b830d1",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Segment/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/cbb36ca23cc1015e3b25761f724f034c6dfada9368c6bbb516341c7e21b830d1.json"
+    },
+    {
+      "id": "6bb9aa958a8347bb2a2442870235d51d8c433c61b23d2d6c9e7ffa90cb43c355",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Segment/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6bb9aa958a8347bb2a2442870235d51d8c433c61b23d2d6c9e7ffa90cb43c355.json"
+    },
+    {
+      "id": "e301b45b3d54f041ae5897fb7a4f6db2dc1916eda4fb332b6149bf80fa7fec6c",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Segment/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e301b45b3d54f041ae5897fb7a4f6db2dc1916eda4fb332b6149bf80fa7fec6c.json"
+    },
+    {
+      "id": "34adba57b1be5e6c59e784cb44092d5254cbb3d1a2d26aafc4a8dd5f3c3fe593",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Segment/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/34adba57b1be5e6c59e784cb44092d5254cbb3d1a2d26aafc4a8dd5f3c3fe593.json"
+    },
+    {
+      "id": "5ccf2d3811d78b4989347ac378de1109dfac722a55d23e1547cd12d236d84df8",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Segment/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/5ccf2d3811d78b4989347ac378de1109dfac722a55d23e1547cd12d236d84df8.json"
+    },
+    {
+      "id": "3e6c7fe8c3c723f852481e0a84793a4075d674a2af285b71e2ff4e7220f55c16",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Segment/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3e6c7fe8c3c723f852481e0a84793a4075d674a2af285b71e2ff4e7220f55c16.json"
+    },
+    {
+      "id": "b4aedb3654d883e74274fb0004ef8aa2fe9577738cb5460edb3fa0049dce6c97",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Segment/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b4aedb3654d883e74274fb0004ef8aa2fe9577738cb5460edb3fa0049dce6c97.json"
+    },
+    {
+      "id": "4a613ea428387993b3f33b3420b376e37897b4a682447b5bebcccc61d960a15d",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Tetrahedron/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4a613ea428387993b3f33b3420b376e37897b4a682447b5bebcccc61d960a15d.json"
+    },
+    {
+      "id": "4e773f5c8e8147e12f2e149ba5562aa5a912792cf2215e0a95705f2fd38443f8",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Tetrahedron/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4e773f5c8e8147e12f2e149ba5562aa5a912792cf2215e0a95705f2fd38443f8.json"
+    },
+    {
+      "id": "2f0233baa31f2ff3e80a2bceffad5e0c40c51f731646f3cf93a6782f08e9370e",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Tetrahedron/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/2f0233baa31f2ff3e80a2bceffad5e0c40c51f731646f3cf93a6782f08e9370e.json"
+    },
+    {
+      "id": "a78460757efc79fd4ec8eba04057519ba4d259d92d4ff86ed79220fc2f425f6e",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Tetrahedron/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/a78460757efc79fd4ec8eba04057519ba4d259d92d4ff86ed79220fc2f425f6e.json"
+    },
+    {
+      "id": "679563af4950017c094f334cb1f7a89522b783dedda3adaddad4158bc3a2615a",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Tetrahedron/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/679563af4950017c094f334cb1f7a89522b783dedda3adaddad4158bc3a2615a.json"
+    },
+    {
+      "id": "350482496e700327f2703e2c1f8463b298c5a20ec5888ec3f6c5beb45ba0454b",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Tetrahedron/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/350482496e700327f2703e2c1f8463b298c5a20ec5888ec3f6c5beb45ba0454b.json"
+    },
+    {
+      "id": "b4795614326529fe5be34a3be7756a601a905a286ec2b59868ff78d6de1d4fb2",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Tetrahedron/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b4795614326529fe5be34a3be7756a601a905a286ec2b59868ff78d6de1d4fb2.json"
+    },
+    {
+      "id": "946c3796499d5e1c682dfa3436aaa3248fb6217d55ff46acedd5b1ef2e9ac83c",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Tetrahedron/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/946c3796499d5e1c682dfa3436aaa3248fb6217d55ff46acedd5b1ef2e9ac83c.json"
+    },
+    {
+      "id": "612b5577a7236fd5bc2f6e93c7143f96cbcf345ded82b92f7920537d05c06d74",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Tetrahedron/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/612b5577a7236fd5bc2f6e93c7143f96cbcf345ded82b92f7920537d05c06d74.json"
+    },
+    {
+      "id": "cda3b7ab3553046ee09c7af9d7bc6d8e3c20e0a87d4d3a2c94c690ffed5fcede",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Triangle/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/cda3b7ab3553046ee09c7af9d7bc6d8e3c20e0a87d4d3a2c94c690ffed5fcede.json"
+    },
+    {
+      "id": "3ecb033e65b5b03f1bcd09be65adf86fcf39fc8f3add5b429b88651d91ba3216",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Triangle/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3ecb033e65b5b03f1bcd09be65adf86fcf39fc8f3add5b429b88651d91ba3216.json"
+    },
+    {
+      "id": "f64503b0c0b486c77409932567848f0e114be9346046ed67767f40326e10ee3f",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Triangle/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f64503b0c0b486c77409932567848f0e114be9346046ed67767f40326e10ee3f.json"
+    },
+    {
+      "id": "9b60e09074844992bf175eb252079b753627e01a07865d6005e3df13f54f9292",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Triangle/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/9b60e09074844992bf175eb252079b753627e01a07865d6005e3df13f54f9292.json"
+    },
+    {
+      "id": "c0a3ebe84bf0c16ecb96e00c79e4a54d9489fe8630c4a464094bc5a62da7f7e8",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Triangle/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/c0a3ebe84bf0c16ecb96e00c79e4a54d9489fe8630c4a464094bc5a62da7f7e8.json"
+    },
+    {
+      "id": "0ebae8fe673bc036aa0bb9306b27da29747bd9cc03139d8d8bc70c0e83e9c8cd",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Triangle/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/0ebae8fe673bc036aa0bb9306b27da29747bd9cc03139d8d8bc70c0e83e9c8cd.json"
+    },
+    {
+      "id": "6e9b13ff8950bbb8cee50674e5671ec622badf4b86d2acdaa3e9021da584e6f6",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Triangle/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/6e9b13ff8950bbb8cee50674e5671ec622badf4b86d2acdaa3e9021da584e6f6.json"
+    },
+    {
+      "id": "17bfdf23814a6d813a9e2cb40cd2705f88e9898850af16ab8a1cd083e6c652d8",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Triangle/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/17bfdf23814a6d813a9e2cb40cd2705f88e9898850af16ab8a1cd083e6c652d8.json"
+    },
+    {
+      "id": "eae2de5106d30fa35035b870709bd9bb652ec65a0a4dff8e5a95c6619583074f",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Triangle/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/eae2de5106d30fa35035b870709bd9bb652ec65a0a4dff8e5a95c6619583074f.json"
+    },
+    {
+      "id": "fb2c1258fec74f7a4f131ca08a68bd4668194b3da4323e46f5c83c66c6efc174",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Wedge/Complete/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fb2c1258fec74f7a4f131ca08a68bd4668194b3da4323e46f5c83c66c6efc174.json"
+    },
+    {
+      "id": "b1aabbad17fb2ed5910b447d38caaf08bad4101a5d24173860815583b3101329",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Wedge/Complete/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/b1aabbad17fb2ed5910b447d38caaf08bad4101a5d24173860815583b3101329.json"
+    },
+    {
+      "id": "4f96109e85838ada5714aa4fad6492f776f6971ea49324f4b837b79455e8c835",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Wedge/Complete/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/4f96109e85838ada5714aa4fad6492f776f6971ea49324f4b837b79455e8c835.json"
+    },
+    {
+      "id": "610573144ae4363e6c5fbf6841eae712f050af03427f090c206dab3eb76a351a",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Wedge/SparseCompletion/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/610573144ae4363e6c5fbf6841eae712f050af03427f090c206dab3eb76a351a.json"
+    },
+    {
+      "id": "daeb89ab733485a7a0c447edcc92554a5c0f4b7e7f9e0a10398c4e232b9675ff",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Wedge/SparseCompletion/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/daeb89ab733485a7a0c447edcc92554a5c0f4b7e7f9e0a10398c4e232b9675ff.json"
+    },
+    {
+      "id": "3916fdad0aa91dae4114e285ed9f8bb590fb9d7c49a1c04ac97a1b6eb498b0d2",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Wedge/SparseCompletion/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/3916fdad0aa91dae4114e285ed9f8bb590fb9d7c49a1c04ac97a1b6eb498b0d2.json"
+    },
+    {
+      "id": "e86c2d6fb8b59fad52b5c00b14bacbe4f171bc73f9dbfcf7b7233eac0c9f0691",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Wedge/Triplets/2/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/e86c2d6fb8b59fad52b5c00b14bacbe4f171bc73f9dbfcf7b7233eac0c9f0691.json"
+    },
+    {
+      "id": "fc267faed4d906a590683908f59b26a1054c796764bc7f9cb2240550d8bc8b34",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Wedge/Triplets/3/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/fc267faed4d906a590683908f59b26a1054c796764bc7f9cb2240550d8bc8b34.json"
+    },
+    {
+      "id": "f08dbed226d8341e8abe63a15ccd6742c8fab5ec2931a33762c268ccb40123f7",
+      "name": "Convection/Assembly/H1/P3/RealField/RealDirection/Wedge/Triplets/4/process_time/real_time",
+      "metric": "real_time",
+      "url": "cases/f08dbed226d8341e8abe63a15ccd6742c8fab5ec2931a33762c268ccb40123f7.json"
+    }
+  ]
+}

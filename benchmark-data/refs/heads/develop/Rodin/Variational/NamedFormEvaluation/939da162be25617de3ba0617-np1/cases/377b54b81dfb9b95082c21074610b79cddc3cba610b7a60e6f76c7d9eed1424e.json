@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "component": "Rodin/Variational/NamedFormEvaluation",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "NamedEvaluation/P2/Helmholtz/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+  "metric": "cpu_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "NamedEvaluation/P2/Helmholtz/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+          "value": 3.1091779318181363,
+          "unit": "ms",
+          "metric": "cpu_time",
+          "samples": [
+            3.1091779318181363
+          ],
+          "records": [
+            {
+              "name": "NamedEvaluation/P2/Helmholtz/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+              "family_index": 77,
+              "per_family_instance_index": 1,
+              "run_name": "NamedEvaluation/P2/Helmholtz/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 88,
+              "real_time": 3.109307749999795,
+              "cpu_time": 3.1091779318181363,
+              "time_unit": "ms",
+              "cells": 384.0,
+              "coefficient_degree": 2.0,
+              "cold_geometry": 0.0,
+              "components": 1.0,
+              "dimension": 3.0,
+              "dofs": 729.0,
+              "field_degree": 2.0,
+              "gradient_points_per_cell": 11.0,
+              "local_dofs": 10.0,
+              "mass_points_per_cell": 23.0,
+              "named_nonzeros": 17025.0,
+              "nonzeros": 17025.0,
+              "paused_timing": 0.0,
+              "relative_error": 1.6424760143998073e-16,
+              "scatter_slots": 38400.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T16:32:01+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinNamedFormBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2445,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.802734,
+              0.241699,
+              0.0854492
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

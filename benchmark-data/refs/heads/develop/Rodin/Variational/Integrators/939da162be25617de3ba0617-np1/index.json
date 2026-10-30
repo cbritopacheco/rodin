@@ -1,0 +1,1190 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBasisScalingBenchmarks",
+      "RodinFieldContractionBenchmarks",
+      "RodinFieldDerivativeBenchmarks",
+      "RodinFieldOperationBenchmarks",
+      "RodinGridFunctionBenchmarks",
+      "RodinH1BasisLifecycleBenchmarks",
+      "RodinH1ConvectionBenchmarks",
+      "RodinH1MassBindingBenchmarks",
+      "RodinH1MassOperandOrderBenchmarks",
+      "RodinH1PreparedBasisBenchmarks",
+      "RodinH1PyramidBenchmarks",
+      "RodinH1PyramidNodalBenchmarks",
+      "RodinNamedFormBenchmarks",
+      "RodinNamedMassKernelBenchmarks",
+      "RodinP1QuadratureBindingBenchmarks",
+      "RodinPhysicalGradientBenchmarks",
+      "RodinProblemLifecycleBenchmarks",
+      "RodinQuadratureBindingBenchmarks",
+      "RodinQuadratureExpressionBenchmarks",
+      "RodinReferenceElementBenchmarks",
+      "RodinStokesBindingBenchmarks",
+      "RodinVariationalCoefficientEvaluationBenchmarks",
+      "RodinVariationalGridFunctionBenchmarks",
+      "RodinVariationalIntegratorsBenchmarks",
+      "RodinVariationalNamedFormsBenchmarks",
+      "RodinVariationalP1Benchmarks",
+      "RodinVariationalRankOneJacobianBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "4fae4adcf26090820446b02e289db4852c7c085c130487172898174759c4a08c",
+      "name": "Integrator/Assembly/H1P2/D2/BoundaryLoad",
+      "metric": "cpu_time",
+      "url": "cases/4fae4adcf26090820446b02e289db4852c7c085c130487172898174759c4a08c.json"
+    },
+    {
+      "id": "01129dddbc0f040f7a2938a3501b8a1d886dfee9b080de7d676d8225bd373609",
+      "name": "Integrator/Assembly/H1P2/D2/BoundaryMass",
+      "metric": "cpu_time",
+      "url": "cases/01129dddbc0f040f7a2938a3501b8a1d886dfee9b080de7d676d8225bd373609.json"
+    },
+    {
+      "id": "3e577667b8ce4a4ef4684f6ba54dc5f9b6db39dbc79d58dc8282f25f41e30439",
+      "name": "Integrator/Assembly/H1P2/D2/ColdGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/3e577667b8ce4a4ef4684f6ba54dc5f9b6db39dbc79d58dc8282f25f41e30439.json"
+    },
+    {
+      "id": "b8069b7152eb04d8cb21702d16d27d54a5bad6da96fb1b6e454b3323f055e96c",
+      "name": "Integrator/Assembly/H1P2/D2/ColdMass",
+      "metric": "cpu_time",
+      "url": "cases/b8069b7152eb04d8cb21702d16d27d54a5bad6da96fb1b6e454b3323f055e96c.json"
+    },
+    {
+      "id": "67c09e0f2a0845aa0a63b1faf8b817c3025cb706e3969a925841c986cca579c2",
+      "name": "Integrator/Assembly/H1P2/D2/Elasticity",
+      "metric": "cpu_time",
+      "url": "cases/67c09e0f2a0845aa0a63b1faf8b817c3025cb706e3969a925841c986cca579c2.json"
+    },
+    {
+      "id": "6945960808aa147571388d1096128519c90c41a49c66394a07d0a2f1d8c8469a",
+      "name": "Integrator/Assembly/H1P2/D2/ReactionDiffusion",
+      "metric": "cpu_time",
+      "url": "cases/6945960808aa147571388d1096128519c90c41a49c66394a07d0a2f1d8c8469a.json"
+    },
+    {
+      "id": "dd2d9697dd6bca93b138c399ffe3955e439a007e2c7977f11221b8cf27615f34",
+      "name": "Integrator/Assembly/H1P2/D2/ReassemblyGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/dd2d9697dd6bca93b138c399ffe3955e439a007e2c7977f11221b8cf27615f34.json"
+    },
+    {
+      "id": "9f506e3909fdc0e34d4a2c9ca525a6b15b0779423ce98b8b72d65f29ba5adbc3",
+      "name": "Integrator/Assembly/H1P2/D2/ReassemblyMass",
+      "metric": "cpu_time",
+      "url": "cases/9f506e3909fdc0e34d4a2c9ca525a6b15b0779423ce98b8b72d65f29ba5adbc3.json"
+    },
+    {
+      "id": "0e793ea653588c318fd2ab89a93d109568b09534cf6a599e2ee5cf38f6024e18",
+      "name": "Integrator/Assembly/H1P2/D3/ColdGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/0e793ea653588c318fd2ab89a93d109568b09534cf6a599e2ee5cf38f6024e18.json"
+    },
+    {
+      "id": "ce52ed5a1139c50870ff79acf0be07bb82c7e03abfead244577f9f8aa2017ba7",
+      "name": "Integrator/Assembly/H1P2/D3/ColdMass",
+      "metric": "cpu_time",
+      "url": "cases/ce52ed5a1139c50870ff79acf0be07bb82c7e03abfead244577f9f8aa2017ba7.json"
+    },
+    {
+      "id": "6ff8feb7e725bb572b6bcaa9fc0229bf9f50edcb19a8b6958e8ecd781dd1b8ea",
+      "name": "Integrator/Assembly/H1P2/D3/Elasticity",
+      "metric": "cpu_time",
+      "url": "cases/6ff8feb7e725bb572b6bcaa9fc0229bf9f50edcb19a8b6958e8ecd781dd1b8ea.json"
+    },
+    {
+      "id": "58b8e4ff6b39f31999777f62f04513aa10421788593c44d32880bb28ede70a73",
+      "name": "Integrator/Assembly/H1P2/D3/ReactionDiffusion",
+      "metric": "cpu_time",
+      "url": "cases/58b8e4ff6b39f31999777f62f04513aa10421788593c44d32880bb28ede70a73.json"
+    },
+    {
+      "id": "398159bb9d7722eec82c385d048ffcceb674ca9b77aef4a3d985451ec1baacb0",
+      "name": "Integrator/Assembly/H1P2/D3/ReassemblyGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/398159bb9d7722eec82c385d048ffcceb674ca9b77aef4a3d985451ec1baacb0.json"
+    },
+    {
+      "id": "0eb624831c38caf53b0e379c151a8b9165fa6b966d8b0e55ff381c32b13a5c71",
+      "name": "Integrator/Assembly/H1P2/D3/ReassemblyMass",
+      "metric": "cpu_time",
+      "url": "cases/0eb624831c38caf53b0e379c151a8b9165fa6b966d8b0e55ff381c32b13a5c71.json"
+    },
+    {
+      "id": "417749e06e9c501f3b5ba69ff659cc7a4b4724ce4de12fe09a369c63f16e4415",
+      "name": "Integrator/Assembly/H1P3/D2/ColdGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/417749e06e9c501f3b5ba69ff659cc7a4b4724ce4de12fe09a369c63f16e4415.json"
+    },
+    {
+      "id": "6c3be76a79448afa92a5654d2f63cb5ef2b4b4b1fa31914a1f800f6a744c12b0",
+      "name": "Integrator/Assembly/H1P3/D2/ColdMass",
+      "metric": "cpu_time",
+      "url": "cases/6c3be76a79448afa92a5654d2f63cb5ef2b4b4b1fa31914a1f800f6a744c12b0.json"
+    },
+    {
+      "id": "8e04cb7f6a6227a8840415f18dcfd77fdf0a56b021367f69e1eef38188ff7992",
+      "name": "Integrator/Assembly/H1P3/D2/Elasticity",
+      "metric": "cpu_time",
+      "url": "cases/8e04cb7f6a6227a8840415f18dcfd77fdf0a56b021367f69e1eef38188ff7992.json"
+    },
+    {
+      "id": "aa7de5fc7ab22af1c73bdc2f0ab0abae56be1f71ccd6be2b1eac3b392fc6f0d4",
+      "name": "Integrator/Assembly/H1P3/D2/ReactionDiffusion",
+      "metric": "cpu_time",
+      "url": "cases/aa7de5fc7ab22af1c73bdc2f0ab0abae56be1f71ccd6be2b1eac3b392fc6f0d4.json"
+    },
+    {
+      "id": "859f012f393810d0c0620391ac57dc9afc5704370c65502514f20c6b12618e43",
+      "name": "Integrator/Assembly/H1P3/D2/ReassemblyGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/859f012f393810d0c0620391ac57dc9afc5704370c65502514f20c6b12618e43.json"
+    },
+    {
+      "id": "2384486961aabf28a111462e4544c815809170aced9db62cb2bd346dbd79f8c9",
+      "name": "Integrator/Assembly/H1P3/D2/ReassemblyMass",
+      "metric": "cpu_time",
+      "url": "cases/2384486961aabf28a111462e4544c815809170aced9db62cb2bd346dbd79f8c9.json"
+    },
+    {
+      "id": "b57949053002705c989d1ac55af2f0725e7a9d639443d57882edfa1e01c92352",
+      "name": "Integrator/Assembly/P1/D2/BoundaryLoad",
+      "metric": "cpu_time",
+      "url": "cases/b57949053002705c989d1ac55af2f0725e7a9d639443d57882edfa1e01c92352.json"
+    },
+    {
+      "id": "7ca17de38b3bcdc6d1ddeeb3d3cf3db50b4d6c64658759bff8e89cb985acd7d1",
+      "name": "Integrator/Assembly/P1/D2/BoundaryMass",
+      "metric": "cpu_time",
+      "url": "cases/7ca17de38b3bcdc6d1ddeeb3d3cf3db50b4d6c64658759bff8e89cb985acd7d1.json"
+    },
+    {
+      "id": "65fd0219b953e61c1e97856410fa15a50fdd9496b0d2404e7babcc77e0aceee6",
+      "name": "Integrator/Assembly/P1/D2/ColdGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/65fd0219b953e61c1e97856410fa15a50fdd9496b0d2404e7babcc77e0aceee6.json"
+    },
+    {
+      "id": "54db0b9c957df3d5199d6286afce3453ddf961c8f8bcd8ea01d1c1e8579a35c0",
+      "name": "Integrator/Assembly/P1/D2/ColdMass",
+      "metric": "cpu_time",
+      "url": "cases/54db0b9c957df3d5199d6286afce3453ddf961c8f8bcd8ea01d1c1e8579a35c0.json"
+    },
+    {
+      "id": "d00a85027983f220fbf3dcba4e6670c0ad414a49f0411a62103772a37b9e6204",
+      "name": "Integrator/Assembly/P1/D2/Elasticity",
+      "metric": "cpu_time",
+      "url": "cases/d00a85027983f220fbf3dcba4e6670c0ad414a49f0411a62103772a37b9e6204.json"
+    },
+    {
+      "id": "5111dd5acdc957f6103acf87cc84df19f9127ea0cb2294aceaf5acf63c8c41cc",
+      "name": "Integrator/Assembly/P1/D2/ReactionDiffusion",
+      "metric": "cpu_time",
+      "url": "cases/5111dd5acdc957f6103acf87cc84df19f9127ea0cb2294aceaf5acf63c8c41cc.json"
+    },
+    {
+      "id": "2216526a987371d428ee4d0950c86056efb5b11a6ca83a5e4e192f5641ecde57",
+      "name": "Integrator/Assembly/P1/D2/ReassemblyGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/2216526a987371d428ee4d0950c86056efb5b11a6ca83a5e4e192f5641ecde57.json"
+    },
+    {
+      "id": "dafde32a0acfb1c32a558efd3e0154edb274c68d4af98673ce81157e9b770f5e",
+      "name": "Integrator/Assembly/P1/D2/ReassemblyMass",
+      "metric": "cpu_time",
+      "url": "cases/dafde32a0acfb1c32a558efd3e0154edb274c68d4af98673ce81157e9b770f5e.json"
+    },
+    {
+      "id": "405978578307b7ba49a5f15110e140d1cb34186dc21ddbda8acbc8776ad575e3",
+      "name": "Integrator/Assembly/P1/D3/BoundaryLoad",
+      "metric": "cpu_time",
+      "url": "cases/405978578307b7ba49a5f15110e140d1cb34186dc21ddbda8acbc8776ad575e3.json"
+    },
+    {
+      "id": "ba28a28cc71b24478d7d50e299472186a179802277146f964f57a9883c11d7a0",
+      "name": "Integrator/Assembly/P1/D3/BoundaryMass",
+      "metric": "cpu_time",
+      "url": "cases/ba28a28cc71b24478d7d50e299472186a179802277146f964f57a9883c11d7a0.json"
+    },
+    {
+      "id": "ee39078a3a19053246f1b801364102821c228d0853bbe480aec59552a78a26be",
+      "name": "Integrator/Assembly/P1/D3/ColdGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/ee39078a3a19053246f1b801364102821c228d0853bbe480aec59552a78a26be.json"
+    },
+    {
+      "id": "1b17216f7e181bc91c9f4c48b06e9c1786f5d2384d868e3fc204b120b9ec6a06",
+      "name": "Integrator/Assembly/P1/D3/ColdMass",
+      "metric": "cpu_time",
+      "url": "cases/1b17216f7e181bc91c9f4c48b06e9c1786f5d2384d868e3fc204b120b9ec6a06.json"
+    },
+    {
+      "id": "288d2b712b01614b80a5fc7bafa47020c236d7660d41237afd82aa8bd580b078",
+      "name": "Integrator/Assembly/P1/D3/Elasticity",
+      "metric": "cpu_time",
+      "url": "cases/288d2b712b01614b80a5fc7bafa47020c236d7660d41237afd82aa8bd580b078.json"
+    },
+    {
+      "id": "9c6bf125dfd5e9921e8b75ceaa0e663ebdf58eb0d31d3462600dac849a2634ca",
+      "name": "Integrator/Assembly/P1/D3/ReactionDiffusion",
+      "metric": "cpu_time",
+      "url": "cases/9c6bf125dfd5e9921e8b75ceaa0e663ebdf58eb0d31d3462600dac849a2634ca.json"
+    },
+    {
+      "id": "01e258b32f46cf257493a6cb9a2798835b7a9c059d3af9f5b4dd48de677fbc83",
+      "name": "Integrator/Assembly/P1/D3/ReassemblyGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/01e258b32f46cf257493a6cb9a2798835b7a9c059d3af9f5b4dd48de677fbc83.json"
+    },
+    {
+      "id": "c0f1968c69a6954566e05309122bf9765e6b6a8dd9d1ca0f2b5f55f7da893c73",
+      "name": "Integrator/Assembly/P1/D3/ReassemblyMass",
+      "metric": "cpu_time",
+      "url": "cases/c0f1968c69a6954566e05309122bf9765e6b6a8dd9d1ca0f2b5f55f7da893c73.json"
+    },
+    {
+      "id": "5fb36fd9d0e866cf1909ad3a4d4681f8e0f17b90698fc705168209dfcd053080",
+      "name": "Integrator/Kernel/H1P1/D2/Advection",
+      "metric": "cpu_time",
+      "url": "cases/5fb36fd9d0e866cf1909ad3a4d4681f8e0f17b90698fc705168209dfcd053080.json"
+    },
+    {
+      "id": "fef30de7aba66bb3f9344ad373d35e2e0cfc04fec5f033d275789c170d51d797",
+      "name": "Integrator/Kernel/H1P1/D2/AnisotropicMass",
+      "metric": "cpu_time",
+      "url": "cases/fef30de7aba66bb3f9344ad373d35e2e0cfc04fec5f033d275789c170d51d797.json"
+    },
+    {
+      "id": "fb1a3ad5511a9918a3cb70a4dfea078a4b38703d9944425d9b1604c891591c64",
+      "name": "Integrator/Kernel/H1P1/D2/BasisLoad",
+      "metric": "cpu_time",
+      "url": "cases/fb1a3ad5511a9918a3cb70a4dfea078a4b38703d9944425d9b1604c891591c64.json"
+    },
+    {
+      "id": "999dd0ac0b7a4d9462e56776cd652f0cf77517a85c41076da3bf217a200454d4",
+      "name": "Integrator/Kernel/H1P1/D2/DivPressure",
+      "metric": "cpu_time",
+      "url": "cases/999dd0ac0b7a4d9462e56776cd652f0cf77517a85c41076da3bf217a200454d4.json"
+    },
+    {
+      "id": "80ebbc3cc7f244ef8743d484f3d7cd8ef016608a284f995051c3269d91243448",
+      "name": "Integrator/Kernel/H1P1/D2/GenericDivDiv",
+      "metric": "cpu_time",
+      "url": "cases/80ebbc3cc7f244ef8743d484f3d7cd8ef016608a284f995051c3269d91243448.json"
+    },
+    {
+      "id": "e422e473a1d03aa94fe2caeed30d1d83fe80de32c021d4f2269f02c4272c914e",
+      "name": "Integrator/Kernel/H1P1/D2/GenericElasticity",
+      "metric": "cpu_time",
+      "url": "cases/e422e473a1d03aa94fe2caeed30d1d83fe80de32c021d4f2269f02c4272c914e.json"
+    },
+    {
+      "id": "b66f014d4ce109d58a45e9cfb655b47c2132ff581c5c292c7851ebc3527e8754",
+      "name": "Integrator/Kernel/H1P1/D2/GenericFluxLoad",
+      "metric": "cpu_time",
+      "url": "cases/b66f014d4ce109d58a45e9cfb655b47c2132ff581c5c292c7851ebc3527e8754.json"
+    },
+    {
+      "id": "22fe8b726a2913738f6bf7f50d5e57a595d2a34fd58abc5f227b7b709eff16e2",
+      "name": "Integrator/Kernel/H1P1/D2/GradGrad",
+      "metric": "cpu_time",
+      "url": "cases/22fe8b726a2913738f6bf7f50d5e57a595d2a34fd58abc5f227b7b709eff16e2.json"
+    },
+    {
+      "id": "05b8f9eaaa0ab142d1cc3ea3826f6b23b64320cc37faeb9a0646564791a2a4e1",
+      "name": "Integrator/Kernel/H1P1/D2/GridFunctionAdvection",
+      "metric": "cpu_time",
+      "url": "cases/05b8f9eaaa0ab142d1cc3ea3826f6b23b64320cc37faeb9a0646564791a2a4e1.json"
+    },
+    {
+      "id": "87ae58ae013fa3cb43b04a8bc67ef2e47bbbf026618428d4de5ea9b0ab95e44b",
+      "name": "Integrator/Kernel/H1P1/D2/GridFunctionWeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/87ae58ae013fa3cb43b04a8bc67ef2e47bbbf026618428d4de5ea9b0ab95e44b.json"
+    },
+    {
+      "id": "defcdc165d474085eb134a20cf2c3abd2ca0fbc85b9c853af83123dfb10944b4",
+      "name": "Integrator/Kernel/H1P1/D2/JacobianJacobian",
+      "metric": "cpu_time",
+      "url": "cases/defcdc165d474085eb134a20cf2c3abd2ca0fbc85b9c853af83123dfb10944b4.json"
+    },
+    {
+      "id": "088d910bb1200a6a8fbf2b2ec32b9c0025900a2808c0e272b12d06bc2dd2c57c",
+      "name": "Integrator/Kernel/H1P1/D2/Mass",
+      "metric": "cpu_time",
+      "url": "cases/088d910bb1200a6a8fbf2b2ec32b9c0025900a2808c0e272b12d06bc2dd2c57c.json"
+    },
+    {
+      "id": "c5e5c62da54fbc220f6a7f2b34579ee0d816728ecf78b47f11d7880ed7587540",
+      "name": "Integrator/Kernel/H1P1/D2/OuterWeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/c5e5c62da54fbc220f6a7f2b34579ee0d816728ecf78b47f11d7880ed7587540.json"
+    },
+    {
+      "id": "ee3b964d83c172c1d07b160a071640beacf9f5598d523aacd9e416c0abf9fe4b",
+      "name": "Integrator/Kernel/H1P1/D2/PressureDiv",
+      "metric": "cpu_time",
+      "url": "cases/ee3b964d83c172c1d07b160a071640beacf9f5598d523aacd9e416c0abf9fe4b.json"
+    },
+    {
+      "id": "597a3784d304aa5cb2408ce50ed8f0a6b506b995227c78052b1442512e27abdf",
+      "name": "Integrator/Kernel/H1P1/D2/SourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/597a3784d304aa5cb2408ce50ed8f0a6b506b995227c78052b1442512e27abdf.json"
+    },
+    {
+      "id": "765e90730600a17193d0f3a2c53a209cdcbc425054972da6e7e31a416550e68c",
+      "name": "Integrator/Kernel/H1P1/D2/VectorMass",
+      "metric": "cpu_time",
+      "url": "cases/765e90730600a17193d0f3a2c53a209cdcbc425054972da6e7e31a416550e68c.json"
+    },
+    {
+      "id": "ae4bc3c12894efe2f86a8715f20a4b977310f160c6ca117e736d3f67adef11ff",
+      "name": "Integrator/Kernel/H1P1/D2/VectorSourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/ae4bc3c12894efe2f86a8715f20a4b977310f160c6ca117e736d3f67adef11ff.json"
+    },
+    {
+      "id": "5f0bb5544ec203aa2c5cd0870bc7ebfbd6a0c4dd18f78a61ffa499db1d744969",
+      "name": "Integrator/Kernel/H1P1/D2/WeightedGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/5f0bb5544ec203aa2c5cd0870bc7ebfbd6a0c4dd18f78a61ffa499db1d744969.json"
+    },
+    {
+      "id": "706957a5ef5b6b421d7159d1f0d0c3f5122ee84a4c9c091674f8872291f6c490",
+      "name": "Integrator/Kernel/H1P1/D2/WeightedJacobianJacobian",
+      "metric": "cpu_time",
+      "url": "cases/706957a5ef5b6b421d7159d1f0d0c3f5122ee84a4c9c091674f8872291f6c490.json"
+    },
+    {
+      "id": "da1a9f1581f7ebc114a2180c0ba5a130c6532e335da5b1308cdc15f20c0e31a2",
+      "name": "Integrator/Kernel/H1P1/D2/WeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/da1a9f1581f7ebc114a2180c0ba5a130c6532e335da5b1308cdc15f20c0e31a2.json"
+    },
+    {
+      "id": "dd9ee0e305702f8bc2d08dccf3479b12c68460a2fdc86fc7cf2fd9d1a8a272aa",
+      "name": "Integrator/Kernel/H1P2-P1/D2/GradGrad",
+      "metric": "cpu_time",
+      "url": "cases/dd9ee0e305702f8bc2d08dccf3479b12c68460a2fdc86fc7cf2fd9d1a8a272aa.json"
+    },
+    {
+      "id": "841b23e3fa27b0068718a204f7ecf7fe1e87e7ca12b7566e05618557571d0b71",
+      "name": "Integrator/Kernel/H1P2-P1/D2/Mass",
+      "metric": "cpu_time",
+      "url": "cases/841b23e3fa27b0068718a204f7ecf7fe1e87e7ca12b7566e05618557571d0b71.json"
+    },
+    {
+      "id": "7ef79bcf061a1146bbdf955927f8eef9cd7c332cd5146c5209ed205af6d18498",
+      "name": "Integrator/Kernel/H1P2-P1/D3/GradGrad",
+      "metric": "cpu_time",
+      "url": "cases/7ef79bcf061a1146bbdf955927f8eef9cd7c332cd5146c5209ed205af6d18498.json"
+    },
+    {
+      "id": "1a8a3b397bb6889d4bf8942eadd71cfa6b5475e492a2fcb76a1670e9f4bdc8b1",
+      "name": "Integrator/Kernel/H1P2-P1/D3/Mass",
+      "metric": "cpu_time",
+      "url": "cases/1a8a3b397bb6889d4bf8942eadd71cfa6b5475e492a2fcb76a1670e9f4bdc8b1.json"
+    },
+    {
+      "id": "526a11158c6f33f7cebbdb02c6358987a69c841bc69fa68b800cb3a87552d19a",
+      "name": "Integrator/Kernel/H1P2/D2/Advection",
+      "metric": "cpu_time",
+      "url": "cases/526a11158c6f33f7cebbdb02c6358987a69c841bc69fa68b800cb3a87552d19a.json"
+    },
+    {
+      "id": "5acda7923125cb2a5daac08467741440c27f47c08afc9940ca40da89f89bc182",
+      "name": "Integrator/Kernel/H1P2/D2/AnisotropicMass",
+      "metric": "cpu_time",
+      "url": "cases/5acda7923125cb2a5daac08467741440c27f47c08afc9940ca40da89f89bc182.json"
+    },
+    {
+      "id": "322e4468c4fa1fe00a1c9e774866895f1685ac03ad651f03cb956b8819be9bb7",
+      "name": "Integrator/Kernel/H1P2/D2/BasisLoad",
+      "metric": "cpu_time",
+      "url": "cases/322e4468c4fa1fe00a1c9e774866895f1685ac03ad651f03cb956b8819be9bb7.json"
+    },
+    {
+      "id": "a8dbe267944eac30dc35d1b1b4b5ccc199afd89db621d9d2b3fa90134deccde8",
+      "name": "Integrator/Kernel/H1P2/D2/CurvedGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/a8dbe267944eac30dc35d1b1b4b5ccc199afd89db621d9d2b3fa90134deccde8.json"
+    },
+    {
+      "id": "647054fcbb775b905f16c1a91a99c9e8d9e7668f03d502cc8f31688afd531a27",
+      "name": "Integrator/Kernel/H1P2/D2/CurvedMass",
+      "metric": "cpu_time",
+      "url": "cases/647054fcbb775b905f16c1a91a99c9e8d9e7668f03d502cc8f31688afd531a27.json"
+    },
+    {
+      "id": "37c4d7f127dd144f1f143e605f5364412aee89f0c1503e36c227e68307c4193d",
+      "name": "Integrator/Kernel/H1P2/D2/DivPressure",
+      "metric": "cpu_time",
+      "url": "cases/37c4d7f127dd144f1f143e605f5364412aee89f0c1503e36c227e68307c4193d.json"
+    },
+    {
+      "id": "185df391215ac72dfea2adee4f9787933489051176b4175b3201118bbed925b5",
+      "name": "Integrator/Kernel/H1P2/D2/GenericDivDiv",
+      "metric": "cpu_time",
+      "url": "cases/185df391215ac72dfea2adee4f9787933489051176b4175b3201118bbed925b5.json"
+    },
+    {
+      "id": "7d2a0bf2b972ba2dd935637a57341d13da4db82c4f877022dfccc313d24bcba7",
+      "name": "Integrator/Kernel/H1P2/D2/GenericElasticity",
+      "metric": "cpu_time",
+      "url": "cases/7d2a0bf2b972ba2dd935637a57341d13da4db82c4f877022dfccc313d24bcba7.json"
+    },
+    {
+      "id": "23b7e969fb70b8042fc374632798137823d1c847f3468ba16a6db5f5cec02481",
+      "name": "Integrator/Kernel/H1P2/D2/GenericFluxLoad",
+      "metric": "cpu_time",
+      "url": "cases/23b7e969fb70b8042fc374632798137823d1c847f3468ba16a6db5f5cec02481.json"
+    },
+    {
+      "id": "7dcb8b94eeafcc52d7b1e5b49cc3db21ce9b254dde099c16c53907d56beda45f",
+      "name": "Integrator/Kernel/H1P2/D2/GradGrad",
+      "metric": "cpu_time",
+      "url": "cases/7dcb8b94eeafcc52d7b1e5b49cc3db21ce9b254dde099c16c53907d56beda45f.json"
+    },
+    {
+      "id": "0cc114cd522d42b3d301ad6c69a82c5eac50308470f8bad5500657b218ebb6ba",
+      "name": "Integrator/Kernel/H1P2/D2/GridFunctionAdvection",
+      "metric": "cpu_time",
+      "url": "cases/0cc114cd522d42b3d301ad6c69a82c5eac50308470f8bad5500657b218ebb6ba.json"
+    },
+    {
+      "id": "324c7b3986f7155c6778040265f76f496bd31cdfbec4ee6abfa3742aa5c7a7e4",
+      "name": "Integrator/Kernel/H1P2/D2/GridFunctionWeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/324c7b3986f7155c6778040265f76f496bd31cdfbec4ee6abfa3742aa5c7a7e4.json"
+    },
+    {
+      "id": "c40e34fdb14a23419fbd4f274a38450ae8c2989e7faa3e173e4da74cad050e91",
+      "name": "Integrator/Kernel/H1P2/D2/JacobianJacobian",
+      "metric": "cpu_time",
+      "url": "cases/c40e34fdb14a23419fbd4f274a38450ae8c2989e7faa3e173e4da74cad050e91.json"
+    },
+    {
+      "id": "310ac3c72a381c155d122539f867f2abc40884f0fa78b37bb93d47a20657ada9",
+      "name": "Integrator/Kernel/H1P2/D2/Mass",
+      "metric": "cpu_time",
+      "url": "cases/310ac3c72a381c155d122539f867f2abc40884f0fa78b37bb93d47a20657ada9.json"
+    },
+    {
+      "id": "e205b750b3189b38a1066a061d8f2b954dafd2fa27c23ba1db35a8684da4a027",
+      "name": "Integrator/Kernel/H1P2/D2/OuterWeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/e205b750b3189b38a1066a061d8f2b954dafd2fa27c23ba1db35a8684da4a027.json"
+    },
+    {
+      "id": "859b97cdcd5395b26a3d8346c59f2f8a25c42b5f5b9dc580e761484d7e92209c",
+      "name": "Integrator/Kernel/H1P2/D2/PressureDiv",
+      "metric": "cpu_time",
+      "url": "cases/859b97cdcd5395b26a3d8346c59f2f8a25c42b5f5b9dc580e761484d7e92209c.json"
+    },
+    {
+      "id": "9f04dcad0a062d850df443f039103929da5144b336884158d1f8e196355f52c3",
+      "name": "Integrator/Kernel/H1P2/D2/SourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/9f04dcad0a062d850df443f039103929da5144b336884158d1f8e196355f52c3.json"
+    },
+    {
+      "id": "f6055aad9003abaeba6ce06ae73af8387120b522b8ab0f0155a8ec53b66ae2b6",
+      "name": "Integrator/Kernel/H1P2/D2/VectorMass",
+      "metric": "cpu_time",
+      "url": "cases/f6055aad9003abaeba6ce06ae73af8387120b522b8ab0f0155a8ec53b66ae2b6.json"
+    },
+    {
+      "id": "5041d9f63d56aeb7e02c412185d99d6921df4eca7a9316fe0a12c25bc8bf7893",
+      "name": "Integrator/Kernel/H1P2/D2/VectorSourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/5041d9f63d56aeb7e02c412185d99d6921df4eca7a9316fe0a12c25bc8bf7893.json"
+    },
+    {
+      "id": "151fb8d98f872fdb0cdbf541766e06fceacff0c15d795f84f3bc938371e9f19c",
+      "name": "Integrator/Kernel/H1P2/D2/WeightedGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/151fb8d98f872fdb0cdbf541766e06fceacff0c15d795f84f3bc938371e9f19c.json"
+    },
+    {
+      "id": "5f0648713316d36d137f47ccf75caba19abde9595141185276f8adf7229e2e7b",
+      "name": "Integrator/Kernel/H1P2/D2/WeightedJacobianJacobian",
+      "metric": "cpu_time",
+      "url": "cases/5f0648713316d36d137f47ccf75caba19abde9595141185276f8adf7229e2e7b.json"
+    },
+    {
+      "id": "ebfeab2363b5de041a7c953836a6cdf1d4263ec6d7da96098d3d3c5ae948162b",
+      "name": "Integrator/Kernel/H1P2/D2/WeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/ebfeab2363b5de041a7c953836a6cdf1d4263ec6d7da96098d3d3c5ae948162b.json"
+    },
+    {
+      "id": "f5579ac122859d9aa0d4dcc2397d643fecd76b58e5612570f3fc280661a5d77b",
+      "name": "Integrator/Kernel/H1P2/D3/Advection",
+      "metric": "cpu_time",
+      "url": "cases/f5579ac122859d9aa0d4dcc2397d643fecd76b58e5612570f3fc280661a5d77b.json"
+    },
+    {
+      "id": "c1f795f1db748cb252e99ae8fb29a412f5665fdefcf1ec0bb00dd0c71fa98b1b",
+      "name": "Integrator/Kernel/H1P2/D3/AnisotropicMass",
+      "metric": "cpu_time",
+      "url": "cases/c1f795f1db748cb252e99ae8fb29a412f5665fdefcf1ec0bb00dd0c71fa98b1b.json"
+    },
+    {
+      "id": "f86f5a47dfbf45c5f3baa9722489d17db9361f822e859955f306dd660b1addc9",
+      "name": "Integrator/Kernel/H1P2/D3/BasisLoad",
+      "metric": "cpu_time",
+      "url": "cases/f86f5a47dfbf45c5f3baa9722489d17db9361f822e859955f306dd660b1addc9.json"
+    },
+    {
+      "id": "80fca96e5662beb988afc50f0441e5f709268aecb6a53b7ca118f1a42d19bf08",
+      "name": "Integrator/Kernel/H1P2/D3/CurvedGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/80fca96e5662beb988afc50f0441e5f709268aecb6a53b7ca118f1a42d19bf08.json"
+    },
+    {
+      "id": "1b7305da3e332cb921ffefc86665bd7071f974812b0696559de336f1fd0817b8",
+      "name": "Integrator/Kernel/H1P2/D3/CurvedMass",
+      "metric": "cpu_time",
+      "url": "cases/1b7305da3e332cb921ffefc86665bd7071f974812b0696559de336f1fd0817b8.json"
+    },
+    {
+      "id": "29b5d0bbcd8c7572df7bff8d48cc1770e295d3060015e465bc85603682c780e3",
+      "name": "Integrator/Kernel/H1P2/D3/DivPressure",
+      "metric": "cpu_time",
+      "url": "cases/29b5d0bbcd8c7572df7bff8d48cc1770e295d3060015e465bc85603682c780e3.json"
+    },
+    {
+      "id": "a91d79db6a530b5ebf05d418cc50bc4b2e60cc8fc5a070b4fd2cb5641ecf6e72",
+      "name": "Integrator/Kernel/H1P2/D3/GenericDivDiv",
+      "metric": "cpu_time",
+      "url": "cases/a91d79db6a530b5ebf05d418cc50bc4b2e60cc8fc5a070b4fd2cb5641ecf6e72.json"
+    },
+    {
+      "id": "54b1a21f0cce996c060b34d9875e9e700b3510a0f225bcc0d1a7a7cb11d78c13",
+      "name": "Integrator/Kernel/H1P2/D3/GenericElasticity",
+      "metric": "cpu_time",
+      "url": "cases/54b1a21f0cce996c060b34d9875e9e700b3510a0f225bcc0d1a7a7cb11d78c13.json"
+    },
+    {
+      "id": "3d6440f2666ac799934a402fadd74d68cbfa8bc14229587e8129a6cefc9f59fb",
+      "name": "Integrator/Kernel/H1P2/D3/GenericFluxLoad",
+      "metric": "cpu_time",
+      "url": "cases/3d6440f2666ac799934a402fadd74d68cbfa8bc14229587e8129a6cefc9f59fb.json"
+    },
+    {
+      "id": "5af9940ecbd91104502d81ed902d180ca65cda0ba65066be47e65a93c074dc6f",
+      "name": "Integrator/Kernel/H1P2/D3/GradGrad",
+      "metric": "cpu_time",
+      "url": "cases/5af9940ecbd91104502d81ed902d180ca65cda0ba65066be47e65a93c074dc6f.json"
+    },
+    {
+      "id": "b2cf03e972854fd4242ce74545880ce0a3107f015d0eef8364499f13434e9b2e",
+      "name": "Integrator/Kernel/H1P2/D3/GridFunctionAdvection",
+      "metric": "cpu_time",
+      "url": "cases/b2cf03e972854fd4242ce74545880ce0a3107f015d0eef8364499f13434e9b2e.json"
+    },
+    {
+      "id": "9c15d87ea570c5f50ef3d0637eb2eb35143233960eb4fb28d3292a340c5e92e3",
+      "name": "Integrator/Kernel/H1P2/D3/GridFunctionWeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/9c15d87ea570c5f50ef3d0637eb2eb35143233960eb4fb28d3292a340c5e92e3.json"
+    },
+    {
+      "id": "8baf0b6b10bb2b57ccd5f8dcf7a504cc01fff2aa2832d5dd22d4c5e2f6fd884a",
+      "name": "Integrator/Kernel/H1P2/D3/JacobianJacobian",
+      "metric": "cpu_time",
+      "url": "cases/8baf0b6b10bb2b57ccd5f8dcf7a504cc01fff2aa2832d5dd22d4c5e2f6fd884a.json"
+    },
+    {
+      "id": "bf0d8bd92597bd991a86f3b650bc36b2ef2a40fbfaae6c7cbd30facbe724684a",
+      "name": "Integrator/Kernel/H1P2/D3/Mass",
+      "metric": "cpu_time",
+      "url": "cases/bf0d8bd92597bd991a86f3b650bc36b2ef2a40fbfaae6c7cbd30facbe724684a.json"
+    },
+    {
+      "id": "5c4dbae377230aaf1a3dfdd708f82ddc40fe4573cf5920c41822df9014fa7f2e",
+      "name": "Integrator/Kernel/H1P2/D3/OuterWeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/5c4dbae377230aaf1a3dfdd708f82ddc40fe4573cf5920c41822df9014fa7f2e.json"
+    },
+    {
+      "id": "1656d7060c9087bbec24ee0761c06f97eef9610d278e37703d9e32958d6e87ce",
+      "name": "Integrator/Kernel/H1P2/D3/PressureDiv",
+      "metric": "cpu_time",
+      "url": "cases/1656d7060c9087bbec24ee0761c06f97eef9610d278e37703d9e32958d6e87ce.json"
+    },
+    {
+      "id": "3a0a4d27643645c190a0cb4fecbf04e8966a9e2fe739ec9f2ffdc2c12dc66a61",
+      "name": "Integrator/Kernel/H1P2/D3/SourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/3a0a4d27643645c190a0cb4fecbf04e8966a9e2fe739ec9f2ffdc2c12dc66a61.json"
+    },
+    {
+      "id": "165758629187f5b784e19d83a40e57a06f2abb82922d9757be1520d67b8bb7f5",
+      "name": "Integrator/Kernel/H1P2/D3/VectorMass",
+      "metric": "cpu_time",
+      "url": "cases/165758629187f5b784e19d83a40e57a06f2abb82922d9757be1520d67b8bb7f5.json"
+    },
+    {
+      "id": "a19a9339d24ec8b20859d6089a86dbeab1571845af50939adf00434e49b98075",
+      "name": "Integrator/Kernel/H1P2/D3/VectorSourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/a19a9339d24ec8b20859d6089a86dbeab1571845af50939adf00434e49b98075.json"
+    },
+    {
+      "id": "7c57a23f0df1704753eea347159bcf8b668545645ccbf26f622221cbd0e91297",
+      "name": "Integrator/Kernel/H1P2/D3/WeightedGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/7c57a23f0df1704753eea347159bcf8b668545645ccbf26f622221cbd0e91297.json"
+    },
+    {
+      "id": "f98efcc02eee7489e30fa355f7f0b3fd0d93b07818df23b57cf889774ea075e4",
+      "name": "Integrator/Kernel/H1P2/D3/WeightedJacobianJacobian",
+      "metric": "cpu_time",
+      "url": "cases/f98efcc02eee7489e30fa355f7f0b3fd0d93b07818df23b57cf889774ea075e4.json"
+    },
+    {
+      "id": "c8a857d452d297f034ce6bb0884f495c3589435385591723d2e35db8965cac6e",
+      "name": "Integrator/Kernel/H1P2/D3/WeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/c8a857d452d297f034ce6bb0884f495c3589435385591723d2e35db8965cac6e.json"
+    },
+    {
+      "id": "f223ea82fa459ea8c6d996af478419cd07200887fb31c741410ea5705a75fede",
+      "name": "Integrator/Kernel/H1P3-P2/D2/GradGrad",
+      "metric": "cpu_time",
+      "url": "cases/f223ea82fa459ea8c6d996af478419cd07200887fb31c741410ea5705a75fede.json"
+    },
+    {
+      "id": "e7e40710985344bf47377736da99740aa41c815759ecc9574dcd203ddfcf9b9a",
+      "name": "Integrator/Kernel/H1P3-P2/D2/Mass",
+      "metric": "cpu_time",
+      "url": "cases/e7e40710985344bf47377736da99740aa41c815759ecc9574dcd203ddfcf9b9a.json"
+    },
+    {
+      "id": "2aae3f6e6c6ecac2503b1b7bfc92b7f86337d2fd2f72cd03450b6cb02f1b3ade",
+      "name": "Integrator/Kernel/H1P3/D2/Advection",
+      "metric": "cpu_time",
+      "url": "cases/2aae3f6e6c6ecac2503b1b7bfc92b7f86337d2fd2f72cd03450b6cb02f1b3ade.json"
+    },
+    {
+      "id": "89d75eaf6508b2ace1a01ca5b55b23f4d159a12e7e9757175b2c7bfff3f62c7f",
+      "name": "Integrator/Kernel/H1P3/D2/AnisotropicMass",
+      "metric": "cpu_time",
+      "url": "cases/89d75eaf6508b2ace1a01ca5b55b23f4d159a12e7e9757175b2c7bfff3f62c7f.json"
+    },
+    {
+      "id": "d6e091b25b0d599549c2c1d0734ea2967579a140632f13a05bfd37df44823fcd",
+      "name": "Integrator/Kernel/H1P3/D2/BasisLoad",
+      "metric": "cpu_time",
+      "url": "cases/d6e091b25b0d599549c2c1d0734ea2967579a140632f13a05bfd37df44823fcd.json"
+    },
+    {
+      "id": "a462482a62378b886d5306b610656089c81e53f19103459302e6ffab4ce1c552",
+      "name": "Integrator/Kernel/H1P3/D2/DivPressure",
+      "metric": "cpu_time",
+      "url": "cases/a462482a62378b886d5306b610656089c81e53f19103459302e6ffab4ce1c552.json"
+    },
+    {
+      "id": "c08b1013a572dcd4e027c9ac5e97ff313461fb05a8d2f984a8b6fd3e6cb3fb93",
+      "name": "Integrator/Kernel/H1P3/D2/GenericDivDiv",
+      "metric": "cpu_time",
+      "url": "cases/c08b1013a572dcd4e027c9ac5e97ff313461fb05a8d2f984a8b6fd3e6cb3fb93.json"
+    },
+    {
+      "id": "e33a50cddd4865d5f845ae54ec686ea99d314952653944c3c0c0fc54ccc6f8e8",
+      "name": "Integrator/Kernel/H1P3/D2/GenericElasticity",
+      "metric": "cpu_time",
+      "url": "cases/e33a50cddd4865d5f845ae54ec686ea99d314952653944c3c0c0fc54ccc6f8e8.json"
+    },
+    {
+      "id": "f0ad796eb9ca65d484915af3afe71a4ecaa23e1942f7890208aee24c4c029527",
+      "name": "Integrator/Kernel/H1P3/D2/GenericFluxLoad",
+      "metric": "cpu_time",
+      "url": "cases/f0ad796eb9ca65d484915af3afe71a4ecaa23e1942f7890208aee24c4c029527.json"
+    },
+    {
+      "id": "a6b09a7b000fef7dcb0be94fd7e85c6508a072c25ba41815b4162d7d3ec1e8a8",
+      "name": "Integrator/Kernel/H1P3/D2/GradGrad",
+      "metric": "cpu_time",
+      "url": "cases/a6b09a7b000fef7dcb0be94fd7e85c6508a072c25ba41815b4162d7d3ec1e8a8.json"
+    },
+    {
+      "id": "b792e5f5cae8dc8c9130237a1132489f648f189ac918f28fba001737c73de72b",
+      "name": "Integrator/Kernel/H1P3/D2/GridFunctionAdvection",
+      "metric": "cpu_time",
+      "url": "cases/b792e5f5cae8dc8c9130237a1132489f648f189ac918f28fba001737c73de72b.json"
+    },
+    {
+      "id": "f77e74d3971e0600263ed019bbbf5227f5bb18765dec4f404dc9b86df05d2a4f",
+      "name": "Integrator/Kernel/H1P3/D2/GridFunctionWeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/f77e74d3971e0600263ed019bbbf5227f5bb18765dec4f404dc9b86df05d2a4f.json"
+    },
+    {
+      "id": "c9bd066fbac2da3dfe4c9c1d247bf9eebe36d7b1925225769cb93e01e156e3ee",
+      "name": "Integrator/Kernel/H1P3/D2/JacobianJacobian",
+      "metric": "cpu_time",
+      "url": "cases/c9bd066fbac2da3dfe4c9c1d247bf9eebe36d7b1925225769cb93e01e156e3ee.json"
+    },
+    {
+      "id": "1c4a548cfcaa790c0724a1065fde34423bd7d8a4174288eb1f73e37715aa33a2",
+      "name": "Integrator/Kernel/H1P3/D2/Mass",
+      "metric": "cpu_time",
+      "url": "cases/1c4a548cfcaa790c0724a1065fde34423bd7d8a4174288eb1f73e37715aa33a2.json"
+    },
+    {
+      "id": "d66d77ad2dcae6a80ba42d3ef5c63511e18a194114f4897b4132c367c4a773e3",
+      "name": "Integrator/Kernel/H1P3/D2/OuterWeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/d66d77ad2dcae6a80ba42d3ef5c63511e18a194114f4897b4132c367c4a773e3.json"
+    },
+    {
+      "id": "51f4234d3cb1d41f2119b8a9980732b086b6cc4673cf820418a7af8d6498620d",
+      "name": "Integrator/Kernel/H1P3/D2/PressureDiv",
+      "metric": "cpu_time",
+      "url": "cases/51f4234d3cb1d41f2119b8a9980732b086b6cc4673cf820418a7af8d6498620d.json"
+    },
+    {
+      "id": "b1b2be8bd3c6b9ea55c40ffc5c642ca30a189cc367259cc0de2ae63547876761",
+      "name": "Integrator/Kernel/H1P3/D2/SourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/b1b2be8bd3c6b9ea55c40ffc5c642ca30a189cc367259cc0de2ae63547876761.json"
+    },
+    {
+      "id": "7a0c16bd34ee8832d578b83511ae78c8073b447497e5ff34b12dcb0e9fc5dfbc",
+      "name": "Integrator/Kernel/H1P3/D2/VectorMass",
+      "metric": "cpu_time",
+      "url": "cases/7a0c16bd34ee8832d578b83511ae78c8073b447497e5ff34b12dcb0e9fc5dfbc.json"
+    },
+    {
+      "id": "b71181aab811da60734b7838c0c84011679e027867489c01c91217743ad9a534",
+      "name": "Integrator/Kernel/H1P3/D2/VectorSourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/b71181aab811da60734b7838c0c84011679e027867489c01c91217743ad9a534.json"
+    },
+    {
+      "id": "4943d75948f6b3b931ef38741bec7a5272bfffb318912ad0d4651283950e627a",
+      "name": "Integrator/Kernel/H1P3/D2/WeightedGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/4943d75948f6b3b931ef38741bec7a5272bfffb318912ad0d4651283950e627a.json"
+    },
+    {
+      "id": "14407bb625fe9b5b2b6ec17a77e18ceecb7f1b4398c05f295b1c48363c67016d",
+      "name": "Integrator/Kernel/H1P3/D2/WeightedJacobianJacobian",
+      "metric": "cpu_time",
+      "url": "cases/14407bb625fe9b5b2b6ec17a77e18ceecb7f1b4398c05f295b1c48363c67016d.json"
+    },
+    {
+      "id": "dd72e08c221b5afeb4cc2313c3dccb0a806ab82eebd233dddbbdd36068cad820",
+      "name": "Integrator/Kernel/H1P3/D2/WeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/dd72e08c221b5afeb4cc2313c3dccb0a806ab82eebd233dddbbdd36068cad820.json"
+    },
+    {
+      "id": "f9e14b9dc80385a6b9c949a9edafe85fa250fffcee94cd51cfc6e5841831fe18",
+      "name": "Integrator/Kernel/P0/D2/Mass",
+      "metric": "cpu_time",
+      "url": "cases/f9e14b9dc80385a6b9c949a9edafe85fa250fffcee94cd51cfc6e5841831fe18.json"
+    },
+    {
+      "id": "7ed9db1a672c5c6c0b5d2c585704c96d17aba33fbc8f99d2658097ed47cdc076",
+      "name": "Integrator/Kernel/P0/D2/SourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/7ed9db1a672c5c6c0b5d2c585704c96d17aba33fbc8f99d2658097ed47cdc076.json"
+    },
+    {
+      "id": "7cb54b57cb32898c9d05af63e1e4ac5926c177cd5f37c85117f814a37a9d5e38",
+      "name": "Integrator/Kernel/P0/D3/Mass",
+      "metric": "cpu_time",
+      "url": "cases/7cb54b57cb32898c9d05af63e1e4ac5926c177cd5f37c85117f814a37a9d5e38.json"
+    },
+    {
+      "id": "749015363035acb63b7104f450da8a675297e367b817cca6134a9a4e121286b8",
+      "name": "Integrator/Kernel/P0/D3/SourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/749015363035acb63b7104f450da8a675297e367b817cca6134a9a4e121286b8.json"
+    },
+    {
+      "id": "519c4b3dcd1b13c845f78daa65b591d2e1b541bdb125d53630e6482af7e55513",
+      "name": "Integrator/Kernel/P1/D2/Advection",
+      "metric": "cpu_time",
+      "url": "cases/519c4b3dcd1b13c845f78daa65b591d2e1b541bdb125d53630e6482af7e55513.json"
+    },
+    {
+      "id": "d012c125937e00bc7e75cc9f1541751fd3136d2c2fbf5c09947bf07240a69092",
+      "name": "Integrator/Kernel/P1/D2/AnisotropicMass",
+      "metric": "cpu_time",
+      "url": "cases/d012c125937e00bc7e75cc9f1541751fd3136d2c2fbf5c09947bf07240a69092.json"
+    },
+    {
+      "id": "2ab1446781ff01bc13d3f080831c9dc59bd580a1b4352a47650a97a44cd590fb",
+      "name": "Integrator/Kernel/P1/D2/BasisLoad",
+      "metric": "cpu_time",
+      "url": "cases/2ab1446781ff01bc13d3f080831c9dc59bd580a1b4352a47650a97a44cd590fb.json"
+    },
+    {
+      "id": "40b38d7a539a310851eba4818ca9d52c4f1ffd8e517ce5bbc4095652bfbe9a8f",
+      "name": "Integrator/Kernel/P1/D2/DivPressure",
+      "metric": "cpu_time",
+      "url": "cases/40b38d7a539a310851eba4818ca9d52c4f1ffd8e517ce5bbc4095652bfbe9a8f.json"
+    },
+    {
+      "id": "b367ede370c9f3f5b24102d9568122ec8a4dfd4d3acedd06f9232e60c672cb2a",
+      "name": "Integrator/Kernel/P1/D2/GenericDivDiv",
+      "metric": "cpu_time",
+      "url": "cases/b367ede370c9f3f5b24102d9568122ec8a4dfd4d3acedd06f9232e60c672cb2a.json"
+    },
+    {
+      "id": "4965fdf8eda4e339a0f1004be565f93341a3d9ea0d3056a27e03233004bac2d2",
+      "name": "Integrator/Kernel/P1/D2/GenericElasticity",
+      "metric": "cpu_time",
+      "url": "cases/4965fdf8eda4e339a0f1004be565f93341a3d9ea0d3056a27e03233004bac2d2.json"
+    },
+    {
+      "id": "4861c6dd0547197829d3fa4582843c23bc8b1d425adb1d3d56f090da1576817e",
+      "name": "Integrator/Kernel/P1/D2/GenericFluxLoad",
+      "metric": "cpu_time",
+      "url": "cases/4861c6dd0547197829d3fa4582843c23bc8b1d425adb1d3d56f090da1576817e.json"
+    },
+    {
+      "id": "7e461106ad914d66f60cc62021454d4d3facd881d8ac192eb9bdfe2ad424ae52",
+      "name": "Integrator/Kernel/P1/D2/GlobalPotential",
+      "metric": "cpu_time",
+      "url": "cases/7e461106ad914d66f60cc62021454d4d3facd881d8ac192eb9bdfe2ad424ae52.json"
+    },
+    {
+      "id": "ba2697b90bd8b305d14143a8a572f6634ea1b259f5ef4bc41f99cfa2e0d35fc0",
+      "name": "Integrator/Kernel/P1/D2/GradGrad",
+      "metric": "cpu_time",
+      "url": "cases/ba2697b90bd8b305d14143a8a572f6634ea1b259f5ef4bc41f99cfa2e0d35fc0.json"
+    },
+    {
+      "id": "27513281e94690134c348df5e9996fa2c00569a45ef06d1a538b0185162550af",
+      "name": "Integrator/Kernel/P1/D2/GridFunctionAdvection",
+      "metric": "cpu_time",
+      "url": "cases/27513281e94690134c348df5e9996fa2c00569a45ef06d1a538b0185162550af.json"
+    },
+    {
+      "id": "ca660e266f2136bd88e4b230d8d99db573204c2fe4ecde6bbfc86e8aa2fe3afb",
+      "name": "Integrator/Kernel/P1/D2/GridFunctionWeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/ca660e266f2136bd88e4b230d8d99db573204c2fe4ecde6bbfc86e8aa2fe3afb.json"
+    },
+    {
+      "id": "ad000d3d30b6d39949df8e69792fc2f73bdd7ba3f9cddb8670cc7793e6760392",
+      "name": "Integrator/Kernel/P1/D2/JacobianJacobian",
+      "metric": "cpu_time",
+      "url": "cases/ad000d3d30b6d39949df8e69792fc2f73bdd7ba3f9cddb8670cc7793e6760392.json"
+    },
+    {
+      "id": "ca2582d770063b3d56eafd37e0e3fb8be2c66ced8ff7df7181b136ed9c48aeb3",
+      "name": "Integrator/Kernel/P1/D2/Mass",
+      "metric": "cpu_time",
+      "url": "cases/ca2582d770063b3d56eafd37e0e3fb8be2c66ced8ff7df7181b136ed9c48aeb3.json"
+    },
+    {
+      "id": "89bec91ea28cbd3cfbe316218c9119953752de1a6d4f4ffb65f765f18308538c",
+      "name": "Integrator/Kernel/P1/D2/OuterWeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/89bec91ea28cbd3cfbe316218c9119953752de1a6d4f4ffb65f765f18308538c.json"
+    },
+    {
+      "id": "0d27bb235f473f583086521ddc135cd15d2a25d1c1af193ee55eb6b211eee53c",
+      "name": "Integrator/Kernel/P1/D2/PressureDiv",
+      "metric": "cpu_time",
+      "url": "cases/0d27bb235f473f583086521ddc135cd15d2a25d1c1af193ee55eb6b211eee53c.json"
+    },
+    {
+      "id": "fee1598bf0ee5b09c2830b6d1384c2736972909d3eee5fef9da040a99a8e213b",
+      "name": "Integrator/Kernel/P1/D2/SourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/fee1598bf0ee5b09c2830b6d1384c2736972909d3eee5fef9da040a99a8e213b.json"
+    },
+    {
+      "id": "72a715ea9c3c0776f745397f8d26bdb59f62442bb43e4e4cea3947af70fe4cc4",
+      "name": "Integrator/Kernel/P1/D2/VectorGlobalPotential",
+      "metric": "cpu_time",
+      "url": "cases/72a715ea9c3c0776f745397f8d26bdb59f62442bb43e4e4cea3947af70fe4cc4.json"
+    },
+    {
+      "id": "d24e459b70c9ce647785eda40222befae552c5641fc25ac045a0b7e57dbf18cb",
+      "name": "Integrator/Kernel/P1/D2/VectorMass",
+      "metric": "cpu_time",
+      "url": "cases/d24e459b70c9ce647785eda40222befae552c5641fc25ac045a0b7e57dbf18cb.json"
+    },
+    {
+      "id": "ca954acfeb512b2b3060f66930b0aea77381b41764e883998db8d053d38f69c4",
+      "name": "Integrator/Kernel/P1/D2/VectorSourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/ca954acfeb512b2b3060f66930b0aea77381b41764e883998db8d053d38f69c4.json"
+    },
+    {
+      "id": "b463307a22fd8a275ef95537749294f9e6161a4f4196af032635a2825d981b05",
+      "name": "Integrator/Kernel/P1/D2/WeightedGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/b463307a22fd8a275ef95537749294f9e6161a4f4196af032635a2825d981b05.json"
+    },
+    {
+      "id": "e2c94a478eea3748666f5c8326ecc3e8df559c2ac879a23975f7696e5c1a738a",
+      "name": "Integrator/Kernel/P1/D2/WeightedJacobianJacobian",
+      "metric": "cpu_time",
+      "url": "cases/e2c94a478eea3748666f5c8326ecc3e8df559c2ac879a23975f7696e5c1a738a.json"
+    },
+    {
+      "id": "291e92876fcc775163d48593813bfd7fd118c4d0122c8bbb22d3d42d9e1b45b8",
+      "name": "Integrator/Kernel/P1/D2/WeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/291e92876fcc775163d48593813bfd7fd118c4d0122c8bbb22d3d42d9e1b45b8.json"
+    },
+    {
+      "id": "c965f577f5c06e8939fde8d2676e7c91545bcedf0b46422ce694b128390069f7",
+      "name": "Integrator/Kernel/P1/D3/Advection",
+      "metric": "cpu_time",
+      "url": "cases/c965f577f5c06e8939fde8d2676e7c91545bcedf0b46422ce694b128390069f7.json"
+    },
+    {
+      "id": "c39e6f1f5c0c6a38c59d89139d83080477943c75a70562ca20875c02f0facde0",
+      "name": "Integrator/Kernel/P1/D3/AnisotropicMass",
+      "metric": "cpu_time",
+      "url": "cases/c39e6f1f5c0c6a38c59d89139d83080477943c75a70562ca20875c02f0facde0.json"
+    },
+    {
+      "id": "dff01659ac1e4a2c5d23db4ac552aab9e1293904b98dc112bed8fe694c48a05e",
+      "name": "Integrator/Kernel/P1/D3/BasisLoad",
+      "metric": "cpu_time",
+      "url": "cases/dff01659ac1e4a2c5d23db4ac552aab9e1293904b98dc112bed8fe694c48a05e.json"
+    },
+    {
+      "id": "3b31b128860f4cfd34f2b3874e0a5710d702e32056f66e5af9159b9875ef6828",
+      "name": "Integrator/Kernel/P1/D3/DivPressure",
+      "metric": "cpu_time",
+      "url": "cases/3b31b128860f4cfd34f2b3874e0a5710d702e32056f66e5af9159b9875ef6828.json"
+    },
+    {
+      "id": "6915dc34c8200f39eecf6286457ab4b522b44cd0666f9ef3832861d2337b4a54",
+      "name": "Integrator/Kernel/P1/D3/GenericDivDiv",
+      "metric": "cpu_time",
+      "url": "cases/6915dc34c8200f39eecf6286457ab4b522b44cd0666f9ef3832861d2337b4a54.json"
+    },
+    {
+      "id": "807e63afae661f0e137547fe40a175ecf2dfb0560ec2856081d2bedc17f44997",
+      "name": "Integrator/Kernel/P1/D3/GenericElasticity",
+      "metric": "cpu_time",
+      "url": "cases/807e63afae661f0e137547fe40a175ecf2dfb0560ec2856081d2bedc17f44997.json"
+    },
+    {
+      "id": "6424a38b3cd3acbc278ac19ca9899a4247c1e1b4097d764aec618fad89d805b6",
+      "name": "Integrator/Kernel/P1/D3/GenericFluxLoad",
+      "metric": "cpu_time",
+      "url": "cases/6424a38b3cd3acbc278ac19ca9899a4247c1e1b4097d764aec618fad89d805b6.json"
+    },
+    {
+      "id": "7595bc52bd05d9978a192844956c34445e40a9e9a88e4348544e32ce50f22d47",
+      "name": "Integrator/Kernel/P1/D3/GlobalPotential",
+      "metric": "cpu_time",
+      "url": "cases/7595bc52bd05d9978a192844956c34445e40a9e9a88e4348544e32ce50f22d47.json"
+    },
+    {
+      "id": "53b7437cb6e4e933bbc36489332919edafab009bec1630c423c0b1442ec560d3",
+      "name": "Integrator/Kernel/P1/D3/GradGrad",
+      "metric": "cpu_time",
+      "url": "cases/53b7437cb6e4e933bbc36489332919edafab009bec1630c423c0b1442ec560d3.json"
+    },
+    {
+      "id": "e2de7122fa7b42547725ae26304677fad1c95895bfec99c4f0fe83ab16f0aa95",
+      "name": "Integrator/Kernel/P1/D3/GridFunctionAdvection",
+      "metric": "cpu_time",
+      "url": "cases/e2de7122fa7b42547725ae26304677fad1c95895bfec99c4f0fe83ab16f0aa95.json"
+    },
+    {
+      "id": "c010e9624c7ac838b9a953a8f3473f010e48bff07de47876b2c807d34b303d12",
+      "name": "Integrator/Kernel/P1/D3/GridFunctionWeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/c010e9624c7ac838b9a953a8f3473f010e48bff07de47876b2c807d34b303d12.json"
+    },
+    {
+      "id": "ac99c42b2afd111357908bc58b8653a7907ae11f7a3394eda4b25e292ee589ce",
+      "name": "Integrator/Kernel/P1/D3/JacobianJacobian",
+      "metric": "cpu_time",
+      "url": "cases/ac99c42b2afd111357908bc58b8653a7907ae11f7a3394eda4b25e292ee589ce.json"
+    },
+    {
+      "id": "6e772f0712d7b4cb1895b9ca18ed76ee89bd13f02a2001992e27675284d6ef1a",
+      "name": "Integrator/Kernel/P1/D3/Mass",
+      "metric": "cpu_time",
+      "url": "cases/6e772f0712d7b4cb1895b9ca18ed76ee89bd13f02a2001992e27675284d6ef1a.json"
+    },
+    {
+      "id": "cd478c498fc590ac4e1fbb1193986ab93358ccf8772b5ff7c2caac60495c4f8c",
+      "name": "Integrator/Kernel/P1/D3/OuterWeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/cd478c498fc590ac4e1fbb1193986ab93358ccf8772b5ff7c2caac60495c4f8c.json"
+    },
+    {
+      "id": "3b4a7b879222ee9942109ebaecb86df0575ca243a1f2fe09e30f96cf439b83be",
+      "name": "Integrator/Kernel/P1/D3/PressureDiv",
+      "metric": "cpu_time",
+      "url": "cases/3b4a7b879222ee9942109ebaecb86df0575ca243a1f2fe09e30f96cf439b83be.json"
+    },
+    {
+      "id": "6d0909e42a4bbc4891f7cbdf3db6f95b3a729687ced684cb16994f72de863661",
+      "name": "Integrator/Kernel/P1/D3/SourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/6d0909e42a4bbc4891f7cbdf3db6f95b3a729687ced684cb16994f72de863661.json"
+    },
+    {
+      "id": "d59530fc6978f1b176ae7a797a6db0e48c2a8a84827613fbaac5a5ec536309ad",
+      "name": "Integrator/Kernel/P1/D3/VectorGlobalPotential",
+      "metric": "cpu_time",
+      "url": "cases/d59530fc6978f1b176ae7a797a6db0e48c2a8a84827613fbaac5a5ec536309ad.json"
+    },
+    {
+      "id": "0ae599490064299ab56f5328431eac4a619035e53a4c5984996d77c3cdfdc6b8",
+      "name": "Integrator/Kernel/P1/D3/VectorMass",
+      "metric": "cpu_time",
+      "url": "cases/0ae599490064299ab56f5328431eac4a619035e53a4c5984996d77c3cdfdc6b8.json"
+    },
+    {
+      "id": "8a8eebc51057635c2e1a80b781fa84a780d6468f07164924939fba483f3f6f8b",
+      "name": "Integrator/Kernel/P1/D3/VectorSourceLoad",
+      "metric": "cpu_time",
+      "url": "cases/8a8eebc51057635c2e1a80b781fa84a780d6468f07164924939fba483f3f6f8b.json"
+    },
+    {
+      "id": "2a15f7465efda0fcec5926260e1d69db35e572ec33a1ed730f51fa5590fb2e7e",
+      "name": "Integrator/Kernel/P1/D3/WeightedGradGrad",
+      "metric": "cpu_time",
+      "url": "cases/2a15f7465efda0fcec5926260e1d69db35e572ec33a1ed730f51fa5590fb2e7e.json"
+    },
+    {
+      "id": "8095363f65221fdc00be61b96afc5a23e91afa01e4ce7bc2aa982ad8595c2191",
+      "name": "Integrator/Kernel/P1/D3/WeightedJacobianJacobian",
+      "metric": "cpu_time",
+      "url": "cases/8095363f65221fdc00be61b96afc5a23e91afa01e4ce7bc2aa982ad8595c2191.json"
+    },
+    {
+      "id": "0333b15802d5051269625a02f2233cd8a8ac80fc19e90b5de0fbfe4a74266bf2",
+      "name": "Integrator/Kernel/P1/D3/WeightedMass",
+      "metric": "cpu_time",
+      "url": "cases/0333b15802d5051269625a02f2233cd8a8ac80fc19e90b5de0fbfe4a74266bf2.json"
+    },
+    {
+      "id": "80e22c0ff2f6debfe93f279a3488af021f882fbabf8d2c4b685e4f3f9b7fe6a7",
+      "name": "Integrator/Kernel/P1/Geometry/GradGrad/1",
+      "metric": "cpu_time",
+      "url": "cases/80e22c0ff2f6debfe93f279a3488af021f882fbabf8d2c4b685e4f3f9b7fe6a7.json"
+    },
+    {
+      "id": "ad2285bb9a10daae7e04c8369f431d41ecec7915a90df7b13ad44760989dd270",
+      "name": "Integrator/Kernel/P1/Geometry/GradGrad/2",
+      "metric": "cpu_time",
+      "url": "cases/ad2285bb9a10daae7e04c8369f431d41ecec7915a90df7b13ad44760989dd270.json"
+    },
+    {
+      "id": "0901205cf86eab54be17a1405060ffef2bb9f0f7b338764142473514eb72c5c4",
+      "name": "Integrator/Kernel/P1/Geometry/GradGrad/3",
+      "metric": "cpu_time",
+      "url": "cases/0901205cf86eab54be17a1405060ffef2bb9f0f7b338764142473514eb72c5c4.json"
+    },
+    {
+      "id": "f4897276df6ebb21f2a2c1ec6e57ead27f6851e04b2139a204bc77cb729c6e51",
+      "name": "Integrator/Kernel/P1/Geometry/GradGrad/4",
+      "metric": "cpu_time",
+      "url": "cases/f4897276df6ebb21f2a2c1ec6e57ead27f6851e04b2139a204bc77cb729c6e51.json"
+    },
+    {
+      "id": "a133534362c35b15ba5ba482488f41c0d61c1542101a3666c98cf97a9dde3f7d",
+      "name": "Integrator/Kernel/P1/Geometry/GradGrad/5",
+      "metric": "cpu_time",
+      "url": "cases/a133534362c35b15ba5ba482488f41c0d61c1542101a3666c98cf97a9dde3f7d.json"
+    },
+    {
+      "id": "c32c540c21c3baa03b3ebfa3ba41d38a61bb843bbc038054b59c65931a7dbe5a",
+      "name": "Integrator/Kernel/P1/Geometry/GradGrad/6",
+      "metric": "cpu_time",
+      "url": "cases/c32c540c21c3baa03b3ebfa3ba41d38a61bb843bbc038054b59c65931a7dbe5a.json"
+    },
+    {
+      "id": "d1944307f254a6de7cc1937608b3c307e913890de7ae5f87740e6b420cfad3f6",
+      "name": "Integrator/Kernel/P1/Geometry/GradGrad/7",
+      "metric": "cpu_time",
+      "url": "cases/d1944307f254a6de7cc1937608b3c307e913890de7ae5f87740e6b420cfad3f6.json"
+    },
+    {
+      "id": "5bbc22c947d0c3ee446b7b83c60a922d8352841e3257d88b445329212ba49c80",
+      "name": "Integrator/Kernel/P1/Geometry/Mass/1",
+      "metric": "cpu_time",
+      "url": "cases/5bbc22c947d0c3ee446b7b83c60a922d8352841e3257d88b445329212ba49c80.json"
+    },
+    {
+      "id": "cb5da1a1949da7e0836f7f7e2f26770dc072642a235e0a8fe9c3c132528f5f23",
+      "name": "Integrator/Kernel/P1/Geometry/Mass/2",
+      "metric": "cpu_time",
+      "url": "cases/cb5da1a1949da7e0836f7f7e2f26770dc072642a235e0a8fe9c3c132528f5f23.json"
+    },
+    {
+      "id": "a2771a3e7f6ee34750f75bdcc7280030c264aba638230387b2f7e943895be206",
+      "name": "Integrator/Kernel/P1/Geometry/Mass/3",
+      "metric": "cpu_time",
+      "url": "cases/a2771a3e7f6ee34750f75bdcc7280030c264aba638230387b2f7e943895be206.json"
+    },
+    {
+      "id": "bfe8acb4684558cfc28b1377b977e888ee10ad9d4b7f4ca623589e8b6793cd10",
+      "name": "Integrator/Kernel/P1/Geometry/Mass/4",
+      "metric": "cpu_time",
+      "url": "cases/bfe8acb4684558cfc28b1377b977e888ee10ad9d4b7f4ca623589e8b6793cd10.json"
+    },
+    {
+      "id": "b9cc2c17a7fd746e3bf7d6cb81fd0a898f25ac87bb7e965194972a5a25808406",
+      "name": "Integrator/Kernel/P1/Geometry/Mass/5",
+      "metric": "cpu_time",
+      "url": "cases/b9cc2c17a7fd746e3bf7d6cb81fd0a898f25ac87bb7e965194972a5a25808406.json"
+    },
+    {
+      "id": "99abbd8e638257b447224a2dd09a25e5caa3a134d4146f38b64ac478802f12e7",
+      "name": "Integrator/Kernel/P1/Geometry/Mass/6",
+      "metric": "cpu_time",
+      "url": "cases/99abbd8e638257b447224a2dd09a25e5caa3a134d4146f38b64ac478802f12e7.json"
+    },
+    {
+      "id": "5c92f443dcabac81224cc8565943679a04f3dcdd514cd5341da63200e1288c98",
+      "name": "Integrator/Kernel/P1/Geometry/Mass/7",
+      "metric": "cpu_time",
+      "url": "cases/5c92f443dcabac81224cc8565943679a04f3dcdd514cd5341da63200e1288c98.json"
+    }
+  ]
+}

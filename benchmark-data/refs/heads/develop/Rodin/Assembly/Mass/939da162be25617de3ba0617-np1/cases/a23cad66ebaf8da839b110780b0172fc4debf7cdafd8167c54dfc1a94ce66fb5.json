@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "component": "Rodin/Assembly/Mass",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "CurvedQ2/Mass/Operator/P0g/ComplexVector/Triangle/5/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "CurvedQ2/Mass/Operator/P0g/ComplexVector/Triangle/5/real_time",
+          "value": 23296.727411426196,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            23296.727411426196
+          ],
+          "records": [
+            {
+              "name": "CurvedQ2/Mass/Operator/P0g/ComplexVector/Triangle/5/real_time",
+              "family_index": 80,
+              "per_family_instance_index": 1,
+              "run_name": "CurvedQ2/Mass/Operator/P0g/ComplexVector/Triangle/5/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 11798,
+              "real_time": 23296.727411426196,
+              "cpu_time": 23294.25995931537,
+              "time_unit": "ns",
+              "ambient_dimension": 2.0,
+              "cells": 32.0,
+              "components": 2.0,
+              "degree": 0.0,
+              "dimension": 2.0,
+              "dofs": 2.0,
+              "domain_measure": 1.0,
+              "geometry_amplitude": 0.1,
+              "geometry_degree": 2.0,
+              "local_basis": 2.0,
+              "local_entries": 4.0,
+              "nnz": 2.0,
+              "points_per_axis": 5.0,
+              "quadrature_order": 8.0,
+              "quadrature_points_per_cell": 16.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T14:43:26+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinMassAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2596,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.78125,
+              0.217773,
+              0.0751953
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "scope": "Warmed operator or projection-load assembly; no solve"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

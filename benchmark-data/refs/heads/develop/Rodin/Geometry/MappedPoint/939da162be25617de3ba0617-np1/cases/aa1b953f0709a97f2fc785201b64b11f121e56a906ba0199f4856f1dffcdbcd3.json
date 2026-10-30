@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "component": "Rodin/Geometry/MappedPoint",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "MappedPoint/BulkJacobian/Quadratic/P4/Triangle/3/15/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "MappedPoint/BulkJacobian/Quadratic/P4/Triangle/3/15/real_time",
+          "value": 2625.291248018088,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            2625.291248018088
+          ],
+          "records": [
+            {
+              "name": "MappedPoint/BulkJacobian/Quadratic/P4/Triangle/3/15/real_time",
+              "family_index": 6,
+              "per_family_instance_index": 12,
+              "run_name": "MappedPoint/BulkJacobian/Quadratic/P4/Triangle/3/15/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 106593,
+              "real_time": 2625.291248018088,
+              "cpu_time": 2624.815682080443,
+              "time_unit": "ns",
+              "basis_functions": 15.0,
+              "cells": 1.0,
+              "curvature": 0.125,
+              "embedding_dimension": 3.0,
+              "formula_identities": 1.0,
+              "geometry_degree": 4.0,
+              "jacobian_contraction_terms": 4140.0,
+              "jacobian_output_payload_bytes": 3680.0,
+              "output_entries": 276.0,
+              "quadrature_order": 15.0,
+              "quadrature_points": 46.0,
+              "reference_dimension": 2.0,
+              "reference_table_miss": 0.0,
+              "reference_table_payload_bytes": 16560.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T13:20:25+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinMappedPointBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2445,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.67041,
+              0.210449,
+              0.0742188
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

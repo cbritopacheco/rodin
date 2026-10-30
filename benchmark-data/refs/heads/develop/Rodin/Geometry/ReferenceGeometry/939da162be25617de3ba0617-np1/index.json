@@ -1,0 +1,331 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBulkP1JacobianBenchmarks",
+      "RodinGeometryConnectivityBenchmarks",
+      "RodinGeometryParametricTransformationBenchmarks",
+      "RodinGeometryUniformGridBenchmarks",
+      "RodinMappedPointBenchmarks",
+      "RodinMappedQuadratureCacheBenchmarks",
+      "RodinReferenceGeometryBenchmarks",
+      "RodinTransformationLifecycleBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "fd079528e4022297ef51a888a972d91e0052ae5576bd11d610298ef75b74f461",
+      "name": "ReferenceGeometry/Pointwise/Hexahedron/12/real_time",
+      "metric": "real_time",
+      "url": "cases/fd079528e4022297ef51a888a972d91e0052ae5576bd11d610298ef75b74f461.json"
+    },
+    {
+      "id": "acfd647003b845410b82409a199c1f2231c3843da315323636911bd76351bfbb",
+      "name": "ReferenceGeometry/Pointwise/Hexahedron/20/real_time",
+      "metric": "real_time",
+      "url": "cases/acfd647003b845410b82409a199c1f2231c3843da315323636911bd76351bfbb.json"
+    },
+    {
+      "id": "7c15f4b78aaa8cc085862df07a9453675529998897eeb12c5f4ed068172b3f49",
+      "name": "ReferenceGeometry/Pointwise/Hexahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/7c15f4b78aaa8cc085862df07a9453675529998897eeb12c5f4ed068172b3f49.json"
+    },
+    {
+      "id": "ef341c851a4e80fe501f3b878858031c202f20a7345168eab6c042645e3cb181",
+      "name": "ReferenceGeometry/Pointwise/Point/12/real_time",
+      "metric": "real_time",
+      "url": "cases/ef341c851a4e80fe501f3b878858031c202f20a7345168eab6c042645e3cb181.json"
+    },
+    {
+      "id": "8da5d7a34e646bf780479f084cb1c8a85804404b2f1ccf35704110a8d4ed1bc0",
+      "name": "ReferenceGeometry/Pointwise/Point/20/real_time",
+      "metric": "real_time",
+      "url": "cases/8da5d7a34e646bf780479f084cb1c8a85804404b2f1ccf35704110a8d4ed1bc0.json"
+    },
+    {
+      "id": "e891880615b86b96fe9175a53d73522607bbcd195548e54679c1ae90a54640fc",
+      "name": "ReferenceGeometry/Pointwise/Point/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e891880615b86b96fe9175a53d73522607bbcd195548e54679c1ae90a54640fc.json"
+    },
+    {
+      "id": "ce37cf6526f12a193001e29d10d19b586c603c929ac730d7ebe98e678698fe51",
+      "name": "ReferenceGeometry/Pointwise/Pyramid/12/real_time",
+      "metric": "real_time",
+      "url": "cases/ce37cf6526f12a193001e29d10d19b586c603c929ac730d7ebe98e678698fe51.json"
+    },
+    {
+      "id": "b48d6e26974d489af4d3956085e8a3fa5fbf41c5eab303557aa0a049a22b73de",
+      "name": "ReferenceGeometry/Pointwise/Pyramid/20/real_time",
+      "metric": "real_time",
+      "url": "cases/b48d6e26974d489af4d3956085e8a3fa5fbf41c5eab303557aa0a049a22b73de.json"
+    },
+    {
+      "id": "b65bf51650effe5e0df6e233c666fcdf49aa0471169a38404718af8718c8a135",
+      "name": "ReferenceGeometry/Pointwise/Pyramid/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b65bf51650effe5e0df6e233c666fcdf49aa0471169a38404718af8718c8a135.json"
+    },
+    {
+      "id": "c51cb3560df40cbf8a54df93191db2a5f7f3b64a7d31eaf16b7e7e53a17a8e1d",
+      "name": "ReferenceGeometry/Pointwise/Quadrilateral/12/real_time",
+      "metric": "real_time",
+      "url": "cases/c51cb3560df40cbf8a54df93191db2a5f7f3b64a7d31eaf16b7e7e53a17a8e1d.json"
+    },
+    {
+      "id": "2d2a71e2bd7ef4b969207e07290b757bf0c73649a9ade36558331bb19551c485",
+      "name": "ReferenceGeometry/Pointwise/Quadrilateral/20/real_time",
+      "metric": "real_time",
+      "url": "cases/2d2a71e2bd7ef4b969207e07290b757bf0c73649a9ade36558331bb19551c485.json"
+    },
+    {
+      "id": "16b08fce6bee1ad94eef872957f1caae2cc0f70dd752012070d7969274b08ffe",
+      "name": "ReferenceGeometry/Pointwise/Quadrilateral/8/real_time",
+      "metric": "real_time",
+      "url": "cases/16b08fce6bee1ad94eef872957f1caae2cc0f70dd752012070d7969274b08ffe.json"
+    },
+    {
+      "id": "a1473c7ee98e585c8ed6c760e473f39349b7f60d01e87e9312f092ce9899a8dd",
+      "name": "ReferenceGeometry/Pointwise/Segment/12/real_time",
+      "metric": "real_time",
+      "url": "cases/a1473c7ee98e585c8ed6c760e473f39349b7f60d01e87e9312f092ce9899a8dd.json"
+    },
+    {
+      "id": "e488e59f420edffaf6d33de1fc783ac92a79ff3ff0da9caea08ed93ba0035980",
+      "name": "ReferenceGeometry/Pointwise/Segment/20/real_time",
+      "metric": "real_time",
+      "url": "cases/e488e59f420edffaf6d33de1fc783ac92a79ff3ff0da9caea08ed93ba0035980.json"
+    },
+    {
+      "id": "5e375207f50ed0423aa49f871f12e924c849eaef966d98f2fe4a047fcb5ae31a",
+      "name": "ReferenceGeometry/Pointwise/Segment/8/real_time",
+      "metric": "real_time",
+      "url": "cases/5e375207f50ed0423aa49f871f12e924c849eaef966d98f2fe4a047fcb5ae31a.json"
+    },
+    {
+      "id": "d3f20e39f7b82468c3e550378c2cf34d07b9c27559ad2db96983b6cb40fd162e",
+      "name": "ReferenceGeometry/Pointwise/Tetrahedron/12/real_time",
+      "metric": "real_time",
+      "url": "cases/d3f20e39f7b82468c3e550378c2cf34d07b9c27559ad2db96983b6cb40fd162e.json"
+    },
+    {
+      "id": "69076489acf3faac8a20f1a801f3ef38598a7521a93edec10c41109d1fb3b8ac",
+      "name": "ReferenceGeometry/Pointwise/Tetrahedron/20/real_time",
+      "metric": "real_time",
+      "url": "cases/69076489acf3faac8a20f1a801f3ef38598a7521a93edec10c41109d1fb3b8ac.json"
+    },
+    {
+      "id": "da78fff4919655204e1d74ffaa533fb6e7452a411195b45d926593dab1f3b89f",
+      "name": "ReferenceGeometry/Pointwise/Tetrahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/da78fff4919655204e1d74ffaa533fb6e7452a411195b45d926593dab1f3b89f.json"
+    },
+    {
+      "id": "3a90ad4f74a05d5e0e6072a4205ccdbe6d0558eff4cf8b6adaf3c1c7c34b8aab",
+      "name": "ReferenceGeometry/Pointwise/Triangle/12/real_time",
+      "metric": "real_time",
+      "url": "cases/3a90ad4f74a05d5e0e6072a4205ccdbe6d0558eff4cf8b6adaf3c1c7c34b8aab.json"
+    },
+    {
+      "id": "f8dbae381c034d700541e0d78c06d18c6e975e2c3985d53ae83994619db861fb",
+      "name": "ReferenceGeometry/Pointwise/Triangle/20/real_time",
+      "metric": "real_time",
+      "url": "cases/f8dbae381c034d700541e0d78c06d18c6e975e2c3985d53ae83994619db861fb.json"
+    },
+    {
+      "id": "46ce5a378c9258a40574cf106f262b40339dd162cda47a1e2f4978787233470d",
+      "name": "ReferenceGeometry/Pointwise/Triangle/8/real_time",
+      "metric": "real_time",
+      "url": "cases/46ce5a378c9258a40574cf106f262b40339dd162cda47a1e2f4978787233470d.json"
+    },
+    {
+      "id": "17ddddc2d4ff8f2d5a4f9a5290517971fc1a5259cfcf524d6586eb8e03f539d6",
+      "name": "ReferenceGeometry/Pointwise/Wedge/12/real_time",
+      "metric": "real_time",
+      "url": "cases/17ddddc2d4ff8f2d5a4f9a5290517971fc1a5259cfcf524d6586eb8e03f539d6.json"
+    },
+    {
+      "id": "279940488c9626c71385f5b0b6bdb858a02fa74e0dda839f040ec99aab8e1913",
+      "name": "ReferenceGeometry/Pointwise/Wedge/20/real_time",
+      "metric": "real_time",
+      "url": "cases/279940488c9626c71385f5b0b6bdb858a02fa74e0dda839f040ec99aab8e1913.json"
+    },
+    {
+      "id": "a9f766f2b5cf88818fd2320086f3d7cab6c6f62e66f18812b925fa54d369a50a",
+      "name": "ReferenceGeometry/Pointwise/Wedge/8/real_time",
+      "metric": "real_time",
+      "url": "cases/a9f766f2b5cf88818fd2320086f3d7cab6c6f62e66f18812b925fa54d369a50a.json"
+    },
+    {
+      "id": "d8bb8e83853dc26863fd19fbfae729b75285d996df4f081ba8647c3d5348a269",
+      "name": "ReferenceGeometry/Table/Hexahedron/12/real_time",
+      "metric": "real_time",
+      "url": "cases/d8bb8e83853dc26863fd19fbfae729b75285d996df4f081ba8647c3d5348a269.json"
+    },
+    {
+      "id": "5042762189c4b95788c70985c77c7b82427d4c8014c05c286f2ba5cbaa7b95a1",
+      "name": "ReferenceGeometry/Table/Hexahedron/20/real_time",
+      "metric": "real_time",
+      "url": "cases/5042762189c4b95788c70985c77c7b82427d4c8014c05c286f2ba5cbaa7b95a1.json"
+    },
+    {
+      "id": "31e1fb8c159c5b09a444f914f2a9eadac23db9b15ec1b96e14800d8e57969d5f",
+      "name": "ReferenceGeometry/Table/Hexahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/31e1fb8c159c5b09a444f914f2a9eadac23db9b15ec1b96e14800d8e57969d5f.json"
+    },
+    {
+      "id": "c235be6ec20290b132a5278da73e159721fe84f58924264e3ba4efe4fa907b35",
+      "name": "ReferenceGeometry/Table/Point/12/real_time",
+      "metric": "real_time",
+      "url": "cases/c235be6ec20290b132a5278da73e159721fe84f58924264e3ba4efe4fa907b35.json"
+    },
+    {
+      "id": "37cb88fb30a53714d8e007ac8cc4db5b511e61b41a1c3d3e6850f8fe03595985",
+      "name": "ReferenceGeometry/Table/Point/20/real_time",
+      "metric": "real_time",
+      "url": "cases/37cb88fb30a53714d8e007ac8cc4db5b511e61b41a1c3d3e6850f8fe03595985.json"
+    },
+    {
+      "id": "5582adb2ec5c5d7bf460a1f417e0fad7a08800ae9bfef413bfd5af6764ef8caf",
+      "name": "ReferenceGeometry/Table/Point/8/real_time",
+      "metric": "real_time",
+      "url": "cases/5582adb2ec5c5d7bf460a1f417e0fad7a08800ae9bfef413bfd5af6764ef8caf.json"
+    },
+    {
+      "id": "390d6f83ba2c2fa4724d82ff609447a401800365ba912a6d7e7ba2bab29a5a14",
+      "name": "ReferenceGeometry/Table/Pyramid/12/real_time",
+      "metric": "real_time",
+      "url": "cases/390d6f83ba2c2fa4724d82ff609447a401800365ba912a6d7e7ba2bab29a5a14.json"
+    },
+    {
+      "id": "7fc44391088d2d4a87a7b4d91c46df99eea9b73044633706fa43d3cd3b103748",
+      "name": "ReferenceGeometry/Table/Pyramid/20/real_time",
+      "metric": "real_time",
+      "url": "cases/7fc44391088d2d4a87a7b4d91c46df99eea9b73044633706fa43d3cd3b103748.json"
+    },
+    {
+      "id": "cf84f467258e6cc2f5f30e2a7f8f20ec1a04201d1d62deb78f11be105f54781d",
+      "name": "ReferenceGeometry/Table/Pyramid/8/real_time",
+      "metric": "real_time",
+      "url": "cases/cf84f467258e6cc2f5f30e2a7f8f20ec1a04201d1d62deb78f11be105f54781d.json"
+    },
+    {
+      "id": "7a1165581e138a2c3154087692dc53ecd5c0c70542905f7848b66b41974f8769",
+      "name": "ReferenceGeometry/Table/Quadrilateral/12/real_time",
+      "metric": "real_time",
+      "url": "cases/7a1165581e138a2c3154087692dc53ecd5c0c70542905f7848b66b41974f8769.json"
+    },
+    {
+      "id": "cdc2191cd4eeda6429c3bce44eccad1743b4442cc78e148fb33410ef7313fa7d",
+      "name": "ReferenceGeometry/Table/Quadrilateral/20/real_time",
+      "metric": "real_time",
+      "url": "cases/cdc2191cd4eeda6429c3bce44eccad1743b4442cc78e148fb33410ef7313fa7d.json"
+    },
+    {
+      "id": "478ecbca4e83fca635d0bfeff00fa340224a1d73f09c87741da81251aba545d9",
+      "name": "ReferenceGeometry/Table/Quadrilateral/8/real_time",
+      "metric": "real_time",
+      "url": "cases/478ecbca4e83fca635d0bfeff00fa340224a1d73f09c87741da81251aba545d9.json"
+    },
+    {
+      "id": "3d10aef04992240859d2c9a99de95bfe0606e054d565635659d765f52afab415",
+      "name": "ReferenceGeometry/Table/Segment/12/real_time",
+      "metric": "real_time",
+      "url": "cases/3d10aef04992240859d2c9a99de95bfe0606e054d565635659d765f52afab415.json"
+    },
+    {
+      "id": "6a0fd460ac9f43acbd4200590b7a9c9b7e8a62f807084cbe03c925eb5f6cdcd0",
+      "name": "ReferenceGeometry/Table/Segment/20/real_time",
+      "metric": "real_time",
+      "url": "cases/6a0fd460ac9f43acbd4200590b7a9c9b7e8a62f807084cbe03c925eb5f6cdcd0.json"
+    },
+    {
+      "id": "e9a0ef8152b93a63c10b140e5c8c748e4568408592a2b120880784e8383f04a4",
+      "name": "ReferenceGeometry/Table/Segment/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e9a0ef8152b93a63c10b140e5c8c748e4568408592a2b120880784e8383f04a4.json"
+    },
+    {
+      "id": "dcab5b3594eb6af4d4874022673404a1f508a0b91525b070c1835b36ee54deb4",
+      "name": "ReferenceGeometry/Table/Tetrahedron/12/real_time",
+      "metric": "real_time",
+      "url": "cases/dcab5b3594eb6af4d4874022673404a1f508a0b91525b070c1835b36ee54deb4.json"
+    },
+    {
+      "id": "b1a9c365a2ba9b7c5b4b058741e4cc2a8e6c7a2f26c6ebb029484dc175cee86b",
+      "name": "ReferenceGeometry/Table/Tetrahedron/20/real_time",
+      "metric": "real_time",
+      "url": "cases/b1a9c365a2ba9b7c5b4b058741e4cc2a8e6c7a2f26c6ebb029484dc175cee86b.json"
+    },
+    {
+      "id": "185aad4e8aab803ee5ef4ece915f7b7c7cf4149bde47006c6e67aa8dbe467ee8",
+      "name": "ReferenceGeometry/Table/Tetrahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/185aad4e8aab803ee5ef4ece915f7b7c7cf4149bde47006c6e67aa8dbe467ee8.json"
+    },
+    {
+      "id": "04b0e8dc42458d4af36cd85a7134f43cd65d16bb9ca8badec464f9cb5ec9237c",
+      "name": "ReferenceGeometry/Table/Triangle/12/real_time",
+      "metric": "real_time",
+      "url": "cases/04b0e8dc42458d4af36cd85a7134f43cd65d16bb9ca8badec464f9cb5ec9237c.json"
+    },
+    {
+      "id": "e953456f99d577364564c4edc59a160687327095906ecf0096520f80e05e3119",
+      "name": "ReferenceGeometry/Table/Triangle/20/real_time",
+      "metric": "real_time",
+      "url": "cases/e953456f99d577364564c4edc59a160687327095906ecf0096520f80e05e3119.json"
+    },
+    {
+      "id": "536689b28b1d43a7a0685153b9db71aa12e7435de81575775c7db3e260950e40",
+      "name": "ReferenceGeometry/Table/Triangle/8/real_time",
+      "metric": "real_time",
+      "url": "cases/536689b28b1d43a7a0685153b9db71aa12e7435de81575775c7db3e260950e40.json"
+    },
+    {
+      "id": "5f3034096350f45da7f6e339fa0750e8724e6eb11772bcf4bac0627a1a382f59",
+      "name": "ReferenceGeometry/Table/Wedge/12/real_time",
+      "metric": "real_time",
+      "url": "cases/5f3034096350f45da7f6e339fa0750e8724e6eb11772bcf4bac0627a1a382f59.json"
+    },
+    {
+      "id": "4108b22349ce2b0339b3a09a0ca9cd15501af1ba862436f23252ce86c1658db8",
+      "name": "ReferenceGeometry/Table/Wedge/20/real_time",
+      "metric": "real_time",
+      "url": "cases/4108b22349ce2b0339b3a09a0ca9cd15501af1ba862436f23252ce86c1658db8.json"
+    },
+    {
+      "id": "ef8e38c41e6bc5881c050418b2493a933796ea00507db58456900fd8e8cb1ed3",
+      "name": "ReferenceGeometry/Table/Wedge/8/real_time",
+      "metric": "real_time",
+      "url": "cases/ef8e38c41e6bc5881c050418b2493a933796ea00507db58456900fd8e8cb1ed3.json"
+    }
+  ]
+}

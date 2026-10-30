@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "component": "Rodin/PETSc/Assembly/Mass",
+  "configuration": "2dd94b60495b0c806e9d930f-np1",
+  "name": "CurvedQ2/Mass/Load/P1/RealScalar/Wedge/3/iterations:3/manual_time",
+  "metric": "manual_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "CurvedQ2/Mass/Load/P1/RealScalar/Wedge/3/iterations:3/manual_time",
+          "value": 118768.33333333333,
+          "unit": "ns",
+          "metric": "manual_time",
+          "samples": [
+            118768.33333333333
+          ],
+          "records": [
+            {
+              "name": "CurvedQ2/Mass/Load/P1/RealScalar/Wedge/3/iterations:3/manual_time",
+              "family_index": 29,
+              "per_family_instance_index": 0,
+              "run_name": "CurvedQ2/Mass/Load/P1/RealScalar/Wedge/3/iterations:3/manual_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 3,
+              "real_time": 118768.33333333333,
+              "cpu_time": 119392.6666663477,
+              "time_unit": "ns",
+              "cell_imbalance": 1.0,
+              "cells": 16.0,
+              "components": 1.0,
+              "degree": 1.0,
+              "dofs": 27.0,
+              "domain_measure": 1.0,
+              "geometry_amplitude": 0.1,
+              "geometry_degree": 2.0,
+              "nnz": 287.0,
+              "owned_cells_max": 16.0,
+              "owned_cells_min": 16.0,
+              "quadrature_order": 8.0,
+              "quadrature_points_per_cell": 80.0,
+              "ranks": 1.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T15:16:29+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinPETScMassAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3244,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.19824,
+              0.417969,
+              0.150391
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "PETSc/Sequential",
+            "compiler": "14.2.0",
+            "petsc_scalar": "Real",
+            "petsc_version": "3.19.6"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

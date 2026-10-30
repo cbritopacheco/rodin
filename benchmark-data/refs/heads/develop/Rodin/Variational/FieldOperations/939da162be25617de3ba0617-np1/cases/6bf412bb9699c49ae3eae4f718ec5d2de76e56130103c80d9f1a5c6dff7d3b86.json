@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "component": "Rodin/Variational/FieldOperations",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Field/ProjectionAssembly/H1/P2/Real/Scalar/Wedge/3/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "Field/ProjectionAssembly/H1/P2/Real/Scalar/Wedge/3/real_time",
+          "value": 449169.16773162025,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            449169.16773162025
+          ],
+          "records": [
+            {
+              "name": "Field/ProjectionAssembly/H1/P2/Real/Scalar/Wedge/3/real_time",
+              "family_index": 20,
+              "per_family_instance_index": 0,
+              "run_name": "Field/ProjectionAssembly/H1/P2/Real/Scalar/Wedge/3/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 626,
+              "real_time": 449169.16773162025,
+              "cpu_time": 448903.17731629097,
+              "time_unit": "ns",
+              "absolute_field_error": 1.3322676295501878e-14,
+              "cells": 16.0,
+              "components": 1.0,
+              "degree": 2.0,
+              "dimension": 3.0,
+              "dofs": 125.0,
+              "local_dofs_per_cell": 18.0,
+              "matrix_norm": 0.07015350966056863,
+              "nnz": 3689.0,
+              "oracle_points_per_cell": 80.0,
+              "oracle_quadrature_order": 8.0,
+              "quadrature_order": 8.0,
+              "quadrature_points_per_cell": 80.0,
+              "relative_coefficient_error": 1.569692587036549e-15,
+              "relative_residual": 1.6784858690330622e-16,
+              "rhs_norm": 0.5566708098405642,
+              "solver_reported_iterations": 11.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T16:23:38+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinFieldOperationBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2445,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.819336,
+              0.272461,
+              0.0966797
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

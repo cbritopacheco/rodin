@@ -1,0 +1,181 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinHyperElasticityKernelBenchmarks",
+      "RodinLinearElasticityKernelBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "f23f3ea35949429d265780a81ff6817f9ac29d1f851029dff5fd8921ffae640f",
+      "name": "InternalVirtualWork/Tangent/Active/P1/Hexahedron/Dynamic",
+      "metric": "cpu_time",
+      "url": "cases/f23f3ea35949429d265780a81ff6817f9ac29d1f851029dff5fd8921ffae640f.json"
+    },
+    {
+      "id": "221a9f49a4301d924fe7cfd197aacfcb6ee8673bb255733b8c693edc58bd8a9d",
+      "name": "InternalVirtualWork/Tangent/Active/P1/Hexahedron/Static",
+      "metric": "cpu_time",
+      "url": "cases/221a9f49a4301d924fe7cfd197aacfcb6ee8673bb255733b8c693edc58bd8a9d.json"
+    },
+    {
+      "id": "c7807dc6efd8a746debb0b1ab317d13f85fe0cc571aba14f46e577e09ac5df88",
+      "name": "InternalVirtualWork/Tangent/Active/P1/Quadrilateral/Dynamic",
+      "metric": "cpu_time",
+      "url": "cases/c7807dc6efd8a746debb0b1ab317d13f85fe0cc571aba14f46e577e09ac5df88.json"
+    },
+    {
+      "id": "ebd89a4b8b9e840ce53a9a309da8978a28b146541346dee3ae2ed9ce20fb7039",
+      "name": "InternalVirtualWork/Tangent/Active/P1/Quadrilateral/Static",
+      "metric": "cpu_time",
+      "url": "cases/ebd89a4b8b9e840ce53a9a309da8978a28b146541346dee3ae2ed9ce20fb7039.json"
+    },
+    {
+      "id": "33010bf0546b6f1bede7178e0abb84b8294676100984c63b3370c27c49402090",
+      "name": "InternalVirtualWork/Tangent/Active/P1/Tetrahedron/Dynamic",
+      "metric": "cpu_time",
+      "url": "cases/33010bf0546b6f1bede7178e0abb84b8294676100984c63b3370c27c49402090.json"
+    },
+    {
+      "id": "1853e2da2196be0aba2fcbe38c3437b426bbe5f4d9a52b399be3fe317d7c9a10",
+      "name": "InternalVirtualWork/Tangent/Active/P1/Tetrahedron/Static",
+      "metric": "cpu_time",
+      "url": "cases/1853e2da2196be0aba2fcbe38c3437b426bbe5f4d9a52b399be3fe317d7c9a10.json"
+    },
+    {
+      "id": "19c8c2414911087c4b9ab7a8b6c47d8623bd0637ee68051a5f7358dd99026ede",
+      "name": "InternalVirtualWork/Tangent/Active/P1/Triangle/Dynamic",
+      "metric": "cpu_time",
+      "url": "cases/19c8c2414911087c4b9ab7a8b6c47d8623bd0637ee68051a5f7358dd99026ede.json"
+    },
+    {
+      "id": "e87e518b34ef7ab2f28c246cceceb604faf708e35b2306d9d6630986366b6534",
+      "name": "InternalVirtualWork/Tangent/Active/P1/Triangle/Static",
+      "metric": "cpu_time",
+      "url": "cases/e87e518b34ef7ab2f28c246cceceb604faf708e35b2306d9d6630986366b6534.json"
+    },
+    {
+      "id": "e74264fc5daef095c43e9d2015482f2e01d7168a03acbae07e006e3e8cad26b4",
+      "name": "InternalVirtualWork/Tangent/Active/P2/Hexahedron/Dynamic",
+      "metric": "cpu_time",
+      "url": "cases/e74264fc5daef095c43e9d2015482f2e01d7168a03acbae07e006e3e8cad26b4.json"
+    },
+    {
+      "id": "c10adadabc857d361cf802214ce179693411f29bc9fa8eced85781715e50deb7",
+      "name": "InternalVirtualWork/Tangent/Active/P2/Hexahedron/Static",
+      "metric": "cpu_time",
+      "url": "cases/c10adadabc857d361cf802214ce179693411f29bc9fa8eced85781715e50deb7.json"
+    },
+    {
+      "id": "82d5a19d49be29641ad15e6d2315398aac4409e4e22eb88a58579a545a5e139c",
+      "name": "InternalVirtualWork/Tangent/Active/P2/Quadrilateral/Dynamic",
+      "metric": "cpu_time",
+      "url": "cases/82d5a19d49be29641ad15e6d2315398aac4409e4e22eb88a58579a545a5e139c.json"
+    },
+    {
+      "id": "8dda0e1c82a321d807a2323bfbaa640ea4a8b8a17dcf41da197342c1dc2d1a72",
+      "name": "InternalVirtualWork/Tangent/Active/P2/Quadrilateral/Static",
+      "metric": "cpu_time",
+      "url": "cases/8dda0e1c82a321d807a2323bfbaa640ea4a8b8a17dcf41da197342c1dc2d1a72.json"
+    },
+    {
+      "id": "80290668e6feb881107e187b114c1ac0a458e220a66033bccfef34a7ad66638c",
+      "name": "InternalVirtualWork/Tangent/Active/P2/Tetrahedron/Dynamic",
+      "metric": "cpu_time",
+      "url": "cases/80290668e6feb881107e187b114c1ac0a458e220a66033bccfef34a7ad66638c.json"
+    },
+    {
+      "id": "46d6841e6c1740f62a63547877768752b93abecc95f85c4cf43ee4c5c4b94903",
+      "name": "InternalVirtualWork/Tangent/Active/P2/Tetrahedron/Static",
+      "metric": "cpu_time",
+      "url": "cases/46d6841e6c1740f62a63547877768752b93abecc95f85c4cf43ee4c5c4b94903.json"
+    },
+    {
+      "id": "bf5459dd3952f92823cf784879b7322e017595aa276ed1eca5afea402f3e8832",
+      "name": "InternalVirtualWork/Tangent/Active/P2/Triangle/Dynamic",
+      "metric": "cpu_time",
+      "url": "cases/bf5459dd3952f92823cf784879b7322e017595aa276ed1eca5afea402f3e8832.json"
+    },
+    {
+      "id": "649fbf84b5f9102bfdfb36e3562037f443a5bf97aed464383218ac6db6729f0b",
+      "name": "InternalVirtualWork/Tangent/Active/P2/Triangle/Static",
+      "metric": "cpu_time",
+      "url": "cases/649fbf84b5f9102bfdfb36e3562037f443a5bf97aed464383218ac6db6729f0b.json"
+    },
+    {
+      "id": "2849461a3fa982b5229266aa06af6a9a70152980303fd609c9b2bb3dea09addb",
+      "name": "InternalVirtualWork/Tangent/Active/P3/Hexahedron/Dynamic",
+      "metric": "cpu_time",
+      "url": "cases/2849461a3fa982b5229266aa06af6a9a70152980303fd609c9b2bb3dea09addb.json"
+    },
+    {
+      "id": "12a5e45977049d17b04af9892c82a62a228a3e36d502a89dd959c772b6121036",
+      "name": "InternalVirtualWork/Tangent/Active/P3/Hexahedron/Static",
+      "metric": "cpu_time",
+      "url": "cases/12a5e45977049d17b04af9892c82a62a228a3e36d502a89dd959c772b6121036.json"
+    },
+    {
+      "id": "e966db7a7c296c82fc9ab184750abeef70de8556b4f3eec180756169d3efbaa5",
+      "name": "InternalVirtualWork/Tangent/Active/P3/Quadrilateral/Dynamic",
+      "metric": "cpu_time",
+      "url": "cases/e966db7a7c296c82fc9ab184750abeef70de8556b4f3eec180756169d3efbaa5.json"
+    },
+    {
+      "id": "c4e829c508ec1dd560de16bbb0d8e40a08c50782e137ffcf02b1cc783a33d01f",
+      "name": "InternalVirtualWork/Tangent/Active/P3/Quadrilateral/Static",
+      "metric": "cpu_time",
+      "url": "cases/c4e829c508ec1dd560de16bbb0d8e40a08c50782e137ffcf02b1cc783a33d01f.json"
+    },
+    {
+      "id": "c1e240bed1779c0e4a0fab53d88bede258393f4cacc9f608ebd9afba0516eecc",
+      "name": "InternalVirtualWork/Tangent/Active/P3/Tetrahedron/Dynamic",
+      "metric": "cpu_time",
+      "url": "cases/c1e240bed1779c0e4a0fab53d88bede258393f4cacc9f608ebd9afba0516eecc.json"
+    },
+    {
+      "id": "d0294ee9d33e40615f3021d5a24cb57a4352af92ad18ba84a5196c55206a9dcf",
+      "name": "InternalVirtualWork/Tangent/Active/P3/Tetrahedron/Static",
+      "metric": "cpu_time",
+      "url": "cases/d0294ee9d33e40615f3021d5a24cb57a4352af92ad18ba84a5196c55206a9dcf.json"
+    },
+    {
+      "id": "8f0c7d14c3b06855894c5b2c173eaa0be008f830fadc4552c157724daac6130b",
+      "name": "InternalVirtualWork/Tangent/Active/P3/Triangle/Dynamic",
+      "metric": "cpu_time",
+      "url": "cases/8f0c7d14c3b06855894c5b2c173eaa0be008f830fadc4552c157724daac6130b.json"
+    },
+    {
+      "id": "e4fafb075e5e9f42a9d5155eb3681b42278b3bd4652908208f384545cb5c614b",
+      "name": "InternalVirtualWork/Tangent/Active/P3/Triangle/Static",
+      "metric": "cpu_time",
+      "url": "cases/e4fafb075e5e9f42a9d5155eb3681b42278b3bd4652908208f384545cb5c614b.json"
+    }
+  ]
+}

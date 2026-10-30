@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "component": "Rodin/Location/AABB/Workload",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Hexahedron/2/3/1/2/interior/0",
+  "metric": "process_cpu_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "Hexahedron/2/3/1/2/interior/0",
+          "value": 49458.4654202,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            49458.4654202
+          ],
+          "records": [
+            {
+              "geometry": "Hexahedron",
+              "degree": "2",
+              "resolution": "3",
+              "cells": "8",
+              "distortion": "1.000000",
+              "warp_degree": "2",
+              "query": "interior",
+              "pruning": "0",
+              "samples": "8",
+              "ns": "49458.4654202"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "format": "csv",
+  "window": 20
+}

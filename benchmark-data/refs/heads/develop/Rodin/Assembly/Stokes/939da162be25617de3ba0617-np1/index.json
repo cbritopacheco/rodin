@@ -1,0 +1,696 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinAssemblyBenchmarks",
+      "RodinConstrainedAssemblyBenchmarks",
+      "RodinConvectionAssemblyBenchmarks",
+      "RodinCoupledReactionDiffusionAssemblyBenchmarks",
+      "RodinHelmholtzAssemblyBenchmarks",
+      "RodinMassAssemblyBenchmarks",
+      "RodinMassOperandOrderAssemblyBenchmarks",
+      "RodinMatrixMassAssemblyBenchmarks",
+      "RodinNonlinearPoissonAssemblyBenchmarks",
+      "RodinPhysicsAssemblyBenchmarks",
+      "RodinPhysicsStageBenchmarks",
+      "RodinSpatialMatrixBenchmarks",
+      "RodinStokesAssemblyBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "3721fd01dae01073349a2d769ca3669173d0cc43f1251de2843ff57b28e9216d",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/3721fd01dae01073349a2d769ca3669173d0cc43f1251de2843ff57b28e9216d.json"
+    },
+    {
+      "id": "27389f83df7257e23c50d140851f4bbc63058ba92f3b339df1300696c158d5b4",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/27389f83df7257e23c50d140851f4bbc63058ba92f3b339df1300696c158d5b4.json"
+    },
+    {
+      "id": "46837c7128e10a33aa350951f4c3822983b245f7599057f71f34563a6053778a",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/46837c7128e10a33aa350951f4c3822983b245f7599057f71f34563a6053778a.json"
+    },
+    {
+      "id": "f7b3f925189a76281c9712e7720576998e66cb2e65620af4c3bc10f970db48d4",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f7b3f925189a76281c9712e7720576998e66cb2e65620af4c3bc10f970db48d4.json"
+    },
+    {
+      "id": "75ab925a16e2badff8575678050cecce9b83d41d98a7b12e34c7aa15ca7f45fd",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/75ab925a16e2badff8575678050cecce9b83d41d98a7b12e34c7aa15ca7f45fd.json"
+    },
+    {
+      "id": "11fbc6329cbe605b18b9bfa4864f67ccce253489f1dc42e163a37d6eeb7bf59a",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/11fbc6329cbe605b18b9bfa4864f67ccce253489f1dc42e163a37d6eeb7bf59a.json"
+    },
+    {
+      "id": "ef0d21d850d6cf386b117903e80de23b72daaf48c6c5c05b749adeb1b28f38a2",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ef0d21d850d6cf386b117903e80de23b72daaf48c6c5c05b749adeb1b28f38a2.json"
+    },
+    {
+      "id": "74e702b3cde58e5e709787fe01cae3a12da1a5f5862f6cf15b84b640f86468e0",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/74e702b3cde58e5e709787fe01cae3a12da1a5f5862f6cf15b84b640f86468e0.json"
+    },
+    {
+      "id": "76a04245548b515429f518cfbc29f02516130455c574e9fcfdb923e110ae0851",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/76a04245548b515429f518cfbc29f02516130455c574e9fcfdb923e110ae0851.json"
+    },
+    {
+      "id": "6bc6e8460e9a12d3896e27f4cbe4fceb3b60105a86f9fa8f3b34045805b938fd",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6bc6e8460e9a12d3896e27f4cbe4fceb3b60105a86f9fa8f3b34045805b938fd.json"
+    },
+    {
+      "id": "cadd68c96f0b6323dd54d6f0debd716cb62437497f142b1d09668111de62eb05",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/cadd68c96f0b6323dd54d6f0debd716cb62437497f142b1d09668111de62eb05.json"
+    },
+    {
+      "id": "d74b8c8bc2cad0f0df1ea018aae004c9b4c4529c7f0af83fc89e000b449baf93",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d74b8c8bc2cad0f0df1ea018aae004c9b4c4529c7f0af83fc89e000b449baf93.json"
+    },
+    {
+      "id": "30ac21bd86d68735d3780bffc440a566d174aaf4a68d2f9cd3996cbefe4b50fa",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/30ac21bd86d68735d3780bffc440a566d174aaf4a68d2f9cd3996cbefe4b50fa.json"
+    },
+    {
+      "id": "22183f66fb7a838500082320bc07bd95f2f089836e27e5a1b09eac1d69e944aa",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/22183f66fb7a838500082320bc07bd95f2f089836e27e5a1b09eac1d69e944aa.json"
+    },
+    {
+      "id": "6f0f19cd12a977ecdb60b4283fa6912950f08efe7f7a01ac7afc8b51bf60092c",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6f0f19cd12a977ecdb60b4283fa6912950f08efe7f7a01ac7afc8b51bf60092c.json"
+    },
+    {
+      "id": "23f61398759011cbdce536149904c572f23b76e753bd4bead2479e3d69fe2977",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/23f61398759011cbdce536149904c572f23b76e753bd4bead2479e3d69fe2977.json"
+    },
+    {
+      "id": "01a88dd91bb004c630dff22c902dc61111078d66984fe3662d76ff715ded4505",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/01a88dd91bb004c630dff22c902dc61111078d66984fe3662d76ff715ded4505.json"
+    },
+    {
+      "id": "e0cf866919306e61a3ea89d321efcc7bda3a8b001bf068c490800f2596ff35e0",
+      "name": "Stokes/Assembly/H1/P2P1/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e0cf866919306e61a3ea89d321efcc7bda3a8b001bf068c490800f2596ff35e0.json"
+    },
+    {
+      "id": "631183ca239f548c65c7c2ff5a6ab87074fded2141a897d50816625ba3c9748a",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/631183ca239f548c65c7c2ff5a6ab87074fded2141a897d50816625ba3c9748a.json"
+    },
+    {
+      "id": "79ff9d663d6ca24ded4a7a302fd1030211e4954e883bc9123d367c37ca7df862",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/79ff9d663d6ca24ded4a7a302fd1030211e4954e883bc9123d367c37ca7df862.json"
+    },
+    {
+      "id": "bcdfebc3529cf0060d4b76222f6090cd0451b759c28367c39f1031e92ff30bf7",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/bcdfebc3529cf0060d4b76222f6090cd0451b759c28367c39f1031e92ff30bf7.json"
+    },
+    {
+      "id": "3c46d6391b14d7628ce3ea9e0767600b3d3a3b34b17397b5d85809b8f7d139d1",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/3c46d6391b14d7628ce3ea9e0767600b3d3a3b34b17397b5d85809b8f7d139d1.json"
+    },
+    {
+      "id": "2de75242f8ff67fe71aeb7e1e60b357eccc947dabbfbbc65598821f95624cb32",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2de75242f8ff67fe71aeb7e1e60b357eccc947dabbfbbc65598821f95624cb32.json"
+    },
+    {
+      "id": "9a2b1265e194948f188222ad3dcccb208b7cbfdcc96ba485f11db63186842401",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9a2b1265e194948f188222ad3dcccb208b7cbfdcc96ba485f11db63186842401.json"
+    },
+    {
+      "id": "5c9efef87bef69effc76405b9c71a00062cdcf1886595562a8a297d4f69eddbc",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5c9efef87bef69effc76405b9c71a00062cdcf1886595562a8a297d4f69eddbc.json"
+    },
+    {
+      "id": "8ffd55d01efea189d6597561adcf4134960e54f52c1ac6f46b6e26c711ba99d7",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8ffd55d01efea189d6597561adcf4134960e54f52c1ac6f46b6e26c711ba99d7.json"
+    },
+    {
+      "id": "d145f11003aba21df2e3918f0a4c686bafd0571eac371d6a211264a02478ced9",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d145f11003aba21df2e3918f0a4c686bafd0571eac371d6a211264a02478ced9.json"
+    },
+    {
+      "id": "add7f7cd2c946503b79161d6233c85e36ad6cd818c78b9fd821c2215dc022cfb",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/add7f7cd2c946503b79161d6233c85e36ad6cd818c78b9fd821c2215dc022cfb.json"
+    },
+    {
+      "id": "d01e4d8d302b0d8fde8e5d4a7e612b6132c6e45476c1fd212cf865bff58fbc3f",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d01e4d8d302b0d8fde8e5d4a7e612b6132c6e45476c1fd212cf865bff58fbc3f.json"
+    },
+    {
+      "id": "f4ba1918f390fc882f986fb468cdd195be33302da64bf42ddbf095f6c3a93321",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f4ba1918f390fc882f986fb468cdd195be33302da64bf42ddbf095f6c3a93321.json"
+    },
+    {
+      "id": "832612f67981873aa61d5c2a0d2491326c0440e2467b53dc072ce456ffeac844",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/832612f67981873aa61d5c2a0d2491326c0440e2467b53dc072ce456ffeac844.json"
+    },
+    {
+      "id": "a3e38af1c606e490f019c536e60714f2ab1a53bdc0a366ed458f95fe564e3466",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a3e38af1c606e490f019c536e60714f2ab1a53bdc0a366ed458f95fe564e3466.json"
+    },
+    {
+      "id": "1a50b4ccaa6f8bb177110abf8ab5bed70304df97c529ca220e6126ba36a89835",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1a50b4ccaa6f8bb177110abf8ab5bed70304df97c529ca220e6126ba36a89835.json"
+    },
+    {
+      "id": "19757f27758f282eb7c269006200a6a8f59dc65643aaa4acb1202e1aa0eae478",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/19757f27758f282eb7c269006200a6a8f59dc65643aaa4acb1202e1aa0eae478.json"
+    },
+    {
+      "id": "d1df858991e4f7b750193468953fdb0eb813b072fbfb4c6a27272e569c133cf2",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d1df858991e4f7b750193468953fdb0eb813b072fbfb4c6a27272e569c133cf2.json"
+    },
+    {
+      "id": "58039163e9679013be6dd0c27c31d3620d78bdbf82b1f6e6fb10af3fd416d736",
+      "name": "Stokes/Assembly/H1/P3P2/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/58039163e9679013be6dd0c27c31d3620d78bdbf82b1f6e6fb10af3fd416d736.json"
+    },
+    {
+      "id": "694120badf0145f21c559fa10aa6e4e9aca9b58f15008d33b6bb53948e4e04e2",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/694120badf0145f21c559fa10aa6e4e9aca9b58f15008d33b6bb53948e4e04e2.json"
+    },
+    {
+      "id": "ef11b1b2fd0860d48d46379e16e504dcdf7eac8ca51c74de90243b24253c22bd",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ef11b1b2fd0860d48d46379e16e504dcdf7eac8ca51c74de90243b24253c22bd.json"
+    },
+    {
+      "id": "8b8cf1905ea3d5d6103efc42ec9859b1ff7628fc5bb51bc02315ac985004fab9",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8b8cf1905ea3d5d6103efc42ec9859b1ff7628fc5bb51bc02315ac985004fab9.json"
+    },
+    {
+      "id": "a3379a414dcabb7353a252bdab144ed53f9c0248ca4b41da9185c1afe64e4a06",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a3379a414dcabb7353a252bdab144ed53f9c0248ca4b41da9185c1afe64e4a06.json"
+    },
+    {
+      "id": "026d2a2a8fbf39e9876a9978093a8c28d64d09afa55970c80663769812a0ad68",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/026d2a2a8fbf39e9876a9978093a8c28d64d09afa55970c80663769812a0ad68.json"
+    },
+    {
+      "id": "9c6631322b45af28169efc5334c33c51d39ae1ae1eaf191ee3fffd914371c6af",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9c6631322b45af28169efc5334c33c51d39ae1ae1eaf191ee3fffd914371c6af.json"
+    },
+    {
+      "id": "e90b29da7beafdc63d57c4ab0d0cb740b9a9987983e2cbd9c4db5d9770a93b8a",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e90b29da7beafdc63d57c4ab0d0cb740b9a9987983e2cbd9c4db5d9770a93b8a.json"
+    },
+    {
+      "id": "5a44d6049589b62b2d1f959db616149a149710584a288edf701deeff4aa0ca0b",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5a44d6049589b62b2d1f959db616149a149710584a288edf701deeff4aa0ca0b.json"
+    },
+    {
+      "id": "bd397d26cf76e6ed6762f3c780c8d3d29bffb4b95036a23643861130ade9c854",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/bd397d26cf76e6ed6762f3c780c8d3d29bffb4b95036a23643861130ade9c854.json"
+    },
+    {
+      "id": "450984ff7427ea0df376208e18bd8a446743ae342de5dc656ff2f7e409420a10",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/450984ff7427ea0df376208e18bd8a446743ae342de5dc656ff2f7e409420a10.json"
+    },
+    {
+      "id": "440bbcb02e691c2457d15de11887fa886d771dbc7f12889f817c236b39567750",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/440bbcb02e691c2457d15de11887fa886d771dbc7f12889f817c236b39567750.json"
+    },
+    {
+      "id": "ccc4e22feebbfe7348dfc19c94f65135a91e9dee82a672c707cde4fbc3a5792c",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ccc4e22feebbfe7348dfc19c94f65135a91e9dee82a672c707cde4fbc3a5792c.json"
+    },
+    {
+      "id": "b3ed04c84063e5095f75e786e0d75c212a701c829af5ed73e2e67407afd7794a",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b3ed04c84063e5095f75e786e0d75c212a701c829af5ed73e2e67407afd7794a.json"
+    },
+    {
+      "id": "7367ef4bcf464a6164d35c7a8a05846b43202dead714cc3a5ffebdc5037852b6",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7367ef4bcf464a6164d35c7a8a05846b43202dead714cc3a5ffebdc5037852b6.json"
+    },
+    {
+      "id": "ffb0d6add5d8f5fd84e7b583e5d2d5fa0cffc8fb19d2c0f684173c91d6ce3581",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ffb0d6add5d8f5fd84e7b583e5d2d5fa0cffc8fb19d2c0f684173c91d6ce3581.json"
+    },
+    {
+      "id": "32976eb910ccbfaa6c6ad5796d6c33cc2b902ca35745af836d59be271374bbed",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/32976eb910ccbfaa6c6ad5796d6c33cc2b902ca35745af836d59be271374bbed.json"
+    },
+    {
+      "id": "4925a1ce6cd6b6e4d09b159fcf9d13c0f9e3cdca6b6f915fe4da6ccace4b926d",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/4925a1ce6cd6b6e4d09b159fcf9d13c0f9e3cdca6b6f915fe4da6ccace4b926d.json"
+    },
+    {
+      "id": "bb62dc952fe1fb82b85d7d4203a95365004248bff3e15a19c1ff8894adc1085c",
+      "name": "Stokes/Assembly/H1/P4P3/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/bb62dc952fe1fb82b85d7d4203a95365004248bff3e15a19c1ff8894adc1085c.json"
+    },
+    {
+      "id": "f4cf791aed9cebd4a5f41f7d0d68bc331a672e97449408cb9bd634f747cf66af",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f4cf791aed9cebd4a5f41f7d0d68bc331a672e97449408cb9bd634f747cf66af.json"
+    },
+    {
+      "id": "17fef97def9d24c92878fb6487059f12506c3189c4b64eb93c513f25b3b92e98",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/17fef97def9d24c92878fb6487059f12506c3189c4b64eb93c513f25b3b92e98.json"
+    },
+    {
+      "id": "68e1007687f59f21cdd96d2c59c23c92891a5b4f3d8062e27b351e74dee539ba",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/68e1007687f59f21cdd96d2c59c23c92891a5b4f3d8062e27b351e74dee539ba.json"
+    },
+    {
+      "id": "b2be24350ecf01816481dc9bde7c3cde6863f65fed419ffdc0f9e11e3edde579",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b2be24350ecf01816481dc9bde7c3cde6863f65fed419ffdc0f9e11e3edde579.json"
+    },
+    {
+      "id": "ad810f6ca8b88f54d087530e430ad45b80cb73082df80d59b7c26b7140d33063",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ad810f6ca8b88f54d087530e430ad45b80cb73082df80d59b7c26b7140d33063.json"
+    },
+    {
+      "id": "cacfc20506753e20a04332c6b25f4062e3b5001509e61384a37a5b7041f7df8a",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/cacfc20506753e20a04332c6b25f4062e3b5001509e61384a37a5b7041f7df8a.json"
+    },
+    {
+      "id": "b0aa2dec228d5b95b1594fc083e378e2c4fac0990ef837bec9fe7b2531f21aca",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b0aa2dec228d5b95b1594fc083e378e2c4fac0990ef837bec9fe7b2531f21aca.json"
+    },
+    {
+      "id": "5354663635b6a9a124684839a035ce2eb92676d86ce27e4c85a62c6e67a1387d",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5354663635b6a9a124684839a035ce2eb92676d86ce27e4c85a62c6e67a1387d.json"
+    },
+    {
+      "id": "e8f1c55994e530cd5bdd551277b0d0017170ab2b4182358b09bd9ac01cd7e57f",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e8f1c55994e530cd5bdd551277b0d0017170ab2b4182358b09bd9ac01cd7e57f.json"
+    },
+    {
+      "id": "272b0d8e71087c4cd471eb0e0cc9a9a7c9d646b65b1f13a4d314576082694a33",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/272b0d8e71087c4cd471eb0e0cc9a9a7c9d646b65b1f13a4d314576082694a33.json"
+    },
+    {
+      "id": "d1441cc49414a5deebf2c2e12b55cd606996abcef312e7f8a542e7e44a82eafb",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d1441cc49414a5deebf2c2e12b55cd606996abcef312e7f8a542e7e44a82eafb.json"
+    },
+    {
+      "id": "9cbdb3f469c2a811d64cc507d2061508b93cb1dea79f60b4b3cbe2832c0395c6",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9cbdb3f469c2a811d64cc507d2061508b93cb1dea79f60b4b3cbe2832c0395c6.json"
+    },
+    {
+      "id": "bcdd086a241010c087d65bb585443d493860fdddac348ef1ad0c1ec70ad55e24",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/bcdd086a241010c087d65bb585443d493860fdddac348ef1ad0c1ec70ad55e24.json"
+    },
+    {
+      "id": "3133da052c86680e4d6ed222cc4d8ad982885c68d7efe7f685c93b8a3c41b068",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3133da052c86680e4d6ed222cc4d8ad982885c68d7efe7f685c93b8a3c41b068.json"
+    },
+    {
+      "id": "fe88e9e7766cbbe4b8670cab85f025ee53ce4be144f8ce9cca73e5e5a3a6502d",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fe88e9e7766cbbe4b8670cab85f025ee53ce4be144f8ce9cca73e5e5a3a6502d.json"
+    },
+    {
+      "id": "1d0c09712ce1895acf34485752bf4d72f5bc83f3417b6cad2f1daf0c72527e91",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1d0c09712ce1895acf34485752bf4d72f5bc83f3417b6cad2f1daf0c72527e91.json"
+    },
+    {
+      "id": "24232b097c6d3a5f70d754edd3315a735b3cfa45549558b76a5890706cc5b8ab",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/24232b097c6d3a5f70d754edd3315a735b3cfa45549558b76a5890706cc5b8ab.json"
+    },
+    {
+      "id": "b0a3b882553fae40ca898c76e25c2ecb94782c2ac9e4d3087080623bc3cd256c",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P2P1/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b0a3b882553fae40ca898c76e25c2ecb94782c2ac9e4d3087080623bc3cd256c.json"
+    },
+    {
+      "id": "5264d25b1b38f36937481b663c028da14a2f26b6e3c2783e8fd61a66f5ab900e",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5264d25b1b38f36937481b663c028da14a2f26b6e3c2783e8fd61a66f5ab900e.json"
+    },
+    {
+      "id": "face1f7cacbd9f2b42e54f94d398797e4f0ca4ffcb609a6ea4fa617f0f962c02",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/face1f7cacbd9f2b42e54f94d398797e4f0ca4ffcb609a6ea4fa617f0f962c02.json"
+    },
+    {
+      "id": "2dbb8f2e880f3e46ea44fae0b97e3d8abcc3b999955e1380f76c52371b21c1e9",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2dbb8f2e880f3e46ea44fae0b97e3d8abcc3b999955e1380f76c52371b21c1e9.json"
+    },
+    {
+      "id": "1894a47cf3fc60fd5f09bbae9b930ea09bd5369af5e752e9093bb006443945a1",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1894a47cf3fc60fd5f09bbae9b930ea09bd5369af5e752e9093bb006443945a1.json"
+    },
+    {
+      "id": "03848cdde9db01589f47f11b1696dd123d2a887b5b457ea2022b67099a479a87",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/03848cdde9db01589f47f11b1696dd123d2a887b5b457ea2022b67099a479a87.json"
+    },
+    {
+      "id": "f669443eb67463166e03c24cc6ca0eacb9603d11391c16745137d4ea03c94d5a",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f669443eb67463166e03c24cc6ca0eacb9603d11391c16745137d4ea03c94d5a.json"
+    },
+    {
+      "id": "736d203e87a649983943b23a31e9af69e142abbec71209e81955b511ca51ac9b",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/736d203e87a649983943b23a31e9af69e142abbec71209e81955b511ca51ac9b.json"
+    },
+    {
+      "id": "c1b9cc8ffe6891368f4c916bc9f48fe79ee6aa3e37c4abf4c642333a91320948",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c1b9cc8ffe6891368f4c916bc9f48fe79ee6aa3e37c4abf4c642333a91320948.json"
+    },
+    {
+      "id": "c34feaf6f9a9957b05ff6d6f058ca930eda291217fa9e62d05204ec6a8259718",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c34feaf6f9a9957b05ff6d6f058ca930eda291217fa9e62d05204ec6a8259718.json"
+    },
+    {
+      "id": "fc53913d96235c28be970d3ad88bb902757aa7edbbf0b1c1fa1faa340d54afe2",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/fc53913d96235c28be970d3ad88bb902757aa7edbbf0b1c1fa1faa340d54afe2.json"
+    },
+    {
+      "id": "a496fbaf51b3b8aea2cd3e72fdf97441147adb3ea75a8f3d364347e39b9694c3",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a496fbaf51b3b8aea2cd3e72fdf97441147adb3ea75a8f3d364347e39b9694c3.json"
+    },
+    {
+      "id": "0bda1f572257edbbf39d3a0c49ff3ff0343a7846b2591b64e86545013af93761",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0bda1f572257edbbf39d3a0c49ff3ff0343a7846b2591b64e86545013af93761.json"
+    },
+    {
+      "id": "c878a790cdbdebd2266006ff179e658ddf6b3e3d0364275111844ef362a81b59",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c878a790cdbdebd2266006ff179e658ddf6b3e3d0364275111844ef362a81b59.json"
+    },
+    {
+      "id": "644cdda46e52868e9eb1d8eea1f0b966e673b8f45b744c5c2b1b34c03671df0b",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/644cdda46e52868e9eb1d8eea1f0b966e673b8f45b744c5c2b1b34c03671df0b.json"
+    },
+    {
+      "id": "4676f0d08304d5fc3ed922497f6fa52eb19d6308fd7949c86f378fe70cbccee0",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4676f0d08304d5fc3ed922497f6fa52eb19d6308fd7949c86f378fe70cbccee0.json"
+    },
+    {
+      "id": "34dfb35c4419cd5316a1185ee029de68060b50ddc596007783fad2eed32b9810",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/34dfb35c4419cd5316a1185ee029de68060b50ddc596007783fad2eed32b9810.json"
+    },
+    {
+      "id": "b7badc2dc4f22392a0f3f6a1106b1faa719df554af86268092adfaaec9dad425",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b7badc2dc4f22392a0f3f6a1106b1faa719df554af86268092adfaaec9dad425.json"
+    },
+    {
+      "id": "6ebfec09c3d36bd06cad3f890e71a202539479ac004adc17a02a4299b97eee6a",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P3P2/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6ebfec09c3d36bd06cad3f890e71a202539479ac004adc17a02a4299b97eee6a.json"
+    },
+    {
+      "id": "c95aba0d501d7fbd1be1478e00deed835bad2ba0b9a16883ffc044d9a7030f77",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c95aba0d501d7fbd1be1478e00deed835bad2ba0b9a16883ffc044d9a7030f77.json"
+    },
+    {
+      "id": "f9de302bcc6166ed7ec9ec71d14c889b8b197cd650ff172f0560abf2b1f38467",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f9de302bcc6166ed7ec9ec71d14c889b8b197cd650ff172f0560abf2b1f38467.json"
+    },
+    {
+      "id": "1da9f895d769a398d627c953ee471a28085ca5f2b625f3b29aa751f6e669bd81",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1da9f895d769a398d627c953ee471a28085ca5f2b625f3b29aa751f6e669bd81.json"
+    },
+    {
+      "id": "1d306348f16a162b05f8157f4f19ebb2c39b722265690e9023c0f9222a8e48b9",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1d306348f16a162b05f8157f4f19ebb2c39b722265690e9023c0f9222a8e48b9.json"
+    },
+    {
+      "id": "649a47a5361ad721cfc6c13f199359420109b78cb8055bce4cde735a637cae98",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/649a47a5361ad721cfc6c13f199359420109b78cb8055bce4cde735a637cae98.json"
+    },
+    {
+      "id": "77f77bf4db39f6cd9bd1c515d19f7a113b02823d45f106a04b833fd4ae2d0cdc",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/77f77bf4db39f6cd9bd1c515d19f7a113b02823d45f106a04b833fd4ae2d0cdc.json"
+    },
+    {
+      "id": "e1c16db28772bb4c43441d129001bf2cd842b0ca488e70f53952a7332e11eddc",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e1c16db28772bb4c43441d129001bf2cd842b0ca488e70f53952a7332e11eddc.json"
+    },
+    {
+      "id": "2440d6f7973d9b7148f060f0082fc9ad9a4ca4dd85cbdb91cf2b99a9f3850c40",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2440d6f7973d9b7148f060f0082fc9ad9a4ca4dd85cbdb91cf2b99a9f3850c40.json"
+    },
+    {
+      "id": "acdf7307855d91bf49738025ab4dedc6d6fb737f8c778dc728e96f6d85656376",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/acdf7307855d91bf49738025ab4dedc6d6fb737f8c778dc728e96f6d85656376.json"
+    },
+    {
+      "id": "9523bac2a8daf4a463251473530c580b23fcb803d57f380ac42c72b18e9ddaa0",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9523bac2a8daf4a463251473530c580b23fcb803d57f380ac42c72b18e9ddaa0.json"
+    },
+    {
+      "id": "e5a14d69b13f2a6bd0e1b6818a547683a0ae4c73e01f7cccc3f80e31ebc8ab84",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e5a14d69b13f2a6bd0e1b6818a547683a0ae4c73e01f7cccc3f80e31ebc8ab84.json"
+    },
+    {
+      "id": "1e0225567579981ebaaa3e1b711a4771052b80b979da27a863c481db6b07fa6f",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1e0225567579981ebaaa3e1b711a4771052b80b979da27a863c481db6b07fa6f.json"
+    },
+    {
+      "id": "4c982496c53be76aed1d0e73ba1f9720229d5fd4b4af186e4b83a3e84bb2fa42",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4c982496c53be76aed1d0e73ba1f9720229d5fd4b4af186e4b83a3e84bb2fa42.json"
+    },
+    {
+      "id": "ee82f2f9af3423897498a61221283542273233509e8bbe8bd57f19d280850893",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ee82f2f9af3423897498a61221283542273233509e8bbe8bd57f19d280850893.json"
+    },
+    {
+      "id": "5c1e06ccf701ba02d44ce4989bf719f12c741659e7ac38b4f81b7d0193b8ac46",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5c1e06ccf701ba02d44ce4989bf719f12c741659e7ac38b4f81b7d0193b8ac46.json"
+    },
+    {
+      "id": "5e81fd2006205b1531e45598f81f5212648ccfc4a65922bc3b38415e384ad3be",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5e81fd2006205b1531e45598f81f5212648ccfc4a65922bc3b38415e384ad3be.json"
+    },
+    {
+      "id": "5d51a42473d5b01d100c1a847ac176ea805376868def9dd9456ff4d4241cf750",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5d51a42473d5b01d100c1a847ac176ea805376868def9dd9456ff4d4241cf750.json"
+    },
+    {
+      "id": "1b53a36b70ee7d88021b58711b786f5501c286c30428d1d245365959450bc77a",
+      "name": "Stokes/Assembly/WeightedViscosity/H1/P4P3/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1b53a36b70ee7d88021b58711b786f5501c286c30428d1d245365959450bc77a.json"
+    }
+  ]
+}

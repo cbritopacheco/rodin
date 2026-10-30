@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "component": "Rodin/Solid/Integrators/InternalVirtualWorkTangent",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "InternalVirtualWork/Tangent/Active/P1/Triangle/Dynamic",
+  "metric": "cpu_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "InternalVirtualWork/Tangent/Active/P1/Triangle/Dynamic",
+          "value": 5.820584641151293,
+          "unit": "us",
+          "metric": "cpu_time",
+          "samples": [
+            5.820584641151293
+          ],
+          "records": [
+            {
+              "name": "InternalVirtualWork/Tangent/Active/P1/Triangle/Dynamic",
+              "family_index": 1,
+              "per_family_instance_index": 0,
+              "run_name": "InternalVirtualWork/Tangent/Active/P1/Triangle/Dynamic",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 48363,
+              "real_time": 5.820867026445702,
+              "cpu_time": 5.820584641151293,
+              "time_unit": "us",
+              "cells_per_iteration": 1.0,
+              "dimension": 2.0,
+              "factor_degree": 1.0,
+              "local_dofs": 6.0,
+              "matrix_entries": 36.0,
+              "quadrature_points": 3.0,
+              "relative_repeat_error": 0.0,
+              "reported_element_order": 1.0,
+              "requested_quadrature_order": 2.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T14:03:54+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinHyperElasticityKernelBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3248,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.922852,
+              0.260742,
+              0.090332
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

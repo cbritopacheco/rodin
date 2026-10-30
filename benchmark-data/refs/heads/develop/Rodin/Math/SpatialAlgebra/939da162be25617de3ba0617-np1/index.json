@@ -1,0 +1,2194 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinMathBenchmarks",
+      "RodinMathSpatialMatrixBenchmarks",
+      "RodinMathSpatialVectorBenchmarks",
+      "RodinScalarDotBenchmarks",
+      "RodinSparseAlgebraBenchmarks",
+      "RodinSparseEliminationBenchmarks",
+      "RodinSpatialDotBenchmarks",
+      "RodinSpatialMatrixContractionBenchmarks",
+      "RodinSpatialMatrixProductBenchmarks",
+      "RodinSpatialMatrixVectorBenchmarks",
+      "RodinSpatialVectorStorageBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "85054b7473668afc8f1e0a2a81ef1d6e44d31bc1a049a3f2ce4b77a809d77ea3",
+      "name": "SpatialMatrix/Complex/Add/0/0",
+      "metric": "cpu_time",
+      "url": "cases/85054b7473668afc8f1e0a2a81ef1d6e44d31bc1a049a3f2ce4b77a809d77ea3.json"
+    },
+    {
+      "id": "ff074425e5847af2ffa360edeba8b1f19f2b6d188c3de2c2326f4c3b373b9bbb",
+      "name": "SpatialMatrix/Complex/Add/1/1",
+      "metric": "cpu_time",
+      "url": "cases/ff074425e5847af2ffa360edeba8b1f19f2b6d188c3de2c2326f4c3b373b9bbb.json"
+    },
+    {
+      "id": "73cb1cbe6870eda42ee9f431eab01217a3e670da97b34ef4fb4147d5fd378099",
+      "name": "SpatialMatrix/Complex/Add/1/2",
+      "metric": "cpu_time",
+      "url": "cases/73cb1cbe6870eda42ee9f431eab01217a3e670da97b34ef4fb4147d5fd378099.json"
+    },
+    {
+      "id": "6e7bf889f8d57989e4e0bf5d9dee736be198161df70b264e2b2d2029e8f8c10c",
+      "name": "SpatialMatrix/Complex/Add/1/3",
+      "metric": "cpu_time",
+      "url": "cases/6e7bf889f8d57989e4e0bf5d9dee736be198161df70b264e2b2d2029e8f8c10c.json"
+    },
+    {
+      "id": "2271826139ae382f810d75ac9da9e36673d91610f286f8147eb998df6e37fb74",
+      "name": "SpatialMatrix/Complex/Add/2/1",
+      "metric": "cpu_time",
+      "url": "cases/2271826139ae382f810d75ac9da9e36673d91610f286f8147eb998df6e37fb74.json"
+    },
+    {
+      "id": "bb01d42f76c2c382fcded46a8e044576b1f989b5752eeb3a4579c0ce0c0f793e",
+      "name": "SpatialMatrix/Complex/Add/2/2",
+      "metric": "cpu_time",
+      "url": "cases/bb01d42f76c2c382fcded46a8e044576b1f989b5752eeb3a4579c0ce0c0f793e.json"
+    },
+    {
+      "id": "01d0cd0dc4e54b7afda41f90dc6f99b97e2d4e7a88856f8c7fba681c845c906b",
+      "name": "SpatialMatrix/Complex/Add/2/3",
+      "metric": "cpu_time",
+      "url": "cases/01d0cd0dc4e54b7afda41f90dc6f99b97e2d4e7a88856f8c7fba681c845c906b.json"
+    },
+    {
+      "id": "576a5ed8e3533bc054ca5d975ce2a6b2311980111bb202660a0007b444e45e62",
+      "name": "SpatialMatrix/Complex/Add/3/1",
+      "metric": "cpu_time",
+      "url": "cases/576a5ed8e3533bc054ca5d975ce2a6b2311980111bb202660a0007b444e45e62.json"
+    },
+    {
+      "id": "c594127b9442eba7418f9dcdffba7a145f4050ee4059df5da0f5a53cf3274a2f",
+      "name": "SpatialMatrix/Complex/Add/3/2",
+      "metric": "cpu_time",
+      "url": "cases/c594127b9442eba7418f9dcdffba7a145f4050ee4059df5da0f5a53cf3274a2f.json"
+    },
+    {
+      "id": "011a4371ca4929820e8557bb36bf7564bc80925ea1ba8b46886e82d3b85fca0f",
+      "name": "SpatialMatrix/Complex/Add/3/3",
+      "metric": "cpu_time",
+      "url": "cases/011a4371ca4929820e8557bb36bf7564bc80925ea1ba8b46886e82d3b85fca0f.json"
+    },
+    {
+      "id": "deb5c82b061b21c3ef15e171f3e18e661b657e4c0c4acc2453314292f55bde59",
+      "name": "SpatialMatrix/Complex/Construct/0/0",
+      "metric": "cpu_time",
+      "url": "cases/deb5c82b061b21c3ef15e171f3e18e661b657e4c0c4acc2453314292f55bde59.json"
+    },
+    {
+      "id": "66d525f51ab9bdc6ecab27cb01ef6419d2a2ae14b7d207c62b08dbf0d39754e5",
+      "name": "SpatialMatrix/Complex/Construct/1/1",
+      "metric": "cpu_time",
+      "url": "cases/66d525f51ab9bdc6ecab27cb01ef6419d2a2ae14b7d207c62b08dbf0d39754e5.json"
+    },
+    {
+      "id": "5be8ef9b0c1bd9d03ca037ac28d8da65ab666ae612f7d9a436fa926c3f462bcb",
+      "name": "SpatialMatrix/Complex/Construct/1/2",
+      "metric": "cpu_time",
+      "url": "cases/5be8ef9b0c1bd9d03ca037ac28d8da65ab666ae612f7d9a436fa926c3f462bcb.json"
+    },
+    {
+      "id": "a285ed651be2500209379ce1fcedda5b2c0498e08da06cc5bb7959563778114a",
+      "name": "SpatialMatrix/Complex/Construct/1/3",
+      "metric": "cpu_time",
+      "url": "cases/a285ed651be2500209379ce1fcedda5b2c0498e08da06cc5bb7959563778114a.json"
+    },
+    {
+      "id": "5e7f52aa54ab5e70c1badf4ca10212828ce5195391384ff39ae021f8e2b5a725",
+      "name": "SpatialMatrix/Complex/Construct/2/1",
+      "metric": "cpu_time",
+      "url": "cases/5e7f52aa54ab5e70c1badf4ca10212828ce5195391384ff39ae021f8e2b5a725.json"
+    },
+    {
+      "id": "de301787a4632bcf8c1efee3fdc26e716d341b3e8de0ecc2f3d51a463aefbdd8",
+      "name": "SpatialMatrix/Complex/Construct/2/2",
+      "metric": "cpu_time",
+      "url": "cases/de301787a4632bcf8c1efee3fdc26e716d341b3e8de0ecc2f3d51a463aefbdd8.json"
+    },
+    {
+      "id": "7d0405cea74fa5b231eabfcf9e9c668542d52538a94217be73988b5c29349f7c",
+      "name": "SpatialMatrix/Complex/Construct/2/3",
+      "metric": "cpu_time",
+      "url": "cases/7d0405cea74fa5b231eabfcf9e9c668542d52538a94217be73988b5c29349f7c.json"
+    },
+    {
+      "id": "47944dbf42057767d0ca3ed2f7e9d0f2aec356851863dc8911c711c37499add6",
+      "name": "SpatialMatrix/Complex/Construct/3/1",
+      "metric": "cpu_time",
+      "url": "cases/47944dbf42057767d0ca3ed2f7e9d0f2aec356851863dc8911c711c37499add6.json"
+    },
+    {
+      "id": "3905700ecabf238f1cdac63150b8422639e10da7927563227c7f6f589ed168ff",
+      "name": "SpatialMatrix/Complex/Construct/3/2",
+      "metric": "cpu_time",
+      "url": "cases/3905700ecabf238f1cdac63150b8422639e10da7927563227c7f6f589ed168ff.json"
+    },
+    {
+      "id": "146f2a74d02f51fa14224edd135fec8e67fa8c226cd37026736f9ca6850b9e2d",
+      "name": "SpatialMatrix/Complex/Construct/3/3",
+      "metric": "cpu_time",
+      "url": "cases/146f2a74d02f51fa14224edd135fec8e67fa8c226cd37026736f9ca6850b9e2d.json"
+    },
+    {
+      "id": "4797c093e78ceab559e107188957b446bb767e189044d37c3a1b1e05793af793",
+      "name": "SpatialMatrix/Complex/Contract/0/0",
+      "metric": "cpu_time",
+      "url": "cases/4797c093e78ceab559e107188957b446bb767e189044d37c3a1b1e05793af793.json"
+    },
+    {
+      "id": "d34bf43aa270dfd2a992bcb97d9ecb026b065f51e85559eb71ba6c7d97e4b892",
+      "name": "SpatialMatrix/Complex/Contract/1/1",
+      "metric": "cpu_time",
+      "url": "cases/d34bf43aa270dfd2a992bcb97d9ecb026b065f51e85559eb71ba6c7d97e4b892.json"
+    },
+    {
+      "id": "e0af40841fbc4a36d47d5d39eae4c8edb7da5000c69ecd40f2c3d440cae791d8",
+      "name": "SpatialMatrix/Complex/Contract/1/2",
+      "metric": "cpu_time",
+      "url": "cases/e0af40841fbc4a36d47d5d39eae4c8edb7da5000c69ecd40f2c3d440cae791d8.json"
+    },
+    {
+      "id": "253bf65c44a742765582d4ddc7732016d5e81e2bb93112fa012b79ebf1ea3b87",
+      "name": "SpatialMatrix/Complex/Contract/1/3",
+      "metric": "cpu_time",
+      "url": "cases/253bf65c44a742765582d4ddc7732016d5e81e2bb93112fa012b79ebf1ea3b87.json"
+    },
+    {
+      "id": "f502d435c6a30a95f080ffd72adc56ea1f3b91da5fde167a9b1bd4331acc157a",
+      "name": "SpatialMatrix/Complex/Contract/2/1",
+      "metric": "cpu_time",
+      "url": "cases/f502d435c6a30a95f080ffd72adc56ea1f3b91da5fde167a9b1bd4331acc157a.json"
+    },
+    {
+      "id": "469a4a317d28156399f23fb84eb7f1aeda34fbbf15dba4f9d287ec467ddfb003",
+      "name": "SpatialMatrix/Complex/Contract/2/2",
+      "metric": "cpu_time",
+      "url": "cases/469a4a317d28156399f23fb84eb7f1aeda34fbbf15dba4f9d287ec467ddfb003.json"
+    },
+    {
+      "id": "5c9914d58008ecae930f210b0ee4caff3b05f8f6532b8b52d0c37466e54389cd",
+      "name": "SpatialMatrix/Complex/Contract/2/3",
+      "metric": "cpu_time",
+      "url": "cases/5c9914d58008ecae930f210b0ee4caff3b05f8f6532b8b52d0c37466e54389cd.json"
+    },
+    {
+      "id": "507edca89661f11784d277dc6c7b9af98e06e0ead230743df5bd429e7046b5bb",
+      "name": "SpatialMatrix/Complex/Contract/3/1",
+      "metric": "cpu_time",
+      "url": "cases/507edca89661f11784d277dc6c7b9af98e06e0ead230743df5bd429e7046b5bb.json"
+    },
+    {
+      "id": "5c445bcd83e4ca31722df66aae240ea75a57ff7e5b81cdf64800f3aace8339d9",
+      "name": "SpatialMatrix/Complex/Contract/3/2",
+      "metric": "cpu_time",
+      "url": "cases/5c445bcd83e4ca31722df66aae240ea75a57ff7e5b81cdf64800f3aace8339d9.json"
+    },
+    {
+      "id": "b63685be9c1368606b557ac87255b949ca0cf90577b382258375b1d314f2e02d",
+      "name": "SpatialMatrix/Complex/Contract/3/3",
+      "metric": "cpu_time",
+      "url": "cases/b63685be9c1368606b557ac87255b949ca0cf90577b382258375b1d314f2e02d.json"
+    },
+    {
+      "id": "928d41da5a32c81991919a22c81d60e95d2d48795dc4ad467cdf37bff172e3fe",
+      "name": "SpatialMatrix/Complex/Copy/0/0",
+      "metric": "cpu_time",
+      "url": "cases/928d41da5a32c81991919a22c81d60e95d2d48795dc4ad467cdf37bff172e3fe.json"
+    },
+    {
+      "id": "b6643ac4bd6882c424a45ea991762445b672b534d5281a749be2115b6374240d",
+      "name": "SpatialMatrix/Complex/Copy/1/1",
+      "metric": "cpu_time",
+      "url": "cases/b6643ac4bd6882c424a45ea991762445b672b534d5281a749be2115b6374240d.json"
+    },
+    {
+      "id": "30b9a04e33e3a9a332ee0619b5550903acf21d2d747d67ec1b60701fda387b9a",
+      "name": "SpatialMatrix/Complex/Copy/1/2",
+      "metric": "cpu_time",
+      "url": "cases/30b9a04e33e3a9a332ee0619b5550903acf21d2d747d67ec1b60701fda387b9a.json"
+    },
+    {
+      "id": "65656836f1fcb212535341f2665e3956db3f3aff6b77ffbe8ac1328cf313ae69",
+      "name": "SpatialMatrix/Complex/Copy/1/3",
+      "metric": "cpu_time",
+      "url": "cases/65656836f1fcb212535341f2665e3956db3f3aff6b77ffbe8ac1328cf313ae69.json"
+    },
+    {
+      "id": "823ad5d3de8bf8c227d96fef6338e968672255a42bee780181815730aafdf39c",
+      "name": "SpatialMatrix/Complex/Copy/2/1",
+      "metric": "cpu_time",
+      "url": "cases/823ad5d3de8bf8c227d96fef6338e968672255a42bee780181815730aafdf39c.json"
+    },
+    {
+      "id": "75280e6007bec76ac89d88e8b007832f251b4d5bdb00a184853fca16ca3d119e",
+      "name": "SpatialMatrix/Complex/Copy/2/2",
+      "metric": "cpu_time",
+      "url": "cases/75280e6007bec76ac89d88e8b007832f251b4d5bdb00a184853fca16ca3d119e.json"
+    },
+    {
+      "id": "81ae8951104603acf1546963fba11d410e270039c2a1fd4d0cd74ddc7d4b3374",
+      "name": "SpatialMatrix/Complex/Copy/2/3",
+      "metric": "cpu_time",
+      "url": "cases/81ae8951104603acf1546963fba11d410e270039c2a1fd4d0cd74ddc7d4b3374.json"
+    },
+    {
+      "id": "d613ef50100beeda508d3e8354e22e83234831d2bd2e86e5e62e73db4b270e3b",
+      "name": "SpatialMatrix/Complex/Copy/3/1",
+      "metric": "cpu_time",
+      "url": "cases/d613ef50100beeda508d3e8354e22e83234831d2bd2e86e5e62e73db4b270e3b.json"
+    },
+    {
+      "id": "527bd23412f0c86b5023e0a588b668534a5dbb42df454e3f8fdf2bedb20834d0",
+      "name": "SpatialMatrix/Complex/Copy/3/2",
+      "metric": "cpu_time",
+      "url": "cases/527bd23412f0c86b5023e0a588b668534a5dbb42df454e3f8fdf2bedb20834d0.json"
+    },
+    {
+      "id": "f2bbebb1b3a9e9273914d204101a43a9aeaaec9e3362b1d73690e4d147b1923d",
+      "name": "SpatialMatrix/Complex/Copy/3/3",
+      "metric": "cpu_time",
+      "url": "cases/f2bbebb1b3a9e9273914d204101a43a9aeaaec9e3362b1d73690e4d147b1923d.json"
+    },
+    {
+      "id": "1901b006cc908ae82bac100a7b688dff5c77ca2bed549aa3922b2600075ad59a",
+      "name": "SpatialMatrix/Complex/Dot/0/0",
+      "metric": "cpu_time",
+      "url": "cases/1901b006cc908ae82bac100a7b688dff5c77ca2bed549aa3922b2600075ad59a.json"
+    },
+    {
+      "id": "1db2cf8de41ae443e7b13cf94b1839e3e984f75af6e26cd4f22459079cf08205",
+      "name": "SpatialMatrix/Complex/Dot/1/1",
+      "metric": "cpu_time",
+      "url": "cases/1db2cf8de41ae443e7b13cf94b1839e3e984f75af6e26cd4f22459079cf08205.json"
+    },
+    {
+      "id": "fb192b0ebd603127f5bd78eb225c7cd4a731d6bd1e27fbaab507cae59a2b3a66",
+      "name": "SpatialMatrix/Complex/Dot/1/2",
+      "metric": "cpu_time",
+      "url": "cases/fb192b0ebd603127f5bd78eb225c7cd4a731d6bd1e27fbaab507cae59a2b3a66.json"
+    },
+    {
+      "id": "f94504a7d3544def34f630c31ad0efdf0c905de2e6efe0c2296594ea5a804003",
+      "name": "SpatialMatrix/Complex/Dot/1/3",
+      "metric": "cpu_time",
+      "url": "cases/f94504a7d3544def34f630c31ad0efdf0c905de2e6efe0c2296594ea5a804003.json"
+    },
+    {
+      "id": "9a53819777de897997ed383a3372e6ed7dad0ea4855a78119acb418b29835aac",
+      "name": "SpatialMatrix/Complex/Dot/2/1",
+      "metric": "cpu_time",
+      "url": "cases/9a53819777de897997ed383a3372e6ed7dad0ea4855a78119acb418b29835aac.json"
+    },
+    {
+      "id": "a61389384e9fe871d22d8cc1edcd75cafe00da45aace6e811f493abfe2ac26c0",
+      "name": "SpatialMatrix/Complex/Dot/2/2",
+      "metric": "cpu_time",
+      "url": "cases/a61389384e9fe871d22d8cc1edcd75cafe00da45aace6e811f493abfe2ac26c0.json"
+    },
+    {
+      "id": "7049fb751cae36f3abde6070d6b5c2705270b339b49970ba0622e4bc073c02cc",
+      "name": "SpatialMatrix/Complex/Dot/2/3",
+      "metric": "cpu_time",
+      "url": "cases/7049fb751cae36f3abde6070d6b5c2705270b339b49970ba0622e4bc073c02cc.json"
+    },
+    {
+      "id": "82af1f09e03dded6ee7fdaafd40bd0d4e7125444664b31ed5cfbfc1f38e182a1",
+      "name": "SpatialMatrix/Complex/Dot/3/1",
+      "metric": "cpu_time",
+      "url": "cases/82af1f09e03dded6ee7fdaafd40bd0d4e7125444664b31ed5cfbfc1f38e182a1.json"
+    },
+    {
+      "id": "f8044ee08c2a16906a6e39b3810deaa5eb6a65174f97d284e2c45c95b8be82e8",
+      "name": "SpatialMatrix/Complex/Dot/3/2",
+      "metric": "cpu_time",
+      "url": "cases/f8044ee08c2a16906a6e39b3810deaa5eb6a65174f97d284e2c45c95b8be82e8.json"
+    },
+    {
+      "id": "bc3bd2393c8ff851096783b314dcebbee15c0778a01b433de6763000d01b297f",
+      "name": "SpatialMatrix/Complex/Dot/3/3",
+      "metric": "cpu_time",
+      "url": "cases/bc3bd2393c8ff851096783b314dcebbee15c0778a01b433de6763000d01b297f.json"
+    },
+    {
+      "id": "97d1ced49fb6fef5dcb06d20bcb1916e63884dac98bddcd7b682ac5237422e5c",
+      "name": "SpatialMatrix/Complex/MatMat/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/97d1ced49fb6fef5dcb06d20bcb1916e63884dac98bddcd7b682ac5237422e5c.json"
+    },
+    {
+      "id": "528cba07fd9aee0a0fee59b8e321c61890ef6fdf0f2896c028b76a5dd8e38e9c",
+      "name": "SpatialMatrix/Complex/MatMat/1/1/2",
+      "metric": "cpu_time",
+      "url": "cases/528cba07fd9aee0a0fee59b8e321c61890ef6fdf0f2896c028b76a5dd8e38e9c.json"
+    },
+    {
+      "id": "fcf3446c61aeac2a5f9aa3d112c5c5383bf13658cdc5bde0630f3e7b6aaf3635",
+      "name": "SpatialMatrix/Complex/MatMat/1/1/3",
+      "metric": "cpu_time",
+      "url": "cases/fcf3446c61aeac2a5f9aa3d112c5c5383bf13658cdc5bde0630f3e7b6aaf3635.json"
+    },
+    {
+      "id": "7be1001b3164d86e2ae8b1d7d1800863ac3dc3dbfb4c314075b6025847d5a4cc",
+      "name": "SpatialMatrix/Complex/MatMat/1/2/1",
+      "metric": "cpu_time",
+      "url": "cases/7be1001b3164d86e2ae8b1d7d1800863ac3dc3dbfb4c314075b6025847d5a4cc.json"
+    },
+    {
+      "id": "3dc36657c8679bd788b4b3d5afeb5bb4af2de0a76cb22e98de804f4923d3496a",
+      "name": "SpatialMatrix/Complex/MatMat/1/2/2",
+      "metric": "cpu_time",
+      "url": "cases/3dc36657c8679bd788b4b3d5afeb5bb4af2de0a76cb22e98de804f4923d3496a.json"
+    },
+    {
+      "id": "531d87055c01641953d66008c09308c317a6392a36203d9102990b08e0935a08",
+      "name": "SpatialMatrix/Complex/MatMat/1/2/3",
+      "metric": "cpu_time",
+      "url": "cases/531d87055c01641953d66008c09308c317a6392a36203d9102990b08e0935a08.json"
+    },
+    {
+      "id": "4230ffb78b8d00bb4ce9509318d763ef8fa677cfaf5f21ad441a21559c384585",
+      "name": "SpatialMatrix/Complex/MatMat/1/3/1",
+      "metric": "cpu_time",
+      "url": "cases/4230ffb78b8d00bb4ce9509318d763ef8fa677cfaf5f21ad441a21559c384585.json"
+    },
+    {
+      "id": "d91b2f084326dffbe2a95db973afea9f848bc3448ab863fd2c05d4fe931bcaf3",
+      "name": "SpatialMatrix/Complex/MatMat/1/3/2",
+      "metric": "cpu_time",
+      "url": "cases/d91b2f084326dffbe2a95db973afea9f848bc3448ab863fd2c05d4fe931bcaf3.json"
+    },
+    {
+      "id": "f1d233496ebe634812bcd21aa511e12f7e3ddcb3ec56da1acff5127738f94416",
+      "name": "SpatialMatrix/Complex/MatMat/1/3/3",
+      "metric": "cpu_time",
+      "url": "cases/f1d233496ebe634812bcd21aa511e12f7e3ddcb3ec56da1acff5127738f94416.json"
+    },
+    {
+      "id": "96b589639bc2555d2601cdded109f844e1f0c94015e1be48d732cb51e10f0a43",
+      "name": "SpatialMatrix/Complex/MatMat/2/1/1",
+      "metric": "cpu_time",
+      "url": "cases/96b589639bc2555d2601cdded109f844e1f0c94015e1be48d732cb51e10f0a43.json"
+    },
+    {
+      "id": "2d3e9ef4f803d994ccbb9f5f895143ca4c1c2c7a6d63b9d474358ca1299f8acd",
+      "name": "SpatialMatrix/Complex/MatMat/2/1/2",
+      "metric": "cpu_time",
+      "url": "cases/2d3e9ef4f803d994ccbb9f5f895143ca4c1c2c7a6d63b9d474358ca1299f8acd.json"
+    },
+    {
+      "id": "e77a4529e60416693a7ca29641ddd412c663467c3694e5e6efc453e07bc53f4d",
+      "name": "SpatialMatrix/Complex/MatMat/2/1/3",
+      "metric": "cpu_time",
+      "url": "cases/e77a4529e60416693a7ca29641ddd412c663467c3694e5e6efc453e07bc53f4d.json"
+    },
+    {
+      "id": "ee87ff788bb93d27ca4120149f66c33e12be13ce6b8879fb3c760fd88e539b4a",
+      "name": "SpatialMatrix/Complex/MatMat/2/2/1",
+      "metric": "cpu_time",
+      "url": "cases/ee87ff788bb93d27ca4120149f66c33e12be13ce6b8879fb3c760fd88e539b4a.json"
+    },
+    {
+      "id": "b2c3879d741aa30d8e478537d5367839c2c3285548deb485d3a0aacaf30f4df0",
+      "name": "SpatialMatrix/Complex/MatMat/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/b2c3879d741aa30d8e478537d5367839c2c3285548deb485d3a0aacaf30f4df0.json"
+    },
+    {
+      "id": "29a0cd5e2183614b32bcfbd3b12c86b777965bbdafb2e316fa38d5b7da50f1ac",
+      "name": "SpatialMatrix/Complex/MatMat/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/29a0cd5e2183614b32bcfbd3b12c86b777965bbdafb2e316fa38d5b7da50f1ac.json"
+    },
+    {
+      "id": "67630005f92e262b890c8a57f6ac1c9e2e7a74aa5c8524b23576c91cab7bc2e5",
+      "name": "SpatialMatrix/Complex/MatMat/2/3/1",
+      "metric": "cpu_time",
+      "url": "cases/67630005f92e262b890c8a57f6ac1c9e2e7a74aa5c8524b23576c91cab7bc2e5.json"
+    },
+    {
+      "id": "3b17194ecc57c788531fff2c055f756b0cdc0edbd6198e83ee9d2caaf117abd3",
+      "name": "SpatialMatrix/Complex/MatMat/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/3b17194ecc57c788531fff2c055f756b0cdc0edbd6198e83ee9d2caaf117abd3.json"
+    },
+    {
+      "id": "bd4553c3144b10e2a86dad77a0d675dd89f0e7bb69750d25146984bb8d292175",
+      "name": "SpatialMatrix/Complex/MatMat/2/3/3",
+      "metric": "cpu_time",
+      "url": "cases/bd4553c3144b10e2a86dad77a0d675dd89f0e7bb69750d25146984bb8d292175.json"
+    },
+    {
+      "id": "25a2749b020f2dfb884ddabd0b8ca4e7c975fe0a47ff8dc9373d99e00f4a3fc6",
+      "name": "SpatialMatrix/Complex/MatMat/3/1/1",
+      "metric": "cpu_time",
+      "url": "cases/25a2749b020f2dfb884ddabd0b8ca4e7c975fe0a47ff8dc9373d99e00f4a3fc6.json"
+    },
+    {
+      "id": "fc513cf71f0c76b0dfbe0503a936833c8f7424dd403179bf8fac292f7ea2263b",
+      "name": "SpatialMatrix/Complex/MatMat/3/1/2",
+      "metric": "cpu_time",
+      "url": "cases/fc513cf71f0c76b0dfbe0503a936833c8f7424dd403179bf8fac292f7ea2263b.json"
+    },
+    {
+      "id": "ed189cda83767844aea173eaffe72768f91ab7275de96fdf72155f233175fcea",
+      "name": "SpatialMatrix/Complex/MatMat/3/1/3",
+      "metric": "cpu_time",
+      "url": "cases/ed189cda83767844aea173eaffe72768f91ab7275de96fdf72155f233175fcea.json"
+    },
+    {
+      "id": "1efcd8cf9417d0c2d083ea2da48c82d8b4ed62fc7f0346a1f165266582c67b01",
+      "name": "SpatialMatrix/Complex/MatMat/3/2/1",
+      "metric": "cpu_time",
+      "url": "cases/1efcd8cf9417d0c2d083ea2da48c82d8b4ed62fc7f0346a1f165266582c67b01.json"
+    },
+    {
+      "id": "6c1104de720b794dcc0a61e76b331afb6300d09e0515e13299a1dbd90eb6f364",
+      "name": "SpatialMatrix/Complex/MatMat/3/2/2",
+      "metric": "cpu_time",
+      "url": "cases/6c1104de720b794dcc0a61e76b331afb6300d09e0515e13299a1dbd90eb6f364.json"
+    },
+    {
+      "id": "ab63eb0b84d6a6f64afdc08e4fe3fd1dd70b9b0249da45570d24fea9669eb627",
+      "name": "SpatialMatrix/Complex/MatMat/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/ab63eb0b84d6a6f64afdc08e4fe3fd1dd70b9b0249da45570d24fea9669eb627.json"
+    },
+    {
+      "id": "7e3bd2add55a5ff0fba1ec1c58309e5fd4735468e11180e25fd17c106a94dcd1",
+      "name": "SpatialMatrix/Complex/MatMat/3/3/1",
+      "metric": "cpu_time",
+      "url": "cases/7e3bd2add55a5ff0fba1ec1c58309e5fd4735468e11180e25fd17c106a94dcd1.json"
+    },
+    {
+      "id": "c1ff309d18aa32a100bb842e85db0dfdacbf6a7bc07c52da3b0ee27e231d6582",
+      "name": "SpatialMatrix/Complex/MatMat/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/c1ff309d18aa32a100bb842e85db0dfdacbf6a7bc07c52da3b0ee27e231d6582.json"
+    },
+    {
+      "id": "491f729717ff16450f4d5f930403435b51f2b91824b19b869a4f591d6e32a920",
+      "name": "SpatialMatrix/Complex/MatMat/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/491f729717ff16450f4d5f930403435b51f2b91824b19b869a4f591d6e32a920.json"
+    },
+    {
+      "id": "9559ec88658a8c9701ee3b835aca9ff578e818d9579f2a10792f54235c5838cf",
+      "name": "SpatialMatrix/Complex/Scale/0/0",
+      "metric": "cpu_time",
+      "url": "cases/9559ec88658a8c9701ee3b835aca9ff578e818d9579f2a10792f54235c5838cf.json"
+    },
+    {
+      "id": "20bac3954731d4bd9586ecfe0eb729cf597d763ca4d42969e26de50478abf59f",
+      "name": "SpatialMatrix/Complex/Scale/1/1",
+      "metric": "cpu_time",
+      "url": "cases/20bac3954731d4bd9586ecfe0eb729cf597d763ca4d42969e26de50478abf59f.json"
+    },
+    {
+      "id": "999e836b561f41065cdb37f6cb64f42cb9851f4ca1ba5a7e63b5fdbd72102728",
+      "name": "SpatialMatrix/Complex/Scale/1/2",
+      "metric": "cpu_time",
+      "url": "cases/999e836b561f41065cdb37f6cb64f42cb9851f4ca1ba5a7e63b5fdbd72102728.json"
+    },
+    {
+      "id": "37a33ef79605669d7160de723d171a2326791be900bc84aff054672523868a7a",
+      "name": "SpatialMatrix/Complex/Scale/1/3",
+      "metric": "cpu_time",
+      "url": "cases/37a33ef79605669d7160de723d171a2326791be900bc84aff054672523868a7a.json"
+    },
+    {
+      "id": "e217529d37948021abd11d530812600a639a39bf817dbf4411d4d6edd8774971",
+      "name": "SpatialMatrix/Complex/Scale/2/1",
+      "metric": "cpu_time",
+      "url": "cases/e217529d37948021abd11d530812600a639a39bf817dbf4411d4d6edd8774971.json"
+    },
+    {
+      "id": "9e01b505ae9c57f9b9b02721ee5a740550c93ef5e0a42be5d286a6abb5516a75",
+      "name": "SpatialMatrix/Complex/Scale/2/2",
+      "metric": "cpu_time",
+      "url": "cases/9e01b505ae9c57f9b9b02721ee5a740550c93ef5e0a42be5d286a6abb5516a75.json"
+    },
+    {
+      "id": "687f91cddf6f122640121a7a77712d6ef4596ea2836a6a5cc2cb727d926dedea",
+      "name": "SpatialMatrix/Complex/Scale/2/3",
+      "metric": "cpu_time",
+      "url": "cases/687f91cddf6f122640121a7a77712d6ef4596ea2836a6a5cc2cb727d926dedea.json"
+    },
+    {
+      "id": "18011516e90eacd5b97fca7524222ebcc441dc3064e5b15c30b13c5024e30554",
+      "name": "SpatialMatrix/Complex/Scale/3/1",
+      "metric": "cpu_time",
+      "url": "cases/18011516e90eacd5b97fca7524222ebcc441dc3064e5b15c30b13c5024e30554.json"
+    },
+    {
+      "id": "d04f19d82dc8049930cc1fbbe2fa04b82a301f3916e6d800f375e6a4c8174045",
+      "name": "SpatialMatrix/Complex/Scale/3/2",
+      "metric": "cpu_time",
+      "url": "cases/d04f19d82dc8049930cc1fbbe2fa04b82a301f3916e6d800f375e6a4c8174045.json"
+    },
+    {
+      "id": "834f3a45deb9c3a78bb37471081474c96055fd2a75fd682c60210e7f410d1be3",
+      "name": "SpatialMatrix/Complex/Scale/3/3",
+      "metric": "cpu_time",
+      "url": "cases/834f3a45deb9c3a78bb37471081474c96055fd2a75fd682c60210e7f410d1be3.json"
+    },
+    {
+      "id": "fa068afe9421f554e1bd09325ac4ae5973ab54c3afeae0ba780dcb065597355a",
+      "name": "SpatialMatrix/Real/Add/0/0",
+      "metric": "cpu_time",
+      "url": "cases/fa068afe9421f554e1bd09325ac4ae5973ab54c3afeae0ba780dcb065597355a.json"
+    },
+    {
+      "id": "7a18afb20988fc04edceb0964f2cf14edc547e24566f4357f8dc06118ffc5fd7",
+      "name": "SpatialMatrix/Real/Add/1/1",
+      "metric": "cpu_time",
+      "url": "cases/7a18afb20988fc04edceb0964f2cf14edc547e24566f4357f8dc06118ffc5fd7.json"
+    },
+    {
+      "id": "d264067e4c029d48e6be30553b77f7dacd95f02826df4763c80dc04577de507f",
+      "name": "SpatialMatrix/Real/Add/1/2",
+      "metric": "cpu_time",
+      "url": "cases/d264067e4c029d48e6be30553b77f7dacd95f02826df4763c80dc04577de507f.json"
+    },
+    {
+      "id": "7cef787c1cb5396d5700c67501cbb8f1617ff6ea56613942094fbb6d754c5040",
+      "name": "SpatialMatrix/Real/Add/1/3",
+      "metric": "cpu_time",
+      "url": "cases/7cef787c1cb5396d5700c67501cbb8f1617ff6ea56613942094fbb6d754c5040.json"
+    },
+    {
+      "id": "f1a4530a6f0b5fcd3b15005c7e90e13673c6924402f7833c93d3aa787b8ce686",
+      "name": "SpatialMatrix/Real/Add/2/1",
+      "metric": "cpu_time",
+      "url": "cases/f1a4530a6f0b5fcd3b15005c7e90e13673c6924402f7833c93d3aa787b8ce686.json"
+    },
+    {
+      "id": "ec60c8382ebdb157b88c60bb046f7c1f231cfbc4e6556385893b5fd7d82ddbf7",
+      "name": "SpatialMatrix/Real/Add/2/2",
+      "metric": "cpu_time",
+      "url": "cases/ec60c8382ebdb157b88c60bb046f7c1f231cfbc4e6556385893b5fd7d82ddbf7.json"
+    },
+    {
+      "id": "9eaeaf057708eff8745fc2b7341d4d9be3ab2bce863b9636229e38e44cef5c0f",
+      "name": "SpatialMatrix/Real/Add/2/3",
+      "metric": "cpu_time",
+      "url": "cases/9eaeaf057708eff8745fc2b7341d4d9be3ab2bce863b9636229e38e44cef5c0f.json"
+    },
+    {
+      "id": "28fda4e773e22a55f0e4640eed8407419bf4a2bb7f29759ca661670afb959a0c",
+      "name": "SpatialMatrix/Real/Add/3/1",
+      "metric": "cpu_time",
+      "url": "cases/28fda4e773e22a55f0e4640eed8407419bf4a2bb7f29759ca661670afb959a0c.json"
+    },
+    {
+      "id": "ef45ad3c7442288574483ad8418748b37e95b6d2428fc23d008ac540cf39d202",
+      "name": "SpatialMatrix/Real/Add/3/2",
+      "metric": "cpu_time",
+      "url": "cases/ef45ad3c7442288574483ad8418748b37e95b6d2428fc23d008ac540cf39d202.json"
+    },
+    {
+      "id": "46ad424cced7b0dcda5b5b55acf43824fe4df2f91cb812c538d67701c7bebc67",
+      "name": "SpatialMatrix/Real/Add/3/3",
+      "metric": "cpu_time",
+      "url": "cases/46ad424cced7b0dcda5b5b55acf43824fe4df2f91cb812c538d67701c7bebc67.json"
+    },
+    {
+      "id": "a84e0aa5f60f5ccdde3143029d0264c9d56544f9676b68ab69a00eba2ab5a16c",
+      "name": "SpatialMatrix/Real/Construct/0/0",
+      "metric": "cpu_time",
+      "url": "cases/a84e0aa5f60f5ccdde3143029d0264c9d56544f9676b68ab69a00eba2ab5a16c.json"
+    },
+    {
+      "id": "c02223ad639cf29c67eed94d9a08ed2c15a5776f9548f98872bc88003c1e54b0",
+      "name": "SpatialMatrix/Real/Construct/1/1",
+      "metric": "cpu_time",
+      "url": "cases/c02223ad639cf29c67eed94d9a08ed2c15a5776f9548f98872bc88003c1e54b0.json"
+    },
+    {
+      "id": "5ae0f4d0d255749ba0d3b21d0453d020d5bb5805bab13d18f1a654839de7fc61",
+      "name": "SpatialMatrix/Real/Construct/1/2",
+      "metric": "cpu_time",
+      "url": "cases/5ae0f4d0d255749ba0d3b21d0453d020d5bb5805bab13d18f1a654839de7fc61.json"
+    },
+    {
+      "id": "edfb49122f4c51bfa315fa152a0da71e4eebfc74068e0a626b55e13944e4ee2b",
+      "name": "SpatialMatrix/Real/Construct/1/3",
+      "metric": "cpu_time",
+      "url": "cases/edfb49122f4c51bfa315fa152a0da71e4eebfc74068e0a626b55e13944e4ee2b.json"
+    },
+    {
+      "id": "ee93a2fc57a0c1966b8ec625f060b25c65efa7bed7bdbc8c2ad914bb958b077b",
+      "name": "SpatialMatrix/Real/Construct/2/1",
+      "metric": "cpu_time",
+      "url": "cases/ee93a2fc57a0c1966b8ec625f060b25c65efa7bed7bdbc8c2ad914bb958b077b.json"
+    },
+    {
+      "id": "8b59a82677c70962c25fc55e962834a01586cf153c1064e77410133403f428f8",
+      "name": "SpatialMatrix/Real/Construct/2/2",
+      "metric": "cpu_time",
+      "url": "cases/8b59a82677c70962c25fc55e962834a01586cf153c1064e77410133403f428f8.json"
+    },
+    {
+      "id": "0389653065f6e85ff330304e4411138cdee3b2cca11b66c379d5925cae67dde9",
+      "name": "SpatialMatrix/Real/Construct/2/3",
+      "metric": "cpu_time",
+      "url": "cases/0389653065f6e85ff330304e4411138cdee3b2cca11b66c379d5925cae67dde9.json"
+    },
+    {
+      "id": "0731a8b8103a9f8f813ec7e7e2a0567376fc4682d5686069d6545501d349473e",
+      "name": "SpatialMatrix/Real/Construct/3/1",
+      "metric": "cpu_time",
+      "url": "cases/0731a8b8103a9f8f813ec7e7e2a0567376fc4682d5686069d6545501d349473e.json"
+    },
+    {
+      "id": "664851907b12930bd87378e4e75f67c5fe3396dc569af55b8e585dac1eee70c5",
+      "name": "SpatialMatrix/Real/Construct/3/2",
+      "metric": "cpu_time",
+      "url": "cases/664851907b12930bd87378e4e75f67c5fe3396dc569af55b8e585dac1eee70c5.json"
+    },
+    {
+      "id": "0731a8a28ca55c9214ed2cf756eca276f6e5f2bbf876c5f6c1aee4c78c508bb0",
+      "name": "SpatialMatrix/Real/Construct/3/3",
+      "metric": "cpu_time",
+      "url": "cases/0731a8a28ca55c9214ed2cf756eca276f6e5f2bbf876c5f6c1aee4c78c508bb0.json"
+    },
+    {
+      "id": "23954a09924b637bd9484a9a61bddb0ab6cc576420bd13fc217e4077d8db6de1",
+      "name": "SpatialMatrix/Real/Contract/0/0",
+      "metric": "cpu_time",
+      "url": "cases/23954a09924b637bd9484a9a61bddb0ab6cc576420bd13fc217e4077d8db6de1.json"
+    },
+    {
+      "id": "011f77e961444cb6d9478514fd9d1b0de283e9c05ace14d6a099f6dd402540de",
+      "name": "SpatialMatrix/Real/Contract/1/1",
+      "metric": "cpu_time",
+      "url": "cases/011f77e961444cb6d9478514fd9d1b0de283e9c05ace14d6a099f6dd402540de.json"
+    },
+    {
+      "id": "80e124b65e36177530a3eea322bd01cfea9dd1b4db615afccf66293a22992689",
+      "name": "SpatialMatrix/Real/Contract/1/2",
+      "metric": "cpu_time",
+      "url": "cases/80e124b65e36177530a3eea322bd01cfea9dd1b4db615afccf66293a22992689.json"
+    },
+    {
+      "id": "272bafbe50b484bc0cc916ff8ecfcc1336e0148e276120cf723a4ab1e7bfa774",
+      "name": "SpatialMatrix/Real/Contract/1/3",
+      "metric": "cpu_time",
+      "url": "cases/272bafbe50b484bc0cc916ff8ecfcc1336e0148e276120cf723a4ab1e7bfa774.json"
+    },
+    {
+      "id": "ec2eed31079005df57711df9df852bb8e494f7117f4ec999198cd6b2793fc4bb",
+      "name": "SpatialMatrix/Real/Contract/2/1",
+      "metric": "cpu_time",
+      "url": "cases/ec2eed31079005df57711df9df852bb8e494f7117f4ec999198cd6b2793fc4bb.json"
+    },
+    {
+      "id": "32528d2d712e40d2a749788e6ad21c6da3f9cb57c9582d0ce9f1ec4d66d1469f",
+      "name": "SpatialMatrix/Real/Contract/2/2",
+      "metric": "cpu_time",
+      "url": "cases/32528d2d712e40d2a749788e6ad21c6da3f9cb57c9582d0ce9f1ec4d66d1469f.json"
+    },
+    {
+      "id": "f2e8bbadaf138ff463efd3115b0ff0c07ad602a2c8f0a1afac1e4a99b9ee2c15",
+      "name": "SpatialMatrix/Real/Contract/2/3",
+      "metric": "cpu_time",
+      "url": "cases/f2e8bbadaf138ff463efd3115b0ff0c07ad602a2c8f0a1afac1e4a99b9ee2c15.json"
+    },
+    {
+      "id": "44073aa04d1d1ff103e5a2c2dc3b0f8e3a72abc98f877a9369cce33154772891",
+      "name": "SpatialMatrix/Real/Contract/3/1",
+      "metric": "cpu_time",
+      "url": "cases/44073aa04d1d1ff103e5a2c2dc3b0f8e3a72abc98f877a9369cce33154772891.json"
+    },
+    {
+      "id": "c81951eb788c58f6ac049054a14048eea518d71294973f9fe09a7dd5454ccfbe",
+      "name": "SpatialMatrix/Real/Contract/3/2",
+      "metric": "cpu_time",
+      "url": "cases/c81951eb788c58f6ac049054a14048eea518d71294973f9fe09a7dd5454ccfbe.json"
+    },
+    {
+      "id": "829351335e46048a25cc4febf2aae7a38f9b2d94087aaa554f04c23fda7706b5",
+      "name": "SpatialMatrix/Real/Contract/3/3",
+      "metric": "cpu_time",
+      "url": "cases/829351335e46048a25cc4febf2aae7a38f9b2d94087aaa554f04c23fda7706b5.json"
+    },
+    {
+      "id": "ecd3b0acc6df058e16f8c64a91ea1e1ede7287e6ae2244dadd9be826c94ecfa2",
+      "name": "SpatialMatrix/Real/Copy/0/0",
+      "metric": "cpu_time",
+      "url": "cases/ecd3b0acc6df058e16f8c64a91ea1e1ede7287e6ae2244dadd9be826c94ecfa2.json"
+    },
+    {
+      "id": "38ac4b7bf274d0b457c07e5add92010bd84469ef9a22126deea5e9797d972221",
+      "name": "SpatialMatrix/Real/Copy/1/1",
+      "metric": "cpu_time",
+      "url": "cases/38ac4b7bf274d0b457c07e5add92010bd84469ef9a22126deea5e9797d972221.json"
+    },
+    {
+      "id": "97e756d72f2142b05b95077dafc572247b94458f3b53933ff49249758e8ff183",
+      "name": "SpatialMatrix/Real/Copy/1/2",
+      "metric": "cpu_time",
+      "url": "cases/97e756d72f2142b05b95077dafc572247b94458f3b53933ff49249758e8ff183.json"
+    },
+    {
+      "id": "e82a517f3160314bdc9c5160f81a909925b342d51fd347ba33971be1d0e2f010",
+      "name": "SpatialMatrix/Real/Copy/1/3",
+      "metric": "cpu_time",
+      "url": "cases/e82a517f3160314bdc9c5160f81a909925b342d51fd347ba33971be1d0e2f010.json"
+    },
+    {
+      "id": "6345eeb8b9895112cd8ac3ee28bc8a8961a7c43f9278ceb02e68658d35498d3a",
+      "name": "SpatialMatrix/Real/Copy/2/1",
+      "metric": "cpu_time",
+      "url": "cases/6345eeb8b9895112cd8ac3ee28bc8a8961a7c43f9278ceb02e68658d35498d3a.json"
+    },
+    {
+      "id": "d9c85478964d8fae459d606e23d9cb0eef8cc9c06a97aac40d25c5634eab3af2",
+      "name": "SpatialMatrix/Real/Copy/2/2",
+      "metric": "cpu_time",
+      "url": "cases/d9c85478964d8fae459d606e23d9cb0eef8cc9c06a97aac40d25c5634eab3af2.json"
+    },
+    {
+      "id": "86a8da767c16a03815ac57c471f48af39770aacd8959788ddc62f35b87584e0c",
+      "name": "SpatialMatrix/Real/Copy/2/3",
+      "metric": "cpu_time",
+      "url": "cases/86a8da767c16a03815ac57c471f48af39770aacd8959788ddc62f35b87584e0c.json"
+    },
+    {
+      "id": "dfdaf5a4b32e3aab71b4f817c599d4bdad3e341a95d1156a7800f4e492eacd94",
+      "name": "SpatialMatrix/Real/Copy/3/1",
+      "metric": "cpu_time",
+      "url": "cases/dfdaf5a4b32e3aab71b4f817c599d4bdad3e341a95d1156a7800f4e492eacd94.json"
+    },
+    {
+      "id": "fc5c2284bdc9636fbaa353033669c653dcd87089f318e62d9faeafce3bd5b1ba",
+      "name": "SpatialMatrix/Real/Copy/3/2",
+      "metric": "cpu_time",
+      "url": "cases/fc5c2284bdc9636fbaa353033669c653dcd87089f318e62d9faeafce3bd5b1ba.json"
+    },
+    {
+      "id": "89e18f8be821fe0c64ae2a581c2ac6399af560d181f5b4860ad891ba8582b9ca",
+      "name": "SpatialMatrix/Real/Copy/3/3",
+      "metric": "cpu_time",
+      "url": "cases/89e18f8be821fe0c64ae2a581c2ac6399af560d181f5b4860ad891ba8582b9ca.json"
+    },
+    {
+      "id": "775941edc70613693272753c7ffae9e8273eeaf579c0383a7d3a73238a189dd7",
+      "name": "SpatialMatrix/Real/Dot/0/0",
+      "metric": "cpu_time",
+      "url": "cases/775941edc70613693272753c7ffae9e8273eeaf579c0383a7d3a73238a189dd7.json"
+    },
+    {
+      "id": "d8937bdcf471a60a5f19790c4531da5b215ce7ef3c1c49efe20e85ece18e03e0",
+      "name": "SpatialMatrix/Real/Dot/1/1",
+      "metric": "cpu_time",
+      "url": "cases/d8937bdcf471a60a5f19790c4531da5b215ce7ef3c1c49efe20e85ece18e03e0.json"
+    },
+    {
+      "id": "cc610319b4b5c8d0284abfa69377adb57a4cee7131d8cea18dbeaa7eadab198b",
+      "name": "SpatialMatrix/Real/Dot/1/2",
+      "metric": "cpu_time",
+      "url": "cases/cc610319b4b5c8d0284abfa69377adb57a4cee7131d8cea18dbeaa7eadab198b.json"
+    },
+    {
+      "id": "a812a12f1fc30f37f97fca0674debf5860362f6c80df2bf701841a9f2ca69b27",
+      "name": "SpatialMatrix/Real/Dot/1/3",
+      "metric": "cpu_time",
+      "url": "cases/a812a12f1fc30f37f97fca0674debf5860362f6c80df2bf701841a9f2ca69b27.json"
+    },
+    {
+      "id": "752c82f6b48e33233055b0da04fe041c0fd5a8b2a567de4e2237298f8209c005",
+      "name": "SpatialMatrix/Real/Dot/2/1",
+      "metric": "cpu_time",
+      "url": "cases/752c82f6b48e33233055b0da04fe041c0fd5a8b2a567de4e2237298f8209c005.json"
+    },
+    {
+      "id": "d53572fe3747690a8cf2667361a4a19f1e4a545715e5ee28305ebc4628426e17",
+      "name": "SpatialMatrix/Real/Dot/2/2",
+      "metric": "cpu_time",
+      "url": "cases/d53572fe3747690a8cf2667361a4a19f1e4a545715e5ee28305ebc4628426e17.json"
+    },
+    {
+      "id": "08ba68c92633ad222264968a23bd814f499b930774c0a54085470be9185a7770",
+      "name": "SpatialMatrix/Real/Dot/2/3",
+      "metric": "cpu_time",
+      "url": "cases/08ba68c92633ad222264968a23bd814f499b930774c0a54085470be9185a7770.json"
+    },
+    {
+      "id": "993baf1425a2e59cacbba943e46cb682ee0864cd5247c16423fc057328f8cbd3",
+      "name": "SpatialMatrix/Real/Dot/3/1",
+      "metric": "cpu_time",
+      "url": "cases/993baf1425a2e59cacbba943e46cb682ee0864cd5247c16423fc057328f8cbd3.json"
+    },
+    {
+      "id": "bee87227c01c762dd4c64b4e67be44cb1e5a300d922dce36e74320b7cef1ead5",
+      "name": "SpatialMatrix/Real/Dot/3/2",
+      "metric": "cpu_time",
+      "url": "cases/bee87227c01c762dd4c64b4e67be44cb1e5a300d922dce36e74320b7cef1ead5.json"
+    },
+    {
+      "id": "36edf5272b9a989768af51e47cae7ff029c51af9e7bcfdf9115156be1d44b332",
+      "name": "SpatialMatrix/Real/Dot/3/3",
+      "metric": "cpu_time",
+      "url": "cases/36edf5272b9a989768af51e47cae7ff029c51af9e7bcfdf9115156be1d44b332.json"
+    },
+    {
+      "id": "5b57cc8e3e27220695c5d4f1440d76f9c2f04f63254b218548bfae32f6d92a25",
+      "name": "SpatialMatrix/Real/MatMat/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/5b57cc8e3e27220695c5d4f1440d76f9c2f04f63254b218548bfae32f6d92a25.json"
+    },
+    {
+      "id": "596af949c62c13a8f4d3fb6995f3822269bf57d7c31e1c4b29337d536862a35e",
+      "name": "SpatialMatrix/Real/MatMat/1/1/2",
+      "metric": "cpu_time",
+      "url": "cases/596af949c62c13a8f4d3fb6995f3822269bf57d7c31e1c4b29337d536862a35e.json"
+    },
+    {
+      "id": "213ae3fa5fc66a395f77676e8210c0cd9b771e4d527fdb5f1991f01fd8e304c9",
+      "name": "SpatialMatrix/Real/MatMat/1/1/3",
+      "metric": "cpu_time",
+      "url": "cases/213ae3fa5fc66a395f77676e8210c0cd9b771e4d527fdb5f1991f01fd8e304c9.json"
+    },
+    {
+      "id": "85aefa50baf48ce7d0b3b22b6374d5fa76bc5064bcc4d0cab99b7c2f971513f4",
+      "name": "SpatialMatrix/Real/MatMat/1/2/1",
+      "metric": "cpu_time",
+      "url": "cases/85aefa50baf48ce7d0b3b22b6374d5fa76bc5064bcc4d0cab99b7c2f971513f4.json"
+    },
+    {
+      "id": "6d2394f10acd66ac538486c9d4be63f0665560a6fc8cd4422d3975b37ff7b016",
+      "name": "SpatialMatrix/Real/MatMat/1/2/2",
+      "metric": "cpu_time",
+      "url": "cases/6d2394f10acd66ac538486c9d4be63f0665560a6fc8cd4422d3975b37ff7b016.json"
+    },
+    {
+      "id": "98a7fbff166f723fca2bc47828ff1a4f47f6ada90ea1309fb66f8ad9c4a5f238",
+      "name": "SpatialMatrix/Real/MatMat/1/2/3",
+      "metric": "cpu_time",
+      "url": "cases/98a7fbff166f723fca2bc47828ff1a4f47f6ada90ea1309fb66f8ad9c4a5f238.json"
+    },
+    {
+      "id": "8549ca46152156da02ac03e4500c2c8aff461749f7a02d8a278c92d844e1dcc6",
+      "name": "SpatialMatrix/Real/MatMat/1/3/1",
+      "metric": "cpu_time",
+      "url": "cases/8549ca46152156da02ac03e4500c2c8aff461749f7a02d8a278c92d844e1dcc6.json"
+    },
+    {
+      "id": "8df98130aa080c7f60d2d3dca13be91334555bdbfc50686c44578546a351dd10",
+      "name": "SpatialMatrix/Real/MatMat/1/3/2",
+      "metric": "cpu_time",
+      "url": "cases/8df98130aa080c7f60d2d3dca13be91334555bdbfc50686c44578546a351dd10.json"
+    },
+    {
+      "id": "7c5b0b020a82963d01e9709069f17aef75eedfb862789dc25b1d2b86177be479",
+      "name": "SpatialMatrix/Real/MatMat/1/3/3",
+      "metric": "cpu_time",
+      "url": "cases/7c5b0b020a82963d01e9709069f17aef75eedfb862789dc25b1d2b86177be479.json"
+    },
+    {
+      "id": "a14defb742143e929fdc755027d65ed098855ec4dd506664c9980fd245185f8a",
+      "name": "SpatialMatrix/Real/MatMat/2/1/1",
+      "metric": "cpu_time",
+      "url": "cases/a14defb742143e929fdc755027d65ed098855ec4dd506664c9980fd245185f8a.json"
+    },
+    {
+      "id": "7185d9c55a907d044cd1cdd3c4c507228b483a03866ca571f550425b14cbcae7",
+      "name": "SpatialMatrix/Real/MatMat/2/1/2",
+      "metric": "cpu_time",
+      "url": "cases/7185d9c55a907d044cd1cdd3c4c507228b483a03866ca571f550425b14cbcae7.json"
+    },
+    {
+      "id": "a6c1604e136d294bd21ee8fbb31c5bbbcf896f401beae8c1b04a847bd7cec6e2",
+      "name": "SpatialMatrix/Real/MatMat/2/1/3",
+      "metric": "cpu_time",
+      "url": "cases/a6c1604e136d294bd21ee8fbb31c5bbbcf896f401beae8c1b04a847bd7cec6e2.json"
+    },
+    {
+      "id": "c69f719c6a27609f72bbd40771897890f50c16243db97aa0904ae3f41483de79",
+      "name": "SpatialMatrix/Real/MatMat/2/2/1",
+      "metric": "cpu_time",
+      "url": "cases/c69f719c6a27609f72bbd40771897890f50c16243db97aa0904ae3f41483de79.json"
+    },
+    {
+      "id": "8f9d664446e1a2d27fb5400e045172011ba3d1538f0bbb575b8ed6e2f6e4f3a8",
+      "name": "SpatialMatrix/Real/MatMat/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/8f9d664446e1a2d27fb5400e045172011ba3d1538f0bbb575b8ed6e2f6e4f3a8.json"
+    },
+    {
+      "id": "2d6ae0036d688f9e93b188932410621b7bd411a34dd2a443c41e270da24aa9a5",
+      "name": "SpatialMatrix/Real/MatMat/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/2d6ae0036d688f9e93b188932410621b7bd411a34dd2a443c41e270da24aa9a5.json"
+    },
+    {
+      "id": "0dfe5a2ae37e6b47cec9c49cfc5a91864576c6d292d76dc62ad534379c5d7c31",
+      "name": "SpatialMatrix/Real/MatMat/2/3/1",
+      "metric": "cpu_time",
+      "url": "cases/0dfe5a2ae37e6b47cec9c49cfc5a91864576c6d292d76dc62ad534379c5d7c31.json"
+    },
+    {
+      "id": "da66603560044683d35e546596eaed22cb3ca76855e35484b9a10d3ec70b1ed9",
+      "name": "SpatialMatrix/Real/MatMat/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/da66603560044683d35e546596eaed22cb3ca76855e35484b9a10d3ec70b1ed9.json"
+    },
+    {
+      "id": "700f5c2980bbf37d3dcefeb261df73c131569d33c630020e1e111ad4393acfeb",
+      "name": "SpatialMatrix/Real/MatMat/2/3/3",
+      "metric": "cpu_time",
+      "url": "cases/700f5c2980bbf37d3dcefeb261df73c131569d33c630020e1e111ad4393acfeb.json"
+    },
+    {
+      "id": "1a7dff8218c0d9190a67b34f1bc7baa039f8b958a08fdf6c5077dc7f1a00a9f7",
+      "name": "SpatialMatrix/Real/MatMat/3/1/1",
+      "metric": "cpu_time",
+      "url": "cases/1a7dff8218c0d9190a67b34f1bc7baa039f8b958a08fdf6c5077dc7f1a00a9f7.json"
+    },
+    {
+      "id": "31f5692ff931765c4525796fb5842f1dcec9c980258df3dc5143f790528e845f",
+      "name": "SpatialMatrix/Real/MatMat/3/1/2",
+      "metric": "cpu_time",
+      "url": "cases/31f5692ff931765c4525796fb5842f1dcec9c980258df3dc5143f790528e845f.json"
+    },
+    {
+      "id": "8560d9c3a67d6f862349fcba838d4edc3c324d945527d91772439caa7af548da",
+      "name": "SpatialMatrix/Real/MatMat/3/1/3",
+      "metric": "cpu_time",
+      "url": "cases/8560d9c3a67d6f862349fcba838d4edc3c324d945527d91772439caa7af548da.json"
+    },
+    {
+      "id": "c7dac4efd9a6c231907207a9032400a701f406fc4bdf21ac536cca2a1d04c43c",
+      "name": "SpatialMatrix/Real/MatMat/3/2/1",
+      "metric": "cpu_time",
+      "url": "cases/c7dac4efd9a6c231907207a9032400a701f406fc4bdf21ac536cca2a1d04c43c.json"
+    },
+    {
+      "id": "5c40646717562900f2f6b6eb5fac8badb9f3a881d37b08cf46677f3548e4a80f",
+      "name": "SpatialMatrix/Real/MatMat/3/2/2",
+      "metric": "cpu_time",
+      "url": "cases/5c40646717562900f2f6b6eb5fac8badb9f3a881d37b08cf46677f3548e4a80f.json"
+    },
+    {
+      "id": "e51cc8ef2548b90d8526744521d03ce2f2db84c2c77547c2d213d268b67b21eb",
+      "name": "SpatialMatrix/Real/MatMat/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/e51cc8ef2548b90d8526744521d03ce2f2db84c2c77547c2d213d268b67b21eb.json"
+    },
+    {
+      "id": "a1afe19606e768f551bf7f06ce6fe4552a411d337ea6d0868736fccc9aab3459",
+      "name": "SpatialMatrix/Real/MatMat/3/3/1",
+      "metric": "cpu_time",
+      "url": "cases/a1afe19606e768f551bf7f06ce6fe4552a411d337ea6d0868736fccc9aab3459.json"
+    },
+    {
+      "id": "e6b42b332382951a1ecb5d964c8573bfc6c5a151a9b2ed847a16e087ae843477",
+      "name": "SpatialMatrix/Real/MatMat/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/e6b42b332382951a1ecb5d964c8573bfc6c5a151a9b2ed847a16e087ae843477.json"
+    },
+    {
+      "id": "f7c78a9108d664063377cc71200e8846e6ea76df58442a8a019caf08aba68f43",
+      "name": "SpatialMatrix/Real/MatMat/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/f7c78a9108d664063377cc71200e8846e6ea76df58442a8a019caf08aba68f43.json"
+    },
+    {
+      "id": "8b5070b0f1ea753b582cad0a523f53aaf8be5ace723e2e2d1613907d3eb0d85b",
+      "name": "SpatialMatrix/Real/Scale/0/0",
+      "metric": "cpu_time",
+      "url": "cases/8b5070b0f1ea753b582cad0a523f53aaf8be5ace723e2e2d1613907d3eb0d85b.json"
+    },
+    {
+      "id": "0f231517b2574edc472f7ea7de1a35de2e972b35c772b359a66c28ae05ed9f66",
+      "name": "SpatialMatrix/Real/Scale/1/1",
+      "metric": "cpu_time",
+      "url": "cases/0f231517b2574edc472f7ea7de1a35de2e972b35c772b359a66c28ae05ed9f66.json"
+    },
+    {
+      "id": "14837ae3bb96532f78561c1a2aaafd9360d763645b5bd49f2a20ac719336bdd7",
+      "name": "SpatialMatrix/Real/Scale/1/2",
+      "metric": "cpu_time",
+      "url": "cases/14837ae3bb96532f78561c1a2aaafd9360d763645b5bd49f2a20ac719336bdd7.json"
+    },
+    {
+      "id": "ca815e61a94627c2ed1244cfe4ea95dacc367d4bdb56327de537408cea62b18b",
+      "name": "SpatialMatrix/Real/Scale/1/3",
+      "metric": "cpu_time",
+      "url": "cases/ca815e61a94627c2ed1244cfe4ea95dacc367d4bdb56327de537408cea62b18b.json"
+    },
+    {
+      "id": "53a7209c06adbc1481d40b5d0259fa440102d37aa2c65a952a9c8a4087d04c9b",
+      "name": "SpatialMatrix/Real/Scale/2/1",
+      "metric": "cpu_time",
+      "url": "cases/53a7209c06adbc1481d40b5d0259fa440102d37aa2c65a952a9c8a4087d04c9b.json"
+    },
+    {
+      "id": "f6916edaff194c83d51fb77f8ce9341195f5f3e9fcea8e1ea38717ddc264d857",
+      "name": "SpatialMatrix/Real/Scale/2/2",
+      "metric": "cpu_time",
+      "url": "cases/f6916edaff194c83d51fb77f8ce9341195f5f3e9fcea8e1ea38717ddc264d857.json"
+    },
+    {
+      "id": "e1d631246b1ce3a19fd15e39b41b048acacb3cf60212b25180c210fbb69d6a3b",
+      "name": "SpatialMatrix/Real/Scale/2/3",
+      "metric": "cpu_time",
+      "url": "cases/e1d631246b1ce3a19fd15e39b41b048acacb3cf60212b25180c210fbb69d6a3b.json"
+    },
+    {
+      "id": "1c7dabba7f70f47d37da072db9fbee80a0e9c11797cb467e8ff48f6565407720",
+      "name": "SpatialMatrix/Real/Scale/3/1",
+      "metric": "cpu_time",
+      "url": "cases/1c7dabba7f70f47d37da072db9fbee80a0e9c11797cb467e8ff48f6565407720.json"
+    },
+    {
+      "id": "bd57b58b991a4ae0af7b8e270cac90158f900d6a87ecc7549d91111582bf43c0",
+      "name": "SpatialMatrix/Real/Scale/3/2",
+      "metric": "cpu_time",
+      "url": "cases/bd57b58b991a4ae0af7b8e270cac90158f900d6a87ecc7549d91111582bf43c0.json"
+    },
+    {
+      "id": "46b6d3a6e4ab0b364aaeef3ac7e136ff7fcbdaa923ca3ffbec04f85814c3ec67",
+      "name": "SpatialMatrix/Real/Scale/3/3",
+      "metric": "cpu_time",
+      "url": "cases/46b6d3a6e4ab0b364aaeef3ac7e136ff7fcbdaa923ca3ffbec04f85814c3ec67.json"
+    },
+    {
+      "id": "3b039b6f0ebdeef82583328bb67da357393966f9399dfbf114747265b168c92a",
+      "name": "SpatialTensor3/Complex/Add/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/3b039b6f0ebdeef82583328bb67da357393966f9399dfbf114747265b168c92a.json"
+    },
+    {
+      "id": "426e6a106efc9b911251ba6166ebdbd2ab831fce8fa492e045cf15f50b90c002",
+      "name": "SpatialTensor3/Complex/Add/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/426e6a106efc9b911251ba6166ebdbd2ab831fce8fa492e045cf15f50b90c002.json"
+    },
+    {
+      "id": "2d6ca188bc5798e9471e5c635d0fd4ca022b3fe36a4314d82fc8774e137fd7c9",
+      "name": "SpatialTensor3/Complex/Add/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/2d6ca188bc5798e9471e5c635d0fd4ca022b3fe36a4314d82fc8774e137fd7c9.json"
+    },
+    {
+      "id": "23aa3c8036c39a57261aa8d0130253689cdef9313d111d860e3b2c30978deb7b",
+      "name": "SpatialTensor3/Complex/Add/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/23aa3c8036c39a57261aa8d0130253689cdef9313d111d860e3b2c30978deb7b.json"
+    },
+    {
+      "id": "554c5ad3af334035120baf366eac1396bbd1adb53e21eb5edaf88a02493da8f2",
+      "name": "SpatialTensor3/Complex/Add/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/554c5ad3af334035120baf366eac1396bbd1adb53e21eb5edaf88a02493da8f2.json"
+    },
+    {
+      "id": "9acae16020285904e16f74537248b8bf374cb72143b902d89c3fc40ee661eb4d",
+      "name": "SpatialTensor3/Complex/Add/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/9acae16020285904e16f74537248b8bf374cb72143b902d89c3fc40ee661eb4d.json"
+    },
+    {
+      "id": "23dcabff391ca1a2c4e389f6c38d2d9b1fdb1864a588c1def49ac3571015e91d",
+      "name": "SpatialTensor3/Complex/Construct/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/23dcabff391ca1a2c4e389f6c38d2d9b1fdb1864a588c1def49ac3571015e91d.json"
+    },
+    {
+      "id": "e94cdae93d214b812eeb00c33c7da5543e1f0c869e56fceed71fd9ca382ad291",
+      "name": "SpatialTensor3/Complex/Construct/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/e94cdae93d214b812eeb00c33c7da5543e1f0c869e56fceed71fd9ca382ad291.json"
+    },
+    {
+      "id": "f360691467a2d62527f00b2d9e46f870068315f90a55a132fef8998078ac29b4",
+      "name": "SpatialTensor3/Complex/Construct/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/f360691467a2d62527f00b2d9e46f870068315f90a55a132fef8998078ac29b4.json"
+    },
+    {
+      "id": "c18491da41f43eda558f61fc9cb47d60b6303afd0dad8ae2d99630cfd3a52cf7",
+      "name": "SpatialTensor3/Complex/Construct/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/c18491da41f43eda558f61fc9cb47d60b6303afd0dad8ae2d99630cfd3a52cf7.json"
+    },
+    {
+      "id": "d188a6412415728931b6db6906a0980203694760350b4317c4a0668c0207fdce",
+      "name": "SpatialTensor3/Complex/Construct/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/d188a6412415728931b6db6906a0980203694760350b4317c4a0668c0207fdce.json"
+    },
+    {
+      "id": "ef4a328fe747c19836d9bec19f6960511e06c8f61f75189e0840b91aa240e8de",
+      "name": "SpatialTensor3/Complex/Construct/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/ef4a328fe747c19836d9bec19f6960511e06c8f61f75189e0840b91aa240e8de.json"
+    },
+    {
+      "id": "5ee80583d601acb28c06f27f99184c68943ebc707ddc14fe290254ab7ee697fc",
+      "name": "SpatialTensor3/Complex/Contract/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/5ee80583d601acb28c06f27f99184c68943ebc707ddc14fe290254ab7ee697fc.json"
+    },
+    {
+      "id": "649cbdfa9461654092d8953cb198cca40de7d4aa1ececfc0cd2279ff24db3596",
+      "name": "SpatialTensor3/Complex/Contract/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/649cbdfa9461654092d8953cb198cca40de7d4aa1ececfc0cd2279ff24db3596.json"
+    },
+    {
+      "id": "8a891682f64462b907664e373b63063208a00745e0ea2f22f520b423c956a9fd",
+      "name": "SpatialTensor3/Complex/Contract/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/8a891682f64462b907664e373b63063208a00745e0ea2f22f520b423c956a9fd.json"
+    },
+    {
+      "id": "09b0963d418d3523fe3b0b7e3b362c726b801fdd70681c602b1a45722d108d9e",
+      "name": "SpatialTensor3/Complex/Contract/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/09b0963d418d3523fe3b0b7e3b362c726b801fdd70681c602b1a45722d108d9e.json"
+    },
+    {
+      "id": "769a2ccbec65d3d2b351c76bbdd64a37bab71f600f81552e6718bae986ca70ce",
+      "name": "SpatialTensor3/Complex/Contract/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/769a2ccbec65d3d2b351c76bbdd64a37bab71f600f81552e6718bae986ca70ce.json"
+    },
+    {
+      "id": "8b9cbd923254331ab7c8da0aea8662df53b5becf6fa15c1680bbfc8df505bad2",
+      "name": "SpatialTensor3/Complex/Contract/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/8b9cbd923254331ab7c8da0aea8662df53b5becf6fa15c1680bbfc8df505bad2.json"
+    },
+    {
+      "id": "129116f9dbff1cb9a058e294cb1e829cb956c5c00761a629ff7f315292ea8517",
+      "name": "SpatialTensor3/Complex/Copy/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/129116f9dbff1cb9a058e294cb1e829cb956c5c00761a629ff7f315292ea8517.json"
+    },
+    {
+      "id": "951a12bcf3d11dc332475822c1bce04d40566ab89b02844bdd6d4a2f821f4e68",
+      "name": "SpatialTensor3/Complex/Copy/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/951a12bcf3d11dc332475822c1bce04d40566ab89b02844bdd6d4a2f821f4e68.json"
+    },
+    {
+      "id": "3f6a5e2a582d3423c2673ff85612b12ff053487997f3ec55ba2a0aa124c371be",
+      "name": "SpatialTensor3/Complex/Copy/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/3f6a5e2a582d3423c2673ff85612b12ff053487997f3ec55ba2a0aa124c371be.json"
+    },
+    {
+      "id": "588798b47ae53225aa19b6f9a9c20ea008b82a5401efd02620a235f6991438a3",
+      "name": "SpatialTensor3/Complex/Copy/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/588798b47ae53225aa19b6f9a9c20ea008b82a5401efd02620a235f6991438a3.json"
+    },
+    {
+      "id": "12e33b1293a15087f392c0f5e725e5ded69da5f3cf7b1454e604c33f4bf25b03",
+      "name": "SpatialTensor3/Complex/Copy/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/12e33b1293a15087f392c0f5e725e5ded69da5f3cf7b1454e604c33f4bf25b03.json"
+    },
+    {
+      "id": "d7f3bba19998c1c485cf96e2f837493ef3a7d68698ed7793c54b1e53f113a638",
+      "name": "SpatialTensor3/Complex/Copy/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/d7f3bba19998c1c485cf96e2f837493ef3a7d68698ed7793c54b1e53f113a638.json"
+    },
+    {
+      "id": "8e5a9d3295b3a7fdd76e902c675e4ea90e6ec388ef4d3512990fb93b37d55de9",
+      "name": "SpatialTensor3/Complex/Dot/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/8e5a9d3295b3a7fdd76e902c675e4ea90e6ec388ef4d3512990fb93b37d55de9.json"
+    },
+    {
+      "id": "a688efc55bc2b75a2830de25c561a03e5b03192a9b942fa4cb9058ac79295628",
+      "name": "SpatialTensor3/Complex/Dot/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/a688efc55bc2b75a2830de25c561a03e5b03192a9b942fa4cb9058ac79295628.json"
+    },
+    {
+      "id": "71c2048c3d7003f48ebe9502375df516d81aa17cb04d2a8e8db82912d9c07536",
+      "name": "SpatialTensor3/Complex/Dot/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/71c2048c3d7003f48ebe9502375df516d81aa17cb04d2a8e8db82912d9c07536.json"
+    },
+    {
+      "id": "a634ebe2b6a2af62bf208729c4ef62fc03b715f6e1e44ea9f92d2bce86a4e4fb",
+      "name": "SpatialTensor3/Complex/Dot/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/a634ebe2b6a2af62bf208729c4ef62fc03b715f6e1e44ea9f92d2bce86a4e4fb.json"
+    },
+    {
+      "id": "01a7e2fc8de58291c6d8ad2fe7827aa7c35922a1f8ce05a5aa0de4b5058f2922",
+      "name": "SpatialTensor3/Complex/Dot/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/01a7e2fc8de58291c6d8ad2fe7827aa7c35922a1f8ce05a5aa0de4b5058f2922.json"
+    },
+    {
+      "id": "a5cd0b1f6fc0bbc9ffe99acb03e554aa52856c36f4dd93fa27c0776a6d296571",
+      "name": "SpatialTensor3/Complex/Dot/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/a5cd0b1f6fc0bbc9ffe99acb03e554aa52856c36f4dd93fa27c0776a6d296571.json"
+    },
+    {
+      "id": "5cf90f6f0175d0d186e34de477c5820ea2c664cdc38f5b15b079a6fb1dea3af3",
+      "name": "SpatialTensor3/Complex/Scale/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/5cf90f6f0175d0d186e34de477c5820ea2c664cdc38f5b15b079a6fb1dea3af3.json"
+    },
+    {
+      "id": "8c5fc93bd603358643f479e90cade2dbd8e22e351c6c5668ce836a2f13493fed",
+      "name": "SpatialTensor3/Complex/Scale/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/8c5fc93bd603358643f479e90cade2dbd8e22e351c6c5668ce836a2f13493fed.json"
+    },
+    {
+      "id": "51b8bfeb91d9bbe03e8fa5b13f31b32012ca6c908633a9cb70894b64a696b420",
+      "name": "SpatialTensor3/Complex/Scale/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/51b8bfeb91d9bbe03e8fa5b13f31b32012ca6c908633a9cb70894b64a696b420.json"
+    },
+    {
+      "id": "f59dcdd7f0adbd14a83fee233c59ef1ae6eaf6471985fca27feae172b6f2cf2d",
+      "name": "SpatialTensor3/Complex/Scale/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/f59dcdd7f0adbd14a83fee233c59ef1ae6eaf6471985fca27feae172b6f2cf2d.json"
+    },
+    {
+      "id": "608666a8dc98e0ee83cd5dc4e3fa12127af20f4da6ee9751e576666becd68605",
+      "name": "SpatialTensor3/Complex/Scale/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/608666a8dc98e0ee83cd5dc4e3fa12127af20f4da6ee9751e576666becd68605.json"
+    },
+    {
+      "id": "383916a5f235a00e636e9a7d678c95db9009db149e5bba78c66b3399f55b7ddc",
+      "name": "SpatialTensor3/Complex/Scale/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/383916a5f235a00e636e9a7d678c95db9009db149e5bba78c66b3399f55b7ddc.json"
+    },
+    {
+      "id": "a2b1cfb0787832c29dc6971e5405ef531660df1c2a659b0244627ddfbdd5f450",
+      "name": "SpatialTensor3/Real/Add/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/a2b1cfb0787832c29dc6971e5405ef531660df1c2a659b0244627ddfbdd5f450.json"
+    },
+    {
+      "id": "263bc6a712bca6d373088c673ea8093ecc88a959bebbc9d3d9bddc34416f9250",
+      "name": "SpatialTensor3/Real/Add/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/263bc6a712bca6d373088c673ea8093ecc88a959bebbc9d3d9bddc34416f9250.json"
+    },
+    {
+      "id": "25795a156bf2c0d57ea88fddecd63ead1dbabb640c490e0282d3eb35cda976d1",
+      "name": "SpatialTensor3/Real/Add/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/25795a156bf2c0d57ea88fddecd63ead1dbabb640c490e0282d3eb35cda976d1.json"
+    },
+    {
+      "id": "c153fe02d189388e68fd22a97c407144d405571b19bbc0bd1657ad6116f08c06",
+      "name": "SpatialTensor3/Real/Add/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/c153fe02d189388e68fd22a97c407144d405571b19bbc0bd1657ad6116f08c06.json"
+    },
+    {
+      "id": "82617914d3b796e30159a4f11e56140f6d4543d8773caf2362e6e9e224ccb7a1",
+      "name": "SpatialTensor3/Real/Add/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/82617914d3b796e30159a4f11e56140f6d4543d8773caf2362e6e9e224ccb7a1.json"
+    },
+    {
+      "id": "8211b723f310731fbce122c01a1e3545d9752474e8422fef953b5a01527e2abc",
+      "name": "SpatialTensor3/Real/Add/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/8211b723f310731fbce122c01a1e3545d9752474e8422fef953b5a01527e2abc.json"
+    },
+    {
+      "id": "ec38a1e6e87fdfc082537bad8dadb9e8f958f35fc27be8b9cc2e9232c2175314",
+      "name": "SpatialTensor3/Real/Construct/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/ec38a1e6e87fdfc082537bad8dadb9e8f958f35fc27be8b9cc2e9232c2175314.json"
+    },
+    {
+      "id": "420b769458daf0c9903b70f625a234c57c664bcab7d718896f2a45440052df30",
+      "name": "SpatialTensor3/Real/Construct/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/420b769458daf0c9903b70f625a234c57c664bcab7d718896f2a45440052df30.json"
+    },
+    {
+      "id": "a3324eb62cfcefaf93ced18c57199fdb1b584c6f5e8a3d7295cb3968baa6be91",
+      "name": "SpatialTensor3/Real/Construct/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/a3324eb62cfcefaf93ced18c57199fdb1b584c6f5e8a3d7295cb3968baa6be91.json"
+    },
+    {
+      "id": "2c8a10a6fdeaa03cc0165024d8038a950cc885aae2a6f44820f447dec020e1bb",
+      "name": "SpatialTensor3/Real/Construct/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/2c8a10a6fdeaa03cc0165024d8038a950cc885aae2a6f44820f447dec020e1bb.json"
+    },
+    {
+      "id": "703bffee64eb9b9d0a752f9bd68fbf5271e7fef66aae4c9557a6aa226dc1aafa",
+      "name": "SpatialTensor3/Real/Construct/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/703bffee64eb9b9d0a752f9bd68fbf5271e7fef66aae4c9557a6aa226dc1aafa.json"
+    },
+    {
+      "id": "92bcee745ccbdfd820b7c7d7ab2cb5233f71bee876c7f0f69081cb489f184e55",
+      "name": "SpatialTensor3/Real/Construct/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/92bcee745ccbdfd820b7c7d7ab2cb5233f71bee876c7f0f69081cb489f184e55.json"
+    },
+    {
+      "id": "0b728634fd6a89d67e0a2e173a101be5bb4b009401f954463b0792579d354779",
+      "name": "SpatialTensor3/Real/Contract/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/0b728634fd6a89d67e0a2e173a101be5bb4b009401f954463b0792579d354779.json"
+    },
+    {
+      "id": "cadf7f3c1e67fb76e16b6181d161d64d39e68f2ee59dea852aa1a4ccb28e354e",
+      "name": "SpatialTensor3/Real/Contract/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/cadf7f3c1e67fb76e16b6181d161d64d39e68f2ee59dea852aa1a4ccb28e354e.json"
+    },
+    {
+      "id": "1e684a7fab40195917bc7714fb8903c03ec8dbaf133b84a58a8ad296dc1d3ff9",
+      "name": "SpatialTensor3/Real/Contract/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/1e684a7fab40195917bc7714fb8903c03ec8dbaf133b84a58a8ad296dc1d3ff9.json"
+    },
+    {
+      "id": "1d8ae7dbf55c3d6f17378183e61de02bb627ae13124f5fd0ad81fff956279580",
+      "name": "SpatialTensor3/Real/Contract/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/1d8ae7dbf55c3d6f17378183e61de02bb627ae13124f5fd0ad81fff956279580.json"
+    },
+    {
+      "id": "de38717f81e64749510ba2f5c3106811ec88368320580de9e9c68fcd5d23ac44",
+      "name": "SpatialTensor3/Real/Contract/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/de38717f81e64749510ba2f5c3106811ec88368320580de9e9c68fcd5d23ac44.json"
+    },
+    {
+      "id": "7d8351948f4cf01ba8893da3cc56a1dce63b141fa17877e84ca0957aef2d2f70",
+      "name": "SpatialTensor3/Real/Contract/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/7d8351948f4cf01ba8893da3cc56a1dce63b141fa17877e84ca0957aef2d2f70.json"
+    },
+    {
+      "id": "7b52ede5d833b23f485c9123261faaaabb3aee553bd5749387c19bf59ce361bf",
+      "name": "SpatialTensor3/Real/Copy/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/7b52ede5d833b23f485c9123261faaaabb3aee553bd5749387c19bf59ce361bf.json"
+    },
+    {
+      "id": "b414f68540aeb4d8d01acda47f395ba79d79d9083c3d2e66517678b572a7a54b",
+      "name": "SpatialTensor3/Real/Copy/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/b414f68540aeb4d8d01acda47f395ba79d79d9083c3d2e66517678b572a7a54b.json"
+    },
+    {
+      "id": "0e1d55e8a7a3456fc3df005c509a199cbf693c1592e85c22ce1216223fbf42d4",
+      "name": "SpatialTensor3/Real/Copy/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/0e1d55e8a7a3456fc3df005c509a199cbf693c1592e85c22ce1216223fbf42d4.json"
+    },
+    {
+      "id": "e0e8aa0082d9cf4f2b93cc93d1779a6cee46a14754bcf29e897ab97b4d83574a",
+      "name": "SpatialTensor3/Real/Copy/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/e0e8aa0082d9cf4f2b93cc93d1779a6cee46a14754bcf29e897ab97b4d83574a.json"
+    },
+    {
+      "id": "6dcffb796740bc9aa19dc000ee1b5ff7d7a803af89b6ac54edc82d8951e39b7c",
+      "name": "SpatialTensor3/Real/Copy/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/6dcffb796740bc9aa19dc000ee1b5ff7d7a803af89b6ac54edc82d8951e39b7c.json"
+    },
+    {
+      "id": "baabf31e2a583ee0966008fbfe54eccab1c0434f99df1a62f0cafaedc6293144",
+      "name": "SpatialTensor3/Real/Copy/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/baabf31e2a583ee0966008fbfe54eccab1c0434f99df1a62f0cafaedc6293144.json"
+    },
+    {
+      "id": "b28c229f78df62f9c2c1aa1965649809be5023e70cee99ed48d1e21b4df5d15c",
+      "name": "SpatialTensor3/Real/Dot/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/b28c229f78df62f9c2c1aa1965649809be5023e70cee99ed48d1e21b4df5d15c.json"
+    },
+    {
+      "id": "6b0d39ea9d93f33c4e5201adf372c1b49ccca697c9f84840f6259821e7b2eec6",
+      "name": "SpatialTensor3/Real/Dot/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/6b0d39ea9d93f33c4e5201adf372c1b49ccca697c9f84840f6259821e7b2eec6.json"
+    },
+    {
+      "id": "93601b53701d4989a88691e499a841f793b4c65fbda5cae0d2a75929fdf3455b",
+      "name": "SpatialTensor3/Real/Dot/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/93601b53701d4989a88691e499a841f793b4c65fbda5cae0d2a75929fdf3455b.json"
+    },
+    {
+      "id": "589c715138b10d5d443c57a41dff31cacfc78c2f40afd3dc18db7993a086dd0a",
+      "name": "SpatialTensor3/Real/Dot/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/589c715138b10d5d443c57a41dff31cacfc78c2f40afd3dc18db7993a086dd0a.json"
+    },
+    {
+      "id": "f5c6587653b1de4cfd7b52cf140fc2651e53ac3e713365087546fefbcb7ba6ed",
+      "name": "SpatialTensor3/Real/Dot/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/f5c6587653b1de4cfd7b52cf140fc2651e53ac3e713365087546fefbcb7ba6ed.json"
+    },
+    {
+      "id": "99840827d06157df1a572588805b6468ea33cf0bc5ffac6417466f660b47935b",
+      "name": "SpatialTensor3/Real/Dot/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/99840827d06157df1a572588805b6468ea33cf0bc5ffac6417466f660b47935b.json"
+    },
+    {
+      "id": "e85df2ce30cfb1ce0848a78d6a92f2d33576e19c85824d07d04de622ea1a9e65",
+      "name": "SpatialTensor3/Real/Scale/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/e85df2ce30cfb1ce0848a78d6a92f2d33576e19c85824d07d04de622ea1a9e65.json"
+    },
+    {
+      "id": "976226c9757cf2d6037dba81073f13b52ad51cfbe8d5f7e497287f3b23716e23",
+      "name": "SpatialTensor3/Real/Scale/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/976226c9757cf2d6037dba81073f13b52ad51cfbe8d5f7e497287f3b23716e23.json"
+    },
+    {
+      "id": "695ca3c075fb4c8b2b6898f805591f1789636bf0099c9acdb1029a062e202561",
+      "name": "SpatialTensor3/Real/Scale/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/695ca3c075fb4c8b2b6898f805591f1789636bf0099c9acdb1029a062e202561.json"
+    },
+    {
+      "id": "0c7b2086e829ce673389cf7d03d8c6ec240a71ca1f456f3bc89ac3a017ba7aaf",
+      "name": "SpatialTensor3/Real/Scale/2/3/2",
+      "metric": "cpu_time",
+      "url": "cases/0c7b2086e829ce673389cf7d03d8c6ec240a71ca1f456f3bc89ac3a017ba7aaf.json"
+    },
+    {
+      "id": "7b9feeabd3feb47429a81353b95698d9618387e03f40cfce65cae91cb321f1b6",
+      "name": "SpatialTensor3/Real/Scale/3/2/3",
+      "metric": "cpu_time",
+      "url": "cases/7b9feeabd3feb47429a81353b95698d9618387e03f40cfce65cae91cb321f1b6.json"
+    },
+    {
+      "id": "e7eb5efd3fc8f4e09a3961a17aa6f7db1dc7f719a84202eca4358a2bfe594cc6",
+      "name": "SpatialTensor3/Real/Scale/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/e7eb5efd3fc8f4e09a3961a17aa6f7db1dc7f719a84202eca4358a2bfe594cc6.json"
+    },
+    {
+      "id": "9d6e853eec759340302b77a9d0a3baa745ab8dec1759db7b251ec2ced7657920",
+      "name": "SpatialTensor4/Complex/Add/0/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/9d6e853eec759340302b77a9d0a3baa745ab8dec1759db7b251ec2ced7657920.json"
+    },
+    {
+      "id": "020bdf6019f1076558d5d8e9d0a8e47f8acdda5d9141515dfd3636843f63d3c7",
+      "name": "SpatialTensor4/Complex/Add/1/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/020bdf6019f1076558d5d8e9d0a8e47f8acdda5d9141515dfd3636843f63d3c7.json"
+    },
+    {
+      "id": "f55da07c5f23872aa80975d1ca85893c5817b8bf1d3bf2f48026061eca8047d8",
+      "name": "SpatialTensor4/Complex/Add/2/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/f55da07c5f23872aa80975d1ca85893c5817b8bf1d3bf2f48026061eca8047d8.json"
+    },
+    {
+      "id": "d68621e669b917c2256badcf53d581f8546a0a08c4023e68c724645048883c9d",
+      "name": "SpatialTensor4/Complex/Add/2/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/d68621e669b917c2256badcf53d581f8546a0a08c4023e68c724645048883c9d.json"
+    },
+    {
+      "id": "87d29c2be441f4a5bb111c60527197a6c7e73e900245af29d54221459a429879",
+      "name": "SpatialTensor4/Complex/Add/3/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/87d29c2be441f4a5bb111c60527197a6c7e73e900245af29d54221459a429879.json"
+    },
+    {
+      "id": "749519caa0e04d94f78f41640d2c9a97f7e9475de0767ca90a7b5c4dd83fef31",
+      "name": "SpatialTensor4/Complex/Add/3/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/749519caa0e04d94f78f41640d2c9a97f7e9475de0767ca90a7b5c4dd83fef31.json"
+    },
+    {
+      "id": "26a9973b1f9abce412efc6d4b5422b22ef75e918e1624a1b80bc6eb0588ae5db",
+      "name": "SpatialTensor4/Complex/Construct/0/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/26a9973b1f9abce412efc6d4b5422b22ef75e918e1624a1b80bc6eb0588ae5db.json"
+    },
+    {
+      "id": "92ef8d7efcad01fcfad30a29648913af071424535d10a6aec0a6c198e4f8c0bd",
+      "name": "SpatialTensor4/Complex/Construct/1/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/92ef8d7efcad01fcfad30a29648913af071424535d10a6aec0a6c198e4f8c0bd.json"
+    },
+    {
+      "id": "9a0645424cceb1b4546551c178c1a4a557413311a7423708283b16243dddf205",
+      "name": "SpatialTensor4/Complex/Construct/2/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/9a0645424cceb1b4546551c178c1a4a557413311a7423708283b16243dddf205.json"
+    },
+    {
+      "id": "9d48491bc0349e48d9f2dda5d9b244ca2d5be38456c8e3cd32ef203124c8dfc6",
+      "name": "SpatialTensor4/Complex/Construct/2/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/9d48491bc0349e48d9f2dda5d9b244ca2d5be38456c8e3cd32ef203124c8dfc6.json"
+    },
+    {
+      "id": "eff8905381a1fb4684f55f4aaf0bcb37970b45b5b9484f6612596a6985d01657",
+      "name": "SpatialTensor4/Complex/Construct/3/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/eff8905381a1fb4684f55f4aaf0bcb37970b45b5b9484f6612596a6985d01657.json"
+    },
+    {
+      "id": "115ae98f6d3e23c875dadf0096af3a6a5b079e687cd339edc9d78edaf1f70abb",
+      "name": "SpatialTensor4/Complex/Construct/3/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/115ae98f6d3e23c875dadf0096af3a6a5b079e687cd339edc9d78edaf1f70abb.json"
+    },
+    {
+      "id": "2ff1307351382409cf8e37a2d3317797cccc7381468abe2eebb393053feff2ae",
+      "name": "SpatialTensor4/Complex/Contract/0/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/2ff1307351382409cf8e37a2d3317797cccc7381468abe2eebb393053feff2ae.json"
+    },
+    {
+      "id": "5f12e9f92547b5a274a64bd5c68450db19fa2deb836ce4b214ec83f8051b2111",
+      "name": "SpatialTensor4/Complex/Contract/1/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/5f12e9f92547b5a274a64bd5c68450db19fa2deb836ce4b214ec83f8051b2111.json"
+    },
+    {
+      "id": "7f55403e6e01954b341d3eadfedc20b51057c610716d3cc3a9d1e4e605d26d85",
+      "name": "SpatialTensor4/Complex/Contract/2/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/7f55403e6e01954b341d3eadfedc20b51057c610716d3cc3a9d1e4e605d26d85.json"
+    },
+    {
+      "id": "59273c774cd8e82fb5261ed54e17d947a447c0a518be2591a9ab557a59c9b74d",
+      "name": "SpatialTensor4/Complex/Contract/2/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/59273c774cd8e82fb5261ed54e17d947a447c0a518be2591a9ab557a59c9b74d.json"
+    },
+    {
+      "id": "53dc5da9b391b6a9d7515e36772c25e8047ae0cafe2ed678e7955d639ddd185e",
+      "name": "SpatialTensor4/Complex/Contract/3/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/53dc5da9b391b6a9d7515e36772c25e8047ae0cafe2ed678e7955d639ddd185e.json"
+    },
+    {
+      "id": "f8e2508c676999407c71d75430049a2aec8167bd8f673ca0aacc1358c2f2aec5",
+      "name": "SpatialTensor4/Complex/Contract/3/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/f8e2508c676999407c71d75430049a2aec8167bd8f673ca0aacc1358c2f2aec5.json"
+    },
+    {
+      "id": "5523f8e6bed8d63b78a403eb36ff09b8dada0de626e417b4bc6159c3501ffea0",
+      "name": "SpatialTensor4/Complex/Copy/0/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/5523f8e6bed8d63b78a403eb36ff09b8dada0de626e417b4bc6159c3501ffea0.json"
+    },
+    {
+      "id": "838dab8f83f89cdfd2f042abe891653d6b7771e8ad8028ebbf5737ba1c5db1bd",
+      "name": "SpatialTensor4/Complex/Copy/1/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/838dab8f83f89cdfd2f042abe891653d6b7771e8ad8028ebbf5737ba1c5db1bd.json"
+    },
+    {
+      "id": "26dc56492e7d8700e4e9ff43196cb1e239d3bb99ba8e12e14b43702badb723ff",
+      "name": "SpatialTensor4/Complex/Copy/2/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/26dc56492e7d8700e4e9ff43196cb1e239d3bb99ba8e12e14b43702badb723ff.json"
+    },
+    {
+      "id": "228bca3b6ba3e949fdfa535cda5464a0ea89f638e6ecc53fd92d776dd0390905",
+      "name": "SpatialTensor4/Complex/Copy/2/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/228bca3b6ba3e949fdfa535cda5464a0ea89f638e6ecc53fd92d776dd0390905.json"
+    },
+    {
+      "id": "d0ae4ab5e660a7038737ebb8a4e78b1ad11bfa112fc5c3f8d4f1a809e72e72e4",
+      "name": "SpatialTensor4/Complex/Copy/3/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/d0ae4ab5e660a7038737ebb8a4e78b1ad11bfa112fc5c3f8d4f1a809e72e72e4.json"
+    },
+    {
+      "id": "753e1843743f95754e780fb241d90e5205f350164d27f90c67fc72b9c5bb744c",
+      "name": "SpatialTensor4/Complex/Copy/3/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/753e1843743f95754e780fb241d90e5205f350164d27f90c67fc72b9c5bb744c.json"
+    },
+    {
+      "id": "87900092227226a6b8737c6b078169eece596e25119349953f20313c2c6db66c",
+      "name": "SpatialTensor4/Complex/Dot/0/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/87900092227226a6b8737c6b078169eece596e25119349953f20313c2c6db66c.json"
+    },
+    {
+      "id": "8b344f88fa4f2e2be438302c4df39b0638eabe782c6ad819b6b5152b1b110c7d",
+      "name": "SpatialTensor4/Complex/Dot/1/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/8b344f88fa4f2e2be438302c4df39b0638eabe782c6ad819b6b5152b1b110c7d.json"
+    },
+    {
+      "id": "9a8ec6b302085b281326bb9274e3821b1a19410a668d55a9435dbcd14dc7c9b2",
+      "name": "SpatialTensor4/Complex/Dot/2/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/9a8ec6b302085b281326bb9274e3821b1a19410a668d55a9435dbcd14dc7c9b2.json"
+    },
+    {
+      "id": "4d3c24af9d816088be3fcae2018125777863a690e4c06eb0466590fd5775807f",
+      "name": "SpatialTensor4/Complex/Dot/2/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/4d3c24af9d816088be3fcae2018125777863a690e4c06eb0466590fd5775807f.json"
+    },
+    {
+      "id": "c37f97577bbdbc7857404846ddcb92598a3c3d55f5ab1f9b31f9c51081b9836a",
+      "name": "SpatialTensor4/Complex/Dot/3/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/c37f97577bbdbc7857404846ddcb92598a3c3d55f5ab1f9b31f9c51081b9836a.json"
+    },
+    {
+      "id": "2291c90d49de0dc2f133dc3d7c7af5ec5d90e2ac476ac99d3c1ebe831de3e9ba",
+      "name": "SpatialTensor4/Complex/Dot/3/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/2291c90d49de0dc2f133dc3d7c7af5ec5d90e2ac476ac99d3c1ebe831de3e9ba.json"
+    },
+    {
+      "id": "e3c7b5412acc7cb000a957bcb8db7a850576f1df427474219a919befed1362fb",
+      "name": "SpatialTensor4/Complex/Scale/0/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/e3c7b5412acc7cb000a957bcb8db7a850576f1df427474219a919befed1362fb.json"
+    },
+    {
+      "id": "f6d2caf768c307307b8e933ef3b8e4819c2326b9e973ef75ce7c101d1015a7ed",
+      "name": "SpatialTensor4/Complex/Scale/1/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/f6d2caf768c307307b8e933ef3b8e4819c2326b9e973ef75ce7c101d1015a7ed.json"
+    },
+    {
+      "id": "add7cd33811eb7ef0211a20b98e1943e98298f8df475f13819c49fd10380df10",
+      "name": "SpatialTensor4/Complex/Scale/2/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/add7cd33811eb7ef0211a20b98e1943e98298f8df475f13819c49fd10380df10.json"
+    },
+    {
+      "id": "affea6d096ca194e8f21ffd243bd2c8a49cb810afa65885649f1ca060f356869",
+      "name": "SpatialTensor4/Complex/Scale/2/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/affea6d096ca194e8f21ffd243bd2c8a49cb810afa65885649f1ca060f356869.json"
+    },
+    {
+      "id": "c9821295fad40374658241378752cf138c44f2a02a32df673a5f921d490ebf5f",
+      "name": "SpatialTensor4/Complex/Scale/3/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/c9821295fad40374658241378752cf138c44f2a02a32df673a5f921d490ebf5f.json"
+    },
+    {
+      "id": "e4031bb77e86272a78df0ff3168924173c4605a2db7e356184411aee4c7ad4cf",
+      "name": "SpatialTensor4/Complex/Scale/3/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/e4031bb77e86272a78df0ff3168924173c4605a2db7e356184411aee4c7ad4cf.json"
+    },
+    {
+      "id": "05d159cee2065e3c16646ff65255483c64f82316108076a7152450980d503273",
+      "name": "SpatialTensor4/Real/Add/0/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/05d159cee2065e3c16646ff65255483c64f82316108076a7152450980d503273.json"
+    },
+    {
+      "id": "2fc004da5ae4e6fd2845e1fea9d80a4c3e32a4c3e742064338cf34ec01e072d2",
+      "name": "SpatialTensor4/Real/Add/1/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/2fc004da5ae4e6fd2845e1fea9d80a4c3e32a4c3e742064338cf34ec01e072d2.json"
+    },
+    {
+      "id": "dca0ce910b358762459ccef501e901781a97fbd3b5f0fce023afc176673ce7f5",
+      "name": "SpatialTensor4/Real/Add/2/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/dca0ce910b358762459ccef501e901781a97fbd3b5f0fce023afc176673ce7f5.json"
+    },
+    {
+      "id": "f58b1541c0d21ecc89ec6470723cc6dafb80eaeba7c2ae93ef309741d00f4443",
+      "name": "SpatialTensor4/Real/Add/2/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/f58b1541c0d21ecc89ec6470723cc6dafb80eaeba7c2ae93ef309741d00f4443.json"
+    },
+    {
+      "id": "3fbc3de117c8ba5ac8cfea571d37ddde0eb67d89252389ba8d55d4dec11beb46",
+      "name": "SpatialTensor4/Real/Add/3/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/3fbc3de117c8ba5ac8cfea571d37ddde0eb67d89252389ba8d55d4dec11beb46.json"
+    },
+    {
+      "id": "f449d50942fa645b91fced96e2a6733b80f5ffca087ce6016d6aaa280cceae62",
+      "name": "SpatialTensor4/Real/Add/3/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/f449d50942fa645b91fced96e2a6733b80f5ffca087ce6016d6aaa280cceae62.json"
+    },
+    {
+      "id": "c9673021244c46a8d0174e23924fa14ca1a23b231462a90c74c018b35fd0931b",
+      "name": "SpatialTensor4/Real/Construct/0/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/c9673021244c46a8d0174e23924fa14ca1a23b231462a90c74c018b35fd0931b.json"
+    },
+    {
+      "id": "1424de3323bd7f0604b4e64b04be4c3ec8dbc41ef346c2b57cb971e3f422a0c2",
+      "name": "SpatialTensor4/Real/Construct/1/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/1424de3323bd7f0604b4e64b04be4c3ec8dbc41ef346c2b57cb971e3f422a0c2.json"
+    },
+    {
+      "id": "12a6d649eb064bcad921e20b2e9b7c113baef5986095fd2f5bebb69145496625",
+      "name": "SpatialTensor4/Real/Construct/2/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/12a6d649eb064bcad921e20b2e9b7c113baef5986095fd2f5bebb69145496625.json"
+    },
+    {
+      "id": "e831914ca42b1feb8b72ded154fa3d97ae786319d9fdd803158668056dad3913",
+      "name": "SpatialTensor4/Real/Construct/2/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/e831914ca42b1feb8b72ded154fa3d97ae786319d9fdd803158668056dad3913.json"
+    },
+    {
+      "id": "6cb76d3b133110d0b5c3e81d163ea41b2b1abbfae0c05d72590cfe4f082161a5",
+      "name": "SpatialTensor4/Real/Construct/3/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/6cb76d3b133110d0b5c3e81d163ea41b2b1abbfae0c05d72590cfe4f082161a5.json"
+    },
+    {
+      "id": "98c1267520e2fe3a612743e92cf23199bcbe2ebb55bcc6c05577318b67db6fd6",
+      "name": "SpatialTensor4/Real/Construct/3/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/98c1267520e2fe3a612743e92cf23199bcbe2ebb55bcc6c05577318b67db6fd6.json"
+    },
+    {
+      "id": "86cd72b9868d919d589e7729565511fa19cfc02378ec5f058043f4c2bac2beae",
+      "name": "SpatialTensor4/Real/Contract/0/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/86cd72b9868d919d589e7729565511fa19cfc02378ec5f058043f4c2bac2beae.json"
+    },
+    {
+      "id": "2849ed2314c5584cb0bce0a16412e349c6ea75aa4f6afb3c3d385c79e7b1fc62",
+      "name": "SpatialTensor4/Real/Contract/1/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/2849ed2314c5584cb0bce0a16412e349c6ea75aa4f6afb3c3d385c79e7b1fc62.json"
+    },
+    {
+      "id": "69ac65a96b9351560087c8392ccfd2c258af1bdc3af8ba42a594b2baf041deef",
+      "name": "SpatialTensor4/Real/Contract/2/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/69ac65a96b9351560087c8392ccfd2c258af1bdc3af8ba42a594b2baf041deef.json"
+    },
+    {
+      "id": "8af3e6e8f2117bdd6df24798598b7d9c7760484d28daeab8c12d799de6911a09",
+      "name": "SpatialTensor4/Real/Contract/2/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/8af3e6e8f2117bdd6df24798598b7d9c7760484d28daeab8c12d799de6911a09.json"
+    },
+    {
+      "id": "3a229a4c0be748d987361fdfc043a6495237fe47994351f05b50132049ccca56",
+      "name": "SpatialTensor4/Real/Contract/3/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/3a229a4c0be748d987361fdfc043a6495237fe47994351f05b50132049ccca56.json"
+    },
+    {
+      "id": "2976416f843ecae05ab4387b1c9d80f6506f0d46b3b4bc04c01a7449edb824cc",
+      "name": "SpatialTensor4/Real/Contract/3/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/2976416f843ecae05ab4387b1c9d80f6506f0d46b3b4bc04c01a7449edb824cc.json"
+    },
+    {
+      "id": "c40ef8a9e6b9c155ea4bc4c67bdeb31e2672985fdd2cc2b6b6ad573e336cc3e0",
+      "name": "SpatialTensor4/Real/Copy/0/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/c40ef8a9e6b9c155ea4bc4c67bdeb31e2672985fdd2cc2b6b6ad573e336cc3e0.json"
+    },
+    {
+      "id": "e407ec9b5e9d114cd803f30dd7a02cf20d8fae3c1221ba3f1e94b187752dfe10",
+      "name": "SpatialTensor4/Real/Copy/1/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/e407ec9b5e9d114cd803f30dd7a02cf20d8fae3c1221ba3f1e94b187752dfe10.json"
+    },
+    {
+      "id": "e32821a457f32cb2f2d5163126d74af425592e7926f63331185c6e22118f623b",
+      "name": "SpatialTensor4/Real/Copy/2/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/e32821a457f32cb2f2d5163126d74af425592e7926f63331185c6e22118f623b.json"
+    },
+    {
+      "id": "61413496c42515d54f153359c0a367db43a8c5d041f543f6d1cbfbcab84301b0",
+      "name": "SpatialTensor4/Real/Copy/2/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/61413496c42515d54f153359c0a367db43a8c5d041f543f6d1cbfbcab84301b0.json"
+    },
+    {
+      "id": "5842ac97aea961a1e9427a0d254a1b6815e4e445883e2671d8f87937c7e27f37",
+      "name": "SpatialTensor4/Real/Copy/3/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/5842ac97aea961a1e9427a0d254a1b6815e4e445883e2671d8f87937c7e27f37.json"
+    },
+    {
+      "id": "c53e95488b0871b3968f579d51ab58f2d3462f42e967bba038eb4ecbbbe7e17a",
+      "name": "SpatialTensor4/Real/Copy/3/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/c53e95488b0871b3968f579d51ab58f2d3462f42e967bba038eb4ecbbbe7e17a.json"
+    },
+    {
+      "id": "677d3b136eb832d5e37b3f070dacb2d318798043ecab9cc8f54864fe7fea023f",
+      "name": "SpatialTensor4/Real/Dot/0/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/677d3b136eb832d5e37b3f070dacb2d318798043ecab9cc8f54864fe7fea023f.json"
+    },
+    {
+      "id": "779b11386b3b1b9cf4078d3130e10e158bbd4aacb043530fa6f63cdcb4c4cae8",
+      "name": "SpatialTensor4/Real/Dot/1/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/779b11386b3b1b9cf4078d3130e10e158bbd4aacb043530fa6f63cdcb4c4cae8.json"
+    },
+    {
+      "id": "94f7a15d7d7d2511f8978355d1f7fa6ee93ac343db03f91fdf281fa866a9da12",
+      "name": "SpatialTensor4/Real/Dot/2/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/94f7a15d7d7d2511f8978355d1f7fa6ee93ac343db03f91fdf281fa866a9da12.json"
+    },
+    {
+      "id": "5d7b97b2bdc28108c6a74be5aa49267e0e0ba6720a277f6df712235b0b4b51df",
+      "name": "SpatialTensor4/Real/Dot/2/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/5d7b97b2bdc28108c6a74be5aa49267e0e0ba6720a277f6df712235b0b4b51df.json"
+    },
+    {
+      "id": "3f575cc6bd8645a5737698f23bc7cac9b734d072fb4834624f72731de3147cb8",
+      "name": "SpatialTensor4/Real/Dot/3/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/3f575cc6bd8645a5737698f23bc7cac9b734d072fb4834624f72731de3147cb8.json"
+    },
+    {
+      "id": "55b94a9a28b45ac6449581845e6ab891663e6f732909a1ade78529497b169192",
+      "name": "SpatialTensor4/Real/Dot/3/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/55b94a9a28b45ac6449581845e6ab891663e6f732909a1ade78529497b169192.json"
+    },
+    {
+      "id": "8ee96568ff0a17e8daa223e7458283a070af7bc33c042f94ca5a3a66133db89d",
+      "name": "SpatialTensor4/Real/Scale/0/0/0/0",
+      "metric": "cpu_time",
+      "url": "cases/8ee96568ff0a17e8daa223e7458283a070af7bc33c042f94ca5a3a66133db89d.json"
+    },
+    {
+      "id": "81fdbbc78ddacbfdcfed42e9c6f6b494a3a9a6219e2c114bff0440c5f5a08ca8",
+      "name": "SpatialTensor4/Real/Scale/1/1/1/1",
+      "metric": "cpu_time",
+      "url": "cases/81fdbbc78ddacbfdcfed42e9c6f6b494a3a9a6219e2c114bff0440c5f5a08ca8.json"
+    },
+    {
+      "id": "63298ea98c865f2c78a8aea3b6e3c34f219f550bada8ae0aab9f9d60d911cb1b",
+      "name": "SpatialTensor4/Real/Scale/2/2/2/2",
+      "metric": "cpu_time",
+      "url": "cases/63298ea98c865f2c78a8aea3b6e3c34f219f550bada8ae0aab9f9d60d911cb1b.json"
+    },
+    {
+      "id": "24e4bb9c77347b10d94e4080409936e722627c51f3ec79baad6b3a1504b7a44d",
+      "name": "SpatialTensor4/Real/Scale/2/3/3/2",
+      "metric": "cpu_time",
+      "url": "cases/24e4bb9c77347b10d94e4080409936e722627c51f3ec79baad6b3a1504b7a44d.json"
+    },
+    {
+      "id": "2e83be4519bd271e3482d7a018383ee4fa215951c9a030b60317bf9900865ac8",
+      "name": "SpatialTensor4/Real/Scale/3/2/2/3",
+      "metric": "cpu_time",
+      "url": "cases/2e83be4519bd271e3482d7a018383ee4fa215951c9a030b60317bf9900865ac8.json"
+    },
+    {
+      "id": "66512753cfe182a05758d500756fa20dd31246266a665f786022bd48f65b09a9",
+      "name": "SpatialTensor4/Real/Scale/3/3/3/3",
+      "metric": "cpu_time",
+      "url": "cases/66512753cfe182a05758d500756fa20dd31246266a665f786022bd48f65b09a9.json"
+    },
+    {
+      "id": "29cfbd0ffdab9b09662e0b9812a6317aa195e7d848b97aac3a080e8bd63e26b5",
+      "name": "SpatialVector/Complex/Add/0",
+      "metric": "cpu_time",
+      "url": "cases/29cfbd0ffdab9b09662e0b9812a6317aa195e7d848b97aac3a080e8bd63e26b5.json"
+    },
+    {
+      "id": "a330a200b6a2e2e2bf20c001dce224a09996f0f767bc4499bf0aa4e42bb701f4",
+      "name": "SpatialVector/Complex/Add/1",
+      "metric": "cpu_time",
+      "url": "cases/a330a200b6a2e2e2bf20c001dce224a09996f0f767bc4499bf0aa4e42bb701f4.json"
+    },
+    {
+      "id": "67a11429d416185fb54648faf496deceb8f37972646ccb662e956f918e6353ec",
+      "name": "SpatialVector/Complex/Add/2",
+      "metric": "cpu_time",
+      "url": "cases/67a11429d416185fb54648faf496deceb8f37972646ccb662e956f918e6353ec.json"
+    },
+    {
+      "id": "7ba66c48b857ae73f4aa4fb64a2d9b2dabe44f701d92e9cf746069f63bd7d966",
+      "name": "SpatialVector/Complex/Add/3",
+      "metric": "cpu_time",
+      "url": "cases/7ba66c48b857ae73f4aa4fb64a2d9b2dabe44f701d92e9cf746069f63bd7d966.json"
+    },
+    {
+      "id": "d0eebbf6540b5dd3a56a92ee522d2bdb2bd3106d034bbcb1e202c7c21acd1ecf",
+      "name": "SpatialVector/Complex/Construct/0",
+      "metric": "cpu_time",
+      "url": "cases/d0eebbf6540b5dd3a56a92ee522d2bdb2bd3106d034bbcb1e202c7c21acd1ecf.json"
+    },
+    {
+      "id": "569610bd74d4c21032470951cffc75d8b4608abcd24c3caaf9d6dab50294c3fb",
+      "name": "SpatialVector/Complex/Construct/1",
+      "metric": "cpu_time",
+      "url": "cases/569610bd74d4c21032470951cffc75d8b4608abcd24c3caaf9d6dab50294c3fb.json"
+    },
+    {
+      "id": "8c4d2f5763fbb8a56c115f86bd14f0fa0ec0da483414d3344bfc2837f86b3237",
+      "name": "SpatialVector/Complex/Construct/2",
+      "metric": "cpu_time",
+      "url": "cases/8c4d2f5763fbb8a56c115f86bd14f0fa0ec0da483414d3344bfc2837f86b3237.json"
+    },
+    {
+      "id": "cfa7858104b8d92e54745d9e62dddbe72ce8ecf2e26b4310b3c981db5ad47fdd",
+      "name": "SpatialVector/Complex/Construct/3",
+      "metric": "cpu_time",
+      "url": "cases/cfa7858104b8d92e54745d9e62dddbe72ce8ecf2e26b4310b3c981db5ad47fdd.json"
+    },
+    {
+      "id": "8e4af558ccecde5616849daaef55f15113ede7c2f13052d9e48023e34613f57e",
+      "name": "SpatialVector/Complex/Copy/0",
+      "metric": "cpu_time",
+      "url": "cases/8e4af558ccecde5616849daaef55f15113ede7c2f13052d9e48023e34613f57e.json"
+    },
+    {
+      "id": "7c266dd227bd7efe7c8b220e4f7ab9dd71d92bde335a0752e0d78c680a56a58e",
+      "name": "SpatialVector/Complex/Copy/1",
+      "metric": "cpu_time",
+      "url": "cases/7c266dd227bd7efe7c8b220e4f7ab9dd71d92bde335a0752e0d78c680a56a58e.json"
+    },
+    {
+      "id": "9f5610890efcab88c027d564580de2c6d97b45ba51aeeb88254efb5398ad3d8e",
+      "name": "SpatialVector/Complex/Copy/2",
+      "metric": "cpu_time",
+      "url": "cases/9f5610890efcab88c027d564580de2c6d97b45ba51aeeb88254efb5398ad3d8e.json"
+    },
+    {
+      "id": "2717d33343b765eefe683d643bcb518abe4be0a9e01c7b92452ad435585bb0f9",
+      "name": "SpatialVector/Complex/Copy/3",
+      "metric": "cpu_time",
+      "url": "cases/2717d33343b765eefe683d643bcb518abe4be0a9e01c7b92452ad435585bb0f9.json"
+    },
+    {
+      "id": "8c00ebbed99679dde160293c144742c60c14379965ceda24653ea15373776321",
+      "name": "SpatialVector/Complex/Dot/0",
+      "metric": "cpu_time",
+      "url": "cases/8c00ebbed99679dde160293c144742c60c14379965ceda24653ea15373776321.json"
+    },
+    {
+      "id": "9ac7a38103f89db1c88827c93a342cc36b844d26cdada72502fbd2d0de593d24",
+      "name": "SpatialVector/Complex/Dot/1",
+      "metric": "cpu_time",
+      "url": "cases/9ac7a38103f89db1c88827c93a342cc36b844d26cdada72502fbd2d0de593d24.json"
+    },
+    {
+      "id": "3afb734db440e6f5fc023236567761ef72c1584472cfd6589a2fdf434ed79fc3",
+      "name": "SpatialVector/Complex/Dot/2",
+      "metric": "cpu_time",
+      "url": "cases/3afb734db440e6f5fc023236567761ef72c1584472cfd6589a2fdf434ed79fc3.json"
+    },
+    {
+      "id": "ae0c0e0e435201d60e21fa7b1c95c0af200fbebef272d3e252cc917abadedd51",
+      "name": "SpatialVector/Complex/Dot/3",
+      "metric": "cpu_time",
+      "url": "cases/ae0c0e0e435201d60e21fa7b1c95c0af200fbebef272d3e252cc917abadedd51.json"
+    },
+    {
+      "id": "2a656de8f577925328020b59d223a8e1cf4a23d34d183f224bdeb1c31de1d836",
+      "name": "SpatialVector/Complex/Scale/0",
+      "metric": "cpu_time",
+      "url": "cases/2a656de8f577925328020b59d223a8e1cf4a23d34d183f224bdeb1c31de1d836.json"
+    },
+    {
+      "id": "f5e91a6b622223162edd534eb867d90ccfa7c12babcd5081ccc643a03e894752",
+      "name": "SpatialVector/Complex/Scale/1",
+      "metric": "cpu_time",
+      "url": "cases/f5e91a6b622223162edd534eb867d90ccfa7c12babcd5081ccc643a03e894752.json"
+    },
+    {
+      "id": "dd20af82ac9d6cb887150306543e678e8b0684860ee6f52bdaf1c62b75b68842",
+      "name": "SpatialVector/Complex/Scale/2",
+      "metric": "cpu_time",
+      "url": "cases/dd20af82ac9d6cb887150306543e678e8b0684860ee6f52bdaf1c62b75b68842.json"
+    },
+    {
+      "id": "ecb69e3df0bd9f175ab8a3046c8db30c4831bbf412836af154aa844ec7bbfd7b",
+      "name": "SpatialVector/Complex/Scale/3",
+      "metric": "cpu_time",
+      "url": "cases/ecb69e3df0bd9f175ab8a3046c8db30c4831bbf412836af154aa844ec7bbfd7b.json"
+    },
+    {
+      "id": "de6c2bfefaafca52015e461876c0dccf72ca909c3ef808c99d53356cb1942dd8",
+      "name": "SpatialVector/Real/Add/0",
+      "metric": "cpu_time",
+      "url": "cases/de6c2bfefaafca52015e461876c0dccf72ca909c3ef808c99d53356cb1942dd8.json"
+    },
+    {
+      "id": "35a50f660c9ccb19bfeb8b87d2ca1ffcc55c3b0b8a95b294430e435e63d7a614",
+      "name": "SpatialVector/Real/Add/1",
+      "metric": "cpu_time",
+      "url": "cases/35a50f660c9ccb19bfeb8b87d2ca1ffcc55c3b0b8a95b294430e435e63d7a614.json"
+    },
+    {
+      "id": "dd30fad4a1edfb25c66eb0e3f20ed9bf32743fff9c2cfb9b4ef6fc89ebcf14a6",
+      "name": "SpatialVector/Real/Add/2",
+      "metric": "cpu_time",
+      "url": "cases/dd30fad4a1edfb25c66eb0e3f20ed9bf32743fff9c2cfb9b4ef6fc89ebcf14a6.json"
+    },
+    {
+      "id": "e32df4ff48a4dcd19c0e42f27170a0070e102838d9dc6ecac40e1dfe7b400cb6",
+      "name": "SpatialVector/Real/Add/3",
+      "metric": "cpu_time",
+      "url": "cases/e32df4ff48a4dcd19c0e42f27170a0070e102838d9dc6ecac40e1dfe7b400cb6.json"
+    },
+    {
+      "id": "13632ed3291b0bb24e9c480c68836dda72643a15d5d578e1ef28957668078356",
+      "name": "SpatialVector/Real/Construct/0",
+      "metric": "cpu_time",
+      "url": "cases/13632ed3291b0bb24e9c480c68836dda72643a15d5d578e1ef28957668078356.json"
+    },
+    {
+      "id": "4b5a93188e03e4aa4420d962fe3a110897e4a7a04cc387a4bef99f47316d968e",
+      "name": "SpatialVector/Real/Construct/1",
+      "metric": "cpu_time",
+      "url": "cases/4b5a93188e03e4aa4420d962fe3a110897e4a7a04cc387a4bef99f47316d968e.json"
+    },
+    {
+      "id": "7c0341c83cea1b4ebf8239d5455d3c151bf9592427388498515f2f155be2564d",
+      "name": "SpatialVector/Real/Construct/2",
+      "metric": "cpu_time",
+      "url": "cases/7c0341c83cea1b4ebf8239d5455d3c151bf9592427388498515f2f155be2564d.json"
+    },
+    {
+      "id": "594cdf37d641d40217db0594cfe6ac85a07580cbbea49dd836107431a57eb79e",
+      "name": "SpatialVector/Real/Construct/3",
+      "metric": "cpu_time",
+      "url": "cases/594cdf37d641d40217db0594cfe6ac85a07580cbbea49dd836107431a57eb79e.json"
+    },
+    {
+      "id": "245a4cdcf896338aa1b6dd0e44b8e8db5cc9aadb68a3979d815360f890df2553",
+      "name": "SpatialVector/Real/Copy/0",
+      "metric": "cpu_time",
+      "url": "cases/245a4cdcf896338aa1b6dd0e44b8e8db5cc9aadb68a3979d815360f890df2553.json"
+    },
+    {
+      "id": "e0e8a814f7c0523ef7e37571a3e35a39256dffa4dbcb256081c86c0bb3ff00ef",
+      "name": "SpatialVector/Real/Copy/1",
+      "metric": "cpu_time",
+      "url": "cases/e0e8a814f7c0523ef7e37571a3e35a39256dffa4dbcb256081c86c0bb3ff00ef.json"
+    },
+    {
+      "id": "42ce5004d27aae619ab01939aa2857e84b453fd73473f56a2545666e2843ce45",
+      "name": "SpatialVector/Real/Copy/2",
+      "metric": "cpu_time",
+      "url": "cases/42ce5004d27aae619ab01939aa2857e84b453fd73473f56a2545666e2843ce45.json"
+    },
+    {
+      "id": "b7daad509bd08b983efdc4129df3e558513ca530c8a74d0921e913990142c0cf",
+      "name": "SpatialVector/Real/Copy/3",
+      "metric": "cpu_time",
+      "url": "cases/b7daad509bd08b983efdc4129df3e558513ca530c8a74d0921e913990142c0cf.json"
+    },
+    {
+      "id": "a849d43722998dc1302c1cf3929fe15cd5fe188b8a8ba98d292d75307f26acbe",
+      "name": "SpatialVector/Real/Dot/0",
+      "metric": "cpu_time",
+      "url": "cases/a849d43722998dc1302c1cf3929fe15cd5fe188b8a8ba98d292d75307f26acbe.json"
+    },
+    {
+      "id": "71097e1ebe0796975fcfa82f33ebac1a209bd230aa17d4582adc6592041b6beb",
+      "name": "SpatialVector/Real/Dot/1",
+      "metric": "cpu_time",
+      "url": "cases/71097e1ebe0796975fcfa82f33ebac1a209bd230aa17d4582adc6592041b6beb.json"
+    },
+    {
+      "id": "6a5e985f610760ffcd5acb6bf74700b1675f139188495e0d86efca0f8b691d8d",
+      "name": "SpatialVector/Real/Dot/2",
+      "metric": "cpu_time",
+      "url": "cases/6a5e985f610760ffcd5acb6bf74700b1675f139188495e0d86efca0f8b691d8d.json"
+    },
+    {
+      "id": "f54af0c29a61cfb5f1861e5577b22eb8207c50feb838beb49cac9ab82ac01ead",
+      "name": "SpatialVector/Real/Dot/3",
+      "metric": "cpu_time",
+      "url": "cases/f54af0c29a61cfb5f1861e5577b22eb8207c50feb838beb49cac9ab82ac01ead.json"
+    },
+    {
+      "id": "d20c0fbadf93fe79ba6bfa3076bc84d14f3f63a167ba967307467c37f296df75",
+      "name": "SpatialVector/Real/Scale/0",
+      "metric": "cpu_time",
+      "url": "cases/d20c0fbadf93fe79ba6bfa3076bc84d14f3f63a167ba967307467c37f296df75.json"
+    },
+    {
+      "id": "9e54413b05d169c24967d183ab4be1d41a4e40d6b53304a5870fe30312ccb71c",
+      "name": "SpatialVector/Real/Scale/1",
+      "metric": "cpu_time",
+      "url": "cases/9e54413b05d169c24967d183ab4be1d41a4e40d6b53304a5870fe30312ccb71c.json"
+    },
+    {
+      "id": "2cc8f0faf1e90309cde2a947c713ce020fee8453a9153f6f993f3b611b9025be",
+      "name": "SpatialVector/Real/Scale/2",
+      "metric": "cpu_time",
+      "url": "cases/2cc8f0faf1e90309cde2a947c713ce020fee8453a9153f6f993f3b611b9025be.json"
+    },
+    {
+      "id": "269d60ea65d4fbc543a7009e2ba8119278b74d5f81fbb03bafbd5965300682f7",
+      "name": "SpatialVector/Real/Scale/3",
+      "metric": "cpu_time",
+      "url": "cases/269d60ea65d4fbc543a7009e2ba8119278b74d5f81fbb03bafbd5965300682f7.json"
+    }
+  ]
+}

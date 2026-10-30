@@ -1,0 +1,679 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBulkP1JacobianBenchmarks",
+      "RodinGeometryConnectivityBenchmarks",
+      "RodinGeometryParametricTransformationBenchmarks",
+      "RodinGeometryUniformGridBenchmarks",
+      "RodinMappedPointBenchmarks",
+      "RodinMappedQuadratureCacheBenchmarks",
+      "RodinReferenceGeometryBenchmarks",
+      "RodinTransformationLifecycleBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "f2bed249d2a47f900854c71d5a2c69966c39e7f1ebbc0e40f43311bb0789b3ae",
+      "name": "ConnectivityBenchmark/Edge_Cold_AllPairs",
+      "metric": "cpu_time",
+      "url": "cases/f2bed249d2a47f900854c71d5a2c69966c39e7f1ebbc0e40f43311bb0789b3ae.json"
+    },
+    {
+      "id": "f78e72bf0a788ed6a6d529b584f95b8246889f4e07ad4a7610a226a0c08fc0b1",
+      "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_0",
+      "metric": "cpu_time",
+      "url": "cases/f78e72bf0a788ed6a6d529b584f95b8246889f4e07ad4a7610a226a0c08fc0b1.json"
+    },
+    {
+      "id": "86b5d8c9097277c23a4b2527b9c9654630f21067129f0bcccdc43ecee8ac476c",
+      "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_1",
+      "metric": "cpu_time",
+      "url": "cases/86b5d8c9097277c23a4b2527b9c9654630f21067129f0bcccdc43ecee8ac476c.json"
+    },
+    {
+      "id": "3d915632829543d5be97820c316e3e454b42a10e926142e10798fe7f782c1b14",
+      "name": "ConnectivityBenchmark/Edge_Cold_Compute_1_0",
+      "metric": "cpu_time",
+      "url": "cases/3d915632829543d5be97820c316e3e454b42a10e926142e10798fe7f782c1b14.json"
+    },
+    {
+      "id": "881e97d855c8d7d2e3e6950517715f15427311dd8243ce6e701d20fb04bcc755",
+      "name": "ConnectivityBenchmark/Edge_Cold_Compute_1_1",
+      "metric": "cpu_time",
+      "url": "cases/881e97d855c8d7d2e3e6950517715f15427311dd8243ce6e701d20fb04bcc755.json"
+    },
+    {
+      "id": "e354b304235696edfb5f8b9f465a0fa3b7e88832555c4282ab407ec3508458b4",
+      "name": "ConnectivityBenchmark/Edge_Warm_AllPairs",
+      "metric": "cpu_time",
+      "url": "cases/e354b304235696edfb5f8b9f465a0fa3b7e88832555c4282ab407ec3508458b4.json"
+    },
+    {
+      "id": "98d3c5b40b9117c8cc57e4571a005dbd83bee4055286099b0ffe0bd155e10dda",
+      "name": "ConnectivityBenchmark/Edge_Warm_Compute_0_0",
+      "metric": "cpu_time",
+      "url": "cases/98d3c5b40b9117c8cc57e4571a005dbd83bee4055286099b0ffe0bd155e10dda.json"
+    },
+    {
+      "id": "706c50a51bc6d2797a877d403c1b90c6784e879bfc320c1aae94c95ab8b42c70",
+      "name": "ConnectivityBenchmark/Edge_Warm_Compute_0_1",
+      "metric": "cpu_time",
+      "url": "cases/706c50a51bc6d2797a877d403c1b90c6784e879bfc320c1aae94c95ab8b42c70.json"
+    },
+    {
+      "id": "c89884f2da81733465772d6a1e1f8bea9c994e4d0f03c0cdc3f30efa7810f7eb",
+      "name": "ConnectivityBenchmark/Edge_Warm_Compute_1_0",
+      "metric": "cpu_time",
+      "url": "cases/c89884f2da81733465772d6a1e1f8bea9c994e4d0f03c0cdc3f30efa7810f7eb.json"
+    },
+    {
+      "id": "889c5e818348fd918ed9b79b4d33170ad15fc57774a1b77ecf1a7bd90dbeda65",
+      "name": "ConnectivityBenchmark/Edge_Warm_Compute_1_1",
+      "metric": "cpu_time",
+      "url": "cases/889c5e818348fd918ed9b79b4d33170ad15fc57774a1b77ecf1a7bd90dbeda65.json"
+    },
+    {
+      "id": "b77eb1242c65526070ddfa9813eceae039858b7ed613e23d6ab3e87122367508",
+      "name": "ConnectivityBenchmark/Hexahedron_Cold_AllPairs",
+      "metric": "cpu_time",
+      "url": "cases/b77eb1242c65526070ddfa9813eceae039858b7ed613e23d6ab3e87122367508.json"
+    },
+    {
+      "id": "c81434159eeac745e502364a2faa254aee80b4c80ac6704b803ee18a3b8f3161",
+      "name": "ConnectivityBenchmark/Hexahedron_Cold_Build_1",
+      "metric": "cpu_time",
+      "url": "cases/c81434159eeac745e502364a2faa254aee80b4c80ac6704b803ee18a3b8f3161.json"
+    },
+    {
+      "id": "a2e6c868f86e12f6ab5cf1f5bd853613c292b41b54965f75b50f6f2f5e98b453",
+      "name": "ConnectivityBenchmark/Hexahedron_Cold_Build_2",
+      "metric": "cpu_time",
+      "url": "cases/a2e6c868f86e12f6ab5cf1f5bd853613c292b41b54965f75b50f6f2f5e98b453.json"
+    },
+    {
+      "id": "2c2132c7d46fb9348a77cfe8a792de91b1e76139ccac255fa7a7e80de1fc8a41",
+      "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_2_3",
+      "metric": "cpu_time",
+      "url": "cases/2c2132c7d46fb9348a77cfe8a792de91b1e76139ccac255fa7a7e80de1fc8a41.json"
+    },
+    {
+      "id": "f85feea7f846d4b5376917dc089e16c847ff72d8b4a5b04ce79b8915cab23191",
+      "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_1",
+      "metric": "cpu_time",
+      "url": "cases/f85feea7f846d4b5376917dc089e16c847ff72d8b4a5b04ce79b8915cab23191.json"
+    },
+    {
+      "id": "0fa41a8c7f5daf55c4695e432423759bed682c718242321a54d9e625c808a153",
+      "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_2",
+      "metric": "cpu_time",
+      "url": "cases/0fa41a8c7f5daf55c4695e432423759bed682c718242321a54d9e625c808a153.json"
+    },
+    {
+      "id": "31691c0e86834af87b5f92a55c39446b2105291bbc643e7dbf82c0c46391425d",
+      "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_3",
+      "metric": "cpu_time",
+      "url": "cases/31691c0e86834af87b5f92a55c39446b2105291bbc643e7dbf82c0c46391425d.json"
+    },
+    {
+      "id": "86a2dc48242e0cfee239bded2ae9d883e4f1f5a3f4c3311ff0d97d0fbe9c59c3",
+      "name": "ConnectivityBenchmark/Hexahedron_Cold_Intersection_3_3_via_0",
+      "metric": "cpu_time",
+      "url": "cases/86a2dc48242e0cfee239bded2ae9d883e4f1f5a3f4c3311ff0d97d0fbe9c59c3.json"
+    },
+    {
+      "id": "9e4796951f479d265c4be3aecdd152ad28ebd755dabe72b64a58aaad5d8e5158",
+      "name": "ConnectivityBenchmark/Hexahedron_Cold_Intersection_3_3_via_2",
+      "metric": "cpu_time",
+      "url": "cases/9e4796951f479d265c4be3aecdd152ad28ebd755dabe72b64a58aaad5d8e5158.json"
+    },
+    {
+      "id": "48150da24d9ac8492850dd7943224cb8b20fad90e44ceb03fd3b9635c57a57da",
+      "name": "ConnectivityBenchmark/Hexahedron_Cold_Transpose_2_3",
+      "metric": "cpu_time",
+      "url": "cases/48150da24d9ac8492850dd7943224cb8b20fad90e44ceb03fd3b9635c57a57da.json"
+    },
+    {
+      "id": "dadf95c48a02e3163029428985896fc4acff94c2cd4cc67d93e8683a4f74a988",
+      "name": "ConnectivityBenchmark/Hexahedron_Warm_AllPairs",
+      "metric": "cpu_time",
+      "url": "cases/dadf95c48a02e3163029428985896fc4acff94c2cd4cc67d93e8683a4f74a988.json"
+    },
+    {
+      "id": "d0e157f6cb3517250cd3d02c45b1fa7fe61fe55eca2f8290d5b20ef0135e81f3",
+      "name": "ConnectivityBenchmark/Hexahedron_Warm_Build_1",
+      "metric": "cpu_time",
+      "url": "cases/d0e157f6cb3517250cd3d02c45b1fa7fe61fe55eca2f8290d5b20ef0135e81f3.json"
+    },
+    {
+      "id": "646a87b9b2be358574cb2cd5f6ba556700fb0e2bdb96c836e64d3f29ee8c8338",
+      "name": "ConnectivityBenchmark/Hexahedron_Warm_Build_2",
+      "metric": "cpu_time",
+      "url": "cases/646a87b9b2be358574cb2cd5f6ba556700fb0e2bdb96c836e64d3f29ee8c8338.json"
+    },
+    {
+      "id": "27a034cd123d029777982654367a8e77bc6d6432f5211e04edc383c769379e4d",
+      "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_2_3",
+      "metric": "cpu_time",
+      "url": "cases/27a034cd123d029777982654367a8e77bc6d6432f5211e04edc383c769379e4d.json"
+    },
+    {
+      "id": "1814282060c59fbe743353c9e62eb3372ad227ae08b2c00e4b7d02e9dd1c4e95",
+      "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_1",
+      "metric": "cpu_time",
+      "url": "cases/1814282060c59fbe743353c9e62eb3372ad227ae08b2c00e4b7d02e9dd1c4e95.json"
+    },
+    {
+      "id": "afc628fa39850df540ece7c023806273c9ebfb5045ae47fd512881571d5b2d39",
+      "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_2",
+      "metric": "cpu_time",
+      "url": "cases/afc628fa39850df540ece7c023806273c9ebfb5045ae47fd512881571d5b2d39.json"
+    },
+    {
+      "id": "847d67bcd862b7a50a747b30891cd555ed0bffc3b6076eb6997e6424a39b4476",
+      "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_3",
+      "metric": "cpu_time",
+      "url": "cases/847d67bcd862b7a50a747b30891cd555ed0bffc3b6076eb6997e6424a39b4476.json"
+    },
+    {
+      "id": "127639787171c533638c6f0a2fc4af6603cec521217aebd2f46e1be17eac3b0b",
+      "name": "ConnectivityBenchmark/Hexahedron_Warm_Intersection_3_3_via_0",
+      "metric": "cpu_time",
+      "url": "cases/127639787171c533638c6f0a2fc4af6603cec521217aebd2f46e1be17eac3b0b.json"
+    },
+    {
+      "id": "a2b464b5319e896398f14f71c7a4d2a086a46ee7851183f27a2f8be43a4ce5eb",
+      "name": "ConnectivityBenchmark/Hexahedron_Warm_Intersection_3_3_via_2",
+      "metric": "cpu_time",
+      "url": "cases/a2b464b5319e896398f14f71c7a4d2a086a46ee7851183f27a2f8be43a4ce5eb.json"
+    },
+    {
+      "id": "2c31d590e2fc129abdbede3de5a654cbb21ac7b6362853707ca30d23913a9533",
+      "name": "ConnectivityBenchmark/Hexahedron_Warm_Transpose_2_3",
+      "metric": "cpu_time",
+      "url": "cases/2c31d590e2fc129abdbede3de5a654cbb21ac7b6362853707ca30d23913a9533.json"
+    },
+    {
+      "id": "0062028ac3445f34ae1c493f1a9d49018e2be9912c7cde4bdb582b956f9aa221",
+      "name": "ConnectivityBenchmark/Quadrilateral_Cold_AllPairs",
+      "metric": "cpu_time",
+      "url": "cases/0062028ac3445f34ae1c493f1a9d49018e2be9912c7cde4bdb582b956f9aa221.json"
+    },
+    {
+      "id": "784d20fe345261f95c5be6fac85a74a4044165d8fa766c5c8315c6f179a43d1a",
+      "name": "ConnectivityBenchmark/Quadrilateral_Cold_Build_1",
+      "metric": "cpu_time",
+      "url": "cases/784d20fe345261f95c5be6fac85a74a4044165d8fa766c5c8315c6f179a43d1a.json"
+    },
+    {
+      "id": "484ea0ee51fb81ced591adfa404913365e77d0c8063c41fabb19c5a6f920ec69",
+      "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_1_1",
+      "metric": "cpu_time",
+      "url": "cases/484ea0ee51fb81ced591adfa404913365e77d0c8063c41fabb19c5a6f920ec69.json"
+    },
+    {
+      "id": "1ae936ecefbe15a2ead1b51751e1ab4aa989ccb7ccfe2c36872c5c9d1628b2d4",
+      "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_1_2",
+      "metric": "cpu_time",
+      "url": "cases/1ae936ecefbe15a2ead1b51751e1ab4aa989ccb7ccfe2c36872c5c9d1628b2d4.json"
+    },
+    {
+      "id": "13f2f7ffe9affd8d968fe9de269e8fbc168f88ae9b46751c45d40941082b6af2",
+      "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_2_1",
+      "metric": "cpu_time",
+      "url": "cases/13f2f7ffe9affd8d968fe9de269e8fbc168f88ae9b46751c45d40941082b6af2.json"
+    },
+    {
+      "id": "d36729d14f74c86b6121b511a2f20d60280f796eb78f0b8b45d3e7fd65e3da82",
+      "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_2_2",
+      "metric": "cpu_time",
+      "url": "cases/d36729d14f74c86b6121b511a2f20d60280f796eb78f0b8b45d3e7fd65e3da82.json"
+    },
+    {
+      "id": "a9e6b9149af50c2f81b37e3b15c4801b19b0be48e53bca8fa4637522589a2c20",
+      "name": "ConnectivityBenchmark/Quadrilateral_Cold_Intersection_1_1_via_0",
+      "metric": "cpu_time",
+      "url": "cases/a9e6b9149af50c2f81b37e3b15c4801b19b0be48e53bca8fa4637522589a2c20.json"
+    },
+    {
+      "id": "863df587b6cdad98db858147ba9fb04d48972a9c3ab7abbfb152f010f2f83ad5",
+      "name": "ConnectivityBenchmark/Quadrilateral_Cold_Intersection_2_2_via_0",
+      "metric": "cpu_time",
+      "url": "cases/863df587b6cdad98db858147ba9fb04d48972a9c3ab7abbfb152f010f2f83ad5.json"
+    },
+    {
+      "id": "703677f350478e484ff389f12e4425b579d5373dbda94430a33d678b086f8188",
+      "name": "ConnectivityBenchmark/Quadrilateral_Cold_Transpose_1_2",
+      "metric": "cpu_time",
+      "url": "cases/703677f350478e484ff389f12e4425b579d5373dbda94430a33d678b086f8188.json"
+    },
+    {
+      "id": "8c8e06585441aaf389e0067470f4369137114f7c4751cc46cd023f5b5d218b88",
+      "name": "ConnectivityBenchmark/Quadrilateral_Warm_AllPairs",
+      "metric": "cpu_time",
+      "url": "cases/8c8e06585441aaf389e0067470f4369137114f7c4751cc46cd023f5b5d218b88.json"
+    },
+    {
+      "id": "95f7bd205b20bbe792da0f0f85cce2b6ea0b49e04f7a76f842545ae29b3ee010",
+      "name": "ConnectivityBenchmark/Quadrilateral_Warm_Build_1",
+      "metric": "cpu_time",
+      "url": "cases/95f7bd205b20bbe792da0f0f85cce2b6ea0b49e04f7a76f842545ae29b3ee010.json"
+    },
+    {
+      "id": "77a64e71f9a2a0b02fc28be2b0a975d80eff782683379ac0e752ff3d8b6cded1",
+      "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_1_1",
+      "metric": "cpu_time",
+      "url": "cases/77a64e71f9a2a0b02fc28be2b0a975d80eff782683379ac0e752ff3d8b6cded1.json"
+    },
+    {
+      "id": "4ce1e0eda0d98a4f1e6740a39c4548c2b3d4d7561d1996f1235a94b283c33afd",
+      "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_1_2",
+      "metric": "cpu_time",
+      "url": "cases/4ce1e0eda0d98a4f1e6740a39c4548c2b3d4d7561d1996f1235a94b283c33afd.json"
+    },
+    {
+      "id": "3a5478ee77584edd6086a62025f9368b53ca3dbce6aaaf67ddedd86919a4bf2b",
+      "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_1",
+      "metric": "cpu_time",
+      "url": "cases/3a5478ee77584edd6086a62025f9368b53ca3dbce6aaaf67ddedd86919a4bf2b.json"
+    },
+    {
+      "id": "a05089e1eb8bbdf70e4f337a6b82d9cb024f22821cbea1b655467bf97c6dae08",
+      "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_2",
+      "metric": "cpu_time",
+      "url": "cases/a05089e1eb8bbdf70e4f337a6b82d9cb024f22821cbea1b655467bf97c6dae08.json"
+    },
+    {
+      "id": "c241dab92de674b2225e73f76b4195459b6fc286f3629250dc2f9c68e948f197",
+      "name": "ConnectivityBenchmark/Quadrilateral_Warm_Intersection_1_1_via_0",
+      "metric": "cpu_time",
+      "url": "cases/c241dab92de674b2225e73f76b4195459b6fc286f3629250dc2f9c68e948f197.json"
+    },
+    {
+      "id": "8142db9cdbc5b6516b0746dd934c6a644ae87ec330358788bf5bcc28f574726f",
+      "name": "ConnectivityBenchmark/Quadrilateral_Warm_Intersection_2_2_via_0",
+      "metric": "cpu_time",
+      "url": "cases/8142db9cdbc5b6516b0746dd934c6a644ae87ec330358788bf5bcc28f574726f.json"
+    },
+    {
+      "id": "94754c92058229de0c059232f63a0e1ebbf162a4b721c154cfa049fedbe979d8",
+      "name": "ConnectivityBenchmark/Quadrilateral_Warm_Transpose_1_2",
+      "metric": "cpu_time",
+      "url": "cases/94754c92058229de0c059232f63a0e1ebbf162a4b721c154cfa049fedbe979d8.json"
+    },
+    {
+      "id": "b25c4895f91f9a2082d0b60acdef236a7c5a5b04c5d4d41208f055eba549d0ae",
+      "name": "ConnectivityBenchmark/Tetrahedron_Cold_AllPairs",
+      "metric": "cpu_time",
+      "url": "cases/b25c4895f91f9a2082d0b60acdef236a7c5a5b04c5d4d41208f055eba549d0ae.json"
+    },
+    {
+      "id": "fe520cb1626da304f2a08ade393d664d781776a6c04745c56da1674044c31181",
+      "name": "ConnectivityBenchmark/Tetrahedron_Cold_Build_1",
+      "metric": "cpu_time",
+      "url": "cases/fe520cb1626da304f2a08ade393d664d781776a6c04745c56da1674044c31181.json"
+    },
+    {
+      "id": "08a0b5304a2918fa6ba8264af989ce2737949a44cbe878daea252724bf9fad1b",
+      "name": "ConnectivityBenchmark/Tetrahedron_Cold_Build_2",
+      "metric": "cpu_time",
+      "url": "cases/08a0b5304a2918fa6ba8264af989ce2737949a44cbe878daea252724bf9fad1b.json"
+    },
+    {
+      "id": "a3ececd8c40bc07a0f848c34931885159718d514a8445b317b6a23616a4e4daa",
+      "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_2_3",
+      "metric": "cpu_time",
+      "url": "cases/a3ececd8c40bc07a0f848c34931885159718d514a8445b317b6a23616a4e4daa.json"
+    },
+    {
+      "id": "6eefd97be3485f4714b80445b94a1fca19d33956347b7aa34c4174c83834cdcd",
+      "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_1",
+      "metric": "cpu_time",
+      "url": "cases/6eefd97be3485f4714b80445b94a1fca19d33956347b7aa34c4174c83834cdcd.json"
+    },
+    {
+      "id": "f7883fcfca845e9e377df02e2738ee62da9516fed5b9219f5cb3332b8dc2166c",
+      "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_2",
+      "metric": "cpu_time",
+      "url": "cases/f7883fcfca845e9e377df02e2738ee62da9516fed5b9219f5cb3332b8dc2166c.json"
+    },
+    {
+      "id": "e76792343c2e766d0729b1ea129e955f83f0c554fcf177770d6ce33da31a46cd",
+      "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_3",
+      "metric": "cpu_time",
+      "url": "cases/e76792343c2e766d0729b1ea129e955f83f0c554fcf177770d6ce33da31a46cd.json"
+    },
+    {
+      "id": "e2a21c0e9c7550d64162bde7e0dfe604d9a6588baec754d7f08c1ee67c84e350",
+      "name": "ConnectivityBenchmark/Tetrahedron_Cold_Intersection_3_3_via_0",
+      "metric": "cpu_time",
+      "url": "cases/e2a21c0e9c7550d64162bde7e0dfe604d9a6588baec754d7f08c1ee67c84e350.json"
+    },
+    {
+      "id": "825d611c78fd6351fedf13f32e48d0b9ad4c11c5c00c9d2a85b67c166e4b5357",
+      "name": "ConnectivityBenchmark/Tetrahedron_Cold_Intersection_3_3_via_2",
+      "metric": "cpu_time",
+      "url": "cases/825d611c78fd6351fedf13f32e48d0b9ad4c11c5c00c9d2a85b67c166e4b5357.json"
+    },
+    {
+      "id": "0bcf38d5cc0988bc22aa48bf4b84c40c5edde4e77ce8773483486a41193e8e56",
+      "name": "ConnectivityBenchmark/Tetrahedron_Cold_Transpose_2_3",
+      "metric": "cpu_time",
+      "url": "cases/0bcf38d5cc0988bc22aa48bf4b84c40c5edde4e77ce8773483486a41193e8e56.json"
+    },
+    {
+      "id": "ec28cd97b33c61e1d2b8c4849bb07b1689504216fd6a5eb8d6845fc620faea93",
+      "name": "ConnectivityBenchmark/Tetrahedron_Warm_AllPairs",
+      "metric": "cpu_time",
+      "url": "cases/ec28cd97b33c61e1d2b8c4849bb07b1689504216fd6a5eb8d6845fc620faea93.json"
+    },
+    {
+      "id": "09366fdc577016aaabd5f18e866190b92311b22c21e9f56e45d51436f1c2ed37",
+      "name": "ConnectivityBenchmark/Tetrahedron_Warm_Build_1",
+      "metric": "cpu_time",
+      "url": "cases/09366fdc577016aaabd5f18e866190b92311b22c21e9f56e45d51436f1c2ed37.json"
+    },
+    {
+      "id": "bef8ccbc2d3dfe84126a506cba60872cb9f46aee112900c0e4bd17c633739efb",
+      "name": "ConnectivityBenchmark/Tetrahedron_Warm_Build_2",
+      "metric": "cpu_time",
+      "url": "cases/bef8ccbc2d3dfe84126a506cba60872cb9f46aee112900c0e4bd17c633739efb.json"
+    },
+    {
+      "id": "ffcdc6709e3977ec596401579ceeda7a77d8bce5c5714e2c72c78f16a93e6be2",
+      "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_2_3",
+      "metric": "cpu_time",
+      "url": "cases/ffcdc6709e3977ec596401579ceeda7a77d8bce5c5714e2c72c78f16a93e6be2.json"
+    },
+    {
+      "id": "9c410fc18740342407ea48acab4a5fd08f855d6f12bfd144b17454258292e84e",
+      "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_1",
+      "metric": "cpu_time",
+      "url": "cases/9c410fc18740342407ea48acab4a5fd08f855d6f12bfd144b17454258292e84e.json"
+    },
+    {
+      "id": "d74c4cf6e0c2eaf1a53d38921f395cc3ea4f13b68eaa08636fd35857cabf1947",
+      "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_2",
+      "metric": "cpu_time",
+      "url": "cases/d74c4cf6e0c2eaf1a53d38921f395cc3ea4f13b68eaa08636fd35857cabf1947.json"
+    },
+    {
+      "id": "b05aaa0a5f2c2e1550cbb9d6bd4d6177d641626f1cd23548f2d0dcbd0c083bd0",
+      "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_3",
+      "metric": "cpu_time",
+      "url": "cases/b05aaa0a5f2c2e1550cbb9d6bd4d6177d641626f1cd23548f2d0dcbd0c083bd0.json"
+    },
+    {
+      "id": "19d13da83e426e5e61cbba77d01b0e521b1f980c781a4f013d3997c64d58b833",
+      "name": "ConnectivityBenchmark/Tetrahedron_Warm_Intersection_3_3_via_0",
+      "metric": "cpu_time",
+      "url": "cases/19d13da83e426e5e61cbba77d01b0e521b1f980c781a4f013d3997c64d58b833.json"
+    },
+    {
+      "id": "d1c0de8191ff8ac52c61f8a589e4116101a4cf2bee8d78988a8148afc0a3f541",
+      "name": "ConnectivityBenchmark/Tetrahedron_Warm_Intersection_3_3_via_2",
+      "metric": "cpu_time",
+      "url": "cases/d1c0de8191ff8ac52c61f8a589e4116101a4cf2bee8d78988a8148afc0a3f541.json"
+    },
+    {
+      "id": "f400201b5e0ae2ac4f23b093d222150adb5dbffc657eeaefbeaafc139aac98e8",
+      "name": "ConnectivityBenchmark/Tetrahedron_Warm_Transpose_2_3",
+      "metric": "cpu_time",
+      "url": "cases/f400201b5e0ae2ac4f23b093d222150adb5dbffc657eeaefbeaafc139aac98e8.json"
+    },
+    {
+      "id": "020dab743f48470c929e7026704a79fdbcc2ab0a89559349319bab940bb019b2",
+      "name": "ConnectivityBenchmark/Triangle_Cold_AllPairs",
+      "metric": "cpu_time",
+      "url": "cases/020dab743f48470c929e7026704a79fdbcc2ab0a89559349319bab940bb019b2.json"
+    },
+    {
+      "id": "f0ae3e53799672da530ca8ebd923a1afde011896f7c49a19068b928c6bf7f402",
+      "name": "ConnectivityBenchmark/Triangle_Cold_Build_1",
+      "metric": "cpu_time",
+      "url": "cases/f0ae3e53799672da530ca8ebd923a1afde011896f7c49a19068b928c6bf7f402.json"
+    },
+    {
+      "id": "7dce8f4b6131d1b4bdf1e6fd7244c582d1b980129b52dec9d207ee96268c148c",
+      "name": "ConnectivityBenchmark/Triangle_Cold_Compute_1_1",
+      "metric": "cpu_time",
+      "url": "cases/7dce8f4b6131d1b4bdf1e6fd7244c582d1b980129b52dec9d207ee96268c148c.json"
+    },
+    {
+      "id": "a3f468d1c86fe32f356cb7319ec4a62add35b64e5f78d4c67f179d60301fa01f",
+      "name": "ConnectivityBenchmark/Triangle_Cold_Compute_1_2",
+      "metric": "cpu_time",
+      "url": "cases/a3f468d1c86fe32f356cb7319ec4a62add35b64e5f78d4c67f179d60301fa01f.json"
+    },
+    {
+      "id": "beef1cdb8eeca3f1b159d851cbbaa155f4afc487c7875ecd5adbe93c02c00f67",
+      "name": "ConnectivityBenchmark/Triangle_Cold_Compute_2_1",
+      "metric": "cpu_time",
+      "url": "cases/beef1cdb8eeca3f1b159d851cbbaa155f4afc487c7875ecd5adbe93c02c00f67.json"
+    },
+    {
+      "id": "925572ada5efdcd532207fae05d6424bf34d7ce982d29ae4379cdc61b764ee3f",
+      "name": "ConnectivityBenchmark/Triangle_Cold_Compute_2_2",
+      "metric": "cpu_time",
+      "url": "cases/925572ada5efdcd532207fae05d6424bf34d7ce982d29ae4379cdc61b764ee3f.json"
+    },
+    {
+      "id": "6e1e67076d4a2151b5fee6144741c7b76ef4c6f414241fc77b809047c9618fd3",
+      "name": "ConnectivityBenchmark/Triangle_Cold_Intersection_1_1_via_0",
+      "metric": "cpu_time",
+      "url": "cases/6e1e67076d4a2151b5fee6144741c7b76ef4c6f414241fc77b809047c9618fd3.json"
+    },
+    {
+      "id": "42c5eafb7b2e28b17c53bda3da8a44f1dc7e69855d82050543b37896b7165a2b",
+      "name": "ConnectivityBenchmark/Triangle_Cold_Intersection_2_2_via_0",
+      "metric": "cpu_time",
+      "url": "cases/42c5eafb7b2e28b17c53bda3da8a44f1dc7e69855d82050543b37896b7165a2b.json"
+    },
+    {
+      "id": "b212c54f5e2f55057abe6d1169199a223c525982394cc311aa971b558304e907",
+      "name": "ConnectivityBenchmark/Triangle_Cold_Transpose_1_2",
+      "metric": "cpu_time",
+      "url": "cases/b212c54f5e2f55057abe6d1169199a223c525982394cc311aa971b558304e907.json"
+    },
+    {
+      "id": "20204e0056cc79259ca4d8963caeb0ca5337e4a484ae68bd374db78d4e3d2957",
+      "name": "ConnectivityBenchmark/Triangle_Warm_AllPairs",
+      "metric": "cpu_time",
+      "url": "cases/20204e0056cc79259ca4d8963caeb0ca5337e4a484ae68bd374db78d4e3d2957.json"
+    },
+    {
+      "id": "429eedac830ae5a2dad605f8432d9576554d42cd831a5a562a1047e5066ff87e",
+      "name": "ConnectivityBenchmark/Triangle_Warm_Build_1",
+      "metric": "cpu_time",
+      "url": "cases/429eedac830ae5a2dad605f8432d9576554d42cd831a5a562a1047e5066ff87e.json"
+    },
+    {
+      "id": "36a6d5ac88d220a7d196c58f7713ac6138b971d7253fdb4b8ba92c27831d8638",
+      "name": "ConnectivityBenchmark/Triangle_Warm_Compute_1_1",
+      "metric": "cpu_time",
+      "url": "cases/36a6d5ac88d220a7d196c58f7713ac6138b971d7253fdb4b8ba92c27831d8638.json"
+    },
+    {
+      "id": "f099a52616b626eba9af5b672304595da0f49db5d35091b3f2033bf53c924df3",
+      "name": "ConnectivityBenchmark/Triangle_Warm_Compute_1_2",
+      "metric": "cpu_time",
+      "url": "cases/f099a52616b626eba9af5b672304595da0f49db5d35091b3f2033bf53c924df3.json"
+    },
+    {
+      "id": "9ca621b0b690fb7445e01bdc9c791b00229218cd68e27437e761b10f4ed3fd7e",
+      "name": "ConnectivityBenchmark/Triangle_Warm_Compute_2_1",
+      "metric": "cpu_time",
+      "url": "cases/9ca621b0b690fb7445e01bdc9c791b00229218cd68e27437e761b10f4ed3fd7e.json"
+    },
+    {
+      "id": "534752f9b61b50853ef0efe733c09d6fb44a75a0c847f63b00c8b6e7a3869b82",
+      "name": "ConnectivityBenchmark/Triangle_Warm_Compute_2_2",
+      "metric": "cpu_time",
+      "url": "cases/534752f9b61b50853ef0efe733c09d6fb44a75a0c847f63b00c8b6e7a3869b82.json"
+    },
+    {
+      "id": "dcac66af21428e06e98764246701f2aa065ea25a7070031d574010adfad122c6",
+      "name": "ConnectivityBenchmark/Triangle_Warm_Intersection_1_1_via_0",
+      "metric": "cpu_time",
+      "url": "cases/dcac66af21428e06e98764246701f2aa065ea25a7070031d574010adfad122c6.json"
+    },
+    {
+      "id": "76a3557fb441c2d91a5911ce87a1743dcbdf8341bd0332ca218d316c90b7fdd0",
+      "name": "ConnectivityBenchmark/Triangle_Warm_Intersection_2_2_via_0",
+      "metric": "cpu_time",
+      "url": "cases/76a3557fb441c2d91a5911ce87a1743dcbdf8341bd0332ca218d316c90b7fdd0.json"
+    },
+    {
+      "id": "bd88d646f6c83151f3fa991c55ed7dc2776a9565aa035081c0778555d1e15f69",
+      "name": "ConnectivityBenchmark/Triangle_Warm_Transpose_1_2",
+      "metric": "cpu_time",
+      "url": "cases/bd88d646f6c83151f3fa991c55ed7dc2776a9565aa035081c0778555d1e15f69.json"
+    },
+    {
+      "id": "66dbb592b444da09a9c380a4310be998967e8300ed0750247749bebff67c13b0",
+      "name": "ConnectivityBenchmark/Wedge_Cold_AllPairs",
+      "metric": "cpu_time",
+      "url": "cases/66dbb592b444da09a9c380a4310be998967e8300ed0750247749bebff67c13b0.json"
+    },
+    {
+      "id": "985580c70f3a35042134693c913a9bf7a207193698753171ad9ab40bbc1dc92a",
+      "name": "ConnectivityBenchmark/Wedge_Cold_Build_1",
+      "metric": "cpu_time",
+      "url": "cases/985580c70f3a35042134693c913a9bf7a207193698753171ad9ab40bbc1dc92a.json"
+    },
+    {
+      "id": "16878bb5aea6da26076637e443c8279e9054263ec3e80128c37656d56faaf85b",
+      "name": "ConnectivityBenchmark/Wedge_Cold_Build_2",
+      "metric": "cpu_time",
+      "url": "cases/16878bb5aea6da26076637e443c8279e9054263ec3e80128c37656d56faaf85b.json"
+    },
+    {
+      "id": "b295dda65b156e76d0727c6e2ce189615fff928f278e531242426fe552de708b",
+      "name": "ConnectivityBenchmark/Wedge_Cold_Compute_2_3",
+      "metric": "cpu_time",
+      "url": "cases/b295dda65b156e76d0727c6e2ce189615fff928f278e531242426fe552de708b.json"
+    },
+    {
+      "id": "b03bc2c489d75710b59f440258ae3745580a168d0f3278d7dc214f6a4438e20b",
+      "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_1",
+      "metric": "cpu_time",
+      "url": "cases/b03bc2c489d75710b59f440258ae3745580a168d0f3278d7dc214f6a4438e20b.json"
+    },
+    {
+      "id": "03b39f1dfe9aa74b7d0fef656046bb5c20bcd50fe16ffb943cd815795193b542",
+      "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_2",
+      "metric": "cpu_time",
+      "url": "cases/03b39f1dfe9aa74b7d0fef656046bb5c20bcd50fe16ffb943cd815795193b542.json"
+    },
+    {
+      "id": "7d2414b4332ad04ef8e8dfdef11c0ef2c4ceb40778257d4f24aaa5348052df17",
+      "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_3",
+      "metric": "cpu_time",
+      "url": "cases/7d2414b4332ad04ef8e8dfdef11c0ef2c4ceb40778257d4f24aaa5348052df17.json"
+    },
+    {
+      "id": "d6906511c65e331577b97b6da03a21cafb214b69013e438bbe25cb638e73e10f",
+      "name": "ConnectivityBenchmark/Wedge_Cold_Intersection_3_3_via_0",
+      "metric": "cpu_time",
+      "url": "cases/d6906511c65e331577b97b6da03a21cafb214b69013e438bbe25cb638e73e10f.json"
+    },
+    {
+      "id": "275e55c3dcfd483d65b052d61b9b6c1665872474feb413abd6e81d045405f5af",
+      "name": "ConnectivityBenchmark/Wedge_Cold_Intersection_3_3_via_2",
+      "metric": "cpu_time",
+      "url": "cases/275e55c3dcfd483d65b052d61b9b6c1665872474feb413abd6e81d045405f5af.json"
+    },
+    {
+      "id": "21eb7b6cadc3cada8ceea7c2109b8b5f40dd490db97c803cbb72312fc27e17e0",
+      "name": "ConnectivityBenchmark/Wedge_Cold_Transpose_2_3",
+      "metric": "cpu_time",
+      "url": "cases/21eb7b6cadc3cada8ceea7c2109b8b5f40dd490db97c803cbb72312fc27e17e0.json"
+    },
+    {
+      "id": "0e76b0c24d2e6e314b73a64ffa5cfed3e169adce6130f8588546ffdecc1fcb68",
+      "name": "ConnectivityBenchmark/Wedge_Warm_AllPairs",
+      "metric": "cpu_time",
+      "url": "cases/0e76b0c24d2e6e314b73a64ffa5cfed3e169adce6130f8588546ffdecc1fcb68.json"
+    },
+    {
+      "id": "f63874616440f2fccdb8f483a791e57f93ff50c4116bf80ab03ea61b1d976909",
+      "name": "ConnectivityBenchmark/Wedge_Warm_Build_1",
+      "metric": "cpu_time",
+      "url": "cases/f63874616440f2fccdb8f483a791e57f93ff50c4116bf80ab03ea61b1d976909.json"
+    },
+    {
+      "id": "43acbe5f423ecc26d565d2c03d820541d59a9e98546000714fee6997c416ed22",
+      "name": "ConnectivityBenchmark/Wedge_Warm_Build_2",
+      "metric": "cpu_time",
+      "url": "cases/43acbe5f423ecc26d565d2c03d820541d59a9e98546000714fee6997c416ed22.json"
+    },
+    {
+      "id": "9d19754b80efd1cc5f09102399d4958ea10d3647e9fd04efd1bc1f5a9b82f5b0",
+      "name": "ConnectivityBenchmark/Wedge_Warm_Compute_2_3",
+      "metric": "cpu_time",
+      "url": "cases/9d19754b80efd1cc5f09102399d4958ea10d3647e9fd04efd1bc1f5a9b82f5b0.json"
+    },
+    {
+      "id": "9916cee96d0edb19f55f1cfeb875491f97411a53428b90b8b7fc7785e967d1c8",
+      "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_1",
+      "metric": "cpu_time",
+      "url": "cases/9916cee96d0edb19f55f1cfeb875491f97411a53428b90b8b7fc7785e967d1c8.json"
+    },
+    {
+      "id": "d53313fa0c6ee1b257a3b3b6d0e4bef46fcb09a0a2a801587988de1750f30c83",
+      "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_2",
+      "metric": "cpu_time",
+      "url": "cases/d53313fa0c6ee1b257a3b3b6d0e4bef46fcb09a0a2a801587988de1750f30c83.json"
+    },
+    {
+      "id": "767c6a01f7a124029adf5aa139ccf105e4fa854d167e51181df1f08da38b0c7f",
+      "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_3",
+      "metric": "cpu_time",
+      "url": "cases/767c6a01f7a124029adf5aa139ccf105e4fa854d167e51181df1f08da38b0c7f.json"
+    },
+    {
+      "id": "648302889e5c5bffb68a2391547d9ec8a386d5496a7bc2af2f8cf5eeb29eda5b",
+      "name": "ConnectivityBenchmark/Wedge_Warm_Intersection_3_3_via_0",
+      "metric": "cpu_time",
+      "url": "cases/648302889e5c5bffb68a2391547d9ec8a386d5496a7bc2af2f8cf5eeb29eda5b.json"
+    },
+    {
+      "id": "07d8ce44ae735d95011da96ef9320342b3a3a1ebee366938179f07b8c180ef7b",
+      "name": "ConnectivityBenchmark/Wedge_Warm_Intersection_3_3_via_2",
+      "metric": "cpu_time",
+      "url": "cases/07d8ce44ae735d95011da96ef9320342b3a3a1ebee366938179f07b8c180ef7b.json"
+    },
+    {
+      "id": "4597b0db5799721d521efedd59ffa0119e17edac466b900ff2a6b92ce89c2104",
+      "name": "ConnectivityBenchmark/Wedge_Warm_Transpose_2_3",
+      "metric": "cpu_time",
+      "url": "cases/4597b0db5799721d521efedd59ffa0119e17edac466b900ff2a6b92ce89c2104.json"
+    }
+  ]
+}

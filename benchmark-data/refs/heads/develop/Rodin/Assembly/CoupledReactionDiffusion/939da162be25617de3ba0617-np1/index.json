@@ -1,0 +1,1560 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinAssemblyBenchmarks",
+      "RodinConstrainedAssemblyBenchmarks",
+      "RodinConvectionAssemblyBenchmarks",
+      "RodinCoupledReactionDiffusionAssemblyBenchmarks",
+      "RodinHelmholtzAssemblyBenchmarks",
+      "RodinMassAssemblyBenchmarks",
+      "RodinMassOperandOrderAssemblyBenchmarks",
+      "RodinMatrixMassAssemblyBenchmarks",
+      "RodinNonlinearPoissonAssemblyBenchmarks",
+      "RodinPhysicsAssemblyBenchmarks",
+      "RodinPhysicsStageBenchmarks",
+      "RodinSpatialMatrixBenchmarks",
+      "RodinStokesAssemblyBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "60863ff63456ce3d4a7923c89881b5e75b6e7bc84f05257a4faa624d6d487bbf",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/60863ff63456ce3d4a7923c89881b5e75b6e7bc84f05257a4faa624d6d487bbf.json"
+    },
+    {
+      "id": "d119d897124ba4891b540c0098194e94c3a13a8925b670113b580a7f3216f36b",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d119d897124ba4891b540c0098194e94c3a13a8925b670113b580a7f3216f36b.json"
+    },
+    {
+      "id": "7d592bcc81035d5708cf95bf5a58a3916e5ffa474e269d546aeb346083e3edce",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7d592bcc81035d5708cf95bf5a58a3916e5ffa474e269d546aeb346083e3edce.json"
+    },
+    {
+      "id": "186c4b18e6e7043dbbe3dfe3b4f8ea59345d34242d99859ddc8f189306482129",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/186c4b18e6e7043dbbe3dfe3b4f8ea59345d34242d99859ddc8f189306482129.json"
+    },
+    {
+      "id": "366091ba6fa5090781c170b8cd30fe384a523e422e155657eed474f505496bd4",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/366091ba6fa5090781c170b8cd30fe384a523e422e155657eed474f505496bd4.json"
+    },
+    {
+      "id": "112d2bfbe381cdd211952a96958e4e948757cbeb8387ffc7c743e1f3990cf337",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/112d2bfbe381cdd211952a96958e4e948757cbeb8387ffc7c743e1f3990cf337.json"
+    },
+    {
+      "id": "8fcfbeedd6a4defd989b1553a6395bbe85ed13b01cac61358546d8e904c55f86",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8fcfbeedd6a4defd989b1553a6395bbe85ed13b01cac61358546d8e904c55f86.json"
+    },
+    {
+      "id": "db836573855c91b6d19ead8c931241c589038a10a2f47215a70b9921792ff292",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/db836573855c91b6d19ead8c931241c589038a10a2f47215a70b9921792ff292.json"
+    },
+    {
+      "id": "49ddb7e4c927f7af8422c17df5f9d4d551a7240372fe28599d2df1975798fe34",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/49ddb7e4c927f7af8422c17df5f9d4d551a7240372fe28599d2df1975798fe34.json"
+    },
+    {
+      "id": "f8da796a665fcefdb2c4da6c2e06da8e72c140df299ae7d91f3c3cd42c8944f9",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f8da796a665fcefdb2c4da6c2e06da8e72c140df299ae7d91f3c3cd42c8944f9.json"
+    },
+    {
+      "id": "54ffd67fef0e7bd54db2777f906cc9cb10610db00f778a4622d36d947b030e01",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/54ffd67fef0e7bd54db2777f906cc9cb10610db00f778a4622d36d947b030e01.json"
+    },
+    {
+      "id": "4a7a72abf16ed13e8d926b0b856a928b55be0ec2336ea0e13493f87646a3e27a",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4a7a72abf16ed13e8d926b0b856a928b55be0ec2336ea0e13493f87646a3e27a.json"
+    },
+    {
+      "id": "02761fb5fd24f2f96f6f256b4f508a73773da6aab19e5ab37ea892057b0f2e19",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/02761fb5fd24f2f96f6f256b4f508a73773da6aab19e5ab37ea892057b0f2e19.json"
+    },
+    {
+      "id": "866b061e94cab7fa3f00ad1214660040b914d93637edc6c635f85a1cef813379",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/866b061e94cab7fa3f00ad1214660040b914d93637edc6c635f85a1cef813379.json"
+    },
+    {
+      "id": "26dc86d6632ca1f694675cd693430d9d352c1a3538f1f43521c20efe90375534",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/26dc86d6632ca1f694675cd693430d9d352c1a3538f1f43521c20efe90375534.json"
+    },
+    {
+      "id": "f2741efa93cab28b197bc75c58c71a69bc56065c790c55d3a25b145467a92fb7",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f2741efa93cab28b197bc75c58c71a69bc56065c790c55d3a25b145467a92fb7.json"
+    },
+    {
+      "id": "80d78d1d82adca032a8fb43ca2a7a3803a51a72bd3799d165f712e8eaeed85ea",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/80d78d1d82adca032a8fb43ca2a7a3803a51a72bd3799d165f712e8eaeed85ea.json"
+    },
+    {
+      "id": "fc30cb387d2f988c38fa63edd6c2300764301695f6f4d4cf41f229e8f283efc5",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fc30cb387d2f988c38fa63edd6c2300764301695f6f4d4cf41f229e8f283efc5.json"
+    },
+    {
+      "id": "5d6b4ecffbaf15f0dd244fd16fd0abcc942a6ad116fb36b2150a0e708984142f",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5d6b4ecffbaf15f0dd244fd16fd0abcc942a6ad116fb36b2150a0e708984142f.json"
+    },
+    {
+      "id": "b9fb8f31284683e2ea51d520e7a0c34d0f2941a6fc012d5ff1102151cb5ed9ca",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b9fb8f31284683e2ea51d520e7a0c34d0f2941a6fc012d5ff1102151cb5ed9ca.json"
+    },
+    {
+      "id": "bcce904d9e5b79cd1d566b984246e6259e4754ca7a10da68d7447e61f1a21cba",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/bcce904d9e5b79cd1d566b984246e6259e4754ca7a10da68d7447e61f1a21cba.json"
+    },
+    {
+      "id": "91561c4426f7294378a4919ec9471271fcaea908b58abb95e0756e3b3527b9c0",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/91561c4426f7294378a4919ec9471271fcaea908b58abb95e0756e3b3527b9c0.json"
+    },
+    {
+      "id": "3813f10756d5719e721f20785c48122fcbdd8448797c8f2d36d537866efe9c63",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3813f10756d5719e721f20785c48122fcbdd8448797c8f2d36d537866efe9c63.json"
+    },
+    {
+      "id": "61f1b1c0155c287494ff60a069167593f07d0a63bcf348ea3ed60607f772aad4",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/61f1b1c0155c287494ff60a069167593f07d0a63bcf348ea3ed60607f772aad4.json"
+    },
+    {
+      "id": "cc89813462d2867b6aa2fe273a0fef4910f7ee60db522b869fe21e408faddaf7",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/cc89813462d2867b6aa2fe273a0fef4910f7ee60db522b869fe21e408faddaf7.json"
+    },
+    {
+      "id": "d9eeb7c6801229940ff45ab9a43f2f2036db465fd34e41fde36d4cadffe237bd",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d9eeb7c6801229940ff45ab9a43f2f2036db465fd34e41fde36d4cadffe237bd.json"
+    },
+    {
+      "id": "be35cc1e2653f6ae3d7bdae9123d34c1e48acbbf8827abba9f1860d62d469b9f",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/be35cc1e2653f6ae3d7bdae9123d34c1e48acbbf8827abba9f1860d62d469b9f.json"
+    },
+    {
+      "id": "590d6f3d3b8adf95e56eb4f0fc537b0bd43497c0dccdaa277048c4e10289c8c2",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/590d6f3d3b8adf95e56eb4f0fc537b0bd43497c0dccdaa277048c4e10289c8c2.json"
+    },
+    {
+      "id": "e8eb22d70cb3af1a13fcca9dde8905abf02c603b2d1061265ca2f1956b13c80a",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e8eb22d70cb3af1a13fcca9dde8905abf02c603b2d1061265ca2f1956b13c80a.json"
+    },
+    {
+      "id": "b0a708e274b5db4652a1177e9644e0e2246e4bcbae0488538b0f2566cc896b7d",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b0a708e274b5db4652a1177e9644e0e2246e4bcbae0488538b0f2566cc896b7d.json"
+    },
+    {
+      "id": "c28e2ba1d4c81d0500360d1df4af210597616e089618465fece8fb8a89aa5bde",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c28e2ba1d4c81d0500360d1df4af210597616e089618465fece8fb8a89aa5bde.json"
+    },
+    {
+      "id": "929b8fc26a39833e3ba13928890c655206ef158f2c534ef898d5d05cb2f2cff2",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/929b8fc26a39833e3ba13928890c655206ef158f2c534ef898d5d05cb2f2cff2.json"
+    },
+    {
+      "id": "2e9c50cab4be8daf458c00a0a2b6a39bd8134392d745128546b0f5bfab498d79",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2e9c50cab4be8daf458c00a0a2b6a39bd8134392d745128546b0f5bfab498d79.json"
+    },
+    {
+      "id": "9dddfc848a5676911f980c256b169869a7ccdef03175fba069fbccc0962c8ba7",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9dddfc848a5676911f980c256b169869a7ccdef03175fba069fbccc0962c8ba7.json"
+    },
+    {
+      "id": "35b762733f16b72229fbc62f0babcdc984c3de72210f4d63bf7cd789cf6d7e70",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/35b762733f16b72229fbc62f0babcdc984c3de72210f4d63bf7cd789cf6d7e70.json"
+    },
+    {
+      "id": "8baa982546f6254d3aa4cb588e568622f1a1331a8c8a4f58c83dba144343fac6",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8baa982546f6254d3aa4cb588e568622f1a1331a8c8a4f58c83dba144343fac6.json"
+    },
+    {
+      "id": "9d0130edb5bd7e42164faf86f41398f19e98ff1b1292731eca646df7de31369e",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9d0130edb5bd7e42164faf86f41398f19e98ff1b1292731eca646df7de31369e.json"
+    },
+    {
+      "id": "10c3858ce1a5f1d834273e136bf85e0d1c02e9a16d0337f0cc78a7e16ebf403b",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/10c3858ce1a5f1d834273e136bf85e0d1c02e9a16d0337f0cc78a7e16ebf403b.json"
+    },
+    {
+      "id": "bccd644b16d97f40004157a23ed74b747fae9c5a6ad65308fcf6210ced2f6508",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/bccd644b16d97f40004157a23ed74b747fae9c5a6ad65308fcf6210ced2f6508.json"
+    },
+    {
+      "id": "370213c47c198eb1f8e7265f86b1eeee94f483410ecf3d23eee01836028b98cb",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/370213c47c198eb1f8e7265f86b1eeee94f483410ecf3d23eee01836028b98cb.json"
+    },
+    {
+      "id": "86575a6ae3e5d02e98bf1b3fc3899f7ff4b0a05017e8f4586514dd0fb00531d8",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/86575a6ae3e5d02e98bf1b3fc3899f7ff4b0a05017e8f4586514dd0fb00531d8.json"
+    },
+    {
+      "id": "3e888884db67c08ab2bdc1372e04bc103a81f5305411fabd41332e87a3eb6f7e",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P1/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/3e888884db67c08ab2bdc1372e04bc103a81f5305411fabd41332e87a3eb6f7e.json"
+    },
+    {
+      "id": "20205bba64b1ceb09a0814f59be18909069331fe4c4566ba39088cfdcebbf17d",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/20205bba64b1ceb09a0814f59be18909069331fe4c4566ba39088cfdcebbf17d.json"
+    },
+    {
+      "id": "e15b3bcc586c5cd54d60f617cf3c9a85bc918b168521c172ae8332c7a6c5f49b",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e15b3bcc586c5cd54d60f617cf3c9a85bc918b168521c172ae8332c7a6c5f49b.json"
+    },
+    {
+      "id": "4c61275e25cc48e07c9b27873a3824e8e40c66a0cdfdcbcd8f20f1a9f1022ef5",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4c61275e25cc48e07c9b27873a3824e8e40c66a0cdfdcbcd8f20f1a9f1022ef5.json"
+    },
+    {
+      "id": "76e9eb85c9093e7253182b146757aad80a059c37e29bab7b0ae079b32ca80f3d",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/76e9eb85c9093e7253182b146757aad80a059c37e29bab7b0ae079b32ca80f3d.json"
+    },
+    {
+      "id": "7f4ff59727e40e1ca0f65a9c4dba44051f6432bac379f47d520301001d7fe036",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7f4ff59727e40e1ca0f65a9c4dba44051f6432bac379f47d520301001d7fe036.json"
+    },
+    {
+      "id": "b4739a71673a7f2bdea805db7f9e248d275e5845248f00fca5c0c94a876e7112",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b4739a71673a7f2bdea805db7f9e248d275e5845248f00fca5c0c94a876e7112.json"
+    },
+    {
+      "id": "7aef7a3d1f0d536f9882200b9785994d0c62bf581acf0fd4d51740082ec87cee",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7aef7a3d1f0d536f9882200b9785994d0c62bf581acf0fd4d51740082ec87cee.json"
+    },
+    {
+      "id": "537aed50b13d89d663e6474c51bd21a35198fcd47fc11bf66987c19386184e6b",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/537aed50b13d89d663e6474c51bd21a35198fcd47fc11bf66987c19386184e6b.json"
+    },
+    {
+      "id": "eb9507d706905fe6cbcc2e29b5e98fbd6cdbc4b2aaf1f80a390a5c4fbbc5849f",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/eb9507d706905fe6cbcc2e29b5e98fbd6cdbc4b2aaf1f80a390a5c4fbbc5849f.json"
+    },
+    {
+      "id": "ea278ba76595d0254dafddf020559ebed86d80a8723226f9530bc3552565315d",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ea278ba76595d0254dafddf020559ebed86d80a8723226f9530bc3552565315d.json"
+    },
+    {
+      "id": "18175cedd639d7d1ebf30f434b9d4db3fa57873ed3969ad09fed1dbb1425b18a",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/18175cedd639d7d1ebf30f434b9d4db3fa57873ed3969ad09fed1dbb1425b18a.json"
+    },
+    {
+      "id": "dc6ec1d8937717802c96fe6c388804bcc7b649ee0bdd24a3f6f68e35255f6bdd",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/dc6ec1d8937717802c96fe6c388804bcc7b649ee0bdd24a3f6f68e35255f6bdd.json"
+    },
+    {
+      "id": "3407467466cc169195c07c5052e678375b54dcf466b4a238071b4748647300cd",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/3407467466cc169195c07c5052e678375b54dcf466b4a238071b4748647300cd.json"
+    },
+    {
+      "id": "efcd6e314accdc58882f0c20dbb1e151eb6ce1ecf87d620977b56fa3821df118",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/efcd6e314accdc58882f0c20dbb1e151eb6ce1ecf87d620977b56fa3821df118.json"
+    },
+    {
+      "id": "c7375ce7f22bf0c4e0e6517b8063300cee2ba6be4178ac6db1a6d4b3793c5179",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c7375ce7f22bf0c4e0e6517b8063300cee2ba6be4178ac6db1a6d4b3793c5179.json"
+    },
+    {
+      "id": "15e876e93892c2127baf9774a8a355649c75c04e5ab48cc630180e12fe017665",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/15e876e93892c2127baf9774a8a355649c75c04e5ab48cc630180e12fe017665.json"
+    },
+    {
+      "id": "ff1e22ccc7c05830c4f56d310526bb1b3a9e9ac555b3afde3f073fb58c3d9bed",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ff1e22ccc7c05830c4f56d310526bb1b3a9e9ac555b3afde3f073fb58c3d9bed.json"
+    },
+    {
+      "id": "940ba491cd46601d699aa8d1434e054a788f6dcf6671407ea1d08dc3e33ec2a7",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/940ba491cd46601d699aa8d1434e054a788f6dcf6671407ea1d08dc3e33ec2a7.json"
+    },
+    {
+      "id": "267ac8a9c51b152e7d1eb7ed667e4580b1b2fa0a1ea6267de96f1b8fd1ec403d",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/267ac8a9c51b152e7d1eb7ed667e4580b1b2fa0a1ea6267de96f1b8fd1ec403d.json"
+    },
+    {
+      "id": "2e71a942dae5da0ef92d3b022d5e945c1aed47df58d529dc1134c124d47c942c",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2e71a942dae5da0ef92d3b022d5e945c1aed47df58d529dc1134c124d47c942c.json"
+    },
+    {
+      "id": "be25128412817335fd2ef4767fb3f2b56412f21853bb413e7137fa01eb059cf3",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/be25128412817335fd2ef4767fb3f2b56412f21853bb413e7137fa01eb059cf3.json"
+    },
+    {
+      "id": "9b005b798f7ad2352f6745ca39a4439fb0266a8c2c67913072cec3be24412709",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9b005b798f7ad2352f6745ca39a4439fb0266a8c2c67913072cec3be24412709.json"
+    },
+    {
+      "id": "61241d11806e85128a5f5e3be2dbd65f15332717599375f5cc413b60c31ba420",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/61241d11806e85128a5f5e3be2dbd65f15332717599375f5cc413b60c31ba420.json"
+    },
+    {
+      "id": "56ef2eee109bc0fdd950a4bd49e8327e1b360c3b9f24212e21ab6fce06e0330d",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/56ef2eee109bc0fdd950a4bd49e8327e1b360c3b9f24212e21ab6fce06e0330d.json"
+    },
+    {
+      "id": "751d0381bb7f913ad66de3f5244fca2ca937b7466a9eade2b2c90256acdf0451",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/751d0381bb7f913ad66de3f5244fca2ca937b7466a9eade2b2c90256acdf0451.json"
+    },
+    {
+      "id": "2d936e169460a869a9b9170d79ebb5de90530287897a2195767d5e9d561ef763",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2d936e169460a869a9b9170d79ebb5de90530287897a2195767d5e9d561ef763.json"
+    },
+    {
+      "id": "c479cd525e94b3bb3fc112ea6f5ac3978d2b0c9eb821e18ff1b8d11228543631",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c479cd525e94b3bb3fc112ea6f5ac3978d2b0c9eb821e18ff1b8d11228543631.json"
+    },
+    {
+      "id": "1445036ed9d54b507271b1564c1e66446085157373a577e063d62d0bd46e5066",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1445036ed9d54b507271b1564c1e66446085157373a577e063d62d0bd46e5066.json"
+    },
+    {
+      "id": "e94ec03d07c6fb691f2c0b622a04c71f0434db3e2ec79e4120c371164afca121",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e94ec03d07c6fb691f2c0b622a04c71f0434db3e2ec79e4120c371164afca121.json"
+    },
+    {
+      "id": "229dd10d306a40961cb871810d9074d830f5e02a28263952e32fd66fea931c03",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/229dd10d306a40961cb871810d9074d830f5e02a28263952e32fd66fea931c03.json"
+    },
+    {
+      "id": "b3266a40637497a8f206364825b4c2e8be594dbd74c667b21f5598b16ffc2df4",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b3266a40637497a8f206364825b4c2e8be594dbd74c667b21f5598b16ffc2df4.json"
+    },
+    {
+      "id": "15ea1f9c9bc6ad6058b831c0df111d897c4153ead67a0a40678245a33cc7d288",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/15ea1f9c9bc6ad6058b831c0df111d897c4153ead67a0a40678245a33cc7d288.json"
+    },
+    {
+      "id": "9d689a1d34159e4981df09a18e7c5dc258746d13937b995ae6e258bcbcef0c13",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9d689a1d34159e4981df09a18e7c5dc258746d13937b995ae6e258bcbcef0c13.json"
+    },
+    {
+      "id": "74000047e1f7186e3059bf9a40373687a74db45c993f5b0e94fa3d6c1f728d29",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/74000047e1f7186e3059bf9a40373687a74db45c993f5b0e94fa3d6c1f728d29.json"
+    },
+    {
+      "id": "f93dda904a494c7686f274acbed1385009d9c3550540025019d65dff987a77cd",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f93dda904a494c7686f274acbed1385009d9c3550540025019d65dff987a77cd.json"
+    },
+    {
+      "id": "83d1f72e25ab1906a8e4dd4d622c24bc0eb3fba4144200b1b1e947a215d7e043",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/83d1f72e25ab1906a8e4dd4d622c24bc0eb3fba4144200b1b1e947a215d7e043.json"
+    },
+    {
+      "id": "cd01454c62bda5c9531192f162f61228708c7c1fe85254fc01517930a7c39a35",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/cd01454c62bda5c9531192f162f61228708c7c1fe85254fc01517930a7c39a35.json"
+    },
+    {
+      "id": "583fda77c62fc672e0ad9a7bc96e4e0908b5f5729aff69ff2d284a1a1a5d95e4",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/583fda77c62fc672e0ad9a7bc96e4e0908b5f5729aff69ff2d284a1a1a5d95e4.json"
+    },
+    {
+      "id": "8552ac3aebfe87092d7cea4aa429f80b0860da08c5877ae522c3446b162e99fd",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8552ac3aebfe87092d7cea4aa429f80b0860da08c5877ae522c3446b162e99fd.json"
+    },
+    {
+      "id": "9af7b91cc192d50dc1e117bb6a1c85329b6e5a6186646728b8bb7619ced185c3",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9af7b91cc192d50dc1e117bb6a1c85329b6e5a6186646728b8bb7619ced185c3.json"
+    },
+    {
+      "id": "eaf96734eeeff55f2f5873f368711831e0c476dd377a9835d35ff904e564d18e",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/eaf96734eeeff55f2f5873f368711831e0c476dd377a9835d35ff904e564d18e.json"
+    },
+    {
+      "id": "5f489dad4f9921ca1af35f2d8b88ded99f6ee039a130dacd6e09b472c5079f37",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P2/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5f489dad4f9921ca1af35f2d8b88ded99f6ee039a130dacd6e09b472c5079f37.json"
+    },
+    {
+      "id": "6c2567c3c5c88c189c5e28a7b4e415e3f264c1c51f94a233ef0d9085815cf87e",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6c2567c3c5c88c189c5e28a7b4e415e3f264c1c51f94a233ef0d9085815cf87e.json"
+    },
+    {
+      "id": "a935b53169519837bfb321dcd8d6fcb8cee049815fec47c5f4fbb486a727d3b1",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a935b53169519837bfb321dcd8d6fcb8cee049815fec47c5f4fbb486a727d3b1.json"
+    },
+    {
+      "id": "b7be703d2a14e4c86087ca3cb87de56771b2d9efcec4817598c23b5f96f6672e",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b7be703d2a14e4c86087ca3cb87de56771b2d9efcec4817598c23b5f96f6672e.json"
+    },
+    {
+      "id": "dfb99159bafe7d484768b72b659ec9d1ac8adc6b10bdb0f7451d5de803b19dd0",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/dfb99159bafe7d484768b72b659ec9d1ac8adc6b10bdb0f7451d5de803b19dd0.json"
+    },
+    {
+      "id": "f85460e3a6aeb7995ceda18c87001be2c5e38e231cfd25321e802a2e0b8bf28c",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f85460e3a6aeb7995ceda18c87001be2c5e38e231cfd25321e802a2e0b8bf28c.json"
+    },
+    {
+      "id": "74607dd609b82cb857453fecb7e472a99f0bd95e53259f3e89a66a23b81a9fc1",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/74607dd609b82cb857453fecb7e472a99f0bd95e53259f3e89a66a23b81a9fc1.json"
+    },
+    {
+      "id": "5dca15c6562e280838f929f6db95be842980f2aa65b4691bdbc5e4b5f08f0687",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5dca15c6562e280838f929f6db95be842980f2aa65b4691bdbc5e4b5f08f0687.json"
+    },
+    {
+      "id": "3e1b770f0de77f5889bff7102e53ee42d9e40e0c1c8a1ae5cad7b7267e15d795",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3e1b770f0de77f5889bff7102e53ee42d9e40e0c1c8a1ae5cad7b7267e15d795.json"
+    },
+    {
+      "id": "e4e24fd5ef10fc4c4f14a9604bc8c3aa9720b3818c88798fed60fd731254282d",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e4e24fd5ef10fc4c4f14a9604bc8c3aa9720b3818c88798fed60fd731254282d.json"
+    },
+    {
+      "id": "45ee7940e21a7d14d5830730d72721de4a5047a5eec3d186bf9ead5976c4ed7f",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/45ee7940e21a7d14d5830730d72721de4a5047a5eec3d186bf9ead5976c4ed7f.json"
+    },
+    {
+      "id": "b9cd9720f514e48dfe2a1e09f979a0348710fe796384ce9d6c340fb3f72db51d",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b9cd9720f514e48dfe2a1e09f979a0348710fe796384ce9d6c340fb3f72db51d.json"
+    },
+    {
+      "id": "c64751afeeb2674ccdc3ceece597e88ddf85c9fb37269c965d3c972ef8d8b671",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c64751afeeb2674ccdc3ceece597e88ddf85c9fb37269c965d3c972ef8d8b671.json"
+    },
+    {
+      "id": "aee6a827eaab817b962e215b71fcbe132bbc816fb05c90218bb6284f38052fc5",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/aee6a827eaab817b962e215b71fcbe132bbc816fb05c90218bb6284f38052fc5.json"
+    },
+    {
+      "id": "6861f026ad1cdd36744c181681f1d9dc9568a06c999d870b9f55630ff697d013",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6861f026ad1cdd36744c181681f1d9dc9568a06c999d870b9f55630ff697d013.json"
+    },
+    {
+      "id": "a2e0bd504fba5f9ab5ed716d306ba509e980ed81967c7f3c4efcfe0c20e49a57",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a2e0bd504fba5f9ab5ed716d306ba509e980ed81967c7f3c4efcfe0c20e49a57.json"
+    },
+    {
+      "id": "5ce5524ed5407d22375867eccf2acb59dc5df8ba2961bb4bfc09103205aad664",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5ce5524ed5407d22375867eccf2acb59dc5df8ba2961bb4bfc09103205aad664.json"
+    },
+    {
+      "id": "ac4dd1d5a3577307dd76413f28f5933d0fd9ef70a79cd9ee13903a94a33a6102",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ac4dd1d5a3577307dd76413f28f5933d0fd9ef70a79cd9ee13903a94a33a6102.json"
+    },
+    {
+      "id": "039aea5a48eb84f972b83fed6c3e2dab65a85bb34e8a43bfc90c81b8823ee39b",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/039aea5a48eb84f972b83fed6c3e2dab65a85bb34e8a43bfc90c81b8823ee39b.json"
+    },
+    {
+      "id": "8aadb576a991189b228f9a1bd51b01976976bc82178ac09be9576652d650e8c2",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8aadb576a991189b228f9a1bd51b01976976bc82178ac09be9576652d650e8c2.json"
+    },
+    {
+      "id": "74afe079e3ae5e44e6e3dc7cca685da6cac1f13f766d857171020c5cbe77463a",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/74afe079e3ae5e44e6e3dc7cca685da6cac1f13f766d857171020c5cbe77463a.json"
+    },
+    {
+      "id": "dc2cdd10a078ff4b767600f6539688e863dc8e419d9e270f577fa25791e58645",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/dc2cdd10a078ff4b767600f6539688e863dc8e419d9e270f577fa25791e58645.json"
+    },
+    {
+      "id": "f49c42292e784044abb1c8700fe016ef76c84ae5d5e536b6a6d6df29e56cd799",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f49c42292e784044abb1c8700fe016ef76c84ae5d5e536b6a6d6df29e56cd799.json"
+    },
+    {
+      "id": "4d33af1223c3920c06a1e7f18656ba419e8d800641c5b24327a2058622bc4c33",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/4d33af1223c3920c06a1e7f18656ba419e8d800641c5b24327a2058622bc4c33.json"
+    },
+    {
+      "id": "0465097fadc8125d1321db112de3d2d6c081feba751fd3393d08ae404eb42cca",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0465097fadc8125d1321db112de3d2d6c081feba751fd3393d08ae404eb42cca.json"
+    },
+    {
+      "id": "9ab70eec2da69df775bdd9d32215454932576fc856f16d2abe97544727b8438a",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9ab70eec2da69df775bdd9d32215454932576fc856f16d2abe97544727b8438a.json"
+    },
+    {
+      "id": "09772e2dba1558830f2dc8a443eec7be4c57875ec52fb3136e0bac995f96bc84",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/09772e2dba1558830f2dc8a443eec7be4c57875ec52fb3136e0bac995f96bc84.json"
+    },
+    {
+      "id": "924dc36bc03ee0ad9c8a0974b1c589ea6166e0adb4dadadb8ed6b07481560de9",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/924dc36bc03ee0ad9c8a0974b1c589ea6166e0adb4dadadb8ed6b07481560de9.json"
+    },
+    {
+      "id": "994a5aa568696cda9b6aa3f24aab161309b381dd39de009630ce59521c8fa3a3",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/994a5aa568696cda9b6aa3f24aab161309b381dd39de009630ce59521c8fa3a3.json"
+    },
+    {
+      "id": "0cbee3308fdb03a87c05739f0d76417e522f09929491b708db96e443aff14245",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0cbee3308fdb03a87c05739f0d76417e522f09929491b708db96e443aff14245.json"
+    },
+    {
+      "id": "477848173dd26a70ff585e8c5274f0f85fcd73ed2c92d69c827c147635f4b66d",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/477848173dd26a70ff585e8c5274f0f85fcd73ed2c92d69c827c147635f4b66d.json"
+    },
+    {
+      "id": "b8925a1816ca6eb98d4d597f920b286f516ba2a89945a94484c1550e9a125c14",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b8925a1816ca6eb98d4d597f920b286f516ba2a89945a94484c1550e9a125c14.json"
+    },
+    {
+      "id": "560d8db3af5ad27b0dd3b7769dbbde301b71bc4795543cf8ba981496e1cba8d6",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/560d8db3af5ad27b0dd3b7769dbbde301b71bc4795543cf8ba981496e1cba8d6.json"
+    },
+    {
+      "id": "1a28cf0d6952e511b5bcddeca5b9d44c6448a04b9585aff2e8b5bfe61480d40a",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1a28cf0d6952e511b5bcddeca5b9d44c6448a04b9585aff2e8b5bfe61480d40a.json"
+    },
+    {
+      "id": "9d034f26458cf1b118683a0b15f969b4eab4899dcc269ee297916fb8c644782b",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9d034f26458cf1b118683a0b15f969b4eab4899dcc269ee297916fb8c644782b.json"
+    },
+    {
+      "id": "72a0e82408af1a54cbac7b66af544e6b9befbb443386cdeb979a093a5a2a7926",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/72a0e82408af1a54cbac7b66af544e6b9befbb443386cdeb979a093a5a2a7926.json"
+    },
+    {
+      "id": "9dfa01f56eee798673dffdedd29677302781602b052bb35b252ee5b209f613c2",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9dfa01f56eee798673dffdedd29677302781602b052bb35b252ee5b209f613c2.json"
+    },
+    {
+      "id": "557b5b8d315905d91b0193a028f738e9e8884afa97493f5a61b4ddbdc5a8c165",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/557b5b8d315905d91b0193a028f738e9e8884afa97493f5a61b4ddbdc5a8c165.json"
+    },
+    {
+      "id": "f15f2a4193c548b3fbbeae3cd911338727b869c261c0b7384eb78b706b24af3e",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f15f2a4193c548b3fbbeae3cd911338727b869c261c0b7384eb78b706b24af3e.json"
+    },
+    {
+      "id": "8e6fd224abf8699a454381723f4ece2cdf8d93bdaee46d7cadc921f977673077",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8e6fd224abf8699a454381723f4ece2cdf8d93bdaee46d7cadc921f977673077.json"
+    },
+    {
+      "id": "98f57f46bc29bb1b74c7e5f6e529c1d15ed20fe28868aee7715053c392e7bd14",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/98f57f46bc29bb1b74c7e5f6e529c1d15ed20fe28868aee7715053c392e7bd14.json"
+    },
+    {
+      "id": "98e86819f5b10a37fc7708f0c82640bde208853c4686b08bbd725b05adcd68c8",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/98e86819f5b10a37fc7708f0c82640bde208853c4686b08bbd725b05adcd68c8.json"
+    },
+    {
+      "id": "0d0ce78e1c22e42962b80b66b22590922eef47e06bc41bd716b1a7932d3199b9",
+      "name": "CoupledReactionDiffusion/Assembly/H1/P3/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0d0ce78e1c22e42962b80b66b22590922eef47e06bc41bd716b1a7932d3199b9.json"
+    },
+    {
+      "id": "bafd53b8332335abe510ba12b9be9f00c0855f7b51dab036d4f900f28c53f955",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/bafd53b8332335abe510ba12b9be9f00c0855f7b51dab036d4f900f28c53f955.json"
+    },
+    {
+      "id": "06054af7d69160a8e3194fcdc695e56bd1561cf2f55e2247529204df90b891c4",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/06054af7d69160a8e3194fcdc695e56bd1561cf2f55e2247529204df90b891c4.json"
+    },
+    {
+      "id": "6986a3afdc9b3cda38c159aabff4bca9cf7a07ceda7ca5d1de1c6f8fea5ed68e",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6986a3afdc9b3cda38c159aabff4bca9cf7a07ceda7ca5d1de1c6f8fea5ed68e.json"
+    },
+    {
+      "id": "5e1171b338a5f73b4d468567642c8f601644730fa82bd4a782bbc7a91e95ef45",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5e1171b338a5f73b4d468567642c8f601644730fa82bd4a782bbc7a91e95ef45.json"
+    },
+    {
+      "id": "d91cf38633b23fcb7e8d9e2a12bb63ae152d3a3520b34d4b4ee1a13935840371",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d91cf38633b23fcb7e8d9e2a12bb63ae152d3a3520b34d4b4ee1a13935840371.json"
+    },
+    {
+      "id": "5f0e48a5a04fe1205f42dea571f08ee236f2fee8f1c98dade967ce0c73ca40f6",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5f0e48a5a04fe1205f42dea571f08ee236f2fee8f1c98dade967ce0c73ca40f6.json"
+    },
+    {
+      "id": "8734499b6d37b0331791b0156ad2e2144955e2d809a3966e1139f5d510402561",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8734499b6d37b0331791b0156ad2e2144955e2d809a3966e1139f5d510402561.json"
+    },
+    {
+      "id": "ffc102d3b237961a02c27bfefcf40605a831c9876b7dd1c47888c9c5c587e05f",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ffc102d3b237961a02c27bfefcf40605a831c9876b7dd1c47888c9c5c587e05f.json"
+    },
+    {
+      "id": "37a0fb5daf762cbc27c4979d0e20ba50ee26eba7fc756eddd99fe9a0a9c64379",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/37a0fb5daf762cbc27c4979d0e20ba50ee26eba7fc756eddd99fe9a0a9c64379.json"
+    },
+    {
+      "id": "b57706e8fc94c8bcc2f9cb794a3054925f74765e4ed99771c02fa7f9d6249438",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b57706e8fc94c8bcc2f9cb794a3054925f74765e4ed99771c02fa7f9d6249438.json"
+    },
+    {
+      "id": "e22f965ba2ab11a4cf8faae7d04e32ddfd11b852b58c82eddb175a3e5955e2fd",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e22f965ba2ab11a4cf8faae7d04e32ddfd11b852b58c82eddb175a3e5955e2fd.json"
+    },
+    {
+      "id": "ac0b0a8d4dd772e68994420f73dd0cf69639b79fbd70b6c479c65b140f6498dc",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ac0b0a8d4dd772e68994420f73dd0cf69639b79fbd70b6c479c65b140f6498dc.json"
+    },
+    {
+      "id": "33d02c76367b573a9074215acf5c0578ec366d2672d13d9c5d1a2dda2032b94f",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/33d02c76367b573a9074215acf5c0578ec366d2672d13d9c5d1a2dda2032b94f.json"
+    },
+    {
+      "id": "53676124cc80064664e79b8e7fbd6c9106a24464ddf53c2f6147c7c1bd7917aa",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/53676124cc80064664e79b8e7fbd6c9106a24464ddf53c2f6147c7c1bd7917aa.json"
+    },
+    {
+      "id": "74c332ee02f4c40a10a76853b64ef11f7c6c2aa2dbda2c94f2a7b8cf3e75aba4",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/74c332ee02f4c40a10a76853b64ef11f7c6c2aa2dbda2c94f2a7b8cf3e75aba4.json"
+    },
+    {
+      "id": "b4dd72c6ad42028993f5b1fe379b61f0f8cdf3490d83c3931508cfede80346d6",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b4dd72c6ad42028993f5b1fe379b61f0f8cdf3490d83c3931508cfede80346d6.json"
+    },
+    {
+      "id": "f2e9727d568d11f9181b4b50658663901565cdc8a4175684f5cd9cb4d427d0c9",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f2e9727d568d11f9181b4b50658663901565cdc8a4175684f5cd9cb4d427d0c9.json"
+    },
+    {
+      "id": "f5dd92864150e5603a82ccf91b11f191c71f362d4979caea27b176c1e31ab969",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f5dd92864150e5603a82ccf91b11f191c71f362d4979caea27b176c1e31ab969.json"
+    },
+    {
+      "id": "1eb10aca3e4cf5e5869160652520b840abc0ee7352f0b139bb1ebfee3d31e846",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1eb10aca3e4cf5e5869160652520b840abc0ee7352f0b139bb1ebfee3d31e846.json"
+    },
+    {
+      "id": "7cef863ad3afb233bada6d430971a9b4e8ec7f93626a051d0ff3bae08abaa1a7",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7cef863ad3afb233bada6d430971a9b4e8ec7f93626a051d0ff3bae08abaa1a7.json"
+    },
+    {
+      "id": "52cdc58aafd53f045f612e421e13e3fe3539963f6fbf2badc24983984102dca9",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/52cdc58aafd53f045f612e421e13e3fe3539963f6fbf2badc24983984102dca9.json"
+    },
+    {
+      "id": "36704f270a8d5b8955ffd2aac049cb4b51292d844b2dc80caada1284ffa09286",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/36704f270a8d5b8955ffd2aac049cb4b51292d844b2dc80caada1284ffa09286.json"
+    },
+    {
+      "id": "45240af259c4ee8d3a3029db9961936af6920f29435471b399ffd96f0ee78fac",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/45240af259c4ee8d3a3029db9961936af6920f29435471b399ffd96f0ee78fac.json"
+    },
+    {
+      "id": "8308e09c4bad87a70d889dc005b154ffcbce876286351de8ab2133a246140b52",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8308e09c4bad87a70d889dc005b154ffcbce876286351de8ab2133a246140b52.json"
+    },
+    {
+      "id": "0fca5e44e9f1e1641d57d896e3300695d016f78ee0f63ea246d51864f1d0894c",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0fca5e44e9f1e1641d57d896e3300695d016f78ee0f63ea246d51864f1d0894c.json"
+    },
+    {
+      "id": "87659a6c5e4d768750e62dedac70b43a1a0719ac007edc647ef6495e638a36d3",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/87659a6c5e4d768750e62dedac70b43a1a0719ac007edc647ef6495e638a36d3.json"
+    },
+    {
+      "id": "fef04db4f7ae3c77a7eb8cd561a8b838c0a6f61b2c802c57832977b192547025",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fef04db4f7ae3c77a7eb8cd561a8b838c0a6f61b2c802c57832977b192547025.json"
+    },
+    {
+      "id": "acf56821daf35c435281b9c2160b732b312cfb7e4d82048189bd09027abb98e0",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/acf56821daf35c435281b9c2160b732b312cfb7e4d82048189bd09027abb98e0.json"
+    },
+    {
+      "id": "0eb52086a3e0190e045663dda3247ef963b9266abc165c96dfa4f8878483d1b3",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0eb52086a3e0190e045663dda3247ef963b9266abc165c96dfa4f8878483d1b3.json"
+    },
+    {
+      "id": "8a2946fb28521376bd7310807cdbe9f2ab3cb7c625777a0642137e64b4cd0dd0",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8a2946fb28521376bd7310807cdbe9f2ab3cb7c625777a0642137e64b4cd0dd0.json"
+    },
+    {
+      "id": "376c12788af23afb6e68bc2f355ef5ffa24c2a9d2b0e221cfdb157e7858ffe66",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/376c12788af23afb6e68bc2f355ef5ffa24c2a9d2b0e221cfdb157e7858ffe66.json"
+    },
+    {
+      "id": "3860169aa9b3672ce1c397c47a85285999a564a96aecfc10978fe4046028dbda",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3860169aa9b3672ce1c397c47a85285999a564a96aecfc10978fe4046028dbda.json"
+    },
+    {
+      "id": "6364568b33c6ce0a68cd0ee413c8e69bad29824e287dff062d34c37aae4725b1",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6364568b33c6ce0a68cd0ee413c8e69bad29824e287dff062d34c37aae4725b1.json"
+    },
+    {
+      "id": "5235fe30ff7c8dfd85d33fb27d28242daa64829624fcb98dd971ca6858a652ea",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5235fe30ff7c8dfd85d33fb27d28242daa64829624fcb98dd971ca6858a652ea.json"
+    },
+    {
+      "id": "0478511f696cd7c832486f9839a23b429a7b61ceb5e24011cd60f98f0da31b83",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0478511f696cd7c832486f9839a23b429a7b61ceb5e24011cd60f98f0da31b83.json"
+    },
+    {
+      "id": "485320a5d5ce4b260584a2499326ec7016e2c33928c0b7b71fead5b7e7909772",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/485320a5d5ce4b260584a2499326ec7016e2c33928c0b7b71fead5b7e7909772.json"
+    },
+    {
+      "id": "8f17bdca78cdac9610f3730066617a555cb023fbafe91afe55ee904eb70bba57",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8f17bdca78cdac9610f3730066617a555cb023fbafe91afe55ee904eb70bba57.json"
+    },
+    {
+      "id": "701854a7b06dcd71ec8e165191ae0e8ff3470207d6f6c04c5fa26c7c5ee4ee78",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/701854a7b06dcd71ec8e165191ae0e8ff3470207d6f6c04c5fa26c7c5ee4ee78.json"
+    },
+    {
+      "id": "0657593d59ad1abbe11565a24749e0b62cba70fcecd86b56cab430c968d8192d",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0657593d59ad1abbe11565a24749e0b62cba70fcecd86b56cab430c968d8192d.json"
+    },
+    {
+      "id": "44d31b5b898ce19c04174ecec02c15e1971253e4b18ad385a5e3f9da8e86cd4c",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/44d31b5b898ce19c04174ecec02c15e1971253e4b18ad385a5e3f9da8e86cd4c.json"
+    },
+    {
+      "id": "be9a4f4e50d0401287af59d88d26aec3332a1635559452bdff5a9483ad3a2e93",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/be9a4f4e50d0401287af59d88d26aec3332a1635559452bdff5a9483ad3a2e93.json"
+    },
+    {
+      "id": "6c2eca710bb9d388be33c5e7551f4f6dad0ad993b10d2b218e0c18d7ff49b69f",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P1/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6c2eca710bb9d388be33c5e7551f4f6dad0ad993b10d2b218e0c18d7ff49b69f.json"
+    },
+    {
+      "id": "48526ce28d203e2c9153dadc822fa44d1325a428e92ac8803d2a983a5e30223f",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/48526ce28d203e2c9153dadc822fa44d1325a428e92ac8803d2a983a5e30223f.json"
+    },
+    {
+      "id": "1ba75d5f184ed3f00cceb6c9d89a505edc7f3fa579019bc7eff9456b0e13cc00",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1ba75d5f184ed3f00cceb6c9d89a505edc7f3fa579019bc7eff9456b0e13cc00.json"
+    },
+    {
+      "id": "2b7b701e9738acef02d17f23efa7d6b9cfaa0c011e15e1b7a417a0560791b5c9",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2b7b701e9738acef02d17f23efa7d6b9cfaa0c011e15e1b7a417a0560791b5c9.json"
+    },
+    {
+      "id": "cd04a15a2d51ecd20d303f95d7d9a19fb4cff9b5fbfc058080379311945002b2",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/cd04a15a2d51ecd20d303f95d7d9a19fb4cff9b5fbfc058080379311945002b2.json"
+    },
+    {
+      "id": "a315e8a1d531b6fc7c7c0757a24805602619a0a45a02db1aef35f5264b4c34f4",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a315e8a1d531b6fc7c7c0757a24805602619a0a45a02db1aef35f5264b4c34f4.json"
+    },
+    {
+      "id": "a1134ec2cc72a269409af0d3166f98ed9e79be154ad09d555d9a4049db2fdd10",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a1134ec2cc72a269409af0d3166f98ed9e79be154ad09d555d9a4049db2fdd10.json"
+    },
+    {
+      "id": "1bb48df69985103de2092b50549c17de972065eb89df5b5b0cfcbb110922db20",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1bb48df69985103de2092b50549c17de972065eb89df5b5b0cfcbb110922db20.json"
+    },
+    {
+      "id": "9d8617fc6c446c5b5a55c3ab0e4dc6fc2cc4db08ef808436326f86e4abb1ac5e",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9d8617fc6c446c5b5a55c3ab0e4dc6fc2cc4db08ef808436326f86e4abb1ac5e.json"
+    },
+    {
+      "id": "84aae8e43e1161027a6f0cf5c1d888ca9a0bebe8523efe11373f9e5a815c4473",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/84aae8e43e1161027a6f0cf5c1d888ca9a0bebe8523efe11373f9e5a815c4473.json"
+    },
+    {
+      "id": "d29fcba1748f0767f0f9295b9b87f41590794cde07f3e72268821b0402f32a5d",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d29fcba1748f0767f0f9295b9b87f41590794cde07f3e72268821b0402f32a5d.json"
+    },
+    {
+      "id": "4d6ab25fa9d2ca28ca4785e6619370373fcb18dd15e6e42ccb529edc4f6beb7d",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/4d6ab25fa9d2ca28ca4785e6619370373fcb18dd15e6e42ccb529edc4f6beb7d.json"
+    },
+    {
+      "id": "284e34bf5b3ccd616f47830854c5d227b4156d6bb094f4ac097617ae081bc2f6",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/284e34bf5b3ccd616f47830854c5d227b4156d6bb094f4ac097617ae081bc2f6.json"
+    },
+    {
+      "id": "fd3abf505b033f8b86fe79514903c2a5bef5dfedf95b152c43425fdf9e6dd4e1",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/fd3abf505b033f8b86fe79514903c2a5bef5dfedf95b152c43425fdf9e6dd4e1.json"
+    },
+    {
+      "id": "4e48fc802731626a7e7bda4901557da5aca6cee67b43bf17db456e347c919fda",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/4e48fc802731626a7e7bda4901557da5aca6cee67b43bf17db456e347c919fda.json"
+    },
+    {
+      "id": "df85564c79f41d01ae62ca843f0114a6f8a29c6a179b4689993b922ce404e1e0",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/df85564c79f41d01ae62ca843f0114a6f8a29c6a179b4689993b922ce404e1e0.json"
+    },
+    {
+      "id": "b7799189118ae09c7b9ac23d43e9b5b6c033e97f89a5e9316c93aa2763d6a2d3",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b7799189118ae09c7b9ac23d43e9b5b6c033e97f89a5e9316c93aa2763d6a2d3.json"
+    },
+    {
+      "id": "eadd99e24cc7597564382ef9a28b3f2e6db4f9d360f40c5a96712dbf7ea02616",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/eadd99e24cc7597564382ef9a28b3f2e6db4f9d360f40c5a96712dbf7ea02616.json"
+    },
+    {
+      "id": "7677fc7976bc4c82cf1b8743d9d46e989c9800bb91de3430d62ab83936014a4c",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7677fc7976bc4c82cf1b8743d9d46e989c9800bb91de3430d62ab83936014a4c.json"
+    },
+    {
+      "id": "ae49bfe2c9bea900be7179312a81aa3616443a407665111d9ba99a98a4517e3a",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ae49bfe2c9bea900be7179312a81aa3616443a407665111d9ba99a98a4517e3a.json"
+    },
+    {
+      "id": "264205f52e18d0e637af072298be3c0eafc7d7242db8070ec9599a29121ba60b",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/264205f52e18d0e637af072298be3c0eafc7d7242db8070ec9599a29121ba60b.json"
+    },
+    {
+      "id": "2aa04fe8a0e001f44c75d69c9d38b76735a28f9feceabc75e3606ef57ea4d6ae",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2aa04fe8a0e001f44c75d69c9d38b76735a28f9feceabc75e3606ef57ea4d6ae.json"
+    },
+    {
+      "id": "61ef174b2286da6fa6ecc210740a35892b5590d4ea6eaae55a37f5bbe94a3966",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/61ef174b2286da6fa6ecc210740a35892b5590d4ea6eaae55a37f5bbe94a3966.json"
+    },
+    {
+      "id": "5c1dd5c7b7accc4aa3d2c6dd270a7bd5eae5dfd154a32640d37390ba9bbc721a",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5c1dd5c7b7accc4aa3d2c6dd270a7bd5eae5dfd154a32640d37390ba9bbc721a.json"
+    },
+    {
+      "id": "ba1cd588717df27e2199be096c32a400fec9ef4e9696ae0db4c7d7bc8615ca02",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ba1cd588717df27e2199be096c32a400fec9ef4e9696ae0db4c7d7bc8615ca02.json"
+    },
+    {
+      "id": "7ea2b33e034a73489e8e06e493c65eebe3349f32e530b6f58bcfcf7cf9fc5123",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7ea2b33e034a73489e8e06e493c65eebe3349f32e530b6f58bcfcf7cf9fc5123.json"
+    },
+    {
+      "id": "97fde4010c1f02a4f08ed2e8c94c1bd8dde9dee8b4b42d153783f9904b982b35",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/97fde4010c1f02a4f08ed2e8c94c1bd8dde9dee8b4b42d153783f9904b982b35.json"
+    },
+    {
+      "id": "62b89f18b7b7dbe77281230d53d6c583a18b39c2e6a9413d9b9f6ad5162cb204",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/62b89f18b7b7dbe77281230d53d6c583a18b39c2e6a9413d9b9f6ad5162cb204.json"
+    },
+    {
+      "id": "33abfe086ab41ae4659a830bb7f50a01204c142790421790e034f4cc762ac405",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/33abfe086ab41ae4659a830bb7f50a01204c142790421790e034f4cc762ac405.json"
+    },
+    {
+      "id": "b560189933b5d880e62ea6cff72ab3d778ff7f3ddd91ff9f86dfd407c927b46b",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b560189933b5d880e62ea6cff72ab3d778ff7f3ddd91ff9f86dfd407c927b46b.json"
+    },
+    {
+      "id": "fb7661f7d357b6e965cf28fd8ec7b977cba4cad96f388413f6e48eec9ddb3968",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fb7661f7d357b6e965cf28fd8ec7b977cba4cad96f388413f6e48eec9ddb3968.json"
+    },
+    {
+      "id": "ec8f4afcdc34cd4b6b1b6311a5196496f52baab0bb2d14828111acbbe48f2441",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ec8f4afcdc34cd4b6b1b6311a5196496f52baab0bb2d14828111acbbe48f2441.json"
+    },
+    {
+      "id": "70c12601e9ae545f1306766f3f3c0cfabf10a86a13da93000873f389ee70ae47",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/70c12601e9ae545f1306766f3f3c0cfabf10a86a13da93000873f389ee70ae47.json"
+    },
+    {
+      "id": "432a7e83a211d898a9139bec39efbecb00a095f760f4cf04a89d1c6cb7a55add",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/432a7e83a211d898a9139bec39efbecb00a095f760f4cf04a89d1c6cb7a55add.json"
+    },
+    {
+      "id": "1c472faedf573dfb4446ae6edd563174e5bbc997d256d907725764f08d0fe429",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1c472faedf573dfb4446ae6edd563174e5bbc997d256d907725764f08d0fe429.json"
+    },
+    {
+      "id": "fb71ab1b9780b3ca2a711b586ed5929489e226146c20d13525249fe5196e8139",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/fb71ab1b9780b3ca2a711b586ed5929489e226146c20d13525249fe5196e8139.json"
+    },
+    {
+      "id": "46e4adc002698e69bb352b0d9c24cd35901d4296991a0de96794f0651352c82c",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/46e4adc002698e69bb352b0d9c24cd35901d4296991a0de96794f0651352c82c.json"
+    },
+    {
+      "id": "c8ec6df0933afb184a162db851bf8afeec10518bc9ba1b3590f6b0932237d09d",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c8ec6df0933afb184a162db851bf8afeec10518bc9ba1b3590f6b0932237d09d.json"
+    },
+    {
+      "id": "f9cd8e3598309e1cbfa5e3917d71f4291672d10cef549524b61dd3e6e3c5d356",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f9cd8e3598309e1cbfa5e3917d71f4291672d10cef549524b61dd3e6e3c5d356.json"
+    },
+    {
+      "id": "a2c0196edd68fe116a08831a7307033f58399805f4559f840c77645df1e27dee",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a2c0196edd68fe116a08831a7307033f58399805f4559f840c77645df1e27dee.json"
+    },
+    {
+      "id": "bacbbd475253a593a62b7786398a7eaf4033c75b788a952949572d95e089d969",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/bacbbd475253a593a62b7786398a7eaf4033c75b788a952949572d95e089d969.json"
+    },
+    {
+      "id": "bf736c43d4e1b0e61c3ec9b09f630e5a71d309b7d1dc9f6250c6d26f7a1d6fc7",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/bf736c43d4e1b0e61c3ec9b09f630e5a71d309b7d1dc9f6250c6d26f7a1d6fc7.json"
+    },
+    {
+      "id": "1bbf3502169e52361c2c5316bd4bc06be4d162da264a0e05a2b1bfb438a6ec5b",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P2/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1bbf3502169e52361c2c5316bd4bc06be4d162da264a0e05a2b1bfb438a6ec5b.json"
+    },
+    {
+      "id": "e742bfd0ff7e51291468928e712cf509364041b3a63fcb7e596d2b6e4d2b684c",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e742bfd0ff7e51291468928e712cf509364041b3a63fcb7e596d2b6e4d2b684c.json"
+    },
+    {
+      "id": "55700e3e2482e9aa8d52ddcd3637fd43729646da76ca6dade14e0e83fbfcd69f",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/55700e3e2482e9aa8d52ddcd3637fd43729646da76ca6dade14e0e83fbfcd69f.json"
+    },
+    {
+      "id": "6a9d4f91d6086be4fd367814af5aa13150ee335394ca6a2345b5b8a77bd5371a",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6a9d4f91d6086be4fd367814af5aa13150ee335394ca6a2345b5b8a77bd5371a.json"
+    },
+    {
+      "id": "cfa07e7116baf7b9854f6b1f5828c05e16347681fac9a07511f4a58bf0d9569a",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/cfa07e7116baf7b9854f6b1f5828c05e16347681fac9a07511f4a58bf0d9569a.json"
+    },
+    {
+      "id": "8d97bbb793c1c9f625a59387996cd8c10ea75ab95c112baa5c07a0a5407e27f8",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8d97bbb793c1c9f625a59387996cd8c10ea75ab95c112baa5c07a0a5407e27f8.json"
+    },
+    {
+      "id": "baec190c1567de0407847bdc43c270449801680a8e4782a07e8ecd77874eae63",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/baec190c1567de0407847bdc43c270449801680a8e4782a07e8ecd77874eae63.json"
+    },
+    {
+      "id": "8a07ed93d78396939f212715a05311326f7e50620a1c73c74b101954f4beb21f",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8a07ed93d78396939f212715a05311326f7e50620a1c73c74b101954f4beb21f.json"
+    },
+    {
+      "id": "1ea035b79374d87c02ac8ad9267cfb97289421b797d74205f542c1807d98327e",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1ea035b79374d87c02ac8ad9267cfb97289421b797d74205f542c1807d98327e.json"
+    },
+    {
+      "id": "6cfa2c9b768eabf4c494a983824f2a3baf3875a74e98a47d0c13fd05338c1728",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6cfa2c9b768eabf4c494a983824f2a3baf3875a74e98a47d0c13fd05338c1728.json"
+    },
+    {
+      "id": "d710cd179c9d8aff5836ce947edf2ac63412636cfc24c324dd0646dd4e4bc914",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d710cd179c9d8aff5836ce947edf2ac63412636cfc24c324dd0646dd4e4bc914.json"
+    },
+    {
+      "id": "a98cff89a030a77f48f2d24081c1475e2aa8777eb8b48caa6382282e5603dcd4",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a98cff89a030a77f48f2d24081c1475e2aa8777eb8b48caa6382282e5603dcd4.json"
+    },
+    {
+      "id": "43d0dba0271c3139cbf6ef25ec89d9f86a93f57a225b75a45c73e0c305933d1b",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/43d0dba0271c3139cbf6ef25ec89d9f86a93f57a225b75a45c73e0c305933d1b.json"
+    },
+    {
+      "id": "47bb77db99f23b9ff2e5c4876a8bd3eace7304fabe7dc6ce4c76f7028c144735",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/47bb77db99f23b9ff2e5c4876a8bd3eace7304fabe7dc6ce4c76f7028c144735.json"
+    },
+    {
+      "id": "e53b801bd76b724e1e8c6e74d919ce2d65e886206b241728c65dd1738e7f1e6b",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e53b801bd76b724e1e8c6e74d919ce2d65e886206b241728c65dd1738e7f1e6b.json"
+    },
+    {
+      "id": "f758d84a0bad61934fec41d477799ebdcc4485d8e63e13e4b38d1a0720290618",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f758d84a0bad61934fec41d477799ebdcc4485d8e63e13e4b38d1a0720290618.json"
+    },
+    {
+      "id": "c7e893d2e78b4b1763d20887e705d25d2655df1c831252ce639fa71024c0f25d",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c7e893d2e78b4b1763d20887e705d25d2655df1c831252ce639fa71024c0f25d.json"
+    },
+    {
+      "id": "9b79ece5da538c180641b98c283c9ac1cf41c2caa1876a00e026de5ad15099be",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9b79ece5da538c180641b98c283c9ac1cf41c2caa1876a00e026de5ad15099be.json"
+    },
+    {
+      "id": "9be7e2d376a8b51f0d252a87940c55b6c6ed2b2ed73ced9435e746b823394744",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9be7e2d376a8b51f0d252a87940c55b6c6ed2b2ed73ced9435e746b823394744.json"
+    },
+    {
+      "id": "5d7a57a3c58fd5f4bd6426d7d85d4faf453671f3ff52336a23c927cd172c126b",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5d7a57a3c58fd5f4bd6426d7d85d4faf453671f3ff52336a23c927cd172c126b.json"
+    },
+    {
+      "id": "95e3348f7e3b9b205f965d7783ae160a971c476fbe95ed929bfc485e31eb2d1c",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/95e3348f7e3b9b205f965d7783ae160a971c476fbe95ed929bfc485e31eb2d1c.json"
+    },
+    {
+      "id": "132ab2a10f59ab4b0d87a7a9c2e78943f3512dfc5bb3af061d8b52ea241be4e5",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/132ab2a10f59ab4b0d87a7a9c2e78943f3512dfc5bb3af061d8b52ea241be4e5.json"
+    },
+    {
+      "id": "04f62d40402290ba7c0a8c8b4e584239e1e7ab257b83c17d2e04a02711d01d66",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/04f62d40402290ba7c0a8c8b4e584239e1e7ab257b83c17d2e04a02711d01d66.json"
+    },
+    {
+      "id": "3c44e05341dce4061f00c21264c0fe36b11d0839c6f5f2887063925face5f61b",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3c44e05341dce4061f00c21264c0fe36b11d0839c6f5f2887063925face5f61b.json"
+    },
+    {
+      "id": "a9912b4c2f8c03c9af3dd5a503c98a71c154c766f097ee790ab4c770a8218815",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a9912b4c2f8c03c9af3dd5a503c98a71c154c766f097ee790ab4c770a8218815.json"
+    },
+    {
+      "id": "8530d2005366fce6edb10a7e4de2da0aeba23991b8ddf1796b700305d8c3bb6f",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8530d2005366fce6edb10a7e4de2da0aeba23991b8ddf1796b700305d8c3bb6f.json"
+    },
+    {
+      "id": "ade414c102126b435a83c40e14037410c4e30cac41439a1ad05cf123c6727fb8",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ade414c102126b435a83c40e14037410c4e30cac41439a1ad05cf123c6727fb8.json"
+    },
+    {
+      "id": "82adf4678e6531bc5a18d3e826fa6c64daedaeb69b862531bb5dde6bf7a59092",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/82adf4678e6531bc5a18d3e826fa6c64daedaeb69b862531bb5dde6bf7a59092.json"
+    },
+    {
+      "id": "8ad1e0a2bd784957b095310fdcf606dc8e41848f170e31921db5df3576e54769",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8ad1e0a2bd784957b095310fdcf606dc8e41848f170e31921db5df3576e54769.json"
+    },
+    {
+      "id": "871f38d9b9b761097162036dbab04b03347b9c3cce9e8c4633ffedf69b4cabb3",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/871f38d9b9b761097162036dbab04b03347b9c3cce9e8c4633ffedf69b4cabb3.json"
+    },
+    {
+      "id": "7ef300d011e9fb0ad47ff743829c83ea2b836fe5fda9571fba7db94c2217e761",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7ef300d011e9fb0ad47ff743829c83ea2b836fe5fda9571fba7db94c2217e761.json"
+    },
+    {
+      "id": "2895a78126600db4491c4f93d93b812e3e6522da2cf5b3ce9ee7034d1809e703",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2895a78126600db4491c4f93d93b812e3e6522da2cf5b3ce9ee7034d1809e703.json"
+    },
+    {
+      "id": "b60902ae31e5d34b6a1c908f8b86ed826f9aadc8506ae57716820f63f5e21f27",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b60902ae31e5d34b6a1c908f8b86ed826f9aadc8506ae57716820f63f5e21f27.json"
+    },
+    {
+      "id": "c3b770430571392f2eefcae0acf5b2ba699f133746d57ce31c95bc3ab430dcd8",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c3b770430571392f2eefcae0acf5b2ba699f133746d57ce31c95bc3ab430dcd8.json"
+    },
+    {
+      "id": "9a241e8992045296dc0def7958de106e3da3188cfb753bf4beb15dbbedc6146c",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9a241e8992045296dc0def7958de106e3da3188cfb753bf4beb15dbbedc6146c.json"
+    },
+    {
+      "id": "e25730c1420b17a7f984de95b2bb0b6558d44389629c386e6799bd7008939961",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e25730c1420b17a7f984de95b2bb0b6558d44389629c386e6799bd7008939961.json"
+    },
+    {
+      "id": "8fe6ef9d8890e7bde0a93c00ee6d905d226cb3e6c00a4eb15e081dcf2de807cb",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8fe6ef9d8890e7bde0a93c00ee6d905d226cb3e6c00a4eb15e081dcf2de807cb.json"
+    },
+    {
+      "id": "194734a7df6a93ff35596fc83d7a1f693932d00cec2be099c136002c6cb864b1",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/194734a7df6a93ff35596fc83d7a1f693932d00cec2be099c136002c6cb864b1.json"
+    },
+    {
+      "id": "25ffa7308810ea61d0a0ad475573e906b1ba32a3b451df13ff891bdccca5fb37",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/25ffa7308810ea61d0a0ad475573e906b1ba32a3b451df13ff891bdccca5fb37.json"
+    },
+    {
+      "id": "6211fa7895ffa7be8fb846a8cb0a7c58c495f75913e06738279a54050e394b69",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6211fa7895ffa7be8fb846a8cb0a7c58c495f75913e06738279a54050e394b69.json"
+    },
+    {
+      "id": "a5cda28688e1bb7318da864adbc1ba62595d935eadc99b57898ef1bdc2d3c2e3",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a5cda28688e1bb7318da864adbc1ba62595d935eadc99b57898ef1bdc2d3c2e3.json"
+    },
+    {
+      "id": "68b04ae2b6493c6738036975ae45562877799ffca879f63254dee0a1673f92ee",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/68b04ae2b6493c6738036975ae45562877799ffca879f63254dee0a1673f92ee.json"
+    },
+    {
+      "id": "64c82153c0c41317a798ec497cf898fc3c84096e4d06e4fbb836f4f366c01e5b",
+      "name": "CoupledReactionDiffusion/GenericGradientAssembly/H1/P3/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/64c82153c0c41317a798ec497cf898fc3c84096e4d06e4fbb836f4f366c01e5b.json"
+    }
+  ]
+}

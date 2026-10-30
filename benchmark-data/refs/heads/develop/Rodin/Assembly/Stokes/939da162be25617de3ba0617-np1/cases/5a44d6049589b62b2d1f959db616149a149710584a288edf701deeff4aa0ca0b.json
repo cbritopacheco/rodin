@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "component": "Rodin/Assembly/Stokes",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Stokes/Assembly/H1/P4P3/Real/Quadrilateral/5/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "Stokes/Assembly/H1/P4P3/Real/Quadrilateral/5/real_time",
+          "value": 3906313.750000647,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            3906313.750000647
+          ],
+          "records": [
+            {
+              "name": "Stokes/Assembly/H1/P4P3/Real/Quadrilateral/5/real_time",
+              "family_index": 0,
+              "per_family_instance_index": 0,
+              "run_name": "Stokes/Assembly/H1/P4P3/Real/Quadrilateral/5/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 76,
+              "real_time": 3906313.750000647,
+              "cpu_time": 3906205.657894735,
+              "time_unit": "ns",
+              "cells": 16.0,
+              "dimension": 2.0,
+              "explicit_unit_viscosity": 0.0,
+              "mean_dofs": 1.0,
+              "nnz": 31986.0,
+              "pressure_degree": 3.0,
+              "pressure_dofs": 169.0,
+              "quadrature_order": 16.0,
+              "quadrature_points_per_cell": 81.0,
+              "relative_missing_pressure_load_residual": 0.9999999999999439,
+              "relative_missing_pressure_residual": 0.005659163162170202,
+              "relative_patch_residual": 1.6201439226284128e-15,
+              "relative_pressure_control_error": 1.6315453126665925e-15,
+              "rows": 748.0,
+              "velocity_degree": 4.0,
+              "velocity_dofs": 578.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T14:59:26+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinStokesAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3249,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.02148,
+              0.301758,
+              0.105469
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "Public mixed Stokes assembly, constraints and completion"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

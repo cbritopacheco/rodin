@@ -1,0 +1,768 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinAssemblyBenchmarks",
+      "RodinConstrainedAssemblyBenchmarks",
+      "RodinConvectionAssemblyBenchmarks",
+      "RodinCoupledReactionDiffusionAssemblyBenchmarks",
+      "RodinHelmholtzAssemblyBenchmarks",
+      "RodinMassAssemblyBenchmarks",
+      "RodinMassOperandOrderAssemblyBenchmarks",
+      "RodinMatrixMassAssemblyBenchmarks",
+      "RodinNonlinearPoissonAssemblyBenchmarks",
+      "RodinPhysicsAssemblyBenchmarks",
+      "RodinPhysicsStageBenchmarks",
+      "RodinSpatialMatrixBenchmarks",
+      "RodinStokesAssemblyBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "2ecf29f83099a928895d93238302f3c4a62665dd682cca62601d274a89c1a7a2",
+      "name": "SpatialAssembly/P1/Bind/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/2ecf29f83099a928895d93238302f3c4a62665dd682cca62601d274a89c1a7a2.json"
+    },
+    {
+      "id": "1daf0284d9adc096f6960952b4bedf7ad4aebd3632c5658750bdb30b36064cd9",
+      "name": "SpatialAssembly/P1/Bind/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/1daf0284d9adc096f6960952b4bedf7ad4aebd3632c5658750bdb30b36064cd9.json"
+    },
+    {
+      "id": "01b99a0563742cc8c7dd1eced5152b096b1dc797abe77947ce5a5fa9b4d8d88c",
+      "name": "SpatialAssembly/P1/Bind/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/01b99a0563742cc8c7dd1eced5152b096b1dc797abe77947ce5a5fa9b4d8d88c.json"
+    },
+    {
+      "id": "d554d217df5fc6e28dc2327b53cfdf429973538afce0515ac71a5b5876694cb6",
+      "name": "SpatialAssembly/P1/Bind/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/d554d217df5fc6e28dc2327b53cfdf429973538afce0515ac71a5b5876694cb6.json"
+    },
+    {
+      "id": "ef272a3b73d398cdaf909a563f1242b7c3c0ce886257d25db7d2612385d9d015",
+      "name": "SpatialAssembly/P1/Bind/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/ef272a3b73d398cdaf909a563f1242b7c3c0ce886257d25db7d2612385d9d015.json"
+    },
+    {
+      "id": "cc1ca635eb6f7c4bc0e05253b34c404111aac4f04d49fd02a559f69256c23986",
+      "name": "SpatialAssembly/P1/Bind/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/cc1ca635eb6f7c4bc0e05253b34c404111aac4f04d49fd02a559f69256c23986.json"
+    },
+    {
+      "id": "2ba45c7279d53ed4d63f436135d37e74c4d134811139658fcd422835c68aefdd",
+      "name": "SpatialAssembly/P1/Bind/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/2ba45c7279d53ed4d63f436135d37e74c4d134811139658fcd422835c68aefdd.json"
+    },
+    {
+      "id": "bad9b872ce50d28ca44e606673cbad975bf35a3d8871f2b6135cfb1a9dfc7c5b",
+      "name": "SpatialAssembly/P1/Bind/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/bad9b872ce50d28ca44e606673cbad975bf35a3d8871f2b6135cfb1a9dfc7c5b.json"
+    },
+    {
+      "id": "3c7e2c4f2cc4d8d1db3170291d61647d9ac06b2a2845f3a088cb1da1a29e6b0e",
+      "name": "SpatialAssembly/P1/Full/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/3c7e2c4f2cc4d8d1db3170291d61647d9ac06b2a2845f3a088cb1da1a29e6b0e.json"
+    },
+    {
+      "id": "24eca2171ddb04a807fcfa02b69dd033d21d4fe811b2e93b91373068ac56ef3c",
+      "name": "SpatialAssembly/P1/Full/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/24eca2171ddb04a807fcfa02b69dd033d21d4fe811b2e93b91373068ac56ef3c.json"
+    },
+    {
+      "id": "212c563578a9691ab323d091be0fc766dc9397dc9f44e902fdfc6549d2d53e7b",
+      "name": "SpatialAssembly/P1/Full/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/212c563578a9691ab323d091be0fc766dc9397dc9f44e902fdfc6549d2d53e7b.json"
+    },
+    {
+      "id": "752be1a67b543e565b0e1e2c6ccbca6355384cd9d601e97e4f0d8a21c466e8e4",
+      "name": "SpatialAssembly/P1/Full/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/752be1a67b543e565b0e1e2c6ccbca6355384cd9d601e97e4f0d8a21c466e8e4.json"
+    },
+    {
+      "id": "b4c744899322871126c3fdb9554e859a2e4506ccff7013c66a787f4c8efc35fb",
+      "name": "SpatialAssembly/P1/Full/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/b4c744899322871126c3fdb9554e859a2e4506ccff7013c66a787f4c8efc35fb.json"
+    },
+    {
+      "id": "ac0b4f382c43bec4e13804cad990cec24b36f1d8be4902a43226223fe95d4b8d",
+      "name": "SpatialAssembly/P1/Full/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/ac0b4f382c43bec4e13804cad990cec24b36f1d8be4902a43226223fe95d4b8d.json"
+    },
+    {
+      "id": "07d1ddfa2c89d490041408afe0db17809cbc221eb9f192f836d9318c7a31307b",
+      "name": "SpatialAssembly/P1/Full/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/07d1ddfa2c89d490041408afe0db17809cbc221eb9f192f836d9318c7a31307b.json"
+    },
+    {
+      "id": "57c466aad8ea163bb89776d1daa92a47d1b70752e65f3565c5debc20c2e1e745",
+      "name": "SpatialAssembly/P1/Full/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/57c466aad8ea163bb89776d1daa92a47d1b70752e65f3565c5debc20c2e1e745.json"
+    },
+    {
+      "id": "e32f5fe736762007c94f10e5c888975bb21074b44c566338148244f771ac931e",
+      "name": "SpatialAssembly/P1/Scan/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/e32f5fe736762007c94f10e5c888975bb21074b44c566338148244f771ac931e.json"
+    },
+    {
+      "id": "be4a855c9b8457923d87512408109a644f862a8f66c18cd1b887c6414ed37142",
+      "name": "SpatialAssembly/P1/Scan/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/be4a855c9b8457923d87512408109a644f862a8f66c18cd1b887c6414ed37142.json"
+    },
+    {
+      "id": "72d42fa2acafa6fd001cb86ca1a852ff63c689634eddebd6ee6db7737482cbb5",
+      "name": "SpatialAssembly/P1/Scan/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/72d42fa2acafa6fd001cb86ca1a852ff63c689634eddebd6ee6db7737482cbb5.json"
+    },
+    {
+      "id": "f3d1772f1993a50661a199858630ce72ad98f8a6f81fb0160c3f9b0165e62363",
+      "name": "SpatialAssembly/P1/Scan/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/f3d1772f1993a50661a199858630ce72ad98f8a6f81fb0160c3f9b0165e62363.json"
+    },
+    {
+      "id": "288c448b00f04daa14d65433832c018bc0bbae54fee011f39f93e121a7c8ba59",
+      "name": "SpatialAssembly/P1/Scan/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/288c448b00f04daa14d65433832c018bc0bbae54fee011f39f93e121a7c8ba59.json"
+    },
+    {
+      "id": "98b01f1b22dca07f89dab1703069e851b9494490f36755a0f84f83477ba44bff",
+      "name": "SpatialAssembly/P1/Scan/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/98b01f1b22dca07f89dab1703069e851b9494490f36755a0f84f83477ba44bff.json"
+    },
+    {
+      "id": "2bef3de9d7ad743c90f36994b6c6cb81635a593b614514e1ecab3a3dc1e1ce5f",
+      "name": "SpatialAssembly/P1/Scan/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/2bef3de9d7ad743c90f36994b6c6cb81635a593b614514e1ecab3a3dc1e1ce5f.json"
+    },
+    {
+      "id": "37a286dcb5162d9bc316d6eb65bb8f4fea0e72b7eafa03d842498cf47935c583",
+      "name": "SpatialAssembly/P1/Scan/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/37a286dcb5162d9bc316d6eb65bb8f4fea0e72b7eafa03d842498cf47935c583.json"
+    },
+    {
+      "id": "f15aa3c31d613003bf3c012d3888b414febc5aca268de94e2a21233f9889e068",
+      "name": "SpatialAssembly/P1/Sparse/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/f15aa3c31d613003bf3c012d3888b414febc5aca268de94e2a21233f9889e068.json"
+    },
+    {
+      "id": "55c53cd028867fdc043f3a1697d82a08c1a433031f6a335babdc99eced9c5fc2",
+      "name": "SpatialAssembly/P1/Sparse/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/55c53cd028867fdc043f3a1697d82a08c1a433031f6a335babdc99eced9c5fc2.json"
+    },
+    {
+      "id": "fa0f0002b08b2cb37d09421e0a6fe870b1f8e3cee503148b0655b412d4e2a17e",
+      "name": "SpatialAssembly/P1/Sparse/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/fa0f0002b08b2cb37d09421e0a6fe870b1f8e3cee503148b0655b412d4e2a17e.json"
+    },
+    {
+      "id": "65fd8a880b9533d871bf37e3c2c9b5f53b81c3afb279554a873152deee2b77d5",
+      "name": "SpatialAssembly/P1/Sparse/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/65fd8a880b9533d871bf37e3c2c9b5f53b81c3afb279554a873152deee2b77d5.json"
+    },
+    {
+      "id": "7f8fcebd42e382702648e83a92d1a21e6e74c9dae1b2ccab6837c10a6602eef1",
+      "name": "SpatialAssembly/P1/Sparse/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/7f8fcebd42e382702648e83a92d1a21e6e74c9dae1b2ccab6837c10a6602eef1.json"
+    },
+    {
+      "id": "f853dae8063c8d8984c8c69c04a00e44f9ea8f1b7f74f3508549c8a9807be7b3",
+      "name": "SpatialAssembly/P1/Sparse/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/f853dae8063c8d8984c8c69c04a00e44f9ea8f1b7f74f3508549c8a9807be7b3.json"
+    },
+    {
+      "id": "8170becbd0f73cbf01ba84d71119f667ecc6c371999b3ca8a971259780c3dca0",
+      "name": "SpatialAssembly/P1/Sparse/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/8170becbd0f73cbf01ba84d71119f667ecc6c371999b3ca8a971259780c3dca0.json"
+    },
+    {
+      "id": "11846ebab8cfab024dbb654dfd6a2ce9afa3e2a82c2f01397b99ab817d67d280",
+      "name": "SpatialAssembly/P1/Sparse/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/11846ebab8cfab024dbb654dfd6a2ce9afa3e2a82c2f01397b99ab817d67d280.json"
+    },
+    {
+      "id": "1469052edf31279cb7f9d90f43467aa142a125c3a64822455aa78fbd7d2ae4c3",
+      "name": "SpatialAssembly/P1/Triplets/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/1469052edf31279cb7f9d90f43467aa142a125c3a64822455aa78fbd7d2ae4c3.json"
+    },
+    {
+      "id": "81ec62598da31e7470b57c0b4e6e35c0f050a6f0bf154e4ac097deacb8c17e5c",
+      "name": "SpatialAssembly/P1/Triplets/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/81ec62598da31e7470b57c0b4e6e35c0f050a6f0bf154e4ac097deacb8c17e5c.json"
+    },
+    {
+      "id": "827f80d906ef3bd6732a25c7c25c477f3abe65027c25904c367df15cd7b9d87c",
+      "name": "SpatialAssembly/P1/Triplets/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/827f80d906ef3bd6732a25c7c25c477f3abe65027c25904c367df15cd7b9d87c.json"
+    },
+    {
+      "id": "3f9ea0ca8451ff89fb4126af31334df96e31a628468853a733882b4993868e68",
+      "name": "SpatialAssembly/P1/Triplets/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/3f9ea0ca8451ff89fb4126af31334df96e31a628468853a733882b4993868e68.json"
+    },
+    {
+      "id": "7f01c8a88f06785781dc7fdbf394d0c89f1ae165a3f1137ccfb98504ce4c6a89",
+      "name": "SpatialAssembly/P1/Triplets/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/7f01c8a88f06785781dc7fdbf394d0c89f1ae165a3f1137ccfb98504ce4c6a89.json"
+    },
+    {
+      "id": "4f561b1fa08292c0ee780914fcc44f0546960f7fd24e8ff4db3a319df5a770f0",
+      "name": "SpatialAssembly/P1/Triplets/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/4f561b1fa08292c0ee780914fcc44f0546960f7fd24e8ff4db3a319df5a770f0.json"
+    },
+    {
+      "id": "e9522ce2314f67d3bf63fdc14b6e380d1fccbc8ae0aad9afde2389d05683b2db",
+      "name": "SpatialAssembly/P1/Triplets/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/e9522ce2314f67d3bf63fdc14b6e380d1fccbc8ae0aad9afde2389d05683b2db.json"
+    },
+    {
+      "id": "554811141abc9d3895b0a018ab5c946d287157d4e7e78b09a304c9cdfad19bb3",
+      "name": "SpatialAssembly/P1/Triplets/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/554811141abc9d3895b0a018ab5c946d287157d4e7e78b09a304c9cdfad19bb3.json"
+    },
+    {
+      "id": "1fbcdcd11e3d4725762dd923a0f46380a09fee8cb1006c61913667b4e958af24",
+      "name": "SpatialAssembly/P2/Bind/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/1fbcdcd11e3d4725762dd923a0f46380a09fee8cb1006c61913667b4e958af24.json"
+    },
+    {
+      "id": "bdb07a29a257d828344b62a2711eee2dab44c0d3b568f313d970616978ef2f37",
+      "name": "SpatialAssembly/P2/Bind/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/bdb07a29a257d828344b62a2711eee2dab44c0d3b568f313d970616978ef2f37.json"
+    },
+    {
+      "id": "891a0986c7287b5361a8d6becacd1be2699e7df7945a6fe8cbc76bff317afd23",
+      "name": "SpatialAssembly/P2/Bind/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/891a0986c7287b5361a8d6becacd1be2699e7df7945a6fe8cbc76bff317afd23.json"
+    },
+    {
+      "id": "4a871f90f607ebc369f92916658827cb90c38b0206ede74d38de1497d7c0bc04",
+      "name": "SpatialAssembly/P2/Bind/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/4a871f90f607ebc369f92916658827cb90c38b0206ede74d38de1497d7c0bc04.json"
+    },
+    {
+      "id": "80f02ac22ae5394f4c50497c5e32dc4be5f9d3c1b46514991f88eeecf464093b",
+      "name": "SpatialAssembly/P2/Bind/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/80f02ac22ae5394f4c50497c5e32dc4be5f9d3c1b46514991f88eeecf464093b.json"
+    },
+    {
+      "id": "614b355fb2a1bfde7a699252ed5e409d972cd415d9ddbe415383ad6f32b966b6",
+      "name": "SpatialAssembly/P2/Bind/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/614b355fb2a1bfde7a699252ed5e409d972cd415d9ddbe415383ad6f32b966b6.json"
+    },
+    {
+      "id": "8be5ee465f2f6be73ff64353a4538c537e7e775b476e67d67a65a7e06688eae3",
+      "name": "SpatialAssembly/P2/Bind/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/8be5ee465f2f6be73ff64353a4538c537e7e775b476e67d67a65a7e06688eae3.json"
+    },
+    {
+      "id": "1d7b0a256b3684fc0c8f3c391c532699cdb7d04e387c12697a562b6f7bbefcd1",
+      "name": "SpatialAssembly/P2/Bind/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/1d7b0a256b3684fc0c8f3c391c532699cdb7d04e387c12697a562b6f7bbefcd1.json"
+    },
+    {
+      "id": "af43a2f19af71be5247d6deb8d1c0be13798d29a1fc584fe7104436577958526",
+      "name": "SpatialAssembly/P2/Full/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/af43a2f19af71be5247d6deb8d1c0be13798d29a1fc584fe7104436577958526.json"
+    },
+    {
+      "id": "4010aef02980b6defbeaae1771a6c5291e766ffe2bab7d8e781f084a7b90071b",
+      "name": "SpatialAssembly/P2/Full/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/4010aef02980b6defbeaae1771a6c5291e766ffe2bab7d8e781f084a7b90071b.json"
+    },
+    {
+      "id": "907e6baee981c2cf5af3fefeecca279f089dbf91c6f30a0b2799a4bd9be66738",
+      "name": "SpatialAssembly/P2/Full/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/907e6baee981c2cf5af3fefeecca279f089dbf91c6f30a0b2799a4bd9be66738.json"
+    },
+    {
+      "id": "0df66805daa57b6ab3cefe5d79a2cbefb989289a138ce16bc56bf89239cdb441",
+      "name": "SpatialAssembly/P2/Full/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/0df66805daa57b6ab3cefe5d79a2cbefb989289a138ce16bc56bf89239cdb441.json"
+    },
+    {
+      "id": "cee63957084be793b0df35aa899ced73dbe9455a26fc67d398cbcaaa1cf428b8",
+      "name": "SpatialAssembly/P2/Full/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/cee63957084be793b0df35aa899ced73dbe9455a26fc67d398cbcaaa1cf428b8.json"
+    },
+    {
+      "id": "790f81374ba0b8ad79d6b0e6b21f200acf73a66c40fd2543b216aceb82a76046",
+      "name": "SpatialAssembly/P2/Full/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/790f81374ba0b8ad79d6b0e6b21f200acf73a66c40fd2543b216aceb82a76046.json"
+    },
+    {
+      "id": "0b81144f5474acf5a23d602c439688dd166286220016d883e6f3ee951913ca4e",
+      "name": "SpatialAssembly/P2/Full/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/0b81144f5474acf5a23d602c439688dd166286220016d883e6f3ee951913ca4e.json"
+    },
+    {
+      "id": "a010284e1b7f13983a6a15b588cd91f2d429c0c05d1271b9585f194c6c0b8d5e",
+      "name": "SpatialAssembly/P2/Full/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/a010284e1b7f13983a6a15b588cd91f2d429c0c05d1271b9585f194c6c0b8d5e.json"
+    },
+    {
+      "id": "89be01ee9ac550da6402e1e0deae0ae38e4c772c0e8e22cb155f6ecd4fc63380",
+      "name": "SpatialAssembly/P2/Scan/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/89be01ee9ac550da6402e1e0deae0ae38e4c772c0e8e22cb155f6ecd4fc63380.json"
+    },
+    {
+      "id": "77e923ccfddeb418cbfd3bca7b4deeb3d7a1ac731074f7fd3f3a04bb67e42b29",
+      "name": "SpatialAssembly/P2/Scan/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/77e923ccfddeb418cbfd3bca7b4deeb3d7a1ac731074f7fd3f3a04bb67e42b29.json"
+    },
+    {
+      "id": "6e04177eeb76b9891e6a0fc4be571ccc1ce91ef0d20e544e5d32f502824ca96a",
+      "name": "SpatialAssembly/P2/Scan/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/6e04177eeb76b9891e6a0fc4be571ccc1ce91ef0d20e544e5d32f502824ca96a.json"
+    },
+    {
+      "id": "df26a8ee58bd6abca276c1001a147ffa3b2813332c9c34f398ea8884f193eb2f",
+      "name": "SpatialAssembly/P2/Scan/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/df26a8ee58bd6abca276c1001a147ffa3b2813332c9c34f398ea8884f193eb2f.json"
+    },
+    {
+      "id": "b2f199751359d50cdfa1be923504f6cb6168df890ec58970670ce635eac450d0",
+      "name": "SpatialAssembly/P2/Scan/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/b2f199751359d50cdfa1be923504f6cb6168df890ec58970670ce635eac450d0.json"
+    },
+    {
+      "id": "1ee9ed5f5adb0c0c63b331a732e9a1c30793e047e9ddb62647513ca52dde45f4",
+      "name": "SpatialAssembly/P2/Scan/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/1ee9ed5f5adb0c0c63b331a732e9a1c30793e047e9ddb62647513ca52dde45f4.json"
+    },
+    {
+      "id": "6bf04a452da3d110b808ad038b9c0e835f33dd0e40ce9c81ac75a44137ac7aa0",
+      "name": "SpatialAssembly/P2/Scan/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/6bf04a452da3d110b808ad038b9c0e835f33dd0e40ce9c81ac75a44137ac7aa0.json"
+    },
+    {
+      "id": "55895ca606456b8d3f5e4cfde343fa66056d1ab9ad3600c888410990cd8dc09f",
+      "name": "SpatialAssembly/P2/Scan/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/55895ca606456b8d3f5e4cfde343fa66056d1ab9ad3600c888410990cd8dc09f.json"
+    },
+    {
+      "id": "a3a244abbcb02c79872a1533a3c9912cb4a2479be149b20b22cb3eca9bc1776d",
+      "name": "SpatialAssembly/P2/Sparse/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/a3a244abbcb02c79872a1533a3c9912cb4a2479be149b20b22cb3eca9bc1776d.json"
+    },
+    {
+      "id": "a41b95df80c686609457a58298ae3cfe3c3941bae7d66e6061f5de475926e244",
+      "name": "SpatialAssembly/P2/Sparse/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/a41b95df80c686609457a58298ae3cfe3c3941bae7d66e6061f5de475926e244.json"
+    },
+    {
+      "id": "bff0b7c1d339ecac0aa8480b3a4dd474ce8aefc9089716d38cc0a1ac466c3161",
+      "name": "SpatialAssembly/P2/Sparse/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/bff0b7c1d339ecac0aa8480b3a4dd474ce8aefc9089716d38cc0a1ac466c3161.json"
+    },
+    {
+      "id": "403a5a9188c1e46eca4e8cbb09be271b5935598a777a28a90a8626e1e8bc6471",
+      "name": "SpatialAssembly/P2/Sparse/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/403a5a9188c1e46eca4e8cbb09be271b5935598a777a28a90a8626e1e8bc6471.json"
+    },
+    {
+      "id": "8dba3ef7ff9022fc057674702a645549153f844c9a5e91ba4c7cab8ea63eb344",
+      "name": "SpatialAssembly/P2/Sparse/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/8dba3ef7ff9022fc057674702a645549153f844c9a5e91ba4c7cab8ea63eb344.json"
+    },
+    {
+      "id": "ee4094973f2b73a3b4ef5d70c09e0f96bbc1c63d31590f00a263c290ad81fd9d",
+      "name": "SpatialAssembly/P2/Sparse/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/ee4094973f2b73a3b4ef5d70c09e0f96bbc1c63d31590f00a263c290ad81fd9d.json"
+    },
+    {
+      "id": "809bb1c08802f0c3a8ca773d331dc262c8aebbb95a236fa71766f081727c29e7",
+      "name": "SpatialAssembly/P2/Sparse/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/809bb1c08802f0c3a8ca773d331dc262c8aebbb95a236fa71766f081727c29e7.json"
+    },
+    {
+      "id": "5259e0b61ef17e2b2030d12374ce75a53f973e1d5ebd6eaa1a6b17139cb79a43",
+      "name": "SpatialAssembly/P2/Sparse/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/5259e0b61ef17e2b2030d12374ce75a53f973e1d5ebd6eaa1a6b17139cb79a43.json"
+    },
+    {
+      "id": "37f51d0ec153847d62f6ebcca316cd775c9b58f24290e2a2d35c8bc094a0e309",
+      "name": "SpatialAssembly/P2/Triplets/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/37f51d0ec153847d62f6ebcca316cd775c9b58f24290e2a2d35c8bc094a0e309.json"
+    },
+    {
+      "id": "b120a5b361a132b8add642f17e5bd0619921337b1d8c7bf99c2d73b357755169",
+      "name": "SpatialAssembly/P2/Triplets/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/b120a5b361a132b8add642f17e5bd0619921337b1d8c7bf99c2d73b357755169.json"
+    },
+    {
+      "id": "eadb8d1075314f725a7bf05c70d1df6db97bec3094688e0370a384be0ad1ae1e",
+      "name": "SpatialAssembly/P2/Triplets/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/eadb8d1075314f725a7bf05c70d1df6db97bec3094688e0370a384be0ad1ae1e.json"
+    },
+    {
+      "id": "3c859880e9e49666866eede3691be2caa0dc5f3f9d6818159fa8bf2077dfced4",
+      "name": "SpatialAssembly/P2/Triplets/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/3c859880e9e49666866eede3691be2caa0dc5f3f9d6818159fa8bf2077dfced4.json"
+    },
+    {
+      "id": "f36f468e46fed1726dd03da4516d8983adf2922914b0bbdf980e7f3bcd89b557",
+      "name": "SpatialAssembly/P2/Triplets/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/f36f468e46fed1726dd03da4516d8983adf2922914b0bbdf980e7f3bcd89b557.json"
+    },
+    {
+      "id": "90afe036d359ec77d04119888744d4700cbea0a8eec996d06b5692a6d0bb1c8a",
+      "name": "SpatialAssembly/P2/Triplets/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/90afe036d359ec77d04119888744d4700cbea0a8eec996d06b5692a6d0bb1c8a.json"
+    },
+    {
+      "id": "4a2ee0978739221d3e57faee4338adde52d5edd23b7c50cdab7d7e0d34018c47",
+      "name": "SpatialAssembly/P2/Triplets/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/4a2ee0978739221d3e57faee4338adde52d5edd23b7c50cdab7d7e0d34018c47.json"
+    },
+    {
+      "id": "175c15f83985ecdc63c3d24c99196f068284ab31fbab60576c701fd597936413",
+      "name": "SpatialAssembly/P2/Triplets/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/175c15f83985ecdc63c3d24c99196f068284ab31fbab60576c701fd597936413.json"
+    },
+    {
+      "id": "999269229ef3dea2a7588dcadc3fbd82cd3a5cbacd5cbf0bb7f5f8050d099f98",
+      "name": "SpatialAssembly/P3/Bind/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/999269229ef3dea2a7588dcadc3fbd82cd3a5cbacd5cbf0bb7f5f8050d099f98.json"
+    },
+    {
+      "id": "200dbdcbe53eab8803fdb4ad6b75336a5366d3eb22beaec6699860b242a7daa8",
+      "name": "SpatialAssembly/P3/Bind/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/200dbdcbe53eab8803fdb4ad6b75336a5366d3eb22beaec6699860b242a7daa8.json"
+    },
+    {
+      "id": "78e3d1031d3ad70970c174bd61b48d672dc994b34e453a8971c33837a945ee16",
+      "name": "SpatialAssembly/P3/Bind/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/78e3d1031d3ad70970c174bd61b48d672dc994b34e453a8971c33837a945ee16.json"
+    },
+    {
+      "id": "0fc63d806da4064c64aaa41e5267c51966ddaf5896e68d0787b61cc31455e6f2",
+      "name": "SpatialAssembly/P3/Bind/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/0fc63d806da4064c64aaa41e5267c51966ddaf5896e68d0787b61cc31455e6f2.json"
+    },
+    {
+      "id": "91f5abff0a7960b3a200b7e2a91b8a0abca4a30d978445c9d499beecb3cbee51",
+      "name": "SpatialAssembly/P3/Bind/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/91f5abff0a7960b3a200b7e2a91b8a0abca4a30d978445c9d499beecb3cbee51.json"
+    },
+    {
+      "id": "a957f849e82d9aeadff5c337e039c89388c461c5334c0cbc4d50e526125150d9",
+      "name": "SpatialAssembly/P3/Bind/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/a957f849e82d9aeadff5c337e039c89388c461c5334c0cbc4d50e526125150d9.json"
+    },
+    {
+      "id": "45abdecff71da247f6454098cabd29db9db85e641d808774fb66c0e5e4a0f2c2",
+      "name": "SpatialAssembly/P3/Bind/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/45abdecff71da247f6454098cabd29db9db85e641d808774fb66c0e5e4a0f2c2.json"
+    },
+    {
+      "id": "81b2fa8fda928b1fb3251dfeb6324d41f9889122f97f407193123ecd11f87302",
+      "name": "SpatialAssembly/P3/Bind/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/81b2fa8fda928b1fb3251dfeb6324d41f9889122f97f407193123ecd11f87302.json"
+    },
+    {
+      "id": "a955ba8070a78fb6ae745814197f0807aabcb39fc30f0f9345bba1bb60f1c3e9",
+      "name": "SpatialAssembly/P3/Full/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/a955ba8070a78fb6ae745814197f0807aabcb39fc30f0f9345bba1bb60f1c3e9.json"
+    },
+    {
+      "id": "67035eaeb61f9e4eae41e5578d68aba6d3870d159b667f83c816882851dd285b",
+      "name": "SpatialAssembly/P3/Full/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/67035eaeb61f9e4eae41e5578d68aba6d3870d159b667f83c816882851dd285b.json"
+    },
+    {
+      "id": "9934d5ff29578ca07aa4d1f40ffde4cd22d761e8cb1fdfdfe7e0fc34305d3a54",
+      "name": "SpatialAssembly/P3/Full/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/9934d5ff29578ca07aa4d1f40ffde4cd22d761e8cb1fdfdfe7e0fc34305d3a54.json"
+    },
+    {
+      "id": "3745ef9c857a22d3d454bf95ca177c6d7f0e933722b0fbab0aa2cea2a49b40c9",
+      "name": "SpatialAssembly/P3/Full/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/3745ef9c857a22d3d454bf95ca177c6d7f0e933722b0fbab0aa2cea2a49b40c9.json"
+    },
+    {
+      "id": "74046a9525d21a34bbee1c7e84e8ac99517db9268934f53e617e0b385f6ef4bb",
+      "name": "SpatialAssembly/P3/Full/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/74046a9525d21a34bbee1c7e84e8ac99517db9268934f53e617e0b385f6ef4bb.json"
+    },
+    {
+      "id": "b676da92c2ccda6e2a4a80b74b9eba3e6a136a8c96c1f2a5d6604634851263d6",
+      "name": "SpatialAssembly/P3/Full/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/b676da92c2ccda6e2a4a80b74b9eba3e6a136a8c96c1f2a5d6604634851263d6.json"
+    },
+    {
+      "id": "7866f8ddc260d736b0e4c02f8faa8510365da86e202475e864e6d6749e01d319",
+      "name": "SpatialAssembly/P3/Full/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/7866f8ddc260d736b0e4c02f8faa8510365da86e202475e864e6d6749e01d319.json"
+    },
+    {
+      "id": "f426e0c6684124f181910b02d1a4348eaa92f58ef4507aa3f68df741a521e42f",
+      "name": "SpatialAssembly/P3/Full/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/f426e0c6684124f181910b02d1a4348eaa92f58ef4507aa3f68df741a521e42f.json"
+    },
+    {
+      "id": "c105601692669be845636e34539b5d126d43c4556c710b4f8ffff21a60b7301d",
+      "name": "SpatialAssembly/P3/Scan/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/c105601692669be845636e34539b5d126d43c4556c710b4f8ffff21a60b7301d.json"
+    },
+    {
+      "id": "91799d6bd3ea1e4ff6325f77d5c618f7bbabc107d46bcd6f06f146955f752f2a",
+      "name": "SpatialAssembly/P3/Scan/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/91799d6bd3ea1e4ff6325f77d5c618f7bbabc107d46bcd6f06f146955f752f2a.json"
+    },
+    {
+      "id": "7c02e8cc3b86f9f62136760bf4c84ebed59427e03d174afc06253db9aad0bda1",
+      "name": "SpatialAssembly/P3/Scan/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/7c02e8cc3b86f9f62136760bf4c84ebed59427e03d174afc06253db9aad0bda1.json"
+    },
+    {
+      "id": "1f69079c10ba1845e08f23641fdc57128fb21bf09a60757e18685f83be3beffd",
+      "name": "SpatialAssembly/P3/Scan/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/1f69079c10ba1845e08f23641fdc57128fb21bf09a60757e18685f83be3beffd.json"
+    },
+    {
+      "id": "61e5049a2b14acae7bfe9656ac3ab9f4cc9b3cf0168c8453ed191e47a1c38dca",
+      "name": "SpatialAssembly/P3/Scan/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/61e5049a2b14acae7bfe9656ac3ab9f4cc9b3cf0168c8453ed191e47a1c38dca.json"
+    },
+    {
+      "id": "534f3a03a92d36df40481c9fcb8de3eec7616f522d4bf44026ce26195e110bfe",
+      "name": "SpatialAssembly/P3/Scan/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/534f3a03a92d36df40481c9fcb8de3eec7616f522d4bf44026ce26195e110bfe.json"
+    },
+    {
+      "id": "68ab80b2ecdc233ebbaa3f6d0a1eb041fbc4439d0105439bce2be10582946224",
+      "name": "SpatialAssembly/P3/Scan/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/68ab80b2ecdc233ebbaa3f6d0a1eb041fbc4439d0105439bce2be10582946224.json"
+    },
+    {
+      "id": "c88c62ce72b1b4fb3a9eac382a29d74943a6be5fc90fc75a6ef5c5e7b90f184b",
+      "name": "SpatialAssembly/P3/Scan/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/c88c62ce72b1b4fb3a9eac382a29d74943a6be5fc90fc75a6ef5c5e7b90f184b.json"
+    },
+    {
+      "id": "9313f3a27dfe95cfe5a26deea8ae4762933e216d0f146eae8cf70aa544e612fa",
+      "name": "SpatialAssembly/P3/Sparse/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/9313f3a27dfe95cfe5a26deea8ae4762933e216d0f146eae8cf70aa544e612fa.json"
+    },
+    {
+      "id": "d32db3f5f28779df662d250da68895376b5cd5811493dff1b0bea4606df89c7b",
+      "name": "SpatialAssembly/P3/Sparse/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/d32db3f5f28779df662d250da68895376b5cd5811493dff1b0bea4606df89c7b.json"
+    },
+    {
+      "id": "867572d5d0d06f7ac396d337605e3a3f4cb2129ec2b5d310925fea9914968ea0",
+      "name": "SpatialAssembly/P3/Sparse/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/867572d5d0d06f7ac396d337605e3a3f4cb2129ec2b5d310925fea9914968ea0.json"
+    },
+    {
+      "id": "7843153c36f339c5b3c16ea7642f224ceb8d191fb739773d6aac1e05833a505c",
+      "name": "SpatialAssembly/P3/Sparse/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/7843153c36f339c5b3c16ea7642f224ceb8d191fb739773d6aac1e05833a505c.json"
+    },
+    {
+      "id": "b8d61d01ca52a2dcb9dc3f1f3f399f4855d6f88704faef9b9d2361a5ace0e3cf",
+      "name": "SpatialAssembly/P3/Sparse/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/b8d61d01ca52a2dcb9dc3f1f3f399f4855d6f88704faef9b9d2361a5ace0e3cf.json"
+    },
+    {
+      "id": "70a24cb4a3f9cdcc618fe9065472152b4645a45365d335b06b8292d86cbecfe7",
+      "name": "SpatialAssembly/P3/Sparse/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/70a24cb4a3f9cdcc618fe9065472152b4645a45365d335b06b8292d86cbecfe7.json"
+    },
+    {
+      "id": "9780fa4c4b3a9eecfd69164c8d3b9f762b73fb54003f0b58d84e629a4a972944",
+      "name": "SpatialAssembly/P3/Sparse/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/9780fa4c4b3a9eecfd69164c8d3b9f762b73fb54003f0b58d84e629a4a972944.json"
+    },
+    {
+      "id": "cae5ebbaf68bd5b6ee38d517d51981d74328a1fe999a1e071089f22e228d93ce",
+      "name": "SpatialAssembly/P3/Sparse/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/cae5ebbaf68bd5b6ee38d517d51981d74328a1fe999a1e071089f22e228d93ce.json"
+    },
+    {
+      "id": "490b77b858fa45a7fb3cece525f7e6c6f237a6834b926e0f85429977b55bf847",
+      "name": "SpatialAssembly/P3/Triplets/Sequential/2/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/490b77b858fa45a7fb3cece525f7e6c6f237a6834b926e0f85429977b55bf847.json"
+    },
+    {
+      "id": "5dd0d7afdc2fdc003ed5895bfd65a23a391115007d50ab4b57269ece70b2cff7",
+      "name": "SpatialAssembly/P3/Triplets/Sequential/2/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/5dd0d7afdc2fdc003ed5895bfd65a23a391115007d50ab4b57269ece70b2cff7.json"
+    },
+    {
+      "id": "768886ab0c312c59871f7bb614878214aaa883bf7584539405cd2505fc3a1012",
+      "name": "SpatialAssembly/P3/Triplets/Sequential/2/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/768886ab0c312c59871f7bb614878214aaa883bf7584539405cd2505fc3a1012.json"
+    },
+    {
+      "id": "85bfb9fe81a2a92c902ee341bcc8e9c29bb11f06826d62ba184fec7ef1aa2b5f",
+      "name": "SpatialAssembly/P3/Triplets/Sequential/2/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/85bfb9fe81a2a92c902ee341bcc8e9c29bb11f06826d62ba184fec7ef1aa2b5f.json"
+    },
+    {
+      "id": "1fba9426e86edd2a12bae8f609698c4bd3beac17088b55a054354049afdef0fa",
+      "name": "SpatialAssembly/P3/Triplets/Sequential/3/0/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/1fba9426e86edd2a12bae8f609698c4bd3beac17088b55a054354049afdef0fa.json"
+    },
+    {
+      "id": "5c36ad5bc3307532ca25a49313a1955c127a429b83cf5bd6f5bc6b6abe94c0af",
+      "name": "SpatialAssembly/P3/Triplets/Sequential/3/0/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/5c36ad5bc3307532ca25a49313a1955c127a429b83cf5bd6f5bc6b6abe94c0af.json"
+    },
+    {
+      "id": "52ff2016bbd7a5d15d254ce5a9520df037f055bd882d4a441030300a9784f25c",
+      "name": "SpatialAssembly/P3/Triplets/Sequential/3/1/0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/52ff2016bbd7a5d15d254ce5a9520df037f055bd882d4a441030300a9784f25c.json"
+    },
+    {
+      "id": "0dd5c54a3f1eef2547bcaa0f52daa559b483cdf92486f2b79dd84ed68fc2b8f1",
+      "name": "SpatialAssembly/P3/Triplets/Sequential/3/1/1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/0dd5c54a3f1eef2547bcaa0f52daa559b483cdf92486f2b79dd84ed68fc2b8f1.json"
+    }
+  ]
+}

@@ -1,0 +1,794 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "distributed",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "ON",
+      "RODIN_USE_PETSC": "ON"
+    },
+    "targets": [
+      "RodinPETScConstrainedAssemblyBenchmarks",
+      "RodinPETScMassAssemblyBenchmarks",
+      "RodinPETScPhysicsAssemblyBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 4,
+  "cases": [
+    {
+      "id": "03be1df31f8c4ad29f897e0204a2ebcdae4962f5917f9bef9c4c36d196e2402c",
+      "name": "Conductivity/P1/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/03be1df31f8c4ad29f897e0204a2ebcdae4962f5917f9bef9c4c36d196e2402c.json"
+    },
+    {
+      "id": "66e6909d2a58f86b6485949c7bba390e06442ab44d88b5daefcf0291d02aa84c",
+      "name": "Conductivity/P1/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/66e6909d2a58f86b6485949c7bba390e06442ab44d88b5daefcf0291d02aa84c.json"
+    },
+    {
+      "id": "74e4e066ed6410e2e51f2c3047d7dc0f1fdca2effabb3238b55bffb35f0ea591",
+      "name": "Conductivity/P1/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/74e4e066ed6410e2e51f2c3047d7dc0f1fdca2effabb3238b55bffb35f0ea591.json"
+    },
+    {
+      "id": "6cf3fa1633a496f99273fe323cf4a7b5d6fd94569ed6b185d1d69f4f25840a47",
+      "name": "Conductivity/P1/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/6cf3fa1633a496f99273fe323cf4a7b5d6fd94569ed6b185d1d69f4f25840a47.json"
+    },
+    {
+      "id": "4e7f2616f215d84738820ab20888769d455b92d87c74d0717abb9ddeba6e324b",
+      "name": "Conductivity/P1/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4e7f2616f215d84738820ab20888769d455b92d87c74d0717abb9ddeba6e324b.json"
+    },
+    {
+      "id": "e2f0aed23263b90ae120cf9b40d681f89cbc79bbbbc0741aebc0e54190c92f09",
+      "name": "Conductivity/P1/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/e2f0aed23263b90ae120cf9b40d681f89cbc79bbbbc0741aebc0e54190c92f09.json"
+    },
+    {
+      "id": "673079a7fb3e3512026c73f9899863709175d4867521ef8987156ffc9ab00d79",
+      "name": "Conductivity/P1/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/673079a7fb3e3512026c73f9899863709175d4867521ef8987156ffc9ab00d79.json"
+    },
+    {
+      "id": "01936477cd2284439c412dab239a4bbd0ee45fa299879ef76cbfb5cd875c594b",
+      "name": "Conductivity/P1/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/01936477cd2284439c412dab239a4bbd0ee45fa299879ef76cbfb5cd875c594b.json"
+    },
+    {
+      "id": "fdfc13a94368fb21e8cd1145935130f9995b0cfae65bf9794fd703a01d99ea0b",
+      "name": "Conductivity/P1/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/fdfc13a94368fb21e8cd1145935130f9995b0cfae65bf9794fd703a01d99ea0b.json"
+    },
+    {
+      "id": "9c836589fb3fbaacf1e7530e7b96af750584c80df7a44c3d36a86227cf02b81b",
+      "name": "Conductivity/P1/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/9c836589fb3fbaacf1e7530e7b96af750584c80df7a44c3d36a86227cf02b81b.json"
+    },
+    {
+      "id": "8332d846e79efad9538a863c8dc602360ea8a0a2fabd2d90a3c0532d9c205769",
+      "name": "Conductivity/P1/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/8332d846e79efad9538a863c8dc602360ea8a0a2fabd2d90a3c0532d9c205769.json"
+    },
+    {
+      "id": "4906115df3ab7dc1aaa91283366d4a0668de5f31685c960ee5b52a76f9a8f0b0",
+      "name": "Conductivity/P1/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4906115df3ab7dc1aaa91283366d4a0668de5f31685c960ee5b52a76f9a8f0b0.json"
+    },
+    {
+      "id": "d2d27264c5b0a0050f4e4272632432f28f8a4f948b412e3bacde759ba567a465",
+      "name": "Conductivity/P1/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/d2d27264c5b0a0050f4e4272632432f28f8a4f948b412e3bacde759ba567a465.json"
+    },
+    {
+      "id": "2fdaaff6e390b372e0f624b8b3815f48511646580155279c8fa1bff9d7cac416",
+      "name": "Conductivity/P1/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/2fdaaff6e390b372e0f624b8b3815f48511646580155279c8fa1bff9d7cac416.json"
+    },
+    {
+      "id": "af39d26158d7e28bf767f08d8636e1954abf911e4e9cdde8bef75eb80f584fde",
+      "name": "Conductivity/P1/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/af39d26158d7e28bf767f08d8636e1954abf911e4e9cdde8bef75eb80f584fde.json"
+    },
+    {
+      "id": "9964a5bc241feaffe3350887c0b2ea1af8ed81cc60b894501c2f14bbdf14a067",
+      "name": "Conductivity/P1/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/9964a5bc241feaffe3350887c0b2ea1af8ed81cc60b894501c2f14bbdf14a067.json"
+    },
+    {
+      "id": "40cda544e1df3325830de6225527d2445591ddb87ff4578ff62261c2e7ff4593",
+      "name": "Conductivity/P1/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/40cda544e1df3325830de6225527d2445591ddb87ff4578ff62261c2e7ff4593.json"
+    },
+    {
+      "id": "0a306c80c3927862cccb93cb2b17b9beaca6acf92d40ac627ebe28c776b231ec",
+      "name": "Conductivity/P1/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0a306c80c3927862cccb93cb2b17b9beaca6acf92d40ac627ebe28c776b231ec.json"
+    },
+    {
+      "id": "0394170723ba8b6b4990a5f7e5d256af62c186d42f8eb1d8a87ce5b76f903eeb",
+      "name": "Conductivity/P1/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0394170723ba8b6b4990a5f7e5d256af62c186d42f8eb1d8a87ce5b76f903eeb.json"
+    },
+    {
+      "id": "e70a22c95a2e98a58f5228cff10ca8abe01fa9f1bf348aca4f30941809af6de3",
+      "name": "Conductivity/P1/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/e70a22c95a2e98a58f5228cff10ca8abe01fa9f1bf348aca4f30941809af6de3.json"
+    },
+    {
+      "id": "f322180b6ad9a82822daedbc6d6d4a10e5cbfa3a3960527c8896e057030a53fb",
+      "name": "Conductivity/P1/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/f322180b6ad9a82822daedbc6d6d4a10e5cbfa3a3960527c8896e057030a53fb.json"
+    },
+    {
+      "id": "0f5378e87f37e1093d0f0feda2dff5fa05cb54b2d31bcebeb5405037cd7f7252",
+      "name": "Conductivity/P2/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0f5378e87f37e1093d0f0feda2dff5fa05cb54b2d31bcebeb5405037cd7f7252.json"
+    },
+    {
+      "id": "54d2c07b11c9b2b61ee5c3f8515a84cafd18c34428c4e6903c998f08f547faea",
+      "name": "Conductivity/P2/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/54d2c07b11c9b2b61ee5c3f8515a84cafd18c34428c4e6903c998f08f547faea.json"
+    },
+    {
+      "id": "12339eb7ec74f8e72e6fc73901edc0a8c7965c882bb9f1704916c4cd45f67f88",
+      "name": "Conductivity/P2/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/12339eb7ec74f8e72e6fc73901edc0a8c7965c882bb9f1704916c4cd45f67f88.json"
+    },
+    {
+      "id": "f5015687a0e57700fc45e9a816ab36af7af0ef60fa600fac1e7723b48bfb7147",
+      "name": "Conductivity/P2/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/f5015687a0e57700fc45e9a816ab36af7af0ef60fa600fac1e7723b48bfb7147.json"
+    },
+    {
+      "id": "85d4d4f0762cb4166e494a16cb5633ae6836e77aae08355db25f2fb74fe0a0d8",
+      "name": "Conductivity/P2/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/85d4d4f0762cb4166e494a16cb5633ae6836e77aae08355db25f2fb74fe0a0d8.json"
+    },
+    {
+      "id": "790b4d885ce217e34e36c349a4cfcefe6b2f07d0e5727a6f87306bd83f1628bd",
+      "name": "Conductivity/P2/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/790b4d885ce217e34e36c349a4cfcefe6b2f07d0e5727a6f87306bd83f1628bd.json"
+    },
+    {
+      "id": "9b4414bfb59d5cbca7364bc3ee37f7f2925851f99414f798992f7d1332665eff",
+      "name": "Conductivity/P2/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/9b4414bfb59d5cbca7364bc3ee37f7f2925851f99414f798992f7d1332665eff.json"
+    },
+    {
+      "id": "9bfa0ffd27605cb4dec36af70b6db92005a9dddc3d6c53d2bd678b792ca023b9",
+      "name": "Conductivity/P2/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/9bfa0ffd27605cb4dec36af70b6db92005a9dddc3d6c53d2bd678b792ca023b9.json"
+    },
+    {
+      "id": "51aa457630c0bfa24897c54c3e4a55ab85ada5650acfcb0783740c0530f34752",
+      "name": "Conductivity/P2/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/51aa457630c0bfa24897c54c3e4a55ab85ada5650acfcb0783740c0530f34752.json"
+    },
+    {
+      "id": "bcf153fda9a0f61ad0a64a17f87ff2c5465d0c4faf9888e0df89dcc26fc9c55b",
+      "name": "Conductivity/P2/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/bcf153fda9a0f61ad0a64a17f87ff2c5465d0c4faf9888e0df89dcc26fc9c55b.json"
+    },
+    {
+      "id": "b58e320d1b20b48603726e458d13bdfaba6ff55963ac4b68e819a9e76964646c",
+      "name": "Conductivity/P2/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b58e320d1b20b48603726e458d13bdfaba6ff55963ac4b68e819a9e76964646c.json"
+    },
+    {
+      "id": "aca871fa0963cfaba553fddd37c0afe91d4e38dd863b900fc2ce294a134117ea",
+      "name": "Conductivity/P2/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/aca871fa0963cfaba553fddd37c0afe91d4e38dd863b900fc2ce294a134117ea.json"
+    },
+    {
+      "id": "8e475809010a183a7f8c07c0160311d8520eaeeb623b0b3a243f9b33510c4a9c",
+      "name": "Conductivity/P2/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/8e475809010a183a7f8c07c0160311d8520eaeeb623b0b3a243f9b33510c4a9c.json"
+    },
+    {
+      "id": "088d93c98b398ef428aabfca1fd9718b7ca7a123bcbf146ce322c45600556004",
+      "name": "Conductivity/P2/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/088d93c98b398ef428aabfca1fd9718b7ca7a123bcbf146ce322c45600556004.json"
+    },
+    {
+      "id": "8d19bc7aebacb5ded4264b151f491d5d1cf792afd0a14d7a81dff47accec9040",
+      "name": "Conductivity/P2/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/8d19bc7aebacb5ded4264b151f491d5d1cf792afd0a14d7a81dff47accec9040.json"
+    },
+    {
+      "id": "0efccf436ecbfe889d02ed3a3df12607479cdb29f63678c2e15ea8889519279e",
+      "name": "Conductivity/P2/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0efccf436ecbfe889d02ed3a3df12607479cdb29f63678c2e15ea8889519279e.json"
+    },
+    {
+      "id": "c68599532f959f54561ef884905775acfaada4c6c68668a7b426493acdf09b8b",
+      "name": "Conductivity/P2/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/c68599532f959f54561ef884905775acfaada4c6c68668a7b426493acdf09b8b.json"
+    },
+    {
+      "id": "059f71ab10e3b8b1aa7916b47c7174b2fd8bcff64908aef91bb36b0c7761fe09",
+      "name": "Conductivity/P2/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/059f71ab10e3b8b1aa7916b47c7174b2fd8bcff64908aef91bb36b0c7761fe09.json"
+    },
+    {
+      "id": "bc3c83c9012e52a5344a03997571d5f7913ae033924e962d0077e843edace171",
+      "name": "Conductivity/P2/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/bc3c83c9012e52a5344a03997571d5f7913ae033924e962d0077e843edace171.json"
+    },
+    {
+      "id": "f37845be8d5f97181a9d794d948a4c1b0c01bd02ff0aba219b4e0c8dde01e986",
+      "name": "Conductivity/P2/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/f37845be8d5f97181a9d794d948a4c1b0c01bd02ff0aba219b4e0c8dde01e986.json"
+    },
+    {
+      "id": "2c1f18abebfbe76f4c0604a464bd1dd791208d46852044ecb959c15a53119f96",
+      "name": "Conductivity/P2/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/2c1f18abebfbe76f4c0604a464bd1dd791208d46852044ecb959c15a53119f96.json"
+    },
+    {
+      "id": "0ce9a234dc8f92ff2a594880d96dcacacf5006cc6a825fc092d48eb138d6a23d",
+      "name": "LinearElasticity/P1/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0ce9a234dc8f92ff2a594880d96dcacacf5006cc6a825fc092d48eb138d6a23d.json"
+    },
+    {
+      "id": "368a7187839947ec640b8ae3373c96ad981caff7e1e91a54749acb7031e5bd1d",
+      "name": "LinearElasticity/P1/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/368a7187839947ec640b8ae3373c96ad981caff7e1e91a54749acb7031e5bd1d.json"
+    },
+    {
+      "id": "813aed6c3b6efa4c8fe250905ccb27e220f31497a8989f6daf4f8be18f49cd26",
+      "name": "LinearElasticity/P1/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/813aed6c3b6efa4c8fe250905ccb27e220f31497a8989f6daf4f8be18f49cd26.json"
+    },
+    {
+      "id": "fa68b77c81bda75505da28670a6f47f6cc3041dc4f536d525fe5447f5539eb1d",
+      "name": "LinearElasticity/P1/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/fa68b77c81bda75505da28670a6f47f6cc3041dc4f536d525fe5447f5539eb1d.json"
+    },
+    {
+      "id": "259784ea7a330f941f0384f995fe7dd57622bcb69c18aed85539d331adaefef1",
+      "name": "LinearElasticity/P1/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/259784ea7a330f941f0384f995fe7dd57622bcb69c18aed85539d331adaefef1.json"
+    },
+    {
+      "id": "785054777e8c6c1956d82e53875d1f0666ad84d5fdd55e8b2bb740771dd1c5c9",
+      "name": "LinearElasticity/P1/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/785054777e8c6c1956d82e53875d1f0666ad84d5fdd55e8b2bb740771dd1c5c9.json"
+    },
+    {
+      "id": "e85932f385f3df0e4dd73cdf2eaa2d294b83eceef044cdf109d75afcdb308611",
+      "name": "LinearElasticity/P1/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/e85932f385f3df0e4dd73cdf2eaa2d294b83eceef044cdf109d75afcdb308611.json"
+    },
+    {
+      "id": "c9186496c59213d0e4a55bd23d72d5ef85d64cb68c809215c83247a2a89043be",
+      "name": "LinearElasticity/P1/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/c9186496c59213d0e4a55bd23d72d5ef85d64cb68c809215c83247a2a89043be.json"
+    },
+    {
+      "id": "5e900386e609f291f863d1c2eeabe656a82c6ae0b8481c098bd13e0a504cb24a",
+      "name": "LinearElasticity/P1/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/5e900386e609f291f863d1c2eeabe656a82c6ae0b8481c098bd13e0a504cb24a.json"
+    },
+    {
+      "id": "5b0de24d1d8b663b92e7a33eda8b0b10ff2471a0767974deb7e8b2c8740c935c",
+      "name": "LinearElasticity/P1/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/5b0de24d1d8b663b92e7a33eda8b0b10ff2471a0767974deb7e8b2c8740c935c.json"
+    },
+    {
+      "id": "af46e56b77a7170c0e9ac5e87be682cd6c96bfcbed3f805373d55ea142d45544",
+      "name": "LinearElasticity/P1/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/af46e56b77a7170c0e9ac5e87be682cd6c96bfcbed3f805373d55ea142d45544.json"
+    },
+    {
+      "id": "562739d39f955f9dc654ffc668ac35b5577135c231afdb4d2d63865263516313",
+      "name": "LinearElasticity/P1/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/562739d39f955f9dc654ffc668ac35b5577135c231afdb4d2d63865263516313.json"
+    },
+    {
+      "id": "aba715d481d26ab85b9c4d89690f013236a19516fd8c5a7bb9abbf679e287ad7",
+      "name": "LinearElasticity/P1/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/aba715d481d26ab85b9c4d89690f013236a19516fd8c5a7bb9abbf679e287ad7.json"
+    },
+    {
+      "id": "4eae698a3375e9a55d87d6413b9caf4573285cce9af3b91e991b78663565969b",
+      "name": "LinearElasticity/P1/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4eae698a3375e9a55d87d6413b9caf4573285cce9af3b91e991b78663565969b.json"
+    },
+    {
+      "id": "4e125492f96d5af6431521692cc49ae4a02e84d6063613263a75601c47cf197f",
+      "name": "LinearElasticity/P1/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4e125492f96d5af6431521692cc49ae4a02e84d6063613263a75601c47cf197f.json"
+    },
+    {
+      "id": "8b47ba996c976824c1a328913ec6628333857d8a326542cbb030b1f54df4b54e",
+      "name": "LinearElasticity/P1/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/8b47ba996c976824c1a328913ec6628333857d8a326542cbb030b1f54df4b54e.json"
+    },
+    {
+      "id": "930c7a7ace607fd4ba4fdde036f6b043f3e8c0c13ffc23d3190a5b20d65b7ee2",
+      "name": "LinearElasticity/P1/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/930c7a7ace607fd4ba4fdde036f6b043f3e8c0c13ffc23d3190a5b20d65b7ee2.json"
+    },
+    {
+      "id": "44fe63769a584dec3ee7fa348593e20b12ed9959f0ed8cb5929c935d30c435da",
+      "name": "LinearElasticity/P1/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/44fe63769a584dec3ee7fa348593e20b12ed9959f0ed8cb5929c935d30c435da.json"
+    },
+    {
+      "id": "205c55c069559c8341646fea2998bdd0f28530493ccbf1b735b4e75d627ba5c2",
+      "name": "LinearElasticity/P1/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/205c55c069559c8341646fea2998bdd0f28530493ccbf1b735b4e75d627ba5c2.json"
+    },
+    {
+      "id": "6ca8570e38bcdd60aa7c1c192cf9f6af68206e5e7ede1ce117ed03ae6cbaed0a",
+      "name": "LinearElasticity/P1/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/6ca8570e38bcdd60aa7c1c192cf9f6af68206e5e7ede1ce117ed03ae6cbaed0a.json"
+    },
+    {
+      "id": "5cb081974dff5c527239d233b5486986d7092e349bd702f382589b0de1f5ac9a",
+      "name": "LinearElasticity/P1/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/5cb081974dff5c527239d233b5486986d7092e349bd702f382589b0de1f5ac9a.json"
+    },
+    {
+      "id": "d36f13a01ce89f19ca1031fa429abd2c89756d1b6db0b22f84be70d54e514ff3",
+      "name": "LinearElasticity/P2/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/d36f13a01ce89f19ca1031fa429abd2c89756d1b6db0b22f84be70d54e514ff3.json"
+    },
+    {
+      "id": "dd88b15531386245dc65b973b8cdee8092169bad0a1ce80c1b77f665ea9c4121",
+      "name": "LinearElasticity/P2/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/dd88b15531386245dc65b973b8cdee8092169bad0a1ce80c1b77f665ea9c4121.json"
+    },
+    {
+      "id": "e8622898a27527c243208e81e340a440946b76b0e305fc9206b68f0106deaa11",
+      "name": "LinearElasticity/P2/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/e8622898a27527c243208e81e340a440946b76b0e305fc9206b68f0106deaa11.json"
+    },
+    {
+      "id": "ceeb61eba45d2a9c754169b9a9435c3237c8b166fd968e54f684cede502afa61",
+      "name": "LinearElasticity/P2/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/ceeb61eba45d2a9c754169b9a9435c3237c8b166fd968e54f684cede502afa61.json"
+    },
+    {
+      "id": "d39bcbbd1ee34670930a80e5ac87eecc0cd590c4b9cf7abd32ce4250914d78ba",
+      "name": "LinearElasticity/P2/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/d39bcbbd1ee34670930a80e5ac87eecc0cd590c4b9cf7abd32ce4250914d78ba.json"
+    },
+    {
+      "id": "5299b48b50f662070f312ccae5d3308ffa89400159e4c6dfe7561f4784b087f7",
+      "name": "LinearElasticity/P2/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/5299b48b50f662070f312ccae5d3308ffa89400159e4c6dfe7561f4784b087f7.json"
+    },
+    {
+      "id": "0a0cc70b16bed2f8a86b0aaef278509e0293462087c7586f801d4d97ec59c3b9",
+      "name": "LinearElasticity/P2/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0a0cc70b16bed2f8a86b0aaef278509e0293462087c7586f801d4d97ec59c3b9.json"
+    },
+    {
+      "id": "98b8d0b937ca7900afdaf757cdafc9ffe787656df19f71492ec99f92f2c1c368",
+      "name": "LinearElasticity/P2/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/98b8d0b937ca7900afdaf757cdafc9ffe787656df19f71492ec99f92f2c1c368.json"
+    },
+    {
+      "id": "7d16f0d5d3c23c2f237ea887bf04b0c12be99beabd848efb3425b76b5b83c389",
+      "name": "LinearElasticity/P2/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/7d16f0d5d3c23c2f237ea887bf04b0c12be99beabd848efb3425b76b5b83c389.json"
+    },
+    {
+      "id": "35e588f83a57b0a7eb30ecff7d864c9817121abcb5194f1ce6e53b09e55bd566",
+      "name": "LinearElasticity/P2/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/35e588f83a57b0a7eb30ecff7d864c9817121abcb5194f1ce6e53b09e55bd566.json"
+    },
+    {
+      "id": "ffc6da4814bc96572902db95de02e8eaa0db283798e1d7c9a012330cdff3152f",
+      "name": "LinearElasticity/P2/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/ffc6da4814bc96572902db95de02e8eaa0db283798e1d7c9a012330cdff3152f.json"
+    },
+    {
+      "id": "5b3eb5412c38448ee6d92894090abfa10da81eb64cdd3e41967cb8c84d4a404c",
+      "name": "LinearElasticity/P2/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/5b3eb5412c38448ee6d92894090abfa10da81eb64cdd3e41967cb8c84d4a404c.json"
+    },
+    {
+      "id": "868525e7b7cf2f0c275072d6ca8c808426fd30c93937002e2eb3b6b4b7a02885",
+      "name": "LinearElasticity/P2/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/868525e7b7cf2f0c275072d6ca8c808426fd30c93937002e2eb3b6b4b7a02885.json"
+    },
+    {
+      "id": "64aa935641abc9fa879e6057fd65bfd926006dfe05c6b29420456cce0d196e08",
+      "name": "LinearElasticity/P2/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/64aa935641abc9fa879e6057fd65bfd926006dfe05c6b29420456cce0d196e08.json"
+    },
+    {
+      "id": "44e78d29ef9849541936bd377a30a23cebc762bd5a73d4e0052b722a8ecd4e26",
+      "name": "LinearElasticity/P2/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/44e78d29ef9849541936bd377a30a23cebc762bd5a73d4e0052b722a8ecd4e26.json"
+    },
+    {
+      "id": "20b9a567a172982b79207309036a10d43fca3929e797c08c6bdc90641efcede4",
+      "name": "LinearElasticity/P2/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/20b9a567a172982b79207309036a10d43fca3929e797c08c6bdc90641efcede4.json"
+    },
+    {
+      "id": "a7cd8907d62d259f1b0c6787728bb400ecfa7cab071cfe9e39a93fd694487589",
+      "name": "LinearElasticity/P2/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/a7cd8907d62d259f1b0c6787728bb400ecfa7cab071cfe9e39a93fd694487589.json"
+    },
+    {
+      "id": "26bbd7a14edf1b4473e691b53570ed6f1fca51225c8371304263f2e92bd791c7",
+      "name": "LinearElasticity/P2/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/26bbd7a14edf1b4473e691b53570ed6f1fca51225c8371304263f2e92bd791c7.json"
+    },
+    {
+      "id": "9d35fd4056534a3e6751af4556239f4e7b9204e06296e5b9cb5e26160831e51d",
+      "name": "LinearElasticity/P2/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/9d35fd4056534a3e6751af4556239f4e7b9204e06296e5b9cb5e26160831e51d.json"
+    },
+    {
+      "id": "b24a296cc8f2840ab5a0efc854c64dca6bd29c6f04cfb23d2b50091db3824af0",
+      "name": "LinearElasticity/P2/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b24a296cc8f2840ab5a0efc854c64dca6bd29c6f04cfb23d2b50091db3824af0.json"
+    },
+    {
+      "id": "523b2ecd4d7f3894cccb43b3617f2d376f0bad656e81346d8f3d8db712c8a319",
+      "name": "LinearElasticity/P2/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/523b2ecd4d7f3894cccb43b3617f2d376f0bad656e81346d8f3d8db712c8a319.json"
+    },
+    {
+      "id": "92f2d9550d49a1be152e9dc7d79c0f8353e16b919fdcc134b9ee7311bc41f285",
+      "name": "Poisson/P1/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/92f2d9550d49a1be152e9dc7d79c0f8353e16b919fdcc134b9ee7311bc41f285.json"
+    },
+    {
+      "id": "9ea82ac7a371e185ad5396760fd9c522ebd8064ad57abf3ee8fe0594b93c2efa",
+      "name": "Poisson/P1/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/9ea82ac7a371e185ad5396760fd9c522ebd8064ad57abf3ee8fe0594b93c2efa.json"
+    },
+    {
+      "id": "fa4de1a42ddfcfbf68614a06efc4ed76ef36cebfc28178961de1a3844f50db46",
+      "name": "Poisson/P1/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/fa4de1a42ddfcfbf68614a06efc4ed76ef36cebfc28178961de1a3844f50db46.json"
+    },
+    {
+      "id": "a5cdef43fa5a7f859ad607e1400521a3ed33724ef2b7d5e25d84ecda9c849c0c",
+      "name": "Poisson/P1/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/a5cdef43fa5a7f859ad607e1400521a3ed33724ef2b7d5e25d84ecda9c849c0c.json"
+    },
+    {
+      "id": "fb129505a9aa84b900291a276c914cf30db13ff323c2ba1876faffa5159fdcd4",
+      "name": "Poisson/P1/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/fb129505a9aa84b900291a276c914cf30db13ff323c2ba1876faffa5159fdcd4.json"
+    },
+    {
+      "id": "50721d6df41030902807d490a89977d1f75793c457ef7f2926121fbd73d607fb",
+      "name": "Poisson/P1/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/50721d6df41030902807d490a89977d1f75793c457ef7f2926121fbd73d607fb.json"
+    },
+    {
+      "id": "aea19625a395e2714217950fdb910799166113f626f5da16bfcfe24f7e6a4513",
+      "name": "Poisson/P1/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/aea19625a395e2714217950fdb910799166113f626f5da16bfcfe24f7e6a4513.json"
+    },
+    {
+      "id": "60afbb101f3e92f8b7159cb852522cc93c8c9eac6a8a2fa7a341f91453f33617",
+      "name": "Poisson/P1/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/60afbb101f3e92f8b7159cb852522cc93c8c9eac6a8a2fa7a341f91453f33617.json"
+    },
+    {
+      "id": "0efc6b9d01b97c2726fd5c14994b6d394cb945838056b6a66cade05b2a9b48d5",
+      "name": "Poisson/P1/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0efc6b9d01b97c2726fd5c14994b6d394cb945838056b6a66cade05b2a9b48d5.json"
+    },
+    {
+      "id": "52c25809ecd718011a3d3bf95f5e7c6c25df5b9cfc352fd2fa610c8d8b5c9605",
+      "name": "Poisson/P1/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/52c25809ecd718011a3d3bf95f5e7c6c25df5b9cfc352fd2fa610c8d8b5c9605.json"
+    },
+    {
+      "id": "bcd448db28e3e6da0d51f4e676a3f7e3af07878f843f4740b0dd8b4c4203f8fe",
+      "name": "Poisson/P1/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/bcd448db28e3e6da0d51f4e676a3f7e3af07878f843f4740b0dd8b4c4203f8fe.json"
+    },
+    {
+      "id": "e443f578f947198528b1908ffae7fc989368beb1f3331497cd4fd6430537be00",
+      "name": "Poisson/P1/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/e443f578f947198528b1908ffae7fc989368beb1f3331497cd4fd6430537be00.json"
+    },
+    {
+      "id": "43b2817826e0ccef9dd51fb4627b6c16c1b417ebc1be7c32c9946bd097b7ca60",
+      "name": "Poisson/P1/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/43b2817826e0ccef9dd51fb4627b6c16c1b417ebc1be7c32c9946bd097b7ca60.json"
+    },
+    {
+      "id": "108fc2f862c5881254981a50d8dc5972b3302f55f14b4a86472dc503edfd557c",
+      "name": "Poisson/P1/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/108fc2f862c5881254981a50d8dc5972b3302f55f14b4a86472dc503edfd557c.json"
+    },
+    {
+      "id": "977c0325de0b708dc1dfb1556677d107fcdd893d3c90c05419901accb607a0d9",
+      "name": "Poisson/P1/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/977c0325de0b708dc1dfb1556677d107fcdd893d3c90c05419901accb607a0d9.json"
+    },
+    {
+      "id": "426b20e0ad2e102b13f342063afb974bb603e768f43be820aaf2b876b397ec1e",
+      "name": "Poisson/P1/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/426b20e0ad2e102b13f342063afb974bb603e768f43be820aaf2b876b397ec1e.json"
+    },
+    {
+      "id": "48a2eb435de50c1d323a574b98224dda441de62bdb76154f9edd6a8bc219f6b3",
+      "name": "Poisson/P1/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/48a2eb435de50c1d323a574b98224dda441de62bdb76154f9edd6a8bc219f6b3.json"
+    },
+    {
+      "id": "7c0914d781b424fedff7103f050d377380b4e01d782170e4ca014ac882ef56a9",
+      "name": "Poisson/P1/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/7c0914d781b424fedff7103f050d377380b4e01d782170e4ca014ac882ef56a9.json"
+    },
+    {
+      "id": "e7484cc9dd5c46d76693605804117f62d461855ad0239ee037b78ed7a458d38f",
+      "name": "Poisson/P1/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/e7484cc9dd5c46d76693605804117f62d461855ad0239ee037b78ed7a458d38f.json"
+    },
+    {
+      "id": "1c730ed4a33965d3980d47a6a66fa16a74d74706050c3834b88445074ac4b22a",
+      "name": "Poisson/P1/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/1c730ed4a33965d3980d47a6a66fa16a74d74706050c3834b88445074ac4b22a.json"
+    },
+    {
+      "id": "f981b6df9ff1c32701902115271e92eddbbce5f528112ac5a2a2f0be78dbe3c5",
+      "name": "Poisson/P1/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/f981b6df9ff1c32701902115271e92eddbbce5f528112ac5a2a2f0be78dbe3c5.json"
+    },
+    {
+      "id": "783d8f9e39a8b99c507af414ef1ac357ed5717d434eaf7f2b79b1254610505e8",
+      "name": "Poisson/P2/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/783d8f9e39a8b99c507af414ef1ac357ed5717d434eaf7f2b79b1254610505e8.json"
+    },
+    {
+      "id": "cc51f019ca093dafffc1d4a4ccd7aca8256c4f75d8b234e05f6fae445fb68a1c",
+      "name": "Poisson/P2/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/cc51f019ca093dafffc1d4a4ccd7aca8256c4f75d8b234e05f6fae445fb68a1c.json"
+    },
+    {
+      "id": "d66530ac9cfe8006456ea51515841b71551b0368a773670f9c088791a0b18db0",
+      "name": "Poisson/P2/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/d66530ac9cfe8006456ea51515841b71551b0368a773670f9c088791a0b18db0.json"
+    },
+    {
+      "id": "72bee2bad487a59390804b4618b68ae8dc04a59541ea0dff9080599b79d56010",
+      "name": "Poisson/P2/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/72bee2bad487a59390804b4618b68ae8dc04a59541ea0dff9080599b79d56010.json"
+    },
+    {
+      "id": "c09e585569b840f823860b09e7e0352327ee1908e2cd2be5bfac9e41b6212eac",
+      "name": "Poisson/P2/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/c09e585569b840f823860b09e7e0352327ee1908e2cd2be5bfac9e41b6212eac.json"
+    },
+    {
+      "id": "57a5abcfcd58ea0c594f48d250501433f5e15c1dbe68000fa3aa7bcf0708a40e",
+      "name": "Poisson/P2/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/57a5abcfcd58ea0c594f48d250501433f5e15c1dbe68000fa3aa7bcf0708a40e.json"
+    },
+    {
+      "id": "e1422933040a3b90d643b6d7cd42c36e4c32d6c91dda0aa9115663e51adb6533",
+      "name": "Poisson/P2/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/e1422933040a3b90d643b6d7cd42c36e4c32d6c91dda0aa9115663e51adb6533.json"
+    },
+    {
+      "id": "0e092e3ddafcf7debb95b4207cfd7e066a37354a395be97347835c4a5cad735f",
+      "name": "Poisson/P2/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0e092e3ddafcf7debb95b4207cfd7e066a37354a395be97347835c4a5cad735f.json"
+    },
+    {
+      "id": "7da25b53bdcc070807734a8e425a6b4b2ad599385be89445f2c37d344e5e13f8",
+      "name": "Poisson/P2/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/7da25b53bdcc070807734a8e425a6b4b2ad599385be89445f2c37d344e5e13f8.json"
+    },
+    {
+      "id": "acc28e52beb0174744a3ea5b3d14af8b025ce0f84172b0757aae112b65139b56",
+      "name": "Poisson/P2/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/acc28e52beb0174744a3ea5b3d14af8b025ce0f84172b0757aae112b65139b56.json"
+    },
+    {
+      "id": "7119cb89a4905ef0fe58f3d79d567008d296bbcadefc3ce76a2a13f3ca95ae68",
+      "name": "Poisson/P2/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/7119cb89a4905ef0fe58f3d79d567008d296bbcadefc3ce76a2a13f3ca95ae68.json"
+    },
+    {
+      "id": "9fbb45b8701d6a2d723da3ba91ff50ffae8d07970011a0bbbc61f531970673a5",
+      "name": "Poisson/P2/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/9fbb45b8701d6a2d723da3ba91ff50ffae8d07970011a0bbbc61f531970673a5.json"
+    },
+    {
+      "id": "30d9766080b866ceda7f95189db079adbf7bacfc11ef2b0910f2fc4205f36c76",
+      "name": "Poisson/P2/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/30d9766080b866ceda7f95189db079adbf7bacfc11ef2b0910f2fc4205f36c76.json"
+    },
+    {
+      "id": "0a2f8ba87c5064c74939874edee8a2e87136a9ccce01e79a20262005a9cd3bfd",
+      "name": "Poisson/P2/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0a2f8ba87c5064c74939874edee8a2e87136a9ccce01e79a20262005a9cd3bfd.json"
+    },
+    {
+      "id": "c78e7604c1ea41ce1b436507631521dafa110eef7a93aec81f95270a193fe2e8",
+      "name": "Poisson/P2/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/c78e7604c1ea41ce1b436507631521dafa110eef7a93aec81f95270a193fe2e8.json"
+    },
+    {
+      "id": "a05ab8e7b22ed9d75c5b01c6f3aabf0a19a9933a80df3f5821fb084631f14129",
+      "name": "Poisson/P2/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/a05ab8e7b22ed9d75c5b01c6f3aabf0a19a9933a80df3f5821fb084631f14129.json"
+    },
+    {
+      "id": "1f2a45a9a9ecbfa6aad60d1bdf05f48a730ff47f57fb0d8e4f723dafa3fd5123",
+      "name": "Poisson/P2/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/1f2a45a9a9ecbfa6aad60d1bdf05f48a730ff47f57fb0d8e4f723dafa3fd5123.json"
+    },
+    {
+      "id": "2e7fc2525bf1c6875118e51eee29e137d3ca55fca7359f75f2ce22c7fc4c8af0",
+      "name": "Poisson/P2/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/2e7fc2525bf1c6875118e51eee29e137d3ca55fca7359f75f2ce22c7fc4c8af0.json"
+    },
+    {
+      "id": "4f9035aa614ba7d9b915388da7f3eb3f608cc4b3f0d07af464dc659105c056a6",
+      "name": "Poisson/P2/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4f9035aa614ba7d9b915388da7f3eb3f608cc4b3f0d07af464dc659105c056a6.json"
+    },
+    {
+      "id": "28b14b2a9ddf84fb553015c2751d743316500d533a2f7d9dde460094920e16a7",
+      "name": "Poisson/P2/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/28b14b2a9ddf84fb553015c2751d743316500d533a2f7d9dde460094920e16a7.json"
+    },
+    {
+      "id": "07e67608a6e61e5d2f5468d2897a05ea9ae5d062f8cffec9adf862bbb1705f07",
+      "name": "Poisson/P2/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/07e67608a6e61e5d2f5468d2897a05ea9ae5d062f8cffec9adf862bbb1705f07.json"
+    }
+  ]
+}

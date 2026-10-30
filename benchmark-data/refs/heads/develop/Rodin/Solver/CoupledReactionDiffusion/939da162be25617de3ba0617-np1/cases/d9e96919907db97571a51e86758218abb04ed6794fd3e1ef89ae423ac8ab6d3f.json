@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "component": "Rodin/Solver/CoupledReactionDiffusion",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Wedge/9/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Wedge/9/real_time",
+          "value": 393129.2241375345,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            393129.2241375345
+          ],
+          "records": [
+            {
+              "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Wedge/9/real_time",
+              "family_index": 6,
+              "per_family_instance_index": 2,
+              "run_name": "CoupledReactionDiffusion/CG/H1/P1/Real/Wedge/9/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 696,
+              "real_time": 393129.2241375345,
+              "cpu_time": 393161.5272986512,
+              "time_unit": "ns",
+              "cells": 1024.0,
+              "degree": 1.0,
+              "diffusion_terms": 2.0,
+              "dimension": 3.0,
+              "fields": 2.0,
+              "local_basis_per_field": 6.0,
+              "local_entries_per_operator_term": 36864.0,
+              "nnz": 22736.0,
+              "omitted_coupling_normalized_residual": 1.0000000000005393,
+              "quadrature_order": 16.0,
+              "quadrature_points_per_cell": 477.0,
+              "reaction_terms": 4.0,
+              "relative_coefficient_error": 1.296310602666584e-13,
+              "relative_load_error": 0.0,
+              "relative_matrix_error": 1.4060044648881666e-20,
+              "relative_residual": 8.289071436024843e-14,
+              "rows": 1458.0,
+              "scalar_bytes": 8.0,
+              "solver_reported_error": 8.287211408705944e-14,
+              "solver_reported_iterations": 40.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T13:25:15+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinCoupledReactionDiffusionSolveBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 4521,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.865723,
+              0.246094,
+              0.0849609
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "Coupled CG setup and solve; zero initial guess"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

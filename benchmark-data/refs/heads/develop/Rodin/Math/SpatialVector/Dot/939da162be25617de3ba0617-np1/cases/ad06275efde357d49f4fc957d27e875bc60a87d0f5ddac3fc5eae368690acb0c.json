@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "component": "Rodin/Math/SpatialVector/Dot",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/1/16/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/1/16/real_time",
+          "value": 143.10440767293687,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            143.10440767293687
+          ],
+          "records": [
+            {
+              "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/1/16/real_time",
+              "family_index": 236,
+              "per_family_instance_index": 0,
+              "run_name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/1/16/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 1976349,
+              "real_time": 143.10440767293687,
+              "cpu_time": 143.10319887833518,
+              "time_unit": "ns",
+              "dimension": 1.0,
+              "input_bytes": 2048.0,
+              "output_bytes": 4096.0,
+              "pairs": 256.0,
+              "row_snapshot": 1.0,
+              "scalar_products": 256.0,
+              "vectors_per_operand": 16.0,
+              "written_bytes": 4096.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T13:48:49+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinSpatialDotBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2600,
+            "cpu_scaling_enabled": true,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 65536,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 2097152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 503316480,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.963867,
+              0.310059,
+              0.11084
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "Spatial dot only; no geometry or assembly"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

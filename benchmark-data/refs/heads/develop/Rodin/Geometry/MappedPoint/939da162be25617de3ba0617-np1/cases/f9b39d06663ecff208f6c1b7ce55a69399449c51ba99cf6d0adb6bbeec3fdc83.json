@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "component": "Rodin/Geometry/MappedPoint",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "MappedPoint/ConstructionAndMetrics/Quadratic/P4/Wedge/3/51/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "MappedPoint/ConstructionAndMetrics/Quadratic/P4/Wedge/3/51/real_time",
+          "value": 2401072.489051023,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            2401072.489051023
+          ],
+          "records": [
+            {
+              "name": "MappedPoint/ConstructionAndMetrics/Quadratic/P4/Wedge/3/51/real_time",
+              "family_index": 8,
+              "per_family_instance_index": 8,
+              "run_name": "MappedPoint/ConstructionAndMetrics/Quadratic/P4/Wedge/3/51/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 137,
+              "real_time": 2401072.489051023,
+              "cpu_time": 2400781.0072992756,
+              "time_unit": "ns",
+              "basis_functions": 75.0,
+              "cells": 1.0,
+              "curvature": 0.125,
+              "embedding_dimension": 3.0,
+              "formula_identities": 1.0,
+              "geometry_degree": 4.0,
+              "jacobian_contraction_terms": 11863800.0,
+              "jacobian_output_payload_bytes": 1406080.0,
+              "output_entries": 175760.0,
+              "quadrature_order": 51.0,
+              "quadrature_points": 17576.0,
+              "reference_dimension": 3.0,
+              "reference_table_miss": 0.0,
+              "reference_table_payload_bytes": 42182400.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T13:20:56+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinMappedPointBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 4208,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.750977,
+              0.239258,
+              0.0854492
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

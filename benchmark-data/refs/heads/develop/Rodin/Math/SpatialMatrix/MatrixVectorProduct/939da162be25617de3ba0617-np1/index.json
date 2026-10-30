@@ -1,0 +1,430 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinMathBenchmarks",
+      "RodinMathSpatialMatrixBenchmarks",
+      "RodinMathSpatialVectorBenchmarks",
+      "RodinScalarDotBenchmarks",
+      "RodinSparseAlgebraBenchmarks",
+      "RodinSparseEliminationBenchmarks",
+      "RodinSpatialDotBenchmarks",
+      "RodinSpatialMatrixContractionBenchmarks",
+      "RodinSpatialMatrixProductBenchmarks",
+      "RodinSpatialMatrixVectorBenchmarks",
+      "RodinSpatialVectorStorageBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "9a87c4ed233b794fff1ba74693e5c8ede988eb2e2491c2cee00172097d9ea8c4",
+      "name": "SpatialMatrixVector/ComplexByComplex/0/0/real_time",
+      "metric": "real_time",
+      "url": "cases/9a87c4ed233b794fff1ba74693e5c8ede988eb2e2491c2cee00172097d9ea8c4.json"
+    },
+    {
+      "id": "40fe069c1d134a251e70fb9cca00e3ddbb0c3b8b40f6e24d6965979ead88a7fe",
+      "name": "SpatialMatrixVector/ComplexByComplex/0/1/real_time",
+      "metric": "real_time",
+      "url": "cases/40fe069c1d134a251e70fb9cca00e3ddbb0c3b8b40f6e24d6965979ead88a7fe.json"
+    },
+    {
+      "id": "9479d4fda34f348b5cf303ea699e26302156b270c499abf0e251c1d0401d7feb",
+      "name": "SpatialMatrixVector/ComplexByComplex/0/2/real_time",
+      "metric": "real_time",
+      "url": "cases/9479d4fda34f348b5cf303ea699e26302156b270c499abf0e251c1d0401d7feb.json"
+    },
+    {
+      "id": "dd7a9315865d17df66bbdd60942fdf7ddbb99c535a393510b90cc7088bd7717f",
+      "name": "SpatialMatrixVector/ComplexByComplex/0/3/real_time",
+      "metric": "real_time",
+      "url": "cases/dd7a9315865d17df66bbdd60942fdf7ddbb99c535a393510b90cc7088bd7717f.json"
+    },
+    {
+      "id": "145007f2ce2890455e184bf9b0c7dc019bcc4dd3e18f9c3a23718b2e0eab02d5",
+      "name": "SpatialMatrixVector/ComplexByComplex/1/0/real_time",
+      "metric": "real_time",
+      "url": "cases/145007f2ce2890455e184bf9b0c7dc019bcc4dd3e18f9c3a23718b2e0eab02d5.json"
+    },
+    {
+      "id": "1cb45128b7152f7c1118154da405e45236380ee44ee74823fc23947354654280",
+      "name": "SpatialMatrixVector/ComplexByComplex/1/1/real_time",
+      "metric": "real_time",
+      "url": "cases/1cb45128b7152f7c1118154da405e45236380ee44ee74823fc23947354654280.json"
+    },
+    {
+      "id": "6d7ba8899e32c95a3f13f8d1ed1b7304cc4b2b69b1e593e3a01c7927b6c28dcb",
+      "name": "SpatialMatrixVector/ComplexByComplex/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/6d7ba8899e32c95a3f13f8d1ed1b7304cc4b2b69b1e593e3a01c7927b6c28dcb.json"
+    },
+    {
+      "id": "c1e0a500aebdd7b90c31761543fb6d07f99934382281f71b7b28cc5ab24e6246",
+      "name": "SpatialMatrixVector/ComplexByComplex/1/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c1e0a500aebdd7b90c31761543fb6d07f99934382281f71b7b28cc5ab24e6246.json"
+    },
+    {
+      "id": "0af48d5cf4d173990f493c59752209df9c8eff52aeb7807232e687714794813e",
+      "name": "SpatialMatrixVector/ComplexByComplex/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/0af48d5cf4d173990f493c59752209df9c8eff52aeb7807232e687714794813e.json"
+    },
+    {
+      "id": "b39c7d3a0f1724abdbc26cf8fd4dead961bb81169be9448123fce7c8a2f33ef9",
+      "name": "SpatialMatrixVector/ComplexByComplex/2/1/real_time",
+      "metric": "real_time",
+      "url": "cases/b39c7d3a0f1724abdbc26cf8fd4dead961bb81169be9448123fce7c8a2f33ef9.json"
+    },
+    {
+      "id": "fb9e470f6a828170989d7466b811b51948c58174a81bf290128832a44ba2eba1",
+      "name": "SpatialMatrixVector/ComplexByComplex/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/fb9e470f6a828170989d7466b811b51948c58174a81bf290128832a44ba2eba1.json"
+    },
+    {
+      "id": "c3d8dfa1e76391d9bad6e72b98684dd8fcc8438ff045616c11ac3b7d7d4bb7c6",
+      "name": "SpatialMatrixVector/ComplexByComplex/2/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c3d8dfa1e76391d9bad6e72b98684dd8fcc8438ff045616c11ac3b7d7d4bb7c6.json"
+    },
+    {
+      "id": "fa27bcc9d8fda28e331dda8425a52a1c15f8daa0aaaf05ae50556a725dc4777a",
+      "name": "SpatialMatrixVector/ComplexByComplex/3/0/real_time",
+      "metric": "real_time",
+      "url": "cases/fa27bcc9d8fda28e331dda8425a52a1c15f8daa0aaaf05ae50556a725dc4777a.json"
+    },
+    {
+      "id": "cb67f5bd152fb1a6df0ac0eef3a63d646eb300c0a8b3e427b27db2bbc5ef5b5a",
+      "name": "SpatialMatrixVector/ComplexByComplex/3/1/real_time",
+      "metric": "real_time",
+      "url": "cases/cb67f5bd152fb1a6df0ac0eef3a63d646eb300c0a8b3e427b27db2bbc5ef5b5a.json"
+    },
+    {
+      "id": "539d72deea20757d533c3d568ba26d03210260b7b58f816e4e28275e1d009d47",
+      "name": "SpatialMatrixVector/ComplexByComplex/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/539d72deea20757d533c3d568ba26d03210260b7b58f816e4e28275e1d009d47.json"
+    },
+    {
+      "id": "bdf3675a861948b0a64c0f7435d78794dd74e468144b5c82382c0773396d4726",
+      "name": "SpatialMatrixVector/ComplexByComplex/3/3/real_time",
+      "metric": "real_time",
+      "url": "cases/bdf3675a861948b0a64c0f7435d78794dd74e468144b5c82382c0773396d4726.json"
+    },
+    {
+      "id": "5f8df266f652f2df85464235520d44a8d7ecc72d87dc28caa73d0554c2c6eb62",
+      "name": "SpatialMatrixVector/ComplexByReal/0/0/real_time",
+      "metric": "real_time",
+      "url": "cases/5f8df266f652f2df85464235520d44a8d7ecc72d87dc28caa73d0554c2c6eb62.json"
+    },
+    {
+      "id": "e6cfdc6d0b53069985d393247438947d84d4cb5506ae499b717779ddafd6b24b",
+      "name": "SpatialMatrixVector/ComplexByReal/0/1/real_time",
+      "metric": "real_time",
+      "url": "cases/e6cfdc6d0b53069985d393247438947d84d4cb5506ae499b717779ddafd6b24b.json"
+    },
+    {
+      "id": "de5a19b5e7686778353fbba262c073226aec3125ddc6e577e904ea3fd3d591c1",
+      "name": "SpatialMatrixVector/ComplexByReal/0/2/real_time",
+      "metric": "real_time",
+      "url": "cases/de5a19b5e7686778353fbba262c073226aec3125ddc6e577e904ea3fd3d591c1.json"
+    },
+    {
+      "id": "2dc138a8138db78f436786bfc39feafdf09b8689395f7ff871fcb8640b5a9d6b",
+      "name": "SpatialMatrixVector/ComplexByReal/0/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2dc138a8138db78f436786bfc39feafdf09b8689395f7ff871fcb8640b5a9d6b.json"
+    },
+    {
+      "id": "cf05746a33288b29eafb5df2acc36ca7c5f7f0d6a3823ddbd050bdfd68c39dd4",
+      "name": "SpatialMatrixVector/ComplexByReal/1/0/real_time",
+      "metric": "real_time",
+      "url": "cases/cf05746a33288b29eafb5df2acc36ca7c5f7f0d6a3823ddbd050bdfd68c39dd4.json"
+    },
+    {
+      "id": "06b92f7562b429a702340420ec09b5fb7755db1465f1352f2844753834447aec",
+      "name": "SpatialMatrixVector/ComplexByReal/1/1/real_time",
+      "metric": "real_time",
+      "url": "cases/06b92f7562b429a702340420ec09b5fb7755db1465f1352f2844753834447aec.json"
+    },
+    {
+      "id": "6d76b0c8e7799353ce07103d84ce714295c2a85c80be34f70aa0a71bc3a11423",
+      "name": "SpatialMatrixVector/ComplexByReal/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/6d76b0c8e7799353ce07103d84ce714295c2a85c80be34f70aa0a71bc3a11423.json"
+    },
+    {
+      "id": "cf9a93f2042a36e1b4e4ab3884cb9664ccf2e97f4530d7f3071b235ed40d569a",
+      "name": "SpatialMatrixVector/ComplexByReal/1/3/real_time",
+      "metric": "real_time",
+      "url": "cases/cf9a93f2042a36e1b4e4ab3884cb9664ccf2e97f4530d7f3071b235ed40d569a.json"
+    },
+    {
+      "id": "be3b0875ae3b7268c2455cfa84867b889b021370d27598d95c204fa0c8028273",
+      "name": "SpatialMatrixVector/ComplexByReal/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/be3b0875ae3b7268c2455cfa84867b889b021370d27598d95c204fa0c8028273.json"
+    },
+    {
+      "id": "f98eb128fe36a8461d3ccac86c72638243a0ad2aac19d9f13cb859e719f94600",
+      "name": "SpatialMatrixVector/ComplexByReal/2/1/real_time",
+      "metric": "real_time",
+      "url": "cases/f98eb128fe36a8461d3ccac86c72638243a0ad2aac19d9f13cb859e719f94600.json"
+    },
+    {
+      "id": "de2ed5bbd1b24890a39f64c1d1b5d6f75ed62c4446bc8751addd939b48b91a26",
+      "name": "SpatialMatrixVector/ComplexByReal/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/de2ed5bbd1b24890a39f64c1d1b5d6f75ed62c4446bc8751addd939b48b91a26.json"
+    },
+    {
+      "id": "6d7a5043bc9189b1e8b659b72b71b9f26bc5790172a5ac955df04273dead624b",
+      "name": "SpatialMatrixVector/ComplexByReal/2/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6d7a5043bc9189b1e8b659b72b71b9f26bc5790172a5ac955df04273dead624b.json"
+    },
+    {
+      "id": "a31eb2aacab4b03455aac2c45d40574ca3d56e400e8a1e746bbbc43ecadca163",
+      "name": "SpatialMatrixVector/ComplexByReal/3/0/real_time",
+      "metric": "real_time",
+      "url": "cases/a31eb2aacab4b03455aac2c45d40574ca3d56e400e8a1e746bbbc43ecadca163.json"
+    },
+    {
+      "id": "c7aebc81a60374d30fff269cb7e60f8b4ab4e637edb218dfe0e162fb41a559be",
+      "name": "SpatialMatrixVector/ComplexByReal/3/1/real_time",
+      "metric": "real_time",
+      "url": "cases/c7aebc81a60374d30fff269cb7e60f8b4ab4e637edb218dfe0e162fb41a559be.json"
+    },
+    {
+      "id": "59321338620e3cd0adeaee27063b89cf0f6928b22a2757fe1e7ff38d7665d6cf",
+      "name": "SpatialMatrixVector/ComplexByReal/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/59321338620e3cd0adeaee27063b89cf0f6928b22a2757fe1e7ff38d7665d6cf.json"
+    },
+    {
+      "id": "65c074f72da941ed664e8564de065d7af1e57c65fd252c2ea8731c60e0707173",
+      "name": "SpatialMatrixVector/ComplexByReal/3/3/real_time",
+      "metric": "real_time",
+      "url": "cases/65c074f72da941ed664e8564de065d7af1e57c65fd252c2ea8731c60e0707173.json"
+    },
+    {
+      "id": "f241029f9b0a085132e6a30353bb2ae3442350dd1e53285d80886de40434645e",
+      "name": "SpatialMatrixVector/RealByComplex/0/0/real_time",
+      "metric": "real_time",
+      "url": "cases/f241029f9b0a085132e6a30353bb2ae3442350dd1e53285d80886de40434645e.json"
+    },
+    {
+      "id": "f0f80af66305b2b8e03b1889fd092d0643e4ab369127286f931a4353c0244baa",
+      "name": "SpatialMatrixVector/RealByComplex/0/1/real_time",
+      "metric": "real_time",
+      "url": "cases/f0f80af66305b2b8e03b1889fd092d0643e4ab369127286f931a4353c0244baa.json"
+    },
+    {
+      "id": "b7d303516030d4f249000db47912bab40c0c074ba39738984865068d4e288d4c",
+      "name": "SpatialMatrixVector/RealByComplex/0/2/real_time",
+      "metric": "real_time",
+      "url": "cases/b7d303516030d4f249000db47912bab40c0c074ba39738984865068d4e288d4c.json"
+    },
+    {
+      "id": "08678af49531c561c234b310f20b8be5a360601af273d03f69222bb72e22dbf9",
+      "name": "SpatialMatrixVector/RealByComplex/0/3/real_time",
+      "metric": "real_time",
+      "url": "cases/08678af49531c561c234b310f20b8be5a360601af273d03f69222bb72e22dbf9.json"
+    },
+    {
+      "id": "f521c139dc7098c696ed78d9da9369455259057b82978b6926fb27663f6370be",
+      "name": "SpatialMatrixVector/RealByComplex/1/0/real_time",
+      "metric": "real_time",
+      "url": "cases/f521c139dc7098c696ed78d9da9369455259057b82978b6926fb27663f6370be.json"
+    },
+    {
+      "id": "ccceac409695f77546cb48f74589e1a93965ffe0cb3d5215df60cd958ba5eff0",
+      "name": "SpatialMatrixVector/RealByComplex/1/1/real_time",
+      "metric": "real_time",
+      "url": "cases/ccceac409695f77546cb48f74589e1a93965ffe0cb3d5215df60cd958ba5eff0.json"
+    },
+    {
+      "id": "335cd71ca2742f8f74135f53a18d6eed45a953654fced9b05059a3b75d195f81",
+      "name": "SpatialMatrixVector/RealByComplex/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/335cd71ca2742f8f74135f53a18d6eed45a953654fced9b05059a3b75d195f81.json"
+    },
+    {
+      "id": "ae5e2b679b23d1b22903919c0af93030dbb958a28d8ad3b534ff179c20b990e5",
+      "name": "SpatialMatrixVector/RealByComplex/1/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ae5e2b679b23d1b22903919c0af93030dbb958a28d8ad3b534ff179c20b990e5.json"
+    },
+    {
+      "id": "7f588825442e1ec7a85793d68c93b34b7a63e123620fc9bfbce2d9a8e61f1923",
+      "name": "SpatialMatrixVector/RealByComplex/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/7f588825442e1ec7a85793d68c93b34b7a63e123620fc9bfbce2d9a8e61f1923.json"
+    },
+    {
+      "id": "9bb6c794f6c8cff98379049ed4e522b1ba461ecbaf41060fb9d66247565b49a1",
+      "name": "SpatialMatrixVector/RealByComplex/2/1/real_time",
+      "metric": "real_time",
+      "url": "cases/9bb6c794f6c8cff98379049ed4e522b1ba461ecbaf41060fb9d66247565b49a1.json"
+    },
+    {
+      "id": "eb259695e3be70d6a70a0355a1249d6ebf6dbcddd910cf89e69448a311fe87c5",
+      "name": "SpatialMatrixVector/RealByComplex/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/eb259695e3be70d6a70a0355a1249d6ebf6dbcddd910cf89e69448a311fe87c5.json"
+    },
+    {
+      "id": "e2073e4363e1c3d99f6aa84313038256b10d1e42685f3697558321fc06eada9c",
+      "name": "SpatialMatrixVector/RealByComplex/2/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e2073e4363e1c3d99f6aa84313038256b10d1e42685f3697558321fc06eada9c.json"
+    },
+    {
+      "id": "e2d64bdec4c975e122f5bc45face708eefeb6c3aec089fd38f3121195b228201",
+      "name": "SpatialMatrixVector/RealByComplex/3/0/real_time",
+      "metric": "real_time",
+      "url": "cases/e2d64bdec4c975e122f5bc45face708eefeb6c3aec089fd38f3121195b228201.json"
+    },
+    {
+      "id": "f7a191e67bbbae3fee34969cb59ee252fae815e759771b497184382c87ff9926",
+      "name": "SpatialMatrixVector/RealByComplex/3/1/real_time",
+      "metric": "real_time",
+      "url": "cases/f7a191e67bbbae3fee34969cb59ee252fae815e759771b497184382c87ff9926.json"
+    },
+    {
+      "id": "d548e915570a41a3900a5b27df911c90583ad63a16d36b33ba0df94cdf4c9bfc",
+      "name": "SpatialMatrixVector/RealByComplex/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/d548e915570a41a3900a5b27df911c90583ad63a16d36b33ba0df94cdf4c9bfc.json"
+    },
+    {
+      "id": "02e22d8dcae73a3588335901453f7ce2a6e6d6dd9b3067b900049dfe8c53f4cb",
+      "name": "SpatialMatrixVector/RealByComplex/3/3/real_time",
+      "metric": "real_time",
+      "url": "cases/02e22d8dcae73a3588335901453f7ce2a6e6d6dd9b3067b900049dfe8c53f4cb.json"
+    },
+    {
+      "id": "eee6790954ae06ab62fe95d0ff2f4365e74a9b31389547989cc4ac4f70037d54",
+      "name": "SpatialMatrixVector/RealByReal/0/0/real_time",
+      "metric": "real_time",
+      "url": "cases/eee6790954ae06ab62fe95d0ff2f4365e74a9b31389547989cc4ac4f70037d54.json"
+    },
+    {
+      "id": "76018bf14771a5cb407bd7e35c43c9f9c6ad7f7040c3eee49cd39d4fd662420d",
+      "name": "SpatialMatrixVector/RealByReal/0/1/real_time",
+      "metric": "real_time",
+      "url": "cases/76018bf14771a5cb407bd7e35c43c9f9c6ad7f7040c3eee49cd39d4fd662420d.json"
+    },
+    {
+      "id": "ab2eb73a25c02753555d4e2d3fa688441e145fbafc6cd66ec95453ed3ee2084b",
+      "name": "SpatialMatrixVector/RealByReal/0/2/real_time",
+      "metric": "real_time",
+      "url": "cases/ab2eb73a25c02753555d4e2d3fa688441e145fbafc6cd66ec95453ed3ee2084b.json"
+    },
+    {
+      "id": "e13e02ccaaf0b241a5d03c2cf0a8c61f1645353ea9c23e8d3dff0f77a9a198ba",
+      "name": "SpatialMatrixVector/RealByReal/0/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e13e02ccaaf0b241a5d03c2cf0a8c61f1645353ea9c23e8d3dff0f77a9a198ba.json"
+    },
+    {
+      "id": "32fefc6a0e1fa6c496b94553af03105723a1eb3d2888b987266af84e9b37c8ad",
+      "name": "SpatialMatrixVector/RealByReal/1/0/real_time",
+      "metric": "real_time",
+      "url": "cases/32fefc6a0e1fa6c496b94553af03105723a1eb3d2888b987266af84e9b37c8ad.json"
+    },
+    {
+      "id": "8d5549b98137c28d5de055927bddb6143e3aeccc7a623bae43d1a57f553548d0",
+      "name": "SpatialMatrixVector/RealByReal/1/1/real_time",
+      "metric": "real_time",
+      "url": "cases/8d5549b98137c28d5de055927bddb6143e3aeccc7a623bae43d1a57f553548d0.json"
+    },
+    {
+      "id": "1e488766479e0549e91c3abf7a79d946da90a4e2bfd9ecad7c52859bbc3e2aa4",
+      "name": "SpatialMatrixVector/RealByReal/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/1e488766479e0549e91c3abf7a79d946da90a4e2bfd9ecad7c52859bbc3e2aa4.json"
+    },
+    {
+      "id": "9d54e23a69d19dbbbdf1233fb6b33ea8829337783b079bf3e290d242efd46c01",
+      "name": "SpatialMatrixVector/RealByReal/1/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9d54e23a69d19dbbbdf1233fb6b33ea8829337783b079bf3e290d242efd46c01.json"
+    },
+    {
+      "id": "9c7ef6a1d024dcb912380dcbb21bfe81f416dd5e0029f6836f30524afc83a559",
+      "name": "SpatialMatrixVector/RealByReal/2/0/real_time",
+      "metric": "real_time",
+      "url": "cases/9c7ef6a1d024dcb912380dcbb21bfe81f416dd5e0029f6836f30524afc83a559.json"
+    },
+    {
+      "id": "9ea40bc1a59aac086713d0d1135b85ca39c20b27db2d40e550172c4f1bd6dc2e",
+      "name": "SpatialMatrixVector/RealByReal/2/1/real_time",
+      "metric": "real_time",
+      "url": "cases/9ea40bc1a59aac086713d0d1135b85ca39c20b27db2d40e550172c4f1bd6dc2e.json"
+    },
+    {
+      "id": "96e0e5a18bdc664075a50a33b8908d629ca565f1d2131c5a42ba6139b9e166b4",
+      "name": "SpatialMatrixVector/RealByReal/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/96e0e5a18bdc664075a50a33b8908d629ca565f1d2131c5a42ba6139b9e166b4.json"
+    },
+    {
+      "id": "32259d7bd79fa5b5ffdc0576b89edb0f859008ed12641d73eac782e1f018237d",
+      "name": "SpatialMatrixVector/RealByReal/2/3/real_time",
+      "metric": "real_time",
+      "url": "cases/32259d7bd79fa5b5ffdc0576b89edb0f859008ed12641d73eac782e1f018237d.json"
+    },
+    {
+      "id": "ac1f1c6fb2da77d4c55215b0b8a2ac17f49e1cb199406572daa0d707d3c3b829",
+      "name": "SpatialMatrixVector/RealByReal/3/0/real_time",
+      "metric": "real_time",
+      "url": "cases/ac1f1c6fb2da77d4c55215b0b8a2ac17f49e1cb199406572daa0d707d3c3b829.json"
+    },
+    {
+      "id": "434df6732856ae9eaf3cad435230365a3fdddd0c5d097ffbe99f880b04dd9e3d",
+      "name": "SpatialMatrixVector/RealByReal/3/1/real_time",
+      "metric": "real_time",
+      "url": "cases/434df6732856ae9eaf3cad435230365a3fdddd0c5d097ffbe99f880b04dd9e3d.json"
+    },
+    {
+      "id": "772fcd4a1d7000063a46c3d7001012c9ddcf595dcd0f761533979290db9a8a46",
+      "name": "SpatialMatrixVector/RealByReal/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/772fcd4a1d7000063a46c3d7001012c9ddcf595dcd0f761533979290db9a8a46.json"
+    },
+    {
+      "id": "d0080515b3c577d17ceb970ef508c914d1a3f35106f9dbd94c0b81564b295fa0",
+      "name": "SpatialMatrixVector/RealByReal/3/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d0080515b3c577d17ceb970ef508c914d1a3f35106f9dbd94c0b81564b295fa0.json"
+    }
+  ]
+}

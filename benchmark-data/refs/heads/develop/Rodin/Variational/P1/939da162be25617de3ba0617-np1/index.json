@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBasisScalingBenchmarks",
+      "RodinFieldContractionBenchmarks",
+      "RodinFieldDerivativeBenchmarks",
+      "RodinFieldOperationBenchmarks",
+      "RodinGridFunctionBenchmarks",
+      "RodinH1BasisLifecycleBenchmarks",
+      "RodinH1ConvectionBenchmarks",
+      "RodinH1MassBindingBenchmarks",
+      "RodinH1MassOperandOrderBenchmarks",
+      "RodinH1PreparedBasisBenchmarks",
+      "RodinH1PyramidBenchmarks",
+      "RodinH1PyramidNodalBenchmarks",
+      "RodinNamedFormBenchmarks",
+      "RodinNamedMassKernelBenchmarks",
+      "RodinP1QuadratureBindingBenchmarks",
+      "RodinPhysicalGradientBenchmarks",
+      "RodinProblemLifecycleBenchmarks",
+      "RodinQuadratureBindingBenchmarks",
+      "RodinQuadratureExpressionBenchmarks",
+      "RodinReferenceElementBenchmarks",
+      "RodinStokesBindingBenchmarks",
+      "RodinVariationalCoefficientEvaluationBenchmarks",
+      "RodinVariationalGridFunctionBenchmarks",
+      "RodinVariationalIntegratorsBenchmarks",
+      "RodinVariationalNamedFormsBenchmarks",
+      "RodinVariationalP1Benchmarks",
+      "RodinVariationalRankOneJacobianBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "8f31bb0ffbf759a3a6bcf28a71fd4ab10023f8ec1c09bcbc5ebbf8b0901da651",
+      "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+      "metric": "cpu_time",
+      "url": "cases/8f31bb0ffbf759a3a6bcf28a71fd4ab10023f8ec1c09bcbc5ebbf8b0901da651.json"
+    },
+    {
+      "id": "090e50abdcf22bc73396864d056cb61e65dce4645941eb5bb78d48130a7264dc",
+      "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+      "metric": "cpu_time",
+      "url": "cases/090e50abdcf22bc73396864d056cb61e65dce4645941eb5bb78d48130a7264dc.json"
+    },
+    {
+      "id": "7defc6c8e7d6d94067a00a2b101a17e79eacb21d05edc4290bb2fb9f9fd48356",
+      "name": "P1Benchmark/UniformTriangular128_Build",
+      "metric": "cpu_time",
+      "url": "cases/7defc6c8e7d6d94067a00a2b101a17e79eacb21d05edc4290bb2fb9f9fd48356.json"
+    },
+    {
+      "id": "9f770bb868ad65d8c18c4a6050745371295a8bbd85d6045ac66a14436c13d197",
+      "name": "P1Benchmark/UniformTriangular16_Build",
+      "metric": "cpu_time",
+      "url": "cases/9f770bb868ad65d8c18c4a6050745371295a8bbd85d6045ac66a14436c13d197.json"
+    },
+    {
+      "id": "bdbf976f4e2248de7d4ccc1fc2f4a8f9a1870b03bebd06b201f471a7ea5f80c6",
+      "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+      "metric": "cpu_time",
+      "url": "cases/bdbf976f4e2248de7d4ccc1fc2f4a8f9a1870b03bebd06b201f471a7ea5f80c6.json"
+    },
+    {
+      "id": "f91480e1696806f3743b1ff67d5913e158e4b773b569ab4b7cee3a107e1fbf92",
+      "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+      "metric": "cpu_time",
+      "url": "cases/f91480e1696806f3743b1ff67d5913e158e4b773b569ab4b7cee3a107e1fbf92.json"
+    },
+    {
+      "id": "05b0c8d64975a895ca6648ba2e92ec531770ff726fe2b44282738b3b26386199",
+      "name": "P1Benchmark/UniformTriangular32_Build",
+      "metric": "cpu_time",
+      "url": "cases/05b0c8d64975a895ca6648ba2e92ec531770ff726fe2b44282738b3b26386199.json"
+    },
+    {
+      "id": "31542a01afc21444aab10ad8d67aef043ec8613ce490f6658d746e8790c66c9d",
+      "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+      "metric": "cpu_time",
+      "url": "cases/31542a01afc21444aab10ad8d67aef043ec8613ce490f6658d746e8790c66c9d.json"
+    },
+    {
+      "id": "c3b35782c63e95ac41e531beaa761de6fc495cf44a3427c4e93ec4c861d1fc56",
+      "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+      "metric": "cpu_time",
+      "url": "cases/c3b35782c63e95ac41e531beaa761de6fc495cf44a3427c4e93ec4c861d1fc56.json"
+    },
+    {
+      "id": "cc3a7b731ee15de97fe861ffd75db7f5271ec075cc6b178a0f1147d3ceaa5cf1",
+      "name": "P1Benchmark/UniformTriangular64_Build",
+      "metric": "cpu_time",
+      "url": "cases/cc3a7b731ee15de97fe861ffd75db7f5271ec075cc6b178a0f1147d3ceaa5cf1.json"
+    }
+  ]
+}

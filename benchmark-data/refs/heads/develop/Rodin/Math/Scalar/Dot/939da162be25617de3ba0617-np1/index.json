@@ -1,0 +1,586 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinMathBenchmarks",
+      "RodinMathSpatialMatrixBenchmarks",
+      "RodinMathSpatialVectorBenchmarks",
+      "RodinScalarDotBenchmarks",
+      "RodinSparseAlgebraBenchmarks",
+      "RodinSparseEliminationBenchmarks",
+      "RodinSpatialDotBenchmarks",
+      "RodinSpatialMatrixContractionBenchmarks",
+      "RodinSpatialMatrixProductBenchmarks",
+      "RodinSpatialMatrixVectorBenchmarks",
+      "RodinSpatialVectorStorageBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "65188b27ed89a6c49cd534c1359481a0b04d612fbea1f2facd0a808ff7e21a88",
+      "name": "ScalarDot/FixedOne/ComplexGeneral/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/65188b27ed89a6c49cd534c1359481a0b04d612fbea1f2facd0a808ff7e21a88.json"
+    },
+    {
+      "id": "21de984c69759ce0fd159bf7acad44522d8fcbc2ef9c893c97279fadf29dd8b8",
+      "name": "ScalarDot/FixedOne/ComplexGeneral/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/21de984c69759ce0fd159bf7acad44522d8fcbc2ef9c893c97279fadf29dd8b8.json"
+    },
+    {
+      "id": "4e2c65689ed7332b1ef2bd8c2d9fb471ca17e1842d7d707d685e242f2bc4beb6",
+      "name": "ScalarDot/FixedOne/ComplexGeneral/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/4e2c65689ed7332b1ef2bd8c2d9fb471ca17e1842d7d707d685e242f2bc4beb6.json"
+    },
+    {
+      "id": "bbaccc117d30902b4e6c424be2a900ab91525ac8a256a21d2d581c26844cec3d",
+      "name": "ScalarDot/FixedOne/ComplexGeneral/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/bbaccc117d30902b4e6c424be2a900ab91525ac8a256a21d2d581c26844cec3d.json"
+    },
+    {
+      "id": "2fbf398470e1c7530eff5b09c29476b69c5bd5679b208caf1aa3925eee15afbd",
+      "name": "ScalarDot/FixedOne/ComplexGeneral/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/2fbf398470e1c7530eff5b09c29476b69c5bd5679b208caf1aa3925eee15afbd.json"
+    },
+    {
+      "id": "36001c591ae098eb415c8d40bc15b73600852acc569cbded30a8c051a4f3c002",
+      "name": "ScalarDot/FixedOne/ComplexGeneral/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/36001c591ae098eb415c8d40bc15b73600852acc569cbded30a8c051a4f3c002.json"
+    },
+    {
+      "id": "d0fc2a8622454076ad9f85d46ad9138af378e0819379f773163046b059827a94",
+      "name": "ScalarDot/FixedOne/ComplexRealTest/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/d0fc2a8622454076ad9f85d46ad9138af378e0819379f773163046b059827a94.json"
+    },
+    {
+      "id": "c97d1fef72591b252d156b2179bf073ca5114bd884c4365b85feba57e12b4245",
+      "name": "ScalarDot/FixedOne/ComplexRealTest/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/c97d1fef72591b252d156b2179bf073ca5114bd884c4365b85feba57e12b4245.json"
+    },
+    {
+      "id": "f8865d679c3f51deaf70de3b151405fe91899a452f9009efe685c4d3fa79d7d4",
+      "name": "ScalarDot/FixedOne/ComplexRealTest/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/f8865d679c3f51deaf70de3b151405fe91899a452f9009efe685c4d3fa79d7d4.json"
+    },
+    {
+      "id": "7e2cd3628a943d7bd70a46f2088a6dd877725958dc01ea86578bcc8f6639be6e",
+      "name": "ScalarDot/FixedOne/ComplexRealTest/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/7e2cd3628a943d7bd70a46f2088a6dd877725958dc01ea86578bcc8f6639be6e.json"
+    },
+    {
+      "id": "3c9ad4366b7c84f1bc67dad6534db08ae0c193d8e570c8302550173b94cb2460",
+      "name": "ScalarDot/FixedOne/ComplexRealTest/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/3c9ad4366b7c84f1bc67dad6534db08ae0c193d8e570c8302550173b94cb2460.json"
+    },
+    {
+      "id": "3751c08ae10fc2a7dcd43c9e34034508741f54aaffa77b0cf49310497da12073",
+      "name": "ScalarDot/FixedOne/ComplexRealTest/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3751c08ae10fc2a7dcd43c9e34034508741f54aaffa77b0cf49310497da12073.json"
+    },
+    {
+      "id": "6321409bac8e3f141aae14b1a77fccae5b5383feb48717f1430f6be96c71dd28",
+      "name": "ScalarDot/FixedOne/Real/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/6321409bac8e3f141aae14b1a77fccae5b5383feb48717f1430f6be96c71dd28.json"
+    },
+    {
+      "id": "656fccd5fc635115692e7cf91d4e51c1f518ec4c54bc95335d9eecc6eb734556",
+      "name": "ScalarDot/FixedOne/Real/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/656fccd5fc635115692e7cf91d4e51c1f518ec4c54bc95335d9eecc6eb734556.json"
+    },
+    {
+      "id": "16f863cb0357b6f152a3a3ff37e73805fb29ec4fccc92fec4214220fe9b083a3",
+      "name": "ScalarDot/FixedOne/Real/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/16f863cb0357b6f152a3a3ff37e73805fb29ec4fccc92fec4214220fe9b083a3.json"
+    },
+    {
+      "id": "fd94c4757d208a388d2c3815b5d31d2da1173c2bbcba4f6ac8dfea7acc686887",
+      "name": "ScalarDot/FixedOne/Real/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/fd94c4757d208a388d2c3815b5d31d2da1173c2bbcba4f6ac8dfea7acc686887.json"
+    },
+    {
+      "id": "bc66a36a8ecc4c91823365b084cff589c649e7188e1532e1e257cca7788d3002",
+      "name": "ScalarDot/FixedOne/Real/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/bc66a36a8ecc4c91823365b084cff589c649e7188e1532e1e257cca7788d3002.json"
+    },
+    {
+      "id": "30c4c50e339008984781c4e5935b32335c250d61addb0282f8f2bf2a658cc2ea",
+      "name": "ScalarDot/FixedOne/Real/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/30c4c50e339008984781c4e5935b32335c250d61addb0282f8f2bf2a658cc2ea.json"
+    },
+    {
+      "id": "df64c1df2c41c72feecd30dcda9c12c95d955f241495d7f9d4cb3314fc06738d",
+      "name": "ScalarDot/FixedOneSeeded/ComplexGeneral/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/df64c1df2c41c72feecd30dcda9c12c95d955f241495d7f9d4cb3314fc06738d.json"
+    },
+    {
+      "id": "7cc9767990c5695a6daa5112423b83b4332e105ddd27d5fba350849acab405ee",
+      "name": "ScalarDot/FixedOneSeeded/ComplexGeneral/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/7cc9767990c5695a6daa5112423b83b4332e105ddd27d5fba350849acab405ee.json"
+    },
+    {
+      "id": "78b397b68d4763a11fdf67518212c9a424cdec03f668513f4cc263467d4a782c",
+      "name": "ScalarDot/FixedOneSeeded/ComplexGeneral/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/78b397b68d4763a11fdf67518212c9a424cdec03f668513f4cc263467d4a782c.json"
+    },
+    {
+      "id": "48d3091191bb02cbc66f18c6ec8bb8fdca80cdf6cc3ef26675ec07d5567682f2",
+      "name": "ScalarDot/FixedOneSeeded/ComplexGeneral/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/48d3091191bb02cbc66f18c6ec8bb8fdca80cdf6cc3ef26675ec07d5567682f2.json"
+    },
+    {
+      "id": "db0598b3e988fa5292aff60bcf22bc0dcd75061cc8f9878ccbc30c37a9eb0995",
+      "name": "ScalarDot/FixedOneSeeded/ComplexGeneral/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/db0598b3e988fa5292aff60bcf22bc0dcd75061cc8f9878ccbc30c37a9eb0995.json"
+    },
+    {
+      "id": "6eb8c62989c3514a1440d8ead60a8b2f8eef1eb216b2a7128419e3f98957516f",
+      "name": "ScalarDot/FixedOneSeeded/ComplexGeneral/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/6eb8c62989c3514a1440d8ead60a8b2f8eef1eb216b2a7128419e3f98957516f.json"
+    },
+    {
+      "id": "e1653b84665da0e707c7b8fd15e7295f3a015d2ffad153b637cf78eebd438cac",
+      "name": "ScalarDot/FixedOneSeeded/ComplexRealTest/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/e1653b84665da0e707c7b8fd15e7295f3a015d2ffad153b637cf78eebd438cac.json"
+    },
+    {
+      "id": "d23983cd86831306e58545dd6c836a02785b93e0684334fd35d4accff72a7861",
+      "name": "ScalarDot/FixedOneSeeded/ComplexRealTest/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/d23983cd86831306e58545dd6c836a02785b93e0684334fd35d4accff72a7861.json"
+    },
+    {
+      "id": "21ead66c93782092cb2a89afd996a2c8442f0bf5a3bfc6a0e85a9351b7830e8e",
+      "name": "ScalarDot/FixedOneSeeded/ComplexRealTest/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/21ead66c93782092cb2a89afd996a2c8442f0bf5a3bfc6a0e85a9351b7830e8e.json"
+    },
+    {
+      "id": "2bec60a98960bc3027f88caf709050a5e5d5d24d4d9e1049820b57e87a85e7b0",
+      "name": "ScalarDot/FixedOneSeeded/ComplexRealTest/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/2bec60a98960bc3027f88caf709050a5e5d5d24d4d9e1049820b57e87a85e7b0.json"
+    },
+    {
+      "id": "35807cdee1f5005cd47e44c358f948bfdf0d47860c7015242533bf8b8a489938",
+      "name": "ScalarDot/FixedOneSeeded/ComplexRealTest/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/35807cdee1f5005cd47e44c358f948bfdf0d47860c7015242533bf8b8a489938.json"
+    },
+    {
+      "id": "e829382e696f5ae13abf81f5ded92578ea4b452c0512ab2d96b3d351f412d65e",
+      "name": "ScalarDot/FixedOneSeeded/ComplexRealTest/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e829382e696f5ae13abf81f5ded92578ea4b452c0512ab2d96b3d351f412d65e.json"
+    },
+    {
+      "id": "a33e6655811126c93c91bfadef55c3792b96eb0101d0da0f5f313f3e43525765",
+      "name": "ScalarDot/FixedOneSeeded/Real/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/a33e6655811126c93c91bfadef55c3792b96eb0101d0da0f5f313f3e43525765.json"
+    },
+    {
+      "id": "18cd38bb7b741c28c7a20dc833b45e65418e03d848c23cc687409d1132c06520",
+      "name": "ScalarDot/FixedOneSeeded/Real/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/18cd38bb7b741c28c7a20dc833b45e65418e03d848c23cc687409d1132c06520.json"
+    },
+    {
+      "id": "3d40500b82651b847a688795573c7e3399ff04c2e18cfcd079e8a00b3b6f402f",
+      "name": "ScalarDot/FixedOneSeeded/Real/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3d40500b82651b847a688795573c7e3399ff04c2e18cfcd079e8a00b3b6f402f.json"
+    },
+    {
+      "id": "782a765e1fbb1f02d25ae0aa64d0da51f4583f6c46505569ec684d43ee853061",
+      "name": "ScalarDot/FixedOneSeeded/Real/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/782a765e1fbb1f02d25ae0aa64d0da51f4583f6c46505569ec684d43ee853061.json"
+    },
+    {
+      "id": "a5cc132b9da3e276d4442b21fef0c621ad23ad6e3d78a698026011d9c0aa0c7c",
+      "name": "ScalarDot/FixedOneSeeded/Real/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/a5cc132b9da3e276d4442b21fef0c621ad23ad6e3d78a698026011d9c0aa0c7c.json"
+    },
+    {
+      "id": "b2151201d677b194d777a966707d6ba55f572229ec7511bae8129a70e86d7939",
+      "name": "ScalarDot/FixedOneSeeded/Real/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b2151201d677b194d777a966707d6ba55f572229ec7511bae8129a70e86d7939.json"
+    },
+    {
+      "id": "b19ef2503f3dc95ca6128c9cf9fa45c2f2bed6ac44c17946388d7adc0e550273",
+      "name": "ScalarDot/Scalar/ComplexGeneral/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/b19ef2503f3dc95ca6128c9cf9fa45c2f2bed6ac44c17946388d7adc0e550273.json"
+    },
+    {
+      "id": "d70bf2312a8fd1c8f7b54d977525f7b204df444e32f48c1b55198116e74b9fce",
+      "name": "ScalarDot/Scalar/ComplexGeneral/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/d70bf2312a8fd1c8f7b54d977525f7b204df444e32f48c1b55198116e74b9fce.json"
+    },
+    {
+      "id": "0c45c8baf8e7356554c63996dc1a564dd5f87768c65f819968f5f9cf6919f074",
+      "name": "ScalarDot/Scalar/ComplexGeneral/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/0c45c8baf8e7356554c63996dc1a564dd5f87768c65f819968f5f9cf6919f074.json"
+    },
+    {
+      "id": "840afa8239b8605d8b56b3127c4fcf5e75e666cb4047262aebdfc9e005a7b02d",
+      "name": "ScalarDot/Scalar/ComplexGeneral/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/840afa8239b8605d8b56b3127c4fcf5e75e666cb4047262aebdfc9e005a7b02d.json"
+    },
+    {
+      "id": "16a917eb570db98dd7e656e929e576c8adbc4b78a83ea7c65a6331e6ef7047c7",
+      "name": "ScalarDot/Scalar/ComplexGeneral/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/16a917eb570db98dd7e656e929e576c8adbc4b78a83ea7c65a6331e6ef7047c7.json"
+    },
+    {
+      "id": "a1bad01ecef795732e7490342f544572d93a0134a95617bd2601aa886547217f",
+      "name": "ScalarDot/Scalar/ComplexGeneral/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/a1bad01ecef795732e7490342f544572d93a0134a95617bd2601aa886547217f.json"
+    },
+    {
+      "id": "844d5700ba309a963108a09c72c6d36becb1ebbd456b2ecc90779718bb729df8",
+      "name": "ScalarDot/Scalar/ComplexRealTest/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/844d5700ba309a963108a09c72c6d36becb1ebbd456b2ecc90779718bb729df8.json"
+    },
+    {
+      "id": "90e8ea5945fe94deda7810835c3937fbe54e90f8dd1ace28484c626d62a3ccea",
+      "name": "ScalarDot/Scalar/ComplexRealTest/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/90e8ea5945fe94deda7810835c3937fbe54e90f8dd1ace28484c626d62a3ccea.json"
+    },
+    {
+      "id": "ace8118e181f9714b00413142200d54e217adf8edabe937b2280796f0edfb27d",
+      "name": "ScalarDot/Scalar/ComplexRealTest/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/ace8118e181f9714b00413142200d54e217adf8edabe937b2280796f0edfb27d.json"
+    },
+    {
+      "id": "68fba1423873478663b8c020b1b8f7cc9e3f41e940ca36d392f7db5885a6a1f9",
+      "name": "ScalarDot/Scalar/ComplexRealTest/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/68fba1423873478663b8c020b1b8f7cc9e3f41e940ca36d392f7db5885a6a1f9.json"
+    },
+    {
+      "id": "90061396a0eb5939ed443e97a00c65424fae802924290fcb2793d2ce10498a04",
+      "name": "ScalarDot/Scalar/ComplexRealTest/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/90061396a0eb5939ed443e97a00c65424fae802924290fcb2793d2ce10498a04.json"
+    },
+    {
+      "id": "e87aabc6239d60f062323d909c46bd268da186851bca32c61e05b465ca2996c7",
+      "name": "ScalarDot/Scalar/ComplexRealTest/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e87aabc6239d60f062323d909c46bd268da186851bca32c61e05b465ca2996c7.json"
+    },
+    {
+      "id": "bad4ef2d1bf186c6e6829c32f5cff34614a49943dd81a75af2c8d3f863d6c98d",
+      "name": "ScalarDot/Scalar/Real/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/bad4ef2d1bf186c6e6829c32f5cff34614a49943dd81a75af2c8d3f863d6c98d.json"
+    },
+    {
+      "id": "78bc813cf20d2f690fd1c99524e6eb5e4a675e467b88e02608c6b09d6c322d6e",
+      "name": "ScalarDot/Scalar/Real/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/78bc813cf20d2f690fd1c99524e6eb5e4a675e467b88e02608c6b09d6c322d6e.json"
+    },
+    {
+      "id": "fdb6cf9a13e8f49b0dcc386959faf659c61a41e9ab2ed3af243093acd6e8b313",
+      "name": "ScalarDot/Scalar/Real/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/fdb6cf9a13e8f49b0dcc386959faf659c61a41e9ab2ed3af243093acd6e8b313.json"
+    },
+    {
+      "id": "f4e10bddd96a6a8fee4a76bb289a7bdcee255f52c2658b0f286c9a008f146920",
+      "name": "ScalarDot/Scalar/Real/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/f4e10bddd96a6a8fee4a76bb289a7bdcee255f52c2658b0f286c9a008f146920.json"
+    },
+    {
+      "id": "8c72848b0e4a94a6ff2b6153c44b79de6c9f80299b15791711424b6f0168da8e",
+      "name": "ScalarDot/Scalar/Real/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/8c72848b0e4a94a6ff2b6153c44b79de6c9f80299b15791711424b6f0168da8e.json"
+    },
+    {
+      "id": "68f59fbb730661d2737412331f89a30aa6b8522eb531e494e6f25de82d8c9a3d",
+      "name": "ScalarDot/Scalar/Real/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/68f59fbb730661d2737412331f89a30aa6b8522eb531e494e6f25de82d8c9a3d.json"
+    },
+    {
+      "id": "9755f291d5e325d50cfb3b1e2e20c942467dbe0a7707770d77c3c8c7c35be1b8",
+      "name": "ScalarDot/ScalarSeeded/ComplexGeneral/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/9755f291d5e325d50cfb3b1e2e20c942467dbe0a7707770d77c3c8c7c35be1b8.json"
+    },
+    {
+      "id": "36ca3e09cc09f832380301ba8e393ca7c602ddcc8fdac84974da6d19366fc286",
+      "name": "ScalarDot/ScalarSeeded/ComplexGeneral/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/36ca3e09cc09f832380301ba8e393ca7c602ddcc8fdac84974da6d19366fc286.json"
+    },
+    {
+      "id": "4f60421d2e01248c4745d160d4a208cddf04d6c5c723828aa4f2ed7e848349e0",
+      "name": "ScalarDot/ScalarSeeded/ComplexGeneral/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/4f60421d2e01248c4745d160d4a208cddf04d6c5c723828aa4f2ed7e848349e0.json"
+    },
+    {
+      "id": "69728dadfe52b40bfe40ecbc1cd3de668789e40dd967d4ff1ae3420e1f514477",
+      "name": "ScalarDot/ScalarSeeded/ComplexGeneral/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/69728dadfe52b40bfe40ecbc1cd3de668789e40dd967d4ff1ae3420e1f514477.json"
+    },
+    {
+      "id": "b519250e8ca7db9bd920e4da814c438b09504247a05272d84d3044b0b9a1fce1",
+      "name": "ScalarDot/ScalarSeeded/ComplexGeneral/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/b519250e8ca7db9bd920e4da814c438b09504247a05272d84d3044b0b9a1fce1.json"
+    },
+    {
+      "id": "dac0ba16711df7b450a29f7ee36eb07cc1af12723a4a2a9b7846fbea6c06dff6",
+      "name": "ScalarDot/ScalarSeeded/ComplexGeneral/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/dac0ba16711df7b450a29f7ee36eb07cc1af12723a4a2a9b7846fbea6c06dff6.json"
+    },
+    {
+      "id": "383213df46e17b112523a3be6240dd9131e303af8962096623eafd5874e464ff",
+      "name": "ScalarDot/ScalarSeeded/ComplexRealTest/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/383213df46e17b112523a3be6240dd9131e303af8962096623eafd5874e464ff.json"
+    },
+    {
+      "id": "ae7660f7c46143af6c013f14014ecd5f535c6bfd43cf74de7c5dc621e01b610b",
+      "name": "ScalarDot/ScalarSeeded/ComplexRealTest/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/ae7660f7c46143af6c013f14014ecd5f535c6bfd43cf74de7c5dc621e01b610b.json"
+    },
+    {
+      "id": "026daa39f257ca612725d1daf9c78a94f82090cb4524278d20ec8ac8ede07db9",
+      "name": "ScalarDot/ScalarSeeded/ComplexRealTest/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/026daa39f257ca612725d1daf9c78a94f82090cb4524278d20ec8ac8ede07db9.json"
+    },
+    {
+      "id": "7ba4a1f2081b5fc18eeab4243cf9da3b28468a564b8545639042adf94a2ade5c",
+      "name": "ScalarDot/ScalarSeeded/ComplexRealTest/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/7ba4a1f2081b5fc18eeab4243cf9da3b28468a564b8545639042adf94a2ade5c.json"
+    },
+    {
+      "id": "24674ff9c7da01cf967cbaa223f75956e1125b253a479cbc2e4e793a78acab55",
+      "name": "ScalarDot/ScalarSeeded/ComplexRealTest/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/24674ff9c7da01cf967cbaa223f75956e1125b253a479cbc2e4e793a78acab55.json"
+    },
+    {
+      "id": "679f3211d5305f81062fc025d7ee7362a8c2b295298d14006b85c46838fd0cd1",
+      "name": "ScalarDot/ScalarSeeded/ComplexRealTest/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/679f3211d5305f81062fc025d7ee7362a8c2b295298d14006b85c46838fd0cd1.json"
+    },
+    {
+      "id": "c11d85a3a075e0f8f6db1655c06037572cef7a0beae78b48e13f319d7d6ef7f6",
+      "name": "ScalarDot/ScalarSeeded/Real/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/c11d85a3a075e0f8f6db1655c06037572cef7a0beae78b48e13f319d7d6ef7f6.json"
+    },
+    {
+      "id": "f12e928559813ee2a129fafa2a40c56c6828fd769235b731b3e9d40a3d223817",
+      "name": "ScalarDot/ScalarSeeded/Real/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/f12e928559813ee2a129fafa2a40c56c6828fd769235b731b3e9d40a3d223817.json"
+    },
+    {
+      "id": "3ac58c5b90b5b5cd4fc18419acbcfef1b5e0982f93d106c4462c42db35014057",
+      "name": "ScalarDot/ScalarSeeded/Real/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3ac58c5b90b5b5cd4fc18419acbcfef1b5e0982f93d106c4462c42db35014057.json"
+    },
+    {
+      "id": "851c48c9399a11efda2769741e461cae2e1e351baf3478edf497c41e263c8ff9",
+      "name": "ScalarDot/ScalarSeeded/Real/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/851c48c9399a11efda2769741e461cae2e1e351baf3478edf497c41e263c8ff9.json"
+    },
+    {
+      "id": "09af579864d41415c56eb6d181683df149589e8914fb1c78a7bee2cfe6e3c8f4",
+      "name": "ScalarDot/ScalarSeeded/Real/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/09af579864d41415c56eb6d181683df149589e8914fb1c78a7bee2cfe6e3c8f4.json"
+    },
+    {
+      "id": "223e35b38303f352b5b6d765c5364de57402f2b5361730508ac10baa20b3ec24",
+      "name": "ScalarDot/ScalarSeeded/Real/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/223e35b38303f352b5b6d765c5364de57402f2b5361730508ac10baa20b3ec24.json"
+    },
+    {
+      "id": "cb9f9e307e307894e734f974e4a05c07bbb43714c6df07977174cc1e39f5f1b5",
+      "name": "ScalarDot/SpatialOne/ComplexGeneral/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/cb9f9e307e307894e734f974e4a05c07bbb43714c6df07977174cc1e39f5f1b5.json"
+    },
+    {
+      "id": "5c7b1b8a129a8f85ea86bd4c4dbd48b49bdf5dedbb4e3fdcc1ae43d507bed68b",
+      "name": "ScalarDot/SpatialOne/ComplexGeneral/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/5c7b1b8a129a8f85ea86bd4c4dbd48b49bdf5dedbb4e3fdcc1ae43d507bed68b.json"
+    },
+    {
+      "id": "d841b07e2f52684e96ccd2dc96ad668e516387b2b9fe68d9d5e4dcbec65a927c",
+      "name": "ScalarDot/SpatialOne/ComplexGeneral/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/d841b07e2f52684e96ccd2dc96ad668e516387b2b9fe68d9d5e4dcbec65a927c.json"
+    },
+    {
+      "id": "29a50db28e0dd469f9726f7eb95220b760bf9c5db63d26798d92d5b7b8da909a",
+      "name": "ScalarDot/SpatialOne/ComplexGeneral/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/29a50db28e0dd469f9726f7eb95220b760bf9c5db63d26798d92d5b7b8da909a.json"
+    },
+    {
+      "id": "4b1890f5092ab3165ac3b926e648dfc9ded37aea98265126a189c6bbec3742e9",
+      "name": "ScalarDot/SpatialOne/ComplexGeneral/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/4b1890f5092ab3165ac3b926e648dfc9ded37aea98265126a189c6bbec3742e9.json"
+    },
+    {
+      "id": "5ecacc5a6df8504a453de288e99510dd9272528e6ed3b35fc611872c23f6c4dc",
+      "name": "ScalarDot/SpatialOne/ComplexGeneral/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/5ecacc5a6df8504a453de288e99510dd9272528e6ed3b35fc611872c23f6c4dc.json"
+    },
+    {
+      "id": "4152cdf97b6eec3913b9ee5110156ee0136f9268901697e23896f4dfddf602f3",
+      "name": "ScalarDot/SpatialOne/ComplexRealTest/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/4152cdf97b6eec3913b9ee5110156ee0136f9268901697e23896f4dfddf602f3.json"
+    },
+    {
+      "id": "0d9cb89902ec036c62dd268f0905fcb914171b5ed2163313a70f630620145d63",
+      "name": "ScalarDot/SpatialOne/ComplexRealTest/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/0d9cb89902ec036c62dd268f0905fcb914171b5ed2163313a70f630620145d63.json"
+    },
+    {
+      "id": "ae506f1a85e400429efd11490e46cdd9885338d3cc4384f6e719c7aa0616856b",
+      "name": "ScalarDot/SpatialOne/ComplexRealTest/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/ae506f1a85e400429efd11490e46cdd9885338d3cc4384f6e719c7aa0616856b.json"
+    },
+    {
+      "id": "5aa873e7b1d51dafadd39f3a0e2241e2fc9522aa45a04ead51786353f6031f2b",
+      "name": "ScalarDot/SpatialOne/ComplexRealTest/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/5aa873e7b1d51dafadd39f3a0e2241e2fc9522aa45a04ead51786353f6031f2b.json"
+    },
+    {
+      "id": "f92091b350ee2a0f5d50618e4748ff9f765a2026d24773389767189bc03ebece",
+      "name": "ScalarDot/SpatialOne/ComplexRealTest/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/f92091b350ee2a0f5d50618e4748ff9f765a2026d24773389767189bc03ebece.json"
+    },
+    {
+      "id": "63a7a16549ae501943d77c09d3ade03369e529db7076eccb5cd3592113134e40",
+      "name": "ScalarDot/SpatialOne/ComplexRealTest/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/63a7a16549ae501943d77c09d3ade03369e529db7076eccb5cd3592113134e40.json"
+    },
+    {
+      "id": "8134ab6b7b2781a4d40a3db0309f45184c0cd1dad7731556faf285031d3b0d00",
+      "name": "ScalarDot/SpatialOne/Real/Dot/27/real_time",
+      "metric": "real_time",
+      "url": "cases/8134ab6b7b2781a4d40a3db0309f45184c0cd1dad7731556faf285031d3b0d00.json"
+    },
+    {
+      "id": "442475441e374c88109d7f7299d5292f4f520a4f1c49055a9da96c520d0ef7a1",
+      "name": "ScalarDot/SpatialOne/Real/Dot/343/real_time",
+      "metric": "real_time",
+      "url": "cases/442475441e374c88109d7f7299d5292f4f520a4f1c49055a9da96c520d0ef7a1.json"
+    },
+    {
+      "id": "3aa5de9e6dd25251005202dc35a376309a79cc7ee715949b24811c730dd84d07",
+      "name": "ScalarDot/SpatialOne/Real/Dot/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3aa5de9e6dd25251005202dc35a376309a79cc7ee715949b24811c730dd84d07.json"
+    },
+    {
+      "id": "d50513037ec16295cb1a2c45421839c97c2cb1fa7e8f027c76f20b5b41ba48cd",
+      "name": "ScalarDot/SpatialOne/Real/Weighted/27/real_time",
+      "metric": "real_time",
+      "url": "cases/d50513037ec16295cb1a2c45421839c97c2cb1fa7e8f027c76f20b5b41ba48cd.json"
+    },
+    {
+      "id": "90ba776ae878add37a07df97c0deda666deb4ae53d7bb1e8fe36e87a8ca60e9c",
+      "name": "ScalarDot/SpatialOne/Real/Weighted/343/real_time",
+      "metric": "real_time",
+      "url": "cases/90ba776ae878add37a07df97c0deda666deb4ae53d7bb1e8fe36e87a8ca60e9c.json"
+    },
+    {
+      "id": "e6cd9529a7d1f3faf0c774d5886e99780003a50029128ed18aa592c18253d7e9",
+      "name": "ScalarDot/SpatialOne/Real/Weighted/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e6cd9529a7d1f3faf0c774d5886e99780003a50029128ed18aa592c18253d7e9.json"
+    }
+  ]
+}

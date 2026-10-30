@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "configurations": [
+    {
+      "id": "2dd94b60495b0c806e9d930f-np2",
+      "label": "gcc-14 / Release / distributed / NP2",
+      "url": "2dd94b60495b0c806e9d930f-np2/index.json"
+    },
+    {
+      "id": "2dd94b60495b0c806e9d930f-np4",
+      "label": "gcc-14 / Release / distributed / NP4",
+      "url": "2dd94b60495b0c806e9d930f-np4/index.json"
+    }
+  ]
+}

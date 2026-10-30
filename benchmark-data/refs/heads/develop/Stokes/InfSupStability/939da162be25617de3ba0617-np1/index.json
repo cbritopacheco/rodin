@@ -1,0 +1,1332 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinMixedStabilityBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "e3c4e261e261b7e53a9213390c18f878a76935fca8809a3b87d727aec2e34243",
+      "name": "Stokes/MixedStability/Affine/P2P1/Hexahedron/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e3c4e261e261b7e53a9213390c18f878a76935fca8809a3b87d727aec2e34243.json"
+    },
+    {
+      "id": "8340e1ea958046e317c45753f5b341e7e371c96bd2fa21da6b67e9ab272baa33",
+      "name": "Stokes/MixedStability/Affine/P2P1/Hexahedron/2/20/real_time",
+      "metric": "real_time",
+      "url": "cases/8340e1ea958046e317c45753f5b341e7e371c96bd2fa21da6b67e9ab272baa33.json"
+    },
+    {
+      "id": "4b0b1256b445bf5057650d14d48141a1f5e689b4c0a46601038d5b291f8f7997",
+      "name": "Stokes/MixedStability/Affine/P2P1/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4b0b1256b445bf5057650d14d48141a1f5e689b4c0a46601038d5b291f8f7997.json"
+    },
+    {
+      "id": "b53b8d0a5b628f51b1f841249dcf61b06ed1b665c0c234cd193ccf40a7173f30",
+      "name": "Stokes/MixedStability/Affine/P2P1/Hexahedron/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/b53b8d0a5b628f51b1f841249dcf61b06ed1b665c0c234cd193ccf40a7173f30.json"
+    },
+    {
+      "id": "c476561521faa9081132b4d9e808d93880a6a9cc8484fe80a1f5e1f1d1c09c51",
+      "name": "Stokes/MixedStability/Affine/P2P1/Hexahedron/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c476561521faa9081132b4d9e808d93880a6a9cc8484fe80a1f5e1f1d1c09c51.json"
+    },
+    {
+      "id": "5de30cc11f8f12b663ed307cc3db72ca93ec60e825583050d46ea08f4ca0205b",
+      "name": "Stokes/MixedStability/Affine/P2P1/Hexahedron/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/5de30cc11f8f12b663ed307cc3db72ca93ec60e825583050d46ea08f4ca0205b.json"
+    },
+    {
+      "id": "d4b46a24aba0b36c07a409b15bad2c221b375f45a5c82e8cc330f990e21b829f",
+      "name": "Stokes/MixedStability/Affine/P2P1/Pyramid/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/d4b46a24aba0b36c07a409b15bad2c221b375f45a5c82e8cc330f990e21b829f.json"
+    },
+    {
+      "id": "1f6fea23c3af6fda23a925e137690651a7cc71a0d80337bc6677aec6138834f0",
+      "name": "Stokes/MixedStability/Affine/P2P1/Pyramid/2/20/real_time",
+      "metric": "real_time",
+      "url": "cases/1f6fea23c3af6fda23a925e137690651a7cc71a0d80337bc6677aec6138834f0.json"
+    },
+    {
+      "id": "75f581e16089134e4ce26607c271924c199f19743796c8232e81724086996b60",
+      "name": "Stokes/MixedStability/Affine/P2P1/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/75f581e16089134e4ce26607c271924c199f19743796c8232e81724086996b60.json"
+    },
+    {
+      "id": "2a7fffbe77a886b66f7097cba949ebc099101efc6a80fcd624ba3d2a5edea602",
+      "name": "Stokes/MixedStability/Affine/P2P1/Pyramid/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/2a7fffbe77a886b66f7097cba949ebc099101efc6a80fcd624ba3d2a5edea602.json"
+    },
+    {
+      "id": "2b8c495caffe4a15803222f04e9899ae1ee9779610280ad0132c554c74805f60",
+      "name": "Stokes/MixedStability/Affine/P2P1/Pyramid/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2b8c495caffe4a15803222f04e9899ae1ee9779610280ad0132c554c74805f60.json"
+    },
+    {
+      "id": "6545a339ebd31a3811e5105cc009772fee6edba0ac980b0bc09deb855cf990fe",
+      "name": "Stokes/MixedStability/Affine/P2P1/Pyramid/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/6545a339ebd31a3811e5105cc009772fee6edba0ac980b0bc09deb855cf990fe.json"
+    },
+    {
+      "id": "f860c5bdc85e75ad4ce676af6ce0e4b590f97a2dc8d395796d5f6505cc9774b9",
+      "name": "Stokes/MixedStability/Affine/P2P1/Quadrilateral/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f860c5bdc85e75ad4ce676af6ce0e4b590f97a2dc8d395796d5f6505cc9774b9.json"
+    },
+    {
+      "id": "9d839bc1972d1ec2522908b3a3b611ac900155db32486a264adf5955b32a8fd0",
+      "name": "Stokes/MixedStability/Affine/P2P1/Quadrilateral/2/20/real_time",
+      "metric": "real_time",
+      "url": "cases/9d839bc1972d1ec2522908b3a3b611ac900155db32486a264adf5955b32a8fd0.json"
+    },
+    {
+      "id": "ca78b485da542b40a2916b506ab500aed06aaa3cdde73a53b78e44ee8c7bce6d",
+      "name": "Stokes/MixedStability/Affine/P2P1/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ca78b485da542b40a2916b506ab500aed06aaa3cdde73a53b78e44ee8c7bce6d.json"
+    },
+    {
+      "id": "d8a25cedca38dcc23917106cb7bb831ee9e5a3763a40ead2e1b57d1c2c97da92",
+      "name": "Stokes/MixedStability/Affine/P2P1/Quadrilateral/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/d8a25cedca38dcc23917106cb7bb831ee9e5a3763a40ead2e1b57d1c2c97da92.json"
+    },
+    {
+      "id": "8bf435716c693ea2fd43ba58c9b3c160a8b27e08c5cfa530265323bbf3a29400",
+      "name": "Stokes/MixedStability/Affine/P2P1/Quadrilateral/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8bf435716c693ea2fd43ba58c9b3c160a8b27e08c5cfa530265323bbf3a29400.json"
+    },
+    {
+      "id": "909af2204051787189b7405479f1d94f68f8a21edd6f6010e4c606b18d2b4fc2",
+      "name": "Stokes/MixedStability/Affine/P2P1/Quadrilateral/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/909af2204051787189b7405479f1d94f68f8a21edd6f6010e4c606b18d2b4fc2.json"
+    },
+    {
+      "id": "8e5daa0ac2abbcd60f192e453a2e78202c2faedbce4e186444da0a83af4359d8",
+      "name": "Stokes/MixedStability/Affine/P2P1/Tetrahedron/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8e5daa0ac2abbcd60f192e453a2e78202c2faedbce4e186444da0a83af4359d8.json"
+    },
+    {
+      "id": "5c8612deb5f28a41e1262323d9eed66e7c1c9efded50088f2a467b89b5cf38b7",
+      "name": "Stokes/MixedStability/Affine/P2P1/Tetrahedron/2/20/real_time",
+      "metric": "real_time",
+      "url": "cases/5c8612deb5f28a41e1262323d9eed66e7c1c9efded50088f2a467b89b5cf38b7.json"
+    },
+    {
+      "id": "b9cd1ea2c64f1f921af48ef20cf26c2e96871db335b5cb658bf7877ca98026a3",
+      "name": "Stokes/MixedStability/Affine/P2P1/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b9cd1ea2c64f1f921af48ef20cf26c2e96871db335b5cb658bf7877ca98026a3.json"
+    },
+    {
+      "id": "5207140401564e93932cea4009228d9c50edead752988ee4d3bf8a1d01786858",
+      "name": "Stokes/MixedStability/Affine/P2P1/Tetrahedron/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/5207140401564e93932cea4009228d9c50edead752988ee4d3bf8a1d01786858.json"
+    },
+    {
+      "id": "af77fe8f69c3e8014cdf7d64d822017b868ea6eb3b24949bed65f6c3bf765e3b",
+      "name": "Stokes/MixedStability/Affine/P2P1/Tetrahedron/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/af77fe8f69c3e8014cdf7d64d822017b868ea6eb3b24949bed65f6c3bf765e3b.json"
+    },
+    {
+      "id": "9bc86668eabfef57ea59df8ad280bcafa69e1295262e9097b82e0fd5459d13e0",
+      "name": "Stokes/MixedStability/Affine/P2P1/Tetrahedron/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/9bc86668eabfef57ea59df8ad280bcafa69e1295262e9097b82e0fd5459d13e0.json"
+    },
+    {
+      "id": "b2d283e79778ba38d5ce572b0cbdd244db81fd1e0ade62bcadf3180d7b77bc0a",
+      "name": "Stokes/MixedStability/Affine/P2P1/Triangle/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b2d283e79778ba38d5ce572b0cbdd244db81fd1e0ade62bcadf3180d7b77bc0a.json"
+    },
+    {
+      "id": "c0c8a7a533c94a4f946706e4a7a07f14d6d84487f16b79e32939f8438130bc3a",
+      "name": "Stokes/MixedStability/Affine/P2P1/Triangle/2/20/real_time",
+      "metric": "real_time",
+      "url": "cases/c0c8a7a533c94a4f946706e4a7a07f14d6d84487f16b79e32939f8438130bc3a.json"
+    },
+    {
+      "id": "c258ea7bb53bde0054df881d63bd3c138471432c4ded1f3b132e041af68f61bb",
+      "name": "Stokes/MixedStability/Affine/P2P1/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c258ea7bb53bde0054df881d63bd3c138471432c4ded1f3b132e041af68f61bb.json"
+    },
+    {
+      "id": "1782c81ebd67e1ae284b57f15a62f21b4c44cc9c58186d70a112a38304bf959f",
+      "name": "Stokes/MixedStability/Affine/P2P1/Triangle/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/1782c81ebd67e1ae284b57f15a62f21b4c44cc9c58186d70a112a38304bf959f.json"
+    },
+    {
+      "id": "6345733366de618b6735d7eb38e0e51375b36c42f4b9abea5c4081abe3205db2",
+      "name": "Stokes/MixedStability/Affine/P2P1/Triangle/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6345733366de618b6735d7eb38e0e51375b36c42f4b9abea5c4081abe3205db2.json"
+    },
+    {
+      "id": "f5889840186b0f6bafa69f24f627624ec287d2bf971c0d43ecf3d84ae0f7dee2",
+      "name": "Stokes/MixedStability/Affine/P2P1/Triangle/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/f5889840186b0f6bafa69f24f627624ec287d2bf971c0d43ecf3d84ae0f7dee2.json"
+    },
+    {
+      "id": "2a9b85078c3a07980026ffc986892ad6f131ed83ce74b3d293ac72ee776eb65e",
+      "name": "Stokes/MixedStability/Affine/P2P1/Wedge/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2a9b85078c3a07980026ffc986892ad6f131ed83ce74b3d293ac72ee776eb65e.json"
+    },
+    {
+      "id": "c14c285796cb4f7d28ac6d98696b2863257dc4e3e128bc5f98b49ae31e0651e5",
+      "name": "Stokes/MixedStability/Affine/P2P1/Wedge/2/20/real_time",
+      "metric": "real_time",
+      "url": "cases/c14c285796cb4f7d28ac6d98696b2863257dc4e3e128bc5f98b49ae31e0651e5.json"
+    },
+    {
+      "id": "31d414b1d55abfa5bbcb103b3bb6fccff3adffe0998436c71a2c976af17568a4",
+      "name": "Stokes/MixedStability/Affine/P2P1/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/31d414b1d55abfa5bbcb103b3bb6fccff3adffe0998436c71a2c976af17568a4.json"
+    },
+    {
+      "id": "31b01ba3e3f42e4809c360a9165c0895b6268d306c008b6b807858051fb918c9",
+      "name": "Stokes/MixedStability/Affine/P2P1/Wedge/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/31b01ba3e3f42e4809c360a9165c0895b6268d306c008b6b807858051fb918c9.json"
+    },
+    {
+      "id": "58b52260faa5c54ff0b5fdb53616992b4a332891dbc44101dfff3f9c59e45b97",
+      "name": "Stokes/MixedStability/Affine/P2P1/Wedge/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/58b52260faa5c54ff0b5fdb53616992b4a332891dbc44101dfff3f9c59e45b97.json"
+    },
+    {
+      "id": "9da7c1e12c7789b25c977e084ddb97b93fb829d61bac27662f5487e81e3fa197",
+      "name": "Stokes/MixedStability/Affine/P2P1/Wedge/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/9da7c1e12c7789b25c977e084ddb97b93fb829d61bac27662f5487e81e3fa197.json"
+    },
+    {
+      "id": "a90fee8b7b35694d575e60429a95032959c80891e49613b14b70b75bccc8c75b",
+      "name": "Stokes/MixedStability/Affine/P3P2/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a90fee8b7b35694d575e60429a95032959c80891e49613b14b70b75bccc8c75b.json"
+    },
+    {
+      "id": "26470daa0ad2834a102bc5132e849391d8707b2d64ccd987915ffea3840a3279",
+      "name": "Stokes/MixedStability/Affine/P3P2/Hexahedron/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/26470daa0ad2834a102bc5132e849391d8707b2d64ccd987915ffea3840a3279.json"
+    },
+    {
+      "id": "193f35362422a4d7b2745addfca4cd0ccb8ae389a34157ef9d72fa407d300d69",
+      "name": "Stokes/MixedStability/Affine/P3P2/Hexahedron/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/193f35362422a4d7b2745addfca4cd0ccb8ae389a34157ef9d72fa407d300d69.json"
+    },
+    {
+      "id": "6aafef5169e612eb92d35669b78ff56361d9a24aea8ff65173dc680a5e5a4846",
+      "name": "Stokes/MixedStability/Affine/P3P2/Hexahedron/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/6aafef5169e612eb92d35669b78ff56361d9a24aea8ff65173dc680a5e5a4846.json"
+    },
+    {
+      "id": "3d3bed209261f3997974c31eb8ba97d1521f6ccc847aa257791c93d2377088df",
+      "name": "Stokes/MixedStability/Affine/P3P2/Hexahedron/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/3d3bed209261f3997974c31eb8ba97d1521f6ccc847aa257791c93d2377088df.json"
+    },
+    {
+      "id": "bc01675b346fd3b6eb36390b3c35f2faa859849770122f177a294d0cb0ed43ba",
+      "name": "Stokes/MixedStability/Affine/P3P2/Hexahedron/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/bc01675b346fd3b6eb36390b3c35f2faa859849770122f177a294d0cb0ed43ba.json"
+    },
+    {
+      "id": "f0429b5fcb230ee8a4907d14d2dae83e1f0f2e5893639cd3b92ce4d4416dab5f",
+      "name": "Stokes/MixedStability/Affine/P3P2/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f0429b5fcb230ee8a4907d14d2dae83e1f0f2e5893639cd3b92ce4d4416dab5f.json"
+    },
+    {
+      "id": "5dec5e5c0a300b0c1b269fbb133d021792091688c749003a2b6079684cc89ae7",
+      "name": "Stokes/MixedStability/Affine/P3P2/Pyramid/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/5dec5e5c0a300b0c1b269fbb133d021792091688c749003a2b6079684cc89ae7.json"
+    },
+    {
+      "id": "347031a4edef8d672c648b01a94263b701908a9e77def67bd2b442a1f960b07c",
+      "name": "Stokes/MixedStability/Affine/P3P2/Pyramid/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/347031a4edef8d672c648b01a94263b701908a9e77def67bd2b442a1f960b07c.json"
+    },
+    {
+      "id": "7c6b4d74d82e0ef00d19c9304d2417d0b2453dd81c23db855dfe8f87a5bc448a",
+      "name": "Stokes/MixedStability/Affine/P3P2/Pyramid/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/7c6b4d74d82e0ef00d19c9304d2417d0b2453dd81c23db855dfe8f87a5bc448a.json"
+    },
+    {
+      "id": "eea87b310d0b66f071fa8d204e99eb1b3e57672a00c89f7182f47c43199cd3f7",
+      "name": "Stokes/MixedStability/Affine/P3P2/Pyramid/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/eea87b310d0b66f071fa8d204e99eb1b3e57672a00c89f7182f47c43199cd3f7.json"
+    },
+    {
+      "id": "2c2d2664adc7a028107fe9ae0332873033379bf9424b8049a7c8674537e38f0d",
+      "name": "Stokes/MixedStability/Affine/P3P2/Pyramid/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/2c2d2664adc7a028107fe9ae0332873033379bf9424b8049a7c8674537e38f0d.json"
+    },
+    {
+      "id": "f0b5c7f901f7bcecccecc9c71f5424e3ce0606e2ad6c1c4d82bdbbc1d7801ec9",
+      "name": "Stokes/MixedStability/Affine/P3P2/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f0b5c7f901f7bcecccecc9c71f5424e3ce0606e2ad6c1c4d82bdbbc1d7801ec9.json"
+    },
+    {
+      "id": "e346f9d6dae60f2a77793f0a8bacbf349e6103515d7dca0fe049c256f04de452",
+      "name": "Stokes/MixedStability/Affine/P3P2/Quadrilateral/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/e346f9d6dae60f2a77793f0a8bacbf349e6103515d7dca0fe049c256f04de452.json"
+    },
+    {
+      "id": "53f3264a514daf6ee9f47d84c2f86f2b560d446c255cbe9212f3802b34586d92",
+      "name": "Stokes/MixedStability/Affine/P3P2/Quadrilateral/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/53f3264a514daf6ee9f47d84c2f86f2b560d446c255cbe9212f3802b34586d92.json"
+    },
+    {
+      "id": "19ccb4e77a2dd7a0c57036207526ac863f114c97c427c5a088527f1b16a86ba6",
+      "name": "Stokes/MixedStability/Affine/P3P2/Quadrilateral/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/19ccb4e77a2dd7a0c57036207526ac863f114c97c427c5a088527f1b16a86ba6.json"
+    },
+    {
+      "id": "09631ec22e98520ec9c924375b8761b799a1c8b58cf4469a2a408837fc094142",
+      "name": "Stokes/MixedStability/Affine/P3P2/Quadrilateral/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/09631ec22e98520ec9c924375b8761b799a1c8b58cf4469a2a408837fc094142.json"
+    },
+    {
+      "id": "cd966f817085367dfcc1f9036919fa67ff1e274b93175730b885f9d30ebd8e24",
+      "name": "Stokes/MixedStability/Affine/P3P2/Quadrilateral/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/cd966f817085367dfcc1f9036919fa67ff1e274b93175730b885f9d30ebd8e24.json"
+    },
+    {
+      "id": "a8e0a62973413386088608968535ceea242b6c50dd58937ffa4aa76cd6e8c63b",
+      "name": "Stokes/MixedStability/Affine/P3P2/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a8e0a62973413386088608968535ceea242b6c50dd58937ffa4aa76cd6e8c63b.json"
+    },
+    {
+      "id": "b6dd40004b396a1babbe782ba009da65b1873462bd991f594a6596ebf494ddda",
+      "name": "Stokes/MixedStability/Affine/P3P2/Tetrahedron/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/b6dd40004b396a1babbe782ba009da65b1873462bd991f594a6596ebf494ddda.json"
+    },
+    {
+      "id": "9871b1d42c7dbf7d026b6f09f155579e3c1a9fd07118c724534609d22c0d85db",
+      "name": "Stokes/MixedStability/Affine/P3P2/Tetrahedron/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/9871b1d42c7dbf7d026b6f09f155579e3c1a9fd07118c724534609d22c0d85db.json"
+    },
+    {
+      "id": "093f1f879d53fbc44e229b85d495086f3f0c96eb2744a3afa9c9e2805e0debc8",
+      "name": "Stokes/MixedStability/Affine/P3P2/Tetrahedron/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/093f1f879d53fbc44e229b85d495086f3f0c96eb2744a3afa9c9e2805e0debc8.json"
+    },
+    {
+      "id": "61c83059d7a641269b346dd7dd3932d426769e109be4ffbff0edd1432064e4a5",
+      "name": "Stokes/MixedStability/Affine/P3P2/Tetrahedron/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/61c83059d7a641269b346dd7dd3932d426769e109be4ffbff0edd1432064e4a5.json"
+    },
+    {
+      "id": "d852a67b5c90f772cc65b8d3bd0e2c689519e062b59e7994d24aead500227955",
+      "name": "Stokes/MixedStability/Affine/P3P2/Tetrahedron/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/d852a67b5c90f772cc65b8d3bd0e2c689519e062b59e7994d24aead500227955.json"
+    },
+    {
+      "id": "f3ed5b68f33654a9ca419684f284b61a2bcbead73e835559a6a02a5220397c36",
+      "name": "Stokes/MixedStability/Affine/P3P2/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f3ed5b68f33654a9ca419684f284b61a2bcbead73e835559a6a02a5220397c36.json"
+    },
+    {
+      "id": "0470577de4df0af63f92fc167e1c57cfb7dbcd38df73bed7346ad7ff8916fc86",
+      "name": "Stokes/MixedStability/Affine/P3P2/Triangle/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/0470577de4df0af63f92fc167e1c57cfb7dbcd38df73bed7346ad7ff8916fc86.json"
+    },
+    {
+      "id": "767c85a5f8844d566e93dfe0e02a653de32dc8b88fd703c5a6d0b7610dc9db8a",
+      "name": "Stokes/MixedStability/Affine/P3P2/Triangle/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/767c85a5f8844d566e93dfe0e02a653de32dc8b88fd703c5a6d0b7610dc9db8a.json"
+    },
+    {
+      "id": "7b86ccc09b48dd3cc3bdaa130069f34d9383f101ea43014cbd016e0a24c4538e",
+      "name": "Stokes/MixedStability/Affine/P3P2/Triangle/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/7b86ccc09b48dd3cc3bdaa130069f34d9383f101ea43014cbd016e0a24c4538e.json"
+    },
+    {
+      "id": "48b1fc7bf79883dcd3fc360240753cfed14bc8005391c41a3e3bfafa44faac30",
+      "name": "Stokes/MixedStability/Affine/P3P2/Triangle/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/48b1fc7bf79883dcd3fc360240753cfed14bc8005391c41a3e3bfafa44faac30.json"
+    },
+    {
+      "id": "083187416e609c7a805159e564a64e1080973926b252abec26e617bcbc0b2bec",
+      "name": "Stokes/MixedStability/Affine/P3P2/Triangle/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/083187416e609c7a805159e564a64e1080973926b252abec26e617bcbc0b2bec.json"
+    },
+    {
+      "id": "26bcac1f1c9bb96198befe8a6bee210138bbf85d7e454d862faaf7a327180632",
+      "name": "Stokes/MixedStability/Affine/P3P2/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/26bcac1f1c9bb96198befe8a6bee210138bbf85d7e454d862faaf7a327180632.json"
+    },
+    {
+      "id": "f8d0a4a287151b4207e6b28cb7066cbd1b2fd7e0492ec6d384c5821f10f43093",
+      "name": "Stokes/MixedStability/Affine/P3P2/Wedge/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/f8d0a4a287151b4207e6b28cb7066cbd1b2fd7e0492ec6d384c5821f10f43093.json"
+    },
+    {
+      "id": "78cdd3c9def3ac5e49bcc18aeaace82007a550f6968bddb10acfb5ff8f79837f",
+      "name": "Stokes/MixedStability/Affine/P3P2/Wedge/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/78cdd3c9def3ac5e49bcc18aeaace82007a550f6968bddb10acfb5ff8f79837f.json"
+    },
+    {
+      "id": "8c697fdfc837f441cfaf3e3e49d99300aae551fbbdcd729dacd7ab246f8eac26",
+      "name": "Stokes/MixedStability/Affine/P3P2/Wedge/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/8c697fdfc837f441cfaf3e3e49d99300aae551fbbdcd729dacd7ab246f8eac26.json"
+    },
+    {
+      "id": "b559f711502afee76bd6e2452cf13d46e4522c98cddcc7c4e71ee8de7ac35ff4",
+      "name": "Stokes/MixedStability/Affine/P3P2/Wedge/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b559f711502afee76bd6e2452cf13d46e4522c98cddcc7c4e71ee8de7ac35ff4.json"
+    },
+    {
+      "id": "a9c66cc55bf2d6fd2028bf6263cec1e71540bffa4af3e756d76f981a1fe7718d",
+      "name": "Stokes/MixedStability/Affine/P3P2/Wedge/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/a9c66cc55bf2d6fd2028bf6263cec1e71540bffa4af3e756d76f981a1fe7718d.json"
+    },
+    {
+      "id": "de08b59615dc8e2bbca5a30113491cfbd4c7941ff079cf63c7b60000a55c1632",
+      "name": "Stokes/MixedStability/Affine/P4P3/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/de08b59615dc8e2bbca5a30113491cfbd4c7941ff079cf63c7b60000a55c1632.json"
+    },
+    {
+      "id": "9959e77a18cf2aef357579a6b3213d0b4f20f91ff66224d5798b1cdaefe5f248",
+      "name": "Stokes/MixedStability/Affine/P4P3/Hexahedron/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/9959e77a18cf2aef357579a6b3213d0b4f20f91ff66224d5798b1cdaefe5f248.json"
+    },
+    {
+      "id": "295b7937d97d0ed2b7c2a6118bdb5e64b9ac930955ae5f810880fc781bb8e331",
+      "name": "Stokes/MixedStability/Affine/P4P3/Hexahedron/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/295b7937d97d0ed2b7c2a6118bdb5e64b9ac930955ae5f810880fc781bb8e331.json"
+    },
+    {
+      "id": "ae7249d92636abbc11b79851f7e9ecc951bf520ecb49a7b41a7af4c5dc1fa90a",
+      "name": "Stokes/MixedStability/Affine/P4P3/Hexahedron/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/ae7249d92636abbc11b79851f7e9ecc951bf520ecb49a7b41a7af4c5dc1fa90a.json"
+    },
+    {
+      "id": "f86e6633633429bc8ab0b95fe0c882dcb8cb8b0a92f05403de9b980831e21e00",
+      "name": "Stokes/MixedStability/Affine/P4P3/Hexahedron/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f86e6633633429bc8ab0b95fe0c882dcb8cb8b0a92f05403de9b980831e21e00.json"
+    },
+    {
+      "id": "02c6bb74b3c941d23bb3fe5bbf5c229896d8331c4a7fa94a9bd665a7b2ea40eb",
+      "name": "Stokes/MixedStability/Affine/P4P3/Hexahedron/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/02c6bb74b3c941d23bb3fe5bbf5c229896d8331c4a7fa94a9bd665a7b2ea40eb.json"
+    },
+    {
+      "id": "a181fcd9697f329adc11e252d105b6a82be41f1979bb7150264af87c6e8498b4",
+      "name": "Stokes/MixedStability/Affine/P4P3/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a181fcd9697f329adc11e252d105b6a82be41f1979bb7150264af87c6e8498b4.json"
+    },
+    {
+      "id": "88c0c292164197d79a693456268d6082eb4009669fa74a21007a5930e4e415d6",
+      "name": "Stokes/MixedStability/Affine/P4P3/Pyramid/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/88c0c292164197d79a693456268d6082eb4009669fa74a21007a5930e4e415d6.json"
+    },
+    {
+      "id": "6304004dbd16760b54537f29cc8c3a1999173209b2e12c9484c101e72d54e8a7",
+      "name": "Stokes/MixedStability/Affine/P4P3/Pyramid/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6304004dbd16760b54537f29cc8c3a1999173209b2e12c9484c101e72d54e8a7.json"
+    },
+    {
+      "id": "add24488ac615eb6ec394ae963e2f2ecab81f9bfb8c1af9495700f998d6608e9",
+      "name": "Stokes/MixedStability/Affine/P4P3/Pyramid/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/add24488ac615eb6ec394ae963e2f2ecab81f9bfb8c1af9495700f998d6608e9.json"
+    },
+    {
+      "id": "6d8455850af3b359650301ad1a6fa8d40bb3d33b231d461fa9037d3c0ef3be8d",
+      "name": "Stokes/MixedStability/Affine/P4P3/Pyramid/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6d8455850af3b359650301ad1a6fa8d40bb3d33b231d461fa9037d3c0ef3be8d.json"
+    },
+    {
+      "id": "b8d5dc9fe78cbd2f08b05bdf4b617874e6bed6290354c456bc7336461eff2bec",
+      "name": "Stokes/MixedStability/Affine/P4P3/Pyramid/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/b8d5dc9fe78cbd2f08b05bdf4b617874e6bed6290354c456bc7336461eff2bec.json"
+    },
+    {
+      "id": "4d026dfd6195ec6f7312f0ea2594ff5ee156629cd9b340cfc8b4e1d00b73f770",
+      "name": "Stokes/MixedStability/Affine/P4P3/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4d026dfd6195ec6f7312f0ea2594ff5ee156629cd9b340cfc8b4e1d00b73f770.json"
+    },
+    {
+      "id": "c0f25495b4fc5813441e9a0b94a31dc351e6168cdc126ce20e6ca38153170aa0",
+      "name": "Stokes/MixedStability/Affine/P4P3/Quadrilateral/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/c0f25495b4fc5813441e9a0b94a31dc351e6168cdc126ce20e6ca38153170aa0.json"
+    },
+    {
+      "id": "e5c64a8dfe87a9705e83934e554c1788b698690fa559fbb4b0a3baa898291992",
+      "name": "Stokes/MixedStability/Affine/P4P3/Quadrilateral/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e5c64a8dfe87a9705e83934e554c1788b698690fa559fbb4b0a3baa898291992.json"
+    },
+    {
+      "id": "a366d4af4e9d256d8b01c8186b039f31aad1ba45eb77cbf9152524fd0f555822",
+      "name": "Stokes/MixedStability/Affine/P4P3/Quadrilateral/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/a366d4af4e9d256d8b01c8186b039f31aad1ba45eb77cbf9152524fd0f555822.json"
+    },
+    {
+      "id": "739b0cad7ae33d0c601894118b30efb26d402e9872385589a3e27cc86a51abce",
+      "name": "Stokes/MixedStability/Affine/P4P3/Quadrilateral/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/739b0cad7ae33d0c601894118b30efb26d402e9872385589a3e27cc86a51abce.json"
+    },
+    {
+      "id": "3f9b0b7be1c8e640b79a0e42bfa123ce599a1edc0eae4af70dceddc5c9356d68",
+      "name": "Stokes/MixedStability/Affine/P4P3/Quadrilateral/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/3f9b0b7be1c8e640b79a0e42bfa123ce599a1edc0eae4af70dceddc5c9356d68.json"
+    },
+    {
+      "id": "886c8659255cb3a433d69d602865f22b6c3bcb1bf12ea4ce1c5f593157835f26",
+      "name": "Stokes/MixedStability/Affine/P4P3/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/886c8659255cb3a433d69d602865f22b6c3bcb1bf12ea4ce1c5f593157835f26.json"
+    },
+    {
+      "id": "59a3c79961415541599e4369274954e96caba7797431c418152a3c1cc040aac1",
+      "name": "Stokes/MixedStability/Affine/P4P3/Tetrahedron/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/59a3c79961415541599e4369274954e96caba7797431c418152a3c1cc040aac1.json"
+    },
+    {
+      "id": "358571d6df61d0928c89c86214894fe1bc64d68299b74fb38004ba60b6df7ff0",
+      "name": "Stokes/MixedStability/Affine/P4P3/Tetrahedron/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/358571d6df61d0928c89c86214894fe1bc64d68299b74fb38004ba60b6df7ff0.json"
+    },
+    {
+      "id": "77b82ee5d29c853847563002451a77fd6f1f6240727da5bb7e4dc3d0ad9f49ec",
+      "name": "Stokes/MixedStability/Affine/P4P3/Tetrahedron/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/77b82ee5d29c853847563002451a77fd6f1f6240727da5bb7e4dc3d0ad9f49ec.json"
+    },
+    {
+      "id": "e7303057abedd8b27653e9de788c92d3921d4aa9ed1bcdf1d4857babff541b4a",
+      "name": "Stokes/MixedStability/Affine/P4P3/Tetrahedron/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e7303057abedd8b27653e9de788c92d3921d4aa9ed1bcdf1d4857babff541b4a.json"
+    },
+    {
+      "id": "ac5c79392c82562138a42a51b1255ad0e3997ef0e01188752b0c9190f5f73bba",
+      "name": "Stokes/MixedStability/Affine/P4P3/Tetrahedron/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/ac5c79392c82562138a42a51b1255ad0e3997ef0e01188752b0c9190f5f73bba.json"
+    },
+    {
+      "id": "c685bb965c57ba7bd8ee024d9d71ff0240ce0b8a2fb03111bde82ca886144970",
+      "name": "Stokes/MixedStability/Affine/P4P3/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c685bb965c57ba7bd8ee024d9d71ff0240ce0b8a2fb03111bde82ca886144970.json"
+    },
+    {
+      "id": "58d352558f55c140fde50032ab82d54393d12b4d4894633c4cbb04e086001082",
+      "name": "Stokes/MixedStability/Affine/P4P3/Triangle/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/58d352558f55c140fde50032ab82d54393d12b4d4894633c4cbb04e086001082.json"
+    },
+    {
+      "id": "44cbfe69f9bdfff04204ce6705a3ad60010b9cfbbe90f83c87d284b6111f7239",
+      "name": "Stokes/MixedStability/Affine/P4P3/Triangle/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/44cbfe69f9bdfff04204ce6705a3ad60010b9cfbbe90f83c87d284b6111f7239.json"
+    },
+    {
+      "id": "bbb0813080ca61d021e5d283caf7a7f4ee8c26136a5332bfcd1cd68ccf5e6d31",
+      "name": "Stokes/MixedStability/Affine/P4P3/Triangle/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/bbb0813080ca61d021e5d283caf7a7f4ee8c26136a5332bfcd1cd68ccf5e6d31.json"
+    },
+    {
+      "id": "cb204f006234fc05b67a92262f0854e41fa036553b58ac39c9ab95539012958e",
+      "name": "Stokes/MixedStability/Affine/P4P3/Triangle/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/cb204f006234fc05b67a92262f0854e41fa036553b58ac39c9ab95539012958e.json"
+    },
+    {
+      "id": "a4fb3842a7e5a04bbb76a631c51a7239656e5018202f781484842c6f450591bf",
+      "name": "Stokes/MixedStability/Affine/P4P3/Triangle/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/a4fb3842a7e5a04bbb76a631c51a7239656e5018202f781484842c6f450591bf.json"
+    },
+    {
+      "id": "705205c59e24625afc886a2f8898d69860fa2116d0f51bf19ed21ff146a5e05d",
+      "name": "Stokes/MixedStability/Affine/P4P3/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/705205c59e24625afc886a2f8898d69860fa2116d0f51bf19ed21ff146a5e05d.json"
+    },
+    {
+      "id": "a1ae24f8794132ccc93443df24f141583f2fee4d3d08a1c079c7c1e2a960e0e5",
+      "name": "Stokes/MixedStability/Affine/P4P3/Wedge/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/a1ae24f8794132ccc93443df24f141583f2fee4d3d08a1c079c7c1e2a960e0e5.json"
+    },
+    {
+      "id": "0d178bf60270bbd82ff96f5f625d5f923106d968e02ed5f28aad39e54186e400",
+      "name": "Stokes/MixedStability/Affine/P4P3/Wedge/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/0d178bf60270bbd82ff96f5f625d5f923106d968e02ed5f28aad39e54186e400.json"
+    },
+    {
+      "id": "3bfd45e5ed9dcddaf8a2d3f51232400962c2cef53e9ef177fcdd9704633aa70a",
+      "name": "Stokes/MixedStability/Affine/P4P3/Wedge/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/3bfd45e5ed9dcddaf8a2d3f51232400962c2cef53e9ef177fcdd9704633aa70a.json"
+    },
+    {
+      "id": "7d19b463d16b063b101d9090efaa7655e9cc3fed87103e3d16d088403afa630d",
+      "name": "Stokes/MixedStability/Affine/P4P3/Wedge/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7d19b463d16b063b101d9090efaa7655e9cc3fed87103e3d16d088403afa630d.json"
+    },
+    {
+      "id": "c6c1eaead328fc8c6b374c78940197bf038f80ea4ab79f072d261bc6b157f6b8",
+      "name": "Stokes/MixedStability/Affine/P4P3/Wedge/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/c6c1eaead328fc8c6b374c78940197bf038f80ea4ab79f072d261bc6b157f6b8.json"
+    },
+    {
+      "id": "e9746d3cfbecce7e8ab784bce541edf7b2b217368508bfae08002396621031fb",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Hexahedron/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e9746d3cfbecce7e8ab784bce541edf7b2b217368508bfae08002396621031fb.json"
+    },
+    {
+      "id": "e93bafd81325fbe9ebf524a5b86b6e77d9c906ea5800d3f3ab078003d6e63dae",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Hexahedron/2/20/real_time",
+      "metric": "real_time",
+      "url": "cases/e93bafd81325fbe9ebf524a5b86b6e77d9c906ea5800d3f3ab078003d6e63dae.json"
+    },
+    {
+      "id": "a3b2f34992780db8d3c265eb1fc7176c1dc8f216d42d6c65a4c826be6869f83f",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a3b2f34992780db8d3c265eb1fc7176c1dc8f216d42d6c65a4c826be6869f83f.json"
+    },
+    {
+      "id": "bb88639176fbce35e81d9ec0d6e8b8d655c1b4326548d61096499792453660f9",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Hexahedron/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/bb88639176fbce35e81d9ec0d6e8b8d655c1b4326548d61096499792453660f9.json"
+    },
+    {
+      "id": "59a899639029cbeb35f4b02b93a70019bf961e407d41925679e717bc81036715",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Hexahedron/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/59a899639029cbeb35f4b02b93a70019bf961e407d41925679e717bc81036715.json"
+    },
+    {
+      "id": "29f3effdee89553f22fcc9531e58cf3fe4886229ac72639a0b608672333a3d46",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Hexahedron/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/29f3effdee89553f22fcc9531e58cf3fe4886229ac72639a0b608672333a3d46.json"
+    },
+    {
+      "id": "10dab8622bc9ae5a0669368089dffd5fc22fbaadd6906b5862c661426d34a84f",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Pyramid/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/10dab8622bc9ae5a0669368089dffd5fc22fbaadd6906b5862c661426d34a84f.json"
+    },
+    {
+      "id": "e132bccb672aa861376d17510e92b99b60972e217a19ffef74f59bd35f1db84c",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Pyramid/2/20/real_time",
+      "metric": "real_time",
+      "url": "cases/e132bccb672aa861376d17510e92b99b60972e217a19ffef74f59bd35f1db84c.json"
+    },
+    {
+      "id": "5f0e4c6ec7ab74cfe506e77b7ae58f58a973c006761084ed626af98182ffe996",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/5f0e4c6ec7ab74cfe506e77b7ae58f58a973c006761084ed626af98182ffe996.json"
+    },
+    {
+      "id": "64f22bee3414d52016e547281aa9d33af7d3f50cf362071d09f0472407be26c5",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Pyramid/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/64f22bee3414d52016e547281aa9d33af7d3f50cf362071d09f0472407be26c5.json"
+    },
+    {
+      "id": "fe49359ee458727ec1c1941a9ce9a3c518e5c83357cd7f2101cb7479c2f203cd",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Pyramid/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/fe49359ee458727ec1c1941a9ce9a3c518e5c83357cd7f2101cb7479c2f203cd.json"
+    },
+    {
+      "id": "7efd029a4f3bab81432f18481e27c302317de31267a4608d7254269c5b8e88f9",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Pyramid/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/7efd029a4f3bab81432f18481e27c302317de31267a4608d7254269c5b8e88f9.json"
+    },
+    {
+      "id": "8400c2f7242cbf24071b936a04dd4a83bdfd4e3edb0793047887e4059ac4b676",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Quadrilateral/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8400c2f7242cbf24071b936a04dd4a83bdfd4e3edb0793047887e4059ac4b676.json"
+    },
+    {
+      "id": "0a16a8c7c95d07ca758fc7bc9fe30171fe9f97cb536cab4a48d58c2d12f302da",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Quadrilateral/2/20/real_time",
+      "metric": "real_time",
+      "url": "cases/0a16a8c7c95d07ca758fc7bc9fe30171fe9f97cb536cab4a48d58c2d12f302da.json"
+    },
+    {
+      "id": "cbc27f6c850911e7644de6aac6054ba02597ec8ca3cda87d625a6ca0aa0ec828",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/cbc27f6c850911e7644de6aac6054ba02597ec8ca3cda87d625a6ca0aa0ec828.json"
+    },
+    {
+      "id": "4e5b98ea5d06293c1c23021d230544009bca8dba92a276b09b3f9d21ae68b80f",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Quadrilateral/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/4e5b98ea5d06293c1c23021d230544009bca8dba92a276b09b3f9d21ae68b80f.json"
+    },
+    {
+      "id": "dda5a6916ca05e028a5a6264072867b0ec2e832d0d1623d62ee1642193678161",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Quadrilateral/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/dda5a6916ca05e028a5a6264072867b0ec2e832d0d1623d62ee1642193678161.json"
+    },
+    {
+      "id": "f8a44296e82990cf4dbc29634e43a613789a08fa18102854a0f1f0b66fcf05ff",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Quadrilateral/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/f8a44296e82990cf4dbc29634e43a613789a08fa18102854a0f1f0b66fcf05ff.json"
+    },
+    {
+      "id": "8999cc4cbef453296037c4d3f2d036f078072b0d7f9a5ed42500d690b31a7c4e",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Tetrahedron/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8999cc4cbef453296037c4d3f2d036f078072b0d7f9a5ed42500d690b31a7c4e.json"
+    },
+    {
+      "id": "2bdbc7032f08fa2f324b8cd4fbdbdd2f43c4acfc08e5c04510af57311db76f91",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Tetrahedron/2/20/real_time",
+      "metric": "real_time",
+      "url": "cases/2bdbc7032f08fa2f324b8cd4fbdbdd2f43c4acfc08e5c04510af57311db76f91.json"
+    },
+    {
+      "id": "12db462dfba8de9cd8de31835906eb7618fe879bb8c80a266538d3b5315871ac",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/12db462dfba8de9cd8de31835906eb7618fe879bb8c80a266538d3b5315871ac.json"
+    },
+    {
+      "id": "3b72f015886a7166c5a7a4bd3db4d69b09d085b8f78e3e2db66fef79436b8281",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Tetrahedron/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/3b72f015886a7166c5a7a4bd3db4d69b09d085b8f78e3e2db66fef79436b8281.json"
+    },
+    {
+      "id": "e100d69ea8f4b37eb0c62e7831e722f17c2dffbe4f41bab18f0a36d5475925f3",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Tetrahedron/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e100d69ea8f4b37eb0c62e7831e722f17c2dffbe4f41bab18f0a36d5475925f3.json"
+    },
+    {
+      "id": "db8664f8280dce3557fda83c821f07ec1e2560b106684f115914c3e8d2ff36ae",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Tetrahedron/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/db8664f8280dce3557fda83c821f07ec1e2560b106684f115914c3e8d2ff36ae.json"
+    },
+    {
+      "id": "29d054563f48bf1247c1e7742a8320cd51b1384ebdf4a0d0ba923c257ee60eec",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Triangle/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/29d054563f48bf1247c1e7742a8320cd51b1384ebdf4a0d0ba923c257ee60eec.json"
+    },
+    {
+      "id": "fb66b16dae3046acc69764a7e9eb8f991645d35a2c2a57e1eb4da00d8bdc8735",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Triangle/2/20/real_time",
+      "metric": "real_time",
+      "url": "cases/fb66b16dae3046acc69764a7e9eb8f991645d35a2c2a57e1eb4da00d8bdc8735.json"
+    },
+    {
+      "id": "859049daab4a64fe0567698db824de9bc66a40ab03007158de0da1d549107ce1",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/859049daab4a64fe0567698db824de9bc66a40ab03007158de0da1d549107ce1.json"
+    },
+    {
+      "id": "7e683c962300f5e0da6d058e6fae3be13e54a54272467d563ea0ad3df118bd1b",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Triangle/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/7e683c962300f5e0da6d058e6fae3be13e54a54272467d563ea0ad3df118bd1b.json"
+    },
+    {
+      "id": "eb108291f7ca71d57cde170fb315d7cc71ed4cc49ad3429621694ec91e67826c",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Triangle/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/eb108291f7ca71d57cde170fb315d7cc71ed4cc49ad3429621694ec91e67826c.json"
+    },
+    {
+      "id": "a5e23f85a5dab851e3027d46ed3a73fe09a3958d9e1adaa683dcdb6cdbb35c1c",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Triangle/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/a5e23f85a5dab851e3027d46ed3a73fe09a3958d9e1adaa683dcdb6cdbb35c1c.json"
+    },
+    {
+      "id": "23984bf393947f24fdb5d43f44d942d856f957fc93eace87708360a18804ebdf",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Wedge/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/23984bf393947f24fdb5d43f44d942d856f957fc93eace87708360a18804ebdf.json"
+    },
+    {
+      "id": "5cf7ae1de08df9042c87338d65cdb28bdb520c56381370eb56c46d0ff282b037",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Wedge/2/20/real_time",
+      "metric": "real_time",
+      "url": "cases/5cf7ae1de08df9042c87338d65cdb28bdb520c56381370eb56c46d0ff282b037.json"
+    },
+    {
+      "id": "9434fff1dc1094f3ca67f16328042eaaa0290d6c33c46611aac18e43db82a60c",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/9434fff1dc1094f3ca67f16328042eaaa0290d6c33c46611aac18e43db82a60c.json"
+    },
+    {
+      "id": "226925283c97a6f755649b7904e36add11a66bcb47093893c69bb273589c6b42",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Wedge/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/226925283c97a6f755649b7904e36add11a66bcb47093893c69bb273589c6b42.json"
+    },
+    {
+      "id": "7b2de6e9851057cbbfd2e880dc2bf9951b813f0758dfbabff10d701ca2a957cc",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Wedge/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7b2de6e9851057cbbfd2e880dc2bf9951b813f0758dfbabff10d701ca2a957cc.json"
+    },
+    {
+      "id": "663c9835f1a778a157bda8ca84647212d92b05b2210647697ee6522d21fcfb81",
+      "name": "Stokes/MixedStability/CurvedQ2/P2P1/Wedge/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/663c9835f1a778a157bda8ca84647212d92b05b2210647697ee6522d21fcfb81.json"
+    },
+    {
+      "id": "d1fbdb3e3836f80c011dc7c29200f01682e0b31d96f8df7eb0dd0ac7c9137934",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/d1fbdb3e3836f80c011dc7c29200f01682e0b31d96f8df7eb0dd0ac7c9137934.json"
+    },
+    {
+      "id": "0eb3dbda2aa6aa71875fdd799285ba26380e5e0c442c2a777bbcae3d998d9540",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Hexahedron/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/0eb3dbda2aa6aa71875fdd799285ba26380e5e0c442c2a777bbcae3d998d9540.json"
+    },
+    {
+      "id": "a67475ef16445a52f16a735a671fc8628b72264c0defd29acf227692b6a28665",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Hexahedron/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a67475ef16445a52f16a735a671fc8628b72264c0defd29acf227692b6a28665.json"
+    },
+    {
+      "id": "b3be68fa5d626cd41c0f5b484e3a7c0300301dd46a104f16662925e64f2fc127",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Hexahedron/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/b3be68fa5d626cd41c0f5b484e3a7c0300301dd46a104f16662925e64f2fc127.json"
+    },
+    {
+      "id": "40387ab98281c62c6f179b383dbcea45ca1ddc9576ea817cf4b9169e91d00a17",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Hexahedron/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/40387ab98281c62c6f179b383dbcea45ca1ddc9576ea817cf4b9169e91d00a17.json"
+    },
+    {
+      "id": "c60db898a23e8da806f319a5cc109ce7881bfab89cd8be2332e9a5e7b903fc87",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Hexahedron/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/c60db898a23e8da806f319a5cc109ce7881bfab89cd8be2332e9a5e7b903fc87.json"
+    },
+    {
+      "id": "f155c3a3a2e1c233cace63a1f64635b38b95b939c46bef74beafe8caf0a0bc2b",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f155c3a3a2e1c233cace63a1f64635b38b95b939c46bef74beafe8caf0a0bc2b.json"
+    },
+    {
+      "id": "dea455accbccb27305445a5e9c202a1d9842cdfd9733eacbd5b5495d3a839e6d",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Pyramid/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/dea455accbccb27305445a5e9c202a1d9842cdfd9733eacbd5b5495d3a839e6d.json"
+    },
+    {
+      "id": "f792732f87066bf9aea517a58bf515abe4b8b9ab382cca1c6b84f7338800d390",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Pyramid/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f792732f87066bf9aea517a58bf515abe4b8b9ab382cca1c6b84f7338800d390.json"
+    },
+    {
+      "id": "819fdb387393bb2868586a96a60ffeed804fa443826adcea4d942e9d18b5af8b",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Pyramid/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/819fdb387393bb2868586a96a60ffeed804fa443826adcea4d942e9d18b5af8b.json"
+    },
+    {
+      "id": "8aa137ec164ddaed6ac6e947fbafc589c888add88efc677907bee7f38bcefc96",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Pyramid/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8aa137ec164ddaed6ac6e947fbafc589c888add88efc677907bee7f38bcefc96.json"
+    },
+    {
+      "id": "02e359604aed9893cf65b9150fb97be4af29dc04447a2b69f9d1a7e81ac9c2e0",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Pyramid/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/02e359604aed9893cf65b9150fb97be4af29dc04447a2b69f9d1a7e81ac9c2e0.json"
+    },
+    {
+      "id": "b9ba86078fcd368855888bffabf1d5cb5e1e6f4dfdd423a13cc4132e056838b2",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b9ba86078fcd368855888bffabf1d5cb5e1e6f4dfdd423a13cc4132e056838b2.json"
+    },
+    {
+      "id": "d32d9b54b7f5c1da6aa18558cee9ba22e2b4fa35eaf0d54d0f93d4cff0b9e0ea",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Quadrilateral/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/d32d9b54b7f5c1da6aa18558cee9ba22e2b4fa35eaf0d54d0f93d4cff0b9e0ea.json"
+    },
+    {
+      "id": "ff262a6f4bf6a0e7e743c06c9f333a24db5034c26067035473738016915e5c0b",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Quadrilateral/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ff262a6f4bf6a0e7e743c06c9f333a24db5034c26067035473738016915e5c0b.json"
+    },
+    {
+      "id": "c937c4d1012c342226b0441cdb61aae1ebfcfdebe590ca80d5f73c0628b79a83",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Quadrilateral/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/c937c4d1012c342226b0441cdb61aae1ebfcfdebe590ca80d5f73c0628b79a83.json"
+    },
+    {
+      "id": "09f440d29012b3888c223c8bca4c5e4b94980e0cc57961b5af058ae5fed24fc4",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Quadrilateral/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/09f440d29012b3888c223c8bca4c5e4b94980e0cc57961b5af058ae5fed24fc4.json"
+    },
+    {
+      "id": "c60d5d27f0467665bebdcbb1a126579aebe39381fbc040c025d2bc649f3691c4",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Quadrilateral/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/c60d5d27f0467665bebdcbb1a126579aebe39381fbc040c025d2bc649f3691c4.json"
+    },
+    {
+      "id": "a014d472344ed9f77e3c1b153aec85d19af3137b4c20214ba7cca72dea702b20",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a014d472344ed9f77e3c1b153aec85d19af3137b4c20214ba7cca72dea702b20.json"
+    },
+    {
+      "id": "80eaf206c70fd06dc68e646b8ded75aa4648b2be76ba7b4efbfad75e05bb1c66",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Tetrahedron/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/80eaf206c70fd06dc68e646b8ded75aa4648b2be76ba7b4efbfad75e05bb1c66.json"
+    },
+    {
+      "id": "e8f433d77a874f2f2aed0c218e5c764dbaa33f5e1eddd01fd4011cf9482e60eb",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Tetrahedron/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e8f433d77a874f2f2aed0c218e5c764dbaa33f5e1eddd01fd4011cf9482e60eb.json"
+    },
+    {
+      "id": "8c996017590e9485940e1cde79b4d7692af362011a0b6e9a88d28b704c4d591a",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Tetrahedron/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/8c996017590e9485940e1cde79b4d7692af362011a0b6e9a88d28b704c4d591a.json"
+    },
+    {
+      "id": "230d39de991b757e30e9d21efe72d71cd48cbd477cb81eda5aa34ddb2746d82b",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Tetrahedron/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/230d39de991b757e30e9d21efe72d71cd48cbd477cb81eda5aa34ddb2746d82b.json"
+    },
+    {
+      "id": "ac1653fe6a79afdae994f7b4650398d270e922fa2e9464a3fa03f1e35315714e",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Tetrahedron/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/ac1653fe6a79afdae994f7b4650398d270e922fa2e9464a3fa03f1e35315714e.json"
+    },
+    {
+      "id": "693ea3cb4e4084c2af74370220e80f6701aa7d62d9f4469941f193d2a8c9fe10",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/693ea3cb4e4084c2af74370220e80f6701aa7d62d9f4469941f193d2a8c9fe10.json"
+    },
+    {
+      "id": "7e501146b6cbb531ceb71d0b64390f40f1426da8c7d288b7ea4341659cf486b4",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Triangle/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/7e501146b6cbb531ceb71d0b64390f40f1426da8c7d288b7ea4341659cf486b4.json"
+    },
+    {
+      "id": "9bbcc5aa25ee4904a02939cbcbfb2024c5ff0f3f3464980c1c540ffbc861d548",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Triangle/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/9bbcc5aa25ee4904a02939cbcbfb2024c5ff0f3f3464980c1c540ffbc861d548.json"
+    },
+    {
+      "id": "c9552cd22ee8db66388fe7f37390438a5e2792cff951736be45adf96b5a15912",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Triangle/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/c9552cd22ee8db66388fe7f37390438a5e2792cff951736be45adf96b5a15912.json"
+    },
+    {
+      "id": "bcc35d1036cd9ad77e076377ba5f66055c8e699ef6cddaa7c60e12a6d20cb31b",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Triangle/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/bcc35d1036cd9ad77e076377ba5f66055c8e699ef6cddaa7c60e12a6d20cb31b.json"
+    },
+    {
+      "id": "ad28a819310cdfbbc87b4842d8a8ea780a09449dfd477a21271c7e990cbe0a42",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Triangle/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/ad28a819310cdfbbc87b4842d8a8ea780a09449dfd477a21271c7e990cbe0a42.json"
+    },
+    {
+      "id": "ae515d8a0b0d0e755e65a7300881c1ee23046f5c5a8872b5a1e1867cfeb14ad4",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ae515d8a0b0d0e755e65a7300881c1ee23046f5c5a8872b5a1e1867cfeb14ad4.json"
+    },
+    {
+      "id": "ff0c4540f8dc094f66cdd4de74ac40a417713e00d87e9f17cdba4c37f4a02c8f",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Wedge/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/ff0c4540f8dc094f66cdd4de74ac40a417713e00d87e9f17cdba4c37f4a02c8f.json"
+    },
+    {
+      "id": "f247ea4ef9f579d0cfeae2cf6f1017ff9e704736dbc487d21519a2fc60ab7b04",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Wedge/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f247ea4ef9f579d0cfeae2cf6f1017ff9e704736dbc487d21519a2fc60ab7b04.json"
+    },
+    {
+      "id": "08e49105d326dc619e8736aa43f3156e38db299a9475c20dd954cf7c7b647980",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Wedge/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/08e49105d326dc619e8736aa43f3156e38db299a9475c20dd954cf7c7b647980.json"
+    },
+    {
+      "id": "e03f020b78da5f95d49e6e487774c5e0a47c14d90b1fd176cb86eb6e81752ea1",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Wedge/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e03f020b78da5f95d49e6e487774c5e0a47c14d90b1fd176cb86eb6e81752ea1.json"
+    },
+    {
+      "id": "231c66c7df6fd4da43099ff14cfe532175312b08d47fd06392c36f41b26a91bc",
+      "name": "Stokes/MixedStability/CurvedQ2/P3P2/Wedge/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/231c66c7df6fd4da43099ff14cfe532175312b08d47fd06392c36f41b26a91bc.json"
+    },
+    {
+      "id": "412aa5c3e8aa462fcc50dc212b4d8926450b44b7e9bc77bbf0a807c66739ec7d",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/412aa5c3e8aa462fcc50dc212b4d8926450b44b7e9bc77bbf0a807c66739ec7d.json"
+    },
+    {
+      "id": "489f6e117d9664f91edad74428f9a197f5a0c45305693d94a3d23bce785f8b20",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Hexahedron/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/489f6e117d9664f91edad74428f9a197f5a0c45305693d94a3d23bce785f8b20.json"
+    },
+    {
+      "id": "e441c2eddb1902e57771756b2fa1c6dfbeb7e3cc8a2f14780edd3b5a20743c16",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Hexahedron/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e441c2eddb1902e57771756b2fa1c6dfbeb7e3cc8a2f14780edd3b5a20743c16.json"
+    },
+    {
+      "id": "d3bc0cb773fc0ef1d5c06803740b912ad4be16d4b247f78d28ac265b7024f397",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Hexahedron/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/d3bc0cb773fc0ef1d5c06803740b912ad4be16d4b247f78d28ac265b7024f397.json"
+    },
+    {
+      "id": "4ddc416e6d80bcf6006e8498af63d19115a630c4ba08c71aac68502190b18ab0",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Hexahedron/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4ddc416e6d80bcf6006e8498af63d19115a630c4ba08c71aac68502190b18ab0.json"
+    },
+    {
+      "id": "6642d9b42988fbd873f43035d02eb4abd8e27360942b19e563e55f0c5d691f65",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Hexahedron/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/6642d9b42988fbd873f43035d02eb4abd8e27360942b19e563e55f0c5d691f65.json"
+    },
+    {
+      "id": "17526500795ec9ba0b4e9a2791790746296597f6dacb455097ec0d642d10d399",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/17526500795ec9ba0b4e9a2791790746296597f6dacb455097ec0d642d10d399.json"
+    },
+    {
+      "id": "2c4bec84a1a7dcbbc1aee6dd76e7ba6207e1f35ec79c8216e5119ce5adf7a4d0",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Pyramid/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/2c4bec84a1a7dcbbc1aee6dd76e7ba6207e1f35ec79c8216e5119ce5adf7a4d0.json"
+    },
+    {
+      "id": "3d41c1ee55fd5da05aaf3592443ad20d32a1c294fc66a24527f874abccf52a61",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Pyramid/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/3d41c1ee55fd5da05aaf3592443ad20d32a1c294fc66a24527f874abccf52a61.json"
+    },
+    {
+      "id": "2bbec23bf9ed1e94b9e44f1ec1974156ea275f10b2554a8ecfcc46a84f43485e",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Pyramid/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/2bbec23bf9ed1e94b9e44f1ec1974156ea275f10b2554a8ecfcc46a84f43485e.json"
+    },
+    {
+      "id": "33fe3789ea220173aaa249dbcef15ea809a3f07be9bf97fccd8404bf6efd30f9",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Pyramid/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/33fe3789ea220173aaa249dbcef15ea809a3f07be9bf97fccd8404bf6efd30f9.json"
+    },
+    {
+      "id": "aa25366767a3c0544c4377b931b0fcf08682d0e53563a60b2d1c2033e70f7815",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Pyramid/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/aa25366767a3c0544c4377b931b0fcf08682d0e53563a60b2d1c2033e70f7815.json"
+    },
+    {
+      "id": "c1cea7d35953d2d7bda4dfb2692ecd61436bf410211ac4a5af843b2c8d505983",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c1cea7d35953d2d7bda4dfb2692ecd61436bf410211ac4a5af843b2c8d505983.json"
+    },
+    {
+      "id": "ae6fb34f2854de7365d8d4ad3faca701b64b34c2211b742682d80170215790eb",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Quadrilateral/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/ae6fb34f2854de7365d8d4ad3faca701b64b34c2211b742682d80170215790eb.json"
+    },
+    {
+      "id": "de6e2d261c1377e2a7aa62bb81796f7d2c0106aaa59b1fc7a64d8d86417271a8",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Quadrilateral/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/de6e2d261c1377e2a7aa62bb81796f7d2c0106aaa59b1fc7a64d8d86417271a8.json"
+    },
+    {
+      "id": "33f3a1348329a8715656fe6e9cabe5fd9554601141bbb2089db4a43bdc707e0a",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Quadrilateral/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/33f3a1348329a8715656fe6e9cabe5fd9554601141bbb2089db4a43bdc707e0a.json"
+    },
+    {
+      "id": "f9afe745499b0e8eacd82badeabec7667b1a59899c479a3b2d80303bd7ab408e",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Quadrilateral/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f9afe745499b0e8eacd82badeabec7667b1a59899c479a3b2d80303bd7ab408e.json"
+    },
+    {
+      "id": "2602770bd32af432a9727112aa0d0b9d3e5efa211a62200e73ef45a737d354b1",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Quadrilateral/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/2602770bd32af432a9727112aa0d0b9d3e5efa211a62200e73ef45a737d354b1.json"
+    },
+    {
+      "id": "d231800428a572d6e13be08fd231a08b9f895076de5dddef0ff16d9535480a60",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/d231800428a572d6e13be08fd231a08b9f895076de5dddef0ff16d9535480a60.json"
+    },
+    {
+      "id": "d2e216ee32f8da4267c3079cfe5e9608bdc6a61c83782dee792eaf0ca5f6c872",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Tetrahedron/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/d2e216ee32f8da4267c3079cfe5e9608bdc6a61c83782dee792eaf0ca5f6c872.json"
+    },
+    {
+      "id": "8d88aae77ab0d98d336c360d5ea81e01d94d532a250ffb915fdb17db4576322b",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Tetrahedron/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8d88aae77ab0d98d336c360d5ea81e01d94d532a250ffb915fdb17db4576322b.json"
+    },
+    {
+      "id": "a646cdcc7cecad62703ddda6d40e092e8e92be74324e887e1fe51f7d0c913bbb",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Tetrahedron/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/a646cdcc7cecad62703ddda6d40e092e8e92be74324e887e1fe51f7d0c913bbb.json"
+    },
+    {
+      "id": "090b48733c90c175bc206a7a4694fd0f0140d439f97270386aea7fd1a1d7cc11",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Tetrahedron/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/090b48733c90c175bc206a7a4694fd0f0140d439f97270386aea7fd1a1d7cc11.json"
+    },
+    {
+      "id": "ef8a1a018fba190c294dc0540b8cba7c687e1b6cf35b08d02fdfadd432c0e501",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Tetrahedron/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/ef8a1a018fba190c294dc0540b8cba7c687e1b6cf35b08d02fdfadd432c0e501.json"
+    },
+    {
+      "id": "8cbec3f13ffa766b62bd2a3fad1a6995faff43e0511487938a3661e7588baba8",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8cbec3f13ffa766b62bd2a3fad1a6995faff43e0511487938a3661e7588baba8.json"
+    },
+    {
+      "id": "04dc14603f2cd7045f9cc82c67906bde8a960cdf33a3f8d44bd52388116461a4",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Triangle/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/04dc14603f2cd7045f9cc82c67906bde8a960cdf33a3f8d44bd52388116461a4.json"
+    },
+    {
+      "id": "3c656b972dddd697ca235851cdf09483481612115d8cd44a6b8ab907e2d96028",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Triangle/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/3c656b972dddd697ca235851cdf09483481612115d8cd44a6b8ab907e2d96028.json"
+    },
+    {
+      "id": "d023fb054ddfd9788b1e964dc506acf13068db1cb54c72a003f152d7d0af69b1",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Triangle/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/d023fb054ddfd9788b1e964dc506acf13068db1cb54c72a003f152d7d0af69b1.json"
+    },
+    {
+      "id": "c599eb6900f2fdb10acea4fbee12bc1032eca93f5e30780b96d41d3539d53fe5",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Triangle/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c599eb6900f2fdb10acea4fbee12bc1032eca93f5e30780b96d41d3539d53fe5.json"
+    },
+    {
+      "id": "8aa5fb6701e29ac39c3a12bdeb967c9c8c4d8ba1a06980b0c502a646d8c2dec3",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Triangle/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/8aa5fb6701e29ac39c3a12bdeb967c9c8c4d8ba1a06980b0c502a646d8c2dec3.json"
+    },
+    {
+      "id": "8301c042e4cd9b11efb1dee702e72456864403c3f74353c9dd5487a410b994c2",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8301c042e4cd9b11efb1dee702e72456864403c3f74353c9dd5487a410b994c2.json"
+    },
+    {
+      "id": "e4878ed2d7be23c626c19c9061178d2bcf9fc1eaf4fb0308ff00af7394733edb",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Wedge/3/20/real_time",
+      "metric": "real_time",
+      "url": "cases/e4878ed2d7be23c626c19c9061178d2bcf9fc1eaf4fb0308ff00af7394733edb.json"
+    },
+    {
+      "id": "8a209086ad1b7fea905f96da13487813d8a2b45ad2ff133e9d2c065b79408bcb",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Wedge/4/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8a209086ad1b7fea905f96da13487813d8a2b45ad2ff133e9d2c065b79408bcb.json"
+    },
+    {
+      "id": "2c851658fcca177c0f53022b367000344f7e8dfdd9e95fb7e36333bfeb2fba5b",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Wedge/4/20/real_time",
+      "metric": "real_time",
+      "url": "cases/2c851658fcca177c0f53022b367000344f7e8dfdd9e95fb7e36333bfeb2fba5b.json"
+    },
+    {
+      "id": "6467570a48f22eed8aeda0df1ab7d2efbfc61c226572f04e6925e8f2b0463981",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Wedge/5/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6467570a48f22eed8aeda0df1ab7d2efbfc61c226572f04e6925e8f2b0463981.json"
+    },
+    {
+      "id": "a84c5fd3f7f8a51d7efbfd72a6ca288414bc16e151707515630422b66198e5ce",
+      "name": "Stokes/MixedStability/CurvedQ2/P4P3/Wedge/5/20/real_time",
+      "metric": "real_time",
+      "url": "cases/a84c5fd3f7f8a51d7efbfd72a6ca288414bc16e151707515630422b66198e5ce.json"
+    }
+  ]
+}

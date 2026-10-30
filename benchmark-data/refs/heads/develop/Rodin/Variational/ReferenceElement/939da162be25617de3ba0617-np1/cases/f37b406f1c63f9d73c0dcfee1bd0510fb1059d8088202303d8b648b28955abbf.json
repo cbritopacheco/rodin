@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "component": "Rodin/Variational/ReferenceElement",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "ReferenceElement/H1/P5/Complex/WarmTablePosition/Wedge/12/1/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "ReferenceElement/H1/P5/Complex/WarmTablePosition/Wedge/12/1/real_time",
+          "value": 2.4977988815435395,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            2.4977988815435395
+          ],
+          "records": [
+            {
+              "name": "ReferenceElement/H1/P5/Complex/WarmTablePosition/Wedge/12/1/real_time",
+              "family_index": 26,
+              "per_family_instance_index": 32,
+              "run_name": "ReferenceElement/H1/P5/Complex/WarmTablePosition/Wedge/12/1/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 114004087,
+              "real_time": 2.4977988815435395,
+              "cpu_time": 2.4976126776929704,
+              "time_unit": "ns",
+              "basis_functions": 126.0,
+              "dimension": 3.0,
+              "formula_identities": 1.0,
+              "output_entries": 28224.0,
+              "quadrature_points": 224.0,
+              "table_bytes": 1806336.0,
+              "warm_lookup_position": 1.0,
+              "written_entries": 0.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T16:45:23+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinReferenceElementBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3669,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.0166,
+              0.362793,
+              0.131836
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

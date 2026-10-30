@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "component": "Stokes/InfSupStability",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Stokes/MixedStability/Affine/P4P3/Tetrahedron/4/16/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "Stokes/MixedStability/Affine/P4P3/Tetrahedron/4/16/real_time",
+          "value": 4965830745.999994,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            4965830745.999994
+          ],
+          "records": [
+            {
+              "name": "Stokes/MixedStability/Affine/P4P3/Tetrahedron/4/16/real_time",
+              "family_index": 0,
+              "per_family_instance_index": 0,
+              "run_name": "Stokes/MixedStability/Affine/P4P3/Tetrahedron/4/16/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 1,
+              "real_time": 4965830745.999994,
+              "cpu_time": 4965493176.999999,
+              "time_unit": "ns",
+              "cells": 162.0,
+              "dimension": 3.0,
+              "divergence_nnz": 225696.0,
+              "free_velocity_dofs": 3993.0,
+              "geometry_degree": 1.0,
+              "pressure_degree": 3.0,
+              "pressure_dofs": 1000.0,
+              "pressure_mass_nnz": 39664.0,
+              "quadrature_order": 16.0,
+              "quadrature_points_per_cell": 729.0,
+              "velocity_degree": 4.0,
+              "velocity_dofs": 6591.0,
+              "velocity_nnz": 421851.0,
+              "zero_mean_pressure_dofs": 999.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T13:38:56+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinMixedStabilityBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3247,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.47754,
+              0.516602,
+              0.186035
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "Mixed-stability spectrum; FE assembly excluded"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

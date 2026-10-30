@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBasisScalingBenchmarks",
+      "RodinFieldContractionBenchmarks",
+      "RodinFieldDerivativeBenchmarks",
+      "RodinFieldOperationBenchmarks",
+      "RodinGridFunctionBenchmarks",
+      "RodinH1BasisLifecycleBenchmarks",
+      "RodinH1ConvectionBenchmarks",
+      "RodinH1MassBindingBenchmarks",
+      "RodinH1MassOperandOrderBenchmarks",
+      "RodinH1PreparedBasisBenchmarks",
+      "RodinH1PyramidBenchmarks",
+      "RodinH1PyramidNodalBenchmarks",
+      "RodinNamedFormBenchmarks",
+      "RodinNamedMassKernelBenchmarks",
+      "RodinP1QuadratureBindingBenchmarks",
+      "RodinPhysicalGradientBenchmarks",
+      "RodinProblemLifecycleBenchmarks",
+      "RodinQuadratureBindingBenchmarks",
+      "RodinQuadratureExpressionBenchmarks",
+      "RodinReferenceElementBenchmarks",
+      "RodinStokesBindingBenchmarks",
+      "RodinVariationalCoefficientEvaluationBenchmarks",
+      "RodinVariationalGridFunctionBenchmarks",
+      "RodinVariationalIntegratorsBenchmarks",
+      "RodinVariationalNamedFormsBenchmarks",
+      "RodinVariationalP1Benchmarks",
+      "RodinVariationalRankOneJacobianBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "3c3bb0a634b6a72cbcbe40ed56e59b4296dd72e2f043949cf3c65acc338e31d5",
+      "name": "H1P2RankOneGeneric",
+      "metric": "cpu_time",
+      "url": "cases/3c3bb0a634b6a72cbcbe40ed56e59b4296dd72e2f043949cf3c65acc338e31d5.json"
+    },
+    {
+      "id": "e3e17a5a179c636d96b326183d1b6d66d85abebcb3f3b1abc14419091001a371",
+      "name": "H1P2RankOneSpecialized",
+      "metric": "cpu_time",
+      "url": "cases/e3e17a5a179c636d96b326183d1b6d66d85abebcb3f3b1abc14419091001a371.json"
+    },
+    {
+      "id": "81c04c4e361111b78cecb90398a1a1b6094ebffe7c54d4c2e58bc98b02177fef",
+      "name": "P1RankOneGeneric",
+      "metric": "cpu_time",
+      "url": "cases/81c04c4e361111b78cecb90398a1a1b6094ebffe7c54d4c2e58bc98b02177fef.json"
+    },
+    {
+      "id": "eb19c85d544406cd1573c8a9b183879dd666f9d6f36c876f0106db3afafad648",
+      "name": "P1RankOneSpecialized",
+      "metric": "cpu_time",
+      "url": "cases/eb19c85d544406cd1573c8a9b183879dd666f9d6f36c876f0106db3afafad648.json"
+    }
+  ]
+}

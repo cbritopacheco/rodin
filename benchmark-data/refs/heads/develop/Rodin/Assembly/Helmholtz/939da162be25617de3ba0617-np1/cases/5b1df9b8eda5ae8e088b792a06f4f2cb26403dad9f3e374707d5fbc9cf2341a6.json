@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "component": "Rodin/Assembly/Helmholtz",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Quadrilateral/9/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Quadrilateral/9/real_time",
+          "value": 1283768.054298636,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            1283768.054298636
+          ],
+          "records": [
+            {
+              "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Quadrilateral/9/real_time",
+              "family_index": 19,
+              "per_family_instance_index": 2,
+              "run_name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Quadrilateral/9/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 221,
+              "real_time": 1283768.054298636,
+              "cpu_time": 1283663.4027149316,
+              "time_unit": "ns",
+              "cells": 64.0,
+              "degree": 2.0,
+              "dimension": 2.0,
+              "imaginary_diagonal_sum": 0.5877777777777784,
+              "local_basis_per_cell": 9.0,
+              "local_entries_per_operator_term": 5184.0,
+              "mass_imaginary": 1.0,
+              "mass_real": -64.0,
+              "nnz": 3089.0,
+              "quadrature_order": 12.0,
+              "quadrature_points_per_cell": 49.0,
+              "relative_load_error": 7.102735738198717e-18,
+              "relative_matrix_error": 7.380980357023223e-18,
+              "relative_residual": 6.295965280477142e-16,
+              "rows": 289.0,
+              "scalar_bytes": 16.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T14:49:19+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinHelmholtzAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 4312,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.774902,
+              0.226562,
+              0.0791016
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "Warmed full Helmholtz problem assembly"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

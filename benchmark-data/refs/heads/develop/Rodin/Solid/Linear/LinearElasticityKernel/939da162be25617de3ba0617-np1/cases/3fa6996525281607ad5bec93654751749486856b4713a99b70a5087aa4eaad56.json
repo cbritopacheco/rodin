@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "component": "Rodin/Solid/Linear/LinearElasticityKernel",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "LinearElasticity/CellKernel/P1/Native/Warm/Segment",
+  "metric": "cpu_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "LinearElasticity/CellKernel/P1/Native/Warm/Segment",
+          "value": 0.18479845591357674,
+          "unit": "us",
+          "metric": "cpu_time",
+          "samples": [
+            0.18479845591357674
+          ],
+          "records": [
+            {
+              "name": "LinearElasticity/CellKernel/P1/Native/Warm/Segment",
+              "family_index": 0,
+              "per_family_instance_index": 0,
+              "run_name": "LinearElasticity/CellKernel/P1/Native/Warm/Segment",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 1509501,
+              "real_time": 0.18480946286222805,
+              "cpu_time": 0.18479845591357674,
+              "time_unit": "us",
+              "cells_per_iteration": 1.0,
+              "dimension": 1.0,
+              "family_order": 1.0,
+              "geometry_degree": 1.0,
+              "global_dofs": 2.0,
+              "local_dofs": 2.0,
+              "matrix_entries": 4.0,
+              "mesh_cells": 1.0,
+              "pair_component_proxy": 8.0,
+              "quadrature_points": 2.0,
+              "reference_total_degree": 1.0,
+              "relative_error": 0.0,
+              "requested_quadrature_order": 2.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T14:04:22+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinLinearElasticityKernelBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3296,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.800781,
+              0.242676,
+              0.0810547
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

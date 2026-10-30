@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "component": "Rodin/Variational/H1/PreparedBasis",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "BasisScaling/PreparedReference/Leaf/H1/P1/Complex/Matrix/Triangle/2/3/2/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "BasisScaling/PreparedReference/Leaf/H1/P1/Complex/Matrix/Triangle/2/3/2/real_time",
+          "value": 901.671635347933,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            901.671635347933
+          ],
+          "records": [
+            {
+              "name": "BasisScaling/PreparedReference/Leaf/H1/P1/Complex/Matrix/Triangle/2/3/2/real_time",
+              "family_index": 39,
+              "per_family_instance_index": 1,
+              "run_name": "BasisScaling/PreparedReference/Leaf/H1/P1/Complex/Matrix/Triangle/2/3/2/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 310411,
+              "real_time": 901.671635347933,
+              "cpu_time": 901.6410404270723,
+              "time_unit": "ns",
+              "ambient_dimension": 2.0,
+              "basis_values": 54.0,
+              "cells": 1.0,
+              "components": 6.0,
+              "degree": 1.0,
+              "dimension": 2.0,
+              "field_columns": 3.0,
+              "field_rows": 2.0,
+              "fixture_cells": 2.0,
+              "global_dofs": 24.0,
+              "local_basis": 18.0,
+              "quadrature_order": 2.0,
+              "quadrature_points": 3.0,
+              "reference_prepared_protocol": 1.0,
+              "reference_table_present_after": 1.0,
+              "reference_table_present_before": 1.0,
+              "retained_output_bytes": 5184.0,
+              "scalar_basis": 3.0,
+              "stored_scalar_values": 324.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T18:00:08+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinH1PreparedBasisBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2727,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.752441,
+              0.258301,
+              0.0917969
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "Prepared-reference public basis consumption; preparation, pair contraction and assembly excluded"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

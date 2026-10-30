@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "component": "Rodin/Variational/P1/QuadratureBinding",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "P1/Binding/WeightedMass/Real/Point/Warm/3/16/real_time",
+  "metric": "real_time",
+  "entries": [
+    {
+      "commit": "ae23d68fff631fc5a760e1606a39199f7216af95",
+      "date": "2026-10-30T02:28:01.014298+00:00",
+      "run": "40875602790.1",
+      "results": [
+        {
+          "name": "P1/Binding/WeightedMass/Real/Point/Warm/3/16/real_time",
+          "value": 239.67605351959284,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            239.67605351959284
+          ],
+          "records": [
+            {
+              "name": "P1/Binding/WeightedMass/Real/Point/Warm/3/16/real_time",
+              "family_index": 0,
+              "per_family_instance_index": 11,
+              "run_name": "P1/Binding/WeightedMass/Real/Point/Warm/3/16/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 1169366,
+              "real_time": 239.67605351959284,
+              "cpu_time": 239.67030425033732,
+              "time_unit": "ns",
+              "alternate_order": 16.0,
+              "alternate_samples": 1.0,
+              "ambient_dimension": 3.0,
+              "base_order": 16.0,
+              "base_samples": 1.0,
+              "columns": 3.0,
+              "components": 3.0,
+              "dimension": 0.0,
+              "entries": 9.0,
+              "reference_error": 0.0,
+              "rows": 3.0,
+              "specialized": 1.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-29T17:39:07+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinP1QuadratureBindingBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2445,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.801758,
+              0.266113,
+              0.0961914
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "One-cell P1 binding; warm and order-refresh preparation"
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}
