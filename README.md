@@ -23,9 +23,7 @@ Contributions, issue reports and documentation improvements are welcome.
 
 ## Getting started
 
-The [getting started
-  guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html) covers installation, a first solve and the
-  main library objects:
+The [getting started guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html) covers installation, a first solve and the main library objects:
 
 - **[Installation and setup](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html)** - Platform-specific installation instructions and verification
 - **[First steps](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-steps.html)** - Project structure and a first Rodin program
@@ -259,7 +257,7 @@ int main(int, char**)
 <table align="center" width="100%">
   <tr>
     <td align="center" width="9999">
-      <img src="doc/README/Poisson.png" alt="Poisson solution on the unit square" width="360" style="max-width:100%;height:auto;">
+      <img src="doc/README/Poisson.gif" alt="Rotating Poisson solution on the unit square" width="360" style="max-width:100%;height:auto;">
     </td>
   </tr>
   <tr>

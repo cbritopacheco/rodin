@@ -72,9 +72,20 @@ python3 examples/PDEs/visualize_surface_convergence.py \
 
 The compact README figure uses the exported Poisson point values. Its height
 and color follow the P1 field on the original triangles. ParaView interpolates
-the point scalars before applying Turbo; the vertical display scale is 8.
+the point scalars before applying Turbo; the vertical display scale is 9.
 
 ```sh
 pvpython examples/PDEs/visualize_paraview.py /path/to/output doc/README \
   --example READMEPoisson
+```
+
+The README uses a six-second, 30 fps rotating GIF. Its camera makes one
+full orbit in 180 frames, with the endpoint omitted for a continuous loop.
+Every frame retains the same camera scale, Turbo range, mesh and P1 solution.
+A single crop is applied to the full sequence. A global 256-color palette and
+error-diffusion dithering preserve the field gradient on a transparent background.
+
+```sh
+pvpython examples/PDEs/visualize_paraview.py /path/to/output doc/README \
+  --example READMEPoissonRotation --frames /path/to/temporary-frames --fps 30
 ```

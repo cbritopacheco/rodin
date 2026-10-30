@@ -101,11 +101,11 @@ def color(source, target, array, limits, signed=False, title=None, association=N
     return display
 
 
-def save(path, target, size=(1280, 640)):
+def save(path, target, size=(1280, 640), crop=True):
     if target.GetXMLName() == 'RenderView':
         target.ViewSize = list(size)
     SaveScreenshot(str(path), target, ImageResolution=list(size), TransparentBackground=1)
-    if path.suffix.lower() == '.png' and target.GetXMLName() == 'RenderView':
+    if crop and path.suffix.lower() == '.png' and target.GetXMLName() == 'RenderView':
         # Trim unused transparent margins from still figures.
         with Image.open(path) as image:
             bounds = image.getchannel('A').getbbox()
@@ -267,11 +267,11 @@ def scalar(root, name, output):
     Delete(target)
 
 
-def poisson_readme(root, output):
+def poisson_readme(root, output, frames=None, fps=30):
     """Render the exported P1 nodal field with interpolated point colors."""
     source = reader(root, 'Poisson')
     target = view()
-    surface = WarpByScalar(Input=source, Scalars=['POINTS', 'u'], ScaleFactor=8)
+    surface = WarpByScalar(Input=source, Scalars=['POINTS', 'u'], ScaleFactor=9)
     surface.UpdatePipeline()
     display = color(surface, target, 'u', source.PointData['u'].GetRange(),
                     title=r'$u$', association='POINTS')
@@ -285,6 +285,45 @@ def poisson_readme(root, output):
     target.CameraViewUp = [0, 0, 1]
     target.CameraParallelScale = .85
     save(output / 'Poisson.png', target, (1000, 800))
+    if frames is not None:
+        frames.mkdir(parents=True, exist_ok=True)
+        count = 6 * fps
+        center = list(target.CameraFocalPoint)
+        offset = [target.CameraPosition[i] - center[i] for i in range(3)]
+        bounds = None
+        for index in range(count):
+            angle = 2 * math.pi * index / count
+            target.CameraPosition = [
+                center[0] + offset[0] * math.cos(angle) - offset[1] * math.sin(angle),
+                center[1] + offset[0] * math.sin(angle) + offset[1] * math.cos(angle),
+                center[2] + offset[2]]
+            path = frames / f'{index:04d}.png'
+            save(path, target, (720, 576), crop=False)
+            with Image.open(path) as image:
+                box = image.getchannel('A').getbbox()
+            bounds = box if bounds is None else (
+                min(bounds[0], box[0]), min(bounds[1], box[1]),
+                max(bounds[2], box[2]), max(bounds[3], box[3]))
+            if index % fps == 0:
+                print('README rotation:', index, '/', count, flush=True)
+        # One crop for the whole orbit prevents the image from shifting or resizing.
+        bounds = (max(0, bounds[0] - 12), max(0, bounds[1] - 12),
+                  min(720, bounds[2] + 12), min(576, bounds[3] + 12))
+        for index in range(count):
+            path = frames / f'{index:04d}.png'
+            with Image.open(path) as image:
+                image.crop(bounds).save(path)
+        pattern = str(frames / '%04d.png')
+        palette = str(frames / 'palette.png')
+        subprocess.run(['ffmpeg', '-y', '-framerate', str(fps), '-t', str(count / fps), '-i', pattern,
+                        '-vf', 'palettegen=stats_mode=full:reserve_transparent=1',
+                        '-frames:v', '1', '-update', '1', palette], check=True)
+        subprocess.run(['ffmpeg', '-y', '-framerate', str(fps), '-t', str(count / fps), '-i', pattern,
+                        '-i', palette, '-lavfi',
+                        'paletteuse=dither=sierra2_4a:alpha_threshold=128',
+                        '-loop', '0', '-final_delay', str(round(100 / fps)),
+                        str(output / 'Poisson.gif')], check=True)
+
     print('README Poisson: point-data P1 interpolation,',
           source.GetDataInformation().GetNumberOfPoints(), 'vertices,',
           source.GetDataInformation().GetNumberOfCells(), 'cells,',
@@ -318,7 +357,7 @@ if __name__ == '__main__':
     parser.add_argument('--frames', type=Path)
     parser.add_argument('--fps', type=int, choices=[30, 60], default=30)
     cases = ['Poisson', 'Elasticity', 'SurfaceMesh', 'Periodic', 'MixedBoundary']
-    parser.add_argument('--example', choices=['all', 'cavity', 'Helmholtz', 'Stokes', 'NavierStokes', 'READMEPoisson'] + cases,
+    parser.add_argument('--example', choices=['all', 'cavity', 'Helmholtz', 'Stokes', 'NavierStokes', 'READMEPoisson', 'READMEPoissonRotation'] + cases,
                         default='all')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
@@ -331,8 +370,11 @@ if __name__ == '__main__':
         flow(args.root, 'Stokes', args.output)
     elif args.example in cases:
         scalar(args.root, args.example, args.output)
-    elif args.example == 'READMEPoisson':
-        poisson_readme(args.root, args.output)
+    elif args.example in ['READMEPoisson', 'READMEPoissonRotation']:
+        if args.example == 'READMEPoissonRotation' and args.frames is None:
+            parser.error('--frames is required for the README rotation')
+        poisson_readme(args.root, args.output,
+                       args.frames if args.example == 'READMEPoissonRotation' else None, args.fps)
     elif args.example == 'Helmholtz':
         helmholtz(args.root, args.output)
     elif args.example == 'NavierStokes':
