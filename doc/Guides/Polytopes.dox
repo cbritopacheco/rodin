@@ -41,17 +41,119 @@
   | `Hexahedron` | 3 | 8 | Product of three unit intervals |
   | `Wedge` | 3 | 6 | Triangle times unit interval |
 
+  The figures and tables use the reference vertices returned by
+  `Polytope::Traits(type).getVertex(i)`. The numbered markers identify the
+  zero-based local vertex indices.
+
   @m_class{rodin-mesh-stages}
 
   @parblock
-  @image html ReferencePolytopes-segment.png "Segment reference vertices from Polytope::Traits."
-  @image html ReferencePolytopes-triangle.png "Triangle reference vertices from Polytope::Traits."
-  @image html ReferencePolytopes-quadrilateral.png "Quadrilateral reference vertices from Polytope::Traits."
-  @image html ReferencePolytopes-tetrahedron.png "Tetrahedron reference vertices from Polytope::Traits."
-  @image html ReferencePolytopes-pyramid.png "Pyramid reference vertices from Polytope::Traits. The apex is above the first base vertex."
-  @image html ReferencePolytopes-hexahedron.png "Hexahedron reference vertices from Polytope::Traits."
-  @image html ReferencePolytopes-wedge.png "Wedge reference vertices from Polytope::Traits."
+  @image html ReferencePolytopes-point.png "Point reference vertex."
+  @image html ReferencePolytopes-segment.png "Segment reference vertices."
+  @image html ReferencePolytopes-triangle.png "Triangle reference vertices."
+  @image html ReferencePolytopes-quadrilateral.png "Quadrilateral reference vertices."
+  @image html ReferencePolytopes-tetrahedron.png "Tetrahedron reference vertices."
+  @image html ReferencePolytopes-pyramid.png "Pyramid reference vertices."
+  @image html ReferencePolytopes-hexahedron.png "Hexahedron reference vertices."
+  @image html ReferencePolytopes-wedge.png "Wedge reference vertices."
   @endparblock
+
+  @section guides-polytopes-vertices Reference vertices and local ordering
+
+  The tables give each reference vertex @f$\widehat v_i@f$ in local order.
+  Coordinate tuples have the reference cell's topological dimension.
+
+  For a physical cell @f$K@f$ with local-to-global vertex connectivity
+  @f$(I_0,\ldots,I_{n-1})@f$, its geometric map satisfies
+  @f$F_K(\widehat v_i)=x_{I_i}@f$. The local index @f$i@f$ selects a position
+  in that cell's connectivity; @f$I_i@f$ identifies the vertex in the mesh.
+  Preserve this order when constructing connectivity or supplying geometric
+  vertex data.
+
+  @subsection guides-polytopes-vertices-point Point
+
+  The reference point is the unique element of @f$\mathbb R^0@f$. Its
+  coordinate vector is empty, written @f$()@f$, and `getVertex(0).size()` is zero.
+
+  | Local index | Reference coordinates |
+  | :--- | :--- |
+  | 0 | @f$\widehat v_0=()@f$ |
+
+  @subsection guides-polytopes-vertices-segment Segment
+
+  | Local index | Reference coordinates |
+  | :--- | :--- |
+  | 0 | @f$\widehat v_0=(0)@f$ |
+  | 1 | @f$\widehat v_1=(1)@f$ |
+
+  @subsection guides-polytopes-vertices-triangle Triangle
+
+  | Local index | Reference coordinates |
+  | :--- | :--- |
+  | 0 | @f$\widehat v_0=(0,0)@f$ |
+  | 1 | @f$\widehat v_1=(1,0)@f$ |
+  | 2 | @f$\widehat v_2=(0,1)@f$ |
+
+  @subsection guides-polytopes-vertices-quadrilateral Quadrilateral
+
+  | Local index | Reference coordinates |
+  | :--- | :--- |
+  | 0 | @f$\widehat v_0=(0,0)@f$ |
+  | 1 | @f$\widehat v_1=(1,0)@f$ |
+  | 2 | @f$\widehat v_2=(1,1)@f$ |
+  | 3 | @f$\widehat v_3=(0,1)@f$ |
+
+  @subsection guides-polytopes-vertices-tetrahedron Tetrahedron
+
+  | Local index | Reference coordinates |
+  | :--- | :--- |
+  | 0 | @f$\widehat v_0=(0,0,0)@f$ |
+  | 1 | @f$\widehat v_1=(1,0,0)@f$ |
+  | 2 | @f$\widehat v_2=(0,1,0)@f$ |
+  | 3 | @f$\widehat v_3=(0,0,1)@f$ |
+
+  @subsection guides-polytopes-vertices-pyramid Pyramid
+
+  Vertices zero through three form the square base. The apex is vertex four,
+  directly above vertex zero. Horizontal cross-sections shrink toward that apex.
+
+  | Local index | Reference coordinates |
+  | :--- | :--- |
+  | 0 | @f$\widehat v_0=(0,0,0)@f$ |
+  | 1 | @f$\widehat v_1=(1,0,0)@f$ |
+  | 2 | @f$\widehat v_2=(1,1,0)@f$ |
+  | 3 | @f$\widehat v_3=(0,1,0)@f$ |
+  | 4 | @f$\widehat v_4=(0,0,1)@f$ |
+
+  @subsection guides-polytopes-vertices-hexahedron Hexahedron
+
+  Vertices zero through three lie on the bottom face. Vertices four through
+  seven are their corresponding vertices on the top face.
+
+  | Local index | Reference coordinates |
+  | :--- | :--- |
+  | 0 | @f$\widehat v_0=(0,0,0)@f$ |
+  | 1 | @f$\widehat v_1=(1,0,0)@f$ |
+  | 2 | @f$\widehat v_2=(1,1,0)@f$ |
+  | 3 | @f$\widehat v_3=(0,1,0)@f$ |
+  | 4 | @f$\widehat v_4=(0,0,1)@f$ |
+  | 5 | @f$\widehat v_5=(1,0,1)@f$ |
+  | 6 | @f$\widehat v_6=(1,1,1)@f$ |
+  | 7 | @f$\widehat v_7=(0,1,1)@f$ |
+
+  @subsection guides-polytopes-vertices-wedge Wedge
+
+  Vertices zero through two form the bottom triangle. Vertices three through
+  five are their corresponding vertices on the top triangle.
+
+  | Local index | Reference coordinates |
+  | :--- | :--- |
+  | 0 | @f$\widehat v_0=(0,0,0)@f$ |
+  | 1 | @f$\widehat v_1=(1,0,0)@f$ |
+  | 2 | @f$\widehat v_2=(0,1,0)@f$ |
+  | 3 | @f$\widehat v_3=(0,0,1)@f$ |
+  | 4 | @f$\widehat v_4=(1,0,1)@f$ |
+  | 5 | @f$\widehat v_5=(0,1,1)@f$ |
 
   @section guides-polytopes-reference Reference and physical coordinates
 
@@ -90,6 +192,93 @@
   @ref Rodin::Geometry::Connectivity "Connectivity". Relations are computed
   on demand. For example, `compute(1, 2)` discovers edges and associates each
   edge with its incident cells in a triangular mesh.
+
+  @subsection guides-polytopes-sub-local Inspect cell-induced ordering
+
+  `getSubPolytopes(entities, cellIndex, d)` enumerates a cell's
+  @f$d@f$-dimensional sub-entities in their local order. Each result contains
+  a geometry type and an ordered vertex key. The key contains mesh vertex
+  indices in the order induced by the parent cell.
+
+  For a pyramid with cell vertex key @f$(I_0,I_1,I_2,I_3,I_4)@f$, the
+  face sequence uses the following positions in that key.
+
+  | Local face | Shape | Parent-cell vertex positions |
+  | :--- | :--- | :--- |
+  | 0 | Quadrilateral | @f$(0,1,2,3)@f$ |
+  | 1 | Triangle | @f$(0,1,4)@f$ |
+  | 2 | Triangle | @f$(1,2,4)@f$ |
+  | 3 | Triangle | @f$(2,3,4)@f$ |
+  | 4 | Triangle | @f$(3,0,4)@f$ |
+
+  The edge sequence follows the base loop
+  @f$(0,1),(1,2),(2,3),(3,0)@f$, followed by the apex edges
+  @f$(0,4),(1,4),(2,4),(3,4)@f$.
+
+  @subsection guides-polytopes-sub-connectivity Inspect stored connectivity
+
+  `compute(D, d)` builds the cell-to-entity relation for a mesh of topological
+  dimension @f$D@f$. `compute(d, D)` builds the reverse relation, listing the
+  cells incident to each entity. `getIndex(d, key)` resolves a vertex key to
+  the entity's mesh index, and `getPolytope(d, index)` exposes its stored
+  vertex order.
+
+  The following code inspects the edges and faces of cell zero in a small
+  pyramid mesh. It uses `Rodin::Geometry`, `Rodin::Context`, `<iostream>` and
+  `<vector>`.
+
+  @code{.cpp}
+  Mesh mesh = Mesh().UniformGrid(Polytope::Type::Pyramid, {2, 2, 2});
+  auto& connectivity = mesh.getConnectivity();
+  const size_t D = mesh.getDimension();
+  const Index cellIndex = 0;
+
+  std::cout << "Cell vertices";
+  for (Index vertex : connectivity.getPolytope(D, cellIndex))
+    std::cout << ' ' << vertex;
+  std::cout << '\n';
+
+  for (size_t d : {size_t{1}, size_t{2}})
+  {
+    connectivity.compute(D, d);
+    connectivity.compute(d, D);
+    std::vector<Connectivity<Context::Local>::SubPolytope> entities;
+    connectivity.getSubPolytopes(entities, cellIndex, d);
+
+    for (size_t local = 0; local < entities.size(); ++local)
+    {
+      const auto& induced = entities[local].vertices;
+      const auto index = connectivity.getIndex(d, induced);
+      std::cout << "Dimension " << d << ", local " << local
+                << ", mesh index " << *index << '\n';
+      std::cout << "  Cell-induced vertices";
+      for (Index vertex : induced)
+        std::cout << ' ' << vertex;
+      std::cout << "\n  Stored vertices";
+      for (Index vertex : connectivity.getPolytope(d, *index))
+        std::cout << ' ' << vertex;
+      std::cout << "\n  Incident cells";
+      for (Index cell : connectivity.getIncidence({d, D}, *index))
+        std::cout << ' ' << cell;
+      std::cout << '\n';
+    }
+  }
+  @endcode
+
+  This cell has eight edges and five faces. The reverse incidence lists expose
+  which entities are shared with neighboring cells.
+
+  The entries returned by `getIncidence({D, d}, cellIndex)` are mesh indices
+  of the incident entities. Each index is resolved through
+  `getPolytope(d, index)` when its vertex order is needed.
+
+  A shared edge or face has one stored vertex order. An incident cell can
+  induce a different order on that same entity. Comparing the two ordered
+  keys gives the vertex permutation needed to align traces or local facet
+  data. Oriented integration additionally requires the appropriate normal
+  convention for each incident cell. The
+  @ref examples-interface-traces "interface traces tutorial" demonstrates
+  two-sided values on a shared edge.
 
   @section guides-polytopes-iteration Traverse mesh entities
 
