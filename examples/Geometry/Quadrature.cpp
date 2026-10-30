@@ -31,9 +31,13 @@ int main()
 
   //! [quadrature-map]
   Mesh mesh = Mesh<Context::Local>::Builder()
-    .initialize(2).nodes(3)
-    .vertex({1, 1}).vertex({3, 1}).vertex({1, 4})
-    .polytope(Polytope::Type::Triangle, {0, 1, 2}).finalize();
+                .initialize(2)
+                .nodes(3)
+                .vertex({1, 1})
+                .vertex({3, 1})
+                .vertex({1, 4})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .finalize();
   const auto cell = mesh.getCell();
   PolytopeQuadrature mapped(*cell, formula);
   Real physicalIntegral = 0;
@@ -47,8 +51,8 @@ int main()
     const Real weight = formula.getWeight(q);
     const Real jacobian = point.getJacobianDeterminant();
     physicalIntegral += weight * jacobian * point.x() * point.y();
-    samples << reference.x() << ',' << reference.y() << ',' << weight << ','
-            << point.x() << ',' << point.y() << ',' << jacobian << '\n';
+    samples << reference.x() << ',' << reference.y() << ',' << weight << ',' << point.x()
+            << ',' << point.y() << ',' << jacobian << '\n';
   }
   //! [quadrature-map]
 
@@ -58,8 +62,8 @@ int main()
   std::cout << "Reference integral: " << referenceIntegral << '\n'
             << "Physical integral: " << physicalIntegral << '\n'
             << "Quadrature points: " << formula.getSize() << std::endl;
-  const bool valid = std::abs(referenceIntegral - 1.0 / 24.0) < tolerance
-    && std::abs(physicalIntegral - 9.5) < tolerance;
+  const bool valid = std::abs(referenceIntegral - 1.0 / 24.0) < tolerance &&
+    std::abs(physicalIntegral - 9.5) < tolerance;
   //! [quadrature-check]
 
   std::ofstream vertices("ReferencePolytopes.csv");

@@ -328,7 +328,7 @@ namespace Rodin::Geometry
      *       a reference returned by this function. Mesh evaluation already
      *       requires geometry to remain unchanged for the duration of assembly.
      *
-     * @note The Factory must be callable with signature.
+       * @note The Factory must be callable with signature.
      *       `std::unique_ptr<PolytopeTransformation>(size_t d, Index idx)`
      */
     template <class Factory>

@@ -235,7 +235,7 @@ namespace Rodin::Solid
         }
 
         /**
-         * Deformed tangents at this face (constant over a P1 face).
+       * Deformed tangents at this face (constant over a P1 face).
          * @param fes Finite element space.
          * @param xjac Storage for the deformed tangent matrix.
          * @param d Surface kinematic state.

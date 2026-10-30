@@ -59,7 +59,8 @@ int main()
     }
     //! [constitutive-bind]
     const Real derivative = (energy[2] - energy[0]) / (2 * increment);
-    const Real error = std::abs(derivative - stress) / std::max(Real(1), std::abs(stress));
+    const Real error =
+      std::abs(derivative - stress) / std::max(Real(1), std::abs(stress));
     maximumError = std::max(maximumError, error);
     samples << stretch << ',' << energy[1] << ',' << stress << ',' << derivative << '\n';
   }

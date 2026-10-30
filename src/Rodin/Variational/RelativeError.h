@@ -32,7 +32,7 @@ namespace Rodin::Variational
      *
      * RelativeError provides static methods to compute the relative error
      * between a computed grid function and an exact solution in various norms.
-     * The relative error is defined as
+   * The relative error is defined as
      * @f[
      *   E_{\text{rel}} = \frac{\|u_h - u_{\text{exact}}\|}{\|u_{\text{exact}}\|}
      * @f]
