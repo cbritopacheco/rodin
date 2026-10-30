@@ -74,7 +74,8 @@ def main():
                VECLIB_MAXIMUM_THREADS='1')
 
     def run(name, ranks, pressure, outlet=0, dt=.001, steps=3, amplitude=0,
-            kinetics=False, lag=1, max_it=100000):
+            kinetics=False, lag=1, max_it=100000, velocity_guard=None,
+            expect_velocity_failure=False):
         folder = output/name
         folder.mkdir(exist_ok=True)
         cmd = [args.mpiexec, '-n', str(ranks), str(args.executable.resolve()),
@@ -92,9 +93,18 @@ def main():
         if lag > 1:
             cmd += ['-ksp_norm_type', 'unpreconditioned',
                     '-ksp_reuse_preconditioner', 'true', '-log_view', f':{folder}/PETSc.log']
+        if velocity_guard is not None:
+            cmd += ['-atrium_fluid_max_velocity', str(velocity_guard)]
         with (folder/'run.log').open('w') as log:
-            subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, env=env,
-                           cwd=output, check=True)
+            completed = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT,
+                                       env=env, cwd=output)
+        if expect_velocity_failure:
+            log = (folder/'run.log').read_text()
+            assert completed.returncode != 0, name
+            assert 'failed the numerical velocity guard' in log, log
+            assert 'max_velocity=' in log and 'numerical_guard=' in log, log
+            return
+        completed.check_returncode()
         with (folder/'Diagnostics.csv').open() as stream:
             rows = list(csv.DictReader(stream))
         fields = {a.attrib['Name'] for a in
@@ -120,6 +130,11 @@ def main():
     reverse = run('reverse', 2, -1, steps=1)
     gauge = run('gauge', 2, 1001, outlet=1000, steps=1)
     speed = 'fluid_max_velocity_m_per_s'
+    high_speed = run('above-old-velocity-limit', 2, 1e5, steps=1)
+    assert 5 < float(high_speed[0][speed]) < 1000
+    run('configured-velocity-guard', 2, 1e5, steps=1, velocity_guard=5,
+        expect_velocity_failure=True)
+    run('numerical-blowup-guard', 2, 1e7, steps=1, expect_velocity_failure=True)
     inlet, outlet = 'fluid_inlet_flux_m3_per_s', 'fluid_outlet_flux_m3_per_s'
     refreshed = run('refresh', 2, 1, steps=12, lag=5)
     fresh = run('refresh-fresh', 2, 1, steps=12)
@@ -155,6 +170,8 @@ def main():
     orders = [math.log2(a/b) for a, b in zip(differences, differences[1:])]
     assert all(.75 < order < 1.25 for order in orders), orders
     report = dict(rest=True, mpi_consistency=True, reversal=True, gauge=True,
+                  above_old_velocity_limit_m_per_s=float(high_speed[0][speed]),
+                  configurable_velocity_guard=True, numerical_blowup_guard=True,
                   maximum_relative_flux_imbalance=imbalance,
                   smooth_source_outlet_flux=q, smooth_source_observed_orders=orders)
     (output/'checks.json').write_text(json.dumps(report, indent=2))

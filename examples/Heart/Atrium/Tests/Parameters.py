@@ -32,7 +32,8 @@ def main():
                               env=env, text=True, capture_output=True, timeout=60)
     assert help_run.returncode == 0, help_run.stdout + help_run.stderr
     for flag in ('-atrium_mode', '-atrium_dt', '-atrium_solid_contractility',
-                 '-atrium_fluid_pin', '-atrium_fsi_rtol'):
+                 '-atrium_fluid_pin', '-atrium_fluid_max_velocity', '-atrium_fsi_rtol', '-atrium_fsi_newton',
+                 '-atrium_fsi_atol', '-atrium_fsi_solid_atol'):
         assert flag in help_run.stdout, flag
     solver = ['-ksp_type', 'gmres', '-ksp_rtol', '1e-12', '-pc_type', 'lu',
               '-pc_factor_mat_solver_type', 'mumps', '-mat_mumps_icntl_20', '0',
@@ -63,6 +64,9 @@ def main():
     for options in (['-atrium_mode', 'invalid'], ['-atrium_dt', '0'],
                     ['-atrium_steps', '-1'], ['--dt', '.001'],
                     ['-atrium_solid_apex', '1,2'], ['-atrium_pin', '1'],
+                    ['-atrium_fluid_max_velocity', '0'],
+                    ['-atrium_fluid_max_velocity', '-1'],
+                    ['-atrium_fluid_max_velocity', 'nan'],
                     ['-atrium_typo', '1']):
         failed = subprocess.run(base + options, env=env, text=True,
                                 capture_output=True, timeout=60)

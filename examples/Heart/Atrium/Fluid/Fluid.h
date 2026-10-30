@@ -290,8 +290,12 @@ namespace Rodin::Examples::Heart::Atrium
         Real crosswindC = 0.7;
         bool solveKinetics = false;
 
-        /// @brief Divergence guard on max|u| (m/s).
-        Real maxVelocity = 5.0;
+        /**
+         * @brief Numerical divergence guard on maximum speed (m/s).
+         * @details The default is three orders above a 1 m/s reference speed;
+         * this heuristic is not a physiological acceptance criterion.
+         */
+        Real maxVelocity = 1e3;
 
         Activation activation;
         AtrialPressure atrialPressure;

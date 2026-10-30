@@ -20,6 +20,7 @@
 #include <Rodin/Configure.h>
 
 #include "Fluid.h"
+#include "FlowIntegral.h"
 #include "Output.h"
 #include "../Log.h"
 #include "../../CoronaryArtery/CoronaryArteryTiming.h"
@@ -553,33 +554,33 @@ namespace Rodin::Examples::Heart::Atrium
     RealFunction pOutFn = [this](const Point&) { return m_pOut; };
     RealFunction mitralFn = [this](const Point&) { return m_mitralZ; };
     // The affine-tetrahedron volume ratio is constant; P1 history times P1 test is quadratic.
-    constexpr size_t MassOrder = 2;
-    auto historyMass = Integral(massRatio * m_uOld, m_v);
+    constexpr size_t MassOrder = 4;
+    auto historyMass = FlowIntegral(massRatio * m_uOld, m_v);
     historyMass.setOrder(MassOrder);
 
-    m_flow = (rho / dt) * Integral(m_u, m_v) - (rho / dt) * historyMass
+    m_flow = (rho / dt) * FlowIntegral(m_u, m_v) - (rho / dt) * historyMass
 
-      + rho * Integral(Dot(convU, m_v)) +
-      0.5 * rho * Integral(temam)
+      + rho * FlowIntegral(Dot(convU, m_v)) +
+      0.5 * rho * FlowIntegral(temam)
 
       // SUPG tests the complete affine-P1 momentum residual along the lagged flow.
-      + (rho / dt) * Integral(m_tauFn * m_u, streamlineTest) -
-      (rho / dt) * Integral(m_tauFn * massRatio * m_uOld, streamlineTest) +
-      rho * Integral(m_tauFn * convU, streamlineTest) +
-      (0.5 * rho) * Integral(m_tauFn * geometricDivergence * m_u, streamlineTest) +
-      Integral(m_tauFn * Grad(m_p), streamlineTest) +
-      VMSGradDivBilinearIntegrator(m_u, m_v, m_tauCFn)
+      + (rho / dt) * FlowIntegral(m_tauFn * m_u, streamlineTest) -
+      (rho / dt) * FlowIntegral(m_tauFn * massRatio * m_uOld, streamlineTest) +
+      rho * FlowIntegral(m_tauFn * convU, streamlineTest) +
+      (0.5 * rho) * FlowIntegral(m_tauFn * geometricDivergence * m_u, streamlineTest) +
+      FlowIntegral(m_tauFn * Grad(m_p), streamlineTest) +
+      FlowIntegral(m_tauCFn * Div(m_u), Div(m_v))
 
-      + 2.0 * Integral(muLag * symU, symV) - Integral(m_p, Div(m_v)) +
-      Integral(Div(m_u), m_q) +
-      m_cfg.pressurePenalty * Integral(m_p, m_q)
+      + 2.0 * FlowIntegral(muLag * symU, symV) - FlowIntegral(m_p, Div(m_v)) +
+      FlowIntegral(Div(m_u), m_q) +
+      m_cfg.pressurePenalty * FlowIntegral(m_p, m_q)
 
       // PSPG tests that same momentum residual with the pressure gradient.
-      + (rho / dt) * Integral(m_tauPFn * m_u, Grad(m_q)) -
-      (rho / dt) * Integral(m_tauPFn * massRatio * m_uOld, Grad(m_q)) +
-      rho * Integral(m_tauPFn * convU, Grad(m_q)) +
-      (0.5 * rho) * Integral(m_tauPFn * geometricDivergence * m_u, Grad(m_q)) +
-      Integral(m_tauPFn * Grad(m_p), Grad(m_q))
+      + (rho / dt) * FlowIntegral(m_tauPFn * m_u, Grad(m_q)) -
+      (rho / dt) * FlowIntegral(m_tauPFn * massRatio * m_uOld, Grad(m_q)) +
+      rho * FlowIntegral(m_tauPFn * convU, Grad(m_q)) +
+      (0.5 * rho) * FlowIntegral(m_tauPFn * geometricDivergence * m_u, Grad(m_q)) +
+      FlowIntegral(m_tauPFn * Grad(m_p), Grad(m_q))
 
       + BoundaryIntegral(pInFn * Dot(m_v, normal)).over(m_inletSet) +
       BoundaryIntegral(pOutFn * Dot(m_v, normal)).over(m_cfg.outlet)
@@ -922,7 +923,14 @@ namespace Rodin::Examples::Heart::Atrium
     m_speedMagnitude = Sqrt(Dot(m_u.getSolution(), m_u.getSolution()));
     m_speed = m_speedMagnitude.max();
 
-    return reason > 0 && std::isfinite(m_speed) && m_speed <= m_cfg.maxVelocity;
+    const bool accepted = std::isfinite(m_speed) && m_speed <= m_cfg.maxVelocity;
+    if (!accepted && isRoot())
+    {
+      Log("Fluid/Velocity", false, Log::Status::Failure)
+        << "max_velocity=" << m_speed << " m/s numerical_guard=" << m_cfg.maxVelocity
+        << " m/s" << Alert::Raise;
+    }
+    return accepted;
   }
 
   void Fluid::recoverGradient()
@@ -1083,7 +1091,10 @@ namespace Rodin::Examples::Heart::Atrium
   {
     beginStep();
     if (!solveFlow())
-      Alert::Exception() << "Fluid trial exceeded its velocity limit" << Alert::Raise;
+    {
+      Alert::Exception() << "Fluid trial failed the numerical velocity guard"
+                         << Alert::Raise;
+    }
     recoverGradient();
     computeWallShear();
     commitStep();

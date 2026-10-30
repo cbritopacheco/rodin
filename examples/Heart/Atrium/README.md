@@ -20,7 +20,7 @@ the optional `FSI` coupling object, cavity-volume measurements, and one CSV
 writer. `initialize()` prepares the components, `step()` advances one accepted
 physical timestep, and `finish()` flushes final states and closes outputs.
 These operations are collective. FSI freezes both previous states during
-coupling iterations and commits the last completed sweep at convergence or
+coupling iterations, with optional analytic interface Newton, and commits the last completed sweep at convergence or
 budget exhaustion.
 
 | Location | Responsibility |
@@ -74,7 +74,9 @@ there are no separate solid/fluid timestep or output-path options.
 Component options use `-atrium_solid_*`, `-atrium_fluid_*`, and `-atrium_fsi_*`.
 For example, `-atrium_solid_contractility 20` sets the active stress source in
 kPa, `-atrium_fluid_pin 1200` sets mean inlet pressure in Pa, and
-`-atrium_fsi_rtol 1e-6` sets the relative solid displacement-change tolerance. The apex is
+`-atrium_fsi_rtol 1e-6` sets the Robin-sweep displacement-change tolerance.
+`-atrium_fsi_newton` selects analytic matrix-free interface Newton;
+`-atrium_fsi_atol 1e-6` sets its absolute nodal Robin residual tolerance in kPa. The apex is
 specified as three comma-separated coordinates in mm:
 `-atrium_solid_apex 46.39638367,187.44307667,-205.03317767`.
 `-help` describes the full option set without loading the mesh.
@@ -205,6 +207,7 @@ The numerical checks require MPI and MUMPS:
 ```sh
 python3 examples/Heart/Atrium/Tests/Fluid.py --mpiexec mpiexec
 python3 examples/Heart/Atrium/Tests/FSI.py --mpiexec mpiexec
+python3 examples/Heart/Atrium/Tests/Newton.py --mpiexec mpiexec
 python3 examples/Heart/Atrium/Tests/Parameters.py --mpiexec mpiexec
 ```
 

@@ -90,6 +90,12 @@ not imply a periodic solution. The shared `Diagnostics.csv` records pressure,
 flux, speed, cavity volume, solver iterations, and preconditioner statistics at
 every step. [Volume rendering](../Visualization/README.md) uses `Fluid.xdmf`.
 
+`-atrium_fluid_max_velocity` sets the numerical divergence guard in metres per
+second for fluid and FSI trials. Its default is $1000\,\mathrm{m/s}$, three
+orders above a $1\,\mathrm{m/s}$ reference speed. This heuristic guard does not
+define physiological admissibility. Nonfinite peak speeds and speeds above the
+guard reject the trial; its measured peak and the configured guard are logged.
+
 ## Preconditioner refresh
 
 `-atrium_fluid_lag_preconditioner N` refreshes numeric factors on the first

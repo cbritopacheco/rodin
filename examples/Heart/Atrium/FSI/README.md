@@ -1,194 +1,151 @@
 # Atrium FSI
 
-Fluid inertia loads the contracting wall, so independently advancing the two
-components does not enforce their interface conditions. `FSI` uses a partitioned
-Robin–Robin construction with the fluid impedance and interface convective
-correction of the [coronary P1/P1 example](../../CoronaryArtery/FSI/Explicit_P1P1_PETSc_Seq/README.md).
-Both subproblems receive Robin data on material label 4.
+Active wall contraction drives an initially resting fluid through open boundaries.
+`FSI` couples the Demiray–Holzapfel–Gasser–Ogden solid with Kelvin–Voigt
+dissipation to the ALE Oseen fluid. The fluid uses P1/P1 velocity and pressure
+with SUPG, PSPG and grad-div stabilization. No ventricular driver, imposed flow,
+coagulation transport or orthogonal subscales enter this coupled model.
 
-Let $n_f$ point out of the current fluid domain, $N_s$ out of the reference solid,
-and $J_\Gamma=dS/dS_0$. The continuous target is displacement compatibility,
-velocity continuity, and traction equilibrium:
+## Interface model
+
+The solid and fluid submeshes retain their common parent vertex identities.
+Their interface is conforming, and retained MPI scatter plans transfer its
+fields. Let $n_f$ point out of the current fluid domain, $N_s$ out of the
+reference solid, and $J_\Gamma=dS/dS_0$. The target conditions are
 
 $$
-d_f=d_s,\qquad u_f=\dot d_s,\qquad
+d_f=d_s,\qquad u_f=v_\Gamma,\qquad
 P_sN_s=J_\Gamma(-\sigma_fn_f),\qquad
 \sigma_f=-pI+2\mu D(u_f).
 $$
 
-The time-discrete interface rate is
+The interface rate uses BDF1,
 
 $$
-v_\Gamma^{n+1}=\frac{d_s^{n+1}-d_s^n}{\Delta t}.
+v_\Gamma=\frac{d_s^{n+1}-d_s^n}{\Delta t}.
 $$
 
-It matches the BDF1 ALE boundary velocity. For the selected average-acceleration
-Newmark parameters, it also equals $(v_s^{n+1}+v_s^n)/2$. The solid retains its
-Newmark endpoint velocity for bulk inertia and tissue viscosity; that endpoint
-velocity is distinct from the interface rate at finite time step.
+Solid bulk dynamics retain Newmark integration. Its endpoint velocity differs
+from the BDF1 interface rate at finite timestep. A harmonic extension moves the
+fluid interior; opening caps and solid opening cut faces remain fixed. No
+additional interface ring is clamped. All fluid openings have zero imposed
+pressure and no prescribed flux.
 
-### Robin data and reference-area traction
-
-Let $T^k$ denote the fluid reaction on the solid per reference area and let
-$\alpha_0>0$ be a reference-area Robin impedance. A correction sweep solves
+For reference-area impedance $\alpha_0>0$, a solid/ALE/fluid evaluation solves
 
 $$
-P_s^{k+1}N_s+\alpha_0v_\Gamma^{k+1}=g^k,\qquad
-g^k=T^k+\alpha_0u_f^k.
+P_sN_s+\alpha_0v_\Gamma=g.
 $$
 
-The fluid receives the following boundary contribution to its weak residual:
+The fluid weak residual contains the Robin and interface convection terms
 
 $$
-\int_{\Gamma(t)}\frac{\alpha_0(u_f^{k+1}-v_\Gamma^{k+1})+T^k}{J_\Gamma}
-\cdot v\,dS
--\frac{\rho_f}{2}\int_{\Gamma(t)}[(u_f^n-a)\cdot n_f]
-(u_f^{k+1}\cdot v)\,dS.
+\int_{\Gamma(t)}\frac{\alpha_0(u_f-v_\Gamma)+T}{J_\Gamma}\cdot w\,dS
+-\frac{\rho_f}{2}\int_{\Gamma(t)}[(u_f^n-a)\cdot n_f](u_f\cdot w)\,dS,
 $$
 
-Here $a$ is the ALE mesh velocity. Division by $J_\Gamma$ converts reference-area
-Robin data to the moving fluid surface. The second integral is the weakly
-consistent interface convective correction. Fluid velocity is not constrained
-by an interface Dirichlet condition.
+where $a$ is the ALE mesh velocity. Division by $J_\Gamma$ converts reference
+Robin data to the current fluid surface. The interface velocity is not imposed
+as a strong fluid Dirichlet condition.
 
-After each fluid solve, the three rows of $\nabla u_f$ are recovered by
-volume mass projections. Their symmetric part $D_h$ supplies the current
-Carreau–Yasuda viscosity and the physical traction on the solid,
+For analytic Newton, the variational Robin reaction defines the exchange map
 
 $$
-t_h=p_hn_f-2\mu(D_h)D_hn_f.
+H_T(g,T)=\Pi_\Gamma T+\alpha_0(u_f-v_\Gamma),\qquad
+H_g(g,T)=H_T(g,T)+\alpha_0u_f.
 $$
 
-Face-dependent tractions are projected to nodal values with lumped trace
-mass, giving one area-weighted value at shared corners independent of MPI
-partitioning. For trace basis $\varphi_i$, the reference nodal
-traction is
+Here $\Pi_\Gamma$ restricts the transferred traction to the common interface.
+Reference traction is exchanged in kPa and solid velocities in mm/s; fluid
+assembly converts to Pa and m/s. In the Newton path, recovered velocity gradients serve wall-shear
+diagnostics; they do not define the exchanged traction.
+
+The automatic impedance is
 
 $$
-T_i=\frac{\int_\Gamma\varphi_i t_h\,dS}
-{\int_\Gamma\varphi_i/J_\Gamma\,dS}.
+\alpha_0=\sqrt{\rho_{s,0}E_m},\qquad
+E_m=\frac{9K_m\mu_m}{3K_m+\mu_m},\qquad
+\mu_m=a_m,\quad K_m=2\mu_v.
 $$
 
-The denominator is the lumped reference trace mass. It implements the
-area pullback and preserves the assembled resultant. These boundary forms are
-reassembled on each moved geometry. Matching parent vertices transfer the
-reference traction and fluid velocity to the solid. The next Robin datum is
+Material coefficients are converted to Pa. This matrix-based scale omits
+fiber reinforcement and is an algorithmic choice. `-atrium_fsi_robin` supplies
+an explicit value in $\mathrm{Pa\,s/m}$.
+
+## Analytic interface Newton
+
+With `-atrium_fsi_newton`, the interface unknown $x=(g,T)$ solves
 
 $$
-g^{k+1}=T^{k+1}+\alpha_0u_f^{k+1}.
+R(x)=\begin{pmatrix}g-H_g(g,T)\\T-H_T(g,T)\end{pmatrix}=0,\qquad
+R'(x_k)\delta x=-R(x_k).
 $$
 
-This is recovered physical-stress exchange, following the coronary example.
-It is not the algebraic variational-reaction update, and there is no Aitken
-relaxation. The fluid receives the lagged reference traction divided by area
-stretch. Both transmission velocities retain BDF1; the solid Robin tangent
-uses $\alpha_0/\Delta t$.
+`FSI::solveNewton()` uses SNES with line search and a matrix-free GMRES
+operator. Each analytic action solves the solid tangent problem, harmonically
+extends the displacement increment, and solves the differentiated fluid
+problem. The fluid derivative includes geometry and surface measure, ALE mass
+ratios, relative convection, Temam terms, Carreau–Yasuda viscosity and
+SUPG/PSPG/grad-div coefficients. Residual and derivative volume forms share
+order-four quadrature. No finite differences construct the solver operator.
 
-### Displacement stopping test and sweep budget
+An evaluation retains its input, residual and solved bulk state. Exact equality
+with the most recently evaluated input allows reuse during initial residual
+requests, Jacobian setup and final acceptance. A different trial point requires
+a fresh evaluation. This cache lives for one physical timestep. Tangent
+matrices are assembled at the current Newton point; zero-direction diagnostic
+solves are omitted.
 
-After a complete solid/ALE/fluid sweep, define
+`-atrium_fsi_atol` defaults to $10^{-6}$ and applies to the global Euclidean norm
+of the two nodal Robin residual blocks, in kPa. This norm is mesh dependent;
+it is not a normalized interface error. `-atrium_fsi_solid_atol` defaults to
+$10^{-10}$ for the inner solid solve. Native interface SNES/KSP options use
+`-atrium_fsi_interface_`, for example
+`-atrium_fsi_interface_ksp_monitor`. Newton failure rejects the step.
+`-atrium_fsi_check_tangent` enables residual Taylor checks for verification.
+
+## Budgeted Robin sweeps
+
+Without `-atrium_fsi_newton`, the legacy Robin sweeps recover the fluid velocity
+gradient and project physical stress to the reference interface with lumped
+trace mass. This exchange differs from Newton's variational reaction map.
+Starting at the second completed sweep, the relative
+solid displacement-change norm determines early termination:
 
 $$
 r_d=\frac{\|d_s^{k+1}-d_s^k\|_2}{\|d_s^{k+1}\|_2}.
 $$
 
-The norm is the global Euclidean norm of the complete solid displacement
-coefficient vector, not a surface-weighted interface norm. If the denominator
-is zero, the absolute increment norm in metres is used instead. Starting with
-the second sweep, $r_d<\varepsilon_d$ terminates the correction loop. Defaults
-are `-atrium_fsi_rtol 1e-6` and `-atrium_fsi_iterations 5`. A zero
-tolerance disables early termination and uses the complete sweep budget.
+At zero denominator, the absolute increment norm in metres is used. Defaults
+are `-atrium_fsi_rtol 1e-6` and `-atrium_fsi_iterations 5`; zero tolerance uses
+the full budget. Budget exhaustion accepts the last complete sweep and marks
+it unconverged. A small budget does not establish interface continuity.
 
-Budget exhaustion accepts the last completed sweep. `fsi_converged` and
-`fsi_budget_exhausted` in the common CSV distinguish criterion satisfaction
-from acceptance at the budget. Inner solver failures, invalid constitutive
-states, and mesh inversion still reject the step. A small budget does not
-establish interface continuity; velocity slip, traction-data change, and
-geometry mismatch remain diagnostics. Unlike the reference's early exit
-before its fluid solve, each accepted Atrium sweep includes ALE and fluid
-updates, so both exported geometries correspond to the accepted solid state.
+## Ownership and output
 
-No wall-face ring band is introduced. Existing solid opening cut faces remain
-fixed, ALE caps remain fixed, and fluid opening interiors remain open. The
-interface is not given an additional strong velocity constraint.
+`FSI` retains trace scatters, interface data and the harmonic mesh-motion
+Problem. `Solid` and `Fluid` own their assembly Problems and histories. Previous
+physical states remain fixed through all coupling trials. Mesh-coordinate
+updates invalidate geometric caches. Accepted steps commit both components
+and write one common `Diagnostics.csv`, including cavity volumes, fluxes,
+interface mismatch, coupling status and mesh Jacobian diagnostics.
 
-The automatic impedance uses the coronary scaling with a matrix-based isotropic
-small-strain modulus:
-
-$$
-\alpha_0=\sqrt{\rho_{s,0}E_m},\qquad
-E_m=\frac{9K_m\mu_m}{3K_m+\mu_m},\qquad
-\mu_m=a,\quad K_m=2\mu_v.
-$$
-
-Material coefficients are converted to Pa for this calculation. This scale
-omits directional fiber reinforcement and is an algorithmic choice, not a full
-anisotropic Young modulus. `-atrium_fsi_robin` supplies an explicit positive
-value in $\mathrm{Pa\,s/m}$.
-
-### ALE evolution and problem ownership
-
-A harmonic extension of solid displacement moves the fluid interior; opening
-caps remain fixed. With $a=(d_f^{n+1}-d_f^n)/\Delta t$ and cell-volume ratio
-$r_K=|K^n|/|K^{n+1}|$, the conservative first-order ALE residual is
-
-$$
-R_m^{\mathrm{ALE}}=
-\rho_f\frac{u_f^{n+1}-r_Ku_f^n}{\Delta t}
-+\rho_f[(u_f^n-a)\cdot\nabla]u_f^{n+1}
-+\rho_f\left(\frac12\nabla\cdot u_f^n-\nabla\cdot a\right)u_f^{n+1}
--\nabla\cdot(2\mu_nD(u_f^{n+1}))+\nabla p^{n+1}.
-$$
-
-SUPG and PSPG use this residual and the relative advecting velocity. Previous
-fluid velocity and solid internal states remain fixed through coupling trials.
-Mesh motion invalidates Rodin's geometric caches through its coordinate API.
-The same spaces, Problems, solvers, and MPI trace scatter plan are retained.
-Recovered velocity gradients are recomputed at every coupling sweep for
-traction exchange. Wall-shear projection is computed once per accepted step.
-
-The common CSV records the Robin coefficient, traction-data update,
-displacement-change metric and tolerance, criterion and budget status,
-fluid/BDF1 interface velocity mismatch, fluid/Newmark endpoint mismatch, and
-shared-geometry mismatch separately. Fluid `MeshVelocity` gives the BDF1 target
-at the wall; solid `Velocity` gives the Newmark endpoint velocity. The two fields
-should not be identified at finite time step.
-
-All openings have zero imposed pressure and no prescribed flux. Fluid starts
-at rest and active wall contraction drives the flow. Backflow stabilization
-remains active. FSI excludes the 0D ventricular driver, species transport, and
-orthogonal subscales. The outer solid surface is unloaded and opening rims are
-clamped. No valve or circulatory model is represented.
-
-
-## Architecture and run
-
-`FSI` binds the existing `Solid` and `Fluid` objects and retains its trace
-scatter plans, interface data, harmonic mesh-motion Problem, and solver. It
-owns the coupling iteration; each component owns its assembly and physical
-state. The shared `Parameters::timeStep` is used for both components. Previous
-states remain frozen through coupling trials, and output and time histories
-are committed after the displacement criterion is satisfied or the sweep
-budget is exhausted.
+`Solid.xdmf` uses reference coordinates and `Displacement`; apply **Warp By
+Vector** for deformation. `Fluid.xdmf` already contains moving coordinates.
 
 ```sh
 cmake --build build --target Atrium -j4
-mpirun -n 4 build/examples/Heart/Atrium/Atrium \
-  -atrium_mode fsi \
+mpirun -n 6 build/examples/Heart/Atrium/Atrium \
+  -atrium_mode fsi -atrium_fsi_newton \
   -atrium_mesh resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh \
-  -atrium_output output/atrium-fsi \
-  -atrium_dt 0.001 -atrium_steps 24 -atrium_output_every 1 \
-  -atrium_solid_cache_constitutive \
-  -atrium_fluid_lag_preconditioner 5 \
-  -ksp_type gmres -ksp_rtol 1e-12 -ksp_max_it 500 \
-  -ksp_norm_type unpreconditioned -pc_type lu \
-  -pc_factor_mat_solver_type mumps -mat_mumps_icntl_20 0 \
-  -ksp_diagonal_scale false -ksp_diagonal_scale_fix false
+  -atrium_output output/atrium-fsi-newton \
+  -atrium_dt 0.001 -atrium_steps 850 -atrium_output_every 1 \
+  -atrium_solid_contractility 2000 -atrium_solid_cache_constitutive \
+  -atrium_solid_apex 46.39638367,187.44307667,-205.03317767 \
+  -atrium_fsi_atol 1e-6 -atrium_fsi_solid_atol 1e-10 \
+  -ksp_type preonly -pc_type lu -pc_factor_mat_solver_type mumps \
+  -mat_mumps_icntl_20 0 -ksp_diagonal_scale false -ksp_diagonal_scale_fix false
 ```
 
-`Solid.xdmf` stores reference coordinates and `Displacement`; apply **Warp By
-Vector** to visualize deformation. `Fluid.xdmf` stores moving coordinates and
-must be viewed directly. `Diagnostics.csv` combines both component diagnostics
-and coupling status. The run saves 25 states including the initial one.
-The [shared configuration](../README.md#configuration) lists the component
-option prefixes; `-help` includes displacement-change tolerance and sweep budget.
+This advances one $0.85\,\mathrm{s}$ cycle. The contraction strength is an
+explicit example parameter; it does not constitute a physiological calibration.

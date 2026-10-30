@@ -15,17 +15,16 @@ namespace Rodin::Examples::Heart::Atrium
   /**
    * @brief Partitioned Robin--Robin coupling on a conforming MPI interface.
    *
-   * The solid and fluid use Robin data built from the latest projected physical
-   * fluid stress and interface velocity. Transmission uses the BDF1 wall rate
+   * The solid and fluid exchange Robin data and interface velocity. Newton uses
+   * variational reactions; budgeted sweeps retain recovered physical stress. Transmission uses the BDF1 wall rate
    * @f$ (d_s^{n+1}-d_s^n)/\Delta t @f$ on both sides. Solid dynamics retain
-   * Newmark integration. Relative solid displacement change determines early
-   * termination; budget exhaustion accepts the last completed sweep.
+   * Newmark integration. Robin sweeps use relative displacement change and budgeted acceptance.
+   * Optional analytic interface Newton enforces an absolute residual tolerance.
    *
    * ## Architecture
    *
    * Parent vertex identities define a retained PETSc trace scatter plan. Solid
-   * displacement is harmonically extended to the fluid mesh. Recovered gradients supply current-area traction; area stretch pulls it back
-   * to the solid reference interface. Previous physical histories remain fixed
+   * displacement is harmonically extended to the fluid mesh. Variational reactions are expressed on the solid reference interface. Previous physical histories remain fixed
    * throughout the sweeps. The geometry is updated for every accepted pair.
    */
   class FSI
@@ -33,6 +32,11 @@ namespace Rodin::Examples::Heart::Atrium
     public:
       struct Parameters
       {
+        bool newton = false; ///< Solve the analytic interface residual with Newton.
+        Real absoluteTolerance = 1e-6; ///< Global nodal Robin residual norm, in kPa.
+        Real solidAbsoluteTolerance = 1e-10; ///< Absolute inner solid SNES tolerance.
+        bool checkTangent =
+          false; ///< Check analytic actions with residual Taylor tests.
         size_t maximumIterations =
           5; ///< Sweep budget; the last completed sweep is accepted.
         Real relativeTolerance =
@@ -49,7 +53,7 @@ namespace Rodin::Examples::Heart::Atrium
         Real displacementChange =
           0; ///< Relative L2 change, or absolute L2 change in m at zero state.
         bool converged =
-          false; ///< Displacement-change criterion satisfied after at least two sweeps.
+          false; ///< The selected displacement-change or Newton residual criterion is satisfied.
         bool budgetExhausted =
           false; ///< Last sweep accepted without satisfying the criterion.
         Real velocityMismatch = 0; ///< m/s, fluid/BDF1 interface velocity mismatch.
@@ -72,7 +76,7 @@ namespace Rodin::Examples::Heart::Atrium
       /// @brief Matches the initial fluid geometry to passive solid equilibrium.
       void initialize();
 
-      /// @brief Advances and commits the last completed coupling sweep.
+      /// @brief Advances with the selected coupling method and commits the accepted state.
       void step();
 
       /**
@@ -116,8 +120,11 @@ namespace Rodin::Examples::Heart::Atrium
       /// @brief Extends solid displacement and updates the ALE geometry and velocity.
       void moveFluidMesh();
 
-      /// @brief Projects recovered fluid stress and transfers its reference-area traction.
+      /// @brief Exchanges interface velocity and the selected traction representation.
       void updateTraction();
+
+      /// @brief Solves the reduced Robin interface residual with analytic actions.
+      void solveNewton();
 
       Solid& m_solid;
       Fluid& m_fluid;

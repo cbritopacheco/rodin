@@ -155,7 +155,10 @@ namespace Rodin::Examples::Heart::Atrium
   {
     if (parameters.maximumIterations < 1 ||
       !std::isfinite(parameters.relativeTolerance) || parameters.relativeTolerance < 0 ||
-      !std::isfinite(m_robinCoefficient) || m_robinCoefficient < 0)
+      !std::isfinite(parameters.absoluteTolerance) || parameters.absoluteTolerance <= 0 ||
+      !std::isfinite(parameters.solidAbsoluteTolerance) ||
+      parameters.solidAbsoluteTolerance <= 0 || !std::isfinite(m_robinCoefficient) ||
+      m_robinCoefficient < 0)
       Alert::Exception() << "Invalid FSI parameters" << Alert::Raise;
     if (fluid.m_cfg.useVentricularModel || fluid.m_cfg.useVMS ||
       fluid.m_cfg.solveKinetics)
@@ -321,6 +324,18 @@ namespace Rodin::Examples::Heart::Atrium
   void FSI::updateTraction()
   {
     Stage stage("Interface traction exchange", m_fluid.isRoot());
+    if (m_parameters.newton)
+    {
+      transfer(m_solidToFluid, m_fluid.m_u.getSolution(), m_importedVelocity, 1e3,
+        SCATTER_REVERSE);
+      transfer(m_solidToFluid, m_fluid.m_wallVelocity, m_interfaceVelocity, 1e3,
+        SCATTER_REVERSE);
+      m_trialTraction = m_importedTraction +
+        m_solid.m_robinCoefficient * (m_importedVelocity - m_interfaceVelocity);
+      m_solid.m_robinData =
+        m_trialTraction + m_solid.m_robinCoefficient * m_importedVelocity;
+      return;
+    }
     transfer(m_solidToFluid, m_fluid.m_u.getSolution(), m_importedVelocity, 1e3,
       SCATTER_REVERSE);
     transfer(
@@ -409,50 +424,61 @@ namespace Rodin::Examples::Heart::Atrium
     m_solid.beginStep();
     m_fluid.beginStep();
     m_previousDisplacementIteration.setData(m_solid.m_displacement.getData());
-    for (size_t iteration = 1; iteration <= m_parameters.maximumIterations; ++iteration)
+    if (m_parameters.newton)
+      solveNewton();
+    else
     {
-      Stage coupling("Coupling iteration " + std::to_string(iteration), m_fluid.isRoot());
-      if (m_fluid.isRoot())
+      for (size_t iteration = 1; iteration <= m_parameters.maximumIterations; ++iteration)
       {
-        Log("FSI/Coupling") << "iteration=" << iteration << '/'
-                            << m_parameters.maximumIterations << Alert::Raise;
+        Stage coupling(
+          "Coupling iteration " + std::to_string(iteration), m_fluid.isRoot());
+        if (m_fluid.isRoot())
+        {
+          Log("FSI/Coupling") << "iteration=" << iteration << '/'
+                              << m_parameters.maximumIterations << Alert::Raise;
+        }
+        m_previousRobinData.setData(m_solid.m_robinData.getData());
+        m_solid.solveStep();
+        m_residualDifference = m_solid.m_displacement - m_previousDisplacementIteration;
+        const Real change = m_residualDifference.norm(NORM_2);
+        const Real state = m_solid.m_displacement.norm(NORM_2);
+        m_diagnostics.displacementChange = state > 0 ? change / state : 1e-3 * change;
+        m_previousDisplacementIteration.setData(m_solid.m_displacement.getData());
+        moveFluidMesh();
+        if (!m_fluid.solveFlow())
+        {
+          Alert::Exception() << "FSI fluid trial failed the numerical velocity guard"
+                             << Alert::Raise;
+        }
+        updateTraction();
+        Stage interface(
+          "Interface convergence and traction diagnostics", m_fluid.isRoot());
+        PetscReal difference = 0, tractionDifference = 0;
+        m_tractionResidual = m_importedTraction - m_trialTraction;
+        m_previousRobinData.axpy(-1, m_solid.m_robinData);
+        PetscErrorCode ierr =
+          VecNorm(m_previousRobinData.getData(), NORM_INFINITY, &difference);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecNorm(m_tractionResidual.getData(), NORM_INFINITY, &tractionDifference);
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+        m_diagnostics.iterations = iteration;
+        m_diagnostics.tractionDataUpdate = 1e3 * std::max(difference, tractionDifference);
+        m_importedTraction.setData(m_trialTraction.getData());
+        m_diagnostics.converged = iteration > 1 &&
+          m_diagnostics.displacementChange < m_parameters.relativeTolerance;
+        if (m_fluid.isRoot())
+        {
+          Log("FSI/Coupling") << "iteration=" << iteration << " displacement_change="
+                              << m_diagnostics.displacementChange
+                              << " tolerance=" << m_parameters.relativeTolerance
+                              << " traction_data_update="
+                              << m_diagnostics.tractionDataUpdate << " Pa"
+                              << Alert::Raise;
+        }
+        if (m_diagnostics.converged)
+          break;
       }
-      m_previousRobinData.setData(m_solid.m_robinData.getData());
-      m_solid.solveStep();
-      m_residualDifference = m_solid.m_displacement - m_previousDisplacementIteration;
-      const Real change = m_residualDifference.norm(NORM_2);
-      const Real state = m_solid.m_displacement.norm(NORM_2);
-      m_diagnostics.displacementChange = state > 0 ? change / state : 1e-3 * change;
-      m_previousDisplacementIteration.setData(m_solid.m_displacement.getData());
-      moveFluidMesh();
-      if (!m_fluid.solveFlow())
-        Alert::Exception() << "FSI fluid velocity exceeded its limit" << Alert::Raise;
-      updateTraction();
-      Stage interface("Interface convergence and traction diagnostics", m_fluid.isRoot());
-      PetscReal difference = 0, tractionDifference = 0;
-      m_tractionResidual = m_importedTraction - m_trialTraction;
-      m_previousRobinData.axpy(-1, m_solid.m_robinData);
-      PetscErrorCode ierr =
-        VecNorm(m_previousRobinData.getData(), NORM_INFINITY, &difference);
-      assert(ierr == PETSC_SUCCESS);
-      ierr = VecNorm(m_tractionResidual.getData(), NORM_INFINITY, &tractionDifference);
-      assert(ierr == PETSC_SUCCESS);
-      (void)ierr;
-      m_diagnostics.iterations = iteration;
-      m_diagnostics.tractionDataUpdate = 1e3 * std::max(difference, tractionDifference);
-      m_importedTraction.setData(m_trialTraction.getData());
-      m_diagnostics.converged = iteration > 1 &&
-        m_diagnostics.displacementChange < m_parameters.relativeTolerance;
-      if (m_fluid.isRoot())
-      {
-        Log("FSI/Coupling") << "iteration=" << iteration
-                            << " displacement_change=" << m_diagnostics.displacementChange
-                            << " tolerance=" << m_parameters.relativeTolerance
-                            << " traction_data_update="
-                            << m_diagnostics.tractionDataUpdate << " Pa" << Alert::Raise;
-      }
-      if (m_diagnostics.converged)
-        break;
     }
     m_diagnostics.budgetExhausted = !m_diagnostics.converged;
     {

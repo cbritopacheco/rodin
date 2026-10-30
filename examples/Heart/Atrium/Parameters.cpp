@@ -123,6 +123,8 @@ namespace Rodin::Examples::Heart::Atrium
       real("-atrium_fluid_pspg_scale", "PSPG multiplier", out.fluid.pspgScale);
       real("-atrium_fluid_period", "Pressure and statistics cycle period (s)",
         out.fluid.period);
+      real("-atrium_fluid_max_velocity", "Numerical divergence guard on speed (m/s)",
+        out.fluid.maxVelocity);
       integer("-atrium_fluid_lag_preconditioner",
         "Numeric preconditioner refresh interval in physical steps",
         out.fluid.preconditionerLag);
@@ -134,6 +136,15 @@ namespace Rodin::Examples::Heart::Atrium
         out.fluid.useVMS);
       boolean("-atrium_fluid_kinetics", "Enable coagulation transport (fluid mode only)",
         out.fluid.solveKinetics);
+      boolean("-atrium_fsi_newton", "Use analytic matrix-free interface Newton",
+        out.fsi.newton);
+      real("-atrium_fsi_atol", "Absolute nodal interface residual tolerance (kPa)",
+        out.fsi.absoluteTolerance);
+      real("-atrium_fsi_solid_atol",
+        "Absolute solid SNES tolerance during interface Newton",
+        out.fsi.solidAbsoluteTolerance);
+      boolean("-atrium_fsi_check_tangent",
+        "Check analytic interface tangents with Taylor remainders", out.fsi.checkTangent);
       integer("-atrium_fsi_iterations", "Maximum Robin-Robin coupling iterations",
         out.fsi.maximumIterations);
       real("-atrium_fsi_robin",
@@ -176,7 +187,7 @@ namespace Rodin::Examples::Heart::Atrium
       const bool solver = name.starts_with("-atrium_sproj_") ||
         name.starts_with("-atrium_vproj_") || name.starts_with("-atrium_wss_") ||
         name.starts_with("-atrium_transmural_") || name.starts_with("-atrium_fibers_") ||
-        name.starts_with("-atrium_ale_");
+        name.starts_with("-atrium_ale_") || name.starts_with("-atrium_fsi_interface_");
       if (name.starts_with("-atrium_") && !solver && !unknown)
         unknown = std::string(name);
     }
@@ -205,6 +216,12 @@ namespace Rodin::Examples::Heart::Atrium
     }
     if (mode != Mode::Fluid)
       validateParameters(solid);
+    if (mode != Mode::Solid &&
+      (!std::isfinite(fluid.maxVelocity) || fluid.maxVelocity <= 0))
+    {
+      Alert::Exception() << "-atrium_fluid_max_velocity must be finite and positive"
+                         << Alert::Raise;
+    }
     return *this;
   }
 }
