@@ -6,13 +6,16 @@
  */
 /**
  * @file Fluid.h
- * @brief Distributed Oseen P1/P1 atrial flow with SUPG and PSPG stabilization.
+ * @brief Distributed Oseen P1/P1 atrial flow with VMS or SUPG/PSPG stabilization.
  *
- * Equal-order P1/P1 Oseen flow uses SUPG, PSPG, and grad-div stabilization.
+ * Equal-order P1/P1 Oseen flow uses, by default, the orthogonal-subscale VMS
+ * of the coronary example: dynamic convective subscale along u^n - w,
+ * projected grad-div, and PSPG tau_1/rho, with h_K the longest cell edge.
+ * Residual-based SUPG/PSPG with grad-div remains available.
  * Standalone flow has pressure-driven openings and a fixed no-slip wall.
  * FSI supplies Robin interface data, harmonic ALE motion, and zero-pressure
- * open boundaries. Ventricular coupling, species transport, and orthogonal
- * subscales are optional standalone models and are disabled in FSI.
+ * open boundaries. Ventricular coupling and species transport are optional
+ * standalone models and are disabled in FSI.
  * The fluid submesh retains the common MPI partition and parent identities;
  * its coordinates are converted to SI units with Parameters::meshScale.
  */
@@ -279,10 +282,10 @@ namespace Rodin::Examples::Heart::Atrium
         Real pspgScale = 1.0;
 
         /**
-         * @brief Enable orthogonal-subscale corrections to the Oseen stabilization.
-         * @details SUPG and PSPG remain active when this option is false.
+         * @brief Orthogonal-subscale VMS of the coronary example.
+         * @details False selects residual-based SUPG/PSPG instead.
          */
-        bool useVMS = false;
+        bool useVMS = true;
 
         ThrombosisParameters thrombosis;
 
@@ -456,6 +459,12 @@ namespace Rodin::Examples::Heart::Atrium
       /// @brief h_K, the local element size.
       static Real cellSize(const Rodin::Geometry::Point& p);
 
+      /// @brief Longest edge of the current cell, the coronary VMS length scale.
+      static Real cellDiameter(const Rodin::Geometry::Point& p);
+
+      /// @brief Flow stabilization length: cellDiameter with VMS, cellSize otherwise.
+      Real stabilizationLength(const Rodin::Geometry::Point& p) const;
+
       /**
        * @brief Local Carreau-Yasuda viscosity at the lagged velocity.
        * @details The stabilisation parameters must be built from the
@@ -479,7 +488,7 @@ namespace Rodin::Examples::Heart::Atrium
       /// @brief Grad-div parameter, the exact square of the above.
       Real tauCAt(const Rodin::Geometry::Point& p) const;
 
-      /// @brief PSPG parameter.
+      /// @brief PSPG parameter: tau_1/rho with VMS, the SUPG tau otherwise.
       Real tauPAt(const Rodin::Geometry::Point& p) const;
 
       /// @brief Codina crosswind coefficient of one species.
@@ -530,6 +539,9 @@ namespace Rodin::Examples::Heart::Atrium
       ScalarCoefficientType m_sqrtTauCFn;
       ScalarCoefficientType m_tauPFn;
       ScalarGridFunctionType m_piTilde;
+
+      /// @brief ALE convecting velocity u^n - w of the VMS terms.
+      VectorGridFunctionType m_uConv;
       VectorGridFunctionType m_convProjection;
       VectorGridFunctionType m_sub;
       VectorGridFunctionType m_subOld;

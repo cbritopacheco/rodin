@@ -130,7 +130,7 @@ namespace Rodin::Examples::Heart::Atrium
         "Cycles before optional species transport begins", out.fluid.flowCycles);
       boolean("-atrium_fluid_lv_model", "Enable 0D ventricular driver (fluid mode only)",
         out.fluid.useVentricularModel);
-      boolean("-atrium_fluid_vms", "Enable orthogonal subscales (fluid mode only)",
+      boolean("-atrium_fluid_vms", "Orthogonal-subscale VMS; false selects SUPG/PSPG",
         out.fluid.useVMS);
       boolean("-atrium_fluid_kinetics", "Enable coagulation transport (fluid mode only)",
         out.fluid.solveKinetics);

@@ -51,38 +51,25 @@ Robin data to the moving fluid surface. The second integral is the weakly
 consistent interface convective correction. Fluid velocity is not constrained
 by an interface Dirichlet condition.
 
-After each fluid solve, the three rows of $\nabla u_f$ are recovered by
-volume mass projections. Their symmetric part $D_h$ supplies the current
-Carreau–Yasuda viscosity and the physical traction on the solid,
+After each fluid solve, the transmission update is
 
 $$
-t_h=p_hn_f-2\mu(D_h)D_hn_f.
-$$
-
-Face-dependent tractions are projected to nodal values with lumped trace
-mass, giving one area-weighted value at shared corners independent of MPI
-partitioning. For trace basis $\varphi_i$, the reference nodal
-traction is
-
-$$
-T_i=\frac{\int_\Gamma\varphi_i t_h\,dS}
-{\int_\Gamma\varphi_i/J_\Gamma\,dS}.
-$$
-
-The denominator is the lumped reference trace mass. It implements the
-area pullback and preserves the assembled resultant. These boundary forms are
-reassembled on each moved geometry. Matching parent vertices transfer the
-reference traction and fluid velocity to the solid. The next Robin datum is
-
-$$
+T^{k+1}=T^k+\alpha_0(u_f^{k+1}-v_\Gamma^{k+1}),\qquad
 g^{k+1}=T^{k+1}+\alpha_0u_f^{k+1}.
 $$
 
-This is recovered physical-stress exchange, following the coronary example.
-It is not the algebraic variational-reaction update, and there is no Aitken
-relaxation. The fluid receives the lagged reference traction divided by area
-stretch. Both transmission velocities retain BDF1; the solid Robin tangent
-uses $\alpha_0/\Delta t$.
+$T^{k+1}$ is the reference fluid variational reaction, including the
+interface convective correction; matching P1 traces permit the update in
+their nodal space. It follows the discrete Robin stress update of
+[Burman et al. (2025), equations (13), (16)–(19)](https://discovery.ucl.ac.uk/id/eprint/10210489/).
+There is no relaxation. The sweep structure, stopping test and budget follow
+the coronary example, but its recovered-gradient traction is not used: with
+that traction the fixed point satisfies equilibrium with the variational
+reaction $\lambda_h$ while leaving the slip
+$u_f-v_\Gamma=(\lambda_h-T_{\mathrm{rec}})/\alpha_0$, which does not vanish
+as the sweeps converge. With the algebraic update the fixed point has
+$u_f=v_\Gamma$. Both transmission velocities retain BDF1; the solid Robin
+tangent uses $\alpha_0/\Delta t$.
 
 ### Displacement stopping test and sweep budget
 
@@ -140,12 +127,19 @@ R_m^{\mathrm{ALE}}=
 -\nabla\cdot(2\mu_nD(u_f^{n+1}))+\nabla p^{n+1}.
 $$
 
-SUPG and PSPG use this residual and the relative advecting velocity. Previous
+The default stabilization is the orthogonal-subscale VMS of the coronary
+example, evaluated with the relative advecting velocity $u_f^n-a$: the
+bilinear term $\int\tau_K\rho^2[(\nabla u)(u^n-a)]\cdot[(\nabla v)(u^n-a)]$, the
+subtraction of $\Pi_h[(\nabla(u^n-a))(u^n-a)]$ and the dynamic subscale,
+grad-div with $\tau_C=\rho h_K^2/(4\tau_1)$ minus $\Pi_h[\sqrt{\tau_C}\nabla\cdot u^n]$,
+and PSPG $\int(\tau_1/\rho)\nabla p\cdot\nabla q$; $h_K$ is the longest edge of
+the current cell. The projections are recomputed after every mesh motion.
+`-atrium_fluid_vms false` selects SUPG and PSPG on the residual above. Previous
 fluid velocity and solid internal states remain fixed through coupling trials.
 Mesh motion invalidates Rodin's geometric caches through its coordinate API.
 The same spaces, Problems, solvers, and MPI trace scatter plan are retained.
-Recovered velocity gradients are recomputed at every coupling sweep for
-traction exchange. Wall-shear projection is computed once per accepted step.
+Recovered gradients and wall-shear projections are computed once per accepted
+physical step and remain output/statistics operations.
 
 The common CSV records the Robin coefficient, traction-data update,
 displacement-change metric and tolerance, criterion and budget status,
@@ -156,8 +150,7 @@ should not be identified at finite time step.
 
 All openings have zero imposed pressure and no prescribed flux. Fluid starts
 at rest and active wall contraction drives the flow. Backflow stabilization
-remains active. FSI excludes the 0D ventricular driver, species transport, and
-orthogonal subscales. The outer solid surface is unloaded and opening rims are
+remains active. FSI excludes the 0D ventricular driver and species transport. The outer solid surface is unloaded and opening rims are
 clamped. No valve or circulatory model is represented.
 
 

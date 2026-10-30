@@ -140,8 +140,6 @@ namespace Rodin::Examples::Heart::Atrium
       m_motionTest(fluid.m_vh),
       m_motion(m_motionTrial, m_motionTest),
       m_motionSolver(m_motion),
-      m_tractionLoad(fluid.m_v),
-      m_tractionWeights(fluid.m_v),
       m_previousMeshDisplacement(fluid.m_vh),
       m_importedTraction(solid.m_space),
       m_trialTraction(solid.m_space),
@@ -157,11 +155,10 @@ namespace Rodin::Examples::Heart::Atrium
       !std::isfinite(parameters.relativeTolerance) || parameters.relativeTolerance < 0 ||
       !std::isfinite(m_robinCoefficient) || m_robinCoefficient < 0)
       Alert::Exception() << "Invalid FSI parameters" << Alert::Raise;
-    if (fluid.m_cfg.useVentricularModel || fluid.m_cfg.useVMS ||
-      fluid.m_cfg.solveKinetics)
+    if (fluid.m_cfg.useVentricularModel || fluid.m_cfg.solveKinetics)
     {
-      Alert::Exception() << "Atrium FSI currently uses Oseen SUPG/PSPG flow without "
-                            "0D ventricular coupling, orthogonal subscales, or species"
+      Alert::Exception() << "Atrium FSI currently excludes 0D ventricular coupling "
+                            "and species transport"
                          << Alert::Raise;
     }
     fluid.m_coupled = true;
@@ -325,75 +322,11 @@ namespace Rodin::Examples::Heart::Atrium
       SCATTER_REVERSE);
     transfer(
       m_solidToFluid, m_fluid.m_wallVelocity, m_interfaceVelocity, 1e3, SCATTER_REVERSE);
-    m_fluid.recoverGradient();
-    const auto normal = BoundaryNormal(m_fluid.m_mesh);
-    const auto& cy = m_fluid.m_cfg.viscosity;
-    const VectorFunction traction(3, [&](const Point& point) {
-      Math::SpatialMatrix<Real> gradient(3, 3);
-      const auto g0 = m_fluid.m_gradRec0(point);
-      const auto g1 = m_fluid.m_gradRec1(point);
-      const auto g2 = m_fluid.m_gradRec2(point);
-      for (Index j = 0; j < 3; ++j)
-      {
-        gradient(0, j) = g0(j);
-        gradient(1, j) = g1(j);
-        gradient(2, j) = g2(j);
-      }
-      const Math::SpatialMatrix<Real> strain = .5 * (gradient + gradient.transpose());
-      const Real shear = std::sqrt(
-        cy.gammaRegularization * cy.gammaRegularization + 2 * strain.squaredNorm());
-      const Real viscosity = cy.muInf +
-        (cy.mu0 - cy.muInf) *
-          std::pow(1 + std::pow(cy.lambda * shear, cy.yasuda), (cy.n - 1) / cy.yasuda);
-      const Math::SpatialVector<Real> n = normal.getValue(point);
-      Math::SpatialVector<Real> value =
-        m_fluid.m_p.getSolution()(point) * n - 2 * viscosity * strain * n;
-      for (Index j = 0; j < 3; ++j)
-      {
-        if (!std::isfinite(value(j)))
-          Alert::Exception() << "Non-finite recovered interface traction" << Alert::Raise;
-      }
-      return value;
-    });
-    const VectorFunction ones(
-      3, [](const Point&) { return Math::SpatialVector<Real>{1, 1, 1}; });
-    const RealFunction inverseStretch([&](const Point& point) {
-      return m_fluid.m_inverseInterfaceStretches.at(point.getPolytope().getIndex());
-    });
-    m_tractionWeights =
-      BoundaryIntegral(inverseStretch * ones, m_fluid.m_v).over(m_fluid.m_cfg.wall);
-    m_tractionWeights.assemble();
-    // Lumped reference trace mass averages corner normals across ranks and
-    // preserves the assembled current-area resultant on the solid reference wall.
-    auto& target = m_fluid.m_wallTraction;
-    auto load = BoundaryIntegral(traction, m_fluid.m_v);
-    load.setOrder(4);
-    m_tractionLoad = load.over(m_fluid.m_cfg.wall);
-    m_tractionLoad.assemble();
-    target.flush();
-    const PetscScalar *weights = nullptr, *values = nullptr;
-    PetscScalar* result = nullptr;
-    PetscInt size = 0;
-    PetscErrorCode ierr = VecGetLocalSize(target.getData(), &size);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecGetArrayRead(m_tractionWeights.getVector(), &weights);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecGetArrayRead(m_tractionLoad.getVector(), &values);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecGetArray(target.getData(), &result);
-    assert(ierr == PETSC_SUCCESS);
-    for (PetscInt i = 0; i < size; ++i)
-      result[i] = PetscRealPart(weights[i]) > 0 ? values[i] / weights[i] : 0;
-    ierr = VecRestoreArray(target.getData(), &result);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecRestoreArrayRead(m_tractionLoad.getVector(), &values);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecRestoreArrayRead(m_tractionWeights.getVector(), &weights);
-    assert(ierr == PETSC_SUCCESS);
-    target *= Real(1);
-    (void)ierr;
-    transfer(
-      m_solidToFluid, m_fluid.m_wallTraction, m_trialTraction, 1e-3, SCATTER_REVERSE);
+    // The Robin stress update is the fluid variational reaction, including
+    // the interface convective correction. All three traces are P1. At a
+    // fixed point u_f = v_Gamma exactly, unlike recovered-gradient tractions.
+    m_trialTraction = m_importedTraction +
+      m_solid.m_robinCoefficient * (m_importedVelocity - m_interfaceVelocity);
     m_solid.m_robinData =
       m_trialTraction + m_solid.m_robinCoefficient * m_importedVelocity;
   }
@@ -441,6 +374,7 @@ namespace Rodin::Examples::Heart::Atrium
       m_diagnostics.iterations = iteration;
       m_diagnostics.tractionDataUpdate = 1e3 * std::max(difference, tractionDifference);
       m_importedTraction.setData(m_trialTraction.getData());
+      transfer(m_solidToFluid, m_importedTraction, m_fluid.m_wallTraction, 1e3);
       m_diagnostics.converged = iteration > 1 &&
         m_diagnostics.displacementChange < m_parameters.relativeTolerance;
       if (m_fluid.isRoot())
@@ -504,6 +438,7 @@ namespace Rodin::Examples::Heart::Atrium
     m_fluid.m_flux.assemble();
     m_diagnostics.wallFlux = m_fluid.m_flux(m_fluid.m_one);
     }
+    m_fluid.recoverGradient();
     m_fluid.computeWallShear();
     m_solid.commitStep();
     m_fluid.commitStep();

@@ -15,8 +15,10 @@ namespace Rodin::Examples::Heart::Atrium
   /**
    * @brief Partitioned Robin--Robin coupling on a conforming MPI interface.
    *
-   * The solid and fluid use Robin data built from the latest projected physical
-   * fluid stress and interface velocity. Transmission uses the BDF1 wall rate
+   * The solid condition is @f$ P_sN_s+\alpha_0 v_\Gamma=T+\alpha_0u_f @f$; the
+   * fluid uses the same reference-area impedance and the lagged traction. The
+   * update @f$ T^{k+1}=T^k+\alpha_0(u_f^{k+1}-v_\Gamma^{k+1}) @f$ is the fluid
+   * variational reaction, without relaxation. Transmission uses the BDF1 wall rate
    * @f$ (d_s^{n+1}-d_s^n)/\Delta t @f$ on both sides. Solid dynamics retain
    * Newmark integration. Relative solid displacement change determines early
    * termination; budget exhaustion accepts the last completed sweep.
@@ -24,8 +26,8 @@ namespace Rodin::Examples::Heart::Atrium
    * ## Architecture
    *
    * Parent vertex identities define a retained PETSc trace scatter plan. Solid
-   * displacement is harmonically extended to the fluid mesh. Recovered gradients supply current-area traction; area stretch pulls it back
-   * to the solid reference interface. Previous physical histories remain fixed
+   * displacement is harmonically extended to the fluid mesh. Matching P1 traces
+   * permit the algebraic traction update. Previous physical histories remain fixed
    * throughout the sweeps. The geometry is updated for every accepted pair.
    */
   class FSI
@@ -116,7 +118,7 @@ namespace Rodin::Examples::Heart::Atrium
       /// @brief Extends solid displacement and updates the ALE geometry and velocity.
       void moveFluidMesh();
 
-      /// @brief Projects recovered fluid stress and transfers its reference-area traction.
+      /// @brief Updates the reference Robin traction from the interface velocity jump.
       void updateTraction();
 
       Solid& m_solid;
@@ -127,8 +129,6 @@ namespace Rodin::Examples::Heart::Atrium
       Fluid::VectorTestFunctionType m_motionTest;
       Fluid::VectorProblemType m_motion;
       Solver::KSP m_motionSolver;
-      using TraceForm = Variational::LinearForm<Fluid::VectorFESType, ::Vec>;
-      TraceForm m_tractionLoad, m_tractionWeights;
       Fluid::VectorGridFunctionType m_previousMeshDisplacement;
       VectorField m_importedTraction, m_trialTraction, m_importedVelocity;
       VectorField m_interfaceVelocity, m_previousRobinData;
