@@ -18,6 +18,8 @@ Layered like the mathematics:
 - **Constitutive/** — one law per header, all deriving from
   `HyperElasticLaw`: `Hooke` (linear), `NeoHookean`, `MooneyRivlin`,
   `SaintVenantKirchhoff`, `HolzapfelOgden` (one fiber family),
+  `DemirayHolzapfelGasserOgden` (isochoric matrix/fiber exponentials and squared-log volume
+  penalty), `KelvinVoigt` (finite-strain Green–Lagrange rate viscosity),
   `ActiveFiberLaw` (1D Hill–Maxwell active contraction law with internal
   state γ, β), `ActiveContraction` (wraps any passive law + active fiber
   law; the dynamic path reads independent discontinuous extension, gamma and

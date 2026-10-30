@@ -18,12 +18,16 @@
 #include <algorithm>
 #include <array>
 #include <cstdlib>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <string>
 #include <vector>
 
 #include <Rodin/Geometry.h>
+#include <Rodin/IO/MEDIT.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -420,7 +424,16 @@ int main(int argc, char** argv)
     input.load(options.input, options.inputFormat);
 
     LocalMesh output = extrude(input, options);
-    output.save(options.output, options.outputFormat);
+    if (options.outputFormat == IO::FileFormat::MEDIT)
+    {
+      std::ofstream stream(options.output);
+      if (!stream)
+        Alert::Exception() << "Cannot write " << options.output << Alert::Raise;
+      stream << std::setprecision(std::numeric_limits<Real>::max_digits10);
+      IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Local>(output).print(stream);
+    }
+    else
+      output.save(options.output, options.outputFormat);
 
     std::cout << "Wrote " << options.output << ": " << output.getVertexCount()
               << " vertices, " << output.getPolytopeCount(Polytope::Type::Wedge)

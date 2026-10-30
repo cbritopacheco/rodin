@@ -59,6 +59,18 @@ namespace Rodin::Solid
    */
   namespace Tags
   {
+    /// @brief Reference velocity gradient used by rate-dependent solid laws.
+    struct VelocityGradient
+    {
+      using Type = Math::SpatialMatrix<Real>; ///< Stored gradient in inverse time.
+    };
+
+    /// @brief Scalar derivative of velocity with respect to displacement.
+    struct VelocityGradientDerivative
+    {
+      using Type = Real; ///< Time-integrator coefficient in inverse time.
+    };
+
     /// @brief Tag for the fiber direction vector.
     struct FiberDirection
     {

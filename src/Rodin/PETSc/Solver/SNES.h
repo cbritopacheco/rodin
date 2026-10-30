@@ -106,6 +106,14 @@ namespace Rodin::Solver
        */
       using StateUpdate = std::function<void(const PETSc::Math::Vector&)>;
 
+      /**
+       * @brief Checks the synchronized state before constitutive assembly.
+       *
+       * The callback must return the same result on every rank. A false result
+       * reports a PETSc domain error so line search can reject the trial state.
+       */
+      using StateValidation = std::function<bool()>;
+
       /// @brief Base problem type that provides the linear system.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
@@ -180,6 +188,13 @@ namespace Rodin::Solver
       SNES& setStateUpdate(StateUpdate update);
 
       /**
+       * @brief Sets the admissibility check performed after state synchronization.
+       * @param validation Collective check of the current state, or empty to disable.
+       * @returns This solver.
+       */
+      SNES& setStateValidation(StateValidation validation);
+
+      /**
        * @brief Solves the nonlinear system @f$ F(x) = 0 @f$.
        * @param[in,out] x Initial guess on input; solution on output.
        */
@@ -205,6 +220,12 @@ namespace Rodin::Solver
        * @returns PETSc iteration count.
        */
       PetscInt getIterationNumber() const;
+
+      /**
+       * @brief Returns the nonlinear residual norm from the most recent solve.
+       * @returns PETSc's global function norm.
+       */
+      Real getResidualNorm() const;
 
       /**
        * @brief Returns `true` if the most recent @ref solve() converged.
@@ -290,6 +311,7 @@ namespace Rodin::Solver
       ::PetscInt m_maxIt, ///< Maximum nonlinear iterations.
         m_maxF; ///< Maximum function evaluations.
       StateUpdate m_update; ///< Optional state synchronization callback.
+      StateValidation m_validation; ///< Optional collective state-domain check.
       Optional<::PetscObjectState> m_lhsAssembled;
       Optional<::PetscObjectState> m_rhsAssembled;
       // Object state is a per-object counter, not an iterate identity.

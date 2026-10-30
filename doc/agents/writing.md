@@ -48,6 +48,11 @@ derivative transfers, or elimination. Make the differentiation variable and
 quantities held fixed explicit; absent explicit dependence is not necessarily
 independence through a coupled state.
 
+Use examples to illustrate a specific case and remarks to clarify a consequence,
+qualification, or limit. Neither should interrupt the logical development or
+substitute for a definition or argument. Keep prose concise; include
+implementation details only when explaining the numerical procedure.
+
 ## Numerical realization and results
 
 Connect continuous constructions to what is actually evaluated. Identify the
@@ -62,6 +67,41 @@ normalization, and remaining confounders. Define norms on their actual spaces
 and domains, and distinguish a norm of a difference from a difference of norms.
 Separate observation from interpretation; explanations should be identified as
 such unless the evidence establishes causation.
+
+## Pull request descriptions
+
+PR equations must use macros supported by the target Markdown math renderer.
+Do not use `\operatorname`; use `\mathrm{Div}`, `\mathrm{cof}`, or the
+corresponding upright notation instead. Avoid custom macros and unverified
+LaTeX commands, and check the rendered equations after updating the PR.
+
+Present what the pull request adds, rather than reporting the local development
+session. Use concise, explanatory, problem-driven mathematical prose:
+
+- Introduce the problem or difficulty before the construction that addresses it.
+- Present definitions and equations in a logical sequence, then explain their
+  meaning, assumptions, and limits. Distinguish proved results from numerical
+  evidence.
+- For a model contribution, preferably include a small set of defining equations
+  in the PR description: the governing balance, constitutive relation, or update
+  law needed to understand the model. Define the symbols and relevant assumptions,
+  connect the equations to the classes that implement them, and use rendered
+  mathematics. Select equations for explanatory value rather than reproducing
+  the full derivation.
+- Make the exposition parallel to the code: name the principal classes and
+  describe their mathematical roles, functionality, and relationships. Explain
+  the resulting model or capability rather than listing files or private members.
+- Include implementation details only when they explain the numerical procedure.
+  Use examples to illustrate a case and remarks to clarify a consequence or
+  qualification.
+- Keep descriptions light. Do not reproduce local paths, build logs, mesh-quality
+  statistics, exploratory attempts, timings, or the chronology of fixes. Detailed
+  numerical evidence belongs in a report; include only a brief validation note
+  when it is needed to assess a claim or required by the repository template.
+
+Describe the final contribution for a reader without the development
+conversation. State incomplete functionality directly, especially when an API
+name denotes a broader model than is currently implemented.
 
 ## Doxygen layout
 
@@ -85,6 +125,32 @@ documentation throughout the project:
 Retain Doxygen mathematical delimiters for rendered expressions and explicit
 links to public concepts. A layout change must not discard assumptions,
 contracts, mathematical content, or existing cross-references.
+
+## README content
+
+READMEs describe the example or component for a reader without the development
+conversation. Explain its purpose, model, assumptions, inputs, configuration,
+outputs, limitations, and the commands needed to use it.
+
+Do not narrate reorganizations or editing work, carry over chat-specific
+requests or artifact history, or add reassurances such as “target names are
+unchanged.” Avoid generic descriptions of folder layouts or generated binary
+locations. Include concrete paths where they are needed in commands or to
+identify an input or output. Keep change summaries and compatibility notes in
+pull request descriptions. READMEs focus on architecture, organization, and
+the mathematical model, with the inputs and instructions needed to use it.
+Keep run findings, measured errors, timings, mesh-quality statistics, and
+validation logs in reports rather than READMEs. Pull request descriptions
+present the contribution, with only the concise validation context needed to
+assess it.
+Describe model assumptions and geometry construction without narrating the
+investigation that produced them.
+
+For Markdown READMEs, use GitHub-compatible `$...$` inline mathematics and
+`$$` display blocks with the delimiters on their own lines. Do not use
+`\(...\)` or `\[...\]` in these files: Markdown escaping can leave the
+expressions unrendered. Check the equations with a math renderer, including
+units and table cells. Doxygen retains its own mathematical delimiters.
 
 ## Editing checklist
 

@@ -44,7 +44,8 @@ namespace Rodin::Solver
       m_dtol(other.m_dtol),
       m_maxIt(other.m_maxIt),
       m_preconditioner(other.m_preconditioner),
-      m_prefix(other.m_prefix)
+      m_prefix(other.m_prefix),
+      m_reusePreconditioner(other.m_reusePreconditioner)
   {
     if (m_ksp)
     {
@@ -64,7 +65,8 @@ namespace Rodin::Solver
       m_dtol(other.m_dtol),
       m_maxIt(other.m_maxIt),
       m_preconditioner(std::move(other.m_preconditioner)),
-      m_prefix(std::move(other.m_prefix))
+      m_prefix(std::move(other.m_prefix)),
+      m_reusePreconditioner(std::move(other.m_reusePreconditioner))
   {}
 
   KSP::~KSP()
@@ -119,6 +121,13 @@ namespace Rodin::Solver
 
     ierr = KSPSetFromOptions(m_ksp);
     assert(ierr == PETSC_SUCCESS);
+
+    if (m_reusePreconditioner)
+    {
+      ierr = KSPSetReusePreconditioner(
+        m_ksp, *m_reusePreconditioner ? PETSC_TRUE : PETSC_FALSE);
+      assert(ierr == PETSC_SUCCESS);
+    }
 
     ::PC pc = PETSC_NULLPTR;
     ierr = KSPGetPC(m_ksp, &pc);
@@ -202,6 +211,12 @@ namespace Rodin::Solver
   KSP& KSP::setPreconditioner(OperatorType preconditioner) noexcept
   {
     m_preconditioner = preconditioner;
+    return *this;
+  }
+
+  KSP& KSP::setReusePreconditioner(Optional<bool> reuse) noexcept
+  {
+    m_reusePreconditioner = reuse;
     return *this;
   }
 }

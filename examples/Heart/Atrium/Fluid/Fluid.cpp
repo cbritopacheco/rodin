@@ -4,41 +4,28 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/**
- * @file Atrium.cpp
- * @brief Driver for the 3D atrium flow and coagulation-kinetics example.
- *
- * Run:
- *   mpirun -n 8 ./examples/Heart/Atrium -atrium_mesh <path> -atrium_dt 1e-3
- *
- * Options: -atrium_mesh, -atrium_mesh_scale, -atrium_dt, -atrium_flow_cycles,
- *          -atrium_species_cycles, -atrium_pin.
- */
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstring>
 #include <iostream>
 #include <numbers>
+#include <limits>
 #include <stdexcept>
+#include <vector>
 
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
 
-#include <petscsys.h>
-#include <petscvec.h>
-
 #include <Rodin/Alert.h>
 #include <Rodin/Configure.h>
 
-#ifdef RODIN_USE_SCOTCH
-#include <Rodin/Scotch/MeshPartitioner.h>
-#endif
+#include "Fluid.h"
+#include "Output.h"
+#include "../Log.h"
+#include "../../CoronaryArtery/CoronaryArteryTiming.h"
 
-#include "Atrium.h"
-#include "CoronaryArtery/CoronaryArteryAlerts.h"
-#include "CoronaryArtery/CoronaryArteryTiming.h"
-
-namespace Rodin::Examples::Heart
+namespace Rodin::Examples::Heart::Atrium
 {
   using namespace Rodin;
   using namespace Rodin::Math;
@@ -66,8 +53,10 @@ namespace Rodin::Examples::Heart
       (void)ierr;
     }
 
-    /// @brief The projections invert mass matrices: CG + Jacobi, never the
-    ///        global direct solver used by the coupled flow system.
+    /**
+     * @brief The projections invert mass matrices: CG + Jacobi, never the
+     * global direct solver used by the coupled flow system.
+     */
     void configureMassSolver(Rodin::Solver::KSP& ksp, const std::string& prefix)
     {
       setPrefixedDefault(prefix, "ksp_type", "cg");
@@ -76,12 +65,14 @@ namespace Rodin::Examples::Heart
     }
   }
 
-  Atrium::Atrium(const Context::MPI& context, const Config& cfg)
+  Fluid::Fluid(const ParentMeshType& parent, const Parameters& cfg,
+    const RunParameters& run, Attribute material)
     : m_cfg(cfg),
+      m_run(run),
       m_input(makeInput(m_cfg)),
       m_model(m_input),
-      m_mesh(makeMesh(context, m_cfg)),
-      m_xdmf(context.getCommunicator(), m_cfg.xdmfBasename),
+      m_mesh(makeMesh(parent, m_cfg, material)),
+      m_output(std::make_unique<Output>(*this, parent.getContext())),
       m_inletSet(m_cfg.inlets.begin(), m_cfg.inlets.end()),
       m_vh(std::integral_constant<size_t, 1>{}, m_mesh, m_mesh.getSpaceDimension()),
       m_sh(std::integral_constant<size_t, 1>{}, m_mesh),
@@ -90,6 +81,12 @@ namespace Rodin::Examples::Heart
       m_v(m_vh),
       m_q(m_sh),
       m_uOld(m_vh),
+      m_wallVelocity(m_vh),
+      m_wallDisplacement(m_vh),
+      m_wallTraction(m_vh),
+      m_meshVelocity(m_vh),
+      m_meshDisplacement(m_vh),
+      m_speedMagnitude(m_sh),
       m_sTrial(m_sh),
       m_sTest(m_sh),
       m_wTrial(m_vh),
@@ -99,6 +96,7 @@ namespace Rodin::Examples::Heart
       m_sqrtTauCFn([this](const Point& p) { return sqrtTauCAt(p); }),
       m_tauPFn([this](const Point& p) { return tauPAt(p); }),
       m_piTilde(m_sh),
+      m_uConv(m_vh),
       m_convProjection(m_vh),
       m_sub(m_vh),
       m_subOld(m_vh),
@@ -149,69 +147,63 @@ namespace Rodin::Examples::Heart
 
     if (isRoot())
     {
-      Alert::Info() << "[mesh] cells=" << cellCount << " vertices=" << vertexCount
-                    << " velocity DOFs=" << velocityDOFs
-                    << " pressure DOFs=" << pressureDOFs << Alert::Raise;
+      Log("Fluid/Mesh") << "cells=" << cellCount << " vertices=" << vertexCount
+                        << " velocity DOFs=" << velocityDOFs
+                        << " pressure DOFs=" << pressureDOFs << Alert::Raise;
     }
   }
 
-  Atrium::~Atrium() = default;
+  Fluid::~Fluid() = default;
 
-  bool Atrium::isRoot() const
+  bool Fluid::isRoot() const
   {
     return m_mesh.getContext().getCommunicator().rank() == RootRank;
   }
 
-  Atrium::MeshType Atrium::makeMesh(const Context::MPI& context, const Config& cfg)
+  Fluid::MeshType Fluid::makeMesh(
+    const ParentMeshType& parent, const Parameters& cfg, Attribute material)
   {
-    const auto& comm = context.getCommunicator();
-
-    Rodin::MPI::Sharder sharder(context);
-    if (comm.rank() == RootRank)
+    if (!std::isfinite(cfg.meshScale) || cfg.meshScale <= 0)
     {
-      Geometry::Mesh<Context::Local> mesh;
-      mesh.load(cfg.meshPath, IO::FileFormat::MEDIT);
-
-      if (mesh.getSpaceDimension() != 3)
-        throw std::runtime_error("Atrium expects a 3D tetrahedral mesh.");
-
-      const size_t D = mesh.getDimension();
-      mesh.getConnectivity().compute(D, D);
-      mesh.getConnectivity().compute(D, 0);
-      mesh.getConnectivity().compute(D, D - 1);
-      mesh.getConnectivity().compute(D - 1, D);
-      mesh.getConnectivity().compute(D - 1, 0);
-      mesh.getConnectivity().compute(D - 1, 1);
-      mesh.getConnectivity().compute(1, 0);
-
-#ifdef RODIN_USE_SCOTCH
-      Scotch::Partitioner partitioner(mesh);
-#else
-      Geometry::BalancedCompactPartitioner partitioner(mesh);
-#endif
-      partitioner.partition(static_cast<size_t>(comm.size()));
-      sharder.shard(partitioner);
-      sharder.scatter(RootRank);
+      Alert::Exception() << "Fluid length conversion must be finite and positive"
+                         << Alert::Raise;
     }
-
-    MeshType mesh = sharder.gather(RootRank);
+    MeshType::Builder builder;
+    builder.initialize(parent);
+    for (auto cell = parent.getCell(); cell; ++cell)
+    {
+      if (parent.getShard().isOwned(3, cell->getIndex()) &&
+        cell->getAttribute() == material)
+        builder.include(3, cell->getIndex());
+    }
+    auto mesh = builder.finalize();
+    if (mesh.getCellCount() == 0)
+      Alert::Exception() << "No fluid cells for material " << material << Alert::Raise;
+    size_t invalid = 0;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      if (cell->getGeometry() != Geometry::Polytope::Type::Tetrahedron &&
+        mesh.getShard().isOwned(3, cell->getIndex()))
+        ++invalid;
+    }
+    invalid = boost::mpi::all_reduce(
+      parent.getContext().getCommunicator(), invalid, std::plus<size_t>());
+    if (invalid)
+    {
+      Alert::Exception() << "The affine-P1 Oseen submesh requires tetrahedra"
+                         << Alert::Raise;
+    }
     mesh.scale(cfg.meshScale);
-
-    const size_t D = mesh.getDimension();
-    mesh.getConnectivity().compute(D, D);
-    mesh.getConnectivity().compute(D, 0);
-    mesh.getConnectivity().compute(D, D - 1);
-    mesh.getConnectivity().compute(D - 1, D);
-    mesh.getConnectivity().compute(D - 1, 0);
-    mesh.getConnectivity().compute(D - 1, 1);
-    mesh.getConnectivity().compute(1, 0);
-    mesh.reconcile(2);
-    mesh.reconcile(1);
-
+    for (size_t d = 1; d <= 3; ++d)
+    {
+      mesh.getConnectivity().compute(d, 0);
+      mesh.getConnectivity().compute(d, d - 1);
+      mesh.getConnectivity().compute(d - 1, d);
+    }
     return mesh;
   }
 
-  Atrium::Model::Input Atrium::makeInput(const Config& cfg)
+  Fluid::Model::Input Fluid::makeInput(const Parameters& cfg)
   {
     Model::Input input;
 
@@ -286,7 +278,7 @@ namespace Rodin::Examples::Heart
     return input;
   }
 
-  Atrium::Real Atrium::activationWave(const Activation& cfg, Real t)
+  Fluid::Real Fluid::activationWave(const Activation& cfg, Real t)
   {
     const Real T = cfg.period;
     const Real tau = t - T * std::floor(t / T);
@@ -317,7 +309,7 @@ namespace Rodin::Examples::Heart
       (1.0 - ss((tau - cfg.tNegativeEnd) / (T - cfg.tNegativeEnd)));
   }
 
-  Atrium::Real Atrium::atrialWave(const AtrialPressure& cfg, Real t)
+  Fluid::Real Fluid::atrialWave(const AtrialPressure& cfg, Real t)
   {
     const Real T = cfg.period;
     const Real tau = t - T * std::floor(t / T);
@@ -343,12 +335,33 @@ namespace Rodin::Examples::Heart
     return cfg.minValue;
   }
 
-  Atrium::Real Atrium::cellSize(const Point& p)
+  Fluid::Real Fluid::cellSize(const Point& p)
   {
     return std::pow(p.getPolytope().getMeasure(), 1.0 / p.getPolytope().getDimension());
   }
 
-  Atrium::Real Atrium::viscosityAt(const Point& p) const
+  Fluid::Real Fluid::cellDiameter(const Point& p)
+  {
+    const auto& cell = p.getPolytope();
+    const auto& mesh = cell.getMesh();
+    std::vector<Math::SpatialPoint> x;
+    for (const Index vertex : cell.getVertices())
+      x.push_back(mesh.getVertexCoordinates(vertex));
+    Real h = 0;
+    for (size_t a = 0; a < x.size(); ++a)
+    {
+      for (size_t b = a + 1; b < x.size(); ++b)
+        h = std::max(h, Real((x[a] - x[b]).norm()));
+    }
+    return h;
+  }
+
+  Fluid::Real Fluid::stabilizationLength(const Point& p) const
+  {
+    return m_cfg.useVMS ? cellDiameter(p) : cellSize(p);
+  }
+
+  Fluid::Real Fluid::viscosityAt(const Point& p) const
   {
     const auto& cy = m_cfg.viscosity;
 
@@ -363,37 +376,39 @@ namespace Rodin::Examples::Heart
       std::pow(1.0 + std::pow(cy.lambda * shear, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
   }
 
-  Atrium::Real Atrium::tau1At(const Point& p) const
+  Fluid::Real Fluid::tau1At(const Point& p) const
   {
-    const auto uc = m_uOld.getValue(p);
-    const Real h = cellSize(p);
+    const auto uc = (m_uOld - m_meshVelocity).getValue(p);
+    const Real h = stabilizationLength(p);
     const Real nu = viscosityAt(p) / m_cfg.rho;
     return 1.0 / (4.0 * nu / (h * h) + 2.0 * std::sqrt(Math::dot(uc, uc)) / h);
   }
 
-  Atrium::Real Atrium::vmsTauAt(const Point& p) const
+  Fluid::Real Fluid::vmsTauAt(const Point& p) const
   {
-    return m_cfg.vmsScale / (m_cfg.rho / m_cfg.dt + m_cfg.rho / tau1At(p));
+    return m_cfg.vmsScale / (m_cfg.rho / m_run.timeStep + m_cfg.rho / tau1At(p));
   }
 
-  Atrium::Real Atrium::sqrtTauCAt(const Point& p) const
+  Fluid::Real Fluid::sqrtTauCAt(const Point& p) const
   {
-    const Real h = cellSize(p);
+    const Real h = stabilizationLength(p);
     return std::sqrt(m_cfg.gradDivScale * m_cfg.rho * h * h / (4.0 * tau1At(p)));
   }
 
-  Atrium::Real Atrium::tauCAt(const Point& p) const
+  Fluid::Real Fluid::tauCAt(const Point& p) const
   {
     const Real s = sqrtTauCAt(p);
     return s * s;
   }
 
-  Atrium::Real Atrium::tauPAt(const Point& p) const
+  Fluid::Real Fluid::tauPAt(const Point& p) const
   {
-    return m_cfg.pspgScale * tau1At(p) / m_cfg.rho;
+    if (m_cfg.useVMS)
+      return m_cfg.pspgScale * tau1At(p) / m_cfg.rho;
+    return m_cfg.pspgScale / (m_cfg.rho / m_run.timeStep + m_cfg.rho / tau1At(p));
   }
 
-  void Atrium::axpy(Real a, const ::Vec& x, ::Vec& y)
+  void Fluid::axpy(Real a, const ::Vec& x, ::Vec& y)
   {
     PetscErrorCode ierr = VecAXPY(y, a, x);
     assert(ierr == PETSC_SUCCESS);
@@ -404,26 +419,44 @@ namespace Rodin::Examples::Heart
     (void)ierr;
   }
 
-  Atrium& Atrium::initialize()
+  Fluid& Fluid::initialize()
   {
+    if (m_finished || m_failed)
+    {
+      Alert::Exception() << "Cannot initialize a finished or failed atrium"
+                         << Alert::Raise;
+    }
+    if (m_initialized)
+      return *this;
+    if (m_cfg.preconditionerLag < 1 || !std::isfinite(m_run.timeStep) ||
+      m_run.timeStep <= 0 || !std::isfinite(m_cfg.period) || m_cfg.period <= 0 ||
+      m_cfg.period / m_run.timeStep < 0.5 || m_cfg.flowCycles < 0 ||
+      !std::isfinite(m_cfg.prescribedOutletPressure) ||
+      !std::isfinite(m_cfg.prescribedOutletResistance) ||
+      m_cfg.prescribedOutletResistance < 0 ||
+      m_cfg.period / m_run.timeStep > std::numeric_limits<int>::max() - 0.5)
+    {
+      Alert::Exception() << "Invalid atrium time-step or cycle configuration"
+                         << Alert::Raise;
+    }
+    m_stepsPerCycle = static_cast<int>(m_cfg.period / m_run.timeStep + 0.5);
+    m_initialDt = m_run.timeStep;
+    m_initialPeriod = m_cfg.period;
+    m_initialUseVentricularModel = m_cfg.useVentricularModel;
+    m_failed = true;
     setupSpaces();
     setupFlow();
     setupSpecies();
     setupWallShear();
-
-    if (isRoot())
-    {
-      m_csv.open(m_cfg.csvPath);
-      if (!m_csv)
-        throw std::runtime_error("Failed to open " + m_cfg.csvPath);
-      writeCSVHeader();
-    }
+    if (!m_coupled)
+      m_output->write(0);
 
     m_initialized = true;
+    m_failed = false;
     return *this;
   }
 
-  void Atrium::setupSpaces()
+  void Fluid::setupSpaces()
   {
     Model::State s0;
     s0.t = 0.0;
@@ -443,8 +476,14 @@ namespace Rodin::Examples::Heart
     const auto zeroVector = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
 
     m_uOld = zeroVector;
+    m_wallVelocity = zeroVector;
+    m_wallDisplacement = zeroVector;
+    m_wallTraction = zeroVector;
+    m_meshVelocity = zeroVector;
+    m_meshDisplacement = zeroVector;
     m_subOld = zeroVector;
     m_sub = zeroVector;
+    m_uConv = zeroVector;
     m_convProjection = zeroVector;
     m_wss = zeroVector;
     m_netShear = zeroVector;
@@ -469,59 +508,44 @@ namespace Rodin::Examples::Heart
     m_fgCur = fg0;
     m_fgPrev = fg0;
 
-    configureMassSolver(m_scalarProjectionKSP, "atrium_sproj_");
+    if (m_cfg.useVMS)
+      configureMassSolver(m_scalarProjectionKSP, "atrium_sproj_");
     configureMassSolver(m_vectorProjectionKSP, "atrium_vproj_");
     configureMassSolver(m_wssKSP, "atrium_wss_");
 
-    m_u.setName("velocity");
-    m_p.setName("pressure");
-    m_thCur.setName("thrombin");
-    m_fgCur.setName("fibrinogen");
-    m_fnCur.setName("fibrin");
-    m_tawss.setName("TAWSS");
-    m_osi.setName("OSI");
-    m_activation.setName("activation");
-    m_wss.setName("shearStress");
-
-    m_xdmf.setMesh(m_mesh);
-    m_xdmf.add("velocity", m_u.getSolution());
-    m_xdmf.add("pressure", m_p.getSolution());
-    m_xdmf.add("thrombin", m_thCur);
-    m_xdmf.add("fibrinogen", m_fgCur);
-    m_xdmf.add("fibrin", m_fnCur);
-    m_xdmf.add("TAWSS", m_tawss);
-    m_xdmf.add("OSI", m_osi);
-    m_xdmf.add("activation", m_activation);
-    m_xdmf.add("shearStress", m_wss);
+    m_output->bind();
 
     m_outletArea = boundaryArea(m_cfg.outlet);
     m_pIn = m_cfg.inletPressureMean;
-    m_pOut = m_model.getState().pv;
+    m_pOut =
+      m_cfg.useVentricularModel ? m_model.getState().pv : m_cfg.prescribedOutletPressure;
     m_outletPressure = m_pIn;
-    m_mitralZ = m_cfg.mitralResistanceOpen * m_outletArea;
+    m_mitralZ = (m_cfg.useVentricularModel ? m_cfg.mitralResistanceOpen
+                                           : m_cfg.prescribedOutletResistance) *
+      m_outletArea;
 
     if (isRoot())
     {
-      Alert::Info() << "[outlet] area = " << m_outletArea << " m^2  pv0 = " << m_pOut
-                    << " Pa" << Alert::Raise;
+      Log("Fluid/Boundary") << "outlet_area=" << m_outletArea
+                            << " m^2 initial_outlet_pressure=" << m_pOut << " Pa"
+                            << Alert::Raise;
     }
   }
 
-  Atrium::Real Atrium::boundaryArea(Attribute tag)
+  Fluid::Real Fluid::boundaryArea(Attribute tag)
   {
     m_flux = BoundaryIntegral(m_one, m_qFlux).over(tag);
     m_flux.assemble();
     return std::max<Real>(m_flux(m_one), 1e-12);
   }
 
-  void Atrium::setupFlow()
+  void Fluid::setupFlow()
   {
-    const size_t dim = m_mesh.getSpaceDimension();
     const auto normal = BoundaryNormal(m_mesh);
     const auto& cy = m_cfg.viscosity;
     const Real deltaMu = cy.mu0 - cy.muInf;
     const Real rho = m_cfg.rho;
-    const Real dt = m_cfg.dt;
+    const Real dt = m_run.timeStep;
 
     const auto symU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
     const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
@@ -532,8 +556,14 @@ namespace Rodin::Examples::Heart
     const auto muLag = cy.muInf +
       deltaMu * Pow(1.0 + Pow(cy.lambda * shearLag, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
 
-    const auto convU = Mult(Jacobian(m_u), m_uOld);
-    const auto temam = Div(m_uOld) * Dot(m_u, m_v);
+    RealFunction massRatio([this](const Point& p) {
+      return m_coupled ? m_massRatios.at(p.getPolytope().getIndex()) : Real(1);
+    });
+    const auto transport = m_uOld - m_meshVelocity;
+    const auto convU = Mult(Jacobian(m_u), transport);
+    const auto geometricDivergence = Div(m_uOld) - 2.0 * Div(m_meshVelocity);
+    const auto temam = geometricDivergence * Dot(m_u, m_v);
+    const auto streamlineTest = rho * Mult(Jacobian(m_v), transport);
 
     const auto uNormal = Dot(m_u, normal) * normal;
     const auto uTangential = m_u - uNormal;
@@ -548,24 +578,19 @@ namespace Rodin::Examples::Heart
     RealFunction pInFn = [this](const Point&) { return m_pIn; };
     RealFunction pOutFn = [this](const Point&) { return m_pOut; };
     RealFunction mitralFn = [this](const Point&) { return m_mitralZ; };
+    // The affine-tetrahedron volume ratio is constant; P1 history times P1 test is quadratic.
+    constexpr size_t MassOrder = 2;
+    auto historyMass = Integral(massRatio * m_uOld, m_v);
+    historyMass.setOrder(MassOrder);
 
-    m_flow = (rho / dt) * Integral(m_u, m_v) - (rho / dt) * Integral(m_uOld, m_v)
+    m_flow = (rho / dt) * Integral(m_u, m_v) - (rho / dt) * historyMass
 
-      + rho * Integral(Dot(convU, m_v)) + 0.5 * rho * Integral(temam)
-
-      + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_tauFn, rho) -
-      VMSConvectionLinearIntegrator(
-        m_v, m_sub, m_uOld, m_convProjection, m_tauFn, rho, dt)
-
-      + VMSGradDivBilinearIntegrator(m_u, m_v, m_tauCFn) -
-      VMSGradDivLinearIntegrator(m_v, m_piTilde, m_sqrtTauCFn)
+      + rho * Integral(Dot(convU, m_v)) + 0.5 * rho * Integral(temam) +
+      VMSGradDivBilinearIntegrator(m_u, m_v, m_tauCFn)
 
       + 2.0 * Integral(muLag * symU, symV) - Integral(m_p, Div(m_v)) +
       Integral(Div(m_u), m_q) +
       m_cfg.pressurePenalty * Integral(m_p, m_q)
-
-      // PSPG. Required by the equal-order pair.
-      + Integral(m_tauPFn * Grad(m_p), Grad(m_q))
 
       + BoundaryIntegral(pInFn * Dot(m_v, normal)).over(m_inletSet) +
       BoundaryIntegral(pOutFn * Dot(m_v, normal)).over(m_cfg.outlet)
@@ -579,31 +604,92 @@ namespace Rodin::Examples::Heart
         BoundaryIntegral(Dot(uTangential, m_v)).over(m_inletSet)
 
       + BoundaryIntegral(inletBackflow * Dot(m_u, m_v)).over(m_inletSet) +
-      BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.outlet)
+      BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.outlet);
+    if (m_cfg.useVMS)
+    {
+      // Orthogonal-subscale VMS of the coronary example: convective subscale
+      // along u^n - w, its orthogonal projection and dynamic history, the
+      // projected grad-div remainder, and PSPG tau_1/rho on grad p.
+      m_flow += VMSConvectionBilinearIntegrator(m_u, m_v, m_uConv, m_tauFn, rho);
+      m_flow -= VMSConvectionLinearIntegrator(
+        m_v, m_sub, m_uConv, m_convProjection, m_tauFn, rho, dt);
+      m_flow -= VMSGradDivLinearIntegrator(m_v, m_piTilde, m_sqrtTauCFn);
+      m_flow += Integral(m_tauPFn * Grad(m_p), Grad(m_q));
+    }
+    else
+    {
+      // SUPG tests the complete affine-P1 momentum residual along the lagged flow.
+      m_flow += (rho / dt) * Integral(m_tauFn * m_u, streamlineTest);
+      m_flow -= (rho / dt) * Integral(m_tauFn * massRatio * m_uOld, streamlineTest);
+      m_flow += rho * Integral(m_tauFn * convU, streamlineTest);
+      m_flow +=
+        (0.5 * rho) * Integral(m_tauFn * geometricDivergence * m_u, streamlineTest);
+      m_flow += Integral(m_tauFn * Grad(m_p), streamlineTest);
 
-      + DirichletBC(m_u, Zero(dim)).on(m_cfg.wall);
+      // PSPG tests that same momentum residual with the pressure gradient.
+      m_flow += (rho / dt) * Integral(m_tauPFn * m_u, Grad(m_q));
+      m_flow -= (rho / dt) * Integral(m_tauPFn * massRatio * m_uOld, Grad(m_q));
+      m_flow += rho * Integral(m_tauPFn * convU, Grad(m_q));
+      m_flow += (0.5 * rho) * Integral(m_tauPFn * geometricDivergence * m_u, Grad(m_q));
+      m_flow += Integral(m_tauPFn * Grad(m_p), Grad(m_q));
+    }
+    if (m_coupled)
+    {
+      // Robin data live per reference area; integrate on the moving fluid wall.
+      RealFunction inverseStretch([this](const Point& point) {
+        return m_inverseInterfaceStretches.at(point.getPolytope().getIndex());
+      });
+      constexpr size_t RobinOrder = 2;
+      constexpr size_t InterfaceConvectionOrder = 3;
+      auto impedance = BoundaryIntegral(inverseStretch * m_u, m_v);
+      auto velocity = BoundaryIntegral(inverseStretch * m_wallVelocity, m_v);
+      auto traction = BoundaryIntegral(inverseStretch * m_wallTraction, m_v);
+      auto convection = BoundaryIntegral(Dot(transport, normal) * Dot(m_u, m_v));
+      impedance.setOrder(RobinOrder);
+      velocity.setOrder(RobinOrder);
+      traction.setOrder(RobinOrder);
+      convection.setOrder(InterfaceConvectionOrder);
+      m_flow += m_robinCoefficient * impedance.over(m_cfg.wall);
+      m_flow -= m_robinCoefficient * velocity.over(m_cfg.wall);
+      m_flow += traction.over(m_cfg.wall);
+      m_flow -= (0.5 * rho) * convection.over(m_cfg.wall);
+
+      // Time-derivative stabilization of Burman et al. (2025, eq. 15),
+      //   -rho/(2 dt) (int_{Omega^{n+1}} - int_{Omega^n}) u.v + rho/2 int div(w) u.v,
+      // with int_{K^n} u.v = r_K int_{K^{n+1}} u.v on affine cells. It closes
+      // the discrete energy balance of the conservative ALE mass term.
+      RealFunction geometricRate([this, dt](const Point& p) {
+        return (m_massRatios.at(p.getPolytope().getIndex()) - 1) / dt;
+      });
+      auto gcl = Integral((geometricRate + Div(m_meshVelocity)) * Dot(m_u, m_v));
+      gcl.setOrder(MassOrder);
+      m_flow += (0.5 * rho) * gcl;
+    }
+    else
+      m_flow += DirichletBC(m_u, m_wallVelocity).on(m_cfg.wall);
   }
 
-  Atrium::Real Atrium::crosswind(const Point& p, Real cur, Real prev,
+  Fluid::Real Fluid::crosswind(const Point& p, Real cur, Real prev,
     const Math::SpatialVector<Real>& gradient, Real diffusivity, Real reaction) const
   {
     const Real gn = std::sqrt(Math::dot(gradient, gradient));
     if (gn < 1.0e-14)
       return 0.0;
     const auto uc = m_uOld.getValue(p);
-    const Real residual = (cur - prev) / m_cfg.dt + Math::dot(uc, gradient) + reaction;
+    const Real residual =
+      (cur - prev) / m_run.timeStep + Math::dot(uc, gradient) + reaction;
     return std::max<Real>(0.0,
       m_cfg.crosswindC * std::abs(residual) * cellSize(p) / (2.0 * gn) - diffusivity);
   }
 
-  void Atrium::setupSpecies()
+  void Fluid::setupSpecies()
   {
     const Real Dth = m_cfg.thrombosis.diffusivityThrombin;
     const Real Dfg = m_cfg.thrombosis.diffusivityFibrinogen;
     const Real Dfn = m_cfg.thrombosis.diffusivityFibrin;
     const Real keff = m_cfg.thrombosis.reactionRate;
     const Real scale = m_cfg.thrombosis.stabilizationScale;
-    const Real dt = m_cfg.dt;
+    const Real dt = m_run.timeStep;
     const Real fg0 =
       m_cfg.thrombosis.fibrinogenSinusRhythm / m_cfg.thrombosis.fibrinogenMolarMass;
 
@@ -698,7 +784,7 @@ namespace Rodin::Examples::Heart
       DirichletBC(m_fg, RealFunction(fg0)).on(m_inletSet);
   }
 
-  void Atrium::setupWallShear()
+  void Fluid::setupWallShear()
   {
     const auto normal = BoundaryNormal(m_mesh);
     const auto& cy = m_cfg.viscosity;
@@ -721,39 +807,28 @@ namespace Rodin::Examples::Heart
       BoundaryIntegral(Dot(wallStress, m_wssTest)).over(m_cfg.wall);
   }
 
-  bool Atrium::advance0D()
+  bool Fluid::advance0D()
   {
-    const auto rep = m_model.step(m_cfg.dt);
+    const auto rep = m_model.step(m_run.timeStep);
     m_pOut = m_model.getState().pv;
 
     if (isRoot())
     {
       const auto& s = m_model.getState();
-      ZeroDInfo() << (rep.converged ? "converged" : "NOT converged")
-                  << "  iter=" << rep.iterations << "  |F|=" << rep.finalResidual
-                  << "  |  pv=" << s.pv << " par=" << s.par << " pd=" << s.pd << " Pa"
-                  << Alert::Raise;
+      Log("Fluid/0D", false, rep.converged ? Log::Status::Success : Log::Status::Failure)
+        << (rep.converged ? "converged" : "NOT converged") << "  iter=" << rep.iterations
+        << "  |F|=" << rep.finalResidual << "  |  pv=" << s.pv << " par=" << s.par
+        << " pd=" << s.pd << " Pa" << Alert::Raise;
     }
 
     return rep.converged;
   }
 
-  bool Atrium::solveFlow()
+  bool Fluid::solveFlow()
   {
+    Stage stage("Fluid Oseen solve", isRoot());
     const Real rho = m_cfg.rho;
-    const Real dt = m_cfg.dt;
-
-    // The first steps are traced projection by projection: each of these
-    // assembles a mass matrix over the whole mesh, so on a fine mesh they are
-    // where the time goes, and a stall must be visible where it happens.
-    const bool trace = isRoot() && m_step < 3;
-    const auto phase = [trace](const char* what) {
-      if (trace)
-      {
-        ThreeDInfo() << what << " ..." << Alert::Raise;
-        std::cout.flush();
-      }
-    };
+    const Real dt = m_run.timeStep;
 
     const auto vmsStart = CoronaryClock::now();
 
@@ -763,14 +838,16 @@ namespace Rodin::Examples::Heart
     // they are evaluated pointwise by m_tauFn and friends.
     if (m_cfg.useVMS)
     {
-      phase("VMS: projecting the convective term");
-      projectVector(Mult(Jacobian(m_uOld), m_uOld), m_convProjection);
+      Stage stage("VMS projections", isRoot());
+      // ALE convecting velocity u^n - w, refreshed after every mesh motion.
+      m_uConv.setData(m_uOld.getData());
+      axpy(-1, m_meshVelocity.getData(), m_uConv.getData());
+      projectVector(Mult(Jacobian(m_uConv), m_uConv), m_convProjection);
 
-      phase("VMS: projecting the dynamic subscale");
       const size_t dim = m_mesh.getSpaceDimension();
       projectVector(VectorFunction(dim,
                       [this, rho, dt, dim](const Point& p) -> Math::SpatialVector<Real> {
-                        const auto conv = Mult(Jacobian(m_uOld), m_uOld).getValue(p);
+                        const auto conv = Mult(Jacobian(m_uConv), m_uConv).getValue(p);
                         const auto proj = m_convProjection.getValue(p);
                         const auto old = m_subOld.getValue(p);
                         const Real tau = vmsTauAt(p);
@@ -785,44 +862,40 @@ namespace Rodin::Examples::Heart
       // square is the implicit coefficient. Lagging one of the two by a step,
       // as the reference does, leaves the explicit half larger than the
       // implicit one on the step where the viscosity drops.
-      phase("VMS: projecting the grad-div residual");
       project(m_sqrtTauCFn * Div(m_uOld), m_piTilde);
     }
 
     m_timing.vms = secondsSince(vmsStart);
 
-    if (isRoot())
-    {
-      ThreeDInfo() << "Assembling the flow system (" << (m_vh.getSize() + m_sh.getSize())
-                   << " unknowns) ..." << Alert::Raise;
-      std::cout.flush();
-    }
-
     const auto assemblyStart = CoronaryClock::now();
-    m_flow.assemble();
-    m_timing.assembly = secondsSince(assemblyStart);
+    {
+      Stage assembly("Fluid assembly", isRoot());
+      m_flow.assemble();
+    }
+    m_timing.assembly += secondsSince(assemblyStart);
 
     if (!m_flowFieldSplitsSet)
     {
-      if (isRoot())
-        ThreeDInfo() << "Creating field splits ..." << Alert::Raise;
+      Stage stage("Fluid field splits", isRoot());
       m_flow.setFieldSplits();
       m_flowFieldSplitsSet = true;
     }
 
     if (isRoot())
     {
-      ThreeDInfo() << "Solving with PETSc KSP"
-                   << (m_step == 0 ? " (first solve: the direct factorization "
-                                     "is built here and is the slowest one)"
-                                   : "")
-                   << " ..." << Alert::Raise;
+      Log("Fluid/KSP") << "solve: Oseen linear system" << Alert::Raise;
       std::cout.flush();
     }
 
     const auto solveStart = CoronaryClock::now();
-    m_flow.solve(m_flowKSP);
-    m_timing.solve = secondsSince(solveStart);
+    bool refreshed = m_cfg.preconditionerLag == 1 || !m_lastPreconditionerRefreshStep ||
+      m_step - *m_lastPreconditionerRefreshStep >= m_cfg.preconditionerLag;
+    bool retried = false;
+    m_flowKSP.setReusePreconditioner(!refreshed);
+    {
+      Stage solve("Fluid KSP and preconditioner", isRoot());
+      m_flow.solve(m_flowKSP);
+    }
 
     ::KSPConvergedReason reason;
     PetscErrorCode ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
@@ -830,36 +903,80 @@ namespace Rodin::Examples::Heart
     PetscInt iterations = 0;
     ierr = KSPGetIterationNumber(m_flowKSP.getHandle(), &iterations);
     assert(ierr == PETSC_SUCCESS);
-    (void)ierr;
+    m_linearIterations += static_cast<int>(iterations);
 
-    if (isRoot())
+    const char* type = nullptr;
+    ierr = KSPGetType(m_flowKSP.getHandle(), &type);
+    assert(ierr == PETSC_SUCCESS);
+    if (m_cfg.preconditionerLag > 1 && type && std::strcmp(type, KSPPREONLY) == 0)
     {
-      KSPInfo() << (reason > 0 ? "Converged" : "Did NOT converge")
-                << "  iterations = " << iterations << "  (" << m_timing.solve << " s)"
-                << Alert::Raise;
+      Alert::Exception() << "Fluid preconditioner lag greater than one requires "
+                            "an iterative KSP, such as GMRES"
+                         << Alert::Raise;
     }
 
-    m_uOld.setData(m_u.getSolution().getData());
-    if (m_cfg.useVMS)
-      m_subOld.setData(m_sub.getData());
+    if (reason <= 0 && !refreshed)
+    {
+      Stage retry("Fluid KSP retry with fresh preconditioner", isRoot());
+      // Retry the current linear system before any timestep state is committed.
+      ierr = VecSet(m_flow.getLinearSystem().getSolution(), 0.0);
+      assert(ierr == PETSC_SUCCESS);
+      m_flowKSP.setReusePreconditioner(false);
+      m_flow.solve(m_flowKSP);
+      ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = KSPGetIterationNumber(m_flowKSP.getHandle(), &iterations);
+      assert(ierr == PETSC_SUCCESS);
+      m_linearIterations += static_cast<int>(iterations);
+      refreshed = true;
+      retried = true;
+    }
+    m_timing.solve += secondsSince(solveStart);
+    m_preconditionerRefreshed |= refreshed;
+    m_preconditionerRetried |= retried;
+    (void)ierr;
 
-    // A direct solve always "succeeds": check the physics, not the solver.
-    m_speed = std::max(std::abs(m_uOld.max()), std::abs(m_uOld.min()));
+    PetscReal residual = 0;
+    ierr = KSPGetResidualNorm(m_flowKSP.getHandle(), &residual);
+    assert(ierr == PETSC_SUCCESS);
+    if (isRoot())
+    {
+      Log("Fluid/KSP", false,
+        reason <= 0 ? Log::Status::Failure
+          : retried ? Log::Status::Retry
+                    : Log::Status::Success)
+        << "iterations=" << iterations << " residual=" << residual
+                       << " reason=" << KSPConvergedReasons[reason]
+                       << " pc=" << (refreshed ? "refreshed" : "retained")
+                       << " retry=" << (retried ? "yes" : "no")
+                       << " elapsed=" << secondsSince(solveStart) << " s (root)"
+                       << Alert::Raise;
+    }
+
+    if (reason <= 0)
+    {
+      Alert::Exception() << "Oseen linear solve did not converge, reason "
+                         << static_cast<int>(reason) << Alert::Raise;
+    }
+
+    if (refreshed)
+    {
+      m_lastPreconditionerRefreshStep = m_step;
+      ++m_preconditionerRefreshes;
+    }
+
+    // Observe the trial without committing the Oseen history.
+    m_speedMagnitude = Sqrt(Dot(m_u.getSolution(), m_u.getSolution()));
+    m_speed = m_speedMagnitude.max();
 
     return reason > 0 && std::isfinite(m_speed) && m_speed <= m_cfg.maxVelocity;
   }
 
-  void Atrium::computeWallShear()
+  void Fluid::recoverGradient()
   {
-    const auto shearStart = CoronaryClock::now();
+    Stage stage("Velocity gradient recovery", isRoot());
+    const auto start = CoronaryClock::now();
     const auto& uSol = m_u.getSolution();
-
-    if (isRoot() && m_step < 3)
-    {
-      ThreeDInfo() << "Recovering the wall shear stress ..." << Alert::Raise;
-      std::cout.flush();
-    }
-
     projectVector(VectorFunction(Component(Jacobian(uSol), 0, 0),
                     Component(Jacobian(uSol), 0, 1), Component(Jacobian(uSol), 0, 2)),
       m_gradRec0);
@@ -870,14 +987,32 @@ namespace Rodin::Examples::Heart
                     Component(Jacobian(uSol), 2, 1), Component(Jacobian(uSol), 2, 2)),
       m_gradRec2);
 
+    m_timing.shear += secondsSince(start);
+  }
+
+  void Fluid::computeWallShear()
+  {
+    Stage stage("Wall shear recovery", isRoot());
+    const auto shearStart = CoronaryClock::now();
+    if (isRoot() && m_step < 3)
+    {
+      Log("Fluid") << "Recovering the wall shear stress ..." << Alert::Raise;
+      std::cout.flush();
+    }
+
     m_wssProjection.assemble();
     m_wssProjection.solve(m_wssKSP);
     m_wss.setData(m_wssTrial.getSolution().getData());
 
+    m_timing.shear += secondsSince(shearStart);
+  }
+
+  void Fluid::accumulateWallShear()
+  {
     // Cycle accumulators. Two are needed and they are not interchangeable: the
     // vector integral measures how much net direction survives, the scalar one
     // how much shear was applied regardless of direction.
-    axpy(m_cfg.dt, m_wss.getData(), m_netShear.getData());
+    axpy(m_run.timeStep, m_wss.getData(), m_netShear.getData());
 
     // Nodal interpolation, NOT an L2 projection. |tau_w| is finite on the wall
     // and zero in the interior; the L2 projection of that onto a continuous P1
@@ -885,12 +1020,10 @@ namespace Rodin::Examples::Heart
     // therefore TAWSS, which is non-negative by definition -- come out
     // negative. Interpolating the magnitude at the nodes cannot.
     m_shearMagnitude.project(Sqrt(Dot(m_wss, m_wss)));
-    axpy(m_cfg.dt, m_shearMagnitude.getData(), m_absShear.getData());
-
-    m_timing.shear = secondsSince(shearStart);
+    axpy(m_run.timeStep, m_shearMagnitude.getData(), m_absShear.getData());
   }
 
-  void Atrium::closeCycle(Real elapsed)
+  void Fluid::closeCycle(Real elapsed)
   {
     if (elapsed <= 0.0)
       return;
@@ -947,13 +1080,14 @@ namespace Rodin::Examples::Heart
     zeroWithGhosts(m_absShear.getData());
   }
 
-  void Atrium::solveSpecies()
+  void Fluid::solveSpecies()
   {
+    Stage stage("Species transport", isRoot());
     const auto speciesStart = CoronaryClock::now();
 
     if (isRoot() && m_step < 3)
     {
-      ThreeDInfo() << "Assembling and solving the coagulation kinetics ..."
+      Log("Fluid") << "Assembling and solving the coagulation kinetics ..."
                    << Alert::Raise;
       std::cout.flush();
     }
@@ -973,8 +1107,9 @@ namespace Rodin::Examples::Heart
     m_timing.species = secondsSince(speciesStart);
   }
 
-  void Atrium::computeFluxes()
+  void Fluid::computeFluxes()
   {
+    Stage stage("Fluid fluxes", isRoot());
     const auto normal = BoundaryNormal(m_mesh);
     const auto& uSol = m_u.getSolution();
 
@@ -991,286 +1126,172 @@ namespace Rodin::Examples::Heart
     m_outletPressure = m_flux(m_one) / m_outletArea;
   }
 
-  void Atrium::writeCSVHeader()
+  void Fluid::step()
   {
-    m_csv << "t,cycle,pIn,pv,par,pd,valveOpen,qIn,qOut,maxU,"
-          << "maxTAWSS,maxOSI,maxActivation,maxThrombin,minFibrinogen,maxFibrin\n";
+    beginStep();
+    if (!solveFlow())
+      Alert::Exception() << "Fluid trial exceeded its velocity limit" << Alert::Raise;
+    recoverGradient();
+    computeWallShear();
+    commitStep();
   }
 
-  void Atrium::writeCSVRow(int cycle)
+  void Fluid::beginStep()
   {
-    const auto& s = m_model.getState();
-    const Real tawss = m_tawss.max();
-    const Real osi = m_osi.max();
-    const Real activation = m_activation.max();
-    const Real th = m_thCur.max();
-    const Real fg = m_fgCur.min();
-    const Real fn = m_fnCur.max();
-
-    if (!isRoot())
-      return;
-
-    m_csv << m_t << ',' << cycle << ',' << m_pIn << ',' << s.pv << ',' << s.par << ','
-          << s.pd << ',' << (m_valveOpen ? 1 : 0) << ',' << m_qIn << ',' << m_qOut << ','
-          << m_speed << ',' << tawss << ',' << osi << ',' << activation << ',' << th
-          << ',' << fg << ',' << fn << '\n';
-    m_csv.flush();
-  }
-
-  int Atrium::run()
-  {
+    if (m_finished || m_failed)
+    {
+      Alert::Exception() << "Cannot advance a finished or failed atrium" << Alert::Raise;
+    }
     if (!m_initialized)
       initialize();
-
-    const Real PI = std::numbers::pi_v<Real>;
-    const int stepsPerCycle = static_cast<int>(m_cfg.period / m_cfg.dt + 0.5);
-    const int totalCycles = m_cfg.flowCycles + m_cfg.speciesCycles;
-    const int totalSteps = totalCycles * stepsPerCycle;
-
-    if (isRoot())
+    if (m_run.timeStep != m_initialDt || m_cfg.period != m_initialPeriod ||
+      m_cfg.useVentricularModel != m_initialUseVentricularModel)
     {
-      Alert::Info() << "[run] " << totalCycles << " cycles of " << stepsPerCycle
-                    << " steps (" << totalSteps << " total); species from cycle "
-                    << (m_cfg.flowCycles + 1) << " on; XDMF every " << m_cfg.outputEvery
-                    << " steps and at every cycle boundary" << Alert::Raise;
+      Alert::Exception() << "Atrium dt, period, and ventricular mode cannot change "
+                            "after initialization"
+                         << Alert::Raise;
     }
-
-    Real cycleElapsed = 0.0;
-    const auto runStart = CoronaryClock::now();
-
-    for (int step = 0; step < totalSteps; ++step)
+    if (!m_cfg.useVentricularModel &&
+      (!std::isfinite(m_cfg.prescribedOutletPressure) ||
+        !std::isfinite(m_cfg.prescribedOutletResistance) ||
+        m_cfg.prescribedOutletResistance < 0))
     {
-      m_step = step;
-      m_timing = Timing{};
-      const auto stepStart = CoronaryClock::now();
+      Alert::Exception() << "Invalid prescribed fluid outlet parameters" << Alert::Raise;
+    }
+    Stage stage("Fluid history and boundary conditions", isRoot());
+    const Real PI = std::numbers::pi_v<Real>;
+    // A failed solve can leave partially updated state; it cannot be retried.
+    m_failed = true;
+    m_timing = Timing{};
+    m_stepStart = CoronaryClock::now();
+    m_linearIterations = 0;
+    m_preconditionerRefreshed = false;
+    m_preconditionerRetried = false;
 
-      m_t += m_cfg.dt;
-      const int cycle = step / stepsPerCycle;
-      const bool endOfCycle = (step % stepsPerCycle == stepsPerCycle - 1);
+    m_t += m_run.timeStep;
 
-      if (isRoot())
-      {
-        Alert::Info() << "---- Step " << (step + 1) << "/" << totalSteps << "  cycle "
-                      << (cycle + 1) << "/" << totalCycles << "  t = " << m_t
-                      << " s  (dt = " << m_cfg.dt << " s"
-                      << (cycle < m_cfg.flowCycles ? ", warm-up" : "") << ") ----"
-                      << Alert::Raise;
-        std::cout.flush();
-      }
-
+    if (m_cfg.useVentricularModel)
+    {
+      Stage stage("Ventricular driver", isRoot());
       const auto zeroDStart = CoronaryClock::now();
       const bool advanced = advance0D();
       m_timing.zeroD = secondsSince(zeroDStart);
-
       if (!advanced)
       {
         Alert::Exception() << "[0D] Newton did not converge at t = " << m_t
                            << Alert::Raise;
-        return 1;
       }
+    }
+    else
+    {
+      m_pOut = m_cfg.prescribedOutletPressure;
+    }
 
-      m_pIn = m_cfg.inletPressureMean +
-        m_cfg.inletPressureAmplitude * std::sin(2.0 * PI * m_t / m_cfg.period);
+    m_pIn = m_cfg.inletPressureMean +
+      m_cfg.inletPressureAmplitude * std::sin(2.0 * PI * m_t / m_cfg.period);
 
+    if (m_cfg.useVentricularModel)
+    {
       // Mitral diode, switched on the previous step's outlet pressure.
       m_valveOpen = (m_outletPressure > m_pOut);
       m_mitralZ =
         (m_valveOpen ? m_cfg.mitralResistanceOpen : m_cfg.mitralResistanceClosed) *
         m_outletArea;
+    }
+    else
+    {
+      m_valveOpen = true;
+      m_mitralZ = m_cfg.prescribedOutletResistance * m_outletArea;
+    }
+  }
 
-      if (!solveFlow())
-      {
-        Alert::Exception() << "[flow] diverged at step " << (step + 1)
-                           << ": max|u| = " << m_speed << " m/s" << Alert::Raise;
-        return 1;
-      }
+  void Fluid::commitStep()
+  {
+    Stage stage("Fluid diagnostics and export", isRoot());
+    const int step = m_step;
+    const int cycle = step / m_stepsPerCycle;
+    const bool endOfCycle = step % m_stepsPerCycle == m_stepsPerCycle - 1;
+    m_uOld.setData(m_u.getSolution().getData());
+    if (m_cfg.useVMS)
+      m_subOld.setData(m_sub.getData());
+    accumulateWallShear();
+    m_cycleElapsed += m_run.timeStep;
 
-      computeWallShear();
-      cycleElapsed += m_cfg.dt;
+    const auto fluxStart = CoronaryClock::now();
+    computeFluxes();
+    m_timing.fluxes = secondsSince(fluxStart);
 
-      const auto fluxStart = CoronaryClock::now();
-      computeFluxes();
-      m_timing.fluxes = secondsSince(fluxStart);
+    if (endOfCycle)
+    {
+      closeCycle(m_cycleElapsed);
+      m_cycleElapsed = 0.0;
 
-      if (endOfCycle)
-      {
-        closeCycle(cycleElapsed);
-        cycleElapsed = 0.0;
-
-        // VecMax is collective: every rank must reach it, so the reductions
-        // happen outside the root-only print.
-        const Real maxTawss = m_tawss.max();
-        const Real maxOsi = m_osi.max();
-        const Real maxActivation = m_activation.max();
-
-        if (isRoot())
-        {
-          Alert::Info() << "[cycle " << (cycle + 1) << "/" << totalCycles
-                        << "] maxTAWSS=" << maxTawss << " Pa  maxOSI=" << maxOsi
-                        << "  maxActivation=" << maxActivation << Alert::Raise;
-        }
-      }
-
-      if (m_cfg.solveKinetics && cycle >= m_cfg.flowCycles)
-        solveSpecies();
-
-      writeCSVRow(cycle);
-
-      // The flow is written from the very first step, so the warm-up cycles are
-      // available before the species are switched on.
-      const bool output =
-        endOfCycle || (m_cfg.outputEvery > 0 && step % m_cfg.outputEvery == 0);
-      if (output)
-      {
-        const auto outputStart = CoronaryClock::now();
-        m_xdmf.write(m_t).flush();
-        m_timing.output = secondsSince(outputStart);
-      }
-
-      m_timing.total = secondsSince(stepStart);
+      // VecMax is collective: every rank must reach it, so the reductions
+      // happen outside the root-only print.
+      const Real maxTawss = m_tawss.max();
+      const Real maxOsi = m_osi.max();
+      const Real maxActivation = m_activation.max();
 
       if (isRoot())
       {
-        const Real elapsed = secondsSince(runStart);
-        const Real perStep = elapsed / static_cast<Real>(step + 1);
-
-        Alert::Info() << "[3D] max|u|=" << m_speed << " m/s  pIn=" << m_pIn
-                      << " Pa  pv=" << m_pOut
-                      << " Pa  valve=" << (m_valveOpen ? "open" : "closed")
-                      << "  qIn=" << m_qIn << "  qOut=" << m_qOut << " m^3/s"
-                      << Alert::Raise;
-
-        Alert::Info() << "[timing] 0D=" << m_timing.zeroD << "  vms=" << m_timing.vms
-                      << "  asm=" << m_timing.assembly << "  ksp=" << m_timing.solve
-                      << "  wss=" << m_timing.shear << "  flux=" << m_timing.fluxes
-                      << "  species=" << m_timing.species << "  out=" << m_timing.output
-                      << "  total=" << m_timing.total << " s  |  ETA "
-                      << (perStep * (totalSteps - step - 1) / 60.0) << " min"
-                      << Alert::Raise;
-        std::cout.flush();
+        Log("Fluid/Cycle") << "cycle=" << (cycle + 1) << " maxTAWSS=" << maxTawss
+                           << " Pa  maxOSI=" << maxOsi
+                           << "  maxActivation=" << maxActivation << Alert::Raise;
       }
     }
 
-    m_xdmf.close();
-    if (isRoot())
-      m_csv.close();
+    if (m_cfg.solveKinetics && cycle >= m_cfg.flowCycles)
+      solveSpecies();
 
-    return 0;
-  }
-}
+    m_output->collectDiagnostics(cycle);
 
-int main(int argc, char** argv)
-{
-  PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
-
-  const auto setPETScDefault = [](const char* name, const char* value) {
-    PetscBool set = PETSC_FALSE;
-    PetscErrorCode ierr = PetscOptionsHasName(PETSC_NULLPTR, PETSC_NULLPTR, name, &set);
-    if (ierr == PETSC_SUCCESS && !set)
-      ierr = PetscOptionsSetValue(PETSC_NULLPTR, name, value);
-    assert(ierr == PETSC_SUCCESS);
-    (void)ierr;
-  };
-
-  setPETScDefault("-ksp_type", "preonly");
-  setPETScDefault("-pc_type", "lu");
-  setPETScDefault("-pc_factor_mat_solver_type", "mumps");
-  setPETScDefault("-mat_mumps_icntl_20", "0");
-  setPETScDefault("-mat_mumps_icntl_21", "0");
-
-  boost::mpi::environment env(argc, argv);
-  boost::mpi::communicator world(PETSC_COMM_WORLD, boost::mpi::comm_attach);
-  Rodin::Context::MPI context(env, world);
-
-  try
-  {
-    int status = 0;
-
+    // The flow is written from the very first step, so the warm-up cycles are
+    // available before the species are switched on.
+    const bool output =
+      endOfCycle || (m_run.outputEvery > 0 && (step + 1) % m_run.outputEvery == 0);
+    if (output)
     {
-      Rodin::Examples::Heart::Atrium::Config cfg;
-
-      char buffer[512];
-      PetscBool got = PETSC_FALSE;
-      PetscOptionsGetString(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_mesh", buffer, sizeof(buffer), &got);
-      if (got)
-        cfg.meshPath = buffer;
-
-      PetscReal real = 0.0;
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_mesh_scale", &real, &got);
-      if (got)
-        cfg.meshScale = real;
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_dt", &real, &got);
-      if (got)
-        cfg.dt = real;
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_pin", &real, &got);
-      if (got)
-        cfg.inletPressureMean = real;
-
-      PetscInt integer = 0;
-      got = PETSC_FALSE;
-      PetscOptionsGetInt(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_flow_cycles", &integer, &got);
-      if (got)
-        cfg.flowCycles = static_cast<int>(integer);
-
-      got = PETSC_FALSE;
-      PetscOptionsGetInt(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_species_cycles", &integer, &got);
-      if (got)
-        cfg.speciesCycles = static_cast<int>(integer);
-
-      got = PETSC_FALSE;
-      PetscOptionsGetInt(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_output_every", &integer, &got);
-      if (got)
-        cfg.outputEvery = static_cast<int>(integer);
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_vms_scale", &real, &got);
-      if (got)
-        cfg.vmsScale = real;
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_graddiv_scale", &real, &got);
-      if (got)
-        cfg.gradDivScale = real;
-
-      got = PETSC_FALSE;
-      PetscOptionsGetReal(
-        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_pspg_scale", &real, &got);
-      if (got)
-        cfg.pspgScale = real;
-
-      PetscBool flag = PETSC_FALSE;
-      got = PETSC_FALSE;
-      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_vms", &flag, &got);
-      if (got)
-        cfg.useVMS = (flag == PETSC_TRUE);
-
-      got = PETSC_FALSE;
-      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_kinetics", &flag, &got);
-      if (got)
-        cfg.solveKinetics = (flag == PETSC_TRUE);
-
-      Rodin::Examples::Heart::Atrium simulation(context, cfg);
-      status = simulation.initialize().run();
+      Stage stage("Fluid field export", isRoot());
+      const auto outputStart = CoronaryClock::now();
+      m_output->write(m_t);
+      m_lastOutputStep = step + 1;
+      m_timing.output = secondsSince(outputStart);
     }
 
-    PetscFinalize();
-    return status;
+    m_timing.total = secondsSince(m_stepStart);
+
+    if (isRoot())
+    {
+      Log("Fluid/State") << "max_velocity=" << m_speed << " m/s  pIn=" << m_pIn
+                         << " Pa  pOut=" << m_pOut << " Pa"
+                         << "  qIn=" << m_qIn << "  qOut=" << m_qOut << " m^3/s"
+                         << Alert::Raise;
+
+      Log("Fluid/Timing") << "0D=" << m_timing.zeroD << "  vms=" << m_timing.vms
+                          << "  asm=" << m_timing.assembly << "  ksp=" << m_timing.solve
+                          << "  wss=" << m_timing.shear << "  flux=" << m_timing.fluxes
+                          << "  species=" << m_timing.species
+                          << "  out=" << m_timing.output
+                          << "  elapsed_step=" << m_timing.total << " s (root)"
+                          << Alert::Raise;
+      std::cout.flush();
+    }
+    ++m_step;
+    m_failed = false;
   }
-  catch (const std::exception& e)
+
+  void Fluid::finish()
   {
-    std::cerr << "Fatal error: " << e.what() << "\n";
-    PetscFinalize();
-    return 1;
+    if (m_finished)
+      return;
+    if (m_initialized)
+    {
+      // Preserve the last completed state when callers stop between output events.
+      if (!m_failed && m_step > 0 && m_lastOutputStep != m_step)
+        m_output->write(m_t);
+      m_output->close();
+    }
+    m_finished = true;
   }
+
 }
