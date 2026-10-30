@@ -74,4 +74,4 @@ rodin_register_benchmark(RodinStokesAssemblyBenchmarks
   PATH Rodin/Assembly/Stokes
   DESCRIPTION "${CMAKE_CURRENT_LIST_DIR}/RodinStokesAssemblyBenchmarks.html"
   FORMAT googlecpp PROFILE slow METRIC auto RANKS 1
-  CASE_BATCH 256)
+  CASE_BATCH 1)

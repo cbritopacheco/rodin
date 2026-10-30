@@ -99,7 +99,7 @@ namespace Rodin::Geometry
      * - @c slots: stable attribute values indexed by polytope index.
      * - @c mutex: a mutex protecting storage growth.
      *
-     * Thread-safety:
+     * @par Thread safety
      * - Readers use atomic slot snapshots and do not acquire a lock.
      * - Storage growth and slot writes are serialized per dimension.
      */
@@ -242,7 +242,7 @@ namespace Rodin::Geometry
        *
        * Copies the stable slots from @p other while blocking storage growth.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Safe w.r.t. concurrent readers/writers of @p other.
        * @param other Object to copy from.
        */
@@ -258,7 +258,7 @@ namespace Rodin::Geometry
        *
        * Assigns slots from @p other to @c *this while blocking storage growth.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Safe w.r.t. concurrent readers/writers of either dimension.
        * - Not an atomic snapshot w.r.t. external observers of the whole container.
        * @param other Object to copy from.
@@ -281,7 +281,7 @@ namespace Rodin::Geometry
        *
        * Moves the stable slots from @p other while blocking storage growth.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Requires that no other thread accesses @p other concurrently.
        * @param other Object to move from.
        */
@@ -297,7 +297,7 @@ namespace Rodin::Geometry
        *
        * Moves slots from @p other into @c *this while blocking storage growth.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Requires external synchronization: no concurrent access to either
        *   dimension while moving.
        * @param other Object to move from.
@@ -359,7 +359,7 @@ namespace Rodin::Geometry
        *
        * Copies all dimensions from @p other.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Safe if @p other is not being moved concurrently.
        * - Copy is not a globally atomic snapshot across dimensions.
        * @param other Object to copy from.
@@ -377,7 +377,7 @@ namespace Rodin::Geometry
        * - Both objects must already be initialized with the same mesh dimension
        *   (i.e. same @c m_dimensions.size()).
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Serializes storage growth per dimension; slot snapshots are atomic.
        * - Not an atomic snapshot across dimensions.
        * @param other Object to copy from.
@@ -402,7 +402,7 @@ namespace Rodin::Geometry
        *
        * Transfers internal dimension storage from @p other.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Requires external synchronization: no concurrent access to either object.
        * @param other Object to move from.
        */
@@ -415,7 +415,7 @@ namespace Rodin::Geometry
        *
        * Transfers internal dimension storage from @p other into @c *this.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Requires external synchronization: no concurrent access to either object.
        * @param other Object to move from.
        * @returns Reference to this object after the operation.
@@ -438,7 +438,7 @@ namespace Rodin::Geometry
        * - Calling initialize again is only valid if called idempotently with the
        *   same @p meshDim.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Not thread-safe. Must be called before any concurrent access.
        *
        * @param[in] meshDim Topological dimension of the mesh.
@@ -463,7 +463,7 @@ namespace Rodin::Geometry
        * Grows the slot vector for dimension @p d to at least @p count, filling new
        * entries with @c std::nullopt.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Thread-safe w.r.t. other operations on the same dimension (protected by
        *   that dimension's mutex).
        *
@@ -485,7 +485,7 @@ namespace Rodin::Geometry
        * If storage is insufficient, grows the slot vector to include @p idx and
        * assigns @p attr.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Thread-safe (dimension growth and slot writes are serialized).
        *
        * @param[in] p Pair (dimension, index) identifying the polytope.
@@ -515,7 +515,7 @@ namespace Rodin::Geometry
        * Preconditions:
        * - @p idx < @p count.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Thread-safe (dimension growth and slot writes are serialized).
        *
        * @param[in] p Pair (dimension, index) identifying the polytope.
@@ -543,7 +543,7 @@ namespace Rodin::Geometry
        * Ensures the dimension has at least @p count slots (growing if necessary),
        * then resets the entry at @p idx to @c std::nullopt.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Thread-safe (dimension growth and slot writes are serialized).
        *
        * @param[in] p Pair (dimension, index) identifying the polytope.
@@ -573,7 +573,7 @@ namespace Rodin::Geometry
        * Preconditions:
        * - @p idx < @p count (debug-checked).
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Thread-safe and does not acquire a mutex when the slot has been
        *   published.
        *
@@ -600,7 +600,7 @@ namespace Rodin::Geometry
        * Iterates over all slots in dimension @p d and collects all engaged
        * attributes.
        *
-       * Thread-safety:
+       * @par Thread safety
        * - Thread-safe; each published slot is read atomically.
        *
        * @param[in] d Dimension of polytopes.

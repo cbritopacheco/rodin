@@ -35,6 +35,11 @@
       'files.html': 'M6 3h9l4 4v14H6z M14 3v5h5'
     };
     for (const link of document.querySelectorAll('#m-navbar-collapse > .m-row > ol > li > a')) {
+      const label = link.textContent.trim() || link.getAttribute('title');
+      if (label) {
+        link.setAttribute('aria-label', label);
+        link.setAttribute('title', label);
+      }
       const drawing = paths[link.getAttribute('href')?.split('/').pop()];
       if (!drawing || link.querySelector('svg')) continue;
       const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -54,6 +59,8 @@
   function initializeControl() {
     const brand = document.querySelector('#m-navbar-brand');
     if (!brand) return false;
+    brand.setAttribute('aria-label', 'Rodin home');
+    brand.setAttribute('title', 'Rodin home');
     if (document.querySelector('#rodin-theme-trigger')) return true;
     if (!brand.querySelector('.rodin-home-icon')) {
       const home = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -64,6 +71,14 @@
       homePath.setAttribute('d', 'M3 10 12 3l9 7 M5 9v12h5v-7h4v7h5V9');
       home.append(homePath);
       brand.prepend(home);
+    }
+    for (const node of [...brand.childNodes]) {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() === 'Rodin') {
+        const wordmark = document.createElement('span');
+        wordmark.className = 'rodin-wordmark';
+        wordmark.textContent = 'Rodin';
+        node.replaceWith(wordmark);
+      }
     }
     const github = document.querySelector('#m-navbar-collapse a[href="https://github.com/cbritopacheco/rodin"]');
     if (github) {

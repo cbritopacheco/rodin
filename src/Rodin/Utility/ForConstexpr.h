@@ -33,7 +33,7 @@ namespace Rodin::Utility
    * to each argument in @p args in sequence. Useful for compile-time
    * iteration over heterogeneous argument packs.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * auto printer = [](auto x) { std::cout << x << " "; };
    * Utility::For(printer, 1, 2.5, "hello");
@@ -71,7 +71,7 @@ namespace Rodin::Utility
    * This utility enables compile-time loops where the loop index is
    * available as a compile-time constant.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * Utility::ForIndex<5>(
    *   [&](auto i){ std::cout << i.value << std::endl; });

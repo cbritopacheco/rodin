@@ -200,14 +200,15 @@ $18\to20$, or SNES residual tolerance $10^{-12}\to10^{-13}$, one at a
 time; each error must change by less than $10^{-6}$ relative to baseline.
 The independently reassembled residual budget remains $10^{-10}$ relative
 to $\max(1,\Vert F(u_h^0)\Vert_2)$. Inner KSP tolerances track SNES as above.
-There are 37 cases per geometry/context, registered on all seven geometries
-locally and at MPI ranks 1–4 in 35 `slow` CTest entries. The watchdog is
-1800 seconds except for tetrahedron entries, which allow 3600 seconds:
-the complete one-rank tetrahedron registration took approximately 1317
-seconds with idle sleep prevented. The larger watchdog provides
-platform/version headroom, rather than accommodating host suspension.
-These are execution budgets, not numerical acceptance bounds. CI separates the
-tetrahedron and pyramid registrations from the other geometries. Run
+The cases run on all seven geometries locally and at MPI ranks 1–4. Each
+rate history has a separate `slow` CTest entry, with the remaining controls
+in a complementary entry. Rate histories on tetrahedra and pyramids have a
+three-hour budget, except the resolved pure-Neumann P1 tetrahedron history,
+which has five hours after exceeding three hours in coverage CI. Other
+geometries and controls retain the 30-minute budget. These are scheduling
+allowances, not numerical acceptance bounds or proven runtime limits. The
+local OpenMP tetrahedral P1 pure-Neumann history has its own CI lane, leaving
+other histories and controls in a separate lane. Run
 `ctest --test-dir build/tests -R '^RodinConvergenceHPETScNonlinearPoissonBoundary_' --output-on-failure`.
 
 Space construction, distributed assembly, state synchronization, nonlinear

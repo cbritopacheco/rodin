@@ -26,7 +26,7 @@ namespace Rodin::Utility
    * template parsing. This is useful in conditional compilation within
    * template contexts.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * template <typename T>
    * void foo()

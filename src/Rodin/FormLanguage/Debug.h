@@ -30,7 +30,7 @@ namespace Rodin::FormLanguage
    * transformations and check template instantiations. When instantiated,
    * compiler errors will reveal the actual type of T.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * // This will trigger a compile error showing the actual type
    * Debug<decltype(myExpression)> debug;

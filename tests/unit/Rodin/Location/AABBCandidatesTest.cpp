@@ -78,7 +78,7 @@ TEST(Location_AABBCandidates, ParentShardPreservesCurvedTransformation)
   Math::SpatialPoint rc(1);
   rc[0] = Real(0.25);
   Point parent(*mesh.getCell(), rc), child(*shard.getCell(), rc);
-  EXPECT_EQ(child.getPolytope().getTransformation().getOrder(), 3);
+  EXPECT_EQ(child.getPolytope().getTransformation().getDegree(), 3);
   EXPECT_LT(
     (parent.getPhysicalCoordinates() - child.getPhysicalCoordinates()).norm(), 1e-12);
   EXPECT_LT((parent.getJacobian() - child.getJacobian()).norm(), 1e-12);

@@ -24,14 +24,16 @@ namespace Rodin::Assembly
   /**
    * @brief Selects boundary DOF functionals using the existing mesh overlap.
    *
-   * Architecture: for locally supported spaces, the required set is the union
+   * @par Architecture
+   *
+   * For locally supported spaces, the required set is the union
    * of owned DOFs and DOFs of owned cells. Vertex-overlap shards contain every
    * incident face of these DOFs. Select the smallest distributed face index
    * among eligible faces, including ghosts. Artificial boundaries at the outer
    * edge of the overlap cannot touch this required set. No communication is
    * performed for these spaces.
    *
-   * P0g is globally supported and is deliberately different: select the lowest
+   * P0g is globally supported. Select the lowest
    * eligible owned face globally and broadcast its evaluated payload. Ownership
    * and numbering are never changed. No numerical comparison selects a source.
    */

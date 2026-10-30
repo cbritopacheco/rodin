@@ -14,11 +14,11 @@
  *
  * # Mathematical foundation
  *
- * A quadrature rule approximates an integral by a weighted sum:
+ * A quadrature rule approximates an integral by a weighted sum.
  * @f[
  *   \int_K f(x)\,dx \approx \sum_{q=1}^{n_q} w_q\,f(x_q),
  * @f]
- * where:
+ * Here,
  * - @f$ x_q @f$ are quadrature points,
  * - @f$ w_q @f$ are quadrature weights,
  * - @f$ n_q @f$ is the number of quadrature points.
@@ -32,7 +32,7 @@
  *
  * # Usage
  *
- * Typical usage is:
+ * The following code constructs and evaluates a quadrature rule.
  * @code{.cpp}
  * auto qr = QuadratureRule(integrand);
  * qr.setPolytope(cell);
@@ -54,6 +54,7 @@
 #ifndef RODIN_VARIATIONAL_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_QUADRATURERULE_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <vector>
 
 #include "Rodin/FormLanguage/IsSpecialized.h"
@@ -455,7 +456,7 @@ namespace Rodin::Variational
    * @brief Local bilinear-form quadrature for the dot product of a trial and a
    * test shape function.
    *
-   * This specialization assembles the local matrix associated with:
+   * This specialization assembles the local matrix associated with
    * @f[
    *   \int_K \phi^{\mathrm{tr}} \cdot \phi^{\mathrm{te}} \, dx
    * @f]
@@ -613,8 +614,27 @@ namespace Rodin::Variational
 
         const auto geometry = polytope.getGeometry();
 
-        const size_t order = this->getOrder(polytope).value_or(
-          integrand.getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder()));
+        auto selectedOrder = this->getOrder(polytope);
+        if (!selectedOrder)
+          selectedOrder = integrand.getOrder(polytope);
+        if (!selectedOrder)
+        {
+          auto trialOrder = trial.getLeaf().getOrder(polytope);
+          auto testOrder = test.getLeaf().getOrder(polytope);
+          if (!trialOrder)
+            trialOrder = trialfe.getDegree();
+          if (!testOrder)
+            testOrder = testfe.getDegree();
+          if (trialOrder && testOrder)
+            selectedOrder = *trialOrder + *testOrder;
+        }
+        if (!selectedOrder)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "No automatic quadrature order is established. "
+            << "Specify an integration order with setOrder()." << Alert::Raise;
+        }
+        const size_t order = *selectedOrder;
 
         const bool recompute = !m_set || (m_order != order) || (m_geometry != geometry);
 
@@ -727,7 +747,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Local linear-form quadrature for a test shape function expression.
    *
-   * This specialization assembles the local vector associated with:
+   * This specialization assembles the local vector associated with
    * @f[
    *   \int_K \phi^{\mathrm{te}} \, dx
    * @f]
@@ -864,8 +884,20 @@ namespace Rodin::Variational
 
         const auto geometry = polytope.getGeometry();
 
-        const size_t order = this->getOrder(polytope).value_or(
-          integrand.getOrder(polytope).value_or(fe.getOrder()));
+        auto selectedOrder = this->getOrder(polytope);
+        if (!selectedOrder)
+          selectedOrder = integrand.getOrder(polytope);
+        if (!selectedOrder)
+          selectedOrder = integrand.getLeaf().getOrder(polytope);
+        if (!selectedOrder)
+          selectedOrder = fe.getDegree();
+        if (!selectedOrder)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "No automatic quadrature order is established. "
+            << "Specify an integration order with setOrder()." << Alert::Raise;
+        }
+        const size_t order = *selectedOrder;
 
         const bool recompute = !m_set || (m_order != order) || (m_geometry != geometry);
 

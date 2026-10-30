@@ -65,13 +65,16 @@
  * @param[in] dp Target dimension
  */
 #define RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, dp)                                    \
-  if (mesh.getConnectivity().getIncidence(d, dp).size() == 0)                            \
+  do                                                                                     \
   {                                                                                      \
-    Rodin::Alert::MemberFunctionException(*this, __func__)                               \
-      << Rodin::Alert::Notation::Incidence(d, dp)                                        \
-      << " has not been computed and is required to use this function."                  \
-      << Rodin::Alert::Raise;                                                            \
-  }
+    if (mesh.getConnectivity().getIncidence(d, dp).size() == 0)                          \
+    {                                                                                    \
+      Rodin::Alert::MemberFunctionException(*this, __func__)                             \
+        << Rodin::Alert::Notation::Incidence(d, dp)                                      \
+        << " has not been computed and is required to use this function."                \
+        << Rodin::Alert::Raise;                                                          \
+    }                                                                                    \
+  } while (false)
 
 /**
  * @brief Requires connectivity @f$ d \rightarrow d' @f$ (for use in member functions).
@@ -83,13 +86,16 @@
  * @param[in] dp Target dimension
  */
 #define RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(d, dp)                                     \
-  if (this->getConnectivity().getIncidence(d, dp).size() == 0)                           \
+  do                                                                                     \
   {                                                                                      \
-    Rodin::Alert::MemberFunctionException(*this, __func__)                               \
-      << Rodin::Alert::Notation::Incidence(d, dp)                                        \
-      << " has not been computed and is required to use this function."                  \
-      << Rodin::Alert::Raise;                                                            \
-  }
+    if (this->getConnectivity().getIncidence(d, dp).size() == 0)                         \
+    {                                                                                    \
+      Rodin::Alert::MemberFunctionException(*this, __func__)                             \
+        << Rodin::Alert::Notation::Incidence(d, dp)                                      \
+        << " has not been computed and is required to use this function."                \
+        << Rodin::Alert::Raise;                                                          \
+    }                                                                                    \
+  } while (false)
 
 /**
  * @brief Requires mesh to be a SubMesh.
@@ -98,13 +104,16 @@
  * invalid downcasting operations.
  */
 #define RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH()                                            \
-  if (!this->isSubMesh())                                                                \
+  do                                                                                     \
   {                                                                                      \
-    Rodin::Alert::MemberFunctionException(*this, __func__)                               \
-      << "This instance of Mesh is not a SubMesh "                                       \
-      << Rodin::Alert::Notation::Predicate(false, "isSubMesh()")                         \
-      << ". Downcasting to SubMesh is ill-defined." << Rodin::Alert::Raise;              \
-  }
+    if (!this->isSubMesh())                                                              \
+    {                                                                                    \
+      Rodin::Alert::MemberFunctionException(*this, __func__)                             \
+        << "This instance of Mesh is not a SubMesh "                                     \
+        << Rodin::Alert::Notation::Predicate(false, "isSubMesh()")                       \
+        << ". Downcasting to SubMesh is ill-defined." << Rodin::Alert::Raise;            \
+    }                                                                                    \
+  } while (false)
 
 namespace Rodin::FormLanguage
 {
@@ -167,7 +176,7 @@ namespace Rodin::Geometry
    *
    * # Mathematical Foundation
    *
-   * A mesh @f$ \mathcal{T}_h @f$ is a partition of a domain @f$ \Omega @f$:
+   * A mesh @f$ \mathcal{T}_h @f$ is a partition of a domain @f$ \Omega @f$.
    * @f[
    *   \Omega = \bigcup_{K \in \mathcal{T}_h} K
    * @f]
@@ -477,7 +486,7 @@ namespace Rodin::Geometry
        * @returns True if this is a SubMesh instance
        *
        * A Mesh which is also a SubMesh may be casted down to access
-       * SubMesh-specific functionality:
+       * SubMesh-specific functionality.
        * @code{.cpp}
        * if (mesh.isSubMesh())
        * {
@@ -535,8 +544,8 @@ namespace Rodin::Geometry
       virtual size_t getSpaceDimension() const = 0;
 
       /**
-       * @brief Gets the total mesh volume.
-       * @returns Sum of all cell volumes
+       * @brief Sums the measures of three-dimensional mesh entities.
+       * @returns Total three-dimensional volume; use getArea() for surface cells.
        */
       virtual Real getVolume() const = 0;
 
@@ -1245,7 +1254,7 @@ namespace Rodin::Geometry
        * @param[in] g Face geometry type (e.g., Point for 1D box,
        * Segment for 2D box boundary, Triangle or Quadrilateral for 3D
        * box boundary)
-       * @param[in] l Number of nodes in each coordinate direction
+       * @param[in] l Number of unit intervals in each embedding-space direction
        * (must have @f$ d+1 @f$ entries)
        * @returns Mesh of the requested box.
        */
@@ -1278,7 +1287,7 @@ namespace Rodin::Geometry
        * with faces of type @p g.
        *
        * @param[in] g Face geometry type
-       * @param[in] shape Number of nodes in each coordinate direction
+       * @param[in] shape Number of unit intervals in each embedding-space direction
        * @returns Mesh of the requested box.
        */
       static Mesh Box(Polytope::Type g, const Array<size_t>& shape);

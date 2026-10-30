@@ -203,3 +203,20 @@ restriction above. Sequential and OpenMP executions are separate evidence.
 CTest uses the shared slow label, 1,800-second per-geometry timeout and
 pyramid resource lock. A separate boundary CI runtime partition builds and
 executes this target without removing refinement levels.
+
+
+### Pyramid process budgets
+
+The homogeneous-Dirichlet executable registers each pyramid case separately,
+for local execution and MPI ranks 1–4. The complete refinement histories,
+quadrature orders, solver tolerances and acceptance tests are retained. Other
+geometries keep their existing process grouping. Each pyramid process uses
+`petsc_refinement_pyramid` to serialize it with the other pyramid studies.
+
+The ordinary per-process timeout remains 600 seconds. With
+`RODIN_CODE_COVERAGE=ON`, the pyramid P1 and P2 rate histories use the existing
+three-hour allowance of the three-dimensional traction rate studies. Local
+instrumentation comparisons exceeded the old 600-second ceiling in assembly;
+the uninstrumented P1 history completed in approximately 13 seconds. This is a
+coverage runtime policy, not a relaxation of numerical acceptance. Atomic
+coverage updates remain enabled for threaded correctness.

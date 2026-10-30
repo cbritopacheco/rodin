@@ -22,6 +22,7 @@
     samples = entries.map(entry => entry.results.find(result => result.name === name && result.metric === metric));
     if (chart) chart.destroy();
     const colors = getComputedStyle(document.documentElement);
+    const fontFamily = getComputedStyle(root).fontFamily;
     chart = new Chart(canvas, {
       type: 'line',
       data: { labels: entries.map(entry => entry.commit.slice(0, 10)), datasets: [{
@@ -30,11 +31,11 @@
         pointRadius: 3, lineTension: 0, spanGaps: false
       }] },
       options: { responsive: true, maintainAspectRatio: false, legend: { display: false },
-        scales: { xAxes: [{ ticks: { fontColor: colors.getPropertyValue('--color').trim(), maxTicksLimit: 8 },
-                            scaleLabel: { display: true, labelString: 'Commit', fontColor: colors.getPropertyValue('--color').trim() } }],
-                  yAxes: [{ ticks: { beginAtZero: true, fontColor: colors.getPropertyValue('--color').trim() },
-                            scaleLabel: { display: true, labelString: metric + ' · ns / ' + (name.includes('/build/') ? 'construction' : history.format === 'csv' ? 'query' : 'iteration'), fontColor: colors.getPropertyValue('--color').trim() } }] },
-        tooltips: { callbacks: { afterLabel: item => {
+        scales: { xAxes: [{ gridLines: { color: colors.getPropertyValue('--line-color').trim() }, ticks: { fontFamily, padding: 8, fontColor: colors.getPropertyValue('--color').trim(), maxTicksLimit: 8 },
+                            scaleLabel: { display: true, fontFamily, labelString: 'Commit', fontColor: colors.getPropertyValue('--color').trim() } }],
+                  yAxes: [{ gridLines: { color: colors.getPropertyValue('--line-color').trim() }, ticks: { beginAtZero: true, fontFamily, padding: 8, fontColor: colors.getPropertyValue('--color').trim() },
+                            scaleLabel: { display: true, fontFamily, labelString: metric + ' · ns / ' + (name.includes('/build/') ? 'construction' : history.format === 'csv' ? 'query' : 'iteration'), fontColor: colors.getPropertyValue('--color').trim() } }] },
+        tooltips: { titleFontFamily: fontFamily, bodyFontFamily: fontFamily, callbacks: { afterLabel: item => {
           const entry = entries[item.index], sample = samples[item.index];
           return [entry.date, 'Samples: ' + sample.samples.length, 'Run: ' + entry.run];
         } } },
@@ -44,12 +45,13 @@
   };
   const configurationLabel = create('label', 'Configuration');
   const configurations = create('select');configurations.setAttribute('aria-label', 'Benchmark configuration');configurationLabel.append(configurations);
-  const caseLabel = create('label', 'Benchmark case');
+  const caseLabel = create('label', 'Benchmark case');caseLabel.className = 'benchmark-case-control';
   const cases = create('select');cases.setAttribute('aria-label', 'Benchmark case');caseLabel.append(cases);
   const filterLabel = create('label', 'Filter cases');
   const filter = create('input');filter.type = 'search';filter.setAttribute('aria-label', 'Filter benchmark cases');
   filter.disabled = true;filter.placeholder = 'Operation, geometry, degree…';filter.value = requested.get('filter') || '';filterLabel.append(filter);
   const controls = create('div');controls.className = 'benchmark-chart-controls';controls.append(configurationLabel, filterLabel, caseLabel);
+  const selected = create('p');selected.className = 'benchmark-selected-case';
   const chartBox = create('div');chartBox.className = 'benchmark-chart';
   const canvas = create('canvas');canvas.setAttribute('role', 'img');canvas.setAttribute('aria-label', 'Timing history for the selected benchmark case');chartBox.append(canvas);
   const status = create('p');status.className = 'benchmark-chart-status';status.setAttribute('aria-live', 'polite');
@@ -67,7 +69,9 @@
     else url.searchParams.delete('filter');
     window.history.replaceState(window.history.state, '', url);
     selectedCase = history.name + '\u0000' + history.metric;
-    status.textContent = `Showing up to ${history.window} recent commits. Repetitions, counters and context remain in the published series.`;
+    selected.textContent = history.name;
+    selected.hidden = false;
+    status.textContent = `Showing ${history.entries.length} recent commit${history.entries.length === 1 ? '' : 's'}.`;
     render();
   };
   const filterCases = async (preferred = cases.value) => {
@@ -76,11 +80,11 @@
     const matching = allCases.filter(item => terms.every(term => (item.name + ' ' + item.metric).toLowerCase().includes(term)));
     cases.replaceChildren();cases.disabled = !matching.length;
     for (const item of matching) {
-      const option = create('option', item.name + ' · ' + item.metric);
+      const option = create('option', item.name + (item.name.endsWith('/' + item.metric) ? '' : ' · ' + item.metric));
       option.value = item.id;option.dataset.url = new URL(item.url, configurationURL).href;cases.append(option);
     }
     if (!matching.length) {
-      history = undefined;
+      history = undefined;selected.hidden = true;
       if (chart) chart.destroy();chart = undefined;
       status.textContent = 'No matching benchmark cases.';
       return;
@@ -117,7 +121,7 @@
     const url = new URL(root.dataset.historyIndex, location.href);
     const index = await read(url);
     if (!index.configurations.length) throw new Error('No timing configuration is available.');
-    root.replaceChildren(controls, chartBox, status);
+    root.replaceChildren(controls, selected, chartBox, status);
     for (const configuration of index.configurations) { const option = create('option', configuration.label);option.value = configuration.id;option.dataset.url = new URL(configuration.url, url).href;configurations.append(option); }
     if ([...configurations.options].some(option => option.value === requested.get('configuration'))) configurations.value = requested.get('configuration');
     await load();

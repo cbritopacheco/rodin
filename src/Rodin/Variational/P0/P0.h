@@ -29,7 +29,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c P0: exposes the mesh type, the scalar type, the range
+   * @brief Type traits for @c P0, exposing the mesh type, the scalar type, the range
    * type, the execution context and the finite element type.
    */
   template <class Number, class Mesh>
@@ -52,7 +52,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c P0: exposes the mesh type, the scalar type, the range
+   * @brief Type traits for @c P0, exposing the mesh type, the scalar type, the range
    * type, the execution context and the finite element type.
    */
   template <class Number, class Mesh>
@@ -98,7 +98,7 @@ namespace Rodin::Variational
    * @brief Scalar-valued piecewise constant (P0) Lagrange finite element space.
    *
    * Represents the finite element space composed of discontinuous,
-   * piecewise constant functions:
+   * piecewise constant functions.
    * @f[
    *  \mathbb{P}_0 (\mathcal{T}_h) = \{ v \in L^2(\Omega) : v|_{\tau} \in \mathbb{P}_0(\tau), \ \tau \in \mathcal{T}_h \}
    * @f]

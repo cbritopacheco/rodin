@@ -14,7 +14,7 @@
  * This file provides the partial derivative of scalar P1 GridFunctions.
  *
  * For a scalar P1 function @f$ u @f$, the partial derivative with respect
- * to coordinate @f$ x_i @f$ is computed as:
+ * to coordinate @f$ x_i @f$ is computed as
  * @f[
  *   \frac{\partial u}{\partial x_i} = (\nabla u) \cdot \mathbf{e}_i
  * @f]
@@ -34,7 +34,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Derivative over a grid function: exposes the finite
+   * @brief Type traits for @c Derivative over a grid function, exposing the finite
    * element space, the operand type and the range type.
    */
   template <class Range, class Data, class Mesh>
@@ -52,7 +52,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Derivative over a shape function: exposes the finite
+   * @brief Type traits for @c Derivative over a shape function, exposing the finite
    * element space, the shape function space, the operand type and the range type.
    */
   template <class NestedDerived, class Range, class Mesh,
@@ -259,7 +259,16 @@ namespace Rodin::Variational
        */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
-        const size_t k = P1Element<ScalarType>(geom.getGeometry()).getOrder();
+        const size_t k =
+          P1Element<ScalarType>(geom.getGeometry()).getDegree().value_or(2);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (k == 0) ? 0 : (k - 1);
       }
 

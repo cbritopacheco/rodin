@@ -106,7 +106,8 @@ class TestPlanTest(unittest.TestCase):
         rows = job["strategy"]["matrix"]["include"]
         command = next(s["run"] for s in job["steps"] if s.get("name") == "Run native MPI restriction rank partition")
         self.assertIn("-j 1", command)
-        self.assertEqual(job["timeout-minutes"], 90)
+        self.assertEqual(job["timeout-minutes"],
+                         "${{ matrix.partition == 'pyramid' && matrix.np == '8' && 180 || 90 }}")
         self.assertEqual(job["env"]["OMP_NUM_THREADS"], 2)
         self.assertEqual(job["env"]["OMP_WAIT_POLICY"], "PASSIVE")
         self.assertEqual(job["env"]["OMPI_MCA_hwloc_base_binding_policy"], "none")

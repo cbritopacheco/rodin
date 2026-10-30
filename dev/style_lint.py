@@ -9,6 +9,7 @@ Checks the rules that clang-format and clang-tidy cannot express:
   docstyle   multiline Doxygen uses /** ... */; one-line Doxygen uses ///
   forbraces  for-loop bodies spanning multiple physical lines require braces
   ifbraces   if/else bodies spanning multiple physical lines require braces
+  danglingelse unbraced conditional assertion macros require braces without else
   pragma     include guards, never #pragma once
   petsc      PETSc headers are only included under src/Rodin/PETSc/
 
@@ -99,8 +100,8 @@ CPP_TOKENS = re.compile(
     + r'|(?P<token>[A-Za-z_]\w*|[^\s])', re.DOTALL | re.MULTILINE)
 
 
-def multiline_control_bodies(text, keywords):
-    """Yield selected unbraced control bodies spanning multiple physical lines.
+def unbraced_control_bodies(text, keywords):
+    """Yield the source extents of selected unbraced control bodies.
 
     Match complete statements, including nested controls, rather than counting
     semicolons inside loop headers, calls, initializers, or lambda bodies.
@@ -186,8 +187,14 @@ def multiline_control_bodies(text, keywords):
         end = statement_end(body)
         if end is not None:
             body_start, body_end = tokens[body][1], tokens[end][2]
-            if "\n" in text[body_start:body_end]:
-                yield start, body_start, body_end
+            yield start, body_start, body_end
+
+
+def multiline_control_bodies(text, keywords):
+    """Yield unbraced bodies spanning multiple physical source lines."""
+    for start, body_start, body_end in unbraced_control_bodies(text, keywords):
+        if "\n" in text[body_start:body_end]:
+            yield start, body_start, body_end
 
 
 def multiline_for_bodies(text):
@@ -271,9 +278,36 @@ def if_brace_findings(relpath, lines):
                        "on one physical line may omit them")
 
 
+def dangling_else_findings(relpath, lines):
+    """Catch single-line GoogleTest expansions rejected by GCC's dangling-else warning.
+
+    Complete outer if/else statements and standalone loop bodies are safe.
+    GoogleTest skip/message macros do not have the assertion expansion either.
+    """
+    text = "\n".join(lines)
+    for start, body_start, body_end in unbraced_control_bodies(text, {"if"}):
+        body = text[body_start:body_end]
+        # Attributes may precede the statement without protecting its expansion.
+        body = re.sub(r"^(?:\[\[.*?\]\]\s*)+", "", body, flags=re.DOTALL)
+        if not re.match(r"(?:GTEST_)?(?:EXPECT|ASSERT)_[A-Z_]+\s*\(", body):
+            continue
+        following = next((m for m in CPP_TOKENS.finditer(text, body_end)
+                          if m.group("comment") is None and m.group("directive") is None), None)
+        if following is not None and following.group("token") == "else":
+            continue
+        line = text.count("\n", 0, start) + 1
+        yield Finding(
+            "danglingelse", relpath, line,
+            "an assertion macro under an unbraced if without else can fail -Wdangling-else",
+            source=lines[line - 1],
+            suggestion="enclose the assertion in Allman braces; macro expansion "
+                       "contains control flow even when the source is one line")
+
+
 def check_file(relpath, lines):
     findings = [*for_brace_findings(relpath, lines),
-                *if_brace_findings(relpath, lines)]
+                *if_brace_findings(relpath, lines),
+                *dangling_else_findings(relpath, lines)]
     text = "\n".join(lines)
     is_header = relpath.endswith((".h", ".hpp"))
 
@@ -429,6 +463,7 @@ def main():
         for path in extra_files:
             all_findings.extend(for_brace_findings(rel(path), read_lines(path)))
             all_findings.extend(if_brace_findings(rel(path), read_lines(path)))
+            all_findings.extend(dangling_else_findings(rel(path), read_lines(path)))
         files.extend(extra_files)
 
     if args.update_baseline:

@@ -307,7 +307,7 @@ namespace Rodin::Geometry
        * owns in its local shard. Ownership guarantees that every polytope of the
        * distributed mesh is counted exactly once across all ranks.
        *
-       * The global count is then obtained through an MPI reduction:
+       * The global count is then obtained through an MPI reduction.
        *
        * @f[
        *   N_d = \sum_{p=0}^{P-1} N_d^{(p)},
@@ -894,7 +894,7 @@ namespace Rodin::Geometry
        * - updates shard metadata (ownership flags, owner and halo maps, and
        *   shard-to-distributed index mapping).
        *
-       * This method is typically called after local connectivity discovery:
+       * This method is typically called after local connectivity discovery.
        *
        * @code{.cpp}
        * mesh.getConnectivity().compute(d, dp);

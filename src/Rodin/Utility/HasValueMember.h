@@ -25,7 +25,7 @@ namespace Rodin::Utility
    * member type named `Value`. The primary template handles the case
    * where no such member exists.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * struct WithValue { using Value = int; };
    * struct WithoutValue { };

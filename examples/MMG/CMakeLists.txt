@@ -21,3 +21,6 @@ target_link_libraries(MeshOptimization
   PUBLIC
   Rodin::Geometry
   Rodin::MMG)
+
+add_executable(MeshAdaptation MeshAdaptation.cpp)
+target_link_libraries(MeshAdaptation PUBLIC Rodin::Geometry Rodin::MMG Rodin::Variational)

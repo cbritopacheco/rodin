@@ -11,7 +11,7 @@
  * @file
  * @brief Gradient operator specialization for H1 (higher-order Lagrange) functions.
  *
- * For H1<K> functions, the gradient is polynomial of degree K-1 on each element:
+ * For H1<K> functions, the gradient is polynomial of degree K-1 on each element.
  * @f[
  *   \nabla u|_K = \sum_{i=1}^{n} u_i \nabla \phi_i
  * @f]
@@ -255,7 +255,16 @@ namespace Rodin::Variational
        */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
-        const size_t k = H1Element<K, ScalarType>(geom.getGeometry()).getOrder();
+        const size_t k =
+          H1Element<K, ScalarType>(geom.getGeometry()).getDegree().value_or(2 * K);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (k == 0) ? 0 : (k - 1);
       }
 
@@ -395,7 +404,7 @@ namespace Rodin::Variational
        *
        * Each explicit bind prepares the physical gradients from the supplied
        * point's inverse Jacobian. Cell and quadrature indices do not identify
-       * geometry state: a deformation can preserve all of them. Storage is
+       * geometry state because a deformation can preserve all of them. Storage is
        * retained for subsequent basis access, while reference tabulation keeps
        * its existing formula-identity lifetime contract.
        *
@@ -470,6 +479,14 @@ namespace Rodin::Variational
         const auto k = getOperand().getOrder(geom);
         if (!k.has_value())
           return std::nullopt;
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (*k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (*k == 0) ? 0 : (*k - 1);
       }
 
@@ -676,6 +693,14 @@ namespace Rodin::Variational
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto order = getOperand().getOrder(poly);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (order && *order == 1)
+        {
+          const auto degree = poly.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return order ? Optional<size_t>(*order ? *order - 1 : 0) : std::nullopt;
       }
       Grad* copy() const noexcept override
@@ -892,6 +917,14 @@ namespace Rodin::Variational
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto order = getOperand().getOrder(poly);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (order && *order == 1)
+        {
+          const auto degree = poly.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return order ? Optional<size_t>(*order ? *order - 1 : 0) : std::nullopt;
       }
       Grad* copy() const noexcept override

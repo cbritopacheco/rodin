@@ -19,12 +19,12 @@
  *
  * # Supported Specializations
  *
- * **Scalar P0Element<Scalar>:**
+ * @par Scalar elements
  * - Works with Real and Complex scalar types
  * - Single DOF at element barycenter
  * - Constant value throughout element
  *
- * **Vector P0Element<Math::SpatialVector<Scalar>>:**
+ * @par Vector elements
  * - Component-wise constant vector fields
  * - @f$ d @f$ DOFs per element (one per vector component)
  * - Basis functions: @f$ \boldsymbol{\phi}_i = \mathbf{e}_j @f$ where @f$ j = i \mod d @f$
@@ -65,7 +65,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c P0Element: exposes the scalar type and the range type of
+   * @brief Type traits for @c P0Element, exposing the scalar type and the range type of
    * the element.
    * @ingroup TraitsSpecializations
    */
@@ -325,11 +325,37 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the polynomial order.
+       * @brief Returns a total polynomial degree bound for the reference basis.
        * @returns Polynomial order of the finite element.
        */
       constexpr size_t getOrder() const
       {
+        return 0;
+      }
+
+      /**
+       * @brief Returns the total polynomial degree of the reference basis.
+       * @returns Zero for the constant reference basis.
+       */
+      constexpr Optional<size_t> getDegree() const
+      {
+        return 0;
+      }
+
+      /**
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
+      {
+        const size_t dimension =
+          Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+        for (const size_t direction : directions)
+        {
+          if (direction >= dimension)
+            return std::nullopt;
+        }
         return 0;
       }
   };
@@ -433,7 +459,7 @@ namespace Rodin::Variational
       /**
        * @brief Represents a piecewise constant vector basis function.
        *
-       * Each basis function is a constant unit vector in one component direction:
+       * Each basis function is a constant unit vector in one component direction.
        * @f$ \boldsymbol{\phi}_i(x) = \mathbf{e}_j @f$ where @f$ j = i \mod d @f$.
        */
       class BasisFunction
@@ -526,7 +552,7 @@ namespace Rodin::Variational
 
           /**
            * @brief Evaluates the vector basis function at a spatial point.
-           * @return Constant unit vector: e_j where j = local % vdim
+           * @return The constant unit vector e_j where j = local % vdim.
            * @param xi Reference coordinates; the constant result is independent of this argument.
            */
           ReturnType operator()(
@@ -696,11 +722,37 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the polynomial order.
+       * @brief Returns a total polynomial degree bound for the reference basis.
        * @returns Polynomial order on the requested polytope, or no value when unavailable.
        */
       constexpr size_t getOrder() const
       {
+        return 0;
+      }
+
+      /**
+       * @brief Returns the total polynomial degree of the reference basis.
+       * @returns Zero for the constant reference basis.
+       */
+      constexpr Optional<size_t> getDegree() const
+      {
+        return 0;
+      }
+
+      /**
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
+      {
+        const size_t dimension =
+          Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+        for (const size_t direction : directions)
+        {
+          if (direction >= dimension)
+            return std::nullopt;
+        }
         return 0;
       }
 
@@ -927,6 +979,32 @@ namespace Rodin::Variational
       size_t getOrder() const
       {
         return m_scalar.getOrder();
+      }
+
+      /**
+       * @brief Returns the total polynomial degree of the reference basis.
+       * @returns Zero for the constant reference basis.
+       */
+      constexpr Optional<size_t> getDegree() const
+      {
+        return 0;
+      }
+
+      /**
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
+      {
+        const size_t dimension =
+          Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+        for (const size_t direction : directions)
+        {
+          if (direction >= dimension)
+            return std::nullopt;
+        }
+        return 0;
       }
 
       /**

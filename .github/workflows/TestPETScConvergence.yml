@@ -29,22 +29,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev
-          mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: PETScConvergence
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Run PETSc convergence suite
       if: matrix.suite == 'bulk'
       run: "case \"${{ matrix.context }}\" in\n  local)\n    pattern='^RodinConvergenceHPETSc'\n    context_exclude='|^RodinConvergenceHPETScMPI'\
@@ -75,10 +65,12 @@ jobs:
       run: "case \"${{ matrix.geometry }}\" in\n  light) geometry_pattern='(Segment|Triangle|Quadrilateral|Hexahedron|Wedge)'\
         \ ;;\n  tetrahedron) geometry_pattern='Tetrahedron' ;;\n  pyramid) geometry_pattern='Pyramid' ;;\n  *) exit 1 ;;\n\
         esac\ncontext_pattern=''\nif [ \"${{ matrix.context }}\" != local ]; then context_pattern='MPI_${{ matrix.context\
-        \ }}_'; fi\nstudy_pattern='([A-Za-z0-9]+_)?'\ncase \"${{ matrix.study }}\" in\n  all) ;;\n  P1Rates|P2Rates|P3Rates)\
-        \ study_pattern='(MixedNeumann|Robin|PureNeumann)${{ matrix.study }}_' ;;\n  Controls) study_pattern='Controls_' ;;\n\
-        \  *) exit 1 ;;\nesac\nctest --test-dir build/tests \\\n  -R \"^RodinConvergenceHPETSc${{ matrix.physics }}Boundary_${context_pattern}${study_pattern}${geometry_pattern}$\"\
-        \ \\\n  --output-on-failure --no-tests=error -j 1\n"
+        \ }}_'; fi\nstudy_pattern='([A-Za-z0-9]+_)?'\ncase \"${{ matrix.study }}\" in\n  all) ;;\n  PureNeumannP1Rates) study_pattern='PureNeumannP1Rates_'\
+        \ ;;\n  OtherTetrahedron) study_pattern='((MixedNeumann|Robin)P1Rates|(MixedNeumann|Robin|PureNeumann)P[23]Rates|Controls)_'\
+        \ ;;\n  P1Rates|P2Rates|P3Rates) study_pattern='(MixedNeumann|Robin|PureNeumann)${{ matrix.study }}_' ;;\n  Controls)\
+        \ study_pattern='Controls_' ;;\n  *) exit 1 ;;\nesac\nctest --test-dir build/tests \\\n  -R \"^RodinConvergenceHPETSc${{\
+        \ matrix.physics }}Boundary_${context_pattern}${study_pattern}${geometry_pattern}$\" \\\n  --output-on-failure --no-tests=error\
+        \ -j 1\n"
     - name: Publish independent production coverage
       id: coverage_record
       uses: ./.github/actions/coverage

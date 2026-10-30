@@ -8,6 +8,7 @@
 #define RODIN_GEOMETRY_POLYTOPETRANSFORMATION_H
 
 #include <vector>
+#include <initializer_list>
 #include <type_traits>
 
 /**
@@ -26,6 +27,7 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/QF/ForwardDecls.h"
 
+#include "Bounds.h"
 #include "ForwardDecls.h"
 
 namespace Rodin::Geometry
@@ -40,15 +42,15 @@ namespace Rodin::Geometry
    *
    * Let @f$ \tau @f$ denote a polytope in a triangulation @f$ \mathcal{T}_h @f$
    * with an associated reference element @f$ K @f$. This class represents the
-   * transformation:
+   * transformation.
    * @f[
    *    x : K \subset \mathbb{R}^k \rightarrow \tau \subset \mathbb{R}^s
    * @f]
-   * that maps a reference point @f$ r \in K @f$ to a physical point @f$ p \in \tau @f$:
+   * that maps a reference point @f$ r \in K @f$ to a physical point @f$ p \in \tau @f$.
    * @f[
    *    p = x(r)
    * @f]
-   * where:
+   * Here,
    * - @f$ k @f$ is the reference dimension (topological dimension of @f$ K @f$)
    * - @f$ s @f$ is the physical dimension (spatial dimension of @f$ \tau @f$)
    * - @f$ K @f$ is the reference element
@@ -142,26 +144,53 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Gets the polynomial order of the transformation.
-       * @returns Polynomial order
-       *
-       * For linear transformations, returns 1. For higher-order geometric
-       * approximations (e.g., quadratic elements), returns the appropriate order.
+       * @brief Returns a total polynomial degree bound for coordinate components.
+       * @returns A certified upper bound, or no established polynomial bound.
        */
-      virtual size_t getOrder() const = 0;
+      virtual Optional<size_t> getDegree() const
+      {
+        return std::nullopt;
+      }
 
       /**
-       * @brief Conservative degree in each factor of the control-point basis.
+       * @brief Bounds coordinate-map degree in selected reference coordinates.
        *
-       * Defaults to the total polynomial order, which bounds every individual
-       * factor degree. Isotropic tensor and collapsed-coordinate elements may
-       * override this with their known factor degree. A total degree alone must
-       * not be divided by the number of factors for an arbitrary transformation.
-       * @returns The factor order.
+       * The degree is total in the selected coordinates, with the other
+       * coordinates treated as coefficients. The default total-degree bound
+       * is conservative for every subset. Indices are zero-based, duplicates
+       * are ignored, and the empty set has degree zero.
+       * @param directions Reference-coordinate indices.
+       * @returns A conservative bound, or no bound when unavailable or invalid.
        */
-      virtual size_t getFactorOrder() const
+      virtual Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        return getOrder();
+        for (const size_t direction : directions)
+        {
+          if (direction >= getReferenceDimension())
+            return std::nullopt;
+        }
+        if (directions.size() == 0)
+          return 0;
+        return getDegree();
+      }
+
+      /**
+       * @brief Certifies membership in the native vertex-defined geometry space.
+       * @returns True when certified; false also includes unsupported maps.
+       */
+      virtual bool isFirstOrder() const
+      {
+        const auto degree = getDegree();
+        return degree && *degree <= 1;
+      }
+
+      /**
+       * @brief Constructs a conservative enclosure of the reference-cell image.
+       * @returns An owned enclosure, or no certified enclosure for this representation.
+       */
+      virtual Optional<Bounds> getBounds() const
+      {
+        return std::nullopt;
       }
 
       /**
@@ -169,7 +198,7 @@ namespace Rodin::Geometry
        * @param[out] pc Physical coordinates @f$ p @f$ (resized automatically)
        * @param[in] rc Reference coordinates @f$ r \in K @f$
        *
-       * Computes:
+       * Computes the following quantity.
        * @f[
        *    pc = x(rc)
        * @f]
@@ -183,7 +212,7 @@ namespace Rodin::Geometry
        * @param[out] jacobian Jacobian matrix @f$ \mathbf{J}_x @f$ (resized automatically)
        * @param[in] rc Reference coordinates @f$ r \in K @f$
        *
-       * Computes the Jacobian matrix:
+       * Computes the Jacobian matrix.
        * @f[
        *  \mathbf{J}_x (r) = \begin{bmatrix}
        * \dfrac{\partial x_1}{\partial r_1} & \ldots & \dfrac{\partial x_1}{\partial r_k}\\
@@ -218,7 +247,7 @@ namespace Rodin::Geometry
        * @param[out] rc Reference coordinates @f$ r @f$ (resized automatically)
        * @param[in] pc Physical coordinates @f$ p \in \tau @f$
        *
-       * Computes the inverse transformation:
+       * Computes the inverse transformation.
        * @f[
        *    rc = x^{-1}(pc)
        * @f]

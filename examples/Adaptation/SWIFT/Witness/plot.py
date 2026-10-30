@@ -5,6 +5,7 @@
 """Plot a Witness JSON result as an SVG without a plotting dependency."""
 
 import argparse
+import base64
 import html
 import json
 from pathlib import Path
@@ -48,9 +49,13 @@ class Plot:
         dimension = geometry.dimension
         views = ('XYZ', 'XY', 'YZ', 'XZ') if dimension == 3 else (None,)
         height = 680+540*(len(views)-1)
+        font_path = next(parent / 'brand/fonts/static/Manrope-Regular.ttf'
+                         for parent in Path(__file__).resolve().parents
+                         if (parent / 'brand/fonts/static/Manrope-Regular.ttf').is_file())
+        font_data = base64.b64encode(font_path.read_bytes()).decode('ascii')
         svg = [f'<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="{height}" viewBox="0 0 1200 {height}">',
-               f'<rect width="1200" height="{height}" fill="white"/>',
-               '<g font-family="sans-serif" fill="#25352f">',
+               '<defs><style>@font-face {font-family:Manrope;src:url(data:font/ttf;base64,' + font_data + ')}</style></defs>',
+               '<g font-family="Manrope, sans-serif" fill="#718096">',
                f'<text x="600" y="32" text-anchor="middle" font-size="23">{geometry.name.title()}: {self.result["count"]} witnesses</text>']
 
         projections = np.concatenate([self.project(geometry.vertices, view) for view in views])
@@ -97,7 +102,7 @@ class Plot:
                 boundary = geometry.vertices
                 outline = polygon(boundary)
                 svg.append(f'<defs><clipPath id="domain{panel}"><polygon points="{outline}"/></clipPath></defs>')
-                svg.append(f'<polygon points="{outline}" fill="#f2f7f5"/>')
+                svg.append(f'<polygon points="{outline}" fill="none"/>')
                 for cell in evaluation['cells']:
                     svg.append(f'<polygon points="{polygon(cell)}" fill="none" stroke="#91a9a0"/>')
                 for x, y in screen(evaluation['holes']):

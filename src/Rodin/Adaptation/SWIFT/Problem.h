@@ -91,7 +91,7 @@ namespace Rodin::Adaptation::SWIFT
       // This is a polynomial FE field, not the composed level-set residual.
       const auto& qf = QF::QuadratureFormula::get(validationOrder > 0
           ? validationOrder
-          : std::max<size_t>(6, 2 * fe.getOrder() + 4),
+          : std::max<size_t>(6, 2 * fe.getDegree().value_or(2 * fe.getOrder()) + 4),
         cell->getGeometry());
       const auto& quadrature = cell->getQuadrature(qf);
       for (std::size_t q = 0; q < quadrature.getSize(); ++q)
@@ -214,7 +214,7 @@ namespace Rodin::Adaptation::SWIFT
    * @subsection swift-usage-boundaries Boundary conditions and metric extensions
    * If a boundary has been marked with an application-defined `FixedBoundary`
    * attribute, its current position can be held fixed by adding a homogeneous
-   * increment condition before solving:
+   * increment condition before solving.
    * @code{.cpp}
    * const auto fixed =
    *   DirichletBC(u, VectorFunction(Real(0), Real(0))).on(FixedBoundary);
@@ -226,7 +226,7 @@ namespace Rodin::Adaptation::SWIFT
    * Additional bilinear metric terms can be added and removed through
    * getMetric(); they alter the direction model, not the fitting objective or
    * force. For example, adding a mass term also penalizes translations and is
-   * therefore a different motion model. See @ref guides-swift-extension.
+   * therefore a different motion model. See @ref swift-reference-extension.
    *
    * @subsection swift-usage-lifetime Ownership, reuse and geometry application
    * The mesh is obtained from the trial function's finite element space.
@@ -385,13 +385,13 @@ namespace Rodin::Adaptation::SWIFT
    * (\bar M_k+D^2B_k(v_m))\,\delta v_m
    *       =f_k-\bar M_kv_m-DB_k(v_m).
    * @f]
-   * Merit backtracking decreases @f$\Psi_k@f$. The model is piecewise quadratic:
+   * Merit backtracking decreases @f$\Psi_k@f$. The model is piecewise quadratic.
    * within a fixed active hinge set its Hessian is constant. Affine slacks
    * contribute rank-one row products, not @f$D^2j@f$ or @f$D^2Q@f$.
    * These finite penalties are not hard constraints; actual nonlinear quality
    * is checked again by the outer line search. Inactive hinges require no
    * correction. Inner stopping uses the Euclidean stationarity residual on
-   * the free solve coordinates:
+   * the free solve coordinates.
    * @f[
    * \|\nabla\Psi_k(v_m)\|_2\le\tau_{\mathrm{abs}}
    *       +\tau_{\mathrm{rel}}\|f_k\|_2.
@@ -423,7 +423,7 @@ namespace Rodin::Adaptation::SWIFT
    * reference size must be supplied by the application. Automatically selected
    * scales are fixed for the duration of a solve; they are not recomputed from
    * the shrinking or expanding mesh. The corresponding C++ fields are listed
-   * in @ref guides-swift-controls and @ref Parameters.
+   * in @ref swift-reference-controls and @ref Parameters.
    *
    * | Parameter | C++ | Description | Value |
    * |-----------|-----|-------------|-------|
@@ -506,13 +506,13 @@ namespace Rodin::Adaptation::SWIFT
    * produce best-effort exits. The report distinguishes these exits from a
    * geometric target hit and records fitting energy, maximum sampled error,
    * quality and iteration counts. Defaults and diagnostic fields are listed
-   * in @ref guides-swift-controls and @ref guides-swift-results.
+   * in @ref swift-reference-controls and @ref swift-reference-results.
    *
    * @section swift-theory Theory
    * @subsection swift-structure Metric structure and solvability
    * For positive metric weights and @f$j_k>0@f$, both terms are integrals of
    * squares. With nonnegative quadrature weights this property also holds for
-   * the assembled form:
+   * the assembled form.
    * @f[
    * M_k[v,v]=F_k[v,v]+D_k[v,v]\ge0.
    * @f]
@@ -535,7 +535,7 @@ namespace Rodin::Adaptation::SWIFT
    *
    * On a fixed finite-dimensional quotient, a symmetric positive-semidefinite
    * form is positive definite after its complete kernel has been removed.
-   * A mesh-uniform @f$H^1@f$ estimate is a stronger, separate statement:
+   * A mesh-uniform @f$H^1@f$ estimate is a stronger, separate statement.
    * @f[
    * M_k[v,v]\ge c\inf_{w\in\mathcal N_k}
    *             \|v-w\|_{H^1(\Omega_0)}^2.
@@ -546,7 +546,7 @@ namespace Rodin::Adaptation::SWIFT
    *
    * @subsection swift-convergence Scope of convergence diagnostics
    * Affine squared hinges are convex. Their active-region Hessian therefore
-   * preserves positive semidefiniteness:
+   * preserves positive semidefiniteness.
    * @f[
    * D^2B_k(v)[z,z]\ge0,\qquad
    * D^2\Psi_k(v)[z,z]=\bar M_k[z,z]+D^2B_k(v)[z,z]\ge0.
@@ -908,8 +908,11 @@ namespace Rodin::Adaptation::SWIFT
           rep.reason = Report::Reason::EmptyInterface;
           return finish(rep);
         }
-        const Real geometricScale = std::pow(
-          h, fes.getFiniteElement(meshDim - 1, interfaceFacets.front()).getOrder() + 1);
+        const auto firstFacet = mesh.getPolytope(meshDim - 1, interfaceFacets.front());
+        assert(firstFacet);
+        const auto& facetFE = fes.getFiniteElement(meshDim - 1, interfaceFacets.front());
+        const Real geometricScale =
+          std::pow(h, facetFE.getDegree().value_or(2 * facetFE.getOrder()) + 1);
         const Real geometricTarget = p.convergence.tolerance.geometric > Real(0)
           ? p.convergence.tolerance.geometric
           : geometricScale;
@@ -966,8 +969,8 @@ namespace Rodin::Adaptation::SWIFT
         const Variational::Integrator::OrderType surfaceOrder =
           [&](const Geometry::Polytope& face) -> std::size_t {
           const auto& fe = fes.getFiniteElement(face.getDimension(), face.getIndex());
-          return p.quadrature.getSurfaceOrder(fe.getOrder(),
-            face.getTransformation().getOrder(),
+          return p.quadrature.getSurfaceOrder(fe.getDegree().value_or(2 * fe.getOrder()),
+            (face.getTransformation().getDegree().value_or(2)),
             Geometry::Polytope::Traits(face.getGeometry()).getVertexCount() ==
               face.getDimension() + 1);
         };
@@ -1078,7 +1081,7 @@ namespace Rodin::Adaptation::SWIFT
               const auto order = integrand.getOrder(face);
               const auto& transformation =
                 mesh.getPolytopeTransformation(face.getDimension(), face.getIndex());
-              if (order && transformation.getOrder() == 1)
+              if (order && (transformation.getDegree().value_or(2)) == 1)
                 return *order;
               return surfaceOrder(face);
             });
@@ -1106,8 +1109,11 @@ namespace Rodin::Adaptation::SWIFT
           {
             order = std::max(order,
               p.quadrature.getVolumeOrder(
-                fes.getFiniteElement(meshDim, cell->getIndex()).getOrder(),
-                cell->getTransformation().getOrder(),
+                fes.getFiniteElement(meshDim, cell->getIndex())
+                  .getDegree()
+                  .value_or(
+                    2 * fes.getFiniteElement(meshDim, cell->getIndex()).getOrder()),
+                (cell->getTransformation().getDegree().value_or(2)),
                 Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount() ==
                   meshDim + 1));
           }
@@ -1768,9 +1774,11 @@ namespace Rodin::Adaptation::SWIFT
           polytope.getDimension() + 1;
         const std::size_t order = isInterface
           ? m_parameters.quadrature.getSurfaceOrder(
-              fe.getOrder(), polytope.getTransformation().getOrder(), simplex)
+              fe.getDegree().value_or(2 * fe.getOrder()),
+              (polytope.getTransformation().getDegree().value_or(2)), simplex)
           : m_parameters.quadrature.getVolumeOrder(
-              fe.getOrder(), polytope.getTransformation().getOrder(), simplex);
+              fe.getDegree().value_or(2 * fe.getOrder()),
+              (polytope.getTransformation().getDegree().value_or(2)), simplex);
         return QF::QuadratureFormula::get(order, polytope.getGeometry());
       }
 
@@ -1788,7 +1796,8 @@ namespace Rodin::Adaptation::SWIFT
           fes.getFiniteElement(polytope.getDimension(), polytope.getIndex());
         const std::size_t order = m_parameters.quadrature.validation > 0
           ? m_parameters.quadrature.validation
-          : Parameters::Quadrature::getValidationOrder(fe.getOrder());
+          : Parameters::Quadrature::getValidationOrder(
+              fe.getDegree().value_or(2 * fe.getOrder()));
         return QF::QuadratureFormula::get(order, polytope.getGeometry());
       }
 
@@ -1913,7 +1922,11 @@ namespace Rodin::Adaptation::SWIFT
           {
             const auto cell = mesh.getCell(cells[static_cast<std::size_t>(i)]);
             const QualitySamples samples(*cell,
-              fes.getFiniteElement(dimension, cell->getIndex()).getOrder(), m_parameters);
+              fes.getFiniteElement(dimension, cell->getIndex())
+                .getDegree()
+                .value_or(
+                  2 * fes.getFiniteElement(dimension, cell->getIndex()).getOrder()),
+              m_parameters);
             samples.forEach([&](const Variational::IntegrationPoint& ip, Real) {
               deformation.setDisplacementGradient(currentJacobian.getValue(ip));
               const Hinge state(
@@ -1960,7 +1973,11 @@ namespace Rodin::Adaptation::SWIFT
           {
             const auto cell = mesh.getCell(validationCells[static_cast<std::size_t>(i)]);
             const QualitySamples samples(*cell,
-              fes.getFiniteElement(dimension, cell->getIndex()).getOrder(), m_parameters);
+              fes.getFiniteElement(dimension, cell->getIndex())
+                .getDegree()
+                .value_or(
+                  2 * fes.getFiniteElement(dimension, cell->getIndex()).getOrder()),
+              m_parameters);
             auto predictorJacobian = Variational::Jacobian(predictor);
             samples.forEachHinge(currentJacobian, predictorJacobian,
               [&](const Variational::IntegrationPoint& ip, Real weightJ, Real weightQ) {
@@ -2026,7 +2043,8 @@ namespace Rodin::Adaptation::SWIFT
             const Index cellIndex = validationCells[static_cast<std::size_t>(i)];
             const auto cell = mesh.getCell(cellIndex);
             const auto& fe = fes.getFiniteElement(dimension, cellIndex);
-            const QualitySamples samples(*cell, fe.getOrder(), m_parameters);
+            const QualitySamples samples(
+              *cell, fe.getDegree().value_or(2 * fe.getOrder()), m_parameters);
             samples.forEach([&](const Variational::IntegrationPoint& ip, Real) {
               deformation.setDisplacementGradient(displacementJacobian.getValue(ip));
               const Real j = deformation.getJacobian();

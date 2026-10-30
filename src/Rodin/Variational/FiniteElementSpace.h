@@ -65,7 +65,7 @@ namespace Rodin::Variational
    * # Mathematical Foundation
    * A finite element space is characterized by:
    * - **Mesh**: Geometric discretization @f$ \mathcal{T}_h @f$
-   * - **Element**: Local finite element @f$ (K, P, \Sigma) @f$ where:
+   * - **Element**: Local finite element @f$ (K, P, \Sigma) @f$ Here,
    *   - @f$ K @f$ is the reference element geometry
    *   - @f$ P @f$ is the polynomial space
    *   - @f$ \Sigma @f$ is the set of degrees of freedom
@@ -363,7 +363,7 @@ namespace Rodin::Variational
        * @brief Evaluates the mapped function on the reference coordinates.
        *
        * For the given function @f$ v \in V(\tau) @f$, performs the following
-       * evaluation:
+       * evaluation.
        * @f[
        *  \psi(v)(r)
        * @f]
@@ -438,7 +438,7 @@ namespace Rodin::Variational
        * @brief Evaluates the mapped function on the physical coordinates.
        *
        * For the given function @f$ v \in V(K) @f$, performs the following
-       * evaluation:
+       * evaluation.
        * @f[
        *  \psi^{-1}(v)(p)
        * @f]

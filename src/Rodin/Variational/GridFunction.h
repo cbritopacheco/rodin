@@ -13,11 +13,11 @@
  * discrete representation of solutions in finite element analysis.
  *
  * # Mathematical Foundation
- * A grid function represents a function @f$ u_h \in V_h @f$ by its coefficients:
+ * A grid function represents a function @f$ u_h \in V_h @f$ by its coefficients.
  * @f[
  *   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
  * @f]
- * where:
+ * Here,
  * - @f$ u_i @f$ are the degrees of freedom (stored in the grid function)
  * - @f$ \phi_i @f$ are the basis functions from the finite element space
  * - @f$ N @f$ is the number of DOFs
@@ -57,6 +57,8 @@
 #include <functional>
 #include <vector>
 #include <variant>
+#include "Rodin/Variational/H1/ForwardDecls.h"
+#include "Rodin/Variational/P1/ForwardDecls.h"
 #include <boost/filesystem.hpp>
 #include <type_traits>
 
@@ -80,7 +82,7 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Traits for GridFunctionBase: exposes the space and data types.
+  /// @brief Traits for GridFunctionBase, exposing the space and data types.
   template <class Derived, class FES, class Data>
   struct Traits<Variational::GridFunctionBase<Derived, FES, Data>>
   {
@@ -91,7 +93,7 @@ namespace Rodin::FormLanguage
     using DataType = Data;
   };
 
-  /// @brief Traits for GridFunction: exposes the space and data types.
+  /// @brief Traits for GridFunction, exposing the space and data types.
   template <class FES, class Data>
   struct Traits<Variational::GridFunction<FES, Data>>
   {
@@ -125,11 +127,11 @@ namespace Rodin::Variational
    * functions with scalar coefficients stored in a data vector.
    *
    * # Mathematical Foundation
-   * A grid function represents a discrete finite element approximation:
+   * A grid function represents a discrete finite element approximation.
    * @f[
    *   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
    * @f]
-   * where:
+   * Here,
    * - @f$ u_h @f$ is the discrete function
    * - @f$ u_i @f$ are the degrees of freedom (coefficients)
    * - @f$ \phi_i @f$ are the finite element basis functions
@@ -374,12 +376,12 @@ namespace Rodin::Variational
    *
    * @par Projection semantics
    * Assigning an expression to a grid function computes the
-   * @e interpolant: the space's degree-of-freedom functionals are applied
+   * @e interpolant by applying the space's degree-of-freedom functionals
    * to the expression, @f$ u_h = \sum_i \sigma_i(f)\, \phi_i @f$. This is
    * @e not the @f$ L^2 @f$-orthogonal projection — the two coincide only
    * when the expression already lies in the space. When the
    * @f$ L^2 @f$ projection is required (e.g. for optimal-order transfer of
-   * rough data), solve the mass-matrix problem explicitly:
+   * rough data), solve the mass-matrix problem explicitly.
    * @code{.cpp}
    * TrialFunction u(vh);
    * TestFunction  v(vh);
@@ -393,7 +395,7 @@ namespace Rodin::Variational
    * holds vertex values. For higher-order spaces
    * (<a href="_variational_2_h1_8h.html">H1&lt;K&gt;</a>,
    * @f$ K \ge 2 @f$) the underlying basis is not plain nodal Lagrange, and
-   * @b coefficients @b are @b not @b nodal @b values: always evaluate
+   * @b coefficients @b are @b not @b nodal @b values. Always evaluate
    * through getValue() (or the element basis) instead of reading the data
    * vector positionally.
    *
@@ -630,7 +632,7 @@ namespace Rodin::Variational
       /**
        * @brief Loads grid function data from a file.
        * @param[in] filename Path to the file to load
-       * @param[in] fmt File format (default: MFEM)
+       * @param[in] fmt File format (default MFEM)
        * @return Reference to this grid function
        *
        * Reads DOF data from a file in the specified format. Supported formats
@@ -1253,7 +1255,9 @@ namespace Rodin::Variational
        */
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const
       {
-        return static_cast<const Derived&>(*this).getOrder(geom);
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(
+          geom.getDimension(), geom.getIndex());
+        return getElementOrder(fe);
       }
 
       /**
@@ -1281,11 +1285,44 @@ namespace Rodin::Variational
 
     private:
       /**
+       * @brief Uses a generic element's established polynomial information.
+       * @param element Reference element, with no required family index.
+       * @returns Its degree bound, or no automatic estimate.
+       */
+      template <class Element>
+      static Optional<size_t> getElementOrder(const Element& element)
+      {
+        return element.getDegree();
+      }
+
+      /**
+       * @brief Retains the native P1 rational-pyramid accuracy estimate.
+       * @param element Reference element.
+       * @returns A polynomial bound or the established pyramid estimate.
+       */
+      template <class Range>
+      static Optional<size_t> getElementOrder(const P1Element<Range>& element)
+      {
+        return element.getDegree().value_or(2);
+      }
+
+      /**
+       * @brief Retains the H1 rational-pyramid accuracy estimate.
+       * @param element Reference element of family index K.
+       * @returns A polynomial bound or the established pyramid estimate.
+       */
+      template <size_t K, class Range>
+      static Optional<size_t> getElementOrder(const H1Element<K, Range>& element)
+      {
+        return element.getDegree().value_or(2 * K);
+      }
+
+      /**
        * @brief Per-thread cache of the DOFs of the polytope
        * last evaluated.
        *
        * The cache outlives the grid functions that fill it, so it cannot be
-       * keyed on their address: a grid function destroyed and another built
+       * keyed on their address. A grid function destroyed and another built
        * in the same storage, as happens to any local in a loop or in
        * consecutive scopes, would find the previous one's entry and read
        * DOFs of a different mesh. It is keyed instead on an identity no two
@@ -1686,18 +1723,6 @@ namespace Rodin::Variational
       constexpr const DataType& getData() const
       {
         return m_data;
-      }
-
-      /**
-       * @brief Returns the polynomial order used on a mesh entity.
-       * @param[in] polytope Entity whose finite element order is requested
-       * @returns Polynomial order when available
-       */
-      constexpr Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
-      {
-        const auto& fes = this->getFiniteElementSpace();
-        return fes.getFiniteElement(polytope.getDimension(), polytope.getIndex())
-          .getOrder();
       }
 
     private:

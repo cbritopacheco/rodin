@@ -32,7 +32,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c ShapeFunctionBase: exposes the derived type, the finite
+   * @brief Type traits for @c ShapeFunctionBase, exposing the derived type, the finite
    * element space, the shape function space, the result type, the range type and the
    * scalar type.
    */
@@ -61,7 +61,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c ShapeFunction: exposes the derived type, the finite
+   * @brief Type traits for @c ShapeFunction, exposing the derived type, the finite
    * element space, the shape function space, the result type, the range type and the
    * scalar type.
    */
@@ -334,11 +334,11 @@ namespace Rodin::Variational
    *
    * # Mathematical Foundation
    * In the finite element method, functions are approximated using a linear
-   * combination of basis functions (shape functions):
+   * combination of basis functions (shape functions).
    * @f[
    *   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
    * @f]
-   * where:
+   * Here,
    * - @f$ \phi_i(x) @f$ are the shape functions
    * - @f$ u_i @f$ are the degrees of freedom (coefficients)
    * - @f$ N @f$ is the number of basis functions
@@ -511,7 +511,7 @@ namespace Rodin::Variational
       /**
        * @brief Sets the current integration point.
        *
-       * This is the preferred path while integrating: it carries both the
+       * This is the preferred path while integrating because it carries both the
        * geometric point and its quadrature metadata so shape functions can
        * reuse tabulations and cache entries tied to the active quadrature rule.
        * For pointwise evaluations outside a quadrature loop, construct an
@@ -587,19 +587,14 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns a geometry-dependent polynomial order bound of the expression
-       *        on the reference element.
+       * @brief Recommends an integration order for the shape expression.
        *
-       * The returned value is a **safe upper bound** on the total polynomial degree
-       * of the expression in reference coordinates, ignoring the geometry map.
-       *
-       * - Used for quadrature selection and composition rules.
-       * - May depend on the reference geometry (simplex, tensor-product, wedge).
-       * - Returns std::nullopt for non-polynomial expressions.
-       * - The value is not guaranteed to be sharp.
-       *
-       * @param poly Polytope on which the order is queried.
-       * @return Polynomial order bound, or std::nullopt if not polynomial.
+       * The recommendation uses the operation, reference family and geometry.
+       * A nonpolynomial accuracy estimate does not assert exactness. Zero
+       * certifies an elementwise constant expression; an empty result means no
+       * estimate is established. Explicit integrator orders remain authoritative.
+       * @param poly Entity supplying reference geometry and coordinate mapping.
+       * @return An automatic integration recommendation, or no established estimate.
        */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {

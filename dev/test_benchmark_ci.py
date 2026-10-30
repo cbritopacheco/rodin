@@ -2,6 +2,7 @@
 import csv
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import subprocess
@@ -184,6 +185,32 @@ class BenchmarkCampaignTest(unittest.TestCase):
         self.assertEqual([name for chunk in chunks for name in chunk], names)
         self.assertTrue(all(len(chunk) <= 256 and sum(len(name) + 1 for name in chunk) <= 60000 for chunk in chunks))
 
+    def test_selector_matches_exact_names_with_cpp_extended_regex(self):
+        # Google Benchmark uses std::regex::extended on its GCC CI build.
+        names = ['Integrator/H1P2-P1/GradGrad', 'Kernel/a[b]{c} +#', r'Backslash/\\']
+        others = ['Integrator/H1P2XP1/GradGrad', 'Kernel/ab{c} +#', r'Backslash/X']
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / 'selector.cpp'
+            executable = Path(folder) / 'selector'
+            source.write_text('''#include <regex>
+#include <iostream>
+int main(int argc, char** argv) {
+  try {
+    const std::regex pattern(argv[1], std::regex_constants::extended);
+    for (int i = 2; i < argc; ++i)
+      std::cout << std::regex_match(argv[i], pattern) << "\\n";
+  } catch (const std::regex_error& error) {
+    std::cerr << error.what();
+    return 1;
+  }
+}
+''')
+            subprocess.run([os.environ.get('CXX', 'c++'), '-std=c++17', str(source),
+                            '-o', str(executable)], check=True, capture_output=True)
+            result = subprocess.run([str(executable), ci.selector(names), *names, *others],
+                                    check=True, capture_output=True, text=True)
+            self.assertEqual(result.stdout.splitlines(), ['1'] * len(names) + ['0'] * len(others))
+
 
     def test_common_build_selects_only_the_required_library_closure(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -214,6 +241,19 @@ class BenchmarkCampaignTest(unittest.TestCase):
             output.return_value = 'Kernel/3Kernel/30\nKernel/3\nKernel/3\n'
             with self.assertRaisesRegex(ValueError, "DistributedFixture ranks=4.*'Kernel/3': 2"):
                 ci.discover(entry, 4)
+
+    def test_csv_failure_preserves_completed_cases_without_a_success_receipt(self):
+        with tempfile.TemporaryDirectory() as folder, patch.object(ci.archive, 'restore'), patch.object(ci, 'command', return_value=['fixture']):
+            root = Path(folder)
+            lane = dict(id='lane', definition={}, entry={'format': 'csv'}, ranks=1,
+                        cases=['Triangle/1/1/0/0', 'Triangle/2/1/0/0'])
+            ci.dump(root / 'build/execution.json', {'lanes': [lane]})
+            with patch.object(ci.subprocess, 'check_output', side_effect=[
+                    'case,ns\nfirst,12\n', subprocess.CalledProcessError(1, ['fixture'])]):
+                with self.assertRaises(subprocess.CalledProcessError):
+                    ci.run_lane(root / 'build', 'lane', root / 'output')
+            self.assertIn('first,12', (root / 'output/report.csv').read_text())
+            self.assertFalse((root / 'output/receipt.json').exists())
 
     def test_execution_discovers_exact_names_and_writes_a_validated_receipt(self):
         with tempfile.TemporaryDirectory() as folder, patch.object(ci.archive, 'restore') as restore, patch.object(ci.archive, 'commit', return_value=COMMIT):

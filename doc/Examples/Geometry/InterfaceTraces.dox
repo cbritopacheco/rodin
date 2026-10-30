@@ -1,0 +1,58 @@
+/**
+  @page examples-interface-traces Evaluating interface traces
+  @brief Inspect two cell values, their jump and their arithmetic average.
+
+  @tableofcontents
+  @m_footernavigation
+
+  @section examples-interface-traces-setting A discontinuous field
+
+  A square split into two triangles has one interior facet. A piecewise
+  constant field takes value one in region one and value three in region two.
+  This small example makes side selection explicit before facet terms are
+  used in a variational formulation.
+
+  @snippet DG/InterfaceTraces.cpp interface-setup
+
+  The mesh is the same two-triangle topology used in the
+  @ref examples-geometry-connectivity "connectivity tutorial".
+
+  @image html Geometry/Connectivity.png "Two cells meeting at one interior diagonal." width=720px
+
+  @section examples-interface-traces-evaluation Select and combine traces
+
+  The facet midpoint is mapped back into each incident cell. Evaluating the
+  field on those two cell points obtains the one-sided values explicitly.
+  `Jump` subtracts the two incident-cell values in the
+  library's incidence order. `Average` forms their arithmetic mean.
+
+  @snippet DG/InterfaceTraces.cpp interface-evaluate
+
+  | Quantity | Expected value |
+  | :--- | :--- |
+  | Trace from region one | 1 |
+  | Trace from region two | 3 |
+  | Absolute jump | 2 |
+  | Arithmetic average | 2 |
+
+  The sign of a jump follows the incidence ordering. A flux formula must use
+  the matching normal convention. Attribute-based trace selection gives an
+  explicit side when modeling a material interface.
+
+  @section examples-interface-traces-run Run and inspect
+
+  Build the `InterfaceTraces` target. The program evaluates the midpoint of
+  the interior facet, prints the four values and exports
+  `InterfaceTraces.csv`. It checks the table above with tolerance
+  @f$10^{-12}@f$ and returns `EXIT_FAILURE` if a check fails.
+
+  The complete program is available in @ref DG/InterfaceTraces.cpp "InterfaceTraces.cpp".
+
+  @section examples-interface-traces-next Continue
+
+  - @ref guides-interfaces-dg "Facet forms and interior-penalty consistency"
+  - @ref guides-boundary-conditions "Exterior boundary data"
+
+  @example DG/InterfaceTraces.cpp
+  @m_footernavigation
+*/

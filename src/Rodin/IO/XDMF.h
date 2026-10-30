@@ -350,7 +350,7 @@ namespace Rodin::IO
            * @brief Sets the mesh observed by this grid.
            * @tparam MeshType  Concrete mesh type (must derive from MeshBase).
            * @param[in] mesh    Mesh to observe (must outlive the XDMF writer).
-           * @param[in] policy  Export policy: Static or Transient.
+           * @param[in] policy  Export policy selected as Static or Transient.
            * @returns Reference to `*this` for method chaining.
            */
           template <class MeshType>
@@ -374,7 +374,7 @@ namespace Rodin::IO
            * @tparam GridFunctionType  Concrete grid function type.
            * @param[in] gf      Grid function to export (must have a name set).
            * @param[in] center  Data centering (Node or Cell).
-           * @param[in] policy  Export policy: Static (written once) or Transient (written at every snapshot).
+           * @param[in] policy  Export policy selected as Static (written once) or Transient (written at every snapshot).
            * @returns Reference to `*this` for method chaining.
            *
            * The grid function must have a name assigned via `setName()`.
@@ -390,7 +390,7 @@ namespace Rodin::IO
            * @param[in] name    Attribute name for the XDMF output.
            * @param[in] gf      Grid function to export.
            * @param[in] center  Data centering (Node or Cell).
-           * @param[in] policy  Export policy: Static (written once) or Transient (written at every snapshot).
+           * @param[in] policy  Export policy selected as Static (written once) or Transient (written at every snapshot).
            * @returns Reference to `*this` for method chaining.
            */
           template <class GridFunctionType>
@@ -529,7 +529,7 @@ namespace Rodin::IO
 
       /**
        * @brief Sets the zero-padding width for `{index}` expansion.
-       * @param[in] digits  Number of digits for zero-padded indices (default: 6).
+       * @param[in] digits  Number of digits for zero-padded indices (default 6).
        * @returns Reference to `*this` for method chaining.
        */
       XDMF& setPadding(size_t digits);
@@ -581,7 +581,7 @@ namespace Rodin::IO
        * @tparam GridFunctionType  Concrete grid function type.
        * @param[in] gf      Grid function to export (must have a name).
        * @param[in] center  Data centering (Node or Cell).
-       * @param[in] policy  Export policy: Static (written once) or Transient (written at every snapshot).
+       * @param[in] policy  Export policy selected as Static (written once) or Transient (written at every snapshot).
        * @returns Reference to `*this` for method chaining.
        */
       template <class GridFunctionType>
@@ -595,7 +595,7 @@ namespace Rodin::IO
        * @param[in] name    Attribute name.
        * @param[in] gf      Grid function to export.
        * @param[in] center  Data centering (Node or Cell).
-       * @param[in] policy  Export policy: Static (written once) or Transient (written at every snapshot).
+       * @param[in] policy  Export policy selected as Static (written once) or Transient (written at every snapshot).
        * @returns Reference to `*this` for method chaining.
        */
       template <class GridFunctionType>

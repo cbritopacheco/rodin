@@ -12,7 +12,7 @@
  * with numerical column pivoting for sparse matrices.
  *
  * # Algorithm
- * The solver computes:
+ * The solver computes the following quantity.
  * @f[
  *   AP = QR
  * @f]

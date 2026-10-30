@@ -16,6 +16,8 @@ class BenchmarkSiteTest(unittest.TestCase):
         (docs / 'theme.css').write_text(':root { --color: black; }')
         (docs / 'index.html').write_text('<header><nav id="navigation"><a id="m-navbar-brand" href="index.html">Rodin</a><a href="pages.html">Pages</a><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg viewBox="0 0 16 16"></svg></a></nav></header><footer><nav>Rodin copyright · Created with Doxygen and m.css</nav></footer>')
         (docs / 'Doxygen.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg"/>')
+        for name in ['wordmark-white.svg', 'favicon-monogram.svg', 'favicon-monogram-light.svg', 'favicon-monogram-dark.svg', 'Manrope-Regular.ttf', 'Manrope-SemiBold.ttf', 'Manrope-Bold.ttf', 'OFL.txt']:
+            (docs / name).write_text('fixture')
         overview = {'brief': 'Matrix operations.', 'representative': '<code>Ax</code>',
                     'description': '<p><a href="class_matrix.html">Matrices</a>.</p>'}
         export_module_catalogue([('Core', [('Math', 'namespace_math')])], {'Core': 'Algebra.'},
@@ -36,6 +38,27 @@ class BenchmarkSiteTest(unittest.TestCase):
             writer = csv.DictWriter(stream, fieldnames=list(records[0]), delimiter='\t')
             writer.writeheader()
             writer.writerows(records)
+
+    def test_explicit_navigation_actions_count_registered_pages_and_mark_empty_modules(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            docs, manifest, record = self.fixture(root)
+            catalogue = json.loads((docs / 'rodin-module-catalogue.json').read_text())
+            empty = dict(catalogue['groups'][0]['modules'][0], title='Empty', path='Rodin/Empty')
+            catalogue['groups'][0]['modules'].append(empty)
+            (docs / 'rodin-module-catalogue.json').write_text(json.dumps(catalogue))
+            self.write_manifest(manifest, [record, dict(record, target='StokesBenchmark', path='Stokes/Solve')])
+            output = root / 'site'
+            build_site(manifest, docs, output, 'Release', '../')
+            index = (output / 'index.html').read_text()
+            self.assertIn('Search benchmarks</a>', index)
+            self.assertIn('aria-label="Browse benchmarks in Math"', index)
+            self.assertIn('aria-label="Browse benchmarks in Stokes"', index)
+            self.assertIn('No benchmarks yet', index)
+            self.assertNotIn('aria-label="Browse benchmarks in Empty"', index)
+            module = (output / 'Rodin/Math/index.html').read_text()
+            self.assertIn('aria-label="View results for SpatialMatrix"', module)
+            self.assertIn('1 benchmark</span>', module)
 
     def test_canonical_module_export_contains_rendered_content_and_no_build_paths(self):
         with tempfile.TemporaryDirectory() as folder:

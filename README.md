@@ -1,28 +1,43 @@
-[![Rodin](doc/Images/README_Header.png)](https://github.com/cbritopacheco/rodin/releases)
+<p align="center">
+  <a href="https://cbritopacheco.github.io/rodin/docs/refs/heads/master/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="brand/logos/horizontal-white.svg">
+      <source media="(prefers-color-scheme: light)" srcset="brand/logos/horizontal-color.svg">
+      <img src="brand/logos/horizontal-color.svg" width="520" alt="Rodin">
+    </picture>
+  </a>
+</p>
 
-# Rodin [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20Rodin-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cbritopacheco)
+<p align="center"><strong>A modern C++ FEM library for shape and topology optimization.</strong></p>
 
-Rodin is a lightweight and modular finite element framework which provides many of the associated functionalities that are needed when implementing shape and topology optimization algorithms. These functionalities range from refining and remeshing the underlying shape, to providing elegant mechanisms to specify and solve variational problems.
+<p align="center">
+  <a href="LICENSE"><img alt="Boost Software License 1.0" src="https://img.shields.io/badge/license-BSL--1.0-green"></a>
+  <a href="https://www.buymeacoffee.com/cbritopacheco"><img alt="Support Rodin" src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20Rodin-yellow?logo=buymeacoffee"></a>
+</p>
+
+Rodin is a modular C++20 finite element framework for solving partial differential equations and developing shape and topology optimization algorithms. Its compositional form language connects mathematical formulations to C++ code, with mesh refinement, remeshing and solver backends available through independent modules.
 
 It is named after the French sculptor Auguste Rodin, considered the founder of modern sculpture.
 
-Any contributors are warmly encouraged and any help or comments are always appreciated!
+Contributions, issue reports and documentation improvements are welcome.
 
-## Getting Started
+## Getting started
 
-New to Rodin? Check out our comprehensive [Getting Started Guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html) which covers:
+The [getting started
+  guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html) covers installation, a first solve and the
+  main library objects:
 
-- **[Installation and Setup](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html)** - Platform-specific installation instructions and verification
-- **[First Steps](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-steps.html)** - Basic concepts, project structure, and your first Rodin program
-- **[Your First Problem](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-problem.html)** - Complete walkthrough solving the Poisson equation
-- **[Core Concepts](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-core-concepts.html)** - Deep dive into meshes, finite elements, and variational formulations
+- **[Installation and setup](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html)** - Platform-specific installation instructions and verification
+- **[First steps](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-steps.html)** - Project structure and a first Rodin program
+- **[A first problem](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-problem.html)** - Complete walkthrough solving the Poisson equation
+- **[Core concepts](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-core-concepts.html)** - Meshes, finite element spaces and variational formulations
 
 ## Status
 
-| Branch      |  Matrix  | Tests | Code Coverage | Benchmarks | Documentation |
+| Branch      |  Build   | Tests | Code Coverage | Benchmarks | Documentation |
 |:-----------:|:--------:|:-----:|:-------------:|:----------:|:-------------:|
-| master      | [![Build](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml?query=branch%3Amaster) | [![Tests](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml/badge.svg?branch=master)](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml?query=branch%3Amaster) | [![codecov](https://codecov.io/gh/cbritopacheco/rodin/branch/master/graph/badge.svg?token=gwEZOnQje1)](https://app.codecov.io/gh/cbritopacheco/rodin/tree/master)  | [![Benchmarks](https://github.com/cbritopacheco/rodin/actions/workflows/Benchmarks.yml/badge.svg?branch=master)](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/benchmarks/) | [![Documentation](https://github.com/cbritopacheco/rodin/actions/workflows/Documentation.yml/badge.svg?branch=master)](https://cbritopacheco.github.io/rodin/docs/refs/heads/master) |
-| develop     | [![Build](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml?query=branch%3Adevelop) | [![Tests](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml/badge.svg?branch=develop)](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml?query=branch%3Adevelop) | [![codecov](https://codecov.io/gh/cbritopacheco/rodin/branch/develop/graph/badge.svg?token=gwEZOnQje1)](https://app.codecov.io/gh/cbritopacheco/rodin/tree/develop) | [![Benchmarks](https://github.com/cbritopacheco/rodin/actions/workflows/Benchmarks.yml/badge.svg?branch=develop)](https://cbritopacheco.github.io/rodin/docs/refs/heads/develop/benchmarks/) | [![Documentation](https://github.com/cbritopacheco/rodin/actions/workflows/Documentation.yml/badge.svg?branch=develop)](https://cbritopacheco.github.io/rodin/docs/refs/heads/develop) |
+| master      | [![Build](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fmaster%2Fbuild.json&style=flat&label=Build&labelColor=555&cacheSeconds=60)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml?query=branch%3Amaster) | [![Tests](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fmaster%2Ftests.json&style=flat&label=Tests&labelColor=555&cacheSeconds=60)](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml?query=branch%3Amaster) | [![codecov](https://codecov.io/gh/cbritopacheco/rodin/branch/master/graph/badge.svg?token=gwEZOnQje1)](https://app.codecov.io/gh/cbritopacheco/rodin/tree/master)  | [![Benchmarks](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fmaster%2Fbenchmarks.json&style=flat&label=Benchmarks&labelColor=555&cacheSeconds=60)](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/benchmarks/) | [![Documentation](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fmaster%2Fdocumentation.json&style=flat&label=Documentation&labelColor=555&cacheSeconds=60)](https://cbritopacheco.github.io/rodin/docs/refs/heads/master) |
+| develop     | [![Build](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fdevelop%2Fbuild.json&style=flat&label=Build&labelColor=555&cacheSeconds=60)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml?query=branch%3Adevelop) | [![Tests](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fdevelop%2Ftests.json&style=flat&label=Tests&labelColor=555&cacheSeconds=60)](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml?query=branch%3Adevelop) | [![codecov](https://codecov.io/gh/cbritopacheco/rodin/branch/develop/graph/badge.svg?token=gwEZOnQje1)](https://app.codecov.io/gh/cbritopacheco/rodin/tree/develop) | [![Benchmarks](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fdevelop%2Fbenchmarks.json&style=flat&label=Benchmarks&labelColor=555&cacheSeconds=60)](https://cbritopacheco.github.io/rodin/docs/refs/heads/develop/benchmarks/) | [![Documentation](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcbritopacheco%2Frodin%2Fci-badges%2Fdevelop%2Fdocumentation.json&style=flat&label=Documentation&labelColor=555&cacheSeconds=60)](https://cbritopacheco.github.io/rodin/docs/refs/heads/develop) |
 
 ## Table of Contents
 
@@ -78,7 +93,7 @@ make -j4
 sudo make install
 ```
 
-If you only need the library and headers, skip resource hydration with
+For a library-and-headers installation, configure resource handling with
 `-DRODIN_INSTALL_RESOURCES=OFF`.
 
 All files under `resources/` are tracked through Git LFS, including test and
@@ -87,7 +102,7 @@ reading a file, run `git lfs pull` from the repository root and retry.
 
 ### User-Local Installation
 
-For installation without sudo (recommended for development):
+A user-local installation avoids sudo and is recommended for development.
 
 ```bash
 # Configure with local prefix
@@ -102,9 +117,10 @@ export CMAKE_PREFIX_PATH=$HOME/.local:$CMAKE_PREFIX_PATH
 
 ### Verifying Installation
 
-After installation, you can verify it works by creating a simple test project:
+The following test project checks the installed headers, library and CMake
+  package.
 
-**CMakeLists.txt:**
+**CMakeLists.txt**
 ```cmake
 cmake_minimum_required(VERSION 3.16)
 project(MyRodinProject CXX)
@@ -115,7 +131,7 @@ add_executable(my_app main.cpp)
 target_link_libraries(my_app PRIVATE Rodin::Geometry Rodin::Variational Rodin::Solver)
 ```
 
-**main.cpp:**
+**main.cpp**
 ```cpp
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
@@ -125,15 +141,16 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-int main() {
+int main()
+{
   Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {8, 8});
-  P1 Vh(mesh);
+  P1 vh(mesh);
   std::cout << "Rodin installation verified!" << std::endl;
   return 0;
 }
 ```
 
-Then build and run:
+Build and run the application with these commands.
 ```bash
 mkdir build && cd build
 cmake ..
@@ -143,13 +160,13 @@ make
 
 ### Platform-Specific Notes
 
-**Ubuntu/Debian:**
+**Ubuntu/Debian**
 ```bash
 sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
 sudo apt-get install git-lfs  # needed for resources
 ```
 
-**macOS (Homebrew):**
+**macOS (Homebrew)**
 ```bash
 brew install cmake boost eigen libomp
 brew install git-lfs  # needed for resources
@@ -166,7 +183,7 @@ For detailed installation instructions, advanced configuration options, and trou
 ## Building the project
 
 ```
-git clone --recursive https://github.com/carlos-brito-pacheco/rodin
+git clone --recursive https://github.com/cbritopacheco/rodin
 cd rodin
 mkdir build && cd build
 cmake ..
@@ -180,7 +197,7 @@ make -j4
 Rodin comes with a native C++20 form language for assembling
 and solving variational formulations.
 
-For example, given a domain $\Omega$ with boundary $\Gamma := \partial \Omega$, the Poisson problem:
+Consider a domain $\Omega$ with boundary $\Gamma := \partial \Omega$. The Poisson problem takes the following form.
 ```math
 \left\{
 \begin{aligned}
@@ -189,12 +206,12 @@ For example, given a domain $\Omega$ with boundary $\Gamma := \partial \Omega$, 
 \end{aligned}
 \right.
 ```
-has the associated weak formulation:
+The corresponding weak formulation seeks a function satisfying the following identity.
 ```math
 \text{Find} \ u \in H^1(\Omega) \quad \text{s.t.} \quad \forall v \in H^1_0(\Omega), \quad \int_\Omega \nabla u \cdot \nabla v \ dx = \int_\Omega f v \ dx, \quad \text{with } \quad H^1_0(\Omega) := \{ v \in H^1(\Omega) \mid v = 0 \text{ on } \Gamma \}
 ```
 
-which can be quickly implemented via the following lines of code:
+The following program implements this weak formulation.
 
 ```c++
 #include <Rodin/Types.h>
@@ -202,6 +219,7 @@ which can be quickly implemented via the following lines of code:
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
+#include <Rodin/IO/XDMF.h>
 
 using namespace Rodin;
 using namespace Rodin::Solver;
@@ -212,6 +230,7 @@ int main(int, char**)
 {
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.scale(1.0 / 15.0);
   mesh.getConnectivity().compute(1, 2); // Compute boundary
 
   P1 vh(mesh);
@@ -228,9 +247,10 @@ int main(int, char**)
           + DirichletBC(u, Zero());
   CG(poisson).solve();
 
-  // Save solution
-  u.getSolution().save("Poisson.gf");
-  mesh.save("Poisson.mesh");
+  // Export the solution for visualization.
+  IO::XDMF xdmf("Poisson");
+  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+  xdmf.write().flush();
 
   return 0;
 }
@@ -239,7 +259,7 @@ int main(int, char**)
 <table>
   <tr>
     <td align="center">
-      <img src="doc/README/Poisson.png" alt="Poisson.png" style="width:50%;">
+      <img src="doc/README/Poisson.png" alt="Poisson solution on the unit square" width="360" style="max-width:100%;height:auto;">
     </td>
   </tr>
   <tr>
@@ -253,7 +273,7 @@ int main(int, char**)
 
 #### Cell, Face, Vertex Iterators
 
-The API offers full support for iteration over _all_ polytopes of the mesh of some given dimension:
+The API offers full support for iteration over _all_ polytopes of the mesh of some given dimension.
 
 ```c++
 Mesh mesh;
@@ -285,7 +305,7 @@ for (auto it = mesh.getPolytope(1); it; ++it)
 #### Full connectivity computation
 
 Rodin is able to compute any connectivity information on the mesh. For example, the following computes
-the adjacency information from faces to cells:
+the adjacency information from faces to cells.
 
 ```c++
 Mesh mesh;
@@ -297,7 +317,7 @@ mesh.getConnectivity().compute(1, 2);
 In general, this means that given a face, we are able to obtain the incident (neighboring) cells.
 
 However, one can also compute any connectivity information on different dimensions.
-For example, for a mesh $\mathcal{T}_h \subset \mathbb{R}^d$, $d = 2$ of topological dimension $d$, we have:
+For example, for a mesh $\mathcal{T}_h \subset \mathbb{R}^d$, $d = 2$ of topological dimension $d$, the following relations hold.
 
 ```c++
 // Compute connectivity between vertices and faces
@@ -325,7 +345,7 @@ mesh.getConnectivity().compute(2, 1);
 
 ### Additional Features
 
-Rodin provides many powerful features for finite element analysis:
+Rodin provides many powerful features for finite element analysis.
 
 **Solver Integration:**
 - Direct integration with Eigen for linear algebra operations
@@ -347,7 +367,7 @@ Rodin provides many powerful features for finite element analysis:
 - Multiple quadrature rules for integration
 - Grundmann-Moeller quadrature
 - Gauss-Legendre quadrature
-- See the [complete list of quadrature formulas](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/group___rodin_quadrature.html)
+- See the [complete list of quadrature formulas](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/namespace_rodin_1_1_q_f.html)
 
 **Advanced Mesh Operations:**
 - SubMesh extraction for domain decomposition
@@ -359,14 +379,14 @@ For comprehensive documentation on all features, see the [Documentation](#docume
 
 ## Documentation
 
-Rodin provides comprehensive documentation covering all aspects of the library:
+Rodin provides comprehensive documentation covering all aspects of the library.
 
 ### User Guides
 
 **Getting Started:**
 - Installation and setup instructions
-- Your first Rodin program
-- Solving your first PDE (Poisson equation)
+- A first Rodin program
+- Solving a first PDE (Poisson equation)
 - Understanding core concepts
 
 **Mesh Guide:**
@@ -396,7 +416,7 @@ Complete API documentation is available for all classes, functions, and modules:
 
 ### Building Documentation Locally
 
-To build the documentation yourself:
+Build the documentation with the following commands.
 
 ```bash
 # Clone repository with submodules
@@ -460,26 +480,29 @@ manager.
 | RODIN_SILENCE_WARNINGS | Silence warnings outputted by Rodin               |
 | RODIN_BUILD_PY         | Build Python bindings                             |
 
+## Benchmark machine
+
+Published [benchmark histories](https://cbritopacheco.github.io/rodin/docs/refs/heads/develop/benchmarks/)
+run on standard GitHub-hosted `ubuntu-24.04` virtual machines for this public
+repository, using GCC 14 and Release builds.
+
+| System | CPU | Memory | SSD |
+| --- | --- | --- | --- |
+| Ubuntu 24.04, x64 | 4 vCPUs | 16 GB | 14 GB |
+
+Each job runs one benchmark executable at a time. OpenMP, OpenBLAS and MKL use
+one thread, and MPI ranks share the runner's resources. The selected benchmark
+configuration records the build and rank count. CPU models and host load can
+vary between virtual machines, so small timing differences require repeated
+measurements. See the [GitHub runner specifications](https://docs.github.com/en/actions/reference/runners/github-hosted-runners#standard-github-hosted-runners-for-public-repositories)
+and the [testing guide](tests/README.md) for resource budgets.
+
 ## Development
 
-Rodin includes a GitHub Copilot custom agent called **Rodin** that assists with building and testing code changes.
-
-### Using the Rodin Agent
-
-The Rodin agent can help you:
-- Compile the Rodin codebase
-- Run unit tests, manufactured tests, and benchmarks
-- Troubleshoot build and test failures
-- Understand the build system
-
-To use the Rodin agent in GitHub Copilot Chat:
-```
-@Rodin build and test my changes
-@Rodin compile the code and run unit tests
-@Rodin help me fix this build error
-```
-
-For more information, see [.github/agents/README.md](.github/agents/README.md).
+See the [testing guide](tests/README.md) for local validation and runner resource
+budgets, and the [documentation guide](doc/README.md) to build the site.
+The [brand guide](brand/README.md) provides logos, editable artwork, fonts and
+usage guidelines.
 
 ## Gallery
 
@@ -487,29 +510,41 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
   <em>Click on any preview to open the full video or image.</em>
 </p>
 
+### Computational fluid dynamics
+
+<table>
+  <tr>
+    <td align="center" valign="bottom" width="33%">
+      <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/CFD/AtriumP1P1/AtriumP1P1.mp4">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/CFD/AtriumP1P1/Preview.png" alt="AtriumP1P1 CFD simulation" width="300">
+      </a>
+      <br />
+      CFD simulation in an atrium
+    </td>
+  </tr>
+</table>
+
 ### Shape optimization
 
 <table>
   <tr>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever2D/LevelSetCantilever2D.webm">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever2D/Preview.png?v=transparent" alt="Shape optimization of a cantilever in 2D" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever2D/Preview.png?v=transparent" alt="Shape optimization of a cantilever in 2D" width="300">
       </a>
       <br />
       Minimization of linear-elastic compliance in 2D
     </td>
-    <td align="center" valign="bottom" width="50%">
+    <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/LevelSetCantilever3D.webm?v=4x">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/Preview.png?v=transparent" alt="Shape optimization of a cantilever in 3D" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/Preview.png?v=transparent" alt="Shape optimization of a cantilever in 3D" width="300">
       </a>
       <br />
      Minimization of linear-elastic compliance in 3D
     </td>
-  </tr>
-  <tr>
-    <td align="center" valign="bottom" width="50%">
+    <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024_Preview.png" alt="Shape optimization of a cantilever in 3D" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024_Preview.png?v=stacked" alt="Translational-rotational coupling optimization in Stokes flow" width="300">
       </a>
       <br />
       Translational-rotational coupling optimization in Stokes flow (by <a href="https://kazusa000.github.io/">J. Wang</a>)
@@ -523,24 +558,10 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
   <tr>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/TemperatureMinimization.webm">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/Preview.png?v=optimized" alt="Minimization of temperature over a 2D plaque" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/Preview.png?v=optimized" alt="Minimization of temperature over a 2D plaque" width="300">
       </a>
       <br />
       Minimization of temperature over a 2D plaque
-    </td>
-        <td align="center" valign="bottom" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
-      </a>
-      <br />
-      Placeholder
-    </td>
-        <td align="center" valign="bottom" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
-      </a>
-      <br />
-      Placeholder
     </td>
   </tr>
 </table>
@@ -551,47 +572,45 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
   <tr>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI_Preview.png?v=dematted" alt="Coronary FSI" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI_Preview.png?v=dematted" alt="Coronary FSI" width="300">
       </a>
       <br />
       Fluid-structure interaction simulation of a coronary artery (by <a href="https://www.researchgate.net/profile/Oscar-Ruz-2">O. Ruz</a>)
     </td>
     <td align="center" valign="bottom" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD_Preview.png?v=3" alt="Blood velocity in an atrium CFD simulation" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD_Preview.png?v=3" alt="Blood velocity in an atrium CFD simulation" width="300">
       </a>
       <br />
       CFD simulation of blood flow in an atrium (by <a href="https://cfdusach.cl/">CFD Lab at USACH</a>)
     </td>
-        <td align="center" valign="bottom" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
-      </a>
-      <br />
-      Placeholder
-    </td>
-  </tr>
+  <td align="center" valign="bottom" width="33%">
+    <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/LeftCoronaryCFD/LeftCoronaryCFD.mp4">
+      <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/LeftCoronaryCFD/Preview.png?v=selected" alt="CFD simulation of a left coronary artery" width="300">
+    </a>
+    <br />
+    CFD simulation of a left coronary artery (by <a href="https://www.researchgate.net/profile/Oscar-Ruz-2">O. Ruz</a>)
+  </td>
+</tr>
 </table>
 
 ## License
 
 Rodin is distributed under the [Boost Software License 1.0](LICENSE), a permissive open-source license.
 
-The choice of this license is intentional. Rodin is intended to be useful both as a research code and as a general-purpose finite element framework. The Boost Software License allows Rodin to be freely used, modified, and redistributed, including in academic, industrial, commercial, and proprietary projects.
+The license permits use, modification and redistribution in academic,
+industrial, commercial and proprietary projects. Software using or linking
+against Rodin can retain its own license and source-distribution policy.
 
-**Using Rodin does not mean that your own project must be licensed under the Boost Software License.** In particular, software that uses or links against Rodin may be distributed under a different open-source license or under a proprietary license. The Boost Software License is not a copyleft license and does not require you to release the source code of software built using Rodin.
-
-If Rodin source code, or modified portions of it, are redistributed in source form, the original copyright notices and the Boost Software License notice must be preserved as required by the license. This requirement applies to the Rodin code being redistributed; it does not require the rest of your project to adopt the Boost Software License.
-
-The aim of this choice is to place as few restrictions as possible on how Rodin may be used, while allowing it to be incorporated into research software, other open-source projects, and proprietary applications.
+Redistribution of Rodin source code or modified portions must preserve the
+original copyright notices and the complete Boost Software License notice.
 
 ### Acknowledgement
 
-The license does not require users to acknowledge Rodin in publications or projects. Nevertheless, if Rodin contributes to your research, software, or other work, an acknowledgement is greatly appreciated.
+Acknowledgement is optional and appreciated. Publications and software using
+Rodin can cite the software reference and link to the
+[project repository](https://github.com/cbritopacheco/rodin).
 
-Please consider mentioning that your project uses **Rodin** and, where appropriate, providing a link to the project repository. For academic work, citing the corresponding Rodin publication (coming soon!) or software reference, is also appreciated.
-
-Such acknowledgements are not a licensing requirement, but they help make the use of Rodin visible and support the continued development of the project.
 
 ## Support Rodin
 

@@ -8,7 +8,7 @@
  * @file Constitutive/Hooke.h
  * @brief Hooke's law for linear elasticity.
  *
- * Provides the isotropic elasticity tensor @f$ \mathbb{C} @f$ such that:
+ * Provides the isotropic elasticity tensor @f$ \mathbb{C} @f$ such that
  * @f[
  *   \boldsymbol{\sigma} = \mathbb{C} : \boldsymbol{\varepsilon}
  *                       = \lambda (\operatorname{tr}\boldsymbol{\varepsilon})\mathbf{I}
@@ -29,14 +29,14 @@ namespace Rodin::Solid
   /**
    * @brief Isotropic Hooke's law for linear elasticity.
    *
-   * Given the Lamé parameters @f$ \lambda @f$ and @f$ \mu @f$, computes:
+   * Given the Lamé parameters @f$ \lambda @f$ and @f$ \mu @f$, computes
    * @f[
    *   \boldsymbol{\sigma} = \lambda (\operatorname{tr}\boldsymbol{\varepsilon})\mathbf{I}
    *                       + 2\mu \boldsymbol{\varepsilon}
    * @f]
    *
    * # Material parameter conversions
-   * From Young's modulus @f$ E @f$ and Poisson's ratio @f$ \nu @f$:
+   * From Young's modulus @f$ E @f$ and Poisson's ratio @f$ \nu @f$.
    * @f[
    *   \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)}, \quad
    *   \mu = \frac{E}{2(1+\nu)}

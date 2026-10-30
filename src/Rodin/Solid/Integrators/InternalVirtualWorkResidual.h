@@ -10,7 +10,7 @@
  * formulations (pure displacement and mixed displacement-pressure), written
  * in terms of the first Piola-Kirchhoff stress.
  *
- * Pure displacement:
+ * The pure-displacement formulation has the following residual.
  * @f[
  *   \delta W^{\text{int}}(\mathbf{v}) = \int_{\Omega_0} \mathbf{P}(\mathbf{u}) : \nabla_0 \mathbf{v} \, dX
  * @f]
@@ -25,6 +25,7 @@
 #ifndef RODIN_SOLID_INTEGRATORS_INTERNALVIRTUALWORKRESIDUAL_H
 #define RODIN_SOLID_INTEGRATORS_INTERNALVIRTUALWORKRESIDUAL_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <algorithm>
 #include <cassert>
 #include <functional>
@@ -183,16 +184,24 @@ namespace Rodin::Solid
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
         const auto& testFES = m_testfes.get();
-        const auto& stateFES = m_statefes.get();
         const size_t vdim = testFES.getVectorDimension();
 
         const auto& testFE = testFES.getFiniteElement(d, idx);
-        const auto& stateFE = stateFES.getFiniteElement(d, idx);
         const size_t testDofs = testFE.getCount();
 
-        const size_t effectiveOrder = (m_quadOrder > 0)
-          ? m_quadOrder
-          : 2 * std::max(testFE.getOrder(), stateFE.getOrder());
+        size_t effectiveOrder = m_quadOrder;
+        if (effectiveOrder == 0)
+        {
+          const auto testOrder = m_test.get().getOrder(polytope);
+          const auto stateOrder = m_displacement.get().getOrder(polytope);
+          if (!testOrder || !stateOrder)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "No automatic constitutive quadrature order is established. "
+              << "Specify it with setQuadratureOrder()." << Alert::Raise;
+          }
+          effectiveOrder = 2 * std::max({*testOrder, *stateOrder});
+        }
         const auto& qf =
           QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
@@ -471,18 +480,25 @@ namespace Rodin::Solid
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
         const auto& testFES = m_testfes.get();
-        const auto& stateFES = m_statefes.get();
-        const auto& pressFES = m_pressfes.get();
         const size_t vdim = testFES.getVectorDimension();
 
         const auto& testFE = testFES.getFiniteElement(d, idx);
-        const auto& stateFE = stateFES.getFiniteElement(d, idx);
-        const auto& pressFE = pressFES.getFiniteElement(d, idx);
         const size_t testDofs = testFE.getCount();
 
-        const size_t effectiveOrder = (m_quadOrder > 0)
-          ? m_quadOrder
-          : 2 * std::max({testFE.getOrder(), stateFE.getOrder(), pressFE.getOrder()});
+        size_t effectiveOrder = m_quadOrder;
+        if (effectiveOrder == 0)
+        {
+          const auto testOrder = m_test.get().getOrder(polytope);
+          const auto stateOrder = m_displacement.get().getOrder(polytope);
+          const auto pressureOrder = m_pressure.get().getOrder(polytope);
+          if (!testOrder || !stateOrder || !pressureOrder)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "No automatic constitutive quadrature order is established. "
+              << "Specify it with setQuadratureOrder()." << Alert::Raise;
+          }
+          effectiveOrder = 2 * std::max({*testOrder, *stateOrder, *pressureOrder});
+        }
         const auto& qf =
           QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
@@ -723,15 +739,23 @@ namespace Rodin::Solid
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
         const auto& testFES = m_testfes.get();
-        const auto& stateFES = m_statefes.get();
 
         const auto& testFE = testFES.getFiniteElement(d, idx);
-        const auto& stateFE = stateFES.getFiniteElement(d, idx);
         const size_t testDofs = testFE.getCount();
 
-        const size_t effectiveOrder = (m_quadOrder > 0)
-          ? m_quadOrder
-          : 2 * std::max(testFE.getOrder(), stateFE.getOrder());
+        size_t effectiveOrder = m_quadOrder;
+        if (effectiveOrder == 0)
+        {
+          const auto testOrder = m_test.get().getOrder(polytope);
+          const auto stateOrder = m_displacement.get().getOrder(polytope);
+          if (!testOrder || !stateOrder)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "No automatic constitutive quadrature order is established. "
+              << "Specify it with setQuadratureOrder()." << Alert::Raise;
+          }
+          effectiveOrder = 2 * std::max({*testOrder, *stateOrder});
+        }
         const auto& qf =
           QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);

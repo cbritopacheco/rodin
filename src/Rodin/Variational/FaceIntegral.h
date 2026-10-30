@@ -14,7 +14,7 @@
  * solutions are discontinuous across element boundaries.
  *
  * # Mathematical Foundation
- * Face integrals compute:
+ * Face integrals compute the following quantity.
  * @f[
  *   \int_{\mathcal{F}_h} f(x) \, ds
  * @f]
@@ -74,7 +74,7 @@ namespace Rodin::Variational
    * @f[
    *   A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
    * @f]
-   * this class represents the integral of their dot product:
+   * this class represents the following integral of their dot product.
    * @f[
    *   \int_{\mathcal{F}_h} A(u) : B(v) \ d\sigma(x) \ .
    * @f]
@@ -105,7 +105,7 @@ namespace Rodin::Variational
        * @param[in] lhs Trial operator @f$ A(u) @f$
        * @param[in] rhs Test operator @f$ B(v) @f$
        *
-       * Represents the face integral over all mesh faces:
+       * Represents the face integral over all mesh faces.
        * @f[
        *   \int_{\mathcal{F}_h} A(u) : B(v) \, d\sigma
        * @f]

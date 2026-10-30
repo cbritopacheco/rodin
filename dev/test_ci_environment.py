@@ -114,6 +114,21 @@ class EnvironmentTest(unittest.TestCase):
                 self.assertIn('g++-14', requested)
                 self.assertIn('lcov', requested)
 
+    def test_shared_environments_resolve_zlib_instead_of_reusing_image_version(self):
+        for action, cases in [
+                ('test-environment', [dict(MODE=mode, COMPILER='gcc-14') for mode in
+                 ['native', 'mpi', 'petsc', 'complex', 'ranges_real', 'ranges_complex', 'optional', 'default', 'baseline']]),
+                ('benchmark-environment', [dict(CONFIGURATION=mode) for mode in ['local', 'distributed']])]:
+            document = yaml.safe_load((ROOT / '.github/actions' / action / 'action.yml').read_text())
+            command = next(step['run'] for step in document['runs']['steps'] if step.get('id') == 'packages')
+            for case in cases:
+                with self.subTest(action=action, case=case), tempfile.TemporaryDirectory() as folder:
+                    output = Path(folder) / 'output'
+                    subprocess.run(['bash', '-e', '-c', command], check=True,
+                                   env=dict(os.environ, **case, GITHUB_OUTPUT=str(output)))
+                    requested = environment.packages(output.read_text().strip().split('=', 1)[1])
+                    self.assertIn('zlib1g', requested)
+
     def test_shared_linux_environments_do_not_download_another_compiler_action(self):
         for name in ['test-environment', 'benchmark-environment']:
             text = (ROOT / '.github/actions' / name / 'action.yml').read_text()
@@ -218,13 +233,132 @@ class EnvironmentTest(unittest.TestCase):
                 self.assertEqual((destination / 'sources.list.d/vendor.list').read_text(), vendor)
             self.assertEqual((parts / 'ubuntu.sources').read_text(), original)
 
+    def test_dependency_closure_excludes_virtual_edges_and_preserves_exact_requests(self):
+        output = ('libhdf5-dev\n  Depends: libhdf5-103-1t64\nlibhdf5-103-1t64\n'
+                  '  Depends: liblzma5\nliblzma5\nlibudev1:amd64\nzlib1g\n'
+                  '<mpi-provider>\n  |Depends: unused-provider\n')
+        options = ['-o', 'Dir::Etc::sourcelist=signed.list']
+        with patch.object(environment.subprocess, 'check_output', return_value=output) as query:
+            self.assertEqual(environment.installed_dependencies(
+                ['libhdf5-dev', 'zlib1g=1.3'], options),
+                ['libhdf5-103-1t64', 'liblzma5', 'libudev1:amd64'])
+        command = query.call_args.args[0]
+        self.assertEqual(command[:4], ['apt-cache', *options, 'depends'])
+        self.assertIn('--installed', command)
+        self.assertIn('--recurse', command)
+        self.assertIn('--important', command)
+        self.assertEqual(query.call_args.kwargs['timeout'], environment.INDEX_TIMEOUT)
+
+    def test_satisfied_preinstalled_runtime_dependencies_are_explicitly_upgraded(self):
+        dependencies = ['liblzma5', 'libudev1', 'zlib1g']
+        versions = dict(lcov='2.0-1', liblzma5='5.6-1', libudev1='255-2', zlib1g='1.3-2')
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(environment, 'sources', return_value=[]), \
+                patch.object(environment, 'installed_dependencies', return_value=dependencies), \
+                patch.object(environment, 'candidates', side_effect=[
+                    {'lcov': '2.0-1'}, {k: versions[k] for k in dependencies}]) as candidates, \
+                patch.object(environment.subprocess, 'check_output', return_value='amd64\n'), \
+                patch.object(environment, 'apt', side_effect=[None, '', '']) as apt:
+            root = Path(tmp)
+            plan = environment.prepare(['lcov'], root / 'cache', root / 'state')
+        self.assertEqual([c.args[0] for c in candidates.call_args_list], [['lcov'], dependencies])
+        self.assertEqual(plan['versions'], versions)
+        simulation = apt.call_args_list[-1].args[0]
+        for name, version in versions.items():
+            self.assertIn(name + '=' + version, simulation)
+        self.assertIn('--no-remove', simulation)
+
+    def test_new_mpi_and_hwloc_packages_expose_preinstalled_udev_on_both_images(self):
+        # Mirrors apt-cache --installed: an uninstalled target is not traversed,
+        # but an explicitly supplied root is processed even before installation.
+        plans = []
+        for installed_udev in ['255-1', '255-2']:
+            with self.subTest(installed_udev=installed_udev), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                queries = []
+                simulations = []
+                def query(command, **kwargs):
+                    if command[:2] == ['dpkg', '--print-architecture']:
+                        return 'amd64\n'
+                    if 'depends' in command:
+                        queries.append(command)
+                        output = 'mpi-default-bin\n'
+                        if 'libhwloc15=2.10-1' in command:
+                            output += 'libhwloc15\n  Depends: libudev1\nlibudev1\n'
+                        return output
+                    self.assertIn('policy', command)
+                    versions = {'mpi-default-bin': '1.15-1', 'libudev1': '255-2'}
+                    names = command[command.index('policy') + 1:]
+                    return ''.join(name + ':\n  Installed: ' +
+                                   (installed_udev if name == 'libudev1' else '(none)') +
+                                   '\n  Candidate: ' + versions[name] + '\n' for name in names)
+                def apt(command, *args, **kwargs):
+                    if command == ['update']:
+                        return None
+                    self.assertIn('--no-remove', command)
+                    simulations.append(command)
+                    output = ('Inst mpi-default-bin (1.15-1 Ubuntu [amd64])\n'
+                              'Inst libopenmpi3t64 (4.1-1 Ubuntu [amd64])\n'
+                              'Inst libhwloc15 (2.10-1 Ubuntu [amd64])\n')
+                    if 'libudev1=255-2' in command and installed_udev != '255-2':
+                        output += 'Inst libudev1 [255-1] (255-2 Ubuntu [amd64])\n'
+                    return output
+                with patch.object(environment, 'sources', return_value=[]), \
+                        patch.object(environment.subprocess, 'check_output', side_effect=query), \
+                        patch.object(environment, 'apt', side_effect=apt):
+                    plan = environment.prepare(['mpi-default-bin'], root / 'cache', root / 'state')
+                plans.append(plan['versions'])
+                self.assertEqual(len(simulations), 2)
+                self.assertNotIn('libudev1=255-2', simulations[0])
+                self.assertIn('libudev1=255-2', simulations[1])
+                self.assertTrue(any('libhwloc15=2.10-1' in command for command in queries))
+                self.assertEqual(plan['versions']['libudev1'], '255-2')
+        self.assertEqual(plans[0], plans[1])
+
+    def test_dependency_expansion_reaches_a_fixed_point_without_losing_prior_pins(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(environment, 'sources', return_value=[]), \
+                patch.object(environment, 'installed_dependencies', side_effect=[['runtime'], ['runtime', 'base'], []]), \
+                patch.object(environment, 'candidates', side_effect=[
+                    {'app': '1'}, {'runtime': '2'}, {'base': '3'}]), \
+                patch.object(environment.subprocess, 'check_output', return_value='amd64\n'), \
+                patch.object(environment, 'apt', side_effect=[None, '', '', '']) as apt:
+            root = Path(tmp)
+            plan = environment.prepare(['app'], root / 'cache', root / 'state')
+        self.assertEqual(plan['versions'], {'app': '1', 'runtime': '2', 'base': '3'})
+        self.assertTrue(set(apt.call_args_list[1].args[0]) <= set(apt.call_args_list[2].args[0]))
+        self.assertTrue(set(apt.call_args_list[2].args[0]) <= set(apt.call_args_list[3].args[0]))
+
+    def test_conflicting_solver_versions_fail_before_plan_is_saved(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(environment, 'sources', return_value=[]), \
+                patch.object(environment, 'candidates', return_value={'app': '1'}), \
+                patch.object(environment, 'apt', side_effect=[None, 'Inst app (2 Ubuntu [amd64])\n']):
+            root = Path(tmp)
+            with self.assertRaisesRegex(ValueError, 'Conflicting resolved version'):
+                environment.prepare(['app=1'], root / 'cache', root / 'state')
+            self.assertFalse((root / 'state/plan.json').exists())
+
+    def test_all_dedicated_consumers_use_the_shared_producer_environment(self):
+        jobs = yaml.safe_load((ROOT / '.github/ci/targeted-lanes.yml').read_text())['jobs']
+        for name, job in jobs.items():
+            with self.subTest(job=name):
+                restore = [s for s in job['steps'] if s.get('uses') == './.github/actions/test-build']
+                self.assertEqual(len(restore), 1)
+                self.assertEqual(restore[0]['with']['environment'], 'true')
+                self.assertFalse(any(s.get('uses') in [
+                    'aminya/setup-cpp@v1', './.github/actions/apt-dependencies'] for s in job['steps']))
+
     def test_prepare_pins_transitive_versions_and_cache_key_changes_with_plan(self):
         with tempfile.TemporaryDirectory() as tmp, \
                 patch.object(environment, 'sources', return_value=[]), \
+                patch.object(environment, 'installed_dependencies', return_value=[]), \
                 patch.object(environment, 'candidates', side_effect=[{'lcov': '2.0-1'}, {'lcov': '2.0-1'}]), \
                 patch.object(environment.subprocess, 'check_output', return_value='amd64\n'), \
                 patch.object(environment, 'apt', side_effect=[None, 'Inst libdep (3.1-2 Ubuntu [amd64])\n',
-                                                             None, 'Inst libdep (3.1-3 Ubuntu [amd64])\n']):
+                                                             'Inst libdep (3.1-2 Ubuntu [amd64])\n',
+                                                             None, 'Inst libdep (3.1-3 Ubuntu [amd64])\n',
+                                                             'Inst libdep (3.1-3 Ubuntu [amd64])\n']):
             root = Path(tmp); output = root / 'output'
             with patch.dict(os.environ, GITHUB_OUTPUT=str(output), ImageOS='ubuntu24', ImageVersion='same'):
                 plan = environment.prepare(['lcov'], root / 'cache', root / 'state')
@@ -240,6 +374,7 @@ class EnvironmentTest(unittest.TestCase):
         fallback = ['-o', 'Dir::Etc::sourcelist=fallback.list']
         with tempfile.TemporaryDirectory() as tmp, \
                 patch.object(environment, 'sources', side_effect=[original, fallback]), \
+                patch.object(environment, 'installed_dependencies', return_value=[]), \
                 patch.object(environment, 'candidates', return_value={'lcov': '2.0-1'}) as candidates, \
                 patch.object(environment.subprocess, 'check_output', return_value='amd64\n'), \
                 patch.object(environment, 'apt', side_effect=[subprocess.CalledProcessError(100, 'apt'), None, '']) as apt:
@@ -253,9 +388,29 @@ class EnvironmentTest(unittest.TestCase):
         options = ['-o', 'Dir::Etc::sourcelist=fallback.list',
                    '-o', 'Dir::Etc::sourceparts=fallback.parts']
         with patch.object(environment.subprocess, 'check_output',
-                          return_value='  Candidate: 2.0-1\n') as policy:
+                          return_value='lcov:\n  Installed: (none)\n  Candidate: 2.0-1\n') as policy:
             self.assertEqual(environment.candidates(['lcov'], options), {'lcov': '2.0-1'})
         self.assertEqual(policy.call_args.args[0], ['apt-cache', *options, 'policy', 'lcov'])
+
+    def test_candidates_batch_the_closure_and_keep_explicit_versions(self):
+        policy = ('liblzma5:\n  Installed: 5.4-1\n  Candidate: 5.6-1\n'
+                  'libudev1:amd64:\n  Installed: 255-1\n  Candidate: 255-2\n')
+        with patch.object(environment.subprocess, 'check_output', return_value=policy) as query:
+            self.assertEqual(environment.candidates(
+                ['zlib1g=1.3-2', 'libudev1:amd64', 'liblzma5'], []),
+                {'zlib1g': '1.3-2', 'libudev1:amd64': '255-2', 'liblzma5': '5.6-1'})
+        query.assert_called_once()
+        self.assertEqual(query.call_args.args[0],
+                         ['apt-cache', 'policy', 'liblzma5', 'libudev1:amd64'])
+        # APT omits the native architecture suffix in policy headings.
+        with patch.object(environment.subprocess, 'check_output',
+                          return_value='libudev1:\n  Candidate: 255-2\n'):
+            self.assertEqual(environment.candidates(['libudev1:amd64'], []),
+                             {'libudev1:amd64': '255-2'})
+        for policy in ['liblzma5:\n  Candidate: (none)\n', '']:
+            with patch.object(environment.subprocess, 'check_output', return_value=policy):
+                with self.assertRaisesRegex(ValueError, 'No APT candidate'):
+                    environment.candidates(['liblzma5'], [])
 
     def test_download_fallback_keeps_the_same_exact_versions_and_installs_offline(self):
         with tempfile.TemporaryDirectory() as tmp, \

@@ -107,7 +107,7 @@ namespace Rodin::Assembly
    *
    * Unlike the generic bilinear form, a named form carries its own local
    * kernel, so the assembly is handed the form itself rather than a
-   * BilinearFormAssemblyInput: it needs the kernel, the region and the
+   * BilinearFormAssemblyInput. Assembly needs the kernel, the region and the
    * attributes the form integrates over.
    *
    * @tparam OperatorType Matrix type for the assembled operator.

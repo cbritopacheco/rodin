@@ -15,7 +15,7 @@
  * integrator for P1 vector finite element spaces.
  *
  * # Bilinear Form
- * The integrator assembles the elasticity bilinear form:
+ * The integrator assembles the elasticity bilinear form.
  * @f[
  *   a(\mathbf{u}, \mathbf{v}) = \int_\Omega 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v}) + \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v}) \, dx
  * @f]
@@ -38,6 +38,7 @@
  * @see <a href="class_rodin_1_1_variational_1_1_p1.html">P1</a>
  */
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Solid/Linear/LinearElasticityIntegral.h"
 #include "Rodin/Variational/P1/ForwardDecls.h"
 #include "Rodin/Variational/P1/P1.h"
@@ -55,7 +56,7 @@ namespace Rodin::Variational
    * Jacobians of P1 basis functions.
    *
    * # Local Stiffness Matrix
-   * For element @f$ K @f$, computes the local matrix entries:
+   * For element @f$ K @f$, computes the local matrix entries.
    * @f[
    *   A^K_{ij} = |K| \left[ 2\mu \, \boldsymbol{\varepsilon}(\phi_j) : \boldsymbol{\varepsilon}(\phi_i) + \lambda (\nabla \cdot \phi_j)(\nabla \cdot \phi_i) \right]
    * @f]
@@ -201,8 +202,26 @@ namespace Rodin::Variational
 
         const size_t muOrder = getShearModulus().getOrder(polytope).value_or(size_t(0));
 
-        const size_t order =
-          std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
+        auto trialDegree = trialfe.getDegree();
+        if constexpr (requires { trialfe.getDegree({0, 1}); })
+        {
+          if (!trialDegree && polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+            trialDegree = trialfe.getDegree({0, 1});
+        }
+        auto testDegree = testfe.getDegree();
+        if constexpr (requires { testfe.getDegree({0, 1}); })
+        {
+          if (!testDegree && polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+            testDegree = testfe.getDegree({0, 1});
+        }
+        if (!trialDegree || !testDegree)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Cannot infer quadrature order for these finite elements. "
+            << "Use Integral with an explicit setOrder()." << Alert::Raise;
+        }
+
+        const size_t order = std::max(lambdaOrder, muOrder) + *trialDegree + *testDegree;
 
         m_qf = &QF::QuadratureFormula::get(order, geometry);
         m_quadrature = &polytope.getQuadrature(*m_qf);

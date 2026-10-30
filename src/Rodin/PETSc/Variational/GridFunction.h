@@ -24,11 +24,11 @@
  *
  * A grid function represents a discrete finite element approximation
  * @f$ u_h \in V_h @f$ defined by its expansion in the finite element
- * basis:
+ * basis.
  * @f[
  *   u_h(x) = \sum_{i=1}^{N} u_i \,\phi_i(x)
  * @f]
- * where:
+ * Here,
  * - @f$ u_i @f$ are the degrees of freedom (DOF coefficients)
  * - @f$ \phi_i @f$ are the finite element basis functions
  * - @f$ N @f$ is the total number of DOFs in the finite element space
@@ -465,7 +465,7 @@ namespace Rodin::Variational
        * Deep-copies the DOF values of @p other into this grid function with
        * `VecCopy`, followed by a forward ghost update in MPI mode.
        *
-       * The underlying `Vec` is **reused**: both operands are required to
+       * The underlying `Vec` is **reused**, and both operands are required to
        * live on the same finite element space, so their layouts (ownership
        * range and ghost mapping) are identical by construction and a fresh
        * allocation would produce a vector indistinguishable from the one
@@ -678,7 +678,7 @@ namespace Rodin::Variational
        *
        * Synchronizes any pending array access, then delegates to `VecNorm`.
        * In MPI mode the norm is taken over the globally owned entries and
-       * the call is collective: every rank must reach it.
+       * the call is collective, so every rank must reach it.
        *
        * @param[in] type PETSc norm type; `NORM_2` by default.  `NORM_1` and
        *                 `NORM_INFINITY` are the other common choices.
@@ -766,7 +766,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Adds a scalar to every DOF value: @f$ u_i \leftarrow u_i + c @f$.
+       * @brief Adds a scalar to every DOF value with @f$ u_i \leftarrow u_i + c @f$.
        *
        * Delegates to `VecShift(data, rhs)`.  Only valid when the range type
        * is a scalar.
@@ -795,7 +795,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Subtracts a scalar from every DOF value: @f$ u_i \leftarrow u_i - c @f$.
+       * @brief Subtracts a scalar from every DOF value with @f$ u_i \leftarrow u_i - c @f$.
        *
        * Delegates to `VecShift(data, -rhs)`.
        *
@@ -823,7 +823,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Scales every DOF value by a scalar: @f$ u_i \leftarrow c \, u_i @f$.
+       * @brief Scales every DOF value by a scalar with @f$ u_i \leftarrow c \, u_i @f$.
        *
        * Delegates to `VecScale(data, rhs)`.
        *
@@ -850,7 +850,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Divides every DOF value by a scalar: @f$ u_i \leftarrow u_i / c @f$.
+       * @brief Divides every DOF value by a scalar with @f$ u_i \leftarrow u_i / c @f$.
        *
        * Delegates to `VecScale(data, 1/rhs)`.
        *
@@ -877,7 +877,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Scaled accumulation of another grid function:
+       * @brief Scaled accumulation of another grid function.
        *        @f$ u_i \leftarrow u_i + a\, v_i @f$.
        *
        * Both grid functions must live on the same finite element space.
@@ -885,7 +885,7 @@ namespace Rodin::Variational
        * forward ghost update in MPI mode.
        *
        * This is the fused form of `*this += a * other`, which the operators
-       * cannot express without materialising a scaled temporary: it is the
+       * cannot express without materialising a scaled temporary. It is the
        * operation time integrators and cycle accumulators need
        * (@f$ \mathbf{u} \leftarrow \mathbf{u} + \Delta t\, \mathbf{v} @f$).
        *
@@ -918,7 +918,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Component-wise addition of another grid function:
+       * @brief Component-wise addition of another grid function.
        *        @f$ u_i \leftarrow u_i + v_i @f$.
        *
        * Both grid functions must live on the same finite element space.
@@ -935,7 +935,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Component-wise subtraction of another grid function:
+       * @brief Component-wise subtraction of another grid function.
        *        @f$ u_i \leftarrow u_i - v_i @f$.
        *
        * Delegates to `axpy(-1.0, rhs)`.
@@ -952,7 +952,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Component-wise (Hadamard) multiplication by another grid
-       *        function: @f$ u_i \leftarrow u_i \cdot v_i @f$.
+       *        function with @f$ u_i \leftarrow u_i \cdot v_i @f$.
        *
        * Delegates to `VecPointwiseMult(data, data, rhs.getData())`.
        *
@@ -979,7 +979,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Component-wise division by another grid function:
+       * @brief Component-wise division by another grid function.
        *        @f$ u_i \leftarrow u_i / v_i @f$.
        *
        * Delegates to `VecPointwiseDivide(data, data, rhs.getData())`.
@@ -1134,7 +1134,7 @@ namespace Rodin::Variational
        * corresponding DOF values by evaluating the function @p v.
        *
        * In local mode functional values are staged before acquiring write
-       * access. In MPI mode interpolation is collective: the
+       * access. In MPI mode interpolation is collective, so the
        * backend-independent @ref Interpolation selects and evaluates
        * functionals, then each owner commits its coefficients and refreshes
        * ghost copies. Unselected coefficients retain their previous values.
@@ -1250,7 +1250,7 @@ namespace Rodin::Variational
        *
        * This is the entry point of the array access protocol.  If the
        * array has not already been acquired (`m_write.acquired == false`),
-       * the method:
+       * the method.
        *
        * # Local mode
        * - Calls `VecGetArrayWrite(m_data, &raw)`.
@@ -1381,7 +1381,7 @@ namespace Rodin::Variational
        * entries that were never written.  A rank that assigns through
        * `operator[]` must therefore cover every DOF of its shard, owned and
        * ghost alike (as element-wise assembly does), not just its ownership
-       * range: leaving the ghost slots at their previous values overwrites
+       * range. Leaving the ghost slots at their previous values overwrites
        * whatever the owning ranks wrote.  Collective assignments
        * (`operator=`, `project()`, `setData()`, `axpy()`, …) are unaffected;
        * they end with a forward update from the owners.
@@ -1492,8 +1492,8 @@ namespace Rodin::Variational
        * Use this before passing the raw `Vec` handle to PETSc.  Member
        * operations call it internally.
        *
-       * @warning In MPI mode this is collective if a write array is acquired:
-       * every rank that participates in the vector must reach the ghost update.
+       * @warning In MPI mode this is collective if a write array is acquired.
+       * Every rank that participates in the vector must reach the ghost update.
        *
        * @returns Reference to `*this`.
        */
@@ -1529,7 +1529,7 @@ namespace Rodin::Variational
        * @brief Returns a mutable reference to the raw PETSc @c Vec handle,
        *        e.g. for passing to PETSc API functions directly.
        *
-       * @warning This accessor performs **no** synchronization: it hands
+       * @warning This accessor performs **no** synchronization and hands
        * out the handle exactly as it is.  If an array is currently acquired
        * — which `operator[]`, `operator()`, and `getValue()` do lazily, and
        * which in MPI mode means this object holds the ghosted local form
@@ -1537,7 +1537,7 @@ namespace Rodin::Variational
        * returned handle operates on a vector whose local form is still
        * checked out, and skips the reverse ghost scatter that `sync()`
        * performs.  Call `sync()` before using the handle, exactly as the
-       * operators of this class do:
+       * operators of this class do.
        *
        * ```cpp
        * u.sync();
@@ -1590,19 +1590,6 @@ namespace Rodin::Variational
       const ArrayWrite& getArrayWrite() const
       {
         return m_write;
-      }
-
-      /**
-       * @brief Returns the polynomial order of the finite element space on
-       *        the given polytope.
-       * @param polytope Polytope used to construct the coordinate mapping.
-       * @returns Polynomial order on the requested polytope, or no value when unavailable.
-       */
-      constexpr Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
-      {
-        const auto& fes = this->getFiniteElementSpace();
-        return fes.getFiniteElement(polytope.getDimension(), polytope.getIndex())
-          .getOrder();
       }
 
       /**
@@ -1705,7 +1692,7 @@ namespace Rodin::PETSc::Variational
    * This thin derived class lives in the `Rodin::PETSc::Variational`
    * namespace and pulls in all base-class constructors, operators, and
    * methods via `using` declarations.  Its sole purpose is to enable
-   * cleaner user-facing syntax:
+   * cleaner user-facing syntax.
    *
    * ```cpp
    * PETSc::Variational::GridFunction u(Vh);

@@ -17,7 +17,7 @@ namespace Rodin::Alert
    * the message to be displayed and potentially triggers other actions
    * (such as program termination for Exception types).
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * Exception() << "An error occurred" << Raise;
    * @endcode

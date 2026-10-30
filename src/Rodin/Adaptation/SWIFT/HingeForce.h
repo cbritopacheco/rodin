@@ -5,6 +5,7 @@
 #ifndef RODIN_ADAPTATION_SWIFT_HINGEFORCE_H
 #define RODIN_ADAPTATION_SWIFT_HINGEFORCE_H
 
+#include "Rodin/Variational/Integrator.h"
 #include "../CellDeformation.h"
 #include "Hinge.h"
 #include "QualitySamples.h"
@@ -73,7 +74,8 @@ namespace Rodin::Adaptation::SWIFT
         const auto& fes = m_z.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(dim, index);
         const auto& parameters = m_parameters.get();
-        const QualitySamples samples(polytope, fe.getOrder(), parameters);
+        const QualitySamples samples(
+          polytope, fe.getDegree().value_or(2 * fe.getOrder()), parameters);
 
         m_vector.resize(static_cast<Eigen::Index>(fe.getCount()));
         m_vector.setZero();

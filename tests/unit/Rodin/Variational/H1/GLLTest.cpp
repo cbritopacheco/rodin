@@ -15,6 +15,21 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  namespace
+  {
+    // Snapshot during dynamic initialization, before any test body runs.
+    const auto InitialQuadraticNodes = GLL01<2>::getNodes();
+  }
+
+  /// @brief Mapped nodes are valid even when first requested before main.
+  TEST(GLL01, InitializationBeforeMain)
+  {
+    EXPECT_EQ(InitialQuadraticNodes[0], 0);
+    EXPECT_EQ(InitialQuadraticNodes[1], Real(0.5));
+    EXPECT_EQ(InitialQuadraticNodes[2], 1);
+    EXPECT_EQ(InitialQuadraticNodes, GLL01<2>::getNodes());
+  }
+
   //==========================================================================
   // GLL Node Count Tests
   //==========================================================================
@@ -539,5 +554,16 @@ namespace Rodin::Tests::Unit
     {
       EXPECT_LT(nodes[i], nodes[i + 1]);
     }
+  }
+
+  /// @brief High orders do not depend on a compiler's constant-evaluation limit.
+  TEST(GLL01, HighOrderInitialization)
+  {
+    const auto& nodes = GLL01<256>::getNodes();
+    ASSERT_EQ(nodes.size(), 257);
+    EXPECT_EQ(nodes.front(), 0);
+    EXPECT_EQ(nodes.back(), 1);
+    for (const Real node : nodes)
+      EXPECT_TRUE(std::isfinite(node));
   }
 }

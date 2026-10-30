@@ -34,7 +34,7 @@ namespace Rodin::Variational
    * @brief Transpose of a matrix-valued function.
    *
    * Given a matrix function @f$ A: \Omega \to \mathbb{R}^{m \times n} @f$,
-   * computes its transpose:
+   * computes its transpose.
    * @f[
    *    A^T(x) = (A(x))^T \in \mathbb{R}^{n \times m}
    * @f]

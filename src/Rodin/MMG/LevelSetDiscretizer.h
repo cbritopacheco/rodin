@@ -13,7 +13,7 @@
 
 #include "Mesh.h"
 
-#include "MMG5.h"
+#include "V5.h"
 #include "Common.h"
 
 namespace Rodin::MMG
@@ -37,7 +37,7 @@ namespace Rodin::MMG
    * keep their metadata and original geometry in the covered 2D/3D cases.
    * Cut-through required entities may be replaced by MMG.
    *
-   * The canonical signed-distance interpretation is:
+   * The canonical signed-distance interpretation is
    * @f[
    *  \left\{
    *    \begin{aligned}
@@ -48,12 +48,12 @@ namespace Rodin::MMG
    *  \right.
    * @f]
    *
-   * Inherits common remeshing controls from @ref MMG5 (hmin/hmax/hausdorff/
+   * Inherits common remeshing controls from @ref Base (hmin/hmax/hausdorff/
    * gradation/angle detection).
    *
    * @see @ref examples-mmg-behavior
    */
-  class LevelSetDiscretizer : public MMG5
+  class LevelSetDiscretizer : public Base
   {
     public:
       /// @brief Default constructor.
@@ -173,7 +173,7 @@ namespace Rodin::MMG
        */
       LevelSetDiscretizer& setAngleDetection(bool enable = true)
       {
-        MMG5::setAngleDetection(enable);
+        Base::setAngleDetection(enable);
         return *this;
       }
 
@@ -184,7 +184,7 @@ namespace Rodin::MMG
        */
       LevelSetDiscretizer& setHMin(Real hmin)
       {
-        MMG5::setHMin(hmin);
+        Base::setHMin(hmin);
         return *this;
       }
 
@@ -195,7 +195,7 @@ namespace Rodin::MMG
        */
       LevelSetDiscretizer& setHMax(Real hmax)
       {
-        MMG5::setHMax(hmax);
+        Base::setHMax(hmax);
         return *this;
       }
 
@@ -206,7 +206,7 @@ namespace Rodin::MMG
        */
       LevelSetDiscretizer& setHausdorff(Real hausd)
       {
-        MMG5::setHausdorff(hausd);
+        Base::setHausdorff(hausd);
         return *this;
       }
 
@@ -217,7 +217,7 @@ namespace Rodin::MMG
        */
       LevelSetDiscretizer& setGradation(Real hgrad)
       {
-        MMG5::setGradation(hgrad);
+        Base::setGradation(hgrad);
         return *this;
       }
 

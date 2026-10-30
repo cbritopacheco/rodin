@@ -22,6 +22,65 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Requirement macros remain one statement inside unbraced if/else branches.
+  TEST(Rodin_Geometry_Mesh, RequirementMacrosPreserveConditionalBranches)
+  {
+    struct Probe
+    {
+      LocalMesh& mesh;
+
+      auto& getConnectivity()
+      {
+        return mesh.getConnectivity();
+      }
+
+      bool isSubMesh() const
+      {
+        return mesh.isSubMesh();
+      }
+
+      bool requireIncidence(bool enabled)
+      {
+        if (enabled)
+          RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 2);
+        else
+          return false;
+        return true;
+      }
+
+      bool requireMemberIncidence(bool enabled)
+      {
+        if (enabled)
+          RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(1, 2);
+        else
+          return false;
+        return true;
+      }
+
+      bool requireSubMesh(bool enabled)
+      {
+        if (enabled)
+          RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH();
+        else
+          return false;
+        return true;
+      }
+    };
+
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().clear(1, 2);
+    Probe probe{mesh};
+    EXPECT_FALSE(probe.requireIncidence(false));
+    EXPECT_FALSE(probe.requireMemberIncidence(false));
+    EXPECT_FALSE(probe.requireSubMesh(false));
+    EXPECT_THROW(probe.requireIncidence(true), Alert::Exception);
+    EXPECT_THROW(probe.requireMemberIncidence(true), Alert::Exception);
+    EXPECT_THROW(probe.requireSubMesh(true), Alert::Exception);
+    mesh.getConnectivity().compute(1, 2);
+    EXPECT_TRUE(probe.requireIncidence(true));
+    EXPECT_TRUE(probe.requireMemberIncidence(true));
+  }
+
   /// @brief Closed surfaces and single cells report absent face selections without changing topology.
   TEST(Rodin_Geometry_Mesh, EmptyFaceSelectionsReportMemberContext)
   {

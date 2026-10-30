@@ -13,21 +13,21 @@
  * bilinear and linear forms in the weak formulation.
  *
  * # Mathematical Foundation
- * Domain integrals compute:
+ * Domain integrals compute the following quantity.
  * @f[
  *   \int_\Omega f(x) \, dx
  * @f]
  * where @f$ \Omega @f$ is the computational domain and @f$ f @f$ is the integrand.
  *
  * # Bilinear Form Integrals
- * For bilinear forms @f$ a(u,v) @f$:
+ * For bilinear forms @f$ a(u,v) @f$.
  * @f[
  *   a(u,v) = \int_\Omega A(u) : B(v) \, dx
  * @f]
  * where @f$ A @f$ and @f$ B @f$ are operators on trial and test functions.
  *
  * # Linear Form Integrals
- * For linear forms @f$ l(v) @f$:
+ * For linear forms @f$ l(v) @f$.
  * @f[
  *   l(v) = \int_\Omega f \cdot v \, dx
  * @f]
@@ -81,7 +81,7 @@ namespace Rodin::Variational
    * @f[
    *   A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
    * @f]
-   * this class represents the integral of their dot product:
+   * this class represents the following integral of their dot product.
    * @f[
    *   \int_{\mathcal{T}_h} A(u) : B(v) \ dx \ .
    * @f]
@@ -110,7 +110,7 @@ namespace Rodin::Variational
       /**
        * @brief Integral of the dot product of trial and test operators
        *
-       * Constructs an object representing the following integral:
+       * Constructs an object representing the following integral.
        * @f[
        *   \int_\Omega A(u) : B(v) \ dx
        * @f]
@@ -125,7 +125,7 @@ namespace Rodin::Variational
       /**
        * @brief Integral of the dot product of trial and test operators
        *
-       * Constructs the object representing the following integral:
+       * Constructs the object representing the following integral.
        * @f[
        *   \int_\Omega A(u) : B(v) \ dx
        * @f]

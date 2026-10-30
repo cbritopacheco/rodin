@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+<title id="title">Rodin small-size R</title>
+<desc id="desc">Rodin visual identity. Editable vector artwork.</desc>
+<defs>
+  <linearGradient id="ocean" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#13B6D0" /><stop offset=".48" stop-color="#17679A" />
+    <stop offset="1" stop-color="#071F46" />
+  </linearGradient>
+  <linearGradient id="flow" x1="0" y1="0" x2="0" y2="1">
+    <stop stop-color="#13B6D0" /><stop offset=".38" stop-color="#13B6D0" />
+    <stop offset=".7" stop-color="#17679A" /><stop offset="1" stop-color="#071F46" />
+  </linearGradient>
+  <linearGradient id="wave" x1="0" y1=".5" x2="1" y2=".5">
+    <stop stop-color="#071F46" /><stop offset=".48" stop-color="#071F46" />
+    <stop offset="1" stop-color="#13B6D0" />
+  </linearGradient>
+</defs><rect width="320" height="320" rx="68" fill="#071F46" ry="68" /><path d="M72 52H150C204 52 234 78 234 120C234 151 215 173 188 182L246 248H190L139 187H117V248H72ZM117 94V146H148C174 146 188 138 188 120C188 102 174 94 148 94Z" fill="white" /></svg>

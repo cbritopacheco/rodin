@@ -278,9 +278,9 @@ namespace Rodin::Tests::Unit
       {
         return element.getCount();
       }
-      size_t getOrder() const
+      Optional<size_t> getDegree() const
       {
-        return element.getOrder();
+        return element.getDegree();
       }
 
       struct Basis
@@ -636,9 +636,9 @@ namespace Rodin::Tests::Unit
          * @brief Gets the geometry element order.
          * @returns The element order.
          */
-        size_t getOrder() const
+        Optional<size_t> getDegree() const
         {
-          return element.getOrder();
+          return element.getDegree();
         }
 
         /**
@@ -975,9 +975,9 @@ namespace Rodin::Tests::Unit
            * @brief Gets the underlying map order.
            * @returns The geometry order.
            */
-          size_t getOrder() const override
+          Optional<size_t> getDegree() const override
           {
-            return m_map.getOrder();
+            return m_map.getDegree();
           }
 
           /**

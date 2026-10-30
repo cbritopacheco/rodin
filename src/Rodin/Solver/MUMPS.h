@@ -83,13 +83,13 @@ namespace Rodin::Solver
    * After changing the sparsity pattern, clear the symbolic factorization so
    * the next factorization also repeats symbolic analysis.
    *
-   * Symmetry is never inferred from the entries: a matrix is factorized as
+   * Symmetry is never inferred from the entries. A matrix is factorized as
    * symmetric only after @ref setSymmetric, which selects the triangle MUMPS
    * reads and the factorization it performs. Declaring a matrix symmetric
    * halves the stored factor, so it is worth doing whenever the assembled
    * operator is symmetric.
    *
-   * Architecture:
+   * @par Architecture
    * 1. Convert the zero-based CSC structure to one-based coordinate arrays,
    *    keeping only the lower triangle for a symmetric matrix.
    * 2. Share the values of an unsymmetric matrix with MUMPS without a copy.
@@ -98,19 +98,19 @@ namespace Rodin::Solver
    *
    * MUMPS is parallel over MPI processes, and within each process over OpenMP
    * threads and threaded BLAS. This specialization solves on @c MPI_COMM_SELF,
-   * so its parallelism and its memory are both shared: the whole factorization
+   * so its parallelism and its memory are both shared. The whole factorization
    * is held in this process and computed by @ref setMaxThreads threads. Under
    * a distributed run each process solves its own system independently.
    *
    * MUMPS calls into MPI. When the host application has not initialized MPI,
    * the first factorization initializes it and leaves finalization to the
-   * host. Destroy every MUMPS solver before calling @c MPI_Finalize: its
+   * host. Destroy every MUMPS solver before calling @c MPI_Finalize because its
    * destructor terminates the MUMPS instance with JOB=-2, which uses MPI.
    *
    * The system matrix must outlive the solves that follow a factorization,
    * because its values may be shared with MUMPS rather than copied.
    *
-   * Info::status holds MUMPS's own @c INFOG(1): zero on success, a negative
+   * Info::status holds MUMPS's own @c INFOG(1), with zero on success, a negative
    * value for an error, and a positive one for a warning.
    *
    * | Specialization | Description |
@@ -281,7 +281,7 @@ namespace Rodin::Solver
        * @brief Declares the symmetry of the system matrix.
        *
        * The caller guarantees that the matrix is symmetric for
-       * Symmetry::PositiveDefinite and Symmetry::General: only its lower
+       * Symmetry::PositiveDefinite and Symmetry::General. Only its lower
        * triangle is read. Symmetry selects the factorization itself and
        * therefore releases any retained factorization.
        *
@@ -568,7 +568,7 @@ namespace Rodin::Solver
       /**
        * @brief Ensures that MPI is available to MUMPS.
        *
-       * Finalization is left to the host application: a solver instance
+       * Finalization is left to the host application. A solver instance
        * destroyed after @c MPI_Finalize could not release its MUMPS instance.
        */
       void initializeSession() const

@@ -1,60 +1,79 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Alert/Raise.h"
-#include "Rodin/Alert/Success.h"
+//! [elasticity-source]
+#include <cmath>
+#include <cstdlib>
+
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
-#include <Rodin/Solid.h>
+#include <Rodin/IO/XDMF.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-int main(int argc, char** argv)
+int main()
 {
-  const char* meshFile = "../resources/examples/PDEs/Elasticity.mfem.mesh";
+  //! [elasticity-mesh]
+  constexpr Real spacing = 0.1;
+  constexpr Real length = 4;
+  constexpr Real boundaryTolerance = 1e-12; // Coordinate tolerance for this grid.
+  constexpr Attribute fixed = 2;
+  constexpr Attribute loaded = 3;
+  constexpr Attribute free = 4;
 
-  // Define boundary attributes
-  Attribute Gamma = 1, GammaD = 2, GammaN = 3, Gamma0 = 4;
-
-  // Load mesh
-  Mesh mesh;
-  mesh.load(meshFile, IO::FileFormat::MFEM);
+  Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {41, 11});
+  mesh.scale(spacing);
   mesh.getConnectivity().compute(1, 2);
 
-  // Functions
-  size_t d = mesh.getSpaceDimension();
-  P1 fes(mesh, d);
+  for (auto face = mesh.getFace(); !face.end(); ++face)
+  {
+    if (!face->isBoundary())
+      continue;
+    bool onLeft = true;
+    bool onRight = true;
+    for (auto vertex = face->getVertex(); !vertex.end(); ++vertex)
+    {
+      const Real x = vertex->getCoordinates().x();
+      onLeft = onLeft && std::abs(x) < boundaryTolerance;
+      onRight = onRight && std::abs(x - length) < boundaryTolerance;
+    }
+    mesh.setAttribute({1, face->getIndex()}, onLeft ? fixed : onRight ? loaded : free);
+  }
+  //! [elasticity-mesh]
 
-  // Lamé coefficients
-  const Real lambda = 0.5769, mu = 0.3846;
+  //! [elasticity-form]
+  P1 vh(mesh, mesh.getSpaceDimension());
+  TrialFunction u(vh);
+  TestFunction v(vh);
 
-  // Pull force
-  VectorFunction f{0, -1};
-
-  // Define problem
-  TrialFunction u(fes);
-  TestFunction  v(fes);
+  constexpr Real lambda = 0.5769;
+  constexpr Real mu = 0.3846;
+  VectorFunction traction{0, -1e-4};
 
   Problem elasticity(u, v);
-  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-             - BoundaryIntegral(f, v).over(GammaN)
-             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+  elasticity = LinearElasticityIntegral(u, v)(lambda, mu) -
+    BoundaryIntegral(traction, v).over(loaded) + DirichletBC(u, Zero(2)).on(fixed);
+  //! [elasticity-form]
 
-  Alert::Info() << "Assembling and solving the system..." << Alert::Raise;
-  Solver::CG(elasticity).solve();
+  //! [elasticity-solve]
+  Solver::CG solver(elasticity);
+  solver.setTolerance(1e-10).solve();
+  if (!solver.success())
+    return EXIT_FAILURE;
+  //! [elasticity-solve]
 
-  // Save solution
-  u.getSolution().save("Elasticity.gf", IO::FileFormat::MFEM);
-  mesh.save("Elasticity.mesh", IO::FileFormat::MFEM);
-
-  Alert::Success() << "Mesh and solution saved to Elasticity.mesh and Elasticity.gf" << Alert::Raise;
-
+  //! [elasticity-export]
+  IO::XDMF xdmf("Elasticity");
+  xdmf.grid().setMesh(mesh).add("displacement", u.getSolution());
+  xdmf.write().flush();
+  //! [elasticity-export]
   return 0;
 }
+//! [elasticity-source]

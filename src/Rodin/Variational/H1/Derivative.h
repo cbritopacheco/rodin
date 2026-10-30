@@ -13,7 +13,7 @@
  *
  * This file provides specialized implementations of the partial derivative
  * operator for H1 GridFunctions. For an H1<K> function @f$ u @f$, the
- * partial derivative with respect to coordinate @f$ x_i @f$ is:
+ * partial derivative with respect to coordinate @f$ x_i @f$ is
  * @f[
  *   \frac{\partial u}{\partial x_i} = (\nabla u) \cdot \mathbf{e}_i
  * @f]
@@ -39,7 +39,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Derivative over a grid function: exposes the finite
+   * @brief Type traits for @c Derivative over a grid function, exposing the finite
    * element space, the operand type and the range type.
    */
   template <size_t K, class Scalar, class Mesh, class Data>
@@ -263,7 +263,16 @@ namespace Rodin::Variational
        */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
-        const size_t k = H1Element<K, ScalarType>(geom.getGeometry()).getOrder();
+        const size_t k =
+          H1Element<K, ScalarType>(geom.getGeometry()).getDegree().value_or(2 * K);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (k == 0) ? 0 : (k - 1);
       }
 

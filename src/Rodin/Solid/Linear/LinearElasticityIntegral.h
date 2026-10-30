@@ -15,6 +15,7 @@
 #ifndef RODIN_SOLID_LINEAR_LINEARELASTICITYINTEGRAL_H
 #define RODIN_SOLID_LINEAR_LINEARELASTICITYINTEGRAL_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <type_traits>
 
 #include "Rodin/FormLanguage/Traits.h"
@@ -36,7 +37,7 @@ namespace Rodin::Variational
   /**
    * @brief Bilinear form integrator for linear elasticity.
    *
-   * Assembles the bilinear form:
+   * Assembles the bilinear form.
    * @f[
    *   a(u, v) = \int_\Omega \left[\lambda (\nabla \cdot u)
    *     \overline{\nabla \cdot v}
@@ -167,7 +168,7 @@ namespace Rodin::Variational
        * Computes the local elasticity matrix over the given element using
        * quadrature derived from the FE basis order and Lamé parameter orders.
        * At each quadrature point, builds the physical-space Jacobian of each
-       * basis function via the reference-to-physical map, then accumulates:
+       * basis function via the reference-to-physical map, then accumulates.
        * @f[
        *   A^K_{ij} = \sum_q w_q |J_q|
        *     \left[ \lambda \, (\nabla \cdot \phi_j)
@@ -178,7 +179,7 @@ namespace Rodin::Variational
        *
        * Coincident spaces with real-valued parameter ranges use Hermitian
        * reconstruction to halve work. Complex parameter ranges require both
-       * triangles: space identity does not imply a Hermitian material operator.
+       * triangles. Space identity does not imply a Hermitian material operator.
        * Real parameters may act on complex fields through scalar promotion;
        * complex material values are not narrowed into real field storage.
        *
@@ -207,8 +208,26 @@ namespace Rodin::Variational
 
         const size_t muOrder = getShearModulus().getOrder(polytope).value_or(size_t(0));
 
-        const size_t order =
-          std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
+        auto trialDegree = trialfe.getDegree();
+        if constexpr (requires { trialfe.getDegree({0, 1}); })
+        {
+          if (!trialDegree && polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+            trialDegree = trialfe.getDegree({0, 1});
+        }
+        auto testDegree = testfe.getDegree();
+        if constexpr (requires { testfe.getDegree({0, 1}); })
+        {
+          if (!testDegree && polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+            testDegree = testfe.getDegree({0, 1});
+        }
+        if (!trialDegree || !testDegree)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Cannot infer quadrature order for these finite elements. "
+            << "Use Integral with an explicit setOrder()." << Alert::Raise;
+        }
+
+        const size_t order = std::max(lambdaOrder, muOrder) + *trialDegree + *testDegree;
 
         m_qf = &QF::QuadratureFormula::get(order, geometry);
         m_quadrature = &polytope.getQuadrature(*m_qf);
@@ -474,7 +493,7 @@ namespace Rodin::Variational
        *
        * Splitting this into an overload of the call operator taking
        * <tt>const L&</tt> for values and one taking
-       * <tt>const FunctionBase<D>&</tt> for functions does not work: the
+       * <tt>const FunctionBase<D>&</tt> for functions does not work because the
        * former is an exact match for every concrete function type, so it wins
        * and wraps the function in a RealFunction it cannot build, and a
        * function mixed with a value matches neither.

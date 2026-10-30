@@ -60,9 +60,9 @@ namespace
         ++*m_destroyed;
       }
 
-      size_t getOrder() const override
+      Optional<size_t> getDegree() const override
       {
-        return m_map->getOrder();
+        return m_map->getDegree();
       }
 
       void transform(
@@ -1421,9 +1421,9 @@ namespace Rodin::Tests::Unit
     for (Index ci = 0; ci < shard.getCellCount(); ci++)
     {
       const auto& trans = mpiMesh.getPolytopeTransformation(D, ci);
-      // Transformation order should be non-negative
-      EXPECT_GE(trans.getOrder(), 0u)
-        << "Rank " << world.rank() << " cell " << ci << ": invalid transformation order.";
+      EXPECT_EQ(trans.getDegree(), Optional<size_t>(1))
+        << "Rank " << world.rank() << " cell " << ci
+        << ": invalid transformation degree.";
     }
   }
 

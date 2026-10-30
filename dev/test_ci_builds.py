@@ -43,13 +43,18 @@ class SharedBuildPlanTest(unittest.TestCase):
             for row in definition['strategy']['matrix']['include']:
                 expected = ci.definition(job, row)
                 self.assertEqual(expected['runner'], definition['runs-on'])
-                setup = next(step for step in definition['steps'] if step.get('uses') == 'aminya/setup-cpp@v1')
-                self.assertEqual(expected['compiler'], setup['with']['compiler'])
+                restore = next(step for step in definition['steps']
+                               if step.get('uses') == './.github/actions/test-build')
+                self.assertEqual(restore['with']['environment'], 'true')
+                self.assertEqual(expected['compiler'], 'gcc-14')
+                self.assertFalse(any(step.get('uses') in [
+                    'aminya/setup-cpp@v1', './.github/actions/apt-dependencies']
+                    for step in definition['steps']))
                 matches = [entry for entry in builds[family] if entry['id'] == ci.identity(expected)]
                 self.assertEqual(matches, [{'id': ci.identity(expected), 'definition': expected}])
         self.assertEqual(sum(map(len, builds.values())), 84)
         self.assertEqual(sum(len(self.workflow['jobs'][job]['strategy']['matrix']['include'])
-                             for job in ci.FAMILIES), 856)
+                             for job in ci.FAMILIES), 857)
         top = yaml.safe_load((ci.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
         self.assertTrue(all(name in top['CoverageFinalize']['needs'] for name in top if name.startswith('Configurations_')))
 

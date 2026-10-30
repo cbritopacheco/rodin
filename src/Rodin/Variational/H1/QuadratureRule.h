@@ -26,6 +26,7 @@
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Math/Common.h"
 #include "Rodin/Variational/IntegrationPoint.h"
+#include "Rodin/Variational/Integrator.h"
 #include "Rodin/Variational/ShapeFunction.h"
 
 #include "H1.h"
@@ -38,7 +39,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int v \ dx@f$ with an H1 test shape function.
    *
-   * This class represents the CTAD for the expression:
+   * This class provides class template argument deduction for the following expression.
    * @f[
    * \int v \ dx \: ,
    * @f]
@@ -165,8 +166,9 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
 
-        const size_t order = this->getOrder(polytope).value_or(
-          integrand.getOrder(polytope).value_or(fe.getOrder()));
+        const size_t order =
+          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
+            fe.getDegree().value_or(2 * fe.getOrder())));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -274,7 +276,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int f \cdot v \ dx@f$ with an H1 test shape function.
    *
-   * This class represents the CTAD for the expression:
+   * This class provides class template argument deduction for the following expression.
    * @f[
    * \int f \cdot v \ dx \: ,
    * @f]
@@ -416,8 +418,9 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
 
-        const size_t order = this->getOrder(polytope).value_or(
-          integrand.getOrder(polytope).value_or(fe.getOrder()));
+        const size_t order =
+          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
+            fe.getDegree().value_or(2 * fe.getOrder())));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -547,7 +550,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int u \cdot v \ dx@f$ with H1 trial and test shape functions.
    *
-   * This class represents the CTAD for the expression:
+   * This class provides class template argument deduction for the following expression.
    * @f[
    * \int u \cdot v \ dx \: ,
    * @f]
@@ -562,8 +565,8 @@ namespace Rodin::Variational
    * j_c=(bm+c)n_r+(am+c)=bm n_r+am+c(n_r+1).
    * @f]
    * Real storage advances an integer address by @f$n_r+1@f$ between
-   * components. Complex storage retains the original row/column expression:
-   * equivalent integer formulas do not produce equally efficient kernels for
+   * components. Complex storage retains the original row/column expression.
+   * Equivalent integer formulas do not produce equally efficient kernels for
    * both scalar representations. The component sequence and floating-point
    * accumulation remain unchanged. Mixed degrees retain the trial count as
    * their row stride; no coordinate matching or distributed operation is used.
@@ -714,8 +717,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order = this->getOrder(polytope).value_or(
           getIntegrand().getOrder(polytope).value_or(k_tr + k_te));
 
@@ -988,7 +991,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Weighted mass quadrature for plain H1 trial and test leaves.
    *
-   * This class represents the CTAD for the expression:
+   * This class provides class template argument deduction for the following expression.
    * @f[
    * \int (A u) \cdot v \ dx \: ,
    * @f]
@@ -1201,8 +1204,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order = this->getOrder(polytope).value_or(
           getIntegrand().getOrder(polytope).value_or(k_tr + k_te));
 
@@ -1469,7 +1472,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int (A \nabla u) \cdot \nabla v \ dx@f$ with H1 trial and test shape functions.
    *
-   * This class represents the CTAD for the expression:
+   * This class provides class template argument deduction for the following expression.
    * @f[
    * \int (A \nabla u) \cdot \nabla v \ dx \: ,
    * @f]
@@ -1640,8 +1643,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
@@ -1894,7 +1897,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int c \, (u \cdot v) \ dx@f$ with H1 trial and test shape functions.
    *
-   * This class represents the CTAD for the expression:
+   * This class provides class template argument deduction for the following expression.
    * @f[
    * \int c \, (u \cdot v) \ dx \: ,
    * @f]
@@ -2052,8 +2055,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order = this->getOrder(polytope).value_or(
           getIntegrand().getOrder(polytope).value_or(k_tr + k_te));
 
@@ -2172,7 +2175,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int \nabla \cdot u \, q \ dx@f$ with H1 trial and test shape functions.
    *
-   * This class represents the CTAD for the expression:
+   * This class provides class template argument deduction for the following expression.
    * @f[
    * \int \nabla \cdot u \, q \ dx \: ,
    * @f]
@@ -2323,8 +2326,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             (k_tr == 0) ? 0 : (k_tr + k_te - 1)));
@@ -2509,7 +2512,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int p \, \nabla \cdot v \ dx@f$ with H1 trial and test shape functions.
    *
-   * This class represents the CTAD for the expression:
+   * This class provides class template argument deduction for the following expression.
    * @f[
    * \int p \, \nabla \cdot v \ dx \: ,
    * @f]
@@ -2661,8 +2664,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             (k_te == 0) ? 0 : (k_tr + k_te - 1)));
@@ -2847,7 +2850,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int (A J u) : J v \ dx@f$ with H1 trial and test shape functions.
    *
-   * This class represents the CTAD for the expression:
+   * This class provides class template argument deduction for the following expression.
    * @f[
    * \int (A J u) : J v \ dx \: ,
    * @f]
@@ -3040,8 +3043,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
@@ -3396,7 +3399,7 @@ namespace Rodin::Variational
    * is stored beyond the bind.
    * Transform expressions and local matrix summation order are unchanged.
    *
-   * This class represents the CTAD for the expression:
+   * This class provides class template argument deduction for the following expression.
    * @f[
    * \int \nabla u \cdot \nabla v \ dx \: ,
    * @f]
@@ -3553,8 +3556,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
             (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2)));
@@ -3848,7 +3851,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int J u : J v \ dx@f$ with H1 trial and test shape functions.
    *
-   * This class represents the CTAD for the expression:
+   * This class provides class template argument deduction for the following expression.
    * @f[
    * \int J u : J v \ dx \: ,
    * @f]
@@ -4024,8 +4027,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         const size_t order =
           this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
@@ -4374,8 +4377,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t kTrial = trialfe.getOrder();
-        const size_t kTest = testfe.getOrder();
+        const size_t kTrial = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t kTest = testfe.getDegree().value_or(2 * testfe.getOrder());
         const auto requestedOrder = this->getOrder(polytope);
         const size_t order = requestedOrder
           ? *requestedOrder
@@ -4524,7 +4527,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int (\mathbf{J}\,u \cdot f) \cdot v \ dx@f$ with H1 trial and test shape functions.
    *
-   * This class represents the CTAD for the expression:
+   * This class provides class template argument deduction for the following expression.
    * @f[
    * \int (\mathbf{J} \: u \cdot f) \cdot v \ dx \: ,
    * @f]
@@ -4701,8 +4704,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = trialfe.getDegree().value_or(2 * trialfe.getOrder());
+        const size_t k_te = testfe.getDegree().value_or(2 * testfe.getOrder());
         // Gradient of trial (k_tr - 1) times value of test (k_te)
         const size_t order =
           this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(

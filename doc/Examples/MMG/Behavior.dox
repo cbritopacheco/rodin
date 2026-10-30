@@ -20,15 +20,13 @@
   | Level-set discretization | @ref Rodin::MMG::LevelSetDiscretizer "MMG::LevelSetDiscretizer" | Cuts an input mesh with an isovalue and produces a body-fitted mesh or extracted surface |
 
   All three workflows convert @ref Rodin::MMG::Mesh "MMG::Mesh" to native MMG
-  data structures, run MMG, and convert the result back to Rodin. The returned
-  mesh is therefore a new mesh topology chosen by MMG; users should not assume
-  that every input element index still names the same geometric entity after
-  remeshing.
+  data structures, run MMG, and convert the result back to Rodin. MMG chooses the output topology and entity numbering. Geometric entities are
+  identified from the returned mesh and metadata.
 
   @section examples-mmg-behavior-required Required entity behavior
 
   @ref Rodin::MMG::Mesh "MMG::Mesh" stores required vertices, edges,
-  triangles, and tetrahedra:
+  triangles, and tetrahedra.
 
   @code{.cpp}
   mesh.setRequiredVertex(vertexIndex);
@@ -49,7 +47,7 @@
 
   The test suite covers this metadata path in 2D and 3D, including MEDIT I/O,
   native MMG conversion, optimization, and level-set discretization.
-  In MMG3D, triangle metadata is boundary-surface metadata: when face-cell
+  In MMG3D, triangle metadata describes the boundary surface. When face-cell
   incidence is available, Rodin exports only boundary triangles to MMG's
   native triangle table. Interior faces of a tetrahedral mesh are not a
   supported MMG3D `RequiredTriangles` preservation mechanism.
@@ -65,14 +63,13 @@
     required metadata and the original entity coordinates remain present in the
     output.
 
-  These tests compare geometry, not only the required index sets. This is the
-  expected behavior for required entities that are away from the level-set cut.
+  The tests check the geometry and required metadata of entities away from the
+  level-set cut.
 
   @subsection examples-mmg-behavior-required-cut Cut-through level-set entities
 
-  Required entities are not a hard "never cut this element" constraint when
-  MMG level-set discretization must conform the mesh to an isovalue crossing
-  that entity.
+  During level-set discretization, MMG can modify a required entity intersected by
+  the isovalue to construct the interface.
 
   In particular, for 3D level-set discretization, if the zero level set cuts a
   required boundary triangle face in a tetrahedral mesh, MMG may replace that
@@ -80,13 +77,12 @@
   triangles. The same caveat applies to other cut-through entities. In this
   situation MMG can emit a warning containing `Required entity ignored.`
 
-  Rodin intentionally documents and tests this behavior rather than promising a
-  stricter guarantee than MMG provides.
+  The regression tests record this MMG behavior.
 
   @section examples-mmg-behavior-nosplit NoSplit and material labels
 
   @ref Rodin::MMG::LevelSetDiscretizer::noSplit "LevelSetDiscretizer::noSplit"
-  applies MMG's material split policy to a material reference:
+  applies MMG's material split policy to a material reference.
 
   @code{.cpp}
   MMG::Mesh result = MMG::LevelSetDiscretizer()
@@ -95,10 +91,8 @@
     .discretize(levelSet);
   @endcode
 
-  `noSplit(ref)` means that the material with reference `ref` should not be
-  split into the configured inside/outside references. It does not mean that a
-  particular edge, triangle face, or tetrahedron is an immutable geometric
-  object.
+  `noSplit(ref)` retains the material reference `ref` during phase classification.
+  The geometry of intersected entities remains subject to MMG's interface-construction step.
 
   The characterization tests cover the following cut-through combinations:
 
@@ -130,9 +124,8 @@
   - change or clamp the level set so the protected entity lies entirely on one
     side of the cut;
   - pre-partition the mesh so the protected surface is already part of the
-    mesh/interface rather than asking MMG to cut through it;
-  - use `noSplit(ref)` only for material-reference splitting policy, not as an
-    element-integrity guarantee.
+    mesh interface before level-set discretization;
+  - use `noSplit(ref)` to configure material-reference splitting.
 
   @section examples-mmg-behavior-tests Test coverage
 
@@ -147,7 +140,7 @@
   - cut-through characterization with `MG_REQ`, labels, adjacent tetrahedra,
     local closure requirements, and `noSplit`.
 
-  @section examples-mmg-behavior-see-also See Also
+  @section examples-mmg-behavior-see-also See also
 
   - @ref examples-mmg-simple_io "MMG I/O"
   - @ref examples-mmg-mesh_optimization "Mesh optimization"

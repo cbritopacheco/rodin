@@ -28,6 +28,12 @@ class CMakeSyntaxTest(unittest.TestCase):
 
 
 class DiscoveryCoverageTest(unittest.TestCase):
+    def test_ctest_discovery_failure_preserves_diagnostic(self):
+        failure = subprocess.CalledProcessError(8, ['ctest'], output='', stderr='discovery executable crashed')
+        with patch.object(ci.subprocess, 'run', side_effect=failure):
+            with self.assertRaisesRegex(RuntimeError, 'discovery executable crashed'):
+                ci.discover(Path('/tmp/stage'), Path('/tmp/build'))
+
     def test_discovery_counters_are_outside_capture_tree(self):
         build = Path("/tmp/rodin-discovery-test/build")
         response = SimpleNamespace(stdout='{"tests": []}')

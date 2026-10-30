@@ -48,7 +48,7 @@ namespace Rodin::QF
    * # Mathematical Foundation
    *
    * For a simplex @f$ K @f$ of dimension @f$ n @f$, the Grundmann-Möller
-   * rule approximates:
+   * rule approximates.
    * @f[
    *   \int_K f(x) \, dx \approx \sum_{i=1}^N w_i f(x_i)
    * @f]
@@ -192,13 +192,13 @@ namespace Rodin::QF
       static boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> initPoints();
 
     private:
-      /// Static table: number of points for each [s][n] combination
+      /// Static table containing the number of points for each [s][n] combination
       static const boost::multi_array<size_t, 2>& s_sizes;
 
-      /// Static table: quadrature weights for each [s][n] combination
+      /// Static table containing quadrature weights for each [s][n] combination
       static const boost::multi_array<Math::Vector<Real>, 2>& s_weights;
 
-      /// Static table: quadrature points for each [s][n] combination
+      /// Static table containing quadrature points for each [s][n] combination
       static const boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2>&
         s_points;
 

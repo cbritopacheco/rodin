@@ -9,7 +9,7 @@
  * @brief Façade for the internal virtual work nonlinear form in hyperelastic formulations.
  *
  * Provides the unified API for constructing the internal virtual work
- * contributions to a nonlinear solid mechanics problem:
+ * contributions to a nonlinear solid mechanics problem.
  *
  * @code
  * auto ivw = Solid::InternalVirtualWork(law, displacement);
@@ -47,7 +47,7 @@
  * @f]
  * and @c NewtonSolver then applies @f$\mathbf{u}^{k+1}
  * = \mathbf{u}^k + \Delta\mathbf{u}@f$. Do not write
- * @c Tangent(du, v) - Residual(v) for this Newton form: the @c Problem
+ * @c Tangent(du, v) - Residual(v) for this Newton form because the @c Problem
  * assembly will negate the already-negated residual and produce
  * @f$K\Delta\mathbf{u}=+R@f$.
  *
@@ -58,6 +58,7 @@
 #ifndef RODIN_SOLID_INTEGRATORS_INTERNALVIRTUALWORK_H
 #define RODIN_SOLID_INTEGRATORS_INTERNALVIRTUALWORK_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <functional>
 #include <type_traits>
 
@@ -124,7 +125,7 @@ namespace Rodin::Solid
 
       /**
        * @brief Sets the quadrature order for both residual and tangent.
-       * @param order Polynomial order (0 = auto: 2 * max(fe order))
+       * @param order Polynomial order (0 selects the automatic value 2 * max(fe order))
        * @returns Reference to this object after the operation.
        */
       InternalVirtualWork& setQuadratureOrder(size_t order)
@@ -151,7 +152,7 @@ namespace Rodin::Solid
       /**
        * @brief Sets the output invoked at each quadrature point by @c commit().
        *
-       * The output is the dual of @c setInput(): it reads the prepared law
+       * The output is the dual of @c setInput() and reads the prepared law
        * after evaluation, and is the extraction site for committed internal
        * variables, recovered stresses or diagnostics. It is invoked only by
        * @c commit(), never during assembly, so a caller controls exactly when
@@ -205,10 +206,19 @@ namespace Rodin::Solid
         {
           const auto& polytope = *it;
           const Index idx = polytope.getIndex();
-          const auto& stateFE = fes.getFiniteElement(d, idx);
 
-          const size_t effectiveOrder =
-            (m_quadOrder > 0) ? m_quadOrder : 2 * stateFE.getOrder();
+          size_t effectiveOrder = m_quadOrder;
+          if (effectiveOrder == 0)
+          {
+            const auto stateOrder = m_displacement.get().getOrder(polytope);
+            if (!stateOrder)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "No automatic constitutive quadrature order is established. "
+                << "Specify it with setQuadratureOrder()." << Alert::Raise;
+            }
+            effectiveOrder = 2 * *stateOrder;
+          }
           const auto& qf =
             QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
           const auto& quadrature = polytope.getQuadrature(qf);
@@ -248,7 +258,7 @@ namespace Rodin::Solid
       /**
        * @brief Returns the residual integrator (linear form contribution).
        *
-       * Produces:
+       * Produces the following result.
        * @f[
        *   \delta W^{\text{int}}(\mathbf{v})
        *     = \int_{\Omega_0} \mathbf{P}(\mathbf{u}) : \nabla_0 \mathbf{v} \, dX
@@ -270,7 +280,7 @@ namespace Rodin::Solid
       /**
        * @brief Returns the tangent integrator (bilinear form contribution).
        *
-       * Produces:
+       * Produces the following result.
        * @f[
        *   D(\delta W^{\text{int}})[\Delta\mathbf{u}, \mathbf{v}]
        *     = \int_{\Omega_0} \mathbf{A}(\mathbf{F}) : \nabla_0 \Delta\mathbf{u}

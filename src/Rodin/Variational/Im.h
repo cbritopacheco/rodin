@@ -21,7 +21,7 @@ namespace Rodin::Variational
    * @brief Extracts the imaginary part of a complex-valued function.
    *
    * For a complex function @f$ f: \Omega \to \mathbb{C} @f$ with
-   * @f$ f(x) = u(x) + iv(x) @f$, this operator extracts the imaginary part:
+   * @f$ f(x) = u(x) + iv(x) @f$, this operator extracts the imaginary part.
    * @f[
    *    \text{Im}(f)(x) = v(x) \in \mathbb{R}
    * @f]

@@ -71,6 +71,8 @@ rodin_export_benchmarks()
             self.assertEqual({row['target'] for row in rows}, declarations)
             self.assertEqual(len(rows), len(declarations))
             self.assertNotIn('RodinBenchmarks', declarations)
+            self.assertIn('RodinStokesGMRESBenchmarks', declarations)
+            self.assertNotIn('RodinStokesSolveBenchmarks', declarations)
             self.assertEqual({row['target'] for row in rows if row['state'] == 'registered'},
                              declarations)
 

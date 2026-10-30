@@ -5,7 +5,7 @@ Doxygen configuration, narrative guide pages, examples index pages, generated
 site styling, bibliography, image assets, and the agent knowledge base used by
 AI coding assistants.
 
-This directory is for source documentation, not generated output. Build
+This directory contains the documentation sources. Build
 artifacts are written under the CMake build tree.
 
 ## Directory Map
@@ -19,7 +19,9 @@ artifacts are written under the CMake build tree.
   top-level reference pages.
 - `Guides/` contains narrative user guides and conceptual documentation.
 - `Examples/` and `ExamplesIndex.dox` organize example-program pages.
-- `Images/`, `favicon.ico`, and `rodin.css` provide visual assets and styling.
+- `../brand/` is the canonical source for the logo, wordmark, SVG favicon and bundled Manrope fonts.
+- `Images/`, `rodin.css` and `rodin-theme.css` provide illustrations and site styling.
+  Brand assets and font licenses are copied into the generated site; no external font service is required.
 - `References.bib` stores bibliography entries used by Doxygen citations.
 - `agents/` contains the AI-agent knowledge base. It is documentation about
   how Rodin is designed and maintained, not user-facing API reference.
@@ -29,13 +31,13 @@ artifacts are written under the CMake build tree.
 
 Rodin builds documentation through the `RodinDoxygen` CMake target.
 
-From a configured build tree:
+Build the documentation from a configured build tree.
 
 ```sh
 cmake --build build --target RodinDoxygen
 ```
 
-For a fresh build tree:
+Configure a fresh build tree before building the documentation.
 
 ```sh
 cmake -S . -B build -DRODIN_BUILD_DOC=ON
@@ -53,14 +55,14 @@ The documentation build has two modes:
 | `RODIN_BUILD_DOC=ON` | Enable the `RodinDoxygen` target. |
 | `RODIN_USE_MCSS=ON` | Build the styled m.css site instead of plain Doxygen HTML. |
 
-Plain Doxygen:
+Build the plain Doxygen documentation with this configuration.
 
 ```sh
 cmake -S . -B build -DRODIN_BUILD_DOC=ON -DRODIN_USE_MCSS=OFF
 cmake --build build --target RodinDoxygen
 ```
 
-Styled m.css documentation:
+Build the styled m.css documentation with this configuration.
 
 ```sh
 cmake -S . -B build -DRODIN_BUILD_DOC=ON -DRODIN_USE_MCSS=ON
@@ -85,13 +87,13 @@ The Python packages for the m.css path are listed in `requirements.txt`.
 Doxygen warnings are tracked by the ratchet in `dev/check_doxygen_warnings.py`.
 The accepted baseline lives in `dev/doxygen_warnings.baseline`.
 
-Run the check with:
+Run the documentation check with the following command.
 
 ```sh
 python3 dev/check_doxygen_warnings.py
 ```
 
-If a change fixes old warnings, shrink the baseline with:
+If a change fixes old warnings, shrink the baseline with the following command.
 
 ```sh
 python3 dev/check_doxygen_warnings.py --update-baseline
@@ -108,8 +110,8 @@ from the Doxygen warning ratchet unless the build target fails.
 
 Prefer documenting the mathematical concept represented by the code. API
 comments should state the formula, space, domain, and ownership/lifetime
-expectations when those matter. For tests, document the behavior being checked:
-read the test body and describe the invariant, regression, or numerical
+expectations when those matter. For tests, document the behavior being checked.
+Read the test body and describe the invariant, regression, or numerical
 property the test protects.
 
 Useful conventions:
@@ -126,8 +128,7 @@ Useful conventions:
   supported set for the family.
 - In `@see` blocks and prose lists that name public classes, templates,
   specialization groups, or generated file pages, write explicit `@ref`
-  references or HTML links. Do not rely on m.css to autolink bare comma-
-  separated names such as `MeshBase, Mesh.h`.
+  references or HTML links. Do not rely on m.css to autolink bare comma-separated names such as `MeshBase, Mesh.h`.
 - Prefer plain code text over `@ref` for names that are intentionally not part
   of the generated public reference.
 - Keep generated files and local build output out of `doc/`.
@@ -186,7 +187,7 @@ that backlink on the primary template. Preprocessor macros stay attached to
 their declaring header; the Configuration page links to `Configure.h.in` and
 explains the generated `Rodin/Configure.h` include.
 
-After rendering the full m.css site, run:
+Check the navigation after rendering the full m.css site.
 
 ```sh
 python3 dev/check_documentation_navigation.py

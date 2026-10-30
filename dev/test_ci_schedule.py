@@ -110,7 +110,7 @@ class HierarchicalScheduleTest(unittest.TestCase):
         top = yaml.safe_load((tests.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
         for name, job in top.items():
             if name.startswith(('Configurations_', 'Installation')):
-                self.assertEqual(job['if'], '${{ !cancelled() }}')
+                self.assertEqual(job['if'], '${{ (!cancelled()) && !github.event.pull_request.draft }}')
 
     def test_diagrams_follow_actual_workflow_dependencies(self):
         for name, document in schedule.generated().items():
@@ -142,6 +142,19 @@ class HierarchicalScheduleTest(unittest.TestCase):
             self.assertIn('/blob/exact-commit/.github/ci/graphs/mpi.md', text)
             self.assertIn('/blob/exact-commit/.github/workflows/TestConfiguration_mpi.yml', text)
             self.assertNotIn('```mermaid', text)
+
+    def test_eight_rank_pyramid_job_has_time_for_all_cases_and_coverage(self):
+        jobs = yaml.safe_load((tests.ROOT / '.github/ci/targeted-lanes.yml').read_text())['jobs']
+        job = jobs['MPIH1Restriction']
+        self.assertEqual(job['timeout-minutes'], "${{ matrix.partition == 'pyramid' && matrix.np == '8' && 180 || 90 }}")
+        generated = schedule.generated()['TestMPIH1Restriction.yml']['jobs']['MPIH1Restriction']
+        self.assertEqual(generated['timeout-minutes'], job['timeout-minutes'])
+        self.assertEqual(generated['env'], job['env'])
+        self.assertEqual(generated['steps'], job['steps'])
+        rows = job['strategy']['matrix']['include']
+        self.assertEqual({row['np'] for row in rows}, {'1', '2', '3', '4', '8'})
+        self.assertEqual(len(rows), 20)
+        self.assertEqual(sum(row['partition'] == 'pyramid' and row['np'] == '8' for row in rows), 2)
 
     def test_preloaded_artifacts_never_fall_back_to_network(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -241,6 +254,33 @@ class HierarchicalScheduleTest(unittest.TestCase):
                     patch.object(schedule, 'layout', return_value=({}, good[1])):
                 with self.assertRaisesRegex(ValueError, 'no unique declared hierarchy edge'):
                     schedule.prepare('common')
+
+    def test_multiple_build_parts_remain_in_one_hierarchy_dependency(self):
+        ordinary, _ = schedule.requests()
+        family, row = next((f, r) for f, rows in ordinary.items() for r in rows
+                           if r['group'] == 'unit/Rodin/Variational')
+        request = {'job': 'Ordinary', 'matrix': row}
+        entry = {'id': 'common', 'definition': {'mode': 'optional',
+                 'cmake': {'RODIN_CODE_COVERAGE': 'OFF'}}, 'requests': [request]}
+        producer = schedule.key('b', row['group'])
+        execution = schedule.execution_key(request, family)
+        index = {'builds': {str(i): {'definition': {'directory': row['group'],
+                 'targets': [f'Target{i}'], 'runner': 'ubuntu-latest', 'part': i}}
+                 for i in (1, 2)}, 'requests': {graph.request_key(**request):
+                 {'builds': ['1', '2'], 'selected': ['fixture']}}}
+        layout = ({producer: {'path': row['group']}},
+                  {execution: {'family': family, 'dependencies': [producer]}})
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'ci-common-plan.json').write_text(json.dumps([entry]))
+            output = root / 'outputs'
+            with patch.object(schedule, 'ROOT', root), patch.object(graph, 'index_graph', return_value=(index, {})), \
+                    patch.dict(os.environ, GITHUB_OUTPUT=str(output)), patch.object(schedule, 'layout', return_value=layout):
+                schedule.prepare('common')
+            values = dict(line.split('=', 1) for line in output.read_text().splitlines())
+            parts = json.loads(values[producer])['include']
+            self.assertEqual({p['id'] for p in parts}, {'1', '2'})
+            self.assertEqual({p['name'][-3:] for p in parts}, {'/ 1', '/ 2'})
 
     def test_generated_workflows_are_current_and_bounded(self):
         for name, document in schedule.generated().items():

@@ -10,14 +10,19 @@ rodin_add_petsc_refinement(RodinConvergenceHPETScNonlinearPoissonBoundary Bounda
 foreach(geometry Tetrahedron Pyramid)
   foreach(boundary MixedNeumann Robin PureNeumann)
     foreach(degree 1 2 3)
+      set(_boundary_timeout 10800)
+      # CI exceeded three hours while solving the finest resolved P1 tetrahedron.
+      if(geometry STREQUAL "Tetrahedron" AND boundary STREQUAL "PureNeumann" AND degree EQUAL 1)
+        set(_boundary_timeout 18000)
+      endif()
       set_tests_properties(
         RodinConvergenceHPETScNonlinearPoissonBoundary_${boundary}P${degree}Rates_${geometry}
-        PROPERTIES TIMEOUT 10800)
+        PROPERTIES TIMEOUT ${_boundary_timeout})
       if(RODIN_USE_MPI)
         foreach(np 1 2 3 4)
           set_tests_properties(
             RodinConvergenceHPETScNonlinearPoissonBoundary_MPI_np${np}_${boundary}P${degree}Rates_${geometry}
-            PROPERTIES TIMEOUT 10800)
+            PROPERTIES TIMEOUT ${_boundary_timeout})
         endforeach()
       endif()
     endforeach()

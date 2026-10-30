@@ -1,86 +1,65 @@
 /**
-  @page examples-io-medit MEDIT format
-  @brief How to load and convert MEDIT-format meshes
-
-  @m_keywords{MEDIT, Mesh, I/O, MMG, Format Conversion}
+  @page examples-io-medit Converting a MEDIT mesh
+  @brief Write a mesh, load it again and convert it to MFEM format.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-io-medit-intro Introduction
+  @section examples-io-medit-intro Mesh data and file formats
 
-  The MEDIT format (`.mesh`) is developed by INRIA and is the native format
-  for the [MMG](https://www.mmgtools.org/) mesh tools. It stores vertex
-  coordinates, element connectivity, and integer attributes (material tags,
-  boundary labels).
+  A mesh file stores coordinates, element connectivity and integer attributes.
+  MEDIT is used by MMG for mesh exchange. MFEM provides another text representation
+  of the same basic mesh data. Both formats use the `.mesh` extension; the
+  format argument selects the reader or writer.
 
-  Use @ref Rodin::IO::FileFormat "IO::FileFormat::MEDIT" when saving or loading.
+  This program creates a unit-square mesh with 25 vertices and 32 triangles,
+  saves it in MEDIT format and converts the saved mesh to MFEM format.
 
-  @section examples-io-medit-load Loading a MEDIT Mesh
+  @section examples-io-medit-load Write and reload the mesh
 
-  A mesh in MEDIT format can be loaded into either a standard
-  @ref Rodin::Geometry::Mesh "Mesh" or an @ref Rodin::MMG
-  "MMG::Mesh":
+  Five vertices in each coordinate direction give four intervals. Scaling by
+  one quarter places the grid on the unit square.
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
+  @snippet IO/MEDIT.cpp medit-write
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
+  The output is `Square.medit.mesh`. The program takes no arguments and writes
+  into its working directory.
 
-  int main(int, char** argv)
-  {
-    Mesh mesh;
-    mesh.load(argv[1], IO::FileFormat::MEDIT);
+  @section examples-io-medit-convert Convert the loaded mesh
 
-    std::cout << "Loaded mesh with "
-              << mesh.getVertexCount() << " vertices and "
-              << mesh.getCellCount() << " cells" << std::endl;
+  Loading fills a new mesh object. Saving that object with a different format
+  performs the conversion; changing the filename extension alone leaves the
+  stored representation unchanged.
 
-    return 0;
-  }
-  @endcode
+  @snippet IO/MEDIT.cpp medit-convert
 
-  @section examples-io-medit-convert Format Conversion
+  The program reloads `Square.mfem.mesh` and compares its vertex and cell counts
+  with the original. It returns `EXIT_FAILURE` if this count check fails.
+  Applications exchanging curved geometry or specialized metadata should also
+  check that their required features are supported by both formats.
 
-  A common workflow is to convert a MEDIT mesh produced by MMG into MFEM
-  format for use with other tools:
+  @section examples-io-medit-mmg Continue with MMG
 
-  @code{.cpp}
-  Mesh mesh;
-  mesh.load("input.medit.mesh", IO::FileFormat::MEDIT);
-  mesh.save("output.mfem.mesh", IO::FileFormat::MFEM);
-  @endcode
+  The @ref examples-mmg-simple_io "MMG I/O example" covers loading and saving
+  meshes through the MMG integration. Conversion through the generic mesh
+  interface is useful when only the supported geometry, connectivity and
+  attributes are required.
 
-  @section examples-io-medit-mmg Using with MMG
+  @section examples-io-medit-full Build and run
 
-  When working with the @ref Rodin::MMG "MMG" module, MEDIT is the
-  recommended format because it preserves MMG-specific metadata:
+  Build the `Rodin_IO_MEDIT` example target and run the resulting executable
+  from a scratch directory. The expected output reports 25 vertices,
+  32 triangles and a successful mesh count round trip.
 
-  @code{.cpp}
-  #include <Rodin/MMG.h>
+  The complete program is available in @ref IO/MEDIT.cpp "MEDIT.cpp".
 
-  MMG::Mesh mesh;
-  mesh.load("domain.medit.mesh", IO::FileFormat::MEDIT);
+  @section examples-io-medit-see-also Next steps
 
-  // Optimize and save
-  MMG::Optimizer().setHMax(0.1).optimize(mesh);
-  mesh.save("optimized.medit.mesh", IO::FileFormat::MEDIT);
-  @endcode
-
-  @section examples-io-medit-full Full Source Code
-
-  -   @ref IO/MEDIT.cpp "MEDIT.cpp"
-
-  @section examples-io-medit-see-also See Also
-
-  - @ref examples-io-mfem "MFEM format" — Alternative text format
-  - @ref examples-io-xdmf "XDMF format" — Recommended for visualization
-  - @ref examples-mmg-simple_io "MMG I/O" — MMG-specific I/O
-  - @ref guides-io "I/O in Rodin"
+  - @ref examples-io-mfem "Save and reload a finite element field"
+  - @ref examples-io-xdmf "Export a time series for ParaView"
+  - @ref guides-io-meshformats "Supported mesh formats"
 
   @example IO/MEDIT.cpp
   @m_examplenavigation{examples-io-medit,IO/}
   @m_footernavigation
-  */
+*/

@@ -48,7 +48,7 @@ namespace Rodin::Tests::Benchmarks
    * \max(1,\|A_K^{\mathrm{integral}}\|_F)\le10^{-11}@f$.
    * A perturbed matrix must be rejected before timing starts.
    *
-   * Counters distinguish factor degree, reported element order, requested
+   * Counters distinguish family order, polynomial degree when known, requested
    * quadrature order and actual point count. The pair-component work proxy is
    * @f$n_q n_{\mathrm{local}}^2 s^2@f$; it is not an instruction count and
    * excludes reference preparation and geometry costs. No source optimization,
@@ -85,7 +85,7 @@ namespace Rodin::Tests::Benchmarks
     const auto cell = *mesh.getCell();
     const auto& element = space.getFiniteElement(cell.getDimension(), cell.getIndex());
     const size_t count = element.getCount();
-    const size_t order = 2 * element.getOrder();
+    const size_t order = 2 * element.getDegree().value_or(2 * element.getOrder());
     const auto& formula = QF::QuadratureFormula::get(order, geometry);
     auto integral = LinearElasticityIntegral(trial, test)(lambda, mu);
     integral.setPolytope(cell);
@@ -137,8 +137,9 @@ namespace Rodin::Tests::Benchmarks
       state.SkipWithError("Repeated local elasticity evaluation changed the operator");
     }
     state.counters["dimension"] = dimension;
-    state.counters["factor_degree"] = element.getFactorOrder();
-    state.counters["reported_element_order"] = element.getOrder();
+    state.counters["family_order"] = element.getOrder();
+    if (const auto degree = element.getDegree())
+      state.counters["reference_total_degree"] = *degree;
     state.counters["requested_quadrature_order"] = order;
     state.counters["quadrature_points"] = formula.getSize();
     state.counters["local_dofs"] = count;

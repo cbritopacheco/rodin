@@ -2,7 +2,7 @@
 GENERATE_HTML           = NO
 GENERATE_XML            = YES
 XML_PROGRAMLISTING      = NO
-HTML_EXTRA_FILES        = @CMAKE_SOURCE_DIR@/doc/rodin-navigation.js @CMAKE_SOURCE_DIR@/doc/rodin-theme.js @CMAKE_SOURCE_DIR@/doc/Images/Doxygen.svg
+HTML_EXTRA_FILES        = @CMAKE_SOURCE_DIR@/doc/rodin-video.js @CMAKE_SOURCE_DIR@/doc/Examples/PDEs/NavierStokes.webm @CMAKE_SOURCE_DIR@/doc/rodin-ci.js @CMAKE_SOURCE_DIR@/doc/rodin-navigation.js @CMAKE_SOURCE_DIR@/doc/rodin-theme.js @CMAKE_SOURCE_DIR@/doc/Images/Doxygen.svg @CMAKE_SOURCE_DIR@/brand/logos/horizontal-color.svg @CMAKE_SOURCE_DIR@/brand/logos/horizontal-dark.svg @CMAKE_SOURCE_DIR@/brand/logos/wordmark-white.svg @CMAKE_SOURCE_DIR@/brand/icons/favicon-monogram-light.svg @CMAKE_SOURCE_DIR@/brand/icons/favicon-monogram-dark.svg @CMAKE_SOURCE_DIR@/brand/fonts/static/Manrope-Regular.ttf @CMAKE_SOURCE_DIR@/brand/fonts/static/Manrope-SemiBold.ttf @CMAKE_SOURCE_DIR@/brand/fonts/static/Manrope-Bold.ttf @CMAKE_SOURCE_DIR@/brand/fonts/OFL.txt
 
 ALIASES = \
     "m_div{1}=@xmlonly<mcss:div xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:class=\"\1\">@endxmlonly" \

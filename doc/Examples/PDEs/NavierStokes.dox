@@ -1,132 +1,141 @@
 /**
-  @page examples-pdes-navierstokes Solving the Navier-Stokes equations
-  @brief Transient nonlinear lid-driven cavity with PETSc SNES
+  @page examples-pdes-navierstokes Solving the Navier–Stokes equations
+  @brief Follow the development of a vortex in a lid-driven cavity.
 
-  @image html PDEs/NavierStokes_placeholder.png width=410px
-
-  @m_keywords{Navier-Stokes, SNES, Newton, PETSc, Taylor-Hood, Fluid, Incompressible}
+  The @ref examples-pdes-stokes "Stokes tutorial" introduces velocity–pressure
+  coupling without inertia. Here the same cavity starts from rest, the lid is
+  set in motion, and convection transports momentum through the fluid. The
+  exported time series is used to produce the animation below.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-pdes-navierstokes-intro Introduction
+  @section examples-pdes-navierstokes-intro The mathematical problem
 
-  The incompressible Navier-Stokes equations describe viscous flow with a
-  nonlinear convective term. The PETSc example solves a transient lid-driven
-  cavity problem on the unit square:
-
+  On @f$\Omega=(0,1)^2@f$, the nondimensional incompressible equations are
   @f[
-  \left\{
-    \begin{aligned}
-      \rho\partial_t\mathbf{u}
-      + \rho(\mathbf{u}\cdot\nabla)\mathbf{u}
-      -\mu\Delta\mathbf{u} + \nabla p &= 0
-        && \mathrm{in}\ \Omega, \\
-      \nabla\cdot\mathbf{u} &= 0
-        && \mathrm{in}\ \Omega, \\
-      \mathbf{u} &= \mathbf{g}
-        && \mathrm{on}\ \partial\Omega.
-    \end{aligned}
-  \right.
+    \partial_tu+(u\cdot\nabla)u-\nu\Delta u+\nabla p=0,
+    \qquad \operatorname{div}u=0.
   @f]
-
-  The top boundary moves with a prescribed horizontal lid velocity and the
-  remaining walls use no-slip boundary conditions. Velocity is discretized
-  with quadratic H1 elements and pressure with linear H1 elements, giving the
-  Taylor-Hood pair.
-
-  @section examples-pdes-navierstokes-weak Weak Formulation
-
-  Backward Euler gives the nonlinear residual at every time step:
-
+  Initially @f$u=0@f$. The bottom and side walls are stationary. On the top,
   @f[
-    R(\mathbf{u}, p; \mathbf{v}, q)
-    = { \rho \over \Delta t }
-      \int_\Omega (\mathbf{u}^{n+1} - \mathbf{u}^n)\cdot\mathbf{v}\,dx
-    + \rho\int_\Omega ((\mathbf{u}^{n+1}\cdot\nabla)\mathbf{u}^{n+1})\cdot\mathbf{v}\,dx
-    + \mu\int_\Omega \nabla\mathbf{u}:\nabla\mathbf{v}\,dx
-    - \int_\Omega p\,\nabla\cdot\mathbf{v}\,dx
-    + \int_\Omega q\,\nabla\cdot\mathbf{u}\,dx
-    + \epsilon\int_\Omega p q\,dx
+    u(x,1,t)=\bigl(U_{\mathrm{lid}}r(t)[1-((x-c(t))/w)^2]_+^2,0\bigr),
+    \qquad r(t)=\min(t,1),
   @f]
-
-  The small pressure term @f$ \epsilon(p,q) @f$ fixes the pressure nullspace
-  for the standalone example. The nonlinear state is initialized with the
-  previous time step before each SNES solve.
-
-  @section examples-pdes-navierstokes-snes PETSc SNES
-
-  PETSc SNES drives the nonlinear solve. The example assembles the Newton
-  Jacobian explicitly, including both convective derivative terms:
-
+  where @f$U_{\mathrm{lid}}=2@f$, @f$[a]_+=\max(a,0)@f$, @f$w=0.25@f$, and
   @f[
-    \rho\int_\Omega
-      \left(((\mathbf{u}\cdot\nabla)\delta\mathbf{u})
-      + ((\delta\mathbf{u}\cdot\nabla)\mathbf{u}))\right)
-      \cdot\mathbf{v}\,dx.
+    c(t)=0.5-0.22\cos(2\pi t/8).
   @f]
+  The smooth driving patch travels horizontally between @f$x=0.28@f$ and
+  @f$x=0.72@f$, completing one round trip in eight time units. Its support
+  stays away from the side walls, and its velocity points to the right even
+  when the patch itself travels left. The amplitude ramps over one time unit.
+  Its peak speed after the ramp is two and the cavity width is one. With
+  @f$\nu=0.01@f$, the Reynolds number based on those scales is
+  @f$\mathrm{Re}=200@f$.
 
-  In Rodin notation these terms are:
+  The compact lid profile vanishes at the corners, avoiding the conflicting corner
+  values of a constant-speed lid. Comparisons with classical cavity reference
+  data would require matching that boundary profile as well as the Reynolds
+  number. Pressure is normalized by @f$\int_\Omega p\,dx=0@f$.
 
-  @code{.cpp}
-  const auto stateConvection = Mult(Jacobian(uState), uState);
-  const auto newtonConvection =
-    Mult(Jacobian(du), uState) + Mult(Jacobian(uState), du);
+  @section examples-pdes-navierstokes-time The time discretization
 
-  Problem navierStokes(du, dp, v, q);
-  navierStokes =
-      (rho / dt) * Integral(du, v)
-    + rho * Integral(Dot(newtonConvection, v))
-    + mu * Integral(Jacobian(du), Jacobian(v))
-    - Integral(dp, Div(v))
-    + Integral(Div(du), q)
-    + epsP * Integral(dp, q)
-    + (rho / dt) * Integral(uState, v)
-    - (rho / dt) * Integral(uOld, v)
-    + rho * Integral(Dot(stateConvection, v))
-    + mu * Integral(Jacobian(uState), Jacobian(v))
-    - Integral(pState, Div(v))
-    + Integral(Div(uState), q)
-    + epsP * Integral(pState, q)
-    + DirichletBC(du, -uState).on(walls)
-    + DirichletBC(du, lidVelocity - uState).on(top);
-  @endcode
+  One Oseen solve is performed per time step. The transport velocity is taken
+  from the previous step, while the transported velocity is implicit. With
+  @f$\Delta t=0.01@f$,
+  @f[
+    \frac{u^{n+1}-u^n}{\Delta t}
+      +(u^n\cdot\nabla)u^{n+1}-\nu\Delta u^{n+1}+\nabla p^{n+1}=0,
+    \qquad \operatorname{div}u^{n+1}=0.
+  @f]
+  The method is first order in time and uses a semi-implicit Oseen linearization.
+  The 2,000 steps reach @f$t=20@f$. The resulting transient can be assessed
+  through time-step and mesh refinement.
 
-  The SNES wrapper synchronizes PETSc's current nonlinear iterate into
-  `uState` and `pState` before each residual and Jacobian assembly.
+  Multiplication by test velocity @f$v@f$ gives the momentum equation
+  @f[
+    \frac{1}{\Delta t}\int_\Omega u^{n+1}\cdot v\,dx
+      +\int_\Omega\bigl((u^n\cdot\nabla)u^{n+1}\bigr)\cdot v\,dx
+      +\nu\int_\Omega\nabla u^{n+1}:\nabla v\,dx
+      -\int_\Omega p^{n+1}\operatorname{div}v\,dx
+      =\frac{1}{\Delta t}\int_\Omega u^n\cdot v\,dx.
+  @f]
+  Continuity and the pressure-mean multiplier are imposed as in the Stokes
+  example. Time-step and mesh refinement are needed to assess temporal and
+  spatial error separately.
 
-  @section examples-pdes-navierstokes-run Running
+  @section examples-pdes-navierstokes-mesh 1. Prepare the cavity
 
-  Build the PETSc examples and run:
+  The unit square is refined to 2,048 triangles (33 by 33 mesh vertices),
+  retaining the Stokes example's boundary labels. Quadratic velocity and linear
+  pressure give 9,539 velocity and pressure DOFs, plus one pressure-mean multiplier.
 
-  @code{.sh}
-  ./examples/PETSc/PDEs/PETSc_Seq_NavierStokes \
-    -ns_n 32 -ns_nt 100 -ns_T 1.0 \
-    -snes_monitor -snes_converged_reason \
-    -ksp_type preonly -pc_type lu
-  @endcode
+  @snippet PDEs/NavierStokes.cpp navierstokes-mesh
 
-  The example writes:
+  @section examples-pdes-navierstokes-fields 2. Initialize fields and output
 
-  - `NavierStokes.mesh`
-  - `NavierStokes_velocity.gf`
-  - `NavierStokes_pressure.gf`
-  - `NavierStokes.xdmf`
+  The Taylor–Hood pair uses quadratic velocity and linear pressure. The stored
+  `velocity` holds the previous time step during assembly; after a successful
+  solve, it is replaced with the new solution. The XDMF time series starts with
+  the fluid at rest. A snapshot is exported every five time steps, giving a
+  visualization interval of @f$0.05@f$ without enlarging the solver time step.
 
-  @section examples-pdes-navierstokes-oseen Related Oseen Examples
+  @snippet PDEs/NavierStokes.cpp navierstokes-fields
 
-  The older semi-implicit examples now use Oseen names to reflect that they
-  freeze the transport velocity and solve one linearized problem per step:
+  @section examples-pdes-navierstokes-step 3. Advance one step at a time
 
-  - [Seq_OseenFlow.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_OseenFlow.cpp)
-  - [Seq_OseenLidDrivenCavity.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_OseenLidDrivenCavity.cpp)
+  `Mult(Jacobian(u), velocity)` expresses
+  @f$(u^n\cdot\nabla)u^{n+1}@f$. The convection term makes the linear system
+  nonsymmetric and is solved with sparse LU. Each time step
+  checks solver success before updating or writing the fields.
 
-  @section examples-pdes-navierstokes-see-also See Also
+  @snippet PDEs/NavierStokes.cpp navierstokes-step
 
-  - @ref examples-pdes-poisson "Poisson equation"
-  - @ref examples-pdes-elasticity "Linear elasticity"
-  - @ref fem-spaces "Finite element spaces"
-  - @ref guides-petsc "PETSc guide"
-  - @ref guides-variational "Variational formulations"
+  Each iteration assembles the Oseen form using the previous velocity and current
+  lid data, solves the resulting linear system, and updates the stored fields.
+
+  @section examples-pdes-navierstokes-output 4. Flow visualization
+
+  @htmlonly
+  <figure class="m-figure rodin-tutorial-video">
+    <video controls playsinline preload="metadata" poster="NavierStokes.png"
+           aria-label="Computed cavity flow with horizontally traveling lid forcing at Reynolds number 200">
+      <source src="NavierStokes.webm" type="video/webm" />
+      <a href="NavierStokes.webm">Watch the cavity animation</a>
+    </video>
+    <figcaption>Computed speed and instantaneous streamlines from rest to time 20.
+      The cyan trace follows the computed top-wall speed as the driving patch travels
+      horizontally. The displayed time is simulation time.</figcaption>
+  </figure>
+  @endhtmlonly
+
+  The right panel shows instantaneous streamlines integrated by ParaView through
+  each exported velocity field. Their evolution displays the displacement of the
+  primary recirculation as the driving patch travels along the lid.
+
+  Open `NavierStokes.xdmf` in ParaView and select **Apply**. Color by the magnitude
+  of **velocity**, then use the time controls to inspect the evolution. Add the <strong>Stream Tracer</strong> filter to examine circulation and color by **pressure** to inspect
+  the pressure field. Keep all referenced HDF5 snapshots next to the XDMF file.
+
+  The `examples/PDEs/visualize_paraview.py` script uses ParaView to produce
+  transparent PNG frames, then FFmpeg encodes the WebM
+  from the same time series. A still image of the final frame is also available.
+
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html PDEs/NavierStokes-speed.png "Computed speed at time 20 with moving lid forcing."
+  @image html PDEs/NavierStokes-streamlines.png "Instantaneous circulation and velocity directions at time 20."
+  @endparblock
+
+  @section examples-pdes-navierstokes-full Complete program
+
+  See @ref PDEs/NavierStokes.cpp "NavierStokes.cpp" for this native example.
+  A separate [PETSc SNES example](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_NavierStokes.cpp)
+  demonstrates a fully implicit nonlinear formulation with both Newton convection
+  terms. Its time integrator and nonlinear solve differ from the Oseen scheme
+  presented here; see the @ref guides-petsc "PETSc guide" for that backend.
+
+  @example PDEs/NavierStokes.cpp @m_examplenavigation{examples-pdes-navierstokes,PDEs/} @m_footernavigation
 */

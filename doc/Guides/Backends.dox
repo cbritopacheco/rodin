@@ -10,7 +10,7 @@
   template specializations. The main axes are mesh context, assembly strategy,
   linear algebra storage, and solver backend.
 
-  @section guides-backends-map Backend Map
+  @section guides-backends-map Backend map
 
   | Axis | Local Eigen | OpenMP | MPI | PETSc |
   |------|-------------|--------|-----|-------|
@@ -18,10 +18,10 @@
   | Mesh | `Mesh<Context::Local>` | same | `Mesh<Context::MPI>` | same mesh contexts |
   | Assembly | `Assembly::Sequential` | `Assembly::OpenMP` | `Assembly::MPI` | PETSc assembly specializations |
   | Linear algebra | `Math::SparseMatrix`, `Math::Matrix`, `Math::Vector` | same | usually PETSc for distributed solves | PETSc `Mat`/`Vec` wrappers |
-  | Solvers | Eigen and SuiteSparse wrappers | same after assembly | usually PETSc KSP/SNES | `Solver::KSP`, PETSc `CG`, `GMRES`, `SNES` |
+  | Solvers | Eigen and SuiteSparse wrappers | same after assembly | usually PETSc KSP/SNES | `PETSc::Solver::KSP`, PETSc `CG`, `GMRES`, `SNES` |
   | I/O | MFEM, MEDIT, HDF5, XDMF | same | HDF5/XDMF shard-aware paths | PETSc grid-function data paths |
 
-  @section guides-backends-local Local Eigen Path
+  @section guides-backends-local Local Eigen path
 
   The local path is the default. It uses
   @ref Rodin::Geometry::Mesh "Mesh<Context::Local>",
@@ -29,29 +29,28 @@
   @ref Rodin::Math "Math" matrices and vectors, and the native
   @ref Rodin::Solver "Solver" wrappers.
 
-  This is the best path for examples, small and medium problems, unit tests,
-  and backend-independent feature development.
+  The local path is used for examples, small and medium problems, unit tests and
+  backend-independent feature development.
 
-  @section guides-backends-openmp OpenMP Assembly
+  @section guides-backends-openmp OpenMP assembly
 
   When Rodin is built with OpenMP support, `Assembly::Default` can select
-  shared-memory assembly for local meshes. OpenMP changes the assembly
-  iteration strategy, not the mathematical problem or the linear algebra
-  objects.
+  shared-memory assembly for local meshes. OpenMP distributes assembly iteration across threads. The problem formulation and
+  linear-algebra objects retain their configured definitions.
 
   OpenMP support should preserve deterministic results within floating-point
   accumulation expectations. A feature that supports local assembly should be
   checked under OpenMP if it changes element iteration, thread-local storage,
   or merge behavior.
 
-  @section guides-backends-mpi MPI Mesh Context
+  @section guides-backends-mpi MPI mesh context
 
   The MPI path uses @ref Rodin::Context::MPI "Context::MPI" and
   @ref Rodin::Geometry::MPIMesh "Mesh<Context::MPI>". A distributed mesh stores
   a rank-local @ref Rodin::Geometry::Shard "Shard" with owned, shared, and
   ghost entities.
 
-  Distributed algorithms must respect ownership and reconciliation:
+  Distributed algorithms must respect ownership and reconciliation.
 
   @code{.cpp}
   mesh.getConnectivity().compute(2, 3);
@@ -60,9 +59,9 @@
 
   See @ref guides-mpi "MPI" for the full mesh distribution workflow.
 
-  @section guides-backends-petsc PETSc Storage and Solvers
+  @section guides-backends-petsc PETSc storage and solvers
 
-  PETSc support is activated by using PETSc-backed trial and test functions:
+  PETSc support is activated by using PETSc-backed trial and test functions.
 
   @code{.cpp}
   PETSc::Variational::TrialFunction u(Vh);
@@ -74,7 +73,7 @@
   be used with local meshes or MPI meshes. For large distributed problems,
   PETSc is the standard solver backend.
 
-  @section guides-backends-kokkos Kokkos Local Mesh
+  @section guides-backends-kokkos Kokkos local mesh
 
   The optional `Rodin::Kokkos` target provides
   `Context::Kokkos<Context::Local, Backend>` and resident mesh/connectivity
@@ -89,10 +88,10 @@
   See @ref guides-kokkos "Kokkos local mesh" for supported geometry,
   ownership, host interfaces and CUDA build setup.
 
-  @section guides-backends-support What Complete Support Means
+  @section guides-backends-support What complete support means
 
-  A feature may support only part of the backend matrix. That is fine, but the
-  documentation and tests should say so explicitly.
+  Supported configurations are specified per feature and specialization.
+  The corresponding tests establish the advertised mesh, storage and assembly paths.
 
   | Feature | Minimum support to claim it |
   |---------|-----------------------------|
@@ -102,7 +101,7 @@
   | Solver | Specialization for each advertised linear-system type |
   | IO format | Loader/printer specialization for each advertised mesh, FES, and data backend |
 
-  @section guides-backends-see-also See Also
+  @section guides-backends-see-also See also
 
   - @ref guides-mpi "MPI"
   - @ref guides-petsc "PETSc"
