@@ -51,7 +51,7 @@
   files. It returns `EXIT_FAILURE` if the mesh counts or sampled field values
   fail their checks.
 
-  @snippet IO/MFEM.cpp mfem-source
+  The complete program is available in @ref IO/MFEM.cpp "MFEM.cpp".
 
   @section examples-io-mfem-see-also Next steps
 

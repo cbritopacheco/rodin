@@ -47,7 +47,7 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c P0gElement: exposes the scalar type and the range type.
+  /// @brief Type traits for @c P0gElement, exposing the scalar type and the range type.
   template <class Range>
   struct Traits<Variational::P0gElement<Range>>
   {
@@ -509,7 +509,7 @@ namespace Rodin::Variational
       {}
 
       /**
-       * Backward-compatible: vdim defaults to spatial dimension of geometry
+       * For backward compatibility, vdim defaults to spatial dimension of geometry
        * @param geometry Reference geometry.
        */
       constexpr explicit P0gElement(G geometry)

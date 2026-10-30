@@ -69,6 +69,7 @@ def main():
         display.AmbientColor = [.06, .13, .21]
         style.text(target, rf'$t = {time:g}$')
     style.save(args.output / 'XDMF.png', layout, (1440, 640))
+    style.save_panels(args.output / 'XDMF.png', [left, right], ['initial', 'final'])
 
 
 if __name__ == '__main__':

@@ -136,7 +136,8 @@ int main(int argc, char** argv)
     auto grid = xdmf.grid();
     grid.clear();
     grid.setMesh(Omega, IO::XDMF::MeshPolicy::Transient)
-      .add("displacement", u.getSolution());
+      .add("displacement", u.getSolution())
+      .add("descent", g.getSolution());
     xdmf.write(Real(i)).flush();
     Alert::Info() << "   | Objective: " << objective << Alert::Raise;
 

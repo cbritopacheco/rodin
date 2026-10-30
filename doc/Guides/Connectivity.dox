@@ -44,7 +44,7 @@
   @section guides-connectivity-compute Computing connectivity
 
   Connectivity relations are computed on demand using the
-  @ref Rodin::Geometry::Connectivity "compute()" method:
+  @ref Rodin::Geometry::Connectivity "compute()" method.
 
   @code{.cpp}
   Mesh mesh;
@@ -93,7 +93,7 @@
 
   Different parts of the boundary can be distinguished by **attributes**
   (integer labels). This is useful when different boundary conditions are
-  applied to different segments:
+  applied to different segments.
 
   @code{.cpp}
   Attribute GammaD = 2, GammaN = 3;

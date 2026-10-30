@@ -27,7 +27,7 @@
   To obtain the weak form, multiply the equation by a test function @f$v@f$
   and integrate over the domain. Integration by parts transfers one derivative
   from @f$u@f$ to @f$v@f$; the boundary term vanishes because @f$v@f$ has zero
-  trace. The problem becomes: find @f$u\in H^1_0(\Omega)@f$ such that
+  trace. The weak problem seeks @f$u\in H^1_0(\Omega)@f$ such that
   @f[
     \int_\Omega \nabla u\cdot\nabla v\,dx = \int_\Omega v\,dx
     \qquad\text{for every }v\in H^1_0(\Omega).
@@ -80,7 +80,7 @@
   @snippet PDEs/Poisson.cpp poisson-export
 
   @m_class{m-flat}
-  @image html PDEs/Poisson.png "Computed solution on the unit square. Height and color represent the scalar field." width=360px
+  @image html PDEs/Poisson.png "Computed solution on the unit square. Height and color represent the scalar field." width=720px
 
   In ParaView:
 
@@ -97,8 +97,6 @@
 
   The complete source combines the steps above and can be built with the other
   Rodin examples. The output files are written to the working directory.
-
-  @snippet PDEs/Poisson.cpp poisson-source
 
   See @ref PDEs/Poisson.cpp "Poisson.cpp" for the source, the
   @ref guides-getting-started-installation "installation guide" for build setup,

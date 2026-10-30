@@ -31,7 +31,12 @@
 
   @section examples-mmg-adapt-behavior Inspect density and domain preservation
 
-  @image html MMGAdaptation.png "Actual meshes before and after adaptation. The prescribed size increases from left to right."
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html MMGAdaptation-before.png "Mesh before adaptation, with the same plotting scale."
+  @image html MMGAdaptation-after.png "Mesh after adaptation, with the same plotting scale."
+  @endparblock
 
   The size field is an input to remeshing. A solve–estimate–adapt loop also
   needs a specified error indicator, its conversion to positive target sizes,
@@ -45,7 +50,7 @@
   used for the figure. The program checks positive triangle areas and unit
   total area with tolerance @f$10^{-10}@f$.
 
-  @snippet MMG/MeshAdaptation.cpp mmg-adapt-source
+  The complete program is available in @ref MMG/MeshAdaptation.cpp "MeshAdaptation.cpp".
 
   @section examples-mmg-adapt-see-also Continue
 

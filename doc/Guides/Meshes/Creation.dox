@@ -79,7 +79,7 @@
   With triangular faces, three interval counts describe a two-dimensional surface
   embedded in three dimensions. The following surface encloses the unit cube
   after scaling by one third and has area six. In this factory, three intervals
-  span coordinates zero to three before scaling:
+  span coordinates zero to three before scaling.
 
   @snippet Geometry/MeshBasics.cpp mesh-basics-box
 

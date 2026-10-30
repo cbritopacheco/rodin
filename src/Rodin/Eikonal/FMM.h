@@ -76,7 +76,7 @@ namespace Rodin::Eikonal
       /// Finite element space type (P1)
       using FES = Variational::P1<ScalarType, Mesh>;
 
-      /// Solution type: grid function storing arrival times
+      /// Grid function storing the arrival times.
       using SolutionType = Variational::GridFunction<FES, Math::Vector<ScalarType>>;
 
       /// Speed function type

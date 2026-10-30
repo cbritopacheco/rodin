@@ -29,7 +29,7 @@
   @subsection guides-meshes-iteration-basic-faces Facets
 
   `mesh.getFace()` traverses codimension-one facets. Compute the relevant
-  connectivity first: edges must exist before a triangular mesh can report
+  connectivity first because edges must exist before a triangular mesh can report
   its complete facet set.
 
   @section guides-meshes-iteration-dimension Select a dimension

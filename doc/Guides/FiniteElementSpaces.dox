@@ -87,7 +87,7 @@
 
   @section fem-spaces-gridfunctions Assign and evaluate a field
 
-  The comparison interpolates @f$f(x,y)=x^2+y^2@f$ into P0, P1, and quadratic H1:
+  The comparison interpolates @f$f(x,y)=x^2+y^2@f$ into P0, P1, and quadratic H1.
 
   @snippet Variational/FiniteElementSpaces.cpp spaces-fields
 
@@ -96,17 +96,25 @@
   reproduce this polynomial on the affine triangular mesh, up to roundoff.
 
   Evaluation goes through `Geometry::Point`, so the reference location and its
-  physical cell are supplied together:
+  physical cell are supplied together.
 
   @snippet Variational/FiniteElementSpaces.cpp spaces-sampling
 
   The additional points refine the sampling of each existing field while preserving
   its DOFs. The CSV records evaluations at the corresponding physical points.
 
-  @section fem-spaces-visualization Inspect interpolation error
+  @section fem-spaces-visualization Inspect the interpolated fields
 
-  @image html Images/SpaceInterpolation.png "Sampled interpolation errors for the same quadratic function and mesh. Each panel has its own stated color scale; the quadratic result is at roundoff level." width=720px
+  @m_class{rodin-mesh-stages}
 
+  @parblock
+  @image html Images/SpaceInterpolation-p0.png "P0 interpolation assigns one constant value to each original triangle."
+  @image html Images/SpaceInterpolation-p1.png "P1 interpolation of the same quadratic function."
+  @image html Images/SpaceInterpolation-p2.png "Quadratic H1 interpolation of the same function. All three figures use the same color scale."
+  @endparblock
+
+  The figures plot the interpolated fields. P0 uses its original cell values;
+  P1 and quadratic H1 use the exported within-cell samples.
   For this mesh and sampling grid, the largest sampled errors are approximately
   @f$0.186@f$ for P0, @f$0.0102@f$ for P1, and below @f$3\times10^{-15}@f$ for
   quadratic H1. These maxima are measured over the exported sample points with the mesh and
@@ -152,8 +160,6 @@
 
   Build the `FiniteElementSpaces` example target. It prints the counts above and
   writes `FiniteElementSpaces.csv` and `ReferenceP1.csv` in the working directory.
-
-  @snippet Variational/FiniteElementSpaces.cpp spaces-source
 
   See @ref Variational/FiniteElementSpaces.cpp "FiniteElementSpaces.cpp" and the
   @ref guides-variational "variational guide" for the next step from a known

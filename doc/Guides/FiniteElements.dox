@@ -12,7 +12,8 @@
 
   @section fem-ciarlet-definition The finite element triple
 
-  A finite element is a triple @f$(\widehat K,\widehat P,\widehat\Sigma)@f$:
+  A finite element is a triple @f$(\widehat K,\widehat P,\widehat\Sigma)@f$
+  with the following components:
 
   | Object | Role |
   | :--- | :--- |
@@ -54,10 +55,16 @@
   Each is one at its own vertex and zero at the other two. Their sum is one,
   so constant fields are reproduced exactly.
 
-  @image html Images/P1Basis.png "P1 triangle basis functions evaluated by Rodin. Color shows each basis value on the reference cell." width=720px
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html Images/P1Basis-0.png "Reference triangle basis function 0, evaluated by Rodin. All three use the same color scale."
+  @image html Images/P1Basis-1.png "Reference triangle basis function 1, evaluated by Rodin. All three use the same color scale."
+  @image html Images/P1Basis-2.png "Reference triangle basis function 2, evaluated by Rodin. All three use the same color scale."
+  @endparblock
 
   The figure is generated from the reference-element evaluations in this
-  runnable example:
+  runnable example.
 
   @snippet Variational/FiniteElementSpaces.cpp spaces-reference
 
@@ -82,7 +89,7 @@
   @section fem-ciarlet-global Map the element to physical cells
 
   Let @f$F_K:\widehat K\to K@f$ map the reference cell to a physical cell.
-  Scalar basis functions are transported by composition:
+  Scalar basis functions are transported by composition.
   @f[
     \phi_i^K=\widehat\phi_i\circ F_K^{-1}.
   @f]
@@ -92,8 +99,7 @@
     \qquad dx=|\det J_K|\,d\widehat x.
   @f]
   Embedded surfaces instead have rectangular Jacobians and use the induced
-  metric and tangential gradient. The @ref examples-pdes-surfacemesh "surface
-  PDE tutorial" illustrates that setting.
+  metric and tangential gradient. The @ref examples-pdes-surfacemesh "surface PDE tutorial" illustrates that setting.
 
   Polynomial degree is a property of the reference approximation space.
   Under a non-affine geometry map, the physical basis is the composition of a

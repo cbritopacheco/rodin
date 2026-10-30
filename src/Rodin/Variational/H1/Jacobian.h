@@ -15,7 +15,7 @@
  * a field with @f$m@f$ components has an @f$m\times s@f$ tangential Jacobian
  * @f$J(u)=\widehat J(u)J_K^{\dagger}@f$. The geometric inverse has shape
  * @f$d\times s@f$; ambient derivative columns are retained independently of
- * the reference and field dimensions. When @f$m=s=d@f$, this is the matrix:
+ * the reference and field dimensions. When @f$m=s=d@f$, this is the matrix.
  * @f[
  *   \mathbf{J}(\mathbf{u}) = \begin{pmatrix}
  *     \frac{\partial u_1}{\partial x_1} & \cdots & \frac{\partial u_1}{\partial x_d} \\
@@ -46,7 +46,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Jacobian over a grid function: exposes the finite element
+   * @brief Type traits for @c Jacobian over a grid function, exposing the finite element
    * space and the operand type.
    */
   template <size_t K, class Range, class Data, class Mesh>
@@ -61,7 +61,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Jacobian over a shape function: exposes the finite element
+   * @brief Type traits for @c Jacobian over a shape function, exposing the finite element
    * space, the shape function space and the operand type.
    */
   template <size_t K, class NestedDerived, class Range, class Mesh,
@@ -86,7 +86,7 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an H1 vector GridFunction.
    *
-   * Computes the Jacobian matrix of an H1<K> vector-valued grid function:
+   * Computes the Jacobian matrix of an H1<K> vector-valued grid function.
    * @f[
    *   \mathbf{J}(\mathbf{u})|_K
    *   = \sum_{\alpha=1}^{N_s}\sum_{c=0}^{m-1} u_{\alpha c}\,
@@ -529,8 +529,8 @@ namespace Rodin::Variational
        * @brief Sets the integration point the expression is evaluated at.
        *
        * Every explicit bind prepares physical derivatives from the supplied
-       * point. Cell and formula identities do not identify geometry state:
-       * deformation may preserve both while changing the inverse Jacobian.
+       * point. Cell and formula identities do not identify geometry state.
+       * Deformation may preserve both while changing the inverse Jacobian.
        * Only reference tabulation and working storage are reused across binds.
        *
        * @param ip Integration point at which the expression is evaluated.

@@ -41,7 +41,17 @@
   | `Hexahedron` | 3 | 8 | Product of three unit intervals |
   | `Wedge` | 3 | 6 | Triangle times unit interval |
 
-  @image html ReferencePolytopes.png "Reference vertices obtained from Polytope::Traits. The pyramid apex is above its first base vertex."
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html ReferencePolytopes-segment.png "Segment reference vertices from Polytope::Traits."
+  @image html ReferencePolytopes-triangle.png "Triangle reference vertices from Polytope::Traits."
+  @image html ReferencePolytopes-quadrilateral.png "Quadrilateral reference vertices from Polytope::Traits."
+  @image html ReferencePolytopes-tetrahedron.png "Tetrahedron reference vertices from Polytope::Traits."
+  @image html ReferencePolytopes-pyramid.png "Pyramid reference vertices from Polytope::Traits. The apex is above the first base vertex."
+  @image html ReferencePolytopes-hexahedron.png "Hexahedron reference vertices from Polytope::Traits."
+  @image html ReferencePolytopes-wedge.png "Wedge reference vertices from Polytope::Traits."
+  @endparblock
 
   @section guides-polytopes-reference Reference and physical coordinates
 
@@ -50,7 +60,7 @@
   quadrature samples; the map supplies physical coordinates and derivatives.
   On a curved cell, the map also depends on its geometric control points.
 
-  Reference vertices can be obtained directly from the library:
+  Reference vertices can be obtained directly from the library.
 
   @code{.cpp}
   const Polytope::Traits traits(Polytope::Type::Pyramid);

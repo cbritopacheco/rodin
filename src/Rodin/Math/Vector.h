@@ -336,7 +336,7 @@ namespace Rodin::FormLanguage
     static constexpr int Size = Rows;
   };
 
-  /// @brief Type traits for a dynamic Math::Vector: exposes the scalar type.
+  /// @brief Type traits for a dynamic Math::Vector, exposing the scalar type.
   template <class Number>
   struct Traits<Math::Vector<Number>>
   {
@@ -345,7 +345,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for a Math::FixedSizeVector: exposes the scalar type
+   * @brief Type traits for a Math::FixedSizeVector, exposing the scalar type
    * and the compile-time size.
    */
   template <class Number, size_t S>

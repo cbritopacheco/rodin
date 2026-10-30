@@ -32,7 +32,7 @@
 
   @section guides-solvers-iterative Iterative convergence
 
-  In the unit-square Poisson program, `poisson` is a defined `Problem` object:
+  In the unit-square Poisson program, `poisson` is a defined `Problem` object.
 
   @snippet PDEs/Poisson.cpp poisson-solve
 
@@ -45,7 +45,7 @@
 
   Native CG and GMRES expose `success()`, `getIterationNumber()`, and
   `getError()`. The error value is a backend convergence estimate. An explicit
-  residual supplies a separate algebraic check:
+  residual supplies a separate algebraic check.
 
   @code{.cpp}
   const auto& system = poisson.getLinearSystem();
@@ -61,7 +61,7 @@
 
   @subsection guides-solvers-gmres GMRES configuration
 
-  For a defined native sparse problem, GMRES can be configured as follows:
+  For a defined native sparse problem, GMRES can be configured as follows.
 
   @code{.cpp}
   Solver::GMRES solver(problem);
@@ -144,7 +144,7 @@
 
   For a PETSc program that initializes PETSc, processes its solver options,
   and defines the associated problem, command-line options can select the
-  method and diagnostics:
+  method and diagnostics.
 
   @code{.sh}
   ./program -ksp_type gmres -pc_type ilu -ksp_rtol 1e-8 -ksp_monitor

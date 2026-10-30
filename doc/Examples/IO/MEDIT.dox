@@ -51,7 +51,7 @@
   from a scratch directory. The expected output reports 25 vertices,
   32 triangles and a successful mesh count round trip.
 
-  @snippet IO/MEDIT.cpp medit-source
+  The complete program is available in @ref IO/MEDIT.cpp "MEDIT.cpp".
 
   @section examples-io-medit-see-also Next steps
 

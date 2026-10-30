@@ -39,7 +39,7 @@
 
   @subsection guides-meshes-concepts-domain Domain partition
 
-  Mathematically, a mesh @f$ \mathcal{T}_h @f$ partitions a domain @f$ \Omega @f$:
+  Mathematically, a mesh @f$ \mathcal{T}_h @f$ partitions a domain @f$ \Omega @f$.
 
   @f[
     \Omega = \bigcup_{K \in \mathcal{T}_h} K
@@ -56,7 +56,7 @@
   - **Space dimension** (`getSpaceDimension()`): The dimension of the ambient
     space in which the mesh is embedded
 
-  Example: A 2D surface embedded in 3D space has topological dimension 2 and
+  For example, a 2D surface embedded in 3D space has topological dimension 2 and
   space dimension 3.
 
   @subsection guides-meshes-concepts-entities Mesh entities
@@ -73,7 +73,7 @@
   @section guides-meshes-usage Basic usage
 
   A triangular mesh with 16 vertices per direction has 256 vertices and
-  450 triangles. The following query measures its area:
+  450 triangles. The following query measures its area.
 
   @code{.cpp}
   #include <Rodin/Geometry.h>

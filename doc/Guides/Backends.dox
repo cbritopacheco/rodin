@@ -50,7 +50,7 @@
   a rank-local @ref Rodin::Geometry::Shard "Shard" with owned, shared, and
   ghost entities.
 
-  Distributed algorithms must respect ownership and reconciliation:
+  Distributed algorithms must respect ownership and reconciliation.
 
   @code{.cpp}
   mesh.getConnectivity().compute(2, 3);
@@ -61,7 +61,7 @@
 
   @section guides-backends-petsc PETSc storage and solvers
 
-  PETSc support is activated by using PETSc-backed trial and test functions:
+  PETSc support is activated by using PETSc-backed trial and test functions.
 
   @code{.cpp}
   PETSc::Variational::TrialFunction u(Vh);

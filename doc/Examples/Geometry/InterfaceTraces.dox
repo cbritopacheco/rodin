@@ -15,9 +15,9 @@
   @snippet DG/InterfaceTraces.cpp interface-setup
 
   The mesh is the same two-triangle topology used in the
-  @ref examples-geometry-connectivity "connectivity tutorial":
+  @ref examples-geometry-connectivity "connectivity tutorial".
 
-  @image html Geometry/Connectivity.png "Two cells meeting at one interior diagonal." width=560px
+  @image html Geometry/Connectivity.png "Two cells meeting at one interior diagonal." width=720px
 
   @section examples-interface-traces-evaluation Select and combine traces
 
@@ -46,7 +46,7 @@
   `InterfaceTraces.csv`. It checks the table above with tolerance
   @f$10^{-12}@f$ and returns `EXIT_FAILURE` if a check fails.
 
-  @snippet DG/InterfaceTraces.cpp interface-source
+  The complete program is available in @ref DG/InterfaceTraces.cpp "InterfaceTraces.cpp".
 
   @section examples-interface-traces-next Continue
 

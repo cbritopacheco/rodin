@@ -20,7 +20,7 @@
     u=0\text{ on }\Gamma_D,\qquad
     a(\gamma)\partial_nu=0\text{ on the remaining boundary}.
   @f]
-  The objective combines mean temperature and material usage:
+  The objective combines mean temperature and material usage.
   @f[
     J(\gamma)=\frac{1}{|\Omega|}\int_\Omega u_\gamma\,dx
                +\ell\int_\Omega\gamma\,dx,\qquad\ell=4.
@@ -99,7 +99,12 @@
 
   @section examples-densopt-temp-output Inspect the results
 
-  @image html SIMPTemperatureMinimization.png "Computed material density and temperature at the last recorded iterate."
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html SIMPTemperatureMinimization-density.png "Computed P1 material density at the last recorded iterate."
+  @image html SIMPTemperatureMinimization-temperature.png "Computed temperature on the same design."
+  @endparblock
 
   In the checked 5,000-state run, the objective decreased from approximately
   4.47838 to 3.16329, with no increases in the recorded history. Material usage

@@ -60,11 +60,11 @@
 
   @snippet PDEs/SurfaceMesh.cpp surface-solve
 
-  After the error and residual checks below pass, export the field:
+  After the error and residual checks below pass, export the field.
 
   @snippet PDEs/SurfaceMesh.cpp surface-export
 
-  @image html PDEs/SurfaceMesh.png "Computed reaction–diffusion field on the triangulated sphere. Color represents the scalar field on the original triangulated geometry." width=480px
+  @image html PDEs/SurfaceMesh.png "Computed reaction–diffusion field on the triangulated sphere. Color represents the scalar field on the original triangulated geometry." width=720px
 
   Open `SurfaceMesh.xdmf` in ParaView, color by **u**, and select **Surface With
   Edges** to inspect the geometry. Positive and negative lobes reflect the sign
@@ -110,8 +110,6 @@
   @section examples-pdes-surface-full Complete program
 
   The program generates its mesh at startup.
-
-  @snippet PDEs/SurfaceMesh.cpp surfacemesh-source
 
   See @ref PDEs/SurfaceMesh.cpp "SurfaceMesh.cpp", the
   @ref guides-meshes-creation "mesh creation guide", and the

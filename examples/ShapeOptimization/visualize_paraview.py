@@ -14,15 +14,21 @@ parser.add_argument('root',type=Path)
 parser.add_argument('output',type=Path)
 parser.add_argument('--stem',default='SimpleCantilever')
 parser.add_argument('--field',default='displacement')
+parser.add_argument('--block', help='Select a named mesh block, e.g. state for a level-set history')
 args=parser.parse_args()
 source=XDMFReader(FileNames=[str((args.root/(args.stem+'.xdmf')).resolve())])
 source.UpdatePipeline()
 times=list(source.TimestepValues)
+if args.block:
+    reader = source
+    source = ExtractBlock(Input=reader)
+    source.Selectors = ['/Root/' + args.block]
+    source.UpdatePipeline()
 bounds=[]; maximum=0
 for time in [times[0],times[-1]]:
     source.UpdatePipeline(time)
     bounds.append(source.GetDataInformation().GetBounds())
-    maximum=max(maximum,source.PointData[args.field].GetRange()[1])
+    maximum=max(maximum,source.PointData[args.field].GetRange(-1)[1])
 x0=min(b[0] for b in bounds);x1=max(b[1] for b in bounds)
 y0=min(b[2] for b in bounds);y1=max(b[3] for b in bounds)
 layout=CreateLayout(name='Cantilever descent')
@@ -43,3 +49,5 @@ for target,time in [(left,times[0]),(right,times[-1])]:
     bar.CustomLabels=[0,maximum/2,maximum];bar.TitleFontSize=17;bar.LabelFontSize=15
     style.text(target,f'Iteration {int(time)}')
 style.save(args.output,layout,(1440,640))
+
+style.save_panels(args.output, [left, right], ['initial', 'final'])

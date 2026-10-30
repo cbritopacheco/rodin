@@ -30,7 +30,7 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c LinearFormBase: exposes the vector type.
+  /// @brief Type traits for @c LinearFormBase, exposing the vector type.
   template <class Vector>
   struct Traits<Variational::LinearFormBase<Vector>>
   {
@@ -39,7 +39,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c LinearForm: exposes the finite element space and the
+   * @brief Type traits for @c LinearForm, exposing the finite element space and the
    * vector type.
    */
   template <class FES, class Vector>
@@ -166,7 +166,7 @@ namespace Rodin::Variational
        * @brief Gets the list of integrators.
        * @return Reference to the list of linear form integrators
        *
-       * Linear form integrators define contributions to the right-hand side:
+       * Linear form integrators define contributions to the right-hand side.
        * @f$ b_i = \sum_{\text{integrators}} \int \text{integrand}(\psi_i) \, dx @f$
        */
       constexpr
@@ -190,7 +190,7 @@ namespace Rodin::Variational
        * @param[in] lfi Linear form integrator to add
        * @return Reference to this linear form for method chaining
        *
-       * Adds a contribution @f$ l_i(v) @f$ to the linear form:
+       * Adds a contribution @f$ l_i(v) @f$ to the linear form.
        * @f$ l(v) = l_1(v) + l_2(v) + \ldots @f$
        */
       constexpr
@@ -219,7 +219,7 @@ namespace Rodin::Variational
        * @param[in] lfi Linear form integrator to subtract
        * @return Reference to this linear form for method chaining
        *
-       * Subtracts a contribution: @f$ l(v) = l(v) - l_i(v) @f$
+       * Subtracts a contribution according to @f$ l(v) = l(v) - l_i(v) @f$
        */
       constexpr
       LinearFormBase& operator-=(const LinearFormIntegratorBaseType& lfi)

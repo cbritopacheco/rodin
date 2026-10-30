@@ -2,12 +2,24 @@
   @page guides-index General concepts
   @brief How meshes, finite element fields, weak forms, and solvers fit together.
 
-  The guides explain the mathematical objects used by Rodin and connect them
-  to the corresponding C++ interfaces. The @ref examples-index "examples and
-  tutorials" apply these ideas to complete problems; the
-  <a href="modules.html">module reference</a> documents individual APIs.
+  A Rodin application connects a geometric domain, a discrete field space,
+  a weak problem and an algebraic solver. These guides develop those objects
+  in that order and identify the C++ interfaces used at each stage.
+  The @ref examples-index "examples and tutorials" supply complete numerical
+  problems; the <a href="modules.html">module reference</a> describes
+  individual APIs.
 
   @tableofcontents
+
+  @section guides-learning-routes Choose a reading route
+
+  | Task | Starting point | Continue with |
+  | :--- | :--- | :--- |
+  | Build and run a first solve | @ref guides-getting-started-installation | @ref guides-getting-started-first-problem |
+  | Understand the finite element construction | @ref fem-ciarlet | @ref fem-spaces and @ref guides-weak-formulations |
+  | Translate a model into C++ forms | @ref guides-variational | @ref guides-boundary-conditions and @ref guides-solvers |
+  | Inspect a computed field | @ref guides-io | @ref gallery and @ref examples-index |
+  | Move a local problem to a distributed backend | @ref guides-backends | @ref guides-mpi and @ref guides-petsc |
 
   @section guides-getting-started-index Start with a complete problem
 
@@ -28,6 +40,8 @@
 
   A mesh records both geometric coordinates and topological relations. These
   guides establish the distinction before introducing integration and fields.
+  Incidence relations describe adjacency; geometric maps supply coordinates,
+  Jacobians and measures for evaluation and integration.
 
   - @subpage guides-meshes — Create, load, inspect, and traverse a mesh.
   - @subpage guides-polytopes — Cells, faces, reference elements, and mappings.
@@ -37,7 +51,9 @@
   @section guides-fem-index Approximate fields on the mesh
 
   A finite element specifies local approximation and degrees of freedom;
-  assembling compatible elements produces a finite element space.
+  identifying compatible degrees of freedom across cells produces a global
+  space. Field range, geometric mapping and coefficient ordering are separate
+  choices in this construction.
 
   - @subpage fem-ciarlet — The finite element triple and local degrees of freedom.
   - @subpage fem-spaces — Scalar, vector, and complex spaces and grid functions.
@@ -47,7 +63,9 @@
   @section guides-variational-index Express and solve equations
 
   The continuous weak problem determines the forms, boundary conditions, and
-  algebraic properties that a solver must respect.
+  algebraic properties that a solver must respect. Follow a derivation before
+  selecting the corresponding form expressions, then check constraints,
+  quadrature and solver status against that problem.
 
   - @subpage guides-weak-formulations — Derive weak forms from Poisson and
     elasticity equations.
@@ -61,12 +79,19 @@
 
   @section guides-io-index Inspect and exchange results
 
+  Mesh topology, geometric coordinates and field coefficients must be exported
+  together with their interpretation. The I/O guides distinguish stored data,
+  visualization output and time-dependent snapshots.
+
   - @subpage guides-io — Select mesh and field formats, export to ParaView,
     and write time series.
 
   @section guides-applications-index Build application models
 
-  These guides combine the preceding concepts into larger numerical workflows.
+  These guides combine the preceding concepts into fitting, design evolution
+  and constitutive models. Their application examples expose geometry checks,
+  objective histories and residual or derivative checks appropriate to each
+  workflow.
 
   - @subpage guides-swift — Fit meshes to marked interfaces and inspect quality.
   - @subpage guides-shape-optimization — Shape derivatives, regularization,
@@ -77,7 +102,9 @@
   @section guides-parallel-index Choose an execution backend
 
   The local workflow provides the starting point. Parallel execution adds
-  ownership, communication, and synchronization requirements.
+  ownership, communication, and synchronization requirements. Establish the
+  discrete problem locally before following the backend-specific construction
+  and collective-operation rules.
 
   - @subpage guides-backends — Local, OpenMP, MPI, and PETSc execution paths.
   - @subpage guides-mpi — Distributed meshes, partitioning, and reconciliation.

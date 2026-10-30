@@ -21,7 +21,7 @@ namespace Rodin::QF
    * @brief Initializes the static table of quadrature point counts.
    *
    * Computes the number of quadrature points for each combination of
-   * simplex dimension @f$ n @f$ and parameter @f$ s @f$ using the formula:
+   * simplex dimension @f$ n @f$ and parameter @f$ s @f$ using the formula.
    * @f[
    *   \text{size} = \binom{n + s + 1}{n + 1}
    * @f]

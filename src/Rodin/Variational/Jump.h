@@ -45,7 +45,7 @@ namespace Rodin::Variational
    * @brief Jump of a FunctionBase instance across an interface.
    *
    * The Jump operator computes the jump (discontinuity) in a function's value
-   * across an interface (face) between two adjacent elements:
+   * across an interface (face) between two adjacent elements.
    * @f[
    *   [\![u]\!] = u^+ - u^-
    * @f]

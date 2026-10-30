@@ -20,3 +20,14 @@ them. An axis background is transparent; colors representing the solution itself
 remain opaque. Use alpha-capable WebM/VP9 for transparent animations. `PDEs/README.md` and `Variational/README.md` give reproduction commands
 for the tutorial figures. Existing optimization illustrations already contain
 transparent backgrounds.
+
+Export individual panels for documentation comparisons. Wrap related figures
+in `rodin-mesh-stages`. Desktop pages show two panels per row, center the
+last panel of an odd-sized group, and stack panels on narrow screens. A single
+panel uses the same desktop width as one column. Keep captions with their
+panels. Composite images remain useful for video posters and external exports.
+
+Plot cellwise fields from their cell values. In particular, a P0 field assigns
+one flat color per original cell. Preserve the exported point/cell association
+in ParaView; the shared `color()` helper selects it from the available arrays.
+Discontinuous higher-order fields retain their cell-local samples and vertices.

@@ -37,7 +37,7 @@ namespace Rodin::MMG
    * keep their metadata and original geometry in the covered 2D/3D cases.
    * Cut-through required entities may be replaced by MMG.
    *
-   * The canonical signed-distance interpretation is:
+   * The canonical signed-distance interpretation is
    * @f[
    *  \left\{
    *    \begin{aligned}

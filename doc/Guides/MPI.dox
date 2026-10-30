@@ -1,5 +1,5 @@
 /**
-  @page guides-mpi MPI: distributed computing
+  @page guides-mpi Distributed computing with MPI
   @brief Guide to distributed-memory parallel computing with Rodin's MPI module
 
   @tableofcontents
@@ -23,7 +23,7 @@
   - A `reconcile()` method that resolves shared entity ownership and
     distributed indices after local connectivity discovery.
 
-  Include the module via:
+  Include the MPI module header.
   @code{.cpp}
   #include <Rodin/MPI.h>
   @endcode
@@ -34,7 +34,7 @@
   @section guides-mpi-context Execution context
 
   The @ref Rodin::Context::MPI "Context::MPI" class wraps a
-  `boost::mpi::environment` and `boost::mpi::communicator`:
+  `boost::mpi::environment` and `boost::mpi::communicator`.
 
   @code{.cpp}
   #include <boost/mpi/environment.hpp>
@@ -68,7 +68,7 @@
   @subsection guides-mpi-mesh-uniformgrid UniformGrid
 
   The simplest way to create a distributed mesh is `UniformGrid`, which
-  partitions and distributes internally:
+  partitions and distributes internally.
 
   @code{.cpp}
   auto mesh = Mesh<Context::MPI>::UniformGrid(
@@ -107,13 +107,13 @@
   @endcode
 
   The `distribute()` convenience method combines `shard()`, `scatter()`, and
-  `gather()` in one call:
+  `gather()` in one call.
 
   @code{.cpp}
   auto mesh = sharder.distribute(partitioner, 0);
   @endcode
 
-  @section guides-mpi-shard Shard: rank-local view
+  @section guides-mpi-shard Rank-local shard view
 
   A @ref Rodin::Geometry::Shard "Shard" is a local mesh enriched with
   distributed metadata.  It classifies every polytope into one of three
@@ -131,7 +131,7 @@
   - Ghost entities provide stencil support and adjacency completeness
 
   The shard provides bidirectional index maps between local shard indices and
-  distributed (global) indices:
+  distributed (global) indices.
 
   @code{.cpp}
   const auto& shard = mesh.getShard();
@@ -154,7 +154,7 @@
   After receiving a shard, compute the local incidence relations required by
   subsequent operations.  However, entities discovered independently
   on neighboring shards may not yet have consistent distributed indices or
-  ownership.  The `reconcile()` method resolves this:
+  ownership.  The `reconcile()` method resolves these ownership differences.
 
   @code{.cpp}
   // Compute face-to-cell incidence locally
@@ -203,7 +203,7 @@
   reductions.  Each rank accumulates contributions from its **owned** entities,
   then the results are summed across ranks. Every participating rank calls
   these collective queries in the same order. Use `mesh.getShard()` for
-  rank-local counts and geometry:
+  rank-local counts and geometry.
 
   @code{.cpp}
   // Total number of cells across all ranks
@@ -222,7 +222,7 @@
   @section guides-mpi-io I/O
 
   The MPI module provides HDF5-based I/O for distributed meshes.  Each rank
-  saves or loads its own shard independently:
+  saves or loads its own shard independently.
 
   @code{.cpp}
   // Rank-dependent filename
@@ -235,7 +235,7 @@
                        IO::FileFormat::MEDIT);
   @endcode
 
-  For XDMF output (ParaView visualization), pass the MPI communicator:
+  For XDMF output (ParaView visualization), pass the MPI communicator.
 
   @code{.cpp}
   IO::XDMF xdmf(MPI_COMM_WORLD, "output/simulation");
@@ -248,7 +248,7 @@
   @section guides-mpi-fes Distributed finite element spaces
 
   The P1 finite element space is specialized for MPI meshes.  It wraps a
-  local shard P1 space and augments it with distributed global indexing:
+  local shard P1 space and augments it with distributed global indexing.
 
   @code{.cpp}
   P1 Vh(mesh);  // mesh is Mesh<Context::MPI>
@@ -261,7 +261,7 @@
   @section guides-mpi-example Complete example
 
   This example solves the Poisson equation on a distributed mesh using MPI
-  and PETSc:
+  and PETSc.
 
   @code{.cpp}
   #include <Rodin/MPI.h>

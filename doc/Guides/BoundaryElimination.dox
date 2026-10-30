@@ -17,7 +17,7 @@
 
   Let @f$C@f$ denote the prescribed indices, @f$F@f$ the remaining indices,
   and @f$g_C@f$ their prescribed coefficients. Their interpretation is determined by the finite element DOF functionals. The free equations
-  follow by substituting @f$x_C=g_C@f$ into the original system:
+  follow by substituting @f$x_C=g_C@f$ into the original system.
   @f[
     A_{FF}x_F=b_F-A_{FC}g_C.
   @f]
@@ -54,9 +54,9 @@
 
   A temporary byte mask identifies constrained rows. Consecutive constrained
   columns are cleared in coalesced storage ranges. Free storage between them
-  is examined in blocks: an empty row mask performs no coefficient stores,
+  is examined in blocks. An empty row mask performs no coefficient stores,
   while a nonempty mask visits only its set bits. The final scalar tail follows
-  the same zeroing rule. Actual zero assignment or bit clearing is required:
+  the same zeroing rule. Actual zero assignment or bit clearing is required because
   multiplication by zero would retain NaNs or create them from infinities.
   Constraint diagonals and prescribed load entries are restored last.
 

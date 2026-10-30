@@ -30,7 +30,7 @@ namespace Rodin::Variational
    * @f$ (r,s) \in [-1,1]^2 @f$, which maps from the reference triangle
    * with vertices @f$ (0,0), (1,0), (0,1) @f$.
    *
-   * The Dubiner basis is constructed as a product of Jacobi polynomials:
+   * The Dubiner basis is constructed as a product of Jacobi polynomials.
    * @f[
    *   \psi_{p,q}(r,s) = P_p^{(0,0)}(a) \cdot P_q^{(2p+1,0)}(b)
    *     \cdot \left(\frac{1-b}{2}\right)^p
@@ -82,7 +82,7 @@ namespace Rodin::Variational
       /**
        * @brief Computes the gradient of ψ_{P,Q} with respect to the collapsed coordinates (a,b).
        *
-       * Computes:
+       * Computes the following quantity.
        *   dψ/da, dψ/db
        *
        * @tparam P First modal index.
@@ -93,13 +93,13 @@ namespace Rodin::Variational
        * @param b Second collapsed coordinate in [-1,1].
        *
        * @note This function returns derivatives in (a,b). If you need derivatives
-       *       w.r.t. (x,y) on the reference triangle, apply the outer chain rule:
+       *       w.r.t. (x,y) on the reference triangle, apply the outer chain rule.
        *
        *   a = 2x/(1-y) - 1,   b = 2y - 1
        *   da/dx = 2/(1-y),    da/dy = 2x/(1-y)^2
        *   db/dx = 0,          db/dy = 2
        *
-       * so:
+       * Applying the chain rule gives
        *   dψ/dx = dψ/da * da/dx + dψ/db * db/dx
        *   dψ/dy = dψ/da * da/dy + dψ/db * db/dy
        */
@@ -198,9 +198,9 @@ namespace Rodin::Variational
       /**
        * @brief Converts (x,y) on the reference triangle to collapsed coordinates (a,b) ∈ [-1,1]^2.
        *
-       * Reference triangle vertices: (0,0), (1,0), (0,1).
+       * The reference triangle has vertices (0,0), (1,0) and (0,1).
        *
-       * Mapping:
+       * The following relations define the collapsed coordinates.
        *   b = 2y - 1
        *   a = 2x/(1-y) - 1    if y != 1
        *   a = -1              at the collapsed vertex y=1
@@ -314,7 +314,7 @@ namespace Rodin::Variational
    * @f$ (a,b,c) \in [-1,1]^3 @f$, mapped from the reference tetrahedron
    * with vertices @f$ (0,0,0), (1,0,0), (0,1,0), (0,0,1) @f$.
    *
-   * The basis uses a Duffy-type collapse and is constructed as:
+   * The basis uses a Duffy-type collapse and is constructed as
    * @f[
    *   \psi_{p,q,r}(a,b,c) = P_p^{(0,0)}(a) \cdot P_q^{(2p+1,0)}(b)
    *     \cdot P_r^{(2p+2q+2,0)}(c) \cdot \left(\frac{1-b}{2}\right)^p

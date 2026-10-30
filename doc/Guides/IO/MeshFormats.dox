@@ -54,7 +54,7 @@
 
   When working with the MMG remeshing tools through Rodin's
   @ref Rodin::MMG module, the MEDIT format is used for mesh
-  exchange:
+  exchange.
 
   @code{.cpp}
   #include <Rodin/MMG.h>
@@ -72,7 +72,7 @@
   @section guides-io-meshformats-conversion Format conversion
 
   The checked conversion program writes a MEDIT mesh, loads it, saves MFEM
-  output and reloads that output:
+  output and reloads that output.
 
   @snippet IO/MEDIT.cpp medit-convert
 

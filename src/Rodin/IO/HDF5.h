@@ -941,7 +941,7 @@ namespace Rodin::IO
      * @param[in] mesh Mesh to inspect.
      * @returns True when an exported cell is not certified as native first-order geometry.
      *
-     * Topology follows interpolation order, rather than total polynomial degree:
+     * Topology follows interpolation order, rather than total polynomial degree.
      * first-order product cells already have total degree greater than one.
      * Unknown transformations conservatively use quadratic visualization sampling.
      */
@@ -1051,7 +1051,7 @@ namespace Rodin::IO
      * @param[in] mesh  Mesh whose cells contribute to the stream.
      * @returns Total number of entries in the mixed topology array.
      *
-     * Each cell contributes: 1 (type id) + optional count + number of vertices.
+     * Each cell contributes one type ID, an optional count and its vertex indices.
      */
     inline size_t getXDMFMixedTopologySize(const Geometry::MeshBase& mesh)
     {
@@ -3182,7 +3182,7 @@ namespace Rodin::IO
    *        `Math::Vector<Scalar>`.
    *
    * Serializes a grid function to a standalone HDF5 field file (one file per
-   * grid function, no mesh or FES embedding). The output layout is:
+   * grid function, no mesh or FES embedding). The following hierarchy defines the output layout.
    *
    * ```
    * /GridFunction/Meta/Size        — number of DOFs

@@ -38,7 +38,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c H1: exposes the mesh type, the scalar type, the range type
+   * @brief Type traits for @c H1, exposing the mesh type, the scalar type, the range type
    * and the finite element type.
    */
   template <size_t K, class Scalar, class Mesh>
@@ -58,7 +58,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c H1: exposes the mesh type, the scalar type, the range type
+   * @brief Type traits for @c H1, exposing the mesh type, the scalar type, the range type
    * and the finite element type.
    */
   template <size_t K, class Scalar, class Mesh>
@@ -103,7 +103,7 @@ namespace Rodin::Variational
    * @brief Degree K H1-conforming Lagrange finite element space
    *
    * Represents the finite element space composed of scalar valued continuous,
-   * piecewise polynomial functions of degree K:
+   * piecewise polynomial functions of degree K.
    * @f[
    *  \mathbb{P}_K (\mathcal{T}_h) = \{ v \in C^0(\mathcal{T}_h) : v|_{\tau} \in \mathbb{P}_K(\tau), \ \tau \in \mathcal{T}_h \} \ .
    * @f]
@@ -121,12 +121,12 @@ namespace Rodin::Variational
    * - **K ≥ 4**: Each cell (3D) carries interior DOFs
    *
    * The construction requires the mesh connectivity chain from the highest
-   * dimension D down to dimension 0:
+   * dimension D down to dimension 0.
    * @f[
    *  D \to D-1 \to \ldots \to 1 \to 0
    * @f]
    *
-   * This connectivity is necessary because DOF numbering proceeds top-down:
+   * This connectivity is necessary because DOF numbering proceeds top-down,
    * starting from cells (dimension D), we recursively number DOFs on faces,
    * edges, and vertices while respecting H1 conformity (shared entities have
    * shared DOFs).
@@ -297,7 +297,7 @@ namespace Rodin::Variational
        * # Mesh Connectivity Requirements
        *
        * The mesh must have the complete connectivity chain from dimension D
-       * (mesh dimension) down to dimension 0:
+       * (mesh dimension) down to dimension 0.
        * @f[
        *   D \to D-1 \to D-2 \to \ldots \to 1 \to 0
        * @f]
@@ -394,7 +394,7 @@ namespace Rodin::Variational
        *
        * This method assigns global DOF indices to a polytope (dimension d, index idx)
        * by recursively processing its boundary entities (faces, edges, vertices).
-       * The process ensures H1 conformity: shared entities receive shared DOFs.
+       * The process ensures H1 conformity because shared entities receive shared DOFs.
        *
        * # Algorithm Overview
        *
@@ -408,7 +408,7 @@ namespace Rodin::Variational
        *
        * # Connectivity Requirements
        *
-       * This method requires mesh connectivity from dimension d down to dimension 0:
+       * This method requires mesh connectivity from dimension d down to dimension 0.
        * @f[
        *   d \to (d-1) \to \ldots \to 1 \to 0
        * @f]
@@ -613,7 +613,7 @@ namespace Rodin::Variational
    * @brief Vector-valued continuous piecewise polynomial (degree K) Lagrange finite element space.
    *
    * Represents the finite element space composed of @f$ d @f$-dimensional
-   * vector-valued, continuous, piecewise polynomial functions:
+   * vector-valued, continuous, piecewise polynomial functions.
    * @f[
    *  [\mathbb{P}_K (\mathcal{T}_h)]^d = \{ \mathbf{v} \in [C^0(\mathcal{T}_h)]^d : \mathbf{v}|_{\tau} \in [\mathbb{P}_K(\tau)]^d, \ \tau \in \mathcal{T}_h \}
    * @f]

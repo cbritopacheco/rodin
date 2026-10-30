@@ -14,7 +14,7 @@
  * boundary terms in weak formulations.
  *
  * # Mathematical Foundation
- * Boundary integrals compute:
+ * Boundary integrals compute the following quantity.
  * @f[
  *   \int_{\partial\Omega} f(x) \, ds
  * @f]
@@ -67,7 +67,7 @@ namespace Rodin::Variational
    * @f[
    *   A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
    * @f]
-   * this class represents the integral of their dot product:
+   * this class represents the following integral of their dot product.
    * @f[
    *   \int_{\mathcal{B}_h} A(u) : B(v) \ d\sigma(x) \ .
    * @f]
@@ -98,7 +98,7 @@ namespace Rodin::Variational
        * @param[in] lhs Trial operator @f$ A(u) @f$
        * @param[in] rhs Test operator @f$ B(v) @f$
        *
-       * Represents the boundary integral:
+       * Represents the boundary integral.
        * @f[
        *   \int_{\partial\Omega} A(u) : B(v) \, d\sigma
        * @f]

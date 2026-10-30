@@ -55,8 +55,8 @@
 
   @subsection guides-meshes-queries-geometric-perimeter Boundary measure
 
-  `getPerimeter()` measures boundary facets: lengths in a two-dimensional
-  mesh and areas in a three-dimensional mesh. Attribute overloads select
+  `getPerimeter()` measures the lengths of boundary facets in a two-dimensional
+  mesh and their areas in a three-dimensional mesh. Attribute overloads select
   boundary-facet labels.
 
   @subsection guides-meshes-queries-geometric-measure Generic measure

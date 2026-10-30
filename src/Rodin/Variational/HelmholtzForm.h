@@ -70,7 +70,7 @@ namespace Rodin::Variational
    * two terms may use different quadratures on the same polytope; what the
    * form saves over the sum of two forms is the second pass over the mesh and
    * the second scatter, not a quadrature. The sign of @f$ c @f$ is the
-   * caller's: a negative @f$ c = -k^2 @f$ gives the indefinite Helmholtz
+   * caller's. A negative @f$ c = -k^2 @f$ gives the indefinite Helmholtz
    * operator, a positive one the reaction-diffusion operator used by the
    * Hilbertian regularizations. Scalar spaces only.
    *

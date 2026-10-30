@@ -13,7 +13,7 @@
  * sparse matrices.
  *
  * # Algorithm
- * The solver computes:
+ * The solver computes the following quantity.
  * @f[
  *   A = LL^T
  * @f]

@@ -2,6 +2,12 @@
   @page examples-shapeoptimization-simple_cantilever Shape optimization of a cantilever
   @brief Compute and inspect a boundary-variation compliance descent.
 
+  A cantilever carries a prescribed load while part of its boundary is
+  clamped. The design task is to redistribute its material boundary so that
+  elastic compliance and material area have a smaller weighted sum. This
+  tutorial follows the state solve, regularized descent and mesh update in
+  `SimpleCantilever2D`.
+
   @tableofcontents
   @m_footernavigation
 
@@ -9,7 +15,8 @@
 
   The elastic body occupies a planar domain @f$\Omega@f$. Its boundary has
   a clamped part @f$\Gamma_D@f$, a loaded part @f$\Gamma_N@f$ and an
-  optimizable traction-free part @f$\Gamma_0@f$. The objective is
+  optimizable traction-free part @f$\Gamma_0@f$. The support and loaded
+  boundary are held fixed during the design update. The objective is
   @f[
     J(\Omega)=C(\Omega)+\ell|\Omega|,\qquad
     C(\Omega)=\int_\Omega\sigma(u):\varepsilon(u)\,dx.
@@ -18,6 +25,28 @@
   performs 50 boundary-displacement updates with remeshing. The measured
   history describes those iterations; an optimality or volume-constraint
   stopping criterion would require additional controls.
+
+  Compliance measures the work done by the applied load. Testing the elastic
+  state equation with its displacement gives
+  @f$C(\Omega)=\int_{\Gamma_N}f\cdot u\,ds@f$; the stored elastic strain
+  energy is @f$C/2@f$. A smaller compliance means a stiffer response for this
+  fixed load. The area term assigns a cost to retaining material, so both
+  contributions must be inspected when interpreting a decrease in @f$J@f$.
+
+  @subsection examples-shapeopt-sc-fields State and design fields
+
+  @m_class{m-scroll}
+
+  @parblock
+  | Quantity | C++ storage | Role |
+  | :--- | :--- | :--- |
+  | @f$u@f$ | `u.getSolution()` | Elastic displacement under the current load |
+  | @f$\theta@f$ | `g.getSolution()`, also referenced by `dJ` | Regularized direction for changing the design geometry |
+  | @f$\Omega@f$ | `Omega` | Current mesh on which both fields are constructed |
+  @endparblock
+
+  The elastic displacement describes the loaded body's response. The design
+  direction changes the domain on which the next elastic state is solved.
 
   @section examples-shapeopt-sc-setup Input and parameters
 
@@ -28,6 +57,9 @@
 
   @subsection examples-shapeopt-sc-setup-params Physical and numerical data
 
+  @m_class{m-scroll}
+
+  @parblock
   | Parameter | Value | Role |
   | :--- | :--- | :--- |
   | @f$\lambda@f$ | 0.5769 | First Lamé coefficient |
@@ -36,15 +68,39 @@
   | @f$h_{\max}@f$ | 0.1 | MMG upper size setting |
   | @f$h_{\min}@f$ | 0.01 | MMG lower size setting and displacement scale |
   | @f$\alpha@f$ | 0.4 | Gradient regularization coefficient |
+  @endparblock
 
   @subsection examples-shapeopt-sc-setup-mesh Supply the mesh
 
   Hydrate the repository's Git LFS resources, build `SimpleCantilever2D`,
-  and pass `resources/examples/ShapeOptimization/SimpleCantilever2D.mfem.mesh`
+  and pass `SimpleCantilever2D.mfem.mesh`
   as the executable's input argument. Run from a scratch directory so the
   exported fields and meshes are kept separate from the sources. The mesh
   carries boundary labels one, two and three for the free, clamped and loaded
   boundary parts respectively.
+
+  Build and run the example from a configured checkout with these commands.
+
+  @code{.sh}
+  git lfs pull --include="resources/examples/ShapeOptimization/SimpleCantilever2D.mfem.mesh"
+  cmake --build build --target SimpleCantilever2D
+  mkdir -p results/simple-cantilever
+  cd results/simple-cantilever
+  ../../build/examples/ShapeOptimization/SimpleCantilever2D \
+    ../../resources/examples/ShapeOptimization/SimpleCantilever2D.mfem.mesh
+  @endcode
+
+  Check the input's boundary attributes when substituting another mesh:
+
+  @m_class{m-scroll}
+
+  @parblock
+  | Facet attribute | Boundary | Data |
+  | :--- | :--- | :--- |
+  | 1 | @f$\Gamma_0@f$ | Traction-free design boundary |
+  | 2 | @f$\Gamma_D@f$ | Zero elastic displacement and zero design motion |
+  | 3 | @f$\Gamma_N@f$ | Downward unit traction and zero design motion |
+  @endparblock
 
   @section examples-shapeopt-sc-loop One iteration
 
@@ -54,14 +110,42 @@
   zero displacement on the clamp and a downward unit traction on the loaded
   boundary. The program checks sparse factorization and solution status.
 
+  With @f$\varepsilon(u)=\tfrac12(\nabla u+\nabla u^T)@f$ and
+  @f$\sigma(u)=2\mu\varepsilon(u)+\lambda\operatorname{tr}\varepsilon(u)I@f$,
+  the weak problem is
+  @f[
+    \int_\Omega\sigma(u):\varepsilon(v)\,dx
+       =\int_{\Gamma_N}f\cdot v\,ds,
+    \qquad f=(0,-1),
+  @f]
+  for test fields vanishing on @f$\Gamma_D@f$. The absence of a traction
+  term on @f$\Gamma_0@f$ imposes its natural zero-traction condition.
+
   @snippet ShapeOptimization/SimpleCantilever2D.cpp shape-state
 
   @subsection examples-shapeopt-sc-loop-gradient Compute a regularized descent
 
-  For the fixed load and support boundary, the free-boundary derivative
-  density is @f$\ell-\sigma(u):\varepsilon(u)@f$. Its negative supplies the
-  load in the regularized descent problem. Zero velocity on the clamped and
-  loaded parts retains their positions.
+  Let @f$n@f$ be the outward material normal and
+  @f$W=\sigma(u):\varepsilon(u)@f$. For smooth free-boundary variations
+  with fixed support and load boundary, the continuous shape derivative is
+  @f[
+    J'(\Omega)[\xi]=\int_{\Gamma_0}(\ell-W)\,\xi\cdot n\,ds.
+  @f]
+  Compliance is self-adjoint, so the elastic state also supplies the adjoint
+  information needed for this derivative. The program therefore uses the
+  state strain in the boundary density without a separate adjoint solve.
+  Its negative provides a scalar boundary load @f$W-\ell@f$. Regions with
+  large @f$W@f$ relative to @f$\ell@f$ favor an outward design motion; the area
+  penalty favors material removal. The regularization solve couples these
+  boundary tendencies into a smooth vector field throughout the body.
+  @f[
+    \alpha\int_\Omega\nabla\theta:\nabla w\,dx
+      +\int_\Omega\theta\cdot w\,dx
+      =\int_{\Gamma_0}(W-\ell)\,n\cdot w\,ds.
+  @f]
+  Both @f$\theta@f$ and @f$w@f$ vanish on the clamped and loaded parts.
+  The boundary derivative is assembled by `BoundaryIntegral`, and `g` is
+  the trial function for @f$\theta@f$.
 
   @snippet ShapeOptimization/SimpleCantilever2D.cpp shape-gradient
 
@@ -69,10 +153,28 @@
   corresponding smoothing length is @f$\sqrt{\alpha}@f$. This convention is
   explicit in the assembled expression.
 
+  For the continuous derivative and an exact regularization solve, testing
+  with @f$w=\theta@f$ yields
+  @f[
+    J'(\Omega)[\theta]=
+      -\alpha\|\nabla\theta\|_{L^2(\Omega)}^2
+      -\|\theta\|_{L^2(\Omega)}^2\leq0.
+  @f]
+  This is a first-order descent relation at the current domain. The finite
+  element boundary evaluation, finite motion and subsequent remeshing enter
+  the actual recorded objective history.
+
   @subsection examples-shapeopt-sc-loop-move Normalize the displacement
 
   The field is scaled so its sampled maximum norm gives a displacement scale
   @f$h_{\min}@f$. Non-finite norms fail the run; a zero norm ends the updates.
+
+  With @f$m@f$ the sampled maximum of @f$|\theta|@f$, the displacement
+  applied to the mesh is @f$\delta x=(h_{\min}/m)\theta@f$. This makes
+  the movement scale explicit even when the derivative magnitude changes
+  during optimization. The positive scaling retains the direction of the
+  regularized field. The chosen @f$h_{\min}@f$ controls both the movement
+  scale and MMG's lower size setting in this example.
 
   @subsection examples-shapeopt-sc-loop-remesh Move and remesh
 
@@ -83,19 +185,69 @@
   controlled line search can be introduced for a specified optimization policy.
   New spaces and problems are constructed on each remeshed domain.
 
+  `Omega.displace()` first moves the current mesh. MMG then changes the mesh
+  as needed to meet its size and quality controls. The following iteration
+  rebuilds the finite element spaces and recomputes the elastic state on that
+  domain. The recorded sequence consists of a state solve, a descent solve, objective/output,
+  displacement and remeshing.
+
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html SimpleCantileverStages-state.png "First computed elastic state. The mesh gives the design geometry; color shows the elastic displacement magnitude."
+  @image html SimpleCantileverStages-descent.png "Computed descent at the first state. Color shows its magnitude divided by the sampled maximum; equal-length arrows show direction."
+  @image html SimpleCantileverStages-displaced.png "First design displacement, before MMG. The navy outline marks the previous boundary; the displayed mesh uses the actual movement scale 0.01."
+  @image html SimpleCantileverStages-remeshed.png "Mesh after MMG, as used by the second elastic state. Remeshing can change vertices and connectivity."
+  @endparblock
+
   @section examples-shapeopt-sc-results Inspect the computed run
 
-  @image html SimpleCantilever.png "Solved initial domain and the domain at the last recorded iteration, colored by displacement magnitude."
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html SimpleCantilever-initial.png "Elastic state on the initial material mesh."
+  @image html SimpleCantilever-final.png "Elastic state on the last recorded material mesh, using the same color scale."
   @image html SimpleCantileverHistory.png "Objective values recorded before each boundary update."
+  @endparblock
 
   The checked 50-state run reduced the objective from approximately 3.56181
   to 2.28789. Every recorded increment decreased the objective in this run.
   Both the elastic state and regularization solve succeeded at every state.
 
+  The mesh coordinates in the comparison depict the evolving design domain;
+  color encodes the elastic displacement magnitude. Inspect the load path
+  between the loaded boundary and the clamp together with the compliance and
+  area columns. A reduced weighted objective can combine increased compliance
+  with reduced material area, depending on their relative changes.
+
   `SimpleCantilever.csv` records compliance, area and their weighted sum.
-  `SimpleCantilever.xdmf` records the transient mesh and displacement at the
+  `SimpleCantilever.xdmf` records the transient mesh, elastic displacement and
+  unscaled regularized descent at the
   same iteration. Open the XDMF file in ParaView and select **Apply** to
   inspect that history.
+
+  @m_class{m-scroll}
+
+  @parblock
+  | File | Interpretation |
+  | :--- | :--- |
+  | `SimpleCantilever.csv` | One row per solved state containing the iteration, compliance, area and @f$C+\ell|\Omega|@f$ |
+  | `SimpleCantilever.xdmf` | Mesh, elastic **displacement** and unscaled **descent** for the same recorded states |
+  | `Omega0.mesh` | Input geometry saved before the update loop |
+  | `Omega.mesh` | Geometry after the most recent displacement and remeshing |
+  @endparblock
+
+  The full run records states 0 through 49, each before its geometry update.
+  `Omega.mesh` after the loop contains the geometry following update 50.
+  Its elastic response would require another state solve. The measured
+  monotone history applies to the recorded run; an application can add
+  objective-based step acceptance and a stopping test appropriate to its
+  accuracy requirements.
+
+  The intermediate figures show the first update. They are rendered from the
+  exported fields by `visualize_stages.py` with
+  `--mode simple`. The pre-remeshing geometry applies the exported descent
+  with the same positive normalization and movement scale as the C++ update.
 
   @section examples-shapeopt-sc-full Complete source
 

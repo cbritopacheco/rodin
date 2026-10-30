@@ -4,7 +4,7 @@
 
   Periodic boundaries identify opposite edges of a computational cell. Unlike
   the @ref examples-pdes-poisson "Dirichlet Poisson problem", this problem has
-  no fixed boundary value: the solution is only determined up to a constant.
+  no fixed boundary value, so the solution is determined up to a constant.
   This example handles both the periodic identification and that remaining
   freedom explicitly.
 
@@ -74,15 +74,13 @@
 
   @snippet PDEs/Periodic.cpp periodic-solve
 
-  @image html PDEs/Periodic.png "Computed zero-mean solution. Opposite edges carry matching values." width=480px
+  @image html PDEs/Periodic.png "Computed zero-mean solution. Opposite edges carry matching values." width=720px
 
   Open `Periodic.xdmf` and color by **u**. Periodic constraints are checked by comparing paired boundary values. The discrete
   integral verifies the zero-mean normalization, and comparison with
   @f$\sin x\cos y@f$ measures the field error.
 
   @section examples-pdes-periodic-full Complete program
-
-  @snippet PDEs/Periodic.cpp periodic-source
 
   See @ref PDEs/Periodic.cpp "Periodic.cpp" and the
   @ref guides-boundary-conditions "boundary conditions guide".

@@ -25,12 +25,12 @@ namespace Rodin::Alert
    * originated. Unlike MemberFunctionException, this does not terminate
    * the program but instead displays a formatted warning message.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * MemberFunctionWarning(*this, __func__) << "Deprecated feature used" << Raise;
    * @endcode
    *
-   * This produces output like:
+   * This produces output of the following form.
    * "Warning: In member function myFunction of class MyClass: Deprecated feature used"
    */
   template <class T, class FuncName>

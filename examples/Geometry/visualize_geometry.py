@@ -22,10 +22,10 @@ def main():
     apply_style()
     args.output.mkdir(parents=True, exist_ok=True)
     data = np.genfromtxt(args.root / 'Quadrature.csv', names=True, delimiter=',')
-    fig, axes = plt.subplots(1, 2, figsize=(9, 4.8))
     triangles = [[[0, 0], [1, 0], [0, 1]], [[1, 1], [3, 1], [1, 4]]]
-    for ax, coordinates, triangle, title in zip(axes, [('r', 's'), ('x', 'y')],
+    for name, coordinates, triangle, title in zip(['reference', 'physical'], [('r', 's'), ('x', 'y')],
             triangles, ['Reference triangle', 'Physical triangle']):
+        fig, ax = plt.subplots(figsize=(4.8, 4.5), layout='constrained')
         ax.add_patch(Polygon(triangle, closed=True, facecolor='#166699',
                              alpha=.09, edgecolor='#718096', linewidth=1.5))
         ax.scatter(data[coordinates[0]], data[coordinates[1]],
@@ -37,11 +37,8 @@ def main():
         ax.set_ylabel('$'+coordinates[1]+'$', rotation=0)
         ax.set_title(title, pad=14)
         ax.spines[['top', 'right']].set_visible(False)
-    fig.text(.5, .02, r'$F(r,s)=(1+2r,\,1+3s),\qquad |\det DF|=6$',
-             ha='center', fontsize=13)
-    fig.subplots_adjust(bottom=.25, top=.86, wspace=.3)
-    fig.savefig(args.output / 'Quadrature.png', dpi=180, transparent=True)
-    plt.close(fig)
+        fig.savefig(args.output / f'Quadrature-{name}.png', dpi=180, transparent=True)
+        plt.close(fig)
 
     vertices = np.genfromtxt(args.root / 'ReferencePolytopes.csv', names=True, delimiter=',')
     names = ['Segment', 'Triangle', 'Quadrilateral', 'Tetrahedron', 'Pyramid', 'Hexahedron', 'Wedge']
@@ -50,12 +47,12 @@ def main():
               [(0,1),(1,2),(2,3),(3,0),(0,4),(1,4),(2,4),(3,4)],
               [(0,1),(1,2),(2,3),(3,0),(4,5),(5,6),(6,7),(7,4),(0,4),(1,5),(2,6),(3,7)],
               [(0,1),(1,2),(2,0),(3,4),(4,5),(5,3),(0,3),(1,4),(2,5)] ]
-    fig = plt.figure(figsize=(10, 5.7), layout='constrained')
     for i, name in enumerate(names):
         selected = vertices[vertices['type'] == i+1]
         xyz = np.stack([selected['x'], selected['y'], selected['z']], axis=1)
         dim = int(selected['dimension'][0])
-        ax = fig.add_subplot(2, 4, i+1, projection='3d' if dim == 3 else None)
+        fig = plt.figure(figsize=(4.8, 4.3), layout='constrained')
+        ax = fig.add_subplot(projection='3d' if dim == 3 else None)
         if dim == 3:
             ax.add_collection3d(Line3DCollection([xyz[list(edge)] for edge in edges[i]],
                                                colors='#166699', linewidths=1.7))
@@ -67,9 +64,12 @@ def main():
                 ax.plot(*xyz[list(edge), :2].T, color='#166699', linewidth=1.7)
             ax.scatter(*xyz[:,:2].T, color='#13b6d0', s=18)
             ax.set(xlim=(-.2,1.2), ylim=(-.2,1.2)); ax.set_aspect('equal')
+        if dim == 1:
+            ax.set_ylim(-.7, .7)
         ax.set_axis_off()
         ax.set_title(name, fontsize=13, pad=3)
-    fig.savefig(args.output / 'ReferencePolytopes.png', dpi=180, transparent=True)
+        fig.savefig(args.output / f'ReferencePolytopes-{name.lower()}.png', dpi=180, transparent=True)
+        plt.close(fig)
 
 
 if __name__ == '__main__':

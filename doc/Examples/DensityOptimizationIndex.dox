@@ -1,16 +1,47 @@
 /**
   @page examples-density_optimization-index Density optimization examples
-  @brief Optimize a material distribution constrained by a state equation.
+  @brief Follow a material field through a state solve, sensitivity and density update.
 
-  Density methods represent the design through a material field. The state
-  equation, material interpolation, and update rule together determine the
-  optimization problem.
+  Density optimization varies a material field on a fixed domain. The field
+  determines the coefficients of a state equation, while an objective assigns
+  a cost to the resulting state and material usage.
+
+  @tableofcontents
+
+  @section examples-density-start Prerequisites
+
+  The @ref examples-pdes-poisson "Poisson tutorial" introduces the scalar
+  diffusion solve and field export. The
+  @ref guides-variational "variational formulations guide" explains how
+  coefficients enter an assembled form.
+
+  @section examples-density-workflow State, sensitivity and update
+
+  The thermal example proceeds through four operations:
+
+  1. Evaluate conductivity from the current density and solve for temperature.
+  2. Solve the adjoint equation and assemble the objective derivative.
+  3. Regularize that derivative to obtain a spatial update field.
+  4. Update the density, project its nodal values into the admissible interval,
+     and record the objective and material usage.
+
+  @section examples-density-tutorial Thermal design
 
   - @subpage examples-density_optimization-simp_temperature_minimization —
-    A thermal optimization problem using a SIMP material interpolation.
+    SIMP conductivity, an adjoint sensitivity and a projected density update
+    on the unit square.
 
-  Familiarity with the @ref examples-pdes-poisson "Poisson tutorial" provides
-  the starting point for the scalar state solve.
+  The tutorial includes the computed density and temperature, the measured
+  objective history, output fields and a link to the complete program.
+  Its fixed-step iteration budget defines the recorded experiment. A
+  stationarity test or a prescribed material budget requires a corresponding
+  optimization criterion.
+
+  @section examples-density-next Continue
+
+  The @ref examples-shapeoptimization-index "shape optimization examples"
+  vary an explicit material boundary. Both representations require a state
+  equation, a consistent derivative and an update policy.
 
   @m_footernavigation
 */

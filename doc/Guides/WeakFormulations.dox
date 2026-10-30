@@ -4,8 +4,7 @@
 
   A weak formulation specifies the spaces in which an equation is tested, the
   derivatives that must exist, and the way boundary data enter. The purpose of
-  this guide is the derivation. The @ref guides-variational "variational formulations
-  guide" then explains how those objects are represented in Rodin.
+  this guide is the derivation. The @ref guides-variational "variational formulations guide" then explains how those objects are represented in Rodin.
 
   @tableofcontents
   @m_footernavigation
@@ -21,7 +20,7 @@
     \nabla u\cdot n=g_N\quad\text{on }\Gamma_N.
   @f]
   For nonzero prescribed values, the admissible fields and test functions belong
-  to different sets:
+  to different sets.
   @f[
     U=\{w\in H^1(\Omega):w|_{\Gamma_D}=g_D\},\qquad
     V=\{v\in H^1(\Omega):v|_{\Gamma_D}=0\}.
@@ -39,7 +38,7 @@
        =\int_\Omega fv\,dx.
   @f]
   The test function vanishes on @f$\Gamma_D@f$, while the normal derivative is
-  prescribed on @f$\Gamma_N@f$. Thus the weak problem is: find @f$u\in U@f$
+  prescribed on @f$\Gamma_N@f$. Thus the weak problem seeks @f$u\in U@f$
   such that
   @f[
     a(u,v)=\ell(v)\quad\text{for every }v\in V,
@@ -72,7 +71,7 @@
 
   The @ref guides-boundary-conditions "mixed-boundary example" takes
   @f$f=0@f$, fixes the left side of the unit square, and prescribes a unit
-  normal derivative on the right:
+  normal derivative on the right.
 
   @snippet PDEs/MixedBoundary.cpp mixed-boundary-form
 

@@ -1,6 +1,6 @@
 /**
   @page guides-solid-mechanics Solid mechanics
-  @brief Finite-strain solid mechanics: kinematics, constitutive laws, and Newton solution
+  @brief Kinematics, constitutive laws and Newton solution for finite-strain solid mechanics.
 
   @tableofcontents
 
@@ -22,7 +22,7 @@
   | Postprocessing | `Solid/Fields/` | Stress and strain fields for output |
   | Linear theory | `Solid/Linear/` | Small-strain elasticity integrators |
 
-  Working examples:
+  Working examples are available in
   [BlockGravity.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Solid/BlockGravity.cpp)
   (quasi-static NeoHookean block under ramped gravity),
   [CantileverBeam.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Solid/CantileverBeam.cpp),
@@ -48,7 +48,7 @@
   are computed *at constitutive points* — laws never see meshes or
   quadrature, only local state.
 
-  `InternalVirtualWork` uses the total Lagrangian formulation: integration
+  `InternalVirtualWork` uses the total Lagrangian formulation with integration
   over the reference configuration, reference gradients @f$\nabla_X@f$
   and first Piola–Kirchhoff stress @f$P@f$. The Cauchy stress is available
   as an output field through @ref guides-solid-fields.
@@ -56,7 +56,7 @@
   @section guides-solid-laws Constitutive laws
 
   A hyperelastic law is a strain-energy density @f$ W @f$; stress and
-  tangent follow by differentiation:
+  tangent follow by differentiation.
   @f$ P = \partial W / \partial F @f$,
   @f$ \mathbb{C} = \partial^2 W / \partial F^2 @f$. All laws derive from
   `HyperElasticLaw` and return, at a constitutive point, the stress and
@@ -72,8 +72,8 @@
   | `ActiveFiberLaw` | 1D fiber element with internal state | Active (muscle) contraction |
   | `ActiveContraction<Passive, Active>` | passive law + active fiber law | Composition wrapper |
 
-  Constructing a law and the internal virtual work form
-  (from [BlockGravity.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Solid/BlockGravity.cpp)):
+  The [BlockGravity.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Solid/BlockGravity.cpp)
+  example constructs a law and its internal virtual work form as follows.
 
   @code{.cpp}
   Solid::NeoHookean law(lambda, mu);
@@ -90,7 +90,12 @@
 
   @snippet Solid/ConstitutiveResponse.cpp constitutive-bind
 
-  @image html ConstitutiveResponse.png "Local energy and first Piola stress from the constitutive law."
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html ConstitutiveResponse-energy.png "Stored energy evaluated from the constitutive law."
+  @image html ConstitutiveResponse-stress.png "First Piola stress compared with the finite-difference energy derivative."
+  @endparblock
 
   Along this loading path, @f$dW/ds=P_{11}@f$. The program checks that identity
   using centered differences with increment @f$10^{-6}@f$. The maximum scaled
@@ -113,7 +118,7 @@
   @f$ \partial^2 W/\partial C^2 @f$) and the geometric (initial-stress)
   stiffness; omitting the latter forfeits quadratic convergence.
   `InternalVirtualWork` packages residual and tangent together — the
-  expression `ivw(du, v)` contributes both to the Newton problem:
+  expression `ivw(du, v)` contributes both to the Newton problem.
 
   @code{.cpp}
   // Newton linearization:  K δu = -F_int(u) + F_ext
@@ -130,7 +135,7 @@
   solver.solve(u);      // iterates du-solves, accumulating into u
   @endcode
 
-  Note the structure: the *increment* @f$ \delta u @f$ is the trial
+  The *increment* @f$ \delta u @f$ is the trial
   function; the Dirichlet condition on @f$ \delta u @f$ is homogeneous
   once @f$ u @f$ satisfies the constraint; loads are ramped in steps
   (incremental loading) because a full load applied to the undeformed
@@ -145,17 +150,17 @@
   Laws that need more than kinematics (time step, activation, previous
   internal state, fiber directions) receive them through the
   *constitutive point* mechanism
-  (<a href="_constitutive_point_8h.html">Solid/Local/ConstitutivePoint.h</a>):
-  the integrators stamp tags — cell index, quadrature-point index, and any
+  (<a href="_constitutive_point_8h.html">Solid/Local/ConstitutivePoint.h</a>).
+  The integrators stamp tags — cell index, quadrature-point index, and any
   user-relevant quantities — onto the point, and a user-supplied input callable
-  maps tags to law inputs:
+  maps tags to law inputs.
 
   @code{.cpp}
   auto ivw = Solid::InternalVirtualWork(law, u).setInput(activeInput);
   @endcode
 
   Direct constitutive evaluation binds inputs once, then reads the prepared
-  law through const methods:
+  law through const methods.
 
   @code{.cpp}
   Solid::KinematicState state(3);
@@ -210,10 +215,10 @@
   @section guides-solid-fields Postprocessing fields
 
   `Solid/Fields/` provides stress/strain functions for output and
-  coupling: `FirstPiolaKirchhoffStress` (@f$ P @f$),
+  coupling through `FirstPiolaKirchhoffStress` (@f$ P @f$),
   `CauchyStress` (@f$ \sigma = J^{-1} P F^\top @f$),
   `GreenLagrangeStrain` (@f$ E @f$). They are ordinary
-  @ref Rodin::Variational "form-language" functions: project them onto an
+  @ref Rodin::Variational "form-language" functions. Project them onto an
   output space and write them with @ref Rodin::IO::XDMF "IO::XDMF".
 
   @section guides-solid-units A note on units

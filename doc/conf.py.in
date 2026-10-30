@@ -17,7 +17,7 @@ RODIN_MCSS_STYLESHEETS = [
     '@CMAKE_SOURCE_DIR@/third-party/m.css/css/m-documentation.css',
 ]
 
-HTML_HEADER = '<script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>'
+HTML_HEADER = '<script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>'
 
 FINE_PRINT = '''<div class="rodin-site-footer">
   <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>

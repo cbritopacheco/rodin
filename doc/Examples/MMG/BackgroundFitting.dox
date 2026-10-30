@@ -27,7 +27,7 @@
   This sequence is also used in the Kelvin ball application. Here the analytic
   target isolates geometry fitting from PDE solves, level-set transport and
   field transfer. The @ref examples-mmg-mesh_adaptation "size-field tutorial"
-  supplies the remeshing background; @ref guides-swift explains the fitting model.
+  supplies the remeshing background; @ref Rodin::Adaptation::SWIFT explains the fitting model.
 
   @section examples-swift-background-size Prepare the background
 
@@ -139,7 +139,7 @@
 
   @section examples-swift-background-run Build, run and visualize
 
-  Build and execute the `SWIFT_BackgroundFitting` target in a scratch directory:
+  Build and execute the `SWIFT_BackgroundFitting` target in a scratch directory.
 
   @code{.sh}
   cmake --build build --target SWIFT_BackgroundFitting
@@ -157,7 +157,7 @@
 
   @section examples-swift-background-full Complete program
 
-  @snippet Adaptation/SWIFT/BackgroundFitting.cpp background-source
+  The complete program is available in @ref Adaptation/SWIFT/BackgroundFitting.cpp "BackgroundFitting.cpp".
 
   @section examples-swift-background-next Continue
 

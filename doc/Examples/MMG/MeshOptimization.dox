@@ -46,7 +46,12 @@
 
   @section examples-mmg-meshopt-results Inspect the result
 
-  @image html MMGOptimization.png "Actual input and optimized meshes, using the same domain and plotting scale."
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html MMGOptimization-before.png "Mesh before optimization, with the same plotting scale."
+  @image html MMGOptimization-after.png "Mesh after optimization, with the same plotting scale."
+  @endparblock
 
   For a triangle with area @f$A@f$ and edge lengths @f$\ell_i@f$, the example
   reports the normalized shape measure
@@ -64,7 +69,7 @@
   `After.medit.mesh` and corresponding triangle CSV files. The program checks
   positive cell measures and unit total area with tolerance @f$10^{-10}@f$.
 
-  @snippet MMG/MeshOptimization.cpp mmg-optimizer-source
+  The complete program is available in @ref MMG/MeshOptimization.cpp "MeshOptimization.cpp".
 
   @section examples-mmg-meshopt-see-also Continue
 

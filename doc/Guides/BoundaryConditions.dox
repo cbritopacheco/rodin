@@ -2,8 +2,7 @@
   @page guides-boundary-conditions Boundary conditions
   @brief Distinguish prescribed values, natural fluxes, and periodic identifications.
 
-  Boundary conditions enter a finite element problem in two different ways:
-  prescribed values restrict admissible fields, while prescribed fluxes enter
+  Prescribed values restrict admissible fields, while prescribed fluxes enter
   the weak equation as loads. This guide follows one mixed-boundary diffusion
   problem, then explains how the same distinction applies to elasticity and
   periodic domains.
@@ -21,7 +20,7 @@
   @f]
   with @f$\partial_nu=0@f$ on the top and bottom. Here @f$n@f$ is the outward
   unit normal and @f$\partial_nu=\nabla u\cdot n@f$. The exact solution is
-  @f$u(x,y)=x@f$: its gradient is horizontal and its right normal derivative is one.
+  @f$u(x,y)=x@f$. Its gradient is horizontal and its right normal derivative is one.
 
   The word “flux” requires a sign convention. Here it means the prescribed
   normal derivative. A physical diffusive flux defined by
@@ -62,7 +61,7 @@
 
   @subsection guides-bc-dirichlet-nonhomogeneous Prescribe nonzero values
 
-  For a scalar trial function `u`, a known function can supply the boundary value:
+  For a scalar trial function `u`, a known function can supply the boundary value.
 
   @code{.cpp}
   RealFunction value = [](const Geometry::Point& point)
@@ -101,7 +100,7 @@
   @subsection guides-bc-neumann-vector Traction in elasticity
 
   The natural boundary quantity is the traction @f$\sigma(u)n@f$. A vector traction enters through a boundary load, while fixed
-  displacement remains an essential condition:
+  displacement remains an essential condition.
 
   @snippet PDEs/Elasticity.cpp elasticity-form
 
@@ -143,8 +142,6 @@
   curved exact solution. Other problems still require mesh-refinement checks.
 
   @section guides-bc-complete Complete program and further reading
-
-  @snippet PDEs/MixedBoundary.cpp mixed-boundary-source
 
   The example is built as the `MixedBoundary` target. See
   @ref PDEs/MixedBoundary.cpp "MixedBoundary.cpp", the

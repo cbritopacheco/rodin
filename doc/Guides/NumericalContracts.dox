@@ -13,7 +13,7 @@
   @section guides-numerical-contracts-interpolation Interpolation vs projection
 
   Assigning an expression to a `GridFunction` applies the finite element
-  space's degree-of-freedom functionals to that expression:
+  space's degree-of-freedom functionals to that expression.
 
   @code{.cpp}
   GridFunction uh(Vh);
@@ -31,14 +31,14 @@
   @subsection guides-numerical-contracts-l2 L2 projection
 
   When the mathematical operation is the @f$ L^2 @f$ projection, assemble the
-  mass problem:
+  mass problem.
 
   @f[
     \int_\Omega u_h v_h\,dx = \int_\Omega f v_h\,dx
     \qquad \forall v_h \in V_h.
   @f]
 
-  In Rodin this is written as:
+  The mass problem is assembled and solved with the form language.
 
   @code{.cpp}
   TrialFunction u(Vh);
@@ -64,7 +64,7 @@
     a(u,v) = \ell(v)
   @f]
 
-  becomes:
+  gives the following residual assignment.
 
   @code{.cpp}
   Problem poisson(u, v);
@@ -91,7 +91,7 @@
   space, number of fields, or global size changes, create a new problem or
   linear system.
 
-  PETSc makes this rule explicit: once a `Mat` or `Vec` has been laid out and
+  Once a PETSc `Mat` or `Vec` has been laid out and
   assembled, it cannot be resized in place. Reassembly may reuse storage when
   sizes and sparsity structure match, but changed structure is a new system.
 
@@ -111,7 +111,7 @@
   @section guides-numerical-contracts-tangent Residual and tangent consistency
 
   Nonlinear residual/tangent pairs must be consistent. For a residual
-  @f$ R(x) @f$ and tangent @f$ J(x) @f$, the check is:
+  @f$ R(x) @f$ and tangent @f$ J(x) @f$, the consistency check compares the following quantities.
 
   @f[
     J(x)w \approx

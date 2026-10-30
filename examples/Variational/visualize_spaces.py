@@ -8,13 +8,13 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from pathlib import Path as _PlotPath
 import sys as _plot_sys
-from pathlib import Path as _PlotPath
 _plot_examples = next(parent for parent in _PlotPath(__file__).resolve().parents
                       if (parent / 'rodin.mplstyle').is_file())
 _plot_sys.path.insert(0, str(_plot_examples))
 from plot_style import apply_style
 apply_style()
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.collections import PolyCollection
 import numpy as np
 
 PALETTE = LinearSegmentedColormap.from_list(
@@ -40,38 +40,51 @@ def render(spaces, connectivity, output):
     (output / 'Images').mkdir(parents=True, exist_ok=True)
     (output / 'Examples/Geometry').mkdir(parents=True, exist_ok=True)
     basis = np.genfromtxt(spaces / 'ReferenceP1.csv', delimiter=',', names=True)
-    fig, axes = plt.subplots(1, 3, figsize=(9.5, 3.5), dpi=180)
-    for index, ax in enumerate(axes):
+    for index in range(3):
+        fig, ax = plt.subplots(figsize=(4.8, 4.3), dpi=180, layout='constrained')
         field = ax.tripcolor(basis['r'], basis['s'], basis[f'phi{index}'],
                              shading='gouraud', cmap=PALETTE, vmin=0, vmax=1)
         ax.plot([0, 1, 0, 0], [0, 0, 1, 0], color='#718096', linewidth=.8)
         ax.scatter([0, 1, 0], [0, 0, 1], s=25, color='#17679A', edgecolor='#071F46', zorder=3)
-        for r, s, label, offset in [(0, 0, '0', (-10, -12)), (1, 0, '1', (8, -5)), (0, 1, '2', (-10, 8))]:
-            ax.annotate(label, (r, s), xytext=offset, textcoords='offset points', fontsize=9)
+        for r, t, label, offset in [(0, 0, '0', (-10, -12)), (1, 0, '1', (8, -5)), (0, 1, '2', (-10, 8))]:
+            ax.annotate(label, (r, t), xytext=offset, textcoords='offset points', fontsize=9)
         ax.set(xlabel='$r$', ylabel='$s$', title=f'$\\widehat{{\\phi}}_{index}$',
                xlim=(-.05, 1.15), ylim=(-.05, 1.15), aspect='equal')
         ax.spines[['top', 'right']].set_visible(False)
         fig.colorbar(field, ax=ax, fraction=.04, pad=.03, ticks=[0, .5, 1])
-    fig.tight_layout()
-    fig.savefig(output / 'Images/P1Basis.png')
-    plt.close(fig)
+        fig.savefig(output / f'Images/P1Basis-{index}.png')
+        plt.close(fig)
 
     samples = np.genfromtxt(spaces / 'FiniteElementSpaces.csv', delimiter=',', names=True)
     triangles = sample_triangles(samples)
-    fig, axes = plt.subplots(1, 3, figsize=(10, 3.8), dpi=180)
-    for ax, name in zip(axes, ['p0', 'p1', 'p2']):
-        error = np.abs(samples[name] - samples['exact'])
-        field = ax.tripcolor(samples['x'], samples['y'], triangles, error,
-                             shading='gouraud', cmap=PALETTE,
-                             vmin=0, vmax=max(error.max(), 3e-15))
-        ax.set(xlabel='$x$', ylabel='$y$', title={'p0': 'P0', 'p1': 'P1', 'p2': 'H1 degree 2'}[name],
-               aspect='equal')
-        bar = fig.colorbar(field, ax=ax, fraction=.045, pad=.03)
-        bar.ax.ticklabel_format(style='sci', scilimits=(-2, 2))
-    fig.suptitle('Absolute interpolation error · same mesh and quadratic data', y=.99)
-    fig.tight_layout(rect=(0, 0, 1, .91))
-    fig.savefig(output / 'Images/SpaceInterpolation.png')
-    plt.close(fig)
+    cells, values = [], []
+    for cell in np.unique(samples['cell']):
+        rows = samples[samples['cell'] == cell]
+        n = int(rows['i'].max())
+        corners = [rows[(rows['i'] == i) & (rows['j'] == j)][0]
+                   for i, j in [(0, 0), (n, 0), (0, n)]]
+        cells.append([(r['x'], r['y']) for r in corners])
+        if not np.allclose(rows['p0'], rows['p0'][0], rtol=0, atol=1e-14):
+            raise ValueError('P0 export must contain one constant value per cell')
+        values.append(rows['p0'][0])
+    for name in ['p0', 'p1', 'p2']:
+        fig, ax = plt.subplots(figsize=(4.8, 4.3), dpi=180, layout='constrained')
+        if name == 'p0':
+            # Original FE cells each receive their own constant, without nodal averaging.
+            field = PolyCollection(cells, array=np.asarray(values), cmap=PALETTE,
+                                   edgecolors='#718096', linewidths=.3)
+            field.set_clim(0, 2)
+            ax.add_collection(field)
+        else:
+            field = ax.tripcolor(samples['x'], samples['y'], triangles, samples[name],
+                                 shading='gouraud', cmap=PALETTE, vmin=0, vmax=2)
+        ax.set(xlabel='$x$', ylabel='$y$',
+               title={'p0': r'$P_0$: cell values', 'p1': r'$P_1$', 'p2': r'$P_2$'}[name],
+               xlim=(0, 1), ylim=(0, 1), aspect='equal')
+        ax.spines[['top', 'right']].set_visible(False)
+        fig.colorbar(field, ax=ax, fraction=.045, pad=.03).set_label(r'$I_h f$')
+        fig.savefig(output / f'Images/SpaceInterpolation-{name}.png')
+        plt.close(fig)
 
     vertices = np.genfromtxt(connectivity / 'Connectivity.vertices.csv', delimiter=',', names=True)
     edges = np.genfromtxt(connectivity / 'Connectivity.edges.csv', delimiter=',', names=True)

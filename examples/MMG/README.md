@@ -11,7 +11,7 @@ element spaces and problems before using the output mesh in another solve.
 | `MeshAdaptation` | Remesh from the prescribed scalar field `0.05 + 0.15*x` | Positive triangle areas and unit area |
 
 The last two programs export `Before.csv` and `After.csv` alongside MEDIT
-meshes. Their figures can be regenerated with:
+meshes. Regenerate their figures with the following command.
 
 ```sh
 python examples/MMG/visualize_meshes.py OUTPUT_DIRECTORY FIGURE.png

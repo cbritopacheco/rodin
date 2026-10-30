@@ -2296,7 +2296,7 @@ namespace Rodin::Assembly
    * matching, no tolerance.
    *
    * For each slave DOF a pair @c (masters, coefficients) is emitted. Each
-   * coefficient is computed as @f$ \ell_s^u(A(\phi_j^v)) @f$: the master
+   * coefficient is computed as @f$ \ell_s^u(A(\phi_j^v)) @f$. The master
    * basis is evaluated through @f$ A(v) @f$ and then sampled by the slave
    * finite element's DOF functional.
    */

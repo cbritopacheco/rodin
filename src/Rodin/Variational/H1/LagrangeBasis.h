@@ -24,7 +24,7 @@ namespace Rodin::Variational
    * @brief Generic 1D Lagrange basis on arbitrary nodes.
    *
    * Evaluates Lagrange basis functions and their derivatives on a given
-   * set of nodes. The i-th basis function is defined as:
+   * set of nodes. The i-th basis function is defined as
    * @f[
    *   L_i(x) = \prod_{j \neq i} \frac{x - x_j}{x_i - x_j}
    * @f]
@@ -142,7 +142,7 @@ namespace Rodin::Variational
    * @brief Lagrange basis on the reference segment [0,1] using GLL nodes.
    *
    * Provides K+1 Lagrange basis functions on GLL01 nodes (Gauss-Lobatto-Legendre
-   * nodes mapped to [0,1]). The basis satisfies:
+   * nodes mapped to [0,1]). The basis satisfies
    * @f[
    *   L_i(x_j) = \delta_{ij}
    * @f]
@@ -411,7 +411,7 @@ namespace Rodin::Variational
       /**
        * @brief Gets the derivative of the basis function.
        *
-       * The differentiation direction is selected by @p deriv_dim: 0 for @f$ x @f$, 1
+       * The differentiation direction is selected by @p deriv_dim, with 0 for @f$ x @f$, 1
        * for @f$ y @f$, and 2 for @f$ z @f$.
        *
        * @param i Index of the requested entry.
@@ -507,7 +507,7 @@ namespace Rodin::Variational
    * @brief Lagrange basis on the reference quadrilateral [0,1]².
    *
    * Provides tensor-product Lagrange basis functions using GLL01 nodes
-   * in each direction:
+   * in each direction.
    * @f[
    *   \phi_{i,j}(x,y) = L_i(x) \cdot L_j(y)
    * @f]
@@ -568,7 +568,7 @@ namespace Rodin::Variational
       /**
        * @brief Gets the derivative of the basis function.
        *
-       * The differentiation direction is selected by @p deriv_dim: 0 for @f$ x @f$, 1
+       * The differentiation direction is selected by @p deriv_dim, with 0 for @f$ x @f$, 1
        * for @f$ y @f$.
        *
        * @param i Index of the requested entry.
@@ -676,7 +676,7 @@ namespace Rodin::Variational
    * @brief Lagrange basis on the reference wedge (triangular prism).
    *
    * The wedge is the tensor product of a triangle in (x,y) with a segment
-   * in z. Basis functions are:
+   * in z. Basis functions are
    * @f[
    *   \phi_{i,j,k}(x,y,z) = T_{i,j}(x,y) \cdot L_k(z)
    * @f]
@@ -751,7 +751,7 @@ namespace Rodin::Variational
       /**
        * @brief Gets the derivative of the basis function.
        *
-       * The differentiation direction is selected by @p deriv_dim: 0 for @f$ x @f$, 1
+       * The differentiation direction is selected by @p deriv_dim, with 0 for @f$ x @f$, 1
        * for @f$ y @f$, and 2 for @f$ z @f$.
        *
        * @param i Index of the requested entry.

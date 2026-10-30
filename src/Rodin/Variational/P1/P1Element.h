@@ -41,7 +41,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c P1Element: exposes the scalar type and the range type of
+   * @brief Type traits for @c P1Element, exposing the scalar type and the range type of
    * the element.
    * @ingroup TraitsSpecializations
    */
@@ -175,7 +175,7 @@ namespace Rodin::Variational
       /**
        * @brief Represents a piecewise linear basis function of a P1 scalar element.
        *
-       * P1 basis functions satisfy the Lagrange property:
+       * P1 basis functions satisfy the Lagrange property.
        * @f$ \phi_i(x_j) = \delta_{ij} @f$ where x_j are the vertices of the element.
        *
        * # Properties
@@ -186,7 +186,7 @@ namespace Rodin::Variational
        * - **Partition of unity**: @f$ \sum_i \phi_i(x) = 1 @f$ for all x in element
        * - **Continuity**: C⁰ continuous across element interfaces
        *
-       * For example, in 1D on [0,1]: @f$ \phi_0(x) = 1-x @f$ and @f$ \phi_1(x) = x @f$.
+       * For example, in 1D on [0,1], @f$ \phi_0(x) = 1-x @f$ and @f$ \phi_1(x) = x @f$.
        * In 2D on a triangle, basis functions use barycentric coordinates.
        */
       class BasisFunction
@@ -247,7 +247,7 @@ namespace Rodin::Variational
           /**
            * @brief Represents the gradient of a P1 basis function.
            *
-           * The gradient is a vector of first-order partial derivatives:
+           * The gradient is a vector of first-order partial derivatives.
            * @f$ \nabla \phi = (\partial\phi/\partial x, \partial\phi/\partial y, \partial\phi/\partial z) @f$
            *
            * The gradient is constant on simplices and generally depends on the

@@ -19,10 +19,10 @@
   @f]
   Initially @f$u=0@f$. The bottom and side walls are stationary. On the top,
   @f[
-    u(x,1,t)=\bigl(r(t)[1-((x-c(t))/w)^2]_+^2,0\bigr),
+    u(x,1,t)=\bigl(U_{\mathrm{lid}}r(t)[1-((x-c(t))/w)^2]_+^2,0\bigr),
     \qquad r(t)=\min(t,1),
   @f]
-  where @f$[a]_+=\max(a,0)@f$, @f$w=0.25@f$, and
+  where @f$U_{\mathrm{lid}}=2@f$, @f$[a]_+=\max(a,0)@f$, @f$w=0.25@f$, and
   @f[
     c(t)=0.5-0.22\cos(2\pi t/8).
   @f]
@@ -30,9 +30,9 @@
   @f$x=0.72@f$, completing one round trip in eight time units. Its support
   stays away from the side walls, and its velocity points to the right even
   when the patch itself travels left. The amplitude ramps over one time unit.
-  Its peak speed after the ramp and the
-  cavity width are both one. With @f$\nu=0.01@f$, the Reynolds number based on
-  those scales is @f$\mathrm{Re}=100@f$.
+  Its peak speed after the ramp is two and the cavity width is one. With
+  @f$\nu=0.01@f$, the Reynolds number based on those scales is
+  @f$\mathrm{Re}=200@f$.
 
   The compact lid profile vanishes at the corners, avoiding the conflicting corner
   values of a constant-speed lid. Comparisons with classical cavity reference
@@ -41,7 +41,7 @@
 
   @section examples-pdes-navierstokes-time The time discretization
 
-  One Oseen solve is performed per time step: the transport velocity is taken
+  One Oseen solve is performed per time step. The transport velocity is taken
   from the previous step, while the transported velocity is implicit. With
   @f$\Delta t=0.01@f$,
   @f[
@@ -50,7 +50,7 @@
     \qquad \operatorname{div}u^{n+1}=0.
   @f]
   The method is first order in time and uses a semi-implicit Oseen linearization.
-  The 1,000 steps reach @f$t=10@f$. The resulting transient can be assessed
+  The 2,000 steps reach @f$t=20@f$. The resulting transient can be assessed
   through time-step and mesh refinement.
 
   Multiplication by test velocity @f$v@f$ gives the momentum equation
@@ -100,11 +100,11 @@
   @htmlonly
   <figure class="m-figure rodin-tutorial-video">
     <video controls playsinline preload="metadata" poster="NavierStokes.png"
-           aria-label="Computed cavity flow with horizontally traveling lid forcing at Reynolds number 100">
+           aria-label="Computed cavity flow with horizontally traveling lid forcing at Reynolds number 200">
       <source src="NavierStokes.webm" type="video/webm" />
       <a href="NavierStokes.webm">Watch the cavity animation</a>
     </video>
-    <figcaption>Computed speed and instantaneous streamlines from rest to time 10.
+    <figcaption>Computed speed and instantaneous streamlines from rest to time 20.
       The cyan trace follows the computed top-wall speed as the driving patch travels
       horizontally. The displayed time is simulation time.</figcaption>
   </figure>
@@ -120,13 +120,16 @@
 
   The `examples/PDEs/visualize_paraview.py` script uses ParaView to produce
   transparent PNG frames, then FFmpeg encodes the WebM
-  from the same time series. A still image of the final frame is also available:
+  from the same time series. A still image of the final frame is also available.
 
-  @image html PDEs/NavierStokes.png "Velocity magnitude and instantaneous circulation at time 10 with the moving lid forcing." width=720px
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html PDEs/NavierStokes-speed.png "Computed speed at time 20 with moving lid forcing."
+  @image html PDEs/NavierStokes-streamlines.png "Instantaneous circulation and velocity directions at time 20."
+  @endparblock
 
   @section examples-pdes-navierstokes-full Complete program
-
-  @snippet PDEs/NavierStokes.cpp navierstokes-source
 
   See @ref PDEs/NavierStokes.cpp "NavierStokes.cpp" for this native example.
   A separate [PETSc SNES example](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_NavierStokes.cpp)

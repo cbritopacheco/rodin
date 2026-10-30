@@ -31,13 +31,13 @@ artifacts are written under the CMake build tree.
 
 Rodin builds documentation through the `RodinDoxygen` CMake target.
 
-From a configured build tree:
+Build the documentation from a configured build tree.
 
 ```sh
 cmake --build build --target RodinDoxygen
 ```
 
-For a fresh build tree:
+Configure a fresh build tree before building the documentation.
 
 ```sh
 cmake -S . -B build -DRODIN_BUILD_DOC=ON
@@ -55,14 +55,14 @@ The documentation build has two modes:
 | `RODIN_BUILD_DOC=ON` | Enable the `RodinDoxygen` target. |
 | `RODIN_USE_MCSS=ON` | Build the styled m.css site instead of plain Doxygen HTML. |
 
-Plain Doxygen:
+Build the plain Doxygen documentation with this configuration.
 
 ```sh
 cmake -S . -B build -DRODIN_BUILD_DOC=ON -DRODIN_USE_MCSS=OFF
 cmake --build build --target RodinDoxygen
 ```
 
-Styled m.css documentation:
+Build the styled m.css documentation with this configuration.
 
 ```sh
 cmake -S . -B build -DRODIN_BUILD_DOC=ON -DRODIN_USE_MCSS=ON
@@ -87,13 +87,13 @@ The Python packages for the m.css path are listed in `requirements.txt`.
 Doxygen warnings are tracked by the ratchet in `dev/check_doxygen_warnings.py`.
 The accepted baseline lives in `dev/doxygen_warnings.baseline`.
 
-Run the check with:
+Run the documentation check with the following command.
 
 ```sh
 python3 dev/check_doxygen_warnings.py
 ```
 
-If a change fixes old warnings, shrink the baseline with:
+If a change fixes old warnings, shrink the baseline with the following command.
 
 ```sh
 python3 dev/check_doxygen_warnings.py --update-baseline
@@ -110,8 +110,8 @@ from the Doxygen warning ratchet unless the build target fails.
 
 Prefer documenting the mathematical concept represented by the code. API
 comments should state the formula, space, domain, and ownership/lifetime
-expectations when those matter. For tests, document the behavior being checked:
-read the test body and describe the invariant, regression, or numerical
+expectations when those matter. For tests, document the behavior being checked.
+Read the test body and describe the invariant, regression, or numerical
 property the test protects.
 
 Useful conventions:
@@ -187,7 +187,7 @@ that backlink on the primary template. Preprocessor macros stay attached to
 their declaring header; the Configuration page links to `Configure.h.in` and
 explains the generated `Rodin/Configure.h` include.
 
-After rendering the full m.css site, run:
+Check the navigation after rendering the full m.css site.
 
 ```sh
 python3 dev/check_documentation_navigation.py

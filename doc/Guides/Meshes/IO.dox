@@ -33,7 +33,7 @@
   @subsection guides-meshes-io-loading-basic Basic loading
 
   Use @ref Rodin::Geometry::Mesh "Mesh::load()" with an explicit
-  @ref Rodin::IO::FileFormat "IO::FileFormat":
+  @ref Rodin::IO::FileFormat "IO::FileFormat".
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -59,7 +59,7 @@
 
   @subsection guides-meshes-io-saving-basic Basic saving
 
-  Use @ref Rodin::Geometry::Mesh "Mesh::save()" with an explicit format:
+  Use @ref Rodin::Geometry::Mesh "Mesh::save()" with an explicit format.
 
   @code{.cpp}
   Mesh mesh;
@@ -75,7 +75,7 @@
   @subsection guides-meshes-io-saving-medit MEDIT format
 
   The MEDIT format is commonly used with the
-  @ref Rodin::MMG "MMG" mesh adaptation tools:
+  @ref Rodin::MMG "MMG" mesh adaptation tools.
 
   @code{.cpp}
   mesh.save("domain.mesh", IO::FileFormat::MEDIT);
@@ -83,7 +83,7 @@
 
   @section guides-meshes-io-example Complete example
 
-  @snippet IO/MEDIT.cpp medit-source
+  The complete program is available in @ref IO/MEDIT.cpp "MEDIT.cpp".
 
   The generated input makes the program self-contained. Its output files use
   distinct names for each representation.
@@ -119,8 +119,8 @@
 
   @subsection guides-meshes-io-considerations-compatibility Compatibility
 
-  - **MFEM**: Best for MFEM-based workflows
-  - **MEDIT**: Required for MMG tools
+  - **MFEM** supports MFEM-based workflows.
+  - **MEDIT** supplies the format required by MMG tools.
 
   @subsection guides-meshes-io-considerations-attributes Attributes
 

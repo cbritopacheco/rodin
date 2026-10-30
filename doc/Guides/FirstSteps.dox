@@ -4,8 +4,7 @@
 
   This guide starts with an installed Rodin library. A small program constructs
   a triangular mesh and a scalar finite element space, then prints their sizes.
-  No equation is solved yet: the goal is to establish the objects on which a
-  variational problem will be built.
+  The program establishes the objects needed to build a variational problem.
 
   @tableofcontents
   @m_footernavigation
@@ -74,7 +73,7 @@
 
   @section guides-getting-started-first-steps-run Build and run
 
-  Run these commands in the directory containing the two files:
+  Run these commands in the directory containing the two files.
 
   @code{.bash}
   cmake -S . -B build
@@ -82,7 +81,7 @@
   ./build/first_rodin
   @endcode
 
-  The expected output is:
+  The program produces the following output.
 
   @code{.text}
   Vertices: 64
@@ -117,7 +116,7 @@
 
   @subsection guides-getting-started-first-steps-functions Trial and test functions
 
-  Trial and test functions are symbolic objects used to construct equations:
+  Trial and test functions are symbolic objects used to construct equations.
 
   @code{.cpp}
   TrialFunction u(vh);
@@ -132,7 +131,7 @@
   @section guides-getting-started-first-steps-modules Finding the relevant API
 
   The <a href="modules.html">module reference</a> groups interfaces by their
-  responsibilities: Geometry describes the domain, Variational describes
+  responsibilities. Geometry describes the domain, Variational describes
   fields and forms, Assembly constructs algebraic systems, Solver solves
   those systems, and IO exports the results. Optional models and integrations
   are listed there alongside their public headers.
@@ -140,6 +139,5 @@
   @section guides-getting-started-first-steps-next Continue with a solve
 
   Proceed to @ref guides-getting-started-first-problem "A first problem"
-  to build and run a Poisson solve. The @ref examples-pdes-poisson "Poisson
-  tutorial" explains the mathematical formulation and each stage of the code.
+  to build and run a Poisson solve. The @ref examples-pdes-poisson "Poisson tutorial" explains the mathematical formulation and each stage of the code.
 */

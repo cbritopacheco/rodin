@@ -69,8 +69,8 @@ namespace Rodin::Solver
    * The state callback synchronizes the variational fields from the iterate;
    * targeted assembly then evaluates the residual or Jacobian. With PETSc
    * 3.20 and newer, synchronization is keyed by the unique vector object ID
-   * and its change counter. A changed key invalidates both assembly caches:
-   * equal counters on different vectors do not denote the same iterate.
+   * and its change counter. A changed key invalidates both assembly caches.
+   * Equal counters on different vectors do not denote the same iterate.
    * PETSc 3.19 uses uncached synchronization and assembly. Each solve resets
    * these caches and synchronizes the final state before returning.
    *
@@ -96,7 +96,7 @@ namespace Rodin::Solver
        *        state-dependent Rodin fields from the current SNES iterate.
        *
        * The argument is the current iterate expressed as a Rodin
-       * @ref Rodin::PETSc::Math::Vector (a PETSc @c Vec).  Typical usage:
+       * @ref Rodin::PETSc::Math::Vector (a PETSc @c Vec).  Typical usage.
        * @code
        * snes.setStateUpdate([&](const PETSc::Math::Vector& x) {
        *   uState.setData(x, 0);
@@ -209,7 +209,7 @@ namespace Rodin::Solver
       /**
        * @brief Returns `true` if the most recent @ref solve() converged.
        *
-       * Wraps @c SNESGetConvergedReason: a positive reason indicates
+       * Wraps @c SNESGetConvergedReason. A positive reason indicates
        * convergence, a negative reason indicates divergence.
        *
        * @returns `true` when converged, `false` when diverged or not yet solved.

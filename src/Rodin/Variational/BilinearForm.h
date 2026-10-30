@@ -76,7 +76,7 @@ namespace Rodin::Variational
    * BilinearFormBase provides the foundation for representing bilinear forms
    * @f$ a(u,v) : U \times V \to \mathbb{K} @f$ in finite element computations.
    * Over the reals the form is bilinear. Over the complex numbers Rodin uses
-   * the standard finite element convention: the form is linear in the trial
+   * the standard finite element convention. The form is linear in the trial
    * argument and conjugate-linear in the test argument.
    *
    * @tparam Operator Matrix type for the discrete representation
@@ -87,7 +87,7 @@ namespace Rodin::Variational
    * - **Linearity in second argument**: @f$ a(u, \alpha v_1 + \beta v_2) = \alpha a(u,v_1) + \beta a(u,v_2) @f$
    *
    * For complex scalars, the second identity instead carries conjugated
-   * coefficients: @f$ a(u, \alpha v_1 + \beta v_2) = \overline{\alpha}
+   * coefficients according to @f$ a(u, \alpha v_1 + \beta v_2) = \overline{\alpha}
    * a(u,v_1) + \overline{\beta} a(u,v_2) @f$.
    *
    * # Discrete Representation
@@ -195,7 +195,7 @@ namespace Rodin::Variational
        * @return Reference to the list of local element integrators
        *
        * Local integrators operate element-by-element, contributing to matrix
-       * entries through local assembly:
+       * entries through local assembly.
        * @f$ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx @f$
        */
       constexpr

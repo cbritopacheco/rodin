@@ -26,7 +26,7 @@
   @section examples-mmg-behavior-required Required entity behavior
 
   @ref Rodin::MMG::Mesh "MMG::Mesh" stores required vertices, edges,
-  triangles, and tetrahedra:
+  triangles, and tetrahedra.
 
   @code{.cpp}
   mesh.setRequiredVertex(vertexIndex);
@@ -47,7 +47,7 @@
 
   The test suite covers this metadata path in 2D and 3D, including MEDIT I/O,
   native MMG conversion, optimization, and level-set discretization.
-  In MMG3D, triangle metadata is boundary-surface metadata: when face-cell
+  In MMG3D, triangle metadata describes the boundary surface. When face-cell
   incidence is available, Rodin exports only boundary triangles to MMG's
   native triangle table. Interior faces of a tetrahedral mesh are not a
   supported MMG3D `RequiredTriangles` preservation mechanism.
@@ -82,7 +82,7 @@
   @section examples-mmg-behavior-nosplit NoSplit and material labels
 
   @ref Rodin::MMG::LevelSetDiscretizer::noSplit "LevelSetDiscretizer::noSplit"
-  applies MMG's material split policy to a material reference:
+  applies MMG's material split policy to a material reference.
 
   @code{.cpp}
   MMG::Mesh result = MMG::LevelSetDiscretizer()

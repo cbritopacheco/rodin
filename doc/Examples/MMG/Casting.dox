@@ -15,7 +15,7 @@
   @section examples-mmg-cast-create Initialize from generated geometry
 
   Assignment from a plain geometry mesh copies its topology and coordinates
-  and clears MMG-specific metadata. Apply feature labels after that assignment:
+  and clears MMG-specific metadata. Apply feature labels after that assignment.
 
   @snippet MMG/MeshIO.cpp mmg-io-create
 
@@ -23,7 +23,7 @@
 
   A finite element space borrows its mesh and determines degrees of freedom
   from the current topology. The adaptation example constructs a nodal size
-  field on that mesh and passes it to MMG:
+  field on that mesh and passes it to MMG.
 
   @snippet MMG/MeshAdaptation.cpp mmg-adapt-call
 

@@ -19,7 +19,7 @@ the source. The observed unit-speed maximum errors are 0.0474507, 0.0299216
 and 0.0182986. Speed 2 halves these errors. These measurements apply to the
 generated triangular grids and central point source.
 
-Render the actual field and contours with ParaView:
+Render the actual field and contours with ParaView.
 
 ```sh
 pvpython examples/Models/Eikonal/visualize_paraview.py \

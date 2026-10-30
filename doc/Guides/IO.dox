@@ -82,7 +82,7 @@
 
   Register the mesh and field once, update the field, and call `write(time)`
   after each update. For example, the following fragment writes two snapshots
-  of @f$u(x,y,t)=txy@f$ using the objects above:
+  of @f$u(x,y,t)=txy@f$ using the objects above.
 
   @code{.cpp}
   for (const Real time : {0.0, 1.0})
@@ -103,7 +103,7 @@
   @section guides-io-mesh-io Exchange a mesh
 
   Loading a MEDIT mesh and saving it in MFEM format uses two explicit format
-  selections:
+  selections.
 
   @code{.cpp}
   Mesh mesh;
@@ -118,7 +118,7 @@
 
   A saved coefficient field must be interpreted with its mesh, finite element
   space, and numbering. Preserve those together when exchanging field data.
-  A grid function can be saved and loaded using the supported format interfaces:
+  A grid function can be saved and loaded using the supported format interfaces.
 
   @code{.cpp}
   field.save("field.gf", IO::FileFormat::MFEM);

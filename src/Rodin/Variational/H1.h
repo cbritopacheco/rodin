@@ -41,7 +41,7 @@
  * ## Usage
  *
  * A quadratic scalar space on a prepared mesh is constructed by selecting
- * its degree at compile time:
+ * its degree at compile time.
  * @code{.cpp}
  * H1 quadratic(std::integral_constant<size_t, 2>{}, mesh);
  * TrialFunction u(quadratic);

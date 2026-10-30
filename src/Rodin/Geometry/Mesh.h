@@ -176,7 +176,7 @@ namespace Rodin::Geometry
    *
    * # Mathematical Foundation
    *
-   * A mesh @f$ \mathcal{T}_h @f$ is a partition of a domain @f$ \Omega @f$:
+   * A mesh @f$ \mathcal{T}_h @f$ is a partition of a domain @f$ \Omega @f$.
    * @f[
    *   \Omega = \bigcup_{K \in \mathcal{T}_h} K
    * @f]
@@ -485,7 +485,7 @@ namespace Rodin::Geometry
        * @returns True if this is a SubMesh instance
        *
        * A Mesh which is also a SubMesh may be casted down to access
-       * SubMesh-specific functionality:
+       * SubMesh-specific functionality.
        * @code{.cpp}
        * if (mesh.isSubMesh())
        * {

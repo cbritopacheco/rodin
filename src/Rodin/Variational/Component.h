@@ -24,7 +24,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Component over a shape function: exposes the finite
+   * @brief Type traits for @c Component over a shape function, exposing the finite
    * element space, the shape function space, the operand type, the scalar type and the
    * range type.
    */
@@ -59,7 +59,7 @@ namespace Rodin::Variational
    * @brief Extracts a single component from a vector-valued function.
    *
    * Given a vector function @f$ \mathbf{f}: \Omega \to \mathbb{R}^d @f$,
-   * extracts component @f$ i @f$ such that:
+   * extracts component @f$ i @f$ such that
    * @f[
    *    \text{Component}(\mathbf{f}, i)(x) = f_i(x)
    * @f]
@@ -194,7 +194,7 @@ namespace Rodin::Variational
    * @brief Extracts a single entry from a matrix-valued function.
    *
    * Given a matrix function @f$ A: \Omega \to \mathbb{R}^{m \times n} @f$,
-   * extracts entry @f$ (i,j) @f$ such that:
+   * extracts entry @f$ (i,j) @f$ such that
    * @f[
    *    \text{Component}(A, i, j)(x) = A_{ij}(x)
    * @f]

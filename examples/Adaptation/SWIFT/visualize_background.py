@@ -17,14 +17,22 @@ def main():
     parser.add_argument('root', type=Path)
     parser.add_argument('output', type=Path)
     parser.add_argument('--reconstruction', help='XDMF stem for a two-block Reconstruction run')
+    parser.add_argument('--degree', type=int, choices=[1, 2, 3], default=2,
+                        help='Geometry degree for the reconstruction panel title')
     parser.add_argument('--lobes', type=int, default=0, help='Target lobe frequency')
     args = parser.parse_args()
     stem = args.reconstruction or 'BackgroundFitting'
     source = XDMFReader(FileNames=[str((args.root / (stem + '.xdmf')).resolve())])
     source.UpdatePipeline()
+    bounds = source.GetDataInformation().GetBounds()
+    center = [(bounds[0] + bounds[1]) / 2, (bounds[2] + bounds[3]) / 2]
+    # Common bounds retain the freely displaced exterior in both comparison views.
+    camera_scale = .60 * max(bounds[3] - bounds[2],
+                             (bounds[1] - bounds[0]) * 660 / 600)
     layout = CreateLayout(name='Background adaptation and interface fitting')
     names = ['background', 'moved'] if args.reconstruction else ['uniform', 'classified', 'fitted']
-    titles = ['Reference mesh', 'Quadratic fitted mesh'] if args.reconstruction else [
+    degree_name = {1: 'Linear', 2: 'Quadratic', 3: 'Cubic'}[args.degree]
+    titles = ['Reference mesh', degree_name + ' fitted mesh'] if args.reconstruction else [
         'Uniform background', 'Adapted and classified', 'Fitted interface']
     views = [style.view() for _ in names]
     AssignViewToLayout(views[0], layout, hint=0)
@@ -80,9 +88,9 @@ output.SetLines(cells)
         reference.AmbientColor = [.027, .122, .275]
         reference.DiffuseColor = [.027, .122, .275]
         reference.LineWidth = 2
-        target.CameraFocalPoint = [.5, .5, 0]
-        target.CameraPosition = [.5, .5, 5]
-        target.CameraParallelScale = .66
+        target.CameraFocalPoint = [*center, 0]
+        target.CameraPosition = [*center, 5]
+        target.CameraParallelScale = camera_scale
         style.text(target, title, size=19)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     style.save(args.output, layout, (600 * len(names), 660))

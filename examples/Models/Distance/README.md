@@ -17,7 +17,7 @@ potential in a disk. The generated **Constructing a distance approximation
 from a Poisson field** tutorial derives that value and reports the measured
 errors for this geometry.
 
-Reproduce the figures from computed output:
+Reproduce the figures from computed output.
 
 ```sh
 pvpython examples/Models/Distance/visualize_paraview.py \

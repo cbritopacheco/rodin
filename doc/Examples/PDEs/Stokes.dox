@@ -73,7 +73,12 @@
 
   @snippet PDEs/Stokes.cpp stokes-solve
 
-  @image html PDEs/Stokes.png "Computed speed and streamlines in the regularized Stokes cavity. The lid moves to the right; fluid returns through the interior." width=720px
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html PDEs/Stokes-speed.png "Computed speed in the regularized Stokes cavity."
+  @image html PDEs/Stokes-streamlines.png "Instantaneous streamlines and velocity directions."
+  @endparblock
 
   Open `Stokes.xdmf`, color by the magnitude of **velocity**, and use ParaView's
   **Stream Tracer** to inspect the circulation. Pressure is exported separately
@@ -83,8 +88,6 @@
   mesh refinement assess the numerical solution.
 
   @section examples-pdes-stokes-full Complete program
-
-  @snippet PDEs/Stokes.cpp stokes-source
 
   See @ref PDEs/Stokes.cpp "Stokes.cpp", the
   @ref examples-pdes-navierstokes "transient cavity example", and the

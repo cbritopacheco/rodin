@@ -43,7 +43,7 @@
   `MMG.medit.mesh` and `MMG.copy.medit.mesh`; the expected mesh has 64 vertices
   and 98 triangles.
 
-  @snippet MMG/MeshIO.cpp mmg-io-source
+  The complete program is available in @ref MMG/MeshIO.cpp "MeshIO.cpp".
 
   @section examples-mmg-io-see-also Continue
 

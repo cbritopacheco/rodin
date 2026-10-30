@@ -93,7 +93,7 @@
 
   @section examples-eikonal-fmm-full Complete program
 
-  @snippet Models/Eikonal/FMM.cpp fmm-source
+  The complete program is available in @ref Models/Eikonal/FMM.cpp "FMM.cpp".
 
   @section examples-eikonal-fmm-next Distance fields in applications
 

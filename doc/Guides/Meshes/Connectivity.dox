@@ -21,7 +21,7 @@
   @section guides-meshes-connectivity-computing Prepare relations
 
   The two-triangle example explicitly requests the relations used by its
-  subsequent edge and cell queries:
+  subsequent edge and cell queries.
 
   @snippet Geometry/Connectivity.cpp connectivity-mesh
 
@@ -62,7 +62,7 @@
 
   @section guides-meshes-connectivity-example Inspect a small mesh
 
-  @image html Geometry/Connectivity.png "Actual edge indices and incident-cell counts from the checked two-triangle example." width=560px
+  @image html Geometry/Connectivity.png "Actual edge indices and incident-cell counts from the checked two-triangle example." width=720px
 
   Build and run `Connectivity`. The full source and exported CSV files are
   explained in @ref examples-geometry-connectivity.

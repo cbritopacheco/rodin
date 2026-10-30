@@ -14,7 +14,7 @@
  * This file provides the partial derivative of scalar P1 GridFunctions.
  *
  * For a scalar P1 function @f$ u @f$, the partial derivative with respect
- * to coordinate @f$ x_i @f$ is computed as:
+ * to coordinate @f$ x_i @f$ is computed as
  * @f[
  *   \frac{\partial u}{\partial x_i} = (\nabla u) \cdot \mathbf{e}_i
  * @f]
@@ -34,7 +34,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Derivative over a grid function: exposes the finite
+   * @brief Type traits for @c Derivative over a grid function, exposing the finite
    * element space, the operand type and the range type.
    */
   template <class Range, class Data, class Mesh>
@@ -52,7 +52,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Derivative over a shape function: exposes the finite
+   * @brief Type traits for @c Derivative over a shape function, exposing the finite
    * element space, the shape function space, the operand type and the range type.
    */
   template <class NestedDerived, class Range, class Mesh,

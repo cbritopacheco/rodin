@@ -16,7 +16,7 @@
     \end{pmatrix}.
   @f]
   Its components vary periodically in space and time. This known field provides
-  a direct check of time-series output: each exported nodal value can be
+  a direct check of time-series output because each exported nodal value can be
   compared with the formula at the recorded time.
 
   @section examples-io-xdmf-setup Define the mesh and space
@@ -59,7 +59,12 @@
      sampling so the arrows remain legible.
   4. Use the time controls to inspect the 41 states between zero and two.
 
-  @image html XDMF.png "Vector magnitude and direction at two exported times."
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html XDMF-initial.png "Exported vector field at the initial time."
+  @image html XDMF-final.png "Exported vector field at time 0.25."
+  @endparblock
 
   The figures use a common magnitude scale from zero to @f$\sqrt{2}@f$.
   The two times reveal the change in vector direction as well as magnitude.
@@ -67,9 +72,7 @@
   @section examples-io-xdmf-full Build and run
 
   Build the `RodinIOXDMF` target and run the executable in a scratch directory.
-  The complete program is:
-
-  @snippet IO/XDMF.cpp xdmf-source
+  The complete program is available in @ref IO/XDMF.cpp "XDMF.cpp".
 
   @example IO/XDMF.cpp
   @m_examplenavigation{examples-io-xdmf,IO/}

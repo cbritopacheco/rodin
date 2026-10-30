@@ -6,6 +6,28 @@ fitted to a circle or lobed circle in two dimensions, or a sphere or lobed
 sphere in three dimensions. The
 mesh topology is retained; the outer box boundary is free to move.
 
+`InterfaceFitting.cpp` is the introductory P1 tutorial. It creates a unit-square
+mesh, defines a circle and its gradient, classifies an internal interface,
+solves for a vector P1 displacement and writes reference/fitted mesh blocks.
+The executable requires both a geometric target hit and a valid sampled
+quality budget. The exterior boundary is free to move.
+
+```sh
+cmake --build build --target SWIFT_InterfaceFitting
+mkdir -p results/interface-fitting
+cd results/interface-fitting
+../../build/examples/Adaptation/SWIFT/SWIFT_InterfaceFitting
+```
+
+The generated **Fitting a mesh interface with SWIFT** guide explains each code
+stage and shows a short P2 extension. Render its computed P1 panels with the following command.
+
+```sh
+pvpython examples/Adaptation/SWIFT/visualize_background.py \
+  results/interface-fitting doc/Images/SWIFTP1Tutorial.png \
+  --reconstruction InterfaceFitting --degree 1
+```
+
 `BackgroundFitting.cpp` adds a step-by-step MMG–MinSTCut–SWIFT example with
 the outer square held fixed. MMG prepares a graded background before
 classification; SWIFT then retains its topology while fitting the circle.
@@ -26,7 +48,7 @@ fixed exterior vertices and unchanged counts during fitting. An independent
 segment-to-circle calculation checks the entire polygonal interface against
 the geometric tolerance. Outputs belong in a scratch directory.
 
-Render the actual mesh comparison from the repository root:
+Render the actual mesh comparison from the repository root.
 
 ```sh
 pvpython examples/Adaptation/SWIFT/visualize_background.py \
@@ -52,7 +74,7 @@ diagnostics share one implementation.
 ## Build
 
 Run the following commands from the repository root. Initialize the submodules
-for a fresh checkout and configure a local build with examples enabled:
+for a fresh checkout and configure a local build with examples enabled.
 
 ```sh
 git submodule update --init --recursive
@@ -64,7 +86,7 @@ cmake --build build --target SWIFT_ReconstructionP1 SWIFT_ReconstructionP2 SWIFT
 
 The standard Rodin dependencies, including Boost, Eigen and HDF5, must be
 available to CMake. These examples do not require downloaded mesh resources
-or PETSc: they construct local meshes and use Eigen-backed displacement
+or PETSc because they construct local meshes and use Eigen-backed displacement
 storage. See the repository's [build workflow](../../../doc/agents/workflows.md)
 for general build procedures.
 
@@ -78,7 +100,7 @@ commands. Only the three named targets need to be built.
 
 ## Run
 
-The executable syntax is:
+The executable accepts the following syntax.
 
 ```text
 SWIFT_ReconstructionP1 [--name=value | --name value]...
@@ -105,7 +127,7 @@ rejected. The previous positional syntax is replaced by named flags.
 
 For example, run from a scratch directory so generated files remain outside
 the source tree. The following commands assume the shell initially starts at
-the repository root:
+the repository root.
 
 ```sh
 build_dir="$(pwd)/build"
@@ -178,7 +200,7 @@ Both supply analytic gradients. In 3D, `--lobes` controls the directional freque
 the background box for a closed reconstruction.
 
 `Geometry::MinSTCut` is the canonical classifier. Its data are cell averages
-of a smooth signed phase indicator:
+of a smooth signed phase indicator.
 
 \[
 m_K=\frac{1}{|K|}\int_K\tanh\!\left(\frac{\phi(x)}{\varepsilon}\right)dx.
@@ -206,7 +228,7 @@ The reconstruction driver converts the dimensionless smoothing coefficient
 s=h\widehat s,\qquad h=\frac{1}{n-1}.
 \]
 
-MinSTCut itself performs no mesh scaling: it uses the supplied facet function
+MinSTCut itself performs no mesh scaling and uses the supplied facet function
 directly. Increasing \(\widehat s\) relative to fidelity regularizes the
 classified interface more strongly. This scaling balances cell and facet costs for mesh-scale label changes. The
   smoothing weight must be chosen to retain the features of interest; larger
@@ -236,7 +258,7 @@ report, and writes the resulting geometry.
 ## API Usage and Ownership
 
 Every executable uses `SWIFT::Problem` directly. The shared source selects
-the displacement degree at compilation:
+the displacement degree at compilation.
 
 ```cpp
 // Degree is 1, 2 or 3, selected by the executable's CMake target.
@@ -251,7 +273,7 @@ const auto& displacement = u.getSolution(); // mesh has not been modified.
 ```
 
 The mesh, space, trial and test functions must outlive the problem. The
-solver uses the supplied level set and its exact gradient. No Dirichlet condition is imposed by this example: exterior mesh
+solver uses the supplied level set and its exact gradient. No Dirichlet condition is imposed by this example, so exterior mesh
 facets move with the computed displacement. Applications may explicitly add
 boundary conditions to the problem when their geometry requires them.
 
@@ -327,7 +349,7 @@ These model and classifier defaults follow the current shared leader of the
 ongoing 2D calibration. They remain provisional until the campaign, including
 its 3D stage, finishes. Work budgets, tolerances and sampling policies are unchanged.
 
-For example, enable tracing or select an available backend through the API:
+For example, enable tracing or select an available backend through the API.
 
 ```cpp
 parameters.trace = true;
@@ -391,8 +413,8 @@ maps to `--convergence-iterations-outer`. Previous flat flag names are rejected.
 
 `quadrature.order` overrides common integration order; `quadrature.surface`
 and `quadrature.volume` override their respective integrations independently.
-`sampling.subdivision` selects the shared inner-hinge and actual-quality witnesses:
-closed-form shifted/contracted reference lattices, without supplemental points.
+`sampling.subdivision` selects the shared inner-hinge and actual-quality witnesses
+from closed-form shifted/contracted reference lattices, without supplemental points.
 The setting specifies subdivisions of the generating lattice. Shifting and
   contracting the lattice preserves its point count and places its witnesses in
   the interior.
@@ -454,7 +476,7 @@ from a target hit.
 Default paths are relative to the working directory; `--output` replaces the
 stem. Open the XDMF file in an XDMF-compatible viewer such as ParaView and keep
 all its HDF5 companions alongside it, including the field files. It contains
-two named blocks: `background` is the unchanged reference mesh, and `moved` is
+two named blocks. `background` is the unchanged reference mesh, and `moved` is
 the fitted isoparametric mesh. Use **Extract Block** to select either one,
 then **Threshold** on `cell_label` (or `Attribute`) with value `1` for the
 inside domain or `2` for the outside domain. The moved mesh retains the background classification.
@@ -478,8 +500,8 @@ diagnostics. Cell-centered quality fields record centroid samples; the solver re
   sets for every Rodin reference geometry, with configurable point counts and
   SVG comparisons. The production solver retains its configured witness sets.
 
-- [SWIFT guide source](../../../doc/Guides/SWIFT.dox): mathematical model,
-  solver stages, supported contexts, and extension points.
+- [SWIFT guide source](../../../doc/Guides/SWIFT.dox): step-by-step P1
+  interface-fitting tutorial and a P2 result.
 - [Parameter definitions](../../../src/Rodin/Adaptation/SWIFT/Parameters.h):
   complete parameter API and automatic quadrature policies.
 - [Problem implementation](../../../src/Rodin/Adaptation/SWIFT/Problem.h):

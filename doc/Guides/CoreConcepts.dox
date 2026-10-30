@@ -2,7 +2,7 @@
   @page guides-getting-started-core-concepts Core concepts
   @brief Follow the path from a geometric domain to a discrete solution.
 
-  A Rodin solve connects five kinds of objects: a mesh, a finite element space,
+  A Rodin solve connects a mesh, a finite element space,
   fields, a variational problem, and a solver. This guide explains their roles
   and the information passed between them. The
   @ref examples-pdes-poisson "Poisson tutorial" supplies a complete executable.
@@ -18,7 +18,7 @@
   vertices lie; connectivity describes how vertices, edges, faces, and cells
   meet. These are related but distinct pieces of data.
 
-  For a triangular mesh of the unit square:
+  The following code constructs a triangular mesh of the unit square.
 
   @code{.cpp}
   Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {16, 16});
@@ -43,7 +43,7 @@
   @section guides-getting-started-core-concepts-connectivity Establish incidence relations
 
   Algorithms need particular incidence relations. For boundary conditions on a
-  two-dimensional mesh, edge-to-cell connectivity identifies exterior edges:
+  two-dimensional mesh, edge-to-cell connectivity identifies exterior edges.
 
   @code{.cpp}
   mesh.getConnectivity().compute(1, 2);
@@ -56,7 +56,7 @@
   @subsection guides-getting-started-core-concepts-iterators Traverse mesh entities
 
   Mesh iterators expose cells, faces, and vertices. Traversal and geometric
-  evaluation serve different purposes: an entity index identifies topology,
+  evaluation serve different purposes. An entity index identifies topology,
   while a `Geometry::Point` combines an entity with a reference coordinate
   for field evaluation. See @ref guides-meshes-iteration "Mesh iteration".
 
@@ -90,7 +90,7 @@
 
   @subsection guides-getting-started-core-concepts-gf-create Interpolate a known field
 
-  Assignment applies the space's degree-of-freedom functionals to an expression:
+  Assignment applies the space's degree-of-freedom functionals to an expression.
 
   @code{.cpp}
   GridFunction field(vh);
@@ -109,7 +109,7 @@
 
   @subsection guides-getting-started-core-concepts-trial-test Trial and test functions
 
-  Trial and test functions construct the discrete equations symbolically:
+  Trial and test functions construct the discrete equations symbolically.
 
   @code{.cpp}
   TrialFunction u(vh);
@@ -152,7 +152,7 @@
 
   Expressions retain the mathematical structure until evaluation is required.
   `Grad(u)` is the gradient of a scalar field; pairing it with `Grad(v)` inside
-  an integral gives the Poisson stiffness form:
+  an integral gives the Poisson stiffness form.
 
   @code{.cpp}
   Problem poisson(u, v);
@@ -177,7 +177,7 @@
   @subsection guides-getting-started-core-concepts-solving Choose a compatible solver
 
   The Poisson problem with these boundary conditions gives a symmetric positive
-  definite system, so conjugate gradient is appropriate:
+  definite system, so conjugate gradient is appropriate.
 
   @code{.cpp}
   Solver::CG solver(poisson);
@@ -191,7 +191,7 @@
   @section guides-getting-started-core-concepts-workflow Interpret and export the solution
 
   The computed grid function can be evaluated, used in another form, or
-  exported with its mesh:
+  exported with its mesh.
 
   @code{.cpp}
   IO::XDMF xdmf("Poisson");

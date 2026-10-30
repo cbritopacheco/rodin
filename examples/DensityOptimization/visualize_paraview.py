@@ -43,3 +43,5 @@ for target,field,title,symbol in [(left,'gamma','Material density',r'$\gamma$'),
     bar.CustomLabels=[0,maximum/2,maximum];bar.TitleFontSize=17;bar.LabelFontSize=15
     style.text(target,title)
 style.save(args.output,layout,(1440,640))
+
+style.save_panels(args.output, [left, right], ['density', 'temperature'])

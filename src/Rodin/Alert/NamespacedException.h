@@ -19,12 +19,12 @@ namespace Rodin::Alert
    * error message. The namespace name is formatted with appropriate coloring
    * and emphasis for clear visual identification in error output.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * NamespacedException("Rodin::Geometry") << "Invalid operation" << Raise;
    * @endcode
    *
-   * This produces output like:
+   * This produces output of the following form.
    * "Error: Rodin::Geometry. Invalid operation"
    */
   class NamespacedException : public Exception

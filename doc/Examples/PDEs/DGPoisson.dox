@@ -121,7 +121,12 @@
 
   @section examples-dg-output Preserve separate traces in visualization
 
-  @image html DGPoisson.png "Computed DG fields on coarse and fine meshes. Each cell retains its own exported vertex values."
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html DGPoisson-coarse.png "DG solution on the coarse mesh. Values remain local to each cell."
+  @image html DGPoisson-fine.png "DG solution on the fine mesh, with the same color scale."
+  @endparblock
 
   The XDMF output duplicates geometric vertices for each cell so ParaView
   retains the cell-local values. Open `DGCoarse.xdmf` or `DGPoisson.xdmf`,

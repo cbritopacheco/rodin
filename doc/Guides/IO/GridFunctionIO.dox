@@ -21,14 +21,14 @@
 
   @subsection guides-io-gridfunctions-save-mfem MFEM format
 
-  The MFEM format stores grid functions as text files:
+  The MFEM format stores grid functions as text files.
 
   @snippet IO/MFEM.cpp mfem-save
 
   @subsection guides-io-gridfunctions-save-xdmf XDMF format (recommended)
 
   For visualization, the XDMF format is recommended. It stores both mesh
-  and field data together and can be opened directly in ParaView:
+  and field data together and can be opened directly in ParaView.
 
   @code{.cpp}
   #include <Rodin/IO/XDMF.h>
@@ -44,7 +44,7 @@
   @subsection guides-io-gridfunctions-load-mfem From MFEM format
 
   Loading a grid function from MFEM requires the mesh and finite
-  element space already set up:
+  element space already set up.
 
   @snippet IO/MFEM.cpp mfem-load
 
@@ -88,7 +88,7 @@
   @section guides-io-gridfunctions-multiple Multiple fields
 
   Several fields can be registered in one XDMF
-  file:
+  file.
 
   @code{.cpp}
   IO::XDMF xdmf("MultiField");
@@ -105,7 +105,7 @@
   @section guides-io-gridfunctions-vector Vector-valued fields
 
   Vector-valued grid functions are defined on finite element spaces with
-  multiple components:
+  multiple components.
 
   @code{.cpp}
   // Create a vector P1 space (2 components)

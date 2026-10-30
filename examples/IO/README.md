@@ -13,7 +13,7 @@ Keep each XDMF file beside its referenced HDF5 files. The time-series program
 interpolates an analytic field on 1,922 triangles with 1,024 vertices.
 
 To regenerate the tutorial figures, place the MFEM output in `OUTPUT_ROOT/MFEM`
-and the time-series output in `OUTPUT_ROOT/XDMF`, then run:
+and the time-series output in `OUTPUT_ROOT/XDMF`, then run the following command.
 
 ```sh
 pvpython examples/IO/visualize_paraview.py OUTPUT_ROOT IMAGE_DIRECTORY

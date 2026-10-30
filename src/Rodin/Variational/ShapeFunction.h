@@ -32,7 +32,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c ShapeFunctionBase: exposes the derived type, the finite
+   * @brief Type traits for @c ShapeFunctionBase, exposing the derived type, the finite
    * element space, the shape function space, the result type, the range type and the
    * scalar type.
    */
@@ -61,7 +61,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c ShapeFunction: exposes the derived type, the finite
+   * @brief Type traits for @c ShapeFunction, exposing the derived type, the finite
    * element space, the shape function space, the result type, the range type and the
    * scalar type.
    */
@@ -334,11 +334,11 @@ namespace Rodin::Variational
    *
    * # Mathematical Foundation
    * In the finite element method, functions are approximated using a linear
-   * combination of basis functions (shape functions):
+   * combination of basis functions (shape functions).
    * @f[
    *   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
    * @f]
-   * where:
+   * Here,
    * - @f$ \phi_i(x) @f$ are the shape functions
    * - @f$ u_i @f$ are the degrees of freedom (coefficients)
    * - @f$ N @f$ is the number of basis functions
@@ -511,7 +511,7 @@ namespace Rodin::Variational
       /**
        * @brief Sets the current integration point.
        *
-       * This is the preferred path while integrating: it carries both the
+       * This is the preferred path while integrating because it carries both the
        * geometric point and its quadrature metadata so shape functions can
        * reuse tabulations and cache entries tied to the active quadrature rule.
        * For pointwise evaluations outside a quadrature loop, construct an

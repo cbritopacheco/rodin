@@ -7,13 +7,13 @@
  * @c Real and @c Complex entries. Rows and columns are explicit, independently
  * between one and @c RODIN_MAXIMAL_SPACE_DIMENSION. Each matrix entry is represented independently.
  * A matrix space is the tensor product of its scalar space with the matrix
- * units: @f$ V_h^{m\times n}=V_h\otimes\mathbb{K}^{m\times n} @f$.
+ * units through @f$ V_h^{m\times n}=V_h\otimes\mathbb{K}^{m\times n} @f$.
  * Matrix specializations live beside the scalar and vector specializations
  * in each space family. Reference bases, physical mappings and DOF distribution
  * belong to that family. The componentwise construction here describes P0,
  * P0g, P1 and H1; future @f$H(\mathrm{div})@f$ and @f$H(\mathrm{curl})@f$
  * families must supply their own conforming bases and Piola mappings.
- * Local and global coefficient indices are interleaved in row-major order:
+ * Local and global coefficient indices are interleaved in row-major order.
  * @f$ a(mn)+in+j @f$. No Voigt scaling or symmetry reduction is applied.
  * This coefficient numbering is independent of matrix memory storage;
  * @ref guides-ordering "Matrix storage and finite-element component ordering"
@@ -36,7 +36,7 @@
  * Div uses row-wise divergence @f$ (\operatorname{div}A)_i=\sum_j\partial_jA_{ij} @f$
  * and requires the column count to match the ambient spatial dimension.
  * A matrix coefficient multiplying a matrix solution acts on its rows;
- * a fourth-order tensor coefficient couples arbitrary matrix entries:
+ * a fourth-order tensor coefficient couples arbitrary matrix entries.
  * @f$ (\mathcal C A)_{ij}=\sum_{kl}\mathcal C_{ijkl}A_{kl} @f$.
  * TensorFunction wraps constant or callable tensor coefficients. Tensor rank
  * is a compile-time parameter; extents are runtime values with stack storage.
@@ -57,7 +57,7 @@
  * The existing P1 potential quadrature handler accepts matrix trial and test
  * functions. A kernel returning a scalar multiplies every component. A kernel
  * filling a @c SpatialMatrix acts on rows, while a kernel filling a
- * @c SpatialTensor<Scalar,4> couples all entries:
+ * @c SpatialTensor<Scalar,4> couples all entries.
  * @f[
  *   (K A)_{ij}(x)=\int_\Omega
  *      \sum_{kl}\mathcal K_{ijkl}(x,y)A_{kl}(y)\,dy.

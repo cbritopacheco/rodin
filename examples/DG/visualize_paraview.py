@@ -38,3 +38,5 @@ for target, stem, title in [(left,'DGCoarse','4 intervals per axis'),
     bar.LabelFontSize = 15
     style.text(target,title)
 style.save(args.output,layout,(1440,640))
+
+style.save_panels(args.output, [left, right], ['coarse', 'fine'])

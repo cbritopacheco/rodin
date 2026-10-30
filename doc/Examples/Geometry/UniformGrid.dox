@@ -54,7 +54,7 @@
 
   @section examples-geom-ug-3d Extend to three dimensions
 
-  Supply three vertex counts and choose a volume cell type:
+  Supply three vertex counts and choose a volume cell type.
 
   @code{.cpp}
   Mesh tetrahedra = Mesh().UniformGrid(Polytope::Type::Tetrahedron, {8, 8, 8});
@@ -68,8 +68,8 @@
 
   @section examples-geom-ug-connectivity Prepare boundary operations
 
-  Boundary algorithms require the relevant incidence relation. For exterior
-  edges in a triangular two-dimensional mesh:
+  Boundary algorithms require the relevant incidence relation. Exterior-edge
+  detection in a triangular two-dimensional mesh uses edge-to-cell connectivity.
 
   @code{.cpp}
   mesh.getConnectivity().compute(1, 2);

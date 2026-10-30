@@ -6,8 +6,9 @@
 
   @m_footernavigation
 
-  Installation has three stages: configure Rodin with the dependencies for the
-  desired features, build and install the library, then compile a small
+  Installation starts by configuring Rodin with the dependencies for the
+  desired features, continues with building and installing the library, and
+  finishes by compiling a small
   application against the installed package. Begin with a local installation
   before enabling additional solver or parallel backends.
 
@@ -39,7 +40,7 @@
 
   @subsection guides-getting-started-installation-ubuntu Ubuntu/Debian
 
-  On Ubuntu or Debian-based systems, install the required dependencies with:
+  On Ubuntu or Debian-based systems, install the required dependencies with the following command.
 
   @code{.bash}
   sudo apt-get update
@@ -47,7 +48,7 @@
   sudo apt-get install git-lfs  # needed for resources
   @endcode
 
-  For optional dependencies:
+  Install the optional dependencies with the following command.
 
   @code{.bash}
   sudo apt-get install libsuitesparse-dev libmetis-dev libopenmpi-dev
@@ -55,14 +56,14 @@
 
   @subsection guides-getting-started-installation-macos macOS
 
-  On macOS, use Homebrew to install dependencies:
+  On macOS, use Homebrew to install dependencies.
 
   @code{.bash}
   brew install cmake boost eigen hdf5 libomp
   brew install git-lfs  # needed for resources
   @endcode
 
-  For optional dependencies:
+  Install the optional dependencies with the following command.
 
   @code{.bash}
   brew install suite-sparse metis open-mpi
@@ -72,7 +73,7 @@
 
   @subsection guides-getting-started-installation-clone Clone the repository
 
-  First, clone the Rodin repository with all submodules:
+  First, clone the Rodin repository with all submodules.
 
   @code{.bash}
   git clone --recursive https://github.com/cbritopacheco/rodin.git
@@ -80,11 +81,11 @@
   @endcode
 
   The `--recursive` flag clones the third-party submodules. An existing checkout can
-  be initialized with:
+  be initialized with the following command.
   `git submodule update --init --recursive`
 
   Files under @c resources/ are stored with Git LFS. Resource-dependent examples use
-  the files hydrated after cloning:
+  the files hydrated after cloning.
 
   @code{.bash}
   git lfs install
@@ -98,11 +99,11 @@
   @subsection guides-getting-started-installation-build Build and install
 
   Rodin uses CMake as its build system. There are two common installation
-  methods:
+  methods.
 
   @subsubsection guides-getting-started-installation-user User-local installation (recommended)
 
-  For a user-local installation, set the install prefix to the home directory:
+  For a user-local installation, set the install prefix to the home directory.
 
   @code{.bash}
   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
@@ -118,7 +119,7 @@
   The @ref configuration "configuration reference" lists the feature switches.
 
   To let applications find this installation, add the prefix to the CMake
-  search path in the shell profile (`~/.bashrc` or `~/.zshrc`):
+  search path in the shell profile (`~/.bashrc` or `~/.zshrc`).
 
   @code{.bash}
   export CMAKE_PREFIX_PATH="$HOME/.local${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}"
@@ -126,7 +127,7 @@
 
   @subsubsection guides-getting-started-installation-system System-wide installation
 
-  Install Rodin system-wide (requires sudo):
+  Install Rodin system-wide (requires sudo).
 
   @code{.bash}
   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
@@ -152,7 +153,7 @@
   @subsection guides-getting-started-installation-cmake-not-found CMake can't find Rodin
 
   If CMake reports that it cannot find the Rodin package, ensure that
-  `CMAKE_PREFIX_PATH` includes the Rodin installation directory:
+  `CMAKE_PREFIX_PATH` includes the Rodin installation directory.
 
   @code{.bash}
   cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/rodin/installation
@@ -168,7 +169,7 @@
   @subsection guides-getting-started-installation-lfs-resources Git LFS resources
 
   If a mesh file begins with a Git LFS pointer instead of mesh data, hydrate
-  the resources from the repository directory:
+  the resources from the repository directory.
 
   @code{.bash}
   git lfs pull
@@ -179,7 +180,7 @@
 
   @subsection guides-getting-started-installation-compiler-errors Compiler errors
 
-  Verify that you're using a C++20 compatible compiler:
+  Verify that you're using a C++20 compatible compiler.
 
   @code{.bash}
   g++ --version  # Should be 12.0 or higher

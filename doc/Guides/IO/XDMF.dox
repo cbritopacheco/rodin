@@ -65,7 +65,7 @@
   @section guides-io-xdmf-guide-grids Working with grids
 
   A grid in XDMF associates a mesh with named fields. The writer returns a
-  handle to the default grid or to a grid selected by name:
+  handle to the default grid or to a grid selected by name.
 
   @code{.cpp}
   IO::XDMF xdmf("Simulation");
@@ -75,7 +75,7 @@
 
   @subsection guides-io-xdmf-guide-grids-mesh Setting the mesh
 
-  Each grid must have a mesh associated with it before writing:
+  Each grid must have a mesh associated with it before writing.
 
   @code{.cpp}
   auto grid = xdmf.grid();
@@ -85,7 +85,7 @@
   @subsection guides-io-xdmf-guide-grids-fields Adding fields
 
   Fields are added using the `add()` method. The field can be a named
-  GridFunction or provided with an explicit name:
+  GridFunction or provided with an explicit name.
 
   @code{.cpp}
   // Option 1: Name the grid function and add it
@@ -104,7 +104,7 @@
   @section guides-io-xdmf-static Static output
 
   For a single snapshot, call `write()` without
-  a time parameter:
+  a time parameter.
 
   @code{.cpp}
   IO::XDMF xdmf("StaticResult");
@@ -115,7 +115,7 @@
   @section guides-io-xdmf-temporal Time-dependent output
 
   Call `write(t).flush()` after updating the registered fields to record
-  a snapshot at time @f$t@f$:
+  a snapshot at time @f$t@f$.
 
   @code{.cpp}
   IO::XDMF xdmf("TimeEvolution");
@@ -147,7 +147,7 @@
   the output loop and keep its geometry and topology unchanged. Calling
   `setMesh()` again resets the grid's static-mesh export state.
   For a mesh that changes over time, configure the writer
-  to export the mesh at each time step:
+  to export the mesh at each time step.
 
   @code{.cpp}
   IO::XDMF xdmf("AdaptiveSim");
@@ -158,11 +158,11 @@
 
   @section guides-io-xdmf-fields Field types
 
-  XDMF supports different types of fields:
+  XDMF supports different types of fields.
 
   @subsection guides-io-xdmf-fields-scalar Scalar fields
 
-  Scalar fields have one component per node:
+  Scalar fields have one component per node.
 
   @code{.cpp}
   P1 vh(mesh);                 // scalar P1 space
@@ -175,7 +175,7 @@
   @subsection guides-io-xdmf-fields-vector Vector fields
 
   Vector fields have multiple components per node. Create the finite element
-  space with the number of components:
+  space with the number of components.
 
   @code{.cpp}
   P1 vh(mesh, 2);              // 2D vector P1 space
@@ -219,9 +219,9 @@
   @section guides-io-xdmf-example Complete example
 
   The @ref examples-pdes-poisson "Poisson tutorial" derives the problem,
-  solves it and exports the computed field. Its checked program is:
+  solves it and exports the computed field.
 
-  @snippet PDEs/Poisson.cpp poisson-source
+  The complete program is available in @ref PDEs/Poisson.cpp "Poisson.cpp".
 
   @section guides-io-xdmf-see-also See also
 

@@ -120,7 +120,7 @@ namespace Rodin::Adaptation::SWIFT
       /**
        * @brief Polynomial order of the composed fitting tensor when known.
        * A globally constant vector is unchanged by deformation. Elementwise
-       * orders cannot be forwarded through point location: a moved entity may
+       * orders cannot be forwarded through point location because a moved entity may
        * cross target cells, including cells with different constant gradients.
        * @returns Zero for a globally constant gradient, or an empty optional.
        * @param polytope Reference entity on which the tensor is integrated.

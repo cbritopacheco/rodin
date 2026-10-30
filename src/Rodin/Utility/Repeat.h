@@ -27,7 +27,7 @@ namespace Rodin::Utility
    * Repeat creates a Tuple containing N copies of type T. This is useful
    * for generating homogeneous tuple types at compile time.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * // Repeat<3, int> exposes the tuple containing three int entries.
    * @endcode

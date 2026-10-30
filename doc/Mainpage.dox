@@ -45,7 +45,7 @@
     \end{aligned}
   @f]
 
-  The corresponding weak form is: find @f$u \in H^1_0(\Omega)@f$ such that
+  The corresponding weak problem seeks @f$u \in H^1_0(\Omega)@f$ such that
 
   @f[
     \int_\Omega \nabla u \cdot \nabla v \, dx
@@ -53,12 +53,28 @@
       \qquad \forall v \in H^1_0(\Omega).
   @f]
 
-  The variational formulation and solve are written as follows. The
-  @ref examples-pdes-poisson "complete tutorial" supplies the mesh, explains
-  each term and exports the computed field.
+  The following code constructs the mesh, defines the finite-element space
+  and solves this weak problem. The @ref examples-pdes-poisson "complete tutorial"
+  explains each step and exports the computed field.
 
-  @snippet PDEs/Poisson.cpp poisson-form
-  @snippet PDEs/Poisson.cpp poisson-solve
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  mesh.scale(1.0 / 15.0);
+  mesh.getConnectivity().compute(1, 2);
+
+  P1 vh(mesh);
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+  RealFunction f = 1;
+
+  Problem problem(u, v);
+  problem = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+
+  Solver::CG(problem).solve();
+  @endcode
 
   @section rodin-architecture Architecture
 

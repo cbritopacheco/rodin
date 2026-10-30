@@ -102,7 +102,7 @@ reading a file, run `git lfs pull` from the repository root and retry.
 
 ### User-Local Installation
 
-For installation without sudo (recommended for development):
+A user-local installation avoids sudo and is recommended for development.
 
 ```bash
 # Configure with local prefix
@@ -118,9 +118,9 @@ export CMAKE_PREFIX_PATH=$HOME/.local:$CMAKE_PREFIX_PATH
 ### Verifying Installation
 
 The following test project checks the installed headers, library and CMake
-  package:
+  package.
 
-**CMakeLists.txt:**
+**CMakeLists.txt**
 ```cmake
 cmake_minimum_required(VERSION 3.16)
 project(MyRodinProject CXX)
@@ -131,7 +131,7 @@ add_executable(my_app main.cpp)
 target_link_libraries(my_app PRIVATE Rodin::Geometry Rodin::Variational Rodin::Solver)
 ```
 
-**main.cpp:**
+**main.cpp**
 ```cpp
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
@@ -150,7 +150,7 @@ int main()
 }
 ```
 
-Then build and run:
+Build and run the application with these commands.
 ```bash
 mkdir build && cd build
 cmake ..
@@ -160,13 +160,13 @@ make
 
 ### Platform-Specific Notes
 
-**Ubuntu/Debian:**
+**Ubuntu/Debian**
 ```bash
 sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
 sudo apt-get install git-lfs  # needed for resources
 ```
 
-**macOS (Homebrew):**
+**macOS (Homebrew)**
 ```bash
 brew install cmake boost eigen libomp
 brew install git-lfs  # needed for resources
@@ -197,7 +197,7 @@ make -j4
 Rodin comes with a native C++20 form language for assembling
 and solving variational formulations.
 
-For example, given a domain $\Omega$ with boundary $\Gamma := \partial \Omega$, the Poisson problem:
+Consider a domain $\Omega$ with boundary $\Gamma := \partial \Omega$. The Poisson problem takes the following form.
 ```math
 \left\{
 \begin{aligned}
@@ -206,12 +206,12 @@ For example, given a domain $\Omega$ with boundary $\Gamma := \partial \Omega$, 
 \end{aligned}
 \right.
 ```
-has the associated weak formulation:
+The corresponding weak formulation seeks a function satisfying the following identity.
 ```math
 \text{Find} \ u \in H^1(\Omega) \quad \text{s.t.} \quad \forall v \in H^1_0(\Omega), \quad \int_\Omega \nabla u \cdot \nabla v \ dx = \int_\Omega f v \ dx, \quad \text{with } \quad H^1_0(\Omega) := \{ v \in H^1(\Omega) \mid v = 0 \text{ on } \Gamma \}
 ```
 
-which can be quickly implemented via the following lines of code:
+The following program implements this weak formulation.
 
 ```c++
 #include <Rodin/Types.h>
@@ -273,7 +273,7 @@ int main(int, char**)
 
 #### Cell, Face, Vertex Iterators
 
-The API offers full support for iteration over _all_ polytopes of the mesh of some given dimension:
+The API offers full support for iteration over _all_ polytopes of the mesh of some given dimension.
 
 ```c++
 Mesh mesh;
@@ -305,7 +305,7 @@ for (auto it = mesh.getPolytope(1); it; ++it)
 #### Full connectivity computation
 
 Rodin is able to compute any connectivity information on the mesh. For example, the following computes
-the adjacency information from faces to cells:
+the adjacency information from faces to cells.
 
 ```c++
 Mesh mesh;
@@ -317,7 +317,7 @@ mesh.getConnectivity().compute(1, 2);
 In general, this means that given a face, we are able to obtain the incident (neighboring) cells.
 
 However, one can also compute any connectivity information on different dimensions.
-For example, for a mesh $\mathcal{T}_h \subset \mathbb{R}^d$, $d = 2$ of topological dimension $d$, we have:
+For example, for a mesh $\mathcal{T}_h \subset \mathbb{R}^d$, $d = 2$ of topological dimension $d$, the following relations hold.
 
 ```c++
 // Compute connectivity between vertices and faces
@@ -345,7 +345,7 @@ mesh.getConnectivity().compute(2, 1);
 
 ### Additional Features
 
-Rodin provides many powerful features for finite element analysis:
+Rodin provides many powerful features for finite element analysis.
 
 **Solver Integration:**
 - Direct integration with Eigen for linear algebra operations
@@ -379,7 +379,7 @@ For comprehensive documentation on all features, see the [Documentation](#docume
 
 ## Documentation
 
-Rodin provides comprehensive documentation covering all aspects of the library:
+Rodin provides comprehensive documentation covering all aspects of the library.
 
 ### User Guides
 
@@ -416,7 +416,7 @@ Complete API documentation is available for all classes, functions, and modules:
 
 ### Building Documentation Locally
 
-To build the documentation yourself:
+Build the documentation with the following commands.
 
 ```bash
 # Clone repository with submodules
@@ -479,6 +479,23 @@ manager.
 | RODIN_USE_SUITESPARSE  | Build with SuiteSparse support                    |
 | RODIN_SILENCE_WARNINGS | Silence warnings outputted by Rodin               |
 | RODIN_BUILD_PY         | Build Python bindings                             |
+
+## Benchmark machine
+
+Published [benchmark histories](https://cbritopacheco.github.io/rodin/docs/refs/heads/develop/benchmarks/)
+run on standard GitHub-hosted `ubuntu-24.04` virtual machines for this public
+repository, using GCC 14 and Release builds.
+
+| System | CPU | Memory | SSD |
+| --- | --- | --- | --- |
+| Ubuntu 24.04, x64 | 4 vCPUs | 16 GB | 14 GB |
+
+Each job runs one benchmark executable at a time. OpenMP, OpenBLAS and MKL use
+one thread, and MPI ranks share the runner's resources. The selected benchmark
+configuration records the build and rank count. CPU models and host load can
+vary between virtual machines, so small timing differences require repeated
+measurements. See the [GitHub runner specifications](https://docs.github.com/en/actions/reference/runners/github-hosted-runners#standard-github-hosted-runners-for-public-repositories)
+and the [testing guide](tests/README.md) for resource budgets.
 
 ## Development
 

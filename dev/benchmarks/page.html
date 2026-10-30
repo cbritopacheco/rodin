@@ -1,3 +1,17 @@
+{% macro benchmark_machine() %}
+<p>Published CI benchmarks run on standard GitHub-hosted <code>ubuntu-24.04</code>
+  virtual machines for public repositories.</p>
+<table class="m-table"><thead><tr><th>System</th><th>CPU</th><th>Memory</th><th>SSD</th></tr></thead>
+  <tbody><tr><td>Ubuntu 24.04, x64</td><td>4 vCPUs</td><td>16 GB</td><td>14 GB</td></tr></tbody></table>
+<p>The benchmark builds use GCC 14 and Release mode. Each job runs one benchmark
+  executable at a time. OpenMP, OpenBLAS and MKL use one thread; MPI ranks share
+  the same runner. The selected configuration identifies the build and rank count.</p>
+<p>The CPU model and host load can vary between virtual machines, so small timing
+  differences should be checked across repeated runs.
+  <a href="https://docs.github.com/en/actions/reference/runners/github-hosted-runners#standard-github-hosted-runners-for-public-repositories">GitHub runner specifications</a>
+  describe the available hardware. The source workflow is
+  <a href="https://github.com/cbritopacheco/rodin/blob/develop/.github/workflows/BenchmarkGroup.yml">BenchmarkGroup.yml</a>.</p>
+{% endmacro %}
 {% macro benchmark_action(path, title, count, record=false) %}
 {% if count %}<div class="benchmark-actions">
   <div class="m-button {{ 'm-success' if record else 'm-primary' }}"><a href="{{ prefix }}{{ path }}/index.html" aria-label="{{ 'View results for ' if record else 'Browse benchmarks in ' }}{{ title }}">{% if record %}<svg class="benchmark-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17M7 15l4-5 4 3 6-7"/></svg> View results{% else %}Browse benchmarks <span aria-hidden="true">→</span>{% endif %}</a></div>
@@ -40,6 +54,7 @@
         Descriptions become more detailed as the navigation reaches individual benchmarks,
         explaining what is measured and why. Use the search to find a class, operation or
         workload directly. Modules without registered benchmarks are identified on their pages.</p>
+      <section class="benchmark-machine"><h2>Benchmark machine</h2>{{ benchmark_machine() }}</section>
       {% for group in groups %}<section data-category="{{ group.name }}"><h2>{{ group.name }}</h2><p>{{ group.description }}</p>
         {% for item in group.modules %}<section class="m-frame"><h3><a href="{{ prefix }}{{ item.path }}/index.html">{{ item.title }}</a></h3>
           <p class="m-text m-dim"><em>{{ item.brief|safe }}</em></p>
@@ -66,6 +81,7 @@
       {% if page.record %}<h2>Timing history</h2>
       <p class="benchmark-contract">{{ page.record.target }} · {{ page.record.metric }} · {{ page.record.profile }} · ranks: {{ page.record.ranks }}</p>
       <div data-benchmark-history><p>No timing history has been published for this component.</p></div>
+      <details class="benchmark-machine"><summary>Benchmark machine and measurement conditions</summary>{{ benchmark_machine() }}</details>
       {% elif not children %}<p>No benchmarks have been registered for this module yet.</p>{% endif %}
       {% endif %}
       </div>

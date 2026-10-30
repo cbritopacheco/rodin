@@ -37,7 +37,7 @@
 
   On the unit reference triangle, @f$\int rs\,dr\,ds=1/24@f$.
   The example requests degree four, which also integrates this quadratic
-  monomial exactly:
+  monomial exactly.
 
   @snippet Geometry/Quadrature.cpp quadrature-reference
 
@@ -51,7 +51,12 @@
 
   @snippet Geometry/Quadrature.cpp quadrature-map
 
-  @image html Quadrature.png "The same six reference samples mapped to the physical triangle. Marker area is proportional to the reference weight."
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html Quadrature-reference.png "Reference quadrature points. Marker area is proportional to the reference weight."
+  @image html Quadrature-physical.png "The same quadrature points mapped to the physical triangle."
+  @endparblock
 
   Build and run the `Quadrature` example target. It writes `Quadrature.csv`
   and checks both analytic integrals with tolerance @f$10^{-12}@f$.
@@ -70,7 +75,7 @@
     <tr><td>Pyramid</td><td>Witherden--Vincent, degrees 1--10</td><td>Positive conical product</td></tr>
   </table>
 
-  The complete directly constructible table ranges are:
+  The following table lists the complete directly constructible ranges.
 
   <table>
     <tr><th>Family</th><th>Triangle</th><th>Quadrilateral</th><th>Tetrahedron</th><th>Hexahedron</th><th>Wedge</th><th>Pyramid</th></tr>
@@ -151,7 +156,7 @@
   no polymorphic-copy or cache-identity contract.
 
   @ref Rodin::QF::QuadratureFormula owns immutable reference samples retained
-  until process termination. Its factory constructs a concrete family on demand:
+  until process termination. Its factory constructs a concrete family on demand.
 
   @code{.cpp}
   const auto& formula = QF::QuadratureFormula::get<QF::GaussLegendre>(
@@ -186,7 +191,7 @@
 
   @ref Rodin::Variational::ReferenceTabulation stores basis values and reference
   derivatives at those reference samples. Persistent table lookup accepts only
-  a published formula. Tables belong to a bounded thread-local cache: formula
+  a published formula. Tables belong to a bounded thread-local cache, so formula
   permanence does not extend a borrowed table's lifetime across eviction.
   Immediate element.tabulate(table, localFormula) accepts a caller-owned
   QuadratureFormulaBase and leaves the result in caller-owned numerical storage.

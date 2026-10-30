@@ -14,9 +14,9 @@
  *
  * ## Reference and physical shape functions
  *
- * On a simplex the reference space is affine:
+ * On a simplex the reference space is affine.
  * @f$\widehat P=\mathbb P_1(\widehat K)@f$. Product cells use their
- * vertex-based product spaces: bilinear on quadrilaterals, trilinear on
+ * vertex-based product spaces that are bilinear on quadrilaterals, trilinear on
  * hexahedra and triangle-by-segment on wedges. The pyramid uses its rational
  * reference construction. The physical functions are
  * @f$\phi_i=\widehat\phi_i\circ F_K^{-1}@f$.
@@ -29,7 +29,7 @@
  * ## Usage
  *
  * Given a mesh with boundary connectivity and a source coefficient @c f,
- * the scalar Poisson form is:
+ * the following code constructs the scalar Poisson form.
  * @code{.cpp}
  * P1 space(mesh);
  * TrialFunction u(space);

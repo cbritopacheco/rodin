@@ -33,7 +33,7 @@
 
   @subsection gallery-pdes-helmholtz Helmholtz equation
 
-  @image html PDEs/Helmholtz.png width=360px
+  @image html PDEs/Helmholtz-real.png width=360px
 
   A manufactured complex wave field with prescribed boundary values.
   Real and imaginary parts are displayed separately after the complex solve.
@@ -42,7 +42,7 @@
 
   @subsection gallery-pdes-stokes Stokes equations
 
-  @image html PDEs/Stokes.png width=360px
+  @image html PDEs/Stokes-streamlines.png width=360px
 
   Viscous cavity flow with a regularized lid, mixed velocity–pressure spaces
   and a zero-mean pressure constraint.
@@ -51,7 +51,7 @@
 
   @subsection gallery-pdes-navierstokes Navier–Stokes equations
 
-  @image html PDEs/NavierStokes.png width=360px
+  @image html PDEs/NavierStokes-streamlines.png width=360px
 
   Transient flow driven by a horizontally moving lid patch. Taylor–Hood
   elements and semi-implicit Oseen steps resolve the velocity and pressure.
@@ -79,7 +79,7 @@
 
   @subsection gallery-pdes-dg Discontinuous Galerkin diffusion
 
-  @image html DGPoisson.png width=360px
+  @image html DGPoisson-fine.png width=360px
 
   A symmetric interior-penalty method with independent affine coefficients
   on each triangle. The tutorial checks a nonzero Dirichlet patch and
@@ -91,7 +91,7 @@
 
   @subsection gallery-shapeopt-cantilever Boundary-deformation cantilever
 
-  @image html SimpleCantilever.png width=360px
+  @image html SimpleCantilever-final.png width=360px
 
   Initial and updated domains for compliance minimization with an area
   penalty. A regularized shape derivative drives boundary displacement and
@@ -101,7 +101,7 @@
 
   @subsection gallery-shapeopt-levelset Level-set cantilever
 
-  @image html LevelSetCantilever.png width=360px
+  @image html LevelSetCantilever-final.png width=360px
 
   A transported level set and body-fitted elasticity solve. The page records
   the fixed-step objective history and the measured mesh-quality limitation.
@@ -110,7 +110,7 @@
 
   @subsection gallery-density-temp Thermal material distribution
 
-  @image html SIMPTemperatureMinimization.png width=360px
+  @image html SIMPTemperatureMinimization-density.png width=360px
 
   A SIMP conductivity field updated using the state, adjoint and regularized
   design gradient. The objective combines mean temperature and a material penalty.

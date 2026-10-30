@@ -17,8 +17,9 @@ _plot_examples = next(parent for parent in _PlotPath(__file__).resolve().parents
 _plot_sys.path.insert(0, str(_plot_examples))
 from plot_style import apply_style
 apply_style()
-fig, axes = plt.subplots(1, 2, figsize=(9, 4.5), layout='constrained')
-for ax, stem in zip(axes, ['Before', 'After']):
+
+for stem in ['Before', 'After']:
+    fig, ax = plt.subplots(figsize=(4.8, 4.5), layout='constrained')
     data = np.genfromtxt(args.root / (stem+'.csv'), names=True, delimiter=',')
     triangles = np.stack([data['x0'],data['y0'],data['x1'],data['y1'],
                           data['x2'],data['y2']], axis=1).reshape(-1,3,2)
@@ -27,4 +28,6 @@ for ax, stem in zip(axes, ['Before', 'After']):
     ax.set(xlim=(-.03,1.03), ylim=(-.03,1.03))
     ax.set_aspect('equal'); ax.set_axis_off()
     ax.set_title(f'{stem}: {len(data)} triangles', pad=12)
-fig.savefig(args.output, dpi=180, transparent=True)
+    fig.savefig(args.output.with_name(args.output.stem + '-' + stem.lower() + args.output.suffix),
+                dpi=180, transparent=True)
+    plt.close(fig)

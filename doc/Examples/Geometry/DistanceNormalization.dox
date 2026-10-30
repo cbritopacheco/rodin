@@ -128,7 +128,7 @@
 
   @section examples-distance-source Complete program
 
-  @snippet Models/Distance/SpaldingTucker.cpp distance-source
+  The complete program is available in @ref Models/Distance/SpaldingTucker.cpp "SpaldingTucker.cpp".
 
   @section examples-distance-next Continue
 

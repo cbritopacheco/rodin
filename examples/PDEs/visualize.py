@@ -72,7 +72,8 @@ def flow_figure(root, name, index=-1):
     uy = LinearTriInterpolator(tri, velocity[:, 1])(xx, yy)
     fig, axes = plt.subplots(1, 2, figsize=(9.2, 4.8), dpi=140)
     speed = np.linalg.norm(velocity, axis=1)
-    image = axes[0].tripcolor(tri, speed, shading='gouraud', cmap=SEQUENTIAL, vmin=0, vmax=1)
+    image = axes[0].tripcolor(tri, speed, shading='gouraud', cmap=SEQUENTIAL, vmin=0,
+                                vmax=2 if name == 'NavierStokes' else 1)
     axes[0].set_title('Speed', pad=36)
     axes[1].streamplot(coordinates, coordinates, ux, uy, density=1.8,
                        color='#17679A', linewidth=.8, arrowsize=.8)
@@ -83,7 +84,7 @@ def flow_figure(root, name, index=-1):
             # The trace is the computed boundary velocity, not an illustrative lid.
             lid = np.isclose(xy[:, 1], 1)
             order = np.argsort(xy[lid, 0])
-            ax.plot(xy[lid, 0][order], 1.025 + .07 * velocity[lid, 0][order],
+            ax.plot(xy[lid, 0][order], 1.025 + .035 * velocity[lid, 0][order],
                     transform=ax.get_xaxis_transform(), color='#13B6D0',
                     linewidth=2, clip_on=False)
             center = .5 - .22 * np.cos(2 * np.pi * time / 8)
@@ -95,7 +96,7 @@ def flow_figure(root, name, index=-1):
                         arrowprops={'arrowstyle': '->', 'color': '#17679A', 'lw': 1.4})
     fig.colorbar(image, ax=axes[0], fraction=.045, pad=.03)
     if name == 'NavierStokes':
-        fig.suptitle(f'Traveling lid forcing · Re = 100 · t = {time:.2f}', y=.99)
+        fig.suptitle(rf'Traveling lid forcing · $\mathrm{{Re}}=200$ · $t={time:.2f}$', y=.99)
     fig.tight_layout(pad=1.2, rect=(0, 0, 1, .93 if name == 'NavierStokes' else 1))
     return fig
 

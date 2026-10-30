@@ -2,7 +2,7 @@
   @page guides-variational Variational formulations in Rodin
   @brief Translate a weak equation into trial fields, test fields, forms, and assembly.
 
-  A Rodin problem is built from the same objects as a weak formulation: spaces,
+  A Rodin problem is built from the same objects as a weak formulation, including spaces,
   unknown fields, test functions, known data, and integrals. This guide explains
   their roles in code. The @ref guides-weak-formulations "weak formulation guide"
   supplies the derivation; the @ref examples-pdes-poisson "Poisson tutorial"
@@ -20,7 +20,7 @@
     \ell(v)=\int_\Omega fv\,dx.
   @f]
   Rodin writes this as a residual @f$a(u,v)-\ell(v)=0@f$, together with the
-  essential boundary condition:
+  essential boundary condition.
 
   @snippet PDEs/Poisson.cpp poisson-form
 
@@ -82,8 +82,8 @@
   order, they represent the same discrete forms as their integral expressions.
   Their reference pages specify supported field types and assembly backends.
 
-  With scalar trial and test functions and previously defined coefficients,
-  for example:
+  The following forms use scalar trial and test functions with previously
+  defined coefficients.
 
   @code{.cpp}
   MassForm mass(c, u, v);
@@ -113,8 +113,7 @@
 
   @section guides-variational-complex Complex test convention
 
-  Over complex fields, Rodin's bilinear-form interface is sesquilinear:
-  linear in the trial argument and conjugate-linear in the test argument. Thus
+  Over complex fields, Rodin's bilinear-form interface is sesquilinear. It is linear in the trial argument and conjugate-linear in the test argument. Thus
   `Integral(c * u, v)` represents
   @f$\int_\Omega c\,u\overline v\,dx@f$. The coefficient retains its original complex value.
   The corresponding discrete action is @f$y^*Ax@f$.
@@ -128,7 +127,7 @@
 
   An essential condition is appended as a `DirichletBC`. A prescribed natural
   load is part of the residual through a `BoundaryIntegral`. Their selections
-  have different roles: `.on(label)` selects constrained DOFs, while
+  have different roles. `.on(label)` selects constrained DOFs, while
   `.over(label)` selects an integration region.
 
   The @ref guides-boundary-conditions "boundary conditions guide" develops a
@@ -139,7 +138,7 @@
 
   A mixed problem lists all trial fields, followed by all test fields. In the
   @ref examples-pdes-stokes "Stokes example", velocity, pressure, and a global
-  pressure-mean multiplier have distinct spaces:
+  pressure-mean multiplier have distinct spaces.
 
   @snippet PDEs/Stokes.cpp stokes-form
 
@@ -161,7 +160,7 @@
 
   A configured solver retains a reference to its problem. On the first solve,
   the problem is assembled before the algebraic solver runs. The Poisson example
-  checks the result before export:
+  checks the result before export.
 
   @snippet PDEs/Poisson.cpp poisson-solve
 

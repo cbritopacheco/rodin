@@ -24,7 +24,7 @@ namespace Rodin::Distance
    *
    * This class implements the Spalding-Tucker normalization method, which
    * evaluates an algebraic approximate-distance construction and interpolates
-   * it into the input finite element space. The pointwise transformation is:
+   * it into the input finite element space. The pointwise transformation is
    * @f[
    *   d(x) = \frac{2u(x)}{|\nabla u(x)| + \sqrt{|\nabla u(x)|^2 + 2|u(x)|}}
    * @f]

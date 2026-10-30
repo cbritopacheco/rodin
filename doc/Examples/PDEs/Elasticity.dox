@@ -54,7 +54,7 @@
   @section examples-pdes-elasticity-weak The weak formulation
 
   Let @f$V=\{v\in H^1(\Omega)^2:v=0\text{ on }\Gamma_D\}@f$. Multiplying
-  equilibrium by a test displacement and integrating by parts gives: find
+  equilibrium by a test displacement and integrating by parts gives a weak problem that seeks
   @f$u\in V@f$ such that, for every @f$v\in V@f$,
   @f[
     \int_\Omega \lambda\,\operatorname{div}(u)\operatorname{div}(v)
@@ -84,7 +84,7 @@
   @section examples-pdes-elasticity-impl-problem 2. Express the finite element problem
 
   The vector-valued `P1` space uses continuous, piecewise affine displacements
-  with two components per vertex: 902 degrees of freedom before imposing the
+  with two components per vertex, giving 902 degrees of freedom before imposing the
   boundary values. `u` is the trial displacement and `v` is the test function.
 
   @snippet PDEs/Elasticity.cpp elasticity-form
@@ -93,8 +93,8 @@
   including the factor @f$2\mu@f$ multiplying the strain inner product.
   `BoundaryIntegral(...).over(loaded)` restricts the traction to the right end;
   `DirichletBC(...).on(fixed)` fixes both displacement components on the left.
-  No boundary integral is needed on the free sides: zero traction is the
-  natural condition there.
+  Zero traction is the natural condition on the free sides, so their
+  boundary integral vanishes.
 
   Rodin expresses the equation as a residual, so the external work is subtracted
   from the stiffness term. The boundary condition completes the problem.
@@ -140,8 +140,6 @@
   Build the `Elasticity` target with the Rodin examples enabled, then run it from
   the directory in which the output should be written. The program generates
   its own mesh at startup.
-
-  @snippet PDEs/Elasticity.cpp elasticity-source
 
   See @ref PDEs/Elasticity.cpp "Elasticity.cpp" for the source,
   the @ref guides-getting-started-installation "installation guide" for build

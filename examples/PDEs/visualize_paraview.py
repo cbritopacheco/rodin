@@ -52,12 +52,21 @@ def text(target, value, position=(.5, .94), size=22):
     return source
 
 
-def color(source, target, array, limits, signed=False, title=None):
+def color(source, target, array, limits, signed=False, title=None, association=None):
+    """Plot the exported association; cell fields remain constant on each cell."""
+    if association is None:
+        point_field = array in source.PointData.keys()
+        cell_field = array in source.CellData.keys()
+        if point_field == cell_field:
+            raise ValueError(f"Select POINTS or CELLS explicitly for {array}")
+        association = 'POINTS' if point_field else 'CELLS'
     display = Show(source, target)
     display.Representation = 'Surface'
     display.Ambient = 1
     display.Diffuse = 0
-    ColorBy(display, ('POINTS', array))
+    ColorBy(display, (association, array))
+    if association == 'CELLS':
+        display.InterpolateScalarsBeforeMapping = 0
     lut = GetColorTransferFunction(array)
     lut.RGBPoints = SIGNED if signed else SEQUENTIAL
     lut.ColorSpace = 'RGB'
@@ -94,6 +103,12 @@ def save(path, target, size=(1280, 640)):
     SaveScreenshot(str(path), target, ImageResolution=list(size), TransparentBackground=1)
 
 
+def save_panels(path, views, names, size=(720, 640)):
+    """Export each scientific panel so HTML controls rows and responsive layout."""
+    for target, name in zip(views, names):
+        save(path.with_name(path.stem + '-' + name + path.suffix), target, size)
+
+
 def flow(root, name, output, frames=None):
     source = reader(root, name)
     left, right = view(), view()
@@ -102,7 +117,8 @@ def flow(root, name, output, frames=None):
     layout.SplitHorizontal(0, .5)
     AssignViewToLayout(right, layout, hint=2)
     layout.SetSize(1280, 680)
-    color(source, left, 'velocity', (0, 1), title='Speed')
+    peak_speed = 2 if name == 'NavierStokes' else 1
+    color(source, left, 'velocity', (0, peak_speed), title='Speed')
     speed_bar = GetScalarBar(GetColorTransferFunction('velocity'), left)
     speed_bar.Position = [.90, .19]
     speed_bar.Title = ''
@@ -139,7 +155,7 @@ def flow(root, name, output, frames=None):
     display.AmbientColor = BLUE
     lid = PlotOverLine(Input=source, Point1=[0, 1, 0], Point2=[1, 1, 0], Resolution=128)
     profile = Calculator(Input=lid)
-    profile.Function = 'coordsX*iHat+(1.04+0.08*mag(velocity))*jHat'
+    profile.Function = f'coordsX*iHat+(1.04+{0.08 / peak_speed}*mag(velocity))*jHat'
     profile.CoordinateResults = 1
     for target in [left, right]:
         display = Show(profile, target)
@@ -155,12 +171,13 @@ def flow(root, name, output, frames=None):
     for frame, (_, time) in enumerate(selected):
         source.UpdatePipeline(time)
         left.ViewTime = right.ViewTime = time
-        label.Text = rf'$\mathrm{{Re}}=100,\quad t={time:.2f}$' if name == 'NavierStokes' else 'Steady Stokes flow'
+        label.Text = rf'$\mathrm{{Re}}=200,\quad t={time:.2f}$' if name == 'NavierStokes' else 'Steady Stokes flow'
         streams.UpdatePipeline(time)
         if frames:
             save(frames / f'{frame:04d}.png', layout, (1280, 680))
         if time == times[-1]:
             save(output / (name + '.png'), layout, (1280, 680))
+            save_panels(output / (name + '.png'), [left, right], ['speed', 'streamlines'])
         print(name, time, flush=True)
     Delete(layout)
     Delete(left)
@@ -200,7 +217,7 @@ def scalar(root, name, output):
         target.CameraPosition = [2.2, -2.8, 2.3]
         target.CameraFocalPoint = [.5, .5, .2]
         target.CameraViewUp = [0, 0, 1]
-        target.CameraParallelScale = .9
+        target.CameraParallelScale = 1.05
     elif name == 'SurfaceMesh':
         display = color(source, target, 'u', (-.5, .5), signed=True)
         display.Representation = 'Surface With Edges'
@@ -214,7 +231,7 @@ def scalar(root, name, output):
         color(source, target, 'u', (-1, 1), signed=True)
         target.CameraPosition = [3.14, 3.14, 8]
         target.CameraFocalPoint = [3.14, 3.14, 0]
-        target.CameraParallelScale = 4.3
+        target.CameraParallelScale = 4.6
     elif name == 'MixedBoundary':
         color(source, target, 'u', (0, 1))
         text(target, 'Mixed boundary conditions', (.5, .94))
@@ -226,7 +243,7 @@ def scalar(root, name, output):
             edge.LineWidth = 3
     else:
         raise ValueError(name)
-    save(output / (name + '.png'), target, (1000, 800))
+    save(output / (name + '.png'), target, (720, 640))
     Delete(target)
 
 
@@ -242,6 +259,7 @@ def helmholtz(root, output):
         color(source, target, array, (-1, 1), signed=True)
         text(target, 'Real part' if array == 'real' else 'Imaginary part')
     save(output / 'Helmholtz.png', layout)
+    save_panels(output / 'Helmholtz.png', [left, right], ['real', 'imaginary'])
     Delete(layout)
     Delete(left)
     Delete(right)
@@ -253,7 +271,7 @@ if __name__ == '__main__':
     parser.add_argument('output', type=Path)
     parser.add_argument('--frames', type=Path)
     cases = ['Poisson', 'Elasticity', 'SurfaceMesh', 'Periodic', 'MixedBoundary']
-    parser.add_argument('--example', choices=['all', 'cavity', 'Helmholtz', 'Stokes'] + cases,
+    parser.add_argument('--example', choices=['all', 'cavity', 'Helmholtz', 'Stokes', 'NavierStokes'] + cases,
                         default='all')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
@@ -268,6 +286,8 @@ if __name__ == '__main__':
         scalar(args.root, args.example, args.output)
     elif args.example == 'Helmholtz':
         helmholtz(args.root, args.output)
+    elif args.example == 'NavierStokes':
+        flow(args.root, 'NavierStokes', args.output)
     elif args.example == 'Stokes':
         flow(args.root, 'Stokes', args.output)
     if args.example in ['all', 'cavity']:

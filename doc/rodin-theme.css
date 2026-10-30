@@ -868,6 +868,7 @@ main article figure.m-figure::before {
   border-color: transparent;
 }
 main article figure.m-figure figcaption {
+  display: block;
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 400;
@@ -875,26 +876,57 @@ main article figure.m-figure figcaption {
   text-align: center;
 }
 
+/* One scientific panel occupies half the content width on desktop. */
+main article figure.m-figure {
+  display: block;
+  width: calc((100% - 1.5rem) / 2);
+  max-width: 22.25rem;
+  margin: 1.5rem auto;
+}
+main article figure.m-figure img {
+  width: 100% !important;
+  height: auto;
+}
+main article figure.m-figure:has(img[src$="Architecture.svg"]) {
+  width: 100%;
+  max-width: none;
+}
 .rodin-mesh-stages {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  margin-block: 1.5rem;
-}
-.rodin-mesh-stages-pair {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 46rem;
+  margin: 1.5rem auto;
 }
 .rodin-mesh-stages figure.m-figure {
+  display: block;
+  width: 100%;
   margin: 0;
   min-width: 0;
+  max-width: none;
+  grid-column: span 2;
 }
-@media screen and (max-width: 767px) {
-  .rodin-mesh-stages {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.rodin-mesh-stages > figure.m-figure:last-child:nth-child(odd) {
+  grid-column: 2 / span 2;
+}
+.rodin-mesh-stages figure.m-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.rodin-mesh-stages figure.m-figure figcaption {
+  display: block;
+  margin: .75rem 0 0;
 }
 
-.rodin-tutorial-video video {
+/* Videos use the full content width, independently of still-image panels. */
+main article figure.m-figure:has(video) {
+  width: 100%;
+  max-width: none;
+  grid-column: 1 / -1;
+}
+main article video {
   display: block;
   width: 100%;
   height: auto;
@@ -933,4 +965,99 @@ main article figure.m-figure figcaption {
   :is(#gallery-pdes, #gallery-optimization, #gallery-fitting) {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+:is(#gallery-pdes, #gallery-optimization, #gallery-fitting) figure.m-figure {
+  width: 100%;
+  max-width: none;
+}
+@media screen and (max-width: 767px) {
+  main article figure.m-figure {
+    width: 100%;
+    max-width: none;
+  }
+  .rodin-mesh-stages {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rodin-mesh-stages > figure.m-figure,
+  .rodin-mesh-stages > figure.m-figure:last-child:nth-child(odd) {
+    grid-column: 1;
+  }
+}
+
+/* Give tightly cropped inline TeX SVGs a small optical gap from prose. */
+main article :is(p, li, td, th, dd, dt) svg.m-math {
+  margin-inline-start: .08em;
+  margin-inline-end: .04em;
+}
+
+/* Floating, flat gray video controls, independent of the browser's skin. */
+main article figure.m-figure > .rodin-video-player {
+  display: block;
+  position: relative;
+  width: 100%;
+  margin: 0;
+}
+.rodin-video-player { position: relative; width: 100%; }
+.rodin-video-player video { display: block; width: 100%; }
+.rodin-video-controls {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: calc(100% - 24px);
+  max-width: 440px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(55, 55, 59, 0.9);
+  color: #fff;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 4px 16px #0003;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease;
+  font: inherit;
+  font-size: .75rem;
+  line-height: 1.3;
+}
+.rodin-video-player:hover .rodin-video-controls,
+.rodin-video-player:has(:focus-visible) .rodin-video-controls,
+.rodin-video-player.controls-visible .rodin-video-controls { opacity: 1; pointer-events: auto; }
+.rodin-video-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 32px;
+  padding: 4px;
+  border: 0;
+  border-radius: 5px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.rodin-video-controls button[hidden] { display: none; }
+.rodin-video-controls button:hover { background: #ffffff20; }
+.rodin-video-controls button:focus-visible, .rodin-video-controls input:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.rodin-video-controls svg { width: 18px; height: 18px; }
+.rodin-video-time { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.rodin-video-controls input { flex: 1; min-width: 32px; width: 0; margin: 0; accent-color: #fff; cursor: pointer; }
+.rodin-video-player:fullscreen { display: flex; align-items: center; justify-content: center; max-width: none !important; background: #171719; }
+.rodin-video-player:fullscreen video { width: 100%; height: 100%; object-fit: contain; }
+@media (hover: none), (pointer: coarse) {
+  .rodin-video-controls { gap: 4px; padding: 4px; }
+  .rodin-video-controls button { flex-basis: 44px; width: 44px; height: 44px; }
+}
+.rodin-video-player.uses-touch-controls .rodin-video-controls { opacity: 0; pointer-events: none; }
+.rodin-video-player.uses-touch-controls.controls-visible .rodin-video-controls { opacity: 1; pointer-events: auto; }
+@media (prefers-reduced-motion: reduce) {
+  .rodin-video-controls { transition: none; }
 }

@@ -11,3 +11,7 @@ add_subdirectory(Witness)
 add_executable(SWIFT_BackgroundFitting BackgroundFitting.cpp)
 target_link_libraries(SWIFT_BackgroundFitting
   PRIVATE Rodin::Geometry Rodin::Solver Rodin::Variational Rodin::MMG)
+
+add_executable(SWIFT_InterfaceFitting InterfaceFitting.cpp)
+target_link_libraries(SWIFT_InterfaceFitting
+  PRIVATE Rodin::Geometry Rodin::Solver Rodin::Variational)

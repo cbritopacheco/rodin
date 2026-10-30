@@ -50,12 +50,12 @@ int main()
   TestFunction v(velocitySpace);
   TestFunction q(pressureSpace);
   TestFunction meanTest(meanSpace);
-  constexpr Real viscosity =
-    0.01; // Reynolds number 100 for unit length and peak lid speed.
+  constexpr Real peakLidSpeed = 2; // Doubled driving speed for the stronger transient.
+  constexpr Real viscosity = 0.01; // Reynolds number 200 for unit cavity width.
   constexpr Real dt = 0.01;
-  constexpr size_t steps = 1000; // Final time 10, for the transient demonstration.
+  constexpr size_t steps = 2000; // Final time 20, for the transient demonstration.
   constexpr size_t outputEvery = 5; // Export every 0.05 time units for visualization.
-  constexpr Real rampTime = 1; // Ramp the lid over one convective time unit.
+  constexpr Real rampTime = 1; // Ramp the lid over one simulation time unit.
   constexpr Real travelAmplitude = 0.22; // Center travels between x=0.28 and x=0.72.
   constexpr Real travelPeriod = 8; // One horizontal round trip in simulation time.
   constexpr Real halfWidth = 0.25; // Compact support stays clear of both corners.
@@ -78,7 +78,7 @@ int main()
     RealFunction lidSpeed = [=](const Point& point) {
       const Real offset = (point.x() - center) / halfWidth;
       const Real profile = std::max<Real>(0, 1 - offset * offset);
-      return ramp * profile * profile;
+      return peakLidSpeed * ramp * profile * profile;
     };
     VectorFunction lidVelocity{lidSpeed, Zero()};
     Problem flow(u, p, multiplier, v, q, meanTest);

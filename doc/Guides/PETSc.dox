@@ -1,5 +1,5 @@
 /**
-  @page guides-petsc PETSc: parallel solvers and distributed linear algebra
+  @page guides-petsc Parallel solvers and distributed linear algebra with PETSc
   @brief Guide to using PETSc-backed variational forms, solvers, and distributed assembly
 
   @tableofcontents
@@ -19,7 +19,7 @@
   - Seamless support for both `Context::Local` (single-process) and
     `Context::MPI` (distributed) mesh contexts.
 
-  Include the module via:
+  Include the PETSc module header.
   @code{.cpp}
   #include <Rodin/PETSc.h>
   @endcode
@@ -31,7 +31,7 @@
   @ref guides-numerical-contracts "Numerical contracts".
 
   Initialize PETSc before constructing its objects. Destroy matrices, vectors,
-  grid functions and solver contexts before finalization:
+  grid functions and solver contexts before finalization.
   @code{.cpp}
   PetscErrorCode ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
   assert(ierr == PETSC_SUCCESS);
@@ -52,7 +52,7 @@
 
   Use `PETSc::Variational::TrialFunction` and
   `PETSc::Variational::TestFunction` instead of the standard versions to
-  activate PETSc storage:
+  activate PETSc storage.
 
   @code{.cpp}
   P1 Vh(mesh);
@@ -91,7 +91,7 @@
   @subsection guides-petsc-forms Bilinear and linear forms
 
   When PETSc trial/test functions are used, `BilinearForm` assembles into a
-  PETSc @c Mat and `LinearForm` assembles into a PETSc @c Vec:
+  PETSc @c Mat and `LinearForm` assembles into a PETSc @c Vec.
 
   @code{.cpp}
   // Automatically selected via CTAD
@@ -111,7 +111,7 @@
   The PETSc `Problem` assembles into a
   `PETSc::Math::LinearSystem` containing
   the system matrix @f$ A @f$, right-hand side @f$ \mathbf{b} @f$, and
-  solution @f$ \mathbf{x} @f$:
+  solution @f$ \mathbf{x} @f$.
 
   @code{.cpp}
   Problem poisson(u, v);
@@ -127,7 +127,7 @@
 
   @section guides-petsc-solvers PETSc solvers
 
-  @subsection guides-petsc-solvers-ksp KSP: Krylov subspace solvers
+  @subsection guides-petsc-solvers-ksp Krylov subspace solvers with KSP
 
   @ref Rodin::Solver::KSP "KSP" is the base PETSc linear solver.  It wraps
   the PETSc @c KSP context and supports programmatic configuration as well
@@ -150,7 +150,7 @@
   ksp.solve();
   @endcode
 
-  PETSc command-line options override programmatic settings:
+  PETSc command-line options override programmatic settings.
   @code
   ./myprogram -ksp_type cg -pc_type jacobi -ksp_rtol 1e-8 -ksp_monitor
   @endcode
@@ -159,7 +159,7 @@
 
   @ref Rodin::Solver::CG<PETSc::Math::LinearSystem> "CG" is a convenience
   specialization that sets the KSP type to `KSPCG`.  Use for symmetric
-  positive-definite (SPD) systems:
+  positive-definite (SPD) systems.
 
   @code{.cpp}
   Solver::CG(poisson).solve();
@@ -168,16 +168,16 @@
   @subsection guides-petsc-solvers-gmres GMRES
 
   @ref Rodin::Solver::GMRES<PETSc::Math::LinearSystem> "GMRES" sets the
-  KSP type to `KSPGMRES`.  Use for non-symmetric or indefinite systems:
+  KSP type to `KSPGMRES`.  Use for non-symmetric or indefinite systems.
 
   @code{.cpp}
   Solver::GMRES(stokes).solve();
   @endcode
 
-  @subsection guides-petsc-solvers-snes SNES: nonlinear solvers
+  @subsection guides-petsc-solvers-snes Nonlinear solvers with SNES
 
   @ref Rodin::Solver::SNES "SNES" wraps PETSc's nonlinear solver framework.
-  It uses a KSP solver for the inner linear system at each Newton step:
+  It uses a KSP solver for the inner linear system at each Newton step.
 
   @code{.cpp}
   Solver::KSP ksp(problem);
@@ -196,7 +196,7 @@
   @section guides-petsc-linearsystem Linear system
 
   `PETSc::Math::LinearSystem` couples
-  the PETSc matrix, RHS vector, and solution vector:
+  the PETSc matrix, RHS vector, and solution vector.
 
   @code{.cpp}
   auto& axb = problem.getLinearSystem();
@@ -221,7 +221,7 @@
   @subsection guides-petsc-fieldsplit Field-split preconditioning
 
   For multi-field problems (e.g.\ Stokes), the linear system supports named
-  field splits that can be passed to PETSc's `PCFIELDSPLIT` preconditioner:
+  field splits that can be passed to PETSc's `PCFIELDSPLIT` preconditioner.
 
   @code{.cpp}
   // The Problem class automatically sets up field splits for multi-field
@@ -283,7 +283,7 @@
 
   @section guides-petsc-sequential-example Sequential PETSc example
 
-  This example solves a 3D Poisson equation on hexahedra using PETSc CG:
+  This example solves a 3D Poisson equation on hexahedra using PETSc CG.
 
   @code{.cpp}
   #include <cassert>

@@ -21,7 +21,7 @@
   The complex amplitude may represent a time-harmonic field; a corresponding
   real oscillation is @f$\operatorname{Re}(u e^{-i\omega t})@f$. The boundary data define a bounded-domain Dirichlet problem.
 
-  A manufactured solution makes the source and boundary data explicit:
+  A manufactured solution makes the source and boundary data explicit.
   @f[
     u_{\mathrm{ex}}(x,y)=e^{ikx}\sin(\pi y),\qquad
     f(x,y)=\pi^2u_{\mathrm{ex}}(x,y).
@@ -43,7 +43,7 @@
   @section examples-pdes-helmholtz-mesh 1. Resolve the wave on a mesh
 
   The program generates a unit-square triangular mesh with 97 vertices in each
-  coordinate direction: 9409 vertices and 18432 triangles. The wavelength in the
+  coordinate direction, giving 9409 vertices and 18432 triangles. The wavelength in the
   horizontal direction is @f$2\pi/k=0.5@f$.
 
   @snippet PDEs/Helmholtz.cpp helmholtz-mesh
@@ -75,7 +75,12 @@
 
   @snippet PDEs/Helmholtz.cpp helmholtz-export
 
-  @image html PDEs/Helmholtz.png "Computed real and imaginary amplitudes, using the same signed color scale." width=720px
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html PDEs/Helmholtz-real.png "Computed real amplitude."
+  @image html PDEs/Helmholtz-imaginary.png "Computed imaginary amplitude; the signed scale matches the real part."
+  @endparblock
 
   Open `Helmholtz.xdmf` in ParaView, select **Apply**, then color by **real** or
   **imaginary**. Keep the HDF5 files beside the XDMF file. The reference fields
@@ -83,8 +88,6 @@
   @f$\sin(kx)\sin(\pi y)@f$.
 
   @section examples-pdes-helmholtz-full Complete program
-
-  @snippet PDEs/Helmholtz.cpp helmholtz-source
 
   See @ref PDEs/Helmholtz.cpp "Helmholtz.cpp" for the source and the
   @ref guides-getting-started-installation "installation guide" for build setup.
