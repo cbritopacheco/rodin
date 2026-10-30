@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Examples and tutorials &raquo; Input/Output examples | Rodin</title>
+  <title>Examples and tutorials &raquo; Input/output examples | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <link rel="prev" href="examples-pdes-index.html" />
   <link rel="next" href="examples-geometry-index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +34,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -73,19 +74,19 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="examples-index.html">Examples and tutorials</a> &raquo;</span>
-          Input/Output examples
+          Input/output examples
         </h1>
-        <p>Examples demonstrating I/O capabilities.</p>
+        <p>Export a field for visualization or exchange mesh files.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#examples-io-index-xdmf">XDMF Output</a></li>
-            <li><a href="#examples-io-index-mesh">Mesh Formats</a></li>
-            <li><a href="#examples-io-index-see-also">See Also</a></li>
+            <li><a href="#examples-io-index-xdmf">Visualize a field with XDMF</a></li>
+            <li><a href="#examples-io-index-mesh">Exchange mesh files</a></li>
+            <li><a href="#examples-io-index-see-also">Further reading</a></li>
           </ul>
         </nav>
-<p>This section contains examples demonstrating the various I/O capabilities of Rodin, including mesh import/export, grid function storage, and visualization output.</p><section id="examples-io-index-xdmf"><h2><a href="#examples-io-index-xdmf">XDMF Output</a></h2><p>The XDMF format is recommended for visualization. It produces files compatible with <a href="https://www.paraview.org/">ParaView</a>:</p><ul><li><a href="examples-io-xdmf.html" class="m-doc">XDMF time-evolution output</a> - Time-dependent vector field export</li></ul></section><section id="examples-io-index-mesh"><h2><a href="#examples-io-index-mesh">Mesh Formats</a></h2><p>Examples demonstrating mesh I/O and format conversion:</p><ul><li><a href="examples-io-mfem.html" class="m-doc">MFEM format</a> - Building a mesh programmatically and saving in MFEM format</li><li><a href="examples-io-medit.html" class="m-doc">MEDIT format</a> - Loading a MEDIT mesh and converting to MFEM format</li></ul></section><section id="examples-io-index-see-also"><h2><a href="#examples-io-index-see-also">See Also</a></h2><ul><li><a href="guides-io.html" class="m-doc">I/O in Rodin</a> — Comprehensive I/O guide</li><li><a href="guides-io-xdmf.html" class="m-doc">XDMF format guide</a></li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="examples-index.html" class="m-doc">Examples and tutorials</a> | <a href="examples-geometry-index.html" class="m-doc">Mesh geometry examples &raquo;</a></div>
+<p>Choose the example according to the data being exchanged. XDMF is the starting point for visualizing a computed field; the mesh-format examples cover importing and exporting geometry.</p><section id="examples-io-index-xdmf"><h2><a href="#examples-io-index-xdmf">Visualize a field with XDMF</a></h2><p>The XDMF format is recommended for visualization. It produces files compatible with <a href="https://www.paraview.org/">ParaView</a>:</p><ul><li><a href="examples-io-xdmf.html" class="m-doc">Exporting a time-dependent field</a> — Export a time-dependent vector field.</li></ul></section><section id="examples-io-index-mesh"><h2><a href="#examples-io-index-mesh">Exchange mesh files</a></h2><p>Examples demonstrating mesh I/O and format conversion:</p><ul><li><a href="examples-io-mfem.html" class="m-doc">Saving and reloading an MFEM field</a> — Save and reload a mesh and scalar field.</li><li><a href="examples-io-medit.html" class="m-doc">Converting a MEDIT mesh</a> — Create a mesh, save it in MEDIT and convert it to MFEM.</li></ul></section><section id="examples-io-index-see-also"><h2><a href="#examples-io-index-see-also">Further reading</a></h2><ul><li><a href="guides-io.html" class="m-doc">I/O in Rodin</a> — Format selection and visualization workflows</li><li><a href="guides-io-xdmf.html" class="m-doc">XDMF format guide</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="examples-pdes-index.html" class="m-doc">&laquo; Partial differential equations</a> | <a href="examples-index.html" class="m-doc">Examples and tutorials</a> | <a href="examples-geometry-index.html" class="m-doc">Mesh geometry examples &raquo;</a></div>
       </div>
     </div>
   </div>

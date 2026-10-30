@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::FiniteElementBase class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -99,7 +99,7 @@
             </li>
           </ul>
         </nav>
-<p>This class provides a minimal CRTP interface shared by all finite elements. Derived classes are expected to implement the following methods:</p><ul><li><code>size_t getCount() const</code></li><li><code>auto getBasis(size_t) const</code></li><li><code>auto getLinearForm(size_t) const</code></li><li><code>Optional&lt;size_t&gt; getDegree() const</code></li></ul><p>The base class stores only the reference geometry and forwards all finite-element-specific queries to the Derived class.</p>
+<p>This class provides a minimal CRTP interface shared by all finite elements. Derived classes are expected to implement the following methods.</p><ul><li><code>size_t getCount() const</code></li><li><code>auto getBasis(size_t) const</code></li><li><code>auto getLinearForm(size_t) const</code></li><li><code>Optional&lt;size_t&gt; getDegree() const</code></li></ul><p>The base class stores only the reference geometry and forwards all finite-element-specific queries to the Derived class.</p>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><div class="rodin-inheritance-current">FiniteElementBase</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_lagrange_finite_element_base.html" title="LagrangeFiniteElementBase&lt; H1Element&lt; K, Scalar &gt; &gt;; LagrangeFiniteElementBase&lt; H1Element&lt; K, Math::SpatialVector&lt; Scalar &gt; &gt; &gt;; LagrangeFiniteElementBase&lt; H1Element&lt; K, Math::SpatialMatrix&lt; Scalar &gt; &gt; &gt;; LagrangeFiniteElementBase&lt; P1Element&lt; Scalar &gt; &gt;; LagrangeFiniteElementBase&lt; P1Element&lt; Math::SpatialVector&lt; Scalar &gt; &gt; &gt;; LagrangeFiniteElementBase&lt; P1Element&lt; Math::SpatialMatrix&lt; Scalar &gt; &gt; &gt;; LagrangeFiniteElementBase&lt; Derived &gt;">LagrangeFiniteElementBase</a></li><li><a href="class_rodin_1_1_variational_1_1_p0_element.html" title="P0Element&lt; RangeType &gt;; P0Element&lt; Real &gt;; P0Element&lt; Complex &gt;; P0Element&lt; Math::SpatialVector&lt; ScalarType &gt; &gt;; P0Element&lt; Math::SpatialVector&lt; Scalar &gt; &gt;&lt; Real &gt;; P0Element&lt; Math::SpatialVector&lt; Scalar &gt; &gt;&lt; Complex &gt;">P0Element</a></li><li><a href="class_rodin_1_1_variational_1_1_p0g_element.html" title="P0gElement&lt; RangeType &gt;; P0gElement&lt; Math::SpatialVector&lt; ScalarType &gt; &gt;">P0gElement</a></li><li class="rodin-inheritance-more"><a href="#derived-classes">+12 more</a></li></ul></figure><section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_lagrange_finite_element_base.html"><code>LagrangeFiniteElementBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">LagrangeFiniteElementBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">H1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
 </pre></details></td><td>Common reference-space properties of Lagrange element families.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0_element.html"><code>P0Element&lt;RangeType&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P0Element</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">RangeType</span><span class="w"> </span><span class="o">&gt;</span>
 </pre></details></td><td>Degree 0 Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0g_element.html"><code>P0gElement&lt;RangeType&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P0gElement</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">RangeType</span><span class="w"> </span><span class="o">&gt;</span>
@@ -375,7 +375,7 @@ $ K $
                 </tr>
               </tfoot>
             </table>
-<p>This forwards to the Derived class via CRTP: <code class="m-code"><span class="k">static_cast</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Derived</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">).</span><span class="n">getCount</span><span class="p">();</span></code></p><p>For polynomial elements, this is typically the number of interpolation nodes (scalar DOFs) on the reference element.</p>
+<p>This forwards to the Derived class via CRTP. <code class="m-code"><span class="k">static_cast</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Derived</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">).</span><span class="n">getCount</span><span class="p">();</span></code></p><p>For polynomial elements, this is typically the number of interpolation nodes (scalar DOFs) on the reference element.</p>
           </div></section>
           <section class="m-doc-details" id="a8c93953f1a596d6abf47a11b177dc64a"><div>
             <h3>
@@ -416,7 +416,7 @@ $ \{\phi_i\} $
 <use x='12.905709' y='1.793263' xlink:href='#eq2-g1-105'/>
 <use x='16.286981' y='0' xlink:href='#eq2-g0-103'/>
 </g>
-</svg> span the local approximation space on the reference element. For Lagrange elements, they satisfy the nodal property:</p><div class="m-math"><svg style="width: 6.448em; height: 1.282em;" viewBox="163.323405 -12.309385 61.896193 12.309385">
+</svg> span the local approximation space on the reference element. For Lagrange elements, they satisfy the nodal property.</p><div class="m-math"><svg style="width: 6.448em; height: 1.282em;" viewBox="163.323405 -12.309385 61.896193 12.309385">
 <title>
 \[  \phi_i(x_j) = \delta_{ij},
 \]
@@ -457,7 +457,7 @@ $ x_j $
 <use x='0' y='0' xlink:href='#eq4-g1-120'/>
 <use x='6.652087' y='1.793263' xlink:href='#eq4-g0-106'/>
 </g>
-</svg> are the interpolation nodes.</p><p>The exact return type depends on the Derived class (scalar-valued, vector-valued, etc.) and is deduced automatically.</p><aside class="m-note m-info"><h4>Note</h4><p>CRTP method: implemented by the Derived class.</p></aside>
+</svg> are the interpolation nodes.</p><p>The exact return type depends on the Derived class (scalar-valued, vector-valued, etc.) and is deduced automatically.</p><aside class="m-note m-info"><h4>Note</h4><p>The Derived class implements this CRTP method.</p></aside>
           </div></section>
           <section class="m-doc-details" id="aca686e68d6d96e0f0813fac17af8ee23"><div>
             <h3>
@@ -610,7 +610,7 @@ $ v $
 <g id='eq9-page1'>
 <use x='0' y='0' xlink:href='#eq9-g0-118'/>
 </g>
-</svg> typically produces the coefficient associated with the i-th degree of freedom.</p><aside class="m-note m-info"><h4>Note</h4><p>CRTP method: implemented by the Derived class.</p></aside>
+</svg> typically produces the coefficient associated with the i-th degree of freedom.</p><aside class="m-note m-info"><h4>Note</h4><p>The Derived class implements this CRTP method.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ab1a4b254bdf003c3544ffbaf49a5d086"><div>
             <h3>

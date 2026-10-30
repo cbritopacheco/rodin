@@ -1,14 +1,15 @@
 
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="../../assets/favicon-monogram.svg">
   <title>Form language · Rodin benchmarks</title>
   <link rel="stylesheet" href="../../assets/mcss-22c93d2587ab.css">
-  <link rel="stylesheet" href="../../assets/rodin-fe7b0e2c871a.css">
-  <link rel="stylesheet" href="../../assets/rodin-theme-27c0d1929b3f.css">
+  <link rel="stylesheet" href="../../assets/rodin-62701ba7f0b9.css">
+  <link rel="stylesheet" href="../../assets/rodin-theme-bc48e2782da9.css">
   <link rel="stylesheet" href="../../assets/rodin.css">
   <link rel="stylesheet" href="../../assets/rodin-theme.css">
   <link rel="stylesheet" href="../../assets/site.css">
@@ -39,7 +40,7 @@
                 <li><a href="../../../guides-index.html">General concepts</a></li>
                 <li><a href="../../../examples-index.html">Examples and tutorials</a></li>
                 <li><a href="../../../gallery.html">Gallery</a></li>
-                <li><a href="../../../guides-io.html">I/O in Rodin</a></li>
+                <li><a href="../../../guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="../../../configuration.html">Configuration</a></li>
                 <li><a href="../../../ci-index.html">Continuous integration</a></li>
                 <li><a href="../../../notation-index.html">Notation</a></li>
@@ -80,7 +81,10 @@
       <h1>Form language</h1>
       <p class="benchmark-configuration">Published configurations</p>
       
-      <p class="m-text m-dim"><em>Typed expressions for constructing variational forms.</em></p><div class="benchmark-representative"><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span></pre></div><div class="m-block m-flat"><p><a href="../../../class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> supplies the common expression-node interface, <a href="../../../struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> describes ranges and algebraic properties, and <a href="../../../class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a> groups polymorphic nodes. They underpin the typed variational expressions used to compose integrals and operators, and provide extension points for new function and form types.</p></div>
+      <p class="m-text m-dim"><em>Typed expressions for constructing variational forms.</em></p><div class="benchmark-representative"><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="nc">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span></pre></div><div class="m-block m-flat"><p>An expression&#x27;s C++ type records its operands and algebraic role. Function expressions represent known fields; shape-function expressions carry a trial or test slot; bilinear integrators pair those slots. Traits propagate scalar type, range and finite element space through composition.</p></div>
       
       
       <p>No benchmarks have been registered for this module yet.</p>
@@ -112,7 +116,7 @@
   </div></div></div>
 </div>
 <script src="../../assets/search-57e2ce511c71.js"></script>
-<script src="../../assets/searchdata-45522af048f6.js"></script>
+<script src="../../assets/searchdata-3859e4a19098.js"></script>
   <footer><nav>
   <div class="m-container">
     <div class="m-row">

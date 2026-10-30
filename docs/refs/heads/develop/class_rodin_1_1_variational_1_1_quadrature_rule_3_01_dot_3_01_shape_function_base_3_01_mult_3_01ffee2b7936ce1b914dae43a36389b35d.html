@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;LeftOperand, RightOperand&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -86,12 +86,12 @@
           <h3>Contents</h3>
           <ul>
             <li>
-              <a href="#autotoc_md416">Architecture</a>
+              <a href="#autotoc_md414">Architecture</a>
               <ul>
-                <li><a href="#autotoc_md417">Scalar coefficients</a></li>
+                <li><a href="#autotoc_md415">Scalar coefficients</a></li>
               </ul>
             </li>
-            <li><a href="#autotoc_md418">Judgement</a></li>
+            <li><a href="#autotoc_md416">Judgement</a></li>
             <li>
               Reference
               <ul>
@@ -104,7 +104,7 @@
             </li>
           </ul>
         </nav>
-<p>This class represents the CTAD for the expression:</p><div class="m-math"><svg style="width: 7.589em; height: 2.767em;" viewBox="157.845518 -26.567319 72.851969 26.567327">
+<p>This class provides class template argument deduction for the following expression.</p><div class="m-math"><svg style="width: 7.589em; height: 2.767em;" viewBox="157.845518 -26.567319 72.851969 26.567327">
 <title>
 \[\int (A u) \cdot v \ dx \: ,
 \]
@@ -163,7 +163,7 @@ $A$
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-65'/>
 </g>
-</svg> is a coefficient function.</p><section id="autotoc_md416"><h2><a href="#autotoc_md416">Architecture</a></h2><p>Mapped quadrature samples and the completed local matrix are owned by the rule. Reference tables are borrowed only during binding, after the current coefficient value has been materialized. Public entry access retains test rows and trial columns independently of the private storage order.</p><section id="autotoc_md417"><h3><a href="#autotoc_md417">Scalar coefficients</a></h3><p>A scalar coefficient gives <svg class="m-math" style="width: 10.666em; height: 1.213em; vertical-align: -0.350em;" viewBox="0 -8.302191 102.391286 11.6452">
+</svg> is a coefficient function.</p><section id="autotoc_md414"><h2><a href="#autotoc_md414">Architecture</a></h2><p>Mapped quadrature samples and the completed local matrix are owned by the rule. Reference tables are borrowed only during binding, after the current coefficient value has been materialized. Public entry access retains test rows and trial columns independently of the private storage order.</p><section id="autotoc_md415"><h3><a href="#autotoc_md415">Scalar coefficients</a></h3><p>A scalar coefficient gives <svg class="m-math" style="width: 10.666em; height: 1.213em; vertical-align: -0.350em;" viewBox="0 -8.302191 102.391286 11.6452">
 <title>
 $M_{bm+e,am+c}=\delta_{ec}S_{ba}$
 </title>
@@ -331,7 +331,7 @@ $w_qJ_q[(\phi_a\rho_q)\overline{\phi_b}]$
 <use x='65.779028' y='1.793263' xlink:href='#eq13-g0-98'/>
 <use x='69.899734' y='0' xlink:href='#eq13-g2-93'/>
 </g>
-</svg>, not by commuting or regrouping the coefficient. Right-side reference values retain the finite-element scalar type before coefficient promotion. Coefficients are evaluated before either reference table is borrowed. Each scaled right-side trial value is reused across the test bases at the current sample. Fixed one-element views use the existing <a href="namespace_rodin_1_1_math.html#af28a31fe86620d25a67338df85ad4cb0" class="m-doc">dot product</a> without constructing component-expanded values. The complex weighted contribution is formed once before component replication. Real multiplication remains in the entry update to preserve the established floating-point association. Quadrature accumulation order is unchanged, and no additional persistent cache or assembly-backend condition is introduced. Right-scaled scalar fields retain generic cached-trial quadrature; this component rule accepts right scaling only for vector and matrix carriers.</p></section></section><section id="autotoc_md418"><h2><a href="#autotoc_md418">Judgement</a></h2><p>The following judgement specifies that the expression is a well formed type of QuadratureRule.</p><div class="m-math"><svg style="width: 20.168em; height: 2.966em;" viewBox="97.466258 -28.471357 193.610474 28.471369">
+</svg>, not by commuting or regrouping the coefficient. Right-side reference values retain the finite-element scalar type before coefficient promotion. Coefficients are evaluated before either reference table is borrowed. Each scaled right-side trial value is reused across the test bases at the current sample. Fixed one-element views use the existing <a href="namespace_rodin_1_1_math.html#af28a31fe86620d25a67338df85ad4cb0" class="m-doc">dot product</a> without constructing component-expanded values. The complex weighted contribution is formed once before component replication. Real multiplication remains in the entry update to preserve the established floating-point association. Quadrature accumulation order is unchanged, and no additional persistent cache or assembly-backend condition is introduced. Right-scaled scalar fields retain generic cached-trial quadrature; this component rule accepts right scaling only for vector and matrix carriers.</p></section></section><section id="autotoc_md416"><h2><a href="#autotoc_md416">Judgement</a></h2><p>The following judgement specifies that the expression is a well formed type of QuadratureRule.</p><div class="m-math"><svg style="width: 20.168em; height: 2.966em;" viewBox="97.466258 -28.471357 193.610474 28.471369">
 <title>
 \[\dfrac
 {\vdash \int (A u) \cdot v \ dx : \texttt{QuadratureRule}}

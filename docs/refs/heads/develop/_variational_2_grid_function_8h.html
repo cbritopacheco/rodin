@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin/Variational/GridFunction.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -106,7 +106,7 @@ $ u_h \in V_h $
 <use x='26.652278' y='0' xlink:href='#eq1-g2-86'/>
 <use x='33.476628' y='1.793263' xlink:href='#eq1-g1-104'/>
 </g>
-</svg> by its coefficients:</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
+</svg> by its coefficients.</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
 <title>
 \[     u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
 \]
@@ -145,7 +145,7 @@ $ u_h \in V_h $
 <use x='232.524316' y='-15.032404' xlink:href='#eq2-g2-120'/>
 <use x='239.176403' y='-15.032404' xlink:href='#eq2-g4-41'/>
 </g>
-</svg></div><p>where:</p><ul><li><svg class="m-math" style="width: 0.994em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.545579 6.940636">
+</svg></div><p>Here,</p><ul><li><svg class="m-math" style="width: 0.994em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.545579 6.940636">
 <title>
 $ u_i $
 </title>
@@ -208,12 +208,12 @@ $ N $
               <div class="m-doc-template">template&lt;class Derived, class FES, class Data&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grid_function_base_3_01_derived_00_01_f_e_s_00_01_data_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::GridFunctionBase&lt;Derived, FES, Data&gt;&gt;</a>
             </dt>
-            <dd>Traits for GridFunctionBase: exposes the space and data types.</dd>
+            <dd>Traits for GridFunctionBase, exposing the space and data types.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grid_function_3_01_f_e_s_00_01_data_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;</a>
             </dt>
-            <dd>Traits for GridFunction: exposes the space and data types.</dd>
+            <dd>Traits for GridFunction, exposing the space and data types.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html" class="m-doc">Rodin::Variational::GridFunctionBaseReference</a>

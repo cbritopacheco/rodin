@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin namespace | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -88,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<p>Rodin is a lightweight and modular C++20 finite element framework providing tools for solving partial differential equations and performing shape and topology optimization. Key modules include:</p><ul><li><a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> — Meshes, polytopes, and connectivity</li><li><a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> — Finite element spaces, trial/test functions, and variational problem formulation</li><li><a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a> — Input/output in MFEM, MEDIT, HDF5, and XDMF formats</li><li><a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> — Linear and iterative solvers (CG, GMRES, SparseLU)</li><li><a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> — Assembly of stiffness matrices and load vectors</li></ul>
+<p>Rodin is a lightweight and modular C++20 finite element framework providing tools for solving partial differential equations and performing shape and topology optimization. Key modules include:</p><ul><li><a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> — Meshes, polytopes, and connectivity</li><li><a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> — Finite element spaces, trial/test functions, and variational problem formulation</li><li><a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a> — Input/output in MFEM, MEDIT, HDF5, and XDMF formats</li><li><a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> — Linear and iterative solvers (CG, GMRES, SparseLU)</li><li><a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly::<wbr />OpenMP</a> — Assembly of stiffness matrices and load vectors</li></ul>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -105,7 +105,7 @@
             <dt>namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a></dt>
             <dd>Execution contexts for local and distributed computation.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance</a></dt>
-            <dd>Distance-field computations.</dd>
+            <dd>Distance propagation and Poisson-based level-set approximations.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a></dt>
             <dd>Eikonal equations and distance propagation.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a></dt>
@@ -127,15 +127,15 @@
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a></dt>
             <dd>Finite element spaces, fields, and variational problems.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a></dt>
-            <dd>PETSc integration module for Rodin.</dd>
+            <dd>PETSc storage, assembly and linear/nonlinear solver adapters.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a></dt>
             <dd>Solution of linear and nonlinear discrete systems.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a></dt>
-            <dd>Module for defining quadrature formulae over reference polytopes.</dd>
+            <dd>Reference integration formulas selected by geometry and exactness.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_scotch.html" class="m-doc">Scotch</a></dt>
             <dd>Graph partitioning through the Scotch integration.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid</a></dt>
-            <dd>Constitutive laws, kinematics, and solid-mechanics integration.</dd>
+            <dd>Finite-strain kinematics, constitutive responses and virtual-work forms.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a></dt>
             <dd>Helpers for constructing numerical tests.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a></dt>

@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin/Solver/Info.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -86,7 +86,7 @@
             </li>
           </ul>
         </nav>
-<p>The solvers that factorize their operator have no common ancestor: each one wraps a library of its own. They share this vocabulary instead, and expose it uniformly through <code>getInfo()</code> and <code>success()</code>.</p><p>A factorization can fail for reasons that are not programming errors, such as a singular matrix or a factor that does not fit in memory. Solving with a failed factorization yields no solution and, depending on the backend, either leaves the solution vector untouched or reads state that was never computed. A solver therefore stops before the solve and reports what happened through its <a href="struct_rodin_1_1_solver_1_1_info.html" class="m-doc">Info</a>, leaving the caller to act on it. A violated contract, such as a matrix that is not square, remains an exception: it is a defect in the calling code rather than an outcome.</p>
+<p>The solvers that factorize their operator have no common ancestor. Each one wraps a library of its own. They share this vocabulary instead, and expose it uniformly through <code>getInfo()</code> and <code>success()</code>.</p><p>A factorization can fail for reasons that are not programming errors, such as a singular matrix or a factor that does not fit in memory. Solving with a failed factorization yields no solution and, depending on the backend, either leaves the solution vector untouched or reads state that was never computed. A solver therefore stops before the solve and reports what happened through its <a href="struct_rodin_1_1_solver_1_1_info.html" class="m-doc">Info</a>, leaving the caller to act on it. A violated contract, such as a matrix that is not square, remains an exception because it is a defect in the calling code rather than an outcome.</p>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

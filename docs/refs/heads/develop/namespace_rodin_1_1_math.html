@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Math module | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -76,23 +76,23 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md595">Types</a></li>
-            <li><a href="#autotoc_md596">Constants</a></li>
-            <li><a href="#autotoc_md597">Mathematical Functions</a></li>
-            <li><a href="#autotoc_md598">Unit Types</a></li>
-            <li><a href="#autotoc_md599">Runge-Kutta Schemes</a></li>
-            <li><a href="#autotoc_md600">Root Finding</a></li>
-            <li><a href="#autotoc_md601">Linear Algebra Utilities</a></li>
+            <li><a href="#autotoc_md585">Types</a></li>
+            <li><a href="#autotoc_md586">Constants</a></li>
+            <li><a href="#autotoc_md587">Mathematical functions</a></li>
+            <li><a href="#autotoc_md588">Unit types</a></li>
+            <li><a href="#autotoc_md589">Runge–Kutta schemes</a></li>
+            <li><a href="#autotoc_md590">Root finding</a></li>
+            <li><a href="#autotoc_md591">Linear algebra utilities</a></li>
             <li>
-              <a href="#autotoc_md602">Usage</a>
+              <a href="#autotoc_md592">Usage</a>
               <ul>
-                <li><a href="#autotoc_md603">Spatial arithmetic</a></li>
-                <li><a href="#autotoc_md604">Dense and fixed-size algebra</a></li>
-                <li><a href="#autotoc_md605">Sparse matrices</a></li>
-                <li><a href="#autotoc_md606">Complex scalar products</a></li>
-                <li><a href="#autotoc_md607">Angles and constants</a></li>
-                <li><a href="#autotoc_md608">Time integration</a></li>
-                <li><a href="#autotoc_md609">Scalar root finding</a></li>
+                <li><a href="#autotoc_md593">Spatial arithmetic</a></li>
+                <li><a href="#autotoc_md594">Dense and fixed-size algebra</a></li>
+                <li><a href="#autotoc_md595">Sparse matrices</a></li>
+                <li><a href="#autotoc_md596">Complex scalar products</a></li>
+                <li><a href="#autotoc_md597">Angles and constants</a></li>
+                <li><a href="#autotoc_md598">Time integration</a></li>
+                <li><a href="#autotoc_md599">Scalar root finding</a></li>
               </ul>
             </li>
             <li>
@@ -105,7 +105,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> and <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> support small spatial calculations without heap allocation. <a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">Vector</a>, <a href="class_rodin_1_1_math_1_1_matrix.html" class="m-doc">Matrix</a>, and their fixed-size counterparts provide Eigen-compatible algebra; <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a> groups system data and constraint elimination. These types support geometric mappings, constitutive calculations, assembly, and linear solves.</p><section id="autotoc_md595"><h2><a href="#autotoc_md595">Types</a></h2><table class="m-table"><thead><tr><th>Symbol</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 7.778em; height: 1.100em; vertical-align: -0.243em;" viewBox="0 -8.235778 74.665382 10.560386">
+<p><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector&lt;T&gt;</a> and <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix&lt;T&gt;</a> support small spatial calculations without heap allocation. <a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">Vector&lt;T&gt;</a>, <a href="class_rodin_1_1_math_1_1_matrix.html" class="m-doc">Matrix&lt;T&gt;</a>, and their fixed-size counterparts provide Eigen-compatible algebra; <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem&lt;Operator, Vector&gt;</a> groups system data and constraint elimination. These types support geometric mappings, constitutive calculations, assembly, and linear solves.</p><section id="autotoc_md585"><h2><a href="#autotoc_md585">Types</a></h2><table class="m-table"><thead><tr><th>Symbol</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 7.778em; height: 1.100em; vertical-align: -0.243em;" viewBox="0 -8.235778 74.665382 10.560386">
 <title>
 $ x \in \mathbb{K}^{n},\ n \in \mathbb{N} $
 </title>
@@ -434,7 +434,7 @@ $ \mathbb{C} $
 <g id='eq14-page1'>
 <use x='0' y='0' xlink:href='#eq14-g0-67'/>
 </g>
-</svg>.</p></section><section id="autotoc_md596"><h2><a href="#autotoc_md596">Constants</a></h2><table class="m-table"><thead><tr><th>Symbol</th><th>Function</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 0.736em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.069273 5.147373">
+</svg>.</p></section><section id="autotoc_md586"><h2><a href="#autotoc_md586">Constants</a></h2><table class="m-table"><thead><tr><th>Symbol</th><th>Function</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 0.736em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.069273 5.147373">
 <title>
 $ \pi $
 </title>
@@ -444,7 +444,7 @@ $ \pi $
 <g id='eq15-page1'>
 <use x='0' y='0' xlink:href='#eq15-g0-25'/>
 </g>
-</svg></td><td><a href="_constants_8h.html#a94c0aa95a6f6a1969b52a2e655288ddc" class="m-doc">Constants::<wbr />pi()</a></td><td>Ratio of a circle&#x27;s circumference to its diameter.</td></tr></tbody></table></section><section id="autotoc_md597"><h2><a href="#autotoc_md597">Mathematical Functions</a></h2><table class="m-table"><thead><tr><th>Symbol</th><th>Function</th><th>Domain</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 1.385em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 13.293867 11.955168">
+</svg></td><td><a href="_constants_8h.html#a94c0aa95a6f6a1969b52a2e655288ddc" class="m-doc">Constants::<wbr />pi()</a></td><td>Ratio of a circle&#x27;s circumference to its diameter.</td></tr></tbody></table></section><section id="autotoc_md587"><h2><a href="#autotoc_md587">Mathematical functions</a></h2><table class="m-table"><thead><tr><th>Symbol</th><th>Function</th><th>Domain</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 1.385em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 13.293867 11.955168">
 <title>
 $ \lvert x \rvert $
 </title>
@@ -880,7 +880,7 @@ $ \operatorname{clamp}(x, lo, hi) $
 <use x='68.374147' y='0' xlink:href='#eq38-g0-105'/>
 <use x='72.36758' y='0' xlink:href='#eq38-g1-41'/>
 </g>
-</svg></td><td><a href="namespace_rodin_1_1_math.html" class="m-doc">clamp(x, lo, hi)</a></td><td>Comparable values</td><td>Restricts a value to the given bounds</td></tr></tbody></table></section><section id="autotoc_md598"><h2><a href="#autotoc_md598">Unit Types</a></h2><table class="m-table"><thead><tr><th>Symbol</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 2.571em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 24.681477 8.302191">
+</svg></td><td><a href="namespace_rodin_1_1_math.html" class="m-doc">clamp(x, lo, hi)</a></td><td>Comparable values</td><td>Restricts a value to the given bounds</td></tr></tbody></table></section><section id="autotoc_md588"><h2><a href="#autotoc_md588">Unit types</a></h2><table class="m-table"><thead><tr><th>Symbol</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 2.571em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 24.681477 8.302191">
 <title>
 $ \theta\,\mathrm{rad} $
 </title>
@@ -908,7 +908,7 @@ $ \theta^{\circ} $
 <use x='0' y='0' xlink:href='#eq40-g1-18'/>
 <use x='5.780341' y='-4.338437' xlink:href='#eq40-g0-14'/>
 </g>
-</svg></td><td><a href="class_rodin_1_1_math_1_1_deg.html" class="m-doc">Deg</a></td><td>Degree wrapper with conversion to <code>Rad</code></td></tr></tbody></table></section><section id="autotoc_md599"><h2><a href="#autotoc_md599">Runge-Kutta Schemes</a></h2><table class="m-table"><thead><tr><th>Symbol</th><th>Method</th><th>Order</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 9.264em; height: 1.138em; vertical-align: -0.274em;" viewBox="0 -8.302191 88.935109 10.925715">
+</svg></td><td><a href="class_rodin_1_1_math_1_1_deg.html" class="m-doc">Deg</a></td><td>Degree wrapper with conversion to <code>Rad</code></td></tr></tbody></table></section><section id="autotoc_md589"><h2><a href="#autotoc_md589">Runge–Kutta schemes</a></h2><table class="m-table"><thead><tr><th>Symbol</th><th>Method</th><th>Order</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 9.264em; height: 1.138em; vertical-align: -0.274em;" viewBox="0 -8.302191 88.935109 10.925715">
 <title>
 $ q_{n+1}=q_n+\Delta t\,k_2 $
 </title>
@@ -989,7 +989,7 @@ $ q_{n+1}=q_n+\frac{\Delta t}{6}(k_1+2k_2+2k_3+k_4) $
 <use x='173.206159' y='1.793263' xlink:href='#eq42-g2-52'/>
 <use x='177.938474' y='0' xlink:href='#eq42-g3-41'/>
 </g>
-</svg></td><td><a href="struct_rodin_1_1_math_1_1_runge_kutta_1_1_r_k4.html" class="m-doc">RungeKutta::<wbr />RK4</a></td><td>4</td><td>Classical Runge-Kutta method</td></tr></tbody></table></section><section id="autotoc_md600"><h2><a href="#autotoc_md600">Root Finding</a></h2><table class="m-table"><thead><tr><th>Symbol</th><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 9.483em; height: 1.853em; vertical-align: -0.639em;" viewBox="0 -11.676185 91.034635 17.791345">
+</svg></td><td><a href="struct_rodin_1_1_math_1_1_runge_kutta_1_1_r_k4.html" class="m-doc">RungeKutta::<wbr />RK4</a></td><td>4</td><td>Classical Runge-Kutta method</td></tr></tbody></table></section><section id="autotoc_md590"><h2><a href="#autotoc_md590">Root finding</a></h2><table class="m-table"><thead><tr><th>Symbol</th><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 9.483em; height: 1.853em; vertical-align: -0.639em;" viewBox="0 -11.676185 91.034635 17.791345">
 <title>
 $ x_{n+1}=x_n-\frac{f(x_n)}{f&#x27;(x_n)} $
 </title>
@@ -1029,7 +1029,7 @@ $ x_{n+1}=x_n-\frac{f(x_n)}{f&#x27;(x_n)} $
 <use x='82.642476' y='5.118896' xlink:href='#eq43-g2-110'/>
 <use x='87.741382' y='4.122632' xlink:href='#eq43-g5-41'/>
 </g>
-</svg></td><td><a href="class_rodin_1_1_math_1_1_root_finding_1_1_newton_raphson.html" class="m-doc">RootFinding::<wbr />NewtonRaphson&lt;Scalar&gt;</a></td><td>Finds scalar roots with a safeguarded Newton iteration, interval bracketing, and bisection fallback</td></tr></tbody></table></section><section id="autotoc_md601"><h2><a href="#autotoc_md601">Linear Algebra Utilities</a></h2><table class="m-table"><thead><tr><th>Operation</th><th>Function</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 2.058em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 19.756267 8.302191">
+</svg></td><td><a href="class_rodin_1_1_math_1_1_root_finding_1_1_newton_raphson.html" class="m-doc">RootFinding::<wbr />NewtonRaphson&lt;Scalar&gt;</a></td><td>Finds scalar roots with a safeguarded Newton iteration, interval bracketing, and bisection fallback</td></tr></tbody></table></section><section id="autotoc_md591"><h2><a href="#autotoc_md591">Linear algebra utilities</a></h2><table class="m-table"><thead><tr><th>Operation</th><th>Function</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 2.058em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 19.756267 8.302191">
 <title>
 $ a \cdot b $
 </title>
@@ -1135,11 +1135,11 @@ $ \mathrm{NaN} $
 <use x='8.775347' y='0' xlink:href='#eq51-g0-97'/>
 <use x='14.628337' y='0' xlink:href='#eq51-g0-78'/>
 </g>
-</svg></td><td><a href="#a4934b42fadb4a45cefccf19c1a5e40f8" class="m-doc">nan&lt;T&gt;()</a></td><td>Returns a quiet NaN sentinel of type <code>T</code></td></tr></tbody></table></section><section id="autotoc_md602"><h2><a href="#autotoc_md602">Usage</a></h2><p>Include <code>&lt;Rodin/Math.h&gt;</code> and <code>&lt;utility&gt;</code> for these examples. The names below assume <code>using namespace Rodin;</code> and <code>using namespace Rodin::Math;</code>.</p><section id="autotoc_md603"><h3><a href="#autotoc_md603">Spatial arithmetic</a></h3><p>Small spatial vectors support scalar products, cross products, and norms.</p><pre class="m-code"><span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
+</svg></td><td><a href="#a4934b42fadb4a45cefccf19c1a5e40f8" class="m-doc">nan&lt;T&gt;()</a></td><td>Returns a quiet NaN sentinel of type <code>T</code></td></tr></tbody></table></section><section id="autotoc_md592"><h2><a href="#autotoc_md592">Usage</a></h2><p>Include <code>&lt;Rodin/Math.h&gt;</code> and <code>&lt;utility&gt;</code> for these examples. The names below assume <code>using namespace Rodin;</code> and <code>using namespace Rodin::Math;</code>.</p><section id="autotoc_md593"><h3><a href="#autotoc_md593">Spatial arithmetic</a></h3><p>Small spatial vectors support scalar products, cross products, and norms.</p><pre class="m-code"><span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
 <span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">};</span>
 <span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">product</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span><span class="w">       </span><span class="c1">// 32</span>
 <span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">cross</span><span class="p">(</span><span class="n">b</span><span class="p">);</span><span class="w">      </span><span class="c1">// {-3, 6, -3}</span>
-<span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">norm</span><span class="p">();</span><span class="w">        </span><span class="c1">// sqrt(14)</span></pre></section><section id="autotoc_md604"><h3><a href="#autotoc_md604">Dense and fixed-size algebra</a></h3><p>Dynamic and fixed-size types support Eigen-compatible initialization and expressions. Store an expression in a concrete type to retain its result.</p><pre class="m-code"><span class="nc">Matrix</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">A</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">norm</span><span class="p">();</span><span class="w">        </span><span class="c1">// sqrt(14)</span></pre></section><section id="autotoc_md594"><h3><a href="#autotoc_md594">Dense and fixed-size algebra</a></h3><p>Dynamic and fixed-size types support Eigen-compatible initialization and expressions. Store an expression in a concrete type to retain its result.</p><pre class="m-code"><span class="nc">Matrix</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">A</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
 <span class="n">A</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span>
 <span class="w">    </span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">2</span><span class="p">;</span>
 <span class="nc">Vector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
@@ -1148,14 +1148,14 @@ $ \mathrm{NaN} $
 
 <span class="nc">FixedSizeMatrix</span><span class="o">&lt;</span><span class="nc">Real</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fixedA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">A</span><span class="p">;</span>
 <span class="nc">FixedSizeVector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fixedX</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
-<span class="nc">FixedSizeVector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fixedY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fixedA</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fixedX</span><span class="p">;</span></pre></section><section id="autotoc_md605"><h3><a href="#autotoc_md605">Sparse matrices</a></h3><p>Insert entries and compress the matrix before using its CSC storage.</p><pre class="m-code"><span class="nc">SparseMatrix</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">A</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="nc">FixedSizeVector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fixedY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fixedA</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fixedX</span><span class="p">;</span></pre></section><section id="autotoc_md595"><h3><a href="#autotoc_md595">Sparse matrices</a></h3><p>Insert entries and compress the matrix before using its CSC storage.</p><pre class="m-code"><span class="nc">SparseMatrix</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">A</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
 <span class="n">A</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
 <span class="n">A</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
 <span class="n">A</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
 <span class="n">A</span><span class="p">.</span><span class="n">makeCompressed</span><span class="p">();</span>
 
 <span class="nc">Vector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Vector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;::</span><span class="n">Ones</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
-<span class="nc">Vector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">              </span><span class="c1">// {2, 3, 4}</span></pre></section><section id="autotoc_md606"><h3><a href="#autotoc_md606">Complex scalar products</a></h3><p>The scalar product conjugates its right-hand operand:</p><div class="m-math"><svg style="width: 7.906em; height: 2.749em;" viewBox="156.321524 -27.585401 75.899934 26.389888">
+<span class="nc">Vector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">              </span><span class="c1">// {2, 3, 4}</span></pre></section><section id="autotoc_md596"><h3><a href="#autotoc_md596">Complex scalar products</a></h3><p>The scalar product conjugates its right-hand operand.</p><div class="m-math"><svg style="width: 7.906em; height: 2.749em;" viewBox="156.321524 -27.585401 75.899934 26.389888">
 <title>
 \[  a\cdot b=\sum_i a_i\overline{b_i}.
 \]
@@ -1185,10 +1185,10 @@ $ \mathrm{NaN} $
 </g>
 </svg></div><pre class="m-code"><span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="nc">Complex</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">{</span><span class="nc">Complex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="nc">Complex</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)};</span>
 <span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="nc">Complex</span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">{</span><span class="nc">Complex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="nc">Complex</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)};</span>
-<span class="k">const</span><span class="w"> </span><span class="nc">Complex</span><span class="w"> </span><span class="n">product</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span><span class="w">   </span><span class="c1">// 7 - i</span></pre></section><section id="autotoc_md607"><h3><a href="#autotoc_md607">Angles and constants</a></h3><p>Convert degrees to radians explicitly; mathematical functions accept the underlying scalar value.</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="nc">Rad</span><span class="w"> </span><span class="n">angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Deg</span><span class="p">(</span><span class="mi">180</span><span class="p">).</span><span class="n">toRad</span><span class="p">();</span>
+<span class="k">const</span><span class="w"> </span><span class="nc">Complex</span><span class="w"> </span><span class="n">product</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span><span class="w">   </span><span class="c1">// 7 - i</span></pre></section><section id="autotoc_md597"><h3><a href="#autotoc_md597">Angles and constants</a></h3><p>Convert degrees to radians explicitly; mathematical functions accept the underlying scalar value.</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="nc">Rad</span><span class="w"> </span><span class="n">angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Deg</span><span class="p">(</span><span class="mi">180</span><span class="p">).</span><span class="n">toRad</span><span class="p">();</span>
 <span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">radians</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Real</span><span class="p">(</span><span class="n">angle</span><span class="p">);</span><span class="w">    </span><span class="c1">// pi</span>
 <span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">halfTurn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Constants</span><span class="o">::</span><span class="n">pi</span><span class="p">();</span>
-<span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">sine</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">radians</span><span class="p">);</span><span class="w">      </span><span class="c1">// approximately zero</span></pre></section><section id="autotoc_md608"><h3><a href="#autotoc_md608">Time integration</a></h3><p>Advance <svg class="m-math" style="width: 3.779em; height: 1.069em; vertical-align: -0.243em;" viewBox="0 -7.934555 36.283124 10.259162">
+<span class="k">const</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="n">sine</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">radians</span><span class="p">);</span><span class="w">      </span><span class="c1">// approximately zero</span></pre></section><section id="autotoc_md598"><h3><a href="#autotoc_md598">Time integration</a></h3><p>Advance <svg class="m-math" style="width: 3.779em; height: 1.069em; vertical-align: -0.243em;" viewBox="0 -7.934555 36.283124 10.259162">
 <title>
 $ \dot{q}=-q $
 </title>
@@ -1209,7 +1209,7 @@ $ \dot{q}=-q $
 <span class="nc">Real</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="n">RungeKutta</span><span class="o">::</span><span class="nc">RK4</span><span class="w"> </span><span class="n">integrator</span><span class="p">;</span>
 <span class="n">integrator</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">next</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="n">current</span><span class="p">,</span><span class="w"> </span><span class="p">[](</span><span class="nc">Real</span><span class="w"> </span><span class="n">q</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">q</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
-<span class="c1">// next approximates exp(-0.1).</span></pre></section><section id="autotoc_md609"><h3><a href="#autotoc_md609">Scalar root finding</a></h3><p>Find <svg class="m-math" style="width: 1.647em; height: 1.245em; vertical-align: -0.166em;" viewBox="0 -10.36776 15.815661 11.955168">
+<span class="c1">// next approximates exp(-0.1).</span></pre></section><section id="autotoc_md599"><h3><a href="#autotoc_md599">Scalar root finding</a></h3><p>Find <svg class="m-math" style="width: 1.647em; height: 1.245em; vertical-align: -0.166em;" viewBox="0 -10.36776 15.815661 11.955168">
 <title>
 $ \sqrt{2} $
 </title>
@@ -1746,7 +1746,7 @@ $ [\text{lo}, \text{hi}] $
               <div class="m-doc-template">template&lt;std::size_t I, class Matrix, class Vector&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a132fa0dad5957967a7e80502e23f5b3f" class="m-doc">get</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&lt;<a href="class_rodin_1_1_math_1_1_matrix.html" class="m-doc">Matrix</a>, <a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">Vector</a>&gt;&amp; ls) -&gt; decltype(auto)</span>
             </dt>
-            <dd>Structured-binding accessor: element <code>I</code> of <code>ls</code> (0 = operator <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+            <dd>Accesses element <code>I</code> of <code>ls</code> for structured binding. (0 = operator <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
 $ A $
 </title>
@@ -3856,7 +3856,7 @@ $ x $
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Sign of <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
+                  <td>The sign of <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
 <title>
 $ x $
 </title>
@@ -3866,11 +3866,11 @@ $ x $
 <g id='eq110-page1'>
 <use x='0' y='0' xlink:href='#eq110-g0-120'/>
 </g>
-</svg>: -1, 0, or +1</td>
+</svg>, represented by -1, 0 or +1.</td>
                 </tr>
               </tfoot>
             </table>
-<p>Returns:</p><div class="m-math"><svg style="width: 12.957em; height: 5.230em;" viewBox="131.480201 -51.108468 124.387049 50.212217">
+<p>Returns the following value.</p><div class="m-math"><svg style="width: 12.957em; height: 5.230em;" viewBox="131.480201 -51.108468 124.387049 50.212217">
 <title>
 \[  \text{sgn}(x) = \begin{cases}
     -1 &amp; \text{if } x &lt; 0 \\
@@ -5017,7 +5017,7 @@ $ \mathbf{v} $
 <g id='eq138-page1'>
 <use x='0' y='0' xlink:href='#eq138-g0-118'/>
 </g>
-</svg>, computes:</p><div class="m-math"><svg style="width: 8.071em; height: 2.749em;" viewBox="155.529968 -27.585401 77.483044 26.389888">
+</svg>, computes</p><div class="m-math"><svg style="width: 8.071em; height: 2.749em;" viewBox="155.529968 -27.585401 77.483044 26.389888">
 <title>
 \[  \mathbf{u} \cdot \mathbf{v} = \sum_i u_i \overline{v_i}
 \]
@@ -6624,7 +6624,7 @@ $ x $
               </div>
               <span class="m-doc-wrap-bumper">decltype(auto) </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a132fa0dad5957967a7e80502e23f5b3f" class="m-doc-self">get</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&lt;<a href="class_rodin_1_1_math_1_1_matrix.html" class="m-doc">Matrix</a>, <a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">Vector</a>&gt;&amp; ls)</span></span>
             </h3><p class="rodin-reference-include">Defined in <a href="_math_2_linear_system_8h.html"><code>Rodin/Math/LinearSystem.h</code></a></p>
-            <p>Structured-binding accessor: element <code>I</code> of <code>ls</code> (0 = operator <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+            <p>Accesses element <code>I</code> of <code>ls</code> for structured binding. (0 = operator <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
 $ A $
 </title>

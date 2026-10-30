@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -578,7 +578,7 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 128.</p>
+<p>The default is 128.</p>
           </div></section>
           <section class="m-doc-details" id="a23e8c2aca0c26a6107731b5558687ebd"><div>
             <h3>
@@ -603,7 +603,7 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 16.</p>
+<p>The default is 16.</p>
           </div></section>
           <section class="m-doc-details" id="a319cfbccaf994415468eaa66441d24fa"><div>
             <h3>
@@ -628,7 +628,7 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 8.</p>
+<p>The default is 8.</p>
           </div></section>
           <section class="m-doc-details" id="a5b3e628efb6191b784336befd260f46a"><div>
             <h3>
@@ -653,7 +653,7 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 100000.</p>
+<p>The default is 100000.</p>
           </div></section>
           <section class="m-doc-details" id="a6b4b65f61aba7564a964617d46e27d21"><div>
             <h3>
@@ -678,7 +678,7 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 512.</p>
+<p>The default is 512.</p>
           </div></section>
           <section class="m-doc-details" id="a8d2c5bf8ce426ca027e2a94055dd5b51"><div>
             <h3>
@@ -703,7 +703,7 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 6.</p>
+<p>The default is 6.</p>
           </div></section>
           <section class="m-doc-details" id="acf7967b94a896efec9f7076811f57d50"><div>
             <h3>
@@ -728,7 +728,7 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 2.0.</p>
+<p>The default is 2.0.</p>
           </div></section>
           <section class="m-doc-details" id="a878f391f049fb1b3d12aa0caba8bb672"><div>
             <h3>
@@ -753,7 +753,7 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 3.</p>
+<p>The default is 3.</p>
           </div></section>
           <section class="m-doc-details" id="a61da3ac9801270f1edb8bb523ae4ce86"><div>
             <h3>
@@ -778,7 +778,7 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
                 </tr>
               </tfoot>
             </table>
-<p>Smaller values are more conservative.</p><p>Default value: 0.5.</p>
+<p>Smaller values are more conservative.</p><p>The default is 0.5.</p>
           </div></section>
           <section class="m-doc-details" id="a1c15dd95b88283f692a56b041aa749c4"><div>
             <h3>
@@ -803,7 +803,7 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 10.</p>
+<p>The default is 10.</p>
           </div></section>
           <section class="m-doc-details" id="a2d94906f1996d3cae00f297b0d2ca088"><div>
             <h3>
@@ -841,7 +841,7 @@ $ \sqrt{\varepsilon} $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 50.</p>
+<p>The default is 50.</p>
           </div></section>
           <section class="m-doc-details" id="a24fc2532b36945ecba08716527db22ae"><div>
             <h3>
@@ -866,7 +866,7 @@ $ \sqrt{\varepsilon} $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 10.</p>
+<p>The default is 10.</p>
           </div></section>
           <section class="m-doc-details" id="a350edea67dfa070881b66ed34db4c27c"><div>
             <h3>

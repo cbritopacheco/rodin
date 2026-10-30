@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Hilbert module | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -76,7 +76,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md577">API</a></li>
+            <li><a href="#autotoc_md571">API</a></li>
             <li>
               Reference
               <ul>
@@ -85,7 +85,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a</a> solves a regularized extension problem that converts a linear functional into a smooth field over the mesh. It is commonly used to extend boundary shape derivatives into volume descent directions, with a configurable length scale controlling smoothing and boundary conditions constraining the extension.</p><div class="m-math"><svg style="width: 19.627em; height: 2.819em;" viewBox="100.060777 -27.065451 188.421456 27.065451">
+<p><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">getTrialFunction() / getTestFunction()</a> solves a regularized extension problem that converts a linear functional into a smooth field over the mesh. It is commonly used to extend boundary shape derivatives into volume descent directions, with a configurable length scale controlling smoothing and boundary conditions constraining the extension.</p><div class="m-math"><svg style="width: 19.627em; height: 2.819em;" viewBox="100.060777 -27.065451 188.421456 27.065451">
 <title>
 \[  \alpha^2 \int_\Omega \nabla u : \nabla v \, dx + \int_\Omega u \cdot v \, dx = \ell(v)
 \]
@@ -154,7 +154,7 @@ $ \alpha $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-11'/>
 </g>
-</svg> = smoother).</p><p>This is used, for example, to extend and regularize a shape derivative (defined only on the boundary) to a smooth descent direction in the full computational domain.</p><section id="autotoc_md577"><h2><a href="#autotoc_md577">API</a></h2><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a(fes)</a></td><td>Constructor: creates the extension operator on a finite element space</td></tr><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">setAlpha(alpha)</a></td><td>Sets <svg class="m-math" style="width: 0.784em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.521724 5.147373">
+</svg> = smoother).</p><p>This is used, for example, to extend and regularize a shape derivative (defined only on the boundary) to a smooth descent direction in the full computational domain.</p><section id="autotoc_md571"><h2><a href="#autotoc_md571">API</a></h2><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a(fes)</a></td><td>Creates the extension operator on a finite element space</td></tr><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">setAlpha(alpha)</a></td><td>Sets <svg class="m-math" style="width: 0.784em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.521724 5.147373">
 <title>
 $ \alpha $
 </title>

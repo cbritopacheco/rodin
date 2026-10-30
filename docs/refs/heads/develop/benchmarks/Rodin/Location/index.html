@@ -1,14 +1,15 @@
 
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="../../assets/favicon-monogram.svg">
   <title>Location · Rodin benchmarks</title>
   <link rel="stylesheet" href="../../assets/mcss-22c93d2587ab.css">
-  <link rel="stylesheet" href="../../assets/rodin-fe7b0e2c871a.css">
-  <link rel="stylesheet" href="../../assets/rodin-theme-27c0d1929b3f.css">
+  <link rel="stylesheet" href="../../assets/rodin-62701ba7f0b9.css">
+  <link rel="stylesheet" href="../../assets/rodin-theme-bc48e2782da9.css">
   <link rel="stylesheet" href="../../assets/rodin.css">
   <link rel="stylesheet" href="../../assets/rodin-theme.css">
   <link rel="stylesheet" href="../../assets/site.css">
@@ -39,7 +40,7 @@
                 <li><a href="../../../guides-index.html">General concepts</a></li>
                 <li><a href="../../../examples-index.html">Examples and tutorials</a></li>
                 <li><a href="../../../gallery.html">Gallery</a></li>
-                <li><a href="../../../guides-io.html">I/O in Rodin</a></li>
+                <li><a href="../../../guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="../../../configuration.html">Configuration</a></li>
                 <li><a href="../../../ci-index.html">Continuous integration</a></li>
                 <li><a href="../../../notation-index.html">Notation</a></li>
@@ -81,7 +82,7 @@
       <p class="benchmark-configuration">Published configurations</p>
       
       <p class="m-text m-dim"><em>Spatial indexing and geometric search.</em></p><div class="benchmark-representative"><pre class="m-code"><span class="n">Location</span><span class="o">::</span><span class="nc">AABB</span><span class="w"> </span><span class="nf">locator</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">point</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">locator</span><span class="p">.</span><span class="n">locate</span><span class="p">(</span><span class="n">physicalCoordinates</span><span class="p">);</span></pre></div><div class="m-block m-flat"><p><a href="../../../class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a> builds a bounding-volume hierarchy to locate physical coordinates in a mesh and recover the containing cell and reference coordinates. The resulting <a href="../../../class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> can be used for field sampling and evaluation at arbitrary locations. The locator must be rebuilt when the mesh geometry or topology changes.</p></div>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">point</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">locator</span><span class="p">.</span><span class="n">locate</span><span class="p">(</span><span class="n">physicalCoordinates</span><span class="p">);</span></pre></div><div class="m-block m-flat"><p><a href="../../../class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a> builds a bounding-volume hierarchy to locate physical coordinates in a mesh and recover the containing cell and reference coordinates. The resulting <a href="../../../class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a> can be used for field sampling and evaluation at arbitrary locations. The locator must be rebuilt when the mesh geometry or topology changes.</p></div>
       
       <h2>Benchmarks</h2>
       <div class="benchmark-children">
@@ -124,7 +125,7 @@
   </div></div></div>
 </div>
 <script src="../../assets/search-57e2ce511c71.js"></script>
-<script src="../../assets/searchdata-45522af048f6.js"></script>
+<script src="../../assets/searchdata-3859e4a19098.js"></script>
   <footer><nav>
   <div class="m-container">
     <div class="m-row">

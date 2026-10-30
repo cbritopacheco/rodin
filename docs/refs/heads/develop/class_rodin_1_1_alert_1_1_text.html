@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Alert::Text class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -104,7 +104,7 @@
             </li>
           </ul>
         </nav>
-<p>A flexible text formatting class that supports foreground colors, background colors, and various text attributes for rich terminal output. The class uses template parameters to specify color types at compile time for type safety.</p><p>Example usage:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">redText</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Text</span><span class="o">&lt;</span><span class="nc">RedT</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"Error message"</span><span class="p">);</span>
+<p>A flexible text formatting class that supports foreground colors, background colors, and various text attributes for rich terminal output. The class uses template parameters to specify color types at compile time for type safety.</p><p>The following example illustrates usage.</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">redText</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Text</span><span class="o">&lt;</span><span class="nc">RedT</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"Error message"</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">boldText</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Text</span><span class="p">(</span><span class="s">"Important"</span><span class="p">).</span><span class="n">setBold</span><span class="p">();</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">styledText</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Text</span><span class="o">&lt;</span><span class="nc">RedT</span><span class="p">,</span><span class="w"> </span><span class="nc">BlueT</span><span class="o">&gt;</span><span class="p">(</span><span class="nc">RedT</span><span class="p">{},</span><span class="w"> </span><span class="nc">BlueT</span><span class="p">{},</span><span class="w"> </span><span class="s">"Styled text"</span><span class="p">);</span></pre>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><div class="rodin-inheritance-current">Text</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_alert_1_1_message_prefix.html" title="MessagePrefix&lt; RedT &gt;; MessagePrefix&lt; BlueT &gt;; MessagePrefix&lt; GreenT &gt;; MessagePrefix&lt; YellowT &gt;">MessagePrefix</a></li><li class="rodin-inheritance-more"><a href="#derived-classes">+3 more</a></li></ul></figure><section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_message_prefix.html"><code>MessagePrefix&lt;RedT&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">MessagePrefix</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">RedT</span><span class="w"> </span><span class="o">&gt;</span>

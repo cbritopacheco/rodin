@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin/Solid/Integrators/FollowerPressure.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -308,7 +308,7 @@ $ \mathbf{x}(\xi,\eta) = \mathbf{X}(\xi,\eta) + \mathbf{d} $
 <use x='378.19519' y='-10.793007' xlink:href='#eq4-g0-119'/>
 <use x='388.095564' y='-10.793007' xlink:href='#eq4-g4-59'/>
 </g>
-</svg></div><p>(cf. Bonet &amp; Wood, Nonlinear Continuum Mechanics for Finite Element Analysis, ch. 8). Only SURFACE-parametric derivatives appear: the operators are assembled face-locally, with no volume trace required. The load-stiffness <svg class="m-math" style="width: 1.481em; height: 1.199em; vertical-align: -0.350em;" viewBox="0 -8.169366 14.221891 11.512374">
+</svg></div><p>(cf. Bonet &amp; Wood, Nonlinear Continuum Mechanics for Finite Element Analysis, ch. 8). Only SURFACE-parametric derivatives appear. The operators are assembled face-locally, with no volume trace required. The load-stiffness <svg class="m-math" style="width: 1.481em; height: 1.199em; vertical-align: -0.350em;" viewBox="0 -8.169366 14.221891 11.512374">
 <title>
 $ K_p $
 </title>
@@ -362,7 +362,7 @@ $ +p \int_{\Gamma_0} \mathbf{N} \cdot \mathbf{w} \, dA $
 <use x='65.591271' y='0' xlink:href='#eq7-g3-100'/>
 <use x='71.673964' y='0' xlink:href='#eq7-g3-65'/>
 </g>
-</svg> (the classic <code>BoundaryIntegral(p * Dot(w, N))</code> term), which both fixes the sign convention (positive p pushes AGAINST the outward normal of the solid, as a pressure must; for a lumen pressure on an inner wall, whose outward normal points INTO the lumen, this pushes the wall outward) and gives a built-in verification limit.</p><p>Both integrators support the standard .over(attribute) restriction. Supported spaces: vector P1 (the local basis is evaluated analytically with the framework&#x27;s  <svg class="m-math" style="width: 16.197em; height: 1.134em; vertical-align: -0.270em;" viewBox="0 -8.302191 155.495874 10.886771">
+</svg> (the classic <code>BoundaryIntegral(p * Dot(w, N))</code> term), which both fixes the sign convention (positive p pushes AGAINST the outward normal of the solid, as a pressure must; for a lumen pressure on an inner wall, whose outward normal points INTO the lumen, this pushes the wall outward) and gives a built-in verification limit.</p><p>Both integrators support the standard .over(attribute) restriction. Supported spaces include vector P1 (the local basis is evaluated analytically with the framework&#x27;s  <svg class="m-math" style="width: 16.197em; height: 1.134em; vertical-align: -0.270em;" viewBox="0 -8.302191 155.495874 10.886771">
 <title>
 $ \text{local} = \text{vertex} \cdot d_v +
 \text{component} $
@@ -413,7 +413,7 @@ $ \text{local} = \text{vertex} \cdot d_v +
 <use x='146.195256' y='0' xlink:href='#eq8-g5-110'/>
 <use x='152.17284' y='0' xlink:href='#eq8-g5-116'/>
 </g>
-</svg> layout). Supported dimensions: 3D (triangular faces) and 2D (segment faces, where the &quot;cross product&quot; is the +90-degree rotation of the tangent).</p><p>Usage (static prestress with FULL Newton convergence):</p><pre class="m-code"><span class="nc">Real</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">// ramped externally</span>
+</svg> layout). Supported dimensions include 3D (triangular faces) and 2D (segment faces, where the &quot;cross product&quot; is the +90-degree rotation of the tangent).</p><p>Usage (static prestress with FULL Newton convergence).</p><pre class="m-code"><span class="nc">Real</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">// ramped externally</span>
 <span class="n">Solid</span><span class="o">::</span><span class="nc">FollowerPressureForce</span><span class="w">   </span><span class="nf">load</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">dState</span><span class="p">);</span><span class="w">    </span><span class="c1">// residual, "+"</span>
 <span class="n">Solid</span><span class="o">::</span><span class="nc">FollowerPressureTangent</span><span class="w"> </span><span class="nf">loadK</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">dState</span><span class="p">);</span><span class="w"> </span><span class="c1">// tangent,  "+"</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tangent</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">internal</span>
@@ -425,7 +425,7 @@ $ \text{local} = \text{vertex} \cdot d_v +
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solid.html" class="m-doc">Rodin::Solid</a></dt>
-            <dd>Constitutive laws, kinematics, and solid-mechanics integration.</dd>
+            <dd>Finite-strain kinematics, constitutive responses and virtual-work forms.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -440,7 +440,7 @@ $ \text{local} = \text{vertex} \cdot d_v +
               <div class="m-doc-template">template&lt;class TestFunctionType, class DisplacementType&gt;</div>
               class <a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">Rodin::Solid::FollowerPressureForce</a>
             </dt>
-            <dd>Linear-form integrator: follower pressure residual  <svg class="m-math" style="width: 9.965em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 95.660055 13.283652">
+            <dd>Integrates the follower-pressure residual as a linear form.  <svg class="m-math" style="width: 9.965em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 95.660055 13.283652">
 <title>
 $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
      \cdot \mathbf{w} $
@@ -480,7 +480,7 @@ $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
               <div class="m-doc-template">template&lt;class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
               class <a href="class_rodin_1_1_solid_1_1_follower_pressure_tangent.html" class="m-doc">Rodin::Solid::FollowerPressureTangent</a>
             </dt>
-            <dd>Bilinear-form integrator: the EXACT load stiffness of the follower pressure,   <svg class="m-math" style="width: 17.205em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 165.169536 13.283652">
+            <dd>Integrates the EXACT load stiffness of the follower pressure,   <svg class="m-math" style="width: 17.205em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 165.169536 13.283652">
 <title>
 $ +p \int (\delta\mathbf{d}_{,\xi} \times \mathbf{x}_{,\eta}
    + \mathbf{x}_{,\xi} \times \delta\mathbf{d}_{,\eta})
@@ -653,7 +653,7 @@ $ +p \int (\delta\mathbf{d}_{,\xi} \times \mathbf{x}_{,\eta}
                 </tr>
               </tbody>
             </table>
-<p>&quot;Cross product&quot; carrying normal direction and area element: 3D: t1 x t2; 2D: +90-degree rotation of t1 (t2 ignored).</p>
+<p>&quot;Cross product&quot; carrying normal direction and area element. Uses t1 x t2 in 3D and a +90-degree rotation of t1 in 2D, where t2 is ignored.</p>
           </div></section>
         </section>
       </div>

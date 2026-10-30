@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::PETSc::Assembly::VectorSetup class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -106,7 +106,7 @@ $ \mathbf{x} $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-120'/>
 </g>
-</svg> therefore retain their global sizes throughout its lifetime. The first call establishes the vector layout; subsequent calls reuse that layout.</p><aside class="m-note m-info"><h4>Note</h4><p>PETSc does not support resizing a vector after its layout has been established. Reuse requires the existing global size to match the requested size; this precondition is checked by a debug assertion. A change of finite element space or mesh requires a new <code>LinearSystem</code>.</p></aside><section id="autotoc_md193"><h2><a href="#autotoc_md193">Zeroing</a></h2><p>The right-hand side and residual vectors are rebuilt from scratch on every assembly and must therefore be zeroed each time (<code>zeroOnReuse</code> = true, the default). The solution vector must <em>not</em> be zeroed on reuse: it carries the previous iterate, which iterative/Newton solvers consume as the initial guess. It is still zeroed once, when first laid out, to provide a defined starting point.</p></section>
+</svg> therefore retain their global sizes throughout its lifetime. The first call establishes the vector layout; subsequent calls reuse that layout.</p><aside class="m-note m-info"><h4>Note</h4><p>PETSc does not support resizing a vector after its layout has been established. Reuse requires the existing global size to match the requested size; this precondition is checked by a debug assertion. A change of finite element space or mesh requires a new <code>LinearSystem</code>.</p></aside><section id="autotoc_md193"><h2><a href="#autotoc_md193">Zeroing</a></h2><p>The right-hand side and residual vectors are rebuilt from scratch on every assembly and must therefore be zeroed each time (<code>zeroOnReuse</code> = true, the default). The solution vector must <em>not</em> be zeroed on reuse because it carries the previous iterate, which iterative/Newton solvers consume as the initial guess. It is still zeroed once, when first laid out, to provide a defined starting point.</p></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">

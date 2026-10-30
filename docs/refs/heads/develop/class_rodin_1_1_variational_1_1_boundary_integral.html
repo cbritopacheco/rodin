@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::BoundaryIntegral class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -97,7 +97,7 @@
             </tr>
           </tbody>
         </table>
-<p>Represents the integral operator with a templated integrand type:</p><div class="m-math"><svg style="width: 7.180em; height: 2.966em;" viewBox="159.808448 -28.471297 68.926078 28.471297">
+<p>Represents an integral operator with a templated integrand type.</p><div class="m-math"><svg style="width: 7.180em; height: 2.966em;" viewBox="159.808448 -28.471297 68.926078 28.471297">
 <title>
 \[  \int_{\mathcal{B}_h} \mathrm{Integrand}
 \]
@@ -188,7 +188,7 @@ $ \mathcal{B}_h $
 <use x='0' y='0' xlink:href='#eq6-g0-66'/>
 <use x='7.852272' y='1.793263' xlink:href='#eq6-g1-104'/>
 </g>
-</svg> is defined as the union of the boundary faces:</p><div class="m-math"><svg style="width: 14.706em; height: 1.245em;" viewBox="123.68047 -11.955168 141.182043 11.955168">
+</svg> is defined as the union of the boundary faces.</p><div class="m-math"><svg style="width: 14.706em; height: 1.245em;" viewBox="123.68047 -11.955168 141.182043 11.955168">
 <title>
 \[  \mathcal{B}_h := \left\{ \partial T \cap \partial \Omega : T \in
   \mathcal{T}_h \right\} \ .
@@ -228,7 +228,7 @@ $ \mathcal{B}_h $
 <use x='250.65202' y='-2.988792' xlink:href='#eq7-g0-103'/>
 <use x='261.610852' y='-2.988792' xlink:href='#eq7-g2-58'/>
 </g>
-</svg></div><p>Then the boundary integral is just the sum of integrals over each member of the boundary:</p><div class="m-math"><svg style="width: 19.146em; height: 3.301em;" viewBox="102.371873 -32.887992 183.799217 31.692478">
+</svg></div><p>Then the boundary integral is just the sum of integrals over each member of the boundary.</p><div class="m-math"><svg style="width: 19.146em; height: 3.301em;" viewBox="102.371873 -32.887992 183.799217 31.692478">
 <title>
 \[  \int_{\mathcal{B}_h} \mathrm{Integrand} := \sum_{F \in \mathcal{B}_h}
   \int_F \mathrm{Integrand} \ .

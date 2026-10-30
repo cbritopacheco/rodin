@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::LinearForm&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -511,11 +511,11 @@ $ L(u) $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object</td>
+                  <td>Newly allocated copy whose ownership passes to the caller.</td>
                 </tr>
               </tfoot>
             </table>
-<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
+<p>Derived classes implement this pure virtual function to support polymorphic copying. The caller must adopt the returned pointer into owned storage or otherwise release it.</p><aside class="m-note m-info"><h4>Note</h4><p>Copy dispatch through this base is virtual.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ab7934b9b67b0dd13b8d5fc35d70d3c07"><div>
             <h3>
@@ -655,7 +655,7 @@ $ l_i(v) $
 <use x='11.420491' y='0' xlink:href='#eq7-g1-118'/>
 <use x='17.50871' y='0' xlink:href='#eq7-g2-41'/>
 </g>
-</svg> to the linear form: <svg class="m-math" style="width: 12.926em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 124.089083 11.955168">
+</svg> to the linear form. <svg class="m-math" style="width: 12.926em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 124.089083 11.955168">
 <title>
 $ l(v) = l_1(v) + l_2(v) + \ldots $
 </title>
@@ -741,7 +741,7 @@ $ l(v) = l_1(v) + l_2(v) + \ldots $
                 </tr>
               </tfoot>
             </table>
-<p>Subtracts a contribution: <svg class="m-math" style="width: 9.407em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 90.304527 11.955168">
+<p>Subtracts a contribution according to <svg class="m-math" style="width: 9.407em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 90.304527 11.955168">
 <title>
 $ l(v) = l(v) - l_i(v) $
 </title>

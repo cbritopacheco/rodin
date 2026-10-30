@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::PolytopeTransformationIndex class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -411,7 +411,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>Uses an atomic pointer on repeated accesses. Storage growth is serialized per dimension, while first construction is serialized per polytope. The factory is called at most once per polytope.</p><aside class="m-note m-info"><h4>Note</h4><p>Cache mutation, including clear() and set(), must not overlap use of a reference returned by this function. Mesh evaluation already requires geometry to remain unchanged for the duration of assembly.</p><p>The Factory must be callable with signature: <code>std::unique_ptr&lt;PolytopeTransformation&gt;(size_t d, Index idx)</code></p></aside>
+<p>Uses an atomic pointer on repeated accesses. Storage growth is serialized per dimension, while first construction is serialized per polytope. The factory is called at most once per polytope.</p><aside class="m-note m-info"><h4>Note</h4><p>Cache mutation, including clear() and set(), must not overlap use of a reference returned by this function. Mesh evaluation already requires geometry to remain unchanged for the duration of assembly.</p><p>The Factory must be callable with signature. <code>std::unique_ptr&lt;PolytopeTransformation&gt;(size_t d, Index idx)</code></p></aside>
           </div></section>
           <section class="m-doc-details" id="ac8bb3912a3ce86b15842e79d0b421204"><div>
             <h3>

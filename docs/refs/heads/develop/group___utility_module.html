@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Utility module | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -365,7 +365,7 @@
                 </tr>
               </tbody>
             </table>
-<p>A type is complete if its size is known (i.e., it has been fully defined). Incomplete types include forward declarations and array types of unknown bound.</p><p>This trait is useful for SFINAE-based conditional compilation when different behavior is needed for complete vs. incomplete types.</p><p>Example usage:</p><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">Complete</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+<p>A type is complete if its size is known (i.e., it has been fully defined). Incomplete types include forward declarations and array types of unknown bound.</p><p>This trait is useful for SFINAE-based conditional compilation when different behavior is needed for complete vs. incomplete types.</p><p>The following example illustrates usage.</p><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">Complete</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">Incomplete</span><span class="p">;</span>
 
 <span class="k">static_assert</span><span class="p">(</span><span class="nc">IsCompleteType</span><span class="o">&lt;</span><span class="n">Complete</span><span class="o">&gt;::</span><span class="n">value</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
@@ -412,7 +412,7 @@
                 </tr>
               </tbody>
             </table>
-<p>This function uses fold expressions to apply the callable <code>f</code> to each argument in <code>args</code> in sequence. Useful for compile-time iteration over heterogeneous argument packs.</p><p>Example usage:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">printer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">auto</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+<p>This function uses fold expressions to apply the callable <code>f</code> to each argument in <code>args</code> in sequence. Useful for compile-time iteration over heterogeneous argument packs.</p><p>The following example illustrates usage.</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">printer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">auto</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
 <span class="n">Utility</span><span class="o">::</span><span class="n">For</span><span class="p">(</span><span class="n">printer</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mf">2.5</span><span class="p">,</span><span class="w"> </span><span class="s">"hello"</span><span class="p">);</span>
 <span class="c1">// Output: 1 2.5 hello</span></pre>
           </div></section>
@@ -449,7 +449,7 @@
                 </tr>
               </tbody>
             </table>
-<p>This utility enables compile-time loops where the loop index is available as a compile-time constant.</p><p>Example usage:</p><pre class="m-code"><span class="n">Utility</span><span class="o">::</span><span class="n">ForIndex</span><span class="o">&lt;</span><span class="mi">5</span><span class="o">&gt;</span><span class="p">(</span>
+<p>This utility enables compile-time loops where the loop index is available as a compile-time constant.</p><p>The following example illustrates usage.</p><pre class="m-code"><span class="n">Utility</span><span class="o">::</span><span class="n">ForIndex</span><span class="o">&lt;</span><span class="mi">5</span><span class="o">&gt;</span><span class="p">(</span>
 <span class="w">  </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="w"> </span><span class="n">i</span><span class="p">){</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
 <span class="c1">// Output: 0 1 2 3 4</span></pre>
           </div></section>
@@ -540,7 +540,7 @@
               bool <a href="#ga8e52dff28b2ca5d4d1a6117aa7fbfbc3" class="m-doc-self">False</a> <span class="m-label m-primary">constexpr</span>
             </h3><p class="rodin-reference-include">Defined in <a href="_false_8h.html"><code>Rodin/Utility/False.h</code></a></p>
             <p>Dependent false value for use in static_assert within template contexts.</p>
-<p>This utility provides a way to create a <code>static_assert(false, ...)</code> that only triggers when a template is actually instantiated, rather than when it is parsed. This is essential for implementing proper error messages in template specializations that should never be instantiated.</p><p>Example usage:</p><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<p>This utility provides a way to create a <code>static_assert(false, ...)</code> that only triggers when a template is actually instantiated, rather than when it is parsed. This is essential for implementing proper error messages in template specializations that should never be instantiated.</p><p>The following example illustrates usage.</p><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">MyStruct</span>
 <span class="p">{</span>
 <span class="w">    </span><span class="k">static_assert</span><span class="p">(</span><span class="n">Utility</span><span class="o">::</span><span class="n">False</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">"This template should not be instantiated"</span><span class="p">);</span>

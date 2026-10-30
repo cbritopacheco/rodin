@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin/Variational/P0.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -77,12 +77,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md473">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md474">Features</a></li>
-            <li><a href="#autotoc_md475">Usage Example</a></li>
+            <li><a href="#autotoc_md471">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md472">Features</a></li>
+            <li><a href="#autotoc_md473">Usage Example</a></li>
           </ul>
         </nav>
-<p>This header aggregates all functionality related to the P0 finite element space, which consists of piecewise constant functions over mesh elements.</p><section id="autotoc_md473"><h2><a href="#autotoc_md473">Mathematical Foundation</a></h2><p>The P0 space is defined as:</p><div class="m-math"><svg style="width: 24.282em; height: 1.361em;" viewBox="77.717547 -13.06128 233.107969 13.06128">
+<p>This header aggregates all functionality related to the P0 finite element space, which consists of piecewise constant functions over mesh elements.</p><section id="autotoc_md471"><h2><a href="#autotoc_md471">Mathematical Foundation</a></h2><p>The P0 space is defined as</p><div class="m-math"><svg style="width: 24.282em; height: 1.361em;" viewBox="77.717547 -13.06128 233.107969 13.06128">
 <title>
 \[     P_0(\mathcal{T}_h) = \{u \in L^2(\Omega) : u|_K \in \mathbb{P}_0(K) \, \forall K \in \mathcal{T}_h\}
 \]
@@ -170,7 +170,7 @@ $ K $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-75'/>
 </g>
-</svg>.</p></section><section id="autotoc_md474"><h2><a href="#autotoc_md474">Features</a></h2><ul><li>One degree of freedom per element (at element center)</li><li>Discontinuous across element boundaries</li><li>Suitable for DG methods and element-wise constant approximations</li><li>Gradient of P0 functions is zero within each element</li></ul></section><section id="autotoc_md475"><h2><a href="#autotoc_md475">Usage Example</a></h2><pre class="m-code"><span class="nc">P0</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">           </span><span class="c1">// Define P0 space</span>
+</svg>.</p></section><section id="autotoc_md472"><h2><a href="#autotoc_md472">Features</a></h2><ul><li>One degree of freedom per element (at element center)</li><li>Discontinuous across element boundaries</li><li>Suitable for DG methods and element-wise constant approximations</li><li>Gradient of P0 functions is zero within each element</li></ul></section><section id="autotoc_md473"><h2><a href="#autotoc_md473">Usage Example</a></h2><pre class="m-code"><span class="nc">P0</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">           </span><span class="c1">// Define P0 space</span>
 <span class="nc">GridFunction</span><span class="o">&lt;</span><span class="nc">P0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w"> </span><span class="c1">// P0 grid function</span></pre></section>
       </div>
     </div>

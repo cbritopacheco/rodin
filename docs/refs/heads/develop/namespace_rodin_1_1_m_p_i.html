@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::MPI module | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -76,9 +76,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md617">Key Components</a></li>
-            <li><a href="#autotoc_md618">Typical Workflow</a></li>
-            <li><a href="#autotoc_md619">Submodules</a></li>
+            <li><a href="#autotoc_md607">Key components</a></li>
+            <li><a href="#autotoc_md608">Typical workflow</a></li>
+            <li><a href="#autotoc_md609">Submodules</a></li>
             <li>
               Reference
               <ul>
@@ -87,7 +87,7 @@
             </li>
           </ul>
         </nav>
-<pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="n">DistributedMesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Mesh</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">MPI</span><span class="o">&gt;</span><span class="p">;</span></pre><p><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> supplies the distributed execution context, while <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> manages distributed mesh entities and connectivity. <a href="#ab21f25a6fa6e1077939157cf5079b131" class="m-doc">Sharder</a> partitions mesh data for transfer between ranks. Distributed finite element spaces, point location, and assembly build on these components for multi-process PDE calculations.</p><section id="autotoc_md617"><h2><a href="#autotoc_md617">Key Components</a></h2><ul><li><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> — Wraps a <code>boost::mpi::environment</code> and <code>boost::mpi::communicator</code> to provide a uniform execution context.</li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> — Distributed mesh storing a rank-local <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> with ownership, ghost, and distributed index metadata. Geometric queries (<code>getPolytopeCount</code>, <code>getVolume</code>, <code>getPerimeter</code>, etc.) perform MPI reductions automatically.</li><li><a href="class_rodin_1_1_geometry_1_1_sharder_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Sharder</a> — Distributes a global mesh across MPI ranks in three steps: <code>shard()</code>, <code>scatter()</code>, <code>gather()</code>. Also available as one-step <code>distribute()</code>.</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> — Rank-local view of a partitioned mesh. Classifies every polytope as <strong>Owned</strong>, <strong>Shared</strong>, or <strong>Ghost</strong> and maintains bidirectional local↔distributed index maps.</li><li><code>reconcile(d)</code> — After local connectivity discovery, reconciles entities of dimension <code>d</code> across ranks so that shared entities have consistent distributed IDs and ownership.</li></ul></section><section id="autotoc_md618"><h2><a href="#autotoc_md618">Typical Workflow</a></h2><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MPI.h&gt;</span>
+<pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="n">DistributedMesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Mesh</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">MPI</span><span class="o">&gt;</span><span class="p">;</span></pre><p><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> supplies the distributed execution context, while <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> manages distributed mesh entities and connectivity. <a href="#ab21f25a6fa6e1077939157cf5079b131" class="m-doc">Sharder</a> partitions mesh data for transfer between ranks. Distributed finite element spaces, point location, and assembly build on these components for multi-process PDE calculations.</p><section id="autotoc_md607"><h2><a href="#autotoc_md607">Key components</a></h2><ul><li><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> — Wraps a <code>boost::mpi::environment</code> and <code>boost::mpi::communicator</code> to provide a uniform execution context.</li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> — Distributed mesh storing a rank-local <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> with ownership, ghost, and distributed index metadata. Geometric queries (<code>getPolytopeCount</code>, <code>getVolume</code>, <code>getPerimeter</code>, etc.) perform MPI reductions automatically.</li><li><a href="class_rodin_1_1_geometry_1_1_sharder_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Sharder</a> — Distributes a global mesh across MPI ranks through <code>shard()</code>, <code>scatter()</code> and <code>gather()</code> in sequence. Also available as one-step <code>distribute()</code>.</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> — Rank-local view of a partitioned mesh. Classifies every polytope as <strong>Owned</strong>, <strong>Shared</strong>, or <strong>Ghost</strong> and maintains bidirectional local↔distributed index maps.</li><li><code>reconcile(d)</code> — After local connectivity discovery, reconciles entities of dimension <code>d</code> across ranks so that shared entities have consistent distributed IDs and ownership.</li></ul></section><section id="autotoc_md608"><h2><a href="#autotoc_md608">Typical workflow</a></h2><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MPI.h&gt;</span>
 
 <span class="n">boost</span><span class="o">::</span><span class="n">mpi</span><span class="o">::</span><span class="n">environment</span><span class="w"> </span><span class="nf">env</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
 <span class="n">boost</span><span class="o">::</span><span class="n">mpi</span><span class="o">::</span><span class="n">communicator</span><span class="w"> </span><span class="n">world</span><span class="p">;</span>
@@ -112,7 +112,7 @@
 
 <span class="c1">// Compute distributed connectivity and reconcile shared entities</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">reconcile</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre></section><section id="autotoc_md619"><h2><a href="#autotoc_md619">Submodules</a></h2><ul><li><strong>Assembly</strong> — MPI-parallel assembly strategies for PETSc-backed forms</li><li><strong>Context</strong> — <code>Context::MPI</code> execution context</li><li><strong>Geometry</strong> — Distributed mesh and sharder</li><li><strong>IO</strong> — HDF5 and MFEM IO specializations for distributed meshes</li><li><strong>Variational</strong> — Distributed FE spaces (P1 on MPI mesh)</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Requires MPI to be available and Rodin configured with <code>RODIN_USE_MPI=ON</code>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a>, <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></p></aside></section>
+<span class="n">mesh</span><span class="p">.</span><span class="n">reconcile</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre></section><section id="autotoc_md609"><h2><a href="#autotoc_md609">Submodules</a></h2><ul><li><strong>Assembly</strong> — MPI-parallel assembly strategies for PETSc-backed forms</li><li><strong>Context</strong> — <code>Context::MPI</code> execution context</li><li><strong>Geometry</strong> — Distributed mesh and sharder</li><li><strong>IO</strong> — HDF5 and MFEM IO specializations for distributed meshes</li><li><strong>Variational</strong> — Distributed FE spaces (P1 on MPI mesh)</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Requires MPI to be available and Rodin configured with <code>RODIN_USE_MPI=ON</code>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a>, <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></p></aside></section>
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">

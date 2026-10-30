@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Context module | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -76,8 +76,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md555">Supported Contexts</a></li>
-            <li><a href="#autotoc_md556">Representative use</a></li>
+            <li><a href="#autotoc_md550">Supported contexts</a></li>
+            <li><a href="#autotoc_md551">Representative use</a></li>
             <li>
               Reference
               <ul>
@@ -86,7 +86,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Local</a> selects local execution, and <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> carries the environment and communicator for distributed execution. Mesh, connectivity, and finite element specializations use these context types to select their data distribution and backend behavior while preserving the same mathematical interfaces.</p><section id="autotoc_md555"><h2><a href="#autotoc_md555">Supported Contexts</a></h2><ul><li><strong>Local Context</strong>: Single-machine execution with shared memory</li><li><strong>Distributed Context</strong>: Multi-node execution with message passing (MPI)</li></ul></section><section id="autotoc_md556"><h2><a href="#autotoc_md556">Representative use</a></h2><p>A mesh&#x27;s context selects its execution environment without changing its geometric role:</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="nc">LocalMesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Mesh</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="p">;</span>
+<p><a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Local</a> selects local execution, and <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> carries the environment and communicator for distributed execution. Mesh, connectivity, and finite element specializations use these context types to select their data distribution and backend behavior while preserving the same mathematical interfaces.</p><section id="autotoc_md550"><h2><a href="#autotoc_md550">Supported contexts</a></h2><ul><li><strong>Local Context</strong>: Single-machine execution with shared memory</li><li><strong>Distributed Context</strong>: Multi-node execution with message passing (MPI)</li></ul></section><section id="autotoc_md551"><h2><a href="#autotoc_md551">Representative use</a></h2><p>A mesh&#x27;s context selects its execution environment without changing its geometric role.</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="nc">LocalMesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Mesh</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">LocalMesh</span><span class="o">::</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">});</span></pre></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>

@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Solid::InternalVirtualWork class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -236,7 +236,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">order</td>
-                  <td>Polynomial order (0 = auto: 2 * max(fe order))</td>
+                  <td>Polynomial order (0 selects the automatic value 2 * max(fe order))</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -295,7 +295,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>The output is the dual of <code>setInput()</code>: it reads the prepared law after evaluation, and is the extraction site for committed internal variables, recovered stresses or diagnostics. It is invoked only by <code>commit()</code>, never during assembly, so a caller controls exactly when derived quantities are taken.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solid_1_1_output.html">Solid::<wbr />Output</a></p></aside>
+<p>The output is the dual of <code>setInput()</code> and reads the prepared law after evaluation, and is the extraction site for committed internal variables, recovered stresses or diagnostics. It is invoked only by <code>commit()</code>, never during assembly, so a caller controls exactly when derived quantities are taken.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solid_1_1_output.html">Solid::<wbr />Output</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="afce99a75399ac776b73cdcaf2fee2373"><div>
             <h3>
@@ -358,7 +358,7 @@ $ 2 \times $
                 </tr>
               </tfoot>
             </table>
-<p>Produces:</p><div class="m-math"><svg style="width: 16.159em; height: 2.935em;" viewBox="116.707154 -28.172399 155.128698 28.172399">
+<p>Produces the following result.</p><div class="m-math"><svg style="width: 16.159em; height: 2.935em;" viewBox="116.707154 -28.172399 155.128698 28.172399">
 <title>
 \[  \delta W^{\text{int}}(\mathbf{v})
     = \int_{\Omega_0} \mathbf{P}(\mathbf{u}) : \nabla_0 \mathbf{v} \, dX
@@ -442,7 +442,7 @@ $ 2 \times $
                 </tr>
               </tfoot>
             </table>
-<p>Produces:</p><div class="m-math"><svg style="width: 24.783em; height: 2.935em;" viewBox="75.314555 -28.172399 237.913907 28.172399">
+<p>Produces the following result.</p><div class="m-math"><svg style="width: 24.783em; height: 2.935em;" viewBox="75.314555 -28.172399 237.913907 28.172399">
 <title>
 \[  D(\delta W^{\text{int}})[\Delta\mathbf{u}, \mathbf{v}]
     = \int_{\Omega_0} \mathbf{A}(\mathbf{F}) : \nabla_0 \Delta\mathbf{u}

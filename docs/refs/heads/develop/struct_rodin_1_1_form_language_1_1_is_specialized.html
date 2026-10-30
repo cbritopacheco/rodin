@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::FormLanguage::IsSpecialized struct | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -103,7 +103,7 @@
             </li>
           </ul>
         </nav>
-<p>An integrand that no optimized handler matches is still integrated, by the generic handler, and still gives the right answer. That is what makes a specialization silently falling out of use so hard to notice: nothing fails, no result changes, and only the running time moves. This trait makes which handler was selected observable, so a test can require the optimized one and fail at compile time when the pattern stops matching.</p><p>Handlers report by declaring a <code>Specialized</code> member: <code class="m-code"><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">Specialized</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span></code> A type declaring no such member is reported unspecialized, so a new handler that omits it reads as generic &mdash; which fails a dispatch test rather than passing one, and is the safe direction to be wrong in.</p><section id="autotoc_md48"><h2><a href="#autotoc_md48">Usage</a></h2><pre class="m-code"><span class="k">static_assert</span><span class="p">(</span><span class="nc">IsSpecialized</span><span class="o">&lt;</span><span class="nc">QuadratureRule</span><span class="o">&lt;</span><span class="n">MassIntegrand</span><span class="o">&gt;&gt;::</span><span class="nc">Value</span><span class="p">);</span>
+<p>An integrand that no optimized handler matches is still integrated, by the generic handler, and still gives the right answer. That is what makes a specialization silently falling out of use so hard to notice because nothing fails, no result changes, and only the running time moves. This trait makes which handler was selected observable, so a test can require the optimized one and fail at compile time when the pattern stops matching.</p><p>Handlers report by declaring a <code>Specialized</code> member. <code class="m-code"><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">Specialized</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span></code> A type declaring no such member is reported unspecialized, so a new handler that omits it reads as generic &mdash; which fails a dispatch test rather than passing one, and is the safe direction to be wrong in.</p><section id="autotoc_md48"><h2><a href="#autotoc_md48">Usage</a></h2><pre class="m-code"><span class="k">static_assert</span><span class="p">(</span><span class="nc">IsSpecialized</span><span class="o">&lt;</span><span class="nc">QuadratureRule</span><span class="o">&lt;</span><span class="n">MassIntegrand</span><span class="o">&gt;&gt;::</span><span class="nc">Value</span><span class="p">);</span>
 <span class="k">static_assert</span><span class="p">(</span><span class="o">!</span><span class="nc">IsSpecialized</span><span class="o">&lt;</span><span class="nc">QuadratureRule</span><span class="o">&lt;</span><span class="n">DivDivIntegrand</span><span class="o">&gt;&gt;::</span><span class="nc">Value</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Always read the <code>Value</code> member; no variable-template alias is provided, in keeping with the other traits here.</p></aside><aside class="m-note m-warning"><h4>Warning</h4><p>A dispatch test must assert both directions. Optimized and generic handlers share base classes &mdash; LocalBilinearFormIntegratorBase and LinearFormIntegratorBase &mdash; so a <code>Specialized</code> member ever declared on one of those would be inherited by the generic handlers and report every type as optimized. Asserting that a known-generic integrand is <em>not</em> specialized is what catches that, and it is why every handler declares the member explicitly rather than relying on its absence.</p></aside></section>
         <section id="pub-static-attribs">
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>

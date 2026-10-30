@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Utility::ParameterPack class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -97,7 +97,7 @@
             </li>
           </ul>
         </nav>
-<p>The ParameterPack class provides compile-time utilities for manipulating and querying template parameter packs. It offers type-safe access to individual elements by index and predicate-based validation of all types.</p><p>This utility is essential for template metaprogramming where compile-time type manipulation and validation are required.</p><p>Example usage:</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="n">Pack</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ParameterPack</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">;</span>
+<p>The ParameterPack class provides compile-time utilities for manipulating and querying template parameter packs. It offers type-safe access to individual elements by index and predicate-based validation of all types.</p><p>This utility is essential for template metaprogramming where compile-time type manipulation and validation are required.</p><p>The following example illustrates usage.</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="n">Pack</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ParameterPack</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">;</span>
 
 <span class="c1">// Get type at index 1 (double)</span>
 <span class="k">using</span><span class="w"> </span><span class="n">SecondType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Pack</span><span class="o">::</span><span class="nc">At</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">;</span>

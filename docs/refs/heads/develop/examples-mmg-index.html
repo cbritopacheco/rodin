@@ -4,12 +4,14 @@
   <meta charset="UTF-8" />
   <title>Examples and tutorials &raquo; Working with MMG | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <link rel="prev" href="examples-geometry-index.html" />
+  <link rel="next" href="examples-density_optimization-index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +34,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -74,8 +76,9 @@
           <span class="m-breadcrumb"><a href="examples-index.html">Examples and tutorials</a> &raquo;</span>
           Working with MMG
         </h1>
-        <p>Showcases the usage of the Rodin::MMG module.</p>
-<ul><li><a href="examples-mmg-simple_io.html" class="m-doc">Simple input/output of MMG objects</a></li><li><a href="examples-mmg-mesh_optimization.html" class="m-doc">Optimizing the mesh</a></li><li><a href="examples-mmg-mesh_adaptation.html" class="m-doc">Adapting the mesh</a></li><li><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a></li><li><a href="examples-mmg-casting.html" class="m-doc">Casting between MMG and Rodin</a></li></ul>
+        <p>Choose a mesh-processing workflow and understand its guarantees.</p>
+<p>MMG operations produce a new mesh topology. Optimization improves element shape, while adaptation uses a prescribed size field. The examples separate these tasks from mesh conversion and metadata handling.</p><ul><li><a href="examples-mmg-simple_io.html" class="m-doc">Saving an MMG mesh</a> — Read and write MMG mesh data.</li><li><a href="examples-mmg-casting.html" class="m-doc">Using an MMG mesh in Rodin</a> — Work with MMG and Geometry mesh interfaces.</li><li><a href="examples-mmg-mesh_optimization.html" class="m-doc">Improving triangle quality</a> — Improve element quality.</li><li><a href="examples-mmg-mesh_adaptation.html" class="m-doc">Adapting to a size field</a> — Adapt to a field or metric.</li><li><a href="examples-swift-background.html" class="m-doc">Adapting and fitting an implicit interface</a> — Adapt a background, classify an implicit circle and fit its interface with SWIFT.</li><li><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a> — Required entities, level-set cuts, and preservation guarantees.</li></ul><p>Read the behavior guide before relying on entity indices or feature metadata across a remeshing operation.</p>
+        <div class="m-note m-dim m-thin m-text-center"><a href="examples-geometry-index.html" class="m-doc">&laquo; Mesh geometry examples</a> | <a href="examples-index.html" class="m-doc">Examples and tutorials</a> | <a href="examples-density_optimization-index.html" class="m-doc">Density optimization examples &raquo;</a></div>
       </div>
     </div>
   </div>

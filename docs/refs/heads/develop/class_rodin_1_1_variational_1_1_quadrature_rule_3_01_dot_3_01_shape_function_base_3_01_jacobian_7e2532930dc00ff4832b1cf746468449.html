@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;RHSDerived, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -106,9 +106,9 @@ $\int J u : J v \ dx$
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md427">Physical-gradient preparation</a></li>
-            <li><a href="#autotoc_md428">Component-block contraction</a></li>
-            <li><a href="#autotoc_md429">Judgement</a></li>
+            <li><a href="#autotoc_md425">Physical-gradient preparation</a></li>
+            <li><a href="#autotoc_md426">Component-block contraction</a></li>
+            <li><a href="#autotoc_md427">Judgement</a></li>
             <li>
               Reference
               <ul>
@@ -121,7 +121,7 @@ $\int J u : J v \ dx$
             </li>
           </ul>
         </nav>
-<p>This class represents the CTAD for the expression:</p><div class="m-math"><svg style="width: 7.644em; height: 2.767em;" viewBox="157.582588 -26.567319 73.37781 26.567327">
+<p>This class provides class template argument deduction for the following expression.</p><div class="m-math"><svg style="width: 7.644em; height: 2.767em;" viewBox="157.582588 -26.567319 73.37781 26.567327">
 <title>
 \[\int J u : J v \ dx \: ,
 \]
@@ -167,7 +167,7 @@ $v$
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-118'/>
 </g>
-</svg> are vector-valued H1 shape functions.</p><section id="autotoc_md427"><h2><a href="#autotoc_md427">Physical-gradient preparation</a></h2><p>The scalar basis gradients are mapped at the current physical sample by <svg class="m-math" style="width: 12.554em; height: 1.591em; vertical-align: -0.365em;" viewBox="0 -11.789127 120.517207 15.276127">
+</svg> are vector-valued H1 shape functions.</p><section id="autotoc_md425"><h2><a href="#autotoc_md425">Physical-gradient preparation</a></h2><p>The scalar basis gradients are mapped at the current physical sample by <svg class="m-math" style="width: 12.554em; height: 1.591em; vertical-align: -0.365em;" viewBox="0 -11.789127 120.517207 15.276127">
 <title>
 $G_{aj}=\sum_{r=0}^{d-1}\partial_r\widehat\phi_a\,(J_K^{\dagger})_{rj}$
 </title>
@@ -217,7 +217,7 @@ $G_{aj}=\sum_{r=0}^{d-1}\partial_r\widehat\phi_a\,(J_K^{\dagger})_{rj}$
 <use x='112.576587' y='1.793263' xlink:href='#eq5-g2-114'/>
 <use x='116.633182' y='1.793263' xlink:href='#eq5-g2-106'/>
 </g>
-</svg>. If both operands borrow the same reference-table object, these images share one scratch buffer. Distinct tables retain separate buffers even when their sizes agree. Identity is checked during the current borrow; no table pointer is retained and physical gradients are never reused across binds. Each cell and quadrature point recomputes its physical gradients. Mapping expressions and local-entry summation order remain unchanged.</p></section><section id="autotoc_md428"><h2><a href="#autotoc_md428">Component-block contraction</a></h2><p>Let <svg class="m-math" style="width: 1.190em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 11.426112 10.626798">
+</svg>. If both operands borrow the same reference-table object, these images share one scratch buffer. Distinct tables retain separate buffers even when their sizes agree. Identity is checked during the current borrow; no table pointer is retained and physical gradients are never reused across binds. Each cell and quadrature point recomputes its physical gradients. Mapping expressions and local-entry summation order remain unchanged.</p></section><section id="autotoc_md426"><h2><a href="#autotoc_md426">Component-block contraction</a></h2><p>Let <svg class="m-math" style="width: 1.190em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 11.426112 10.626798">
 <title>
 $\phi_a$
 </title>
@@ -443,7 +443,7 @@ $0\times0$
 <use x='8.509654' y='0' xlink:href='#eq14-g0-2'/>
 <use x='20.464814' y='0' xlink:href='#eq14-g1-48'/>
 </g>
-</svg> matrix before scalar tabulation or contraction, including for unequal polynomial degrees. On a point, the physical derivative is zero and no scalar gradient contraction is performed, independently of the ambient dimension.</p></section><section id="autotoc_md429"><h2><a href="#autotoc_md429">Judgement</a></h2><p>The following judgement specifies that the expression is a well formed type of QuadratureRule.</p><div class="m-math"><svg style="width: 20.168em; height: 2.966em;" viewBox="97.466258 -28.471357 193.610474 28.471369">
+</svg> matrix before scalar tabulation or contraction, including for unequal polynomial degrees. On a point, the physical derivative is zero and no scalar gradient contraction is performed, independently of the ambient dimension.</p></section><section id="autotoc_md427"><h2><a href="#autotoc_md427">Judgement</a></h2><p>The following judgement specifies that the expression is a well formed type of QuadratureRule.</p><div class="m-math"><svg style="width: 20.168em; height: 2.966em;" viewBox="97.466258 -28.471357 193.610474 28.471369">
 <title>
 \[\dfrac
 {\vdash \int J u : J v \ dx : \texttt{QuadratureRule}}

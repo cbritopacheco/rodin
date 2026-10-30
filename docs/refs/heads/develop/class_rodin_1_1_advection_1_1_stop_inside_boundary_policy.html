@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Advection::StopInsideBoundaryPolicy class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -70,7 +70,7 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_advection.html">Advection</a></div><h1>StopInsideBoundaryPolicy</h1><p class="rodin-reference-brief">Boundary policy for characteristic tracing: stop-at-boundary with inward offset.</p><p class="rodin-reference-include">Defined in <a href="_lagrangian_8h.html"><code>Rodin/Advection/Lagrangian.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">StopInsideBoundaryPolicy</span><span class="p">;</span>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_advection.html">Advection</a></div><h1>StopInsideBoundaryPolicy</h1><p class="rodin-reference-brief">Stops characteristic tracing at the boundary with an inward offset.</p><p class="rodin-reference-include">Defined in <a href="_lagrangian_8h.html"><code>Rodin/Advection/Lagrangian.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">StopInsideBoundaryPolicy</span><span class="p">;</span>
 </pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
@@ -106,7 +106,7 @@ $ J^{-T} n_{\mathrm{ref}} $
 <use x='31.055892' y='1.793263' xlink:href='#eq1-g3-101'/>
 <use x='34.81961' y='1.793263' xlink:href='#eq1-g3-102'/>
 </g>
-</svg> as a physical normal direction on the face. (Best behavior for affine/<a href="class_rodin_1_1_variational_1_1_p1.html">P1</a> geometry.)</li></ul></aside><aside class="m-note m-default"><h4>Robustness notes</h4><ul><li>The inward nudge is done in <em>physical space</em> so that the offset represents a true physical distance, independent of the reference parametrization.</li><li>The policy orients the normal using the cell centroid as an interior probe, which avoids relying on a pre-defined orientation convention of face normals.</li></ul></aside><aside class="m-note m-default"><h4>Parameters</h4><ul><li><code>epsInPhys:</code> desired inward physical offset when the boundary is hit. The effective offset is <code>max</code>(10*machine_epsilon, min(epsInPhys, 0.1*abs(dt))).</li></ul></aside><aside class="m-note m-default"><h4>Complexity</h4><p>Constant time per boundary hit: one projection to cell + face, a few transforms, and a clamp.</p></aside>
+</svg> as a physical normal direction on the face. (Best behavior for affine/<a href="class_rodin_1_1_variational_1_1_p1.html">P1</a> geometry.)</li></ul></aside><aside class="m-note m-default"><h4>Robustness notes</h4><ul><li>The inward nudge is done in <em>physical space</em> so that the offset represents a true physical distance, independent of the reference parametrization.</li><li>The policy orients the normal using the cell centroid as an interior probe, which avoids relying on a pre-defined orientation convention of face normals.</li></ul></aside><aside class="m-note m-default"><h4>Parameters</h4><ul><li><code>epsInPhys:</code> desired inward physical offset when the boundary is hit. The effective offset is <code>max</code>(10*machine_epsilon, min(epsInPhys, 0.1*abs(dt))).</li></ul></aside><aside class="m-note m-default"><h4>Complexity</h4><p>Each boundary hit takes constant time, requiring one projection to the cell and face, a few transforms and a clamp.</p></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">

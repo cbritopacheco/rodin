@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Examples and tutorials &raquo; Density optimization examples | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -74,8 +74,17 @@
           <span class="m-breadcrumb"><a href="examples-index.html">Examples and tutorials</a> &raquo;</span>
           Density optimization examples
         </h1>
-        <p>Implementation of density optimization algorithms.</p>
-<ul><li><a href="examples-density_optimization-simp_temperature_minimization.html" class="m-doc">Temperature minimization</a></li></ul>
+        <p>Follow a material field through a state solve, sensitivity and density update.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#examples-density-start">Prerequisites</a></li>
+            <li><a href="#examples-density-workflow">State, sensitivity and update</a></li>
+            <li><a href="#examples-density-tutorial">Thermal design</a></li>
+            <li><a href="#examples-density-next">Continue</a></li>
+          </ul>
+        </nav>
+<p>Density optimization varies a material field on a fixed domain. The field determines the coefficients of a state equation, while an objective assigns a cost to the resulting state and material usage.</p><section id="examples-density-start"><h2><a href="#examples-density-start">Prerequisites</a></h2><p>The <a href="examples-pdes-poisson.html" class="m-doc">Poisson tutorial</a> introduces the scalar diffusion solve and field export. The <a href="guides-variational.html" class="m-doc">variational formulations guide</a> explains how coefficients enter an assembled form.</p></section><section id="examples-density-workflow"><h2><a href="#examples-density-workflow">State, sensitivity and update</a></h2><p>The thermal example proceeds through four operations:</p><ol><li>Evaluate conductivity from the current density and solve for temperature.</li><li>Solve the adjoint equation and assemble the objective derivative.</li><li>Regularize that derivative to obtain a spatial update field.</li><li>Update the density, project its nodal values into the admissible interval, and record the objective and material usage.</li></ol></section><section id="examples-density-tutorial"><h2><a href="#examples-density-tutorial">Thermal design</a></h2><ul><li><a href="examples-density_optimization-simp_temperature_minimization.html" class="m-doc">Temperature minimization</a> — SIMP conductivity, an adjoint sensitivity and a projected density update on the unit square.</li></ul><p>The tutorial includes the computed density and temperature, the measured objective history, output fields and a link to the complete program. Its fixed-step iteration budget defines the recorded experiment. A stationarity test or a prescribed material budget requires a corresponding optimization criterion.</p></section><section id="examples-density-next"><h2><a href="#examples-density-next">Continue</a></h2><p>The <a href="examples-shapeoptimization-index.html" class="m-doc">shape optimization examples</a> vary an explicit material boundary. Both representations require a state equation, a consistent derivative and an update policy.</p></section>
       </div>
     </div>
   </div>

@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin/Variational/Jacobian.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -77,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md445">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md446">Special Cases</a></li>
-            <li><a href="#autotoc_md447">Applications</a></li>
-            <li><a href="#autotoc_md448">Usage Example</a></li>
+            <li><a href="#autotoc_md443">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md444">Special Cases</a></li>
+            <li><a href="#autotoc_md445">Applications</a></li>
+            <li><a href="#autotoc_md446">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the Jacobian class, which computes the Jacobian matrix (matrix of all first-order partial derivatives) of vector-valued functions in variational formulations.</p><section id="autotoc_md445"><h2><a href="#autotoc_md445">Mathematical Foundation</a></h2><p>For a vector-valued function <svg class="m-math" style="width: 9.127em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 87.618912 10.340659">
+<p>This file defines the Jacobian class, which computes the Jacobian matrix (matrix of all first-order partial derivatives) of vector-valued functions in variational formulations.</p><section id="autotoc_md443"><h2><a href="#autotoc_md443">Mathematical Foundation</a></h2><p>For a vector-valued function <svg class="m-math" style="width: 9.127em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 87.618912 10.340659">
 <title>
 $ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^n $
 </title>
@@ -115,7 +115,7 @@ $ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^n $
 <use x='73.846398' y='0' xlink:href='#eq1-g1-82'/>
 <use x='82.48071' y='-4.338437' xlink:href='#eq1-g3-110'/>
 </g>
-</svg>, the Jacobian matrix is defined as:</p><div class="m-math"><svg style="width: 5.056em; height: 2.910em;" viewBox="169.403038 -27.933621 48.541378 27.933621">
+</svg>, the Jacobian matrix is defined as</p><div class="m-math"><svg style="width: 5.056em; height: 2.910em;" viewBox="169.403038 -27.933621 48.541378 27.933621">
 <title>
 \[     J_{ij} = \frac{\partial u_i}{\partial x_j}
 \]
@@ -156,7 +156,7 @@ $ n \times d $
 <use x='9.644269' y='0' xlink:href='#eq3-g0-2'/>
 <use x='21.59943' y='0' xlink:href='#eq3-g1-100'/>
 </g>
-</svg> matrix.</p></section><section id="autotoc_md446"><h2><a href="#autotoc_md446">Special Cases</a></h2><ul><li>When <svg class="m-math" style="width: 3.002em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 28.816609 8.302191">
+</svg> matrix.</p></section><section id="autotoc_md444"><h2><a href="#autotoc_md444">Special Cases</a></h2><ul><li>When <svg class="m-math" style="width: 3.002em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 28.816609 8.302191">
 <title>
 $ n = d $
 </title>
@@ -223,7 +223,7 @@ $ J^T $
 <use x='0' y='0' xlink:href='#eq7-g1-74'/>
 <use x='7.577119' y='-4.338437' xlink:href='#eq7-g0-84'/>
 </g>
-</svg> gives the gradient of components</li></ul></section><section id="autotoc_md447"><h2><a href="#autotoc_md447">Applications</a></h2><ul><li>Nonlinear elasticity: deformation gradient tensor</li><li>Fluid dynamics: velocity gradient tensor</li><li>Differential geometry: metric tensor computations</li><li>Coordinate transformations</li></ul></section><section id="autotoc_md448"><h2><a href="#autotoc_md448">Usage Example</a></h2><pre class="m-code"><span class="c1">// Displacement gradient for elasticity</span>
+</svg> gives the gradient of components</li></ul></section><section id="autotoc_md445"><h2><a href="#autotoc_md445">Applications</a></h2><ul><li>Nonlinear elasticity: deformation gradient tensor</li><li>Fluid dynamics: velocity gradient tensor</li><li>Differential geometry: metric tensor computations</li><li>Coordinate transformations</li></ul></section><section id="autotoc_md446"><h2><a href="#autotoc_md446">Usage Example</a></h2><pre class="m-code"><span class="c1">// Displacement gradient for elasticity</span>
 <span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getSpaceDimension</span><span class="p">());</span>
 <span class="nc">GridFunction</span><span class="o">&lt;</span><span class="nc">P1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">F</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// Deformation gradient F = \nabla u</span></pre></section>

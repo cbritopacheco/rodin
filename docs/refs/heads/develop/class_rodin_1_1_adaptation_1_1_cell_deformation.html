@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Adaptation::CellDeformation class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -118,7 +118,7 @@ $F=I+H$
 <use x='33.709371' y='0' xlink:href='#eq2-g1-43'/>
 <use x='45.470686' y='0' xlink:href='#eq2-g0-72'/>
 </g>
-</svg> and derives, on demand, the quantities mesh adaptation needs: the Jacobian <svg class="m-math" style="width: 5.075em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 48.716225 10.626798">
+</svg> and derives, on demand, the quantities mesh adaptation needs, including the Jacobian <svg class="m-math" style="width: 5.075em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 48.716225 10.626798">
 <title>
 $j=\det F$
 </title>
@@ -930,7 +930,7 @@ $F^{-\top}$
                 </tr>
               </tfoot>
             </table>
-<p>Defined for inverted cells too: only the cofactor structure is needed, not the sign of <svg class="m-math" style="width: 0.575em; height: 1.059em; vertical-align: -0.243em;" viewBox="0 -7.837689 5.515499 10.162297">
+<p>The operation is also defined for inverted cells because it needs only the cofactor structure, not the sign of <svg class="m-math" style="width: 0.575em; height: 1.059em; vertical-align: -0.243em;" viewBox="0 -7.837689 5.515499 10.162297">
 <title>
 $j$
 </title>

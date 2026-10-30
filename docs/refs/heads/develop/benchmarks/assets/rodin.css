@@ -24,11 +24,6 @@
   font-family: 'Manrope', sans-serif;
 }
 
-/* Anchored sections must not draw a competing line between coloured blocks. */
-article section:target:has(.m-block) {
-  border-left-color: transparent;
-}
-
 /* Keep the full-width layout and inline contents on smaller screens. */
 .rodin-page-nav
 {
@@ -700,12 +695,19 @@ nav[aria-label*="table of contents"] summary,
   padding-left: 0;
 }
 
+.rodin-toc li,
 .rodin-toc-branch {
   position: relative;
   list-style: none;
   display: grid;
   grid-template-columns: 1.25em minmax(0, 1fr);
   align-items: baseline;
+}
+.rodin-toc li > a {
+  grid-column: 2;
+}
+.rodin-toc li > :is(ul, ol) {
+  grid-column: 1 / -1;
 }
 .rodin-toc-toggle {
   position: static;

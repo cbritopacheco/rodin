@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Examples and tutorials &raquo; Shape optimization examples | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -74,8 +74,17 @@
           <span class="m-breadcrumb"><a href="examples-index.html">Examples and tutorials</a> &raquo;</span>
           Shape optimization examples
         </h1>
-        <p>Implementation of shape optimization algorithms.</p>
-<ul><li><a href="examples-shapeoptimization-simple_cantilever.html" class="m-doc">Shape optimization of a cantilever</a></li><li><a href="examples-shapeoptimization-levelset_cantilever.html" class="m-doc">Shape optimization of a cantilever via the level set method</a></li></ul>
+        <p>Use a state solve and a shape derivative to evolve a design boundary.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#examples-shapeoptimization-start">Prerequisites</a></li>
+            <li><a href="#examples-shapeoptimization-route">Choose a representation</a></li>
+            <li><a href="#examples-shapeoptimization-results">Assess an update sequence</a></li>
+            <li><a href="#examples-shapeoptimization-next">Geometry and material fields</a></li>
+          </ul>
+        </nav>
+<p>The design is an elastic body&#x27;s material domain. Compliance and an area penalty define the objective; the state equation supplies displacement and stress. A regularized shape derivative determines the geometry update.</p><section id="examples-shapeoptimization-start"><h2><a href="#examples-shapeoptimization-start">Prerequisites</a></h2><p>The <a href="examples-pdes-elasticity.html" class="m-doc">elasticity tutorial</a> supplies the state problem. The <a href="guides-shape-optimization.html" class="m-doc">shape optimization guide</a> derives the derivative, descent sign and regularization conventions. Both examples use MMG and require a hydrated input mesh from the repository&#x27;s Git LFS resources.</p></section><section id="examples-shapeoptimization-route"><h2><a href="#examples-shapeoptimization-route">Choose a representation</a></h2><p>Start with direct boundary deformation to follow the state, derivative and remeshing steps. Then use the level-set example to study transport and reconstruction of a material interface inside a background domain.</p><ol><li><a href="examples-shapeoptimization-simple_cantilever.html" class="m-doc">Shape optimization of a cantilever</a> — A cantilever with an explicitly displaced boundary and remeshing after each update.</li><li><a href="examples-shapeoptimization-levelset_cantilever.html" class="m-doc">Optimizing a level-set cantilever</a> — A cantilever whose material interface is transported through a signed field and reconstructed by MMG.</li></ol></section><section id="examples-shapeoptimization-results"><h2><a href="#examples-shapeoptimization-results">Assess an update sequence</a></h2><p>Each tutorial provides computed geometry, recorded objectives, output-file descriptions and the complete example source. Compare compliance, material area and their weighted objective at solved states. Check solver status, Jacobian signs and element quality after geometry updates.</p><p>The examples use fixed update budgets. The level-set tutorial also records increasing objective steps and a reproduced low-quality triangle after interface reconstruction. These measurements guide the choice of step acceptance, geometric quality controls and stopping criteria for a new application.</p></section><section id="examples-shapeoptimization-next"><h2><a href="#examples-shapeoptimization-next">Geometry and material fields</a></h2><ul><li><a href="examples-swift-background.html" class="m-doc">MMG–SWIFT interface fitting</a> — Isolate classification and geometric fitting before coupling a state equation.</li><li><a href="examples-density_optimization-index.html" class="m-doc">Density optimization</a> — Vary a material coefficient on a fixed domain.</li></ul></section>
       </div>
     </div>
   </div>

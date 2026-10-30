@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::GridFunctionBase class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>Abstract base class for GridFunction objects.</p><p>This class contains the common routines for the behaviour of a GridFunction object. It provides a common interface for the manipulation of its data and weights, as well as projection utilities and convenience functions.</p><aside class="m-note m-default"><h4>Projection semantics</h4><p>Assigning an expression to a grid function computes the <em>interpolant:</em> the space&#x27;s degree-of-freedom functionals are applied to the expression, <svg class="m-math" style="width: 8.726em; height: 1.297em; vertical-align: -0.365em;" viewBox="0 -8.966452 83.769494 12.453452">
+<p>Abstract base class for GridFunction objects.</p><p>This class contains the common routines for the behaviour of a GridFunction object. It provides a common interface for the manipulation of its data and weights, as well as projection utilities and convenience functions.</p><aside class="m-note m-default"><h4>Projection semantics</h4><p>Assigning an expression to a grid function computes the <em>interpolant</em> by applying the space&#x27;s degree-of-freedom functionals to the expression, <svg class="m-math" style="width: 8.726em; height: 1.297em; vertical-align: -0.365em;" viewBox="0 -8.966452 83.769494 12.453452">
 <title>
 $ u_h = \sum_i \sigma_i(f)\, \phi_i $
 </title>
@@ -144,7 +144,7 @@ $ L^2 $
 <use x='0' y='0' xlink:href='#eq3-g0-76'/>
 <use x='7.964506' y='-4.338437' xlink:href='#eq3-g1-50'/>
 </g>
-</svg> projection is required (e.g. for optimal-order transfer of rough data), solve the mass-matrix problem explicitly:</p><pre class="m-code"><span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
+</svg> projection is required (e.g. for optimal-order transfer of rough data), solve the mass-matrix problem explicitly.</p><pre class="m-code"><span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
 <span class="nc">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
 <span class="nc">Problem</span><span class="w"> </span><span class="nf">l2</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">l2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
@@ -162,7 +162,7 @@ $ K \ge 2 $
 <use x='14.138509' y='0' xlink:href='#eq4-g0-21'/>
 <use x='26.757835' y='0' xlink:href='#eq4-g2-50'/>
 </g>
-</svg>) the underlying basis is not plain nodal Lagrange, and <strong>coefficients</strong> <strong>are</strong> <strong>not</strong> <strong>nodal</strong> <strong>values:</strong> always evaluate through getValue() (or the element basis) instead of reading the data vector positionally.</p></aside><aside class="m-note m-default"><h4>Thread safety</h4><p>Concurrent reads (getValue() from multiple threads) on a fully constructed grid function are safe; any mutation (assignment, setData(), load()) requires exclusive access. See the <a href="guides-thread-safety.html" class="m-doc">thread safety guide</a>.</p></aside>
+</svg>) the underlying basis is not plain nodal Lagrange, and <strong>coefficients</strong> <strong>are</strong> <strong>not</strong> <strong>nodal</strong> <strong>values</strong>. Always evaluate through getValue() (or the element basis) instead of reading the data vector positionally.</p></aside><aside class="m-note m-default"><h4>Thread safety</h4><p>Concurrent reads (getValue() from multiple threads) on a fully constructed grid function are safe; any mutation (assignment, setData(), load()) requires exclusive access. See the <a href="guides-thread-safety.html" class="m-doc">thread safety guide</a>.</p></aside>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html" title="GridFunctionBaseReference&lt; Derived &gt;">GridFunctionBaseReference</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">GridFunctionBase</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html"><code>GridFunctionBaseReference&lt;Derived&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#ad7e9b7168aa151ead6193d4b0d5cebbd"><span class="nc">GridFunctionBaseReference</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Derived</span><span class="w"> </span><span class="o">&gt;</span>
 </pre></details></td><td>Base class for discrete finite element functions.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a55906fdb64ef621b6b153e7d8d8adf35"><code>getName()</code></a></td><td><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796">Base::getName</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html"><code>GridFunctionBaseReference</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a992cc9631a9fa2be535cf7e9a6789503"><code>copy()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a7c866cf8be951c464aceeb788579b29a"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a15eb99a5cecce266b59c5e7c1a9b2f4d"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a11cae0eed7fc3211076c29a6552091ab"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a4f6717827cbc7fd8cc1e9bb61fbc0c13"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a00dc82bfe030a25cc55d89b93cf4b5a2"><code>setData()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>11 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#aa75b0ee8f7f82337ebf0b88abfa91b18"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ad7584a02ad39a4e93816d166a02c170c"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#afd564b09b05a55499d7576b85f69a01e"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ad722433deff18a068eb7bd27da532d45"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#aba5919eddb1f90f8ca65bbd25d065d60"><code>traceOf()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
@@ -875,7 +875,7 @@ $ \mathbf{u} $
                 </tr>
                 <tr>
                   <td>fmt&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>File format (default: MFEM)</td>
+                  <td>File format (default MFEM)</td>
                 </tr>
               </tbody>
               <tfoot>

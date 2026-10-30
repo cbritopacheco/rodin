@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Solver::NewtonSolver class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -189,7 +189,7 @@ $ \alpha &gt; 0 $
 <use x='10.842553' y='0' xlink:href='#eq4-g0-62'/>
 <use x='23.268034' y='0' xlink:href='#eq4-g1-48'/>
 </g>
-</svg> is a constant damping factor.</p><aside class="m-note m-default"><h4>Globalization</h4><p>The damping factor is <em>constant:</em> this solver performs no line search and no step-acceptance test, so convergence is only guaranteed close to a solution (the classical local quadratic convergence of Newton&#x27;s method). Practical consequences:</p><ul><li>For problems solved far from equilibrium (large loads, strong nonlinearity), use <em>incremental</em> <em>loading</em> — ramp the load over several solves so each Newton run starts inside its basin of attraction (see <code>examples/Solid/BlockGravity.cpp</code>).</li><li>Merit functions with barriers (e.g. terms that blow up as an element Jacobian determinant approaches zero) cannot be minimized reliably with a constant step: they require a backtracking line search with a validity test, which callers must currently implement around this solver.</li><li>A damping factor <svg class="m-math" style="width: 3.033em; height: 0.836em; vertical-align: -0.033em;" viewBox="0 -7.704442 29.121025 8.023258">
+</svg> is a constant damping factor.</p><aside class="m-note m-default"><h4>Globalization</h4><p>The damping factor is <em>constant</em>. This solver performs no line search and no step-acceptance test. Convergence is only guaranteed close to a solution (the classical local quadratic convergence of Newton&#x27;s method). Practical consequences:</p><ul><li>For problems solved far from equilibrium (large loads, strong nonlinearity), use <em>incremental</em> <em>loading</em> — ramp the load over several solves so each Newton run starts inside its basin of attraction (see <code>examples/Solid/BlockGravity.cpp</code>).</li><li>Merit functions with barriers (e.g. terms that blow up as an element Jacobian determinant approaches zero) cannot be minimized reliably with a constant step because they require a backtracking line search with a validity test, which callers must currently implement around this solver.</li><li>A damping factor <svg class="m-math" style="width: 3.033em; height: 0.836em; vertical-align: -0.033em;" viewBox="0 -7.704442 29.121025 8.023258">
 <title>
 $ \alpha &lt; 1 $
 </title>
@@ -203,7 +203,7 @@ $ \alpha &lt; 1 $
 <use x='10.842553' y='0' xlink:href='#eq5-g0-60'/>
 <use x='23.268034' y='0' xlink:href='#eq5-g1-49'/>
 </g>
-</svg> trades convergence speed for robustness and can stabilize mildly nonconvex problems, but it is not a substitute for a line search.</li></ul></aside><p>The nonlinear state vector passed to <code>solve()</code> is updated in place and is used both as the initial guess and as the storage for the final iterate.</p><aside class="m-note m-default"><h4>Associated tangential problem</h4><p>The solver obtains the tangential <a href="_variational_2_problem_8h.html">Variational::<wbr />ProblemBase</a> from the supplied linear solver through <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase::<wbr />getProblem()</a>. At each Newton iteration:</p><ul><li>the tangential problem is reassembled by calling <code>assemble()</code>,</li><li>the assembled linear system is accessed through <a href="_variational_2_problem_8h.html">ProblemBase::<wbr />getLinearSystem()</a>,</li><li>the linear correction is computed by the associated linear solver.</li></ul></aside><aside class="m-note m-default"><h4>Contract</h4><p>This solver assumes that the associated problem is already assembled in Newton form:</p><div class="m-math"><svg style="width: 9.465em; height: 1.245em;" viewBox="148.837383 -11.955168 90.868221 11.955168">
+</svg> trades convergence speed for robustness and can stabilize mildly nonconvex problems, but it is not a substitute for a line search.</li></ul></aside><p>The nonlinear state vector passed to <code>solve()</code> is updated in place and is used both as the initial guess and as the storage for the final iterate.</p><aside class="m-note m-default"><h4>Associated tangential problem</h4><p>The solver obtains the tangential <a href="_variational_2_problem_8h.html">Variational::<wbr />ProblemBase</a> from the supplied linear solver through <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase::<wbr />getProblem()</a>. At each Newton iteration:</p><ul><li>the tangential problem is reassembled by calling <code>assemble()</code>,</li><li>the assembled linear system is accessed through <a href="_variational_2_problem_8h.html">ProblemBase::<wbr />getLinearSystem()</a>,</li><li>the linear correction is computed by the associated linear solver.</li></ul></aside><aside class="m-note m-default"><h4>Contract</h4><p>This solver assumes that the associated problem is already assembled in Newton form.</p><div class="m-math"><svg style="width: 9.465em; height: 1.245em;" viewBox="148.837383 -11.955168 90.868221 11.955168">
 <title>
 \[  J(x)\,\delta x = -F(x).
 \]
@@ -362,7 +362,7 @@ $ u $
 <g id='eq11-page1'>
 <use x='0' y='0' xlink:href='#eq11-g0-117'/>
 </g>
-</svg>:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">ivw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">InternalVirtualWork</span><span class="p">(</span><span class="n">law</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// residual + tangent</span>
+</svg>.</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">ivw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">InternalVirtualWork</span><span class="p">(</span><span class="n">law</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// residual + tangent</span>
 
 <span class="nc">Problem</span><span class="w"> </span><span class="nf">newton</span><span class="p">(</span><span class="n">du</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">newton</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ivw</span><span class="p">(</span><span class="n">du</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
@@ -664,7 +664,7 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 1e-12.</p>
+<p>The default is 1e-12.</p>
           </div></section>
           <section class="m-doc-details" id="aed2c454c4dbc92230144d7f1882ef6fe"><div>
             <h3>
@@ -705,7 +705,7 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 1e-8.</p>
+<p>The default is 1e-8.</p>
           </div></section>
           <section class="m-doc-details" id="ae098838ab06264886dd956b4f255de9b"><div>
             <h3>
@@ -746,7 +746,7 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 0.0, which disables the step criterion.</p>
+<p>The default is 0.0, which disables the step criterion.</p>
           </div></section>
           <section class="m-doc-details" id="ae34baff1e8728f402d832cd215321caa"><div>
             <h3>
@@ -787,7 +787,7 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 1.0.</p>
+<p>The default is 1.0.</p>
           </div></section>
           <section class="m-doc-details" id="a61fa49d443d46d3e79b1eb21abb0f618"><div>
             <h3>
@@ -828,7 +828,7 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<p>Default value: 100.</p>
+<p>The default is 100.</p>
           </div></section>
           <section class="m-doc-details" id="a38e3e1eba9895de2375394ef5b2ddb81"><div>
             <h3>
@@ -853,7 +853,7 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<p>Passing a callable installs a monitor invoked once per Newton iteration. Passing <code>std::nullopt</code> disables monitoring.</p><p>Default value: none.</p>
+<p>Passing a callable installs a monitor invoked once per Newton iteration. Passing <code>std::nullopt</code> disables monitoring.</p><p>The default is none.</p>
           </div></section>
           <section class="m-doc-details" id="a946de55ddbf51d4a0576aeae309021c8"><div>
             <h3>

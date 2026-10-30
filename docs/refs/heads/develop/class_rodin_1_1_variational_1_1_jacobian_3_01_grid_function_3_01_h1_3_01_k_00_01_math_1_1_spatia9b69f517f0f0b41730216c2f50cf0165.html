@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Jacobian&lt;GridFunction&lt;H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -81,7 +81,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md408">Applications</a></li>
+            <li><a href="#autotoc_md406">Applications</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>Computes the Jacobian matrix of an H1&lt;K&gt; vector-valued grid function:</p><div class="m-math"><svg style="width: 20.594em; height: 3.556em;" viewBox="95.421238 -35.334293 197.700514 34.13878">
+<p>Computes the Jacobian matrix of an H1&lt;K&gt; vector-valued grid function.</p><div class="m-math"><svg style="width: 20.594em; height: 3.556em;" viewBox="95.421238 -35.334293 197.700514 34.13878">
 <title>
 \[  \mathbf{J}(\mathbf{u})|_K
   = \sum_{\alpha=1}^{N_s}\sum_{c=0}^{m-1} u_{\alpha c}\,
@@ -214,7 +214,7 @@ $s$
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-115'/>
 </g>
-</svg> ambient entries.</p><p>The inverse geometric Jacobian is evaluated at the current sample. Curved mappings need not produce polynomial physical derivatives.</p><section id="autotoc_md408"><h2><a href="#autotoc_md408">Applications</a></h2><ul><li>Strain tensor in elasticity: <svg class="m-math" style="width: 7.574em; height: 1.455em; vertical-align: -0.431em;" viewBox="0 -9.843428 72.713112 13.96606">
+</svg> ambient entries.</p><p>The inverse geometric Jacobian is evaluated at the current sample. Curved mappings need not produce polynomial physical derivatives.</p><section id="autotoc_md406"><h2><a href="#autotoc_md406">Applications</a></h2><ul><li>Strain tensor in elasticity: <svg class="m-math" style="width: 7.574em; height: 1.455em; vertical-align: -0.431em;" viewBox="0 -9.843428 72.713112 13.96606">
 <title>
 $ \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{J} + \mathbf{J}^T) $
 </title>

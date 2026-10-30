@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>std namespace | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -94,19 +94,19 @@
 <span class="k">struct</span><span class="w"> </span><span class="nc">tuple_element</span><span class="o">&lt;</span>
 <span class="w">  </span><span class="mi">0</span><span class="p">,</span>
 <span class="w">  </span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><span class="nc">LinearSystem</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Matrix</span><span class="p">,</span><span class="w"> </span><span class="nc">Vector</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
-</pre></details></td><td>Structured-binding element 0 of a LinearSystem: the operator $ A $.</td></tr><tr><td><a href="structstd_1_1tuple__element_3_011_00_01_rodin_1_1_math_1_1_linear_system_3_01_matrix_00_01_vector_01_4_01_4.html"><code>1, Rodin::Math::LinearSystem&lt;Matrix, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+</pre></details></td><td>Structured-binding element 0 of a LinearSystem holding the operator $ A $.</td></tr><tr><td><a href="structstd_1_1tuple__element_3_011_00_01_rodin_1_1_math_1_1_linear_system_3_01_matrix_00_01_vector_01_4_01_4.html"><code>1, Rodin::Math::LinearSystem&lt;Matrix, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
 <span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Matrix</span><span class="p">,</span>
 <span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Vector</span><span class="o">&gt;</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">tuple_element</span><span class="o">&lt;</span>
 <span class="w">  </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">  </span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><span class="nc">LinearSystem</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Matrix</span><span class="p">,</span><span class="w"> </span><span class="nc">Vector</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
-</pre></details></td><td>Structured-binding element 1 of a LinearSystem: the solution $ x $.</td></tr><tr><td><a href="structstd_1_1tuple__element_3_012_00_01_rodin_1_1_math_1_1_linear_system_3_01_matrix_00_01_vector_01_4_01_4.html"><code>2, Rodin::Math::LinearSystem&lt;Matrix, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+</pre></details></td><td>Structured-binding element 1 of a LinearSystem holding the solution $ x $.</td></tr><tr><td><a href="structstd_1_1tuple__element_3_012_00_01_rodin_1_1_math_1_1_linear_system_3_01_matrix_00_01_vector_01_4_01_4.html"><code>2, Rodin::Math::LinearSystem&lt;Matrix, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
 <span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Matrix</span><span class="p">,</span>
 <span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Vector</span><span class="o">&gt;</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">tuple_element</span><span class="o">&lt;</span>
 <span class="w">  </span><span class="mi">2</span><span class="p">,</span>
 <span class="w">  </span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><span class="nc">LinearSystem</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Matrix</span><span class="p">,</span><span class="w"> </span><span class="nc">Vector</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
-</pre></details></td><td>Structured-binding element 2 of a LinearSystem: the right-hand side $ b $.</td></tr></tbody></table></details></dd>
+</pre></details></td><td>Structured-binding element 2 of a LinearSystem holding the right-hand side $ b $.</td></tr></tbody></table></details></dd>
             
             
           </dl>

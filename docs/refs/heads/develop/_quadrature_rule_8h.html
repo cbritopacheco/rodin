@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin/Variational/QuadratureRule.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -77,8 +77,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md524">Mathematical foundation</a></li>
-            <li><a href="#autotoc_md525">Usage</a></li>
+            <li><a href="#autotoc_md521">Mathematical foundation</a></li>
+            <li><a href="#autotoc_md522">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -88,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines specializations of <code>Rodin::Variational::QuadratureRule</code> for integrating functions and shape-function expressions over mesh polytopes.</p><section id="autotoc_md524"><h2><a href="#autotoc_md524">Mathematical foundation</a></h2><p>A quadrature rule approximates an integral by a weighted sum:</p><div class="m-math"><svg style="width: 14.074em; height: 3.622em;" viewBox="126.714685 -35.965274 135.113609 34.76976">
+<p>This file defines specializations of <code>Rodin::Variational::QuadratureRule</code> for integrating functions and shape-function expressions over mesh polytopes.</p><section id="autotoc_md521"><h2><a href="#autotoc_md521">Mathematical foundation</a></h2><p>A quadrature rule approximates an integral by a weighted sum.</p><div class="m-math"><svg style="width: 14.074em; height: 3.622em;" viewBox="126.714685 -35.965274 135.113609 34.76976">
 <title>
 \[  \int_K f(x)\,dx \approx \sum_{q=1}^{n_q} w_q\,f(x_q),
 \]
@@ -136,7 +136,7 @@
 <use x='254.024307' y='-16.493782' xlink:href='#eq1-g6-41'/>
 <use x='258.576633' y='-16.493782' xlink:href='#eq1-g4-59'/>
 </g>
-</svg></div><p>where:</p><ul><li><svg class="m-math" style="width: 1.117em; height: 0.884em; vertical-align: -0.350em;" viewBox="0 -5.147373 10.718838 8.490382">
+</svg></div><p>Here,</p><ul><li><svg class="m-math" style="width: 1.117em; height: 0.884em; vertical-align: -0.350em;" viewBox="0 -5.147373 10.718838 8.490382">
 <title>
 $ x_q $
 </title>
@@ -172,7 +172,7 @@ $ n_q $
 <use x='0' y='0' xlink:href='#eq4-g1-110'/>
 <use x='6.987606' y='1.793263' xlink:href='#eq4-g0-113'/>
 </g>
-</svg> is the number of quadrature points.</li></ul><p>In Rodin, the reference quadrature formula lives in the <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a> module, while the mapped geometric points live in <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>. This separation allows:</p><ul><li>canonical reuse of reference quadrature formulas,</li><li>integrator-owned mapped points for the currently bound polytope,</li><li>bounded mapped-point storage during a one-pass mesh traversal.</li></ul></section><section id="autotoc_md525"><h2><a href="#autotoc_md525">Usage</a></h2><p>Typical usage is:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">qr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">QuadratureRule</span><span class="p">(</span><span class="n">integrand</span><span class="p">);</span>
+</svg> is the number of quadrature points.</li></ul><p>In Rodin, the reference quadrature formula lives in the <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a> module, while the mapped geometric points live in <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>. This separation allows:</p><ul><li>canonical reuse of reference quadrature formulas,</li><li>integrator-owned mapped points for the currently bound polytope,</li><li>bounded mapped-point storage during a one-pass mesh traversal.</li></ul></section><section id="autotoc_md522"><h2><a href="#autotoc_md522">Usage</a></h2><p>The following code constructs and evaluates a quadrature rule.</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">qr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">QuadratureRule</span><span class="p">(</span><span class="n">integrand</span><span class="p">);</span>
 <span class="n">qr</span><span class="p">.</span><span class="n">setPolytope</span><span class="p">(</span><span class="n">cell</span><span class="p">);</span>
 <span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qr</span><span class="p">.</span><span class="n">compute</span><span class="p">();</span></pre><p>For local element integrators, setPolytope() binds the integrator to a concrete polytope, selects an appropriate quadrature formula, and owns the corresponding <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a> until the next bind or destruction. Moving a rule transfers this ownership without relocating the mapped points. Copying a rule does not copy its polytope binding. For <svg class="m-math" style="width: 0.884em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.486836 8.169366">
 <title>

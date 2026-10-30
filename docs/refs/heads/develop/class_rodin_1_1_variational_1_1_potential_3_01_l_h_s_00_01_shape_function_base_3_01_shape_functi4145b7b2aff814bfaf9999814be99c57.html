@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Potential&lt;LHS, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, FES, SpaceType&gt;, FES, SpaceType&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -94,7 +94,7 @@
             </li>
           </ul>
         </nav>
-<p>Represents the expression:</p><div class="m-math"><svg style="width: 33.028em; height: 3.882em;" viewBox="35.735408 -38.467001 317.072198 37.271487">
+<p>Represents the expression.</p><div class="m-math"><svg style="width: 33.028em; height: 3.882em;" viewBox="35.735408 -38.467001 317.072198 37.271487">
 <title>
 \[ (K u)(x) = \sum_{\tau \in \mathcal{T}_h} (K_\tau u)(x)
  = \sum_{\tau \in \mathcal{T}_h} \sum^{n(\tau)}_{\ell = 1} w_{\tau, \ell}
@@ -185,7 +185,7 @@
 <use x='332.882326' y='-16.615548' xlink:href='#eq1-g3-50'/>
 <use x='344.173294' y='-16.615548' xlink:href='#eq1-g0-82'/>
 </g>
-</svg></div><p>where:</p><div class="m-math"><svg style="width: 20.427em; height: 2.819em;" viewBox="96.22035 -27.065451 196.102343 27.065451">
+</svg></div><p>Here,</p><div class="m-math"><svg style="width: 20.427em; height: 2.819em;" viewBox="96.22035 -27.065451 196.102343 27.065451">
 <title>
 \[   (K_\tau \phi_{\tau, \ell})(x) := \ \mathrm{p.v.} \int_{\tau} k(x, y) \phi_{\tau, \ell}(y) \ dy
 \]
@@ -454,11 +454,11 @@
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object</td>
+                  <td>Newly allocated copy whose ownership passes to the caller.</td>
                 </tr>
               </tfoot>
             </table>
-<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
+<p>Derived classes implement this pure virtual function to support polymorphic copying. The caller must adopt the returned pointer into owned storage or otherwise release it.</p><aside class="m-note m-info"><h4>Note</h4><p>Copy dispatch through this base is virtual.</p></aside>
           </div></section>
         </section>
       </div>

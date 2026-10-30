@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::MassForm::Kernel class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -75,7 +75,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md464">Architecture</a></li>
+            <li><a href="#autotoc_md462">Architecture</a></li>
             <li>
               Reference
               <ul>
@@ -86,7 +86,7 @@
             </li>
           </ul>
         </nav>
-<p>Evaluates the reference bases once per polytope geometry and quadrature order and reuses them across polytopes; only the quadrature weights, the distortion of the map and the coefficient change from one polytope to the next. The kernel owns a copy of the coefficient, so that each thread assembling with its own copy of the kernel also evaluates its own copy of the coefficient.</p><section id="autotoc_md464"><h2><a href="#autotoc_md464">Architecture</a></h2><p>Reference preparation owns one basis-pair matrix per quadrature sample. Trial values are evaluated once into point-local scratch before the test-basis loop. Thus <svg class="m-math" style="width: 2.851em; height: 1.199em; vertical-align: -0.350em;" viewBox="0 -8.169366 27.369107 11.512374">
+<p>Evaluates the reference bases once per polytope geometry and quadrature order and reuses them across polytopes; only the quadrature weights, the distortion of the map and the coefficient change from one polytope to the next. The kernel owns a copy of the coefficient, so that each thread assembling with its own copy of the kernel also evaluates its own copy of the coefficient.</p><section id="autotoc_md462"><h2><a href="#autotoc_md462">Architecture</a></h2><p>Reference preparation owns one basis-pair matrix per quadrature sample. Trial values are evaluated once into point-local scratch before the test-basis loop. Thus <svg class="m-math" style="width: 2.851em; height: 1.199em; vertical-align: -0.350em;" viewBox="0 -8.169366 27.369107 11.512374">
 <title>
 $N_qN_r$
 </title>

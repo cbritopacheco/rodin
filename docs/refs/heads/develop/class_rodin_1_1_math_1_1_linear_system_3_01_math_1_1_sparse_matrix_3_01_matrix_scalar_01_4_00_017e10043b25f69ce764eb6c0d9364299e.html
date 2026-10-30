@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Math::LinearSystem&lt;Math::SparseMatrix&lt;MatrixScalar&gt;, Math::Vector&lt;VectorScalar&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -587,7 +587,7 @@ $x_C=g_C$
 <use x='29.495197' y='0' xlink:href='#eq11-g1-103'/>
 <use x='35.100505' y='1.793263' xlink:href='#eq11-g0-67'/>
 </g>
-</svg>. Neither symmetry of values nor transpose storage is required. In particular, no conjugation enters the lifting for complex systems. The solution vector is preserved for warm starts.</p><h4 id="autotoc_md167">Implementation</h4><p>All constrained columns contribute to the load before any coefficient is cleared. Their diagonal positions are recorded after each column&#x27;s traversal. Absent diagonals are inserted together by one backwards merge of the compressed arrays, preserving sorted row indices and all existing stored entries, including explicit zeros.</p><p>A byte per row identifies constraints. Adjacent constrained columns are cleared as contiguous storage ranges. Between these ranges, blocks of sixteen row indices form a bit mask: empty masks require no coefficient stores, while nonempty masks visit only their set bits. Sixteen is a kernel granularity, not a numerical threshold. The tail uses bit masking for Real and conditional zero assignment for other scalars; multiplication by zero would not clear nonfinite values. Finally the diagonals and prescribed load entries are restored.</p><p>For a single contiguous constraint interval, a bounded sample may select exact row-range pruning. This heuristic requires at least eight entries per column on average and at least half of sixteen storage- quantile samples to reject the interval. These measured policy choices select a kernel only: each skipped column is independently certified by its actual row bounds. Partial columns use binary searches. Fragmented constraints always use the block kernel.</p><p>With <svg class="m-math" style="width: 0.728em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.987606 5.147373">
+</svg>. Neither symmetry of values nor transpose storage is required. In particular, no conjugation enters the lifting for complex systems. The solution vector is preserved for warm starts.</p><h4 id="autotoc_md167">Implementation</h4><p>All constrained columns contribute to the load before any coefficient is cleared. Their diagonal positions are recorded after each column&#x27;s traversal. Absent diagonals are inserted together by one backwards merge of the compressed arrays, preserving sorted row indices and all existing stored entries, including explicit zeros.</p><p>A byte per row identifies constraints. Adjacent constrained columns are cleared as contiguous storage ranges. Between these ranges, blocks of sixteen row indices form a bit mask. Empty masks require no coefficient stores, while nonempty masks visit only their set bits. Sixteen is a kernel granularity, not a numerical threshold. The tail uses bit masking for Real and conditional zero assignment for other scalars; multiplication by zero would not clear nonfinite values. Finally the diagonals and prescribed load entries are restored.</p><p>For a single contiguous constraint interval, a bounded sample may select exact row-range pruning. This heuristic requires at least eight entries per column on average and at least half of sixteen storage- quantile samples to reject the interval. These measured policy choices select a kernel only. Each skipped column is independently certified by its actual row bounds. Partial columns use binary searches. Fragmented constraints always use the block kernel.</p><p>With <svg class="m-math" style="width: 0.728em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.987606 5.147373">
 <title>
 $n$
 </title>
@@ -692,7 +692,7 @@ $O(n+k)$
                 </tr>
                 <tr>
                   <td>offset&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Index offset applied to DOF indices (default: 0)</td>
+                  <td>Index offset applied to DOF indices (default 0)</td>
                 </tr>
               </tbody>
               <tfoot>

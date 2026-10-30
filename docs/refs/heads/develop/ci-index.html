@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Continuous integration | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html" id="m-navbar-current">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -73,8 +73,8 @@
         <h1>
           Continuous integration
         </h1>
-        <p>Branch status, workflow runs and CI reports.</p>
-<p>CI status and reports for develop and master.</p><section id="ci-status"><h2><a href="#ci-status">Current status</a></h2></section>
+        <p>Inspect branch commits, workflow outcomes and generated reports.</p>
+<p>The tables below collect the latest workflow runs for <code>master</code> and <code>develop</code>. Each branch heading identifies its current commit; each workflow row links to the commit actually checked by that run.</p><section id="ci-status"><h2><a href="#ci-status">Current status</a></h2><p>The <strong>Workflow run</strong> link opens the execution and job logs. <strong>Report</strong> opens the generated summary when a matching report is available for that commit and run attempt.</p></section><section id="ci-reading"><h2><a href="#ci-reading">Interpret a result</a></h2><p>A passing result applies to the commit shown in its row. An <strong>older commit</strong> label identifies a run that predates the current branch head. The Labeler row records pull-request labeling activity; it can therefore refer to a different commit from the branch&#x27;s build and numerical tests.</p><p>Running and queued states describe work in progress. For coverage, the Tests run&#x27;s <strong>Coverage / Finalize</strong> job supplies the combined result after all required contributions and publication receipts have been checked. The Benchmarks run contains the campaign validation, pooling and publication jobs. Their outcomes establish whether the complete result set was published.</p></section>
       </div>
     </div>
   </div>

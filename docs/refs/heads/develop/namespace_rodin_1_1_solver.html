@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Solver module | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -172,7 +172,7 @@ $ LDL^T $
 <use x='18.008982' y='0' xlink:href='#eq4-g1-76'/>
 <use x='25.973488' y='-4.338437' xlink:href='#eq4-g0-84'/>
 </g>
-</svg></li></ul><p>Iterative solvers (for large systems):</p><ul><li><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> — Conjugate Gradient (SPD systems)</li><li><a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> — Bi-conjugate gradient stabilized</li><li><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> — Generalized Minimum Residual</li><li><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> — Deflated GMRES</li><li><a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a> — Minimum Residual (symmetric systems)</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s.html" class="m-doc">IDRS</a> — Induced Dimension Reduction</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a> — IDR(s) with stabilization</li><li><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a> — Least-squares CG</li></ul><p>Usage:</p><pre class="m-code"><span class="c1">// Inline iterative solver — most common pattern</span>
+</svg></li></ul><p>Iterative solvers (for large systems):</p><ul><li><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> — Conjugate Gradient (SPD systems)</li><li><a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> — Bi-conjugate gradient stabilized</li><li><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> — Generalized Minimum Residual</li><li><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> — Deflated GMRES</li><li><a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a> — Minimum Residual (symmetric systems)</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s.html" class="m-doc">IDRS</a> — Induced Dimension Reduction</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a> — IDR(s) with stabilization</li><li><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a> — Least-squares CG</li></ul><p>A solver can be constructed from an assembled form or problem.</p><pre class="m-code"><span class="c1">// Inline iterative solver — most common pattern</span>
 <span class="n">Solver</span><span class="o">::</span><span class="nc">CG</span><span class="p">(</span><span class="n">problem</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
 
 <span class="c1">// Configured iterative solver</span>
@@ -252,7 +252,7 @@ $ u^{k+1} = u^k + \delta u^k $
 <use x='70.182308' y='0' xlink:href='#eq7-g1-117'/>
 <use x='76.844748' y='-4.338437' xlink:href='#eq7-g0-107'/>
 </g>
-</svg>. Configurable via <code>setMaxIterations()</code>, <code>setAbsoluteTolerance()</code>, and <code>setRelativeTolerance()</code>.</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-solvers.html" class="m-doc">Solvers Guide</a></p></aside>
+</svg>. Configurable via <code>setMaxIterations()</code>, <code>setAbsoluteTolerance()</code>, and <code>setRelativeTolerance()</code>.</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-solvers.html" class="m-doc">Solvers guide</a></p></aside>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">

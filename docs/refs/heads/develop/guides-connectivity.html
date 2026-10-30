@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <title>General concepts &raquo; Connectivity | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <link rel="prev" href="guides-polytopes.html" />
   <link rel="next" href="fem-ciarlet.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -34,7 +34,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -83,14 +83,14 @@
             <li><a href="#guides-connectivity-intro">Introduction</a></li>
             <li><a href="#guides-connectivity-notation">Notation</a></li>
             <li>
-              <a href="#guides-connectivity-compute">Computing Connectivity</a>
+              <a href="#guides-connectivity-compute">Computing connectivity</a>
               <ul>
-                <li><a href="#guides-connectivity-compute-modes">Computation Modes</a></li>
+                <li><a href="#guides-connectivity-compute-modes">Computation modes</a></li>
               </ul>
             </li>
-            <li><a href="#guides-connectivity-boundary">Boundary Detection</a></li>
-            <li><a href="#guides-connectivity-attributes">Boundary Attributes</a></li>
-            <li><a href="#guides-connectivity-see-also">See Also</a></li>
+            <li><a href="#guides-connectivity-boundary">Boundary detection</a></li>
+            <li><a href="#guides-connectivity-attributes">Boundary attributes</a></li>
+            <li><a href="#guides-connectivity-see-also">See also</a></li>
           </ul>
         </nav>
 <section id="guides-connectivity-intro"><h2><a href="#guides-connectivity-intro">Introduction</a></h2><p>Connectivity (or incidence) information describes how the polytopes (vertices, edges, faces, cells) in a mesh relate to each other. In Rodin, this is managed by the <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> class, which is accessed through <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />getConnectivity()</a>.</p><p>Connectivity is essential for:</p><ul><li>Identifying boundary entities for imposing boundary conditions</li><li>Traversing mesh topology during assembly</li><li>Finding neighbors and adjacencies</li></ul></section><section id="guides-connectivity-notation"><h2><a href="#guides-connectivity-notation">Notation</a></h2><p>Connectivity is described as a relation between polytopes of dimension <svg class="m-math" style="width: 1.075em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 10.316876 10.095454">
@@ -180,7 +180,7 @@ $ d = 0 $
 <use x='9.403522' y='0' xlink:href='#eq6-g1-61'/>
 <use x='21.829003' y='0' xlink:href='#eq6-g1-48'/>
 </g>
-</svg> (vertices)</li></ul><p>Common connectivity relations:</p><table class="m-table"><thead><tr><th>Relation</th><th>Meaning</th><th>Use Case</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 2.714em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.054791 11.955168">
+</svg> (vertices)</li></ul><p>Common connectivity relations:</p><table class="m-table"><thead><tr><th>Relation</th><th>Meaning</th><th>Use case</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 2.714em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.054791 11.955168">
 <title>
 $ (0, 2) $
 </title>
@@ -252,7 +252,7 @@ $ (2, 1) $
 <use x='15.649475' y='0' xlink:href='#eq10-g1-49'/>
 <use x='21.502465' y='0' xlink:href='#eq10-g1-41'/>
 </g>
-</svg></td><td>Cells → Edges</td><td>Cell edge lookup</td></tr></tbody></table></section><section id="guides-connectivity-compute"><h2><a href="#guides-connectivity-compute">Computing Connectivity</a></h2><p>Connectivity relations are computed on demand using the <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">compute()</a> method:</p><pre class="m-code"><span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+</svg></td><td>Cells → Edges</td><td>Cell edge lookup</td></tr></tbody></table></section><section id="guides-connectivity-compute"><h2><a href="#guides-connectivity-compute">Computing connectivity</a></h2><p>Connectivity relations are computed on demand using the <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">compute()</a> method.</p><pre class="m-code"><span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
 
 <span class="c1">// Compute edge-to-cell connectivity (required for boundary detection)</span>
@@ -277,7 +277,7 @@ $ (d{-}1, d) $
 <use x='31.030657' y='0' xlink:href='#eq11-g1-100'/>
 <use x='37.11335' y='0' xlink:href='#eq11-g2-41'/>
 </g>
-</svg> connectivity (edges → cells in 2D, or faces → cells in 3D) is required before imposing <code>DirichletBC</code>, since boundary detection relies on finding entities that belong to only one cell.</p></aside><section id="guides-connectivity-compute-modes"><h3><a href="#guides-connectivity-compute-modes">Computation Modes</a></h3><p>The <code>compute()</code> method accepts an optional <strong>mode</strong> parameter that controls how sub-entities are handled:</p><table class="m-table"><thead><tr><th>Mode</th><th>Behavior</th></tr></thead><tbody><tr><td><code>Connectivity::Mode::Discover</code> (default)</td><td>Creates any missing sub-polytopes that are needed for the relation. For example, computing <svg class="m-math" style="width: 2.714em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.054791 11.955168">
+</svg> connectivity (edges → cells in 2D, or faces → cells in 3D) is required before imposing <code>DirichletBC</code>, since boundary detection relies on finding entities that belong to only one cell.</p></aside><section id="guides-connectivity-compute-modes"><h3><a href="#guides-connectivity-compute-modes">Computation modes</a></h3><p>The <code>compute()</code> method accepts an optional <strong>mode</strong> parameter that controls how sub-entities are handled:</p><table class="m-table"><thead><tr><th>Mode</th><th>Behavior</th></tr></thead><tbody><tr><td><code>Connectivity::Mode::Discover</code> (default)</td><td>Creates any missing sub-polytopes that are needed for the relation. For example, computing <svg class="m-math" style="width: 2.714em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.054791 11.955168">
 <title>
 $ (1, 2) $
 </title>
@@ -295,11 +295,11 @@ $ (1, 2) $
 <use x='15.649475' y='0' xlink:href='#eq12-g1-50'/>
 <use x='21.502465' y='0' xlink:href='#eq12-g1-41'/>
 </g>
-</svg> on a triangle mesh will create edge entities if they do not yet exist.</td></tr><tr><td><code>Connectivity::Mode::Restrict</code></td><td>Only uses polytopes that already exist in the mesh. Does not create new entities. Use this when you only want to relate entities that have been explicitly added.</td></tr></tbody></table><pre class="m-code"><span class="c1">// Default mode: discovers (creates) edges if needed</span>
+</svg> on a triangle mesh will create edge entities if they do not yet exist.</td></tr><tr><td><code>Connectivity::Mode::Restrict</code></td><td>Restricts the relation to existing polytopes. Entity creation remains under the control of the mesh builder.</td></tr></tbody></table><pre class="m-code"><span class="c1">// Default mode: discovers (creates) edges if needed</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
 
 <span class="c1">// Restrict mode: only uses existing entities</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nc">Connectivity</span><span class="o">::</span><span class="nc">Mode</span><span class="o">::</span><span class="n">Restrict</span><span class="p">);</span></pre><p>In most workflows, the default <code>Discover</code> mode is what you want.</p></section></section><section id="guides-connectivity-boundary"><h2><a href="#guides-connectivity-boundary">Boundary Detection</a></h2><p>Once the <svg class="m-math" style="width: 4.894em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.979011 11.955168">
+<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nc">Connectivity</span><span class="o">::</span><span class="nc">Mode</span><span class="o">::</span><span class="n">Restrict</span><span class="p">);</span></pre><p>The default <code>Discover</code> mode constructs the sub-polytopes required by each requested relation.</p></section></section><section id="guides-connectivity-boundary"><h2><a href="#guides-connectivity-boundary">Boundary detection</a></h2><p>Once the <svg class="m-math" style="width: 4.894em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.979011 11.955168">
 <title>
 $ (d-1, d) $
 </title>
@@ -330,24 +330,19 @@ $ d $
 <g id='eq14-page1'>
 <use x='0' y='0' xlink:href='#eq14-g0-100'/>
 </g>
-</svg> is the mesh dimension), Rodin can identify boundary entities — those that are incident to exactly one cell. This is how <code>DirichletBC</code> finds the boundary DOFs automatically.</p><pre class="m-code"><span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
-<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">  </span><span class="c1">// Required for boundary detection</span>
+</svg> is the mesh dimension), Rodin can identify boundary entities — those that are incident to exactly one cell. This is how <code>DirichletBC</code> finds the boundary DOFs automatically.</p><pre class="m-code"><span class="w">  </span><span class="nc">P1</span><span class="w"> </span><span class="nf">vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">  </span><span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
+<span class="w">  </span><span class="nc">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
+<span class="w">  </span><span class="nc">RealFunction</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 
-<span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
-<span class="nc">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
-
-<span class="nc">Problem</span><span class="w"> </span><span class="nf">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
-<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
-<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span><span class="w">  </span><span class="c1">// Automatically detects boundary</span></pre></section><section id="guides-connectivity-attributes"><h2><a href="#guides-connectivity-attributes">Boundary Attributes</a></h2><p>Different parts of the boundary can be distinguished by <strong>attributes</strong> (integer labels). This is useful when different boundary conditions are applied to different segments:</p><pre class="m-code"><span class="nc">Attribute</span><span class="w"> </span><span class="n">GammaD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">GammaN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">  </span><span class="nc">Problem</span><span class="w"> </span><span class="nf">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="w">  </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span></pre></section><section id="guides-connectivity-attributes"><h2><a href="#guides-connectivity-attributes">Boundary attributes</a></h2><p>Different parts of the boundary can be distinguished by <strong>attributes</strong> (integer labels). This is useful when different boundary conditions are applied to different segments.</p><pre class="m-code"><span class="nc">Attribute</span><span class="w"> </span><span class="n">GammaD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">GammaN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
 
 <span class="c1">// Apply Dirichlet BC only on boundary with attribute GammaD</span>
 <span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">()).</span><span class="n">on</span><span class="p">(</span><span class="n">GammaD</span><span class="p">)</span>
 
 <span class="c1">// Apply Neumann BC only on boundary with attribute GammaN</span>
-<span class="nc">BoundaryIntegral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span></pre><p>Boundary attributes are typically set when loading a mesh from a file or when building a mesh programmatically.</p></section><section id="guides-connectivity-see-also"><h2><a href="#guides-connectivity-see-also">See Also</a></h2><ul><li><a href="guides-polytopes.html" class="m-doc">Polytopes</a> — The geometric entities</li><li><a href="guides-meshes.html" class="m-doc">Meshes</a> — Working with meshes</li><li><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity class reference</a></li></ul></section>
+<span class="nc">BoundaryIntegral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span></pre><p>Boundary attributes are typically set when loading a mesh from a file or when building a mesh programmatically.</p></section><section id="guides-connectivity-see-also"><h2><a href="#guides-connectivity-see-also">See also</a></h2><ul><li><a href="guides-polytopes.html" class="m-doc">Polytopes</a> — The geometric entities</li><li><a href="guides-meshes.html" class="m-doc">Meshes</a> — Working with meshes</li><li><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">compute()</a></li></ul></section>
         <div class="m-note m-dim m-thin m-text-center"><a href="guides-polytopes.html" class="m-doc">&laquo; Polytopes</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="fem-ciarlet.html" class="m-doc">Ciarlet&#x27;s definition of a finite element &raquo;</a></div>
       </div>
     </div>

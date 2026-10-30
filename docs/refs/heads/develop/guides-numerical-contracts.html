@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <title>General concepts &raquo; Numerical contracts | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="prev" href="guides-getting-started-core-concepts.html" />
-  <link rel="next" href="guides-meshes.html" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <link rel="prev" href="guides-solvers.html" />
+  <link rel="next" href="guides-interfaces-dg.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -34,7 +34,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -81,23 +81,24 @@
           <h3>Contents</h3>
           <ul>
             <li>
-              <a href="#guides-numerical-contracts-interpolation">Interpolation vs Projection</a>
+              <a href="#guides-numerical-contracts-interpolation">Interpolation vs projection</a>
               <ul>
-                <li><a href="#guides-numerical-contracts-l2">L2 Projection</a></li>
+                <li><a href="#guides-numerical-contracts-l2">L2 projection</a></li>
               </ul>
             </li>
-            <li><a href="#guides-numerical-contracts-signs">Problem Sign Convention</a></li>
-            <li><a href="#guides-numerical-contracts-linearsystem">LinearSystem Lifetime</a></li>
-            <li><a href="#guides-numerical-contracts-quadrature">Quadrature Exactness</a></li>
-            <li><a href="#guides-numerical-contracts-tangent">Residual and Tangent Consistency</a></li>
+            <li><a href="#guides-numerical-contracts-signs">Problem sign convention</a></li>
+            <li><a href="#guides-numerical-contracts-linearsystem">LinearSystem lifetime</a></li>
+            <li><a href="#guides-numerical-contracts-quadrature">Quadrature exactness</a></li>
+            <li><a href="#guides-numerical-contracts-tangent">Residual and tangent consistency</a></li>
             <li><a href="#guides-numerical-contracts-constraints">Constraints</a></li>
-            <li><a href="#guides-numerical-contracts-see-also">See Also</a></li>
+            <li><a href="#guides-numerical-contracts-see-also">See also</a></li>
           </ul>
         </nav>
-<p>Rodin tries to make code read like mathematics, but some operations have precise numerical contracts. This page collects the rules that affect accuracy and solver behavior across modules.</p><section id="guides-numerical-contracts-interpolation"><h2><a href="#guides-numerical-contracts-interpolation">Interpolation vs Projection</a></h2><p>Assigning an expression to a <code>GridFunction</code> applies the finite element space&#x27;s degree-of-freedom functionals to that expression:</p><pre class="m-code"><span class="nc">GridFunction</span><span class="w"> </span><span class="nf">uh</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
-<span class="n">uh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">;</span><span class="w">        </span><span class="c1">// interpolate f in the DOF sense of Vh</span></pre><p>This is interpolation, not an <svg class="m-math" style="width: 1.271em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 12.198689 9.474739">
+<p>Rodin tries to make code read like mathematics, but some operations have precise numerical contracts. This page collects the rules that affect accuracy and solver behavior across modules.</p><section id="guides-numerical-contracts-interpolation"><h2><a href="#guides-numerical-contracts-interpolation">Interpolation vs projection</a></h2><p>Assigning an expression to a <code>GridFunction</code> applies the finite element space&#x27;s degree-of-freedom functionals to that expression.</p><pre class="m-code"><span class="nc">GridFunction</span><span class="w"> </span><span class="nf">uh</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="n">uh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">;</span><span class="w">        </span><span class="c1">// interpolate f in the DOF sense of Vh</span></pre><p>Assignment applies the interpolation functionals of the selected space. An  <svg class="m-math" style="width: 1.271em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 12.198689 9.474739">
 <title>
-$ L^2 $
+$ L^2
+$
 </title>
 <defs>
 <path id='eq1-g1-50' d='M2.247572-1.625903C2.375093-1.745455 2.709838-2.008468 2.83736-2.12005C3.331507-2.574346 3.801743-3.012702 3.801743-3.737983C3.801743-4.686426 3.004732-5.300125 2.008468-5.300125C1.052055-5.300125 .422416-4.574844 .422416-3.865504C.422416-3.474969 .73325-3.419178 .844832-3.419178C1.012204-3.419178 1.259278-3.53873 1.259278-3.841594C1.259278-4.25604 .860772-4.25604 .765131-4.25604C.996264-4.837858 1.530262-5.037111 1.920797-5.037111C2.662017-5.037111 3.044583-4.407472 3.044583-3.737983C3.044583-2.909091 2.462765-2.303362 1.522291-1.338979L.518057-.302864C.422416-.215193 .422416-.199253 .422416 0H3.57061L3.801743-1.42665H3.55467C3.53076-1.267248 3.466999-.868742 3.371357-.71731C3.323537-.653549 2.717808-.653549 2.590286-.653549H1.171606L2.247572-1.625903Z'/>
@@ -107,7 +108,7 @@ $ L^2 $
 <use x='0' y='0' xlink:href='#eq1-g0-76'/>
 <use x='7.964506' y='-4.338437' xlink:href='#eq1-g1-50'/>
 </g>
-</svg>-orthogonal projection. For nodal <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> spaces, the DOF functionals are vertex evaluations, so the assignment stores nodal values. For higher-order <code>H1&lt;K&gt;</code> spaces, Rodin uses higher-order bases and DOF machinery; coefficients should not be read as nodal values. Evaluate the <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> at a <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> instead.</p><section id="guides-numerical-contracts-l2"><h3><a href="#guides-numerical-contracts-l2">L2 Projection</a></h3><p>When the mathematical operation is the <svg class="m-math" style="width: 1.271em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 12.198689 9.474739">
+</svg>-orthogonal projection requires a variational mass-matrix solve. For nodal <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> spaces, the DOF functionals are vertex evaluations, so the assignment stores nodal values. For higher-order <code>H1&lt;K&gt;</code> spaces, Rodin uses higher-order bases and DOF machinery; coefficient interpretation follows the space&#x27;s DOF map. Point values are obtained by evaluating the <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> at a <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>.</p><section id="guides-numerical-contracts-l2"><h3><a href="#guides-numerical-contracts-l2">L2 projection</a></h3><p>When the mathematical operation is the <svg class="m-math" style="width: 1.271em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 12.198689 9.474739">
 <title>
 $ L^2 $
 </title>
@@ -119,7 +120,7 @@ $ L^2 $
 <use x='0' y='0' xlink:href='#eq2-g0-76'/>
 <use x='7.964506' y='-4.338437' xlink:href='#eq2-g1-50'/>
 </g>
-</svg> projection, assemble the mass problem:</p><div class="m-math"><svg style="width: 19.637em; height: 2.819em;" viewBox="100.014229 -27.065451 188.514586 27.065451">
+</svg> projection, assemble the mass problem.</p><div class="m-math"><svg style="width: 19.637em; height: 2.819em;" viewBox="100.014229 -27.065451 188.514586 27.065451">
 <title>
 \[  \int_\Omega u_h v_h\,dx = \int_\Omega f v_h\,dx
   \qquad \forall v_h \in V_h.
@@ -165,14 +166,14 @@ $ L^2 $
 <use x='279.899113' y='-8.999744' xlink:href='#eq3-g2-104'/>
 <use x='285.277154' y='-10.793007' xlink:href='#eq3-g3-58'/>
 </g>
-</svg></div><p>In Rodin this is written as:</p><pre class="m-code"><span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+</svg></div><p>The mass problem is assembled and solved with the form language.</p><pre class="m-code"><span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="nc">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
 <span class="nc">Problem</span><span class="w"> </span><span class="nf">l2</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">l2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">Solver</span><span class="o">::</span><span class="nc">CG</span><span class="p">(</span><span class="n">l2</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
 
-<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">uh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">();</span></pre><p>Use this route for optimal-order transfer of rough data, conservative projection workflows, or whenever the variational definition of the projection matters.</p></section></section><section id="guides-numerical-contracts-signs"><h2><a href="#guides-numerical-contracts-signs">Problem Sign Convention</a></h2><p>A <code>Problem</code> assignment writes the residual equation with all terms on the left-hand side. The Poisson weak form</p><div class="m-math"><svg style="width: 7.197em; height: 1.245em;" viewBox="159.723653 -11.955168 69.0957 11.955168">
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">uh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">();</span></pre><p>Use this route for optimal-order transfer of rough data, conservative projection workflows, or whenever the variational definition of the projection matters.</p></section></section><section id="guides-numerical-contracts-signs"><h2><a href="#guides-numerical-contracts-signs">Problem sign convention</a></h2><p>A <code>Problem</code> assignment writes the residual equation with all terms on the left-hand side. The Poisson weak form</p><div class="m-math"><svg style="width: 7.197em; height: 1.245em;" viewBox="159.723653 -11.955168 69.0957 11.955168">
 <title>
 \[  a(u,v) = \ell(v)
 \]
@@ -200,7 +201,7 @@ $ L^2 $
 <use x='218.178808' y='-2.988792' xlink:href='#eq4-g0-118'/>
 <use x='224.267027' y='-2.988792' xlink:href='#eq4-g1-41'/>
 </g>
-</svg></div><p>becomes:</p><pre class="m-code"><span class="nc">Problem</span><span class="w"> </span><span class="nf">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg></div><p>gives the following residual assignment.</p><pre class="m-code"><span class="nc">Problem</span><span class="w"> </span><span class="nf">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 <span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
 <span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span></pre><p>Bilinear terms contribute to the operator <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
@@ -258,7 +259,7 @@ $ b $
 <use x='239.581238' y='-2.988792' xlink:href='#eq7-g3-41'/>
 <use x='244.133564' y='-2.988792' xlink:href='#eq7-g2-58'/>
 </g>
-</svg></div><p>Do not write a second manual negation around a residual term that the <code>Problem</code> assembly already moves to the right-hand side.</p></section><section id="guides-numerical-contracts-linearsystem"><h2><a href="#guides-numerical-contracts-linearsystem">LinearSystem Lifetime</a></h2><p>A <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a> is tied to the finite element spaces and block layout that created it. If the mesh, finite element space, number of fields, or global size changes, create a new problem or linear system.</p><p>PETSc makes this rule explicit: once a <code>Mat</code> or <code>Vec</code> has been laid out and assembled, it cannot be resized in place. Reassembly may reuse storage when sizes and sparsity structure match, but changed structure is a new system.</p></section><section id="guides-numerical-contracts-quadrature"><h2><a href="#guides-numerical-contracts-quadrature">Quadrature Exactness</a></h2><p>Quadrature order controls the mathematical form being assembled. For polynomial integrands on affine elements, choose a rule exact for the product degree. Curved transformations, material coefficients, nonlinear constitutive laws, and flow-map evaluations can raise the effective degree or make the integrand non-polynomial.</p><p>If a specialized integrator uses a shortcut, verify it against the generic quadrature path or a manufactured solution. Agreement should include the assembled values, convergence rates, and any invariants the form is expected to satisfy.</p></section><section id="guides-numerical-contracts-tangent"><h2><a href="#guides-numerical-contracts-tangent">Residual and Tangent Consistency</a></h2><p>Nonlinear residual/tangent pairs must be consistent. For a residual <svg class="m-math" style="width: 2.580em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.765254 11.955168">
+</svg></div><p><code>Problem</code> assembly applies the residual-to-right-hand-side sign convention once.</p></section><section id="guides-numerical-contracts-linearsystem"><h2><a href="#guides-numerical-contracts-linearsystem">LinearSystem lifetime</a></h2><p>A <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a> is tied to the finite element spaces and block layout that created it. If the mesh, finite element space, number of fields, or global size changes, create a new problem or linear system.</p><p>Once a PETSc <code>Mat</code> or <code>Vec</code> has been laid out and assembled, it cannot be resized in place. Reassembly may reuse storage when sizes and sparsity structure match, but changed structure is a new system.</p></section><section id="guides-numerical-contracts-quadrature"><h2><a href="#guides-numerical-contracts-quadrature">Quadrature exactness</a></h2><p>Quadrature order controls the mathematical form being assembled. For polynomial integrands on affine elements, choose a rule exact for the product degree. Curved transformations, material coefficients, nonlinear constitutive laws, and flow-map evaluations can raise the effective degree or make the integrand non-polynomial.</p><p>If a specialized integrator uses a shortcut, verify it against the generic quadrature path or a manufactured solution. Agreement should include the assembled values, convergence rates, and any invariants the form is expected to satisfy.</p></section><section id="guides-numerical-contracts-tangent"><h2><a href="#guides-numerical-contracts-tangent">Residual and tangent consistency</a></h2><p>Nonlinear residual/tangent pairs must be consistent. For a residual <svg class="m-math" style="width: 2.580em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.765254 11.955168">
 <title>
 $ R(x) $
 </title>
@@ -290,7 +291,7 @@ $ J(x) $
 <use x='12.129445' y='0' xlink:href='#eq9-g0-120'/>
 <use x='18.781532' y='0' xlink:href='#eq9-g1-41'/>
 </g>
-</svg>, the check is:</p><div class="m-math"><svg style="width: 18.241em; height: 2.631em;" viewBox="106.714749 -25.254797 175.113481 25.254797">
+</svg>, the consistency check compares the following quantities.</p><div class="m-math"><svg style="width: 18.241em; height: 2.631em;" viewBox="106.714749 -25.254797 175.113481 25.254797">
 <title>
 \[  J(x)w \approx
   \frac{R(x+\varepsilon w)-R(x-\varepsilon w)}{2\varepsilon}.
@@ -337,8 +338,8 @@ $ J(x) $
 <use x='216.81492' y='0' xlink:href='#eq10-g1-34'/>
 <use x='278.576569' y='-8.200662' xlink:href='#eq10-g1-58'/>
 </g>
-</svg></div><p>Rodin provides finite-difference probe helpers under <a href="namespace_rodin_1_1_test.html" class="m-doc">Rodin::<wbr />Test</a>. Run these checks when adding or changing nonlinear terms, especially in solid mechanics and mesh optimization.</p></section><section id="guides-numerical-contracts-constraints"><h2><a href="#guides-numerical-contracts-constraints">Constraints</a></h2><p>Dirichlet and identification boundary conditions are structural constraints. They are represented in the assembly constraint map and eliminated or expanded algebraically. Use penalty terms only when the model is explicitly a penalty method.</p></section><section id="guides-numerical-contracts-see-also"><h2><a href="#guides-numerical-contracts-see-also">See Also</a></h2><ul><li><a href="guides-getting-started-core-concepts.html" class="m-doc">Core concepts</a></li><li><a href="guides-variational.html" class="m-doc">Variational formulations</a></li><li><a href="guides-solvers.html" class="m-doc">Solvers</a></li><li><a href="guides-petsc.html" class="m-doc">PETSc</a></li><li><a href="guides-solid-mechanics.html" class="m-doc">Solid mechanics</a></li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="guides-getting-started-core-concepts.html" class="m-doc">&laquo; Understanding Core Concepts</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-meshes.html" class="m-doc">Meshes &raquo;</a></div>
+</svg></div><p>Rodin provides finite-difference probe helpers under <a href="namespace_rodin_1_1_test.html" class="m-doc">Rodin::<wbr />Test</a>. Run these checks when adding or changing nonlinear terms, especially in solid mechanics and mesh optimization.</p></section><section id="guides-numerical-contracts-constraints"><h2><a href="#guides-numerical-contracts-constraints">Constraints</a></h2><p>Dirichlet and identification boundary conditions are structural constraints. They are represented in the assembly constraint map and eliminated or expanded algebraically. Use penalty terms only when the model is explicitly a penalty method.</p></section><section id="guides-numerical-contracts-see-also"><h2><a href="#guides-numerical-contracts-see-also">See also</a></h2><ul><li><a href="guides-getting-started-core-concepts.html" class="m-doc">Core concepts</a></li><li><a href="guides-variational.html" class="m-doc">Variational formulations</a></li><li><a href="guides-solvers.html" class="m-doc">Solvers</a></li><li><a href="guides-petsc.html" class="m-doc">PETSc</a></li><li><a href="guides-solid-mechanics.html" class="m-doc">Solid mechanics</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-solvers.html" class="m-doc">&laquo; Solvers</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-interfaces-dg.html" class="m-doc">Interfaces, traces, and discontinuous Galerkin &raquo;</a></div>
       </div>
     </div>
   </div>

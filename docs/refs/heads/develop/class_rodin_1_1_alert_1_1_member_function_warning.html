@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Alert::MemberFunctionWarning class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -103,7 +103,7 @@
             </li>
           </ul>
         </nav>
-<p>This warning class is used to report issues in member functions, providing context about the class and function where the warning originated. Unlike MemberFunctionException, this does not terminate the program but instead displays a formatted warning message.</p><p>Example usage: <code class="m-code"><span class="nc">MemberFunctionWarning</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">__func__</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Deprecated feature used"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></code></p><p>This produces output like: &quot;Warning: In member function myFunction of class MyClass: Deprecated feature used&quot;</p>
+<p>This warning class is used to report issues in member functions, providing context about the class and function where the warning originated. Unlike MemberFunctionException, this does not terminate the program but instead displays a formatted warning message.</p><p>The following example illustrates usage. <code class="m-code"><span class="nc">MemberFunctionWarning</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">__func__</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Deprecated feature used"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></code></p><p>This produces output of the following form. &quot;Warning: In member function myFunction of class MyClass: Deprecated feature used&quot;</p>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_alert_1_1_warning.html" title="Warning">Warning</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">MemberFunctionWarning</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_warning.html"><code>Warning</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_alert_1_1_warning.html#ac75fc2b243c50e0381d9452161777b60"><span class="nc">Warning</span></a>
 </pre></details></td><td>Warning message class with formatted output.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_message.html"><code>Message</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_alert_1_1_message.html#ae86b1d95969f40504107a97b5af66432"><code>operator&lt;&lt;()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#a0ba9797c311384eee8ad17f6ea2d20fc"><code>operator&lt;&lt;()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#aaf41a99ca70ed695dfc5b78e1c1b03bd"><code>operator&lt;&lt;()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#a05fa0dbb9670de92ab00a301d3e676b5"><code>raise()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#a313a6aa220cc1d01a1ebf1d598043186"><code>setOutputStream()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#a576a441c2b1e2f01d271e237b314eac3"><code>what()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">

@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::InterfaceIntegral class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -97,7 +97,7 @@
             </tr>
           </tbody>
         </table>
-<p>Represents the integral operator with a templated integrand type:</p><div class="m-math"><svg style="width: 7.089em; height: 2.966em;" viewBox="160.243493 -28.471297 68.055989 28.471297">
+<p>Represents an integral operator with a templated integrand type.</p><div class="m-math"><svg style="width: 7.089em; height: 2.966em;" viewBox="160.243493 -28.471297 68.055989 28.471297">
 <title>
 \[  \int_{\mathcal{I}_h} \mathrm{Integrand}
 \]
@@ -175,7 +175,7 @@ $\mathcal{I}_h $
 <use x='0' y='0' xlink:href='#eq5-g0-73'/>
 <use x='6.509776' y='1.793263' xlink:href='#eq5-g1-104'/>
 </g>
-</svg> is defined as the union of interfaces between elements:</p><div class="m-math"><svg style="width: 17.295em; height: 1.245em;" viewBox="111.256996 -11.955168 166.028995 11.955168">
+</svg> is defined as the union of interfaces between elements.</p><div class="m-math"><svg style="width: 17.295em; height: 1.245em;" viewBox="111.256996 -11.955168 166.028995 11.955168">
 <title>
 \[  \mathcal{I}_h := \left\{ \partial T_1 \cap \partial T_2 : T_1, T_2 \in
   \mathcal{T}_h \right\} \ .
@@ -223,7 +223,7 @@ $\mathcal{I}_h $
 <use x='263.075498' y='-2.988792' xlink:href='#eq6-g0-103'/>
 <use x='274.03433' y='-2.988792' xlink:href='#eq6-g2-58'/>
 </g>
-</svg></div><p>Then then the interface integral is just the sum of integrals over each member of the interface:</p><div class="m-math"><svg style="width: 18.964em; height: 3.301em;" viewBox="103.241963 -32.887992 182.059039 31.692478">
+</svg></div><p>Then then the interface integral is just the sum of integrals over each member of the interface.</p><div class="m-math"><svg style="width: 18.964em; height: 3.301em;" viewBox="103.241963 -32.887992 182.059039 31.692478">
 <title>
 \[  \int_{\mathcal{I}_h} \mathrm{Integrand} := \sum_{F \in \mathcal{I}_h}
   \int_F \mathrm{Integrand} \ .

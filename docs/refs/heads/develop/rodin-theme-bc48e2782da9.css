@@ -1,0 +1,1063 @@
+/* Manrope is bundled with the brand kit under the SIL Open Font License. */
+@font-face {
+  font-family: Manrope;
+  src: url('Manrope-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: Manrope;
+  src: url('Manrope-SemiBold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: Manrope;
+  src: url('Manrope-Bold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Rodin palette; the upstream m.css components retain their CSS variables. */
+:root,
+body
+{
+  --font: 'Manrope', sans-serif;
+  --code-font: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  color-scheme: dark;
+  --background-color: #202124;
+  --color: #dee3eb;
+  --line-color: #41434a;
+  --link-color: #87b5da;
+  --link-active-color: #b7d3e9;
+  --dim-color: #a3adbc;
+  --code-color: #e6edf3;
+  --code-background-color: #18191c;
+  --code-note-background-color: #25262b;
+  --console-background-color: #18191c;
+  --header-background-color: #18191c;
+  --header-color: #dee3eb;
+  --header-link-color: #dee3eb;
+  --header-link-current-color: #87b5da;
+  --header-link-active-color: #b7d3e9;
+  --header-link-active-background-color: #282a2f;
+  --article-heading-color: #dee3eb;
+  --article-heading-active-color: #b7d3e9;
+  --article-header-color: #dee3eb;
+  --navpanel-link-color: #dee3eb;
+  --footer-background-color: #282a2f;
+  --footer-color: #a3adbc;
+  --default-color: #dee3eb;
+  --default-filled-color: #dee3eb;
+  --default-filled-background-color: #282a2f;
+  --default-filled-link-color: #87b5da;
+  --success-color: #96b99c;
+  --success-filled-background-color: #29362f;
+  --success-filled-color: #cbded0;
+  --info-color: #87b5da;
+  --info-filled-background-color: #283440;
+  --info-filled-color: #cedfed;
+  --warning-color: #c9b580;
+  --ci-success-color: #56d879;
+  --ci-danger-color: #ff7b82;
+  --ci-queued-color: #62b5ff;
+  --ci-running-color: #f2d35d;
+  --ci-cancelled-color: #ff9a55;
+  --ci-unknown-color: #b2b9c3;
+  --warning-filled-background-color: #383426;
+  --warning-filled-color: #e3d6b5;
+  --primary-color: #87b5da;
+  --danger-color: #df9292;
+  --button-background-color: #282a2f;
+  --code-base: #e6edf3;
+  --code-keyword: #c6a4db;
+  --code-type: #87b5da;
+  --code-enum: #ed8d87;
+  --code-operator: #d7a0ba;
+  --code-string: #a8c9a7;
+  --code-number: #d8b189;
+  --code-comment: #a3adbc;
+}
+
+@media(prefers-color-scheme:light)
+{
+  :root:not([data-theme]),
+  :root:not([data-theme]) body
+  {
+    color-scheme: light;
+    --background-color: #F4F8FB;
+    --color: #27323f;
+    --line-color: #d1d8e0;
+    --link-color: #28648f;
+    --link-active-color: #16476b;
+    --dim-color: #627083;
+    --code-color: #27323f;
+    --code-background-color: #edf0f4;
+    --code-note-background-color: #edf0f4;
+    --console-background-color: #edf0f4;
+    --header-background-color: #edf0f4;
+    --header-color: #27323f;
+    --header-link-color: #27323f;
+    --header-link-current-color: #28648f;
+    --header-link-active-color: #16476b;
+    --header-link-active-background-color: #e0e6ed;
+    --article-heading-color: #27323f;
+    --article-heading-active-color: #16476b;
+    --article-header-color: #27323f;
+    --navpanel-link-color: #27323f;
+    --footer-background-color: #edf0f4;
+    --footer-color: #627083;
+    --default-color: #27323f;
+    --default-filled-color: #27323f;
+    --default-filled-background-color: #edf0f4;
+    --default-filled-link-color: #28648f;
+    --success-color: #39764d;
+    --success-filled-background-color: #e6efe8;
+    --success-filled-color: #294d36;
+    --info-color: #28648f;
+    --info-filled-background-color: #e6eef5;
+    --info-filled-color: #254b67;
+    --warning-color: #7e6527;
+    --ci-success-color: #167537;
+    --ci-danger-color: #b42335;
+    --ci-queued-color: #175db0;
+    --ci-running-color: #786000;
+    --ci-cancelled-color: #b04d00;
+    --ci-unknown-color: #596575;
+    --warning-filled-background-color: #f2edde;
+    --warning-filled-color: #69551f;
+    --primary-color: #28648f;
+    --danger-color: #b12f37;
+    --button-background-color: #edf0f4;
+    --code-base: #27323f;
+    --code-keyword: #795299;
+    --code-type: #216184;
+    --code-enum: #b12f37;
+    --code-operator: #984e74;
+    --code-string: #397246;
+    --code-number: #92531d;
+    --code-comment: #627083;
+  }
+
+}
+
+:root[data-theme="light"],
+:root[data-theme="light"] body
+{
+  color-scheme: light;
+  --background-color: #F4F8FB;
+  --color: #27323f;
+  --line-color: #d1d8e0;
+  --link-color: #28648f;
+  --link-active-color: #16476b;
+  --dim-color: #627083;
+  --code-color: #27323f;
+  --code-background-color: #edf0f4;
+  --code-note-background-color: #edf0f4;
+  --console-background-color: #edf0f4;
+  --header-background-color: #edf0f4;
+  --header-color: #27323f;
+  --header-link-color: #27323f;
+  --header-link-current-color: #28648f;
+  --header-link-active-color: #16476b;
+  --header-link-active-background-color: #e0e6ed;
+  --article-heading-color: #27323f;
+  --article-heading-active-color: #16476b;
+  --article-header-color: #27323f;
+  --navpanel-link-color: #27323f;
+  --footer-background-color: #edf0f4;
+  --footer-color: #627083;
+  --default-color: #27323f;
+  --default-filled-color: #27323f;
+  --default-filled-background-color: #edf0f4;
+  --default-filled-link-color: #28648f;
+  --success-color: #39764d;
+  --success-filled-background-color: #e6efe8;
+  --success-filled-color: #294d36;
+  --info-color: #28648f;
+  --info-filled-background-color: #e6eef5;
+  --info-filled-color: #254b67;
+  --warning-color: #7e6527;
+  --ci-success-color: #167537;
+  --ci-danger-color: #b42335;
+  --ci-queued-color: #175db0;
+  --ci-running-color: #786000;
+  --ci-cancelled-color: #b04d00;
+  --ci-unknown-color: #596575;
+  --warning-filled-background-color: #f2edde;
+  --warning-filled-color: #69551f;
+  --primary-color: #28648f;
+  --danger-color: #b12f37;
+  --button-background-color: #edf0f4;
+  --code-base: #27323f;
+  --code-keyword: #795299;
+  --code-type: #216184;
+  --code-enum: #b12f37;
+  --code-operator: #984e74;
+  --code-string: #397246;
+  --code-number: #92531d;
+  --code-comment: #627083;
+}
+
+.m-code,
+.m-code span
+{
+  color: var(--code-base);
+}
+
+pre.m-code
+{
+  background: var(--code-background-color);
+}
+
+/* Keep blocks inside an anchored section clear of its selection indicator. */
+article .m-container-inflatable section[id]:target > :is(pre, .m-note, .m-frame, .m-block, .m-code-figure, .m-console-figure),
+article .m-container-inflatable section[id]:target section > :is(pre, .m-note, .m-frame, .m-block, .m-code-figure, .m-console-figure),
+article .m-container-inflatable section[id]:target .m-container-inflate > :is(pre, .m-note, .m-frame, .m-block, .m-code-figure, .m-console-figure)
+{
+  margin-left: 0;
+  margin-right: 0;
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+}
+
+article .m-container-inflatable section[id]:target > pre,
+article .m-container-inflatable section[id]:target section > pre,
+article .m-container-inflatable section[id]:target .m-container-inflate > pre
+{
+  border-left-width: 1px;
+  padding-left: 1rem;
+}
+
+article .m-container-inflatable section[id]:target :is(.m-code-figure, .m-console-figure)::before
+{
+  border-left-width: 0.125rem;
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+}
+
+.m-code .k,
+.m-code .kd,
+.m-code .kn,
+.m-code .kr,
+.m-code .kc
+{
+  color: var(--code-keyword);
+}
+
+.m-code .nc,
+.m-code .nt,
+.m-code .kt,
+.m-code .nb
+{
+  color: var(--code-type);
+}
+
+.m-code .no
+{
+  color: var(--code-enum);
+}
+
+.m-code .cp,
+.m-code .o,
+.m-code .ow
+{
+  color: var(--code-operator);
+}
+
+.m-code .s,
+.m-code .s1,
+.m-code .s2,
+.m-code .sa,
+.m-code .sb,
+.m-code .sc,
+.m-code .sd,
+.m-code .se,
+.m-code .sh,
+.m-code .si,
+.m-code .sr,
+.m-code .ss,
+.m-code .sx,
+.m-code .cpf
+{
+  color: var(--code-string);
+}
+
+.m-code .m,
+.m-code .mi,
+.m-code .mf,
+.m-code .mh,
+.m-code .mo,
+.m-code .mb,
+.m-code .il,
+.m-code .fm
+{
+  color: var(--code-number);
+}
+
+.m-code .c,
+.m-code .c1,
+.m-code .cm,
+.m-code .cs,
+.m-code .ch
+{
+  color: var(--code-comment);
+}
+
+.m-code,
+.m-code span[class]
+{
+  font-weight: 400;
+}
+
+.m-block.m-default
+{
+  background: var(--default-filled-background-color);
+}
+
+.m-block.m-success
+{
+  background: var(--success-filled-background-color);
+}
+
+.m-block.m-info
+{
+  background: var(--info-filled-background-color);
+}
+
+.m-code .n,
+.m-code .p,
+.m-code .nn,
+.m-code .nv,
+.m-code .na,
+.m-code .nf,
+.m-code .w,
+.m-code .nx,
+.m-code .nl,
+.m-code .py,
+.m-code .bp,
+.m-code .ne
+{
+  color: var(--code-base);
+}
+
+.rodin-logo-light
+{
+  display: none;
+}
+
+.rodin-logo-dark
+{
+  display: block;
+}
+
+@media(prefers-color-scheme:light)
+{
+  :root:not([data-theme]) .rodin-logo-light
+  {
+    display: block;
+  }
+
+  :root:not([data-theme]) .rodin-logo-dark
+  {
+    display: none;
+  }
+
+}
+
+:root[data-theme="light"] .rodin-logo-light
+{
+  display: block;
+}
+
+:root[data-theme="light"] .rodin-logo-dark
+{
+  display: none;
+}
+
+#navigation
+{
+  position: relative;
+}
+
+#navigation > .m-container
+{
+  box-sizing: border-box;
+  padding-right: 4.5rem;
+}
+
+#navigation > .m-container > .m-row
+{
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#navigation #m-navbar-brand
+{
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  width: auto;
+  flex: 0 0 auto;
+}
+
+.rodin-home-icon
+{
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rodin-github-icon
+{
+  width: 1em;
+  height: 1em;
+  margin-right: .4em;
+  fill: currentColor;
+  vertical-align: -.125em;
+}
+
+#navigation #m-navbar-brand,
+#navigation .m-doc-search-icon,
+#navigation #m-navbar-collapse > .m-row > ol > li > a
+{
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  min-height: 3rem;
+  box-sizing: border-box;
+}
+
+#navigation .rodin-nav-icon,
+#navigation .rodin-github-icon,
+#navigation .rodin-benchmark-icon
+{
+  width: 1em;
+  height: 1em;
+  margin: 0;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+#navigation .rodin-nav-icon
+{
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#navigation #m-navbar-collapse
+{
+  margin-left: auto;
+}
+
+/* Match the documentation's one-column desktop content inset. */
+@media screen and (min-width: 992px)
+{
+  #navigation > .m-container { padding-right: 1rem; }
+  #navigation #m-navbar-brand { left: calc(100% / 12); }
+  #navigation #m-navbar-collapse { margin-right: 3.5rem; }
+}
+
+#navigation .rodin-theme-control
+{
+  position: absolute;
+  right: max(0.75rem,env(safe-area-inset-right));
+  top: 0;
+  width: 2.75rem;
+  height: 3rem;
+  margin: 0;
+  padding: 0;
+  z-index: 2;
+}
+
+.rodin-theme-icon
+{
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.rodin-theme-trigger
+{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  font: inherit;
+  color: var(--header-link-color);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.3rem;
+  cursor: pointer;
+}
+
+.rodin-theme-trigger:hover
+{
+  border-color: var(--line-color);
+}
+
+.rodin-theme-trigger:focus-visible
+{
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+}
+
+.rodin-theme-menu
+{
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  right: 0;
+  width: 9.5rem;
+  padding: 0.25rem;
+  background: var(--header-background-color);
+  border: 1px solid var(--line-color);
+  border-radius: 0.4rem;
+  box-shadow: 0 0.35rem 1rem rgb(0 0 0 / 22%);
+}
+
+.rodin-theme-menu[hidden]
+{
+  display: none;
+}
+
+.rodin-theme-menu button
+{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  text-align: left;
+  color: var(--color);
+  background: transparent;
+  border: 0;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.rodin-theme-menu button:hover,
+.rodin-theme-menu button:focus-visible
+{
+  outline: none;
+  background: var(--header-link-active-background-color);
+}
+
+.rodin-theme-menu button[aria-checked="true"]::after
+{
+  content: '✓';
+  color: var(--link-color);
+}
+
+/* Use a compact icon row when navigation labels no longer fit. */
+@media(max-width:991px) {
+  #navigation > .m-container { padding-right: 3rem; }
+  #navigation > .m-container > .m-row { flex-wrap: nowrap; }
+  #navigation > .m-container > .m-row > .m-hide-m { display: none; }
+  #navigation #m-navbar-brand { margin-right: .5rem; padding-right: .5rem; }
+  #navigation .rodin-wordmark { display: none; }
+  #navigation #m-navbar-collapse {
+    display: block;
+    flex: 0 0 auto;
+    width: auto;
+    margin: 0;
+    padding: 0;
+  }
+  #navigation #m-navbar-collapse > .m-row { display: flex; margin: 0; }
+  #navigation #m-navbar-collapse > .m-row > ol {
+    display: flex;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    float: none;
+  }
+  #navigation #m-navbar-collapse > .m-row > ol > li {
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    float: none;
+  }
+  #navigation #m-navbar-collapse > .m-row > ol > li > a {
+    justify-content: center;
+    width: 2rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    gap: 0;
+    font-size: 0;
+  }
+  #navigation #m-navbar-collapse > .m-row > ol > li > a svg {
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+  }
+  #navigation #m-navbar-collapse .m-doc-search-icon:has(.rodin-benchmark-icon) {
+    width: 3rem;
+    gap: .4rem;
+  }
+  #navigation #m-navbar-collapse .benchmark-search-trigger { min-width: 0; }
+  #navigation #m-navbar-collapse .benchmark-search-trigger .rodin-benchmark-icon {
+    position: static;
+    transform: none;
+  }
+  #navigation #m-navbar-collapse ol ol { display: none; }
+}
+
+:root,
+body
+{
+  --category-core: #87b5da;
+  --category-model: #96b99c;
+  --category-physical: #d6a092;
+  --category-integration: #c9b580;
+  --category-infrastructure: #a99abb;
+}
+
+@media(prefers-color-scheme:light)
+{
+  :root:not([data-theme]),
+  :root:not([data-theme]) body
+  {
+    --category-core: #28648f;
+    --category-model: #39764d;
+    --category-physical: #a04f3d;
+    --category-integration: #7e6527;
+    --category-infrastructure: #756082;
+  }
+
+}
+
+:root[data-theme="light"],
+:root[data-theme="light"] body
+{
+  --category-core: #28648f;
+  --category-model: #39764d;
+  --category-physical: #a04f3d;
+  --category-integration: #7e6527;
+  --category-infrastructure: #756082;
+}
+
+main article section > h2,
+main article section > h2 > a
+{
+  color: var(--link-color);
+}
+
+section[data-category="Core"],
+.rodin-page-nav li[data-category="Core"]
+{
+  --category-color: var(--category-core);
+}
+
+section[data-category="Physical contexts"],
+.rodin-page-nav li[data-category="Physical contexts"]
+{
+  --category-color: var(--category-physical);
+}
+
+section[data-category="Models"],
+.rodin-page-nav li[data-category="Models"]
+{
+  --category-color: var(--category-model);
+}
+
+section[data-category="Parallelism and integrations"],
+.rodin-page-nav li[data-category="Parallelism and integrations"]
+{
+  --category-color: var(--category-integration);
+}
+
+section[data-category="Infrastructure"],
+.rodin-page-nav li[data-category="Infrastructure"]
+{
+  --category-color: var(--category-infrastructure);
+}
+
+section[data-category]>h2,
+section[data-category] section[data-module]>h3,
+section[data-category] section[data-module]>h3>a
+{
+  color: var(--category-color);
+}
+
+/* Shared component states follow the active palette as well. */
+:root,
+body
+{
+  --footer-link-color: var(--link-color);
+  --footer-link-active-color: var(--link-active-color);
+  --article-footer-color: var(--dim-color);
+  --navpanel-link-active-color: var(--link-active-color);
+  --header-breadcrumb-color: var(--dim-color);
+  --default-link-active-color: var(--link-active-color);
+  --default-filled-link-active-color: var(--link-active-color);
+  --primary-link-active-color: var(--link-active-color);
+  --success-link-active-color: var(--link-active-color);
+  --success-filled-link-color: var(--link-color);
+  --success-filled-link-active-color: var(--link-active-color);
+  --info-link-active-color: var(--link-active-color);
+  --info-filled-link-color: var(--link-color);
+  --info-filled-link-active-color: var(--link-active-color);
+  --warning-link-active-color: var(--link-active-color);
+  --warning-filled-link-color: var(--link-color);
+  --warning-filled-link-active-color: var(--link-active-color);
+  --dim-link-color: var(--link-color);
+  --dim-link-active-color: var(--link-active-color);
+  --dim-filled-color: var(--dim-color);
+  --dim-filled-background-color: var(--default-filled-background-color);
+  --dim-filled-link-color: var(--link-color);
+  --dim-filled-link-active-color: var(--link-active-color);
+  --console-color: var(--code-color);
+  --plot-background-color: var(--default-filled-background-color);
+}
+
+/* Match every navigation indicator to its rendered section heading. */
+.rodin-page-nav li > a
+{
+  border-left-color: var(--rodin-section-color, var(--link-color));
+}
+
+.rodin-page-nav li > a:hover,
+.rodin-page-nav li > a[aria-current="location"]
+{
+  color: var(--rodin-section-color, var(--link-color));
+  border-left-color: var(--rodin-section-color, var(--link-color));
+}
+
+.rodin-page-nav li > ol,
+.rodin-page-nav li > a::before
+{
+  border-color: var(--rodin-section-color, var(--line-color));
+}
+
+/* The outlined wordmark follows the navigation color in both themes. */
+.rodin-wordmark {
+  display: inline-block;
+  width: 4.25rem;
+  height: 1.4875rem;
+  flex-shrink: 0;
+  background-color: currentColor;
+  -webkit-mask: url('wordmark-white.svg') center / contain no-repeat;
+  mask: url('wordmark-white.svg') center / contain no-repeat;
+  font-size: 0;
+}
+.rodin-main-brand {
+  margin: .5rem 0 1.5rem;
+}
+.rodin-main-brand img {
+  width: 18rem;
+  max-width: 100%;
+  height: auto;
+}
+.rodin-main-brand p {
+  margin: .25rem 0 0;
+  font-weight: 600;
+  text-indent: 0;
+}
+
+/* Reserve a separate home area before the main navigation links. */
+#navigation #m-navbar-brand {
+  position: relative;
+  margin-right: .75rem;
+  padding-right: 1.25rem;
+}
+#navigation #m-navbar-brand::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: .75rem;
+  width: 2px;
+  height: 1.5rem;
+  background: var(--dim-color);
+}
+@media screen and (min-width: 992px) {
+  /* Leave a gutter between the aligned dividers and full-width article blocks. */
+  main article > .m-container > .m-row > .m-col-l-10 {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  #navigation > .m-container > .m-row { position: relative; }
+  #navigation #m-navbar-brand {
+    position: absolute;
+    top: 0;
+    left: calc(100% / 12);
+    transform: translateX(-100%);
+    margin: 0;
+    padding-left: 0;
+    padding-right: 1rem;
+  }
+  #navigation #m-navbar-brand::after { right: -1px; }
+  #navigation #m-navbar-collapse { margin-left: calc(100% / 12 + 1rem); }
+}
+
+@media screen and (min-width: 992px) and (max-width: 1199px) {
+  /* Keep room for the full-size home link in the narrow desktop gutter. */
+  main article > .m-container > .m-row > .m-col-l-10.m-push-l-1 {
+    left: calc(100% / 12 + 1.5rem);
+    width: calc(10 * 100% / 12 - 1.5rem);
+  }
+  #navigation #m-navbar-brand { left: calc(100% / 12 + 1.5rem); }
+  #navigation #m-navbar-collapse { margin-left: calc(100% / 12 + 2.5rem); }
+}
+
+/* Avoid flashing a duplicate title before in-page navigation initializes. */
+main article .m-col-l-10:has(> .rodin-main-brand) > h1 {
+  display: none;
+}
+
+/* Keep space between the page outline and the article on either side. */
+@media screen and (min-width: 1200px) {
+  .rodin-page-nav.rodin-page-nav-fit[data-side="left"] { padding-right: .75rem; }
+  .rodin-page-nav.rodin-page-nav-fit[data-side="right"] { padding-left: .75rem; }
+}
+
+
+@media(max-width:359px) {
+  #navigation #m-navbar-brand { margin-right: .25rem; padding-right: .25rem; }
+  #navigation #m-navbar-collapse > .m-row > ol > li > a { width: 1.75rem; }
+  #navigation #m-navbar-collapse .m-doc-search-icon:has(.rodin-benchmark-icon) {
+    width: 2.25rem;
+    gap: .125rem;
+  }
+  #navigation #m-navbar-collapse .m-doc-search-icon:has(.rodin-benchmark-icon) svg {
+    width: .875rem;
+    height: .875rem;
+  }
+}
+
+/* Credit portraits and institutional marks retain their own proportions. */
+.rodin-credit-person img {
+  object-fit: cover;
+  object-position: 35% 35%;
+}
+.rodin-credit-person h4,
+.rodin-credit-lab h4 {
+  margin-left: 5rem;
+}
+.rodin-credit-lab img {
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
+  background: white;
+  border-radius: 0.25rem;
+}
+
+/* Scientific figures share the site's typography and quiet caption style. */
+main article figure.m-figure::before {
+  border-color: transparent;
+}
+main article figure.m-figure figcaption {
+  display: block;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* One scientific panel occupies half the content width on desktop. */
+main article figure.m-figure {
+  display: block;
+  width: calc((100% - 1.5rem) / 2);
+  max-width: 22.25rem;
+  margin: 1.5rem auto;
+}
+main article figure.m-figure img {
+  width: 100% !important;
+  height: auto;
+}
+main article figure.m-figure:has(img[src$="Architecture.svg"]) {
+  width: 100%;
+  max-width: none;
+}
+.rodin-mesh-stages {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 46rem;
+  margin: 1.5rem auto;
+}
+.rodin-mesh-stages figure.m-figure {
+  display: block;
+  width: 100%;
+  margin: 0;
+  min-width: 0;
+  max-width: none;
+  grid-column: span 2;
+}
+.rodin-mesh-stages > figure.m-figure:last-child:nth-child(odd) {
+  grid-column: 2 / span 2;
+}
+.rodin-mesh-stages figure.m-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.rodin-mesh-stages figure.m-figure figcaption {
+  display: block;
+  margin: .75rem 0 0;
+}
+
+/* Videos use the full content width, independently of still-image panels. */
+main article figure.m-figure:has(video) {
+  width: 100%;
+  max-width: none;
+  grid-column: 1 / -1;
+}
+main article video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: .2rem;
+}
+
+/* Gallery entries retain their own explanation and tutorial link. */
+:is(#gallery-pdes, #gallery-optimization, #gallery-fitting) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 2rem;
+}
+:is(#gallery-pdes, #gallery-optimization, #gallery-fitting) > h2 {
+  grid-column: 1 / -1;
+}
+:is(#gallery-pdes, #gallery-optimization, #gallery-fitting) > section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+}
+:is(#gallery-pdes, #gallery-optimization, #gallery-fitting) > section > h3 {
+  min-height: 3.2rem;
+}
+:is(#gallery-pdes, #gallery-optimization, #gallery-fitting) img {
+  display: block;
+  width: 100%;
+  height: 14rem;
+  object-fit: contain;
+}
+:is(#gallery-pdes, #gallery-optimization, #gallery-fitting) > section > p:last-child {
+  margin-top: auto;
+  padding-top: .5rem;
+}
+@media screen and (max-width: 767px) {
+  :is(#gallery-pdes, #gallery-optimization, #gallery-fitting) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+:is(#gallery-pdes, #gallery-optimization, #gallery-fitting) figure.m-figure {
+  width: 100%;
+  max-width: none;
+}
+@media screen and (max-width: 767px) {
+  main article figure.m-figure {
+    width: 100%;
+    max-width: none;
+  }
+  .rodin-mesh-stages {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rodin-mesh-stages > figure.m-figure,
+  .rodin-mesh-stages > figure.m-figure:last-child:nth-child(odd) {
+    grid-column: 1;
+  }
+}
+
+/* Give tightly cropped inline TeX SVGs a small optical gap from prose. */
+main article :is(p, li, td, th, dd, dt) svg.m-math {
+  margin-inline-start: .08em;
+  margin-inline-end: .04em;
+}
+
+/* Floating, flat gray video controls, independent of the browser's skin. */
+main article figure.m-figure > .rodin-video-player {
+  display: block;
+  position: relative;
+  width: 100%;
+  margin: 0;
+}
+.rodin-video-player { position: relative; width: 100%; }
+.rodin-video-player video { display: block; width: 100%; }
+.rodin-video-controls {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: calc(100% - 24px);
+  max-width: 440px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(55, 55, 59, 0.9);
+  color: #fff;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 4px 16px #0003;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease;
+  font: inherit;
+  font-size: .75rem;
+  line-height: 1.3;
+}
+.rodin-video-player:hover .rodin-video-controls,
+.rodin-video-player:has(:focus-visible) .rodin-video-controls,
+.rodin-video-player.controls-visible .rodin-video-controls { opacity: 1; pointer-events: auto; }
+.rodin-video-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 32px;
+  padding: 4px;
+  border: 0;
+  border-radius: 5px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.rodin-video-controls button[hidden] { display: none; }
+.rodin-video-controls button:hover { background: #ffffff20; }
+.rodin-video-controls button:focus-visible, .rodin-video-controls input:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.rodin-video-controls svg { width: 18px; height: 18px; }
+.rodin-video-time { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.rodin-video-controls input { flex: 1; min-width: 32px; width: 0; margin: 0; accent-color: #fff; cursor: pointer; }
+.rodin-video-player:fullscreen { display: flex; align-items: center; justify-content: center; max-width: none !important; background: #171719; }
+.rodin-video-player:fullscreen video { width: 100%; height: 100%; object-fit: contain; }
+@media (hover: none), (pointer: coarse) {
+  .rodin-video-controls { gap: 4px; padding: 4px; }
+  .rodin-video-controls button { flex-basis: 44px; width: 44px; height: 44px; }
+}
+.rodin-video-player.uses-touch-controls .rodin-video-controls { opacity: 0; pointer-events: none; }
+.rodin-video-player.uses-touch-controls.controls-visible .rodin-video-controls { opacity: 1; pointer-events: auto; }
+@media (prefers-reduced-motion: reduce) {
+  .rodin-video-controls { transition: none; }
+}

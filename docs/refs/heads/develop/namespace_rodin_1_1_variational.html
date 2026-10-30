@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational module | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -76,10 +76,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md569">Finite Element Spaces</a></li>
-            <li><a href="#autotoc_md570">Functions</a></li>
-            <li><a href="#autotoc_md571">Variational Forms</a></li>
-            <li><a href="#autotoc_md572">Problem</a></li>
+            <li><a href="#autotoc_md564">Finite element spaces</a></li>
+            <li><a href="#autotoc_md565">Functions</a></li>
+            <li><a href="#autotoc_md566">Variational forms</a></li>
+            <li><a href="#autotoc_md567">Problem</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> and <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> define finite element spaces, while <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> evaluates and interpolates discrete fields. <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>, <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>, and <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> express weak forms, boundary conditions, and the algebraic problems used to solve PDEs.</p><section id="autotoc_md569"><h2><a href="#autotoc_md569">Finite Element Spaces</a></h2><ul><li><code>P0</code> — Piecewise constant (discontinuous) finite element space</li><li><code>P0g</code> — Global constant space (1 DOF for scalar, vdim for vector)</li><li><code>P1</code> — Piecewise linear (continuous) finite element space</li><li><code>H1</code> — Higher-order <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+<p><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> and <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> define finite element spaces, while <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> evaluates and interpolates discrete fields. <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>, <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>, and <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> express weak forms, boundary conditions, and the algebraic problems used to solve PDEs.</p><section id="autotoc_md564"><h2><a href="#autotoc_md564">Finite element spaces</a></h2><ul><li><code>P0</code> — Piecewise constant (discontinuous) finite element space</li><li><code>P0g</code> — Global constant space (1 DOF for scalar, vdim for vector)</li><li><code>P1</code> — Piecewise linear (continuous) finite element space</li><li><code>H1</code> — Higher-order <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>
@@ -105,7 +105,7 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq1-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq1-g1-49'/>
 </g>
-</svg>-conforming finite element space (arbitrary polynomial order)</li></ul></section><section id="autotoc_md570"><h2><a href="#autotoc_md570">Functions</a></h2><ul><li><code>TrialFunction</code> — Represents the unknown solution <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+</svg>-conforming finite element space (arbitrary polynomial order)</li></ul></section><section id="autotoc_md565"><h2><a href="#autotoc_md565">Functions</a></h2><ul><li><code>TrialFunction</code> — Represents the unknown solution <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -125,7 +125,7 @@ $ v $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-118'/>
 </g>
-</svg></li><li><code>GridFunction</code> — A concrete function storing DOF values in a finite element space</li></ul></section><section id="autotoc_md571"><h2><a href="#autotoc_md571">Variational Forms</a></h2><p>The module supports building variational problems of the form:</p><div class="m-math"><svg style="width: 24.319em; height: 1.245em;" viewBox="77.53888 -11.955168 233.465314 11.955168">
+</svg></li><li><code>GridFunction</code> — A concrete function storing DOF values in a finite element space</li></ul></section><section id="autotoc_md566"><h2><a href="#autotoc_md566">Variational forms</a></h2><p>The module supports building variational problems with the following weak form.</p><div class="m-math"><svg style="width: 24.319em; height: 1.245em;" viewBox="77.53888 -11.955168 233.465314 11.955168">
 <title>
 \[  \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
   a(u, v) = b(v) \ ,
@@ -351,7 +351,7 @@ $ u|_{\partial\Omega} $
 <use x='9.98333' y='1.793263' xlink:href='#eq13-g1-64'/>
 <use x='14.914894' y='1.793263' xlink:href='#eq13-g3-10'/>
 </g>
-</svg></li><li><code>LinearElasticityIntegral(u, v)(lambda, mu)</code> — Hooke elasticity bilinear form</li></ul></section><section id="autotoc_md572"><h2><a href="#autotoc_md572">Problem</a></h2><p>The <code>Problem</code> class assembles all forms and boundary conditions into a solvable linear system.</p><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></li><li><code>LinearElasticityIntegral(u, v)(lambda, mu)</code> — Hooke elasticity bilinear form</li></ul></section><section id="autotoc_md567"><h2><a href="#autotoc_md567">Problem</a></h2><p>The <code>Problem</code> class assembles all forms and boundary conditions into a solvable linear system.</p><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="nc">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
@@ -360,7 +360,7 @@ $ u|_{\partial\Omega} $
 <span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
 <span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span>
 
-<span class="n">Solver</span><span class="o">::</span><span class="nc">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-variational.html" class="m-doc">Variational Formulations Guide</a></p></aside></section>
+<span class="n">Solver</span><span class="o">::</span><span class="nc">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-variational.html" class="m-doc">Variational formulations guide</a></p></aside></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -12842,7 +12842,7 @@ $ f \cdot z $
                 </tr>
               </tfoot>
             </table>
-<p>Enables expression chains such as: <code class="m-code"><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">preassembledBF</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span></code> where the BilinearForm has already been assembled and the Dirichlet boundary condition is added to constrain the problem.</p><p>Scalar value type.</p>
+<p>Supports the following expression chains. <code class="m-code"><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">preassembledBF</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span></code> where the BilinearForm has already been assembled and the Dirichlet boundary condition is added to constrain the problem.</p><p>Scalar value type.</p>
           </div></section>
           <section class="m-doc-details" id="a421b7a02012fb58041ed28d3f2827f4c"><div>
             <h3>
@@ -12974,7 +12974,7 @@ $ f \cdot z $
                 </tr>
               </tfoot>
             </table>
-<p>Enables expression chains such as: <code class="m-code"><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">preassembledBF</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">...;</span></code> where the first two Integral terms produce a List&lt;LocalBFI&gt; (via Sum) and the preassembled BilinearForm is added afterwards.</p><p>Scalar value type.</p>
+<p>Supports the following expression chains. <code class="m-code"><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">preassembledBF</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">...;</span></code> where the first two Integral terms produce a List&lt;LocalBFI&gt; (via Sum) and the preassembled BilinearForm is added afterwards.</p><p>Scalar value type.</p>
           </div></section>
           <section class="m-doc-details" id="ac840d6bab4810822f588d3536fded9d7"><div>
             <h3>
@@ -13007,7 +13007,7 @@ $ f \cdot z $
                 </tr>
               </tfoot>
             </table>
-<p>Enables expression chains such as: <code class="m-code"><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">assembledLoadForm</span><span class="p">;</span></code> where a single Integral term (LocalBFI) is combined with a preassembled LinearForm.</p><p>Scalar value type.</p>
+<p>Supports the following expression chains. <code class="m-code"><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">assembledLoadForm</span><span class="p">;</span></code> where a single Integral term (LocalBFI) is combined with a preassembled LinearForm.</p><p>Scalar value type.</p>
           </div></section>
           <section class="m-doc-details" id="a170591422ffbc4fa8a84b68f417a3cdd"><div>
             <h3>
@@ -13040,7 +13040,7 @@ $ f \cdot z $
                 </tr>
               </tfoot>
             </table>
-<p>Enables expression chains such as: <code class="m-code"><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">loadP0</span><span class="p">;</span></code> where the Integral terms produce a List&lt;LocalBFI&gt; and the preassembled LinearForm is subtracted afterwards.</p><p>Scalar value type.</p>
+<p>Supports the following expression chains. <code class="m-code"><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">loadP0</span><span class="p">;</span></code> where the Integral terms produce a List&lt;LocalBFI&gt; and the preassembled LinearForm is subtracted afterwards.</p><p>Scalar value type.</p>
           </div></section>
           <section class="m-doc-details" id="a3e7de3ffe62d783d32b23a4266e4385e"><div>
             <h3>
@@ -13073,7 +13073,7 @@ $ f \cdot z $
                 </tr>
               </tfoot>
             </table>
-<p>Enables expression chains such as: <code class="m-code"><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">preassembledBF</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">loadP0</span><span class="p">;</span></code> where the chain first produces ProblemBody&lt;Op, void, S&gt; (after adding the preassembled BF) and then the LinearForm introduces the VectorType.</p><p>Scalar value type.</p>
+<p>Supports the following expression chains. <code class="m-code"><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">preassembledBF</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">loadP0</span><span class="p">;</span></code> where the chain first produces ProblemBody&lt;Op, void, S&gt; (after adding the preassembled BF) and then the LinearForm introduces the VectorType.</p><p>Scalar value type.</p>
           </div></section>
           <section class="m-doc-details" id="a41ca36e663826303d674460112db6118"><div>
             <h3>
@@ -13122,7 +13122,7 @@ $ \mathrm{void} $
 <use x='11.705981' y='0' xlink:href='#eq43-g0-105'/>
 <use x='14.957642' y='0' xlink:href='#eq43-g0-100'/>
 </g>
-</svg>-vector overload above covers the case where the LinearForm is what introduces the vector; this one covers a body that already holds linear-form content, so that several preassembled forms can be reused in one chain: <code class="m-code"><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">preassembledBF</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">preassembledLF</span><span class="p">;</span></code></p><p>Scalar value type.</p>
+</svg>-vector overload above covers the case where the LinearForm is what introduces the vector; this one covers a body that already holds linear-form content, so that several preassembled forms can be reused in one chain. <code class="m-code"><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">preassembledBF</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">preassembledLF</span><span class="p">;</span></code></p><p>Scalar value type.</p>
           </div></section>
           <section class="m-doc-details" id="a6eec6caed7f5ca6edc98453c6de6b46c"><div>
             <h3>
@@ -14279,7 +14279,7 @@ $ \mathrm{void} $
                 </tr>
               </tbody>
             </table>
-<p>Allows automatic type deduction when constructing a TestFunction:</p><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<p>Allows automatic type deduction when constructing a TestFunction.</p><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="nc">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w">  </span><span class="c1">// Type deduced as TestFunction&lt;P1&gt;</span></pre>
           </div></section>
           <section class="m-doc-details" id="a7c7db83e156aaff2ad3c746719f00063"><div>
@@ -14386,7 +14386,7 @@ $ \mathrm{void} $
                 </tr>
               </tbody>
             </table>
-<p>Allows automatic type deduction when constructing a TrialFunction:</p><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Uh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<p>Allows automatic type deduction when constructing a TrialFunction.</p><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Uh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Uh</span><span class="p">);</span><span class="w">  </span><span class="c1">// Type deduced automatically</span></pre>
           </div></section>
           <section class="m-doc-details" id="ac2472717385a7be18105c797610fc9a5"><div>

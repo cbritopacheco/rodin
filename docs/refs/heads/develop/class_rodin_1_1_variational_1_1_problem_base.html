@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::ProblemBase class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -88,7 +88,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md520">Usage Example</a></li>
+            <li><a href="#autotoc_md517">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -117,7 +117,7 @@ $ Au = b $
 <use x='18.758616' y='0' xlink:href='#eq1-g1-61'/>
 <use x='31.184096' y='0' xlink:href='#eq1-g0-98'/>
 </g>
-</svg> arising from the weak formulation of PDEs and provides a unified interface for assembly and solution operations.</p><section id="autotoc_md520"><h2><a href="#autotoc_md520">Usage Example</a></h2><pre class="m-code"><span class="c1">// Define a problem and solve</span>
+</svg> arising from the weak formulation of PDEs and provides a unified interface for assembly and solution operations.</p><section id="autotoc_md517"><h2><a href="#autotoc_md517">Usage Example</a></h2><pre class="m-code"><span class="c1">// Define a problem and solve</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Problem</span><span class="p">(</span><span class="n">trialSpace</span><span class="p">,</span><span class="w"> </span><span class="n">testSpace</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bilinearForm</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">linearForm</span><span class="p">;</span>
 <span class="n">problem</span><span class="p">.</span><span class="n">assemble</span><span class="p">();</span>

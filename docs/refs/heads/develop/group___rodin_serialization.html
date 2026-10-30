@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Serialization module | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -76,10 +76,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md629">Representative use</a></li>
+            <li><a href="#autotoc_md618">Representative use</a></li>
           </ul>
         </nav>
-<pre class="m-code"><span class="n">archive</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">values</span><span class="p">;</span></pre><p>Boost.Serialization adapters store arrays, Eigen-compatible dense matrices, flat containers, and optional values. The export registrations cover selected <a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">ParametricTransformation</a> instantiations used in MPI shard transfer. Including the relevant adapter headers enables binary archives of supported numerical data and container structures.</p><section id="autotoc_md629"><h2><a href="#autotoc_md629">Representative use</a></h2><p>Include the adapter for a stored type before using it with a Boost archive. For example, a Rodin array can be written to a binary archive over a stream:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Serialization/Array.h&gt;</span>
+<pre class="m-code"><span class="n">archive</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">values</span><span class="p">;</span></pre><p>Boost.Serialization adapters store arrays, Eigen-compatible dense matrices, flat containers, and optional values. The export registrations cover selected <a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">ParametricTransformation</a> instantiations used in MPI shard transfer. Including the relevant adapter headers enables binary archives of supported numerical data and container structures.</p><section id="autotoc_md618"><h2><a href="#autotoc_md618">Representative use</a></h2><p>Include the adapter for a stored type before using it with a Boost archive. For example, a Rodin array can be written to a binary archive over a stream.</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Serialization/Array.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;boost/archive/binary_oarchive.hpp&gt;</span>
 
 <span class="nc">Array</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">values</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>

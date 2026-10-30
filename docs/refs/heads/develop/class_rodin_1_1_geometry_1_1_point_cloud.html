@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::PointCloud class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -86,7 +86,7 @@
             </li>
           </ul>
         </nav>
-<p>Ownership: std::vector&lt;Eigen::Vector3&lt;Real&gt;&gt; (always 3 scalars per point). Active dimension: m_rows in {0,1,2,3} tells which prefix is meaningful.</p><p>Views:</p><ul><li>getMatrix(): (rows x N) view for computations in the active dimension.</li><li>getPackedMatrix(): (3 x N) full view of the underlying packed storage.</li></ul><p>Storage layout (AoS): [x0 y0 z0][x1 y1 z1]...</p><p>We map it as a column-major 3xN matrix with outer stride 3 and inner stride 1.</p>
+<p>Storage is owned by std::vector&lt;Eigen::Vector3&lt;Real&gt;&gt;, with three scalars per point. The active dimension m_rows in {0,1,2,3} identifies the meaningful prefix.</p><p>Views:</p><ul><li>getMatrix(): (rows x N) view for computations in the active dimension.</li><li>getPackedMatrix(): (3 x N) full view of the underlying packed storage.</li></ul><p>The following layout stores points in array-of-structures order. [x0 y0 z0][x1 y1 z1]...</p><p>We map it as a column-major 3xN matrix with outer stride 3 and inner stride 1.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -759,7 +759,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>Naming rationale: this is the raw, packed, always-3D storage view.</p>
+<p>The name describes the raw, packed storage view with three components per point.</p>
           </div></section>
           <section class="m-doc-details" id="ad6cb45c9b034bc2d9f61c3d02312f4e1"><div>
             <h3>

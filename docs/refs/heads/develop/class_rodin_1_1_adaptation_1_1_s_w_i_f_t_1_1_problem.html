@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Adaptation::SWIFT::Problem class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -254,11 +254,11 @@ $x_1=0.55$
 <span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">targetReached</span><span class="w"> </span><span class="o">=</span>
 <span class="w">  </span><span class="n">report</span><span class="p">.</span><span class="n">reason</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="k">decltype</span><span class="p">(</span><span class="n">fitting</span><span class="p">)</span><span class="o">::</span><span class="nc">Report</span><span class="o">::</span><span class="nc">Reason</span><span class="o">::</span><span class="no">GeometricTarget</span><span class="p">;</span>
 <span class="c1">// solve() updates u, but leaves mesh vertices and transformations unchanged.</span>
-<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">displacement</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">();</span></pre><p>A best-effort result may remain quality-admissible without reaching the target. Interpretation requires both the stopping reason and the geometric and quality fields; successful linear or inner solves are not geometric convergence. The final monitor snapshot can repeat the last accepted step.</p></section><section id="swift-usage-boundaries"><h3><a href="#swift-usage-boundaries">Boundary conditions and metric extensions</a></h3><p>If a boundary has been marked with an application-defined <code>FixedBoundary</code> attribute, its current position can be held fixed by adding a homogeneous increment condition before solving:</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">fixed</span><span class="w"> </span><span class="o">=</span>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">displacement</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">();</span></pre><p>A best-effort result may remain quality-admissible without reaching the target. Interpretation requires both the stopping reason and the geometric and quality fields; successful linear or inner solves are not geometric convergence. The final monitor snapshot can repeat the last accepted step.</p></section><section id="swift-usage-boundaries"><h3><a href="#swift-usage-boundaries">Boundary conditions and metric extensions</a></h3><p>If a boundary has been marked with an application-defined <code>FixedBoundary</code> attribute, its current position can be held fixed by adding a homogeneous increment condition before solving.</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">fixed</span><span class="w"> </span><span class="o">=</span>
 <span class="w">  </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">VectorFunction</span><span class="p">(</span><span class="nc">Real</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="nc">Real</span><span class="p">(</span><span class="mi">0</span><span class="p">))).</span><span class="n">on</span><span class="p">(</span><span class="n">FixedBoundary</span><span class="p">);</span>
 <span class="n">fitting</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">fixed</span><span class="p">;</span>
 <span class="c1">// Remove the same condition when this boundary is allowed to move again.</span>
-<span class="n">fitting</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">fixed</span><span class="p">;</span></pre><p>Nonzero increment values and identification conditions are not supported. Additional bilinear metric terms can be added and removed through getMetric(); they alter the direction model, not the fitting objective or force. For example, adding a mass term also penalizes translations and is therefore a different motion model. See <a href="guides-swift.html#guides-swift-extension" class="m-doc">Adding metric terms</a>.</p></section><section id="swift-usage-lifetime"><h3><a href="#swift-usage-lifetime">Ownership, reuse and geometry application</a></h3><p>The mesh is obtained from the trial function&#x27;s finite element space. Boundary attributes and <svg class="m-math" style="width: 3.027em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 29.063034 10.626798">
+<span class="n">fitting</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">fixed</span><span class="p">;</span></pre><p>Nonzero increment values and identification conditions are not supported. Additional bilinear metric terms can be added and removed through getMetric(); they alter the direction model, not the fitting objective or force. For example, adding a mass term also penalizes translations and is therefore a different motion model. See <a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html#swift-reference-extension" class="m-doc">Adding metric terms</a>.</p></section><section id="swift-usage-lifetime"><h3><a href="#swift-usage-lifetime">Ownership, reuse and geometry application</a></h3><p>The mesh is obtained from the trial function&#x27;s finite element space. Boundary attributes and <svg class="m-math" style="width: 3.027em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 29.063034 10.626798">
 <title>
 $\phi,\nabla\phi$
 </title>
@@ -2091,7 +2091,7 @@ $\Psi_k$
 <use x='0' y='0' xlink:href='#eq53-g1-9'/>
 <use x='9.104652' y='1.793263' xlink:href='#eq53-g0-107'/>
 </g>
-</svg>. The model is piecewise quadratic: within a fixed active hinge set its Hessian is constant. Affine slacks contribute rank-one row products, not <svg class="m-math" style="width: 2.114em; height: 1.229em; vertical-align: -0.243em;" viewBox="0 -9.474739 20.292289 11.799346">
+</svg>. The model is piecewise quadratic. within a fixed active hinge set its Hessian is constant. Affine slacks contribute rank-one row products, not <svg class="m-math" style="width: 2.114em; height: 1.229em; vertical-align: -0.243em;" viewBox="0 -9.474739 20.292289 11.799346">
 <title>
 $D^2j$
 </title>
@@ -2119,7 +2119,7 @@ $D^2Q$
 <use x='10.044475' y='-4.338437' xlink:href='#eq55-g1-50'/>
 <use x='14.77679' y='0' xlink:href='#eq55-g0-81'/>
 </g>
-</svg>. These finite penalties are not hard constraints; actual nonlinear quality is checked again by the outer line search. Inactive hinges require no correction. Inner stopping uses the Euclidean stationarity residual on the free solve coordinates:</p><div class="m-math"><svg style="width: 16.424em; height: 1.245em;" viewBox="115.434932 -11.955168 157.673172 11.955168">
+</svg>. These finite penalties are not hard constraints; actual nonlinear quality is checked again by the outer line search. Inactive hinges require no correction. Inner stopping uses the Euclidean stationarity residual on the free solve coordinates.</p><div class="m-math"><svg style="width: 16.424em; height: 1.245em;" viewBox="115.434932 -11.955168 157.673172 11.955168">
 <title>
 \[\|\nabla\Psi_k(v_m)\|_2\le\tau_{\mathrm{abs}}
       +\tau_{\mathrm{rel}}\|f_k\|_2.
@@ -2468,7 +2468,7 @@ $p$
 <g id='eq63-page1'>
 <use x='0' y='0' xlink:href='#eq63-g0-112'/>
 </g>
-</svg> is the interface finite element order. This is a sampled local distance estimate, not a certified Hausdorff bound. Small accepted steps, small relative energy changes and exhausted iteration budgets are best-effort exits, not target convergence.</p></section></section><section id="swift-parameters"><h2><a href="#swift-parameters">Parameters</a></h2><p>The values below describe the default model and stopping policy. The reference size must be supplied by the application. Automatically selected scales are fixed for the duration of a solve; they are not recomputed from the shrinking or expanding mesh. The corresponding C++ fields are listed in <a href="guides-swift.html#guides-swift-controls" class="m-doc">Main controls</a> and <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>.</p><table class="m-table"><thead><tr><th>Parameter</th><th>C++</th><th>Description</th><th>Value</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 0.702em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.738555 8.302191">
+</svg> is the interface finite element order. This is a sampled local distance estimate, not a certified Hausdorff bound. Small accepted steps, small relative energy changes and exhausted iteration budgets are best-effort exits, not target convergence.</p></section></section><section id="swift-parameters"><h2><a href="#swift-parameters">Parameters</a></h2><p>The values below describe the default model and stopping policy. The reference size must be supplied by the application. Automatically selected scales are fixed for the duration of a solve; they are not recomputed from the shrinking or expanding mesh. The corresponding C++ fields are listed in <a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html#swift-reference-controls" class="m-doc">Main controls</a> and <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>.</p><table class="m-table"><thead><tr><th>Parameter</th><th>C++</th><th>Description</th><th>Value</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 0.702em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.738555 8.302191">
 <title>
 $h$
 </title>
@@ -3198,7 +3198,7 @@ $h^{p+1}$
 <use x='11.001332' y='-4.338437' xlink:href='#eq115-g2-43'/>
 <use x='17.587839' y='-4.338437' xlink:href='#eq115-g2-49'/>
 </g>
-</svg>. <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence_1_1_tolerance.html#adafdba2846fa091227e8408f29994640" class="m-doc">innerRelative</a> and <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence_1_1_tolerance.html#a7ae4406a3ade1bcad0990ab60c4ce474" class="m-doc">innerAbsolute</a> control stationarity of the direction problem, not geometric accuracy. Linear residual accuracy is controlled separately by <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence_1_1_tolerance.html#a03c285aa9dd8583dd664aa72d9c8384c" class="m-doc">linearRelative</a>. <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence_1_1_iterations.html#ae9cb9e692e3597404b5aba564de06cee" class="m-doc">outer</a> and <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence_1_1_iterations.html#a82374a8d2078b5b47831fb8401c5ec06" class="m-doc">inner</a> are work limits, not convergence certificates. Persistent small accepted motion or small energy changes produce best-effort exits. The report distinguishes these exits from a geometric target hit and records fitting energy, maximum sampled error, quality and iteration counts. Defaults and diagnostic fields are listed in <a href="guides-swift.html#guides-swift-controls" class="m-doc">Main controls</a> and <a href="guides-swift.html#guides-swift-results" class="m-doc">Reading results</a>.</p></section></section><section id="swift-theory"><h2><a href="#swift-theory">Theory</a></h2><section id="swift-structure"><h3><a href="#swift-structure">Metric structure and solvability</a></h3><p>For positive metric weights and <svg class="m-math" style="width: 3.288em; height: 1.059em; vertical-align: -0.243em;" viewBox="0 -7.837689 31.561971 10.162297">
+</svg>. <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence_1_1_tolerance.html#adafdba2846fa091227e8408f29994640" class="m-doc">innerRelative</a> and <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence_1_1_tolerance.html#a7ae4406a3ade1bcad0990ab60c4ce474" class="m-doc">innerAbsolute</a> control stationarity of the direction problem, not geometric accuracy. Linear residual accuracy is controlled separately by <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence_1_1_tolerance.html#a03c285aa9dd8583dd664aa72d9c8384c" class="m-doc">linearRelative</a>. <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence_1_1_iterations.html#ae9cb9e692e3597404b5aba564de06cee" class="m-doc">outer</a> and <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence_1_1_iterations.html#a82374a8d2078b5b47831fb8401c5ec06" class="m-doc">inner</a> are work limits, not convergence certificates. Persistent small accepted motion or small energy changes produce best-effort exits. The report distinguishes these exits from a geometric target hit and records fitting energy, maximum sampled error, quality and iteration counts. Defaults and diagnostic fields are listed in <a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html#swift-reference-controls" class="m-doc">Main controls</a> and <a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html#swift-reference-results" class="m-doc">Reading results</a>.</p></section></section><section id="swift-theory"><h2><a href="#swift-theory">Theory</a></h2><section id="swift-structure"><h3><a href="#swift-structure">Metric structure and solvability</a></h3><p>For positive metric weights and <svg class="m-math" style="width: 3.288em; height: 1.059em; vertical-align: -0.243em;" viewBox="0 -7.837689 31.561971 10.162297">
 <title>
 $j_k&gt;0$
 </title>
@@ -3214,7 +3214,7 @@ $j_k&gt;0$
 <use x='13.2835' y='0' xlink:href='#eq116-g1-62'/>
 <use x='25.708981' y='0' xlink:href='#eq116-g2-48'/>
 </g>
-</svg>, both terms are integrals of squares. With nonnegative quadrature weights this property also holds for the assembled form:</p><div class="m-math"><svg style="width: 17.809em; height: 1.245em;" viewBox="108.790522 -11.955168 170.962 11.955168">
+</svg>, both terms are integrals of squares. With nonnegative quadrature weights this property also holds for the assembled form.</p><div class="m-math"><svg style="width: 17.809em; height: 1.245em;" viewBox="108.790522 -11.955168 170.962 11.955168">
 <title>
 \[M_k[v,v]=F_k[v,v]+D_k[v,v]\ge0.
 \]
@@ -3364,7 +3364,7 @@ $H^1$
 <use x='0' y='0' xlink:href='#eq119-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq119-g1-49'/>
 </g>
-</svg> estimate is a stronger, separate statement:</p><div class="m-math"><svg style="width: 16.921em; height: 1.971em;" viewBox="113.052524 -20.112612 162.438011 18.917098">
+</svg> estimate is a stronger, separate statement.</p><div class="m-math"><svg style="width: 16.921em; height: 1.971em;" viewBox="113.052524 -20.112612 162.438011 18.917098">
 <title>
 \[M_k[v,v]\ge c\inf_{w\in\mathcal N_k}
             \|v-w\|_{H^1(\Omega_0)}^2.
@@ -3443,7 +3443,7 @@ $c&gt;0$
 <use x='8.358818' y='0' xlink:href='#eq121-g0-62'/>
 <use x='20.784299' y='0' xlink:href='#eq121-g1-48'/>
 </g>
-</svg> independent of refinement. It does not follow from positive semidefiniteness alone.</p></section><section id="swift-convergence"><h3><a href="#swift-convergence">Scope of convergence diagnostics</a></h3><p>Affine squared hinges are convex. Their active-region Hessian therefore preserves positive semidefiniteness:</p><div class="m-math"><svg style="width: 36.408em; height: 1.361em;" viewBox="19.514087 -13.06128 349.514873 13.06128">
+</svg> independent of refinement. It does not follow from positive semidefiniteness alone.</p></section><section id="swift-convergence"><h3><a href="#swift-convergence">Scope of convergence diagnostics</a></h3><p>Affine squared hinges are convex. Their active-region Hessian therefore preserves positive semidefiniteness.</p><div class="m-math"><svg style="width: 36.408em; height: 1.361em;" viewBox="19.514087 -13.06128 349.514873 13.06128">
 <title>
 \[D^2B_k(v)[z,z]\ge0,\qquad
 D^2\Psi_k(v)[z,z]=\bar M_k[z,z]+D^2B_k(v)[z,z]\ge0.

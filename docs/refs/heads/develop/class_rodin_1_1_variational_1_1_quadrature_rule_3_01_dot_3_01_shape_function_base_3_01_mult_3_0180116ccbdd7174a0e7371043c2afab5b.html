@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, FunctionBase&lt;CoefficientDerived&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -110,8 +110,8 @@ $ \int (\nabla u \cdot f) \cdot v $
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md508">Judgement</a></li>
-            <li><a href="#autotoc_md509">Architecture</a></li>
+            <li><a href="#autotoc_md505">Judgement</a></li>
+            <li><a href="#autotoc_md506">Architecture</a></li>
             <li>
               Reference
               <ul>
@@ -124,7 +124,7 @@ $ \int (\nabla u \cdot f) \cdot v $
             </li>
           </ul>
         </nav>
-<p>This class represents the CTAD for the expression:</p><div class="m-math"><svg style="width: 9.308em; height: 2.767em;" viewBox="149.591437 -26.567319 89.360124 26.567327">
+<p>This class provides class template argument deduction for the following expression.</p><div class="m-math"><svg style="width: 9.308em; height: 2.767em;" viewBox="149.591437 -26.567319 89.360124 26.567327">
 <title>
 \[\int (\mathbf{J} \: u \cdot f) \cdot v \ dx \: ,
 \]
@@ -198,7 +198,7 @@ $ f $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-102'/>
 </g>
-</svg> is a coefficient function.</p><section id="autotoc_md508"><h2><a href="#autotoc_md508">Judgement</a></h2><p>The following judgement specifies that the expression is a well formed type of QuadratureRule.</p><div class="m-math"><svg style="width: 19.568em; height: 2.966em;" viewBox="100.342922 -28.471357 187.857253 28.471369">
+</svg> is a coefficient function.</p><section id="autotoc_md505"><h2><a href="#autotoc_md505">Judgement</a></h2><p>The following judgement specifies that the expression is a well formed type of QuadratureRule.</p><div class="m-math"><svg style="width: 19.568em; height: 2.966em;" viewBox="100.342922 -28.471357 187.857253 28.471369">
 <title>
 \[\dfrac
 {\vdash \int (\mathbf{J} \: u \cdot f) \cdot v \ dx :
@@ -269,7 +269,7 @@ $ f $
 <use x='207.509821' y='-2.324596' xlink:href='#eq6-g2-80'/>
 <use x='214.815775' y='-.531333' xlink:href='#eq6-g6-49'/>
 </g>
-</svg></div><p>Evaluates at every sample of the selected quadrature formula. Supports distinct P1 trial and test spaces and implements the linearized convection term for Navier-Stokes.</p></section><section id="autotoc_md509"><h2><a href="#autotoc_md509">Architecture</a></h2><p>Reference derivatives of the trial scalar basis and values of the test scalar basis are prepared directly in their respective scalar fields. Their counts do not require division by a vector component count or access to a component-zero vector basis. The cache is marked ready only after the complete sample collection is filled. Empty ranges retain mapped quadrature and a <svg class="m-math" style="width: 2.741em; height: 0.906em; vertical-align: -0.104em;" viewBox="0 -7.704442 26.317805 8.700714">
+</svg></div><p>Evaluates at every sample of the selected quadrature formula. Supports distinct P1 trial and test spaces and implements the linearized convection term for Navier-Stokes.</p></section><section id="autotoc_md506"><h2><a href="#autotoc_md506">Architecture</a></h2><p>Reference derivatives of the trial scalar basis and values of the test scalar basis are prepared directly in their respective scalar fields. Their counts do not require division by a vector component count or access to a component-zero vector basis. The cache is marked ready only after the complete sample collection is filled. Empty ranges retain mapped quadrature and a <svg class="m-math" style="width: 2.741em; height: 0.906em; vertical-align: -0.104em;" viewBox="0 -7.704442 26.317805 8.700714">
 <title>
 $0\times0$
 </title>

@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Assembly::MPIBoundaryDOFs class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -88,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<p>Architecture: for locally supported spaces, the required set is the union of owned DOFs and DOFs of owned cells. Vertex-overlap shards contain every incident face of these DOFs. Select the smallest distributed face index among eligible faces, including ghosts. Artificial boundaries at the outer edge of the overlap cannot touch this required set. No communication is performed for these spaces.</p><p>P0g is globally supported and is deliberately different: select the lowest eligible owned face globally and broadcast its evaluated payload. Ownership and numbering are never changed. No numerical comparison selects a source.</p>
+<aside class="m-note m-default"><h4>Architecture</h4></aside><p>For locally supported spaces, the required set is the union of owned DOFs and DOFs of owned cells. Vertex-overlap shards contain every incident face of these DOFs. Select the smallest distributed face index among eligible faces, including ghosts. Artificial boundaries at the outer edge of the overlap cannot touch this required set. No communication is performed for these spaces.</p><p>P0g is globally supported. Select the lowest eligible owned face globally and broadcast its evaluated payload. Ownership and numbering are never changed. No numerical comparison selects a source.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">

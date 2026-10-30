@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -653,7 +653,7 @@ $(d, i)$
                 </tr>
               </tfoot>
             </table>
-<p>For a P0 space, degrees of freedom are associated with mesh cells. The global dimension of the space equals the total number of cells in the distributed mesh:</p><div class="m-math"><svg style="width: 8.186em; height: 1.245em;" viewBox="154.978964 -11.955168 78.585048 11.955168">
+<p>For a P0 space, degrees of freedom are associated with mesh cells. The global dimension of the space equals the total number of cells in the distributed mesh.</p><div class="m-math"><svg style="width: 8.186em; height: 1.245em;" viewBox="154.978964 -11.955168 78.585048 11.955168">
 <title>
 \[  \dim(V_h) = N_c \, k
 \]
@@ -706,7 +706,7 @@ $k$
 <g id='eq7-page1'>
 <use x='0' y='0' xlink:href='#eq7-g0-107'/>
 </g>
-</svg> is the number of field components.</p><aside class="m-note m-info"><h4>Note</h4><p>Non-collective: returns the size established during construction.</p></aside>
+</svg> is the number of field components.</p><aside class="m-note m-info"><h4>Note</h4><p>This non-collective operation returns the size established during construction.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a1c88fa53fe90dcf92c359274842445e9"><div>
             <h3>

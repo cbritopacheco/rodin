@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin/Variational/Integral.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -77,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md432">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md433">Bilinear Form Integrals</a></li>
-            <li><a href="#autotoc_md434">Linear Form Integrals</a></li>
-            <li><a href="#autotoc_md435">Usage Examples</a></li>
+            <li><a href="#autotoc_md430">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md431">Bilinear Form Integrals</a></li>
+            <li><a href="#autotoc_md432">Linear Form Integrals</a></li>
+            <li><a href="#autotoc_md433">Usage Examples</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the Integral classes which represent domain integrals in finite element formulations. These integrals form the basis for defining bilinear and linear forms in the weak formulation.</p><section id="autotoc_md432"><h2><a href="#autotoc_md432">Mathematical Foundation</a></h2><p>Domain integrals compute:</p><div class="m-math"><svg style="width: 5.498em; height: 2.819em;" viewBox="167.882039 -27.065451 52.778905 27.065451">
+<p>This file defines the Integral classes which represent domain integrals in finite element formulations. These integrals form the basis for defining bilinear and linear forms in the weak formulation.</p><section id="autotoc_md430"><h2><a href="#autotoc_md430">Mathematical Foundation</a></h2><p>Domain integrals compute the following quantity.</p><div class="m-math"><svg style="width: 5.498em; height: 2.819em;" viewBox="167.882039 -27.065451 52.778905 27.065451">
 <title>
 \[     \int_\Omega f(x) \, dx
 \]
@@ -134,7 +134,7 @@ $ f $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-102'/>
 </g>
-</svg> is the integrand.</p></section><section id="autotoc_md433"><h2><a href="#autotoc_md433">Bilinear Form Integrals</a></h2><p>For bilinear forms <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
+</svg> is the integrand.</p></section><section id="autotoc_md431"><h2><a href="#autotoc_md431">Bilinear Form Integrals</a></h2><p>For bilinear forms <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
 <title>
 $ a(u,v) $
 </title>
@@ -154,7 +154,7 @@ $ a(u,v) $
 <use x='22.603868' y='0' xlink:href='#eq4-g0-118'/>
 <use x='28.692087' y='0' xlink:href='#eq4-g1-41'/>
 </g>
-</svg>:</p><div class="m-math"><svg style="width: 14.385em; height: 2.819em;" viewBox="125.225838 -27.065451 138.091342 27.065451">
+</svg>.</p><div class="m-math"><svg style="width: 14.385em; height: 2.819em;" viewBox="125.225838 -27.065451 138.091342 27.065451">
 <title>
 \[     a(u,v) = \int_\Omega A(u) : B(v) \, dx
 \]
@@ -217,7 +217,7 @@ $ B $
 <g id='eq7-page1'>
 <use x='0' y='0' xlink:href='#eq7-g0-66'/>
 </g>
-</svg> are operators on trial and test functions.</p></section><section id="autotoc_md434"><h2><a href="#autotoc_md434">Linear Form Integrals</a></h2><p>For linear forms <svg class="m-math" style="width: 1.973em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 18.942679 11.955168">
+</svg> are operators on trial and test functions.</p></section><section id="autotoc_md432"><h2><a href="#autotoc_md432">Linear Form Integrals</a></h2><p>For linear forms <svg class="m-math" style="width: 1.973em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 18.942679 11.955168">
 <title>
 $ l(v) $
 </title>
@@ -233,7 +233,7 @@ $ l(v) $
 <use x='8.302134' y='0' xlink:href='#eq8-g0-118'/>
 <use x='14.390353' y='0' xlink:href='#eq8-g1-41'/>
 </g>
-</svg>:</p><div class="m-math"><svg style="width: 9.003em; height: 2.819em;" viewBox="151.0547 -27.065451 86.433591 27.065451">
+</svg>.</p><div class="m-math"><svg style="width: 9.003em; height: 2.819em;" viewBox="151.0547 -27.065451 86.433591 27.065451">
 <title>
 \[     l(v) = \int_\Omega f \cdot v \, dx
 \]
@@ -265,7 +265,7 @@ $ l(v) $
 <use x='224.753511' y='-10.793007' xlink:href='#eq9-g2-100'/>
 <use x='230.836204' y='-10.793007' xlink:href='#eq9-g2-120'/>
 </g>
-</svg></div></section><section id="autotoc_md435"><h2><a href="#autotoc_md435">Usage Examples</a></h2><pre class="m-code"><span class="c1">// Stiffness matrix: \int \nabla u\cdot\nabla v dx</span>
+</svg></div></section><section id="autotoc_md433"><h2><a href="#autotoc_md433">Usage Examples</a></h2><pre class="m-code"><span class="c1">// Stiffness matrix: \int \nabla u\cdot\nabla v dx</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
 
 <span class="c1">// Mass matrix: \int u\cdot v dx</span>

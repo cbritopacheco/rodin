@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::Adaptation::SWIFT::FittingTensor class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -162,7 +162,7 @@ $D^2\phi$
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a1277221b2d1c2fcb12361d7957fbb9c5" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Polynomial order of the composed fitting tensor when known. A globally constant vector is unchanged by deformation. Elementwise orders cannot be forwarded through point location: a moved entity may cross target cells, including cells with different constant gradients.</dd>
+            <dd>Polynomial order of the composed fitting tensor when known. A globally constant vector is unchanged by deformation. Elementwise orders cannot be forwarded through point location because a moved entity may cross target cells, including cells with different constant gradients.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aba4a3a9887b3287fbff9d7065f1c0ec8" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a681ee28ac93403d7cca340754a657a5e" class="m-doc">FittingTensor</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -292,7 +292,7 @@ $D^2\phi$
               
               <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1277221b2d1c2fcb12361d7957fbb9c5" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Polynomial order of the composed fitting tensor when known. A globally constant vector is unchanged by deformation. Elementwise orders cannot be forwarded through point location: a moved entity may cross target cells, including cells with different constant gradients.</p>
+            <p>Polynomial order of the composed fitting tensor when known. A globally constant vector is unchanged by deformation. Elementwise orders cannot be forwarded through point location because a moved entity may cross target cells, including cells with different constant gradients.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>

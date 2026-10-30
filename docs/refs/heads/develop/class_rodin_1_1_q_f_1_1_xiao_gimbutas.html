@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::QF::XiaoGimbutas class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -86,7 +86,7 @@
             </li>
           </ul>
         </nav>
-<p>Provides the tabulated positive interior rules described by Xiao and Gimbutas <a href="citelist.html#CITEREF_xiao2010numerical" class="m-doc">[14]</a>. The published coefficients are vendored from the authors&#x27; triasymq distribution under its BSD 3-Clause license. The triangle table reaches degree 50 and the tetrahedron table degree 15. Every entry is independently tested for polynomial exactness, positive weights, and interior nodes.</p><p>Beyond the tabulated range, the default dispatcher uses a positive Gauss&ndash;Jacobi conical-product rule.</p>
+<p>Provides the tabulated positive interior rules described by Xiao and Gimbutas <a href="citelist.html#CITEREF_xiao2010numerical" class="m-doc">[15]</a>. The published coefficients are vendored from the authors&#x27; triasymq distribution under its BSD 3-Clause license. The triangle table reaches degree 50 and the tetrahedron table degree 15. Every entry is independently tested for polynomial exactness, positive weights, and interior nodes.</p><p>Beyond the tabulated range, the default dispatcher uses a positive Gauss&ndash;Jacobi conical-product rule.</p>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" title="QuadratureFormulaBase">QuadratureFormulaBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">XiaoGimbutas</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html"><code>QuadratureFormulaBase</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">QuadratureFormulaBase</span>
 </pre></details></td><td>Read-only access to reference quadrature points and weights.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_q_f_1_1_xiao_gimbutas.html#a3eae8327ca1fb513e25290e9d367039f"><code>getSamples()</code></a></td><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html#ac9de85c2457236f7e87494d48158e743">QuadratureFormulaBase::getSamples</a></td></tr><tr><td><a href="class_rodin_1_1_q_f_1_1_xiao_gimbutas.html#a23e73ba10e16901b2326d8212936b72b"><code>getSize()</code></a></td><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html#a319cde5b2ea76e92e922845ecfa5c615">QuadratureFormulaBase::getSize</a></td></tr><tr><td><a href="class_rodin_1_1_q_f_1_1_xiao_gimbutas.html#a56b74ff92cb5876bea3ef654457be465"><code>getWeight()</code></a></td><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html#a37791e12d1a664c6d31f69c0b2e2b69f">QuadratureFormulaBase::getWeight</a></td></tr><tr><td><a href="class_rodin_1_1_q_f_1_1_xiao_gimbutas.html#a3d9ae6d6960698e83f7b4f81ad9c40e3"><code>getPoint()</code></a></td><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html#a498c8f41a2a0208b3c64510e52fa04f6">QuadratureFormulaBase::getPoint</a></td></tr></tbody></table></section>
         <section id="pub-static-methods">

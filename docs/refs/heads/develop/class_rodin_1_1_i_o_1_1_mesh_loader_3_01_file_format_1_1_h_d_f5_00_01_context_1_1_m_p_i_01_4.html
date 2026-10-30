@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::IO::MeshLoader&lt;FileFormat::HDF5, Context::MPI&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>Each MPI rank independently loads its local <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">shard</a> from the given HDF5 file path using the canonical local mesh HDF5 layout and the vertex/cell <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">shard</a> metadata stored under <code>/Shard/...</code>. The file is expected to have been produced by <code>MeshPrinter&lt;FileFormat::HDF5, Context::MPI&gt;</code>. Reconstruction is collective: the maximum local dimension determines the distributed dimension and the metadata extent on empty shards.</p><aside class="m-note m-info"><h4>Note</h4><p>Each rank must be given a rank-specific file path (e.g. via the callable filename overload on Mesh&lt;Context::MPI&gt;::load).</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a></p></aside>
+<p>Each MPI rank independently loads its local <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">shard</a> from the given HDF5 file path using the canonical local mesh HDF5 layout and the vertex/cell <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">shard</a> metadata stored under <code>/Shard/...</code>. The file is expected to have been produced by <code>MeshPrinter&lt;FileFormat::HDF5, Context::MPI&gt;</code>. Reconstruction is collective. The maximum local dimension determines the distributed dimension and the metadata extent on empty shards.</p><aside class="m-note m-info"><h4>Note</h4><p>Each rank must be given a rank-specific file path (e.g. via the callable filename overload on Mesh&lt;Context::MPI&gt;::load).</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a></p></aside>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" title="MeshLoaderBase&lt; Context::MPI &gt;">MeshLoaderBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">MeshLoader</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html"><code>MeshLoaderBase&lt;Context::MPI&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html#ac4b2329eaa90a59450bfcdeb60ce7946"><span class="nc">MeshLoaderBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="w"> </span><span class="o">&gt;</span>
 </pre></details></td><td>Base class for loading meshes from files or streams.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html#a69a36ae58eeb6d0819e38eea87d59767"><code>load()</code></a></td><td><a href="class_rodin_1_1_i_o_1_1_loader.html#a4a361edaafdca57b230ccf5f8bc6479a">Loader::load</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html"><code>MeshLoaderBase</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html#a6c83de099561717325b0b3a729cfeb1f"><code>getObject()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">

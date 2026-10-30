@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>Rodin::FormLanguage::Debug struct | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
-  <link rel="stylesheet" href="rodin-fe7b0e2c871a.css" />
-  <link rel="stylesheet" href="rodin-theme-27c0d1929b3f.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-bc48e2782da9.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -32,7 +32,7 @@
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
                 <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="ci-index.html">Continuous integration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
@@ -85,7 +85,7 @@
             </li>
           </ul>
         </nav>
-<p>The Debug template provides a mechanism for introspecting and debugging form language types during compilation and runtime. Specialize this template for specific types to provide custom debugging information.</p><section id="autotoc_md45"><h2><a href="#autotoc_md45">Usage</a></h2><p>This template is primarily used during development to understand type transformations and check template instantiations. When instantiated, compiler errors will reveal the actual type of T.</p><p>Example usage:</p><pre class="m-code"><span class="c1">// This will trigger a compile error showing the actual type</span>
+<p>The Debug template provides a mechanism for introspecting and debugging form language types during compilation and runtime. Specialize this template for specific types to provide custom debugging information.</p><section id="autotoc_md45"><h2><a href="#autotoc_md45">Usage</a></h2><p>This template is primarily used during development to understand type transformations and check template instantiations. When instantiated, compiler errors will reveal the actual type of T.</p><p>The following example illustrates usage.</p><pre class="m-code"><span class="c1">// This will trigger a compile error showing the actual type</span>
 <span class="nc">Debug</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">myExpression</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">debug</span><span class="p">;</span></pre></section>
       </div>
     </div>
