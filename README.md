@@ -256,11 +256,18 @@ int main(int, char**)
 }
 ```
 
-<p align="center">
-  <img src="doc/README/Poisson.png" alt="Poisson solution on the unit square" width="360" style="max-width:100%;height:auto;">
-  <br>
-  <em>Solution of the Poisson equation in 2D.</em>
-</p>
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="doc/README/Poisson.png" alt="Poisson solution on the unit square" width="360" style="max-width:100%;height:auto;">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      Solution of the Poisson equation in 2D.
+    </td>
+  </tr>
+</table>
 
 ### Full high level mesh access and functionalities
 
