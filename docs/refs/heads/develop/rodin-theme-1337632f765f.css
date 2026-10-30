@@ -872,15 +872,16 @@ main article figure.m-figure figcaption {
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 400;
+  color: var(--color);
   line-height: 1.5;
   text-align: center;
 }
 
-/* One scientific panel occupies half the content width on desktop. */
+/* Standalone figures use a larger canvas; comparisons retain two columns. */
 main article figure.m-figure {
   display: block;
-  width: calc((100% - 1.5rem) / 2);
-  max-width: 22.25rem;
+  width: 100%;
+  max-width: 36rem;
   margin: 1.5rem auto;
 }
 main article figure.m-figure img {
@@ -918,6 +919,36 @@ main article figure.m-figure:has(img[src$="Architecture.svg"]) {
 .rodin-mesh-stages figure.m-figure figcaption {
   display: block;
   margin: .75rem 0 0;
+}
+
+/* Frame a comparison row together, including both captions. */
+main article figure.m-figure:has(img),
+.rodin-figure-row {
+  box-sizing: border-box;
+  border: 1px solid var(--line-color);
+  border-radius: .35rem;
+  padding: .85rem;
+}
+.rodin-mesh-stages .rodin-figure-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  grid-column: 1 / -1;
+}
+.rodin-mesh-stages .rodin-figure-row-single {
+  grid-column: 2 / span 2;
+  grid-template-columns: minmax(0, 1fr);
+}
+.rodin-figure-row figure.m-figure:has(img) {
+  border: 0;
+  padding: 0;
+  grid-column: auto;
+}
+@media screen and (max-width: 767px) {
+  .rodin-mesh-stages .rodin-figure-row {
+    grid-template-columns: minmax(0, 1fr);
+    grid-column: 1;
+  }
 }
 
 /* Videos use the full content width, independently of still-image panels. */

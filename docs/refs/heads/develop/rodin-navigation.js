@@ -4,6 +4,22 @@
   const content = benchmark || document.querySelector('main > article > .m-container > .m-row > .m-col-l-10');
   if (!content) return;
 
+  // Keep each comparison row and its captions inside one frame.
+  for (const group of content.querySelectorAll('.rodin-mesh-stages')) {
+    const figures = Array.from(group.querySelectorAll(':scope > figure.m-figure'));
+    for (let index = 0; index < figures.length; index += 2) {
+      const row = document.createElement('div');
+      row.className = 'rodin-figure-row';
+      if (index + 1 === figures.length) row.classList.add('rodin-figure-row-single');
+      group.insertBefore(row, figures[index]);
+      row.append(...figures.slice(index, index + 2));
+      // Reparenting an image can interrupt a pending browser request.
+      for (const image of row.querySelectorAll('img')) {
+        if (!image.complete || !image.naturalWidth) image.src = image.src;
+      }
+    }
+  }
+
   // The homepage signature already identifies the project.
   if (content.querySelector(':scope > .rodin-main-brand')) {
     content.querySelector(':scope > h1')?.remove();
