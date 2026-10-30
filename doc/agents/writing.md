@@ -112,19 +112,28 @@ contracts, mathematical content, or existing cross-references.
 
 Use the site's bundled Manrope font for figure titles, captions, axes and
 legends. Write mathematical expressions in TeX, including labels inside
-figures. Mathematical glyphs retain mathematical typography; prose retains
-Manrope. Use `examples/plot_style.py` for Matplotlib figures and the shared
+figures. Mathematical glyphs use the Computer Modern LaTeX font; prose retains
+Manrope. Use high-contrast lettering adapted to the light and dark themes. Use `examples/plot_style.py` for Matplotlib figures and the shared
 ParaView renderer's Manrope font file for scientific field plots. Keep
 backgrounds transparent, include mesh edges when they clarify the field,
-and reserve space for labels and color bars.
+and reserve space for labels and color bars. Use Turbo for solution fields
+and numerical plots, including curve colors sampled from Turbo. Retain common
+field ranges in comparisons. Categorical regions and mesh outlines keep their
+consistent categorical colors.
 
 Export comparisons as individual panels and group related figures with
 `rodin-mesh-stages`. Use two panels per desktop row, center the final panel
-when the count is odd, and stack panels on narrow screens. Single figures use
-the same width as one desktop column. Keep each caption with its panel.
+when the count is odd, and stack panels on narrow screens. Frame each pair
+together, including its captions. Standalone figures can use up to 36rem of
+the content width. Trim empty figure margins so that plots and meshes use
+the available space. Keep each caption with its panel.
 Plot P0 fields using one value and flat color per original cell; preserve the
 point/cell data association of all exported fields and the cell-local samples
 of discontinuous higher-order fields.
+
+Documentation videos must be encoded at **30 or 60 fps**, with **30 fps** as
+the default. Preserve simulation-time playback when interpolating or resampling
+recorded snapshots. Keep transparent backgrounds with alpha-capable WebM/VP9.
 
 ## Editing checklist
 

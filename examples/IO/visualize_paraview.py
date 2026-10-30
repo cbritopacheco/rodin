@@ -29,7 +29,7 @@ def main():
     target.CameraParallelScale = .9
     display = style.color(source, target, 'u', (0, 2))
     display.Representation = 'Surface With Edges'
-    display.EdgeColor = style.TEXT
+    display.EdgeColor = style.EDGE
     bar = GetScalarBar(GetColorTransferFunction('u'), target)
     bar.Position = [.83, .19]
     style.text(target, 'Restored scalar field')

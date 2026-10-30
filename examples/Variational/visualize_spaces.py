@@ -13,12 +13,10 @@ _plot_examples = next(parent for parent in _PlotPath(__file__).resolve().parents
 _plot_sys.path.insert(0, str(_plot_examples))
 from plot_style import apply_style
 apply_style()
-from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.collections import PolyCollection
 import numpy as np
 
-PALETTE = LinearSegmentedColormap.from_list(
-    'Rodin', ['#071F46', '#17679A', '#13B6D0', '#F4F8FB'])
+PALETTE = plt.get_cmap('turbo')
 
 
 def sample_triangles(samples):

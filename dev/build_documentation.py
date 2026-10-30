@@ -193,6 +193,13 @@ def build(configuration, renderer, templates):
     if not output.is_absolute():
         output = doxyfile.parent / output
     output.mkdir(parents=True, exist_ok=True)
+    dark_figures = config.get('RODIN_DARK_FIGURES', [])
+    figure_manifest = output / 'rodin-figure-themes.json'
+    figure_manifest.write_text(json.dumps({
+        Path(path).name.replace('-dark.', '.'): Path(path).name
+        for path in dark_figures
+    }, sort_keys=True))
+    state.config['EXTRA_FILES'] += dark_figures + [str(figure_manifest)]
     xml = output / state.doxyfile['XML_OUTPUT']
     clear_generated_pages(xml, output / state.doxyfile['HTML_OUTPUT'])
     subprocess.run(['doxygen', str(doxyfile)], cwd=doxyfile.parent, check=True)

@@ -29,6 +29,21 @@
   A complete simulation checkpoint includes the saved fields, application state and
   restart logic.
 
+  @section guides-io-figures Plot colors and presentation
+
+  Solution fields and numerical plots use the **Turbo** colormap. In ParaView,
+  choose **Turbo** from the color-map presets. Comparison panels retain the same
+  field range so that equal values have equal colors. Signed fields use a
+  symmetric range about zero.
+
+  Line plots sample their curve colors from Turbo and distinguish series with
+  markers and line styles. Mesh edges, reference outlines and categorical
+  material regions use separate, consistent colors. Figure backgrounds remain
+  transparent; captions and labels use the body font, Manrope, with Computer
+  Modern LaTeX lettering for mathematical expressions. Text adapts to the light
+  or dark theme while field colors remain unchanged. Documentation videos use
+  30 or 60 fps and preserve simulation-time playback.
+
   @section guides-io-xdmf-overview Export a field for visualization
 
   XDMF separates the description of a dataset from its numerical data. Open
@@ -71,8 +86,9 @@
 
   1. Open `Field.xdmf` in ParaView and select **Apply**.
   2. Select the point field **u** for coloring.
-  3. Use **Surface With Edges** to inspect the mesh.
-  4. Optionally apply **Warp By Scalar** to lift the field above the plane.
+  3. Choose the **Turbo** color-map preset.
+  4. Use **Surface With Edges** to inspect the mesh.
+  5. Optionally apply **Warp By Scalar** to lift the field above the plane.
 
   For this example, the nodal values range from zero to one. The field is zero
   on the two coordinate axes and reaches one at the opposite corner. This

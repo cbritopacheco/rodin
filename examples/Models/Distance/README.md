@@ -24,6 +24,6 @@ pvpython examples/Models/Distance/visualize_paraview.py \
   /path/to/results doc/Images
 ```
 
-The figures use the Rodin palette, transparent backgrounds, Manrope for
+The figures use the Turbo colormap, transparent backgrounds, Manrope for
 prose and TeX for mathematical labels. The signed fields share a symmetric
 color range. Individual panels stack at phone widths in the documentation.

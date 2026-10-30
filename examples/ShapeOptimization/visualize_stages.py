@@ -44,7 +44,7 @@ def mesh(source, target, fill=None):
     display.Ambient = 1
     display.Diffuse = 0
     display.AmbientColor = fill or [.91, .96, .97]
-    display.EdgeColor = style.TEXT
+    display.EdgeColor = style.EDGE
     display.LineWidth = .5
     return display
 

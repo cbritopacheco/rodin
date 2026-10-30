@@ -118,3 +118,10 @@ LINKS_NAVBAR2 = [
     ('<a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a>', []),
     ("<a href=\"https://github.com/cbritopacheco/rodin\">GitHub</a>", [])
 ]
+
+# Paired renders preserve field colors while adapting figure lettering.
+from pathlib import Path
+RODIN_DARK_FIGURES = [str(path) for path in
+                      Path('@CMAKE_SOURCE_DIR@/doc').rglob('*-dark.png')]
+RODIN_DARK_FIGURES += [str(path) for path in
+                       Path('@CMAKE_SOURCE_DIR@/doc').rglob('*-dark.webm')]

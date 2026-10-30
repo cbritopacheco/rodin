@@ -1,7 +1,7 @@
-# Shared presentation for every example plot; data colors remain case-specific.
+# Shared presentation for every example plot; plot_style.py supplies the Turbo data colors.
 font.family: sans-serif
 font.sans-serif: Manrope, DejaVu Sans
-mathtext.fontset: stix
+mathtext.fontset: cm
 font.size: 10
 text.color: 718096
 axes.labelcolor: 718096

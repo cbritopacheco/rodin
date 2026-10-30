@@ -44,3 +44,12 @@ reconstruction and the next iteration's geometry preparation.
 snapshot. `visualize_paraview.py` renders the first/last elastic-state
 comparison from a complete history. Generated fields and temporary data
 remain outside the repository.
+
+Regenerate the objective-history plot from the exported CSV with Turbo curve
+colors using the shared example style.
+
+```sh
+python examples/ShapeOptimization/visualize_history.py \
+  /path/to/results/SimpleCantilever.csv \
+  doc/Examples/ShapeOptimization/SimpleCantileverHistory.png
+```

@@ -7,17 +7,21 @@ those frames into the cavity's alpha-capable VP9/WebM animation.
 import argparse
 from pathlib import Path
 import subprocess
+import os
+import math
+import matplotlib
+from PIL import Image
+
+matplotlib.rcParams['mathtext.fontset'] = 'cm'
 
 from paraview.simple import *
 from paraview.simple import _DisableFirstRenderCameraReset
 
 FONT = str(Path(__file__).resolve().parents[2] / 'brand/fonts/static/Manrope-Regular.ttf')
-TEXT = [.44, .50, .56]
+TEXT = [value / 255 for value in ([222, 227, 235] if os.environ.get('RODIN_PLOT_THEME') == 'dark' else [48, 59, 73])]
+EDGE = [.44, .50, .56]
 BLUE = [.09, .40, .60]
 CYAN = [.075, .714, .816]
-SEQUENTIAL = [0, .027, .122, .275, .33, .09, .40, .60,
-              .67, .075, .714, .816, 1, .957, .973, .984]
-SIGNED = [0, .027, .122, .275, .5, .957, .973, .984, 1, .075, .714, .816]
 _DisableFirstRenderCameraReset()
 
 
@@ -68,12 +72,12 @@ def color(source, target, array, limits, signed=False, title=None, association=N
     if association == 'CELLS':
         display.InterpolateScalarsBeforeMapping = 0
     lut = GetColorTransferFunction(array)
-    lut.RGBPoints = SIGNED if signed else SEQUENTIAL
-    lut.ColorSpace = 'RGB'
+    # Use the same continuous palette across the tutorial fields.
+    lut.ApplyPreset('Turbo', True)
     lut.RescaleTransferFunction(*limits)
     display.SetScalarBarVisibility(target, True)
     bar = GetScalarBar(lut, target)
-    bar.Title = title or array
+    bar.Title = title or rf'${array}$'
     bar.ComponentTitle = ''
     bar.TitleFontFamily = 'File'
     bar.TitleFontFile = FONT
@@ -101,6 +105,14 @@ def save(path, target, size=(1280, 640)):
     if target.GetXMLName() == 'RenderView':
         target.ViewSize = list(size)
     SaveScreenshot(str(path), target, ImageResolution=list(size), TransparentBackground=1)
+    if path.suffix.lower() == '.png' and target.GetXMLName() == 'RenderView':
+        # Trim unused transparent margins from still figures.
+        with Image.open(path) as image:
+            bounds = image.getchannel('A').getbbox()
+            if bounds:
+                image.crop((max(0, bounds[0] - 12), max(0, bounds[1] - 12),
+                            min(image.width, bounds[2] + 12),
+                            min(image.height, bounds[3] + 12))).save(path)
 
 
 def save_panels(path, views, names, size=(720, 640)):
@@ -109,8 +121,12 @@ def save_panels(path, views, names, size=(720, 640)):
         save(path.with_name(path.stem + '-' + name + path.suffix), target, size)
 
 
-def flow(root, name, output, frames=None):
+def flow(root, name, output, frames=None, fps=30):
     source = reader(root, name)
+    times = list(source.TimestepValues)
+    if frames:
+        source = TemporalInterpolator(Input=source)
+        source.UpdatePipeline(times[0])
     left, right = view(), view()
     layout = CreateLayout(name=name)
     AssignViewToLayout(left, layout, hint=0)
@@ -164,8 +180,9 @@ def flow(root, name, output, frames=None):
         display.AmbientColor = CYAN
         display.LineWidth = 3
     label = text(left, '', (.5, .02), 18)
-    times = list(source.TimestepValues)
-    selected = list(enumerate(times))[::2] if frames else [(len(times)-1, times[-1])]
+    selected = ([(index, min(times[0] + index / fps, times[-1]))
+                 for index in range(math.ceil((times[-1] - times[0]) * fps) + 1)]
+                if frames else [(len(times)-1, times[-1])])
     if frames:
         frames.mkdir(parents=True, exist_ok=True)
     for frame, (_, time) in enumerate(selected):
@@ -217,7 +234,9 @@ def scalar(root, name, output):
         target.CameraPosition = [2.2, -2.8, 2.3]
         target.CameraFocalPoint = [.5, .5, .2]
         target.CameraViewUp = [0, 0, 1]
-        target.CameraParallelScale = 1.05
+        target.CameraParallelScale = .85
+        bar = GetScalarBar(GetColorTransferFunction('u'), target)
+        bar.Position = [.87, .19]
     elif name == 'SurfaceMesh':
         display = color(source, target, 'u', (-.5, .5), signed=True)
         display.Representation = 'Surface With Edges'
@@ -243,7 +262,33 @@ def scalar(root, name, output):
             edge.LineWidth = 3
     else:
         raise ValueError(name)
-    save(output / (name + '.png'), target, (720, 640))
+    size = (800, 640) if name == 'Poisson' else (720, 640)
+    save(output / (name + '.png'), target, size)
+    Delete(target)
+
+
+def poisson_readme(root, output):
+    """Render the exported P1 nodal field with interpolated point colors."""
+    source = reader(root, 'Poisson')
+    target = view()
+    surface = WarpByScalar(Input=source, Scalars=['POINTS', 'u'], ScaleFactor=8)
+    surface.UpdatePipeline()
+    display = color(surface, target, 'u', source.PointData['u'].GetRange(),
+                    title=r'$u$', association='POINTS')
+    display.InterpolateScalarsBeforeMapping = 1
+    display.SetScalarBarVisibility(target, False)
+    display.Representation = 'Surface With Edges'
+    display.EdgeColor = [.18, .30, .40]
+    display.LineWidth = .4
+    target.CameraPosition = [2.2, -2.8, 2.3]
+    target.CameraFocalPoint = [.5, .5, .2]
+    target.CameraViewUp = [0, 0, 1]
+    target.CameraParallelScale = .85
+    save(output / 'Poisson.png', target, (1000, 800))
+    print('README Poisson: point-data P1 interpolation,',
+          source.GetDataInformation().GetNumberOfPoints(), 'vertices,',
+          source.GetDataInformation().GetNumberOfCells(), 'cells,',
+          'nodal range', source.PointData['u'].GetRange(), flush=True)
     Delete(target)
 
 
@@ -256,7 +301,8 @@ def helmholtz(root, output):
     AssignViewToLayout(right, layout, hint=2)
     layout.SetSize(1280, 640)
     for target, array in [(left, 'real'), (right, 'imaginary')]:
-        color(source, target, array, (-1, 1), signed=True)
+        color(source, target, array, (-1, 1), signed=True,
+              title=r'$\mathrm{Re}(u_h)$' if array == 'real' else r'$\mathrm{Im}(u_h)$')
         text(target, 'Real part' if array == 'real' else 'Imaginary part')
     save(output / 'Helmholtz.png', layout)
     save_panels(output / 'Helmholtz.png', [left, right], ['real', 'imaginary'])
@@ -270,8 +316,9 @@ if __name__ == '__main__':
     parser.add_argument('root', type=Path)
     parser.add_argument('output', type=Path)
     parser.add_argument('--frames', type=Path)
+    parser.add_argument('--fps', type=int, choices=[30, 60], default=30)
     cases = ['Poisson', 'Elasticity', 'SurfaceMesh', 'Periodic', 'MixedBoundary']
-    parser.add_argument('--example', choices=['all', 'cavity', 'Helmholtz', 'Stokes', 'NavierStokes'] + cases,
+    parser.add_argument('--example', choices=['all', 'cavity', 'Helmholtz', 'Stokes', 'NavierStokes', 'READMEPoisson'] + cases,
                         default='all')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
@@ -284,6 +331,8 @@ if __name__ == '__main__':
         flow(args.root, 'Stokes', args.output)
     elif args.example in cases:
         scalar(args.root, args.example, args.output)
+    elif args.example == 'READMEPoisson':
+        poisson_readme(args.root, args.output)
     elif args.example == 'Helmholtz':
         helmholtz(args.root, args.output)
     elif args.example == 'NavierStokes':
@@ -291,7 +340,7 @@ if __name__ == '__main__':
     elif args.example == 'Stokes':
         flow(args.root, 'Stokes', args.output)
     if args.example in ['all', 'cavity']:
-        flow(args.root, 'NavierStokes', args.output, args.frames)
-        subprocess.run(['ffmpeg', '-y', '-framerate', '10', '-i', str(args.frames / '%04d.png'),
+        flow(args.root, 'NavierStokes', args.output, args.frames, args.fps)
+        subprocess.run(['ffmpeg', '-y', '-framerate', str(args.fps), '-i', str(args.frames / '%04d.png'),
                         '-c:v', 'libvpx-vp9', '-pix_fmt', 'yuva420p', '-crf', '30', '-b:v', '0',
                         '-auto-alt-ref', '0', str(args.output / 'NavierStokes.webm')], check=True)
