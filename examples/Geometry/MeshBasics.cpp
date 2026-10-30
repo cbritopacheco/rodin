@@ -19,13 +19,21 @@ int main()
 {
   //! [mesh-basics-build]
   Mesh mesh = Mesh<Context::Local>::Builder()
-    .initialize(2).nodes(6)
-    .vertex({0, 0}).vertex({1, 0}).vertex({2, 0})
-    .vertex({0, 1}).vertex({1, 1}).vertex({2, 1})
-    .polytope(Polytope::Type::Triangle, {0, 1, 4}).attribute({2, 0}, 1)
-    .polytope(Polytope::Type::Triangle, {0, 4, 3}).attribute({2, 1}, 1)
-    .polytope(Polytope::Type::Quadrilateral, {1, 2, 5, 4}).attribute({2, 2}, 2)
-    .finalize();
+                .initialize(2)
+                .nodes(6)
+                .vertex({0, 0})
+                .vertex({1, 0})
+                .vertex({2, 0})
+                .vertex({0, 1})
+                .vertex({1, 1})
+                .vertex({2, 1})
+                .polytope(Polytope::Type::Triangle, {0, 1, 4})
+                .attribute({2, 0}, 1)
+                .polytope(Polytope::Type::Triangle, {0, 4, 3})
+                .attribute({2, 1}, 1)
+                .polytope(Polytope::Type::Quadrilateral, {1, 2, 5, 4})
+                .attribute({2, 2}, 2)
+                .finalize();
   mesh.getConnectivity().compute(1, 2);
   mesh.getConnectivity().compute(2, 2);
   //! [mesh-basics-build]
@@ -79,8 +87,8 @@ int main()
   Mesh surface = Mesh().Box(Polytope::Type::Triangle, {3, 3, 3});
   surface.scale(1.0 / 3.0);
   std::cout << "Box boundary: dimension " << surface.getDimension()
-            << ", embedding dimension " << surface.getSpaceDimension()
-            << ", area " << surface.getArea() << std::endl;
+            << ", embedding dimension " << surface.getSpaceDimension() << ", area "
+            << surface.getArea() << std::endl;
   //! [mesh-basics-box]
 
   std::ofstream edges("MeshBasics.csv");
@@ -94,15 +102,13 @@ int main()
   }
   mesh.save("MeshBasics.mesh", IO::FileFormat::MFEM);
   constexpr Real tolerance = 1e-12;
-  const bool valid = mesh.getVertexCount() == 6 && mesh.getFaceCount() == 8
-    && mesh.getCellCount() == 3 && boundaryCount == 6
-    && region.getCellCount() == 2 && boundary.getCellCount() == 6
-    && components.getComponents().size() == 2
-    && std::abs(area - 2) < tolerance && std::abs(perimeter - 6) < tolerance
-    && std::abs(mesh.getArea(1) - 1) < tolerance
-    && std::abs(mesh.getArea(2) - 1) < tolerance
-    && surface.getDimension() == 2 && surface.getSpaceDimension() == 3
-    && std::abs(surface.getArea() - 6) < tolerance;
+  const bool valid = mesh.getVertexCount() == 6 && mesh.getFaceCount() == 8 &&
+    mesh.getCellCount() == 3 && boundaryCount == 6 && region.getCellCount() == 2 &&
+    boundary.getCellCount() == 6 && components.getComponents().size() == 2 &&
+    std::abs(area - 2) < tolerance && std::abs(perimeter - 6) < tolerance &&
+    std::abs(mesh.getArea(1) - 1) < tolerance &&
+    std::abs(mesh.getArea(2) - 1) < tolerance && surface.getDimension() == 2 &&
+    surface.getSpaceDimension() == 3 && std::abs(surface.getArea() - 6) < tolerance;
   edges.flush();
   return valid && edges ? EXIT_SUCCESS : EXIT_FAILURE;
 }

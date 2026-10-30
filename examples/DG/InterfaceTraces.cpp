@@ -46,19 +46,21 @@ int main()
     const auto firstCell = mesh.getCell(0);
     const auto secondCell = mesh.getCell(1);
     Math::SpatialPoint firstReference, secondReference;
-    firstCell->getTransformation().inverse(firstReference, point.getPhysicalCoordinates());
-    secondCell->getTransformation().inverse(secondReference, point.getPhysicalCoordinates());
+    firstCell->getTransformation().inverse(
+      firstReference, point.getPhysicalCoordinates());
+    secondCell->getTransformation().inverse(
+      secondReference, point.getPhysicalCoordinates());
     const Real first = field(Point(*firstCell, firstReference));
     const Real second = field(Point(*secondCell, secondReference));
     const Real value = jump(point);
     const Real mean = average(point);
-    samples << point.x() << ',' << point.y() << ',' << first << ','
-            << second << ',' << value << ',' << mean << '\n';
-    std::cout << "Traces: " << first << ", " << second
-              << "; jump: " << value << "; average: " << mean << std::endl;
-    valid = valid && std::abs(first - 1) < tolerance
-      && std::abs(second - 3) < tolerance
-      && std::abs(std::abs(value) - 2) < tolerance && std::abs(mean - 2) < tolerance;
+    samples << point.x() << ',' << point.y() << ',' << first << ',' << second << ','
+            << value << ',' << mean << '\n';
+    std::cout << "Traces: " << first << ", " << second << "; jump: " << value
+              << "; average: " << mean << std::endl;
+    valid = valid && std::abs(first - 1) < tolerance &&
+      std::abs(second - 3) < tolerance && std::abs(std::abs(value) - 2) < tolerance &&
+      std::abs(mean - 2) < tolerance;
     ++interfaces;
   }
   //! [interface-evaluate]

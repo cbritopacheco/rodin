@@ -65,7 +65,7 @@ namespace Rodin::Solver
        * @brief Status reported by the underlying solver.
        *
        * Zero denotes success. The meaning of a nonzero value is the backend's
-       * own. Each solver documents which status it reports here.
+     * own. Each solver documents which status it reports here.
        */
       Integer status = 0;
   };
