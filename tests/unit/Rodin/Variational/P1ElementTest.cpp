@@ -1,8 +1,17 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
+#include <array>
 #include <complex>
+#include <type_traits>
 #include "Rodin/Variational/P1.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;
@@ -12,6 +21,219 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  template <class Scalar>
+  class PointP1ElementTest : public ::testing::Test
+  {};
+
+  using PointScalarTypes = ::testing::Types<Real, Complex>;
+  TYPED_TEST_SUITE(PointP1ElementTest, PointScalarTypes);
+
+  /// @brief Point elements reproduce constants with zero derivative extensions.
+  TYPED_TEST(PointP1ElementTest, ScalarConstantAndDerivativeConvention)
+  {
+    using Scalar = TypeParam;
+    const P1Element<Scalar> element(Polytope::Type::Point);
+    const Math::SpatialPoint reference(0);
+    ASSERT_EQ(element.getCount(), 1u);
+    EXPECT_EQ(element.getDegree(), 0u);
+    const auto& basis = element.getBasis(0);
+    EXPECT_EQ(basis(reference), Scalar(1));
+    EXPECT_EQ(basis.getGradient()(reference).size(), 0u);
+    for (size_t direction = 0; direction < 3; ++direction)
+    {
+      EXPECT_EQ(basis.template getDerivative<0>(direction)(reference), Scalar(1));
+      EXPECT_EQ(basis.template getDerivative<1>(direction)(reference), Scalar(0));
+      EXPECT_EQ(basis.template getDerivative<2>(direction)(reference), Scalar(0));
+    }
+    const Scalar coefficient = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(2, -3);
+      else
+        return Scalar(2.5);
+    }();
+    EXPECT_EQ(element.getLinearForm(0)([&](const Math::SpatialPoint& node) {
+      EXPECT_EQ(node.size(), 0u);
+      return coefficient;
+    }),
+      coefficient);
+  }
+
+  /// @brief Vector point functionals select every component without spatial variation.
+  TYPED_TEST(PointP1ElementTest, VectorComponentFunctionalsAndOrder)
+  {
+    using Scalar = TypeParam;
+    const Math::SpatialPoint reference(0);
+    const Scalar coefficient = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(2, -3);
+      else
+        return Scalar(2.5);
+    }();
+    for (size_t dimension = 1; dimension <= 3; ++dimension)
+    {
+      const P1Element<Math::SpatialVector<Scalar>> element(
+        Polytope::Type::Point, dimension);
+      EXPECT_EQ(element.getCount(), dimension);
+      EXPECT_EQ(element.getDegree(), 0u);
+      const auto data = [&](const Math::SpatialPoint& node) {
+        EXPECT_EQ(node.size(), 0u);
+        Math::SpatialVector<Scalar> value(dimension);
+        for (size_t component = 0; component < dimension; ++component)
+          value(component) = Scalar(component + 1) * coefficient;
+        return value;
+      };
+      for (size_t local = 0; local < dimension; ++local)
+      {
+        const auto& basis = element.getBasis(local);
+        const auto value = basis(reference);
+        ASSERT_EQ(value.size(), dimension);
+        for (size_t component = 0; component < dimension; ++component)
+        {
+          EXPECT_EQ(value(component), Scalar(local == component));
+          EXPECT_EQ(basis.template getDerivative<1>(component, 0)(reference), Scalar(0));
+        }
+        EXPECT_EQ(element.getLinearForm(local)(data), Scalar(local + 1) * coefficient);
+        const auto jacobian = basis.getJacobian()(reference);
+        EXPECT_EQ(jacobian.rows(), dimension);
+        EXPECT_EQ(jacobian.cols(), 0u);
+      }
+    }
+  }
+
+  /// @brief Rectangular matrix point functionals preserve complex component ordering.
+  TYPED_TEST(PointP1ElementTest, MatrixComponentFunctionalsAndDerivatives)
+  {
+    using Scalar = TypeParam;
+    const P1Element<Math::SpatialMatrix<Scalar>> element(Polytope::Type::Point, 2, 3);
+    const Math::SpatialPoint reference(0);
+    ASSERT_EQ(element.getCount(), 6u);
+    EXPECT_EQ(element.getDegree(), 0u);
+    const Scalar coefficient = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(2, -3);
+      else
+        return Scalar(2.5);
+    }();
+    const auto data = [&](const Math::SpatialPoint& node) {
+      EXPECT_EQ(node.size(), 0u);
+      Math::SpatialMatrix<Scalar> value(2, 3);
+      for (size_t row = 0; row < 2; ++row)
+      {
+        for (size_t column = 0; column < 3; ++column)
+          value(row, column) = Scalar(3 * row + column + 1) * coefficient;
+      }
+      return value;
+    };
+    for (size_t local = 0; local < 6; ++local)
+    {
+      const auto& basis = element.getBasis(local);
+      const auto value = basis(reference);
+      for (size_t row = 0; row < 2; ++row)
+      {
+        for (size_t column = 0; column < 3; ++column)
+          EXPECT_EQ(value(row, column), Scalar(local == 3 * row + column));
+      }
+      EXPECT_EQ(element.getLinearForm(local)(data), Scalar(local + 1) * coefficient);
+      for (size_t direction = 0; direction < 3; ++direction)
+        EXPECT_EQ(basis.template getDerivative<1>(direction)(reference).norm(), 0);
+    }
+  }
+
+  /**
+   * @brief Preserves immutable borrowed descriptors across mixed-geometry access.
+   *
+   * Real and complex descriptors retain their reference geometry and vertex
+   * index after other elements are queried and the originating element is
+   * reassigned. At every reference vertex the Kronecker values are compared
+   * exactly. Initialization cost is checked separately by the opt-in binary
+   * diagnostic; no wall-clock threshold is added to the numerical suite.
+   */
+  TEST(Rodin_Variational_RealP1Element, BorrowedBasisSurvivesMixedGeometryAccess)
+  {
+    const auto check = []<class Scalar>() {
+      const std::array geometries = {Polytope::Type::Point, Polytope::Type::Segment,
+        Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid,
+        Polytope::Type::Wedge};
+      for (const auto geometry : geometries)
+      {
+        SCOPED_TRACE(static_cast<int>(geometry));
+        P1Element<Scalar> origin(geometry);
+        const Polytope::Traits traits(geometry);
+        for (size_t a = 0; a < traits.getVertexCount(); ++a)
+        {
+          const auto& borrowed = origin.getBasis(a);
+          for (const auto otherGeometry : geometries)
+          {
+            P1Element<Scalar> other(otherGeometry);
+            for (size_t b = 0; b < other.getCount(); ++b)
+            {
+              EXPECT_EQ(
+                &other.getBasis(b), &P1Element<Scalar>(otherGeometry).getBasis(b));
+            }
+            origin = other;
+            for (size_t b = 0; b < traits.getVertexCount(); ++b)
+              EXPECT_EQ(borrowed(traits.getVertex(b)), Scalar(a == b ? 1 : 0));
+          }
+          origin = P1Element<Scalar>(geometry);
+          EXPECT_EQ(&borrowed, &origin.getBasis(a));
+        }
+      }
+    };
+    check.template operator()<Real>();
+    check.template operator()<Complex>();
+  }
+
+  /**
+   * @brief Compares real and complex reference tables with the P1 basis exactly.
+   *
+   * Every reference geometry, including the point, is exercised at two
+   * quadrature orders. Values, first derivatives and gradient spans must retain
+   * the element's vertex ordering. Repeated lookup must return the same table.
+   */
+  TEST(Rodin_Variational_RealP1Element, ReferenceTabulationAllGeometriesAndScalars)
+  {
+    const auto check = []<class Scalar>() {
+      for (const auto geometry :
+        {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+          Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+          Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+      {
+        SCOPED_TRACE(static_cast<int>(geometry));
+        P1Element<Scalar> element(geometry);
+        for (const size_t order : {size_t(8), size_t(16)})
+        {
+          SCOPED_TRACE(order);
+          const auto& formula = QF::QuadratureFormula::get(order, geometry);
+          const auto& table = element.getTabulation(formula);
+          ASSERT_EQ(&element.getTabulation(formula), &table);
+          ASSERT_EQ(table.getSize(), formula.getSize());
+          ASSERT_EQ(table.getCount(), element.getCount());
+          ASSERT_EQ(table.getDimension(), Polytope::Traits(geometry).getDimension());
+          for (size_t qp = 0; qp < formula.getSize(); ++qp)
+          {
+            for (size_t a = 0; a < element.getCount(); ++a)
+            {
+              const auto basis = element.getBasis(a);
+              EXPECT_EQ(table.getBasis(qp, a), basis(formula.getPoint(qp)));
+              const auto gradient = table.getGradient(qp, a);
+              ASSERT_EQ(gradient.size(), table.getDimension());
+              for (size_t i = 0; i < table.getDimension(); ++i)
+              {
+                const auto expected =
+                  basis.template getDerivative<1>(i)(formula.getPoint(qp));
+                EXPECT_EQ(table.template getDerivative<1>(qp, a, i), expected);
+                EXPECT_EQ(gradient[i], expected);
+              }
+            }
+          }
+        }
+      }
+    };
+    check.template operator()<Real>();
+    check.template operator()<Complex>();
+  }
+
   TEST(Rodin_Variational_RealP1Element, PyramidApexGradientReproducesAffineFields)
   {
     const RealP1Element element(Polytope::Type::Pyramid);
@@ -107,8 +329,10 @@ namespace Rodin::Tests::Unit
 
     {
       EXPECT_NEAR(k.getBasis(0)(Math::Vector<Real>{{0.5, 0.5}}), 0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR(k.getBasis(1)(Math::Vector<Real>{{0.5, 0.5}}), 0.5, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR(k.getBasis(2)(Math::Vector<Real>{{0.5, 0.5}}), 0.5, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(
+        k.getBasis(1)(Math::Vector<Real>{{0.5, 0.5}}), 0.5, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(
+        k.getBasis(2)(Math::Vector<Real>{{0.5, 0.5}}), 0.5, RODIN_FUZZY_CONSTANT);
     }
 
     {
@@ -130,7 +354,8 @@ namespace Rodin::Tests::Unit
       for (size_t i = 0; i < n; i++)
       {
         const auto& s = gen();
-        Math::Vector<Real> p = s * Math::Vector<Real>{{0, 0}} + (1 - s) * Math::Vector<Real>{{1, 0}};
+        Math::Vector<Real> p =
+          s * Math::Vector<Real>{{0, 0}} + (1 - s) * Math::Vector<Real>{{1, 0}};
         EXPECT_NEAR(k.getBasis(0)(p), -p.x() - p.y() + 1, RODIN_FUZZY_CONSTANT);
         EXPECT_NEAR(k.getBasis(1)(p), p.x(), RODIN_FUZZY_CONSTANT);
         EXPECT_NEAR(k.getBasis(2)(p), p.y(), RODIN_FUZZY_CONSTANT);
@@ -148,7 +373,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 2);
 
     // Check order (linear = order 1)
-    EXPECT_EQ(k.getOrder(), 1);
+    EXPECT_EQ(k.getDegree(), 1);
 
     // Check nodes (vertices of reference segment)
     const auto& node0 = k.getNode(0);
@@ -166,7 +391,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 3);
 
     // Check order (linear = order 1)
-    EXPECT_EQ(k.getOrder(), 1);
+    EXPECT_EQ(k.getDegree(), 1);
 
     // Check nodes (vertices of reference triangle)
     const auto& node0 = k.getNode(0);
@@ -319,7 +544,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 4);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 1);
+    EXPECT_EQ(k.getDegree(), 1);
 
     // Test at vertices
     {
@@ -367,7 +592,8 @@ namespace Rodin::Tests::Unit
       if (s + t + u <= 1.0)
       {
         Math::Vector<Real> p{{s, t, u}};
-        Real sum = k.getBasis(0)(p) + k.getBasis(1)(p) + k.getBasis(2)(p) + k.getBasis(3)(p);
+        Real sum =
+          k.getBasis(0)(p) + k.getBasis(1)(p) + k.getBasis(2)(p) + k.getBasis(3)(p);
         EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
       }
     }
@@ -379,7 +605,7 @@ namespace Rodin::Tests::Unit
     RealP1Element k(Polytope::Type::Pyramid);
 
     EXPECT_EQ(k.getCount(), 5);
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_FALSE(k.getDegree());
 
     for (size_t i = 0; i < k.getCount(); ++i)
     {
@@ -433,7 +659,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 4);
 
     // Check order (bilinear = order 2 for quadrilateral)
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
 
     // Test at vertices
     {
@@ -464,7 +690,8 @@ namespace Rodin::Tests::Unit
       const auto& s = gen();
       const auto& t = gen();
       Math::Vector<Real> p{{s, t}};
-      Real sum = k.getBasis(0)(p) + k.getBasis(1)(p) + k.getBasis(2)(p) + k.getBasis(3)(p);
+      Real sum =
+        k.getBasis(0)(p) + k.getBasis(1)(p) + k.getBasis(2)(p) + k.getBasis(3)(p);
       EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
     }
   }
@@ -573,7 +800,7 @@ namespace Rodin::Tests::Unit
     RealP1Element elem(Polytope::Type::Segment);
 
     // Test linear function f(x) = 2 + 3*x
-    Real c0 = 2.0, c1 = 3.0;  // f(0) = 2, f(1) = 5
+    Real c0 = 2.0, c1 = 3.0; // f(0) = 2, f(1) = 5
     Real f_at_0 = c0;
     Real f_at_1 = c0 + c1;
 
@@ -597,7 +824,8 @@ namespace Rodin::Tests::Unit
     // Test at arbitrary point
     Math::Vector<Real> p{{0.3, 0.4}};
     Real exact = 1.0 + 2.0 * p(0) + 3.0 * p(1);
-    Real interpolated = f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p) + f2 * elem.getBasis(2)(p);
+    Real interpolated =
+      f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p) + f2 * elem.getBasis(2)(p);
 
     EXPECT_NEAR(interpolated, exact, RODIN_FUZZY_CONSTANT);
   }
@@ -643,11 +871,11 @@ namespace Rodin::Tests::Unit
     using Complex = std::complex<Real>;
     P1Element<Complex> elem(Polytope::Type::Segment);
 
-    Complex f0(1.0, 2.0);  // x=0
-    Complex f1(4.0, 6.0);  // x=1
+    Complex f0(1.0, 2.0); // x=0
+    Complex f1(4.0, 6.0); // x=1
 
-    Math::Vector<Real> p{{0.6}};         // if reference segment is [0,1]
-    Complex exact(2.8, 4.4);             // correct value
+    Math::Vector<Real> p{{0.6}}; // if reference segment is [0,1]
+    Complex exact(2.8, 4.4); // correct value
     Complex interpolated = f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p);
 
     EXPECT_NEAR(interpolated.real(), exact.real(), RODIN_FUZZY_CONSTANT);
@@ -658,7 +886,7 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_P1Element_Vector, ComponentStructure_2D_Segment)
   {
     VectorP1Element<Real> elem(Polytope::Type::Segment, 2);
-    EXPECT_EQ(elem.getCount(), 4);  // 2 nodes × 2 components
+    EXPECT_EQ(elem.getCount(), 4); // 2 nodes × 2 components
 
     Math::Vector<Real> p{{0.5}};
 
@@ -670,7 +898,7 @@ namespace Rodin::Tests::Unit
 
       // Only one component should be non-zero
       size_t component = i % 2;
-      EXPECT_NEAR(val(component), 0.5, RODIN_FUZZY_CONSTANT);  // P1 basis at midpoint
+      EXPECT_NEAR(val(component), 0.5, RODIN_FUZZY_CONSTANT); // P1 basis at midpoint
       EXPECT_NEAR(val(1 - component), 0.0, RODIN_FUZZY_CONSTANT);
     }
   }
@@ -686,14 +914,15 @@ namespace Rodin::Tests::Unit
     Math::Vector<Real> v1{{3.0, 7.0}};
 
     Math::Vector<Real> p{{0.4}};
-    Math::Vector<Real> exact{{1.8, 4.6}};  // [1+2*0.4, 3+4*0.4]
+    Math::Vector<Real> exact{{1.8, 4.6}}; // [1+2*0.4, 3+4*0.4]
 
     // Interpolate
-    Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(2)); interpolated.setZero();
-    interpolated += v0(0) * elem.getBasis(0)(p);  // x-component, node 0
-    interpolated += v0(1) * elem.getBasis(1)(p);  // y-component, node 0
-    interpolated += v1(0) * elem.getBasis(2)(p);  // x-component, node 1
-    interpolated += v1(1) * elem.getBasis(3)(p);  // y-component, node 1
+    Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(2));
+    interpolated.setZero();
+    interpolated += v0(0) * elem.getBasis(0)(p); // x-component, node 0
+    interpolated += v0(1) * elem.getBasis(1)(p); // y-component, node 0
+    interpolated += v1(0) * elem.getBasis(2)(p); // x-component, node 1
+    interpolated += v1(1) * elem.getBasis(3)(p); // y-component, node 1
 
     EXPECT_NEAR(interpolated(0), exact(0), RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(interpolated(1), exact(1), RODIN_FUZZY_CONSTANT);
@@ -713,7 +942,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 6);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 2);  // Wedge is tensor product, so order 2
+    EXPECT_EQ(k.getDegree(), 2); // Wedge is tensor product, so order 2
 
     // Test Lagrange property at vertices
     // Bottom triangle vertices: (0,0,0), (1,0,0), (0,1,0)
@@ -767,7 +996,7 @@ namespace Rodin::Tests::Unit
     {
       // Generate random point inside wedge
       Real s = gen();
-      Real t = gen() * (1 - s);  // Ensure s + t <= 1
+      Real t = gen() * (1 - s); // Ensure s + t <= 1
       Real r = gen();
       Math::Vector<Real> p{{s, t, r}};
 
@@ -813,7 +1042,7 @@ namespace Rodin::Tests::Unit
     // Test vdim=1 (scalar-like)
     {
       VectorP1Element<Real> elem(Polytope::Type::Segment, 1);
-      EXPECT_EQ(elem.getCount(), 2);  // 1 component × 2 nodes
+      EXPECT_EQ(elem.getCount(), 2); // 1 component × 2 nodes
 
       Math::Vector<Real> p{{0.5}};
       const auto& val = elem.getBasis(0)(p);
@@ -824,15 +1053,15 @@ namespace Rodin::Tests::Unit
     // Test vdim=2
     {
       VectorP1Element<Real> elem(Polytope::Type::Segment, 2);
-      EXPECT_EQ(elem.getCount(), 4);  // 2 components × 2 nodes
+      EXPECT_EQ(elem.getCount(), 4); // 2 components × 2 nodes
 
       Math::Vector<Real> p{{0.5}};
-      const auto& val0 = elem.getBasis(0)(p);  // First component, first node
+      const auto& val0 = elem.getBasis(0)(p); // First component, first node
       EXPECT_EQ(val0.size(), 2);
       EXPECT_NEAR(val0(0), 0.5, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(val0(1), 0.0, RODIN_FUZZY_CONSTANT);
 
-      const auto& val1 = elem.getBasis(1)(p);  // Second component, first node
+      const auto& val1 = elem.getBasis(1)(p); // Second component, first node
       EXPECT_NEAR(val1(0), 0.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(val1(1), 0.5, RODIN_FUZZY_CONSTANT);
     }
@@ -840,7 +1069,7 @@ namespace Rodin::Tests::Unit
     // Test vdim=3
     {
       VectorP1Element<Real> elem(Polytope::Type::Segment, 3);
-      EXPECT_EQ(elem.getCount(), 6);  // 3 components × 2 nodes
+      EXPECT_EQ(elem.getCount(), 6); // 3 components × 2 nodes
 
       Math::Vector<Real> p{{0.5}};
       for (size_t i = 0; i < 3; i++)
@@ -864,19 +1093,19 @@ namespace Rodin::Tests::Unit
     // Test vdim=1 on Triangle
     {
       VectorP1Element<Real> elem(Polytope::Type::Triangle, 1);
-      EXPECT_EQ(elem.getCount(), 3);  // 1 component × 3 nodes
+      EXPECT_EQ(elem.getCount(), 3); // 1 component × 3 nodes
     }
 
     // Test vdim=2 on Triangle
     {
       VectorP1Element<Real> elem(Polytope::Type::Triangle, 2);
-      EXPECT_EQ(elem.getCount(), 6);  // 2 components × 3 nodes
+      EXPECT_EQ(elem.getCount(), 6); // 2 components × 3 nodes
     }
 
     // Test vdim=3 on Triangle
     {
       VectorP1Element<Real> elem(Polytope::Type::Triangle, 3);
-      EXPECT_EQ(elem.getCount(), 9);  // 3 components × 3 nodes
+      EXPECT_EQ(elem.getCount(), 9); // 3 components × 3 nodes
     }
   }
 
@@ -885,7 +1114,7 @@ namespace Rodin::Tests::Unit
   {
     // Test vdim=3 on Tetrahedron (typical 3D case)
     VectorP1Element<Real> elem(Polytope::Type::Tetrahedron, 3);
-    EXPECT_EQ(elem.getCount(), 12);  // 3 components × 4 nodes
+    EXPECT_EQ(elem.getCount(), 12); // 3 components × 4 nodes
 
     Math::Vector<Real> p{{0.25, 0.25, 0.25}};
     Real sum_per_component[3] = {0, 0, 0};
@@ -908,7 +1137,7 @@ namespace Rodin::Tests::Unit
   {
     // Test vdim=3 on Wedge
     VectorP1Element<Real> elem(Polytope::Type::Wedge, 3);
-    EXPECT_EQ(elem.getCount(), 18);  // 3 components × 6 nodes
+    EXPECT_EQ(elem.getCount(), 18); // 3 components × 6 nodes
   }
 
   /// @brief Verifies vector dimensions pyramid for final test P1 element vector by checking exact expected values.
@@ -1267,7 +1496,8 @@ namespace Rodin::Tests::Unit
 
       // Test interpolation at a point
       Math::Vector<Real> p{{0.3, 0.4}};
-      Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(vdim)); interpolated.setZero();
+      Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(vdim));
+      interpolated.setZero();
 
       for (size_t i = 0; i < elem.getCount(); i++)
         interpolated += dof_values[i] * elem.getBasis(i)(p);

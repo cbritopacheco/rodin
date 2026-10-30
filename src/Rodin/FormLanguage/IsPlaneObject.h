@@ -32,11 +32,11 @@ namespace Rodin::FormLanguage
    * owns its data storage, such as Matrix, Array, or Vector. Plain objects
    * are distinguished from expression templates and mapped types.
    *
-   * ## Type Classification
+   * # Type Classification
    * - **Plain objects**: Matrix, Array, Vector (own their data)
    * - **Non-plain**: MatrixBase expressions, Map types, Block expressions
    *
-   * ## Usage
+   * # Usage
    * @code{.cpp}
    * // Check if type is plain object
    * static_assert(IsPlainObject<Eigen::MatrixXd>::Value);
@@ -52,7 +52,7 @@ namespace Rodin::FormLanguage
   struct IsPlainObject;
 
   /**
-   * @brief General case: checks if type derives from Eigen::PlainObjectBase.
+   * @brief Checks whether a type derives from Eigen::PlainObjectBase in the general case.
    * @tparam T Type to check
    */
   template <class T>

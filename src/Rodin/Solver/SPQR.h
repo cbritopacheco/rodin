@@ -11,8 +11,8 @@
  * This header provides a wrapper for SPQR (SuiteSparseQR) from SuiteSparse,
  * a high-performance direct solver using multifrontal sparse QR factorization.
  *
- * ## Algorithm
- * SPQR computes:
+ * # Algorithm
+ * SPQR computes the factorization
  * @f[
  *   AP = QR
  * @f]
@@ -20,14 +20,14 @@
  * and @f$ R @f$ is upper triangular. The multifrontal method processes the
  * matrix efficiently using an elimination tree.
  *
- * ## Applicability
+ * # Applicability
  * - General sparse matrices
  * - Rank-deficient systems
  * - Least-squares problems
  * - Overdetermined systems
  * - Problems requiring excellent numerical stability
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);

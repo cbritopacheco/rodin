@@ -20,8 +20,8 @@ Layered like the mathematics:
   `SaintVenantKirchhoff`, `HolzapfelOgden` (one fiber family),
   `ActiveFiberLaw` (1D Hill–Maxwell active contraction law with internal
   state γ, β), `ActiveContraction` (wraps any passive law + active fiber
-  law; static path takes activation via tags, dynamic path runs a local
-  update).
+  law; the dynamic path reads independent discontinuous extension, gamma and
+  beta fields and exposes their uneliminated residual/tangent blocks).
 - **Local/** — `ConstitutivePoint`: the *tag-based input injection*
   mechanism. Integrators stamp tags (CellIndex, QuadraturePointIndex,
   TimeStep, ElectricalActivation, previous internal state, ...) onto the
@@ -82,7 +82,8 @@ couple elements. With both distribution coefficients positive, distribution
 controls \(H^1\) modulo global affine fields on a fixed connected Lipschitz domain;
 it is not a full-space norm or an unconditional uniform refinement bound.
 The defaults are `model.fit = 1`, `model.distribution.deviatoric = 1e-4`,
-`model.distribution.divergence = 1e-2` and `model.hinge = 10`.
+`model.distribution.divergence = 1e-4` and
+`model.hinge = {.jacobian = 10, .distortion = 100}`.
 D retains the mesh factor \(h\); there is no shape or constraint Hessian in the metric.
 The fitting energy/force remain robust Welsch. Minimizing this integral is not
 equivalent to minimizing the maximum geometric residual. Power-loss experiments

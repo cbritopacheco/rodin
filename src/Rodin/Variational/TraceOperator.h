@@ -12,25 +12,25 @@
  * restriction) of functions to specified mesh boundaries. This is different from
  * the matrix trace in Trace.h - this operator restricts function domains.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For a function @f$ u : \Omega \to \mathbb{R} @f$ and boundary @f$ \Gamma \subset \partial\Omega @f$,
- * the trace operator computes:
+ * the trace operator computes
  * @f[
  *   \gamma_\Gamma(u) = u|_\Gamma
  * @f]
  * which is the restriction of @f$ u @f$ to the boundary @f$ \Gamma @f$.
  *
- * ## Trace Theorem
+ * # Trace Theorem
  * For @f$ u \in H^1(\Omega) @f$, the trace @f$ u|_{\partial\Omega} @f$ is well-defined
  * and belongs to @f$ H^{1/2}(\partial\Omega) @f$.
  *
- * ## Applications
+ * # Applications
  * - Boundary condition evaluation
  * - Surface integrals
  * - Coupling interface conditions
  * - Weak boundary term evaluation
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Evaluate function on specific boundary
  * auto u_boundary = TraceOperator(u, boundary_attr);

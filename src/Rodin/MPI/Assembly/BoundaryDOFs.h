@@ -24,14 +24,16 @@ namespace Rodin::Assembly
   /**
    * @brief Selects boundary DOF functionals using the existing mesh overlap.
    *
-   * Architecture: for locally supported spaces, the required set is the union
+   * @par Architecture
+   *
+   * For locally supported spaces, the required set is the union
    * of owned DOFs and DOFs of owned cells. Vertex-overlap shards contain every
    * incident face of these DOFs. Select the smallest distributed face index
    * among eligible faces, including ghosts. Artificial boundaries at the outer
    * edge of the overlap cannot touch this required set. No communication is
    * performed for these spaces.
    *
-   * P0g is globally supported and is deliberately different: select the lowest
+   * P0g is globally supported. Select the lowest
    * eligible owned face globally and broadcast its evaluated payload. Ownership
    * and numbering are never changed. No numerical comparison selects a source.
    */
@@ -41,8 +43,10 @@ namespace Rodin::Assembly
     public:
       /// Scalar field type of the constrained space.
       using Scalar = typename FES::ScalarType;
+
       /// Rank identifier in the mesh communicator.
       using Rank = int;
+
       /// Whether the space has globally supported constant DOFs.
       static constexpr bool Global = std::is_same_v<FES,
         Variational::P0g<typename FES::RangeType, typename FES::MeshType>>;
@@ -70,8 +74,10 @@ namespace Rodin::Assembly
           for (auto cell = mesh.getCell(); cell; ++cell)
           {
             if (shard.isOwned(dim, cell->getIndex()))
+            {
               for (Index dof : fes.getDOFs(dim, cell->getIndex()))
                 required.insert(dof);
+            }
           }
         }
 
@@ -84,8 +90,10 @@ namespace Rodin::Assembly
         {
           const Index i = face->getIndex();
           if constexpr (Global)
+          {
             if (!shard.isOwned(dim - 1, i))
               continue;
+          }
           if (attributes.empty())
           {
             if (!shard.isBoundary(i))
@@ -100,8 +108,10 @@ namespace Rodin::Assembly
           {
             const Index global = dofs[local];
             if constexpr (!Global)
+            {
               if (required.find(global) == required.end())
                 continue;
+            }
             const auto found = candidates.find(global);
             if (found == candidates.end() || source < found->second.first)
               candidates[global] = {source, {i, local}};

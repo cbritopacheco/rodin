@@ -28,7 +28,7 @@ namespace Rodin::MMG
    * - required tetrahedra (`MG_REQ` on tetrahedra).
    *
    * These sets are preserved when converting to/from native MMG structures via
-   * @ref MMG5::rodinToMesh and @ref MMG5::meshToRodin. The optimizer and
+   * @ref Rodin::MMG::V5::Mesh::toV5 and @ref Rodin::MMG::V5::Mesh::fromV5. The optimizer and
    * level-set wrappers also restore the required index sets when the original
    * indices are still valid in the remeshed output.
    * In MMG3D, required triangles refer to boundary triangles exported to MMG's
@@ -580,6 +580,13 @@ namespace Rodin::MMG
          IO::FileFormat fmt) override;
 
     private:
+      /**
+       * @brief Requires a valid entity index of the metadata's geometric type.
+       * @param index Zero-based mesh entity index.
+       * @param type Required entity geometry.
+       */
+      void require(Index index, Geometry::Polytope::Type type) const;
+
       CornerIndex m_cornerIndex; ///< Corner vertex indices (`MG_CRN`).
       RequiredVertexIndex m_requiredVertexIndex; ///< Required vertex indices (`MG_REQ` on vertices).
       RequiredTriangleIndex

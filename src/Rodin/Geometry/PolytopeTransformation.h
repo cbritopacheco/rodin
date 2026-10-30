@@ -8,6 +8,8 @@
 #define RODIN_GEOMETRY_POLYTOPETRANSFORMATION_H
 
 #include <vector>
+#include <initializer_list>
+#include <type_traits>
 
 /**
  * @file
@@ -25,6 +27,7 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/QF/ForwardDecls.h"
 
+#include "Bounds.h"
 #include "ForwardDecls.h"
 
 namespace Rodin::Geometry
@@ -39,15 +42,15 @@ namespace Rodin::Geometry
    *
    * Let @f$ \tau @f$ denote a polytope in a triangulation @f$ \mathcal{T}_h @f$
    * with an associated reference element @f$ K @f$. This class represents the
-   * transformation:
+   * transformation.
    * @f[
    *    x : K \subset \mathbb{R}^k \rightarrow \tau \subset \mathbb{R}^s
    * @f]
-   * that maps a reference point @f$ r \in K @f$ to a physical point @f$ p \in \tau @f$:
+   * that maps a reference point @f$ r \in K @f$ to a physical point @f$ p \in \tau @f$.
    * @f[
    *    p = x(r)
    * @f]
-   * where:
+   * Here,
    * - @f$ k @f$ is the reference dimension (topological dimension of @f$ K @f$)
    * - @f$ s @f$ is the physical dimension (spatial dimension of @f$ \tau @f$)
    * - @f$ K @f$ is the reference element
@@ -61,9 +64,9 @@ namespace Rodin::Geometry
    *
    * # Thread Safety
    *
-   * Transformation objects are immutable after construction and are thread-safe
-   * for concurrent read access. The transform(), jacobian(), and inverse()
-   * methods can be called concurrently from multiple threads.
+   * Concurrent read access is supported. Mutating a derived map requires
+   * exclusive access and fresh point/quadrature and cell bindings before
+   * evaluation resumes. Geometry must remain fixed during each binding.
    *
    * @see <a href="class_rodin_1_1_geometry_1_1_identity_transformation.html">IdentityTransformation</a>
    * @see <a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html">ParametricTransformation</a>
@@ -72,81 +75,122 @@ namespace Rodin::Geometry
   class PolytopeTransformation : public Copyable
   {
     friend class boost::serialization::access;
-    friend class PointBase;
 
-  public:
+    public:
       /**
        * @brief Constructs a transformation with given dimensions.
        * @param[in] rdim Reference dimension @f$ k @f$
        * @param[in] pdim Physical dimension @f$ s @f$
        */
-    constexpr PolytopeTransformation(size_t rdim, size_t pdim)
-      : m_rdim(rdim),
-        m_pdim(pdim)
-    {}
+      constexpr PolytopeTransformation(size_t rdim, size_t pdim)
+        : m_rdim(rdim),
+          m_pdim(pdim)
+      {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-    constexpr PolytopeTransformation(const PolytopeTransformation& other) = default;
+      constexpr PolytopeTransformation(const PolytopeTransformation& other) noexcept
+        : Copyable(other),
+          m_rdim(other.m_rdim),
+          m_pdim(other.m_pdim)
+      {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-    constexpr PolytopeTransformation(PolytopeTransformation&& other) = default;
+      constexpr PolytopeTransformation(PolytopeTransformation&& other) noexcept
+        : Copyable(std::move(other)),
+          m_rdim(other.m_rdim),
+          m_pdim(other.m_pdim)
+      {}
 
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
        * @param other Object to move from.
        */
-    PolytopeTransformation& operator=(PolytopeTransformation&& other) = default;
+      PolytopeTransformation& operator=(PolytopeTransformation&& other) noexcept
+      {
+        if (this != &other)
+        {
+          m_rdim = other.m_rdim;
+          m_pdim = other.m_pdim;
+        }
+        return *this;
+      }
 
       /// @brief Virtual destructor.
-    virtual ~PolytopeTransformation() = default;
+      virtual ~PolytopeTransformation() = default;
 
       /**
        * @brief Gets the reference dimension @f$ k @f$.
        * @returns Reference dimension (topological dimension of reference element)
        */
-    constexpr size_t getReferenceDimension() const
-    {
-      return m_rdim;
-    }
+      constexpr size_t getReferenceDimension() const
+      {
+        return m_rdim;
+      }
 
       /**
        * @brief Gets the physical dimension @f$ s @f$.
        * @returns Physical dimension (spatial dimension of physical element)
        */
-      constexpr
-      size_t getPhysicalDimension() const
+      constexpr size_t getPhysicalDimension() const
       {
         return m_pdim;
       }
 
       /**
-       * @brief Gets the polynomial order of the transformation.
-       * @returns Polynomial order
-       *
-       * For linear transformations, returns 1. For higher-order geometric
-       * approximations (e.g., quadratic elements), returns the appropriate order.
+       * @brief Returns a total polynomial degree bound for coordinate components.
+       * @returns A certified upper bound, or no established polynomial bound.
        */
-      virtual size_t getOrder() const = 0;
+      virtual Optional<size_t> getDegree() const
+      {
+        return std::nullopt;
+      }
 
       /**
-       * @brief Conservative degree in each factor of the control-point basis.
+       * @brief Bounds coordinate-map degree in selected reference coordinates.
        *
-       * Defaults to the total polynomial order, which bounds every individual
-       * factor degree. Isotropic tensor and collapsed-coordinate elements may
-       * override this with their known factor degree. A total degree alone must
-       * not be divided by the number of factors for an arbitrary transformation.
-       * @returns The factor order.
+       * The degree is total in the selected coordinates, with the other
+       * coordinates treated as coefficients. The default total-degree bound
+       * is conservative for every subset. Indices are zero-based, duplicates
+       * are ignored, and the empty set has degree zero.
+       * @param directions Reference-coordinate indices.
+       * @returns A conservative bound, or no bound when unavailable or invalid.
        */
-      virtual size_t getFactorOrder() const
+      virtual Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        return getOrder();
+        for (const size_t direction : directions)
+        {
+          if (direction >= getReferenceDimension())
+            return std::nullopt;
+        }
+        if (directions.size() == 0)
+          return 0;
+        return getDegree();
+      }
+
+      /**
+       * @brief Certifies membership in the native vertex-defined geometry space.
+       * @returns True when certified; false also includes unsupported maps.
+       */
+      virtual bool isFirstOrder() const
+      {
+        const auto degree = getDegree();
+        return degree && *degree <= 1;
+      }
+
+      /**
+       * @brief Constructs a conservative enclosure of the reference-cell image.
+       * @returns An owned enclosure, or no certified enclosure for this representation.
+       */
+      virtual Optional<Bounds> getBounds() const
+      {
+        return std::nullopt;
       }
 
       /**
@@ -154,20 +198,21 @@ namespace Rodin::Geometry
        * @param[out] pc Physical coordinates @f$ p @f$ (resized automatically)
        * @param[in] rc Reference coordinates @f$ r \in K @f$
        *
-       * Computes:
+       * Computes the following quantity.
        * @f[
        *    pc = x(rc)
        * @f]
        * The output vector is resized to the physical dimension @f$ s @f$.
        */
-      virtual void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const = 0;
+      virtual void transform(
+        Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const = 0;
 
       /**
        * @brief Computes the Jacobian matrix of the transformation.
        * @param[out] jacobian Jacobian matrix @f$ \mathbf{J}_x @f$ (resized automatically)
        * @param[in] rc Reference coordinates @f$ r \in K @f$
        *
-       * Computes the Jacobian matrix:
+       * Computes the Jacobian matrix.
        * @f[
        *  \mathbf{J}_x (r) = \begin{bmatrix}
        * \dfrac{\partial x_1}{\partial r_1} & \ldots & \dfrac{\partial x_1}{\partial r_k}\\
@@ -180,7 +225,8 @@ namespace Rodin::Geometry
        * The output matrix is resized to @f$ s \times k @f$ where @f$ k @f$ is
        * the reference dimension and @f$ s @f$ is the physical dimension.
        */
-      virtual void jacobian(Math::SpatialMatrix<Real>& jacobian, const Math::SpatialPoint& rc) const = 0;
+      virtual void jacobian(
+        Math::SpatialMatrix<Real>& jacobian, const Math::SpatialPoint& rc) const = 0;
 
       /**
        * @brief Computes the Jacobians at a reference quadrature's points.
@@ -194,14 +240,14 @@ namespace Rodin::Geometry
        * @param[in] qf Reference quadrature formula defining the points.
        */
       virtual void jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
-        const QF::QuadratureFormulaBase& qf) const;
+        const QF::QuadratureFormula& qf) const;
 
       /**
        * @brief Computes the reference coordinates from physical coordinates.
        * @param[out] rc Reference coordinates @f$ r @f$ (resized automatically)
        * @param[in] pc Physical coordinates @f$ p \in \tau @f$
        *
-       * Computes the inverse transformation:
+       * Computes the inverse transformation.
        * @f[
        *    rc = x^{-1}(pc)
        * @f]
@@ -231,21 +277,20 @@ namespace Rodin::Geometry
        */
       virtual PolytopeTransformation* copy() const noexcept override = 0;
 
-    protected:
       /**
        * @brief Maps an owned reference sample using available reference data.
        *
-       * Called only by a point whose constructor established the provenance
-       * of @p rc. Cache misses retain direct pointwise evaluation. The logical
-       * identity is a value, not a borrowed formula or table pointer.
+       * The caller must establish that @p rc is the sample at @p qp in the
+       * persistent @p formula. Cache misses retain direct pointwise evaluation.
+       * No reference-table storage is retained by the point.
        *
        * @param[out] pc Physical coordinates.
        * @param rc Owned reference coordinates of the sample.
-       * @param identity Formula lifetime/assignment identity.
+       * @param formula Persistent immutable reference formula.
        * @param qp Logical reference-sample index.
        */
       virtual void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc,
-        size_t identity, size_t qp) const;
+        const QF::QuadratureFormula& formula, size_t qp) const;
 
     private:
       size_t m_rdim; ///< Reference dimension @f$ k @f$

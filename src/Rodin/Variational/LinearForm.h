@@ -30,7 +30,7 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c LinearFormBase: exposes the vector type.
+  /// @brief Type traits for @c LinearFormBase, exposing the vector type.
   template <class Vector>
   struct Traits<Variational::LinearFormBase<Vector>>
   {
@@ -39,7 +39,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c LinearForm: exposes the finite element space and the
+   * @brief Type traits for @c LinearForm, exposing the finite element space and the
    * vector type.
    */
   template <class FES, class Vector>
@@ -67,7 +67,7 @@ namespace Rodin::Variational
    *
    * @tparam Vector Vector type for the discrete representation
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * A real linear form @f$ l(v) @f$ satisfies:
    * - **Linearity**: @f$ l(\alpha v_1 + \beta v_2) = \alpha l(v_1) + \beta l(v_2) @f$
    * - **Boundedness**: @f$ |l(v)| \leq C \|v\|_V @f$ for some constant @f$ C @f$
@@ -75,11 +75,11 @@ namespace Rodin::Variational
    * For complex scalars, the first identity instead carries conjugated
    * coefficients.
    *
-   * ## Discrete Representation
+   * # Discrete Representation
    * The discrete vector representation satisfies @f$ b_i = l(\psi_i) @f$ where
    * @f$ \psi_i @f$ are test basis functions.
    *
-   * ## Common Examples
+   * # Common Examples
    * - **Load vector**: @f$ l(v) = \int_\Omega f \cdot v \, dx @f$
    * - **Neumann boundary**: @f$ l(v) = \int_{\partial\Omega} g \cdot v \, ds @f$
    * - **Point sources**: @f$ l(v) = \sum_k f_k v(x_k) @f$
@@ -143,7 +143,6 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
-          Parent::operator=(other);
           m_lfis = other.m_lfis;
         }
         return *this;
@@ -158,7 +157,6 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
-          Parent::operator=(std::move(other));
           m_lfis = std::move(other.m_lfis);
         }
         return *this;
@@ -168,7 +166,7 @@ namespace Rodin::Variational
        * @brief Gets the list of integrators.
        * @return Reference to the list of linear form integrators
        *
-       * Linear form integrators define contributions to the right-hand side:
+       * Linear form integrators define contributions to the right-hand side.
        * @f$ b_i = \sum_{\text{integrators}} \int \text{integrand}(\psi_i) \, dx @f$
        */
       constexpr
@@ -192,7 +190,7 @@ namespace Rodin::Variational
        * @param[in] lfi Linear form integrator to add
        * @return Reference to this linear form for method chaining
        *
-       * Adds a contribution @f$ l_i(v) @f$ to the linear form:
+       * Adds a contribution @f$ l_i(v) @f$ to the linear form.
        * @f$ l(v) = l_1(v) + l_2(v) + \ldots @f$
        */
       constexpr
@@ -221,7 +219,7 @@ namespace Rodin::Variational
        * @param[in] lfi Linear form integrator to subtract
        * @return Reference to this linear form for method chaining
        *
-       * Subtracts a contribution: @f$ l(v) = l(v) - l_i(v) @f$
+       * Subtracts a contribution according to @f$ l(v) = l(v) - l_i(v) @f$
        */
       constexpr
       LinearFormBase& operator-=(const LinearFormIntegratorBaseType& lfi)
@@ -451,7 +449,7 @@ namespace Rodin::Variational
       constexpr
       ScalarType operator()(const GridFunction<FES, Data>& u) const
       {
-        return u.getData().dot(this->getVector());
+        return Math::dot(this->getVector(), u.getData());
       }
 
       void assemble() override

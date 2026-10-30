@@ -1,0 +1,5 @@
+<p>Generic coefficient evaluation inside weighted assembly.</p>
+<h2>Measured operation</h2>
+<p>Coefficient-weighted forms evaluate their spatially varying data at integration points while constructing the operator. The registered cases vary the expression and finite-element context, exposing the combined evaluation and assembly cost. Fixture creation is outside the benchmark loop; coefficient evaluation needed by each assembly remains inside.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

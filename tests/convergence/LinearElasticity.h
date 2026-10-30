@@ -86,10 +86,12 @@ namespace Rodin::Tests::Convergence::LinearElasticity
               value(i) += (Real((i + 1) * (j + 1)) + (i == 0 && j == dim - 1)) * x(j);
           }
           else
+          {
             value(i) = field == Field::Constant ? Real(1)
               : field == Field::Exponential     ? Real(i + 1) * std::exp(exponent)
                                                 : 1 +
                 Real(i + 1) * (field == Field::Affine ? exponent : exponent * exponent);
+          }
         }
         return value;
       }

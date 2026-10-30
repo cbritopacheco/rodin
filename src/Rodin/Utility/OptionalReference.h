@@ -15,6 +15,8 @@
 #include <optional>
 #include <functional>
 
+#include "Rodin/Types.h"
+
 namespace Rodin::Utility
 {
   /**
@@ -29,7 +31,7 @@ namespace Rodin::Utility
    * The class inherits from Optional<std::reference_wrapper<T>> and provides
    * convenient pointer-like and reference access operators.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * int value = 42;
    * OptionalReference<int> optRef;  // Empty optional reference
@@ -53,7 +55,7 @@ namespace Rodin::Utility
        * @brief Pointer access operator.
        * @return Pointer to the referenced object.
        */
-      T* operator->()
+      T* operator->() const
       {
         return &(this->Parent::operator*().get());
       }
@@ -62,7 +64,7 @@ namespace Rodin::Utility
        * @brief Dereference operator.
        * @return Reference to the referenced object.
        */
-      T& operator*()
+      T& operator*() const
       {
         return this->Parent::operator*().get();
       }

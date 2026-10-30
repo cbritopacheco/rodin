@@ -12,27 +12,27 @@
  * finite element problems. Periodic conditions enforce that the solution
  * values match across opposite boundaries of the domain.
  *
- * ## Mathematical Foundation
- * A periodic boundary condition specifies:
+ * # Mathematical Foundation
+ * A periodic boundary condition specifies.
  * @f[
  *   u(x + L) = u(x) \quad \text{for} \quad x \in \Gamma_-
  * @f]
  * where @f$ \Gamma_- @f$ and @f$ \Gamma_+ @f$ are matching boundary pairs
  * separated by periodicity vector @f$ L @f$.
  *
- * ## Applications
+ * # Applications
  * - Crystal lattice simulations
  * - Unit cell problems in homogenization
  * - Fluid flow in periodic geometries
  * - Wave propagation in periodic media
  *
- * ## Implementation
+ * # Implementation
  * Periodic conditions are enforced by:
  * 1. Identifying matching DOF pairs on opposite boundaries
  * 2. Constraining one DOF to equal its periodic partner
  * 3. Eliminating dependent DOFs from the system
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Periodic BC between boundaries 1 and 2
  * auto pbc = PeriodicBC(u).from(1).to(2);
@@ -174,7 +174,8 @@ namespace Rodin::Variational
       PeriodicBC(const PeriodicBC& other)
         : Parent(other),
           m_u(other.m_u),
-          m_adjacency(other.m_adjacency)
+          m_adjacency(other.m_adjacency),
+          m_dofs(other.m_dofs)
       {}
 
       /**
@@ -184,7 +185,8 @@ namespace Rodin::Variational
       PeriodicBC(PeriodicBC&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
-          m_adjacency(std::move(other.m_adjacency))
+          m_adjacency(std::move(other.m_adjacency)),
+          m_dofs(std::move(other.m_dofs))
       {}
 
       /**
@@ -202,8 +204,9 @@ namespace Rodin::Variational
           for (const auto& child : v)
             dofs.coeffRef(i++) = child;
           Math::Vector<ScalarType> coeffs(v.size());
+          coeffs.setOnes();
           coeffs.array() /= v.size();
-          m_dofs.emplace(k, std::pair{ std::move(dofs), std::move(coeffs) });
+          m_dofs.emplace(k, std::pair{std::move(dofs), std::move(coeffs)});
         }
       }
 

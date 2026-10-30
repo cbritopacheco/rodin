@@ -11,29 +11,29 @@
  * This header provides the CG (Conjugate Gradient) solver class, an iterative
  * method for solving linear systems with symmetric positive definite matrices.
  *
- * ## Algorithm
- * The conjugate gradient method solves:
+ * # Algorithm
+ * The conjugate gradient method solves the linear system
  * @f[
  *   Ax = b
  * @f]
  * where @f$ A @f$ is symmetric positive definite. It minimizes the quadratic
  * form @f$ \frac{1}{2}x^TAx - b^Tx @f$ using conjugate search directions.
  *
- * ## Convergence
+ * # Convergence
  * CG converges in at most @f$ n @f$ iterations in exact arithmetic. The error
- * decreases as:
+ * decreases as
  * @f[
  *   \|x_k - x^*\|_A \leq 2 \left( \frac{\sqrt{\kappa} - 1}{\sqrt{\kappa} + 1} \right)^k \|x_0 - x^*\|_A
  * @f]
  * where @f$ \kappa @f$ is the condition number of @f$ A @f$.
  *
- * ## Applicability
+ * # Applicability
  * - Symmetric positive definite matrices
  * - Large sparse systems
  * - Elliptic PDEs (Poisson, heat equation, elasticity)
  * - Systems amenable to preconditioning
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);

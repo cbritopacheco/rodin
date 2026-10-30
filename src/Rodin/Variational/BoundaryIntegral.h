@@ -13,21 +13,21 @@
  * are essential for imposing natural (Neumann) boundary conditions and
  * boundary terms in weak formulations.
  *
- * ## Mathematical Foundation
- * Boundary integrals compute:
+ * # Mathematical Foundation
+ * Boundary integrals compute the following quantity.
  * @f[
  *   \int_{\partial\Omega} f(x) \, ds
  * @f]
  * where @f$ \partial\Omega @f$ is the domain boundary and @f$ ds @f$ is the
  * surface measure.
  *
- * ## Applications
+ * # Applications
  * - **Neumann boundary conditions**: @f$ \int_{\Gamma_N} g \cdot v \, ds @f$
  * - **Robin boundary conditions**: @f$ \int_{\Gamma_R} (\alpha u - \beta) v \, ds @f$
  * - **Weak boundary terms**: Integration by parts produces boundary integrals
  * - **Flux calculations**: Computing normal fluxes across boundaries
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Neumann BC: \int_\Gamma g\cdot v ds
  * auto neumann = BoundaryIntegral(g, v).on(2);  // On boundary attribute 2
@@ -67,7 +67,7 @@ namespace Rodin::Variational
    * @f[
    *   A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
    * @f]
-   * this class represents the integral of their dot product:
+   * this class represents the following integral of their dot product.
    * @f[
    *   \int_{\mathcal{B}_h} A(u) : B(v) \ d\sigma(x) \ .
    * @f]
@@ -98,7 +98,7 @@ namespace Rodin::Variational
        * @param[in] lhs Trial operator @f$ A(u) @f$
        * @param[in] rhs Test operator @f$ B(v) @f$
        *
-       * Represents the boundary integral:
+       * Represents the boundary integral.
        * @f[
        *   \int_{\partial\Omega} A(u) : B(v) \, d\sigma
        * @f]

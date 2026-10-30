@@ -115,7 +115,7 @@ namespace Rodin::Utility
    * This utility is essential for template metaprogramming where compile-time
    * type manipulation and validation are required.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * using Pack = ParameterPack<int, double, std::string>;
    * 

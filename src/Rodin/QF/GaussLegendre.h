@@ -29,9 +29,9 @@ namespace Rodin::QF
    * points are the zeros of the Legendre polynomial @f$ P_n(x) @f$, and the
    * weights are chosen to maximize the degree of exactness.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    *
-   * For the unit interval @f$ [0,1] @f$, the rule approximates:
+   * For the unit interval @f$ [0,1] @f$, the rule approximates.
    * @f[
    *   \int_0^1 f(x) \, dx \approx \sum_{i=1}^n w_i f(x_i)
    * @f]
@@ -39,7 +39,7 @@ namespace Rodin::QF
    * determined by the requirement that the formula is exact for all
    * polynomials of degree at most @f$ 2n-1 @f$.
    *
-   * ## Higher Dimensions
+   * # Higher Dimensions
    *
    * For tensor-product geometries, the multi-dimensional rule is constructed
    * from one-dimensional Gauss--Legendre rules. For triangles and
@@ -53,7 +53,7 @@ namespace Rodin::QF
    * an @f$ n @f$-point rule in every collapsed coordinate is exact for total
    * polynomial degree @f$ 2n-1 @f$ and has strictly positive weights.
    *
-   * ## Supported Geometries
+   * # Supported Geometries
    * - Point
    * - Segment
    * - Triangle
@@ -64,10 +64,11 @@ namespace Rodin::QF
    */
   class GaussLegendre final : public QuadratureFormulaBase
   {
-      /// @brief Newton work budget for quadrature nodes; not a convergence guarantee.
-      static constexpr size_t DefaultRootMaxIterations = 100;
-      /// @brief Absolute Newton root-update tolerance on the dimensionless interval [-1,1].
-      static constexpr Real DefaultRootTolerance = 1e-14;
+    /// @brief Newton work budget for quadrature nodes; not a convergence guarantee.
+    static constexpr size_t DefaultRootMaxIterations = 100;
+
+    /// @brief Absolute Newton root-update tolerance on the dimensionless interval [-1,1].
+    static constexpr Real DefaultRootTolerance = 1e-14;
 
     public:
       /**
@@ -77,7 +78,7 @@ namespace Rodin::QF
        *
        * The reference pyramid collapses as
        * @f$ (x,y,z) = ((1-z)u, (1-z)v, z) @f$, contributing a Jacobian
-       * @f$ (1-z)^2 @f$, and its P1 basis is *rational*: with @f$ q = 1-z @f$
+       * @f$ (1-z)^2 @f$, and its P1 basis is *rational*. With @f$ q = 1-z @f$
        * the shape functions are @f$ (q-x)(q-y)/q @f$, @f$ x(q-y)/q @f$ and
        * @f$ xy/q @f$. A product of two of them carries @f$ q^{-2} @f$, which
        * the Jacobian cancels exactly --- but only if the @f$ q^2 @f$ is
@@ -113,8 +114,8 @@ namespace Rodin::QF
        * @param n Number of quadrature points
        * @param x Output vector for quadrature point coordinates
        * @param w Output vector for quadrature weights
-       * @param maxIt Maximum Newton iterations for finding nodes (default: 100)
-       * @param tol Convergence tolerance for Newton iteration (default: 1e-14)
+       * @param maxIt Maximum Newton iterations for finding nodes (default 100)
+       * @param tol Convergence tolerance for Newton iteration (default 1e-14)
        *
        * Computes the @f$ n @f$ Gauss-Legendre quadrature nodes and weights
        * on the unit interval @f$ [0,1] @f$. Nodes are the zeros of the
@@ -140,7 +141,6 @@ namespace Rodin::QF
           m_ny(order),
           m_nz(order)
       {
-        assert(order >= 1);
         build();
       }
 
@@ -159,7 +159,6 @@ namespace Rodin::QF
           m_ny(ny),
           m_nz(1)
       {
-        assert(nx >= 1 && ny >= 1);
         build();
       }
 
@@ -179,7 +178,6 @@ namespace Rodin::QF
           m_ny(nv),
           m_nz(nw)
       {
-        assert(nu >= 1 && nv >= 1 && nw >= 1);
         build();
       }
 
@@ -206,6 +204,12 @@ namespace Rodin::QF
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;
+      }
+
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{m_points, m_weights.data(), 1};
       }
 
       /**
@@ -243,7 +247,7 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new GaussLegendre instance
        */
-      GaussLegendre* copy() const noexcept override
+      GaussLegendre* copy() const noexcept
       {
         return new GaussLegendre(*this);
       }
@@ -252,7 +256,12 @@ namespace Rodin::QF
       /// @brief Builds the quadrature rule for the selected geometry.
       void build();
 
-      /// @brief Builds quadrature for a point (0D).
+      /**
+       * @brief Builds the unit-mass rule on a zero-dimensional point.
+       *
+       * The single reference sample is the empty tuple in
+       * @f$\mathbb{R}^0@f$, with weight one.
+       */
       void buildPoint();
 
       /**
@@ -285,10 +294,11 @@ namespace Rodin::QF
 
       /**
        * @brief Builds Gauss-Legendre quadrature on a wedge (prism).
-       * @param ntri Number of points for the triangular cross-section
+       * @param nx Number of points in the first collapsed triangle direction
+       * @param ny Number of points in the second collapsed triangle direction
        * @param nz Number of points in the extrusion direction
        */
-      void buildWedge(size_t ntri, size_t nz);
+      void buildWedge(size_t nx, size_t ny, size_t nz);
 
       /**
        * @brief Builds Gauss-Legendre quadrature on a pyramid.

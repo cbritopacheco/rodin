@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_DIFFUSIONFORM_H
 #define RODIN_VARIATIONAL_DIFFUSIONFORM_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <functional>
 #include <memory>
 #include <type_traits>
@@ -19,7 +20,7 @@
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SparseMatrix.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "BilinearForm.h"
 #include "NamedFormStorage.h"
@@ -35,17 +36,17 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::DiffusionForm<Solution, TrialFES, TestFES, Operator, CoefficientDerived>>
   {
-      /// @brief Solution type of the trial function.
-      using SolutionType = Solution;
+    /// @brief Solution type of the trial function.
+    using SolutionType = Solution;
 
-      /// @brief Trial finite element space type.
-      using TrialFESType = TrialFES;
+    /// @brief Trial finite element space type.
+    using TrialFESType = TrialFES;
 
-      /// @brief Test finite element space type.
-      using TestFESType = TestFES;
+    /// @brief Test finite element space type.
+    using TestFESType = TestFES;
 
-      /// @brief Assembled operator type.
-      using OperatorType = Operator;
+    /// @brief Assembled operator type.
+    using OperatorType = Operator;
   };
 
   /// @brief Marks Variational::DiffusionForm as a named form.
@@ -55,8 +56,8 @@ namespace Rodin::FormLanguage
     Variational::DiffusionForm<Solution, TrialFES, TestFES, Operator, CoefficientDerived>>
     : std::true_type
   {
-      /// @brief True for diffusion forms.
-      static constexpr bool Value = true;
+    /// @brief True for diffusion forms.
+    static constexpr bool Value = true;
   };
 }
 
@@ -66,7 +67,7 @@ namespace Rodin::Variational
    * @brief Discrete diffusion form
    * @f$ a(u,v) = \int_\Omega a\, \nabla u \cdot \nabla v\,dx @f$.
    *
-   * The coefficient @f$ a @f$ is optional: with @p CoefficientDerived
+   * The coefficient @f$ a @f$ is optional. With @p CoefficientDerived
    * @c void the form is the unweighted diffusion form. It computes the same
    * operator as <tt>Integral(a * Grad(u), Grad(v))</tt>, respectively
    * <tt>Integral(Grad(u), Grad(v))</tt>, including the quadrature order that
@@ -87,10 +88,10 @@ namespace Rodin::Variational
     class CoefficientDerived>
   class DiffusionForm final : public BilinearFormBase<Operator>
   {
-      using TrialMeshType = typename FormLanguage::Traits<TrialFES>::MeshType;
-      using TestMeshType = typename FormLanguage::Traits<TestFES>::MeshType;
-      using TrialContextType = typename FormLanguage::Traits<TrialMeshType>::ContextType;
-      using TestContextType = typename FormLanguage::Traits<TestMeshType>::ContextType;
+    using TrialMeshType = typename FormLanguage::Traits<TrialFES>::MeshType;
+    using TestMeshType = typename FormLanguage::Traits<TestFES>::MeshType;
+    using TrialContextType = typename FormLanguage::Traits<TrialMeshType>::ContextType;
+    using TestContextType = typename FormLanguage::Traits<TestMeshType>::ContextType;
 
     public:
       /// @brief Solution type of the trial function.
@@ -179,8 +180,30 @@ namespace Rodin::Variational
             const Index i = polytope.getIndex();
             const auto& trialFE = m_trialFES.get().getFiniteElement(d, i);
             const auto& testFE = m_testFES.get().getFiniteElement(d, i);
-            const size_t kTrial = trialFE.getOrder();
-            const size_t kTest = testFE.getOrder();
+
+            auto trialDegree = trialFE.getDegree();
+            if constexpr (requires { trialFE.getDegree({0, 1}); })
+            {
+              if (!trialDegree &&
+                polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+                trialDegree = trialFE.getDegree({0, 1});
+            }
+            auto testDegree = testFE.getDegree();
+            if constexpr (requires { testFE.getDegree({0, 1}); })
+            {
+              if (!testDegree &&
+                polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+                testDegree = testFE.getDegree({0, 1});
+            }
+            if (!trialDegree || !testDegree)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Cannot infer quadrature order for these finite elements. "
+                << "Use Integral with an explicit setOrder()." << Alert::Raise;
+            }
+
+            const size_t kTrial = *trialDegree;
+            const size_t kTest = *testDegree;
             // The same order Integral(a * Grad(u), Grad(v)) picks: the
             // integrand's order when the coefficient knows its own, the order
             // of the gradients otherwise.
@@ -188,11 +211,12 @@ namespace Rodin::Variational
             if constexpr (HasCoefficient)
             {
               if (const auto k = m_coefficient->getOrder(polytope))
+              {
                 order =
                   *k + (kTrial == 0 ? 0 : kTrial - 1) + (kTest == 0 ? 0 : kTest - 1);
+              }
             }
-            const auto& qf =
-              QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
+            const auto& qf = QF::QuadratureFormula::get(order, polytope.getGeometry());
             const auto& quadrature = polytope.getQuadrature(qf);
 
             const bool rebuild = !m_cached || m_geometry != polytope.getGeometry() ||
@@ -216,13 +240,39 @@ namespace Rodin::Variational
                 testGradients.reserve(testFE.getCount());
                 for (size_t tr = 0; tr < trialFE.getCount(); ++tr)
                 {
-                  trialGradients.emplace_back(
-                    trialFE.getBasis(tr).getGradient()(reference));
+                  if constexpr (requires { trialFE.getBasis(tr).getGradient(); })
+                  {
+                    trialGradients.emplace_back(
+                      trialFE.getBasis(tr).getGradient()(reference));
+                  }
+                  else
+                  {
+                    // Constant-space bases expose directional derivatives,
+                    // not a gradient convenience wrapper.
+                    auto& gradient = trialGradients.emplace_back(reference.size());
+                    for (size_t j = 0; j < static_cast<size_t>(reference.size()); ++j)
+                    {
+                      gradient(j) =
+                        trialFE.getBasis(tr).template getDerivative<1>(j)(reference);
+                    }
+                  }
                 }
                 for (size_t te = 0; te < testFE.getCount(); ++te)
                 {
-                  testGradients.emplace_back(
-                    testFE.getBasis(te).getGradient()(reference));
+                  if constexpr (requires { testFE.getBasis(te).getGradient(); })
+                  {
+                    testGradients.emplace_back(
+                      testFE.getBasis(te).getGradient()(reference));
+                  }
+                  else
+                  {
+                    auto& gradient = testGradients.emplace_back(reference.size());
+                    for (size_t j = 0; j < static_cast<size_t>(reference.size()); ++j)
+                    {
+                      gradient(j) =
+                        testFE.getBasis(te).template getDerivative<1>(j)(reference);
+                    }
+                  }
                 }
               }
             }
@@ -240,7 +290,7 @@ namespace Rodin::Variational
               if constexpr (HasCoefficient)
               {
                 weight *= static_cast<ScalarType>(
-                  m_coefficient->getValue(IntegrationPoint(point, &qf, qp)));
+                  m_coefficient->getValue(IntegrationPoint(quadrature, qp)));
               }
               const auto& jacobianInverse = point.getJacobianInverse();
               const auto metric = jacobianInverse * jacobianInverse.transpose();
@@ -319,7 +369,8 @@ namespace Rodin::Variational
        * @param[in] v Test function.
        */
       template <class L>
-        requires std::is_same_v<CoefficientDerived,
+        requires(!std::is_base_of_v<FormLanguage::Base, L>) &&
+        std::is_same_v<CoefficientDerived,
           typename FormLanguage::FunctionDerived<RealFunction<L>>::Type>
       DiffusionForm(const L& c, const TrialFunction<SolutionType, TrialFESType>& u,
         const TestFunction<TestFESType>& v)
@@ -434,11 +485,15 @@ namespace Rodin::Variational
       Kernel getKernel() const
       {
         if constexpr (HasCoefficient)
+        {
           return Kernel(getTrialFunction().getFiniteElementSpace(),
             getTestFunction().getFiniteElementSpace(), *m_coefficient);
+        }
         else
+        {
           return Kernel(getTrialFunction().getFiniteElementSpace(),
             getTestFunction().getFiniteElementSpace());
+        }
       }
 
       DiffusionForm* copy() const noexcept override
@@ -503,14 +558,14 @@ namespace Rodin::Variational
    * @param v Test function.
    */
   template <class L, class Solution, class TrialFES, class TestFES>
-    requires(!std::is_base_of_v<FormLanguage::Base, L>)
   DiffusionForm(const L& c, const TrialFunction<Solution, TrialFES>& u,
     const TestFunction<TestFES>& v)
     -> DiffusionForm<Solution, TrialFES, TestFES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<L>>::Type>;
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, L>,
+        FormLanguage::FunctionDerived<RealFunction<L>>>::Type>;
 }
 
 #endif

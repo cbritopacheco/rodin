@@ -39,7 +39,7 @@ namespace Rodin::Utility
    * @ingroup UtilityModule
    * @tparam Ts The types in the tuple.
    *
-   * Example usage:
+   * The following example illustrates usage.
    *
    * @code{.cpp}
    * using Original = Tuple<int, double, char>;

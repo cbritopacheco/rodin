@@ -11,6 +11,7 @@
 #ifndef RODIN_SOLID_LINEAR_LINEARELASTICITYFORM_H
 #define RODIN_SOLID_LINEAR_LINEARELASTICITYFORM_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <algorithm>
 #include <functional>
 #include <memory>
@@ -25,7 +26,7 @@
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/Traits.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/BilinearForm.h"
 #include "Rodin/Variational/NamedFormStorage.h"
 #include "Rodin/Variational/Function.h"
@@ -42,17 +43,17 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::LinearElasticityForm<Solution, FES, Operator, LambdaDerived, MuDerived>>
   {
-      /// @brief Solution type of the trial function.
-      using SolutionType = Solution;
+    /// @brief Solution type of the trial function.
+    using SolutionType = Solution;
 
-      /// @brief Trial finite element space type.
-      using TrialFESType = FES;
+    /// @brief Trial finite element space type.
+    using TrialFESType = FES;
 
-      /// @brief Test finite element space type.
-      using TestFESType = FES;
+    /// @brief Test finite element space type.
+    using TestFESType = FES;
 
-      /// @brief Assembled operator type.
-      using OperatorType = Operator;
+    /// @brief Assembled operator type.
+    using OperatorType = Operator;
   };
 
   /// @brief Marks Variational::LinearElasticityForm as a named form.
@@ -62,21 +63,28 @@ namespace Rodin::FormLanguage
     Variational::LinearElasticityForm<Solution, FES, Operator, LambdaDerived, MuDerived>>
     : std::true_type
   {
-      /// @brief True for linear elasticity forms.
-      static constexpr bool Value = true;
+    /// @brief True for linear elasticity forms.
+    static constexpr bool Value = true;
   };
 }
 
 namespace Rodin::Variational
 {
   /**
-   * @brief Discrete isotropic linear elasticity form
-   * @f$ a(u,v) = \int_\Omega \lambda\, (\nabla \cdot u)(\nabla \cdot v)
-   *   + 2 \mu\, \varepsilon(u) : \varepsilon(v)\,dx @f$.
+   * @brief Discrete isotropic linear elasticity form.
+   *
+   * The test-conjugating form is
+   * @f[
+   *   a(u,v) = \int_\Omega \lambda\, (\nabla \cdot u)
+   *     \overline{\nabla \cdot v}
+   *     + 2\mu\,\varepsilon(u):\overline{\varepsilon(v)}\,dx,
+   * @f]
+   * with @f$\varepsilon(u)=\tfrac12(\nabla u+(\nabla u)^T)@f$.
+   * Real and complex field coefficients use the supported real-valued bases.
    *
    * Computes the same operator as
    * <tt>LinearElasticityIntegral(u, v)(lambda, mu)</tt>, including the
-   * quadrature order that integrator picks: the highest order either Lamé
+   * quadrature order that integrator picks, namely the highest order either Lamé
    * parameter reports, counting an unknown order as zero, plus the orders of
    * the two bases. Vector-valued spaces whose dimension matches the mesh's.
    *
@@ -95,11 +103,11 @@ namespace Rodin::Variational
     class MuDerived>
   class LinearElasticityForm final : public BilinearFormBase<Operator>
   {
-      using MeshType = typename FormLanguage::Traits<FES>::MeshType;
-      using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+    using MeshType = typename FormLanguage::Traits<FES>::MeshType;
+    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
 
-      static_assert(FormLanguage::IsVectorRange<
-        typename FormLanguage::Traits<FES>::RangeType>::Value);
+    static_assert(FormLanguage::IsVectorRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value);
 
     public:
       /// @brief Solution type of the trial function.
@@ -129,6 +137,25 @@ namespace Rodin::Variational
        * and combined into divergences and symmetric gradients. The kernel
        * owns copies of the Lamé parameters, so that each thread assembling
        * with its own copy of the kernel evaluates its own copies.
+       *
+       * # Trial-side weighting
+       *
+       * At each quadrature point, trial divergences are multiplied by the
+       * first Lamé parameter and trial symmetric gradients by the shear
+       * modulus before visiting test functions. The resulting arguments of
+       * @ref Math::dot are reused without changing conjugation, quadrature
+       * order or the local entry accumulation sequence. No additional buffer
+       * or cross-point physical cache is introduced.
+       *
+       * # Spatial contraction
+       *
+       * At spatial dimension @f$s=3@f$, const Eigen views expose the known
+       * column extent while retaining dynamic rows. Other dimensions retain
+       * the original spatial-matrix expression. Policy selection occurs once
+       * per cell, before the integration implementation; both policies compute
+       * the same test-conjugating Frobenius product. Quadrature, material
+       * weighting, entry order and backend insertion are unchanged. No state,
+       * geometry comparison or collective operation is added.
        */
       class Kernel
       {
@@ -148,7 +175,12 @@ namespace Rodin::Variational
             : m_trialFES(trialFES),
               m_testFES(testFES),
               m_lambda(lambda.copy()),
-              m_mu(mu.copy())
+              m_mu(mu.copy()),
+              m_cached(false),
+              m_geometry(Geometry::Polytope::Type::Point),
+              m_order(0),
+              m_trialCount(0),
+              m_testCount(0)
           {}
 
           /**
@@ -159,7 +191,12 @@ namespace Rodin::Variational
             : m_trialFES(other.m_trialFES),
               m_testFES(other.m_testFES),
               m_lambda(other.m_lambda->copy()),
-              m_mu(other.m_mu->copy())
+              m_mu(other.m_mu->copy()),
+              m_cached(false),
+              m_geometry(Geometry::Polytope::Type::Point),
+              m_order(0),
+              m_trialCount(0),
+              m_testCount(0)
           {}
 
           /**
@@ -169,6 +206,32 @@ namespace Rodin::Variational
            */
           void compute(MatrixType& out, const Geometry::Polytope& polytope)
           {
+            const size_t dimension = polytope.getMesh().getSpaceDimension();
+            if (dimension == 3)
+              compute<3>(out, polytope);
+            else
+              compute<Eigen::Dynamic>(out, polytope);
+          }
+
+        private:
+          /**
+           * @brief Integrates with the caller-known contraction column extent.
+           *
+           * Geometry, reference preparation, material weighting and accumulation
+           * have one implementation. Specializing the column extent at entry
+           * keeps shape dispatch outside the quadrature and pair loops. Rows
+           * remain dynamic to preserve the original Eigen reduction strategy.
+           * Two-column specialization is excluded after GCC probes changed
+           * real reduction rounding relative to the dynamic expression.
+           *
+           * @tparam Columns Three for spatial dimension three, otherwise dynamic.
+           * @param[out] out Local matrix, test rows by trial columns.
+           * @param[in] polytope Polytope to integrate over.
+           */
+          template <int Columns>
+          void compute(MatrixType& out, const Geometry::Polytope& polytope)
+          {
+            static_assert(Columns == Eigen::Dynamic || Columns == 3);
             const size_t d = polytope.getDimension();
             const Index i = polytope.getIndex();
             const auto geometry = polytope.getGeometry();
@@ -176,11 +239,32 @@ namespace Rodin::Variational
             const auto& testFE = m_testFES.get().getFiniteElement(d, i);
             const size_t trialCount = trialFE.getCount();
             const size_t testCount = testFE.getCount();
+            auto trialDegree = trialFE.getDegree();
+            if constexpr (requires { trialFE.getDegree({0, 1}); })
+            {
+              if (!trialDegree &&
+                polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+                trialDegree = trialFE.getDegree({0, 1});
+            }
+            auto testDegree = testFE.getDegree();
+            if constexpr (requires { testFE.getDegree({0, 1}); })
+            {
+              if (!testDegree &&
+                polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+                testDegree = testFE.getDegree({0, 1});
+            }
+            if (!trialDegree || !testDegree)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Cannot infer quadrature order for these finite elements. "
+                << "Use Integral with an explicit setOrder()." << Alert::Raise;
+            }
+
             const size_t order =
               std::max(m_lambda->getOrder(polytope).value_or(size_t(0)),
                 m_mu->getOrder(polytope).value_or(size_t(0))) +
-              trialFE.getOrder() + testFE.getOrder();
-            const auto& qf = QF::PolytopeQuadratureFormula::get(order, geometry);
+              *trialDegree + *testDegree;
+            const auto& qf = QF::QuadratureFormula::get(order, geometry);
             const auto& quadrature = polytope.getQuadrature(qf);
 
             const bool rebuild = !m_cached || m_geometry != geometry ||
@@ -204,14 +288,14 @@ namespace Rodin::Variational
 
             out.resize(testCount, trialCount);
             out.setZero();
-            m_trialSymmetric.resize(trialCount);
-            m_trialDivergence.resize(trialCount);
+            m_weightedTrialSymmetric.resize(trialCount);
+            m_weightedTrialDivergence.resize(trialCount);
             m_testSymmetric.resize(testCount);
             m_testDivergence.resize(testCount);
             for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
             {
               const auto& point = quadrature.getPoint(qp);
-              const IntegrationPoint ip(point, &qf, qp);
+              const IntegrationPoint ip(quadrature, qp);
               const ScalarType weight =
                 static_cast<ScalarType>(qf.getWeight(qp) * point.getDistortion());
               const auto lambda = m_lambda->getValue(ip);
@@ -221,8 +305,8 @@ namespace Rodin::Variational
               {
                 const Math::SpatialMatrix<ScalarType> jacobian =
                   m_trialDerivatives[qp][tr] * jacobianInverse;
-                m_trialSymmetric[tr] = jacobian + jacobian.adjoint();
-                m_trialDivergence[tr] = jacobian.trace();
+                m_weightedTrialSymmetric[tr] = mu * (jacobian + jacobian.adjoint());
+                m_weightedTrialDivergence[tr] = lambda * jacobian.trace();
               }
               for (size_t te = 0; te < testCount; ++te)
               {
@@ -235,16 +319,32 @@ namespace Rodin::Variational
               {
                 for (size_t tr = 0; tr < trialCount; ++tr)
                 {
-                  out(te, tr) += weight *
-                    (Math::dot(lambda * m_trialDivergence[tr], m_testDivergence[te]) +
-                      static_cast<ScalarType>(0.5) *
-                        Math::dot(mu * m_trialSymmetric[tr], m_testSymmetric[te]));
+                  if constexpr (Columns == Eigen::Dynamic)
+                  {
+                    out(te, tr) += weight *
+                      (Math::dot(m_weightedTrialDivergence[tr], m_testDivergence[te]) +
+                        static_cast<ScalarType>(0.5) *
+                          Math::dot(m_weightedTrialSymmetric[tr], m_testSymmetric[te]));
+                  }
+                  else
+                  {
+                    const auto& trial = m_weightedTrialSymmetric[tr];
+                    const auto& test = m_testSymmetric[te];
+                    out(te, tr) += weight *
+                      (Math::dot(m_weightedTrialDivergence[tr], m_testDivergence[te]) +
+                        static_cast<ScalarType>(0.5) *
+                          Math::dot(trial.getData()
+                                      .template topLeftCorner<Eigen::Dynamic, Columns>(
+                                        trial.rows(), trial.cols()),
+                            test.getData()
+                              .template topLeftCorner<Eigen::Dynamic, Columns>(
+                                test.rows(), test.cols())));
+                  }
                 }
               }
             }
           }
 
-        private:
           /**
            * @brief Evaluates the reference Jacobian of every basis function of
            * @p fe at @p reference.
@@ -276,15 +376,15 @@ namespace Rodin::Variational
           std::reference_wrapper<const FES> m_testFES;
           std::unique_ptr<LambdaType> m_lambda;
           std::unique_ptr<MuType> m_mu;
-          bool m_cached = false;
-          Geometry::Polytope::Type m_geometry = Geometry::Polytope::Type::Point;
-          size_t m_order = 0;
-          size_t m_trialCount = 0;
-          size_t m_testCount = 0;
+          bool m_cached;
+          Geometry::Polytope::Type m_geometry;
+          size_t m_order;
+          size_t m_trialCount;
+          size_t m_testCount;
           std::vector<std::vector<Math::SpatialMatrix<ScalarType>>> m_trialDerivatives;
           std::vector<std::vector<Math::SpatialMatrix<ScalarType>>> m_testDerivatives;
-          std::vector<Math::SpatialMatrix<ScalarType>> m_trialSymmetric;
-          std::vector<ScalarType> m_trialDivergence;
+          std::vector<Math::SpatialMatrix<ScalarType>> m_weightedTrialSymmetric;
+          std::vector<ScalarType> m_weightedTrialDivergence;
           std::vector<Math::SpatialMatrix<ScalarType>> m_testSymmetric;
           std::vector<ScalarType> m_testDivergence;
       };
@@ -501,13 +601,14 @@ namespace Rodin::Variational
    * @param v Test function.
    */
   template <class LambdaDerived, class M, class Solution, class FES>
-    requires(!std::is_base_of_v<FormLanguage::Base, M>)
   LinearElasticityForm(const FunctionBase<LambdaDerived>& lambda, const M& mu,
     const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Traits<FES>::ScalarType>::Type,
-      LambdaDerived, typename FormLanguage::FunctionDerived<RealFunction<M>>::Type>;
+      LambdaDerived,
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, M>,
+        FormLanguage::FunctionDerived<RealFunction<M>>>::Type>;
 
   /**
    * @brief Deduction guide for a lifted first parameter and a function shear modulus.
@@ -517,13 +618,14 @@ namespace Rodin::Variational
    * @param v Test function.
    */
   template <class L, class MuDerived, class Solution, class FES>
-    requires(!std::is_base_of_v<FormLanguage::Base, L>)
   LinearElasticityForm(const L& lambda, const FunctionBase<MuDerived>& mu,
     const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Traits<FES>::ScalarType>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<L>>::Type, MuDerived>;
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, L>,
+        FormLanguage::FunctionDerived<RealFunction<L>>>::Type,
+      MuDerived>;
 
   /**
    * @brief Deduction guide for two lifted Lamé parameters.
@@ -533,15 +635,17 @@ namespace Rodin::Variational
    * @param v Test function.
    */
   template <class L, class M, class Solution, class FES>
-    requires(!std::is_base_of_v<FormLanguage::Base, L> &&
-              !std::is_base_of_v<FormLanguage::Base, M>)
   LinearElasticityForm(const L& lambda, const M& mu,
     const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Traits<FES>::ScalarType>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<L>>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<M>>::Type>;
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, L> &&
+          !std::is_base_of_v<FormLanguage::Base, M>,
+        FormLanguage::FunctionDerived<RealFunction<L>>>::Type,
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, L> &&
+          !std::is_base_of_v<FormLanguage::Base, M>,
+        FormLanguage::FunctionDerived<RealFunction<M>>>::Type>;
 }
 
 #endif

@@ -13,22 +13,22 @@
  * Galerkin formulations. Interface integrals specifically exclude boundary
  * faces, focusing on element-to-element coupling.
  *
- * ## Mathematical Foundation
- * Interface integrals compute:
+ * # Mathematical Foundation
+ * Interface integrals compute the following quantity.
  * @f[
  *   \int_{\Gamma_h} f(x) \, ds
  * @f]
  * where @f$ \Gamma_h @f$ is the set of interior faces (excluding the domain
  * boundary @f$ \partial\Omega @f$).
  *
- * ## Discontinuous Galerkin Context
+ * # Discontinuous Galerkin Context
  * Interface integrals are fundamental to DG methods, enabling:
  * - **Element coupling**: Connect discontinuous solutions across elements
  * - **Flux consistency**: Ensure conservative numerical fluxes
  * - **Stability**: Add necessary stabilization terms
  *
- * ## Interior Penalty Method
- * A typical IP-DG formulation includes:
+ * # Interior Penalty Method
+ * A typical IP-DG formulation includes
  * @f[
  *   a(u,v) = \int_\Omega \nabla u \cdot \nabla v \, dx
  *          - \int_{\Gamma_h} \{\!\{\nabla u\}\!\} \cdot [\![v]\!] \, ds
@@ -36,7 +36,7 @@
  *          + \int_{\Gamma_h} \frac{\sigma}{h} [\![u]\!] \cdot [\![v]\!] \, ds
  * @f]
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Interior penalty terms (only on interior faces)
  * auto penalty = InterfaceIntegral(sigma / h * Jump(u), Jump(v));
@@ -81,7 +81,7 @@ namespace Rodin::Variational
    * @f[
    *   A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
    * @f]
-   * this class represents the integral of their dot product:
+   * this class represents the following integral of their dot product.
    * @f[
    *   \int_{\mathcal{F}_h} A(u) : B(v) \ d\sigma(x) \ .
    * @f]

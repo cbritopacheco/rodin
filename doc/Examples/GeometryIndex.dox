@@ -1,8 +1,27 @@
 /**
   @page examples-geometry-index Mesh geometry examples
-  @brief Examples demonstrating mesh creation and geometric operations
+  @brief Create a mesh, then inspect its topological relations.
 
-  - @subpage examples-geometry-uniformgrid
-  - @subpage examples-geometry-connectivity
+  These examples establish the geometric data needed before fields and
+  equations can be defined. They use generated meshes, so no external mesh
+  files are needed to begin.
 
-  */
+  1. @subpage examples-geometry-uniformgrid — Create structured meshes and
+     control their physical dimensions.
+  2. @subpage examples-geometry-connectivity — Compute and inspect incidence
+     relations between vertices, edges, and cells.
+
+  3. @subpage examples-interface-traces — Evaluate a discontinuous field from
+     each side of an interior facet.
+
+  4. @subpage examples-eikonal-fmm — Compute arrival times and check them
+     against an analytic point-source solution.
+
+  5. @subpage examples-distance-normalization — Normalize a signed Poisson
+     field and compare it with an analytic geometric reference.
+
+  The @ref guides-meshes "mesh guide" covers traversal and queries; the
+  @ref guides-polytopes "polytope guide" explains reference elements and mappings.
+
+  @m_footernavigation
+*/

@@ -21,7 +21,7 @@ namespace Rodin::Variational
    * @brief Represents the identity matrix function @f$ I_n @f$.
    *
    * This class represents the matrix function that returns the @f$ n @f$ 
-   * dimensional identity matrix at each point:
+   * dimensional identity matrix at each point.
    * @f[
    *    F(x) = I_n = \begin{pmatrix}
    *      1 & 0 & \cdots & 0 \\

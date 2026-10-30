@@ -15,20 +15,19 @@
  * default column-major storage. For a dense matrix with @f$m@f$ rows, entry
  * @f$A_{ij}@f$ has offset @f$i+mj@f$, with zero-based indices. Rows vary
  * fastest within each column. @ref Rodin::Math::SparseMatrix explicitly uses
- * column-major compressed sparse storage; its entries are not a contiguous
- * dense array.
+ * column-major compressed sparse storage, with column pointers, row indices
+ * and stored coefficients.
  *
  * @ref Rodin::Math::SpatialMatrix also uses column-major storage, in a fixed
  * three-by-three backing matrix. Its runtime dimensions select an active
  * upper-left block. Consequently, its backing-storage offset is
  * @f$i+3j@f$, including when the active row count is smaller than three.
- * The active entries of a rectangular spatial matrix must not be treated
- * as a packed array with leading dimension equal to its runtime row count.
- * Access through @c operator()(i,j) preserves the mathematical indexing.
+ * The leading dimension is three for every runtime shape. Access through
+ * @c operator()(i,j) preserves the mathematical indexing.
  *
  * Explicit row-major Eigen buffers occur in local integration kernels.
- * These are internal storage choices and do not change the default storage
- * of public matrix types or the numbering of finite-element coefficients.
+ * Public matrix storage and finite-element coefficient numbering retain
+ * their documented conventions.
  *
  * @section ordering-components Matrix finite-element coefficients
  *
@@ -46,9 +45,7 @@
  *   (0,0),\ (0,1),\ (0,2),\ (1,0),\ (1,1),\ (1,2).
  * @f]
  * This numbering is distinct from column-major matrix storage. No Voigt
- * scaling, symmetry assumption or component reduction is applied. A
- * column-major component convention would instead use @f$c=i+mj@f$;
- * that is not the current matrix-space coefficient convention.
+ * scaling, symmetry assumption or component reduction is applied. The current coefficient convention is @f$c=in+j@f$.
  *
  * Within these space families, local and global component expansion follows
  * this rule relative to their respective scalar DOF maps. Generic algorithms
@@ -74,24 +71,24 @@
  * the gradient of a matrix field has entries
  * @f$G_{ijk}=\partial_k A_{ij}@f$, and a constitutive tensor acts through
  * @f$(\mathcal C A)_{ij}=\sum_{kl}\mathcal C_{ijkl}A_{kl}@f$.
- * These definitions do not depend on storage order. Tensor storage does not
- * define a tensor-valued finite-element DOF convention; the current matrix
- * solution API does not introduce higher-rank tensor solution spaces.
+ * These definitions specify the mathematical index roles. Finite-element DOF conventions
+ * are specified by each space; the current solution API covers scalar, vector
+ * and matrix ranges.
  *
  * @section ordering-assembly Consequences for assembly
  *
  * A change of component numbering permutes coefficient vectors and the rows
  * and columns of assembled operators. Such a change requires coordinated
  * updates to basis evaluation, component access, DOF maps, persistence and
- * interoperability. Changing memory order alone does not redefine components.
+ * interoperability. Memory order specifies storage, while component numbering specifies the
+ * basis correspondence.
  *
  * For uncoupled matrix mass and stiffness forms in the componentwise spaces,
  * interleaved numbering gives @f$A_h=A_{\mathrm{scalar}}\otimes I_{mn}@f$.
  * With @f$N@f$ scalar local basis functions, full dense traversal examines
  * @f$(mn)^2N^2@f$ entries although only @f$mnN^2@f$ component pairs can
- * contribute. Switching between row-major and column-major component
- * numbering does not remove this structural work. Assembly must preserve
- * the form's component coupling to avoid traversing absent pairs; coupled
+ * contribute. Assembly must use the form's component coupling to traverse the
+ * contributing pairs; coupled
  * constitutive forms require their actual coupling pattern.
  *
  * @see @ref guides-spatial-matrix "Matrix solutions and spatial tensors"

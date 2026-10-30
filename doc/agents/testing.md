@@ -6,7 +6,8 @@
 tests/unit/Rodin/<Module>/...      GoogleTest, mirrors src/Rodin exactly
 tests/manufactured/Rodin/...       Manufactured solutions + fixed-mesh regressions
 tests/convergence/{h,p,hp,...}/... Multi-resolution convergence-rate validation
-tests/benchmarks/                  Google Benchmark (target RodinBenchmarks)
+tests/benchmarks/Rodin/<Module>/   Module/component Google Benchmark executables
+tests/benchmarks/Workloads/        Shared benchmark forms and numerical oracles
 tests/installation/                Install-tree consumption checks
 src/Rodin/Test/                    Library-side helpers (Random functions, Utility)
 ```
@@ -32,6 +33,13 @@ src/Rodin/Test/                    Library-side helpers (Random functions, Utili
   `isoparametric/`). They use enough discretizations to establish the stated
   rate interval, integrate error norms independently of the solved field, and
   assert every observed rate.
+- Library benchmarks mirror source modules, including MPI/PETSc mirrors.
+  Module and component executables are opt-in and are not CTest timing gates.
+  Every executable has an explicit component registration and authored description.
+  Shared builds feed independent Regular/Slow execution lanes; complete results
+  publish in the m.css documentation. Physical contexts include
+  `benchmarks/Stokes/InfSupStability`; there is no convergence-benchmark category.
+  See `tests/benchmarks/README.md` for registration and publication procedures.
 
 A change is complete after the affected unit test executable passes. Assembly
 and solver changes also require the relevant manufactured tests to pass.
@@ -105,17 +113,88 @@ Two rules that make the difference between coverage and theatre:
 - **Randomized inputs** via `Rodin::Test::Random` where a property should
   hold for arbitrary data.
 - **Benchmarks as oracles**: performance claims cite
-  `RodinBenchmarks --benchmark_filter=...` numbers plus identical-numerics
+  the owning component executable’s `--benchmark_filter=...` measurements plus identical-numerics
   evidence (iteration counts, final energies) — never "it feels faster".
 - New capability defaults off; its tests prove both the feature and the
   default-off no-regression.
 
 ## CI (.github/workflows/)
 
-`Build.yml`, `Tests.yml` (Unit + Manufactured jobs), `Benchmarks.yml`
-(published to the benchmarks site), `Documentation.yml` (Doxygen site),
-`Installation.yml`, `StaticAnalysis.yml`, `Labeler.yml`. Branches
+`Build.yml`, `Tests.yml` (unit, manufactured, convergence, installation and
+coverage jobs), `TestGroup.yml` (the reusable directory-group runner),
+`Benchmarks.yml` (published to the benchmarks site), `Documentation.yml`
+(Doxygen site), `Labeler.yml`. Branches
 `master` and `develop` both gate.
+
+All test checks use the `Tests /` umbrella. Test group paths follow their
+CMake registration directories, with named component leaves for oversized
+directories. Short sibling suites share their common parent job while retaining
+their full directory labels. MPI retains its module position; `slow` remains an independent
+execution label. Compiler, optimization, threading, sanitizer, scalar and MPI
+rank configurations must survive scheduling changes. Splitting jobs does not
+justify weakening a numerical check or its timeout.
+
+`dev/ci_test_plan.py` generates the current directory matrices. The configured
+`RodinTestTargets-<configuration>.tsv` manifest, emitted by CMake, is authoritative
+for enabled executable targets. `rodin_discover_tests` forwards GoogleTest
+registrations unchanged while recording their execution profiles. Explicit
+CTest commands supply the MPI target/profile associations. New test targets
+in an existing registration directory are included automatically.
+
+Use the scoped runner to avoid discovering unbuilt sibling executables:
+
+```sh
+python3 dev/ci_tests.py build --build build --group unit/Rodin/Geometry --profile unit
+python3 dev/ci_tests.py run --build build --group unit/Rodin/Geometry --profile unit
+```
+
+The build must already be configured for the desired backend and sanitizer
+settings. The runner retains generated commands and properties, restores the
+original working directories, adds hierarchical CTest labels, verifies its
+selection, and runs CTest serially. Each distributed invocation keeps its
+registered MPI rank count. Build-time and discovery-only runtime profiles are
+redirected outside the measured coverage directory.
+
+Unsanitized Unit, Manufactured and Slow lanes independently capture and save
+production-only LCOV and a current-commit receipt. Native/MPI/PETSc convergence
+and restriction lanes do the same. Sanitizer and installation checks retain
+their test configurations but do not contribute coverage. There is no separate
+coverage test execution lane. Incremental publisher jobs validate every expected
+lane receipt and combine the reports within each family and configuration into
+at most 64 Codecov submissions per run across 17 families. Each
+batch retains its complete contribution/hash inventory. This avoids relying on
+an account-specific increase over Codecov's default per-commit upload limit.
+The former Coverage backend configuration is retained under ordinary Unit and
+Manufactured jobs as `Backends / Baseline`; their slow tests run only in Slow.
+Native MPI H1 restriction jobs partition the complete 420-case matrix by MPI
+rank, retaining all geometries, degrees, mappings and per-test watchdogs. This
+limits each instrumented job to one rank under the existing 90-minute limit.
+These jobs use passive OpenMP waiting, no Open MPI CPU binding and yielding
+inside blocking MPI calls to avoid starving compute ranks on shared runner
+CPUs. They record the runner CPU topology and rank affinity before execution;
+rank counts, thread counts and per-test watchdogs remain unchanged.
+Original optional-backend Unit and default-backend Manufactured configurations
+remain intact. Compilation contexts distinguish backend, optimization and
+threading; final line coverage is their union, never an average of percentages.
+
+`dev/ci_test_plan.py` reads the explicit workflow matrices with pinned PyYAML
+(provisioned by preflight) to inventory every targeted coverage partition.
+Long PETSc convergence lanes partition independent PDEs and communicator
+sizes rather than sharing one job deadline. Curved elasticity invokes each
+GoogleTest study separately; each study retains its complete refinement
+history. Pyramid nonlinear rate studies have separate scheduling partitions,
+with complementary controls executed once. The CI registration guards verify
+the concrete CMake targets, MPI rank registrations, matrix-size limits, and
+selection of every curved elasticity and nonlinear study exactly once.
+Zero-hit baseline jobs retain previously compiled test/template instantiations
+and production libraries even when those targets are absent from a runtime
+selection. Tests and benchmarks supply execution hits, never denominator
+entries. `Tests / Coverage / Finalize` requires every current-commit producer,
+successful uploads, report digests, and the complete configuration-specific
+compilation inventory before
+triggering Codecov notifications and enforcing the 95% production line floor.
+It neither rebuilds nor reruns tests. Missing producers cannot be replaced by
+carryforward coverage. The local guard tests run serially in `Tests / CMake / CI`.
 
 CI facts that bite:
 
@@ -134,3 +213,65 @@ CI facts that bite:
   `@see` blocks and prose lists should use explicit `@ref` references or HTML
   links for public classes, templates, specialization groups, and generated
   file pages instead of bare comma-separated names.
+
+### Shared compilation and independent execution
+
+`dev/ci_build_graph.py` plans common compilation by complete compiler, backend,
+runner, build-type, threading and sanitizer configuration. Tests are registered
+as a superset; these registration switches do not change the production ABI.
+The original execution requests and configuration-specific compilation
+inventories remain mandatory. Installation tests retain their actual install
+and consumption builds, which are the operations being tested.
+
+Each common producer configures once and compiles the CMake codemodel dependency
+closure of requested executables and explicit baseline libraries, including
+shared test dependencies. Unrelated library variants are not built. Its archive retains objects for
+reuse by directory builders. Tracked source and submodule timestamps are
+normalized before compilation so later checkouts do not invalidate those
+objects. No source contents are changed. Directory builders verify that no
+common object was rebuilt.
+
+Executable ownership comes from the configured CMake target manifest. Build
+names follow `Tests / Build / Unit / Rodin / Geometry`,
+`Tests / Build / Manufactured / Rodin / P1` and the corresponding convergence
+hierarchy. Compilation stops at `Unit / Rodin / <Module>`,
+`Manufactured / Rodin / <Module>` and `Convergence / H`, `/ P`, `/ HP` or
+`/ Isoparametric`. All selected descendants share that producer. Direct root
+targets retain their own parent group. There are no automatic twelve-target
+subdivisions or component-specific producers. Each executable has exactly one
+producer per compatible configuration. Logical execution components, Slow,
+geometry and MPI-rank partitions remain separate. A lane waits for its combined
+hierarchy group; unrelated groups and configurations remain independent.
+Changes to cut levels require measured build-time or memory evidence.
+Configuration-local publishers also wait only for their own family. Regenerate the backend-specific `TestConfiguration_*.yml`
+graphs and dedicated `Test<Family>.yml` wrappers with
+`python3 dev/ci_schedule.py --write` after registration or lane edits; preflight
+rejects stale output. Dedicated numerical recipes live in
+`.github/ci/targeted-lanes.yml`. Configured manifests validate every generated
+dependency edge before builders or executions start. See the
+[extension guide](../../dev/ci-testing.md) for the editing procedure.
+Declare only applicable execution groups in a backend variant; sanitizer
+variants omit publishers, and each dedicated wrapper contains a single family.
+Universal guarded branches create unnecessary skipped check rows.
+
+The runtime artifact contains executables, libraries, generated CTest files,
+CMake metadata, target manifests and all zero-hit `.gcno` notes. Compile objects
+and `.gcda` runtime counters are excluded from execution workspaces. A lane can
+restore several directory artifacts when its original selection spans several
+directories. Regular and Slow selections share compatible executables; MPI
+ranks, geometries and refinement selections do not trigger compilation.
+
+Every restoration checks the commit, complete configuration, architecture,
+compiler version, archive digest, dynamic runtime-library hashes and MPI
+launcher. The generated build suppresses CMake regeneration during execution
+and coverage capture. Artifacts remain available for seven days; expired
+artifacts require rerunning their producer.
+
+Execution matrices, environments, timeouts, case selections and MPI ranks are
+preserved. Discovery counters remain outside the measured coverage directory.
+Finalization requires every expected execution receipt, every directory build,
+unchanged common objects, the full original compilation inventories and a
+successful Codecov publication covering every eligible report exactly once.
+It independently compares the published LCOV union with the raw lane union,
+retains zero-hit production lines, and enforces 95% line coverage. Missing
+reports cannot be replaced by carryforward coverage or a partial percentage.

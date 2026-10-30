@@ -34,7 +34,8 @@ namespace Rodin::Assembly
    * @tparam TestFES Test finite element space type
    */
   template <class OperatorType, class Solution, class TrialFES, class TestFES>
-  class AssemblyBase<OperatorType, Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>>
+  class AssemblyBase<OperatorType,
+    Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>>
     : public FormLanguage::Base
   {
     public:
@@ -55,6 +56,27 @@ namespace Rodin::Assembly
        * @param other Object to move from.
        */
       AssemblyBase(AssemblyBase&& other) = default;
+
+
+      /**
+       * @brief Assigns execution state while retaining this expression's identity.
+       * @param other Source assembler; this base has no execution state.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] const AssemblyBase& other) noexcept
+      {
+        return *this;
+      }
+
+      /**
+       * @brief Moves execution state while retaining this expression's identity.
+       * @param other Source assembler; this base has no execution state.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] AssemblyBase&& other) noexcept
+      {
+        return *this;
+      }
 
       /// @brief Virtual destructor
       virtual ~AssemblyBase() = default;
@@ -85,7 +107,7 @@ namespace Rodin::Assembly
    *
    * Unlike the generic bilinear form, a named form carries its own local
    * kernel, so the assembly is handed the form itself rather than a
-   * BilinearFormAssemblyInput: it needs the kernel, the region and the
+   * BilinearFormAssemblyInput. Assembly needs the kernel, the region and the
    * attributes the form integrates over.
    *
    * @tparam OperatorType Matrix type for the assembled operator.
@@ -122,8 +144,10 @@ namespace Rodin::Assembly
    * Provides the polymorphic interface used by block assembly routines that
    * collect several bilinear forms into one operator.
    */
-  template <class OperatorType, class ... Solution, class ... TrialFES, class ... TestFES, class ... BlockType>
-  class AssemblyBase<OperatorType, Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, BlockType>...>>
+  template <class OperatorType, class... Solution, class... TrialFES, class... TestFES,
+    class... BlockType>
+  class AssemblyBase<OperatorType,
+    Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, BlockType>...>>
   {
     public:
       static_assert(sizeof...(TrialFES) == sizeof...(TestFES));
@@ -198,6 +222,27 @@ namespace Rodin::Assembly
        */
       AssemblyBase(AssemblyBase&& other) = default;
 
+
+      /**
+       * @brief Assigns execution state while retaining this expression's identity.
+       * @param other Source assembler; this base has no execution state.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] const AssemblyBase& other) noexcept
+      {
+        return *this;
+      }
+
+      /**
+       * @brief Moves execution state while retaining this expression's identity.
+       * @param other Source assembler; this base has no execution state.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] AssemblyBase&& other) noexcept
+      {
+        return *this;
+      }
+
       /// @brief Virtual destructor
       virtual ~AssemblyBase() = default;
 
@@ -227,15 +272,14 @@ namespace Rodin::Assembly
    * Provides the polymorphic interface used by block assembly routines that
    * collect several linear forms into one vector.
    */
-  template <class VectorType, class ... FES, class ... BlockType>
+  template <class VectorType, class... FES, class... BlockType>
   class AssemblyBase<VectorType, Tuple<Variational::LinearForm<FES, BlockType>...>>
   {
     public:
       static_assert(sizeof...(FES) == sizeof...(FES));
 
       /// @brief Tuple input data type.
-      using InputType =
-        LinearFormTupleAssemblyInput<LinearFormAssemblyInput<FES>...>;
+      using InputType = LinearFormTupleAssemblyInput<LinearFormAssemblyInput<FES>...>;
 
       /// @brief Default constructor.
       AssemblyBase() = default;
@@ -276,11 +320,9 @@ namespace Rodin::Assembly
    * values.
    */
   template <class Scalar, class Solution, class FES, class ValueDerived>
-  class AssemblyBase<
-    IndexMap<Scalar>,
-    Variational::DirichletBC<
-      Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>>
-    : public FormLanguage::Base
+  class AssemblyBase<IndexMap<Scalar>,
+    Variational::DirichletBC<Variational::TrialFunction<Solution, FES>,
+      Variational::FunctionBase<ValueDerived>>> : public FormLanguage::Base
   {
     public:
       /// @brief Scalar value type.
@@ -385,21 +427,19 @@ namespace Rodin::Assembly
 
   /// @brief Base class for complete single-field problem assembly.
   template <class LinearSystem, class TrialFunction, class TestFunction>
-  class AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
+  class AssemblyBase<LinearSystem,
+    Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
     : public FormLanguage::Base
   {
     public:
       /// @brief Assembled operator type.
-      using OperatorType =
-        typename FormLanguage::Traits<LinearSystem>::OperatorType;
+      using OperatorType = typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
       /// @brief Vector type of the linear system.
-      using VectorType =
-        typename FormLanguage::Traits<LinearSystem>::VectorType;
+      using VectorType = typename FormLanguage::Traits<LinearSystem>::VectorType;
 
       /// @brief Scalar value type.
-      using ScalarType =
-        typename FormLanguage::Traits<LinearSystem>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
       /// @brief Problem body type storing the forms and boundary conditions.
       using ProblemBodyType =
@@ -410,8 +450,7 @@ namespace Rodin::Assembly
         ProblemAssemblyInput<ProblemBodyType, TrialFunction, TestFunction>;
 
       /// @brief Parent class type.
-      using Parent =
-        FormLanguage::Base;
+      using Parent = FormLanguage::Base;
 
       /// @brief Default constructor.
       AssemblyBase() = default;
@@ -434,6 +473,29 @@ namespace Rodin::Assembly
 
       /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
+
+      /**
+       * @brief Retains this assembler's identity during policy assignment.
+       *
+       * The complete-problem base has no execution state. Derived assemblers
+       * assign their own policy/storage without assigning FormLanguage identity.
+       * @param other Source assembler; no base execution state is transferred.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] const AssemblyBase& other) noexcept
+      {
+        return *this;
+      }
+
+      /**
+       * @brief Retains this assembler's identity during policy move assignment.
+       * @param other Source assembler; no base execution state is transferred.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] AssemblyBase&& other) noexcept
+      {
+        return *this;
+      }
 
       /**
        * @brief Executes complete problem assembly.
@@ -456,28 +518,23 @@ namespace Rodin::Assembly
   {
     public:
       /// @brief Assembled operator type.
-      using OperatorType =
-        typename FormLanguage::Traits<LinearSystem>::OperatorType;
+      using OperatorType = typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
       /// @brief Vector type of the linear system.
-      using VectorType =
-        typename FormLanguage::Traits<LinearSystem>::VectorType;
+      using VectorType = typename FormLanguage::Traits<LinearSystem>::VectorType;
 
       /// @brief Scalar value type.
-      using ScalarType =
-        typename FormLanguage::Traits<LinearSystem>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
       /// @brief Problem body type storing the forms and boundary conditions.
       using ProblemBodyType =
         Variational::ProblemBody<OperatorType, VectorType, ScalarType>;
 
       /// @brief Input data type.
-      using InputType =
-        ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;
+      using InputType = ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;
 
       /// @brief Parent class type.
-      using Parent =
-        FormLanguage::Base;
+      using Parent = FormLanguage::Base;
 
       /// @brief Default constructor.
       AssemblyBase() = default;
@@ -500,6 +557,29 @@ namespace Rodin::Assembly
 
       /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
+
+      /**
+       * @brief Retains this assembler's identity during policy assignment.
+       *
+       * The complete-problem base has no execution state. Derived assemblers
+       * assign their own policy/storage without assigning FormLanguage identity.
+       * @param other Source assembler; no base execution state is transferred.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] const AssemblyBase& other) noexcept
+      {
+        return *this;
+      }
+
+      /**
+       * @brief Retains this assembler's identity during policy move assignment.
+       * @param other Source assembler; no base execution state is transferred.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] AssemblyBase&& other) noexcept
+      {
+        return *this;
+      }
 
       /**
        * @brief Executes complete mixed problem assembly.

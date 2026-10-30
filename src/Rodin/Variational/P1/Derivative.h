@@ -11,16 +11,16 @@
  * @file Derivative.h
  * @brief Partial derivative operator specialization for P1 functions.
  *
- * This file provides specialized implementations of the partial derivative
- * operator for P1 GridFunctions and ShapeFunctions.
+ * This file provides the partial derivative of scalar P1 GridFunctions.
  *
  * For a scalar P1 function @f$ u @f$, the partial derivative with respect
- * to coordinate @f$ x_i @f$ is computed as:
+ * to coordinate @f$ x_i @f$ is computed as
  * @f[
  *   \frac{\partial u}{\partial x_i} = (\nabla u) \cdot \mathbf{e}_i
  * @f]
  *
- * For P1 elements, partial derivatives are piecewise constant on each element.
+ * Derivatives are constant on affine simplices. Other reference geometries
+ * and non-affine physical maps may produce point-dependent derivatives.
  *
  * @see <a href="_derivative_8h.html">Derivative</a>
  * @see <a href="_grad_8h.html">Grad</a>
@@ -34,41 +34,43 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Derivative over a grid function: exposes the finite
+   * @brief Type traits for @c Derivative over a grid function, exposing the finite
    * element space, the operand type and the range type.
    */
   template <class Range, class Data, class Mesh>
-  struct Traits<Variational::Derivative<Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
+  struct Traits<Variational::Derivative<
+    Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::P1<Range, Mesh>;
+    /// @brief Finite element space type.
+    using FESType = Variational::P1<Range, Mesh>;
 
-      /// @brief Operand type.
-      using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Operand type.
+    using OperandType = Variational::GridFunction<FESType, Data>;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = Range;
+    /// @brief Range (evaluation value) type.
+    using RangeType = Range;
   };
 
   /**
-   * @brief Type traits for @c Derivative over a shape function: exposes the finite
+   * @brief Type traits for @c Derivative over a shape function, exposing the finite
    * element space, the shape function space, the operand type and the range type.
    */
-  template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Derivative<
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
+  template <class NestedDerived, class Range, class Mesh,
+    Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Derivative<
+    Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::P1<Range, Mesh>;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = Variational::P1<Range, Mesh>;
 
-      /// @brief Operand type.
-      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = Range;
+    /// @brief Operand type.
+    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = Range;
   };
 }
 
@@ -139,7 +141,35 @@ namespace Rodin::Variational
        */
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
-        interpolate(out, ip.getPoint());
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const auto* qf = ip.getReferenceQuadratureFormula();
+        if (!qf || polytope.getDimension() != polytope.getMesh().getDimension())
+        {
+          interpolate(out, p);
+          return;
+        }
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+
+        const auto& gf = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        SpatialVectorType ref(static_cast<std::uint8_t>(d));
+        ref.setZero();
+
+        for (size_t local = 0; local < fe.getCount(); ++local)
+        {
+          const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
+          const auto gref = fe.getTabulation(*qf).getGradient(ip.getIndex(), local);
+          for (size_t j = 0; j < d; ++j)
+            ref(static_cast<std::uint8_t>(j)) += uval * gref[j];
+        }
+
+        const auto phys = JinvT * ref;
+        out = phys(static_cast<std::uint8_t>(m_i));
       }
 
       /**
@@ -157,7 +187,7 @@ namespace Rodin::Variational
         if (d == meshDim - 1) // Evaluating on a face
         {
           const auto& conn = mesh.getConnectivity();
-          const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
+          const auto& inc = conn.getIncidence({meshDim - 1, meshDim}, i);
           const auto& pc = p.getPhysicalCoordinates();
           assert(inc.size() == 1 || inc.size() == 2);
           if (inc.size() == 1)
@@ -173,7 +203,6 @@ namespace Rodin::Variational
           {
             assert(inc.size() == 2);
             const auto& traceDomain = this->getTraceDomain();
-            assert(traceDomain.size() > 0);
             if (traceDomain.size() == 0)
             {
               Alert::MemberFunctionException(*this, __func__)
@@ -187,7 +216,8 @@ namespace Rodin::Variational
               for (auto& idx : inc)
               {
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
-                if (traceDomain.count(tracePolytope->getAttribute()))
+                const auto attribute = tracePolytope->getAttribute();
+                if (attribute && traceDomain.contains(*attribute))
                 {
                   Math::SpatialPoint rc;
                   tracePolytope->getTransformation().inverse(rc, pc);
@@ -197,7 +227,8 @@ namespace Rodin::Variational
                 }
               }
               UndeterminedTraceDomainException(
-                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
+                *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+                << Alert::Raise;
             }
             return;
           }
@@ -209,16 +240,36 @@ namespace Rodin::Variational
           const auto& fes = gf.getFiniteElementSpace();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          SpatialVectorType grad(d);
           SpatialVectorType res(d);
           res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {
-            fe.getGradient(local)(grad, rc);
-            res += gf.getValue(fes.getGlobalIndex({d, i}, local)) * grad;
+            const auto& basis = fe.getBasis(local);
+            res += basis.getGradient()(rc) * gf[fes.getGlobalIndex({d, i}, local)];
           }
-          out = (p.getJacobianInverse().transpose() * res).eval().coeff(m_i);
+          const SpatialVectorType transformed = p.getJacobianInverse().transpose() * res;
+          out = transformed(m_i);
         }
+      }
+
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order of the derivative on the entity.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const size_t k =
+          P1Element<ScalarType>(geom.getGeometry()).getDegree().value_or(2);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
+        return (k == 0) ? 0 : (k - 1);
       }
 
       /**

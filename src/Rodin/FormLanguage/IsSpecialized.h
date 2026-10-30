@@ -22,12 +22,12 @@ namespace Rodin::FormLanguage
    *
    * An integrand that no optimized handler matches is still integrated, by the
    * generic handler, and still gives the right answer. That is what makes a
-   * specialization silently falling out of use so hard to notice: nothing
+   * specialization silently falling out of use so hard to notice because nothing
    * fails, no result changes, and only the running time moves. This trait
    * makes which handler was selected observable, so a test can require the
    * optimized one and fail at compile time when the pattern stops matching.
    *
-   * Handlers report by declaring a @c Specialized member:
+   * Handlers report by declaring a @c Specialized member.
    * @code{.cpp}
    * static constexpr bool Specialized = true;
    * @endcode
@@ -35,7 +35,7 @@ namespace Rodin::FormLanguage
    * handler that omits it reads as generic --- which fails a dispatch test
    * rather than passing one, and is the safe direction to be wrong in.
    *
-   * ## Usage
+   * # Usage
    * @code{.cpp}
    * static_assert(IsSpecialized<QuadratureRule<MassIntegrand>>::Value);
    * static_assert(!IsSpecialized<QuadratureRule<DivDivIntegrand>>::Value);

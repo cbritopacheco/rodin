@@ -39,7 +39,7 @@ namespace Rodin::Assembly
    * and test finite element spaces, as well as lists of local and global
    * bilinear form integrators.
    *
-   * ## Local vs Global Integrators
+   * # Local vs Global Integrators
    * - **Local integrators**: Operate on individual elements @f$ K @f$, computing
    *   contributions @f$ a_K(\phi_j, \psi_i) @f$ for basis functions with support
    *   on @f$ K @f$.
@@ -49,7 +49,7 @@ namespace Rodin::Assembly
    * @tparam TrialFES Trial finite element space type
    * @tparam TestFES Test finite element space type
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 Uh(mesh), Vh(mesh);
    * auto lbfis = // list of local integrators
@@ -180,7 +180,7 @@ namespace Rodin::Assembly
    *
    * @tparam FES Finite element space type
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 Vh(mesh);
    * auto lfis = // list of linear form integrators
@@ -242,7 +242,7 @@ namespace Rodin::Assembly
    * It manages the layout and offsets for assembling block matrices.
    *
    * For a mixed problem with spaces @f$ V_h = V_{h,1} \times V_{h,2} @f$ and
-   * @f$ W_h = W_{h,1} \times W_{h,2} @f$, this assembles the block matrix:
+   * @f$ W_h = W_{h,1} \times W_{h,2} @f$, this assembles the block matrix.
    * @f[
    *   A = \begin{bmatrix}
    *     A_{11} & A_{12} \\
@@ -327,7 +327,7 @@ namespace Rodin::Assembly
    * and offsets for assembling block vectors.
    *
    * For a mixed problem with test space @f$ W_h = W_{h,1} \times W_{h,2} @f$,
-   * this assembles the block vector:
+   * this assembles the block vector.
    * @f[
    *   b = \begin{bmatrix} b_1 \\ b_2 \end{bmatrix}
    * @f]

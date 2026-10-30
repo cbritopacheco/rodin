@@ -1,69 +1,76 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+//! [periodic-source]
+#include <map>
+#include <cmath>
+#include <cstdlib>
+
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
+#include <Rodin/IO/XDMF.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-static constexpr Geometry::Attribute Boundary = 2;
-
-static constexpr Real m = 1;
-
-int main(int, char**)
+int main()
 {
-  const size_t n = 200;
-
-  // Build a mesh
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+  //! [periodic-mesh]
+  constexpr size_t nodes = 33;
+  const Real length = 2 * Math::Constants::pi();
+  Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {nodes, nodes});
+  mesh.scale(length / (nodes - 1));
   mesh.getConnectivity().compute(1, 2);
-  mesh.scale(1.0 / (n - 1));
-  mesh.scale(2 * M_PI);
-
-  // Functions
   P1 vh(mesh);
+  //! [periodic-mesh]
 
+  //! [periodic-map]
+  std::map<std::pair<size_t, size_t>, Index> vertexDOFs;
+  for (auto vertex = mesh.getVertex(); !vertex.end(); ++vertex)
+  {
+    const auto& point = vertex->getCoordinates();
+    const size_t i = std::llround(point.x() * (nodes - 1) / length);
+    const size_t j = std::llround(point.y() * (nodes - 1) / length);
+    vertexDOFs[{i, j}] = vh.getDOFs(0, vertex->getIndex())[0];
+  }
+  IndexMap<IndexSet> periodicDOFs;
+  for (const auto& [position, dof] : vertexDOFs)
+  {
+    const auto [i, j] = position;
+    if (i == nodes - 1 || j == nodes - 1)
+      periodicDOFs[dof].insert(vertexDOFs.at({i % (nodes - 1), j % (nodes - 1)}));
+  }
+  //! [periodic-map]
+
+  //! [periodic-form]
+  P0g meanSpace(mesh);
   TrialFunction u(vh);
-  TestFunction  v(vh);
+  TrialFunction multiplier(meanSpace);
+  TestFunction v(vh);
+  TestFunction meanTest(meanSpace);
+  RealFunction source = [](const Point& point) {
+    return 2 * std::sin(point.x()) * std::cos(point.y());
+  };
+  Problem poisson(u, multiplier, v, meanTest);
+  poisson = Integral(Grad(u), Grad(v)) + Integral(multiplier, v) + Integral(u, meanTest) -
+    Integral(source, v) + PeriodicBC(u, periodicDOFs);
+  //! [periodic-form]
 
-  // Define problem
-  RealFunction f =
-    [](const Point& p)
-    {
-      return sin(p.x() + M_PI / 4) * cos(p.y() + M_PI / 4);
-    };
-
-  RealFunction g = 0.0;
-
-  IndexMap<IndexSet> dofs;
-  for (Index i = 0; i < vh.getSize(); i += n)
-    dofs[i].insert(i + n - 1);
-
-  for (Index i = 0; i < n; i++)
-    dofs[i].insert(i + n * (n - 1));
-
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + PeriodicBC(u, dofs);
-  poisson.assemble();
-
-  // Solve the problem
-  Solver::SparseLU(poisson).solve();
-
-  // Save solution
-  u.getSolution().save("Periodic.gf", IO::FileFormat::MFEM);
-  mesh.save("Periodic.mesh", IO::FileFormat::MFEM);
-
+  //! [periodic-solve]
+  Solver::SparseLU solver(poisson);
+  solver.solve();
+  if (!solver.success())
+    return EXIT_FAILURE;
+  IO::XDMF xdmf("Periodic");
+  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+  xdmf.write().flush();
+  //! [periodic-solve]
   return 0;
 }
-
-
+//! [periodic-source]

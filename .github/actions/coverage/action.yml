@@ -1,0 +1,33 @@
+name: Independent production coverage
+description: Capture, audit and save one mandatory contribution for incremental publication.
+inputs:
+  token:
+    description: Codecov upload token.
+    required: false
+  definition:
+    description: JSON execution job and matrix coordinates.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Capture production coverage
+      id: coverage_capture
+      shell: bash
+      env:
+        GCOV: gcov-14
+      run: |
+        cmake --build build --target RodinCoverage
+        python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output build/coverage-audit.json
+    - name: Record independent coverage contribution
+      id: coverage_receipt
+      shell: bash
+      env:
+        CI_TARGET_DEFINITION: ${{ inputs.definition }}
+      run: python3 dev/ci_coverage.py record-target --output ci-target-result
+    - name: Save independent coverage contribution
+      uses: actions/upload-artifact@v4
+      with:
+        overwrite: true
+        name: ${{ steps.coverage_receipt.outputs.artifact }}
+        path: ci-target-result
+        if-no-files-found: error

@@ -299,6 +299,10 @@ namespace Rodin::IO
 
   void MeshLoader<FileFormat::MEDIT, Context::Local>::load(std::istream& is)
   {
+    m_pos.clear();
+    m_count.clear();
+    m_currentLineNumber = 0;
+    m_build = ObjectType::Builder();
     readVersion(is);
     readDimension(is);
     readEntities(is);

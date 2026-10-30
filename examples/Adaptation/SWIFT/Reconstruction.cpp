@@ -5,7 +5,7 @@
 #include <Rodin/Adaptation.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/IO/XDMF.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 #include <Rodin/Variational.h>
 
 #include <filesystem>
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
     classifier.setParameters(classificationParameters);
     const auto classified = classifier.classify([&](const Polytope& cell) -> Real {
       const auto& formula =
-        QF::PolytopeQuadratureFormula::get(ClassificationOrder, cell.getGeometry());
+        QF::QuadratureFormula::get(ClassificationOrder, cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(formula);
       Real moment = 0;
       for (size_t q = 0; q < quadrature.getSize(); ++q)
@@ -124,12 +124,14 @@ int main(int argc, char** argv)
                   << classified.cut.size() << " interface facets." << Alert::Raise;
 
     // The only degree-dependent choice: all spaces use the same SWIFT problem.
+    //! [swift-problem]
     H1 space(std::integral_constant<size_t, Degree>{}, mesh, dimension);
     TrialFunction u(space);
     TestFunction v(space);
     Adaptation::SWIFT::Problem fitting(u, v);
     fitting.setParameters(options.parameters).setInterfaceAttribute(Interface);
     const auto report = fitting.solve(phi, gradient);
+    //! [swift-problem]
 
     // A valid best-effort fit may miss the target: report fit and quality separately.
     std::cout << std::scientific
@@ -149,6 +151,7 @@ int main(int argc, char** argv)
 
     // Apply the solution to a separate mesh, including all higher-order geometry nodes.
     const auto& displacement = u.getSolution();
+    //! [swift-geometry]
     Mesh<Context::Local> moved(mesh);
     for (auto vertex = mesh.getVertex(); vertex; ++vertex)
     {
@@ -175,6 +178,7 @@ int main(int argc, char** argv)
             std::move(nodes), geometry));
       }
     }
+    //! [swift-geometry]
     const std::filesystem::path stem = options.output.empty()
       ? "swift/ReconstructionP" + std::to_string(Degree)
       : options.output;

@@ -1,0 +1,38 @@
+name: Download exact planned artifacts
+description: Resolve each mandatory artifact by name without listing the workflow's artifacts.
+inputs:
+  names:
+    description: JSON array of exact artifact names.
+    default: ''
+  names-file:
+    description: File containing a JSON array of exact artifact names.
+    default: ''
+  path:
+    description: Destination directory; each artifact gets its own subdirectory.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Install pinned artifact client once per runner
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        python3 "$GITHUB_WORKSPACE/dev/ci_artifact_client.py" \
+          --action "$ACTION_PATH" --client "$RUNNER_TEMP/rodin-artifact-client"
+    - name: Download every mandatory artifact by exact name
+      uses: actions/github-script@v8
+      env:
+        ARTIFACT_NAMES: ${{ inputs.names }}
+        ARTIFACT_NAMES_FILE: ${{ inputs.names-file }}
+        ARTIFACT_DESTINATION: ${{ inputs.path }}
+        ARTIFACT_ACTION_PATH: ${{ github.action_path }}
+      with:
+        script: |
+          const path = require('node:path');
+          const {DefaultArtifactClient} = require(path.join(process.env.RUNNER_TEMP,
+            'rodin-artifact-client/node_modules/@actions/artifact'));
+          const {downloadArtifacts, readNames} = require(path.join(
+            process.env.ARTIFACT_ACTION_PATH, 'download.js'));
+          await downloadArtifacts(new DefaultArtifactClient(), readNames(process.env),
+            process.env.ARTIFACT_DESTINATION, core);

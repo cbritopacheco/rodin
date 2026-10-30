@@ -29,7 +29,7 @@ namespace Rodin::Distance
    * @brief Poisson approximation to the distance function.
    *
    * This class computes an approximation to the distance function by solving
-   * a Poisson equation with appropriate boundary conditions. The method solves:
+   * a Poisson equation with appropriate boundary conditions. The method solves the following equation.
    * @f[
    *   -\Delta u = 1 \quad \text{in } \Omega
    * @f]
@@ -38,12 +38,12 @@ namespace Rodin::Distance
    * @f]
    * where @f$ u @f$ approximates the distance to the boundary.
    *
-   * ## Mathematical Background
+   * # Mathematical Background
    * Unlike the Eikonal equation which gives exact distances, the Poisson
    * approach provides a smooth approximation that can be computed more
    * efficiently for certain applications.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 fes(mesh);
    * Poisson poissonDist;

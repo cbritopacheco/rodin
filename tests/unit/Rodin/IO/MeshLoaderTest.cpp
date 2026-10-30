@@ -22,17 +22,151 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Member diagnostics report physical lines and restart on each load attempt.
+  TEST(Rodin_IO_MeshLoader, MFEMDiagnosticLinesAndLoaderReuse)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+    size_t expectedLine = 6;
+    for (const std::string input :
+      {"# comment\n\nMFEM mesh v1.0\n# marker\n\nvertices\n2\n",
+        "MFEM mesh v1.0\nvertices\n2\n"})
+    {
+      std::stringstream stream(input);
+      try
+      {
+        loader.load(stream);
+        FAIL() << "Missing dimension keyword was accepted";
+      }
+      catch (const Alert::Exception& error)
+      {
+        const std::string message = error.what();
+        EXPECT_NE(message.find("In member function readDimension"), std::string::npos);
+        EXPECT_NE(message.find("on line " + std::to_string(expectedLine) + "."),
+          std::string::npos);
+      }
+      EXPECT_EQ(mesh.getVertexCount(), 4u);
+      EXPECT_EQ(mesh.getCellCount(), 2u);
+      expectedLine = 2;
+    }
+  }
+
+  /// @brief A valid-looking section cannot replace the required dimension keyword.
+  TEST(Rodin_IO_MeshLoader, MFEMRequiresDimensionKeyword)
+  {
+    for (const std::string keyword : {"elements", "boundary", "vertices"})
+    {
+      SCOPED_TRACE(keyword);
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+      std::stringstream stream("MFEM mesh v1.0\n" + keyword +
+        "\n2\nelements\n1\n7 2 0 1 2\nboundary\n0\nvertices\n3\n2\n0 0\n1 0\n0 1\n");
+      MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+      EXPECT_THROW(loader.load(stream), Alert::Exception);
+      EXPECT_EQ(mesh.getVertexCount(), 4u);
+      EXPECT_EQ(mesh.getCellCount(), 2u);
+    }
+  }
+
+  /// @brief Straight MFEM meshes require a separate spatial-dimension record.
+  TEST(Rodin_IO_MeshLoader, MFEMRequiresExplicitSpaceDimension)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    std::stringstream stream("MFEM mesh v1.0\ndimension\n2\nelements\n1\n"
+                             "7 2 0 1 2\nboundary\n0\nvertices\n3\n0 0\n1 0\n0 1\n");
+    MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+    EXPECT_THROW(loader.load(stream), Alert::Exception);
+    EXPECT_EQ(mesh.getVertexCount(), 4u);
+    EXPECT_EQ(mesh.getCellCount(), 2u);
+  }
+
+  /// @brief Malformed keywords and spatial dimensions are rejected before replacing the mesh.
+  TEST(Rodin_IO_MeshLoader, MFEMRejectsInvalidDimensionRecords)
+  {
+    for (const std::string input :
+      {"MFEM mesh v1.0\n!\n2\n", "MFEM mesh v1.0\n", "MFEM mesh v1.0\ndimension\n4\n",
+        "MFEM mesh v1.0\ndimension\n2\nvertices\n1\n0\n",
+        "MFEM mesh v1.0\ndimension\n2\nvertices\n1\n1\n",
+        "MFEM mesh v1.0\ndimension\n2\nvertices\n1\n4\n"})
+    {
+      SCOPED_TRACE(input);
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+      std::stringstream stream(input);
+      MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+      EXPECT_THROW(loader.load(stream), Alert::Exception);
+      EXPECT_EQ(mesh.getVertexCount(), 4u);
+      EXPECT_EQ(mesh.getCellCount(), 2u);
+    }
+  }
+
+  /// @brief Topological and spatial dimensions remain distinct for embedded surfaces.
+  TEST(Rodin_IO_MeshLoader, MFEMEmbeddedTriangleCoordinatesAndArea)
+  {
+    Mesh mesh;
+    std::stringstream stream(
+      "MFEM mesh v1.0\ndimension\n2\nelements\n1\n"
+      "7 2 0 1 2\nboundary\n0\nvertices\n3\n3\n0 0 1\n1 0 1\n0 1 1\n");
+    MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+    loader.load(stream);
+    ASSERT_EQ(mesh.getDimension(), 2u);
+    ASSERT_EQ(mesh.getSpaceDimension(), 3u);
+    ASSERT_EQ(mesh.getVertexCount(), 3u);
+    ASSERT_EQ(mesh.getCellCount(), 1u);
+    for (Index vertex = 0; vertex < 3; ++vertex)
+    {
+      const auto& point = mesh.getVertexCoordinates(vertex);
+      EXPECT_EQ(point[0], vertex == 1 ? 1 : 0);
+      EXPECT_EQ(point[1], vertex == 2 ? 1 : 0);
+      EXPECT_EQ(point[2], 1);
+    }
+    auto cell = mesh.getCell();
+    EXPECT_EQ(cell->getAttribute(), 7);
+    EXPECT_NEAR(cell->getMeasure(), 0.5, 1e-12);
+  }
+
+  /// @brief Rejects malformed MFEM headers and dimensions without replacing the destination.
+  TEST(Rodin_IO_MeshLoader, MFEMRejectsMalformedHeader)
+  {
+    for (const std::string input :
+      {"not an MFEM mesh\n", "MFEM mesh v1.0\ndimension\nnotanumber\n"})
+    {
+      SCOPED_TRACE(input);
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+      const auto vertexCount = mesh.getVertexCount();
+      const auto cellCount = mesh.getCellCount();
+      std::stringstream stream(input);
+      MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+      EXPECT_THROW(loader.load(stream), Alert::Exception);
+      EXPECT_EQ(mesh.getVertexCount(), vertexCount);
+      EXPECT_EQ(mesh.getCellCount(), cellCount);
+    }
+  }
+
+  /// @brief Rejects malformed and truncated MFEM sections before committing a partial mesh.
+  TEST(Rodin_IO_MeshLoader, MFEMRejectsMalformedSections)
+  {
+    for (const std::string section : {"!\n", "unknown\n", "dimension\n2\n",
+           "elements\ninvalid\n", "elements\n1\ninvalid\n", "elements\n1\n",
+           "boundary\ninvalid\n", "boundary\n1\ninvalid\n", "boundary\n1\n",
+           "vertices\ninvalid\n", "vertices\n1\n2\ninvalid\n", "vertices\n1\n2\n"})
+    {
+      SCOPED_TRACE(section);
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+      const auto vertexCount = mesh.getVertexCount();
+      const auto cellCount = mesh.getCellCount();
+      std::stringstream stream("MFEM mesh v1.0\ndimension\n2\n" + section);
+      MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+      EXPECT_THROW(loader.load(stream), Alert::Exception);
+      EXPECT_EQ(mesh.getVertexCount(), vertexCount);
+      EXPECT_EQ(mesh.getCellCount(), cellCount);
+    }
+  }
+
   namespace
   {
     Mesh<Context::Local> makePointMesh()
     {
       Mesh<Context::Local>::Builder builder;
-      return builder
-        .initialize(1)
-        .nodes(1)
-        .vertex({ 0.0 })
-        .attribute({ 0, 0 }, 7)
-        .finalize();
+      return builder.initialize(1).nodes(1).vertex({0.0}).attribute({0, 0}, 7).finalize();
     }
 
     Mesh<Context::Local> makeCoverageMesh(Polytope::Type geometry)
@@ -42,15 +176,15 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Point:
           return makePointMesh();
         case Polytope::Type::Segment:
-          return LocalMesh::UniformGrid(geometry, { 5 });
+          return LocalMesh::UniformGrid(geometry, {5});
         case Polytope::Type::Triangle:
         case Polytope::Type::Quadrilateral:
-          return LocalMesh::UniformGrid(geometry, { 3, 3 });
+          return LocalMesh::UniformGrid(geometry, {3, 3});
         case Polytope::Type::Tetrahedron:
         case Polytope::Type::Pyramid:
         case Polytope::Type::Hexahedron:
         case Polytope::Type::Wedge:
-          return LocalMesh::UniformGrid(geometry, { 2, 2, 2 });
+          return LocalMesh::UniformGrid(geometry, {2, 2, 2});
       }
       assert(false);
       return {};
@@ -116,15 +250,22 @@ namespace Rodin::Tests::Unit
     {
       switch (geometry)
       {
-        case Polytope::Type::Point:         return "Point";
-        case Polytope::Type::Segment:       return "Segment";
-        case Polytope::Type::Triangle:      return "Triangle";
-        case Polytope::Type::Quadrilateral: return "Quadrilateral";
-        case Polytope::Type::Tetrahedron:   return "Tetrahedron";
+        case Polytope::Type::Point:
+          return "Point";
+        case Polytope::Type::Segment:
+          return "Segment";
+        case Polytope::Type::Triangle:
+          return "Triangle";
+        case Polytope::Type::Quadrilateral:
+          return "Quadrilateral";
+        case Polytope::Type::Tetrahedron:
+          return "Tetrahedron";
         case Polytope::Type::Pyramid:
           return "Pyramid";
-        case Polytope::Type::Hexahedron:    return "Hexahedron";
-        case Polytope::Type::Wedge:         return "Wedge";
+        case Polytope::Type::Hexahedron:
+          return "Hexahedron";
+        case Polytope::Type::Wedge:
+          return "Wedge";
       }
       return "Unknown";
     }
@@ -140,8 +281,7 @@ namespace Rodin::Tests::Unit
     }
 
     void expectSameMeshShape(
-        const Mesh<Context::Local>& actual,
-        const Mesh<Context::Local>& expected)
+      const Mesh<Context::Local>& actual, const Mesh<Context::Local>& expected)
     {
       ASSERT_EQ(actual.getSpaceDimension(), expected.getSpaceDimension());
       ASSERT_EQ(actual.getDimension(), expected.getDimension());
@@ -157,14 +297,17 @@ namespace Rodin::Tests::Unit
       }
 
       for (size_t d = 0; d <= expected.getDimension(); ++d)
-        ASSERT_EQ(actual.getPolytopeCount(d), expected.getPolytopeCount(d)) << "dimension " << d;
+      {
+        ASSERT_EQ(actual.getPolytopeCount(d), expected.getPolytopeCount(d))
+          << "dimension " << d;
+      }
 
       const size_t D = expected.getDimension();
       for (Index c = 0; c < static_cast<Index>(expected.getCellCount()); ++c)
       {
         EXPECT_EQ(actual.getGeometry(D, c), expected.getGeometry(D, c)) << "cell " << c;
-        EXPECT_TRUE(Polytope::Key::SymmetricEquality()(
-            actual.getConnectivity().getPolytope(D, c),
+        EXPECT_TRUE(
+          Polytope::Key::SymmetricEquality()(actual.getConnectivity().getPolytope(D, c),
             expected.getConnectivity().getPolytope(D, c)))
           << "cell " << c;
       }
@@ -253,6 +396,57 @@ namespace Rodin::Tests::Unit
 
       expectAttributeRegressionMesh(loaded, dim);
     }
+  }
+
+  namespace
+  {
+    /// @brief A failed MEDIT parse must not commit its partially constructed mesh.
+    void expectPreservedMEDITFailure(const std::string& input)
+    {
+      auto expected = makeAttributeRegressionMesh(2);
+      computeAllIncidences(expected);
+      auto mesh = expected;
+      std::stringstream stream(input);
+      MeshLoader<FileFormat::MEDIT, Context::Local> loader(mesh);
+      EXPECT_THROW(loader.load(stream), Alert::Exception);
+      ASSERT_EQ(mesh.getSpaceDimension(), expected.getSpaceDimension());
+      ASSERT_EQ(mesh.getDimension(), expected.getDimension());
+      for (size_t d = 0; d <= expected.getDimension(); ++d)
+        ASSERT_EQ(mesh.getPolytopeCount(d), expected.getPolytopeCount(d));
+      expectSameMeshWithAttributes(mesh, expected);
+    }
+  }
+
+  /// @brief Missing or malformed numeric headers leave the destination intact.
+  TEST(Rodin_IO_MeshLoader, MEDITRejectsMalformedHeaders)
+  {
+    for (const std::string input :
+      {"", "MeshVersionFormatted invalid\ninvalid\n", "MeshVersionFormatted 2\n",
+        "MeshVersionFormatted 2\nDimension invalid\ninvalid\n"})
+    {
+      SCOPED_TRACE(input);
+      expectPreservedMEDITFailure(input);
+    }
+  }
+
+  /// @brief Every entity reader rejects malformed counts, invalid records and truncation.
+  TEST(Rodin_IO_MeshLoader, MEDITRejectsMalformedAndTruncatedEntities)
+  {
+    const std::string header = "MeshVersionFormatted 2\nDimension 3\n";
+    const std::string vertices = "Vertices\n8\n0 0 0 0\n1 0 0 0\n1 1 0 0\n0 1 0 0\n"
+                                 "0 0 1 0\n1 0 1 0\n1 1 1 0\n0 1 1 0\n";
+    for (const std::string entity : {"Vertices", "Edges", "Triangles", "Quadrilaterals",
+           "Tetrahedra", "Hexahedra", "Wedges", "Pyramids"})
+    {
+      for (const std::string suffix : {"invalid\n", "1\ninvalid\n", "1\n"})
+      {
+        const std::string input =
+          header + (entity == "Vertices" ? "" : vertices) + entity + "\n" + suffix;
+        SCOPED_TRACE(input);
+        expectPreservedMEDITFailure(input);
+      }
+    }
+    expectPreservedMEDITFailure(header + "Vertices\n2\n0 0 0 0\n");
   }
 
   class MeshFormatCoverage : public ::testing::TestWithParam<Polytope::Type>

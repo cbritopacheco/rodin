@@ -1,0 +1,12 @@
+<p>Measures the StokesAssembly workload through its public library pipeline.</p>
+<h2>Measured operation</h2>
+<p>Measures repeated public Stokes assembly, including constraints and global pressure-mean completion. Setup checks the exact affine patch residual and rejects wrong-field and missing-pressure controls without factorizing the system. Every timed assembly is checked against the exact field outside timing.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its mesh, finite element spaces, quadrature and iteration policy. Solver-specific coefficient and solve checks belong to the solver benchmark. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>
+
+<p>The missing-pressure control is scaled by the independently assembled forcing
+load on unconstrained velocity test DOFs, not by Dirichlet-elimination entries
+in the full right-hand side. Since the affine field has zero viscous divergence,
+the omitted residual must equal the negative load within the full-RHS-normalized
+10<sup>−11</sup> residual tolerance, with relative magnitude above 10<sup>−4</sup>.
+The original full-RHS-normalized counter is retained for comparison.</p>

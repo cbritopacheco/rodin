@@ -26,20 +26,21 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c TrialFunction: exposes the finite element space, the shape
+   * @brief Type traits for @c TrialFunction, exposing the finite element space, the shape
    * function space and the solution type.
    */
   template <class Solution, class FES>
   struct Traits<Variational::TrialFunction<Solution, FES>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType =
-        Variational::TrialSpace;
+    /// @brief Finite element space type.
+    using FESType = FES;
 
-      /// @brief Solution vector type.
-      using SolutionType = Solution;
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType =
+      Variational::TrialSpace;
+
+    /// @brief Solution vector type.
+    using SolutionType = Solution;
   };
 }
 
@@ -60,7 +61,8 @@ namespace Rodin::Variational
    */
   template <class Solution, class FES>
   class TrialFunctionReference
-    : public ShapeFunction<TrialFunctionReference<Solution, FES>, FES, ShapeFunctionSpaceType::Trial>
+    : public ShapeFunction<TrialFunctionReference<Solution, FES>, FES,
+        ShapeFunctionSpaceType::Trial>
   {
     public:
       /// @brief Finite element space type
@@ -78,8 +80,8 @@ namespace Rodin::Variational
        * @param[in] ref Trial function to reference
        * @param[in] fes Finite element space
        */
-      explicit
-      TrialFunctionReference(const TrialFunction<Solution, FESType>& ref, const FESType& fes)
+      explicit TrialFunctionReference(
+        const TrialFunction<Solution, FESType>& ref, const FESType& fes)
         : Parent(fes),
           m_ref(std::cref(ref))
       {}
@@ -103,13 +105,24 @@ namespace Rodin::Variational
       {}
 
       /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      TrialFunctionReference& setPolytope(const Geometry::Polytope& polytope)
+      {
+        Parent::setPolytope(polytope);
+        return *this;
+      }
+
+      /**
        * @brief Sets the evaluation point for the shape function.
        * @param[in] p Point at which to evaluate
        * @returns Reference to this object
        */
       TrialFunctionReference& setIntegrationPoint(const IntegrationPoint& p)
       {
-        m_ref.get().setIntegrationPoint(p);
+        Parent::setIntegrationPoint(p);
         return *this;
       }
 
@@ -119,15 +132,14 @@ namespace Rodin::Variational
        */
       const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_ref.get().getIntegrationPoint();
+        return Parent::getIntegrationPoint();
       }
 
       /**
        * @brief Gets the x-component of a vector-valued trial function.
        * @returns Component expression representing @f$ u_x @f$
        */
-      constexpr
-      auto x() const
+      constexpr auto x() const
       {
         return m_ref.get().x();
       }
@@ -136,8 +148,7 @@ namespace Rodin::Variational
        * @brief Gets the y-component of a vector-valued trial function.
        * @returns Component expression representing @f$ u_y @f$
        */
-      constexpr
-      auto y() const
+      constexpr auto y() const
       {
         return m_ref.get().y();
       }
@@ -146,8 +157,7 @@ namespace Rodin::Variational
        * @brief Gets the z-component of a vector-valued trial function.
        * @returns Component expression representing @f$ u_z @f$
        */
-      constexpr
-      auto z() const
+      constexpr auto z() const
       {
         return m_ref.get().z();
       }
@@ -156,8 +166,7 @@ namespace Rodin::Variational
        * @brief Gets the leaf (innermost) expression in the shape function tree.
        * @returns Reference to the underlying trial function
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return m_ref.get().getLeaf();
       }
@@ -166,8 +175,7 @@ namespace Rodin::Variational
        * @brief Gets the solution grid function (mutable).
        * @returns Reference to solution
        */
-      constexpr
-      auto& getSolution()
+      constexpr auto& getSolution()
       {
         return m_ref.get().getSolution();
       }
@@ -177,18 +185,16 @@ namespace Rodin::Variational
        * @param[in] local Local index of the basis function
        * @returns Basis function expression
        */
-      constexpr
-      decltype(auto) getBasis(size_t local) const
+      constexpr decltype(auto) getBasis(size_t local) const
       {
-        return m_ref.get().getBasis(local);
+        return Parent::getBasis(local);
       }
 
       /**
        * @brief Gets the solution grid function (const).
        * @returns Const reference to solution
        */
-      constexpr
-      const auto& getSolution() const
+      constexpr const auto& getSolution() const
       {
         return m_ref.get().getSolution();
       }
@@ -222,6 +228,29 @@ namespace Rodin::Variational
         return new TrialFunctionReference(*this);
       }
 
+    protected:
+      /**
+       * @brief Copies shape state while binding a new owning trial function.
+       * @param other Shape state to copy.
+       * @param owner New owner of this reference base.
+       */
+      TrialFunctionReference(const TrialFunctionReference& other,
+        const TrialFunction<Solution, FESType>& owner)
+        : Parent(other),
+          m_ref(owner)
+      {}
+
+      /**
+       * @brief Moves shape state while binding a new owning trial function.
+       * @param other Shape state to move.
+       * @param owner New owner of this reference base.
+       */
+      TrialFunctionReference(
+        TrialFunctionReference&& other, const TrialFunction<Solution, FESType>& owner)
+        : Parent(std::move(other)),
+          m_ref(owner)
+      {}
+
     private:
       std::reference_wrapper<const TrialFunction<Solution, FESType>> m_ref;
   };
@@ -235,12 +264,12 @@ namespace Rodin::Variational
    * @f$ U_h @f$, the trial function @f$ u \in U_h @f$ is the function to be 
    * determined by solving the variational problem.
    *
-   * ## Mathematical Foundation
-   * The weak formulation seeks @f$ u \in U_h @f$ such that:
+   * # Mathematical Foundation
+   * The weak formulation seeks @f$ u \in U_h @f$ such that
    * @f[
    *   a(u, v) = l(v) \quad \forall v \in V_h
    * @f]
-   * where:
+   * Here,
    * - @f$ u @f$ is the trial function (unknown)
    * - @f$ v @f$ is a test function
    * - @f$ a(\cdot, \cdot) @f$ is a bilinear form
@@ -250,7 +279,7 @@ namespace Rodin::Variational
    * The TrialFunction internally manages a GridFunction that stores the degrees
    * of freedom of the solution after the problem is solved.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 Uh(mesh);                    // Define finite element space
    * TrialFunction u(Uh);             // Define trial function
@@ -297,8 +326,7 @@ namespace Rodin::Variational
        * Creates a trial function with an associated solution grid function
        * initialized to zero.
        */
-      constexpr
-      TrialFunction(const FES& fes)
+      constexpr TrialFunction(const FES& fes)
         : Parent(*this, fes),
           m_gf(fes)
       {}
@@ -307,9 +335,8 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param[in] other Trial function to copy
        */
-      constexpr
-      TrialFunction(const TrialFunction& other)
-        : Parent(other),
+      constexpr TrialFunction(const TrialFunction& other)
+        : Parent(other, *this),
           m_gf(other.m_gf)
       {}
 
@@ -317,9 +344,8 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param[in] other Trial function to move
        */
-      constexpr
-      TrialFunction(TrialFunction&& other)
-        : Parent(std::move(other)),
+      constexpr TrialFunction(TrialFunction&& other)
+        : Parent(std::move(other), *this),
           m_gf(std::move(other.m_gf))
       {}
 
@@ -339,8 +365,7 @@ namespace Rodin::Variational
        * @brief Gets the x-component of a vector-valued trial function.
        * @returns Component expression representing @f$ u_x @f$
        */
-      constexpr
-      auto x() const
+      constexpr auto x() const
       {
         assert(this->getFiniteElementSpace().getVectorDimension() >= 1);
         return Component(*this, 0);
@@ -350,8 +375,7 @@ namespace Rodin::Variational
        * @brief Gets the y-component of a vector-valued trial function.
        * @returns Component expression representing @f$ u_y @f$
        */
-      constexpr
-      auto y() const
+      constexpr auto y() const
       {
         assert(this->getFiniteElementSpace().getVectorDimension() >= 2);
         return Component(*this, 1);
@@ -361,8 +385,7 @@ namespace Rodin::Variational
        * @brief Gets the z-component of a vector-valued trial function.
        * @returns Component expression representing @f$ u_z @f$
        */
-      constexpr
-      auto z() const
+      constexpr auto z() const
       {
         assert(this->getFiniteElementSpace().getVectorDimension() >= 3);
         return Component(*this, 2);
@@ -372,8 +395,7 @@ namespace Rodin::Variational
        * @brief Gets the leaf (innermost) expression in the shape function tree.
        * @returns Reference to this trial function
        */
-      constexpr
-      const TrialFunction& getLeaf() const
+      constexpr const TrialFunction& getLeaf() const
       {
         return *this;
       }
@@ -385,8 +407,7 @@ namespace Rodin::Variational
        * The solution grid function stores the degrees of freedom of the 
        * computed solution after solving the variational problem.
        */
-      constexpr
-      SolutionType& getSolution()
+      constexpr SolutionType& getSolution()
       {
         return m_gf;
       }
@@ -395,8 +416,7 @@ namespace Rodin::Variational
        * @brief Gets the solution grid function (const).
        * @returns Const reference to the solution
        */
-      constexpr
-      const SolutionType& getSolution() const
+      constexpr const SolutionType& getSolution() const
       {
         return m_gf;
       }
@@ -421,10 +441,10 @@ namespace Rodin::Variational
         return m_gf.getName();
       }
 
-       /**
-       * @brief Creates a copy of this trial function.
-       * @returns Pointer to newly allocated copy
-       */
+    /**
+     * @brief Creates a copy of this trial function.
+     * @returns Pointer to newly allocated copy
+     */
 
     private:
       SolutionType m_gf;
@@ -433,7 +453,7 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for TrialFunction.
    *
-   * Allows automatic type deduction when constructing a TrialFunction:
+   * Allows automatic type deduction when constructing a TrialFunction.
    * ```cpp
    * P1 Uh(mesh);
    * TrialFunction u(Uh);  // Type deduced automatically

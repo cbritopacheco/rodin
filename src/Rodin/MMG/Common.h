@@ -49,7 +49,7 @@ namespace Rodin::MMG
   /**
    * @brief Singleton tag instance for convenience in split configuration.
    *
-   * Example:
+   * The following example illustrates this operation.
    * @code
    * SplitMap split;
    * split[5] = NoSplit;

@@ -12,6 +12,7 @@
  * @brief Top level include for the Rodin::Geometry utilities.
  */
 
+#include "Geometry/Bounds.h"
 #include "Geometry/Types.h"
 #include "Geometry/ForwardDecls.h"
 #include "Geometry/Mesh.h"

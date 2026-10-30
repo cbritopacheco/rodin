@@ -3,16 +3,22 @@ target_link_libraries(RodinConvergenceIsoparametricGeometryApproximation
   PRIVATE GTest::gtest GTest::gtest_main RodinConvergence Rodin::Solver)
 set(_RODIN_GEOMETRY_APPROXIMATION_GEOMETRIES
   Segment Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
-foreach(geometry IN LISTS _RODIN_GEOMETRY_APPROXIMATION_GEOMETRIES)
-  add_test(NAME RodinConvergenceIsoparametricGeometryApproximation_${geometry}
-    COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricGeometryApproximation>
-      "--gtest_filter=AllGeometries/LocalTest.*/${geometry}")
-  set_tests_properties(RodinConvergenceIsoparametricGeometryApproximation_${geometry}
-    PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
-  if (geometry STREQUAL "Pyramid")
-    set_tests_properties(RodinConvergenceIsoparametricGeometryApproximation_${geometry}
-      PROPERTIES RESOURCE_LOCK geometry_approximation_pyramid)
-  endif()
+set(_RODIN_GEOMETRY_APPROXIMATION_CASES
+  GeometryDegreeRefinement CoupledMeshAndGeometryRefinement
+  Q1Rates Q2Rates Q3Rates Q1Patch Q2Patch Q3Patch
+  IndependentControls Q1Sensitivity Q2Sensitivity Q3Sensitivity)
+foreach(case IN LISTS _RODIN_GEOMETRY_APPROXIMATION_CASES)
+  foreach(geometry IN LISTS _RODIN_GEOMETRY_APPROXIMATION_GEOMETRIES)
+    add_test(NAME RodinConvergenceIsoparametricGeometryApproximation_${case}_${geometry}
+      COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricGeometryApproximation>
+      "--gtest_filter=AllGeometries/LocalTest.${case}/${geometry}")
+    set_tests_properties(RodinConvergenceIsoparametricGeometryApproximation_${case}_${geometry}
+      PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
+    if (geometry STREQUAL "Pyramid")
+      set_tests_properties(RodinConvergenceIsoparametricGeometryApproximation_${case}_${geometry}
+        PROPERTIES RESOURCE_LOCK geometry_approximation_pyramid)
+    endif()
+  endforeach()
 endforeach()
 
 if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
@@ -21,18 +27,20 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
     PRIVATE RODIN_GEOMETRY_APPROXIMATION_PETSC)
   target_link_libraries(RodinConvergenceIsoparametricPETScGeometryApproximation
     PRIVATE GTest::gtest RodinConvergence Rodin::PETSc)
-  foreach(geometry IN LISTS _RODIN_GEOMETRY_APPROXIMATION_GEOMETRIES)
-    add_test(NAME RodinConvergenceIsoparametricPETScGeometryApproximation_${geometry}
-      COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScGeometryApproximation>
-        "--gtest_filter=AllGeometries/LocalTest.*/${geometry}")
-    set_tests_properties(RodinConvergenceIsoparametricPETScGeometryApproximation_${geometry}
-      PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
-    if (geometry STREQUAL "Pyramid")
-      set_tests_properties(RodinConvergenceIsoparametricPETScGeometryApproximation_${geometry}
-        PROPERTIES RESOURCE_LOCK geometry_approximation_pyramid)
-    endif()
-    rodin_suppress_external_mpi_lsan_for_test(
-      RodinConvergenceIsoparametricPETScGeometryApproximation_${geometry})
+  foreach(case IN LISTS _RODIN_GEOMETRY_APPROXIMATION_CASES)
+    foreach(geometry IN LISTS _RODIN_GEOMETRY_APPROXIMATION_GEOMETRIES)
+      add_test(NAME RodinConvergenceIsoparametricPETScGeometryApproximation_${case}_${geometry}
+        COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScGeometryApproximation>
+        "--gtest_filter=AllGeometries/LocalTest.${case}/${geometry}")
+      set_tests_properties(RodinConvergenceIsoparametricPETScGeometryApproximation_${case}_${geometry}
+        PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
+      if (geometry STREQUAL "Pyramid")
+        set_tests_properties(RodinConvergenceIsoparametricPETScGeometryApproximation_${case}_${geometry}
+          PROPERTIES RESOURCE_LOCK geometry_approximation_pyramid)
+      endif()
+      rodin_suppress_external_mpi_lsan_for_test(
+        RodinConvergenceIsoparametricPETScGeometryApproximation_${case}_${geometry})
+    endforeach()
   endforeach()
   if (RODIN_USE_MPI)
     target_link_libraries(RodinConvergenceIsoparametricPETScGeometryApproximation PRIVATE Rodin::MPI)
@@ -42,23 +50,25 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
     if (_mpi_version_output MATCHES "Open MPI|OpenRTE")
       set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "--oversubscribe")
     endif()
-    foreach(np 1 2 3 4)
-      foreach(geometry IN LISTS _RODIN_GEOMETRY_APPROXIMATION_GEOMETRIES)
-        add_test(NAME RodinConvergenceIsoparametricPETScMPIGeometryApproximation_np${np}_${geometry}
-          COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+    foreach(case IN LISTS _RODIN_GEOMETRY_APPROXIMATION_CASES)
+      foreach(np 1 2 3 4)
+        foreach(geometry IN LISTS _RODIN_GEOMETRY_APPROXIMATION_GEOMETRIES)
+          add_test(NAME RodinConvergenceIsoparametricPETScMPIGeometryApproximation_np${np}_${case}_${geometry}
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
             $<TARGET_FILE:RodinConvergenceIsoparametricPETScGeometryApproximation>
-            "--gtest_filter=AllGeometries/MPITest.*/${geometry}")
-        set_tests_properties(
-          RodinConvergenceIsoparametricPETScMPIGeometryApproximation_np${np}_${geometry}
-          PROPERTIES LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
-        if (geometry STREQUAL "Pyramid")
+            "--gtest_filter=AllGeometries/MPITest.${case}/${geometry}")
           set_tests_properties(
-            RodinConvergenceIsoparametricPETScMPIGeometryApproximation_np${np}_${geometry}
-            PROPERTIES RESOURCE_LOCK geometry_approximation_pyramid)
-        endif()
-        rodin_suppress_external_mpi_lsan_for_test(
-          RodinConvergenceIsoparametricPETScMPIGeometryApproximation_np${np}_${geometry})
+            RodinConvergenceIsoparametricPETScMPIGeometryApproximation_np${np}_${case}_${geometry}
+            PROPERTIES LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
+          if (geometry STREQUAL "Pyramid")
+            set_tests_properties(
+              RodinConvergenceIsoparametricPETScMPIGeometryApproximation_np${np}_${case}_${geometry}
+              PROPERTIES RESOURCE_LOCK geometry_approximation_pyramid)
+          endif()
+          rodin_suppress_external_mpi_lsan_for_test(
+            RodinConvergenceIsoparametricPETScMPIGeometryApproximation_np${np}_${case}_${geometry})
+        endforeach()
       endforeach()
     endforeach()
   endif()

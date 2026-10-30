@@ -21,7 +21,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c TestFunction: exposes the finite element space and the
+   * @brief Type traits for @c TestFunction, exposing the finite element space and the
    * shape function space.
    */
   template <class FES>
@@ -46,18 +46,18 @@ namespace Rodin::Variational
    * variational problem. Given a finite element space @f$ V_h @f$, the test
    * function @f$ v \in V_h @f$ is chosen from this space.
    *
-   * ## Mathematical Foundation
-   * The weak formulation seeks @f$ u \in U_h @f$ such that:
+   * # Mathematical Foundation
+   * The weak formulation seeks @f$ u \in U_h @f$ such that
    * @f[
    *   a(u, v) = l(v) \quad \forall v \in V_h
    * @f]
-   * where:
+   * Here,
    * - @f$ v @f$ is the test function
    * - @f$ a(\cdot, \cdot) @f$ is a bilinear form
    * - @f$ l(\cdot) @f$ is a linear functional
    * - @f$ V_h @f$ is the test space (typically equal to the trial space @f$ U_h @f$)
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 Vh(mesh);                    // Define finite element space
    * TestFunction v(Vh);              // Define test function
@@ -180,7 +180,7 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for TestFunction.
    *
-   * Allows automatic type deduction when constructing a TestFunction:
+   * Allows automatic type deduction when constructing a TestFunction.
    * ```cpp
    * P1 Vh(mesh);
    * TestFunction v(Vh);  // Type deduced as TestFunction<P1>

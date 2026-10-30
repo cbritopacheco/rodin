@@ -1,0 +1,30 @@
+name: Compatible benchmark environment
+description: Install identical compiler and runtime dependencies for shared benchmark producers and consumers.
+inputs:
+  configuration:
+    description: local or distributed benchmark configuration.
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/prepare-apt
+    - name: Select benchmark dependencies
+      id: packages
+      shell: bash
+      env:
+        CONFIGURATION: ${{ inputs.configuration }}
+      run: |
+        # Resolve zlib explicitly on both build producers and execution consumers.
+        packages='zlib1g gcc-14 g++-14 libboost-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev'
+        case "$CONFIGURATION" in
+          local) ;;
+          distributed) packages="$packages petsc-dev mpi-default-bin mpi-default-dev" ;;
+          *) exit 1 ;;
+        esac
+        echo "packages=$packages" >> "$GITHUB_OUTPUT"
+    - uses: ./.github/actions/apt-dependencies
+      with:
+        packages: ${{ steps.packages.outputs.packages }}
+    - name: Select and verify benchmark compiler
+      shell: bash
+      run: python3 dev/ci_environment.py compiler --compiler gcc-14

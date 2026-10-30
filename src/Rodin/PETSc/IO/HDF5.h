@@ -16,7 +16,7 @@
  * files.  This enables checkpoint/restart workflows and post-processing
  * with external HDF5-compatible tools.
  *
- * ## HDF5 File Layout
+ * # HDF5 File Layout
  *
  * ```
  * /GridFunction/
@@ -32,6 +32,7 @@
  * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html">Rodin::PETSc::Variational::GridFunction</a>
  */
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <petscvec.h>
 #include <petscsys.h>
 #include <petscmath.h>
@@ -59,11 +60,13 @@ namespace Rodin::IO
     {
       const auto space = H5Screate(H5S_SCALAR);
       assert(space >= 0);
-      const auto ds = H5Dcreate2(file, path, H5T_NATIVE_ULLONG, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      const auto ds = H5Dcreate2(
+        file, path, H5T_NATIVE_ULLONG, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
       assert(ds >= 0);
-      const auto writeStatus = H5Dwrite(ds, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
+      const auto writeStatus =
+        H5Dwrite(ds, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
       assert(writeStatus >= 0);
-      (void) writeStatus;
+      (void)writeStatus;
       H5Dclose(ds);
       H5Sclose(space);
     }
@@ -76,27 +79,13 @@ namespace Rodin::IO
      */
     inline std::vector<double> readVectorDouble(hid_t file, const char* path)
     {
-      const auto ds = H5Dopen2(file, path, H5P_DEFAULT);
-      assert(ds >= 0);
-      const auto space = H5Dget_space(ds);
-      assert(space >= 0);
-      hsize_t dims[1] = {0};
-      const auto ndims = H5Sget_simple_extent_ndims(space);
-      assert(ndims == 1);
-      (void) ndims;
-      const auto dimStatus = H5Sget_simple_extent_dims(space, dims, nullptr);
-      assert(dimStatus >= 0);
-      (void) dimStatus;
-      std::vector<double> v(static_cast<size_t>(dims[0]));
-      if (!v.empty())
+      const auto shape = HDF5::readDatasetShape(file, path);
+      if (shape.size() != 1)
       {
-        const auto readStatus = H5Dread(ds, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
-        assert(readStatus >= 0);
-        (void) readStatus;
+        Alert::Exception() << "Expected one-dimensional HDF5 coefficient dataset: "
+                           << path << Alert::Raise;
       }
-      H5Sclose(space);
-      H5Dclose(ds);
-      return v;
+      return HDF5::readVectorDataset<HDF5::F64>(file, path);
     }
 
     /**
@@ -107,14 +96,7 @@ namespace Rodin::IO
      */
     inline unsigned long long readScalarULL(hid_t file, const char* path)
     {
-      const auto ds = H5Dopen2(file, path, H5P_DEFAULT);
-      assert(ds >= 0);
-      unsigned long long value = 0;
-      const auto readStatus = H5Dread(ds, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
-      assert(readStatus >= 0);
-      (void) readStatus;
-      H5Dclose(ds);
-      return value;
+      return HDF5::readScalarDataset<HDF5::U64>(file, path);
     }
 
   }
@@ -125,7 +107,7 @@ namespace Rodin::IO
    * Reads per-rank DOF values from an HDF5 file into the local portion
    * of a distributed PETSc vector.
    *
-   * ## HDF5 Layout
+   * # HDF5 Layout
    *
    * The expected file structure is:
    * - `/GridFunction/Values/Data` — 1-D array of DOF values
@@ -145,8 +127,10 @@ namespace Rodin::IO
     public:
       /// @brief PETSc vector data type (@c Vec).
       using DataType = ::Vec;
+
       /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FES, DataType>;
+
       /// @brief Parent loader base class.
       using Parent = GridFunctionLoaderBase<FES, DataType>;
 
@@ -169,8 +153,7 @@ namespace Rodin::IO
           << "HDF5 GridFunction loading is file-path based."
           << "Please use the "
           << Alert::Identifier::Function("load(const boost::filesystem::path&)")
-          << " overload."
-          << Alert::Raise;
+          << " overload." << Alert::Raise;
       }
 
       /**
@@ -180,6 +163,7 @@ namespace Rodin::IO
       void load(const boost::filesystem::path& filename) override
       {
         auto& gf = this->getObject();
+        gf.sync();
         auto& vec = gf.getData();
 
         PetscInt rb = 0, re = 0;
@@ -187,33 +171,42 @@ namespace Rodin::IO
         assert(ierr == PETSC_SUCCESS);
         const PetscInt localN = re - rb;
 
-        const auto file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+        auto fileOwner =
+          HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+        const auto file = fileOwner.get();
         if (file < 0)
         {
-          Alert::Exception()
-            << "Failed to open HDF5 file for reading: " << filename
-            << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to open HDF5 file for reading: " << filename << Alert::Raise;
         }
 
         const auto values = Internal::readVectorDouble(file, "/GridFunction/Values/Data");
+        const auto size = Internal::readScalarULL(file, "/GridFunction/Meta/Size");
+        const auto dimension =
+          Internal::readScalarULL(file, "/GridFunction/Meta/Dimension");
+        if (size != values.size() || dimension != gf.getDimension())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "HDF5 coefficient metadata does not match the destination field."
+            << Alert::Raise;
+        }
         std::vector<double> imaginary(values.size(), 0);
         if (H5Lexists(file, "/GridFunction/Values/ImaginaryData", H5P_DEFAULT) > 0)
+        {
           imaginary =
             Internal::readVectorDouble(file, "/GridFunction/Values/ImaginaryData");
+        }
         if (imaginary.size() != values.size())
         {
-          H5Fclose(file);
-          Alert::Exception() << "Incompatible HDF5 imaginary coefficient count."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Incompatible HDF5 imaginary coefficient count." << Alert::Raise;
         }
 
         if (static_cast<PetscInt>(values.size()) != localN)
         {
-          H5Fclose(file);
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "Local DOF count mismatch: file has " << values.size()
-            << ", local Vec portion has " << localN << "."
-            << Alert::Raise;
+            << ", local Vec portion has " << localN << "." << Alert::Raise;
         }
 
         if constexpr (FormLanguage::IsMatrixRange<
@@ -223,11 +216,11 @@ namespace Rodin::IO
           const auto cols = Internal::readScalarULL(file, "/GridFunction/Meta/Columns");
           if (rows != gf.getRows() || cols != gf.getColumns())
           {
-            H5Fclose(file);
-            Alert::Exception() << "HDF5 matrix range shape mismatch." << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "HDF5 matrix range shape mismatch." << Alert::Raise;
           }
         }
-        H5Fclose(file);
+        fileOwner.reset();
 
         std::vector<PetscInt> indices(static_cast<size_t>(localN));
         std::iota(indices.begin(), indices.end(), rb);
@@ -239,13 +232,16 @@ namespace Rodin::IO
             PetscCMPLX(values[static_cast<size_t>(i)], imaginary[static_cast<size_t>(i)]);
 #else
           if (imaginary[static_cast<size_t>(i)] != 0)
-            Alert::Exception() << "Complex HDF5 coefficients require complex PETSc."
-                               << Alert::Raise;
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Complex HDF5 coefficients require complex PETSc." << Alert::Raise;
+          }
           localValues[static_cast<size_t>(i)] = values[static_cast<size_t>(i)];
 #endif
         }
 
-        ierr = VecSetValues(vec, localN, indices.data(), localValues.data(), INSERT_VALUES);
+        ierr =
+          VecSetValues(vec, localN, indices.data(), localValues.data(), INSERT_VALUES);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = VecAssemblyBegin(vec);
@@ -253,6 +249,14 @@ namespace Rodin::IO
 
         ierr = VecAssemblyEnd(vec);
         assert(ierr == PETSC_SUCCESS);
+        if constexpr (std::is_same_v<typename ObjectType::FESMeshContextType,
+                        Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(vec, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(vec, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
       }
   };
 
@@ -275,8 +279,10 @@ namespace Rodin::IO
     public:
       /// @brief PETSc vector data type (@c Vec).
       using DataType = ::Vec;
+
       /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FES, DataType>;
+
       /// @brief Parent printer base class.
       using Parent = GridFunctionPrinterBase<FileFormat::HDF5, FES, DataType>;
 
@@ -299,8 +305,7 @@ namespace Rodin::IO
           << "HDF5 GridFunction printing is file-path based."
           << "Please use the "
           << Alert::Identifier::Function("print(const boost::filesystem::path&)")
-          << " overload."
-          << Alert::Raise;
+          << " overload." << Alert::Raise;
       }
 
       /**
@@ -337,41 +342,43 @@ namespace Rodin::IO
         ierr = VecRestoreArrayRead(vec, &raw);
         assert(ierr == PETSC_SUCCESS);
 
-        const auto file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        const auto file =
+          H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         if (file < 0)
         {
-          Alert::Exception()
-            << "Failed to create HDF5 file: " << filename
-            << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to create HDF5 file: " << filename << Alert::Raise;
         }
 
-        const auto gfGroup = H5Gcreate2(file, "/GridFunction", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        const auto gfGroup =
+          H5Gcreate2(file, "/GridFunction", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         assert(gfGroup >= 0);
         H5Gclose(gfGroup);
 
-        const auto metaGroup = H5Gcreate2(file, "/GridFunction/Meta", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        const auto metaGroup =
+          H5Gcreate2(file, "/GridFunction/Meta", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         assert(metaGroup >= 0);
         H5Gclose(metaGroup);
 
-        const auto valuesGroup = H5Gcreate2(file, "/GridFunction/Values", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        const auto valuesGroup =
+          H5Gcreate2(file, "/GridFunction/Values", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         assert(valuesGroup >= 0);
         H5Gclose(valuesGroup);
 
-        const hsize_t dims[1] = { static_cast<hsize_t>(values.size()) };
+        const hsize_t dims[1] = {static_cast<hsize_t>(values.size())};
         const auto dataSpace = H5Screate_simple(1, dims, nullptr);
         assert(dataSpace >= 0);
 
-        const auto dataSet = H5Dcreate2(
-            file, "/GridFunction/Values/Data", H5T_NATIVE_DOUBLE, dataSpace,
-            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        const auto dataSet = H5Dcreate2(file, "/GridFunction/Values/Data",
+          H5T_NATIVE_DOUBLE, dataSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         assert(dataSet >= 0);
 
         if (!values.empty())
         {
-          const auto writeStatus = H5Dwrite(dataSet, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
-                          H5P_DEFAULT, values.data());
+          const auto writeStatus = H5Dwrite(
+            dataSet, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, values.data());
           assert(writeStatus >= 0);
-          (void) writeStatus;
+          (void)writeStatus;
         }
         H5Dclose(dataSet);
 #if defined(PETSC_USE_COMPLEX)
@@ -389,10 +396,10 @@ namespace Rodin::IO
 #endif
         H5Sclose(dataSpace);
 
-        Internal::writeScalarULL(file, "/GridFunction/Meta/Size",
-            static_cast<unsigned long long>(localN));
+        Internal::writeScalarULL(
+          file, "/GridFunction/Meta/Size", static_cast<unsigned long long>(localN));
         Internal::writeScalarULL(file, "/GridFunction/Meta/Dimension",
-            static_cast<unsigned long long>(gf.getDimension()));
+          static_cast<unsigned long long>(gf.getDimension()));
 
         if constexpr (FormLanguage::IsMatrixRange<
                         typename FormLanguage::Traits<FES>::RangeType>::Value)
@@ -402,7 +409,6 @@ namespace Rodin::IO
         }
         H5Fclose(file);
       }
-
   };
 }
 

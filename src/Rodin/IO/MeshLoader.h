@@ -42,7 +42,7 @@ namespace Rodin::IO
    * Specialized loaders for specific file formats should derive from this class
    * and implement the load(std::istream&) method to parse their respective formats.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * Mesh<Context::Local> mesh;
    * MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);

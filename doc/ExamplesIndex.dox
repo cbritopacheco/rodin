@@ -1,160 +1,236 @@
 /**
   @page examples-index Examples and tutorials
-  @brief Examples utilizing the Rodin library
+  @brief Guided numerical problems and application source examples.
 
   @tableofcontents
 
-  @section examples-index-gallery Gallery
+  The tutorials explain a problem, its discretization, the code that realizes
+  it, and the interpretation of the result. Source examples extend that
+  workflow to other models and backends.
 
-  For a visual overview of what Rodin can do, visit the @ref gallery "Gallery".
+  @section examples-index-start Start here
 
-  @section examples-index-variational Variational methods and weak formulations
+  1. @ref guides-getting-started-first-steps "Build a first program" to create
+     a mesh and a finite element space.
+  2. @ref examples-pdes-poisson "Solve the Poisson equation" to connect a weak
+     form to assembly, a solver, and visualization.
+  3. @ref examples-pdes-elasticity "Continue with linear elasticity" for a
+     vector-valued field and boundary traction.
 
-  The @ref Rodin::Variational "Variational" module is used when dealing with
-  variational problems of the form:
+  The @ref guides-index "General concepts" guides supply the mathematical
+  background. The @ref gallery "Gallery" collects visual results.
 
-  @f[
-    \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
-    a(u, v) = b(v) \ .
-  @f]
+  @section examples-index-variational Before choosing a model
 
-  See the @ref guides-variational "variational formulations guide" for the
-  mathematical background, the @ref notation-index "notation reference" for
-  the symbols used, and the @ref guides-solvers "solvers guide" for choosing
-  a solver.
+  A variational problem combines a trial space, a test space, forms, and
+  boundary conditions. The @ref guides-variational "variational formulations guide" explains this construction; the @ref guides-solvers "solver guide"
+  explains how the resulting matrix properties determine solver choice.
 
-  @section examples-index-pdes Solving PDEs
+  @section examples-index-pdes Partial differential equations
 
-  %Rodin can be used to solve partial differential equations of many types. To
-  start solving PDEs with Rodin, we recommend taking a look at the simplest
-  example which is how to solve the Poisson equation.
+  Begin with Poisson, then select a tutorial according to the field type,
+  boundary conditions, or geometry needed for the problem.
 
-  | Equation                                        | Link to example |
-  | ----------------------------------------------- | --------------- |
-  | @f$ - \Delta u = f @f$                          | @ref examples-pdes-poisson |
-  | @f$ - \nabla \cdot \sigma (u ) = 0  @f$         | @ref examples-pdes-elasticity |
-  | @f$ - \Delta u - k^2 u = f @f$                  | @ref examples-pdes-helmholtz |
-  | @f$ -\nu \Delta \mathbf{u} + (\mathbf{u} \cdot \nabla)\mathbf{u} + \nabla p = \mathbf{f} @f$ | @ref examples-pdes-navierstokes |
-  | @f$ - \Delta u = f @f$ (periodic)               | @ref examples-pdes-periodic |
-  | @f$ - \Delta_\Gamma u + u = f @f$ (surface)     | @ref examples-pdes-surfacemesh |
+  | Tutorial | Main idea |
+  | :--- | :--- |
+  | @ref examples-pdes-poisson | Scalar diffusion and homogeneous Dirichlet data |
+  | @ref examples-pdes-dg-poisson | Discontinuous affine space, SIPG fluxes and convergence checks |
+  | @ref examples-pdes-elasticity | Vector displacement and boundary traction |
+  | @ref examples-pdes-helmholtz | Wave propagation and complex-valued fields |
+  | @ref examples-pdes-stokes | Incompressibility, mixed spaces and pressure normalization |
+  | @ref examples-pdes-navierstokes | Transient cavity flow driven by a moving lid patch |
+  | @ref examples-pdes-periodic | Periodic boundary identification and a mean-value constraint |
+  | @ref examples-pdes-surfacemesh | Tangential operators and refinement on a triangulated sphere |
 
-  @section examples-index-io Input/Output
+  The @ref guides-weak-formulations "weak formulation guide" derives the
+  forms; the @ref guides-solvers "solver guide" explains their algebraic
+  requirements. The @subpage examples-pdes-index "PDE overview" provides
+  the same tutorial sequence on a separate page.
 
-  Rodin supports several I/O formats for meshes, grid functions, and simulation
-  data. The supported formats are @ref Rodin::IO::FileFormat "MFEM", MEDIT,
-  and HDF5. The @ref Rodin::IO::XDMF "XDMF" format is recommended for
-  exporting results for visualization in ParaView:
+  @section examples-index-io Input/output
 
-  - @subpage examples-io-index
+  Select an example according to the data being exchanged. XDMF records
+  fields and time-dependent snapshots for ParaView; MFEM and MEDIT examples
+  demonstrate mesh and field exchange.
 
-  @section examples-index-geometry Mesh Geometry
+  | Tutorial | Output and checks |
+  | :--- | :--- |
+  | @ref examples-io-xdmf | Export a time-dependent vector field with its mesh |
+  | @ref examples-io-mfem | Save and reload a mesh and scalar field |
+  | @ref examples-io-medit | Create a mesh, save MEDIT and convert to MFEM |
 
-  The @ref Rodin::Geometry "Geometry" module provides mesh creation,
-  topological connectivity, and geometric operations:
+  The @ref guides-io "I/O guide" explains format selection and field
+  lifetimes. See also the @subpage examples-io-index "I/O overview".
 
-  - @subpage examples-geometry-index
+  @section examples-index-geometry Mesh geometry
+
+  Generated meshes provide a starting point for geometry and incidence
+  operations without an input file.
+
+  | Tutorial | Main idea |
+  | :--- | :--- |
+  | @ref examples-geometry-uniformgrid | Create structured meshes and set their physical dimensions |
+  | @ref examples-geometry-connectivity | Inspect incidence relations between vertices, edges and cells |
+  | @ref examples-interface-traces | Evaluate the two traces, jump and average on an interior facet |
+
+  The @ref guides-meshes "mesh guide" covers traversal and queries, while
+  the @ref guides-polytopes "polytope guide" explains reference elements
+  and mappings. The @subpage examples-geometry-index "geometry overview"
+  also links the distance-field examples below.
 
   @section examples-index-mmg Working with MMG
 
-  The @ref Rodin::MMG "MMG" module has a wide variety of uses which
-  ranges from optimization of the mesh, to implicit domain meshing. It provides
-  many C++ wrappers to execute the functionality of the [Mmg
-  Platform](https://www.mmgtools.org/):
+  MMG changes mesh topology to improve element shape, follow a size field or
+  reconstruct an implicit domain. Construct fresh finite element spaces
+  after remeshing and check required entities and labels at each stage.
 
-  - @subpage examples-mmg-index
+  | Tutorial | Main idea |
+  | :--- | :--- |
+  | @ref examples-mmg-simple_io | Read and write MMG mesh data and check metadata |
+  | @ref examples-mmg-casting | Work with MMG and Geometry mesh interfaces |
+  | @ref examples-mmg-mesh_optimization | Improve element quality and inspect the resulting mesh |
+  | @ref examples-mmg-mesh_adaptation | Adapt the background to a prescribed size field |
+  | @ref examples-swift-background | Adapt a background, classify a circle and fit its interface with SWIFT |
+  | @ref examples-mmg-behavior | Required entities, level-set cuts and preservation guarantees |
+
+  The @subpage examples-mmg-index "MMG overview" collects these workflows.
 
   @section examples-index-density_optimization Density optimization examples
 
-  - @subpage examples-density_optimization-index
+  Density optimization varies a material coefficient on a fixed domain.
+  A state solve determines temperature, an adjoint supplies sensitivity,
+  and a regularized update changes the density within its admissible interval.
+
+  | Tutorial | Main idea |
+  | :--- | :--- |
+  | @ref examples-density_optimization-simp_temperature_minimization | SIMP conductivity, adjoint sensitivity and a projected material update |
+
+  Begin with the @ref examples-pdes-poisson "Poisson solve". The thermal
+  tutorial supplies computed density and temperature fields, objective and
+  material histories, and the complete source. Its fixed iteration budget
+  defines the recorded experiment; stationarity or a prescribed material
+  budget requires an associated optimization criterion. The
+  @subpage examples-density_optimization-index "density optimization overview"
+  develops the state–sensitivity–update sequence.
 
   @section examples-index-shapeoptimization Shape optimization examples
 
-  - @subpage examples-shapeoptimization-index
+  Shape optimization varies the material boundary of an elastic body.
+  Compliance and an area penalty define the objective; a regularized shape
+  derivative supplies the geometry update. Both tutorials use MMG and require
+  a hydrated input mesh from the repository's Git LFS resources.
 
-  @section examples-index-solid Solid Mechanics
+  | Tutorial | Main idea |
+  | :--- | :--- |
+  | @ref examples-shapeoptimization-simple_cantilever | Explicit boundary displacement followed by remeshing |
+  | @ref examples-shapeoptimization-levelset_cantilever | Signed-field transport and body-fitted interface reconstruction |
+
+  Start with the boundary-deformation example after the
+  @ref examples-pdes-elasticity "elasticity tutorial". Compare compliance,
+  area and objective at solved states, then inspect Jacobian signs and
+  element quality after each update. The level-set tutorial records both
+  increasing objective steps and a reproduced low-quality triangle, making
+  step acceptance and geometric quality part of interpreting its fixed-budget
+  run. The @subpage examples-shapeoptimization-index "shape optimization overview"
+  explains the two representations and prerequisites.
+
+  @section examples-index-solid Solid mechanics source examples
 
   The @ref Rodin::Solid "Solid" module provides hyperelastic constitutive
   laws and nonlinear integrators for large-deformation solid mechanics. The
-  @ref Rodin::Elasticity "LinearElasticityIntegral" covers the small-deformation
+  @ref Rodin::Variational::LinearElasticityIntegral "LinearElasticityIntegral" covers the small-deformation
   (linearized) case, while the Solid module handles finite-strain problems with
   constitutive laws such as NeoHookean, Saint-Venant-Kirchhoff, and
   Mooney-Rivlin:
 
-  | Problem | Constitutive Law | Example |
-  |---------|-----------------|---------|
-  | Linear cantilever beam | @f$ \sigma = \lambda(\operatorname{tr}\varepsilon)I + 2\mu\varepsilon @f$ | @ref examples-pdes-elasticity |
-  | Hyperelastic cantilever (NeoHookean, transient) | @f$ W = \frac{\mu}{2}(I_1-d) - \mu\ln J + \frac{\lambda}{2}(\ln J)^2 @f$ | [CantileverBeam.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Solid/CantileverBeam.cpp) |
+  @m_class{m-scroll}
+
+  @parblock
+  | Tutorial | Method |
+  | :--- | :--- |
+  | @ref examples-pdes-elasticity "Linear cantilever beam" | Linear elasticity with @f$\sigma=\lambda(\operatorname{tr}\varepsilon)I+2\mu\varepsilon@f$ |
+  | [Hyperelastic cantilever](https://github.com/cbritopacheco/rodin/blob/develop/examples/Solid/CantileverBeam.cpp) | Transient Neo-Hookean model with @f$W=\frac{\mu}{2}(I_1-d)-\mu\ln J+\frac{\lambda}{2}(\ln J)^2@f$ |
+  @endparblock
 
   @section examples-index-eikonal Distance and Eikonal
 
-  The @ref Rodin::Eikonal "Eikonal" module solves @f$ |\nabla u| = F(x) @f$
+  The @ref Rodin::Eikonal "Eikonal" module solves @f$ F(x)|\nabla u| = 1 @f$ for positive propagation speed @f$F@f$
   via the Fast Marching Method, and the @ref Rodin::Distance "Distance" module
   wraps several distance-function computation strategies:
 
-  | Method | Description | Example |
-  |--------|-------------|---------|
-  | FMM | Exact distance on unstructured meshes | [FMM.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Models/Eikonal/FMM.cpp) |
-  | Spalding-Tucker | Boundary-layer wall distance | [SpaldingTucker.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Models/Distance/SpaldingTucker.cpp) |
+  | Tutorial | Method |
+  | :--- | :--- |
+  | @ref examples-eikonal-fmm | Fast marching with an exact point-source comparison and mesh refinement |
+  | @ref examples-distance-normalization | Spalding–Tucker normalization of a signed Poisson field and geometric error checks |
 
-  @section examples-index-petsc PETSc Examples
+  @section examples-index-petsc PETSc source examples
 
   The @ref Rodin::PETSc "PETSc" module enables distributed solvers and
   multi-field block systems. Examples include:
 
-  | Problem | Description | Example |
-  |---------|-------------|---------|
-  | Sequential Poisson | PETSc CG solver on local mesh | [Seq_Poisson.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_Poisson.cpp) |
-  | MPI Poisson | Distributed mesh + PETSc KSP | [MPI_Poisson.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/MPI_Poisson.cpp) |
-  | Sequential Stokes | Multi-field (velocity-pressure-Lagrange) | [Seq_Stokes.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_Stokes.cpp) |
-  | Oseen flow | Transient Picard/Oseen linearization | [Seq_OseenFlow.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_OseenFlow.cpp) |
-  | Oseen lid-driven cavity | Transient cavity with Picard/Oseen linearization | [Seq_OseenLidDrivenCavity.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_OseenLidDrivenCavity.cpp) |
-  | Navier-Stokes | Transient nonlinear lid-driven cavity with PETSc SNES | [Seq_NavierStokes.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_NavierStokes.cpp) |
+  @m_class{m-scroll}
 
-  @see @ref guides-petsc "PETSc Guide", @ref guides-mpi "MPI Guide"
+  @parblock
+  | Tutorial | Description |
+  | :--- | :--- |
+  | [Sequential Poisson](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_Poisson.cpp) | PETSc CG solver on a local mesh |
+  | [MPI Poisson](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/MPI_Poisson.cpp) | Distributed mesh and PETSc KSP |
+  | [Sequential Stokes](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_Stokes.cpp) | Mixed velocity, pressure and pressure-mean multiplier |
+  | [Oseen flow](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_OseenFlow.cpp) | Transient Picard/Oseen linearization |
+  | [Oseen lid-driven cavity](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_OseenLidDrivenCavity.cpp) | Transient cavity with Picard/Oseen linearization |
+  | [Navier–Stokes](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_NavierStokes.cpp) | Transient nonlinear lid-driven cavity with PETSc SNES |
+  @endparblock
+
+  @see @ref guides-petsc "PETSc guide", @ref guides-mpi "MPI guide"
 
   @section examples-index-dg Discontinuous Galerkin
 
-  The DG example solves the Poisson equation using the Symmetric Interior
-  Penalty (SIP) method with DG-specific operators (`Jump`, `Average`,
-  `FaceIntegral`, `InterfaceIntegral`):
+  Begin with two-sided traces, then assemble a complete interior-penalty solve.
 
-  | Equation | Method | Example |
-  |----------|--------|---------|
-  | @f$ -\Delta u = f @f$ | SIP-DG | [Poisson.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp) |
+  | Tutorial | Output and checks |
+  | :--- | :--- |
+  | @ref examples-interface-traces | One-sided values, jump and average on a two-cell mesh |
+  | @ref examples-pdes-dg-poisson | Independent cell-local affine unknowns, SIPG fluxes, weak Dirichlet data, an affine patch test and four-level refinement |
 
-  @see @ref guides-variational "Variational Formulations Guide" for the DG section.
-
-  @section examples-index-integral Integral Equations
+  @section examples-index-integral Integral equation source examples
 
   The `Potential` operator enables integral
   equation formulations (boundary element methods). The kernel
   @f$ K(\mathbf{x}, \mathbf{y}) @f$ is convolved with the solution on the mesh:
 
-  | Problem | Kernel | Example |
-  |---------|--------|---------|
-  | Newtonian potential | @f$ \frac{1}{4\pi\lVert\mathbf{x}-\mathbf{y}\rVert} @f$ | [NewtonianPotential.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/IntegralEquations/NewtonianPotential.cpp) |
-  | Elastic distribution | Navier 3×3 kernel | [ElasticDistribution.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/IntegralEquations/ElasticDistribution.cpp) |
+  @m_class{m-scroll}
 
-  @section examples-index-surfevol Surface Evolution
+  @parblock
+  | Tutorial | Method |
+  | :--- | :--- |
+  | [Newtonian potential](https://github.com/cbritopacheco/rodin/blob/develop/examples/IntegralEquations/NewtonianPotential.cpp) | Scalar kernel @f$1/(4\pi\lVert\mathbf{x}-\mathbf{y}\rVert)@f$ |
+  | [Elastic distribution](https://github.com/cbritopacheco/rodin/blob/develop/examples/IntegralEquations/ElasticDistribution.cpp) | Navier @f$3\times3@f$ kernel |
+  @endparblock
+
+  @section examples-index-surfevol Surface evolution source examples
 
   The surface evolution examples demonstrate conormal advection — moving
   domain boundaries along their outward normal direction using level-set
   methods with MMG implicit-domain meshing:
 
-  | Problem | Description | Example |
-  |---------|-------------|---------|
-  | Conormal advection | Move boundary along conormal | [Main.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/SurfaceEvolution/ConormalAdvection/Main.cpp) |
-  | Convergence study | Parametric sweep over resolution and CFL | [Test.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/SurfaceEvolution/ConormalAdvection/Test.cpp) |
-  | Plane evolution | Planar surface motion | [Plane.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/SurfaceEvolution/ConormalAdvection/Plane.cpp) |
+  | Tutorial | Description |
+  | :--- | :--- |
+  | [Conormal advection](https://github.com/cbritopacheco/rodin/blob/develop/examples/SurfaceEvolution/ConormalAdvection/Main.cpp) | Move the boundary along its conormal |
+  | [Convergence study](https://github.com/cbritopacheco/rodin/blob/develop/examples/SurfaceEvolution/ConormalAdvection/Test.cpp) | Parametric sweep over resolution and CFL |
+  | [Plane evolution](https://github.com/cbritopacheco/rodin/blob/develop/examples/SurfaceEvolution/ConormalAdvection/Plane.cpp) | Planar surface motion |
 
-  @section examples-index-boundaryopt Boundary Optimization
+  @section examples-index-boundaryopt Boundary optimization source examples
 
   Advanced shape and topology optimization examples that combine complex-valued
   PDE solvers, adjoint methods, Hilbert space regularization, and MMG
   remeshing:
 
-  | Problem | Description | Example |
-  |---------|-------------|---------|
-  | Acoustic cloaking | Complex Helmholtz + adjoint-based shape gradient + conormal advection | [AcousticCloaking.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/BoundaryOptimization/AcousticCloaking.cpp) |
+  @m_class{m-scroll}
+
+  @parblock
+  | Tutorial | Method |
+  | :--- | :--- |
+  | [Acoustic cloaking](https://github.com/cbritopacheco/rodin/blob/develop/examples/BoundaryOptimization/AcousticCloaking.cpp) | Complex Helmholtz solve, adjoint shape gradient and conormal advection |
+  @endparblock
 
   */

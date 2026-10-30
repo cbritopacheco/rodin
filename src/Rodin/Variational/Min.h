@@ -30,7 +30,7 @@ namespace Rodin::Variational
    * @ingroup MinSpecializations
    * @brief Represents the minimum operation between two functions.
    *
-   * This class represents the pointwise minimum of two functions:
+   * This class represents the pointwise minimum of two functions.
    * @f[
    *    \text{Min}(f, g)(x) = \min(f(x), g(x))
    * @f]
@@ -272,7 +272,11 @@ namespace Rodin::Variational
         return m_rhs;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Polytope on which the polynomial order is requested.
+       * @returns Polynomial order on the requested polytope, or no value when unavailable.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto lo = getLHS().getOrder(polytope);

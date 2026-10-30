@@ -22,10 +22,10 @@ namespace Rodin::Geometry
   {
     struct MaxSize
     {
-        size_t operator()(size_t lhs, size_t rhs) const
-        {
-          return std::max(lhs, rhs);
-        }
+      size_t operator()(size_t lhs, size_t rhs) const
+      {
+        return std::max(lhs, rhs);
+      }
     };
   }
 
@@ -213,8 +213,10 @@ namespace Rodin::Geometry
         continue;
       const auto halo = halos.find(local);
       if (halo != halos.end())
+      {
         for (Index rank : halo->second)
           outgoing.at(static_cast<int>(rank)).push_back(global);
+      }
     }
     exchange(21);
     for (const auto& [rank, indices] : incoming)

@@ -12,7 +12,7 @@
  * dense LU factorization for general square matrices using Eigen's
  * PartialPivLU solver.
  *
- * ## Algorithm
+ * # Algorithm
  * The solver computes
  * @f[
  *   A = P^{-1} L U
@@ -24,12 +24,12 @@
  * where @f$ P @f$ is a permutation matrix, @f$ L @f$ is unit lower triangular,
  * and @f$ U @f$ is upper triangular.
  *
- * ## Applicability
+ * # Applicability
  * - General dense square matrices
  * - Non-symmetric systems
  * - Newton systems with dense Jacobians
  *
- * ## Notes
+ * # Notes
  * - This solver does not assume symmetry.
  * - Eigen's PartialPivLU assumes the matrix is square and invertible.
  * - If rank deficiency is possible and must be handled robustly, FullPivLU is safer.

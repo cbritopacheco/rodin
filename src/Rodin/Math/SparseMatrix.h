@@ -41,14 +41,14 @@ namespace Rodin::Math
    * entries are zero. The matrix uses compressed column storage (CCS) format
    * by default.
    *
-   * ## Storage Format
+   * # Storage Format
    * Eigen's SparseMatrix uses Compressed Column Storage (CCS), also known as
    * Compressed Sparse Column (CSC) format, which stores:
    * - Non-zero values
    * - Signed 32-bit row indices for each non-zero value
    * - Signed 32-bit column pointers indicating where each column starts
    *
-   * ## Typical Applications
+   * # Typical Applications
    * - Stiffness matrices: @f$ K @f$ in @f$ Ku = f @f$
    * - Mass matrices: @f$ M @f$ in @f$ M\ddot{u} + Ku = f @f$
    * - Discretized differential operators
@@ -82,7 +82,7 @@ namespace Rodin::Math
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for a Math::SparseMatrix: exposes the scalar type.
+  /// @brief Type traits for a Math::SparseMatrix, exposing the scalar type.
   template <class Number>
   struct Traits<Math::SparseMatrix<Number>>
   {

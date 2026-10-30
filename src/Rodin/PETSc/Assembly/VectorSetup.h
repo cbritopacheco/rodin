@@ -27,11 +27,11 @@ namespace Rodin::PETSc::Assembly
    * size; this precondition is checked by a debug assertion. A change of finite
    * element space or mesh requires a new @c LinearSystem.
    *
-   * ## Zeroing
+   * # Zeroing
    *
    * The right-hand side and residual vectors are rebuilt from scratch on every
    * assembly and must therefore be zeroed each time (@c zeroOnReuse = true, the
-   * default). The solution vector must *not* be zeroed on reuse: it carries the
+   * default). The solution vector must *not* be zeroed on reuse because it carries the
    * previous iterate, which iterative/Newton solvers consume as the initial
    * guess. It is still zeroed once, when first laid out, to provide a defined
    * starting point.

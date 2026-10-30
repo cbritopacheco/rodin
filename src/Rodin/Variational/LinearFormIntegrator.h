@@ -16,6 +16,7 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 #define RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 
+#include "Rodin/Utility/OptionalReference.h"
 #include <type_traits>
 
 #include "Rodin/Geometry/Region.h"
@@ -32,28 +33,28 @@ namespace Rodin::Variational
    *
    * LinearFormIntegratorBase provides the foundation for implementing specific
    * linear form terms in variational formulations. A linear form integrator
-   * computes the local element vector contributions:
+   * computes the local element vector contributions.
    * @f[
    *   b^K_i = \int_K l(\psi_i) \, dx
    * @f]
    * where @f$ \psi_i @f$ are test basis functions on element @f$ K @f$ and
    * @f$ l(\cdot) @f$ is a linear functional.
    *
-   * ## Role in Assembly
+   * # Role in Assembly
    * During finite element assembly:
    * 1. The integrator is called for each element (or boundary face) in the mesh
    * 2. Local element vectors are computed using quadrature
    * 3. Local vectors are assembled into the global right-hand side vector
    *
-   * ## Common Linear Forms
+   * # Common Linear Forms
    * - **Volume load**: @f$ \int_K f \cdot v \, dx @f$
    * - **Neumann BC**: @f$ \int_{\partial K} g \cdot v \, ds @f$
    * - **Point source**: @f$ f_i v(x_i) @f$
    * - **Initial conditions**: @f$ \int_K u_0 \cdot v \, dx @f$
    *
-   * ## Domain Specification
+   * # Domain Specification
    * Linear form integrators support the `over()` method to restrict integration
-   * to specific mesh regions identified by attributes:
+   * to specific mesh regions identified by attributes.
    * ```cpp
    * auto load = Integral(f, v).over(1, 2);  // Integrate over regions 1 and 2
    * ```
@@ -102,8 +103,8 @@ namespace Rodin::Variational
       template <class OtherNumber>
       LinearFormIntegratorBase(const LinearFormIntegratorBase<OtherNumber>& other)
         : Parent(other),
-          m_v(other.m_v->copy()),
-          m_attrs(other.m_attrs)
+          m_v(other.getTestFunction().copy()),
+          m_attrs(other.getAttributes())
       {}
 
       /**
@@ -123,9 +124,15 @@ namespace Rodin::Variational
       template <class OtherNumber>
       LinearFormIntegratorBase(LinearFormIntegratorBase<OtherNumber>&& other)
         : Parent(std::move(other)),
-          m_v(std::move(other.m_v)),
-          m_attrs(std::move(other.m_attrs))
+          m_v(other.getTestFunction().copy()),
+          m_attrs(other.getAttributes())
       {}
+
+      /// @returns The bound test numbering, or no override for ordinary element DOFs.
+      Utility::OptionalReference<const IndexArray> getTestDOFIndices() const
+      {
+        return m_testDOFs;
+      }
 
       /// @brief Virtual destructor
       virtual ~LinearFormIntegratorBase() = default;
@@ -230,7 +237,18 @@ namespace Rodin::Variational
        */
       virtual Geometry::Region getRegion() const = 0;
 
+    protected:
+      /**
+       * @brief Binds the numbering prepared by a two-sided integrand.
+       * @param test Test numbering, absent for ordinary element bases.
+       */
+      void setDOFIndices(Utility::OptionalReference<const IndexArray> test)
+      {
+        m_testDOFs = test;
+      }
+
     private:
+      Utility::OptionalReference<const IndexArray> m_testDOFs;
       std::unique_ptr<FormLanguage::Base> m_v;
       FlatSet<Geometry::Attribute> m_attrs;
   };

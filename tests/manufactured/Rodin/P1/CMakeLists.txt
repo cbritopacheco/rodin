@@ -7,7 +7,7 @@ target_link_libraries(RodinManufacturedPoisson
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedPoisson
+rodin_discover_tests(RodinManufacturedPoisson
   PROPERTIES
     LABELS manufactured
 )
@@ -23,13 +23,13 @@ target_link_libraries(RodinManufacturedPoisson3D
 )
 set(RodinManufacturedPoisson3D_SLOW_TESTS
   "*Manufactured_Poisson3D_Test_32.VectorPoisson3D_SimpleSine*:*Manufactured_Poisson3D_Test_32.VectorPoisson3D_NonhomogeneousDirichlet*")
-gtest_discover_tests(RodinManufacturedPoisson3D
+rodin_discover_tests(RodinManufacturedPoisson3D
   TEST_FILTER
     "-${RodinManufacturedPoisson3D_SLOW_TESTS}"
   PROPERTIES
     LABELS manufactured
 )
-gtest_discover_tests(RodinManufacturedPoisson3D
+rodin_discover_tests(RodinManufacturedPoisson3D
   TEST_FILTER
     "${RodinManufacturedPoisson3D_SLOW_TESTS}"
   PROPERTIES
@@ -45,7 +45,7 @@ target_link_libraries(RodinManufacturedNonLinearPoisson
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedNonLinearPoisson
+rodin_discover_tests(RodinManufacturedNonLinearPoisson
   PROPERTIES
     LABELS manufactured
 )
@@ -59,7 +59,7 @@ target_link_libraries(RodinManufacturedConductivity
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedConductivity
+rodin_discover_tests(RodinManufacturedConductivity
   PROPERTIES
     LABELS manufactured
 )
@@ -73,7 +73,7 @@ target_link_libraries(RodinManufacturedReactionDiffusion
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedReactionDiffusion
+rodin_discover_tests(RodinManufacturedReactionDiffusion
   PROPERTIES
     LABELS manufactured
 )
@@ -87,7 +87,7 @@ target_link_libraries(RodinManufacturedDivergencePoisson
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedDivergencePoisson
+rodin_discover_tests(RodinManufacturedDivergencePoisson
   PROPERTIES
     LABELS manufactured
 )
@@ -101,7 +101,7 @@ target_link_libraries(RodinManufacturedLinearElasticity
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedLinearElasticity
+rodin_discover_tests(RodinManufacturedLinearElasticity
   PROPERTIES
     LABELS manufactured
 )
@@ -115,7 +115,7 @@ target_link_libraries(RodinManufacturedHelmholtz
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedHelmholtz
+rodin_discover_tests(RodinManufacturedHelmholtz
   PROPERTIES
     LABELS manufactured
 )
@@ -129,7 +129,7 @@ target_link_libraries(RodinManufacturedHelmholtz3D
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedHelmholtz3D
+rodin_discover_tests(RodinManufacturedHelmholtz3D
   PROPERTIES
     LABELS manufactured
 )
@@ -143,7 +143,7 @@ target_link_libraries(RodinManufacturedReactionDiffusion3D
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedReactionDiffusion3D
+rodin_discover_tests(RodinManufacturedReactionDiffusion3D
   PROPERTIES
     LABELS manufactured
 )
@@ -159,13 +159,13 @@ target_link_libraries(RodinManufacturedLinearElasticity3D
 )
 set(RodinManufacturedLinearElasticity3D_SLOW_TESTS
   "*MixedComponents*")
-gtest_discover_tests(RodinManufacturedLinearElasticity3D
+rodin_discover_tests(RodinManufacturedLinearElasticity3D
   TEST_FILTER
     "-${RodinManufacturedLinearElasticity3D_SLOW_TESTS}"
   PROPERTIES
     LABELS manufactured
 )
-gtest_discover_tests(RodinManufacturedLinearElasticity3D
+rodin_discover_tests(RodinManufacturedLinearElasticity3D
   TEST_FILTER
     "${RodinManufacturedLinearElasticity3D_SLOW_TESTS}"
   PROPERTIES
@@ -183,7 +183,7 @@ target_link_libraries(RodinManufacturedP1HyperElasticity
   Rodin::Solid
   Rodin::Test
 )
-gtest_discover_tests(RodinManufacturedP1HyperElasticity
+rodin_discover_tests(RodinManufacturedP1HyperElasticity
   PROPERTIES
     LABELS manufactured
 )
@@ -198,7 +198,7 @@ target_link_libraries(RodinManufacturedDirichletBCIdentification
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedDirichletBCIdentification
+rodin_discover_tests(RodinManufacturedDirichletBCIdentification
   PROPERTIES
     LABELS manufactured
 )

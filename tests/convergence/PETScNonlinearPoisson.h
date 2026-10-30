@@ -120,8 +120,10 @@ namespace Rodin::Tests::Convergence
           }
 #ifdef RODIN_USE_MPI
           if constexpr (requires { mesh.getShard(); })
+          {
             m_freeDOFs = boost::mpi::all_reduce(
               mesh.getContext().getCommunicator(), m_freeDOFs, std::plus<size_t>());
+          }
 #endif
         }
         if (condition == Boundary::Dirichlet)

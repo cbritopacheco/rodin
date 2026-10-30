@@ -49,7 +49,7 @@ namespace Rodin::Utility
      * @brief Resulting Cartesian product as a Tuple of Pair<..., ...>.
      * @tparam Pair Binary template taking one type from each input Tuple.
      *
-     * Example:
+     * The following example illustrates this operation.
      * @code{.cpp}
      * using A = Tuple<int, double, char>;
      * using B = Tuple<bool, long>;

@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <set>
 
 #include <Rodin/Geometry.h>
 
@@ -988,7 +989,7 @@ namespace Rodin::Tests::Unit
     const auto& trans = triangle.getTransformation();
 
     // Just verify we can get the transformation
-    EXPECT_GE(trans.getOrder(), 0);
+    EXPECT_GE(trans.getDegree(), 0);
   }
 
   /// @brief Verifies polytope comparison less than for geometry polytope by checking true predicates, false predicates.
@@ -1720,4 +1721,26 @@ namespace Rodin::Tests::Unit
     // Two tets sharing a face should have > 0 boundary faces
     EXPECT_GT(boundary_count, 0);
   }
+}
+
+/// @brief Different grades with the same local index remain distinct ordered entities.
+TEST(Geometry_Polytope, OrderingIncludesDimension)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  const Polytope vertex(0, 0, mesh), cell(1, 0, mesh);
+  EXPECT_NE(vertex, cell);
+  EXPECT_LT(vertex, cell);
+  EXPECT_FALSE(cell < vertex);
+}
+
+/// @brief Equal entity indices on different meshes remain distinct ordered keys.
+TEST(Geometry_Polytope, OrderingIncludesMesh)
+{
+  const auto first = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  const auto second = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  const Polytope left = *first.getCell();
+  const Polytope right = *second.getCell();
+  EXPECT_NE(left, right);
+  EXPECT_NE(left < right, right < left);
+  EXPECT_EQ(std::set<Polytope>({left, right}).size(), 2u);
 }

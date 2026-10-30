@@ -1,5 +1,5 @@
 # Doxygen warning baseline for the ratchet check.
-# doxygen 1.14.0
+# doxygen 1.15.0
 # Entries are line-number-agnostic (file: warning text) so
 # unrelated edits do not shift warnings into 'new' status.
 # Shrink by fixing warnings, regenerate with

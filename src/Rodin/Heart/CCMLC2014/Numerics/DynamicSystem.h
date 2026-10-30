@@ -8,7 +8,7 @@
  * @file DynamicSystem.h
  * @brief Residual and analytic Jacobian assembly for the CCMLC2014 0D system.
  *
- * The active variables are solved as part of the global Newton system:
+ * The active variables are solved as part of the global Newton system.
  * @f[
  *   (y, v, p_v, p_{ar}, p_d, e_c, k_c, \tau_c, w).
  * @f]

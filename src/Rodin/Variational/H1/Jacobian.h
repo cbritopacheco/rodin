@@ -11,8 +11,11 @@
  * This file provides specialized implementations of the Jacobian matrix
  * operator for H1 vector-valued GridFunctions and ShapeFunctions.
  *
- * For a vector function @f$ \mathbf{u} : \Omega \to \mathbb{R}^d @f$, the
- * Jacobian is the @f$ d \times d @f$ matrix:
+ * On a cell of reference dimension @f$d@f$ embedded in @f$\mathbb{R}^s@f$,
+ * a field with @f$m@f$ components has an @f$m\times s@f$ tangential Jacobian
+ * @f$J(u)=\widehat J(u)J_K^{\dagger}@f$. The geometric inverse has shape
+ * @f$d\times s@f$; ambient derivative columns are retained independently of
+ * the reference and field dimensions. When @f$m=s=d@f$, this is the matrix.
  * @f[
  *   \mathbf{J}(\mathbf{u}) = \begin{pmatrix}
  *     \frac{\partial u_1}{\partial x_1} & \cdots & \frac{\partial u_1}{\partial x_d} \\
@@ -21,7 +24,8 @@
  *   \end{pmatrix}
  * @f]
  *
- * For H1<K> elements, the Jacobian is polynomial of degree K-1 on each element.
+ * The physical derivative includes the current inverse geometric Jacobian;
+ * a curved mapping does not generally preserve reference polynomial degree.
  *
  * @see <a href="_jacobian_8h.html">Jacobian</a>
  * @see <a href="_variational_2_h1_8h.html">H1</a>
@@ -31,6 +35,7 @@
 #ifndef RODIN_VARIATIONAL_H1_JACOBIAN_H
 #define RODIN_VARIATIONAL_H1_JACOBIAN_H
 
+#include <array>
 #include <vector>
 
 #include "Rodin/Variational/ForwardDecls.h"
@@ -41,36 +46,37 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Jacobian over a grid function: exposes the finite element
+   * @brief Type traits for @c Jacobian over a grid function, exposing the finite element
    * space and the operand type.
    */
   template <size_t K, class Range, class Data, class Mesh>
-  struct Traits<
-    Variational::Jacobian<
-      Variational::GridFunction<
-        Variational::H1<K, Range, Mesh>, Data>>>
+  struct Traits<Variational::Jacobian<
+    Variational::GridFunction<Variational::H1<K, Range, Mesh>, Data>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::H1<K, Range, Mesh>;
-      /// @brief Operand type.
-      using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+    using FESType = Variational::H1<K, Range, Mesh>;
+
+    /// @brief Operand type.
+    using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
   /**
-   * @brief Type traits for @c Jacobian over a shape function: exposes the finite element
+   * @brief Type traits for @c Jacobian over a shape function, exposing the finite element
    * space, the shape function space and the operand type.
    */
-  template <size_t K, class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Jacobian<
-      Variational::ShapeFunction<NestedDerived, Variational::H1<K, Range, Mesh>, Space>>>
+  template <size_t K, class NestedDerived, class Range, class Mesh,
+    Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Jacobian<
+    Variational::ShapeFunction<NestedDerived, Variational::H1<K, Range, Mesh>, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::H1<K, Range, Mesh>;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-      /// @brief Operand type.
-      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
+    /// @brief Finite element space type.
+    using FESType = Variational::H1<K, Range, Mesh>;
+
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    /// @brief Operand type.
+    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 
@@ -80,15 +86,21 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an H1 vector GridFunction.
    *
-   * Computes the Jacobian matrix of an H1<K> vector-valued grid function:
+   * Computes the Jacobian matrix of an H1<K> vector-valued grid function.
    * @f[
-   *   \mathbf{J}(\mathbf{u})|_K = \sum_{i=1}^{n_{dof} \cdot d} u_i \nabla \phi_i \otimes \mathbf{e}_j
+   *   \mathbf{J}(\mathbf{u})|_K
+   *   = \sum_{\alpha=1}^{N_s}\sum_{c=0}^{m-1} u_{\alpha c}\,
+   *     \mathbf{e}_c\otimes
+   *     \bigl((J_K^{\dagger})^T\widehat\nabla\widehat\phi_\alpha\bigr)
    * @f]
-   * where @f$ j = i \mod d @f$ and @f$ n_{dof} @f$ is the number of DOFs per element.
+   * where @f$N_s@f$ is the scalar basis count and @f$m@f$ the field component
+   * count. Reference gradients have @f$d@f$ entries; physical gradients retain
+   * all @f$s@f$ ambient entries.
    *
-   * The Jacobian is polynomial of degree K-1 on each element for H1<K> functions.
+   * The inverse geometric Jacobian is evaluated at the current sample. Curved
+   * mappings need not produce polynomial physical derivatives.
    *
-   * ## Applications
+   * # Applications
    * - Strain tensor in elasticity: @f$ \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{J} + \mathbf{J}^T) @f$
    * - Velocity gradient in fluid mechanics
    * - Deformation gradient in nonlinear mechanics
@@ -100,8 +112,7 @@ namespace Rodin::Variational
    */
   template <size_t K, class Scalar, class Data, class Mesh>
   class Jacobian<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>> final
-    : public JacobianBase<
-        GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>,
+    : public JacobianBase<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>,
         Jacobian<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
@@ -130,7 +141,9 @@ namespace Rodin::Variational
        * @brief Constructs the expression from its operand.
        * @param u Operand expression.
        */
-      Jacobian(const OperandType& u) : Parent(u) {}
+      Jacobian(const OperandType& u)
+        : Parent(u)
+      {}
 
       /**
        * @brief Copy constructor.
@@ -153,10 +166,19 @@ namespace Rodin::Variational
        * @param polytope Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      constexpr Optional<size_t> getOrder(
+        const Geometry::Polytope& polytope) const noexcept
       {
-        const size_t k = H1Element<K, ScalarType>(polytope.getGeometry()).getOrder();
+        const size_t k =
+          H1Element<K, ScalarType>(polytope.getGeometry()).getDegree().value_or(2 * K);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (k == 1)
+        {
+          const auto degree = polytope.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (k == 0) ? 0 : (k - 1);
       }
 
@@ -164,7 +186,10 @@ namespace Rodin::Variational
        * @brief Creates a polymorphic copy.
        * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */
-      Jacobian* copy() const noexcept override { return new Jacobian(*this); }
+      Jacobian* copy() const noexcept override
+      {
+        return new Jacobian(*this);
+      }
 
       /**
        * @brief Interpolates at an integration point.
@@ -174,30 +199,32 @@ namespace Rodin::Variational
       void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
-        if (!ip.getQuadratureFormula())
+        if (!ip.getReferenceQuadratureFormula() ||
+          p.getPolytope().getDimension() != p.getPolytope().getMesh().getDimension())
         {
           interpolate(out, p);
           return;
         }
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
+        const size_t spaceDimension = polytope.getMesh().getSpaceDimension();
         const Index i = polytope.getIndex();
 
-        const auto& gf  = this->getOperand();
+        const auto& gf = this->getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
 
         const auto feS = H1Element<K, ScalarType>(polytope.getGeometry());
         const size_t nscalar = feS.getCount();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         assert(qf);
         const auto& tab = feS.getTabulation(*qf);
         const auto JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(d);
-        SpatialVectorType phys(d);
+        SpatialVectorType phys(spaceDimension);
 
-        out.resize(vdim, d);
+        out.resize(vdim, spaceDimension);
         out.setZero();
 
         for (size_t alpha = 0; alpha < nscalar; ++alpha)
@@ -212,7 +239,7 @@ namespace Rodin::Variational
           {
             const size_t local = alpha * vdim + comp;
             const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
-            for (size_t j = 0; j < d; ++j)
+            for (size_t j = 0; j < spaceDimension; ++j)
               out(comp, j) += uval * phys(j);
           }
         }
@@ -230,12 +257,13 @@ namespace Rodin::Variational
         const auto& i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
         const size_t meshDim = mesh.getDimension();
+        const size_t spaceDimension = mesh.getSpaceDimension();
 
         if (d == meshDim - 1) // face
         {
           const auto& conn = mesh.getConnectivity();
-          const auto& inc  = conn.getIncidence({ meshDim - 1, meshDim }, i);
-          const auto& pc   = p.getPhysicalCoordinates();
+          const auto& inc = conn.getIncidence({meshDim - 1, meshDim}, i);
+          const auto& pc = p.getPhysicalCoordinates();
 
           assert(inc.size() == 1 || inc.size() == 2);
 
@@ -275,43 +303,73 @@ namespace Rodin::Variational
             }
 
             UndeterminedTraceDomainException(
-                *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
+              *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+              << Alert::Raise;
             return;
           }
         }
 
         assert(d == mesh.getDimension());
 
-        const auto& gf  = this->getOperand();
+        const auto& gf = this->getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
 
         const auto geom = polytope.getGeometry();
         const auto feS = H1Element<K, ScalarType>(geom);
-        const size_t nscalar = feS.getCount();
         const auto& rc = p.getReferenceCoordinates();
         const auto JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(d);
-        SpatialVectorType phys(d);
+        SpatialVectorType phys(spaceDimension);
 
-        out.resize(vdim, d);
+        out.resize(vdim, spaceDimension);
         out.setZero();
 
-        for (size_t alpha = 0; alpha < nscalar; ++alpha)
+        if (static_cast<size_t>(rc.size()) < d)
         {
-          const auto gref = feS.getBasis(alpha).getGradient()(rc);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Reference gradient evaluation requires " << d
+            << " coordinate components, got " << rc.size() << "." << Alert::Raise;
+        }
+        const auto accumulate = [&](size_t alpha, const auto& gradient) {
           for (size_t j = 0; j < d; ++j)
-            ref(j) = gref(j);
-
+            ref(j) = gradient(j);
           phys = JinvT * ref;
-
           for (size_t comp = 0; comp < vdim; ++comp)
           {
             const size_t local = alpha * vdim + comp;
             const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
-            for (size_t j = 0; j < d; ++j)
+            for (size_t j = 0; j < spaceDimension; ++j)
               out(comp, j) += uval * phys(j);
+          }
+        };
+        if (geom == Geometry::Polytope::Type::Tetrahedron ||
+          geom == Geometry::Polytope::Type::Pyramid)
+        {
+          const auto tabulate = [&]<size_t Count>() {
+            std::array<ScalarType, 3 * Count> storage;
+            feS.tabulate(typename H1Element<K, ScalarType>::Gradients{storage, 3}, rc);
+            for (size_t alpha = 0; alpha < Count; ++alpha)
+            {
+              for (size_t j = 0; j < 3; ++j)
+                ref(j) = storage[3 * alpha + j];
+              accumulate(alpha, ref);
+            }
+          };
+          if (geom == Geometry::Polytope::Type::Tetrahedron)
+            tabulate.template operator()<FeketeTetrahedron<K>::Count>();
+          else
+            tabulate.template operator()<PyramidIndex<K>::Count>();
+        }
+        else
+        {
+          for (size_t alpha = 0; alpha < feS.getCount(); ++alpha)
+          {
+            const auto basis = feS.getBasis(alpha);
+            for (size_t j = 0; j < d; ++j)
+              ref(j) = basis.template getDerivative<1>(j)(rc);
+            accumulate(alpha, ref);
           }
         }
       }
@@ -329,17 +387,24 @@ namespace Rodin::Variational
   /**
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an H1 ShapeFunction object.
+   *
+   * Each basis Jacobian has one row per field component and one column per
+   * ambient coordinate. Reference gradients have @f$d@f$ entries, while their
+   * physical images under @f$(J_K^{\dagger})^T@f$ have @f$s@f$ entries, including
+   * on embedded cells and zero-dimensional points.
    */
-  template <size_t K, class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  class Jacobian<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>> final
-    : public ShapeFunctionBase<
-        Jacobian<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>>,
-        H1<K, Math::SpatialVector<Scalar>, Mesh>,
-        Space>
+  template <size_t K, class NestedDerived, class Scalar, class Mesh,
+    ShapeFunctionSpaceType Space>
+  class Jacobian<
+    ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>>
+    final : public ShapeFunctionBase<Jacobian<ShapeFunction<NestedDerived,
+                                       H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>>,
+              H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>
   {
     public:
       /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
@@ -347,17 +412,15 @@ namespace Rodin::Variational
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
 
       /// @brief Parent class type.
-      using Parent      =
-        ShapeFunctionBase<
-          Jacobian<ShapeFunction<NestedDerived, FESType, SpaceType>>,
-          FESType,
-          SpaceType>;
+      using Parent =
+        ShapeFunctionBase<Jacobian<ShapeFunction<NestedDerived, FESType, SpaceType>>,
+          FESType, SpaceType>;
 
       /// @brief Scalar value type.
-      using ScalarType        = typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// @brief Range (evaluation value) type.
-      using RangeType         = Math::SpatialMatrix<ScalarType>;
+      using RangeType = Math::SpatialMatrix<ScalarType>;
 
       /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
@@ -365,80 +428,11 @@ namespace Rodin::Variational
       /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
-      /// @brief Per-cell tabulation cache.
+      /// @brief Physical derivatives prepared by the current integration-point bind.
       struct Cache
       {
-          /// @brief Key identifying a cached tabulation.
-          struct Key
-          {
-              /// @brief Geometry of the cached polytope.
-              Geometry::Polytope::Type geom;
-              /// @brief Spatial dimension.
-              size_t dim;
-              /// @brief Cached cell tabulation.
-              Index cell;
-
-              /// @brief Quadrature formula the cached tabulation belongs to.
-              const QF::QuadratureFormulaBase* qf;
-              /// @brief Logical lifetime and assignment identity of the formula.
-              size_t identity;
-              /// @brief Index of the quadrature point.
-              size_t qp;
-
-              /// @brief Whether the key holds a cached entry.
-              bool valid;
-
-              /// @brief Constructs an invalid quadrature cache key.
-              Key()
-                : geom(Geometry::Polytope::Type::Point),
-                  dim(0),
-                  cell(0),
-                  qf(nullptr),
-                  identity(0),
-                  qp(0),
-                  valid(false)
-              {}
-
-              /**
-               * @brief Tests whether the key holds a cached entry.
-               * @returns True if the key identifies a cached entry; false otherwise.
-               */
-              explicit operator bool() const noexcept
-              {
-                return valid;
-              }
-
-              /**
-               * @brief Equality comparison.
-               * @returns Whether the operands compare equal.
-               * @param o Key to compare with this key.
-               */
-              bool operator==(const Key& o) const noexcept
-              {
-                if (!valid || !o.valid)
-                  return false;
-                return geom == o.geom && dim == o.dim && cell == o.cell && qf == o.qf &&
-                  identity == o.identity && qp == o.qp;
-              }
-
-              /// @brief Invalidates the cached tabulation.
-              void invalidate() noexcept
-              {
-                valid = false;
-                geom = Geometry::Polytope::Type::Point;
-                dim = 0;
-                cell = 0;
-                qf = nullptr;
-                identity = 0;
-                qp = 0;
-              }
-        };
-
-        // minimal cache: physical gradients for scalar basis indices alpha
-        /// @brief Cached physical gradients per scalar DOF (size = nscalar).
+        /// @brief Prepared physical derivatives in local basis order.
         std::vector<SpatialVectorType> gradPhys;
-        /// @brief Key identifying the cached entry.
-        Key key;
       };
 
       /**
@@ -477,8 +471,7 @@ namespace Rodin::Variational
        * @brief Gets the operand function.
        * @returns The operand function.
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -487,8 +480,7 @@ namespace Rodin::Variational
        * @brief Gets the operand in the shape function expression.
        * @returns The operand in the shape function expression.
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
@@ -498,8 +490,7 @@ namespace Rodin::Variational
        * @param element Finite element used by the operation.
        * @returns Number of local basis functions on the selected entity.
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
@@ -508,8 +499,7 @@ namespace Rodin::Variational
        * @brief Gets the finite element space.
        * @returns The finite element space.
        */
-      constexpr
-      const auto& getFiniteElementSpace() const
+      constexpr const auto& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
@@ -518,15 +508,31 @@ namespace Rodin::Variational
        * @brief Gets the integration point the expression is evaluated at.
        * @returns The integration point the expression is evaluated at.
        */
-      constexpr
-      const IntegrationPoint& getIntegrationPoint() const
+      constexpr const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
       }
 
       /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Jacobian& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        return *this;
+      }
+
+      /**
        * @brief Sets the integration point the expression is evaluated at.
+       *
+       * Every explicit bind prepares physical derivatives from the supplied
+       * point. Cell and formula identities do not identify geometry state.
+       * Deformation may preserve both while changing the inverse Jacobian.
+       * Only reference tabulation and working storage are reused across binds.
+       *
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
@@ -534,28 +540,13 @@ namespace Rodin::Variational
       {
         m_ip = &ip;
 
-        const auto& p  = ip.getPoint();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto& p = ip.getPoint();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();
-        const auto  geom = poly.getGeometry();
-        const size_t d   = poly.getDimension();
-        const Index  cell = poly.getIndex();
-
-        typename Cache::Key key;
-        key.geom  = geom;
-        key.dim   = d;
-        key.cell  = cell;
-        key.qf = qf;
-        key.identity = qf ? qf->getCacheIdentity() : 0;
-        key.qp    = qp;
-        key.valid = true;
-
-        if (qf && m_cache.key == key)
-          return *this;
-
-        m_cache.key = key;
+        const auto geom = poly.getGeometry();
+        const size_t d = poly.getDimension();
 
         // scalar element for geometry-only tabulation
         const H1Element<K, ScalarType> feS(geom);
@@ -565,11 +556,14 @@ namespace Rodin::Variational
           m_cache.gradPhys.resize(nscalar);
 
         for (auto& g : m_cache.gradPhys)
-          if (g.size() != d) g.resize(d);
+        {
+          if (g.size() != d)
+            g.resize(d);
+        }
 
         const auto* tab = qf ? &feS.getTabulation(*qf) : nullptr;
         const auto& rc = p.getReferenceCoordinates();
-        const auto  JinvT = p.getJacobianInverse().transpose();
+        const auto JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(d);
 
@@ -594,25 +588,23 @@ namespace Rodin::Variational
        */
       RangeType getBasis(size_t local) const
       {
-        assert(m_cache.key);
-
         const auto& fes = this->getFiniteElementSpace();
         const std::uint8_t vdim = fes.getVectorDimension();
 
         const auto& p = this->getIntegrationPoint().getPoint();
-        const std::uint8_t d = p.getPolytope().getDimension();
+        const std::uint8_t spaceDimension = p.getPolytope().getMesh().getSpaceDimension();
 
         const size_t alpha = local / vdim;
-        const size_t comp  = local % vdim;
+        const size_t comp = local % vdim;
 
         assert(alpha < m_cache.gradPhys.size());
         assert(vdim <= RangeType::MaxSize);
-        assert(d <= RangeType::MaxSize);
+        assert(spaceDimension <= RangeType::MaxSize);
 
-        RangeType J(vdim, d);
+        RangeType J(vdim, spaceDimension);
         J.setZero();
 
-        for (std::uint8_t j = 0; j < d; ++j)
+        for (std::uint8_t j = 0; j < spaceDimension; ++j)
           J(comp, j) = m_cache.gradPhys[alpha](j);
 
         return J;
@@ -623,12 +615,19 @@ namespace Rodin::Variational
        * @param geom Reference geometry.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const auto k = getOperand().getOrder(geom);
         if (!k.has_value())
           return std::nullopt;
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (*k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (*k == 0) ? 0 : (*k - 1);
       }
 

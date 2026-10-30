@@ -6,6 +6,11 @@
 #define RODIN_ADAPTATION_SWIFT_DISTRIBUTION_H
 
 #include <vector>
+#include <functional>
+#include "Rodin/Configure.h"
+#ifdef RODIN_USE_MPI
+#include <boost/mpi/collectives/all_reduce.hpp>
+#endif
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
 #include "../CellDeformation.h"
@@ -31,6 +36,7 @@ namespace Rodin::Adaptation::SWIFT
     public:
       /// @brief Scalar coefficient type of the trial field.
       using ScalarType = typename TrialFunction::ScalarType;
+
       /// @brief Native cell-integrator interface.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -68,18 +74,20 @@ namespace Rodin::Adaptation::SWIFT
         const auto& testFES = m_test.get().getFiniteElementSpace();
         const auto nTrial = trialFES.getFiniteElement(d, cell.getIndex()).getCount();
         const auto nTest = testFES.getFiniteElement(d, cell.getIndex()).getCount();
-        const auto& qf = QF::PolytopeQuadratureFormula::get(m_order, cell.getGeometry());
+        const auto& qf = QF::QuadratureFormula::get(m_order, cell.getGeometry());
         const auto& quadrature = cell.getQuadrature(qf);
         m_matrix = Math::Matrix<Real>::Zero(nTest, nTrial);
         m_trialStrains.resize(nTrial);
         m_testStrains.resize(nTest);
         auto currentJacobian = Variational::Jacobian(m_current.get());
         auto trialJacobian = Variational::Jacobian(m_trial.get());
+        trialJacobian.setPolytope(cell);
         auto testJacobian = Variational::Jacobian(m_test.get());
+        testJacobian.setPolytope(cell);
         for (size_t q = 0; q < quadrature.getSize(); ++q)
         {
           const auto& point = quadrature.getPoint(q);
-          const Variational::IntegrationPoint ip(point, &qf, q);
+          const Variational::IntegrationPoint ip(quadrature, q);
           CellDeformation deformation(d);
           deformation.setDisplacementGradient(currentJacobian.getValue(ip));
           const Math::SpatialMatrix<Real> inverse(
@@ -134,7 +142,10 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Global mean-strain subtraction represented by @f$UU^\top@f$.
        * Native linear forms integrate the symmetric strain in an orthonormal
        * tensor basis. The volume and moments use the sparse core's quadrature,
-       * preserving the variance identity for the centered form.
+       * preserving the variance identity for the centered form. Current volume
+       * is integrated directly as the same reference weights times geometric
+       * distortion and deformation determinant. Interpolated position fields
+       * cannot define this volume when displacement degree is below map degree.
        * @returns Mean-strain coupling matrix @f$U@f$ for the current fields and weights.
        */
       Math::Matrix<Real> getCentering() const
@@ -152,21 +163,39 @@ namespace Rodin::Adaptation::SWIFT
         const auto gradient =
           Variational::Jacobian(test) * CurrentInverse<Displacement>(current, dimension);
         const auto strain = Real(0.5) * (gradient + Variational::Transpose(gradient));
-        auto traceIntegral = Variational::Integral(weight * Variational::Trace(strain));
-        traceIntegral.setOrder(m_order);
-        Variational::LinearForm trace(test);
-        trace = traceIntegral;
-        trace.assemble();
-        Variational::GridFunction position(test.getFiniteElementSpace());
-        position =
-          Variational::VectorFunction(dimension, [](const Geometry::Point& point) {
-            return Math::SpatialVector<Real>(point.getCoordinates());
-          });
-        position += current;
-        const Real volume = trace.getVector().dot(position.getData()) / Real(dimension);
-        assert(volume > Real(0));
+        const auto& mesh = test.getFiniteElementSpace().getMesh();
+        Real volume = 0;
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          if constexpr (requires { mesh.getShard(); })
+          {
+            if (!mesh.getShard().isOwned(dimension, cell->getIndex()))
+              continue;
+          }
+          const auto& formula = QF::QuadratureFormula::get(m_order, cell->getGeometry());
+          const auto& quadrature = cell->getQuadrature(formula);
+          for (size_t sample = 0; sample < quadrature.getSize(); ++sample)
+          {
+            const Variational::IntegrationPoint point(quadrature, sample);
+            volume += formula.getWeight(sample) *
+              quadrature.getPoint(sample).getDistortion() * weight.getValue(point);
+          }
+        }
+#ifdef RODIN_USE_MPI
+        if constexpr (requires { mesh.getShard(); })
+        {
+          volume = boost::mpi::all_reduce(
+            mesh.getContext().getCommunicator(), volume, std::plus<Real>());
+        }
+#endif
+        if (!(volume > 0) || !std::isfinite(volume))
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Mean-strain centering requires finite positive current volume."
+            << Alert::Raise;
+        }
         Math::Matrix<Real> centering(
-          trace.getVector().size(), dimension * (dimension + 1) / 2);
+          test.getFiniteElementSpace().getSize(), dimension * (dimension + 1) / 2);
         size_t column = 0;
         for (size_t a = 0; a < dimension; ++a)
         {
@@ -223,6 +252,7 @@ namespace Rodin::Adaptation::SWIFT
         : m_gradient(Variational::Jacobian(current)),
           m_dimension(dimension)
       {}
+
       /**
        * @brief Evaluates the inverse deformation gradient.
        * @param point Reference-mesh evaluation point.
@@ -235,6 +265,7 @@ namespace Rodin::Adaptation::SWIFT
         deformation.setDisplacementGradient(m_gradient.getValue(point));
         return Math::SpatialMatrix<Real>(deformation.getInverseTranspose().transpose());
       }
+
       /**
        * @brief Returns the coefficient's row count.
        * @returns The spatial dimension.
@@ -243,6 +274,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_dimension;
       }
+
       /**
        * @brief Returns the coefficient's column count.
        * @returns The spatial dimension.
@@ -251,6 +283,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_dimension;
       }
+
       /**
        * @brief Reports that inversion has no polynomial order guarantee.
        * @param polytope Entity whose coefficient order is requested.

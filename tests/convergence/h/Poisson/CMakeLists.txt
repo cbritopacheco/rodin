@@ -7,7 +7,7 @@ target_link_libraries(RodinConvergenceHPoisson
   Rodin::Solver
 )
 
-gtest_discover_tests(RodinConvergenceHPoisson
+rodin_discover_tests(RodinConvergenceHPoisson
   PROPERTIES
     LABELS convergence
 )
@@ -22,7 +22,7 @@ target_link_libraries(RodinConvergenceHPoissonBoundaryConditions
   Rodin::Solver
 )
 
-gtest_discover_tests(RodinConvergenceHPoissonBoundaryConditions
+rodin_discover_tests(RodinConvergenceHPoissonBoundaryConditions
   PROPERTIES
     LABELS convergence
 )

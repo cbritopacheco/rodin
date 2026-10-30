@@ -4,6 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <array>
+#include <vector>
+
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
 
@@ -13,6 +16,9 @@
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/SubMesh.h>
 #include <Rodin/MPI/IO.h>
+#include <Rodin/QF/QuadratureFormula.h>
+#include <Rodin/QF/Centroid.h>
+#include <Rodin/Variational/H1/H1Element.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -73,17 +79,90 @@ namespace
       local.getConnectivity().compute(dimension, 0);
       local.getConnectivity().compute(dimension, dimension);
       if (completeIncidences)
+      {
         for (size_t d = 0; d <= dimension; ++d)
         {
           for (size_t dp = 0; dp <= dimension; ++dp)
             local.getConnectivity().compute(d, dp);
         }
+      }
       EmptyRootPartitioner partitioner(local);
       partitioner.partition(world->size(), dimension);
       sharder.shard(partitioner);
     }
     sharder.scatter(0);
     return sharder.gather(0);
+  }
+}
+
+/// @brief Attribute-restricted measures recover half-unit-box volumes and boundaries.
+TEST(MPI_Geometry_Mesh, AttributeRestrictedUnitBoxMeasuresWithEmptyRoot)
+{
+  for (const auto geometry :
+    {Polytope::Type::Triangle, Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    const Array<size_t> shape = Array<size_t>::Constant(dimension, 3);
+    const Context::MPI context(*environment, *world);
+    Sharder<Context::MPI> sharder(context);
+    if (world->rank() == 0)
+    {
+      auto local = LocalMesh::UniformGrid(geometry, shape);
+      local.scale(0.5);
+      local.getConnectivity().compute(dimension - 1, dimension);
+      for (auto cell = local.getCell(); cell; ++cell)
+      {
+        const Point center(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+        local.setAttribute({dimension, cell->getIndex()}, center.x() < 0.5 ? 17 : 23);
+      }
+      for (auto face = local.getBoundary(); face; ++face)
+      {
+        const Point center(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+        local.setAttribute({dimension - 1, face->getIndex()}, center.x() < 0.5 ? 31 : 37);
+      }
+      local.getConnectivity().compute(dimension, 0);
+      local.getConnectivity().compute(dimension, dimension);
+      EmptyRootPartitioner partitioner(local);
+      partitioner.partition(world->size(), dimension);
+      sharder.shard(partitioner);
+    }
+    sharder.scatter(0);
+    auto mesh = sharder.gather(0);
+    if (world->size() > 1 && world->rank() == 0)
+    {
+      EXPECT_EQ(mesh.getShard().getCellCount(), 0u);
+    }
+
+    for (const Attribute attribute : {17, 23})
+    {
+      EXPECT_NEAR(mesh.getMeasure(dimension, attribute), 0.5, 1e-13);
+      EXPECT_NEAR(mesh.getMeasure(dimension, FlatSet<Attribute>{attribute}), 0.5, 1e-13);
+      if (dimension == 2)
+      {
+        EXPECT_NEAR(mesh.getArea(attribute), 0.5, 1e-13);
+        EXPECT_NEAR(mesh.getArea(FlatSet<Attribute>{attribute}), 0.5, 1e-13);
+      }
+      else
+      {
+        EXPECT_NEAR(mesh.getVolume(attribute), 0.5, 1e-13);
+        EXPECT_NEAR(mesh.getVolume(FlatSet<Attribute>{attribute}), 0.5, 1e-13);
+      }
+    }
+    EXPECT_NEAR(mesh.getMeasure(dimension, FlatSet<Attribute>{17, 23, 999}), 1, 1e-13);
+    EXPECT_EQ(mesh.getMeasure(dimension, Attribute(999)), 0);
+    EXPECT_EQ(mesh.getMeasure(dimension, FlatSet<Attribute>{}), 0);
+    EXPECT_EQ(mesh.getMeasure(dimension, FlatSet<Attribute>{999}), 0);
+    // A half of the unit square/cube's exterior has measure 2/3.
+    for (const Attribute attribute : {31, 37})
+    {
+      EXPECT_NEAR(mesh.getPerimeter(attribute), dimension, 1e-13);
+      EXPECT_NEAR(mesh.getPerimeter(FlatSet<Attribute>{attribute}), dimension, 1e-13);
+    }
+    EXPECT_NEAR(mesh.getPerimeter(FlatSet<Attribute>{31, 37, 999}), 2 * dimension, 1e-13);
+    EXPECT_EQ(mesh.getPerimeter(Attribute(999)), 0);
+    EXPECT_EQ(mesh.getPerimeter(FlatSet<Attribute>{}), 0);
   }
 }
 
@@ -127,6 +206,48 @@ TEST(MPI_Geometry_Mesh, DimensionWithEmptyRootAcrossGeometries)
     }
     world->barrier();
   }
+}
+
+/// @brief Invalid grid shapes are rejected consistently on every rank.
+TEST(MPI_Geometry_Mesh, UniformGridRejectsInvalidShapes)
+{
+  const Context::MPI context(*environment, *world);
+  EXPECT_THROW(Mesh<Context::MPI>::UniformGrid(
+                 context, Polytope::Type::Point, Array<size_t>::Constant(1, 2)),
+    Alert::Exception);
+  for (const auto geometry : geometries)
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    EXPECT_THROW(Mesh<Context::MPI>::UniformGrid(
+                   context, geometry, Array<size_t>::Constant(dimension + 1, 2)),
+      Alert::Exception);
+    for (size_t component = 0; component < dimension; ++component)
+    {
+      for (const size_t count : {0u, 1u})
+      {
+        Array<size_t> shape = Array<size_t>::Constant(dimension, 2);
+        shape[component] = count;
+        EXPECT_THROW(
+          Mesh<Context::MPI>::UniformGrid(context, geometry, shape), Alert::Exception);
+      }
+    }
+  }
+}
+
+/// @brief A uniform point grid has one global owner and valid ghost replicas.
+TEST(MPI_Geometry_Mesh, UniformPointGridOwnership)
+{
+  const Context::MPI context(*environment, *world);
+  const auto mesh =
+    Mesh<Context::MPI>::UniformGrid(context, Polytope::Type::Point, Array<size_t>(0));
+  EXPECT_EQ(mesh.getDimension(), 0u);
+  EXPECT_EQ(mesh.getSpaceDimension(), 0u);
+  EXPECT_EQ(mesh.getVertexCount(), 1u);
+  const auto& shard = mesh.getShard();
+  ASSERT_EQ(shard.getVertexCount(), 1u);
+  EXPECT_EQ(shard.isOwned(0, 0), world->rank() == 0);
+  EXPECT_EQ(shard.getVertexCoordinates(0).size(), 0);
 }
 
 /// @brief Uniform-grid construction reports the same dimension on empty ranks.
@@ -228,6 +349,74 @@ TEST(MPI_Geometry_Mesh, ReconciliationWithEmptyRootAcrossGeometries)
   }
 }
 
+/// @brief Non-strict finite caps preserve fully propagated IDs and ownership metadata.
+TEST(MPI_Geometry_Mesh, NonStrictRoundCapsPreserveConvergedEntities)
+{
+  boost::mpi::communicator self(MPI_COMM_SELF, boost::mpi::comm_attach);
+  for (const bool independent : {true, false})
+  {
+    SCOPED_TRACE(independent);
+    const auto& communicator = independent ? self : *world;
+    const Context::MPI context(*environment, communicator);
+    const size_t cap = independent ? 0 : static_cast<size_t>(communicator.size());
+    for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+           Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dimension = Polytope::Traits(geometry).getDimension();
+      const Array<size_t> shape = Array<size_t>::Constant(dimension, 4);
+      auto mesh = Mesh<Context::MPI>::UniformGrid(context, geometry, shape);
+      auto reference = LocalMesh::UniformGrid(geometry, shape);
+      for (size_t d = 1; d < dimension; ++d)
+      {
+        SCOPED_TRACE(d);
+        mesh.getConnectivity().compute(dimension, d);
+        mesh.getConnectivity().compute(d, 0);
+        mesh.getConnectivity().compute(d, dimension);
+        reference.getConnectivity().compute(d, dimension);
+        mesh.reconcile(d);
+        const auto& shard = mesh.getShard();
+        const auto indices = shard.getPolytopeMap(d).left;
+        const auto owners = shard.getOwner(d);
+        const auto halo = shard.getHalo(d);
+        std::vector<std::array<bool, 3>> states;
+        for (Index i = 0; i < shard.getPolytopeCount(d); ++i)
+        {
+          states.push_back(
+            {shard.isOwned(d, i), shard.isShared(d, i), shard.isGhost(d, i)});
+        }
+        Mesh<Context::MPI>::ReconcileOptions options;
+        options.maxOwnerRounds = cap;
+        options.maxGidRounds = cap;
+        options.globalCheckPeriod = cap + 1;
+        options.strictRoundCap = false;
+        // A rank graph has diameter at most size-1. The larger check period
+        // makes the first epoch use the finite cap; SELF needs no exchange.
+        for (size_t repeat = 0; repeat < 2; ++repeat)
+        {
+          SCOPED_TRACE(repeat);
+          mesh.reconcile(d, options);
+          EXPECT_EQ(mesh.getPolytopeCount(d), reference.getPolytopeCount(d));
+          EXPECT_EQ(shard.getPolytopeMap(d).left, indices);
+          EXPECT_EQ(shard.getOwner(d), owners);
+          EXPECT_EQ(shard.getHalo(d), halo);
+          EXPECT_EQ(shard.getPolytopeCount(d), states.size());
+          if (shard.getPolytopeCount(d) == states.size())
+          {
+            for (Index i = 0; i < states.size(); ++i)
+            {
+              EXPECT_EQ(shard.isOwned(d, i), states[i][0]);
+              EXPECT_EQ(shard.isShared(d, i), states[i][1]);
+              EXPECT_EQ(shard.isGhost(d, i), states[i][2]);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 /// @brief Both HDF5 entry points restore collective dimension with an empty root shard.
 TEST(MPI_Geometry_Mesh, HDF5DimensionWithEmptyRootAcrossGeometries)
 {
@@ -256,6 +445,144 @@ TEST(MPI_Geometry_Mesh, HDF5DimensionWithEmptyRootAcrossGeometries)
     }
     boost::filesystem::remove(path);
   }
+}
+
+/// @brief Already reconciled vertex and cell maps retain ownership and coordinates.
+TEST(MPI_Geometry_Mesh, ReconcileVerticesAndCellsPreservesStateWithEmptyRoot)
+{
+  for (const auto geometry : geometries)
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    auto mesh = distribute(geometry);
+    const auto coordinates = mesh.getShard().getVertices().getMatrix().eval();
+    for (const size_t dimension : {size_t(0), mesh.getDimension()})
+    {
+      SCOPED_TRACE(dimension);
+      const auto indices = mesh.getShard().getPolytopeMap(dimension).left;
+      const auto owners = mesh.getShard().getOwner(dimension);
+      const auto halo = mesh.getShard().getHalo(dimension);
+      for (size_t repeat = 0; repeat < 2; ++repeat)
+      {
+        EXPECT_EQ(&mesh.reconcile(dimension), &mesh);
+        EXPECT_EQ(mesh.getShard().getPolytopeMap(dimension).left, indices);
+        EXPECT_EQ(mesh.getShard().getOwner(dimension), owners);
+        EXPECT_EQ(mesh.getShard().getHalo(dimension), halo);
+        EXPECT_EQ(mesh.getShard().getVertices().getMatrix(), coordinates);
+      }
+    }
+  }
+}
+
+/// @brief Cached MPI quadratures reuse formulas and track scaled physical measures.
+TEST(MPI_Geometry_Mesh, QuadratureCacheTracksScalingWithEmptyRoot)
+{
+  // Roundoff budget for summing mapped quadrature weights across the grid.
+  constexpr Real tolerance = 1e-12;
+  for (const auto geometry : geometries)
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    auto mesh = distribute(geometry);
+    const size_t dimension = mesh.getDimension();
+    const auto& first = QF::QuadratureFormula::get(2, geometry);
+    // Adjacent exactness requests can select the same persistent formula.
+    const auto& second = QF::QuadratureFormula::get(4, geometry);
+    ASSERT_NE(&first, &second);
+    // distribute() creates three vertices per axis, spanning [0, 2].
+    Real expectedVolume = 1;
+    for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+      expectedVolume *= 2;
+    for (size_t phase = 0; phase < 4; ++phase)
+    {
+      SCOPED_TRACE(phase);
+      Real localVolume = 0;
+      const auto& shard = mesh.getShard();
+      for (Index cell = 0; cell < shard.getPolytopeCount(dimension); ++cell)
+      {
+        const auto& quadrature = mesh.getQuadrature(dimension, cell, first);
+        const auto& other = mesh.getQuadrature(dimension, cell, second);
+        if (&first == &second)
+          EXPECT_EQ(&quadrature, &other);
+        else
+          EXPECT_NE(&quadrature, &other);
+        EXPECT_EQ(&mesh.getQuadrature(dimension, cell, first), &quadrature);
+        EXPECT_EQ(&quadrature.getQuadratureFormula(), &first);
+        EXPECT_EQ(&other.getQuadratureFormula(), &second);
+        EXPECT_EQ(quadrature.getSize(), first.getSize());
+        for (size_t point = 0; point < quadrature.getSize(); ++point)
+        {
+          const auto& mapped = quadrature.getPoint(point);
+          EXPECT_EQ(&mapped.getPolytope().getMesh(), &mesh);
+          if (shard.isOwned(dimension, cell))
+            localVolume += first.getWeight(point) * mapped.getDistortion();
+        }
+      }
+      const Real volume = boost::mpi::all_reduce(*world, localVolume, std::plus<Real>());
+      EXPECT_NEAR(volume, expectedVolume, tolerance * expectedVolume);
+      if (phase < 3)
+      {
+        if (phase == 0)
+          EXPECT_EQ(&mesh.scale(2), &mesh);
+        else
+        {
+          for (Index vertex = 0; vertex < shard.getVertexCount(); ++vertex)
+          {
+            const Math::SpatialPoint coordinates = mesh.getVertexCoordinates(vertex);
+            if (phase == 1)
+              EXPECT_EQ(&mesh.setVertexCoordinates(vertex, Real(2) * coordinates), &mesh);
+            else
+            {
+              for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+              {
+                EXPECT_EQ(&mesh.setVertexCoordinates(
+                            vertex, Real(2) * coordinates[coordinate], coordinate),
+                  &mesh);
+              }
+            }
+          }
+        }
+        for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+          expectedVolume *= 2;
+      }
+    }
+  }
+}
+
+/// @brief Replacing a cell map invalidates cached physical quadrature coordinates.
+TEST(MPI_Geometry_Mesh, QuadratureCacheTracksReplacementTransformationWithEmptyRoot)
+{
+  auto mesh = distribute(Polytope::Type::Segment);
+  const Variational::RealH1Element<2> element(Polytope::Type::Segment);
+  const auto& rule = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Segment);
+  // The quadratic map fixes both endpoints and has positive derivative on [0, 1].
+  constexpr Real curvature = 0.25;
+  constexpr Real tolerance = 1e-12;
+  size_t localCount = 0;
+  for (Index cell = 0; cell < mesh.getShard().getCellCount(); ++cell)
+  {
+    const auto& original = mesh.getPolytopeTransformation(1, cell);
+    Math::SpatialPoint left, right;
+    original.transform(left, Math::SpatialPoint{0});
+    original.transform(right, Math::SpatialPoint{1});
+    const Real center =
+      mesh.getQuadrature(1, cell, rule).getPoint(0).getPhysicalCoordinates()[0];
+    PointCloud nodes(1, element.getCount());
+    for (size_t node = 0; node < element.getCount(); ++node)
+    {
+      const Real t = element.getNode(node)[0];
+      nodes(0, node) = left[0] + (right[0] - left[0]) * (t + curvature * t * (1 - t));
+    }
+    EXPECT_EQ(&mesh.setPolytopeTransformation({1, cell},
+                new ParametricTransformation<Variational::RealH1Element<2>>(
+                  std::move(nodes), element)),
+      &mesh);
+    const auto& quadrature = mesh.getQuadrature(1, cell, rule);
+    EXPECT_EQ(&mesh.getQuadrature(1, cell, rule), &quadrature);
+    EXPECT_EQ(&quadrature.getPoint(0).getPolytope().getMesh(), &mesh);
+    EXPECT_NEAR(quadrature.getPoint(0).getPhysicalCoordinates()[0],
+      center + (right[0] - left[0]) * curvature / 4, tolerance);
+    ++localCount;
+  }
+  EXPECT_GT(boost::mpi::all_reduce(*world, localCount, std::plus<size_t>()), 0u);
 }
 
 int main(int argc, char** argv)

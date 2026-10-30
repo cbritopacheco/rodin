@@ -13,22 +13,22 @@
  * Face integrals are crucial for coupling elements in DG methods where
  * solutions are discontinuous across element boundaries.
  *
- * ## Mathematical Foundation
- * Face integrals compute:
+ * # Mathematical Foundation
+ * Face integrals compute the following quantity.
  * @f[
  *   \int_{\mathcal{F}_h} f(x) \, ds
  * @f]
  * where @f$ \mathcal{F}_h @f$ is the set of all mesh faces (both interior
  * and boundary faces).
  *
- * ## Discontinuous Galerkin Context
+ * # Discontinuous Galerkin Context
  * In DG methods, face integrals handle:
  * - **Numerical fluxes**: Coupling between elements
  * - **Jump terms**: @f$ \int_{\mathcal{F}_h} [\![u]\!] \cdot [\![v]\!] \, ds @f$
  * - **Average terms**: @f$ \int_{\mathcal{F}_h} \{\!\{u\}\!\} \cdot [\![v]\!] \, ds @f$
  * - **Penalty terms**: Interior penalty for stability
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Interior penalty DG method
  * auto penalty = FaceIntegral(Jump(u), Jump(v));
@@ -74,7 +74,7 @@ namespace Rodin::Variational
    * @f[
    *   A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
    * @f]
-   * this class represents the integral of their dot product:
+   * this class represents the following integral of their dot product.
    * @f[
    *   \int_{\mathcal{F}_h} A(u) : B(v) \ d\sigma(x) \ .
    * @f]
@@ -105,7 +105,7 @@ namespace Rodin::Variational
        * @param[in] lhs Trial operator @f$ A(u) @f$
        * @param[in] rhs Test operator @f$ B(v) @f$
        *
-       * Represents the face integral over all mesh faces:
+       * Represents the face integral over all mesh faces.
        * @f[
        *   \int_{\mathcal{F}_h} A(u) : B(v) \, d\sigma
        * @f]

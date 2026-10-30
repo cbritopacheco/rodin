@@ -1,22 +1,27 @@
 # Math module tests
 
+add_executable(RodinMathSpatialMatrixVectorTest SpatialMatrixVectorTest.cpp)
+target_link_libraries(RodinMathSpatialMatrixVectorTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Math)
+rodin_discover_tests(RodinMathSpatialMatrixVectorTest PROPERTIES LABELS unit)
+
 add_executable(RodinMathSpatialTensorTest SpatialTensorTest.cpp)
 target_link_libraries(RodinMathSpatialTensorTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Math)
-gtest_discover_tests(RodinMathSpatialTensorTest PROPERTIES LABELS unit)
+rodin_discover_tests(RodinMathSpatialTensorTest PROPERTIES LABELS unit)
 
 add_executable(RodinMathSpatialScalarProductTest SpatialScalarProductTest.cpp)
 target_link_libraries(RodinMathSpatialScalarProductTest
-  PRIVATE GTest::gtest GTest::gtest_main Rodin::Rodin)
-gtest_discover_tests(RodinMathSpatialScalarProductTest PROPERTIES LABELS unit)
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Math)
+rodin_discover_tests(RodinMathSpatialScalarProductTest PROPERTIES LABELS unit)
 
 add_executable(RodinMathMatrixTest MatrixTest.cpp)
 target_link_libraries(RodinMathMatrixTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
-  Rodin::Rodin)
-gtest_discover_tests(RodinMathMatrixTest
+  Rodin::Math)
+rodin_discover_tests(RodinMathMatrixTest
   PROPERTIES
     LABELS unit
 )
@@ -26,8 +31,8 @@ target_link_libraries(RodinMathVectorTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
-  Rodin::Rodin)
-gtest_discover_tests(RodinMathVectorTest
+  Rodin::Math)
+rodin_discover_tests(RodinMathVectorTest
   PROPERTIES
     LABELS unit
 )
@@ -37,8 +42,8 @@ target_link_libraries(RodinMathSparseMatrixTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
-  Rodin::Rodin)
-gtest_discover_tests(RodinMathSparseMatrixTest
+  Rodin::Math)
+rodin_discover_tests(RodinMathSparseMatrixTest
   PROPERTIES
     LABELS unit
 )
@@ -48,8 +53,8 @@ target_link_libraries(RodinMathCommonTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
-  Rodin::Rodin)
-gtest_discover_tests(RodinMathCommonTest
+  Rodin::Math)
+rodin_discover_tests(RodinMathCommonTest
   PROPERTIES
     LABELS unit
 )
@@ -59,8 +64,8 @@ target_link_libraries(RodinMathConstantsTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
-  Rodin::Rodin)
-gtest_discover_tests(RodinMathConstantsTest
+  Rodin::Math)
+rodin_discover_tests(RodinMathConstantsTest
   PROPERTIES
     LABELS unit
 )
@@ -70,8 +75,8 @@ target_link_libraries(RodinMathUnitTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
-  Rodin::Rodin)
-gtest_discover_tests(RodinMathUnitTest
+  Rodin::Math)
+rodin_discover_tests(RodinMathUnitTest
   PROPERTIES
     LABELS unit
 )
@@ -81,8 +86,8 @@ target_link_libraries(RodinMathRadTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
-  Rodin::Rodin)
-gtest_discover_tests(RodinMathRadTest
+  Rodin::Math)
+rodin_discover_tests(RodinMathRadTest
   PROPERTIES
     LABELS unit
 )
@@ -92,8 +97,8 @@ target_link_libraries(RodinMathTraitsTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
-  Rodin::Rodin)
-gtest_discover_tests(RodinMathTraitsTest
+  Rodin::Math)
+rodin_discover_tests(RodinMathTraitsTest
   PROPERTIES
     LABELS unit
 )
@@ -103,8 +108,8 @@ target_link_libraries(RodinMathLinearSystemTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
-  Rodin::Rodin)
-gtest_discover_tests(RodinMathLinearSystemTest
+  Rodin::Math)
+rodin_discover_tests(RodinMathLinearSystemTest
   PROPERTIES
     LABELS unit
 )
@@ -114,8 +119,8 @@ target_link_libraries(RodinMathNewtonRaphsonTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
-  Rodin::Rodin)
-gtest_discover_tests(RodinMathNewtonRaphsonTest
+  Rodin::Math)
+rodin_discover_tests(RodinMathNewtonRaphsonTest
   PROPERTIES
     LABELS unit
 )
@@ -125,8 +130,32 @@ target_link_libraries(RodinMathRungeKuttaTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
-  Rodin::Rodin)
-gtest_discover_tests(RodinMathRungeKuttaTest
+  Rodin::Math)
+rodin_discover_tests(RodinMathRungeKuttaTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinMathSpatialBoundaryTest SpatialBoundaryTest.cpp)
+target_link_libraries(RodinMathSpatialBoundaryTest PRIVATE GTest::gtest_main Rodin::Math)
+rodin_discover_tests(RodinMathSpatialBoundaryTest PROPERTIES LABELS unit)
+
+add_executable(RodinMathSpatialEigenInteropTest SpatialEigenInteropTest.cpp)
+target_link_libraries(RodinMathSpatialEigenInteropTest PRIVATE GTest::gtest_main Rodin::Math)
+rodin_discover_tests(RodinMathSpatialEigenInteropTest PROPERTIES LABELS unit)
+
+add_executable(RodinMathSparseEliminationTest SparseEliminationTest.cpp)
+target_link_libraries(RodinMathSparseEliminationTest PRIVATE GTest::gtest_main Rodin::Math)
+rodin_discover_tests(RodinMathSparseEliminationTest PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinMathSpatialComplexTest SpatialComplexTest.cpp)
+target_link_libraries(RodinMathSpatialComplexTest PRIVATE GTest::gtest_main Rodin::Math)
+rodin_discover_tests(RodinMathSpatialComplexTest PROPERTIES LABELS unit)
+
+add_executable(RodinMathVectorContractTest VectorContractTest.cpp)
+target_link_libraries(RodinMathVectorContractTest PRIVATE GTest::gtest_main Rodin::Math)
+rodin_discover_tests(RodinMathVectorContractTest PROPERTIES LABELS unit)
+
+add_executable(RodinMathMatrixContractTest MatrixContractTest.cpp)
+target_link_libraries(RodinMathMatrixContractTest PRIVATE GTest::gtest_main Rodin::Math)
+rodin_discover_tests(RodinMathMatrixContractTest PROPERTIES LABELS unit)

@@ -32,14 +32,14 @@ namespace Rodin::Variational
    * (element-level) contributions that are then assembled into global matrices
    * and vectors.
    *
-   * ## Integrator Types
+   * # Integrator Types
    * There are two main types of integrators:
    * - **Linear Integrators**: Compute contributions to the load vector (RHS)
-   *   - Example: @f$ b_i = \int_K f \psi_i \, dx @f$
+   *   - The following example illustrates this operation. @f$ b_i = \int_K f \psi_i \, dx @f$
    * - **Bilinear Integrators**: Compute contributions to the system matrix
-   *   - Example: @f$ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx @f$
+   *   - The following example illustrates this operation. @f$ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx @f$
    *
-   * ## Role in Assembly
+   * # Role in Assembly
    * During the assembly process:
    * 1. Integrators are iterated over mesh elements
    * 2. Local contributions are computed using numerical quadrature
@@ -94,7 +94,7 @@ namespace Rodin::Variational
       /**
        * @brief Restores order inference from the integrand.
        *
-       * This is the default: the order is derived per polytope from the
+       * This is the default the order is derived per polytope from the
        * polynomial degrees of the finite elements living on it, and is
        * therefore right exactly when the integrand's degree is the sum of
        * those degrees --- when nothing else in the expression contributes any.
@@ -122,7 +122,7 @@ namespace Rodin::Variational
        * @brief Sets a constant integration order.
        *
        * The order is the degree the quadrature rule must integrate exactly,
-       * so this is how a caller says what its integrand actually needs: the
+       * so this is how a caller says what its integrand actually needs. The
        * degree of a polynomial integrand that inference cannot see in full,
        * or, for an integrand that is not polynomial at all, the accuracy
        * being asked for.
@@ -145,7 +145,7 @@ namespace Rodin::Variational
        *
        * On an integrator the order is the degree of the quadrature rule, not
        * the polynomial degree of an expression. Set it whenever the degree
-       * inference can see is not the degree the integrand has: a coefficient
+       * inference can see is not the degree the integrand has because a coefficient
        * that reports no degree undercounts a polynomial integrand, and one
        * that is not polynomial at all --- a level set composed with a mesh
        * lookup, say --- has no degree to infer, so the inferred order is

@@ -90,7 +90,9 @@ error must change by less than $10^{-6}$ relative to baseline.
 
 Native Eigen sequential/OpenMP assembly is selected by
 `RODIN_MULTITHREADED` and tested in the local convergence CI matrix. Geometry
-entries have `convergence;slow` labels and 600-second budgets. Run
+Each independent case has its own `convergence;slow` registration, retaining
+the complete degree history and tangent/control comparisons. Watchdogs are
+600 seconds, except pyramid cases, which receive 3600 seconds. Run
 `ctest --test-dir build/tests -R RodinConvergencePNonlinearPoisson --output-on-failure`.
 PETSc/SNES, MPI, nonzero or mixed boundary data, curved maps, and arbitrary
 degrees beyond four are not certified here. Point/0D has no spatial p-study.

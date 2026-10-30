@@ -10,17 +10,18 @@
  *
  * Provides the CRTP base class for all hyperelastic constitutive laws.
  * Each derived law must provide:
- * - A `Cache` struct for precomputed data
- * - `setCache(Cache&, const ConstitutivePoint&)` to populate the cache
- * - `getFirstPiolaKirchhoffStress(SpatialMatrix&, const Cache&, const ConstitutivePoint&)`
+ * - Non-const `setConstitutivePoint(const ConstitutivePoint&)` to prepare owned data
+ * - Const `getFirstPiolaKirchhoffStress(SpatialMatrix&)`
  *   to compute @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$
- * - `getMaterialTangent(SpatialMatrix&, const Cache&, const ConstitutivePoint&, const SpatialMatrix&)`
+ * - `getMaterialTangent(SpatialMatrix&, const SpatialMatrix&)`
  *   to compute @f$ D\mathbf{P}[\delta\mathbf{F}] @f$
  */
 #ifndef RODIN_SOLID_CONSTITUTIVE_HYPERELASTICLAW_H
 #define RODIN_SOLID_CONSTITUTIVE_HYPERELASTICLAW_H
 
 #include "Rodin/Types.h"
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SpatialMatrix.h"
 
@@ -36,10 +37,15 @@ namespace Rodin::Solid
    * function @f$ W(\mathbf{F}) @f$ from which all stress measures derive.
    *
    * Each derived class implements:
-   * - **Cache setup**: Precomputes law-specific data from the constitutive point.
+   * - **Binding**: Captures inputs and prepares private law-specific data.
    * - **First Piola-Kirchhoff stress**: @f$ \mathbf{P} = \frac{\partial W}{\partial \mathbf{F}} @f$
    * - **Material tangent**: Directional derivative
    *   @f$ D\mathbf{P}[\delta\mathbf{F}] = \frac{\partial^2 W}{\partial \mathbf{F}^2} : \delta\mathbf{F} @f$
+   *
+   * Binding is non-const. Evaluation methods are const and use the captured
+   * inputs until the next binding, without retaining references to the point.
+   * Copies own independent prepared state; each assembly worker uses its own
+   * law. Concurrent binding of the same law requires external synchronization.
    *
    * @tparam Derived The derived constitutive law type (CRTP)
    */
@@ -48,105 +54,149 @@ namespace Rodin::Solid
   {
     public:
       /**
-       * @brief Sets the cache from the constitutive point.
-       * @param[out] cache Storage for the constitutive invariant cache.
-       * @param[in] cp Constitutive point (kinematic state, coordinates, region, etc.)
+       * @brief Binds the law to constitutive inputs through the derived implementation.
+       * @param cp Constitutive point whose consumed values are captured by the law.
+       * @returns The prepared derived law.
        */
-      template <class Cache>
-      void setCache(Cache& cache, const ConstitutivePoint& cp) const
+      Derived& setConstitutivePoint(const ConstitutivePoint& cp)
       {
-        static_cast<const Derived&>(*this).setCache(cache, cp);
+        return static_cast<Derived&>(*this).setConstitutivePoint(cp);
       }
 
       /**
-       * @brief Computes the first Piola-Kirchhoff stress tensor.
-       *
-       * @f[
-       *   \mathbf{P} = \frac{\partial W}{\partial \mathbf{F}}
-       * @f]
-       *
-       * @param[out] P Output stress tensor
-       * @param[in] cache Constitutive invariant cache populated by setCache().
-       * @param[in] cp Constitutive point
+       * @brief Returns the prepared kinematic snapshot.
+       * @returns Owned kinematics of the prepared law.
        */
-      template <class Cache>
-      void getFirstPiolaKirchhoffStress(
-          Math::SpatialMatrix<Real>& P,
-          const Cache& cache,
-          const ConstitutivePoint& cp) const
+      const KinematicState& getKinematicState() const
       {
-        static_cast<const Derived&>(*this).getFirstPiolaKirchhoffStress(P, cache, cp);
+        return static_cast<const Derived&>(*this).getKinematicState();
       }
 
       /**
-       * @brief Computes the material tangent on a perturbation.
-       *
-       * Evaluates the directional derivative of the first Piola-Kirchhoff
-       * stress:
-       * @f[
-       *   D\mathbf{P}[\delta\mathbf{F}]
-       *     = \frac{\partial^2 W}{\partial \mathbf{F}^2} : \delta\mathbf{F}
-       * @f]
-       *
-       * @param[out] dP Output tangent stress increment
-       * @param[in] cache Constitutive invariant cache populated by setCache().
-       * @param[in] cp Constitutive point
-       * @param[in] dF Perturbation of the deformation gradient
+       * @brief Computes the prepared first Piola-Kirchhoff stress.
+       * @param P Output stress tensor.
        */
-      template <class Cache>
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P) const
+      {
+        static_cast<const Derived&>(*this).getFirstPiolaKirchhoffStress(P);
+      }
+
+      /**
+       * @brief Computes the prepared material tangent action.
+       * @param dP Output stress increment.
+       * @param dF Deformation-gradient increment.
+       */
       void getMaterialTangent(
-          Math::SpatialMatrix<Real>& dP,
-          const Cache& cache,
-          const ConstitutivePoint& cp,
-          const Math::SpatialMatrix<Real>& dF) const
+        Math::SpatialMatrix<Real>& dP, const Math::SpatialMatrix<Real>& dF) const
       {
-        static_cast<const Derived&>(*this).getMaterialTangent(dP, cache, cp, dF);
+        static_cast<const Derived&>(*this).getMaterialTangent(dP, dF);
       }
 
       /**
-       * @brief Computes the strain energy density.
-       *
-       * @f[
-       *   W(\mathbf{F})
-       * @f]
-       *
-       * @param[in] cache Constitutive invariant cache populated by setCache().
-       * @param[in] cp Constitutive point
-       * @returns Strain energy density value
+       * @brief Returns the prepared strain-energy density.
+       * @returns Strain-energy density.
        */
-      template <class Cache>
-      Real getStrainEnergyDensity(
-          const Cache& cache,
-          const ConstitutivePoint& cp) const
+      Real getStrainEnergyDensity() const
       {
-        return static_cast<const Derived&>(*this).getStrainEnergyDensity(cache, cp);
+        return static_cast<const Derived&>(*this).getStrainEnergyDensity();
       }
 
     protected:
+      /**
+       * @brief Requires successful preparation before reading constitutive results.
+       * @param condition Whether the derived evaluation is prepared.
+       * @param function Calling member function name.
+       */
+      void require(bool condition, const char* function) const
+      {
+        if (!condition) [[unlikely]]
+        {
+          raiseUnbound(function);
+        }
+      }
+
+      /**
+       * @brief Compares the independent kinematic inputs exactly.
+       * @param lhs Previously captured kinematics.
+       * @param rhs Incoming kinematics.
+       * @returns Whether the dimensions and displacement gradients agree.
+       */
+      static bool hasSameKinematics(const KinematicState& lhs, const KinematicState& rhs)
+      {
+        if (lhs.getDimension() != rhs.getDimension())
+        {
+          return false;
+        }
+        const auto& a = lhs.getDisplacementGradient();
+        const auto& b = rhs.getDisplacementGradient();
+        return (a.getData().topLeftCorner(a.rows(), a.cols()).array() ==
+          b.getData().topLeftCorner(b.rows(), b.cols()).array())
+          .all();
+      }
+
+      /**
+       * @brief Compares consumed preferred directions exactly.
+       * @param lhs Previously captured direction.
+       * @param rhs Incoming direction.
+       * @returns Whether the dimensions and coordinates agree.
+       */
+      static bool hasSameDirection(
+        const Math::SpatialVector<Real>& lhs, const Math::SpatialVector<Real>& rhs)
+      {
+        if (lhs.size() != rhs.size())
+        {
+          return false;
+        }
+        for (size_t i = 0; i < lhs.size(); ++i)
+        {
+          if (lhs(i) != rhs(i))
+          {
+            return false;
+          }
+        }
+        return true;
+      }
+
       /// @brief Default constructor for derived CRTP laws.
       HyperElasticLaw() = default;
+
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
       HyperElasticLaw(const HyperElasticLaw& other) = default;
+
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
       HyperElasticLaw(HyperElasticLaw&& other) = default;
+
       /**
        * @brief Copy assignment operator.
        * @returns Reference to this object after the operation.
        * @param other Object to copy from.
        */
       HyperElasticLaw& operator=(const HyperElasticLaw& other) = default;
+
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
        * @param other Object to move from.
        */
       HyperElasticLaw& operator=(HyperElasticLaw&& other) = default;
+
+    private:
+      /**
+       * @brief Reports a read before successful constitutive binding.
+       * @param function Calling member function name.
+       */
+      void raiseUnbound(const char* function) const
+      {
+        Alert::MemberFunctionException(static_cast<const Derived&>(*this), function)
+          << "Bind a constitutive point before evaluating the material law."
+          << Alert::Raise;
+      }
   };
 }
 

@@ -40,7 +40,7 @@ namespace Rodin::Geometry
       Sharder(const Context::MPI& context);
 
       /**
-       * @brief One-step distribution: shard, scatter, and gather.
+       * @brief Distributes a mesh by sharding, scattering and gathering in one operation.
        *
        * Calls shard(), then scatter() on the root rank, then gather().
        *

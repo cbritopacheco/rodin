@@ -4,6 +4,7 @@
  */
 #ifndef RODIN_ADAPTATION_SWIFT_LINEARSOLVER_H
 #define RODIN_ADAPTATION_SWIFT_LINEARSOLVER_H
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -34,9 +35,11 @@ namespace Rodin::Adaptation::SWIFT
     public:
       /// @brief Native linear-solver interface.
       using Parent = Solver::LinearSolverBase<LinearSystem>;
+
       /// @brief Linear-system type handled by this solver.
       using LinearSystemType = LinearSystem;
       using Parent::solve;
+
       /**
        * @brief Binds a solver to its variational problem.
        * @param problem Problem whose lifetime includes all solves.
@@ -44,6 +47,7 @@ namespace Rodin::Adaptation::SWIFT
       explicit LinearSolver(typename Parent::ProblemBaseType& problem)
         : Parent(problem)
       {}
+
       /**
        * @brief Copies configuration and problem binding, not backend factorization resources.
        * @param other Solver whose configuration is copied.
@@ -54,6 +58,7 @@ namespace Rodin::Adaptation::SWIFT
           m_parameters(other.m_parameters),
           m_report(other.m_report)
       {}
+
       /**
        * @brief Copies solver and convergence controls.
        * @param parameters Backend and residual-tolerance configuration.
@@ -64,6 +69,7 @@ namespace Rodin::Adaptation::SWIFT
         m_parameters = parameters;
         return *this;
       }
+
       /**
        * @brief Copies the centered metric's low-rank factor.
        * @param couplings Factor of the mean-strain subtraction.
@@ -74,6 +80,7 @@ namespace Rodin::Adaptation::SWIFT
         m_centering = couplings;
         return *this;
       }
+
       /**
        * @brief Binds an optional destination for factorization counters.
        * @param report Diagnostics destination, or null to disable counters.
@@ -93,6 +100,7 @@ namespace Rodin::Adaptation::SWIFT
         m_seconds =
           std::chrono::duration<Real>(std::chrono::steady_clock::now() - start).count();
       }
+
       /**
        * @brief Reports whether the last solve met the physical residual tolerance.
        * @returns Whether the last solution is finite and residual-validated.
@@ -101,6 +109,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_success;
       }
+
       /**
        * @brief Returns the last iterative solve count.
        * @returns CG iterations, or zero for a direct solve.
@@ -109,6 +118,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_iterations;
       }
+
       /**
        * @brief Returns the last centered-system residual.
        * @returns Relative Euclidean residual norm.
@@ -117,6 +127,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_error;
       }
+
       /**
        * @brief Returns the last solve duration.
        * @returns Elapsed wall-clock seconds including factorization.
@@ -328,8 +339,10 @@ namespace Rodin::Adaptation::SWIFT
             if (m_parameters.linear.solver == Parameters::LinearSolver::MUMPS)
             {
               if (!m_mumps)
+              {
                 m_mumps =
                   std::make_unique<Solver::MUMPS<LinearSystemType>>(this->getProblem());
+              }
               m_mumps->setSymmetric(Solver::MUMPS<LinearSystemType>::Symmetry::General)
                 .setMaxThreads(m_parameters.linear.threads);
               return solveDirect(*m_mumps, "MUMPS");
@@ -357,14 +370,17 @@ namespace Rodin::Adaptation::SWIFT
             error <= m_parameters.convergence.tolerance.linearRelative;
           axb.getSolution() = solution;
           if (m_parameters.trace && (!ok || !solution.allFinite()))
+          {
             std::cout << "        cg failure: ok=" << ok << "  it=" << iterations
                       << "  max_it=" << maxIterations << "  err=" << error
                       << "  finite=" << solution.allFinite() << '\n';
+          }
           return ok && solution.allFinite();
         }
         else
         {
-          Alert::Exception() << "SWIFT requires the local Eigen backend." << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT requires the local Eigen backend." << Alert::Raise;
           return false;
         }
       }
@@ -372,6 +388,7 @@ namespace Rodin::Adaptation::SWIFT
       /// Bounds on the automatic CG budget when no explicit cap is provided.
       static constexpr size_t AutomaticCGMinIterations = 100;
       static constexpr size_t AutomaticCGMaxIterations = 2000;
+
       /// Iterations per algebraic DOF in the automatic-budget heuristic.
       static constexpr size_t AutomaticCGIterationsPerDOF = 2;
       Math::Matrix<Real> m_centering;
@@ -393,8 +410,8 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Adaptation::SWIFT::LinearSolver<LinearSystem>>
   {
-      /// @brief Linear system assembled by the variational problem.
-      using LinearSystemType = LinearSystem;
+    /// @brief Linear system assembled by the variational problem.
+    using LinearSystemType = LinearSystem;
   };
 }
 #endif

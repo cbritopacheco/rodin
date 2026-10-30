@@ -7,15 +7,354 @@
 #include <gtest/gtest.h>
 #include <sstream>
 #include <cmath>
+#include <limits>
 #include <vector>
+#include <array>
+#include <algorithm>
+#include <set>
+#include <tuple>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/MMG.h>
+#include <Rodin/MMG/MeshLoader.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+
+/// @brief Unsupported positive volume dimensions reject without leaking native storage.
+TEST(MMG5Lifecycle, UnsupportedVolumeDimensionsDoNotLeak)
+{
+  for (const size_t dimension :
+    {size_t(1), size_t(4), std::numeric_limits<size_t>::max()})
+  {
+    SCOPED_TRACE(dimension);
+    try
+    {
+      std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)> mesh(
+        MMG::V5::Mesh::create(2, dimension, dimension), MMG::V5::Mesh::destroy);
+      FAIL() << "Unsupported MMG dimensions must be rejected.";
+    }
+    catch (const Alert::Exception& error)
+    {
+      const std::string message = error.what();
+      EXPECT_NE(message.find("In create of class Rodin::MMG::Base:"), std::string::npos);
+      EXPECT_NE(message.find("Unsupported MMG mesh dimensions"), std::string::npos);
+      EXPECT_NE(message.find("topology " + std::to_string(dimension)), std::string::npos);
+      EXPECT_NE(
+        message.find("embedding " + std::to_string(dimension)), std::string::npos);
+    }
+  }
+}
+
+/// @brief Invalid embeddings reject before changing the supported backend paths.
+TEST(MMG5Lifecycle, InvalidDimensionsPermitSupportedMeshRecovery)
+{
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
+  for (const auto& [dimension, embedding] :
+    {std::pair<size_t, size_t>{0, 0}, {1, 2}, {2, 0}, {2, 1}, {2, 4}, {3, 2}, {3, 4}})
+  {
+    SCOPED_TRACE(::testing::Message() << dimension << ':' << embedding);
+    try
+    {
+      Owner mesh(MMG::V5::Mesh::create(2, dimension, embedding), MMG::V5::Mesh::destroy);
+      FAIL() << "Unsupported MMG dimensions must be rejected.";
+    }
+    catch (const Alert::Exception& error)
+    {
+      const std::string message = error.what();
+      EXPECT_NE(message.find("In create of class Rodin::MMG::Base:"), std::string::npos);
+      EXPECT_NE(message.find("Unsupported MMG mesh dimensions"), std::string::npos);
+      EXPECT_NE(message.find("topology " + std::to_string(dimension)), std::string::npos);
+      EXPECT_NE(
+        message.find("embedding " + std::to_string(embedding)), std::string::npos);
+    }
+  }
+  for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+  {
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    const auto source =
+      LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
+    Owner mesh(MMG::V5::Mesh::toV5(source), MMG::V5::Mesh::destroy);
+    ASSERT_NE(mesh, nullptr);
+    EXPECT_EQ(mesh->dim, static_cast<int>(dimension));
+    EXPECT_EQ(mesh->np, source.getVertexCount());
+    EXPECT_EQ(dimension == 2 ? mesh->nt : mesh->ne, source.getCellCount());
+  }
+  const auto surface = LocalMesh::Build()
+                         .initialize(3)
+                         .nodes(3)
+                         .vertex({0, 0, 0})
+                         .vertex({1, 0, 0})
+                         .vertex({0, 1, 1})
+                         .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                         .finalize();
+  Owner mesh(MMG::V5::Mesh::toV5(surface), MMG::V5::Mesh::destroy);
+  ASSERT_NE(mesh, nullptr);
+  EXPECT_EQ(mesh->dim, 3);
+  EXPECT_EQ(mesh->np, 3);
+  EXPECT_EQ(mesh->nt, 1);
+  EXPECT_EQ(mesh->ne, 0);
+}
+
+/// @brief Native mesh copies own their arrays and survive source destruction.
+TEST(MMG5Lifecycle, MeshCopyIsIndependent)
+{
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
+  for (auto type : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+  {
+    const bool volume = type == Polytope::Type::Tetrahedron;
+    auto mesh = volume ? LocalMesh::UniformGrid(type, {2, 2, 2})
+                       : LocalMesh::UniformGrid(type, {2, 2});
+    Owner source(MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
+    Owner copy(
+      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), MMG::V5::Mesh::destroy);
+    ASSERT_NE(copy, nullptr);
+    MMG::V5::Mesh::copy(source.get(), copy.get());
+    EXPECT_EQ(copy->np, source->np);
+    EXPECT_EQ(copy->nt, source->nt);
+    EXPECT_EQ(copy->ne, source->ne);
+    EXPECT_NE(copy->point, source->point);
+    if (source->namein)
+    {
+      EXPECT_NE(copy->namein, source->namein);
+    }
+    EXPECT_STREQ(copy->namein, source->namein);
+    EXPECT_STREQ(copy->nameout, source->nameout);
+    for (int i = 1; i <= source->np; ++i)
+    {
+      for (int axis = 0; axis < 3; ++axis)
+        EXPECT_EQ(copy->point[i].c[axis], source->point[i].c[axis]);
+    }
+    const auto coordinate = copy->point[1].c[0];
+    source->point[1].c[0] += 10;
+    EXPECT_EQ(copy->point[1].c[0], coordinate);
+    source.reset();
+    auto restored = MMG::V5::Mesh::fromV5(copy.get());
+    EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
+  }
+}
+
+/// @brief Mesh copies retain independently owned remeshing and material policies.
+TEST(MMG5Lifecycle, MeshCopyPreservesMaterialPoliciesAfterSourceDestruction)
+{
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  Owner source(MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
+  ASSERT_EQ(MMG3D_Set_inputMeshName(source.get(), "source.mesh"), 1);
+  ASSERT_EQ(MMG3D_Set_outputMeshName(source.get(), "adapted.mesh"), 1);
+  ASSERT_EQ(
+    MMG3D_Set_iparameter(source.get(), nullptr, MMG3D_IPARAM_numberOfLocalParam, 1), 1);
+  ASSERT_EQ(MMG3D_Set_localParameter(
+              source.get(), nullptr, MMG5_Tetrahedron, 17, 0.125, 0.75, 0.0625),
+    1);
+  ASSERT_EQ(
+    MMG3D_Set_iparameter(source.get(), nullptr, MMG3D_IPARAM_numberOfLSBaseReferences, 1),
+    1);
+  ASSERT_EQ(MMG3D_Set_lsBaseReference(source.get(), nullptr, 31), 1);
+  ASSERT_EQ(MMG3D_Set_iparameter(source.get(), nullptr, MMG3D_IPARAM_numberOfMat, 2), 1);
+  ASSERT_EQ(MMG3D_Set_multiMat(source.get(), nullptr, 17, MMG5_MMAT_Split, 71, 73), 1);
+  ASSERT_EQ(MMG3D_Set_multiMat(source.get(), nullptr, 23, MMG5_MMAT_NoSplit, 23, 23), 1);
+  Owner copy(
+    static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), MMG::V5::Mesh::destroy);
+  ASSERT_NE(copy, nullptr);
+  MMG::V5::Mesh::copy(source.get(), copy.get());
+  ASSERT_NE(source->info.par, nullptr);
+  ASSERT_NE(source->info.br, nullptr);
+  ASSERT_NE(source->info.mat, nullptr);
+  ASSERT_NE(source->info.invmat.lookup, nullptr);
+  ASSERT_NE(copy->info.par, nullptr);
+  ASSERT_NE(copy->info.br, nullptr);
+  ASSERT_NE(copy->info.mat, nullptr);
+  ASSERT_NE(copy->info.invmat.lookup, nullptr);
+  EXPECT_NE(copy->info.par, source->info.par);
+  EXPECT_NE(copy->info.br, source->info.br);
+  EXPECT_NE(copy->info.mat, source->info.mat);
+  EXPECT_NE(copy->info.invmat.lookup, source->info.invmat.lookup);
+  EXPECT_NE(copy->namein, source->namein);
+  EXPECT_NE(copy->nameout, source->nameout);
+  source->info.par[0].hmin = 0.25;
+  source->info.mat[0].rin = 79;
+  ASSERT_EQ(MMG3D_Set_inputMeshName(source.get(), "changed.mesh"), 1);
+  ASSERT_EQ(MMG3D_Set_outputMeshName(source.get(), "changed-output.mesh"), 1);
+  source.reset();
+  EXPECT_STREQ(copy->namein, "source.mesh");
+  EXPECT_STREQ(copy->nameout, "adapted.mesh");
+  ASSERT_EQ(copy->info.npar, 1);
+  EXPECT_EQ(copy->info.par[0].elt, MMG5_Tetrahedron);
+  EXPECT_EQ(copy->info.par[0].ref, 17);
+  EXPECT_DOUBLE_EQ(copy->info.par[0].hmin, 0.125);
+  EXPECT_DOUBLE_EQ(copy->info.par[0].hmax, 0.75);
+  EXPECT_DOUBLE_EQ(copy->info.par[0].hausd, 0.0625);
+  ASSERT_EQ(copy->info.nbr, 1);
+  EXPECT_EQ(copy->info.br[0], 31);
+  MMG5_int interior = 0, exterior = 0;
+  EXPECT_EQ(MMG5_isSplit(copy.get(), 17, &interior, &exterior), 1);
+  EXPECT_EQ(interior, 71);
+  EXPECT_EQ(exterior, 73);
+  EXPECT_EQ(MMG5_isSplit(copy.get(), 23, &interior, &exterior), 0);
+  MMG5_int parent = 0;
+  ASSERT_EQ(MMG5_getStartRef(copy.get(), 71, &parent), 1);
+  EXPECT_EQ(parent, 17);
+  ASSERT_EQ(MMG5_getStartRef(copy.get(), 73, &parent), 1);
+  EXPECT_EQ(parent, 17);
+  const auto restored = MMG::V5::Mesh::fromV5(copy.get());
+  EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
+  EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
+  EXPECT_NEAR(restored.getVolume(), 1, 1e-12);
+}
+
+/// @brief Scalar/vector native solution copies and swaps preserve ownership.
+TEST(MMG5Lifecycle, SolutionCopyAndSwap)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)> native(
+    MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
+  using Owner = std::unique_ptr<MMG5_Sol, decltype(&MMG::V5::Solution::destroy)>;
+  EXPECT_EQ(MMG::V5::Solution::create(native.get(), 0), nullptr);
+  EXPECT_EQ(MMG::V5::Solution::create(native.get(), 4), nullptr);
+  for (size_t dimension : {1, 2, 3})
+  {
+    Owner source(
+      MMG::V5::Solution::create(native.get(), dimension), MMG::V5::Solution::destroy);
+    Owner copy(
+      static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), MMG::V5::Solution::destroy);
+    ASSERT_NE(source, nullptr);
+    ASSERT_NE(copy, nullptr);
+    const size_t count = dimension * (source->np + 1);
+    for (size_t i = 0; i < count; ++i)
+      source->m[i] = 0.25 + i;
+    MMG::V5::Solution::copy(source.get(), copy.get());
+    EXPECT_NE(copy->m, source->m);
+    for (size_t i = 0; i < count; ++i)
+      EXPECT_EQ(copy->m[i], source->m[i]);
+    source->m[1] = -100;
+    EXPECT_EQ(copy->m[1], 1.25);
+    MMG::V5::Solution::swap(source.get(), copy.get());
+    EXPECT_EQ(source->m[1], 1.25);
+    EXPECT_EQ(copy->m[1], -100);
+    source.reset();
+    EXPECT_EQ(copy->m[count - 1], 0.25 + count - 1);
+  }
+  MMG::V5::Solution::destroy(nullptr);
+}
+
+/// @brief Surface conversion retains coordinates, triangles and attributed edge references.
+TEST(MMG5Lifecycle, SurfaceConversionPreservesGeometryAndAttributes)
+{
+  auto volume = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  volume.getConnectivity().compute(2, 3);
+  auto surface = volume.skin();
+  surface.getConnectivity().compute(1, 2);
+  for (auto cell = surface.getCell(); cell; ++cell)
+    surface.setAttribute({2, cell->getIndex()}, 17);
+  size_t attributedEdges = 0;
+  for (auto edge = surface.getFace(); edge; ++edge)
+  {
+    if (edge->getIndex() % 2 == 0)
+    {
+      surface.setAttribute({1, edge->getIndex()}, 23);
+      ++attributedEdges;
+    }
+  }
+  std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)> native(
+    MMG::V5::Mesh::toV5(surface), MMG::V5::Mesh::destroy);
+  ASSERT_TRUE(MMG::V5::Mesh::isSurface(native.get()));
+  EXPECT_EQ(native->np, surface.getVertexCount());
+  EXPECT_EQ(native->nt, surface.getCellCount());
+  EXPECT_EQ(native->na, attributedEdges);
+  for (int i = 1; i <= native->nt; ++i)
+    EXPECT_EQ(native->tria[i].ref, 17);
+  for (int i = 1; i <= native->na; ++i)
+    EXPECT_EQ(native->edge[i].ref, 23);
+  auto restored = MMG::V5::Mesh::fromV5(native.get());
+  EXPECT_EQ(restored.getDimension(), 2u);
+  EXPECT_EQ(restored.getSpaceDimension(), 3u);
+  EXPECT_EQ(restored.getVertexCount(), surface.getVertexCount());
+  EXPECT_EQ(restored.getCellCount(), surface.getCellCount());
+  std::set<std::array<Real, 3>> expected, actual;
+  for (auto vertex = surface.getVertex(); vertex; ++vertex)
+  {
+    const auto& x = vertex->getCoordinates();
+    expected.insert({x[0], x[1], x[2]});
+  }
+  for (auto vertex = restored.getVertex(); vertex; ++vertex)
+  {
+    const auto& x = vertex->getCoordinates();
+    actual.insert({x[0], x[1], x[2]});
+  }
+  EXPECT_EQ(actual, expected);
+  for (auto cell = restored.getCell(); cell; ++cell)
+    EXPECT_EQ(cell->getAttribute(), Optional<Attribute>(17));
+  restored.getConnectivity().compute(1, 2);
+  size_t restoredReferences = 0;
+  for (auto edge = restored.getFace(); edge; ++edge)
+  {
+    if (edge->getAttribute() == Optional<Attribute>(23))
+      ++restoredReferences;
+  }
+  EXPECT_EQ(restoredReferences, attributedEdges);
+  const auto keys = [](const LocalMesh& mesh, size_t dimension, Attribute attribute) {
+    std::set<std::vector<std::array<Real, 3>>> result;
+    for (auto polytope = mesh.getPolytope(dimension); polytope; ++polytope)
+    {
+      if (polytope->getAttribute() != Optional<Attribute>(attribute))
+        continue;
+      std::vector<std::array<Real, 3>> vertices;
+      for (const auto index : polytope->getVertices())
+      {
+        const auto& x = mesh.getVertexCoordinates(index);
+        vertices.push_back({x[0], x[1], x[2]});
+      }
+      std::sort(vertices.begin(), vertices.end());
+      result.insert(std::move(vertices));
+    }
+    return result;
+  };
+  EXPECT_EQ(keys(restored, 2, 17), keys(surface, 2, 17));
+  EXPECT_EQ(keys(restored, 1, 23), keys(surface, 1, 23));
+}
+
+/// @brief All three native backends receive the configured remeshing parameters.
+TEST(MMG5Lifecycle, ParameterForwardingMatchesEveryBackend)
+{
+  /// @brief Exposes parameter forwarding without invoking a remeshing algorithm.
+  class Parameters : public MMG::Base
+  {
+    public:
+      using MMG::Base::setParameters;
+  };
+
+  auto planar = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  auto volume = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  volume.getConnectivity().compute(2, 3);
+  auto surface = volume.skin();
+  surface.getConnectivity().compute(1, 2);
+  const auto check = [](const LocalMesh& mesh) {
+    std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)> native(
+      MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
+    Parameters parameters;
+    parameters.setHMin(0.125)
+      .setHMax(0.75)
+      .setHausdorff(0.0625)
+      .setGradation(1.75)
+      .setAngleDetection(false);
+    EXPECT_EQ(&parameters.setParameters(native.get()), &parameters);
+    EXPECT_DOUBLE_EQ(native->info.hmin, 0.125);
+    EXPECT_DOUBLE_EQ(native->info.hmax, 0.75);
+    EXPECT_DOUBLE_EQ(native->info.hausd, 0.0625);
+    EXPECT_NEAR(native->info.hgrad, std::log(1.75), 1e-14);
+    EXPECT_EQ(native->info.dhd, -1);
+    parameters.setAngleDetection(true);
+    parameters.setParameters(native.get());
+    EXPECT_GT(native->info.dhd, 0);
+  };
+  check(planar);
+  check(surface);
+  check(volume);
+}
 
 namespace Rodin::Tests::Unit
 {
@@ -117,8 +456,16 @@ namespace Rodin::Tests::Unit
     return true;
   }
 
-  static bool hasEntityWithCoordinates(
-    MMG::Mesh& mesh, Polytope::Type type, const std::vector<Point>& points)
+  /**
+   * @brief Finds an entity by its unordered physical vertex coordinates.
+   * @param mesh Mesh to search, computing incidence when needed.
+   * @param type Geometry of the sought entity.
+   * @param points Expected physical vertex coordinates.
+   * @param required Optional required-index set restricting the matching entities.
+   * @returns Whether a matching entity belongs to the selected set.
+   */
+  static bool hasEntityWithCoordinates(MMG::Mesh& mesh, Polytope::Type type,
+    const std::vector<Point>& points, const IndexSet* required = nullptr)
   {
     const size_t dimension = getDimension(type);
     if (dimension < mesh.getDimension())
@@ -127,11 +474,40 @@ namespace Rodin::Tests::Unit
     {
       if (it->getGeometry() != type)
         continue;
+      if (required && !required->count(it->getIndex()))
+        continue;
       const auto candidate = getVertexCoordinates(mesh, *it);
       if (containsPointSet(candidate, points) && containsPointSet(points, candidate))
         return true;
     }
     return false;
+  }
+
+  /**
+   * @brief Checks required geometry after remesher renumbering and tag propagation.
+   * @param source Input mesh with required entities not cut by the level set.
+   * @param result Remeshed output whose required tags must identify that geometry.
+   */
+  static void expectRequiredGeometry(const MMG::Mesh& source, MMG::Mesh& result)
+  {
+    for (const auto& [type, input, output] :
+      {std::tuple{Polytope::Type::Point, &source.getRequiredVertices(),
+         &result.getRequiredVertices()},
+        std::tuple{Polytope::Type::Segment, &source.getRequiredEdges(),
+          &result.getRequiredEdges()},
+        std::tuple{Polytope::Type::Triangle, &source.getRequiredTriangles(),
+          &result.getRequiredTriangles()},
+        std::tuple{Polytope::Type::Tetrahedron, &source.getRequiredTetrahedra(),
+          &result.getRequiredTetrahedra()}})
+    {
+      for (const Index index : *input)
+      {
+        SCOPED_TRACE(::testing::Message() << static_cast<int>(type) << ':' << index);
+        const auto points =
+          getVertexCoordinates(source, *source.getPolytope(getDimension(type), index));
+        EXPECT_TRUE(hasEntityWithCoordinates(result, type, points, output));
+      }
+    }
   }
 
   static bool hasVertexWithCoordinates(MMG::Mesh& mesh, const Point& point)
@@ -287,7 +663,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     EXPECT_FALSE(mesh.isEmpty());
     EXPECT_EQ(mesh.getVertexCount(), n * n);
     EXPECT_EQ(mesh.getCellCount(), 2 * (n - 1) * (n - 1));
@@ -300,7 +676,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     mesh.setCorner(0);
     mesh.setCorner(3);
@@ -319,7 +695,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.getConnectivity().compute(1, 2);
 
     size_t ridgeCount = 0;
@@ -337,7 +713,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, SetRequiredVertex)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
 
     mesh.setRequiredVertex(0);
     mesh.setRequiredVertex(5);
@@ -351,7 +727,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, SetRequiredEdge)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(1, 2);
 
     mesh.setRequiredEdge(0);
@@ -397,62 +773,81 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies copy construction for MMG mesh by checking exact expected values, true predicates, copy semantics.
   TEST(Rodin_MMG_Mesh, CopyConstruction)
   {
-    MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.setCorner(0);
-    mesh.setCorner(3);
-    mesh.setRidge(0);
-    mesh.setRequiredVertex(5);
-    mesh.setRequiredEdge(2);
-    mesh.setRequiredTriangle(1);
-    mesh.setRequiredTetrahedron(0);
+    for (const bool volume : {false, true})
+    {
+      SCOPED_TRACE(volume);
+      MMG::Mesh mesh;
+      mesh = volume ? mesh.UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4})
+                    : mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+      mesh.getConnectivity().compute(1, mesh.getDimension());
+      if (volume)
+        mesh.getConnectivity().compute(2, 3);
+      mesh.setCorner(0);
+      mesh.setCorner(3);
+      mesh.setRidge(0);
+      mesh.setRequiredVertex(5);
+      mesh.setRequiredEdge(2);
+      mesh.setRequiredTriangle(1);
+      if (volume)
+        mesh.setRequiredTetrahedron(0);
 
-    MMG::Mesh copy(mesh);
-    EXPECT_EQ(copy.getVertexCount(), mesh.getVertexCount());
-    EXPECT_EQ(copy.getCellCount(), mesh.getCellCount());
-    EXPECT_EQ(copy.getCorners().size(), 2);
-    EXPECT_EQ(copy.getRidges().size(), 1);
-    EXPECT_EQ(copy.getRequiredVertices().size(), 1);
-    EXPECT_EQ(copy.getRequiredEdges().size(), 1);
-    EXPECT_EQ(copy.getRequiredTriangles().size(), 1);
-    EXPECT_EQ(copy.getRequiredTetrahedra().size(), 1);
-    EXPECT_TRUE(copy.getCorners().count(0));
-    EXPECT_TRUE(copy.getCorners().count(3));
-    EXPECT_TRUE(copy.getRequiredTriangles().count(1));
-    EXPECT_TRUE(copy.getRequiredTetrahedra().count(0));
+      MMG::Mesh copy(mesh);
+      EXPECT_EQ(copy.getVertexCount(), mesh.getVertexCount());
+      EXPECT_EQ(copy.getCellCount(), mesh.getCellCount());
+      EXPECT_EQ(copy.getCorners().size(), 2);
+      EXPECT_EQ(copy.getRidges().size(), 1);
+      EXPECT_EQ(copy.getRequiredVertices().size(), 1);
+      EXPECT_EQ(copy.getRequiredEdges().size(), 1);
+      EXPECT_EQ(copy.getRequiredTriangles().size(), 1);
+      EXPECT_EQ(copy.getRequiredTetrahedra().size(), volume ? 1 : 0);
+      EXPECT_TRUE(copy.getCorners().count(0));
+      EXPECT_TRUE(copy.getCorners().count(3));
+      EXPECT_TRUE(copy.getRequiredTriangles().count(1));
+      EXPECT_EQ(copy.getRequiredTetrahedra().count(0), volume ? 1 : 0);
+    }
   }
 
   /// @brief Verifies move construction for MMG mesh by checking exact expected values, move semantics.
   TEST(Rodin_MMG_Mesh, MoveConstruction)
   {
-    MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.setCorner(0);
-    mesh.setRidge(0);
-    mesh.setRequiredVertex(5);
-    mesh.setRequiredEdge(2);
-    mesh.setRequiredTriangle(1);
-    mesh.setRequiredTetrahedron(0);
+    for (const bool volume : {false, true})
+    {
+      SCOPED_TRACE(volume);
+      MMG::Mesh mesh;
+      mesh = volume ? mesh.UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4})
+                    : mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+      mesh.getConnectivity().compute(1, mesh.getDimension());
+      if (volume)
+        mesh.getConnectivity().compute(2, 3);
+      mesh.setCorner(0);
+      mesh.setRidge(0);
+      mesh.setRequiredVertex(5);
+      mesh.setRequiredEdge(2);
+      mesh.setRequiredTriangle(1);
+      if (volume)
+        mesh.setRequiredTetrahedron(0);
 
-    size_t vertexCount = mesh.getVertexCount();
-    size_t cellCount = mesh.getCellCount();
+      size_t vertexCount = mesh.getVertexCount();
+      size_t cellCount = mesh.getCellCount();
 
-    MMG::Mesh moved(std::move(mesh));
-    EXPECT_EQ(moved.getVertexCount(), vertexCount);
-    EXPECT_EQ(moved.getCellCount(), cellCount);
-    EXPECT_EQ(moved.getCorners().size(), 1);
-    EXPECT_EQ(moved.getRidges().size(), 1);
-    EXPECT_EQ(moved.getRequiredVertices().size(), 1);
-    EXPECT_EQ(moved.getRequiredEdges().size(), 1);
-    EXPECT_EQ(moved.getRequiredTriangles().size(), 1);
-    EXPECT_EQ(moved.getRequiredTetrahedra().size(), 1);
+      MMG::Mesh moved(std::move(mesh));
+      EXPECT_EQ(moved.getVertexCount(), vertexCount);
+      EXPECT_EQ(moved.getCellCount(), cellCount);
+      EXPECT_EQ(moved.getCorners().size(), 1);
+      EXPECT_EQ(moved.getRidges().size(), 1);
+      EXPECT_EQ(moved.getRequiredVertices().size(), 1);
+      EXPECT_EQ(moved.getRequiredEdges().size(), 1);
+      EXPECT_EQ(moved.getRequiredTriangles().size(), 1);
+      EXPECT_EQ(moved.getRequiredTetrahedra().size(), volume ? 1 : 0);
+    }
   }
 
   /// @brief Verifies move assignment for MMG mesh by checking exact expected values, move semantics.
   TEST(Rodin_MMG_Mesh, MoveAssignment)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+    mesh.getConnectivity().compute(1, 2);
     mesh.setCorner(0);
     mesh.setRidge(0);
 
@@ -471,7 +866,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, MoveFromParent)
   {
     Mesh<Context::Local> parentMesh;
-    parentMesh = parentMesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    parentMesh = parentMesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     size_t vertexCount = parentMesh.getVertexCount();
     size_t cellCount = parentMesh.getCellCount();
 
@@ -490,21 +885,20 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies triangle mesh with MMG metadata for MMG mesh builder by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh_Builder, TriangleMeshWithMMGMetadata)
   {
-    MMG::Mesh mesh =
-      MMG::Mesh::Builder()
-      .initialize(2)
-      .nodes(4)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .vertex({1, 1})
-      .polytope(Polytope::Type::Triangle, {0, 1, 2})
-      .polytope(Polytope::Type::Triangle, {1, 3, 2})
-      .corner(0)
-      .corner(1)
-      .corner(2)
-      .corner(3)
-      .finalize();
+    MMG::Mesh mesh = MMG::Mesh::Builder()
+                       .initialize(2)
+                       .nodes(4)
+                       .vertex({0, 0})
+                       .vertex({1, 0})
+                       .vertex({0, 1})
+                       .vertex({1, 1})
+                       .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                       .polytope(Polytope::Type::Triangle, {1, 3, 2})
+                       .corner(0)
+                       .corner(1)
+                       .corner(2)
+                       .corner(3)
+                       .finalize();
 
     EXPECT_EQ(mesh.getVertexCount(), 4);
     EXPECT_EQ(mesh.getCellCount(), 2);
@@ -548,12 +942,88 @@ namespace Rodin::Tests::Unit
   // MMG::Mesh I/O roundtrip tests (MEDIT format)
   // ========================================================================
 
+  /// @brief Invalid and overflowing metadata numbers report the section and member context.
+  TEST(Rodin_MMG_Mesh_IO, MalformedMetadataIndicesUseMemberContext)
+  {
+    auto source = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+    source.getConnectivity().compute(1, 3);
+    source.getConnectivity().compute(2, 3);
+    std::ostringstream body;
+    IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Local>(source).printMesh(body, false);
+    for (const auto keyword : {IO::MEDIT::Keyword::Corners, IO::MEDIT::Keyword::Ridges,
+           IO::MEDIT::Keyword::RequiredEdges, IO::MEDIT::Keyword::RequiredVertices,
+           IO::MEDIT::Keyword::RequiredTriangles, IO::MEDIT::Keyword::RequiredTetrahedra})
+    {
+      for (const std::string& token :
+        {std::string("not-a-number"), std::string(128, '9')})
+      {
+        SCOPED_TRACE(IO::MEDIT::toCharString(keyword));
+        SCOPED_TRACE(token);
+        std::istringstream input(
+          body.str() + IO::MEDIT::toCharString(keyword) + "\n1\n" + token + "\nEnd\n");
+        MMG::Mesh loaded;
+        MMG::MeshLoader loader(loaded);
+        try
+        {
+          loader.load(input);
+          ADD_FAILURE() << "Malformed metadata numbers must be rejected.";
+        }
+        catch (const Alert::Exception& error)
+        {
+          const std::string message = error.what();
+          EXPECT_NE(message.find("In member function"), std::string::npos);
+          EXPECT_NE(message.find("readIndex"), std::string::npos);
+          EXPECT_NE(message.find(IO::MEDIT::toCharString(keyword)), std::string::npos);
+          EXPECT_NE(message.find(token), std::string::npos);
+        }
+        catch (...)
+        {
+          ADD_FAILURE() << "Metadata number errors must raise an Alert exception.";
+        }
+      }
+    }
+  }
+
+  /// @brief Every MMG metadata section retains one-based indexing and surrounding whitespace.
+  TEST(Rodin_MMG_Mesh_IO, MetadataIndicesPreserveValidSectionAssignments)
+  {
+    auto source = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+    source.getConnectivity().compute(1, 3);
+    source.getConnectivity().compute(2, 3);
+    std::ostringstream body;
+    IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Local>(source).printMesh(body, false);
+    const std::array keywords{IO::MEDIT::Keyword::Corners, IO::MEDIT::Keyword::Ridges,
+      IO::MEDIT::Keyword::RequiredEdges, IO::MEDIT::Keyword::RequiredVertices,
+      IO::MEDIT::Keyword::RequiredTriangles, IO::MEDIT::Keyword::RequiredTetrahedra};
+    for (size_t section = 0; section < keywords.size(); ++section)
+    {
+      for (const std::string& token : {std::string("1"), std::string("  1  ")})
+      {
+        SCOPED_TRACE(IO::MEDIT::toCharString(keywords[section]));
+        std::istringstream input(body.str() + IO::MEDIT::toCharString(keywords[section]) +
+          "\n1\n" + token + "\nEnd\n");
+        MMG::Mesh loaded;
+        MMG::MeshLoader(loaded).load(input);
+        EXPECT_EQ(loaded.getVertexCount(), source.getVertexCount());
+        EXPECT_EQ(loaded.getCellCount(), source.getCellCount());
+        const std::array<const IndexSet*, 6> indices{&loaded.getCorners(),
+          &loaded.getRidges(), &loaded.getRequiredEdges(), &loaded.getRequiredVertices(),
+          &loaded.getRequiredTriangles(), &loaded.getRequiredTetrahedra()};
+        for (size_t i = 0; i < indices.size(); ++i)
+        {
+          EXPECT_EQ(indices[i]->size(), i == section ? 1u : 0u);
+          EXPECT_EQ(indices[i]->count(0), i == section ? 1u : 0u);
+        }
+      }
+    }
+  }
+
   /// @brief Verifies save load MEDIT roundtrip for MMG mesh IO by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh_IO, SaveLoadMEDITRoundtrip)
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.getConnectivity().compute(1, 2);
 
     // Set some MMG metadata
@@ -695,7 +1165,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     // Save without any MMG metadata
     const std::string filename = "/tmp/rodin_mmg_test_empty_metadata.mesh";
@@ -725,17 +1195,17 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     size_t origVertexCount = mesh.getVertexCount();
     size_t origCellCount = mesh.getCellCount();
 
     // Convert to MMG and back
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     EXPECT_EQ(result.getVertexCount(), origVertexCount);
     EXPECT_EQ(result.getCellCount(), origCellCount);
@@ -747,7 +1217,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.getConnectivity().compute(1, 2);
 
     mesh.setCorner(0);
@@ -770,11 +1240,11 @@ namespace Rodin::Tests::Unit
     mesh.setRequiredTriangle(1);
 
     // Convert to MMG and back
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     // Corners should be preserved (they live on vertices, which are always
     // converted)
@@ -807,11 +1277,11 @@ namespace Rodin::Tests::Unit
     mesh.setRequiredTriangle(0);
     mesh.setRequiredTriangle(3);
 
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     EXPECT_EQ(result.getRequiredTriangles().size(), 2);
     EXPECT_TRUE(result.getRequiredTriangles().count(0));
@@ -832,11 +1302,11 @@ namespace Rodin::Tests::Unit
     mesh.setRequiredEdge(requiredEdge);
     mesh.setRequiredTriangle(requiredTriangle);
 
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     EXPECT_EQ(result.getRequiredVertices().size(), 1);
     EXPECT_EQ(result.getRequiredEdges().size(), 1);
@@ -854,11 +1324,11 @@ namespace Rodin::Tests::Unit
     const Index required = getFirstBoundaryTriangleIndex(mesh);
     mesh.setRequiredTriangle(required);
 
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     EXPECT_EQ(result.getRequiredTriangles().size(), 1);
   }
@@ -873,11 +1343,11 @@ namespace Rodin::Tests::Unit
     const Index required = getFirstBoundaryTriangleIndex(mesh);
     mesh.setRequiredTriangle(required);
 
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     EXPECT_EQ(result.getRequiredTriangles().size(), 1);
     EXPECT_TRUE(result.getRequiredTriangles().count(0));
@@ -900,11 +1370,11 @@ namespace Rodin::Tests::Unit
     mesh.setRequiredTriangle(requiredTriangle);
     mesh.setRequiredTetrahedron(requiredTetrahedron);
 
-    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
     ASSERT_NE(mmgMesh, nullptr);
 
-    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
-    MMG::MMG5::destroyMesh(mmgMesh);
+    MMG::Mesh result = MMG::V5::Mesh::fromV5(mmgMesh);
+    MMG::V5::Mesh::destroy(mmgMesh);
 
     EXPECT_EQ(result.getRequiredVertices().size(), 1);
     EXPECT_EQ(result.getRequiredEdges().size(), 1);
@@ -925,7 +1395,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     MMG::Optimizer optimizer;
     optimizer.setHMax(0.5);
@@ -943,14 +1413,11 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     // Fluent API method chaining
-    MMG::Optimizer()
-      .setHMax(0.5)
-      .setAngleDetection(true)
-      .setGradation(1.3)
-      .optimize(mesh);
+    MMG::Optimizer().setHMax(0.5).setAngleDetection(true).setGradation(1.3).optimize(
+      mesh);
 
     EXPECT_FALSE(mesh.isEmpty());
     EXPECT_GT(mesh.getVertexCount(), 0);
@@ -962,7 +1429,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.getConnectivity().compute(1, 2);
 
     // Mark corners
@@ -1080,7 +1547,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     // Create a constant size map
     P1 fes(mesh);
@@ -1103,13 +1570,12 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     // Create a variable size map: smaller near center, larger near boundary
     P1 fes(mesh);
     MMG::RealGridFunction sizeMap(fes);
-    sizeMap = [&](const Geometry::Point& p)
-    {
+    sizeMap = [&](const Geometry::Point& p) {
       Real cx = static_cast<Real>(n - 1) / 2.0;
       Real cy = cx;
       Real dx = p.x() - cx;
@@ -1133,7 +1599,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     P1 fes(mesh);
     MMG::RealGridFunction sizeMap(fes);
@@ -1167,27 +1633,25 @@ namespace Rodin::Tests::Unit
 
     const size_t n = 16;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.scale(1.0 / (n - 1));
 
     // Set all cells to interior attribute
     for (auto it = mesh.getCell(); it; ++it)
-      mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+      mesh.setAttribute({it->getDimension(), it->getIndex()}, interior);
 
     // Create level-set function: circle of given radius centered at (0.5, 0.5)
     P1 fes(mesh);
     MMG::RealGridFunction ls(fes);
-    ls = [](const Geometry::Point& p)
-    {
+    ls = [](const Geometry::Point& p) {
       return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - radius;
     };
 
-    MMG::Mesh result =
-      MMG::LevelSetDiscretizer()
-        .split(interior, { interior, exterior })
-        .setBoundaryReference(boundary)
-        .setHMax(0.1)
-        .discretize(ls);
+    MMG::Mesh result = MMG::LevelSetDiscretizer()
+                         .split(interior, {interior, exterior})
+                         .setBoundaryReference(boundary)
+                         .setHMax(0.1)
+                         .discretize(ls);
 
     // Result should be a valid non-empty mesh
     EXPECT_FALSE(result.isEmpty());
@@ -1204,29 +1668,27 @@ namespace Rodin::Tests::Unit
 
     const size_t n = 16;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.scale(1.0 / (n - 1));
 
     for (auto it = mesh.getCell(); it; ++it)
-      mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+      mesh.setAttribute({it->getDimension(), it->getIndex()}, interior);
 
     P1 fes(mesh);
     MMG::RealGridFunction ls(fes);
-    ls = [](const Geometry::Point& p)
-    {
+    ls = [](const Geometry::Point& p) {
       return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - 0.1;
     };
 
     // Verify fluent API chaining compiles and works
-    MMG::Mesh result =
-      MMG::LevelSetDiscretizer()
-        .split(interior, { interior, exterior })
-        .setBoundaryReference(10)
-        .setHMin(0.01)
-        .setHMax(0.1)
-        .setGradation(1.3)
-        .setAngleDetection(true)
-        .discretize(ls);
+    MMG::Mesh result = MMG::LevelSetDiscretizer()
+                         .split(interior, {interior, exterior})
+                         .setBoundaryReference(10)
+                         .setHMin(0.01)
+                         .setHMax(0.1)
+                         .setGradation(1.3)
+                         .setAngleDetection(true)
+                         .discretize(ls);
 
     EXPECT_FALSE(result.isEmpty());
   }
@@ -1239,22 +1701,21 @@ namespace Rodin::Tests::Unit
 
     const size_t n = 16;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.scale(1.0 / (n - 1));
 
     // Set half the cells to mat1, half to mat2
     for (auto it = mesh.getCell(); it; ++it)
-      mesh.setAttribute({ it->getDimension(), it->getIndex() }, mat1);
+      mesh.setAttribute({it->getDimension(), it->getIndex()}, mat1);
 
     P1 fes(mesh);
     MMG::RealGridFunction ls(fes);
-    ls = [](const Geometry::Point& p)
-    {
+    ls = [](const Geometry::Point& p) {
       return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - 0.1;
     };
 
     MMG::LevelSetDiscretizer discretizer;
-    discretizer.split(mat1, { mat1, exterior });
+    discretizer.split(mat1, {mat1, exterior});
     discretizer.setBoundaryReference(10);
     discretizer.setHMax(0.1);
 
@@ -1275,27 +1736,25 @@ namespace Rodin::Tests::Unit
 
     const size_t n = 16;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.scale(1.0 / (n - 1));
 
     for (auto it = mesh.getCell(); it; ++it)
-      mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+      mesh.setAttribute({it->getDimension(), it->getIndex()}, interior);
 
     P1 fes(mesh);
     MMG::RealGridFunction ls(fes);
-    ls = [](const Geometry::Point& p)
-    {
+    ls = [](const Geometry::Point& p) {
       return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - 0.1;
     };
 
     // Discretize at a non-zero level-set value
-    MMG::Mesh result =
-      MMG::LevelSetDiscretizer()
-        .split(interior, { interior, exterior })
-        .setBoundaryReference(10)
-        .setLevelSet(0.0)
-        .setHMax(0.1)
-        .discretize(ls);
+    MMG::Mesh result = MMG::LevelSetDiscretizer()
+                         .split(interior, {interior, exterior})
+                         .setBoundaryReference(10)
+                         .setLevelSet(0.0)
+                         .setHMax(0.1)
+                         .discretize(ls);
 
     EXPECT_FALSE(result.isEmpty());
     EXPECT_GT(result.getVertexCount(), 0);
@@ -1360,6 +1819,7 @@ namespace Rodin::Tests::Unit
       return dx * dx + dy * dy + dz * dz - 0.16;
     };
 
+    const MMG::Mesh requiredMesh(mesh);
     MMG::Mesh result = MMG::LevelSetDiscretizer()
                          .split(interior, {interior, exterior})
                          .setBoundaryReference(10)
@@ -1368,8 +1828,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_FALSE(result.isEmpty());
     EXPECT_GT(result.getCellCount(), 0);
-    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
-    EXPECT_TRUE(result.getRequiredTriangles().count(required));
+    expectRequiredGeometry(requiredMesh, result);
   }
 
   /// @brief Verifies preserves required entities 2 D for MMG level set discretizer by checking exact expected values, true predicates, false predicates.
@@ -1400,6 +1859,7 @@ namespace Rodin::Tests::Unit
       return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - 0.1;
     };
 
+    const MMG::Mesh requiredMesh(mesh);
     MMG::Mesh result = MMG::LevelSetDiscretizer()
                          .split(interior, {interior, exterior})
                          .setBoundaryReference(10)
@@ -1408,12 +1868,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_FALSE(result.isEmpty());
     EXPECT_GT(result.getCellCount(), 0);
-    EXPECT_EQ(result.getRequiredVertices().size(), 1);
-    EXPECT_EQ(result.getRequiredEdges().size(), 1);
-    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
-    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
-    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
-    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
+    expectRequiredGeometry(requiredMesh, result);
   }
 
   /// @brief Verifies preserves uncut required entity geometry 2 D for MMG level set discretizer by checking true predicates.
@@ -1456,15 +1911,14 @@ namespace Rodin::Tests::Unit
     MMG::RealGridFunction ls(fes);
     ls = lsFn;
 
+    const MMG::Mesh requiredMesh(mesh);
     MMG::Mesh result = MMG::LevelSetDiscretizer()
                          .split(interior, {interior, exterior})
                          .setBoundaryReference(10)
                          .setHMax(0.1)
                          .discretize(ls);
 
-    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
-    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
-    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
+    expectRequiredGeometry(requiredMesh, result);
     EXPECT_TRUE(hasVertexWithCoordinates(result, requiredVertexPoint));
     EXPECT_TRUE(
       hasEntityWithCoordinates(result, Polytope::Type::Segment, requiredEdgePoints));
@@ -1524,6 +1978,7 @@ namespace Rodin::Tests::Unit
     ASSERT_TRUE(foundUncutTetrahedron);
     mesh.setRequiredTetrahedron(requiredTetrahedron);
 
+    const MMG::Mesh requiredMesh(mesh);
     MMG::Mesh result = MMG::LevelSetDiscretizer()
                          .split(interior, {interior, exterior})
                          .setBoundaryReference(10)
@@ -1532,14 +1987,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_FALSE(result.isEmpty());
     EXPECT_GT(result.getCellCount(), 0);
-    EXPECT_EQ(result.getRequiredVertices().size(), 1);
-    EXPECT_EQ(result.getRequiredEdges().size(), 1);
-    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
-    EXPECT_EQ(result.getRequiredTetrahedra().size(), 1);
-    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
-    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
-    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
-    EXPECT_TRUE(result.getRequiredTetrahedra().count(requiredTetrahedron));
+    expectRequiredGeometry(requiredMesh, result);
   }
 
   /// @brief Verifies preserves uncut required entity geometry 3 D for MMG level set discretizer by checking true predicates.
@@ -1591,16 +2039,14 @@ namespace Rodin::Tests::Unit
     MMG::RealGridFunction ls(fes);
     ls = lsFn;
 
+    const MMG::Mesh requiredMesh(mesh);
     MMG::Mesh result = MMG::LevelSetDiscretizer()
                          .split(interior, {interior, exterior})
                          .setBoundaryReference(10)
                          .setHMax(0.35)
                          .discretize(ls);
 
-    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
-    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
-    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
-    EXPECT_TRUE(result.getRequiredTetrahedra().count(requiredTetrahedron));
+    expectRequiredGeometry(requiredMesh, result);
     EXPECT_TRUE(hasVertexWithCoordinates(result, requiredVertexPoint));
     EXPECT_TRUE(
       hasEntityWithCoordinates(result, Polytope::Type::Segment, requiredEdgePoints));
@@ -2208,7 +2654,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Common, SplitMapConstruction)
   {
     MMG::SplitMap splitMap;
-    splitMap[1] = MMG::Split{ 2, 3 };
+    splitMap[1] = MMG::Split{2, 3};
     splitMap[4] = MMG::NoSplit;
 
     EXPECT_EQ(splitMap.size(), 2);
@@ -2228,7 +2674,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarGridFunctionConstruction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
 
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
@@ -2242,13 +2688,12 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, VectorGridFunctionConstruction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
 
     P1 fes(mesh, 2);
     MMG::VectorGridFunction gf(fes);
-    gf = [](const Geometry::Point& p)
-    {
-      return Math::SpatialVector<Real>{{ p.x(), p.y() }};
+    gf = [](const Geometry::Point& p) {
+      return Math::SpatialVector<Real>{{p.x(), p.y()}};
     };
 
     EXPECT_EQ(gf.getFiniteElementSpace().getVectorDimension(), 2);
@@ -2326,7 +2771,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.scale(0.5);
 
     EXPECT_EQ(mesh.getVertexCount(), n * n);
@@ -2339,12 +2784,12 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     static constexpr Attribute label = 42;
     for (auto it = mesh.getCell(); it; ++it)
     {
-      mesh.setAttribute({ it->getDimension(), it->getIndex() }, label);
+      mesh.setAttribute({it->getDimension(), it->getIndex()}, label);
     }
 
     // Verify attributes are set correctly
@@ -2360,7 +2805,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, VertexCoordinates)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {3, 3});
 
     // Vertices on a 3x3 grid at integer coordinates
     const size_t vertexCount = mesh.getVertexCount();
@@ -2379,14 +2824,14 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, ScaleAffectsCoordinates)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh.scale(0.5);
 
     // After scaling by 0.5, max coordinates should be halved
     for (Index i = 0; i < static_cast<Index>(mesh.getVertexCount()); i++)
     {
       auto coords = mesh.getVertexCoordinates(i);
-      EXPECT_LE(coords(0), 1.1);  // Allow small FP tolerance
+      EXPECT_LE(coords(0), 1.1); // Allow small FP tolerance
       EXPECT_LE(coords(1), 1.1);
     }
   }
@@ -2396,7 +2841,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.getConnectivity().compute(1, 2);
 
     // After computing face→cell incidence, boundary detection works
@@ -2414,7 +2859,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, IdempotentSetCorner)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
 
     mesh.setCorner(0);
     mesh.setCorner(0);
@@ -2428,7 +2873,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, IdempotentSetRidge)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+    mesh.getConnectivity().compute(1, 2);
 
     mesh.setRidge(0);
     mesh.setRidge(0);
@@ -2439,34 +2885,43 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies move assignment clears source for MMG mesh by checking exact expected values, false predicates, move semantics.
   TEST(Rodin_MMG_Mesh, MoveAssignmentClearsSource)
   {
-    MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.setCorner(0);
-    mesh.setCorner(3);
-    mesh.setRidge(1);
-    mesh.setRequiredVertex(5);
-    mesh.setRequiredEdge(2);
-    mesh.setRequiredTriangle(1);
-    mesh.setRequiredTetrahedron(0);
+    for (const bool volume : {false, true})
+    {
+      SCOPED_TRACE(volume);
+      MMG::Mesh mesh;
+      mesh = volume ? mesh.UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4})
+                    : mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+      mesh.getConnectivity().compute(1, mesh.getDimension());
+      if (volume)
+        mesh.getConnectivity().compute(2, 3);
+      mesh.setCorner(0);
+      mesh.setCorner(3);
+      mesh.setRidge(1);
+      mesh.setRequiredVertex(5);
+      mesh.setRequiredEdge(2);
+      mesh.setRequiredTriangle(1);
+      if (volume)
+        mesh.setRequiredTetrahedron(0);
 
-    MMG::Mesh target;
-    target = std::move(mesh);
+      MMG::Mesh target;
+      target = std::move(mesh);
 
-    // Target has the data
-    EXPECT_EQ(target.getCorners().size(), 2);
-    EXPECT_EQ(target.getRidges().size(), 1);
-    EXPECT_EQ(target.getRequiredVertices().size(), 1);
-    EXPECT_EQ(target.getRequiredEdges().size(), 1);
-    EXPECT_EQ(target.getRequiredTriangles().size(), 1);
-    EXPECT_EQ(target.getRequiredTetrahedra().size(), 1);
-    EXPECT_FALSE(target.isEmpty());
+      // Target has the data
+      EXPECT_EQ(target.getCorners().size(), 2);
+      EXPECT_EQ(target.getRidges().size(), 1);
+      EXPECT_EQ(target.getRequiredVertices().size(), 1);
+      EXPECT_EQ(target.getRequiredEdges().size(), 1);
+      EXPECT_EQ(target.getRequiredTriangles().size(), 1);
+      EXPECT_EQ(target.getRequiredTetrahedra().size(), volume ? 1 : 0);
+      EXPECT_FALSE(target.isEmpty());
+    }
   }
 
   /// @brief Verifies copy preserves metadata after mutation for MMG mesh by checking exact expected values, copy semantics.
   TEST(Rodin_MMG_Mesh, CopyPreservesMetadataAfterMutation)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.setCorner(0);
 
     MMG::Mesh copy(mesh);
@@ -2485,7 +2940,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, ParentMoveAssignmentClearsMMGMetadata)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4});
+    mesh.getConnectivity().compute(1, 3);
+    mesh.getConnectivity().compute(2, 3);
     mesh.setCorner(0);
     mesh.setRidge(1);
     mesh.setRequiredTriangle(0);
@@ -2493,7 +2950,7 @@ namespace Rodin::Tests::Unit
 
     // Assign from parent type (which has no MMG metadata)
     Mesh<Context::Local> parentMesh;
-    parentMesh = parentMesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    parentMesh = parentMesh.UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh = std::move(parentMesh);
 
     // After parent assignment, topology changes and MMG metadata is cleared.
@@ -2511,7 +2968,7 @@ namespace Rodin::Tests::Unit
   {
     // A 2D uniform grid on triangles is not a surface mesh
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     EXPECT_FALSE(mesh.isSurface());
   }
 
@@ -2519,7 +2976,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, GetArea)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh.getConnectivity().compute(1, 2);
 
     // The area of the default 2D grid
@@ -2535,7 +2992,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarZeroInitialization)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2551,7 +3008,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarProjectFromLambda)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2571,7 +3028,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarProjectConstant)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2587,7 +3044,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarDataAccess)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2605,7 +3062,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarOperatorBracket)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2626,7 +3083,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticAddScalar)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2643,7 +3100,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticSubScalar)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2660,7 +3117,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticMulScalar)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2677,7 +3134,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticDivScalar)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2694,7 +3151,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticAddGridFunction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes), gf2(fes);
 
@@ -2712,7 +3169,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticSubGridFunction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes), gf2(fes);
 
@@ -2730,7 +3187,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticMulGridFunction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes), gf2(fes);
 
@@ -2748,7 +3205,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticDivGridFunction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes), gf2(fes);
 
@@ -2766,7 +3223,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarMinMax)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2783,7 +3240,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArgMinArgMax)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2800,7 +3257,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarCopyConstructor)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes);
     gf1 = RealFunction(5.0);
@@ -2823,7 +3280,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarMoveConstructor)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes);
     gf1 = RealFunction(7.0);
@@ -2841,7 +3298,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarCopyAssignment)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes), gf2(fes);
     gf1 = RealFunction(3.0);
@@ -2858,7 +3315,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarFESAssociation)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2872,7 +3329,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarPointEvaluation)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2882,7 +3339,7 @@ namespace Rodin::Tests::Unit
     // Get the first cell and evaluate at a reference point inside it
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+    const Math::Vector<Real> rc{{0.25, 0.25}};
     Geometry::Point p(polytope, rc);
 
     Real value = gf.getValue(p);
@@ -2893,7 +3350,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarLinearFunctionExactInterpolation)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2907,7 +3364,7 @@ namespace Rodin::Tests::Unit
       const auto& polytope = *it;
       const auto& trans = mesh.getPolytopeTransformation(mesh.getDimension(), cellIdx);
 
-      const Math::Vector<Real> rc{{ 1.0 / 3.0, 1.0 / 3.0 }};
+      const Math::Vector<Real> rc{{1.0 / 3.0, 1.0 / 3.0}};
       Math::SpatialPoint pc;
       trans.transform(pc, rc);
       Geometry::Point p(polytope, rc);
@@ -2922,13 +3379,12 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, VectorProjectFromLambda)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh, 2);
     MMG::VectorGridFunction gf(fes);
 
-    gf = [](const Geometry::Point& p)
-    {
-      return Math::SpatialVector<Real>{{ p.x(), p.y() }};
+    gf = [](const Geometry::Point& p) {
+      return Math::SpatialVector<Real>{{p.x(), p.y()}};
     };
 
     EXPECT_EQ(gf.getFiniteElementSpace().getVectorDimension(), 2);
@@ -2939,7 +3395,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, VectorFESAssociation)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh, 3);
     MMG::GridFunction<Math::SpatialVector<Real>> gf(fes);
 
@@ -2952,7 +3408,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarIOSaveLoadMEDIT)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
     gf = [](const Geometry::Point& p) { return p.x() + p.y(); };
@@ -2983,7 +3439,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarIOSaveLoadMFEM)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
     gf = RealFunction(3.14);
@@ -3017,7 +3473,7 @@ namespace Rodin::Tests::Unit
     // mesh can host a new grid function.
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     P1 fes(mesh);
     MMG::RealGridFunction sizeMap(fes);
@@ -3039,20 +3495,17 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, VectorPointEvaluation)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh, 2);
     MMG::VectorGridFunction gf(fes);
 
     // Project a constant vector function
-    gf = [](const Geometry::Point&)
-    {
-      return Math::SpatialVector<Real>{{ 1.0, 2.0 }};
-    };
+    gf = [](const Geometry::Point&) { return Math::SpatialVector<Real>{{1.0, 2.0}}; };
 
     // Evaluate at a point inside the first cell
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+    const Math::Vector<Real> rc{{0.25, 0.25}};
     Geometry::Point p(polytope, rc);
 
     auto value = gf.getValue(p);
@@ -3064,7 +3517,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarSetData)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3079,6 +3532,614 @@ namespace Rodin::Tests::Unit
     for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
     {
       EXPECT_NEAR(gf[i], static_cast<Real>(i * 2), 1e-14);
+    }
+  }
+}
+
+/// @brief Reusing a volume cutter applies the current labels and exact affine interface.
+TEST(Rodin_MMG_LevelSetDiscretizer, ReusedAffineVolumeCutUsesCurrentMaterialLabels)
+{
+  constexpr Attribute material = 17;
+  constexpr Attribute boundary = 71;
+  constexpr Real isovalue = 0.37;
+  MMG::Mesh mesh;
+  mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+  mesh.scale(0.5);
+  for (auto cell = mesh.getCell(); cell; ++cell)
+    mesh.setAttribute({3, cell->getIndex()}, material);
+  P1 space(mesh);
+  MMG::RealGridFunction levelSet(space);
+  levelSet = [](const Point& point) { return point.x(); };
+  MMG::LevelSetDiscretizer cutter;
+  cutter.setLevelSet(isovalue)
+    .setBoundaryReference(boundary)
+    .setRMC(0)
+    .setBaseReferences(material)
+    .setHMax(0.4);
+  for (const auto labels : {MMG::Split{41, 42}, MMG::Split{51, 52}, MMG::Split{41, 42}})
+  {
+    cutter.setSplit({{material, labels}});
+    auto result = cutter.discretize(levelSet);
+    ASSERT_FALSE(result.isEmpty());
+    EXPECT_EQ(result.getDimension(), 3);
+    Real inside = 0, outside = 0, interfaceArea = 0;
+    for (auto cell = result.getCell(); cell; ++cell)
+    {
+      const auto attribute = cell->getAttribute();
+      ASSERT_TRUE(attribute);
+      const Real measure = cell->getMeasure();
+      if (*attribute == labels.interior)
+      {
+        inside += measure;
+        for (const auto vertex : cell->getVertices())
+          EXPECT_LE(result.getVertexCoordinates(vertex).x(), isovalue + 1e-10);
+      }
+      else
+      {
+        EXPECT_EQ(*attribute, labels.exterior);
+        outside += measure;
+        for (const auto vertex : cell->getVertices())
+          EXPECT_GE(result.getVertexCoordinates(vertex).x(), isovalue - 1e-10);
+      }
+    }
+    for (auto face = result.getFace(); face; ++face)
+    {
+      if (face->getAttribute() != boundary)
+        continue;
+      interfaceArea += face->getMeasure();
+      for (const auto vertex : face->getVertices())
+        EXPECT_NEAR(result.getVertexCoordinates(vertex).x(), isovalue, 1e-10);
+    }
+    EXPECT_NEAR(inside, isovalue, 1e-10);
+    EXPECT_NEAR(outside, 1 - isovalue, 1e-10);
+    EXPECT_NEAR(interfaceArea, 1, 1e-10);
+  }
+}
+
+/// @brief Surface cutting preserves a planar square and emits the exact affine contour.
+TEST(Rodin_MMG_LevelSetDiscretizer, AffineSurfaceCutPreservesAreaAndContour)
+{
+  constexpr Attribute boundary = 71;
+  constexpr Real isovalue = 0.37;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+  mesh.scale(0.5);
+  Mesh<Context::Local>::Builder builder;
+  builder.initialize(3).nodes(mesh.getVertexCount());
+  for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+  {
+    const auto& coordinates = vertex->getCoordinates();
+    builder.vertex({coordinates.x(), coordinates.y(), 0});
+  }
+  for (auto cell = mesh.getCell(); cell; ++cell)
+  {
+    const auto& vertices = cell->getVertices();
+    builder.polytope(Polytope::Type::Triangle, {vertices[0], vertices[1], vertices[2]});
+  }
+  auto surface = builder.finalize();
+  surface.getConnectivity().compute(1, 2);
+  P1 space(surface);
+  MMG::RealGridFunction levelSet(space);
+  levelSet = [](const Point& point) { return point.x(); };
+  auto result = MMG::LevelSetDiscretizer()
+                  .setLevelSet(isovalue)
+                  .setBoundaryReference(boundary)
+                  .setHMax(0.3)
+                  .discretize(levelSet);
+  ASSERT_FALSE(result.isEmpty());
+  EXPECT_TRUE(result.isSurface());
+  Real area = 0, contourLength = 0;
+  for (auto cell = result.getCell(); cell; ++cell)
+    area += cell->getMeasure();
+  for (auto edge = result.getFace(); edge; ++edge)
+  {
+    if (edge->getAttribute() != boundary)
+      continue;
+    contourLength += edge->getMeasure();
+    for (const auto vertex : edge->getVertices())
+      EXPECT_NEAR(result.getVertexCoordinates(vertex).x(), isovalue, 1e-10);
+  }
+  for (auto vertex = result.getVertex(); vertex; ++vertex)
+    EXPECT_NEAR(vertex->getCoordinates().z(), 0, 1e-10);
+  EXPECT_NEAR(area, 1, 1e-10);
+  EXPECT_NEAR(contourLength, 1, 1e-10);
+}
+
+/// @brief Native copies retain cached neighbors and geometry after source destruction.
+TEST(MMG5Lifecycle, CachedAdjacencyCopiesMatchTopology)
+{
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
+  for (const size_t configuration : {0u, 1u, 2u})
+  {
+    SCOPED_TRACE(configuration);
+    auto mesh = [&]() -> LocalMesh {
+      if (configuration == 1)
+      {
+        return LocalMesh::Builder()
+          .initialize(3)
+          .nodes(4)
+          .vertex({0, 0, 0})
+          .vertex({1, 0, 1})
+          .vertex({1, 1, 2})
+          .vertex({0, 1, 1})
+          .polytope(Polytope::Type::Triangle, {0, 1, 2})
+          .polytope(Polytope::Type::Triangle, {0, 2, 3})
+          .finalize();
+      }
+      auto grid = configuration == 0
+        ? LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3})
+        : LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+      grid.scale(Real(0.5));
+      return grid;
+    }();
+    const size_t dimension = mesh.getDimension();
+    mesh.getConnectivity().compute(dimension, dimension - 1);
+    mesh.getConnectivity().compute(dimension - 1, dimension);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+      mesh.setAttribute(cell.key(), 17 + cell->getIndex());
+    Owner source(MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
+    auto neighbors = [configuration](MMG5_pMesh native, MMG5_int cell, MMG5_int* result) {
+      if (configuration == 0)
+        return MMG2D_Get_adjaTri(native, cell, result);
+      if (configuration == 1)
+        return MMGS_Get_adjaTri(native, cell, result);
+      return MMG3D_Get_adjaTet(native, cell, result);
+    };
+    std::array<MMG5_int, 4> first{};
+    ASSERT_EQ(neighbors(source.get(), 1, first.data()), 1);
+    ASSERT_NE(source->adja, nullptr);
+    Owner copy(
+      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), MMG::V5::Mesh::destroy);
+    ASSERT_NE(copy, nullptr);
+    MMG::V5::Mesh::copy(source.get(), copy.get());
+    ASSERT_NE(copy->adja, nullptr);
+    EXPECT_NE(copy->adja, source->adja);
+    const size_t faces = dimension + 1;
+    const size_t count = faces * mesh.getCellCount() + 5;
+    for (size_t slot = 0; slot < count; ++slot)
+      EXPECT_EQ(copy->adja[slot], source->adja[slot]);
+    const auto cached = copy->adja[1];
+    source->adja[1] = cached == 0 ? 1 : 0;
+    EXPECT_EQ(copy->adja[1], cached);
+    source.reset();
+    for (Index cell = 0; cell < mesh.getCellCount(); ++cell)
+    {
+      std::array<MMG5_int, 4> adjacent{};
+      ASSERT_EQ(neighbors(copy.get(), cell + 1, adjacent.data()), 1);
+      FlatSet<MMG5_int> actual, expected;
+      for (size_t face = 0; face < faces; ++face)
+      {
+        if (adjacent[face] != 0)
+          actual.insert(adjacent[face]);
+      }
+      for (const auto face :
+        mesh.getConnectivity().getIncidence(dimension, dimension - 1).at(cell))
+      {
+        for (const auto other :
+          mesh.getConnectivity().getIncidence(dimension - 1, dimension).at(face))
+        {
+          if (other != cell)
+            expected.insert(other + 1);
+        }
+      }
+      EXPECT_EQ(actual, expected);
+    }
+    const auto restored = MMG::V5::Mesh::fromV5(copy.get());
+    EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
+    for (Index cell = 0; cell < mesh.getCellCount(); ++cell)
+    {
+      EXPECT_EQ(
+        restored.getAttribute(dimension, cell), mesh.getAttribute(dimension, cell));
+    }
+    const Real expectedMeasure = configuration == 1 ? std::sqrt(Real(3)) : Real(1);
+    const Real measure = dimension == 3 ? restored.getVolume() : restored.getArea();
+    EXPECT_NEAR(measure, expectedMeasure, 1e-12);
+  }
+}
+
+/// @brief Copied solution payloads and file names remain owned after releasing the source.
+TEST(MMG5Lifecycle, NamedSolutionCopyOwnsPayloadAndNames)
+{
+  using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
+  using SolOwner = std::unique_ptr<MMG5_Sol, decltype(&MMG::V5::Solution::destroy)>;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  MeshOwner native(MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
+  for (const size_t components : {1u, 2u, 3u})
+  {
+    SolOwner source(
+      MMG::V5::Solution::create(native.get(), components), MMG::V5::Solution::destroy);
+    ASSERT_NE(source, nullptr);
+    ASSERT_EQ(MMG2D_Set_inputSolName(native.get(), source.get(), "metric.input.sol"), 1);
+    ASSERT_EQ(
+      MMG2D_Set_outputSolName(native.get(), source.get(), "metric.output.sol"), 1);
+    const size_t count = components * (source->np + 1);
+    for (size_t index = 0; index < count; ++index)
+      source->m[index] = Real(0.25) * index;
+    SolOwner copy(
+      static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), MMG::V5::Solution::destroy);
+    ASSERT_NE(copy, nullptr);
+    MMG::V5::Solution::copy(source.get(), copy.get());
+    EXPECT_NE(copy->m, source->m);
+    EXPECT_NE(copy->namein, source->namein);
+    EXPECT_NE(copy->nameout, source->nameout);
+    EXPECT_EQ(copy->np, source->np);
+    EXPECT_EQ(copy->size, source->size);
+    source->m[1] = -1;
+    source->namein[0] = 'X';
+    source->nameout[0] = 'Y';
+    source.reset();
+    for (size_t index = 0; index < count; ++index)
+      EXPECT_EQ(copy->m[index], Real(0.25) * index);
+    EXPECT_STREQ(copy->namein, "metric.input.sol");
+    EXPECT_STREQ(copy->nameout, "metric.output.sol");
+  }
+}
+
+/// @brief Empty optional solutions copy and exchange ownership with populated solutions.
+TEST(MMG5Lifecycle, EmptySolutionCopiesAndSwaps)
+{
+  using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
+  using SolOwner = std::unique_ptr<MMG5_Sol, decltype(&MMG::V5::Solution::destroy)>;
+  MeshOwner emptyMesh(MMG::V5::Mesh::create(2, 2), MMG::V5::Mesh::destroy);
+  SolOwner empty(
+    MMG::V5::Solution::create(emptyMesh.get(), 1), MMG::V5::Solution::destroy);
+  ASSERT_NE(empty, nullptr);
+  EXPECT_EQ(empty->np, 0);
+  EXPECT_EQ(empty->m, nullptr);
+  SolOwner copied(
+    static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), MMG::V5::Solution::destroy);
+  MMG::V5::Solution::copy(empty.get(), copied.get());
+  EXPECT_EQ(copied->np, 0);
+  EXPECT_EQ(copied->size, 1);
+  EXPECT_EQ(copied->m, nullptr);
+  EXPECT_EQ(copied->namein, nullptr);
+  EXPECT_EQ(copied->nameout, nullptr);
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  MeshOwner native(MMG::V5::Mesh::toV5(mesh), MMG::V5::Mesh::destroy);
+  SolOwner populated(
+    MMG::V5::Solution::create(native.get(), 1), MMG::V5::Solution::destroy);
+  populated->m[1] = Real(1.5);
+  const auto payload = populated->m;
+  MMG::V5::Solution::swap(copied.get(), populated.get());
+  EXPECT_EQ(copied->m, payload);
+  EXPECT_EQ(copied->np, mesh.getVertexCount());
+  EXPECT_EQ(copied->m[1], Real(1.5));
+  EXPECT_EQ(populated->np, 0);
+  EXPECT_EQ(populated->m, nullptr);
+}
+
+/// @brief Surface optimization improves a distorted patch while preserving its plane and corners.
+TEST(Rodin_MMG_Optimizer, EmbeddedSurfaceImprovesQualityAndPreservesGeometry)
+{
+  auto mesh = MMG::Mesh::Builder()
+                .initialize(3)
+                .nodes(5)
+                .vertex({0, 0, 0})
+                .vertex({1, 0, 1})
+                .vertex({1, 1, 3})
+                .vertex({0, 1, 2})
+                .vertex({0.08, 0.12, 0.32})
+                .polytope(Polytope::Type::Triangle, {0, 1, 4})
+                .polytope(Polytope::Type::Triangle, {1, 2, 4})
+                .polytope(Polytope::Type::Triangle, {2, 3, 4})
+                .polytope(Polytope::Type::Triangle, {3, 0, 4})
+                .corner(0)
+                .corner(1)
+                .corner(2)
+                .corner(3)
+                .finalize();
+  for (auto cell = mesh.getCell(); cell; ++cell)
+    mesh.setAttribute(cell.key(), 17);
+  const Math::SpatialVector<Real> normal{-1, -2, 1};
+  const std::array<Math::SpatialPoint, 4> corners{
+    {{0, 0, 0}, {1, 0, 1}, {1, 1, 3}, {0, 1, 2}}};
+  const auto geometry = [&] {
+    Real area = 0;
+    Real quality = std::numeric_limits<Real>::infinity();
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      EXPECT_EQ(cell->getGeometry(), Polytope::Type::Triangle);
+      EXPECT_EQ(cell->getAttribute(), Optional<Attribute>(17));
+      const auto vertices = cell->getVertices();
+      EXPECT_EQ(vertices.size(), 3);
+      if (vertices.size() != 3)
+        continue;
+      const auto a = mesh.getVertexCoordinates(vertices[0]);
+      const auto b = mesh.getVertexCoordinates(vertices[1]);
+      const auto c = mesh.getVertexCoordinates(vertices[2]);
+      const auto cross = (b - a).cross(c - a);
+      EXPECT_GT(cross.dot(normal), 0);
+      const Real sum =
+        (b - a).squaredNorm() + (c - b).squaredNorm() + (a - c).squaredNorm();
+      EXPECT_GT(sum, 0);
+      area += cross.norm() / 2;
+      quality = std::min(quality,
+        2 * std::sqrt(Real(3)) * cross.norm() /
+          std::max(sum, std::numeric_limits<Real>::min()));
+    }
+    return std::pair{area, quality};
+  };
+  const auto before = geometry();
+  EXPECT_NEAR(before.first, std::sqrt(Real(6)), 1e-12);
+  MMG::Optimizer().optimize(mesh);
+  ASSERT_FALSE(mesh.isEmpty());
+  EXPECT_TRUE(mesh.isSurface());
+  EXPECT_EQ(mesh.getDimension(), 2);
+  EXPECT_EQ(mesh.getSpaceDimension(), 3);
+  const auto after = geometry();
+  EXPECT_NEAR(after.first, std::sqrt(Real(6)), 1e-10);
+  EXPECT_GT(after.second, before.second);
+  for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+  {
+    const auto coordinate = vertex->getCoordinates();
+    EXPECT_NEAR(coordinate.z() - coordinate.x() - 2 * coordinate.y(), 0, 1e-10);
+  }
+  for (const auto& expected : corners)
+  {
+    size_t found = 0;
+    for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+      found += (vertex->getCoordinates() - expected).norm() < 1e-12;
+    EXPECT_EQ(found, 1);
+  }
+}
+
+/// @brief Moving a builder replaces prior geometry and every MMG constraint set.
+TEST(Rodin_MMG_Mesh_Builder, MoveAssignmentReplacesGeometryAndConstraints)
+{
+  MMG::Mesh::Builder target;
+  target.initialize(2)
+    .nodes(3)
+    .vertex({0, 0})
+    .vertex({1, 0})
+    .vertex({0, 1})
+    .polytope(Polytope::Type::Segment, {0, 1})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .corner(0)
+    .ridge(0)
+    .requiredVertex(0)
+    .requiredEdge(0)
+    .requiredTriangle(0);
+  {
+    MMG::Mesh::Builder source;
+    source.initialize(3)
+      .nodes(5)
+      .vertex({0, 0, 0})
+      .vertex({2, 0, 0})
+      .vertex({0, 3, 0})
+      .vertex({0, 0, 4})
+      .vertex({0, 0, -4})
+      .polytope(Polytope::Type::Segment, {0, 1})
+      .polytope(Polytope::Type::Segment, {0, 2})
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {0, 1, 3})
+      .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+      .polytope(Polytope::Type::Tetrahedron, {0, 2, 1, 4})
+      .corner(3)
+      .corner(4)
+      .ridge(1)
+      .requiredVertex(2)
+      .requiredVertex(4)
+      .requiredEdge(1)
+      .requiredTriangle(1)
+      .requiredTetrahedron(1);
+    EXPECT_EQ(&(target = std::move(source)), &target);
+  }
+  const auto mesh = target.finalize();
+  EXPECT_EQ(mesh.getDimension(), 3);
+  EXPECT_EQ(mesh.getSpaceDimension(), 3);
+  ASSERT_EQ(mesh.getVertexCount(), 5);
+  EXPECT_EQ(mesh.getCellCount(), 2);
+  const std::array<Math::SpatialPoint, 5> expected{
+    {{0, 0, 0}, {2, 0, 0}, {0, 3, 0}, {0, 0, 4}, {0, 0, -4}}};
+  for (size_t i = 0; i < expected.size(); ++i)
+    EXPECT_EQ((mesh.getVertexCoordinates(i) - expected[i]).norm(), 0);
+  EXPECT_EQ(mesh.getCorners(), (IndexSet{3, 4}));
+  EXPECT_EQ(mesh.getRidges(), (IndexSet{1}));
+  EXPECT_EQ(mesh.getRequiredVertices(), (IndexSet{2, 4}));
+  EXPECT_EQ(mesh.getRequiredEdges(), (IndexSet{1}));
+  EXPECT_EQ(mesh.getRequiredTriangles(), (IndexSet{1}));
+  EXPECT_EQ(mesh.getRequiredTetrahedra(), (IndexSet{1}));
+}
+
+/// @brief Native hybrid cells and boundary caches are independently owned after copying.
+TEST(MMG5Lifecycle, NativeHybridPayloadCopiesOutliveSource)
+{
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
+  Owner source(MMG::V5::Mesh::create(2, 3), MMG::V5::Mesh::destroy);
+  ASSERT_EQ(MMG3D_Set_meshSize(source.get(), 10, 1, 1, 1, 1, 1), 1);
+  const std::array<std::array<Real, 3>, 10> coordinates{{{0, 0, 0}, {1, 0, 0}, {0, 1, 0},
+    {0, 0, 1}, {1, 0, 1}, {0, 1, 1}, {3, 0, 0}, {4, 0, 0}, {3, 1, 0}, {3, 0, 1}}};
+  for (size_t i = 0; i < coordinates.size(); ++i)
+  {
+    const auto& x = coordinates[i];
+    ASSERT_EQ(MMG3D_Set_vertex(source.get(), x[0], x[1], x[2], 11 + i, i + 1), 1);
+  }
+  ASSERT_EQ(MMG3D_Set_tetrahedron(source.get(), 7, 8, 9, 10, 17, 1), 1);
+  ASSERT_EQ(MMG3D_Set_prism(source.get(), 1, 2, 3, 4, 5, 6, 23, 1), 1);
+  ASSERT_EQ(MMG3D_Set_triangle(source.get(), 1, 2, 3, 31, 1), 1);
+  ASSERT_EQ(MMG3D_Set_quadrilateral(source.get(), 1, 2, 5, 4, 37, 1), 1);
+  ASSERT_EQ(MMG3D_Set_edge(source.get(), 1, 2, 41, 1), 1);
+
+  // Boundary caches are public MMG records; no remeshing operation is performed.
+  source->xp = 1;
+  source->xt = 1;
+  source->xpoint = static_cast<MMG5_pxPoint>(mycalloc(2, sizeof(MMG5_xPoint)));
+  source->xtetra = static_cast<MMG5_pxTetra>(mycalloc(2, sizeof(MMG5_xTetra)));
+  source->xprism = static_cast<MMG5_pxPrism>(mycalloc(2, sizeof(MMG5_xPrism)));
+  ASSERT_NE(source->xpoint, nullptr);
+  ASSERT_NE(source->xtetra, nullptr);
+  ASSERT_NE(source->xprism, nullptr);
+  source->point[1].xp = 1;
+  source->tetra[1].xt = 1;
+  source->prism[1].xpr = 1;
+  source->xpoint[1].n1[2] = -1;
+  source->xtetra[1].ref[0] = 43;
+  source->xtetra[1].edg[0] = 47;
+  source->xprism[1].ref[0] = 53;
+  source->xprism[1].edg[0] = 59;
+
+  Owner copy(
+    static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), MMG::V5::Mesh::destroy);
+  ASSERT_NE(copy, nullptr);
+  MMG::V5::Mesh::copy(source.get(), copy.get());
+  ASSERT_NE(copy->prism, nullptr);
+  ASSERT_NE(copy->quadra, nullptr);
+  ASSERT_NE(copy->edge, nullptr);
+  ASSERT_NE(copy->xpoint, nullptr);
+  ASSERT_NE(copy->xtetra, nullptr);
+  ASSERT_NE(copy->xprism, nullptr);
+  EXPECT_NE(copy->prism, source->prism);
+  EXPECT_NE(copy->quadra, source->quadra);
+  EXPECT_NE(copy->edge, source->edge);
+  EXPECT_NE(copy->xpoint, source->xpoint);
+  EXPECT_NE(copy->xtetra, source->xtetra);
+  EXPECT_NE(copy->xprism, source->xprism);
+  source->prism[1].ref = 101;
+  source->quadra[1].ref = 103;
+  source->edge[1].ref = 107;
+  source->xpoint[1].n1[2] = 1;
+  source->xtetra[1].ref[0] = 109;
+  source->xtetra[1].edg[0] = 113;
+  source->xprism[1].ref[0] = 127;
+  source->xprism[1].edg[0] = 131;
+  source.reset();
+
+  EXPECT_EQ(copy->np, 10);
+  EXPECT_EQ(copy->ne, 1);
+  EXPECT_EQ(copy->nprism, 1);
+  EXPECT_EQ(copy->nquad, 1);
+  EXPECT_EQ(copy->na, 1);
+  for (size_t i = 0; i < coordinates.size(); ++i)
+  {
+    for (size_t j = 0; j < 3; ++j)
+      EXPECT_EQ(copy->point[i + 1].c[j], coordinates[i][j]);
+    EXPECT_EQ(copy->point[i + 1].ref, 11 + i);
+  }
+  const std::array<MMG5_int, 6> prism{1, 2, 3, 4, 5, 6};
+  for (size_t i = 0; i < prism.size(); ++i)
+    EXPECT_EQ(copy->prism[1].v[i], prism[i]);
+  const std::array<MMG5_int, 4> quad{1, 2, 5, 4};
+  for (size_t i = 0; i < quad.size(); ++i)
+    EXPECT_EQ(copy->quadra[1].v[i], quad[i]);
+  EXPECT_EQ(copy->prism[1].ref, 23);
+  EXPECT_EQ(copy->quadra[1].ref, 37);
+  EXPECT_EQ(copy->edge[1].a, 1);
+  EXPECT_EQ(copy->edge[1].b, 2);
+  EXPECT_EQ(copy->edge[1].ref, 41);
+  EXPECT_EQ(copy->point[1].xp, 1);
+  EXPECT_EQ(copy->tetra[1].xt, 1);
+  EXPECT_EQ(copy->prism[1].xpr, 1);
+  EXPECT_DOUBLE_EQ(copy->xpoint[1].n1[2], -1);
+  EXPECT_EQ(copy->xtetra[1].ref[0], 43);
+  EXPECT_EQ(copy->xtetra[1].edg[0], 47);
+  EXPECT_EQ(copy->xprism[1].ref[0], 53);
+  EXPECT_EQ(copy->xprism[1].edg[0], 59);
+}
+
+/// @brief Copies own optional adjacency caches and geometric hash records through source destruction.
+TEST(MMG5Lifecycle, OptionalAdjacencyAndHashCachesAreIndependent)
+{
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&MMG::V5::Mesh::destroy)>;
+  for (bool volume : {false, true})
+  {
+    SCOPED_TRACE(volume);
+    Owner source(MMG::V5::Mesh::create(2, volume ? 3 : 2), MMG::V5::Mesh::destroy);
+    if (volume)
+    {
+      ASSERT_EQ(MMG3D_Set_meshSize(source.get(), 10, 1, 1, 1, 1, 1), 1);
+      const std::array<std::array<Real, 3>, 10> points{{{0, 0, 0}, {1, 0, 0}, {0, 1, 0},
+        {0, 0, 1}, {1, 0, 1}, {0, 1, 1}, {3, 0, 0}, {4, 0, 0}, {3, 1, 0}, {3, 0, 1}}};
+      for (size_t i = 0; i < points.size(); ++i)
+      {
+        ASSERT_EQ(MMG3D_Set_vertex(
+                    source.get(), points[i][0], points[i][1], points[i][2], 1, i + 1),
+          1);
+      }
+      ASSERT_EQ(MMG3D_Set_tetrahedron(source.get(), 7, 8, 9, 10, 17, 1), 1);
+      ASSERT_EQ(MMG3D_Set_prism(source.get(), 1, 2, 3, 4, 5, 6, 23, 1), 1);
+      ASSERT_EQ(MMG3D_Set_triangle(source.get(), 1, 2, 3, 31, 1), 1);
+      ASSERT_EQ(MMG3D_Set_quadrilateral(source.get(), 1, 2, 5, 4, 37, 1), 1);
+      ASSERT_EQ(MMG3D_Set_edge(source.get(), 1, 2, 41, 1), 1);
+    }
+    else
+    {
+      ASSERT_EQ(MMG2D_Set_meshSize(source.get(), 7, 1, 1, 0), 1);
+      const std::array<std::array<Real, 2>, 7> points{
+        {{0, 0}, {1, 0}, {1, 1}, {0, 1}, {0, 2}, {1, 2}, {0, 3}}};
+      for (size_t i = 0; i < points.size(); ++i)
+      {
+        ASSERT_EQ(
+          MMG2D_Set_vertex(source.get(), points[i][0], points[i][1], 1, i + 1), 1);
+      }
+      ASSERT_EQ(MMG2D_Set_triangle(source.get(), 5, 6, 7, 17, 1), 1);
+      ASSERT_EQ(MMG2D_Set_quadrilateral(source.get(), 1, 2, 3, 4, 23, 1), 1);
+    }
+    const size_t triangleSize = 3 * source->nt + 4;
+    ASSERT_EQ(source->adjt, nullptr);
+    source->adjt = static_cast<int*>(mycalloc(triangleSize, sizeof(int)));
+    ASSERT_NE(source->adjt, nullptr);
+    for (size_t i = 0; i < triangleSize; ++i)
+      source->adjt[i] = 11 + i;
+    const size_t secondarySize = volume ? 5 * source->nprism + 6 : 4 * source->nquad + 5;
+    auto& secondary = volume ? source->adjapr : source->adjq;
+    ASSERT_EQ(secondary, nullptr);
+    secondary = static_cast<int*>(mycalloc(secondarySize, sizeof(int)));
+    ASSERT_NE(secondary, nullptr);
+    for (size_t i = 0; i < secondarySize; ++i)
+      secondary[i] = 31 + i;
+    if (volume)
+    {
+      source->htab.max = 2;
+      source->htab.siz = 2;
+      source->htab.nxt = 1;
+      ASSERT_EQ(source->htab.geom, nullptr);
+      source->htab.geom = static_cast<MMG5_hgeom*>(mycalloc(3, sizeof(MMG5_hgeom)));
+      ASSERT_NE(source->htab.geom, nullptr);
+      for (size_t i = 0; i < 3; ++i)
+      {
+        source->htab.geom[i].a = i + 1;
+        source->htab.geom[i].b = i + 2;
+        source->htab.geom[i].ref = 53 + i;
+        source->htab.geom[i].nxt = i == 2 ? 0 : i + 1;
+        source->htab.geom[i].tag = 67 + i;
+      }
+    }
+    Owner copy(
+      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), MMG::V5::Mesh::destroy);
+    ASSERT_NE(copy, nullptr);
+    MMG::V5::Mesh::copy(source.get(), copy.get());
+    ASSERT_NE(copy->adjt, nullptr);
+    EXPECT_NE(copy->adjt, source->adjt);
+    const auto copiedSecondary = volume ? copy->adjapr : copy->adjq;
+    ASSERT_NE(copiedSecondary, nullptr);
+    EXPECT_NE(copiedSecondary, secondary);
+    if (volume)
+    {
+      ASSERT_NE(copy->htab.geom, nullptr);
+      EXPECT_NE(copy->htab.geom, source->htab.geom);
+      EXPECT_EQ(copy->htab.max, source->htab.max);
+      EXPECT_EQ(copy->htab.siz, source->htab.siz);
+      EXPECT_EQ(copy->htab.nxt, source->htab.nxt);
+    }
+    source->adjt[0] = -1;
+    secondary[secondarySize - 1] = -2;
+    if (volume)
+      source->htab.geom[2].ref = -3;
+    source.reset();
+    for (size_t i = 0; i < triangleSize; ++i)
+      EXPECT_EQ(copy->adjt[i], 11 + i);
+    for (size_t i = 0; i < secondarySize; ++i)
+      EXPECT_EQ(copiedSecondary[i], 31 + i);
+    if (volume)
+    {
+      for (size_t i = 0; i < 3; ++i)
+      {
+        EXPECT_EQ(copy->htab.geom[i].a, i + 1);
+        EXPECT_EQ(copy->htab.geom[i].b, i + 2);
+        EXPECT_EQ(copy->htab.geom[i].ref, 53 + i);
+        EXPECT_EQ(copy->htab.geom[i].nxt, i == 2 ? 0 : i + 1);
+        EXPECT_EQ(copy->htab.geom[i].tag, 67 + i);
+      }
     }
   }
 }

@@ -14,26 +14,23 @@
 #include <Eigen/Core>
 
 #include <boost/serialization/array.hpp>
+#include <boost/serialization/split_free.hpp>
+
+#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/Matrix.h"
 
 namespace boost::serialization
 {
   /**
    * @brief Saves an Eigen matrix to an archive.
    * @tparam Archive Archive type.
-   * @tparam Scalar Matrix scalar type.
-   * @tparam Rows Compile-time row count.
-   * @tparam Cols Compile-time column count.
-   * @tparam Options Eigen storage options.
-   * @tparam MaxRows Compile-time maximum row count.
-   * @tparam MaxCols Compile-time maximum column count.
+   * @tparam Derived Eigen owning matrix type.
    * @param ar Archive used for serialization.
    * @param matrix Matrix to save.
    * @param version Serialization version.
    */
-  template <class Archive, typename Scalar, int Rows, int Cols, int Options, int MaxRows,
-    int MaxCols>
-  void save(Archive& ar,
-    const Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& matrix,
+  template <class Archive, class Derived>
+  void save(Archive& ar, const Eigen::PlainObjectBase<Derived>& matrix,
     const unsigned int version)
   {
     (void)version;
@@ -47,21 +44,14 @@ namespace boost::serialization
   /**
    * @brief Loads an Eigen matrix from an archive.
    * @tparam Archive Archive type.
-   * @tparam Scalar Matrix scalar type.
-   * @tparam Rows Compile-time row count.
-   * @tparam Cols Compile-time column count.
-   * @tparam Options Eigen storage options.
-   * @tparam MaxRows Compile-time maximum row count.
-   * @tparam MaxCols Compile-time maximum column count.
+   * @tparam Derived Eigen owning matrix type.
    * @param ar Archive used for serialization.
    * @param matrix Matrix to load.
    * @param version Serialization version.
    */
-  template <class Archive, typename Scalar, int Rows, int Cols, int Options, int MaxRows,
-    int MaxCols>
-  void load(Archive& ar,
-    Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& matrix,
-    const unsigned int version)
+  template <class Archive, class Derived>
+  void load(
+    Archive& ar, Eigen::PlainObjectBase<Derived>& matrix, const unsigned int version)
   {
     (void)version;
     Eigen::Index rows, cols;
@@ -92,6 +82,73 @@ namespace boost::serialization
   {
     boost::serialization::split_free(ar, matrix, version);
   }
+
+  /**
+   * @brief Serializes a Rodin vector using the Eigen dense-matrix format.
+   * @tparam Archive Archive type.
+   * @tparam Scalar Vector scalar type.
+   * @param ar Archive used for serialization.
+   * @param vector Vector to serialize.
+   * @param version Serialization version.
+   */
+  template <class Archive, class Scalar>
+  void serialize(
+    Archive& ar, Rodin::Math::Vector<Scalar>& vector, const unsigned int version)
+  {
+    serialize(
+      ar, static_cast<typename Rodin::Math::Vector<Scalar>::Parent&>(vector), version);
+  }
+
+  /**
+   * @brief Serializes a fixed-size Rodin vector using the Eigen dense-matrix format.
+   * @tparam Archive Archive type.
+   * @tparam Scalar Vector scalar type.
+   * @tparam Size Compile-time number of coefficients.
+   * @param ar Archive used for serialization.
+   * @param vector Vector to serialize.
+   * @param version Serialization version.
+   */
+  template <class Archive, class Scalar, size_t Size>
+  void serialize(Archive& ar, Rodin::Math::FixedSizeVector<Scalar, Size>& vector,
+    const unsigned int version)
+  {
+    serialize(ar,
+      static_cast<typename Rodin::Math::FixedSizeVector<Scalar, Size>::Parent&>(vector),
+      version);
+  }
+
+  /**
+   * @brief Serializes a Rodin matrix using the Eigen dense-matrix format.
+   * @tparam Archive Archive type.
+   * @tparam Scalar Matrix scalar type.
+   * @param ar Archive used for serialization.
+   * @param matrix Matrix to serialize.
+   * @param version Serialization version.
+   */
+  template <class Archive, class Scalar>
+  void serialize(
+    Archive& ar, Rodin::Math::Matrix<Scalar>& matrix, const unsigned int version)
+  {
+    boost::serialization::split_free(ar, matrix, version);
+  }
+
+  /**
+   * @brief Serializes a fixed-size Rodin matrix using the Eigen dense-matrix format.
+   * @tparam Archive Archive type.
+   * @tparam Scalar Matrix scalar type.
+   * @tparam Rows Compile-time row count.
+   * @tparam Cols Compile-time column count.
+   * @param ar Archive used for serialization.
+   * @param matrix Matrix to serialize.
+   * @param version Serialization version.
+   */
+  template <class Archive, class Scalar, size_t Rows, size_t Cols>
+  void serialize(Archive& ar, Rodin::Math::FixedSizeMatrix<Scalar, Rows, Cols>& matrix,
+    const unsigned int version)
+  {
+    boost::serialization::split_free(ar, matrix, version);
+  }
+
 }
 
 #endif

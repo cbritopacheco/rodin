@@ -26,10 +26,10 @@ namespace Rodin::IO
    * @tparam T Type of object to load
    *
    * Derived classes must implement:
-   * - load(std::istream&) - Load object from an input stream
-   * - getObject() - Access the object being loaded
+   * - @ref load(std::istream&) "load(std::istream&)" - Load object from an input stream
+   * - @ref getObject() "getObject()" - Access the object being loaded
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * class MyObjectLoader : public Loader<MyObject>
    * {
@@ -61,6 +61,9 @@ namespace Rodin::IO
       /// @brief Type of object being loaded.
       using ObjectType = T;
 
+      /// @brief Destroys the loader through its polymorphic interface.
+      virtual ~Loader() = default;
+
       /**
        * @brief Loads object from an input stream.
        * @param[in] is Input stream to read from
@@ -74,7 +77,8 @@ namespace Rodin::IO
        * @brief Loads object from a file.
        * @param[in] is Path to the file to load
        *
-       * Opens the file at the specified path and delegates to load(std::istream&).
+       * Opens the file at the specified path and delegates to
+       * @ref load(std::istream&) "load(std::istream&)".
        * This provides a convenient file-based interface while reusing the stream
        * loading logic.
        */

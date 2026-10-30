@@ -21,19 +21,20 @@ namespace Rodin::QF
    * @brief Initializes the static table of quadrature point counts.
    *
    * Computes the number of quadrature points for each combination of
-   * simplex dimension @f$ n @f$ and parameter @f$ s @f$ using the formula:
+   * simplex dimension @f$ n @f$ and parameter @f$ s @f$ using the formula.
    * @f[
    *   \text{size} = \binom{n + s + 1}{n + 1}
    * @f]
    */
   boost::multi_array<size_t, 2> GrundmannMoller::initSizes()
   {
-    const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1][RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
+    const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1]
+                                       [RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
     boost::multi_array<size_t, 2> res(extents);
     for (size_t n = 0; n <= RODIN_MAXIMAL_SPACE_DIMENSION; n++)
     {
       for (size_t s = 0; s <= RODIN_QF_GRUNDMANNMOLLER_MAX_S; s++)
-        res[n][s] = Math::binom(n + s + 1, n + 1);
+        res[n][s] = n == 0 ? 1 : Math::binom(n + s + 1, n + 1);
     }
     return res;
   }
@@ -48,7 +49,8 @@ namespace Rodin::QF
    */
   boost::multi_array<Math::Vector<Real>, 2> GrundmannMoller::initWeights()
   {
-    const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1][RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
+    const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1]
+                                       [RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
     boost::multi_array<Math::Vector<Real>, 2> res(extents);
     for (size_t n = 0; n <= RODIN_MAXIMAL_SPACE_DIMENSION; n++)
     {
@@ -70,9 +72,16 @@ namespace Rodin::QF
         size_t pt = 0;
         for (size_t i = 0; i <= s; i++)
         {
-          Real w = Math::pow(2, -2 * Integer(s));
-          w *= Math::pow(Integer(d + n - 2 * i), Integer(d));
-          w /= Math::factorial(i) * Math::factorial(d + n - i);
+          // Form the factorial ratio in floating point. Integer factorials
+          // overflow within the supported degree range, before conversion.
+          long double weight = std::ldexp(1.L, -2 * static_cast<int>(s));
+          weight *=
+            std::pow(static_cast<long double>(d + n - 2 * i), static_cast<int>(d));
+          for (size_t factor = 2; factor <= i; ++factor)
+            weight /= static_cast<long double>(factor);
+          for (size_t factor = 2; factor <= d + n - i; ++factor)
+            weight /= static_cast<long double>(factor);
+          Real w = static_cast<Real>(weight);
           if (i % 2)
             w = -w;
           size_t k = s - i;
@@ -114,9 +123,11 @@ namespace Rodin::QF
    * of simplex dimension @f$ n @f$ and parameter @f$ s @f$. The points
    * are located in barycentric coordinates within the reference simplex.
    */
-  boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> GrundmannMoller::initPoints()
+  boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2>
+  GrundmannMoller::initPoints()
   {
-    const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1][RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
+    const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1]
+                                       [RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
     boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> res(extents);
     for (size_t n = 0; n <= RODIN_MAXIMAL_SPACE_DIMENSION; n++)
     {
@@ -124,7 +135,7 @@ namespace Rodin::QF
       if (n == 0)
       {
         for (size_t s = 0; s <= RODIN_QF_GRUNDMANNMOLLER_MAX_S; s++)
-          res[0][s] = { Math::SpatialVector<Real>{ 0 } };
+          res[0][s] = {Math::SpatialVector<Real>(0)};
         continue;
       }
 
@@ -168,11 +179,17 @@ namespace Rodin::QF
     return res;
   }
 
-  boost::multi_array<size_t, 2> GrundmannMoller::s_sizes = GrundmannMoller::initSizes();
+  // Published formulas may borrow these tables throughout static destruction.
+  const boost::multi_array<size_t, 2>& GrundmannMoller::s_sizes =
+    *new boost::multi_array<size_t, 2>(GrundmannMoller::initSizes());
 
-  boost::multi_array<Math::Vector<Real>, 2> GrundmannMoller::s_weights = GrundmannMoller::initWeights();
+  const boost::multi_array<Math::Vector<Real>, 2>& GrundmannMoller::s_weights =
+    *new boost::multi_array<Math::Vector<Real>, 2>(GrundmannMoller::initWeights());
 
-  boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> GrundmannMoller::s_points = GrundmannMoller::initPoints();
+  const boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2>&
+    GrundmannMoller::s_points =
+      *new boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2>(
+        GrundmannMoller::initPoints());
 
   GrundmannMoller::GrundmannMoller(size_t s, Geometry::Polytope::Type geom)
     : m_geometry(geom),
@@ -180,7 +197,12 @@ namespace Rodin::QF
       m_n(Geometry::Polytope::Traits(geom).getDimension()),
       m_order(2 * m_s + 1)
   {
-    assert(m_order <= RODIN_QF_GRUNDMANNMOLLER_MAX_ORDER);
+    if (m_s > RODIN_QF_GRUNDMANNMOLLER_MAX_S)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Grundmann-Moller parameter exceeds its supported maximum of "
+        << RODIN_QF_GRUNDMANNMOLLER_MAX_S << "." << Alert::Raise;
+    }
     if (!Geometry::Polytope::Traits(geom).isSimplex())
     {
       Alert::MemberFunctionException(*this, __func__)

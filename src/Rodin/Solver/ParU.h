@@ -78,7 +78,7 @@ namespace Rodin::Solver
    * the sparsity pattern, clear the symbolic factorization so the next
    * factorization also repeats symbolic analysis.
    *
-   * Architecture:
+   * @par Architecture
    * 1. Compress the Eigen CSC matrix and expose its values through
    *    Eigen::viewAsCholmod without copying them.
    * 2. Convert the CSC column pointers and row indices to the signed 64-bit

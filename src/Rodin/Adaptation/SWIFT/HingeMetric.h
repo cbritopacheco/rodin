@@ -5,6 +5,7 @@
 #ifndef RODIN_ADAPTATION_SWIFT_HINGEMETRIC_H
 #define RODIN_ADAPTATION_SWIFT_HINGEMETRIC_H
 
+#include "Rodin/Variational/Integrator.h"
 #include "../CellDeformation.h"
 #include "Hinge.h"
 #include "QualitySamples.h"
@@ -19,6 +20,7 @@ namespace Rodin::Adaptation::SWIFT
     public:
       /// @brief Scalar value type.
       using ScalarType = typename TrialFunction::ScalarType;
+
       /// @brief Parent class type.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -30,7 +32,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param inner Current inner displacement increment.
        * @param predictor Frozen directionally scaled predictor.
        * @param parameters Quality budgets and hinge activation weights.
-       * @param hingeCoefficient Effective hinge coefficient for this outer model.
+       * @param hingeCoefficient Predicted decrease per volume, before constraint strengths.
        */
       HingeMetric(const TrialFunction& du, const TestFunction& z,
         const Displacement& current, const Displacement& inner,
@@ -77,7 +79,8 @@ namespace Rodin::Adaptation::SWIFT
         const auto& trialFE = trialFES.getFiniteElement(dim, index);
         const auto& testFE = testFES.getFiniteElement(dim, index);
         const auto& parameters = m_parameters.get();
-        const QualitySamples samples(polytope, trialFE.getOrder(), parameters);
+        const QualitySamples samples(
+          polytope, trialFE.getDegree().value_or(2 * trialFE.getOrder()), parameters);
         const std::size_t nTrial = trialFE.getCount();
         const std::size_t nTest = testFE.getCount();
 
@@ -90,7 +93,9 @@ namespace Rodin::Adaptation::SWIFT
         m_qTest.resize(nTest);
 
         auto trialJacobian = Variational::Jacobian(m_du.get());
+        trialJacobian.setPolytope(polytope);
         auto testJacobian = Variational::Jacobian(m_z.get());
+        testJacobian.setPolytope(polytope);
         auto currentJacobian = Variational::Jacobian(m_current.get());
         auto innerJacobian = Variational::Jacobian(m_inner.get());
         auto predictorJacobian = Variational::Jacobian(m_predictor.get());

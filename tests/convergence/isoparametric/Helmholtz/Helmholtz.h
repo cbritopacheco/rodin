@@ -419,9 +419,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
           for (auto polytope = mesh.getPolytope(d); polytope; ++polytope)
           {
             const Variational::RealH1Element<2> element(polytope->getGeometry());
-            EXPECT_EQ(polytope->getTransformation().getOrder(), element.getOrder());
-            const auto& qf =
-              QF::PolytopeQuadratureFormula::get(4, polytope->getGeometry());
+            EXPECT_EQ(polytope->getTransformation().getDegree(), element.getDegree());
+            const auto& qf = QF::QuadratureFormula::get(4, polytope->getGeometry());
             const Geometry::PolytopeQuadrature quadrature(*polytope, qf);
             for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
             {

@@ -1,35 +1,22 @@
 #!/usr/bin/env python3
 """Changed-lines clang-format check for Rodin.
 
-Only the lines a change touches must satisfy .clang-format — the existing
-tree is never reformatted wholesale (see the "Known deviations" note in
-.clang-format). That policy is defined by ``git clang-format`` against a
-base revision.
-
-Why the extra full-file cross-check:
-
-  ``git clang-format`` reformats only the changed line *ranges*. With a
-  partial range clang-format lacks the surrounding scope context, so with
-  options like ``IndentAccessModifiers: true`` it mis-computes indentation
-  and proposes changes to lines that are in fact already correct. The result
-  is base-dependent false positives — a file "fails" against one base and
-  passes against another with byte-identical content.
-
-  So every hunk ``git clang-format`` proposes is validated against the
-  canonical, context-complete result of formatting the *whole* file: a hunk
-  is a real violation only if full-file clang-format would touch the same
-  original lines. Hunks the full-file format leaves alone are partial-range
-  artifacts and are dropped. This keeps the changed-lines-only policy while
-  making the check base-independent.
+Only lines touched by a change must satisfy the canonical format. Complete
+files are formatted through format_cpp.py to retain scope context; proposed
+edits are intersected with changed lines from Git. This also enforces the
+plain-struct indentation that clang-format alone cannot express. The check
+does not write the index or temporary Git trees. Workspace files are unchanged
+unless --fix is explicitly requested.
 
 Fix locally with:
 
-  git clang-format <base>          # rewrites the changed lines in place
-  clang-format -i <file>           # or format the whole file, base-independent
+  python3 dev/check_format.py --base REF --fix [paths...]
+  python3 dev/format_cpp.py -i <file>  # formats the selected complete file
 
 Usage:
   python3 dev/check_format.py [--base REF] [--head REF]
-                              [--binary clang-format] [--no-color]
+                              [--binary clang-format] [--no-color] [--fix]
+                              [paths...]
 
 Defaults: base = merge-base with origin/master (or HEAD~1), head = the
 working tree (so uncommitted changes are checked too).
@@ -39,9 +26,11 @@ import argparse
 import difflib
 import os
 import re
-import shutil
 import subprocess
 import sys
+
+from format_cpp import format_source
+from style_lint import CPP_TOKENS
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GITHUB = os.environ.get("GITHUB_ACTIONS") == "true"
@@ -74,86 +63,76 @@ def resolve_base(base):
     return "HEAD~1"
 
 
-def find_git_clang_format(binary, override=None):
-    """Locate git-clang-format matching the clang-format binary."""
-    if override:
-        path = shutil.which(override) or override
-        if os.path.exists(path):
-            return path
-        print(f"error: git-clang-format '{override}' not found")
-        sys.exit(2)
-    suffix = ""
-    m = re.search(r"clang-format(.*)$", os.path.basename(binary))
-    if m:
-        suffix = m.group(1)
-    for name in (f"git-clang-format{suffix}", "git-clang-format"):
-        path = shutil.which(name)
-        if path:
-            return path
-    print("error: git-clang-format not found in PATH")
-    sys.exit(2)
+def formatting_hunks(content, formatted):
+    """Yield zero-context edits and their original inclusive line ranges.
 
-
-def parse_hunks(diff):
-    """Split a unified diff into {path: [(orig_start, orig_end, text)]}.
-
-    orig_start/orig_end are 1-based inclusive line numbers on the '-' side
-    (the current file); a pure insertion (orig_count == 0) anchors on the
-    line it follows.
+    Disable the sequence matcher's popularity heuristic: repeated braces and
+    common declaration lines must still anchor edits in large C++ files.
+    Insertions are associated with both neighbours, including the first line.
     """
-    files = {}
-    path = None
-    cur = None  # (orig_start, orig_end, [lines])
-    for ln in diff.splitlines():
-        m = re.match(r"^\+\+\+ b/(.*)$", ln)
-        if m:
-            path = m.group(1)
-            continue
-        if ln.startswith("--- "):
-            continue
-        m = HUNK_RE.match(ln)
-        if m and path is not None:
-            ostart = int(m.group(1))
-            ocount = int(m.group(2)) if m.group(2) is not None else 1
-            if ocount == 0:
-                lo, hi = ostart, ostart  # insertion after line `ostart`
-            else:
-                lo, hi = ostart, ostart + ocount - 1
-            cur = (lo, hi, [ln])
-            files.setdefault(path, []).append(cur)
-        elif cur is not None and (ln.startswith(("+", "-", " ")) or ln == ""):
-            cur[2].append(ln)
-        else:
-            cur = None
-    return files
-
-
-def full_file_bad_lines(binary, path, content):
-    """Original 1-based line numbers that full-file clang-format would change."""
-    r = subprocess.run([binary, f"--assume-filename={path}"],
-                       input=content, capture_output=True, text=True)
-    if r.returncode != 0:
-        return None
-    if r.stdout == content:
-        return set()
-    o = content.splitlines(keepends=True)
-    f = r.stdout.splitlines(keepends=True)
-    bad = set()
-    for tag, i1, i2, _j1, _j2 in difflib.SequenceMatcher(
-            None, o, f, autojunk=False).get_opcodes():
+    original = content.splitlines(keepends=True)
+    canonical = formatted.splitlines(keepends=True)
+    # Anchor equal source lines without their indentation. Otherwise a long
+    # reindent of repetitive code can be represented as a distant deletion and
+    # insertion, which is unsafe to apply only in part.
+    matcher = difflib.SequenceMatcher(
+        None, [line.lstrip(" \t") for line in original],
+        [line.lstrip(" \t") for line in canonical], autojunk=False)
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
         if tag == "equal":
-            continue
-        if tag == "insert":
-            bad.update({i1, i1 + 1})  # 1-based neighbours of the anchor
+            edits = [(i, i + 1, j1 + i - i1, j1 + i - i1 + 1)
+                     for i in range(i1, i2) if original[i] != canonical[j1 + i - i1]]
         else:
-            bad.update(range(i1 + 1, i2 + 1))
-    return bad
+            edits = [(i1, i2, j1, j2)]
+        for a, b, c, d in edits:
+            old_count, new_count = b - a, d - c
+            old_start = a + 1 if old_count else a
+            new_start = c + 1 if new_count else c
+            lines = [f"@@ -{old_start},{old_count} +{new_start},{new_count} @@"]
+            lines += ["-" + line.rstrip("\r\n") for line in original[a:b]]
+            lines += ["+" + line.rstrip("\r\n") for line in canonical[c:d]]
+            yield (a + 1, b, lines) if old_count else (a, a + 1, lines)
+
+
+def source_tokens(content):
+    """Fingerprint code and literals, conservatively retaining directives verbatim."""
+    return tuple(m.group("token") or m.group() for m in CPP_TOKENS.finditer(content)
+                 if m.group("comment") is None)
+
+
+def format_changed_source(content, formatted, touched):
+    """Apply canonical edits intersecting touched original lines, and no others.
+
+    The edits come from the same context-complete diff used by the checker.
+    Replacement text is taken from the canonical source, retaining exact line
+    endings and pure insertions rather than reconstructing it from diagnostics.
+    """
+    original = content.splitlines(keepends=True)
+    canonical = formatted.splitlines(keepends=True)
+    result = []
+    cursor = 0
+    for lo, hi, text in formatting_hunks(content, formatted):
+        if not touched.intersection(range(lo, hi + 1)):
+            continue
+        match = HUNK_RE.match(text[0])
+        start, count, new_start, new_count = map(int, match.groups())
+        i = start - 1 if count else start
+        j = new_start - 1 if new_count else new_start
+        result.extend(original[cursor:i])
+        result.extend(canonical[j:j + new_count])
+        cursor = i + count
+    result.extend(original[cursor:])
+    fixed = "".join(result)
+    if source_tokens(fixed) != source_tokens(content):
+        raise ValueError("Partial formatting would change C++ tokens, literals or "
+                         "directives; this file was not written")
+    return fixed
 
 
 def annotate(path, lo, hi):
     print(f"::error file={path},line={lo},endLine={max(hi, lo)},"
           f"title=clang-format::lines {lo}-{max(hi, lo)} of {path} are not "
-          "clang-formatted (run: git clang-format)")
+          "canonically formatted (run: python3 dev/format_cpp.py -i <file>)")
 
 
 def print_diff_lines(lines, tty):
@@ -176,65 +155,68 @@ def main():
     ap.add_argument("--head", default="",
                     help="check base..HEAD instead of base..worktree")
     ap.add_argument("--binary", default="clang-format")
-    ap.add_argument("--git-clang-format", dest="gcf", default=None,
-                    help="explicit git-clang-format script (e.g. when the "
-                         "clang-format binary comes from a pip wheel)")
+    ap.add_argument("--git-clang-format", help=argparse.SUPPRESS)
     ap.add_argument("--no-color", action="store_true")
+    ap.add_argument("--fix", action="store_true",
+                    help="apply canonical edits touching changed working-tree lines")
+    ap.add_argument("paths", nargs="*", help="limit checks/fixes to these paths")
     args = ap.parse_args()
+    if args.fix and args.head:
+        ap.error("--fix cannot be combined with --head; historical files are read-only")
 
     tty = not args.no_color and (sys.stdout.isatty() or GITHUB)
     base = resolve_base(args.base)
-    gcf = find_git_clang_format(args.binary, args.gcf)
+    while True:
+        # Read changed ranges without temporary Git trees or index writes. Format
+        # with complete scope context, then intersect canonical edits with those
+        # ranges. The same canonical formatter is used locally and in CI.
+        revision = [base, args.head] if args.head else [base]
+        changed = git("diff", "--no-ext-diff", "--no-color", "--unified=0", *revision,
+                      "--", *(args.paths or CODE_PATHS))
+        ranges = {}
+        path = None
+        for line in changed.stdout.splitlines():
+            if line.startswith("+++ "):
+                path = line[6:] if line.startswith("+++ b/") else None
+            match = HUNK_RE.match(line)
+            if match and path and path.endswith((".h", ".hpp", ".cpp", ".cc", ".cxx")):
+                start = int(match.group(3))
+                count = int(match.group(4) or 1)
+                ranges.setdefault(path, set()).update(
+                    range(start, start + count) if count else (start, start + 1))
 
-    # Candidate set: the changed-line hunks git-clang-format wants to rewrite.
-    cmd = [gcf, "--binary", args.binary, "--diff", base]
-    if args.head:
-        cmd.append(args.head)
-    cmd += ["--", *CODE_PATHS]
-    r = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
-    out = r.stdout.strip()
-
-    if r.returncode != 0 and not out:
-        print(r.stderr.strip() or "error: git-clang-format failed")
-        return 2
-
-    clean_markers = ("no modified files to format",
-                     "clang-format did not modify any files")
-    if any(m in out for m in clean_markers) or not out:
-        print(f"{color('1;32', 'OK', tty)}: changed lines against "
-              f"{base[:12]} are clang-formatted.")
-        return 0
-
-    if not out.startswith("diff") and "---" not in out:
-        print(out)
-        print(r.stderr)
-        return 2
-
-    # Validate each proposed hunk against the full-file (context-complete)
-    # result, dropping partial-range false positives.
-    hunks = parse_hunks(out)
-    bad_cache = {}
-    real = []  # (path, lo, hi, text_lines)
-    for path, file_hunks in hunks.items():
-        if path not in bad_cache:
+        real = []  # (path, lo, hi, text_lines)
+        fixed_files = 0
+        for path, touched in ranges.items():
             if args.head:
-                cf = git("show", f"{args.head}:{path}", check=False)
-                content = cf.stdout if cf.returncode == 0 else None
+                content = git("show", f"{args.head}:{path}").stdout
             else:
+                with open(os.path.join(REPO, path), encoding="utf-8") as fh:
+                    content = fh.read()
+            formatted = format_source(args.binary, os.path.join(REPO, path), content)
+            if args.fix:
                 try:
-                    with open(os.path.join(REPO, path), encoding="utf-8") as fh:
-                        content = fh.read()
-                except (OSError, UnicodeDecodeError):
-                    content = None
-            bad_cache[path] = (full_file_bad_lines(args.binary, path, content)
-                               if content is not None else None)
-        bad = bad_cache[path]
-        for lo, hi, text in file_hunks:
-            # None => could not format the file: keep the hunk to be safe.
-            if bad is None or bad & set(range(lo, hi + 1)):
-                real.append((path, lo, hi, text))
+                    fixed = format_changed_source(content, formatted, touched)
+                except ValueError as error:
+                    print(f"error: {path}: {error}")
+                    return 2
+                if fixed != content:
+                    with open(os.path.join(REPO, path), "w", encoding="utf-8") as fh:
+                        fh.write(fixed)
+                    fixed_files += 1
+                    print(f"formatted changed regions: {path}")
+                continue
+            for lo, hi, text in formatting_hunks(content, formatted):
+                if touched & set(range(lo, hi + 1)):
+                    real.append((path, lo, hi, text))
+
+        if not args.fix or fixed_files == 0:
+            break
 
     if not real:
+        if args.fix:
+            print(f"Applied and verified changed-region formatting against {base[:12]}.")
+            return 0
         print(f"{color('1;32', 'OK', tty)}: changed lines against "
               f"{base[:12]} are clang-formatted.")
         return 0
@@ -251,7 +233,7 @@ def main():
         if GITHUB:
             annotate(path, lo, hi)
     print(f"\n{color('1;33', 'fix:', tty)} run "
-          f"`git clang-format {base[:12]}` (or `clang-format -i <file>`) "
+          f"`python3 dev/check_format.py --base {base[:12]} --fix` "
           "and commit the result.")
     return 1
 

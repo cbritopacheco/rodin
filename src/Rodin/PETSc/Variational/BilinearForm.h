@@ -17,13 +17,13 @@
  * the stiffness (or system) matrix @f$ A @f$ of a discrete finite
  * element system @f$ A\mathbf{x} = \mathbf{b} @f$.
  *
- * ## Mathematical Background
+ * # Mathematical Background
  *
  * A form @f$ a : U_h \times V_h \to \mathbb{K} @f$ acts on a trial function
  * @f$ u \in U_h @f$ and a test function @f$ v \in V_h @f$. It is bilinear
  * over the reals and, over the complex numbers, linear in @f$ u @f$ and
  * conjugate-linear in @f$ v @f$.
- * After discretisation, its entries are:
+ * After discretisation, its entries are
  * @f[
  *   A_{ij} = a(\psi_j, \phi_i), \quad
  *   i = 1,\ldots,M, \;\; j = 1,\ldots,N
@@ -152,7 +152,10 @@ namespace Rodin::Variational
         (void) ierr;
       }
 
-      /// @brief Copy constructor (deep-copies the PETSc matrix).
+      /**
+       * @brief Copy constructor (deep-copies the PETSc matrix).
+       * @param other Source object to copy or move from.
+       */
       BilinearForm(const BilinearForm& other)
         : Parent(other),
           m_u(other.m_u),
@@ -175,7 +178,10 @@ namespace Rodin::Variational
         (void) ierr;
       }
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Source object to copy or move from.
+       */
       BilinearForm(BilinearForm&& other) noexcept
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -282,13 +288,19 @@ namespace Rodin::Variational
         return result;
       }
 
-      /// @brief Returns a mutable reference to the assembled PETSc system matrix @f$ A @f$.
+      /**
+       * @brief Returns a mutable reference to the assembled PETSc system matrix @f$ A @f$.
+       * @returns PETSc matrix storing the assembled bilinear form.
+       */
       OperatorType& getOperator() override
       {
         return m_operator;
       }
 
-      /// @brief Returns a read-only reference to the assembled PETSc system matrix @f$ A @f$.
+      /**
+       * @brief Returns a read-only reference to the assembled PETSc system matrix @f$ A @f$.
+       * @returns PETSc matrix storing the assembled bilinear form.
+       */
       const OperatorType& getOperator() const override
       {
         return m_operator;
@@ -306,19 +318,28 @@ namespace Rodin::Variational
           trialFES, testFES, this->getLocalIntegrators(), this->getGlobalIntegrators() });
       }
 
-      /// @brief Returns a reference to the associated trial function.
+      /**
+       * @brief Returns a reference to the associated trial function.
+       * @returns Trial function used by the assembled form.
+       */
       const TrialFunction<SolutionType, TrialFES>& getTrialFunction() const override
       {
         return m_u.get();
       }
 
-      /// @brief Returns a reference to the associated test function.
+      /**
+       * @brief Returns a reference to the associated test function.
+       * @returns Test function used by the assembled form.
+       */
       const TestFunction<TestFES>& getTestFunction() const override
       {
         return m_v.get();
       }
 
-      /// @brief Creates a heap-allocated copy of this bilinear form.
+      /**
+       * @brief Creates a heap-allocated copy of this bilinear form.
+       * @returns Pointer to a newly allocated copy of this object.
+       */
       BilinearForm* copy() const noexcept override
       {
         return new BilinearForm(*this);

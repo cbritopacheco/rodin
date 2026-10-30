@@ -45,7 +45,7 @@ namespace Rodin::Geometry
    *
    * # Usage
    *
-   * ## Creating a distributed boundary submesh:
+   * ## Creating a distributed boundary submesh.
    * @code{.cpp}
    * SubMesh<Context::MPI>::Builder builder;
    * builder.initialize(mpiMesh);
@@ -75,7 +75,9 @@ namespace Rodin::Geometry
        * a parent `Mesh<Context::MPI>` by selecting specific polytopes. Each
        * rank includes entities independently using parent-shard-local indices.
        *
-       * Architecture: the global top-dimensional selection is the union of
+       * @par Architecture
+       *
+       * The global top-dimensional selection is the union of
        * rank-local requests. Finalization first reconciles that selection at
        * parent owners and publishes it to parent holders, then includes those
        * entities and their subentities before resolving ownership. For a parent
@@ -220,6 +222,8 @@ namespace Rodin::Geometry
        * @brief Gets the polytope index mapping for a dimension.
        * @param[in] d Topological dimension.
        * @returns Bidirectional mapping between submesh-local and parent-local indices.
+       * @throws Alert::Exception If no rank-local map slot exists for @p d.
+       * @note This query and its error handling are non-collective.
        *
        * The mapping allows efficient queries:
        * - `left[i]`: parent shard-local index for submesh shard-local index i
@@ -227,7 +231,13 @@ namespace Rodin::Geometry
        */
       const PolytopeMap& getPolytopeMap(size_t d) const override
       {
-        return m_s2ps.at(d);
+        if (d >= m_s2ps.size())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Polytope map dimension " << d << " is outside map count " << m_s2ps.size()
+            << '.' << Alert::Raise;
+        }
+        return m_s2ps[d];
       }
 
       /**
@@ -259,7 +269,7 @@ namespace Rodin::Geometry
 
     private:
       std::reference_wrapper<const Mesh<Context::MPI>>
-        m_parent;  ///< Parent mesh reference
+        m_parent; ///< Parent mesh reference
       std::vector<PolytopeMap> m_s2ps; ///< Submesh-to-parent index maps
       Deque<Ancestor> m_ancestors; ///< Ancestor mesh chain
   };

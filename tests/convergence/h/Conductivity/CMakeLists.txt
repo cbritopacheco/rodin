@@ -6,7 +6,7 @@ target_link_libraries(RodinConvergenceHConductivity
     RodinConvergenceH
     Rodin::Solver
 )
-gtest_discover_tests(RodinConvergenceHConductivity
+rodin_discover_tests(RodinConvergenceHConductivity
   PROPERTIES
     LABELS convergence
 )

@@ -19,6 +19,7 @@ set(RodinIO_HEADERS
 )
 
 set(RodinIO_SRCS
+  HDF5.cpp
   MFEM.cpp
   MEDIT.cpp
   XDMF.cpp

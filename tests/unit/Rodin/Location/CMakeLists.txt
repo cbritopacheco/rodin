@@ -5,7 +5,7 @@ target_link_libraries(RodinLocationAABBTest
   GTest::gtest_main
   Rodin::Location
   Rodin::Variational)
-gtest_discover_tests(RodinLocationAABBTest
+rodin_discover_tests(RodinLocationAABBTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit

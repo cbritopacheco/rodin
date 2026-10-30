@@ -14,6 +14,7 @@
 #include "Rodin/Alert.h"
 
 #include "Rodin/Types.h"
+#include "Rodin/Variational/Integrator.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/Jacobian.h"
 
@@ -26,12 +27,14 @@ namespace Rodin::Adaptation::SWIFT
   /// @brief Sampled geometric admissibility diagnostics.
   struct AdmissibilityReport
   {
-      /// @brief Minimum sampled Jacobian determinant.
-      Real minJ = std::numeric_limits<Real>::infinity();
-      /// @brief Number of failed Jacobian or distortion validity checks.
-      std::size_t inadmissibleCount = 0;
-      /// @brief Maximum finite sampled relative distortion.
-      Real maxQRel = Real(0);
+    /// @brief Minimum sampled Jacobian determinant.
+    Real minJ = std::numeric_limits<Real>::infinity();
+
+    /// @brief Number of failed Jacobian or distortion validity checks.
+    std::size_t inadmissibleCount = 0;
+
+    /// @brief Maximum finite sampled relative distortion.
+    Real maxQRel = Real(0);
   };
 
   template <class Displacement>
@@ -54,8 +57,10 @@ namespace Rodin::Adaptation::SWIFT
     const std::size_t dim = mesh.getDimension();
     const std::size_t vdim = fes.getVectorDimension();
     if (dim != vdim)
+    {
       Alert::Exception() << "SWIFT displacement dimension must equal mesh dimension."
                          << Alert::Raise;
+    }
 
     auto gradU = Jacobian(u);
     Parameters parameters;
@@ -65,7 +70,8 @@ namespace Rodin::Adaptation::SWIFT
     {
       const auto& cell = *cellIt;
       const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
-      const QualitySamples samples(cell, fe.getOrder(), parameters);
+      const QualitySamples samples(
+        cell, fe.getDegree().value_or(2 * fe.getOrder()), parameters);
       samples.forEach([&](const IntegrationPoint& ip, Real) {
         deformation.setDisplacementGradient(gradU.getValue(ip));
         const Real j = deformation.getJacobian();

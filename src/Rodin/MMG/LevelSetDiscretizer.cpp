@@ -4,6 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <memory>
+
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Utility/Overloaded.h"
 
@@ -50,8 +52,7 @@ namespace Rodin::MMG
     return *this;
   }
 
-  LevelSetDiscretizer& LevelSetDiscretizer::noSplit(
-    const Geometry::Attribute& ref)
+  LevelSetDiscretizer& LevelSetDiscretizer::noSplit(const Geometry::Attribute& ref)
   {
     m_split[ref] = NoSplit;
     return *this;
@@ -78,28 +79,23 @@ namespace Rodin::MMG
         const auto& split = v.second;
 
         std::visit(
-            Utility::Overloaded
-            {
-              [&](const NoSplitT&)
+          Utility::Overloaded{
+            [&](const NoSplitT&) {
+              if (!MMG2D_Set_multiMat(mesh, sol, ref, MMG5_MMAT_NoSplit, ref, ref))
               {
-                if (!MMG2D_Set_multiMat(mesh, sol, ref, MMG5_MMAT_NoSplit, ref, ref))
-                {
-                  Alert::MemberFunctionException(*this, __func__)
-                    << "Could not set the multi-material reference lookup."
-                    << Alert::Raise;
-                }
-              },
-              [&](const Split& s)
-              {
-                if (!MMG2D_Set_multiMat(mesh, sol, ref, MMG5_MMAT_Split,
-                      s.interior, s.exterior))
-                {
-                  Alert::MemberFunctionException(*this, __func__)
-                    << "Could not set the multi-material reference lookup."
-                    << Alert::Raise;
-                }
+                Alert::MemberFunctionException(*this, __func__)
+                  << "Could not set the multi-material reference lookup." << Alert::Raise;
               }
-          }, split);
+            },
+            [&](const Split& s) {
+              if (!MMG2D_Set_multiMat(
+                    mesh, sol, ref, MMG5_MMAT_Split, s.interior, s.exterior))
+              {
+                Alert::MemberFunctionException(*this, __func__)
+                  << "Could not set the multi-material reference lookup." << Alert::Raise;
+              }
+            }},
+          split);
       }
     }
 
@@ -108,8 +104,7 @@ namespace Rodin::MMG
     if (m_meshTheSurface)
     {
       Alert::MemberFunctionException(*this, __func__)
-        << "Meshing the surface for a 2D mesh is not supported."
-        << Alert::Raise;
+        << "Meshing the surface for a 2D mesh is not supported." << Alert::Raise;
     }
     else
     {
@@ -127,7 +122,7 @@ namespace Rodin::MMG
     if (m_lsBaseReferences.size())
     {
       MMG3D_Set_iparameter(
-          mesh, sol, MMG3D_IPARAM_numberOfLSBaseReferences, m_lsBaseReferences.size());
+        mesh, sol, MMG3D_IPARAM_numberOfLSBaseReferences, m_lsBaseReferences.size());
       for (const auto& br : m_lsBaseReferences)
         MMG3D_Set_lsBaseReference(mesh, sol, br);
     }
@@ -144,28 +139,23 @@ namespace Rodin::MMG
         const auto& split = v.second;
 
         std::visit(
-          Utility::Overloaded
-          {
-            [&](const NoSplitT&)
-            {
+          Utility::Overloaded{
+            [&](const NoSplitT&) {
               if (!MMG3D_Set_multiMat(mesh, sol, ref, MMG5_MMAT_NoSplit, ref, ref))
               {
                 Alert::MemberFunctionException(*this, __func__)
-                  << "Could not set the multi-material reference lookup."
-                  << Alert::Raise;
+                  << "Could not set the multi-material reference lookup." << Alert::Raise;
               }
             },
-            [&](const Split& s)
-            {
+            [&](const Split& s) {
               if (!MMG3D_Set_multiMat(
                     mesh, sol, ref, MMG5_MMAT_Split, s.interior, s.exterior))
               {
                 Alert::MemberFunctionException(*this, __func__)
-                  << "Could not set the multi-material reference lookup."
-                  << Alert::Raise;
+                  << "Could not set the multi-material reference lookup." << Alert::Raise;
               }
-            }
-          }, split);
+            }},
+          split);
       }
     }
 
@@ -186,7 +176,10 @@ namespace Rodin::MMG
   int LevelSetDiscretizer::discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol)
   {
     if (m_rmc)
-      Alert::Warning() << "Warning RMC option is not supported for surfaces." << Alert::Raise;
+    {
+      Alert::Warning() << "Warning RMC option is not supported for surfaces."
+                       << Alert::Raise;
+    }
     if (m_isoref)
       MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_isoref, *m_isoref);
     if (getSplitMap().size() > 0)
@@ -198,8 +191,7 @@ namespace Rodin::MMG
     if (m_meshTheSurface)
     {
       Alert::MemberFunctionException(*this, __func__)
-        << "Meshing the surface for a surface mesh is not supported."
-        << Alert::Raise;
+        << "Meshing the surface for a surface mesh is not supported." << Alert::Raise;
     }
     else
     {
@@ -212,6 +204,7 @@ namespace Rodin::MMG
   void LevelSetDiscretizer::generateUniqueSplit(const FlatSet<Geometry::Attribute>& attrs)
   {
     m_uniqueSplit.clear();
+    m_g2om.clear();
 
     // Compute existing attributes
     FlatSet<Geometry::Attribute> existingAttributes;
@@ -221,16 +214,12 @@ namespace Rodin::MMG
     for (const auto& [attr, split] : getSplitMap())
     {
       existingAttributes.insert(attr);
-      std::visit(
-        Utility::Overloaded
-        {
-          [&](const Split& s)
-          {
-            existingAttributes.insert(s.interior);
-            existingAttributes.insert(s.exterior);
-          },
-          [&](const NoSplitT&) {}
-        }, split);
+      std::visit(Utility::Overloaded{[&](const Split& s) {
+                                       existingAttributes.insert(s.interior);
+                                       existingAttributes.insert(s.exterior);
+                                     },
+                   [&](const NoSplitT&) {}},
+        split);
     }
 
     // Generate unique splits for each reference
@@ -239,37 +228,37 @@ namespace Rodin::MMG
     {
       const auto& attribute = it.first;
       const auto& split = it.second;
-      std::visit(
-        Utility::Overloaded
-        {
-          [&](const Split& s)
-          {
-            // Generate unique interior attribute
-            Geometry::Attribute interior;
-            do { interior = gen++; } while (existingAttributes.count(interior));
-            existingAttributes.insert(interior);
-            m_g2om.insert({ interior, s.interior });
+      std::visit(Utility::Overloaded{[&](const Split& s) {
+                                       // Generate unique interior attribute
+                                       Geometry::Attribute interior;
+                                       do
+                                       {
+                                         interior = gen++;
+                                       } while (existingAttributes.count(interior));
+                                       existingAttributes.insert(interior);
+                                       m_g2om.insert({interior, s.interior});
 
-            // Generate unique exterior attribute
-            Geometry::Attribute exterior;
-            do { exterior = gen++; } while (existingAttributes.count(exterior));
-            existingAttributes.insert(exterior);
-            m_g2om.insert({ exterior, s.exterior });
+                                       // Generate unique exterior attribute
+                                       Geometry::Attribute exterior;
+                                       do
+                                       {
+                                         exterior = gen++;
+                                       } while (existingAttributes.count(exterior));
+                                       existingAttributes.insert(exterior);
+                                       m_g2om.insert({exterior, s.exterior});
 
-            // Add the unique split to the map
-            m_uniqueSplit.insert({ attribute, Split{ interior, exterior } });
-          },
-          [&](const NoSplitT&)
-          {
-            m_uniqueSplit.insert({ attribute, NoSplit });
-          }
-        }, split);
+                                       // Add the unique split to the map
+                                       m_uniqueSplit.insert(
+                                         {attribute, Split{interior, exterior}});
+                                     },
+                   [&](const NoSplitT&) { m_uniqueSplit.insert({attribute, NoSplit}); }},
+        split);
     }
   }
 
   void LevelSetDiscretizer::deleteBoundaryRef(MMG5_pMesh mesh, Geometry::Attribute ref)
   {
-    if (m_meshTheSurface || MMG5::isSurfaceMesh(mesh) || mesh->dim == 2)
+    if (m_meshTheSurface || V5::Mesh::isSurface(mesh) || mesh->dim == 2)
     {
       size_t oldna = mesh->na;
       std::vector<size_t> ids;
@@ -335,28 +324,21 @@ namespace Rodin::MMG
   {
     const auto& fes = ls.getFiniteElementSpace();
     const auto& mesh = fes.getMesh();
-    IndexSet requiredVertices;
-    IndexSet requiredEdges;
-    IndexSet requiredTriangles;
-    IndexSet requiredTetrahedra;
-    if (const auto* inputMesh = dynamic_cast<const MMG::Mesh*>(&mesh))
-    {
-      requiredVertices = inputMesh->getRequiredVertices();
-      requiredEdges = inputMesh->getRequiredEdges();
-      requiredTriangles = inputMesh->getRequiredTriangles();
-      requiredTetrahedra = inputMesh->getRequiredTetrahedra();
-    }
-
-    MMG5_pMesh mmgMesh = nullptr;
-    mmgMesh = rodinToMesh(ls.getFiniteElementSpace().getMesh());
+    using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&V5::Mesh::destroy)>;
+    using SolutionOwner = std::unique_ptr<MMG5_Sol, decltype(&V5::Solution::destroy)>;
+    MeshOwner meshOwner(MMG::V5::Mesh::toV5(mesh), &V5::Mesh::destroy);
+    MMG5_pMesh mmgMesh = meshOwner.get();
 
     // Erase boundary elements which have the isoref
     if (m_isoref)
       deleteBoundaryRef(mmgMesh, *m_isoref);
 
-    MMG5_pSol sol = createSolution(mmgMesh, ls.getFiniteElementSpace().getVectorDimension());
-    copySolution(ls, sol);
-    MMG5::setParameters(mmgMesh);
+    SolutionOwner solutionOwner(
+      MMG::V5::Solution::create(mmgMesh, fes.getVectorDimension()),
+      &V5::Solution::destroy);
+    MMG5_pSol sol = solutionOwner.get();
+    MMG::V5::Solution::copy(ls, sol);
+    Base::setParameters(mmgMesh);
     const bool isSurface = ls.getFiniteElementSpace().getMesh().isSurface();
     const size_t meshDim = mesh.getDimension();
 
@@ -394,47 +376,17 @@ namespace Rodin::MMG
     if (retcode != MMG5_SUCCESS)
     {
       Alert::MemberFunctionException(*this, __func__)
-        << "Failed to discretize the implicit domain."
-        << Alert::Raise;
+        << "Failed to discretize the implicit domain." << Alert::Raise;
     }
 
     // Delete zero ref
     // deleteBoundaryRef(mmgMesh, 0);
 
-    auto rodinMesh = meshToRodin(mmgMesh);
-    rodinMesh.getRequiredVertices().clear();
-    const size_t vertexCount = rodinMesh.getVertexCount();
-    for (const auto& idx : requiredVertices)
-    {
-      if (idx < vertexCount)
-        rodinMesh.setRequiredVertex(idx);
-    }
-    rodinMesh.getRequiredEdges().clear();
-    const size_t edgeCount =
-      rodinMesh.getPolytopeCount(Geometry::Polytope::Type::Segment);
-    for (const auto& idx : requiredEdges)
-    {
-      if (idx < edgeCount)
-        rodinMesh.setRequiredEdge(idx);
-    }
-    rodinMesh.getRequiredTriangles().clear();
-    const size_t triangleCount =
-      rodinMesh.getPolytopeCount(Geometry::Polytope::Type::Triangle);
-    for (const auto& idx : requiredTriangles)
-    {
-      if (idx < triangleCount)
-        rodinMesh.setRequiredTriangle(idx);
-    }
-    rodinMesh.getRequiredTetrahedra().clear();
-    const size_t tetrahedronCount =
-      rodinMesh.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron);
-    for (const auto& idx : requiredTetrahedra)
-    {
-      if (idx < tetrahedronCount)
-        rodinMesh.setRequiredTetrahedron(idx);
-    }
-    destroySolution(sol);
-    destroyMesh(mmgMesh);
+    auto rodinMesh = MMG::V5::Mesh::fromV5(mmgMesh);
+    // Conversion reads the remesher's output tags after entity renumbering.
+    // Input numeric indices no longer identify the same output entities.
+    solutionOwner.reset();
+    meshOwner.reset();
 
     // Recover original attributes
     if (!isSurface)
@@ -452,9 +404,13 @@ namespace Rodin::MMG
         const Geometry::Attribute attr = polytope.getAttribute().value_or(0);
         auto attrIt = m_g2om.find(attr);
         if (attrIt != m_g2om.end())
-          rodinMesh.setAttribute({ d, idx }, attrIt->second);
+          rodinMesh.setAttribute({d, idx}, attrIt->second);
         else
-          assert(std::holds_alternative<NoSplitT>(m_split.at(attr)));
+        {
+          // MMG's default region references need no explicit split policy.
+          assert(m_split.count(attr) == 0 ||
+            std::holds_alternative<NoSplitT>(m_split.at(attr)));
+        }
       }
     }
 

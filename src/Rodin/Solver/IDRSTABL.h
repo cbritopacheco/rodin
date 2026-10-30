@@ -8,7 +8,7 @@
  * @file IDRSTABL.h
  * @brief IDRstab(l) solver for (generally) non-symmetric linear systems.
  *
- * This header provides the IDRstab(l) solver class, an iterative method for solving:
+ * This header provides the IDRstab(l) solver class, an iterative method for solving.
  * @f[
  *   Ax = b
  * @f]
@@ -16,10 +16,10 @@
  *
  * IDRstab(l) is a stabilized variant in the IDR family (similar spirit to BiCGSTAB(l)).
  *
- * ## Notes
+ * # Notes
  * - This implementation uses Eigen's unsupported IDRSTABL.
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Solver::IDRSTABL solver(problem);
  * solver.setTolerance(1e-10).setMaxIterations(1000).setL(4).solve();
@@ -151,7 +151,7 @@ namespace Rodin::Solver
       /**
        * @brief Sets the IDRstab(l) parameter l.
        *
-       * Typical values: 2, 4, 8. Larger l may improve robustness but increases
+       * Typical values are 2, 4 and 8. Larger l may improve robustness but increases
        * work and storage.
        */
       /**

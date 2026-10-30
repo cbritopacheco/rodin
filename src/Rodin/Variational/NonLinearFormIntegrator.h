@@ -25,7 +25,7 @@ namespace Rodin::Variational
   /**
    * @brief CRTP mixin for nonlinear form integrators.
    *
-   * Derived classes must implement:
+   * Derived classes implement the following operations.
    * @code
    *   template <class Test>
    *   auto Residual(const Test& v) const;   // LinearFormIntegrator
@@ -34,7 +34,7 @@ namespace Rodin::Variational
    *   auto Tangent(const Trial& u, const Test& v) const;  // BilinearFormIntegrator
    * @endcode
    *
-   * This mixin then provides:
+   * This mixin then provides the following call interface.
    * @code
    *   template <class Trial, class Test>
    *   auto operator()(const Trial& u, const Test& v) const;  // ProblemBody

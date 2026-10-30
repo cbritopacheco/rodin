@@ -15,7 +15,7 @@
  * metaprogramming utilities for type manipulation, compile-time computations,
  * and helper constructs used throughout the Rodin finite element library.
  *
- * ## Key Components
+ * # Key Components
  *
  * - **Type Manipulation**: Extract, Wrap, Zip, Product for tuple type operations
  * - **Type Traits**: IsSpecialization, IsCompleteType, IsOneOf, HasTypeMember, HasValueMember

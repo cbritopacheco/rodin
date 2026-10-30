@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
@@ -12,6 +18,31 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Complex vector constants keep borrowing and temporary ownership after migration.
+  TEST(Rodin_Variational_Dot, ComplexOwnersAndEigenConstantsConjugateRight)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    const auto cell = mesh.getPolytope(mesh.getDimension(), 0);
+    Point point(*cell, Math::SpatialPoint{0.25, 0.25});
+    Math::Vector<Complex> left(2), right(2);
+    left << Complex(1, 2), Complex(3, -1);
+    right << Complex(2, -3), Complex(-1, 4);
+    VectorFunction lhs(left), rhs(right);
+    auto expression = Dot(lhs, rhs);
+    EXPECT_EQ(expression.getValue(point), Complex(-11, -4));
+    left(0) = Complex(2, 1);
+    EXPECT_EQ(expression.getValue(point), Complex(-6, -3));
+    Eigen::VectorX<Complex> native = left;
+    VectorFunction borrowed(native);
+    native(0) = Complex(1, 2);
+    EXPECT_EQ(Dot(borrowed, rhs).getValue(point), Complex(-11, -4));
+    VectorFunction owned((native + native).eval());
+    native.setZero();
+    EXPECT_EQ(Dot(owned, rhs).getValue(point), Complex(-22, -8));
+    VectorFunction moved{Math::Vector<Complex>(right)};
+    EXPECT_EQ(Dot(moved, rhs).getValue(point), Complex(30));
+  }
+
   /// @brief Verifies vector functions construction for variational dot.
   TEST(Rodin_Variational_Dot, VectorFunctions_Construction)
   {

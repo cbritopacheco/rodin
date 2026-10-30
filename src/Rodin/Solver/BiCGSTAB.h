@@ -12,21 +12,21 @@
  * solving non-symmetric linear systems with better convergence properties
  * than the standard Bi-Conjugate Gradient method.
  *
- * ## Algorithm
- * BiCGSTAB solves:
+ * # Algorithm
+ * BiCGSTAB solves the linear system
  * @f[
  *   Ax = b
  * @f]
  * for non-symmetric matrices @f$ A @f$. It combines BiCG with stabilization
  * to avoid the irregular convergence patterns often seen in BiCG.
  *
- * ## Applicability
+ * # Applicability
  * - Non-symmetric sparse matrices
  * - Large systems where direct solvers are expensive
  * - Convection-dominated problems
  * - Advection-diffusion equations
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) + Integral(beta * Grad(u), v) - Integral(f, v);
@@ -91,7 +91,7 @@ namespace Rodin::Solver
    *
    * @tparam Scalar The scalar type (e.g., Real, Complex)
    *
-   * **Example usage:**
+   * **The following example illustrates usage.**
    * @code{.cpp}
    * Problem problem(u, v);
    * problem = Integral(Grad(u), Grad(v)) + Integral(beta * Grad(u), v) - Integral(f, v);

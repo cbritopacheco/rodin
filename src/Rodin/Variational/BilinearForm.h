@@ -76,21 +76,21 @@ namespace Rodin::Variational
    * BilinearFormBase provides the foundation for representing bilinear forms
    * @f$ a(u,v) : U \times V \to \mathbb{K} @f$ in finite element computations.
    * Over the reals the form is bilinear. Over the complex numbers Rodin uses
-   * the standard finite element convention: the form is linear in the trial
+   * the standard finite element convention. The form is linear in the trial
    * argument and conjugate-linear in the test argument.
    *
    * @tparam Operator Matrix type for the discrete representation
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * A real bilinear form @f$ a(u,v) @f$ satisfies:
    * - **Linearity in first argument**: @f$ a(\alpha u_1 + \beta u_2, v) = \alpha a(u_1,v) + \beta a(u_2,v) @f$
    * - **Linearity in second argument**: @f$ a(u, \alpha v_1 + \beta v_2) = \alpha a(u,v_1) + \beta a(u,v_2) @f$
    *
    * For complex scalars, the second identity instead carries conjugated
-   * coefficients: @f$ a(u, \alpha v_1 + \beta v_2) = \overline{\alpha}
+   * coefficients according to @f$ a(u, \alpha v_1 + \beta v_2) = \overline{\alpha}
    * a(u,v_1) + \overline{\beta} a(u,v_2) @f$.
    *
-   * ## Discrete Representation  
+   * # Discrete Representation
    * The discrete matrix representation satisfies @f$ A_{ij} = a(\phi_j, \psi_i) @f$
    * where @f$ \phi_j @f$ are trial basis functions and @f$ \psi_i @f$ are test basis functions.
    */
@@ -195,7 +195,7 @@ namespace Rodin::Variational
        * @return Reference to the list of local element integrators
        *
        * Local integrators operate element-by-element, contributing to matrix
-       * entries through local assembly:
+       * entries through local assembly.
        * @f$ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx @f$
        */
       constexpr
@@ -507,6 +507,7 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
+          Parent::operator=(other);
           m_u = other.m_u;
           m_v = other.m_v;
           m_operator = other.m_operator;
@@ -524,6 +525,7 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
+          Parent::operator=(std::move(other));
           m_u = std::move(other.m_u);
           m_v = std::move(other.m_v);
           m_operator = std::move(other.m_operator);
@@ -549,7 +551,7 @@ namespace Rodin::Variational
       ScalarType operator()(
         const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
       {
-        return v.getData().dot(this->getOperator() * u.getData());
+        return Math::dot(this->getOperator() * u.getData(), v.getData());
       }
 
       /**
@@ -705,6 +707,7 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
+          Parent::operator=(other);
           m_u = other.m_u;
           m_v = other.m_v;
           m_operator = other.m_operator;
@@ -722,6 +725,7 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
+          Parent::operator=(std::move(other));
           m_u = std::move(other.m_u);
           m_v = std::move(other.m_v);
           m_operator = std::move(other.m_operator);
@@ -747,7 +751,7 @@ namespace Rodin::Variational
       ScalarType operator()(
         const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
       {
-        return v.getData().dot(this->getOperator() * u.getData());
+        return Math::dot(this->getOperator() * u.getData(), v.getData());
       }
 
       /**

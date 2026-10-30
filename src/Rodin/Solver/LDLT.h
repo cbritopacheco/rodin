@@ -11,21 +11,21 @@
  * This header provides the LDLT solver class for dense matrices, implementing
  * Cholesky decomposition with pivoting for numerical stability.
  *
- * ## Algorithm
- * The solver computes:
+ * # Algorithm
+ * The solver computes the following quantity.
  * @f[
  *   PAP^T = LDL^T
  * @f]
  * where @f$ P @f$ is a permutation matrix, @f$ L @f$ is unit lower triangular,
  * and @f$ D @f$ is diagonal. Pivoting improves numerical stability.
  *
- * ## Applicability
+ * # Applicability
  * - Symmetric indefinite dense matrices
  * - When numerical stability is critical
  * - Small to medium-sized systems
  * - Systems requiring robust factorization
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);

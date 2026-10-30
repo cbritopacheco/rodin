@@ -1,284 +1,152 @@
 /**
-  @page guides-boundary-conditions Boundary Conditions
-  @brief Guide to applying boundary conditions in Rodin
+  @page guides-boundary-conditions Boundary conditions
+  @brief Distinguish prescribed values, natural fluxes, and periodic identifications.
+
+  Prescribed values restrict admissible fields, while prescribed fluxes enter
+  the weak equation as loads. This guide follows one mixed-boundary diffusion
+  problem, then explains how the same distinction applies to elasticity and
+  periodic domains.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section guides-bc-intro Introduction
+  @section guides-bc-intro Start from the boundary-value problem
 
-  Boundary conditions specify the behavior of the solution on the boundary
-  @f$ \partial \Omega @f$ of the computational domain. They are essential for
-  obtaining a **well-posed** problem — without appropriate boundary conditions,
-  the PDE may have no solution, or infinitely many solutions.
-
-  In the finite element method, boundary conditions are classified by how they
-  enter the discrete system:
-
-  - **Essential (Dirichlet) conditions**: Directly prescribe the value of
-    the solution on the boundary: @f$ u = g @f$ on @f$ \Gamma_D @f$. These
-    are imposed by modifying the assembled linear system — the corresponding
-    rows and columns of the system matrix are adjusted to enforce the
-    prescribed values. In Rodin, this is handled by
-    `DirichletBC`.
-  - **Natural (Neumann) conditions**: Prescribe the flux or normal derivative
-    of the solution: @f$ \partial u / \partial n = h @f$ on @f$ \Gamma_N @f$.
-    These appear **naturally** in the weak formulation as boundary integrals
-    after integration by parts. In Rodin, they are expressed as
-    `BoundaryIntegral(h, v).over(GammaN)`.
-  - **Periodic conditions**: Tie degrees of freedom on opposite boundaries.
-    In Rodin, handled by `PeriodicBC`
-    with an explicit DOF correspondence map.
-
-  @note **Homogeneous Neumann** conditions (@f$ \partial u / \partial n = 0 @f$)
-  are the "default" boundary condition. If no Dirichlet or Neumann condition
-  is imposed on a boundary segment, homogeneous Neumann is automatically
-  satisfied by the weak formulation.
-
-  @note Dirichlet and periodic conditions are structural constraints: Rodin
-  enforces them algebraically in the assembled system. Penalty terms are a
-  different modeling choice. See @ref guides-numerical-contracts "Numerical
-  contracts" for the shared constraint contract.
-
-  @section guides-bc-dirichlet Dirichlet Boundary Conditions
-
-  Dirichlet conditions specify the value of the solution on the boundary:
+  Let @f$\Omega=(0,1)^2@f$. The scalar field satisfies
   @f[
-    u = g \quad \text{on } \Gamma_D \subseteq \partial\Omega
+    -\Delta u=0\quad\text{in }\Omega,\qquad
+    u=0\quad\text{on the left},\qquad
+    \partial_nu=1\quad\text{on the right},
   @f]
+  with @f$\partial_nu=0@f$ on the top and bottom. Here @f$n@f$ is the outward
+  unit normal and @f$\partial_nu=\nabla u\cdot n@f$. The exact solution is
+  @f$u(x,y)=x@f$. Its gradient is horizontal and its right normal derivative is one.
 
-  @subsection guides-bc-dirichlet-homogeneous Homogeneous Dirichlet (@f$ g = 0 @f$)
+  The word “flux” requires a sign convention. Here it means the prescribed
+  normal derivative. A physical diffusive flux defined by
+  @f$j=-\nabla u@f$ instead has @f$j\cdot n=-\partial_nu@f$.
 
-  The most common case sets the solution to zero on the boundary:
+  @section guides-bc-mesh 1. Label the boundary regions
 
-  @code{.cpp}
-  Problem problem(u, v);
-  problem = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());       // u = 0 on entire boundary
-  @endcode
+  Attributes identify the mesh regions on which boundary conditions or integrals are
+  applied.
+  This program labels exterior edges by checking both endpoints after
+  edge-to-cell connectivity has identified the boundary.
 
-  @subsection guides-bc-dirichlet-nonhomogeneous Non-Homogeneous Dirichlet
+  @snippet PDEs/MixedBoundary.cpp mixed-boundary-mesh
 
-  To prescribe a non-zero value:
+  `fixed`, `loaded`, and `insulated` are local names for integer labels. Other
+  meshes may use different values or load their labels from a mesh file. The
+  @ref examples-pdes-elasticity "elasticity example" uses the same labeling
+  approach for a rectangular beam.
 
-  @code{.cpp}
-  // Using a constant
-  DirichletBC(u, RealFunction(1.0))
+  @section guides-bc-dirichlet 2. Separate essential and natural conditions
 
-  // Using a spatial function
-  RealFunction g([](const Geometry::Point& p) {
-    return p.x() * p.x();
-  });
-  DirichletBC(u, g)
-  @endcode
-
-  @subsection guides-bc-dirichlet-partial Partial Boundary Conditions
-
-  To apply Dirichlet conditions only on a specific part of the boundary,
-  use the `.on()` method with a boundary attribute:
-
-  @code{.cpp}
-  // Apply u = 0 only on boundary with attribute 1
-  DirichletBC(u, Zero()).on(1)
-
-  // Apply u = g only on boundary with attribute 2
-  DirichletBC(u, g).on(2)
-
-  // Apply on multiple boundary attributes at once
-  DirichletBC(u, Zero()).on({1, 3})
-  @endcode
-
-  Boundary attributes are integers associated with boundary elements in
-  the mesh. They are typically set during mesh generation or loaded from
-  a mesh file.
-
-  @subsection guides-bc-dirichlet-vector Vector Dirichlet Conditions
-
-  For vector-valued problems (e.g., elasticity), use vector functions:
-
-  @code{.cpp}
-  // Fix displacement to zero (clamped boundary)
-  DirichletBC(u, VectorFunction{0, 0}).on(GammaD)
-
-  // Prescribe a specific displacement
-  VectorFunction prescribed{0.1, 0};
-  DirichletBC(u, prescribed).on(GammaD)
-  @endcode
-
-  @section guides-bc-neumann Neumann Boundary Conditions
-
-  Neumann conditions prescribe the normal derivative (or flux) on the
-  boundary:
+  Test functions vanish on the left, where the solution is prescribed. Integration
+  by parts gives
   @f[
-    \frac{\partial u}{\partial n} = g \quad \text{on } \Gamma_N
+    \int_\Omega\nabla u\cdot\nabla v\,dx
+      =\int_{\Gamma_N}v\,ds,
   @f]
+  where @f$\Gamma_N@f$ is the right edge. The boundary contribution vanishes on
+  the left because the test function is zero there, and on the top and bottom
+  because the prescribed normal derivative is zero.
 
-  These arise naturally from integration by parts in the weak formulation
-  and appear as **boundary integrals**:
+  @snippet PDEs/MixedBoundary.cpp mixed-boundary-form
 
-  @code{.cpp}
-  // \int_\GammaN g v ds
-  BoundaryIntegral(g, v).over(GammaN)
-  @endcode
+  `DirichletBC(...).on(fixed)` restricts the unknown on the selected boundary.
+  `BoundaryIntegral(...).over(loaded)` adds the Neumann load. It is subtracted in
+  the residual expression, so it appears with a positive sign on the right-hand
+  side of the weak equation.
 
-  @subsection guides-bc-neumann-example Example: Neumann on One Side
+  @subsection guides-bc-dirichlet-nonhomogeneous Prescribe nonzero values
 
-  @code{.cpp}
-  int GammaD = 1;  // Dirichlet boundary
-  int GammaN = 2;  // Neumann boundary
-
-  RealFunction g = 1.0;  // Prescribed flux
-
-  Problem problem(u, v);
-  problem = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          - BoundaryIntegral(g, v).over(GammaN)
-          + DirichletBC(u, Zero()).on(GammaD);
-  @endcode
-
-  @subsection guides-bc-neumann-natural Homogeneous Neumann (Natural)
-
-  Homogeneous Neumann conditions (@f$ \partial u / \partial n = 0 @f$) are
-  the "default" — they are automatically satisfied when no boundary integral
-  is added and no Dirichlet condition is imposed on that part of the boundary.
-
-  @subsection guides-bc-neumann-vector Vector Neumann (Traction)
-
-  In elasticity, a Neumann condition corresponds to an applied traction
-  (force per unit area). The traction vector @f$ \mathbf{f} @f$ is
-  prescribed on the loaded boundary:
+  For a scalar trial function `u`, a known function can supply the boundary value.
 
   @code{.cpp}
-  VectorFunction traction{0, -1};   // Downward pull
-
-  Problem elasticity(u, v);
-  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-             - BoundaryIntegral(traction, v).over(GammaN)
-             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-  @endcode
-
-  @section guides-bc-periodic Periodic Boundary Conditions
-
-  Periodic conditions enforce that the solution on one boundary equals the
-  solution on the opposite boundary. They are used for problems on domains
-  that tile (e.g.\ unit cells in homogenization):
-
-  @f[
-    u(0, y) = u(2\pi, y), \quad
-    u(x, 0) = u(x, 2\pi)
-  @f]
-
-  In Rodin, periodic conditions are imposed by building an `IndexMap` that
-  pairs the DOF indices on opposite boundaries, then passing it to
-  `PeriodicBC`:
-
-  @code{.cpp}
-  const size_t n = 200;
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
-  mesh.getConnectivity().compute(1, 2);
-  mesh.scale(1.0 / (n - 1));
-  mesh.scale(2 * M_PI);   // Scale to [0, 2π]^2
-
-  P1 vh(mesh);
-
-  // Build DOF correspondence: left ↔ right, bottom ↔ top
-  IndexMap<IndexSet> dofs;
-  for (Index i = 0; i < vh.getSize(); i += n)
-    dofs[i].insert(i + n - 1);        // left ↔ right
-  for (Index i = 0; i < n; i++)
-    dofs[i].insert(i + n * (n - 1));  // bottom ↔ top
-
-  TrialFunction u(vh);
-  TestFunction  v(vh);
-
-  Problem problem(u, v);
-  problem = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + PeriodicBC(u, dofs);
-  @endcode
-
-  See the @ref examples-pdes-periodic "periodic Poisson example" for a
-  complete walkthrough.
-
-  @section guides-bc-mixed Mixed Boundary Conditions
-
-  In practice, different parts of the boundary often have different
-  conditions. For example, in elasticity:
-
-  @code{.cpp}
-  int GammaD = 1;  // Clamped (fixed) boundary
-  int GammaN = 2;  // Loaded boundary
-  // Remaining boundary: traction-free (homogeneous Neumann)
-
-  VectorFunction load{0, -1};  // Downward force
-
-  Problem elasticity(u, v);
-  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-             - BoundaryIntegral(load, v).over(GammaN)
-             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-  @endcode
-
-  @section guides-bc-complete Complete Example
-
-  Here is a complete example with mixed boundary conditions:
-
-  @code{.cpp}
-  #include <Rodin/Solver.h>
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
-  #include <Rodin/IO/XDMF.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
-
-  int main()
+  RealFunction value = [](const Geometry::Point& point)
   {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-    mesh.getConnectivity().compute(1, 2);
-
-    P1 Vh(mesh);
-    TrialFunction u(Vh);
-    TestFunction  v(Vh);
-
-    RealFunction f = 1;
-
-    Problem problem(u, v);
-    problem = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
-
-    Solver::CG(problem).solve();
-
-    // Export to XDMF
-    IO::XDMF xdmf("BoundaryConditions");
-    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
-    xdmf.write();
-
-    return 0;
-  }
+    return point.x() * point.x();
+  };
+  auto condition = DirichletBC(u, value).on(fixed);
   @endcode
 
-  @section guides-bc-summary Summary Table
+  Omitting `.on(...)` selects the exterior boundary. Multiple attributes can be
+  selected with `.on(first, second)`. The value must have the same range shape
+  as the trial field; a two-component displacement can use `Zero(2)`.
 
-  | Type | Math | Rodin Code | Appears In |
-  |------|------|------------|------------|
-  | Dirichlet | @f$ u = g @f$ on @f$ \Gamma_D @f$ | `DirichletBC(u, g).on(GammaD)` | System modification |
-  | Neumann | @f$ \partial u / \partial n = h @f$ on @f$ \Gamma_N @f$ | `BoundaryIntegral(h, v).over(GammaN)` | Weak formulation |
-  | Homogeneous Neumann | @f$ \partial u / \partial n = 0 @f$ | (nothing needed) | Default |
-  | Periodic | @f$ u(x_L) = u(x_R) @f$ | `PeriodicBC(u, dofMap)` | System modification |
+  @subsection guides-bc-elimination What essential elimination changes
 
-  @section guides-bc-see-also See Also
+  With fixed coefficients @f$x_C=g_C@f$, the remaining equations are
+  @f[
+    A_{FF}x_F=b_F-A_{FC}g_C.
+  @f]
+  The prescribed values therefore affect both the operator and the load.
+  Constraints are imposed by structural elimination.
+  These are finite element coefficients; their interpretation depends on the
+  space's degrees of freedom.
 
-  - @ref guides-weak-formulations "Weak formulations"
-  - @ref guides-getting-started-core-concepts "Core concepts"
-  - @ref guides-numerical-contracts "Numerical contracts"
-  - @ref examples-pdes-poisson "Poisson example"
-  - @ref examples-pdes-elasticity "Elasticity example"
-  - @ref examples-pdes-periodic "Periodic Poisson example"
+  The @subpage guides-boundary-elimination "essential constraint elimination reference"
+  gives the full projector formulation, sparse storage requirements, and
+  implementation costs for callers supplying their own linear systems.
 
-  */
+  @section guides-bc-neumann 3. Homogeneous natural conditions
+
+  For this diffusion weak form, omitting a boundary load on an unconstrained
+  exterior edge supplies the homogeneous natural condition on the normal derivative. The condition is represented in the weak equation through boundary integration.
+
+  The natural boundary condition follows from the operator and its integration-by-parts formula.
+
+  @subsection guides-bc-neumann-vector Traction in elasticity
+
+  The natural boundary quantity is the traction @f$\sigma(u)n@f$. A vector traction enters through a boundary load, while fixed
+  displacement remains an essential condition.
+
+  @snippet PDEs/Elasticity.cpp elasticity-form
+
+  Edges with neither fixed displacement nor a traction load are traction-free
+  for this elasticity formulation. See the
+  @ref examples-pdes-elasticity "complete beam tutorial" for the model and labels.
+
+  @section guides-bc-periodic 4. Identify boundaries and handle the nullspace
+
+  `PeriodicBC` relates slave and master DOFs across matching boundaries. For a
+  scalar P1 grid, the @ref examples-pdes-periodic "periodic Poisson tutorial"
+  constructs the pairing using coordinates and the finite element space's DOF
+  queries to determine the constrained indices.
+
+  All corner identifications must be consistent. Higher-order spaces also require
+  the appropriate edge or face DOFs; pairing only vertices is insufficient.
+  The example exercises the native assembly path; backend support should be
+  checked before transferring constraints to a different execution backend.
+
+  Periodic Poisson still has a constant nullspace. Its source must satisfy
+  @f$\int_\Omega f\,dx=0@f$, and a normalization such as
+  @f$\int_\Omega u\,dx=0@f$ selects one solution. Neither identification alone
+  nor choosing a direct solver removes that freedom. The same compatibility and
+  normalization issue occurs for a connected pure-Neumann Poisson problem.
+
+  @section guides-bc-output 5. Inspect the computed field
+
+  Fixing the left edge removes the constant nullspace, so conjugate gradients
+  is suitable for this symmetric diffusion system. The program checks solver
+  success before exporting the result.
+
+  @snippet PDEs/MixedBoundary.cpp mixed-boundary-solve
+
+  @image html PDEs/MixedBoundary.png "Computed mixed-boundary solution. Color represents the scalar field; labels identify the prescribed boundary data." width=720px
+
+  The linear field is representable exactly by P1 elements on this affine mesh;
+  comparison with @f$u=x@f$ therefore checks boundary labels, the Neumann sign,
+  and the algebraic solve without introducing an approximation error from a
+  curved exact solution. Other problems still require mesh-refinement checks.
+
+  @section guides-bc-complete Complete program and further reading
+
+  The example is built as the `MixedBoundary` target. See
+  @ref PDEs/MixedBoundary.cpp "MixedBoundary.cpp", the
+  @ref guides-weak-formulations "weak formulation derivation", and the
+  @ref guides-numerical-contracts "numerical contracts" for related details.
+
+  @example PDEs/MixedBoundary.cpp
+*/

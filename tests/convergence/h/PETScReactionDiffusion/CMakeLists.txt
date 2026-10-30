@@ -1,6 +1,9 @@
 add_executable(RodinConvergenceHPETScReactionDiffusion ReactionDiffusion.cpp)
 include(../../PETScRefinement.cmake)
-rodin_add_petsc_refinement(RodinConvergenceHPETScReactionDiffusionBoundary BoundaryConditions.cpp)
+rodin_add_petsc_refinement(RodinConvergenceHPETScReactionDiffusionBoundary BoundaryConditions.cpp
+  RATE_CASES MixedNeumannP1Rates MixedNeumannP2Rates MixedNeumannP3Rates
+  RobinP1Rates RobinP2Rates RobinP3Rates
+  PureNeumannP1Rates PureNeumannP2Rates PureNeumannP3Rates)
 target_link_libraries(RodinConvergenceHPETScReactionDiffusion
   PRIVATE GTest::gtest RodinConvergenceH Rodin::PETSc)
 set(_RODIN_REACTIONDIFFUSION_GEOMETRIES

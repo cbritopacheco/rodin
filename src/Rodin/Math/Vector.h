@@ -6,13 +6,15 @@
  */
 /**
  * @file Vector.h
- * @brief Dense vector type aliases and definitions.
+ * @brief Dense vector classes and dimension aliases.
  *
- * This file provides type aliases for various vector types built on Eigen.
+ * This file provides Rodin vector types with Eigen storage and expression support.
  * Vectors are column-oriented by default and support both dynamic and fixed sizes.
  */
 #ifndef RODIN_MATH_VECTOR_H
 #define RODIN_MATH_VECTOR_H
+
+#include <utility>
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -21,18 +23,131 @@
 
 #include "Rodin/FormLanguage/Traits.h"
 
+#include "Common.h"
+
+namespace Eigen::internal
+{
+  /// @brief Retains Eigen map and reference support for dynamic Rodin vectors.
+  template <class Scalar>
+  struct traits<Rodin::Math::Vector<Scalar>> : traits<Eigen::VectorX<Scalar>>
+  {};
+
+  /// @brief Retains Eigen map and reference support for fixed-size Rodin vectors.
+  template <class Scalar, size_t Size>
+  struct traits<Rodin::Math::FixedSizeVector<Scalar, Size>>
+    : traits<Eigen::Vector<Scalar, Size>>
+  {};
+
+  /// @brief Evaluates dynamic Rodin vectors through their Eigen storage.
+  template <class Scalar>
+  struct evaluator<Rodin::Math::Vector<Scalar>> : evaluator<Eigen::VectorX<Scalar>>
+  {
+    /// @brief Native Eigen evaluator.
+    using Parent = evaluator<Eigen::VectorX<Scalar>>;
+
+    /// @brief Inherits evaluation of the Eigen storage.
+    using Parent::Parent;
+  };
+
+  /// @brief Evaluates fixed-size Rodin vectors through their Eigen storage.
+  template <class Scalar, size_t Size>
+  struct evaluator<Rodin::Math::FixedSizeVector<Scalar, Size>>
+    : evaluator<Eigen::Vector<Scalar, Size>>
+  {
+    /// @brief Native Eigen evaluator.
+    using Parent = evaluator<Eigen::Vector<Scalar, Size>>;
+
+    /// @brief Inherits evaluation of the Eigen storage.
+    using Parent::Parent;
+  };
+}
+
 namespace Rodin::Math
 {
   /**
    * @brief Dynamic-size dense vector type.
    *
    * A column vector with dynamic size determined at runtime. The vector
-   * supports standard linear algebra operations.
+   * supports standard linear algebra operations with no additional storage.
+   * Dot products conjugate the right operand.
    *
    * @tparam ScalarType The element type (e.g., Real, Complex)
    */
   template <class ScalarType>
-  using Vector = Eigen::VectorX<ScalarType>;
+  class Vector final : public Eigen::VectorX<ScalarType>
+  {
+    public:
+      /// @brief Eigen storage and expression base.
+      using Parent = Eigen::VectorX<ScalarType>;
+
+      /// @brief Inherits Eigen's size, coefficient and expression constructors.
+      using Parent::Parent;
+
+      /// @brief Assigns Eigen expressions into the owned storage.
+      using Parent::operator=;
+
+      /// @brief Constructs a vector with Eigen's default initialization.
+      Vector() = default;
+
+      /**
+       * @brief Copies the vector and its owned coefficients.
+       * @param other Vector to copy.
+       */
+      Vector(const Vector& other) = default;
+
+      /**
+       * @brief Moves the vector and its owned coefficients.
+       * @param other Vector to move.
+       */
+      Vector(Vector&& other) noexcept = default;
+
+      /**
+       * @brief Copies Eigen storage into a Rodin vector.
+       * @param other Eigen vector to copy.
+       */
+      Vector(const Parent& other)
+        : Parent(other)
+      {}
+
+      /**
+       * @brief Takes ownership of an Eigen vector's storage.
+       * @param other Eigen vector to move.
+       */
+      Vector(Parent&& other) noexcept
+        : Parent(std::move(other))
+      {}
+
+      /**
+       * @brief Copies the vector coefficients.
+       * @param other Vector to copy.
+       * @returns This vector.
+       */
+      Vector& operator=(const Vector& other) = default;
+
+      /**
+       * @brief Moves the vector coefficients.
+       * @param other Vector to move.
+       * @returns This vector.
+       */
+      Vector& operator=(Vector&& other) noexcept = default;
+
+      /**
+       * @brief Contracts with the conjugate of the right operand.
+       *
+       * Computes @f$\sum_i u_i\overline{v_i}@f$, consistently with
+       * @ref Rodin::Math::dot. Eigen expressions and views retain their Eigen
+       * types; use @ref Rodin::Math::dot to contract those with this convention.
+       *
+       * @tparam Derived Eigen type of the right operand.
+       * @param other Vector of the same size.
+       * @returns The right-conjugating inner product.
+       */
+      template <class Derived>
+      auto dot(const Eigen::MatrixBase<Derived>& other) const
+      {
+        return Math::dot(static_cast<const Parent&>(*this), other);
+      }
+  };
 
   /**
    * @brief Dynamic-size complex-valued vector.
@@ -45,13 +160,87 @@ namespace Rodin::Math
    * @brief Fixed-size vector type.
    *
    * A compile-time fixed-size column vector. The size is known at compile time,
-   * enabling optimizations and stack allocation.
+   * enabling optimizations and stack allocation without additional storage.
+   * Dot products conjugate the right operand.
    *
    * @tparam ScalarType The element type
    * @tparam Size The number of elements (must be known at compile time)
    */
   template <class ScalarType, size_t Size>
-  using FixedSizeVector = Eigen::Vector<ScalarType, Size>;
+  class FixedSizeVector final : public Eigen::Vector<ScalarType, Size>
+  {
+    public:
+      /// @brief Eigen storage and expression base.
+      using Parent = Eigen::Vector<ScalarType, Size>;
+
+      /// @brief Inherits Eigen's size, coefficient and expression constructors.
+      using Parent::Parent;
+
+      /// @brief Assigns Eigen expressions into the owned storage.
+      using Parent::operator=;
+
+      /// @brief Constructs a vector with Eigen's default initialization.
+      FixedSizeVector() = default;
+
+      /**
+       * @brief Copies the vector and its owned coefficients.
+       * @param other Vector to copy.
+       */
+      FixedSizeVector(const FixedSizeVector& other) = default;
+
+      /**
+       * @brief Moves the vector and its owned coefficients.
+       * @param other Vector to move.
+       */
+      FixedSizeVector(FixedSizeVector&& other) noexcept = default;
+
+      /**
+       * @brief Copies Eigen storage into a Rodin vector.
+       * @param other Eigen vector to copy.
+       */
+      FixedSizeVector(const Parent& other)
+        : Parent(other)
+      {}
+
+      /**
+       * @brief Takes ownership of an Eigen vector's storage.
+       * @param other Eigen vector to move.
+       */
+      FixedSizeVector(Parent&& other) noexcept
+        : Parent(std::move(other))
+      {}
+
+      /**
+       * @brief Copies the vector coefficients.
+       * @param other Vector to copy.
+       * @returns This vector.
+       */
+      FixedSizeVector& operator=(const FixedSizeVector& other) = default;
+
+      /**
+       * @brief Moves the vector coefficients.
+       * @param other Vector to move.
+       * @returns This vector.
+       */
+      FixedSizeVector& operator=(FixedSizeVector&& other) noexcept = default;
+
+      /**
+       * @brief Contracts with the conjugate of the right operand.
+       *
+       * Computes @f$\sum_i u_i\overline{v_i}@f$, consistently with
+       * @ref Rodin::Math::dot. Eigen expressions and views retain their Eigen
+       * types; use @ref Rodin::Math::dot to contract those with this convention.
+       *
+       * @tparam Derived Eigen type of the right operand.
+       * @param other Vector of the same size.
+       * @returns The right-conjugating inner product.
+       */
+      template <class Derived>
+      auto dot(const Eigen::MatrixBase<Derived>& other) const
+      {
+        return Math::dot(static_cast<const Parent&>(*this), other);
+      }
+  };
 
   /**
    * @brief 2D fixed-size vector.
@@ -136,7 +325,18 @@ namespace Rodin::Math
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for a dynamic Math::Vector: exposes the scalar type.
+  /// @brief Scalar type of an Eigen column vector, including bounded vectors.
+  template <class Number, int Rows, int Options, int MaxRows>
+  struct Traits<Eigen::Matrix<Number, Rows, 1, Options, MaxRows, 1>>
+  {
+    /// @brief Scalar value type.
+    using ScalarType = Number;
+
+    /// @brief Compile-time number of elements, or Eigen::Dynamic.
+    static constexpr int Size = Rows;
+  };
+
+  /// @brief Type traits for a dynamic Math::Vector, exposing the scalar type.
   template <class Number>
   struct Traits<Math::Vector<Number>>
   {
@@ -145,7 +345,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for a Math::FixedSizeVector: exposes the scalar type
+   * @brief Type traits for a Math::FixedSizeVector, exposing the scalar type
    * and the compile-time size.
    */
   template <class Number, size_t S>
@@ -153,6 +353,7 @@ namespace Rodin::FormLanguage
   {
       /// @brief Scalar value type.
       using ScalarType = Number;
+
       /// @brief Compile-time number of elements.
       static constexpr size_t Size = S;
   };

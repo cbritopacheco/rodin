@@ -9,7 +9,7 @@
  * @brief IDRS(s) solver for (generally) non-symmetric linear systems.
  *
  * This header provides the IDRS(s) (Induced Dimension Reduction) solver class,
- * an iterative method for solving linear systems:
+ * an iterative method for solving linear systems.
  * @f[
  *   Ax = b
  * @f]
@@ -18,10 +18,10 @@
  * IDR(s) is typically competitive with BiCGSTAB/GMRES for certain nonsymmetric
  * problems, with short recurrences and modest memory footprint.
  *
- * ## Notes
+ * # Notes
  * - This implementation uses Eigen's unsupported IDRS.
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Solver::IDRS solver(problem);
  * solver.setTolerance(1e-10).setMaxIterations(1000).setS(8).solve();
@@ -48,8 +48,8 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::IDRS<LinearSystem>>
   {
-      /// @brief Linear system type.
-      using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+    using LinearSystemType = LinearSystem;
   };
 }
 
@@ -82,19 +82,25 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class IDRS<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Scalar;
+
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+
       /// @brief Assembled operator type.
       using OperatorType = Math::SparseMatrix<ScalarType>;
+
       /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+
       /// @brief Associated problem base type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
       /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
@@ -114,16 +120,25 @@ namespace Rodin::Solver
        */
       IDRS(const IDRS& other)
         : Parent(other)
-      {}
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+        setS(other.m_shadowSpace);
+      }
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
       IDRS(IDRS&& other)
-        : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
-      {}
+        : Parent(std::move(other))
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+        setS(other.m_shadowSpace);
+      }
 
       /// @brief Destructor.
       ~IDRS() = default;
@@ -146,6 +161,7 @@ namespace Rodin::Solver
        */
       IDRS& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
@@ -153,7 +169,7 @@ namespace Rodin::Solver
       /**
        * @brief Sets the IDR(s) parameter s (dimension of the shadow space).
        *
-       * Typical values: 4, 8, 16. Larger s can improve robustness but increases
+       * Typical values are 4, 8 and 16. Larger s can improve robustness but increases
        * work per iteration.
        */
       /**
@@ -164,6 +180,7 @@ namespace Rodin::Solver
        */
       IDRS& setS(size_t s)
       {
+        m_shadowSpace = s;
         m_solver.setS(s);
         return *this;
       }
@@ -200,6 +217,8 @@ namespace Rodin::Solver
       }
 
     private:
+      Optional<size_t> m_maxIterations; ///< Explicit iteration limit, if set.
+      size_t m_shadowSpace = 4; ///< Requested shadow-space dimension.
       Eigen::IDRS<OperatorType> m_solver;
   };
 
@@ -211,19 +230,25 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class IDRS<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Scalar;
+
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+
       /// @brief Assembled operator type.
       using OperatorType = Math::Matrix<ScalarType>;
+
       /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+
       /// @brief Problem type solved by this solver.
       using ProblemType = Variational::ProblemBase<LinearSystemType>;
+
       /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
@@ -242,18 +267,26 @@ namespace Rodin::Solver
        * @param other Object to copy from.
        */
       IDRS(const IDRS& other)
-        : Parent(other),
-          m_solver(other.m_solver)
-      {}
+        : Parent(other)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+        setS(other.m_shadowSpace);
+      }
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
       IDRS(IDRS&& other)
-        : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
-      {}
+        : Parent(std::move(other))
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+        setS(other.m_shadowSpace);
+      }
 
       /// @brief Destructor.
       ~IDRS() = default;
@@ -276,6 +309,7 @@ namespace Rodin::Solver
        */
       IDRS& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
@@ -287,6 +321,7 @@ namespace Rodin::Solver
        */
       IDRS& setS(size_t s)
       {
+        m_shadowSpace = s;
         m_solver.setS(s);
         return *this;
       }
@@ -323,6 +358,8 @@ namespace Rodin::Solver
       }
 
     private:
+      Optional<size_t> m_maxIterations; ///< Explicit iteration limit, if set.
+      size_t m_shadowSpace = 4; ///< Requested shadow-space dimension.
       Eigen::IDRS<OperatorType> m_solver;
   };
 }

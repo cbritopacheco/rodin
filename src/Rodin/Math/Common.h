@@ -34,8 +34,7 @@ namespace Rodin::Math
    * @return Absolute value @f$ |x| @f$
    */
   template <class T>
-  constexpr
-  auto abs(const T& x)
+  constexpr auto abs(const T& x)
   {
     return x < static_cast<T>(0.0) ? -x : x;
   }
@@ -45,10 +44,13 @@ namespace Rodin::Math
    *
    * For @f$z=a+ib@f$, the magnitude is @f$|z|=\sqrt{a^2+b^2}@f$.
    *
+   * @tparam Scalar Complex scalar type.
    * @param x Complex scalar whose magnitude is evaluated.
    * @returns The nonnegative real magnitude.
    */
-  inline Real abs(const Complex& x)
+  template <class Scalar>
+    requires(Eigen::NumTraits<Scalar>::IsComplex != 0)
+  inline typename Eigen::NumTraits<Scalar>::Real abs(const Scalar& x)
   {
     return std::abs(x);
   }
@@ -63,8 +65,7 @@ namespace Rodin::Math
    * @return @f$ e^x @f$
    */
   template <class T>
-  constexpr
-  auto exp(const T& x)
+  constexpr auto exp(const T& x)
   {
     return std::exp(x);
   }
@@ -74,11 +75,13 @@ namespace Rodin::Math
    *
    * For @f$ z = a + bi @f$, returns @f$ \bar{z} = a - bi @f$.
    *
+   * @tparam Scalar Complex scalar type.
    * @param[in] x Complex number
-   * @return Complex conjugate @f$ \bar{x} @f$
+   * @return Complex conjugate @f$ \bar{x} @f$, preserving scalar precision.
    */
-  constexpr
-  Complex conj(const Complex& x)
+  template <class Scalar>
+    requires(Eigen::NumTraits<Scalar>::IsComplex != 0)
+  constexpr Scalar conj(const Scalar& x)
   {
     return std::conj(x);
   }
@@ -93,8 +96,7 @@ namespace Rodin::Math
    * @return Conjugate matrix
    */
   template <class T>
-  constexpr
-  auto conj(const Eigen::MatrixBase<T>& x)
+  constexpr auto conj(const Eigen::MatrixBase<T>& x)
   {
     return x.conjugate().eval();
   }
@@ -104,13 +106,37 @@ namespace Rodin::Math
    *
    * For real numbers, the conjugate is the number itself.
    *
+   * @tparam Scalar Arithmetic scalar type.
    * @param[in] x Real number
-   * @return @f$ x @f$
+   * @return @f$ x @f$, preserving scalar precision.
    */
-  constexpr
-  Real conj(const Real& x)
+  template <class Scalar>
+    requires std::is_arithmetic_v<Scalar>
+  constexpr Scalar conj(const Scalar& x)
   {
     return x;
+  }
+
+  /**
+   * @brief Conjugates each active component of a spatial vector.
+   * @param value Vector to conjugate.
+   * @returns An owning spatial vector with unchanged dimension.
+   */
+  template <class Scalar>
+  auto conj(const SpatialVector<Scalar>& value)
+  {
+    return value.conjugate();
+  }
+
+  /**
+   * @brief Conjugates each active entry of a spatial matrix.
+   * @param value Matrix to conjugate.
+   * @returns An owning spatial matrix with unchanged dimensions.
+   */
+  template <class Scalar>
+  auto conj(const SpatialMatrix<Scalar>& value)
+  {
+    return value.conjugate();
   }
 
   /**
@@ -124,8 +150,7 @@ namespace Rodin::Math
    * @return @f$ \text{base}^2 @f$
    */
   template <class Base>
-  constexpr
-  auto pow2(const Base& base)
+  constexpr auto pow2(const Base& base)
   {
     return base * base;
   }
@@ -195,8 +220,7 @@ namespace Rodin::Math
    * @return @f$ x^y @f$
    */
   template <class Base, class Exponent>
-  constexpr
-  auto pow(const Base& base, const Exponent& exponent)
+  constexpr auto pow(const Base& base, const Exponent& exponent)
   {
     return std::pow(base, exponent);
   }
@@ -211,8 +235,7 @@ namespace Rodin::Math
    * @return @f$ \sqrt{x} @f$
    */
   template <class T>
-  constexpr
-  auto sqrt(const T& x)
+  constexpr auto sqrt(const T& x)
   {
     return std::sqrt(x);
   }
@@ -228,8 +251,7 @@ namespace Rodin::Math
    * @return True if @f$ x @f$ is NaN, false otherwise
    */
   template <class T>
-  constexpr
-  Boolean isNaN(const T& x)
+  constexpr Boolean isNaN(const T& x)
   {
     return std::isnan(x);
   }
@@ -242,9 +264,7 @@ namespace Rodin::Math
    * @param[in] x Complex number to check
    * @return True if real or imaginary part is NaN, false otherwise
    */
-  inline
-  constexpr
-  Boolean isNaN(const Complex& x)
+  inline constexpr Boolean isNaN(const Complex& x)
   {
     return std::isnan(x.real()) || std::isnan(x.imag());
   }
@@ -260,8 +280,7 @@ namespace Rodin::Math
    * @return True if @f$ x @f$ is @f$ +\infty @f$ or @f$ -\infty @f$, false otherwise
    */
   template <class T>
-  constexpr
-  Boolean isInf(const T& x)
+  constexpr Boolean isInf(const T& x)
   {
     return std::isinf(x);
   }
@@ -276,8 +295,7 @@ namespace Rodin::Math
    * @return @f$ \cos(x) @f$
    */
   template <class T>
-  constexpr
-  auto cos(const T& x)
+  constexpr auto cos(const T& x)
   {
     return std::cos(x);
   }
@@ -292,8 +310,7 @@ namespace Rodin::Math
    * @return @f$ \cosh(x) @f$
    */
   template <class T>
-  constexpr
-  auto cosh(const T& x)
+  constexpr auto cosh(const T& x)
   {
     return std::cosh(x);
   }
@@ -308,8 +325,7 @@ namespace Rodin::Math
    * @return @f$ \sin(x) @f$
    */
   template <class T>
-  constexpr
-  auto sin(const T& x)
+  constexpr auto sin(const T& x)
   {
     return std::sin(x);
   }
@@ -324,8 +340,7 @@ namespace Rodin::Math
    * @return @f$ \sinh(x) @f$
    */
   template <class T>
-  constexpr
-  auto sinh(const T& x)
+  constexpr auto sinh(const T& x)
   {
     return std::sinh(x);
   }
@@ -340,16 +355,15 @@ namespace Rodin::Math
    * @return @f$ \tan(x) @f$
    */
   template <class T>
-  constexpr
-  auto tan(const T& x)
+  constexpr auto tan(const T& x)
   {
-   return std::tan(x);
+    return std::tan(x);
   }
 
   /**
    * @brief Computes the sign (signum) function.
    *
-   * Returns:
+   * Returns the following value.
    * @f[
    *   \text{sgn}(x) = \begin{cases}
    *     -1 & \text{if } x < 0 \\
@@ -360,11 +374,10 @@ namespace Rodin::Math
    *
    * @tparam T Type of value
    * @param[in] x Value
-   * @return Sign of @f$ x @f$: -1, 0, or +1
+   * @return The sign of @f$ x @f$, represented by -1, 0 or +1.
    */
   template <typename T>
-  constexpr
-  T sgn(const T& x)
+  constexpr T sgn(const T& x)
   {
     return (T(0) < x) - (x < T(0));
   }
@@ -382,8 +395,7 @@ namespace Rodin::Math
    * @pre @f$ 0 \leq k \leq n @f$
    */
   template <class T>
-  constexpr
-  T binom(const T& n, const T& k)
+  constexpr T binom(const T& n, const T& k)
   {
     assert(T(0) <= n);
     assert(T(0) <= k);
@@ -408,8 +420,7 @@ namespace Rodin::Math
    * @pre @f$ n \geq 0 @f$
    */
   template <class T>
-  constexpr
-  T factorial(const T& n)
+  constexpr T factorial(const T& n)
   {
     assert(T(0) <= n);
     T res(1);
@@ -431,15 +442,14 @@ namespace Rodin::Math
    * @pre @f$ 0 \leq k \leq n @f$
    */
   template <class T>
-  constexpr
-  T permutation(const T& n, const T& k)
+  constexpr T permutation(const T& n, const T& k)
   {
     assert(T(0) <= n);
     assert(T(0) <= k);
     assert(k <= n);
     T res(1);
     for (T i = 0; i < k; i++)
-        res *= (n - i);
+      res *= (n - i);
     return res;
   }
 
@@ -453,12 +463,12 @@ namespace Rodin::Math
    * @return Quiet NaN value of type T
    */
   template <class T>
-  constexpr
-  auto nan()
+  constexpr auto nan()
   {
     if constexpr (std::is_same_v<T, Complex>)
     {
-      return Complex(std::numeric_limits<Real>::quiet_NaN(), std::numeric_limits<Real>::quiet_NaN());
+      return Complex(
+        std::numeric_limits<Real>::quiet_NaN(), std::numeric_limits<Real>::quiet_NaN());
     }
     else
     {
@@ -479,8 +489,7 @@ namespace Rodin::Math
    * @return @f$ \text{lhs} + \text{rhs} @f$
    */
   template <class LHS, class RHS>
-  constexpr
-  auto sum(const LHS& lhs, const RHS& rhs)
+  constexpr auto sum(const LHS& lhs, const RHS& rhs)
   {
     return lhs + rhs;
   }
@@ -496,8 +505,7 @@ namespace Rodin::Math
    * @return @f$ -\text{op} @f$
    */
   template <class Operand>
-  constexpr
-  auto minus(const Operand& op)
+  constexpr auto minus(const Operand& op)
   {
     return -op;
   }
@@ -515,8 +523,7 @@ namespace Rodin::Math
    * @return @f$ \text{lhs} - \text{rhs} @f$
    */
   template <class LHS, class RHS>
-  constexpr
-  auto minus(const LHS& lhs, const RHS& rhs)
+  constexpr auto minus(const LHS& lhs, const RHS& rhs)
   {
     return lhs - rhs;
   }
@@ -534,8 +541,7 @@ namespace Rodin::Math
    * @return @f$ \text{lhs} \times \text{rhs} @f$
    */
   template <class LHS, class RHS>
-  constexpr
-  auto mult(const LHS& lhs, const RHS& rhs)
+  constexpr auto mult(const LHS& lhs, const RHS& rhs)
   {
     return lhs * rhs;
   }
@@ -553,50 +559,77 @@ namespace Rodin::Math
    * @return @f$ \text{lhs} / \text{rhs} @f$
    */
   template <class LHS, class RHS>
-  constexpr
-  auto division(const LHS& lhs, const RHS& rhs)
+  constexpr auto division(const LHS& lhs, const RHS& rhs)
   {
     return lhs / rhs;
   }
 
   /**
-   * @brief Computes the dot product of two real numbers.
-   *
-   * For real numbers, the dot product is simply multiplication:
-   * @f$ \text{lhs} \cdot \text{rhs} = \text{lhs} \times \text{rhs} @f$.
-   *
-   * @param[in] lhs Left-hand side operand
-   * @param[in] rhs Right-hand side operand
-   * @return @f$ \text{lhs} \times \text{rhs} @f$
+   * @brief Multiplies two real scalars.
+   * @tparam Left Left arithmetic type.
+   * @tparam Right Right arithmetic type.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Ordinary arithmetic product.
    */
-  inline
-  constexpr
-  Real dot(const Real& lhs, const Real& rhs)
+  template <class Left, class Right>
+    requires(std::is_arithmetic_v<Left> && std::is_arithmetic_v<Right>)
+  inline constexpr auto dot(const Left& lhs, const Right& rhs)
   {
     return lhs * rhs;
   }
 
   /**
-   * @brief Computes the dot product of two complex numbers.
-   *
-   * For complex numbers, the dot product uses conjugation:
-   * @f$ z_1 \cdot z_2 = z_1 \times \overline{z_2} @f$.
-   *
-   * @param[in] lhs Left-hand side complex number
-   * @param[in] rhs Right-hand side complex number
-   * @return @f$ \text{lhs} \times \overline{\text{rhs}} @f$
+   * @brief Multiplies complex scalars, conjugating the right operand.
+   * @tparam Left Left floating-point component type.
+   * @tparam Right Right floating-point component type.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns @f$u\overline{v}@f$ at their common scalar precision.
    */
-  inline
-  constexpr
-  Complex dot(const Complex& lhs, const Complex& rhs)
+  template <class Left, class Right>
+  inline constexpr auto dot(const std::complex<Left>& lhs, const std::complex<Right>& rhs)
   {
-    return lhs * conj(rhs);
+    using Scalar = std::common_type_t<Left, Right>;
+    return std::complex<Scalar>(lhs) * std::conj(std::complex<Scalar>(rhs));
+  }
+
+  /**
+   * @brief Multiplies real and complex scalars, conjugating the right operand.
+   * @tparam Left Left arithmetic type.
+   * @tparam Right Right floating-point component type.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns @f$u\overline{v}@f$ at their common scalar precision.
+   */
+  template <class Left, class Right>
+    requires std::is_arithmetic_v<Left>
+  inline constexpr auto dot(const Left& lhs, const std::complex<Right>& rhs)
+  {
+    using Scalar = std::common_type_t<Left, Right>;
+    return Scalar(lhs) * std::conj(std::complex<Scalar>(rhs));
+  }
+
+  /**
+   * @brief Multiplies complex and real scalars.
+   * @tparam Left Left floating-point component type.
+   * @tparam Right Right arithmetic type.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns @f$u\overline{v}=uv@f$ at their common scalar precision.
+   */
+  template <class Left, class Right>
+    requires std::is_arithmetic_v<Right>
+  inline constexpr auto dot(const std::complex<Left>& lhs, const Right& rhs)
+  {
+    using Scalar = std::common_type_t<Left, Right>;
+    return std::complex<Scalar>(lhs) * Scalar(rhs);
   }
 
   /**
    * @brief Computes the dot product of two Eigen vectors/matrices.
    *
-   * For vectors @f$ \mathbf{u} @f$ and @f$ \mathbf{v} @f$, computes:
+   * For vectors @f$ \mathbf{u} @f$ and @f$ \mathbf{v} @f$, computes
    * @f[
    *   \mathbf{u} \cdot \mathbf{v} = \sum_i u_i \overline{v_i}
    * @f]
@@ -609,16 +642,60 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSDerived, class RHSDerived>
-  constexpr
-  auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
+  constexpr auto dot(
+    const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
-    assert(lhs.rows() == rhs.rows());
-    assert(lhs.cols() == rhs.cols());
-    return (lhs.array() * rhs.conjugate().array()).sum();
+    using LeftScalar = typename LHSDerived::Scalar;
+    using RightScalar = typename RHSDerived::Scalar;
+    if constexpr (LHSDerived::IsVectorAtCompileTime && RHSDerived::IsVectorAtCompileTime)
+    {
+      assert(lhs.size() == rhs.size());
+      using Scalar = decltype(dot(LeftScalar{}, RightScalar{}));
+      // Contract Eigen expressions directly: Rodin owners route member dot()
+      // back here. Align row/column vectors before the coefficientwise product.
+      if constexpr ((LHSDerived::RowsAtCompileTime == 1) !=
+        (RHSDerived::RowsAtCompileTime == 1))
+      {
+        return (lhs.template cast<Scalar>().array() *
+          rhs.template cast<Scalar>().conjugate().transpose().array())
+          .sum();
+      }
+      else
+      {
+        return (lhs.template cast<Scalar>().array() *
+          rhs.template cast<Scalar>().conjugate().array())
+          .sum();
+      }
+    }
+    else
+    {
+      assert(lhs.rows() == rhs.rows());
+      assert(lhs.cols() == rhs.cols());
+      if constexpr (requires {
+                      typename Eigen::ScalarBinaryOpTraits<LeftScalar, RightScalar,
+                        Eigen::internal::scalar_product_op<LeftScalar,
+                          RightScalar>>::ReturnType;
+                    })
+        return (lhs.array() * rhs.conjugate().array()).sum();
+      else
+      {
+        using Scalar = decltype(dot(LeftScalar{}, RightScalar{}));
+        return (lhs.template cast<Scalar>().array() *
+          rhs.template cast<Scalar>().conjugate().array())
+          .sum();
+      }
+    }
   }
 
   /**
    * @brief Computes the dot product of two SpatialVector objects.
+   *
+   * For logical dimension @f$d\le3@f$, computes
+   * @f$\sum_{i=0}^{d-1}u_i\overline{v_i}@f$. Real operands use scalar
+   * contractions; complex operands retain fixed-extent reductions with right
+   * conjugation. Mixed scalar products retain their dynamic reduction. Fused
+   * arithmetic and reduction order may differ within floating-point rounding.
+   * Inactive storage is never read; the empty product is zero.
    *
    * @tparam LHSScalar Scalar type of left-hand side
    * @tparam RHSScalar Scalar type of right-hand side
@@ -627,16 +704,65 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSScalar, class RHSScalar>
-  constexpr
-  auto dot(const SpatialVector<LHSScalar>& lhs, const SpatialVector<RHSScalar>& rhs)
+  constexpr auto dot(
+    const SpatialVector<LHSScalar>& lhs, const SpatialVector<RHSScalar>& rhs)
   {
     assert(lhs.size() == rhs.size());
-    const auto size = static_cast<Eigen::Index>(lhs.size());
-    return dot(lhs.getData().head(size), rhs.getData().head(size));
+    if constexpr (!std::is_same_v<LHSScalar, RHSScalar>)
+    {
+      const auto size = static_cast<Eigen::Index>(lhs.size());
+      return dot(lhs.getData().head(size), rhs.getData().head(size));
+    }
+    else
+    {
+      using Result =
+        decltype(dot(lhs.getData().template head<1>(), rhs.getData().template head<1>()));
+      if constexpr (std::is_same_v<LHSScalar, Real>)
+      {
+        const auto* left = lhs.getData().data();
+        const auto* right = rhs.getData().data();
+        switch (lhs.size())
+        {
+          case 0:
+            return Result(0);
+          case 1:
+            return left[0] * right[0];
+          case 2:
+            return left[0] * right[0] + left[1] * right[1];
+          case 3:
+            return (left[0] * right[0] + left[1] * right[1]) + left[2] * right[2];
+          default:
+            assert(false);
+            return Result(0);
+        }
+      }
+
+      switch (lhs.size())
+      {
+        case 0:
+          return Result(0);
+        case 1:
+          return dot(lhs.getData().template head<1>(), rhs.getData().template head<1>());
+        case 2:
+          return dot(lhs.getData().template head<2>(), rhs.getData().template head<2>());
+        case 3:
+          return dot(lhs.getData().template head<2>(), rhs.getData().template head<2>()) +
+            dot(lhs.getData().template tail<1>(), rhs.getData().template tail<1>());
+        default:
+          assert(false);
+          return Result(0);
+      }
+    }
   }
 
   /**
    * @brief Computes the dot product of two SpatialMatrix objects.
+   *
+   * Computes @f$\sum_{i,j} A_{ij}\overline{B_{ij}}@f$ over active entries.
+   * Real matrices retain dimension-specific kernels in one shape dispatch,
+   * shared with the member dot operation. Full-size storage uses Eigen's fixed
+   * reduction directly; smaller shapes use explicit active entries. Empty
+   * shapes return zero without reading inactive storage.
    *
    * @tparam LHSScalar Scalar type of left-hand side
    * @tparam RHSScalar Scalar type of right-hand side
@@ -645,13 +771,64 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSScalar, class RHSScalar>
-  constexpr
-  auto dot(const SpatialMatrix<LHSScalar>& lhs, const SpatialMatrix<RHSScalar>& rhs)
+  constexpr auto dot(
+    const SpatialMatrix<LHSScalar>& lhs, const SpatialMatrix<RHSScalar>& rhs)
   {
     assert(lhs.rows() == rhs.rows());
     assert(lhs.cols() == rhs.cols());
     const auto rows = static_cast<Eigen::Index>(lhs.rows());
     const auto cols = static_cast<Eigen::Index>(lhs.cols());
+    if constexpr (std::is_same_v<LHSScalar, Real> && std::is_same_v<RHSScalar, Real>)
+    {
+      const auto& left = lhs.getData();
+      const auto& right = rhs.getData();
+      constexpr unsigned ExtentCount = SpatialMatrix<LHSScalar>::MaxSize + 1;
+      switch (static_cast<unsigned>(rows) * ExtentCount + static_cast<unsigned>(cols))
+      {
+        case 0:
+          return Real(0);
+        case 1:
+          return Real(0);
+        case 2:
+          return Real(0);
+        case 3:
+          return Real(0);
+        case 4:
+          return Real(0);
+        case 5:
+          return left(0, 0) * right(0, 0);
+        case 6:
+          return left(0, 0) * right(0, 0) + left(0, 1) * right(0, 1);
+        case 7:
+          return left(0, 0) * right(0, 0) + left(0, 1) * right(0, 1) +
+            left(0, 2) * right(0, 2);
+        case 8:
+          return Real(0);
+        case 9:
+          return left(0, 0) * right(0, 0) + left(1, 0) * right(1, 0);
+        case 10:
+          return left(0, 0) * right(0, 0) + left(0, 1) * right(0, 1) +
+            left(1, 0) * right(1, 0) + left(1, 1) * right(1, 1);
+        case 11:
+          return left(0, 0) * right(0, 0) + left(0, 1) * right(0, 1) +
+            left(0, 2) * right(0, 2) + left(1, 0) * right(1, 0) +
+            left(1, 1) * right(1, 1) + left(1, 2) * right(1, 2);
+        case 12:
+          return Real(0);
+        case 13:
+          return left(0, 0) * right(0, 0) + left(1, 0) * right(1, 0) +
+            left(2, 0) * right(2, 0);
+        case 14:
+          return left(0, 0) * right(0, 0) + left(0, 1) * right(0, 1) +
+            left(1, 0) * right(1, 0) + left(1, 1) * right(1, 1) +
+            left(2, 0) * right(2, 0) + left(2, 1) * right(2, 1);
+        case 15:
+          return dot(left, right);
+        default:
+          assert(false);
+          return Real(0);
+      }
+    }
     return dot(
       lhs.getData().topLeftCorner(rows, cols), rhs.getData().topLeftCorner(rows, cols));
   }
@@ -666,8 +843,8 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSDerived, class RHSScalar>
-  constexpr
-  auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialVector<RHSScalar>& rhs)
+  constexpr auto dot(
+    const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialVector<RHSScalar>& rhs)
   {
     return dot(lhs, rhs.getData().head(static_cast<Eigen::Index>(rhs.size())));
   }
@@ -682,8 +859,8 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSScalar, class RHSDerived>
-  constexpr
-  auto dot(const Math::SpatialVector<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
+  constexpr auto dot(
+    const Math::SpatialVector<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
     return dot(lhs.getData().head(static_cast<Eigen::Index>(lhs.size())), rhs);
   }
@@ -698,8 +875,8 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSDerived, class RHSScalar>
-  constexpr
-  auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialMatrix<RHSScalar>& rhs)
+  constexpr auto dot(
+    const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialMatrix<RHSScalar>& rhs)
   {
     const auto rows = static_cast<Eigen::Index>(rhs.rows());
     const auto cols = static_cast<Eigen::Index>(rhs.cols());
@@ -716,8 +893,8 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSScalar, class RHSDerived>
-  constexpr
-  auto dot(const Math::SpatialMatrix<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
+  constexpr auto dot(
+    const Math::SpatialMatrix<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
     const auto rows = static_cast<Eigen::Index>(lhs.rows());
     const auto cols = static_cast<Eigen::Index>(lhs.cols());
@@ -734,8 +911,7 @@ namespace Rodin::Math
    * @return @f$ \ln(x) @f$
    */
   template <class T>
-  constexpr
-  auto log(const T& x)
+  constexpr auto log(const T& x)
   {
     return std::log(x);
   }
@@ -750,8 +926,7 @@ namespace Rodin::Math
    * @return @f$ \log_2(x) @f$
    */
   template <class T>
-  constexpr
-  auto log2(const T& x)
+  constexpr auto log2(const T& x)
   {
     return std::log2(x);
   }
@@ -766,8 +941,7 @@ namespace Rodin::Math
    * @return @f$ \log_{10}(x) @f$
    */
   template <class T>
-  constexpr
-  auto log10(const T& x)
+  constexpr auto log10(const T& x)
   {
     return std::log10(x);
   }
@@ -782,8 +956,7 @@ namespace Rodin::Math
    * @return @f$ \arccos(x) @f$ in radians
    */
   template <class T>
-  constexpr
-  auto acos(const T& x)
+  constexpr auto acos(const T& x)
   {
     return std::acos(x);
   }
@@ -798,8 +971,7 @@ namespace Rodin::Math
    * @return @f$ \arcsin(x) @f$ in radians
    */
   template <class T>
-  constexpr
-  auto asin(const T& x)
+  constexpr auto asin(const T& x)
   {
     return std::asin(x);
   }
@@ -814,8 +986,7 @@ namespace Rodin::Math
    * @return @f$ \arctan(x) @f$ in radians
    */
   template <class T>
-  constexpr
-  auto atan(const T& x)
+  constexpr auto atan(const T& x)
   {
     return std::atan(x);
   }
@@ -832,8 +1003,7 @@ namespace Rodin::Math
    * @return @f$ \text{atan2}(y, x) @f$ in radians
    */
   template <class T>
-  constexpr
-  auto atan2(const T& y, const T& x)
+  constexpr auto atan2(const T& y, const T& x)
   {
     return std::atan2(y, x);
   }
@@ -848,8 +1018,7 @@ namespace Rodin::Math
    * @return @f$ \tanh(x) @f$
    */
   template <class T>
-  constexpr
-  auto tanh(const T& x)
+  constexpr auto tanh(const T& x)
   {
     return std::tanh(x);
   }
@@ -863,8 +1032,7 @@ namespace Rodin::Math
    * @return The smaller of @f$ a @f$ and @f$ b @f$
    */
   template <class T>
-  constexpr
-  auto min(const T& a, const T& b)
+  constexpr auto min(const T& a, const T& b)
   {
     return (a < b) ? a : b;
   }
@@ -878,8 +1046,7 @@ namespace Rodin::Math
    * @return The larger of @f$ a @f$ and @f$ b @f$
    */
   template <class T>
-  constexpr
-  auto max(const T& a, const T& b)
+  constexpr auto max(const T& a, const T& b)
   {
     return (a > b) ? a : b;
   }
@@ -898,11 +1065,11 @@ namespace Rodin::Math
    * @return Clamped value in @f$ [\text{lo}, \text{hi}] @f$
    */
   template <class T>
-  constexpr
-  auto clamp(const T& x, const T& lo, const T& hi)
+  constexpr auto clamp(const T& x, const T& lo, const T& hi)
   {
     return min(max(x, lo), hi);
   }
+
   /**
    * @brief Frobenius contraction of spatial tensors, conjugating the RHS.
    * @returns Scalar Frobenius contraction of the operands.

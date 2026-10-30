@@ -1,0 +1,134 @@
+name: Benchmark group
+on:
+  workflow_call:
+    inputs:
+      configuration:
+        type: string
+        required: true
+      group:
+        type: string
+        required: true
+permissions:
+  contents: read
+env:
+  OMPI_MCA_rmaps_base_oversubscribe: '1'
+jobs:
+  Build:
+    name: Shared component build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    outputs:
+      lanes: ${{ steps.build.outputs.lanes }}
+    steps:
+      - uses: actions/checkout@v4
+        id: checkout
+        with:
+          submodules: recursive
+          lfs: false
+      - uses: actions/setup-python@v5
+        id: python
+        with:
+          python-version: '3.12'
+      - run: pip install -r doc/requirements.txt
+        id: dependencies
+      - uses: ./.github/actions/benchmark-environment
+        with:
+          configuration: ${{ inputs.configuration }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: benchmark-common-${{ inputs.configuration }}
+          path: benchmark-common
+      - name: Restore shared libraries, build components and discover cases
+        id: build
+        env:
+          GROUP: ${{ inputs.group }}
+        run: python3 dev/benchmark_ci.py build --source benchmark-common --id "$GROUP" --output benchmark-group
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: benchmark-group-${{ inputs.group }}
+          path: benchmark-group
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: benchmark-plan-group-${{ inputs.group }}
+          path: benchmark-group/execution.json
+          if-no-files-found: error
+  Run:
+    name: ${{ matrix.lane.label }}
+    needs: Build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: ${{ fromJSON(needs.Build.outputs.lanes) }}
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OMPI_MCA_rmaps_base_oversubscribe: '1'
+    steps:
+      - uses: actions/checkout@v4
+        id: checkout
+        with:
+          submodules: recursive
+          lfs: false
+      - uses: actions/setup-python@v5
+        id: python
+        with:
+          python-version: '3.12'
+      - run: pip install -r doc/requirements.txt
+        id: dependencies
+      - uses: ./.github/actions/benchmark-environment
+        id: environment
+        with:
+          configuration: ${{ inputs.configuration }}
+      - name: Hydrate benchmark resources
+        id: resources
+        run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/medit/UniformTriangular64.medit.mesh"
+      - uses: actions/download-artifact@v4
+        id: restore
+        with:
+          name: benchmark-group-${{ inputs.group }}
+          path: benchmark-group
+      - name: Run one benchmark executable at a time
+        id: execution
+        env:
+          LANE: ${{ matrix.lane.id }}
+        run: |
+          mkdir -p benchmark-diagnostics
+          set -o pipefail
+          python3 -u dev/ci_resource_monitor.py benchmark-diagnostics/memory.log &
+          monitor_pid=$!
+          trap 'kill "$monitor_pid" 2>/dev/null || true; wait "$monitor_pid" 2>/dev/null || true' EXIT
+          /usr/bin/time -v -o benchmark-diagnostics/resources.txt \
+            python3 -u dev/benchmark_ci.py run --source benchmark-group --id "$LANE" --output benchmark-result \
+            2>&1 | tee benchmark-diagnostics/execution.log
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: benchmark-result-${{ matrix.lane.id }}
+          path: benchmark-result
+          if-no-files-found: error
+      - name: Save benchmark diagnostic context
+        if: always()
+        env:
+          BENCHMARK_LANE: ${{ toJSON(matrix.lane) }}
+          BENCHMARK_STEPS: ${{ toJSON(steps) }}
+          BENCHMARK_CONTEXT_ONLY: '1'
+        run: python3 dev/ci_summary.py
+      - name: Preserve failed benchmark diagnostics
+        id: diagnostics
+        if: ${{ failure() || cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: benchmark-diagnostics-${{ matrix.lane.id }}-attempt-${{ github.run_attempt }}
+          path: |
+            benchmark-diagnostics/
+            benchmark-result/
+          if-no-files-found: warn

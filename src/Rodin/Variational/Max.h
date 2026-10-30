@@ -33,7 +33,7 @@ namespace Rodin::Variational
    * @ingroup MaxSpecializations
    * @brief Represents the maximum operation between two functions.
    *
-   * This class represents the pointwise maximum of two functions:
+   * This class represents the pointwise maximum of two functions.
    * @f[
    *    \text{Max}(f, g)(x) = \max(f(x), g(x))
    * @f]
@@ -278,7 +278,11 @@ namespace Rodin::Variational
         return m_rhs;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Polytope on which the polynomial order is requested.
+       * @returns Polynomial order on the requested polytope, or no value when unavailable.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto lo = this->getLHS().getOrder(polytope);

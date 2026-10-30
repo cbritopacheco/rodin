@@ -81,6 +81,113 @@ class ForBracesTests(unittest.TestCase):
             "  else reject(x);")), 1)
 
 
+
+class IfBracesTests(unittest.TestCase):
+    def findings(self, text):
+        return [finding for finding in check_file("src/Rodin/Example.cpp",
+                                                 text.splitlines())
+                if finding.check == "ifbraces"]
+
+    def test_one_line_body_and_wrapped_condition_pass(self):
+        self.assertEqual(self.findings(
+            "if (first &&\n    second)\n  consume();\nelse\n  reject();"), [])
+
+    def test_wrapped_single_statement_requires_braces(self):
+        self.assertEqual([f.line for f in self.findings(
+            "if (ready)\n  consume(\n    value);\nelse\n  reject(\n    value);")], [1, 4])
+
+    def test_streamed_exception_requires_braces(self):
+        self.assertEqual(len(self.findings(
+            "if (invalid)\n  Alert::Exception()\n    << message << Alert::Raise;")), 1)
+
+    def test_constexpr_and_nested_body_require_braces(self):
+        self.assertEqual([f.line for f in self.findings(
+            "if constexpr (Enabled)\n  if (ready)\n    consume(\n      value);")], [1, 2])
+
+    def test_else_if_chains_keep_conventional_layout(self):
+        self.assertEqual(self.findings(
+            "if (a)\n{\n  first();\n}\nelse if (b)\n{\n  second();\n}\nelse\n{\n  third();\n}"), [])
+        self.assertEqual([f.line for f in self.findings(
+            "if (a) first();\nelse if (b)\n  consume(\n    value);\nelse last();")], [2])
+
+    def test_else_with_nested_loop_requires_braces(self):
+        self.assertEqual([f.line for f in self.findings(
+            "if (a) first();\nelse\n  for (auto x : xs)\n    consume(x);")], [2])
+
+    def test_dangling_else_is_part_of_outer_body(self):
+        self.assertEqual([f.line for f in self.findings(
+            "if (outer)\n  if (inner) first();\n  else second();")], [1])
+
+    def test_literals_comments_and_directives_do_not_create_conditions(self):
+        self.assertEqual(self.findings(
+            '// if (a)\n/* else\nconsume(); */\n'
+            'auto s = R"doc(if (a)\nconsume(); else reject();)doc";\n'
+            '#define CONDITIONAL if (a) consume( \\\n value);\n'), [])
+
+    def test_multiline_lambda_and_raw_literal_require_braces(self):
+        for body in ('consume([] {\n  work();\n});',
+                     'consume(R"doc(first\nsecond)doc");'):
+            with self.subTest(body=body):
+                self.assertEqual(len(self.findings("if (ready)\n" + body)), 1)
+
+    def test_attributes_and_leading_comments(self):
+        self.assertEqual(self.findings(
+            "if (ready)\n  [[likely]] {\n    consume();\n  }"), [])
+        self.assertEqual(self.findings(
+            "if (ready)\n  // Explanation.\n  consume();"), [])
+
+
+
+class DanglingElseTests(unittest.TestCase):
+    def findings(self, text):
+        return [f for f in check_file("tests/unit/Example.cpp", text.splitlines())
+                if f.check == "danglingelse"]
+
+    def test_single_line_assertions_require_braces_without_outer_else(self):
+        for macro in ["EXPECT_EQ(a, b)", "ASSERT_TRUE(ready)",
+                      "GTEST_EXPECT_FALSE(ready)", "EXPECT_THROW(work(), Error)"]:
+            with self.subTest(macro=macro):
+                findings = self.findings("if (ready)\n  " + macro + ";")
+                self.assertEqual([f.line for f in findings], [1])
+
+    def test_constexpr_wrapped_conditions_and_attributes_are_checked(self):
+        findings = self.findings(
+            "if constexpr (Enabled &&\n              Supported)\n"
+            "  [[likely]] EXPECT_EQ(a, b);")
+        self.assertEqual([f.line for f in findings], [1])
+
+    def test_complete_if_else_and_else_if_chains_are_safe(self):
+        self.assertEqual(self.findings(
+            "if (a) EXPECT_EQ(x, y);\n"
+            "else if (b) EXPECT_NEAR(x, y, tolerance);\n"
+            "else EXPECT_FALSE(ready);"), [])
+        self.assertEqual(self.findings(
+            "if (a) EXPECT_EQ(x, y); /* explanation */ else reject();"), [])
+
+    def test_nested_conditional_is_checked_at_its_own_line(self):
+        self.assertEqual([f.line for f in self.findings(
+            "if (outer)\n{\n  if (inner)\n    EXPECT_EQ(x, y);\n}")], [3])
+
+    def test_braced_assertions_and_loop_bodies_are_safe(self):
+        self.assertEqual(self.findings(
+            "if (ready)\n{\n  EXPECT_EQ(x, y);\n}\n"
+            "for (auto x : xs) EXPECT_EQ(x, y);\n"
+            "while (ready()) ASSERT_TRUE(work());"), [])
+
+    def test_skip_messages_and_ordinary_calls_are_not_assertion_expansions(self):
+        self.assertEqual(self.findings(
+            "if (ready) GTEST_SKIP() << reason;\n"
+            "if (ready) ADD_FAILURE() << reason;\n"
+            "if (ready) consume();\nif (ready) assert(valid);"), [])
+
+    def test_comments_strings_and_definitions_are_ignored(self):
+        self.assertEqual(self.findings(
+            '// if (ready) EXPECT_EQ(a, b);\n'
+            '/* if (ready) EXPECT_EQ(a, b); */\n'
+            'auto s = R"doc(if (ready) EXPECT_EQ(a, b);)doc";\n'
+            '#define CHECK if (ready) EXPECT_EQ(a, b);\n'), [])
+
+
 class DoxygenStyleTests(unittest.TestCase):
     def findings(self, text):
         return [finding for finding in check_file("src/Rodin/Example.cpp",

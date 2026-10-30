@@ -4,7 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Alert/Exception.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Mesh.h"
 #include "MeshLoader.h"
@@ -12,38 +12,57 @@
 
 namespace Rodin::MMG
 {
+  void Mesh::require(Index index, Geometry::Polytope::Type type) const
+  {
+    const size_t dimension = Geometry::Polytope::Traits(type).getDimension();
+    if (dimension > getConnectivity().getMaximalDimension() ||
+      index >= getConnectivity().getCount(dimension) ||
+      getPolytope(dimension, index)->getGeometry() != type)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Invalid MMG metadata entity index " << index << " for geometry "
+        << static_cast<size_t>(type) << "." << Alert::Raise;
+    }
+  }
+
   Mesh& Mesh::setCorner(Index vertexIdx)
   {
+    require(vertexIdx, Geometry::Polytope::Type::Point);
     m_cornerIndex.insert(vertexIdx);
     return *this;
   }
 
   Mesh& Mesh::setRidge(Index edgeIdx)
   {
+    require(edgeIdx, Geometry::Polytope::Type::Segment);
     m_ridgeIndex.insert(edgeIdx);
     return *this;
   }
 
   Mesh& Mesh::setRequiredEdge(Index edgeIdx)
   {
+    require(edgeIdx, Geometry::Polytope::Type::Segment);
     m_requiredEdgeIndex.insert(edgeIdx);
     return *this;
   }
 
   Mesh& Mesh::setRequiredTriangle(Index triangleIdx)
   {
+    require(triangleIdx, Geometry::Polytope::Type::Triangle);
     m_requiredTriangleIndex.insert(triangleIdx);
     return *this;
   }
 
   Mesh& Mesh::setRequiredTetrahedron(Index tetrahedronIdx)
   {
+    require(tetrahedronIdx, Geometry::Polytope::Type::Tetrahedron);
     m_requiredTetrahedronIndex.insert(tetrahedronIdx);
     return *this;
   }
 
   Mesh& Mesh::setRequiredVertex(Index vertexIdx)
   {
+    require(vertexIdx, Geometry::Polytope::Type::Point);
     m_requiredVertexIndex.insert(vertexIdx);
     return *this;
   }

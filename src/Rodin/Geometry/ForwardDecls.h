@@ -26,6 +26,8 @@
 
 namespace Rodin::Geometry
 {
+  class Bounds;
+
   /**
    * @brief Template container indexed by polytope geometry types.
    * @tparam T Type of values to store
@@ -168,9 +170,11 @@ namespace Rodin::Geometry
    * | [Mesh<Context::Local>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html) | Sequential mesh storing the full incidence complex and geometry in a single process. |
    * | [Mesh<Context::MPI>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html) | Distributed mesh storing a rank-local @ref Rodin::Geometry::Shard "shard", global/local index maps, and MPI context for parallel assembly. |
    *
-   * @tparam ContextType Execution context (default: Context::Local)
+   * @tparam ContextType Execution context (default Context::Local)
    * @see <a href="class_rodin_1_1_geometry_1_1_mesh_base.html">MeshBase</a>
    * @see <a href="_geometry_2_mesh_8h.html">Mesh.h</a>
+   *
+   * @see @ref MeshTypes "Mesh Types and Template Specializations"
    */
   template <class ContextType = Context::Local>
   class Mesh;
@@ -198,7 +202,7 @@ namespace Rodin::Geometry
    *
    * # Downcasting
    * A Mesh that is also a SubMesh can be downcasted to access SubMesh
-   * functionality. For instance:
+   * functionality. The following example uses that interface.
    * @code{.cpp}
    * if (mesh.isSubMesh())
    * {
@@ -221,6 +225,8 @@ namespace Rodin::Geometry
    * @tparam Context Execution context type
    * @see <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html">SubMeshBase</a>
    * @see <a href="_geometry_2_sub_mesh_8h.html">SubMesh.h</a>
+   *
+   * @see @ref SubMeshSpecializations "SubMesh Template Specializations"
    */
   template <class Context>
   class SubMesh;

@@ -1,6 +1,12 @@
 /*
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file
+ * @brief Geometry-aware witnesses for SWIFT quality and hinge evaluation.
  */
 #ifndef RODIN_ADAPTATION_SWIFT_QUALITYSAMPLES_H
 #define RODIN_ADAPTATION_SWIFT_QUALITYSAMPLES_H
@@ -8,6 +14,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "Rodin/Geometry/PolytopeTransformation.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "QualityCovering.h"
 #include "Parameters.h"
@@ -37,7 +44,8 @@ namespace Rodin::Adaptation::SWIFT
         : m_cell(cell),
           m_parameters(parameters),
           m_formula(QualityCovering::get(cell.getGeometry(),
-            parameters.sampling.getSubdivision(order, cell.getTransformation().getOrder(),
+            parameters.sampling.getSubdivision(order,
+              (cell.getTransformation().getDegree().value_or(2)),
               Geometry::Polytope::Traits(cell.getGeometry()).getVertexCount() ==
                 cell.getDimension() + 1)))
       {}
@@ -52,11 +60,13 @@ namespace Rodin::Adaptation::SWIFT
         const auto& cell = m_cell.get();
         const auto& formula = m_formula.get();
         const auto& quadrature = cell.getQuadrature(formula);
+        // Covering base weights are uniform and fixed throughout evaluation.
+        const Real weight = formula.getWeight(0);
         for (size_t q = 0; q < quadrature.getSize(); ++q)
         {
           const auto& point = quadrature.getPoint(q);
-          evaluate(Variational::IntegrationPoint(point, &formula, q),
-            formula.getWeight(q) * point.getDistortion());
+          evaluate(
+            Variational::IntegrationPoint(quadrature, q), weight * point.getDistortion());
         }
       }
 
@@ -124,11 +134,12 @@ namespace Rodin::Adaptation::SWIFT
     private:
       /// Equal-weight fraction protects witnesses with no predicted risk.
       static constexpr Real AdaptiveFraction = Real(0.5);
+
       /// Caps dimensionless risk, including inverted predictor witnesses.
       static constexpr Real MaximumRisk = Real(100);
       std::reference_wrapper<const Geometry::Polytope> m_cell;
       std::reference_wrapper<const Parameters> m_parameters;
-      std::reference_wrapper<const QualityCovering> m_formula;
+      std::reference_wrapper<const QF::QuadratureFormula> m_formula;
   };
 }
 

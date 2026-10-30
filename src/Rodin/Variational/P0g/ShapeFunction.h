@@ -26,31 +26,29 @@ namespace Rodin::Variational
   /// @brief Shape function expression.
   template <class Derived, class Range, class Mesh, ShapeFunctionSpaceType Space>
   class ShapeFunction<Derived, P0g<Range, Mesh>, Space>
-    : public ShapeFunctionBase<
-        ShapeFunction<Derived, P0g<Range, Mesh>, Space>,
-        P0g<Range, Mesh>,
-        Space>
+    : public ShapeFunctionBase<ShapeFunction<Derived, P0g<Range, Mesh>, Space>,
+        P0g<Range, Mesh>, Space>
   {
     public:
       /// @brief Finite element space type.
       using FESType = P0g<Range, Mesh>;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       /// @brief Range (evaluation value) type.
-      using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
       /// @brief Parent class type.
       using Parent =
-        ShapeFunctionBase<
-          ShapeFunction<Derived, FESType, SpaceType>,
-          FESType,
-          SpaceType>;
+        ShapeFunctionBase<ShapeFunction<Derived, FESType, SpaceType>, FESType, SpaceType>;
 
       /// @brief Whether the range of the space is scalar.
       static constexpr bool IsScalarRange = std::is_same_v<RangeType, ScalarType>;
+
       /// @brief Whether the range of the space is vector valued.
       static constexpr bool IsVectorRange = FormLanguage::IsVectorRange<RangeType>::Value;
 
@@ -61,9 +59,10 @@ namespace Rodin::Variational
       struct VectorCache
       {
         /// @brief Vector dimension of the finite element space.
-          size_t vdim = 0;
+        size_t vdim = 0;
+
         /// @brief Cached reference basis tabulation.
-          std::vector<RangeType> basis; // basis[c] = e_c (size vdim)
+        std::vector<RangeType> basis; // basis[c] = e_c (size vdim)
       };
 
       ShapeFunction() = delete;
@@ -72,8 +71,7 @@ namespace Rodin::Variational
        * @brief Constructs the shape function over a finite element space.
        * @param fes Finite element space.
        */
-      constexpr
-      explicit ShapeFunction(const FESType& fes)
+      constexpr explicit ShapeFunction(const FESType& fes)
         : Parent(fes),
           m_ip(nullptr)
       {}
@@ -82,8 +80,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      ShapeFunction(const ShapeFunction& other)
+      constexpr ShapeFunction(const ShapeFunction& other)
         : Parent(other),
           m_ip(nullptr),
           m_vcache(other.m_vcache)
@@ -93,8 +90,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      ShapeFunction(ShapeFunction&& other)
+      constexpr ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
           m_ip(std::exchange(other.m_ip, nullptr)),
           m_vcache(std::move(other.m_vcache))
@@ -122,11 +118,21 @@ namespace Rodin::Variational
        * @brief Gets the integration point the expression is evaluated at.
        * @returns The integration point the expression is evaluated at.
        */
-      constexpr
-      const IntegrationPoint& getIntegrationPoint() const
+      constexpr const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
+      }
+
+      /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      ShapeFunction& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        return *this;
       }
 
       /**
@@ -154,13 +160,12 @@ namespace Rodin::Variational
        * @param local Index in the local numbering.
        * @returns Value of the selected local basis function at the evaluation point.
        */
-      constexpr
-      decltype(auto) getBasis(size_t local) const
+      constexpr decltype(auto) getBasis(size_t local) const
       {
         if constexpr (IsScalarRange)
         {
           assert(local == 0);
-          (void) local;
+          (void)local;
           return ScalarType(1);
         }
         else
@@ -187,8 +192,7 @@ namespace Rodin::Variational
        * @brief Gets the operand in the shape function expression.
        * @returns The operand in the shape function expression.
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();
       }
@@ -237,14 +241,18 @@ namespace Rodin::Variational
     public:
       /// @brief CRTP or finite element base class.
       using FES = P0g<Math::SpatialMatrix<Scalar>, Mesh>;
+
       /// @brief Current shape-function specialization.
       using Shape = ShapeFunction;
+
       /// @brief Existing shape-function interface.
       using Parent = ShapeFunctionBase<
         ShapeFunction<Derived, P0g<Math::SpatialMatrix<Scalar>, Mesh>, Space>, FES,
         Space>;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = typename FormLanguage::Traits<FES>::RangeType;
+
       /**
        * @brief Constructs matrix basis tabulation on the supplied finite element space.
        * @param fes Finite element space.
@@ -252,6 +260,7 @@ namespace Rodin::Variational
       explicit ShapeFunction(const FES& fes)
         : Parent(fes)
       {}
+
       /**
        * @brief Constructs matrix basis tabulation on the supplied finite element space.
        * @param other Object to copy from.
@@ -259,6 +268,7 @@ namespace Rodin::Variational
       ShapeFunction(const ShapeFunction& other)
         : Parent(other)
       {}
+
       /**
        * @brief Constructs matrix basis tabulation on the supplied finite element space.
        * @param other Object to move from.
@@ -290,7 +300,23 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Shape& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        return *this;
+      }
+
+      /**
        * @brief Binds the integration point and prepares local basis values.
+       *
+       * Both matrix dimensions and the local basis count identify the owned
+       * component layout. A space assignment can change rows and columns while
+       * preserving the formula, sample and total component count.
+       *
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
@@ -301,7 +327,10 @@ namespace Rodin::Variational
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(
           poly.getDimension(), poly.getIndex());
         if (!ip.getQuadratureFormula() || m_qf != ip.getQuadratureFormula() ||
-          m_qp != ip.getIndex() || m_geometry != poly.getGeometry())
+          m_qp != ip.getIndex() || m_geometry != poly.getGeometry() ||
+          m_basis.size() != fe.getCount() || m_basis.empty() ||
+          m_basis.front().rows() != fe.getRows() ||
+          m_basis.front().cols() != fe.getColumns())
         {
           m_basis.resize(fe.getCount());
           const auto& scalar = fe.getScalarElement();
@@ -334,6 +363,7 @@ namespace Rodin::Variational
       {
         return m_basis.at(local);
       }
+
       /**
        * @brief Returns the leaf shape function used for assembly.
        * @returns The leaf shape function used for assembly.
@@ -342,6 +372,7 @@ namespace Rodin::Variational
       {
         return static_cast<const Derived&>(*this).getLeaf();
       }
+
       /**
        * @brief Returns the polynomial order when it is known.
        * @param poly Mesh entity used by this operation.
@@ -351,7 +382,7 @@ namespace Rodin::Variational
       {
         return this->getFiniteElementSpace()
           .getFiniteElement(poly.getDimension(), poly.getIndex())
-          .getOrder();
+          .getDegree();
       }
 
       ShapeFunction* copy() const noexcept override
@@ -361,7 +392,7 @@ namespace Rodin::Variational
 
     private:
       const IntegrationPoint* m_ip = nullptr;
-      const QF::QuadratureFormulaBase* m_qf = nullptr;
+      const QF::QuadratureFormula* m_qf = nullptr;
       size_t m_qp = 0;
       Geometry::Polytope::Type m_geometry = Geometry::Polytope::Type::Point;
       std::vector<RangeType> m_basis;

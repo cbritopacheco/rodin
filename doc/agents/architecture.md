@@ -11,7 +11,7 @@ src/Rodin/          The library
 tests/unit/         GoogleTest, mirrors src/Rodin module tree
 tests/manufactured/ Manufactured solutions + targeted fixed-mesh regressions
 tests/convergence/  Multi-resolution h, p, hp, and isoparametric rate validation
-tests/benchmarks/   Google Benchmark (target RodinBenchmarks)
+tests/benchmarks/   Registered module/component benchmarks and physical contexts
 examples/           One directory per theme; each example is a CLI executable
 third-party/        Git submodules (eigen, googletest, ...)
 py/                 pybind11 Python bindings (scikit-build / pyproject.toml)
@@ -74,7 +74,7 @@ Assembly 7, FormLanguage 6, Distance 6, Test 6.
   classifier). → geometry.md
 - **QF/** — positive quadrature on reference polytopes: published
   Xiao--Gimbutas and Witherden--Vincent tables, Gauss--Legendre/Jacobi
-  conical products, tensor products, and `PolytopeQuadratureFormula`
+  conical products, tensor products, and `QuadratureFormula`
   dispatch/caching. Grundmann--Möller remains explicitly selectable but is
   not a default. → quadrature.md
 - **FormLanguage/** — `Base` (clone + identity root), `Traits` (open

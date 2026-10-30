@@ -4,52 +4,53 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/IO/ForwardDecls.h"
-#include "Rodin/IO/XDMF.h"
+//! [poisson-source]
+#include <cstdlib>
+
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
-#include <type_traits>
+#include <Rodin/IO/XDMF.h>
 
 using namespace Rodin;
 using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-int main(int, char**)
+int main()
 {
-  Mesh mesh;
-  mesh.load(
-    "../resources/examples/Heart/CoronaryArtery/MergedFSI.mesh", IO::FileFormat::MEDIT);
-  // mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  mesh.getConnectivity().compute(2, 3); // Compute boundary
-  mesh.getConnectivity().compute(2, 1); // Compute boundary
-  mesh.getConnectivity().compute(1, 0); // Compute boundary
+  //! [poisson-mesh]
+  constexpr size_t nodes = 16;
+  Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {nodes, nodes});
+  mesh.scale(1.0 / (nodes - 1));
+  mesh.getConnectivity().compute(1, 2);
+  //! [poisson-mesh]
 
-  H1 vh(std::integral_constant<size_t, 2>{}, mesh);
-
+  //! [poisson-form]
+  P1 vh(mesh);
   TrialFunction u(vh);
-  TestFunction  v(vh);
-
+  TestFunction v(vh);
   RealFunction f = 1;
 
-  // Apply Dirichlet conditions on the entire boundary.
   Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          // - Integral(f, v)
-    + DirichletBC(u, f).on(17);
-  CG(poisson).solve();
+  poisson = Integral(Grad(u), Grad(v)) - Integral(f, v)
+             + DirichletBC(u, Zero());
+  //! [poisson-form]
 
-  mesh.save("Poisson.mesh", IO::FileFormat::MEDIT);
-  u.getSolution().save("Poisson.gf", IO::FileFormat::MFEM);
+  //! [poisson-solve]
+  CG solver(poisson);
+  solver.solve();
+  if (!solver.success())
+    return EXIT_FAILURE;
+  //! [poisson-solve]
 
-  // Save solution
+  //! [poisson-export]
   IO::XDMF xdmf("Poisson");
   xdmf.grid().setMesh(mesh).add("u", u.getSolution());
   xdmf.write().flush();
-  xdmf.close();
-
+  //! [poisson-export]
   return 0;
 }
+//! [poisson-source]

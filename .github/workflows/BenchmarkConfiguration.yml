@@ -1,0 +1,58 @@
+name: Benchmark configuration
+on:
+  workflow_call:
+    inputs:
+      configuration:
+        type: string
+        required: true
+permissions:
+  contents: read
+jobs:
+  Common:
+    name: Shared libraries
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    outputs:
+      groups: ${{ steps.build.outputs.groups }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r doc/requirements.txt
+      - uses: ./.github/actions/benchmark-environment
+        with:
+          configuration: ${{ inputs.configuration }}
+      - name: Configure and build shared libraries
+        id: build
+        env:
+          CONFIGURATION: ${{ inputs.configuration }}
+        run: python3 dev/benchmark_ci.py prepare --configuration "$CONFIGURATION" --output benchmark-common
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: benchmark-common-${{ inputs.configuration }}
+          path: benchmark-common
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: benchmark-plan-common-${{ inputs.configuration }}
+          path: benchmark-common/plan.json
+          if-no-files-found: error
+  Groups:
+    name: ${{ matrix.group.label }}
+    needs: Common
+    strategy:
+      fail-fast: false
+      matrix:
+        group: ${{ fromJSON(needs.Common.outputs.groups) }}
+    uses: ./.github/workflows/BenchmarkGroup.yml
+    with:
+      configuration: ${{ inputs.configuration }}
+      group: ${{ matrix.group.id }}

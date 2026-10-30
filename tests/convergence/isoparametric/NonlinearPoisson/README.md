@@ -314,9 +314,12 @@ contracts. The workload does not add collectives to local geometry queries.
 Each of the nine boundary/order rate hierarchies has a separate process;
 the remaining 28 fixed-mesh controls are grouped separately. All three
 levels and both adjacent intervals remain in each rate case. The tetrahedral
-P1 entries have a three-hour watchdog: the resolved local pure-Neumann
-hierarchy took approximately 6836 seconds. Other entries retain 1800-second
-watchdogs. These are scheduling allowances, not numerical budgets or a
+P1 entries have a five-hour watchdog: a mixed-boundary CI run exceeded the
+previous three-hour allowance, while the resolved local pure-Neumann hierarchy
+took approximately 6836 seconds. Tetrahedral P2/P3 rate entries receive three
+hours; other entries retain 1800-second watchdogs. Rate runs report mesh,
+initial assembly, and solve/norm phase completion for each level. These are
+scheduling allowances, not numerical budgets or a
 performance certificate. MPI processor counts and the common pyramid
 resource lock are retained. Full runtime certification of the revised
 hierarchy and process partition remains separate from its registration.
@@ -373,9 +376,4 @@ separate from convergence of the solved field.
 Separate registrations cover all seven geometries, native and real-PETSc
 local execution, MPI ranks one through four and both thread configurations.
 Slow labels, 1800-second watchdogs, processor counts and pyramid resource
-locks are retained. The complete finite matrix is locally verified: 84
-registrations select 336 configurations and produce 672 rank reports across
-the seven geometries, native and real-PETSc local/MPI execution, and both
-thread modes. Dependency freshness, case-selection uniqueness and every
-participant report are checked independently. This is not hosted-CI
-certification or a statement about arbitrary meshes and degrees.
+locks are retained.

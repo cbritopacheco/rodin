@@ -1,98 +1,57 @@
 /**
-  @page examples-mmg-simple_io Simple input/output of MMG objects
-  @brief How to read and write MMG meshes in MFEM and MEDIT formats
-
-  @m_keywords{MMG, I/O, MEDIT, MFEM, Mesh}
+  @page examples-mmg-simple_io Saving an MMG mesh
+  @brief Write and reload geometry together with MMG feature metadata.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-mmg-io-intro Introduction
+  @section examples-mmg-io-intro Geometry and remeshing features
 
-  The @ref Rodin::MMG "MMG" module provides a mesh class
-  (`MMG::Mesh`) that extends the standard @ref Rodin::Geometry::Mesh "Mesh"
-  with remeshing capabilities. This example shows how to load and save
-  MMG meshes in the supported formats.
+  `MMG::Mesh` extends the local geometry mesh with corner, ridge and required
+  entity sets. These labels carry remeshing constraints in addition to the
+  mesh's ordinary region and boundary attributes.
 
-  @section examples-mmg-io-create Creating an MMG Mesh
+  @section examples-mmg-io-create Construct and mark the mesh
 
-  An `MMG::Mesh` can be created using the same
-  @ref Rodin::Geometry::Mesh "UniformGrid()" method as a
-  regular mesh. The key difference is that `MMG::Mesh` stores additional
-  metadata (corners, ridges, and required entities) that MMG uses during
-  remeshing:
+  The example scales an eight-by-eight vertex grid to the unit square and
+  marks its four corners. Vertex zero is also marked as required.
+  Boundary incidence is prepared before any facet queries.
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-  #include <Rodin/MMG.h>
+  @snippet MMG/MeshIO.cpp mmg-io-create
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
+  @section examples-mmg-io-save Save the metadata
 
-  int main()
-  {
-    MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-    mesh.getConnectivity().compute(1, 2);
+  MEDIT represents MMG features through dedicated sections. Required vertices,
+  edges, triangles and tetrahedra are written as their corresponding
+  `RequiredVertices`, `RequiredEdges`, `RequiredTriangles` and
+  `RequiredTetrahedra` sections when those sets are populated.
 
-    // Mark corners (points that must be preserved during remeshing)
-    mesh.setCorner(0);
-    mesh.setCorner(15);
-    mesh.setCorner(240);
-    mesh.setCorner(255);
+  @section examples-mmg-io-load Reload and compare
 
-    // Mark boundary edges as ridges (sharp features)
-    for (auto it = mesh.getBoundary(); !it.end(); ++it)
-      mesh.setRidge(it->getIndex());
+  The format argument selects the MEDIT reader explicitly. A second write
+  makes the loaded representation available for inspection.
 
-    // Required entities are serialized in MEDIT and passed to MMG as MG_REQ.
-    mesh.setRequiredVertex(0);
-    mesh.setRequiredEdge(0);
-    mesh.setRequiredTriangle(0);
+  @snippet MMG/MeshIO.cpp mmg-io-roundtrip
 
-    return 0;
-  }
-  @endcode
+  The program compares mesh counts and the marked corner/required-vertex
+  metadata. Preservation during a subsequent remeshing or level-set cut is
+  covered separately by @ref examples-mmg-behavior.
 
-  @section examples-mmg-io-save Saving in MEDIT Format
+  @section examples-mmg-io-full Build and run
 
-  The MEDIT format (`.mesh`) is the native format for MMG. Use
-  @ref Rodin::IO::FileFormat "IO::FileFormat::MEDIT":
+  Build `MeshIO` and run it from a scratch directory. It writes
+  `MMG.medit.mesh` and `MMG.copy.medit.mesh`; the expected mesh has 64 vertices
+  and 98 triangles.
 
-  @code{.cpp}
-  mesh.save("output.medit.mesh", IO::FileFormat::MEDIT);
-  @endcode
+  The complete program is available in @ref MMG/MeshIO.cpp "MeshIO.cpp".
 
-  Rodin writes and reads the MMG-specific `RequiredVertices`,
-  `RequiredEdges`, `RequiredTriangles`, and `RequiredTetrahedra` sections when
-  they are present.
+  @section examples-mmg-io-see-also Continue
 
-  @section examples-mmg-io-load Loading and Re-saving
-
-  Loading is symmetric:
-
-  @code{.cpp}
-  MMG::Mesh mesh2;
-  mesh2.load("output.medit.mesh", IO::FileFormat::MEDIT);
-  mesh2.save("copy.medit.mesh", IO::FileFormat::MEDIT);
-  @endcode
-
-  @note The file format must always be specified explicitly — there is no
-  default format parameter.
-
-  @section examples-mmg-io-full Full Source Code
-
-  -   @ref MMG/MeshIO.cpp "MeshIO.cpp"
-
-  @section examples-mmg-io-see-also See Also
-
-  - @ref examples-mmg-mesh_optimization "Mesh optimization" - Remeshing with MMG
-  - @ref examples-mmg-behavior "MMG behavior and guarantees"
-  - @ref guides-io "I/O in Rodin" - Format reference
-  - @ref Rodin::MMG "MMG namespace"
+  - @ref examples-mmg-casting "Mesh conversion and object lifetimes"
+  - @ref examples-mmg-mesh_optimization "Optimize the geometry"
+  - @ref guides-io "Other I/O formats"
 
   @example MMG/MeshIO.cpp
   @m_examplenavigation{examples-mmg-simple_io,MMG/}
   @m_footernavigation
-  */
+*/

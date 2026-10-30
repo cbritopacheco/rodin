@@ -9,7 +9,7 @@
  * @brief Boolean-valued functions for logical operations in variational formulations.
  *
  * This file defines BooleanFunctionBase and BooleanFunction for representing
- * functions mapping points to boolean values: @f$ f: \Omega \to \{0, 1\} @f$.
+ * functions mapping points to boolean values with @f$ f: \Omega \to \{0, 1\} @f$.
  * These are commonly used for characteristic functions, indicator functions,
  * and logical conditions in variational problems.
  */
@@ -30,7 +30,7 @@ namespace Rodin::Variational
   /**
    * @brief Base class for boolean-valued functions.
    *
-   * BooleanFunctionBase represents functions mapping points to boolean values:
+   * BooleanFunctionBase represents functions mapping points to boolean values.
    * @f$ f: \Omega \to \{0, 1\} @f$ or equivalently @f$ f: \Omega \to \{\text{true}, \text{false}\} @f$.
    *
    * These functions are commonly used for:
@@ -40,7 +40,7 @@ namespace Rodin::Variational
    *
    * @tparam Derived The derived class following CRTP pattern
    *
-   * ## Usage Examples
+   * # Usage Examples
    * ```
    * // Constant boolean function
    * BooleanFunction<Boolean> isActive(true);

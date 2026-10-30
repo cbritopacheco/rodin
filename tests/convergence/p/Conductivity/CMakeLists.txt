@@ -8,7 +8,7 @@ target_link_libraries(RodinConvergencePConductivity
     Rodin::Solver
 )
 
-gtest_discover_tests(RodinConvergencePConductivity
+rodin_discover_tests(RodinConvergencePConductivity
   PROPERTIES
     LABELS convergence
 )

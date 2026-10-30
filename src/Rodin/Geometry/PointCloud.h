@@ -21,14 +21,14 @@ namespace Rodin::Geometry
   /**
    * @brief Point cloud with a point-centric API and Eigen "matrix" views.
    *
-   * Ownership: std::vector<Eigen::Vector3<Real>> (always 3 scalars per point).
-   * Active dimension: m_rows in {0,1,2,3} tells which prefix is meaningful.
+   * Storage is owned by std::vector<Eigen::Vector3<Real>>, with three scalars per point.
+   * The active dimension m_rows in {0,1,2,3} identifies the meaningful prefix.
    *
    * Views:
    * - getMatrix(): (rows x N) view for computations in the active dimension.
    * - getPackedMatrix(): (3 x N) full view of the underlying packed storage.
    *
-   * Storage layout (AoS):
+   * The following layout stores points in array-of-structures order.
    *   [x0 y0 z0][x1 y1 z1]...
    *
    * We map it as a column-major 3xN matrix with outer stride 3 and inner stride 1.
@@ -360,7 +360,7 @@ namespace Rodin::Geometry
       /**
        * @brief Returns a (3 x N) matrix view of the underlying packed storage.
        *
-       * Naming rationale: this is the raw, packed, always-3D storage view.
+       * The name describes the raw, packed storage view with three components per point.
        * @returns A (3 x N) matrix view of the underlying packed storage.
        */
       [[nodiscard]] inline
@@ -395,23 +395,23 @@ namespace Rodin::Geometry
         assert(getCount() == other.getCount());
         if (m_dimension == 0 || getCount() == 0)
           return Scalar(0);
-        return (this->getMatrix().cwiseProduct(other.getMatrix())).sum();
+        return Math::dot(this->getMatrix(), other.getMatrix());
       }
 
       /**
-       * @brief Returns the Frobenius inner product of the active coordinates with an Eigen matrix.
+       * @brief Returns the Frobenius inner product of the active coordinates with an Eigen matrix, conjugating its entries.
        * @param other Other operand.
        * @returns The Frobenius inner product of the active coordinates with an Eigen matrix.
        */
       template <class EigenDerived>
-      [[nodiscard]] inline
-      Scalar dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
+      [[nodiscard]] inline auto dot(
+        const Eigen::MatrixBase<EigenDerived>& other) const noexcept
       {
         assert(static_cast<std::uint8_t>(other.rows()) == m_dimension);
         assert(static_cast<Eigen::Index>(other.cols()) == getCount());
         if (m_dimension == 0 || getCount() == 0)
-          return Scalar(0);
-        return (this->getMatrix().cwiseProduct(other)).sum();
+          return decltype(Math::dot(this->getMatrix(), other))(0);
+        return Math::dot(this->getMatrix(), other);
       }
 
       /**
@@ -635,7 +635,7 @@ namespace Rodin::Geometry
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for a Geometry::PointCloud: exposes the scalar type.
+  /// @brief Type traits for a Geometry::PointCloud, exposing the scalar type.
   template <>
   struct Traits<Rodin::Geometry::PointCloud>
   {

@@ -56,6 +56,8 @@ namespace Rodin::IO
    * @tparam Fmt File format to use for loading
    * @tparam Trait Context trait (e.g., sequential or parallel)
    * @see <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html">MeshLoader</a>
+   *
+   * @see @ref MeshLoaderSpecializations "MeshLoader Template Specializations"
    */
   template <FileFormat Fmt, class Trait>
   class MeshLoader;
@@ -122,14 +124,12 @@ namespace Rodin::IO
    * @param[in] fmt File format enum value
    * @returns C-style string name of the format, or nullptr if invalid
    *
-   * ## Example
+   * # Example
    * ```cpp
    * const char* name = toCharString(FileFormat::MFEM);  // Returns "MFEM"
    * ```
    */
-  inline
-  constexpr
-  const char* toCharString(FileFormat fmt)
+  inline constexpr const char* toCharString(FileFormat fmt)
   {
     switch (fmt)
     {
@@ -149,17 +149,21 @@ namespace Rodin::IO
    * @param[in] fmt File format to output
    * @returns Reference to the output stream
    *
-   * Writes the string representation of the file format to the stream.
+   * Writes the name of a known file format, or the numeric value of an
+   * unrecognized format. Numeric fallback preserves diagnostics without
+   * inserting a null string into the stream.
    *
-   * ## Example
+   * # Example
    * ```cpp
    * std::cout << FileFormat::MEDIT;  // Outputs "MEDIT"
    * ```
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, FileFormat fmt)
+  inline std::ostream& operator<<(std::ostream& os, FileFormat fmt)
   {
-    os << toCharString(fmt);
+    if (const auto* name = toCharString(fmt))
+      os << name;
+    else
+      os << static_cast<int>(fmt);
     return os;
   }
 }

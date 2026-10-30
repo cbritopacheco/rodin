@@ -22,14 +22,14 @@ namespace Rodin::Math::RungeKutta
    * @brief Classical second-order Runge-Kutta method with midpoint rule.
    *
    * This method provides second-order accurate numerical integration for
-   * ordinary differential equations (ODEs) of the form:
+   * ordinary differential equations (ODEs) of the form
    * @f[
    *   \frac{dq}{dt} = f(q, t)
    * @f]
    *
-   * ## Algorithm
+   * # Algorithm
    * Given a time step @f$ \Delta t @f$ and current state @f$ q_n @f$, the
-   * method computes @f$ q_{n+1} @f$ using:
+   * method computes @f$ q_{n+1} @f$ using
    * @f[
    *   \begin{aligned}
    *   k_1 &= f(q_n) \\
@@ -38,17 +38,17 @@ namespace Rodin::Math::RungeKutta
    *   \end{aligned}
    * @f]
    *
-   * ## Properties
+   * # Properties
    * - **Order of accuracy**: 2 (error @f$ \sim O(\Delta t^3) @f$ per step)
    * - **Stages**: 2 function evaluations per step
    * - **Stability**: A-stable for linear problems
    *
-   * ## Typical Use Cases
+   * # Typical Use Cases
    * - Time-dependent PDEs (heat equation, wave equation)
    * - Particle dynamics
    * - Systems requiring better accuracy than forward Euler
    *
-   * ## Example Usage
+   * # Example Usage
    * ```cpp
    * RK2 integrator;
    * Vector<Real> q = initial_state;

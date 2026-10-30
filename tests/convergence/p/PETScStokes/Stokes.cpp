@@ -30,8 +30,10 @@ namespace Rodin::Tests::Convergence::P::PETScStokes
           return UniformGrid(GetParam()).makeMesh(n);
 #ifdef RODIN_USE_MPI
         else
+        {
           return DistributedUniformGrid(Context::MPI(*environment, *world), GetParam())
             .makeMesh(n);
+        }
 #endif
       }
 

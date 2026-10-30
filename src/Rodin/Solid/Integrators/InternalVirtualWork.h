@@ -9,7 +9,7 @@
  * @brief Façade for the internal virtual work nonlinear form in hyperelastic formulations.
  *
  * Provides the unified API for constructing the internal virtual work
- * contributions to a nonlinear solid mechanics problem:
+ * contributions to a nonlinear solid mechanics problem.
  *
  * @code
  * auto ivw = Solid::InternalVirtualWork(law, displacement);
@@ -47,7 +47,7 @@
  * @f]
  * and @c NewtonSolver then applies @f$\mathbf{u}^{k+1}
  * = \mathbf{u}^k + \Delta\mathbf{u}@f$. Do not write
- * @c Tangent(du, v) - Residual(v) for this Newton form: the @c Problem
+ * @c Tangent(du, v) - Residual(v) for this Newton form because the @c Problem
  * assembly will negate the already-negated residual and produce
  * @f$K\Delta\mathbf{u}=+R@f$.
  *
@@ -58,6 +58,7 @@
 #ifndef RODIN_SOLID_INTEGRATORS_INTERNALVIRTUALWORK_H
 #define RODIN_SOLID_INTEGRATORS_INTERNALVIRTUALWORK_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <functional>
 #include <type_traits>
 
@@ -93,12 +94,12 @@ namespace Rodin::Solid
     public:
       /// @brief Constitutive law type.
       using LawType = Law;
+
       /// @brief Current displacement state type.
       using StateType = State;
-      /// @brief The law's cache type, handed to the output by @c commit().
-      using CacheType = typename Law::Cache;
+
       /// @brief Type-erased output callable for this law.
-      using OutputFunctionType = OutputFunction<CacheType>;
+      using OutputFunctionType = OutputFunction<LawType>;
 
       /**
        * @brief Constructs the internal virtual work object.
@@ -124,7 +125,7 @@ namespace Rodin::Solid
 
       /**
        * @brief Sets the quadrature order for both residual and tangent.
-       * @param order Polynomial order (0 = auto: 2 * max(fe order))
+       * @param order Polynomial order (0 selects the automatic value 2 * max(fe order))
        * @returns Reference to this object after the operation.
        */
       InternalVirtualWork& setQuadratureOrder(size_t order)
@@ -151,7 +152,7 @@ namespace Rodin::Solid
       /**
        * @brief Sets the output invoked at each quadrature point by @c commit().
        *
-       * The output is the dual of @c setInput(): it reads the law's cache
+       * The output is the dual of @c setInput() and reads the prepared law
        * after evaluation, and is the extraction site for committed internal
        * variables, recovered stresses or diagnostics. It is invoked only by
        * @c commit(), never during assembly, so a caller controls exactly when
@@ -175,7 +176,7 @@ namespace Rodin::Solid
        * constitutive evaluation of @c Residual() and @c Tangent() at the
        * current displacement -- the same kinematics, the same
        * @c ConstitutivePoint, the same @c Input -- and hands each resulting
-       * cache to the output. Callers use this to commit internal variables
+       * prepared law to the output. Callers use this to commit internal variables
        * once a nonlinear solve has converged, without recomputing the
        * kinematics themselves.
        *
@@ -199,24 +200,34 @@ namespace Rodin::Solid
         const size_t d = mesh.getSpaceDimension();
 
         auto stateGradient = Variational::Jacobian(displacement);
+        auto law = m_law;
 
         for (auto it = mesh.getCell(); it; ++it)
         {
           const auto& polytope = *it;
           const Index idx = polytope.getIndex();
-          const auto& stateFE = fes.getFiniteElement(d, idx);
 
-          const size_t effectiveOrder =
-            (m_quadOrder > 0) ? m_quadOrder : 2 * stateFE.getOrder();
+          size_t effectiveOrder = m_quadOrder;
+          if (effectiveOrder == 0)
+          {
+            const auto stateOrder = m_displacement.get().getOrder(polytope);
+            if (!stateOrder)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "No automatic constitutive quadrature order is established. "
+                << "Specify it with setQuadratureOrder()." << Alert::Raise;
+            }
+            effectiveOrder = 2 * *stateOrder;
+          }
           const auto& qf =
-            QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+            QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
           const auto& quadrature = polytope.getQuadrature(qf);
           const size_t nqp = quadrature.getSize();
 
           for (size_t q = 0; q < nqp; ++q)
           {
             const auto& pt = quadrature.getPoint(q);
-            const Variational::IntegrationPoint ip(pt, &qf, q);
+            const Variational::IntegrationPoint ip(quadrature, q);
             const auto H = stateGradient.getValue(ip);
 
             KinematicState state(d);
@@ -229,10 +240,8 @@ namespace Rodin::Solid
             if (m_input)
               m_input(cp);
 
-            typename LawType::Cache cache;
-            m_law.setCache(cache, cp);
-
-            m_output(cp, cache);
+            law.setConstitutivePoint(cp);
+            m_output(cp, law);
           }
         }
       }
@@ -249,7 +258,7 @@ namespace Rodin::Solid
       /**
        * @brief Returns the residual integrator (linear form contribution).
        *
-       * Produces:
+       * Produces the following result.
        * @f[
        *   \delta W^{\text{int}}(\mathbf{v})
        *     = \int_{\Omega_0} \mathbf{P}(\mathbf{u}) : \nabla_0 \mathbf{v} \, dX
@@ -271,7 +280,7 @@ namespace Rodin::Solid
       /**
        * @brief Returns the tangent integrator (bilinear form contribution).
        *
-       * Produces:
+       * Produces the following result.
        * @f[
        *   D(\delta W^{\text{int}})[\Delta\mathbf{u}, \mathbf{v}]
        *     = \int_{\Omega_0} \mathbf{A}(\mathbf{F}) : \nabla_0 \Delta\mathbf{u}
@@ -293,8 +302,8 @@ namespace Rodin::Solid
         return integrator;
       }
 
-      // operator()(u, v) → ProblemBody{Tangent, Residual} is provided by the
-      // NonLinearFormIntegrator CRTP base.
+    // operator()(u, v) → ProblemBody{Tangent, Residual} is provided by the
+    // NonLinearFormIntegrator CRTP base.
 
     private:
       Law m_law;

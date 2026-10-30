@@ -110,7 +110,7 @@ namespace Rodin::Geometry
    * # Mathematical Foundation
    *
    * For a mesh with topological dimension @f$ D @f$, the connectivity stores
-   * all incidence relations:
+   * all incidence relations.
    * @f[
    *  d \longrightarrow d', \quad 0 \leq d, d' \leq D
    * @f]
@@ -122,7 +122,7 @@ namespace Rodin::Geometry
    * ## Basic Connectivity Computation
    *
    * Connectivity must be computed before use. The compute() method accepts an
-   * optional Mode parameter to control how missing polytopes are handled:
+   * optional Mode parameter to control how missing polytopes are handled.
    *
    * @code{.cpp}
    * // Compute face-to-cell incidence (edges to cells in 2D)
@@ -145,7 +145,7 @@ namespace Rodin::Geometry
    *   restrict connectivity to a specific subset of polytopes or when all required
    *   polytopes have been pre-computed.
    *
-   * Example demonstrating the difference:
+   * Example demonstrating the difference.
    * @code{.cpp}
    * Connectivity<Context::Local> connectivity;
    * connectivity.initialize(2)
@@ -216,19 +216,19 @@ namespace Rodin::Geometry
        * Automatically discovers and inserts missing polytopes during connectivity
        * computation. This is the default and most commonly used mode.
        *
-       * **Behavior:**
+       * @par Behavior
        * - When computing connectivity from dimension @p d to dimension @p dp,
        *   any missing polytopes of dimension @p dp that are incident to polytopes
        *   of dimension @p d are automatically created and inserted.
        * - Edge and face counts will increase as new entities are discovered.
        * - Ensures complete connectivity information.
        *
-       * **Use when:**
+       * @par Appropriate use
        * - Building connectivity for a new mesh
        * - You need all sub-polytopes (edges, faces) to be available
        * - Standard mesh operations that require complete connectivity
        *
-       * **Example:**
+       * The following example illustrates this operation.
        * @code{.cpp}
        * connectivity.compute(2, 1, Mode::Discover);
        * // Creates all edges of cells automatically
@@ -239,20 +239,20 @@ namespace Rodin::Geometry
        * Only uses polytopes that already exist in the connectivity without
        * creating new ones.
        *
-       * **Behavior:**
+       * @par Behavior
        * - Only references polytopes of dimension @p dp that have been previously
        *   added to the connectivity.
        * - Polytope counts remain unchanged.
        * - Missing polytopes are silently skipped.
        * - Useful for partial connectivity or working with pre-defined subsets.
        *
-       * **Use when:**
+       * @par Appropriate use
        * - All required polytopes have been pre-computed
        * - You want to restrict connectivity to a specific subset of polytopes
        * - Re-computing connectivity relations after clearing them
        * - Performance is critical and you've already built necessary polytopes
        *
-       * **Example:**
+       * The following example illustrates this operation.
        * @code{.cpp}
        * // First, build edges with Discover mode
        * connectivity.compute(2, 1, Mode::Discover);
@@ -345,6 +345,7 @@ namespace Rodin::Geometry
        * A defaulted copy would leave them aliasing the source's @c right map
        * (dangling once the source dies), so relink them into this object's
        * own @c right map.
+       * @param other Source object to copy or move from.
        */
       Connectivity(const Connectivity& other)
         : m_maximalDimension(other.m_maximalDimension),
@@ -364,19 +365,23 @@ namespace Rodin::Geometry
        *
        * Moving a @c std::unordered_map preserves node addresses, so the
        * @c left pointers remain valid; a defaulted move is correct.
+       * @param other Source object to copy or move from.
        */
-      Connectivity(Connectivity&&) = default;
+      Connectivity([[maybe_unused]] Connectivity&& other) = default;
 
       /**
        * @brief Copy assignment operator.
        *
-       * See the copy constructor: @c left is relinked into this object's
+       * As in the copy constructor, @c left is relinked into this object's
        * own @c right map.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
        */
       Connectivity& operator=(const Connectivity& other)
       {
         if (this != &other)
         {
+          ++m_revision;
           m_maximalDimension = other.m_maximalDimension;
           m_dimension = other.m_dimension;
           m_count = other.m_count;
@@ -390,8 +395,39 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      /// @brief Move assignment operator.
-      Connectivity& operator=(Connectivity&&) = default;
+      /**
+       * @brief Move assignment operator.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
+      Connectivity& operator=(Connectivity&& other) noexcept
+      {
+        if (this != &other)
+        {
+          ++m_revision;
+          m_maximalDimension = other.m_maximalDimension;
+          m_dimension = other.m_dimension;
+          m_count = std::move(other.m_count);
+          m_gcount = std::move(other.m_gcount);
+          m_index = std::move(other.m_index);
+          m_dirty = std::move(other.m_dirty);
+          m_geometry = std::move(other.m_geometry);
+          m_connectivity = std::move(other.m_connectivity);
+        }
+        return *this;
+      }
+
+      /**
+       * @brief Returns the revision of the stored topology.
+       * @returns Revision changed by explicit topology edits or replacement.
+       *
+       * Derived incidence computations retain this revision. Topology edits
+       * must not run concurrently with mesh evaluation.
+       */
+      size_t getRevision() const noexcept
+      {
+        return m_revision;
+      }
 
       /**
        * @brief Initializes connectivity for a mesh of given dimension.
@@ -527,14 +563,14 @@ namespace Rodin::Geometry
        * @brief Computes the entities of dimension @f$ d @f$ of each cell and
        * for each such entity the vertices of that entity.
        *
-       * Computes the connectivities:
+       * Computes the connectivities.
        * @f[
        *  D \longrightarrow d \quad \text{and} \quad D \longrightarrow 0, \quad 0 < d < D,
        * @f]
        * from @f$ D \longrightarrow 0 @f$ and @f$ D \longrightarrow D @f$.
        *
        * @param[in] d Dimension of entities to build
-       * @param[in] mode Computation mode (default: Mode::Discover)
+       * @param[in] mode Computation mode (default Mode::Discover)
        *   - Mode::Discover: Automatically creates missing sub-polytopes
        *   - Mode::Restrict: Only uses existing polytopes
        * @returns Reference to this connectivity object
@@ -549,7 +585,7 @@ namespace Rodin::Geometry
        *
        * @param[in] i Polytope index
        * @param[in] d Dimension of the sub-polytopes to extract
-       * @param[in] mode Computation mode (default: Mode::Discover)
+       * @param[in] mode Computation mode (default Mode::Discover)
        *   - Mode::Discover: Creates missing sub-polytopes and inserts them
        *   - Mode::Restrict: Only includes sub-polytopes already present in the connectivity
        * @returns Reference to this connectivity object
@@ -568,7 +604,7 @@ namespace Rodin::Geometry
        *
        * @param[in] d Source dimension
        * @param[in] dp Target dimension
-       * @param[in] mode Computation mode (default: Mode::Discover)
+       * @param[in] mode Computation mode (default Mode::Discover)
        *   - Mode::Discover: Automatically discovers and creates missing polytopes
        *     of dimension @p dp that are incident to polytopes of dimension @p d
        *   - Mode::Restrict: Only uses polytopes of dimension @p dp that already
@@ -701,7 +737,10 @@ namespace Rodin::Geometry
        */
       Connectivity& setDirty(size_t d, size_t dp, bool dirty = true);
 
-      /// @brief Returns the maximal polytope dimension present in this connectivity.
+      /**
+       * @brief Returns the maximal polytope dimension present in this connectivity.
+       * @returns Largest polytope dimension stored in the mesh.
+       */
       size_t getMaximalDimension() const;
 
       /**
@@ -713,6 +752,8 @@ namespace Rodin::Geometry
       template<class Archive>
       void serialize(Archive& ar, const unsigned int version)
       {
+        if constexpr (Archive::is_loading::value)
+          ++m_revision;
         ar & m_maximalDimension;
         ar & m_dimension;
         ar & m_count;
@@ -728,7 +769,7 @@ namespace Rodin::Geometry
        * @brief Repoints every @c m_index[d].left entry into this object's own
        * @c m_index[d].right map.
        *
-       * Call after a memberwise copy: @c left still points at the source's
+       * Call after a memberwise copy because @c left still points at the source's
        * @c right nodes; dereferencing yields the key, which is looked up in
        * this object's copied @c right map.
        */
@@ -745,6 +786,7 @@ namespace Rodin::Geometry
         }
       }
 
+      size_t m_revision = 0; ///< Revision of explicitly supplied topology.
       size_t m_maximalDimension;
       size_t m_dimension;
       std::vector<size_t> m_count;

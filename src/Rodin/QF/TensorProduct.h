@@ -7,6 +7,11 @@
 #ifndef RODIN_QF_TENSORPRODUCT_H
 #define RODIN_QF_TENSORPRODUCT_H
 
+/**
+ * @file
+ * @brief Owns Cartesian products of reference quadrature formulas.
+ */
+
 #include "QuadratureFormula.h"
 
 namespace Rodin::QF
@@ -25,7 +30,7 @@ namespace Rodin::QF
     public:
       /**
        * @brief Constructs the Cartesian product of two quadrature formulae.
-       * @param g Mesh entity used by this operation.
+       * @param g Reference geometry of the Cartesian product.
        * @param left Quadrature formula for the first tensor-product factor.
        * @param right Quadrature formula for the second tensor-product factor.
        */
@@ -38,7 +43,7 @@ namespace Rodin::QF
 
       /**
        * @brief Constructs the Cartesian product of three quadrature formulae.
-       * @param g Mesh entity used by this operation.
+       * @param g Reference geometry of the Cartesian product.
        * @param first Quadrature formula for the first tensor-product factor.
        * @param second Quadrature formula for the second tensor-product factor.
        * @param third Quadrature formula for the third tensor-product factor.
@@ -49,6 +54,12 @@ namespace Rodin::QF
       {
         TensorProduct pair(g, first, second);
         append(pair, third);
+      }
+
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{m_points, m_weights.data(), 1};
       }
 
       /**
@@ -83,7 +94,11 @@ namespace Rodin::QF
         return m_geometry;
       }
 
-      TensorProduct* copy() const noexcept override
+      /**
+       * @brief Copies the concrete formula without regenerating its samples.
+       * @returns A new formula owned by the caller.
+       */
+      TensorProduct* copy() const noexcept
       {
         return new TensorProduct(*this);
       }
@@ -91,25 +106,39 @@ namespace Rodin::QF
     private:
       /**
        * @brief Appends product quadrature points and weights.
-       * @param left Left quadrature formula or serialized index sequence.
+       *
+       * Factor sizes and left samples are invariant over their inner loops.
+       * References are borrowed only during construction; the product owns all
+       * coordinates and weights. Concatenation order and floating-point weight
+       * multiplication are unchanged, including for aliased factors.
+       * Each point is zero-constructed in its final owning slot before filling
+       * active coordinates, avoiding a temporary fixed-capacity vector move.
+       *
+       * @param left Left quadrature formula.
        * @param right Right quadrature formula.
        */
       void append(const QuadratureFormulaBase& left, const QuadratureFormulaBase& right)
       {
-        m_points.reserve(left.getSize() * right.getSize());
-        m_weights.reserve(left.getSize() * right.getSize());
-        for (size_t i = 0; i < left.getSize(); ++i)
+        const size_t leftCount = left.getSize(), rightCount = right.getSize();
+        if (leftCount == 0 || rightCount == 0)
+          return;
+        m_points.reserve(leftCount * rightCount);
+        m_weights.reserve(leftCount * rightCount);
+        for (size_t i = 0; i < leftCount; ++i)
         {
-          for (size_t j = 0; j < right.getSize(); ++j)
+          const auto& leftPoint = left.getPoint(i);
+          const auto leftDimension = leftPoint.size();
+          const Real leftWeight = left.getWeight(i);
+          for (size_t j = 0; j < rightCount; ++j)
           {
-            Math::SpatialVector<Real> p(
-              left.getPoint(i).size() + right.getPoint(j).size());
-            for (Eigen::Index k = 0; k < left.getPoint(i).size(); ++k)
-              p[k] = left.getPoint(i)[k];
-            for (Eigen::Index k = 0; k < right.getPoint(j).size(); ++k)
-              p[left.getPoint(i).size() + k] = right.getPoint(j)[k];
-            m_points.push_back(std::move(p));
-            m_weights.push_back(left.getWeight(i) * right.getWeight(j));
+            const auto& rightPoint = right.getPoint(j);
+            const auto rightDimension = rightPoint.size();
+            auto& p = m_points.emplace_back(leftDimension + rightDimension);
+            for (Eigen::Index k = 0; k < leftDimension; ++k)
+              p[k] = leftPoint[k];
+            for (Eigen::Index k = 0; k < rightDimension; ++k)
+              p[leftDimension + k] = rightPoint[k];
+            m_weights.push_back(leftWeight * right.getWeight(j));
           }
         }
       }

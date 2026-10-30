@@ -42,13 +42,13 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
 
   struct LiftedErrors
   {
-      LiftedErrors()
-        : velocity(),
-          pressure(),
-          divergence()
-      {}
-      LiftedErrorNorm::Result velocity, pressure;
-      std::array<Real, 3> divergence;
+    LiftedErrors()
+      : velocity(),
+        pressure(),
+        divergence()
+    {}
+    LiftedErrorNorm::Result velocity, pressure;
+    std::array<Real, 3> divergence;
   };
 
 #if defined(RODIN_CURVED_STOKES_PETSC) && defined(RODIN_USE_MPI)
@@ -104,27 +104,27 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
           assert(m_reference);
           struct VelocityData
           {
-              const StokesData& data;
-              auto getSolution(const Math::SpatialPoint& x) const
-              {
-                return data.getVelocity(x);
-              }
-              auto getJacobian(const Math::SpatialPoint& x) const
-              {
-                return data.getVelocityJacobian(x);
-              }
+            const StokesData& data;
+            auto getSolution(const Math::SpatialPoint& x) const
+            {
+              return data.getVelocity(x);
+            }
+            auto getJacobian(const Math::SpatialPoint& x) const
+            {
+              return data.getVelocityJacobian(x);
+            }
           };
           struct PressureData
           {
-              const StokesData& data;
-              Real getSolution(const Math::SpatialPoint& x) const
-              {
-                return data.getPressure(x);
-              }
-              auto getGradient(const Math::SpatialPoint& x) const
-              {
-                return data.getPressureGradient(x);
-              }
+            const StokesData& data;
+            Real getSolution(const Math::SpatialPoint& x) const
+            {
+              return data.getPressure(x);
+            }
+            auto getGradient(const Math::SpatialPoint& x) const
+            {
+              return data.getPressureGradient(x);
+            }
           };
           std::array<Real, 3> squared{};
           const auto divergence = [&](const auto& derivatives, Real weight) {
@@ -143,11 +143,13 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
             PressureData{exact}, SineMap(), integrationOrder);
 #ifdef RODIN_USE_MPI
           if constexpr (requires { m_mesh.getShard(); })
+          {
             for (Real& value : squared)
             {
               value = boost::mpi::all_reduce(
                 m_mesh.getContext().getCommunicator(), value, std::plus<Real>());
             }
+          }
 #endif
           for (size_t component = 0; component < squared.size(); ++component)
             lifted->divergence[component] = std::sqrt(squared[component]);
@@ -168,8 +170,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
           return UniformGrid(geometry).makeMesh(n);
 #if defined(RODIN_CURVED_STOKES_PETSC) && defined(RODIN_USE_MPI)
         else
+        {
           return DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
             .makeMesh(n);
+        }
 #endif
       }
       Mesh<ContextType> m_mesh;
@@ -442,11 +446,13 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
               represented.pressure, lifted.pressure.field, lifted.pressure.total};
             history[field].append(Real(1) / Real(n - 1), errors[field]);
             if (field == 1)
+            {
               for (size_t component = 0; component < 3; ++component)
               {
                 pressureHistory[component].append(
                   Real(1) / Real(n - 1), errors[field][component]);
               }
+            }
           }
           for (size_t component = 0; component < 2; ++component)
           {
@@ -700,10 +706,11 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           if constexpr (requires { mesh.getShard(); })
+          {
             if (!mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
               continue;
-          const auto& qf =
-            QF::PolytopeQuadratureFormula::get(AssemblyOrder, cell->getGeometry());
+          }
+          const auto& qf = QF::QuadratureFormula::get(AssemblyOrder, cell->getGeometry());
           const Geometry::PolytopeQuadrature quadrature(*cell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {

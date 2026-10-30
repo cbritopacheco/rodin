@@ -33,3 +33,21 @@ foreach(np 1 2 3 4 8)
     RodinMPIIOHDF5IOTest_np${np}
     "HDF5_USE_FILE_LOCKING=FALSE")
 endforeach()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  add_executable(RodinMPIIOHDF5FailureTest HDF5FailureTest.cpp)
+  target_link_libraries(RodinMPIIOHDF5FailureTest PRIVATE
+    GTest::gtest Rodin::Geometry Rodin::Variational Rodin::IO Rodin::MPI)
+  target_link_options(RodinMPIIOHDF5FailureTest PRIVATE
+    "LINKER:--wrap=H5Gcreate2" "LINKER:--wrap=H5Fopen")
+  foreach(np 1 2 3 4 8)
+    add_test(NAME RodinMPIIOHDF5FailureTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinMPIIOHDF5FailureTest>)
+    set_tests_properties(RodinMPIIOHDF5FailureTest_np${np} PROPERTIES
+      LABELS "unit;distributed")
+    rodin_suppress_external_mpi_lsan_for_test(
+      RodinMPIIOHDF5FailureTest_np${np} "HDF5_USE_FILE_LOCKING=FALSE")
+  endforeach()
+endif()

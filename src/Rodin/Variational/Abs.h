@@ -89,7 +89,7 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates absolute value at a point.
        * @param p Point at which to evaluate
-       * @returns For scalars: @f$ |f(p)| @f$, for vectors: @f$ \|\mathbf{f}(p)\| @f$, for matrices: @f$ \|A(p)\|_F @f$
+       * @returns For scalars, returns @f$ |f(p)| @f$, for vectors, returns @f$ \|\mathbf{f}(p)\| @f$, for matrices, returns @f$ \|A(p)\|_F @f$
        */
       template <class Point>
       constexpr

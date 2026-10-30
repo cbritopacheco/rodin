@@ -1,235 +1,121 @@
 /**
-  @page guides-meshes-queries Geometric Queries
-  @brief Querying mesh properties and measurements
+  @page guides-meshes-queries Geometric queries
+  @brief Interpret dimensions, entity counts, measures and attributes.
 
   @tableofcontents
-
   @m_footernavigation
 
-  Rodin provides various methods to query geometric properties of meshes,
-  including volumes, areas, perimeters, and spatial information.
+  @section guides-meshes-queries-intro Query the stored mesh
 
-  @section guides-meshes-queries-intro Introduction
+  A query acts on the mesh's current entities and geometry. Compute the
+  required incidence relations before querying facets or boundaries. The
+  `MeshBasics` example uses a rectangle of width two and height one, split
+  into two triangles and one quadrilateral.
 
-  After creating or loading a mesh, you often need to query its properties:
-  dimensions, entity counts, volumes, and other geometric measurements.
-
-  @section guides-meshes-queries-basic Basic Properties
+  @section guides-meshes-queries-basic Dimensions and counts
 
   @subsection guides-meshes-queries-basic-dim Dimensions
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
+  `getDimension()` is the topological cell dimension; `getSpaceDimension()`
+  is the embedding dimension. A surface mesh in three-dimensional space has
+  dimensions two and three respectively.
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
+  @subsection guides-meshes-queries-basic-counts Counts
 
-  int main() {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  `getVertexCount()`, `getFaceCount()` and `getCellCount()` count vertices,
+  codimension-one facets and cells. `getPolytopeCount(d)` selects a dimension;
+  its geometry-type overload selects a reference shape. Counts of discovered
+  edges and faces depend on which incidence relations have been computed.
 
-    // Topological dimension (2 for 2D meshes)
-    std::cout << "Dimension: " << mesh.getDimension() << std::endl;
+  @subsection guides-meshes-queries-basic-empty Empty meshes
 
-    // Space dimension (dimension of embedding space)
-    std::cout << "Space dimension: " << mesh.getSpaceDimension() << std::endl;
+  `isEmpty()` tests whether a mesh contains cells. Check it before computing
+  an average or evaluating a quantity that requires a cell.
 
-    return 0;
-  }
-  @endcode
+  @section guides-meshes-queries-geometric Select the measure dimension
 
-  @subsection guides-meshes-queries-basic-counts Entity Counts
-
-  @code{.cpp}
-  std::cout << "Vertices: " << mesh.getVertexCount() << std::endl;
-  std::cout << "Faces: " << mesh.getFaceCount() << std::endl;
-  std::cout << "Cells: " << mesh.getCellCount() << std::endl;
-
-  // Count polytopes by dimension
-  for (size_t d = 0; d <= mesh.getDimension(); ++d) {
-    std::cout << "Polytopes of dimension " << d << ": " 
-              << mesh.getPolytopeCount(d) << std::endl;
-  }
-
-  // Count by geometry type
-  std::cout << "Triangles: " 
-            << mesh.getPolytopeCount(Polytope::Type::Triangle) << std::endl;
-  @endcode
-
-  @subsection guides-meshes-queries-basic-empty Empty Check
-
-  @code{.cpp}
-  if (mesh.isEmpty()) {
-    std::cout << "Mesh is empty" << std::endl;
-  }
-  @endcode
-
-  @section guides-meshes-queries-geometric Geometric Measurements
+  | Query | Entities included |
+  | :--- | :--- |
+  | `getMeasure(d)` | All stored entities of dimension `d` |
+  | `getArea()` | All two-dimensional entities |
+  | `getVolume()` | All three-dimensional entities |
+  | `getPerimeter()` | Boundary facets of the mesh |
 
   @subsection guides-meshes-queries-geometric-volume Volume
 
-  @code{.cpp}
-  // Total volume (area in 2D)
-  Real totalVolume = mesh.getVolume();
-  std::cout << "Total volume: " << totalVolume << std::endl;
-
-  // Volume by attribute
-  Real volume1 = mesh.getVolume(1);
-  std::cout << "Volume of region 1: " << volume1 << std::endl;
-
-  // Volume of multiple attributes
-  FlatSet<Attribute> attrs = {1, 2, 3};
-  Real combinedVolume = mesh.getVolume(attrs);
-  std::cout << "Combined volume: " << combinedVolume << std::endl;
-  @endcode
-
-  @subsection guides-meshes-queries-geometric-perimeter Perimeter
-
-  @code{.cpp}
-  // Total perimeter
-  Real totalPerimeter = mesh.getPerimeter();
-  std::cout << "Total perimeter: " << totalPerimeter << std::endl;
-
-  // Perimeter by attribute
-  Real perimeter1 = mesh.getPerimeter(1);
-  @endcode
+  A volume mesh has three-dimensional cells. `getVolume()` sums their
+  geometric measures. Its attribute overloads restrict that sum to selected
+  three-dimensional entities.
 
   @subsection guides-meshes-queries-geometric-area Area
 
-  @code{.cpp}
-  // Total area
-  Real totalArea = mesh.getArea();
+  On a planar or surface mesh, `getArea()` sums cell areas. In a volume mesh,
+  it sums all stored faces, including interior faces. Boundary surface area
+  is obtained from `getPerimeter()` after computing facet-to-cell incidence.
 
-  // Area by attribute
-  Real area1 = mesh.getArea(1);
+  @subsection guides-meshes-queries-geometric-perimeter Boundary measure
 
-  // Area of multiple attributes
-  Real combinedArea = mesh.getArea(attrs);
-  @endcode
+  `getPerimeter()` measures the lengths of boundary facets in a two-dimensional
+  mesh and their areas in a three-dimensional mesh. Attribute overloads select
+  boundary-facet labels.
 
-  @subsection guides-meshes-queries-geometric-measure Measure
+  @subsection guides-meshes-queries-geometric-measure Generic measure
 
-  Generic measure for polytopes of any dimension:
+  `mesh.getMeasure(mesh.getDimension())` sums the cell measures in the mesh's
+  own dimension. Summing dimension-one entities of a triangular mesh includes
+  its interior edges as well as its boundary edges.
 
-  @code{.cpp}
-  // Measure of all edges (dimension 1)
-  Real edgeMeasure = mesh.getMeasure(1);
+  @snippet Geometry/MeshBasics.cpp mesh-basics-queries
 
-  // Measure of edges with attribute 1
-  Real edgeMeasure1 = mesh.getMeasure(1, 1);
+  Expected values are six vertices, eight edges, three cells, area two,
+  perimeter six and area one in each region.
 
-  // Measure of edges with multiple attributes
-  Real combinedEdgeMeasure = mesh.getMeasure(1, attrs);
-  @endcode
+  @section guides-meshes-queries-attributes Optional attributes
 
-  @section guides-meshes-queries-attributes Attribute Queries
+  @subsection guides-meshes-queries-attributes-get Read a label
 
-  @subsection guides-meshes-queries-attributes-get Getting Attributes
+  An entity may have no attribute. `getAttribute()`, `getCellAttribute(i)` and
+  `getFaceAttribute(i)` therefore return an optional value. Test presence
+  before dereferencing it.
 
-  @code{.cpp}
-  // Get cell attribute
-  Attribute cellAttr = mesh.getCellAttribute(5);
+  @snippet Geometry/MeshBasics.cpp mesh-basics-iterate
 
-  // Get face attribute
-  Attribute faceAttr = mesh.getFaceAttribute(10);
+  @subsection guides-meshes-queries-attributes-set Set a label
 
-  // Get arbitrary polytope attribute
-  Attribute attr = mesh.getAttribute(2, 7);  // Cell 7
-  @endcode
+  `mesh.setAttribute({dimension, index}, value)` labels one entity. Region
+  labels belong to cells; boundary-condition labels belong to facets. A cell
+  label does not automatically label its boundary facets.
 
-  @subsection guides-meshes-queries-attributes-set Setting Attributes
+  @section guides-meshes-queries-spatial Coordinates and boundaries
 
-  @code{.cpp}
-  // Set cell attribute
-  mesh.setAttribute({2, 5}, 2);  // Set cell 5 to attribute 2
+  @subsection guides-meshes-queries-spatial-coords Vertex coordinates
 
-  // Set face attribute
-  mesh.setAttribute({1, 10}, 3);  // Set face 10 to attribute 3
-  @endcode
+  `mesh.getVertexCoordinates(i)` returns the coordinates of vertex `i`.
+  The coordinate vector has `getSpaceDimension()` entries. For points inside
+  a cell, construct a `Geometry::Point` from a cell and reference coordinates.
 
-  @section guides-meshes-queries-spatial Spatial Queries
+  @subsection guides-meshes-queries-spatial-surface Surface meshes
 
-  @subsection guides-meshes-queries-spatial-coords Vertex Coordinates
+  `isSurface()` tests the mesh's surface classification. Compare the two
+  dimensions when the embedding codimension itself is needed.
 
-  @code{.cpp}
-  // Get coordinates of vertex 0
-  auto coords = mesh.getVertexCoordinates(0);
-  std::cout << "Vertex 0: (" << coords[0] << ", " << coords[1] << ")" 
-            << std::endl;
-  @endcode
+  @subsection guides-meshes-queries-spatial-boundary Boundary facets
 
-  @subsection guides-meshes-queries-spatial-surface Surface Check
+  After computing facet-to-cell connectivity, `isBoundary(faceIndex)` selects
+  facets with one incident cell. `isInterface(faceIndex)` selects interior
+  facets; attribute jumps can be selected separately through region labels.
 
-  @code{.cpp}
-  // Check if mesh is a surface mesh (codimension 1)
-  if (mesh.isSurface()) {
-    std::cout << "This is a surface mesh" << std::endl;
-  }
-  @endcode
+  @section guides-meshes-queries-example Checked program
 
-  @subsection guides-meshes-queries-spatial-boundary Boundary Checks
+  Build and run `MeshBasics` from a scratch directory. It compares the reported
+  measures with analytic rectangle and cube-surface values and returns
+  `EXIT_FAILURE` if the checks fail.
 
-  @code{.cpp}
-  mesh.getConnectivity().compute(1, 2);  // Required
+  @section guides-meshes-queries-see-also Continue
 
-  // Check if face is on boundary
-  if (mesh.isBoundary(5)) {
-    std::cout << "Face 5 is on the boundary" << std::endl;
-  }
+  - @ref guides-meshes-iteration "Iteration and optional attributes"
+  - @ref guides-meshes-connectivity "Incidence prerequisites"
+  - @ref Geometry/MeshBasics.cpp "Complete checked source"
 
-  // Check if face is an interface
-  if (mesh.isInterface(10)) {
-    std::cout << "Face 10 is an interface" << std::endl;
-  }
-  @endcode
-
-  @section guides-meshes-queries-example Complete Example
-
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-
-  int main() {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {32, 32});
-    mesh.getConnectivity().compute(1, 2);
-
-    // Basic information
-    std::cout << "=== Mesh Information ===" << std::endl;
-    std::cout << "Dimension: " << mesh.getDimension() << std::endl;
-    std::cout << "Space dimension: " << mesh.getSpaceDimension() << std::endl;
-    std::cout << "Vertices: " << mesh.getVertexCount() << std::endl;
-    std::cout << "Edges: " << mesh.getFaceCount() << std::endl;
-    std::cout << "Cells: " << mesh.getCellCount() << std::endl;
-
-    // Geometric measurements
-    std::cout << "\n=== Measurements ===" << std::endl;
-    std::cout << "Total volume: " << mesh.getVolume() << std::endl;
-    std::cout << "Total perimeter: " << mesh.getPerimeter() << std::endl;
-
-    // Boundary information
-    size_t boundaryEdges = 0;
-    for (auto it = mesh.getBoundary(); it; ++it) {
-      boundaryEdges++;
-    }
-    std::cout << "\n=== Boundary ===" << std::endl;
-    std::cout << "Boundary edges: " << boundaryEdges << std::endl;
-
-    // Average cell size
-    Real avgCellSize = mesh.getVolume() / mesh.getCellCount();
-    std::cout << "\n=== Statistics ===" << std::endl;
-    std::cout << "Average cell size: " << avgCellSize << std::endl;
-
-    return 0;
-  }
-  @endcode
-
-  @section guides-meshes-queries-see-also See Also
-
-  - @ref guides-meshes "Meshes overview"
-  - @ref Rodin::Geometry::Mesh "Mesh class reference"
-  - [Volume.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/Volume.cpp)
-
-  */
+  @example Geometry/MeshBasics.cpp
+*/

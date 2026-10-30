@@ -1,15 +1,12 @@
 name: Documentation
 permissions:
-  contents: write
+  contents: read
 on:
   push:
-    branches:
-      - master
-      - develop
+    branches: [master, develop]
   pull_request:
-    branches:
-      - master
-      - develop
+    branches: [master, develop]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
 
 concurrency:
   group: Documentation-${{ github.ref }}
@@ -17,6 +14,10 @@ concurrency:
 
 jobs:
   Build-And-Deploy:
+    if: ${{ !github.event.pull_request.draft }}
+    permissions:
+      contents: write
+      actions: read
     runs-on: ubuntu-latest
     env:
       MAKEFLAGS: "-j2"
@@ -26,6 +27,21 @@ jobs:
         with:
           submodules: recursive
           lfs: false
+          persist-credentials: false
+      - name: Mark documentation as running
+        if: github.event_name == 'push'
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+          RUN: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          ATTEMPT: ${{ github.run_attempt }}
+        run: >-
+          python3 dev/ci_badges.py --documentation-only --branch "$BRANCH"
+          --documentation running --source-run "$RUN" --source-sha "$SHA"
+          --source-attempt "$ATTEMPT"
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -33,20 +49,16 @@ jobs:
           cache: 'pip'
       - run: pip install -r doc/requirements.txt
       - name: Install dependencies
-        run: >-
-          sudo apt-get update && sudo apt-get install -y
-          dvisvgm
-          texlive-base
-          texlive-latex-extra
-          texlive-fonts-extra
-          texlive-fonts-recommended
+        uses: ./.github/actions/apt-dependencies
+        with:
+          packages: dvisvgm texlive-base texlive-latex-extra texlive-fonts-extra texlive-fonts-recommended
       - name: Install pinned Doxygen
         # Use the same parser as the Style warning check.
         run: |
           curl -fsSL -o doxygen.tar.gz \
-            https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
+            https://github.com/doxygen/doxygen/releases/download/Release_1_15_0/doxygen-1.15.0.linux.bin.tar.gz
           tar -xzf doxygen.tar.gz
-          echo "$PWD/doxygen-1.14.0/bin" >> "$GITHUB_PATH"
+          echo "$PWD/doxygen-1.15.0/bin" >> "$GITHUB_PATH"
       - name: Configure CMake
         run: >
           cmake
@@ -57,12 +69,115 @@ jobs:
           -DRODIN_USE_MCSS=ON
           -DRODIN_BUILD_SRC=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
+      - name: Test documentation navigation checks
+        run: python3 -m unittest discover -s dev -p 'test_documentation_*.py' -v
       - name: Build
         run: cmake --build ${{github.workspace}}/build --target RodinDoxygen
-      - name: Deploy
-        if: github.event_name == 'push'
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Verify rendered module and template navigation
+        run: python3 dev/check_documentation_navigation.py
+      - uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{github.workspace}}/build/doc/html
-          destination_dir: docs/${{ github.ref }}
+          overwrite: true
+          name: documentation
+          path: ${{ github.workspace }}/build/doc/html
+          if-no-files-found: error
+      - name: Report documentation build outcome
+        if: ${{ always() && github.event_name == 'push' }}
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+          RUN: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          ATTEMPT: ${{ github.run_attempt }}
+          OUTCOME: ${{ job.status }}
+        run: |
+          status="$OUTCOME"
+          if [ "$status" = success ]; then status=queued; fi
+          python3 dev/ci_badges.py --documentation-only --branch "$BRANCH" \
+            --documentation "$status" --source-run "$RUN" --source-sha "$SHA" \
+            --source-attempt "$ATTEMPT"
+  PublishDocumentation:
+    name: Publish documentation
+    needs: Build-And-Deploy
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: rodin-gh-pages-publication
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: Documentation and benchmarks
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - name: Mark documentation publication as running
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+          RUN: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          ATTEMPT: ${{ github.run_attempt }}
+        run: >-
+          python3 dev/ci_badges.py --documentation-only --branch "$BRANCH"
+          --documentation running --source-run "$RUN" --source-sha "$SHA"
+          --source-attempt "$ATTEMPT"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r doc/requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: documentation
+          path: documentation-site
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: .ci-pages
+          lfs: false
+      - name: Integrate documentation with the latest complete benchmark histories
+        env:
+          REF: ${{ github.ref }}
+        run: python3 dev/benchmark_publish.py --documentation-only --site documentation-site --pages .ci-pages --ref "$REF"
+      - name: Publish documentation Pages update
+        working-directory: .ci-pages
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish documentation $SHA"
+            git push origin HEAD:gh-pages
+          fi
+      - name: Publish documentation and benchmarks
+        id: deployment
+        uses: ./.github/actions/publish-pages
+        with:
+          checkout: .ci-pages
+          artifact-name: documentation-pages
+      - name: Report documentation deployment outcome
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+          RUN: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          ATTEMPT: ${{ github.run_attempt }}
+          OUTCOME: ${{ steps.deployment.outcome == 'success' && 'success' || job.status }}
+        run: >-
+          python3 dev/ci_badges.py --documentation-only --branch "$BRANCH"
+          --documentation "$OUTCOME" --source-run "$RUN" --source-sha "$SHA"
+          --source-attempt "$ATTEMPT"

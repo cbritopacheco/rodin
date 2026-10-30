@@ -1,4 +1,13 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <gtest/gtest.h>
+#include <sstream>
+#include <string>
+#include <type_traits>
 #include "Rodin/Test/Random.h"
 
 #include "Rodin/Variational.h"
@@ -15,7 +24,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies sanity test build for variational real P1 bilinear form by checking exact expected values.
   TEST(Rodin_Variational_Real_P1_BilinearForm, SanityTest_Build)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -27,7 +36,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies copy constructor for variational real P1 bilinear form by checking exact expected values, copy semantics.
   TEST(Rodin_Variational_Real_P1_BilinearForm, CopyConstructor)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -40,7 +49,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies move constructor for variational real P1 bilinear form by checking exact expected values, move semantics.
   TEST(Rodin_Variational_Real_P1_BilinearForm, MoveConstructor)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -53,7 +62,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies assignment for variational real P1 bilinear form by checking false predicates.
   TEST(Rodin_Variational_Real_P1_BilinearForm, Assignment)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -65,7 +74,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies addition assignment for variational real P1 bilinear form by checking false predicates.
   TEST(Rodin_Variational_Real_P1_BilinearForm, AdditionAssignment)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -77,7 +86,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies subtraction assignment for variational real P1 bilinear form by checking false predicates.
   TEST(Rodin_Variational_Real_P1_BilinearForm, SubtractionAssignment)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -89,7 +98,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies assemble and get operator for variational real P1 bilinear form by checking exact expected values, form assembly.
   TEST(Rodin_Variational_Real_P1_BilinearForm, AssembleAndGetOperator)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -107,7 +116,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies copy for variational real P1 bilinear form by checking copy semantics.
   TEST(Rodin_Variational_Real_P1_BilinearForm, Copy)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -122,7 +131,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Vector_P1_BilinearForm, SanityTest_Build)
   {
     constexpr size_t vdim = 2;
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh, vdim);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -135,7 +144,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Vector_P1_BilinearForm, ElasticityIntegrator)
   {
     constexpr size_t vdim = 2;
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh, vdim);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -151,7 +160,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies mass matrix for variational real P1 bilinear form by checking form assembly.
   TEST(Rodin_Variational_Real_P1_BilinearForm, MassMatrix)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -258,7 +267,10 @@ namespace Rodin::Tests::Unit
     test.getData()(0) = Complex(-2, 1);
     test.getData()(1) = Complex(1, 3);
 
-    const Complex expected = Math::dot(A * trial.getData(), test.getData());
+    const Complex expected =
+      (Complex(1, 2) * Complex(1, -2) + Complex(-3, 1) * Complex(3, 1)) *
+        Complex(-2, -1) +
+      Complex(2, -4) * Complex(1, -2) * Complex(1, -3);
     EXPECT_NEAR(std::abs(form(trial, test) - expected), 0.0, 1e-14);
   }
 
@@ -288,7 +300,10 @@ namespace Rodin::Tests::Unit
     test.getData()(0) = Complex(-2, 1);
     test.getData()(1) = Complex(1, 3);
 
-    const Complex expected = Math::dot(A * trial.getData(), test.getData());
+    const Complex expected =
+      (Complex(1, 2) * Complex(1, -2) + Complex(-3, 1) * Complex(3, 1)) *
+        Complex(-2, -1) +
+      Complex(2, -4) * Complex(1, -2) * Complex(1, -3);
     EXPECT_NEAR(std::abs(form(trial, test) - expected), 0.0, 1e-14);
   }
 
@@ -339,4 +354,115 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(
       std::abs(form.getOperator().sum() - Complex(0.5) * coefficient), 0.0, 1e-14);
   }
+}
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Rejected foreign contributions preserve the assembled mass operator.
+  TEST(FormOwnership, BilinearContributionsPreserveOperator)
+  {
+    auto checkScalar = []<class Scalar>() {
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+      mesh.scale(Real(0.5));
+      auto checkSpace = [&](const auto& space) {
+        TrialFunction u(space), foreignU(space);
+        TestFunction v(space), foreignV(space);
+        foreignU.setName("foreign-trial");
+        BilinearForm form(u, v);
+        form = Integral(u, v);
+        form.assemble();
+        const Math::SparseMatrix<Scalar> original = form.getOperator();
+        u.getSolution() = Scalar(1);
+        const Math::Vector<Scalar> constant = u.getSolution().getData();
+        EXPECT_NEAR(std::abs(constant.dot(original * constant) - Scalar(1)), 0, 1e-12);
+        auto reject = [&](
+                        auto&& operation, const char* kind, const std::string& identity) {
+          try
+          {
+            operation();
+            FAIL() << "A foreign function contribution must be rejected.";
+          }
+          catch (const Alert::Exception& error)
+          {
+            const std::string message = error.what();
+            EXPECT_NE(message.find(kind), std::string::npos);
+            EXPECT_NE(message.find(identity), std::string::npos);
+            EXPECT_NE(
+              message.find("does not appear in the declaration"), std::string::npos);
+          }
+          EXPECT_EQ(form.getLocalIntegrators().size(), 1u);
+          EXPECT_TRUE(form.getGlobalIntegrators().empty());
+          form.assemble();
+          EXPECT_NEAR((form.getOperator() - original).norm(), 0, 1e-12);
+        };
+        std::ostringstream uuid;
+        uuid << foreignV.getUUID();
+        const auto foreignTrial = Integral(foreignU, v);
+        const auto foreignTest = Integral(u, foreignV);
+        reject([&] { form += foreignTrial; }, "TrialFunction", "foreign-trial");
+        reject([&] { form -= foreignTrial; }, "TrialFunction", "foreign-trial");
+        reject([&] { form += foreignTest; }, "TestFunction", uuid.str());
+        reject([&] { form -= foreignTest; }, "TestFunction", uuid.str());
+        if constexpr (std::is_same_v<std::remove_cvref_t<decltype(space)>, P1<Scalar>>)
+        {
+          const auto kernel = [](const Point&, const Point&) { return Scalar(1); };
+          const auto foreignGlobalTrial = Integral(Potential(kernel, foreignU), v);
+          const auto foreignGlobalTest = Integral(Potential(kernel, u), foreignV);
+          reject([&] { form += foreignGlobalTrial; }, "TrialFunction", "foreign-trial");
+          reject([&] { form -= foreignGlobalTrial; }, "TrialFunction", "foreign-trial");
+          reject([&] { form += foreignGlobalTest; }, "TestFunction", uuid.str());
+          reject([&] { form -= foreignGlobalTest; }, "TestFunction", uuid.str());
+        }
+      };
+      const P1<Scalar> p1(mesh);
+      const H1<2, Scalar> h1(std::integral_constant<size_t, 2>{}, mesh);
+      checkSpace(p1);
+      checkSpace(h1);
+    };
+    checkScalar.operator()<Real>();
+    checkScalar.operator()<Complex>();
+  }
+}
+
+/// @brief Copy/move assignment transfers integrators as well as assembled values for both local backends.
+TEST(BilinearFormAssignment, IntegratorsSurviveReassembly)
+{
+  const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+  P1 fes(mesh);
+  TrialFunction u(fes);
+  TestFunction v(fes);
+  const auto check = [&](auto& source) {
+    using Form = std::decay_t<decltype(source)>;
+    source = Integral(Real(3) * u, v);
+    source.assemble();
+    const Math::Matrix<Real> expected = source.getOperator();
+    Form destination(u, v);
+    destination = Integral(Real(7) * u, v);
+    destination = source;
+    destination.assemble();
+    EXPECT_LE((Math::Matrix<Real>(destination.getOperator()) - expected).norm(), 1e-13);
+    Form moved(u, v);
+    moved = std::move(destination);
+    moved.assemble();
+    EXPECT_LE((Math::Matrix<Real>(moved.getOperator()) - expected).norm(), 1e-13);
+  };
+  BilinearForm sparse(u, v);
+  check(sparse);
+  using Solution = typename decltype(u)::SolutionType;
+  BilinearForm<Solution, decltype(fes), decltype(fes), Math::Matrix<Real>> dense(u, v);
+  check(dense);
+}
+
+/// @brief Empty sparse assembly avoids undefined conversion of a nonfinite reserve estimate.
+TEST(BilinearFormAssembly, EmptySpace)
+{
+  const auto mesh = LocalMesh::Build().initialize(1).nodes(0).finalize();
+  P1 fes(mesh);
+  TrialFunction u(fes);
+  TestFunction v(fes);
+  BilinearForm form(u, v);
+  form = Integral(u, v);
+  EXPECT_NO_THROW(form.assemble());
+  EXPECT_EQ(form.getOperator().rows(), 0);
+  EXPECT_EQ(form.getOperator().cols(), 0);
 }

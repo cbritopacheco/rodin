@@ -330,8 +330,12 @@ storage and the existing vector workload are reused; no solver or library
 implementation is added. Geometry installation and physical data evaluation
 remain local; global assembly, solution and owned-cell norm sums require
 communicator participation. Registrations retain slow labels and the shared
-pyramid lock. Tetrahedral traction groups reserve a two-hour execution budget
-for the resolved P1 hierarchy; the other geometries retain 30-minute budgets.
+pyramid lock. The resolved tetrahedral P1 traction hierarchy reserves four
+hours after exceeding two hours in coverage CI; the P2 and P3 histories retain
+two-hour budgets. Other geometries retain 30-minute budgets. The tetrahedral
+CI job allows six hours for the sequential studies and coverage publication.
+The boundary target explicitly enables curved geometry, including its P3
+cases. PETSc refinement registrations fail if their filter selects no tests.
 CI separates local and each MPI rank count for tetrahedral traction, so the
 cost of five complete groups is not accumulated in one job. These are
 scheduling policies, not numerical error budgets or performance bounds.
@@ -381,10 +385,4 @@ two, without changing geometry errors.
 Separate registrations cover seven geometries, native and real-PETSc local
 execution, MPI ranks one through four and both thread configurations. Slow
 labels, 1800-second watchdogs, processor counts and pyramid resource locks
-remain explicit. The complete finite numerical matrix was verified locally:
-84 registrations, 252 configurations and 504 rank-level reports across these
-geometries, backends, rank counts and thread configurations. Four Clang builds
-and four GNU syntax checks passed; 1249 transitive repository dependencies
-were checked for freshness. This establishes the stated finite-hierarchy
-acceptance criteria, not an unconditional asymptotic theorem or hosted-CI
-certification. Sampled memory guards do not measure continuous peak usage.
+remain explicit.

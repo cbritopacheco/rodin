@@ -50,20 +50,26 @@ foreach(np 1 2 3 4)
     RodinManufacturedMPIH1LinearElasticityTest_np${np}
     "HDF5_USE_FILE_LOCKING=FALSE")
 
-  add_test(
-    NAME RodinManufacturedMPIH1LinearElasticityTest_slow_np${np}
-    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinManufacturedMPIH1LinearElasticityTest>
-            --gtest_filter=${_RODIN_MPI_H1_LINEAR_ELASTICITY_SLOW_FILTER})
-  set_tests_properties(RodinManufacturedMPIH1LinearElasticityTest_slow_np${np} PROPERTIES
-    LABELS "manufactured;petsc;distributed;slow"
-    TIMEOUT 900
-  )
-  rodin_suppress_external_mpi_lsan_for_test(
-    RodinManufacturedMPIH1LinearElasticityTest_slow_np${np}
-    "HDF5_USE_FILE_LOCKING=FALSE"
-    "RODIN_TEST_TIMING=1")
+  # Keep every selected case, but do not share one watchdog across all six
+  # geometries: the original group can exceed 900 seconds after many passes.
+  foreach(geometry Triangle Quadrilateral Tetrahedron Hexahedron Pyramid Wedge)
+    set(_elasticity_slow_test
+      RodinManufacturedMPIH1LinearElasticityTest_slow_np${np}_${geometry})
+    add_test(
+      NAME ${_elasticity_slow_test}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinManufacturedMPIH1LinearElasticityTest>
+              "--gtest_filter=AllGeometriesAndDegrees/H1LinearElasticity*D.*/${geometry}_K*${_RODIN_MPI_H1_LINEAR_ELASTICITY_SLOW_FILTER}")
+    set_tests_properties(${_elasticity_slow_test} PROPERTIES
+      LABELS "manufactured;petsc;distributed;slow"
+      TIMEOUT 900
+    )
+    rodin_suppress_external_mpi_lsan_for_test(
+      ${_elasticity_slow_test}
+      "HDF5_USE_FILE_LOCKING=FALSE"
+      "RODIN_TEST_TIMING=1")
+  endforeach()
 endforeach()
 
 add_executable(RodinManufacturedMPIH1PoissonTest PoissonTest.cpp)
@@ -96,16 +102,25 @@ foreach(np 1 2 3 4 6)
     RodinManufacturedMPIH1PoissonTest_np${np}
     "HDF5_USE_FILE_LOCKING=FALSE")
 
-  add_test(
-    NAME RodinManufacturedMPIH1PoissonTest_slow_np${np}
-    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinManufacturedMPIH1PoissonTest>)
-  set_tests_properties(RodinManufacturedMPIH1PoissonTest_slow_np${np} PROPERTIES
-    LABELS "manufactured;petsc;distributed;slow"
-    TIMEOUT 900
-  )
-  rodin_suppress_external_mpi_lsan_for_test(
-    RodinManufacturedMPIH1PoissonTest_slow_np${np}
-    "HDF5_USE_FILE_LOCKING=FALSE")
+  # Retain every workflow, geometry and degree. Give each geometry its own
+  # watchdog instead of accumulating all thirty cases against one budget.
+  foreach(workflow 1 2 3)
+    foreach(geometry Triangle Quadrilateral Tetrahedron Hexahedron Pyramid Wedge)
+      set(_poisson_slow_test
+        RodinManufacturedMPIH1PoissonTest_slow_workflow${workflow}_np${np}_${geometry})
+      add_test(
+        NAME ${_poisson_slow_test}
+        COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+                ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+                $<TARGET_FILE:RodinManufacturedMPIH1PoissonTest>
+                "--gtest_filter=AllGeometriesAndDegrees/H1Poisson*D_Workflow${workflow}.*/${geometry}_K*")
+      set_tests_properties(${_poisson_slow_test} PROPERTIES
+        LABELS "manufactured;petsc;distributed;slow"
+        TIMEOUT 900
+      )
+      rodin_suppress_external_mpi_lsan_for_test(
+        ${_poisson_slow_test}
+        "HDF5_USE_FILE_LOCKING=FALSE")
+    endforeach()
+  endforeach()
 endforeach()

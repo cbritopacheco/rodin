@@ -12,6 +12,8 @@
  * @brief Sequential assembly specializations targeting PETSc objects.
  */
 
+#include "Rodin/Types.h"
+#include <algorithm>
 #include <petsc.h>
 #include <petscsys.h>
 #include <petscsystypes.h>
@@ -50,8 +52,10 @@ namespace Rodin::Assembly
     public:
       /// @brief Parent assembly interface.
       using Parent = AssemblyBase<::Mat, Form>;
+
       /// @brief Form supplying spaces, region and kernel.
       using InputType = typename Parent::InputType;
+
       /**
        * @brief Assembles or reassembles the named operator.
        * @param out Matrix receiving cell contributions; created when null.
@@ -97,7 +101,7 @@ namespace Rodin::Assembly
             for (Index c = 0; c < static_cast<Index>(cols.size()); ++c)
             {
               ierr = MatSetValue(out, static_cast<PetscInt>(rows[r]),
-                static_cast<PetscInt>(cols[c]), Math::conj(local(r, c)), ADD_VALUES);
+                static_cast<PetscInt>(cols[c]), local(r, c), ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
             }
           }
@@ -108,6 +112,7 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
         (void)ierr;
       }
+
       /**
        * @brief Copies the assembler.
        * @returns New assembler owned by the caller.
@@ -135,12 +140,16 @@ namespace Rodin::Assembly
     public:
       /// @brief Scalar type of the DOF coefficients (`PetscScalar`).
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+
       /// @brief PETSc vector type (@c Vec).
       using VectorType = ::Vec;
+
       /// @brief Linear form type being assembled.
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
+
       /// @brief Parent assembly base class.
       using Parent = AssemblyBase<VectorType, LinearFormType>;
+
       /// @brief Input data type for the assembly pipeline.
       using InputType = typename Parent::InputType;
 
@@ -181,7 +190,9 @@ namespace Rodin::Assembly
                 continue;
             }
             lfi.setPolytope(*it);
-            const auto& dofs = input.getFES().getDOFs(it.getDimension(), it->getIndex());
+            const auto& dofs = lfi.getTestDOFIndices()
+              ? *lfi.getTestDOFIndices()
+              : input.getFES().getDOFs(it.getDimension(), it->getIndex());
             for (PetscInt l = 0; l < dofs.size(); ++l)
             {
               const PetscScalar v = PetscScalar(lfi.integrate(l));
@@ -211,7 +222,6 @@ namespace Rodin::Assembly
       }
   };
 
-
   /**
    * @brief Sequential assembly of a PETSc matrix from a bilinear form.
    *
@@ -225,28 +235,31 @@ namespace Rodin::Assembly
    */
   // Sequential assembly for PETSc Mat (bilinear form)
   template <class Solution, class TrialFES, class TestFES>
-  class Sequential<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>> final
-    : public AssemblyBase<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
+  class Sequential<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
+    final : public AssemblyBase<::Mat,
+              Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
   {
     public:
       /// @brief Scalar type resulting from the dot product of trial and test scalars.
       using DotType =
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Dot<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
+
       /// @brief PETSc matrix type (@c Mat).
       using OperatorType = ::Mat;
+
       /// @brief Bilinear form type being assembled.
-      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
+      using BilinearFormType =
+        Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
+
       /// @brief Parent assembly base class.
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
+
       /// @brief Input data type for the assembly pipeline.
       using InputType = typename Parent::InputType;
 
-      static_assert(
-        std::is_same_v<DotType, PetscScalar>,
-        "FES ScalarTypes must yield PetscScalar for PETSc Mat assembly"
-      );
+      static_assert(std::is_same_v<DotType, PetscScalar>,
+        "FES ScalarTypes must yield PetscScalar for PETSc Mat assembly");
 
       /**
        * @brief Assembles the bilinear form into a PETSc matrix.
@@ -284,8 +297,11 @@ namespace Rodin::Assembly
                 continue;
             }
             bfi.setPolytope(*it);
-            const auto& rows = input.getTestFES().getDOFs(d, i);
-            const auto& cols = input.getTrialFES().getDOFs(d, i);
+            const auto& rows = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
+                                                       : input.getTestFES().getDOFs(d, i);
+            const auto& cols = bfi.getTrialDOFIndices()
+              ? *bfi.getTrialDOFIndices()
+              : input.getTrialFES().getDOFs(d, i);
             for (PetscInt i = 0; i < rows.size(); ++i)
             {
               for (PetscInt j = 0; j < cols.size(); ++j)
@@ -303,7 +319,7 @@ namespace Rodin::Assembly
         for (auto& bfi : input.getGlobalBFIs())
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
-          const auto& testAttrs  = bfi.getTestAttributes();
+          const auto& testAttrs = bfi.getTestAttributes();
           SequentialIteration trialseq(mesh, bfi.getTrialRegion());
           SequentialIteration testseq(mesh, bfi.getTestRegion());
           for (auto teIt = testseq.getIterator(); teIt; ++teIt)
@@ -323,8 +339,11 @@ namespace Rodin::Assembly
                   continue;
               }
               bfi.setPolytope(*trIt, *teIt);
-              const auto& rows = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
-              const auto& cols = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
+              // Preserve test indices: getDOFs may reuse scratch storage on the next call.
+              const auto rows =
+                input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
+              const auto& cols =
+                input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
               for (PetscInt i = 0; i < rows.size(); ++i)
               {
                 for (PetscInt j = 0; j < cols.size(); ++j)
@@ -370,36 +389,45 @@ namespace Rodin::Assembly
    */
   // Sequential assembly for single-variable Problem (PETSc)
   template <class U, class V>
-  class Sequential<
-      Rodin::PETSc::Math::LinearSystem,
-      Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U, V>> final
-    : public AssemblyBase<
-        Rodin::PETSc::Math::LinearSystem,
-        Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U, V>>
+  class Sequential<Rodin::PETSc::Math::LinearSystem,
+    Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U, V>>
+    final : public AssemblyBase<Rodin::PETSc::Math::LinearSystem,
+              Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U, V>>
   {
     public:
       /// @brief PETSc linear system type.
       using LinearSystemType = Rodin::PETSc::Math::LinearSystem;
+
       /// @brief Problem type being assembled.
-      using ProblemType =
-        Rodin::Variational::Problem<LinearSystemType, U, V>;
+      using ProblemType = Rodin::Variational::Problem<LinearSystemType, U, V>;
+
       /// @brief Parent assembly base class.
       using Parent = AssemblyBase<LinearSystemType, ProblemType>;
+
       /// @brief Input data type for the assembly pipeline.
       using InputType = typename Parent::InputType;
 
       /// @brief PETSc matrix type (@c Mat) for the system operator.
-      using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+      using OperatorType =
+        typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+
       /// @brief PETSc vector type (@c Vec) for the RHS and solution.
-      using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
+      using VectorType =
+        typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType; // ::Vec
+
       /// @brief Scalar type (`PetscScalar`).
-      using ScalarType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::ScalarType;   // PetscScalar
+      using ScalarType =
+        typename Rodin::FormLanguage::Traits<LinearSystemType>::ScalarType; // PetscScalar
+
       /// @brief Finite element space type for the trial function.
       using TrialFESType = typename Rodin::FormLanguage::Traits<U>::FESType;
+
       /// @brief Mesh type for the trial finite element space.
       using TrialMeshType = typename Rodin::FormLanguage::Traits<TrialFESType>::MeshType;
+
       /// @brief Context type (Local or MPI) for the trial mesh.
-      using TrialMeshContextType = typename Rodin::FormLanguage::Traits<TrialMeshType>::ContextType;
+      using TrialMeshContextType =
+        typename Rodin::FormLanguage::Traits<TrialMeshType>::ContextType;
 
       /**
        * @brief Assembles the full single-field PETSc linear system.
@@ -438,6 +466,7 @@ namespace Rodin::Assembly
         LHS,
         RHS
       };
+
       /**
        * @brief Assembles the requested operator and vector contributions.
        * @param axb Linear system receiving the assembled operator and vector.
@@ -452,6 +481,8 @@ namespace Rodin::Assembly
 
         const bool doMatrix = mode != AssemblyMode::RHS;
         const bool doVector = mode != AssemblyMode::LHS;
+        const bool liftBoundary =
+          mode == AssemblyMode::RHS && !input.getProblemBody().getDBCs().empty();
 
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
@@ -461,42 +492,13 @@ namespace Rodin::Assembly
         const auto& v = input.getTestFunction();
 
         const auto& trialFES = u.getFiniteElementSpace();
-        const auto& testFES  = v.getFiniteElementSpace();
-        const auto& mesh     = trialFES.getMesh();
+        const auto& testFES = v.getFiniteElementSpace();
+        const auto& mesh = trialFES.getMesh();
 
         const size_t cols = static_cast<size_t>(trialFES.getSize());
         const size_t rows = static_cast<size_t>(testFES.getSize());
 
         PetscErrorCode ierr;
-
-        assert(A);
-        if (doMatrix)
-        {
-          ierr = PETSc::Assembly::MatrixSetup(A).prepare({static_cast<PetscInt>(rows),
-            static_cast<PetscInt>(cols), static_cast<PetscInt>(rows),
-            static_cast<PetscInt>(cols), MATSEQAIJ, false});
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-        }
-
-        // Vector setup
-        assert(b);
-        if (doVector)
-        {
-          ierr = PETSc::Assembly::VectorSetup(b).prepare({static_cast<PetscInt>(rows),
-            static_cast<PetscInt>(rows), VECSEQ, true, true});
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-        }
-
-        auto& x = axb.getSolution();
-        assert(x);
-        // The solution vector carries the previous iterate as the solver's
-        // initial guess, so it must not be zeroed on reuse.
-        ierr = PETSc::Assembly::VectorSetup(x).prepare({static_cast<PetscInt>(cols),
-          static_cast<PetscInt>(cols), VECSEQ, true, false});
-        assert(ierr == PETSC_SUCCESS);
-        (void)ierr;
 
         ConstraintMap<PetscScalar> constraints(std::max(rows, cols));
         using DBCBaseType = Variational::DirichletBCBase<PetscScalar>;
@@ -544,6 +546,8 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        if (!constraints.getIdentifiedRows().empty())
+          constraints.finalize();
 
         if (mode != AssemblyMode::Full && !constraints.getIdentifiedRows().empty())
         {
@@ -552,7 +556,46 @@ namespace Rodin::Assembly
             << Alert::Raise;
         }
 
+        assert(A);
+        if (doMatrix)
+        {
+          ierr = PETSc::Assembly::MatrixSetup(A).prepare({static_cast<PetscInt>(rows),
+            static_cast<PetscInt>(cols), static_cast<PetscInt>(rows),
+            static_cast<PetscInt>(cols), MATSEQAIJ, false});
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
+
+        // Vector setup
+        assert(b);
+        if (doVector)
+        {
+          ierr = PETSc::Assembly::VectorSetup(b).prepare({static_cast<PetscInt>(rows),
+            static_cast<PetscInt>(rows), VECSEQ, true, true});
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
+
+        auto& x = axb.getSolution();
+        assert(x);
+        // The solution vector carries the previous iterate as the solver's
+        // initial guess, so it must not be zeroed on reuse.
+        ierr = PETSc::Assembly::VectorSetup(x).prepare({static_cast<PetscInt>(cols),
+          static_cast<PetscInt>(cols), VECSEQ, true, false});
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+
         auto matrix_entry = [&](Index row, Index col, PetscScalar val) {
+          if (!doMatrix)
+          {
+            if (!constraints.isFixed(row) && constraints.isFixed(col))
+            {
+              const PetscScalar shift = -val * constraints.getFixedValue(col);
+              ierr = VecSetValue(b, static_cast<PetscInt>(row), shift, ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
+            return;
+          }
           const PetscScalar colValue = constraints.isIdentified(col)
             ? constraints.getIdentificationValue(col)
             : PetscScalar(0);
@@ -561,7 +604,7 @@ namespace Rodin::Assembly
             const PetscInt I = static_cast<PetscInt>(r.index);
             if (colValue != PetscScalar(0))
             {
-              const PetscScalar rhsShift = -r.coefficient * val * colValue;
+              const PetscScalar rhsShift = -Math::conj(r.coefficient) * val * colValue;
               if (doVector)
               {
                 ierr = VecSetValue(b, I, rhsShift, ADD_VALUES);
@@ -574,7 +617,7 @@ namespace Rodin::Assembly
               for (const auto& c : constraints.expand(col))
               {
                 const PetscInt J = static_cast<PetscInt>(c.index);
-                const PetscScalar v = r.coefficient * val * c.coefficient;
+                const PetscScalar v = Math::conj(r.coefficient) * val * c.coefficient;
                 // Insert unconditionally. PETSc decides whether zero-valued
                 // insertions affect the pattern according to its current
                 // matrix options.
@@ -592,7 +635,7 @@ namespace Rodin::Assembly
           for (const auto& r : constraints.expand(row))
           {
             const PetscInt I = static_cast<PetscInt>(r.index);
-            const PetscScalar v = r.coefficient * val;
+            const PetscScalar v = Math::conj(r.coefficient) * val;
             ierr = VecSetValue(b, I, v, ADD_VALUES);
             assert(ierr == PETSC_SUCCESS);
             (void)ierr;
@@ -603,7 +646,7 @@ namespace Rodin::Assembly
         /// @brief Mesh type.
         using MeshType = std::decay_t<decltype(mesh)>;
 
-        if (doMatrix)
+        if (doMatrix || liftBoundary)
         {
           for (auto& bfi : pb.getLocalBFIs())
           {
@@ -621,10 +664,24 @@ namespace Rodin::Assembly
               const size_t d = it->getDimension();
               const Index p = it->getIndex();
 
+              if (!doMatrix && bfi.getRegion() == Geometry::Region::Cells)
+              {
+                const auto& boundaryDOFs = trialFES.getDOFs(d, p);
+                const bool affected =
+                  std::any_of(boundaryDOFs.begin(), boundaryDOFs.end(), [&](Index local) {
+                    const Index column = local;
+                    return constraints.isFixed(column) &&
+                      constraints.getFixedValue(column) != PetscScalar(0);
+                  });
+                if (!affected)
+                  continue;
+              }
               bfi.setPolytope(*it);
 
-              const auto& rowsDOF = testFES.getDOFs(d, p);
-              const auto& colsDOF = trialFES.getDOFs(d, p);
+              const auto& rowsDOF = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
+                                                            : testFES.getDOFs(d, p);
+              const auto& colsDOF = bfi.getTrialDOFIndices() ? *bfi.getTrialDOFIndices()
+                                                             : trialFES.getDOFs(d, p);
 
               for (PetscInt i = 0; i < static_cast<PetscInt>(rowsDOF.size()); ++i)
               {
@@ -654,7 +711,7 @@ namespace Rodin::Assembly
                   continue;
               }
 
-              const auto& rowsDOF =
+              const auto rowsDOF =
                 testFES.getDOFs(teIt->getDimension(), teIt->getIndex());
 
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
@@ -725,7 +782,9 @@ namespace Rodin::Assembly
               }
 
               lfi.setPolytope(*it);
-              const auto& dofs = testFES.getDOFs(it->getDimension(), it->getIndex());
+              const auto& dofs = lfi.getTestDOFIndices()
+                ? *lfi.getTestDOFIndices()
+                : testFES.getDOFs(it->getDimension(), it->getIndex());
               for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
               {
                 const PetscScalar val = PetscScalar(lfi.integrate(l));
@@ -879,8 +938,8 @@ namespace Rodin::Assembly
           }
           else if (mode == AssemblyMode::LHS)
           {
-            ierr = MatZeroRows(A, static_cast<PetscInt>(bcIdx.size()), bcIdx.data(), 1.0,
-              nullptr, nullptr);
+            ierr = MatZeroRowsColumns(A, static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.data(), 1.0, nullptr, nullptr);
             assert(ierr == PETSC_SUCCESS);
             (void)ierr;
           }
@@ -922,34 +981,34 @@ namespace Rodin::Assembly
    * @tparam U3  Third trial/test function type.
    * @tparam Us  Additional trial/test function types.
    */
-  template <class U1, class U2, class U3, class ... Us>
-  class Sequential<
-      Rodin::PETSc::Math::LinearSystem,
-      Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...>> final
-    : public AssemblyBase<
-        Rodin::PETSc::Math::LinearSystem,
+  template <class U1, class U2, class U3, class... Us>
+  class Sequential<Rodin::PETSc::Math::LinearSystem,
+    Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...>>
+    final
+    : public AssemblyBase<Rodin::PETSc::Math::LinearSystem,
         Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...>>
   {
     public:
       /// @brief PETSc linear system type.
-      using LinearSystemType =
-        Rodin::PETSc::Math::LinearSystem;
+      using LinearSystemType = Rodin::PETSc::Math::LinearSystem;
 
       /// @brief Multi-field problem type being assembled.
       using ProblemType =
         Rodin::Variational::Problem<LinearSystemType, U1, U2, U3, Us...>;
 
       /// @brief Parent assembly base class.
-      using Parent =
-        AssemblyBase<LinearSystemType, ProblemType>;
+      using Parent = AssemblyBase<LinearSystemType, ProblemType>;
 
       /// @brief Input data type for the assembly pipeline.
       using InputType = typename Parent::InputType;
 
       /// @brief PETSc matrix type (@c Mat) for the block system operator.
-      using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+      using OperatorType =
+        typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+
       /// @brief PETSc vector type (@c Vec) for the block RHS and solution.
-      using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
+      using VectorType =
+        typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType; // ::Vec
 
       /**
        * @brief Assembles the full multi-field PETSc linear system.
@@ -988,6 +1047,7 @@ namespace Rodin::Assembly
         LHS,
         RHS
       };
+
       /**
        * @brief Assembles the requested operator and vector contributions.
        * @param axb Linear system receiving the assembled operator and vector.
@@ -999,89 +1059,52 @@ namespace Rodin::Assembly
       {
         const bool doMatrix = mode != AssemblyMode::RHS;
         const bool doVector = mode != AssemblyMode::LHS;
+        const bool liftBoundary =
+          mode == AssemblyMode::RHS && !input.getProblemBody().getDBCs().empty();
 
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
 
         auto& pb = input.getProblemBody();
-        auto&       us           = input.getTrialFunctions();
-        auto&       vs           = input.getTestFunctions();
+        auto& us = input.getTrialFunctions();
+        auto& vs = input.getTestFunctions();
         const auto& trialOffsets = input.getTrialOffsets();
-        const auto& testOffsets  = input.getTestOffsets();
-        auto&       trialUUIDMap = input.getTrialUUIDMap();
-        auto&       testUUIDMap  = input.getTestUUIDMap();
+        const auto& testOffsets = input.getTestOffsets();
+        auto& trialUUIDMap = input.getTrialUUIDMap();
+        auto& testUUIDMap = input.getTestUUIDMap();
 
         const size_t ncols = input.getTotalTrialSize();
         const size_t nrows = input.getTotalTestSize();
 
-        using FirstTrialMeshType =
-          std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
+        using FirstTrialMeshType = std::decay_t<
+          decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
         using MeshContextType =
           typename Rodin::FormLanguage::Traits<FirstTrialMeshType>::ContextType;
 
-        static_assert(
-          std::is_same_v<MeshContextType, Rodin::Context::Local>,
+        static_assert(std::is_same_v<MeshContextType, Rodin::Context::Local>,
           "PETSc sequential assembly supports only Local mesh context.");
 
         PetscErrorCode ierr;
 
         // ------------------------
-        // Allocate / reset A (SeqAIJ); re-use structure across assemblies.
-        // ------------------------
-        assert(A);
-        if (doMatrix)
-        {
-          ierr = PETSc::Assembly::MatrixSetup(A).prepare({static_cast<PetscInt>(nrows),
-            static_cast<PetscInt>(ncols), static_cast<PetscInt>(nrows),
-            static_cast<PetscInt>(ncols), MATSEQAIJ, false});
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-        }
-
-        // ------------------------
-        // Allocate / reset b (Seq Vec)
-        // ------------------------
-        assert(b);
-        if (doVector)
-        {
-          ierr = PETSc::Assembly::VectorSetup(b).prepare({static_cast<PetscInt>(nrows),
-            static_cast<PetscInt>(nrows), VECSEQ, true, true});
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-        }
-
-        auto& x = axb.getSolution();
-        assert(x);
-        // The solution vector carries the previous iterate as the solver's
-        // initial guess, so it must not be zeroed on reuse.
-        ierr = PETSc::Assembly::VectorSetup(x).prepare({static_cast<PetscInt>(ncols),
-          static_cast<PetscInt>(ncols), VECSEQ, true, false});
-        assert(ierr == PETSC_SUCCESS);
-        (void)ierr;
-
-        // ------------------------
         // Helpers
         // ------------------------
-        const auto findTrialBlock = [&](const auto& uuid) -> size_t
-        {
+        const auto findTrialBlock = [&](const auto& uuid) -> size_t {
           auto it = trialUUIDMap.left.find(uuid);
           assert(it != trialUUIDMap.left.end());
           return it->second;
         };
 
-        const auto findTestBlock = [&](const auto& uuid) -> size_t
-        {
+        const auto findTestBlock = [&](const auto& uuid) -> size_t {
           auto it = testUUIDMap.left.find(uuid);
           assert(it != testUUIDMap.left.end());
           return it->second;
         };
 
-        const auto withTrialFES = [&](const auto& uuid, auto&& fn)
-        {
+        const auto withTrialFES = [&](const auto& uuid, auto&& fn) {
           const size_t k = findTrialBlock(uuid);
           [[maybe_unused]] bool found = false;
-          us.iapply([&](size_t i, const auto& uref)
-          {
+          us.iapply([&](size_t i, const auto& uref) {
             if (i == k)
             {
               fn(uref.get().getFiniteElementSpace());
@@ -1091,12 +1114,10 @@ namespace Rodin::Assembly
           assert(found);
         };
 
-        const auto withTestFES = [&](const auto& uuid, auto&& fn)
-        {
+        const auto withTestFES = [&](const auto& uuid, auto&& fn) {
           const size_t k = findTestBlock(uuid);
           [[maybe_unused]] bool found = false;
-          vs.iapply([&](size_t i, const auto& vref)
-          {
+          vs.iapply([&](size_t i, const auto& vref) {
             if (i == k)
             {
               fn(vref.get().getFiniteElementSpace());
@@ -1106,14 +1127,15 @@ namespace Rodin::Assembly
           assert(found);
         };
 
-        using MeshType0 =
-          std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
-        std::optional<std::reference_wrapper<const MeshType0>> meshRef;
-        us.apply([&](const auto& uref)
-        {
-          using MeshT = std::decay_t<decltype(uref.get().getFiniteElementSpace().getMesh())>;
+        using MeshType0 = std::decay_t<
+          decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
+        Optional<std::reference_wrapper<const MeshType0>> meshRef;
+        us.apply([&](const auto& uref) {
+          using MeshT =
+            std::decay_t<decltype(uref.get().getFiniteElementSpace().getMesh())>;
           static_assert(std::is_same_v<MeshT, MeshType0>,
-            "Mixed mesh types are not supported in PETSc multi-field sequential assembly.");
+            "Mixed mesh types are not supported in PETSc multi-field sequential "
+            "assembly.");
           if (!meshRef)
             meshRef = std::cref(uref.get().getFiniteElementSpace().getMesh());
         });
@@ -1175,6 +1197,9 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        if (!constraints.getIdentifiedRows().empty())
+          constraints.finalize();
+
 
         if (mode != AssemblyMode::Full && !constraints.getIdentifiedRows().empty())
         {
@@ -1183,7 +1208,51 @@ namespace Rodin::Assembly
             << Alert::Raise;
         }
 
+        // ------------------------
+        // Allocate / reset A (SeqAIJ); re-use structure across assemblies.
+        // ------------------------
+        assert(A);
+        if (doMatrix)
+        {
+          ierr = PETSc::Assembly::MatrixSetup(A).prepare({static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(ncols), static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(ncols), MATSEQAIJ, false});
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
+
+        // ------------------------
+        // Allocate / reset b (Seq Vec)
+        // ------------------------
+        assert(b);
+        if (doVector)
+        {
+          ierr = PETSc::Assembly::VectorSetup(b).prepare({static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(nrows), VECSEQ, true, true});
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
+
+        auto& x = axb.getSolution();
+        assert(x);
+        // The solution vector carries the previous iterate as the solver's
+        // initial guess, so it must not be zeroed on reuse.
+        ierr = PETSc::Assembly::VectorSetup(x).prepare({static_cast<PetscInt>(ncols),
+          static_cast<PetscInt>(ncols), VECSEQ, true, false});
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+
         auto matrix_entry = [&](Index row, Index col, PetscScalar val) {
+          if (!doMatrix)
+          {
+            if (!constraints.isFixed(row) && constraints.isFixed(col))
+            {
+              const PetscScalar shift = -val * constraints.getFixedValue(col);
+              ierr = VecSetValue(b, static_cast<PetscInt>(row), shift, ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
+            return;
+          }
           const PetscScalar colValue = constraints.isIdentified(col)
             ? constraints.getIdentificationValue(col)
             : PetscScalar(0);
@@ -1192,7 +1261,7 @@ namespace Rodin::Assembly
             const PetscInt I = static_cast<PetscInt>(r.index);
             if (colValue != PetscScalar(0))
             {
-              const PetscScalar rhsShift = -r.coefficient * val * colValue;
+              const PetscScalar rhsShift = -Math::conj(r.coefficient) * val * colValue;
               ierr = VecSetValue(b, I, rhsShift, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
               (void)ierr;
@@ -1200,7 +1269,7 @@ namespace Rodin::Assembly
             for (const auto& c : constraints.expand(col))
             {
               const PetscInt J = static_cast<PetscInt>(c.index);
-              const PetscScalar v = r.coefficient * val * c.coefficient;
+              const PetscScalar v = Math::conj(r.coefficient) * val * c.coefficient;
               // Insert unconditionally. PETSc decides whether zero-valued
               // insertions affect the pattern according to its current
               // matrix options.
@@ -1217,7 +1286,7 @@ namespace Rodin::Assembly
           for (const auto& r : constraints.expand(row))
           {
             const PetscInt I = static_cast<PetscInt>(r.index);
-            const PetscScalar v = r.coefficient * val;
+            const PetscScalar v = Math::conj(r.coefficient) * val;
             ierr = VecSetValue(b, I, v, ADD_VALUES);
             assert(ierr == PETSC_SUCCESS);
             (void)ierr;
@@ -1227,7 +1296,7 @@ namespace Rodin::Assembly
         // ------------------------
         // Assemble bilinear terms into A
         // ------------------------
-        if (doMatrix)
+        if (doMatrix || liftBoundary)
         {
           // Local BFIs
           for (auto& bfi : pb.getLocalBFIs())
@@ -1258,10 +1327,24 @@ namespace Rodin::Assembly
                   const size_t d = it->getDimension();
                   const Index p = it->getIndex();
 
+                  if (!doMatrix && bfi.getRegion() == Geometry::Region::Cells)
+                  {
+                    const auto& boundaryDOFs = uFES.getDOFs(d, p);
+                    const bool affected = std::any_of(
+                      boundaryDOFs.begin(), boundaryDOFs.end(), [&](Index local) {
+                        const Index column = static_cast<Index>(uOff) + local;
+                        return constraints.isFixed(column) &&
+                          constraints.getFixedValue(column) != PetscScalar(0);
+                      });
+                    if (!affected)
+                      continue;
+                  }
                   bfi.setPolytope(*it);
 
-                  const auto& rows = vFES.getDOFs(d, p);
-                  const auto& cols = uFES.getDOFs(d, p);
+                  const auto& rows = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
+                                                             : vFES.getDOFs(d, p);
+                  const auto& cols = bfi.getTrialDOFIndices() ? *bfi.getTrialDOFIndices()
+                                                              : uFES.getDOFs(d, p);
 
                   const PetscInt nr = static_cast<PetscInt>(rows.size());
                   const PetscInt nc = static_cast<PetscInt>(cols.size());
@@ -1313,7 +1396,7 @@ namespace Rodin::Assembly
                       continue;
                   }
 
-                  const auto& rows = vFES.getDOFs(teIt.getDimension(), teIt->getIndex());
+                  const auto rows = vFES.getDOFs(teIt.getDimension(), teIt->getIndex());
 
                   for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                   {
@@ -1385,12 +1468,15 @@ namespace Rodin::Assembly
             }
           }
 
-          ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-          ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
+          if (doMatrix)
+          {
+            ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+            ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+          }
         } // doMatrix
 
         // ------------------------
@@ -1419,7 +1505,9 @@ namespace Rodin::Assembly
 
                 lfi.setPolytope(*it);
 
-                const auto& dofs = vFES.getDOFs(it.getDimension(), it->getIndex());
+                const auto& dofs = lfi.getTestDOFIndices()
+                  ? *lfi.getTestDOFIndices()
+                  : vFES.getDOFs(it.getDimension(), it->getIndex());
                 for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
                 {
                   const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs[l]));
@@ -1569,8 +1657,8 @@ namespace Rodin::Assembly
           }
           else if (mode == AssemblyMode::LHS)
           {
-            ierr = MatZeroRows(A, static_cast<PetscInt>(bcIdx.size()), bcIdx.data(), 1.0,
-              nullptr, nullptr);
+            ierr = MatZeroRowsColumns(A, static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.data(), 1.0, nullptr, nullptr);
             assert(ierr == PETSC_SUCCESS);
             (void)ierr;
           }

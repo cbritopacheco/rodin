@@ -1,0 +1,18 @@
+# Shared presentation for every example plot; data colors remain case-specific.
+font.family: sans-serif
+font.sans-serif: Manrope, DejaVu Sans
+mathtext.fontset: stix
+font.size: 10
+text.color: 718096
+axes.labelcolor: 718096
+axes.titlecolor: 718096
+xtick.color: 718096
+ytick.color: 718096
+axes.edgecolor: d1d8e0
+figure.facecolor: none
+axes.facecolor: none
+savefig.facecolor: none
+savefig.edgecolor: none
+savefig.transparent: True
+legend.frameon: False
+svg.fonttype: path

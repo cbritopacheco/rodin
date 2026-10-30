@@ -36,7 +36,7 @@ namespace Rodin::Assembly
    * and scatters the local matrices straight into it through the cached
    * indices, skipping both the triplet list and Eigen's symbolic pass.
    *
-   * The pattern is purely topological: it holds every entry the DOF maps
+   * The pattern is purely topological and holds every entry the DOF maps
    * connect, including those whose value happens to vanish. Reassembling a
    * form therefore never changes the sparsity of its operator, which is what
    * makes the value array reusable.
@@ -53,14 +53,14 @@ namespace Rodin::Assembly
    * # Validity
    *
    * The cached indices are only valid for the DOF maps and the selection they
-   * were built from, and the shape of the operator identifies neither: an
+   * were built from, and the shape of the operator identifies neither. An
    * edge flip or a renumbering can leave the row count, the column count, the
    * nonzero count and the candidate count all unchanged while moving every
    * entry, and so can a change of attribute set. The cache is therefore keyed
    * on a fingerprint of the visited polytopes and their maps.
    *
    * The fingerprint is accumulated inside the scatter loop rather than in a
-   * pass of its own: the loop already reads both DOF arrays, so folding the
+   * pass of its own because the loop already reads both DOF arrays, so folding the
    * hash into it costs one mix per degree of freedom instead of a second
    * traversal, which measured 2-3x on the reassembly benchmarks. It is
    * compared once the loop is done, and a mismatch discards the values and
@@ -131,7 +131,7 @@ namespace Rodin::Assembly
             for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
             {
               for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
-                values[m_indices[k++]] += Math::conj(local(r, c));
+                values[m_indices[k++]] += local(r, c);
             }
           }
           if (!stale && fingerprint == m_fingerprint)
@@ -223,7 +223,7 @@ namespace Rodin::Assembly
               {
                 for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                 {
-                  const ScalarType s = Math::conj(local(r, c));
+                  const ScalarType s = local(r, c);
                   add(values[m_indices[k++]], s);
                 }
               }
@@ -275,6 +275,8 @@ namespace Rodin::Assembly
 #ifdef RODIN_USE_OPENMP
       /**
        * @brief Atomically accumulates @p s into @p value.
+       * @param[in,out] value Destination entry updated atomically.
+       * @param[in] s Contribution added to the destination.
        *
        * Only the OpenMP scatter needs this, and the @c omp @c atomic
        * directives are not valid outside an OpenMP build.
@@ -331,6 +333,8 @@ namespace Rodin::Assembly
       template <class TrialFES, class TestFES>
       static size_t getCapacity(const TrialFES& trialFES, const TestFES& testFES)
       {
+        if (trialFES.getSize() == 0 || testFES.getSize() == 0)
+          return 0;
         return testFES.getSize() * std::log(trialFES.getSize());
       }
 
@@ -354,7 +358,7 @@ namespace Rodin::Assembly
         for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
         {
           for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
-            triplets.emplace_back(rows(r), cols(c), Math::conj(local(r, c)));
+            triplets.emplace_back(rows(r), cols(c), local(r, c));
         }
         return hashCell(d, i, rows, cols);
       }

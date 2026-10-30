@@ -49,8 +49,8 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::MUMPS<LinearSystem>>
   {
-      /// @brief Linear system type.
-      using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+    using LinearSystemType = LinearSystem;
   };
 }
 
@@ -83,13 +83,13 @@ namespace Rodin::Solver
    * After changing the sparsity pattern, clear the symbolic factorization so
    * the next factorization also repeats symbolic analysis.
    *
-   * Symmetry is never inferred from the entries: a matrix is factorized as
+   * Symmetry is never inferred from the entries. A matrix is factorized as
    * symmetric only after @ref setSymmetric, which selects the triangle MUMPS
    * reads and the factorization it performs. Declaring a matrix symmetric
    * halves the stored factor, so it is worth doing whenever the assembled
    * operator is symmetric.
    *
-   * Architecture:
+   * @par Architecture
    * 1. Convert the zero-based CSC structure to one-based coordinate arrays,
    *    keeping only the lower triangle for a symmetric matrix.
    * 2. Share the values of an unsymmetric matrix with MUMPS without a copy.
@@ -98,19 +98,19 @@ namespace Rodin::Solver
    *
    * MUMPS is parallel over MPI processes, and within each process over OpenMP
    * threads and threaded BLAS. This specialization solves on @c MPI_COMM_SELF,
-   * so its parallelism and its memory are both shared: the whole factorization
+   * so its parallelism and its memory are both shared. The whole factorization
    * is held in this process and computed by @ref setMaxThreads threads. Under
    * a distributed run each process solves its own system independently.
    *
    * MUMPS calls into MPI. When the host application has not initialized MPI,
    * the first factorization initializes it and leaves finalization to the
-   * host. Destroy every MUMPS solver before calling @c MPI_Finalize: its
+   * host. Destroy every MUMPS solver before calling @c MPI_Finalize because its
    * destructor terminates the MUMPS instance with JOB=-2, which uses MPI.
    *
    * The system matrix must outlive the solves that follow a factorization,
    * because its values may be shared with MUMPS rather than copied.
    *
-   * Info::status holds MUMPS's own @c INFOG(1): zero on success, a negative
+   * Info::status holds MUMPS's own @c INFOG(1), with zero on success, a negative
    * value for an error, and a positive one for a warning.
    *
    * | Specialization | Description |
@@ -165,89 +165,93 @@ namespace Rodin::Solver
       /// @brief Factorization stages retained between solves.
       struct Resources
       {
-          Resources() = default;
-          Resources(const Resources&) = delete;
-          Resources& operator=(const Resources&) = delete;
+        Resources() = default;
+        Resources(const Resources&) = delete;
+        Resources& operator=(const Resources&) = delete;
 
-          /// @brief MUMPS instance, valid while @ref initialized is true.
-          DMUMPS_STRUC_C instance{};
-          /// @brief Whether the MUMPS instance has been initialized.
-          bool initialized = false;
-          /// @brief Whether reusable symbolic analysis is retained.
-          bool symbolic = false;
-          /// @brief Whether a reusable numeric factorization is retained.
-          bool numeric = false;
-          /// @brief Backend workspace margin established by JOB=-1.
-          MUMPS_INT defaultWorkspacePercentage = 0;
+        /// @brief MUMPS instance, valid while @ref initialized is true.
+        DMUMPS_STRUC_C instance{};
 
-          void initialize(const MUMPS& solver, Symmetry symmetry)
+        /// @brief Whether the MUMPS instance has been initialized.
+        bool initialized = false;
+
+        /// @brief Whether reusable symbolic analysis is retained.
+        bool symbolic = false;
+
+        /// @brief Whether a reusable numeric factorization is retained.
+        bool numeric = false;
+
+        /// @brief Backend workspace margin established by JOB=-1.
+        MUMPS_INT defaultWorkspacePercentage = 0;
+
+        void initialize(const MUMPS& solver, Symmetry symmetry)
+        {
+          if (initialized)
+            return;
+          // This specialization is nailed to the process-local linear system
+          // type, which only Local-context assembly produces, so the solve is
+          // private to this process. MPI_COMM_WORLD would instead make it
+          // collective over ranks that each hold a different matrix. This
+          // mirrors the PETSc backend, which creates its objects on
+          // PETSC_COMM_SELF for a Context::Local mesh.
+          instance.comm_fortran = static_cast<MUMPS_INT>(MPI_Comm_c2f(MPI_COMM_SELF));
+          instance.par = 1;
+          instance.sym = static_cast<MUMPS_INT>(symmetry);
+          instance.job = JobInitialize;
+          dmumps_c(&instance);
+          initialized = true;
+          solver.check("initialization");
+          defaultWorkspacePercentage = instance.icntl[13];
+        }
+
+        /**
+         * @brief Releases retained factorization resources.
+         *
+         * Clearing Factorization::Numeric sends JOB=-4, which releases MUMPS
+         * factorization and solve data while retaining the initialized
+         * instance and its symbolic analysis. A later JOB=2 can therefore
+         * rebuild the numeric factorization without repeating analysis.
+         *
+         * Clearing Factorization::Symbolic destroys the MUMPS instance
+         * through JOB=-2 and consequently releases both retained stages.
+         */
+        void clear(Factorization factorization) noexcept
+        {
+          if (factorization == Factorization::Numeric)
           {
-            if (initialized)
-              return;
-            // This specialization is nailed to the process-local linear system
-            // type, which only Local-context assembly produces, so the solve is
-            // private to this process. MPI_COMM_WORLD would instead make it
-            // collective over ranks that each hold a different matrix. This
-            // mirrors the PETSc backend, which creates its objects on
-            // PETSC_COMM_SELF for a Context::Local mesh.
-            instance.comm_fortran = static_cast<MUMPS_INT>(MPI_Comm_c2f(MPI_COMM_SELF));
-            instance.par = 1;
-            instance.sym = static_cast<MUMPS_INT>(symmetry);
-            instance.job = JobInitialize;
-            dmumps_c(&instance);
-            initialized = true;
-            solver.check("initialization");
-            defaultWorkspacePercentage = instance.icntl[13];
-          }
-
-          /**
-           * @brief Releases retained factorization resources.
-           *
-           * Clearing Factorization::Numeric sends JOB=-4, which releases MUMPS
-           * factorization and solve data while retaining the initialized
-           * instance and its symbolic analysis. A later JOB=2 can therefore
-           * rebuild the numeric factorization without repeating analysis.
-           *
-           * Clearing Factorization::Symbolic destroys the MUMPS instance
-           * through JOB=-2 and consequently releases both retained stages.
-           */
-          void clear(Factorization factorization) noexcept
-          {
-            if (factorization == Factorization::Numeric)
+            if (!numeric)
             {
-              if (!numeric)
-              {
-                numeric = false;
-                return;
-              }
-
-              if (initialized)
-              {
-                instance.job = JobDiscardFactors;
-                dmumps_c(&instance);
-              }
               numeric = false;
               return;
             }
 
-            destroy();
-          }
-
-          void destroy() noexcept
-          {
+            if (initialized)
+            {
+              instance.job = JobDiscardFactors;
+              dmumps_c(&instance);
+            }
             numeric = false;
-            symbolic = false;
-            if (!initialized)
-              return;
-            instance.job = JobDestroy;
-            dmumps_c(&instance);
-            initialized = false;
+            return;
           }
 
-          ~Resources()
-          {
-            destroy();
-          }
+          destroy();
+        }
+
+        void destroy() noexcept
+        {
+          numeric = false;
+          symbolic = false;
+          if (!initialized)
+            return;
+          instance.job = JobDestroy;
+          dmumps_c(&instance);
+          initialized = false;
+        }
+
+        ~Resources()
+        {
+          destroy();
+        }
       };
 
       /// @brief Constructs a MUMPS solver for the given problem.
@@ -277,7 +281,7 @@ namespace Rodin::Solver
        * @brief Declares the symmetry of the system matrix.
        *
        * The caller guarantees that the matrix is symmetric for
-       * Symmetry::PositiveDefinite and Symmetry::General: only its lower
+       * Symmetry::PositiveDefinite and Symmetry::General. Only its lower
        * triangle is read. Symmetry selects the factorization itself and
        * therefore releases any retained factorization.
        *
@@ -408,8 +412,8 @@ namespace Rodin::Solver
         instance.jcn = m_columnIndices.data();
         if (m_symmetry == Symmetry::Unsymmetric)
         {
-          // The values of an unsymmetric matrix are read in place.
-          instance.a = const_cast<ScalarType*>(matrix.valuePtr());
+          // The non-const system lends its writable values to the external API.
+          instance.a = matrix.valuePtr();
         }
         else
         {
@@ -564,7 +568,7 @@ namespace Rodin::Solver
       /**
        * @brief Ensures that MPI is available to MUMPS.
        *
-       * Finalization is left to the host application: a solver instance
+       * Finalization is left to the host application. A solver instance
        * destroyed after @c MPI_Finalize could not release its MUMPS instance.
        */
       void initializeSession() const

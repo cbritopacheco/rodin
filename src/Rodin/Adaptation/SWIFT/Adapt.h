@@ -7,6 +7,7 @@
 #ifndef RODIN_ADAPTATION_SWIFT_ADAPT_H
 #define RODIN_ADAPTATION_SWIFT_ADAPT_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Context/ForwardDecls.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Variational/P1.h"
@@ -77,13 +78,17 @@ namespace Rodin::Adaptation::SWIFT
     public:
       /// @brief This specialization uses the local Eigen variational backend.
       static constexpr bool isSupported = true;
+
       /// @brief Vector P1 space on the local mesh.
       using Space =
         Variational::P1<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>>;
+
       /// @brief Trial function owning displacement.
       using TrialFunction = decltype(Variational::TrialFunction(std::declval<Space&>()));
+
       /// @brief Test function on the displacement space.
       using TestFunction = decltype(Variational::TestFunction(std::declval<Space&>()));
+
       /// @brief Fitting problem using the owned trial and test functions.
       using ProblemType = Problem<TrialFunction, TestFunction>;
 
@@ -99,8 +104,10 @@ namespace Rodin::Adaptation::SWIFT
           m_problem(m_trial, m_test)
       {
         if (mesh.getSpaceDimension() != mesh.getDimension())
-          Alert::Exception() << "SWIFT::Adapt requires a full-dimensional mesh."
-                             << Alert::Raise;
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT::Adapt requires a full-dimensional mesh." << Alert::Raise;
+        }
         for (auto cell = mesh.getCell(); !cell.end(); ++cell)
         {
           const auto geometry = cell->getGeometry();
@@ -108,10 +115,12 @@ namespace Rodin::Adaptation::SWIFT
                 geometry != Geometry::Polytope::Type::Triangle &&
                 geometry != Geometry::Polytope::Type::Tetrahedron) ||
             mesh.getPolytopeTransformation(mesh.getDimension(), cell->getIndex())
-                .getOrder() != 1)
-            Alert::Exception() << "SWIFT::Adapt requires affine simplicial geometry. "
-                               << "Use SWIFT::Problem for curved geometry."
-                               << Alert::Raise;
+                .getDegree() != Optional<size_t>(1))
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "SWIFT::Adapt requires affine simplicial geometry. "
+              << "Use SWIFT::Problem for curved geometry." << Alert::Raise;
+          }
         }
       }
 
@@ -120,6 +129,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param other Workflow that cannot be copied.
        */
       Adapt(const Adapt& other) = delete;
+
       /**
        * @brief Copy assignment of an owned adaptation workflow is disabled.
        * @param other Workflow that cannot be assigned.
@@ -157,6 +167,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_problem;
       }
+
       /**
        * @brief Inspects the owned fitting problem.
        * @returns The read-only owned problem.
@@ -165,6 +176,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_problem;
       }
+
       /**
        * @brief Accesses the trial function for additional variational terms.
        * @returns The owned trial function.
@@ -173,6 +185,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_trial;
       }
+
       /**
        * @brief Accesses the test function for additional variational terms.
        * @returns The owned test function.
@@ -181,6 +194,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_test;
       }
+
       /**
        * @brief Inspects the current controls.
        * @returns The owned problem parameters.
@@ -189,6 +203,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_problem.getParameters();
       }
+
       /**
        * @brief Inspects the last fit.
        * @returns The last fitting report.

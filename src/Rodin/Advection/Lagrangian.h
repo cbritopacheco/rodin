@@ -30,7 +30,7 @@
 namespace Rodin::Advection
 {
   /**
-   * @brief Boundary policy for characteristic tracing: stop-at-boundary with inward offset.
+   * @brief Stops characteristic tracing at the boundary with an inward offset.
    *
    * This policy is intended to be used with @ref Lagrangian
    * "semi-Lagrangian" / characteristic-based
@@ -92,7 +92,7 @@ namespace Rodin::Advection
    *   offset is @c max(10*machine_epsilon, min(epsInPhys, 0.1*abs(dt))).
    *
    * @par Complexity
-   * Constant time per boundary hit: one projection to cell + face, a few transforms, and a clamp.
+   * Each boundary hit takes constant time, requiring one projection to the cell and face, a few transforms and a clamp.
    */
   class StopInsideBoundaryPolicy
   {
@@ -419,25 +419,25 @@ namespace Rodin::Advection
    * @brief Lagrangian variational advection for scalar fields.
    *
    * This class implements semi-Lagrangian time-stepping for the advection
-   * equation:
+   * equation.
    * @f[
    *   \frac{\partial u}{\partial t} + \mathbf{v} \cdot \nabla u = 0
    * @f]
    * where @f$ u @f$ is the scalar field and @f$ \mathbf{v} @f$ is the velocity
    * field.
    *
-   * ## Semi-Lagrangian Method
+   * # Semi-Lagrangian Method
    * At each time step, the method:
    * 1. Traces characteristics backwards: @f$ \mathbf{X}(t) = \mathbf{x} - \int_0^{\Delta t} \mathbf{v} \, ds @f$
    * 2. Interpolates the solution at departure points
    * 3. Solves a projection problem to obtain the new solution
    *
-   * The variational formulation at each step is:
+   * Each step solves the following variational problem.
    * @f[
    *   \int_\Omega u^{n+1} v \, dx = \int_\Omega u^n(\mathbf{X}) v \, dx
    * @f]
    *
-   * ## Advantages
+   * # Advantages
    * - Unconditionally stable for large CFL numbers
    * - Naturally handles complex geometries
    * - Mass-conservative in variational form
@@ -459,7 +459,7 @@ namespace Rodin::Advection
    * @tparam Data Data storage type for grid function
    * @tparam Initial Type of initial condition
    * @tparam VectorField Type of velocity field
-   * @tparam Step Type of time-stepping scheme (default: RK4)
+   * @tparam Step Type of time-stepping scheme (default RK4)
    */
   template <class FES, class Data, class Initial, class VectorField, class Step>
   class Lagrangian<
@@ -487,7 +487,7 @@ namespace Rodin::Advection
       using StepType =
         Step;
 
-      /// Solution type: grid function holding the advected field
+      /// Grid function holding the advected field.
       using SolutionType =
         Variational::GridFunction<FES, Data>;
 
@@ -504,12 +504,12 @@ namespace Rodin::Advection
        *
        * @tparam U0 Type of initial condition (deduced)
        * @tparam VVel Type of velocity field (deduced)
-       * @tparam S Type of time-stepping scheme (deduced, default: RK4)
+       * @tparam S Type of time-stepping scheme (deduced, default RK4)
        * @param[in,out] u Trial function holding the solution
        * @param[in,out] v Test function for variational formulation
        * @param[in] u0 Initial condition
        * @param[in] vel Velocity field
-       * @param[in] st Time-stepping scheme (default: RK4)
+       * @param[in] st Time-stepping scheme (default RK4)
        */
       template <class U0, class VVel, class S = StepType>
       Lagrangian(TrialFunctionType& u, TestFunctionType& v, U0&& u0, VVel&& vel, S&& st = S{})
@@ -596,7 +596,7 @@ namespace Rodin::Advection
    * @param v Test function for variational formulation
    * @param u0 Initial condition
    * @param vel Velocity field
-   * @param st Time-stepping scheme (default: RK4)
+   * @param st Time-stepping scheme (default RK4)
    */
   template <class FES, class Data, class Initial, class VVel, class SStep>
   Lagrangian(Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>& u,

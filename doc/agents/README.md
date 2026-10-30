@@ -54,6 +54,9 @@ Hierarchical: read top-down, stop at the depth your task needs.
 - [petsc.md](petsc.md) — PETSc backend: idioms, CI version skew, known traps.
 - [testing.md](testing.md) — test-suite layout, test patterns
   (FD-consistency, manufactured solutions, benchmarks), CI workflows.
+  For test registration or lane changes, also read the actionable
+  [CI extension guide](../../dev/ci-testing.md) and
+  [shared-build and coverage architecture](../../.github/workflows/README.md).
 
 ## Level 4 — foundations (theory ↔ code)
 

@@ -13,26 +13,26 @@
  * element space defines the polynomial degree, mesh association, DOF mapping,
  * and conformity properties of the approximation.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * A finite element space @f$ V_h @f$ is defined by the triple @f$ (K, P, \Sigma) @f$:
  * - @f$ K @f$: Reference element geometry (triangle, tetrahedron, etc.)
  * - @f$ P @f$: Polynomial space (@f$ \mathbb{P}_k @f$, @f$ \mathbb{Q}_k @f$, etc.)
  * - @f$ \Sigma @f$: Set of degrees of freedom (nodal values, moments, etc.)
  *
- * ## Conformity
+ * # Conformity
  * Different conforming spaces for different problems:
  * - **H¹-conforming**: Continuous functions (standard Lagrange elements)
  * - **H(div)-conforming**: Normal component continuous (Raviart-Thomas, BDM)
  * - **H(curl)-conforming**: Tangential component continuous (Nédélec)
  * - **L²-spaces**: Discontinuous (DG methods)
  *
- * ## DOF Management
+ * # DOF Management
  * The finite element space manages:
  * - Global DOF numbering: unique index for each basis function
  * - Local-to-global mapping: relates element DOFs to global DOFs
  * - Boundary DOFs: identification for boundary condition application
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Create P1 space (continuous piecewise linear)
  * P1 Vh(mesh);
@@ -62,16 +62,16 @@ namespace Rodin::Variational
    * space defines the basis functions, degrees of freedom, and mesh association
    * required for finite element computations.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * A finite element space is characterized by:
    * - **Mesh**: Geometric discretization @f$ \mathcal{T}_h @f$
-   * - **Element**: Local finite element @f$ (K, P, \Sigma) @f$ where:
+   * - **Element**: Local finite element @f$ (K, P, \Sigma) @f$ Here,
    *   - @f$ K @f$ is the reference element geometry
    *   - @f$ P @f$ is the polynomial space
    *   - @f$ \Sigma @f$ is the set of degrees of freedom
    * - **Global Space**: @f$ V_h = \{v \in V : v|_K \in P_K \text{ for all } K \in \mathcal{T}_h\} @f$
    *
-   * ## Key Features
+   * # Key Features
    * - **DOF Management**: Global and local degree of freedom indexing
    * - **Basis Functions**: Access to shape functions and their derivatives
    * - **Mesh Association**: Strong coupling with underlying mesh structure
@@ -302,45 +302,6 @@ namespace Rodin::Variational
       {
         return static_cast<const Derived&>(*this).getPushforward(idx, v);
       }
-
-      /**
-       * @brief Evaluates a finite element expansion on a physical element.
-       *
-       * The reference expansion is evaluated first and the finite element
-       * space pushforward is then applied to the complete function:
-       * @f[
-       *   u_h(x)
-       *   =
-       *   \psi_K^{-1}
-       *   \left(
-       *     \sum_i c_i \widehat{\varphi}_i
-       *   \right)(x).
-       * @f]
-       * This formulation applies equally to composition-based Lagrange maps
-       * and to range-transforming maps such as the Piola transformations used
-       * by @f$ H(\mathrm{div}) @f$ and @f$ H(\mathrm{curl}) @f$ spaces.
-       *
-       * @tparam Range Range type of the finite element expansion.
-       * @tparam Coefficient Callable returning the local coefficient of a basis.
-       * @param[out] out Value of the expansion.
-       * @param[in] idx Dimension and index of the physical element.
-       * @param[in] coefficient Local coefficient accessor.
-       * @param[in] p Point on the physical element.
-       */
-      template <class Range, class Coefficient>
-      constexpr void evaluate(Range& out, const std::pair<size_t, Index>& idx,
-        Coefficient&& coefficient, const Geometry::Point& p) const
-      {
-        const auto& derived = static_cast<const Derived&>(*this);
-        const auto& fe = derived.getFiniteElement(idx.first, idx.second);
-        const auto expansion = [&](const Math::SpatialPoint& rc) {
-          Range value;
-          fe.evaluate(value, coefficient, rc);
-          return value;
-        };
-        const auto mapping = derived.getPushforward(idx, expansion);
-        out = mapping(p);
-      }
   };
 
   /**
@@ -402,7 +363,7 @@ namespace Rodin::Variational
        * @brief Evaluates the mapped function on the reference coordinates.
        *
        * For the given function @f$ v \in V(\tau) @f$, performs the following
-       * evaluation:
+       * evaluation.
        * @f[
        *  \psi(v)(r)
        * @f]
@@ -477,11 +438,18 @@ namespace Rodin::Variational
        * @brief Evaluates the mapped function on the physical coordinates.
        *
        * For the given function @f$ v \in V(K) @f$, performs the following
-       * evaluation:
+       * evaluation.
        * @f[
        *  \psi^{-1}(v)(p)
        * @f]
        * on the physical coordinates @f$ p \in \tau @f$.
+       *
+       * A mapping may additionally accept an IntegrationPoint when it preserves
+       * the certified reference association. Composition mappings forward that
+       * sample to the reference callable; mappings which change its reference
+       * coordinates evaluate the callable at those changed coordinates instead.
+       * GridFunction owns expansion evaluation and applies the mapping using
+       * current geometry and coefficients.
        *
        * @note CRTP function to be overriden in Derived class.
        * @param pc Point at which the operation is evaluated.

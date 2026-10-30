@@ -1,0 +1,43 @@
+name: Preflight
+'on':
+  pull_request:
+    branches: [master, develop]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+  push:
+    branches:
+    - master
+    - develop
+permissions:
+  contents: read
+concurrency:
+  group: Preflight-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  Labeler:
+    if: ${{ !github.event.pull_request.draft }}
+    name: Labeler
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out proposed rules and regression tests
+      uses: actions/checkout@v4
+      with:
+        lfs: false
+        persist-credentials: false
+    - name: Check out the pinned labeler for offline API tests
+      uses: actions/checkout@v4
+      with:
+        repository: actions/labeler
+        ref: b8dd2d9be0f68b860e7dae5dae7d772984eacd6d
+        path: .labeler-action
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+    - name: Install workflow parser
+      run: python3 dev/ci_environment.py python
+    - name: Verify workflow trigger policy
+      run: python3 -m unittest discover -s dev -p test_ci_trigger_policy.py -v
+    - name: Test label matching and API behavior serially
+      env:
+        LABELER_ACTION_PATH: ${{ github.workspace }}/.labeler-action
+      run: python3 -m unittest discover -s dev -p test_labeler.py -v

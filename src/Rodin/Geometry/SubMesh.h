@@ -15,6 +15,8 @@
 #include <functional>
 #include <boost/bimap.hpp>
 
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "ForwardDecls.h"
 #include "Mesh.h"
 
@@ -82,6 +84,7 @@ namespace Rodin::Geometry
        * @brief Gets the polytope index mapping for a dimension.
        * @param[in] d Dimension
        * @returns Bidirectional mapping between submesh and parent indices
+       * @throws Alert::Exception If no map slot exists for @p d.
        */
       virtual const PolytopeMap& getPolytopeMap(size_t d) const = 0;
 
@@ -90,8 +93,7 @@ namespace Rodin::Geometry
        * @param[in] other SubMesh to compare with
        * @returns True if this is the same object (pointer equality)
        */
-      constexpr
-      bool operator==(const SubMeshBase& other) const
+      constexpr bool operator==(const SubMeshBase& other) const
       {
         return this == &other;
       }
@@ -111,7 +113,7 @@ namespace Rodin::Geometry
    *
    * # Mathematical Foundation
    *
-   * For a parent mesh @f$ \mathcal{T}_h @f$ and submesh @f$ \mathcal{S} @f$:
+   * For a parent mesh @f$ \mathcal{T}_h @f$ and submesh @f$ \mathcal{S} @f$.
    * @f[
    *   \mathcal{S} \subseteq \mathcal{T}_h
    * @f]
@@ -120,7 +122,7 @@ namespace Rodin::Geometry
    *
    * # Usage Examples
    *
-   * ## Creating a boundary submesh:
+   * ## Creating a boundary submesh.
    * @code{.cpp}
    * SubMesh<Context::Local>::Builder builder;
    * builder.initialize(mesh);
@@ -133,7 +135,7 @@ namespace Rodin::Geometry
    * SubMesh<Context::Local> boundary = builder.finalize();
    * @endcode
    *
-   * ## Accessing as submesh:
+   * ## Accessing as submesh.
    * @code{.cpp}
    * if (mesh.isSubMesh())
    * {
@@ -221,8 +223,7 @@ namespace Rodin::Geometry
        * @brief Constructs a submesh with a parent.
        * @param[in] parent Reference to the parent mesh
        */
-      explicit
-      SubMesh(std::reference_wrapper<const Mesh<Context>> parent);
+      explicit SubMesh(std::reference_wrapper<const Mesh<Context>> parent);
 
       /**
        * @brief Copy constructor.
@@ -254,6 +255,7 @@ namespace Rodin::Geometry
           Parent::operator=(std::move(other));
           m_parent = std::move(other.m_parent);
           m_s2ps = std::move(other.m_s2ps);
+          m_ancestors = std::move(other.m_ancestors);
         }
         return *this;
       }
@@ -293,7 +295,13 @@ namespace Rodin::Geometry
        */
       const PolytopeMap& getPolytopeMap(size_t d) const override
       {
-        return m_s2ps.at(d);
+        if (d >= m_s2ps.size())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Polytope map dimension " << d << " is outside map count " << m_s2ps.size()
+            << '.' << Alert::Raise;
+        }
+        return m_s2ps[d];
       }
 
       /**
@@ -309,8 +317,8 @@ namespace Rodin::Geometry
 
     private:
       std::reference_wrapper<const Mesh<Context>> m_parent;  ///< Parent mesh reference
-      std::vector<PolytopeMap> m_s2ps;                      ///< Index mappings per dimension
-      Deque<Ancestor> m_ancestors;                           ///< Ancestor mesh chain
+      std::vector<PolytopeMap> m_s2ps; ///< Index mappings per dimension
+      Deque<Ancestor> m_ancestors; ///< Ancestor mesh chain
   };
 }
 
