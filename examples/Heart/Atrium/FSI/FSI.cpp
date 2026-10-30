@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cmath>
 #include <limits>
+#include <Eigen/Dense>
 #include <boost/mpi/collectives.hpp>
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/utility.hpp>
@@ -233,10 +234,146 @@ namespace Rodin::Examples::Heart::Atrium
     m_residualDifference = zero;
     m_solidToFluid = makeScatter(
       solid.m_mesh, solid.m_displacement, fluid.m_mesh, fluid.m_wallDisplacement);
+    const ::Vec layout = solid.m_robinData.sync().getData();
+    for (::Vec* v : {&m_inputData, &m_inputTraction, &m_outputData, &m_outputTraction,
+           &m_residualData, &m_residualTraction})
+    {
+      const PetscErrorCode ierr = VecDuplicate(layout, v);
+      assert(ierr == PETSC_SUCCESS);
+      (void)ierr;
+    }
+  }
+
+  void FSI::clearHistory(bool all)
+  {
+    // Pairs from the current and the previous `quasiNewtonReuse` steps remain.
+    for (size_t i = m_secants.size(); i-- > 0;)
+    {
+      if (!all && m_secantSteps[i] + m_parameters.quasiNewtonReuse >= m_stepIndex)
+        continue;
+      for (::Vec& v : m_secants[i])
+      {
+        const PetscErrorCode ierr = VecDestroy(&v);
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+      }
+      m_secants.erase(m_secants.begin() + i);
+      m_secantSteps.erase(m_secantSteps.begin() + i);
+    }
+    m_haveSecantBase = false;
+  }
+
+  void FSI::accelerate()
+  {
+    // IQN-ILS (Degroote et al. 2009) on x = (g, T): with sweep input x^k,
+    // output H(x^k) and residual r^k = H(x^k) - x^k, the columns
+    // V = [r^k - r^{k-1}, ...], W = [H(x^k) - H(x^{k-1}), ...] give
+    // c = argmin |V c + r^k| and x^{k+1} = H(x^k) + W c. Both blocks are in kPa.
+    const ::Vec gOut = m_solid.m_robinData.sync().getData();
+    const ::Vec tOut = m_trialTraction.sync().getData();
+    PetscErrorCode ierr;
+    std::array<::Vec, 4> column{};
+    if (m_haveSecantBase)
+    {
+      for (::Vec& v : column)
+      {
+        ierr = VecDuplicate(gOut, &v);
+        assert(ierr == PETSC_SUCCESS);
+      }
+    }
+    // r^k into the input vectors, after forming the new differences.
+    ierr = VecAYPX(m_inputData, -1, gOut);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecAYPX(m_inputTraction, -1, tOut);
+    assert(ierr == PETSC_SUCCESS);
+    if (m_haveSecantBase)
+    {
+      ierr = VecWAXPY(column[0], -1, m_residualData, m_inputData);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecWAXPY(column[1], -1, m_residualTraction, m_inputTraction);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecWAXPY(column[2], -1, m_outputData, gOut);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecWAXPY(column[3], -1, m_outputTraction, tOut);
+      assert(ierr == PETSC_SUCCESS);
+      m_secants.insert(m_secants.begin(), column);
+      m_secantSteps.insert(m_secantSteps.begin(), m_stepIndex);
+      while (m_secants.size() > m_parameters.quasiNewtonColumns)
+      {
+        for (::Vec& v : m_secants.back())
+        {
+          ierr = VecDestroy(&v);
+          assert(ierr == PETSC_SUCCESS);
+        }
+        m_secants.pop_back();
+        m_secantSteps.pop_back();
+      }
+    }
+    ierr = VecCopy(m_inputData, m_residualData);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecCopy(m_inputTraction, m_residualTraction);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecCopy(gOut, m_outputData);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecCopy(tOut, m_outputTraction);
+    assert(ierr == PETSC_SUCCESS);
+    m_haveSecantBase = true;
+    const size_t n = m_secants.size();
+    if (n == 0)
+      return;
+    Eigen::MatrixXd gram(n, n);
+    Eigen::VectorXd rhs(n);
+    for (size_t i = 0; i < n; ++i)
+    {
+      PetscScalar a = 0, b = 0;
+      ierr = VecDot(m_secants[i][0], m_residualData, &a);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecDot(m_secants[i][1], m_residualTraction, &b);
+      assert(ierr == PETSC_SUCCESS);
+      rhs(i) = -PetscRealPart(a + b);
+      for (size_t j = 0; j <= i; ++j)
+      {
+        ierr = VecDot(m_secants[i][0], m_secants[j][0], &a);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecDot(m_secants[i][1], m_secants[j][1], &b);
+        assert(ierr == PETSC_SUCCESS);
+        gram(i, j) = gram(j, i) = PetscRealPart(a + b);
+      }
+    }
+    // Rank-revealing solve of the normal equations; nearly dependent
+    // secants (relative pivot below the threshold) are discarded.
+    constexpr Real DependencyThreshold = 1e-12;
+    Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr(gram);
+    qr.setThreshold(DependencyThreshold);
+    const Eigen::VectorXd coefficients = qr.solve(rhs);
+    for (size_t i = 0; i < n; ++i)
+    {
+      if (!std::isfinite(coefficients(i)))
+        continue;
+      ierr = VecAXPY(gOut, coefficients(i), m_secants[i][2]);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecAXPY(tOut, coefficients(i), m_secants[i][3]);
+      assert(ierr == PETSC_SUCCESS);
+    }
+    (void)ierr;
+    // Refresh ghost values of the two modified fields.
+    m_solid.m_robinData *= Real(1);
+    m_trialTraction *= Real(1);
   }
 
   FSI::~FSI()
   {
+    clearHistory(true);
+    for (::Vec* v : {&m_inputData, &m_inputTraction, &m_outputData, &m_outputTraction,
+           &m_residualData, &m_residualTraction})
+    {
+      if (*v)
+      {
+        const PetscErrorCode ierr = VecDestroy(v);
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+      }
+    }
     if (m_solidToFluid)
     {
       const PetscErrorCode ierr = VecScatterDestroy(&m_solidToFluid);
@@ -342,6 +479,8 @@ namespace Rodin::Examples::Heart::Atrium
     m_solid.beginStep();
     m_fluid.beginStep();
     m_previousDisplacementIteration.setData(m_solid.m_displacement.getData());
+    ++m_stepIndex;
+    clearHistory();
     for (size_t iteration = 1; iteration <= m_parameters.maximumIterations; ++iteration)
     {
       Stage coupling("Coupling iteration " + std::to_string(iteration), m_fluid.isRoot());
@@ -351,11 +490,25 @@ namespace Rodin::Examples::Heart::Atrium
                             << m_parameters.maximumIterations << Alert::Raise;
       }
       m_previousRobinData.setData(m_solid.m_robinData.getData());
+      if (m_parameters.quasiNewton)
+      {
+        PetscErrorCode ierr = VecCopy(m_solid.m_robinData.sync().getData(), m_inputData);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecCopy(m_importedTraction.sync().getData(), m_inputTraction);
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+      }
       m_solid.solveStep();
       m_residualDifference = m_solid.m_displacement - m_previousDisplacementIteration;
       const Real change = m_residualDifference.norm(NORM_2);
-      const Real state = m_solid.m_displacement.norm(NORM_2);
-      m_diagnostics.displacementChange = state > 0 ? change / state : 1e-3 * change;
+      // Normalized by the motion of this step, not by the accumulated
+      // displacement: |d| includes all previous motion and prestretch, which
+      // makes a state-relative test increasingly lax as the cycle proceeds.
+      m_tractionResidual = m_solid.m_displacement - m_solid.m_previousDisplacement;
+      const Real increment = m_tractionResidual.norm(NORM_2);
+      m_diagnostics.displacementChange = increment > 0 ? change / increment
+        : change > 0 ? std::numeric_limits<Real>::infinity()
+                     : 0;
       m_previousDisplacementIteration.setData(m_solid.m_displacement.getData());
       moveFluidMesh();
       if (!m_fluid.solveFlow())
@@ -373,10 +526,14 @@ namespace Rodin::Examples::Heart::Atrium
       (void)ierr;
       m_diagnostics.iterations = iteration;
       m_diagnostics.tractionDataUpdate = 1e3 * std::max(difference, tractionDifference);
-      m_importedTraction.setData(m_trialTraction.getData());
-      transfer(m_solidToFluid, m_importedTraction, m_fluid.m_wallTraction, 1e3);
       m_diagnostics.converged = iteration > 1 &&
         m_diagnostics.displacementChange < m_parameters.relativeTolerance;
+      // A converged sweep commits its own (unaccelerated) fluid reaction.
+      if (m_parameters.quasiNewton && !m_diagnostics.converged &&
+        iteration < m_parameters.maximumIterations)
+        accelerate();
+      m_importedTraction.setData(m_trialTraction.getData());
+      transfer(m_solidToFluid, m_importedTraction, m_fluid.m_wallTraction, 1e3);
       if (m_fluid.isRoot())
       {
         Log("FSI/Coupling") << "iteration=" << iteration

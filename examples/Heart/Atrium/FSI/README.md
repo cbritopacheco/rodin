@@ -71,29 +71,57 @@ as the sweeps converge. With the algebraic update the fixed point has
 $u_f=v_\Gamma$. Both transmission velocities retain BDF1; the solid Robin
 tangent uses $\alpha_0/\Delta t$.
 
-### Displacement stopping test and sweep budget
+### Sweeps, acceleration and stopping test
 
-After a complete solid/ALE/fluid sweep, define
+Each sweep solves the solid, moves the fluid mesh, solves the fluid and updates
+$(g,T)$. As a fixed-point map on $x=(g,T)$ the Robin–Robin sweep contracts every
+interface mode: with scalar solid and fluid interface impedances $Z_s$ and
+$Z_f$ (added mass) its amplification is
 
 $$
-r_d=\frac{\|d_s^{k+1}-d_s^k\|_2}{\|d_s^{k+1}\|_2}.
+\varrho=\frac{\alpha_0^2+Z_fZ_s}{(\alpha_0+Z_f)(\alpha_0+Z_s)}<1,
 $$
 
-The norm is the global Euclidean norm of the complete solid displacement
-coefficient vector, not a surface-weighted interface norm. If the denominator
-is zero, the absolute increment norm in metres is used instead. Starting with
-the second sweep, $r_d<\varepsilon_d$ terminates the correction loop. Defaults
-are `-atrium_fsi_rtol 1e-6` and `-atrium_fsi_iterations 5`. A zero
-tolerance disables early termination and uses the complete sweep budget.
+but no single $\alpha_0$ makes $\varrho$ small for both added-mass-dominated
+($Z_f\gg\alpha_0$, $\varrho\to Z_s/(\alpha_0+Z_s)$) and weakly loaded
+($Z_f\to0$, $\varrho\to\alpha_0/(\alpha_0+Z_s)$) modes, so plain sweeps
+converge linearly at a rate close to one for a few modes. The sweeps are
+therefore accelerated by interface quasi-Newton least squares (IQN-ILS,
+Degroote et al. 2009). With residual $r^k=H(x^k)-x^k$ and secant columns
+$V=[r^k-r^{k-1},\dots]$, $W=[H(x^k)-H(x^{k-1}),\dots]$,
+
+$$
+c=\arg\min_c\|Vc+r^k\|_2,\qquad x^{k+1}=H(x^k)+Wc .
+$$
+
+Pairs from the previous `-atrium_fsi_iqn_reuse 4` steps are kept (at most
+`-atrium_fsi_iqn_columns 10`); `-atrium_fsi_iqn false` restores plain sweeps.
+The fixed point, and hence the converged solution, is unchanged. A converged
+sweep commits its own fluid reaction, not the accelerated one.
+
+After a complete solid/ALE/fluid sweep the solid displacement change is
+measured against the motion of the step,
+
+$$
+r_d=\frac{\|d_s^{k}-d_s^{k-1}\|_2}{\|d_s^{k}-d_s^{n}\|_2},
+$$
+
+with the Euclidean norm of the complete solid coefficient vector. A test
+relative to $\|d_s^k\|$ instead becomes progressively laxer as displacement and
+prestretch accumulate, which hides unconverged sweeps. Starting with the second
+sweep, $r_d<\varepsilon_d$ ends the loop. Defaults are `-atrium_fsi_rtol 1e-4`
+and `-atrium_fsi_iterations 8`; a zero tolerance uses the complete budget.
+The solid Newton stops at an absolute residual of $10^{-8}$; a sweep whose
+correction falls below it leaves the solid unchanged and reports $r_d=0$, so
+tolerances finer than that resolution are not meaningful.
 
 Budget exhaustion accepts the last completed sweep. `fsi_converged` and
 `fsi_budget_exhausted` in the common CSV distinguish criterion satisfaction
 from acceptance at the budget. Inner solver failures, invalid constitutive
-states, and mesh inversion still reject the step. A small budget does not
-establish interface continuity; velocity slip, traction-data change, and
-geometry mismatch remain diagnostics. Unlike the reference's early exit
-before its fluid solve, each accepted Atrium sweep includes ALE and fluid
-updates, so both exported geometries correspond to the accepted solid state.
+states, and mesh inversion still reject the step. Velocity slip, traction-data
+change, and geometry mismatch remain diagnostics. Each accepted sweep includes
+ALE and fluid updates, so both exported geometries correspond to the accepted
+solid state.
 
 No wall-face ring band is introduced. Existing solid opening cut faces remain
 fixed, ALE caps remain fixed, and fluid opening interiors remain open. The
@@ -126,6 +154,17 @@ R_m^{\mathrm{ALE}}=
 +\rho_f\left(\frac12\nabla\cdot u_f^n-\nabla\cdot a\right)u_f^{n+1}
 -\nabla\cdot(2\mu_nD(u_f^{n+1}))+\nabla p^{n+1}.
 $$
+
+The momentum form also contains the time-derivative stabilization of
+[Burman et al. (2025), eq. (15)](https://discovery.ucl.ac.uk/id/eprint/10210489/),
+
+$$
+-\frac{\rho_f}{2\Delta t}\Big(\int_{\Omega^{n+1}}u\cdot v-\int_{\Omega^{n}}u\cdot v\Big)
++\frac{\rho_f}{2}\int_{\Omega^{n+1}}(\nabla\cdot a)\,u\cdot v
+=\frac{\rho_f}{2}\int_{\Omega^{n+1}}\Big(\frac{r_K-1}{\Delta t}+\nabla\cdot a\Big)u\cdot v,
+$$
+
+which closes the discrete energy balance of the conservative ALE mass term.
 
 The default stabilization is the orthogonal-subscale VMS of the coronary
 example, evaluated with the relative advecting velocity $u_f^n-a$: the

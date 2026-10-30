@@ -7,6 +7,8 @@
 #ifndef RODIN_ATRIUM_FSI_FSI_H
 #define RODIN_ATRIUM_FSI_FSI_H
 
+#include <array>
+#include <vector>
 #include "../Solid/Solid.h"
 #include "../Fluid/Fluid.h"
 
@@ -18,10 +20,11 @@ namespace Rodin::Examples::Heart::Atrium
    * The solid condition is @f$ P_sN_s+\alpha_0 v_\Gamma=T+\alpha_0u_f @f$; the
    * fluid uses the same reference-area impedance and the lagged traction. The
    * update @f$ T^{k+1}=T^k+\alpha_0(u_f^{k+1}-v_\Gamma^{k+1}) @f$ is the fluid
-   * variational reaction, without relaxation. Transmission uses the BDF1 wall rate
+   * variational reaction. Transmission uses the BDF1 wall rate
    * @f$ (d_s^{n+1}-d_s^n)/\Delta t @f$ on both sides. Solid dynamics retain
-   * Newmark integration. Relative solid displacement change determines early
-   * termination; budget exhaustion accepts the last completed sweep.
+   * Newmark integration. Sweeps are accelerated by IQN-ILS on (g, T); the solid
+   * displacement change relative to the step increment determines early
+   * termination, and budget exhaustion accepts the last completed sweep.
    *
    * ## Architecture
    *
@@ -36,10 +39,20 @@ namespace Rodin::Examples::Heart::Atrium
       struct Parameters
       {
         size_t maximumIterations =
-          5; ///< Sweep budget; the last completed sweep is accepted.
-        Real relativeTolerance =
-          1e-6; ///< Relative global solid displacement-change tolerance.
+          8; ///< Sweep budget; the last completed sweep is accepted.
+
+        /// Sweep change of the solid displacement relative to the step increment.
+        Real relativeTolerance = 1e-4;
         Real robinCoefficient = 0; ///< Pa s/m; zero selects sqrt(rho_s E_matrix).
+
+        /// Interface quasi-Newton (IQN-ILS) acceleration of the sweeps on (g, T).
+        bool quasiNewton = true;
+
+        /// Secant pairs retained by IQN-ILS within one step.
+        size_t quasiNewtonColumns = 10;
+
+        /// Previous steps whose secant pairs are reused (IQN-ILS(q)); 0 keeps none.
+        size_t quasiNewtonReuse = 4;
       };
 
       struct Diagnostics
@@ -48,8 +61,9 @@ namespace Rodin::Examples::Heart::Atrium
         Real tractionDataUpdate = 0; ///< Pa, maximum Robin-data or traction update.
         Real minimumMeshJacobian = 1;
         Real wallFlux = 0; ///< m^3/s, outward from the fluid.
-        Real displacementChange =
-          0; ///< Relative L2 change, or absolute L2 change in m at zero state.
+
+        /// |d^k - d^{k-1}| / |d^k - d^n| over all solid coefficients.
+        Real displacementChange = 0;
         bool converged =
           false; ///< Displacement-change criterion satisfied after at least two sweeps.
         bool budgetExhausted =
@@ -118,6 +132,12 @@ namespace Rodin::Examples::Heart::Atrium
       /// @brief Extends solid displacement and updates the ALE geometry and velocity.
       void moveFluidMesh();
 
+      /// @brief Replaces (g, T) by the IQN-ILS update from the latest sweep output.
+      void accelerate();
+
+      /// @brief Releases secant vectors older than the reuse window.
+      void clearHistory(bool all = false);
+
       /// @brief Updates the reference Robin traction from the interface velocity jump.
       void updateTraction();
 
@@ -139,6 +159,15 @@ namespace Rodin::Examples::Heart::Atrium
       std::vector<Real> m_referenceFaceMeasures;
       ::VecScatter m_solidToFluid = nullptr;
       Real m_robinCoefficient;
+
+      /// IQN-ILS state on the pair (g, T): sweep input, previous output and residual.
+      ::Vec m_inputData = nullptr, m_inputTraction = nullptr;
+      ::Vec m_outputData = nullptr, m_outputTraction = nullptr;
+      ::Vec m_residualData = nullptr, m_residualTraction = nullptr;
+      bool m_haveSecantBase = false;
+      std::vector<std::array<::Vec, 4>> m_secants; ///< (dr_g, dr_T, dx_g, dx_T).
+      std::vector<size_t> m_secantSteps; ///< Physical step that produced each pair.
+      size_t m_stepIndex = 0;
   };
 }
 

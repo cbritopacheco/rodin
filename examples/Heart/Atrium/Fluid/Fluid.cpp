@@ -653,6 +653,17 @@ namespace Rodin::Examples::Heart::Atrium
       m_flow -= m_robinCoefficient * velocity.over(m_cfg.wall);
       m_flow += traction.over(m_cfg.wall);
       m_flow -= (0.5 * rho) * convection.over(m_cfg.wall);
+
+      // Time-derivative stabilization of Burman et al. (2025, eq. 15),
+      //   -rho/(2 dt) (int_{Omega^{n+1}} - int_{Omega^n}) u.v + rho/2 int div(w) u.v,
+      // with int_{K^n} u.v = r_K int_{K^{n+1}} u.v on affine cells. It closes
+      // the discrete energy balance of the conservative ALE mass term.
+      RealFunction geometricRate([this, dt](const Point& p) {
+        return (m_massRatios.at(p.getPolytope().getIndex()) - 1) / dt;
+      });
+      auto gcl = Integral((geometricRate + Div(m_meshVelocity)) * Dot(m_u, m_v));
+      gcl.setOrder(MassOrder);
+      m_flow += (0.5 * rho) * gcl;
     }
     else
       m_flow += DirichletBC(m_u, m_wallVelocity).on(m_cfg.wall);

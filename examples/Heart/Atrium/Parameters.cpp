@@ -139,7 +139,14 @@ namespace Rodin::Examples::Heart::Atrium
       real("-atrium_fsi_robin",
         "Reference-area Robin impedance (Pa s/m); zero selects automatic scale",
         out.fsi.robinCoefficient);
-      real("-atrium_fsi_rtol", "Relative solid displacement-change tolerance",
+      boolean("-atrium_fsi_iqn", "Interface quasi-Newton (IQN-ILS) acceleration",
+        out.fsi.quasiNewton);
+      integer("-atrium_fsi_iqn_columns", "IQN-ILS secant pairs retained per step",
+        out.fsi.quasiNewtonColumns);
+      integer("-atrium_fsi_iqn_reuse", "Previous steps whose IQN-ILS pairs are reused",
+        out.fsi.quasiNewtonReuse);
+      real("-atrium_fsi_rtol",
+        "Sweep change of the solid displacement relative to the step increment",
         out.fsi.relativeTolerance);
       PetscReal apex[3] = {out.solid.appendageApex(0), out.solid.appendageApex(1),
         out.solid.appendageApex(2)};

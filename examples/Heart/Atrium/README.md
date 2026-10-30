@@ -74,7 +74,8 @@ there are no separate solid/fluid timestep or output-path options.
 Component options use `-atrium_solid_*`, `-atrium_fluid_*`, and `-atrium_fsi_*`.
 For example, `-atrium_solid_contractility 20` sets the active stress source in
 kPa, `-atrium_fluid_pin 1200` sets mean inlet pressure in Pa, and
-`-atrium_fsi_rtol 1e-6` sets the relative solid displacement-change tolerance. The apex is
+`-atrium_fsi_rtol 1e-4` sets the sweep tolerance relative to the step's solid
+displacement increment. The apex is
 specified as three comma-separated coordinates in mm:
 `-atrium_solid_apex 46.39638367,187.44307667,-205.03317767`.
 `-help` describes the full option set without loading the mesh.
