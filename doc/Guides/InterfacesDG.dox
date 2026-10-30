@@ -1,114 +1,98 @@
 /**
   @page guides-interfaces-dg Interfaces, traces, and discontinuous Galerkin
-  @brief Working on facets: traces, jumps and averages, interface tagging, and DG formulations
+  @brief Select facet domains and assemble consistent interface terms.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section guides-ifdg-intro Introduction
+  @section guides-ifdg-intro Facet contributions
 
-  Many formulations live on *facets* rather than cells: Neumann data on
-  the boundary, transmission conditions on material interfaces, and the
-  entire discontinuous Galerkin (DG) family. This guide collects the
-  facet-side vocabulary of the form language and its correct use.
+  Cell integrals describe volume contributions. Facet integrals express
+  exterior fluxes and coupling between neighboring cells. The integration
+  domain, one-sided values and normal orientation must be specified together.
 
-  @section guides-ifdg-integrals The facet integral family
+  @section guides-ifdg-integrals Select the facet domain
 
-  | Class | Ranges over | Typical use |
-  |-------|-------------|-------------|
-  | `BoundaryIntegral` | Exterior (codimension-1 boundary) facets | Neumann/Robin terms |
-  | `InterfaceIntegral` | Interior facets | DG coupling, transmission terms |
-  | `FaceIntegral` | All facets | Terms defined uniformly on faces |
+  | Form | Domain | Use |
+  | :--- | :--- | :--- |
+  | `BoundaryIntegral` | Exterior facets | Neumann, Robin and weak Dirichlet terms |
+  | `InterfaceIntegral` | Interior facets | Material interfaces and DG coupling |
+  | `FaceIntegral` | All facets | Terms common to both domains |
 
-  All accept attribute restriction via `.over(attr, ...)`, so a term can
-  target a *tagged* subset of facets. Normals are provided by
-  `BoundaryNormal` (outward on the
-  boundary) and `FaceNormal` (a fixed
-  orientation convention on interior faces — sign-sensitive terms must use
-  it consistently on both sides).
+  `.over(attribute, ...)` restricts a form to tagged facets. Prepare the
+  facet-to-cell relation first. `BoundaryNormal` provides the exterior normal;
+  `FaceNormal` follows the library's facet orientation.
 
-  @section guides-ifdg-traces Traces: which side is meant?
+  @section guides-ifdg-traces Choose a side
 
-  An @f$ H^1 @f$ function has a well-defined boundary trace, but on an
-  *interior* facet a discontinuous quantity (a `P0` function, a gradient
-  of a `P1` function, any DG field) has **two** one-sided values. Rodin
-  requires you to disambiguate:
+  A conforming scalar field has equal values on the two sides of an interior
+  facet. A discontinuous field or a conforming field's gradient can have
+  distinct traces. For derivative expressions,
+  `Grad(field).traceOf(attribute)` selects the incident cell with that region
+  label. Ambiguous derivative evaluation raises
+  `UndeterminedTraceDomainException`. For a discontinuous field value, evaluate
+  on a point mapped into the selected cell, as in the checked example.
 
-  - `f.traceOf(attr)` selects the trace *seen from* the cells with
-    attribute `attr` — the tool for transmission problems where a
-    coefficient jumps across a material interface;
-  - if evaluation on an interior facet is attempted without a
-    determined side, the library raises
-    `UndeterminedTraceDomainException` — this exception almost always
-    means a missing `traceOf` on a coefficient in an interface term.
-
-  Interfaces themselves are just *tagged facets*: use
-  `mesh.trace({{attr1, attr2}, ifaceAttr})` to label the facets between
-  two cell attributes, after computing the facet-cell connectivity (see
-  @ref guides-connectivity).
+  `mesh.trace({{attr1, attr2}, interfaceAttribute})` assigns a facet label from
+  a pair of cell labels. This operation prepares attribute selection for
+  subsequent interface forms; the selected field trace still specifies its
+  incident region.
 
   @section guides-ifdg-jump Jump and average
 
-  The two facet operators of DG methods, defined for a quantity @f$ w @f$
-  with one-sided values @f$ w^+, w^- @f$:
-
+  With a fixed ordering of incident cells, define
   @f[
-    [\![ w ]\!] = w^+ - w^-, \qquad \{ w \} = \tfrac12 (w^+ + w^-),
+    [\![w]\!]=w^+-w^-,\qquad
+    \{w\}=\tfrac12(w^++w^-).
   @f]
+  `Jump(w)` and `Average(w)` implement these operations. For a continuous
+  trace, the jump is zero and the average equals the common value.
+  The @ref examples-interface-traces "checked trace example" evaluates a
+  piecewise constant field and verifies both selected traces and both operators.
 
-  available as `Jump` and
-  `Average`:
+  @section guides-ifdg-dg Symmetric interior penalty
 
-  @code{.cpp}
-  auto jf = Jump(f);       // f: any function with facet traces
-  auto af = Average(f);
-  @endcode
-
-  Sanity properties worth internalizing (they are what the unit tests
-  assert): the jump of any continuous function — a constant, or a
-  conforming `P1`/`H1` grid function — is zero on every interior facet;
-  the average of a continuous function equals its trace.
-
-  @section guides-ifdg-dg Interior penalty DG in the form language
-
-  The symmetric interior penalty (SIPG) discretization of
-  @f$ -\Delta u = f @f$ reads
-
+  For scalar diffusion with coefficient one, choose an interior normal
+  @f$n@f$ from the plus cell to the minus cell and use the same ordering in
+  the jump. On a discontinuous trial/test space, the interior part is
   @f[
-    \sum_K \int_K \nabla u \cdot \nabla v
-    \;-\; \int_{\mathcal F_i} \{\nabla u\}\cdot n \,[\![ v ]\!]
-    \;-\; \int_{\mathcal F_i} \{\nabla v\}\cdot n \,[\![ u ]\!]
-    \;+\; \int_{\mathcal F_i} \frac{\eta}{h} [\![ u ]\!]\,[\![ v ]\!]
-    \;=\; \int_\Omega f v ,
+  \begin{aligned}
+    a_i(u,v)={}&\sum_K\int_K\nabla u\cdot\nabla v
+      -\sum_{F\in\mathcal F_i}\int_F\{\nabla u\}\cdot n[\![v]\!]\\
+      &-\sum_{F\in\mathcal F_i}\int_F\{\nabla v\}\cdot n[\![u]\!]
+      +\sum_{F\in\mathcal F_i}\int_F\sigma_F[\![u]\!][\![v]\!].
+  \end{aligned}
   @f]
+  The two consistency terms are transposes. A penalty of the form
+  @f$\sigma_F=\eta p^2/h_F@f$ is typical for positive degree @f$p@f$;
+  the sufficient constant depends on the element family and mesh geometry.
 
-  written with `Integral` for the cell term and `InterfaceIntegral` for
-  the three facet terms (plus `BoundaryIntegral` analogues to impose
-  Dirichlet data weakly, Nitsche-style). Structural facts the mathematics
-  imposes:
+  Homogeneous Dirichlet data imposed weakly on @f$\Gamma_D@f$ adds
+  @f[
+    -\int_{\Gamma_D}(\nabla u\cdot n)v
+    -\int_{\Gamma_D}(\nabla v\cdot n)u
+    +\int_{\Gamma_D}\sigma_Fuv.
+  @f]
+  For prescribed value @f$g@f$, the right-hand side includes
+  @f$-\int_{\Gamma_D}(\nabla v\cdot n)g
+       +\int_{\Gamma_D}\sigma_Fgv@f$, in addition to the volume source.
+  These terms complete the boundary treatment required by this method.
 
-  - the **penalty scaling** @f$ \eta / h @f$ with @f$ \eta @f$ large
-    enough (growing with the polynomial degree) is what makes the form
-    coercive — omitting or under-sizing it is the standard DG
-    instability, and it manifests as an indefinite system, not a crash;
-  - the two consistency terms must be *transposes* of each other for
-    symmetry (SIPG); flipping one sign gives the nonsymmetric NIPG
-    variant with different penalty requirements;
-  - assembled DG systems are not SPD in general — see
-    @ref guides-solvers for appropriate solvers.
+  The analysis of interior-penalty formulations is developed in
+  @cite arnold2002unified. For suitable discontinuous spaces, regular meshes and a sufficiently large
+  penalty, the symmetric Dirichlet diffusion form is coercive and yields an
+  SPD matrix. Solver choice follows the assembled form and constraints.
+  Conforming `P1` fields have zero interior value jumps, while `P0` has zero
+  cellwise gradient. A DG discretization therefore requires a space and facet
+  operators appropriate to the full chosen formulation.
 
-  See [examples/DG](https://github.com/cbritopacheco/rodin/tree/develop/examples/DG)
-  for a starting point, and the `Jump`/`Average` unit tests
-  ([JumpTest.cpp](https://github.com/cbritopacheco/rodin/blob/develop/tests/unit/Rodin/Variational/JumpTest.cpp),
-  [AverageTest.cpp](https://github.com/cbritopacheco/rodin/blob/develop/tests/unit/Rodin/Variational/AverageTest.cpp))
-  for the precise operational semantics.
+  The @ref examples-pdes-dg-poisson "SIPG diffusion tutorial" implements the
+  complete cell-local affine method, including weak boundary data, and checks
+  a patch test and a four-level refinement study.
 
-  @section guides-ifdg-seealso See also
+  @section guides-ifdg-seealso Continue
 
-  - @ref guides-boundary-conditions — strong (eliminated) boundary
-    conditions, as opposed to the weak impositions here
-  - @ref guides-connectivity — computing the facet incidences these
-    integrals require
-  - @ref guides-variational — the general problem-composition machinery
+  - @ref examples-interface-traces "Evaluate actual interface traces"
+  - @ref guides-connectivity "Prepare facet incidence"
+  - @ref guides-solvers "Select a solver from matrix properties"
 */

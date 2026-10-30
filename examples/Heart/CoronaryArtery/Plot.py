@@ -55,6 +55,14 @@ from pathlib import Path
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from pathlib import Path as _PlotPath
+import sys as _plot_sys
+from pathlib import Path as _PlotPath
+_plot_examples = next(parent for parent in _PlotPath(__file__).resolve().parents
+                      if (parent / 'rodin.mplstyle').is_file())
+_plot_sys.path.insert(0, str(_plot_examples))
+from plot_style import apply_style
+apply_style()
 import numpy as np
 import pandas as pd
 

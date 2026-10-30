@@ -64,7 +64,51 @@
   overflow: visible;
 }
 
-.benchmark-chart { position: relative; height: 22rem; }
+.benchmark-chart-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+}
+.benchmark-chart-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  min-width: 0;
+  font-weight: 600;
+}
+.benchmark-chart-controls :is(select, input) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: .6rem .75rem;
+  border: 1px solid var(--dim-color);
+  border-radius: var(--border-radius, .25rem);
+  background: var(--background-color);
+  color: var(--color);
+  font: inherit;
+  font-weight: 400;
+}
+.benchmark-chart-controls :is(select, input):focus-visible {
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+}
+.benchmark-case-control { grid-column: 1 / -1; }
+.benchmark-selected-case {
+  overflow-wrap: anywhere;
+  margin: 0 0 1.5rem;
+  color: var(--dim-color);
+  font-size: .9rem;
+}
+.benchmark-contract { overflow-wrap: anywhere; }
+.benchmark-chart { position: relative; height: 25rem; margin-bottom: 1.5rem; }
+.benchmark-machine { margin: 2rem 0; }
+.benchmark-machine table { width: 100%; }
+@container (max-width: 36rem) {
+  .benchmark-chart-controls { grid-template-columns: minmax(0, 1fr); }
+  .benchmark-chart { height: 20rem; }
+}
 .benchmark-chart-status { color: var(--dim-color); }
 
 #navigation .benchmark-search-trigger .benchmark-magnifier-icon

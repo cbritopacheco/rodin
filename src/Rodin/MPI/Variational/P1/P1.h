@@ -60,7 +60,7 @@ namespace Rodin::Variational
       {
         /**
          * @note The names `left` and `right` mirror bidirectional-map
-         * terminology:
+         * terminology.
          * - `left[local] = global`
          * - `right[global] = local`
          */
@@ -773,7 +773,7 @@ namespace Rodin::Variational
        *
        * where @f$N_v@f$ is the global number of mesh vertices.
        *
-       * @note Non-collective: returns the size established during construction.
+       * @note This non-collective operation returns the size established during construction.
        * @return Global number of degrees of freedom.
        */
       size_t getSize() const override

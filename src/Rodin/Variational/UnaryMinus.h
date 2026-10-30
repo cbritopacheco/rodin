@@ -10,7 +10,7 @@
  * @brief Negation operator for functions, shape functions, and integrators.
  *
  * Provides the unary minus operator (-) for negating functions, shape functions,
- * and form integrators. For a function @f$ f @f$, the negation is:
+ * and form integrators. For a function @f$ f @f$, the negation is
  * @f[
  *   (-f)(x) = -f(x)
  * @f]
@@ -33,7 +33,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c UnaryMinus over a shape function: exposes the finite
+   * @brief Type traits for @c UnaryMinus over a shape function, exposing the finite
    * element space and the shape function space.
    */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -71,7 +71,7 @@ namespace Rodin::Variational
    * @ingroup UnaryMinusSpecializations
    * @brief Negation of a function.
    *
-   * Represents the negation:
+   * Represents the negation.
    * @f[
    *   (-f)(x) = -f(x)
    * @f]
@@ -208,7 +208,7 @@ namespace Rodin::Variational
    * @ingroup UnaryMinusSpecializations
    * @brief Negation of a shape function.
    *
-   * Represents the negation:
+   * Represents the negation.
    * @f[
    *   (-u)_i = -u_i
    * @f]

@@ -91,13 +91,13 @@ namespace Rodin::FormLanguage
 
       /**
        * @brief Creates a polymorphic copy of this object.
-       * @return Non-owning pointer to the copied object
+       * @return Newly allocated copy whose ownership passes to the caller.
        *
-       * Pure virtual function that must be implemented by derived classes
-       * to support polymorphic copying. The returned pointer is non-owning;
-       * the caller is responsible for managing its lifetime.
+       * Derived classes implement this pure virtual function to support
+       * polymorphic copying. The caller must adopt the returned pointer
+       * into owned storage or otherwise release it.
        *
-       * @note This is a CRTP function to be overridden in derived classes.
+       * @note Copy dispatch through this base is virtual.
        */
       virtual Base* copy() const noexcept override = 0;
   };

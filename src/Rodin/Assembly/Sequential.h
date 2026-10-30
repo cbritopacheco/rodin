@@ -1159,6 +1159,18 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        for (auto& pbc : pb.getPBCs())
+        {
+          const size_t offset = trialOffsets[findTrialBlock(pbc.getOperand().getUUID())];
+          pbc.assemble();
+          for (const auto& [slave, relation] : pbc.getDOFs())
+          {
+            std::vector<typename ConstraintMap<ScalarType>::Entry> entries;
+            for (Index k = 0; k < static_cast<Index>(relation.first.size()); ++k)
+              entries.push_back({offset + relation.first[k], relation.second[k]});
+            constraints.setIdentification(offset + slave, entries);
+          }
+        }
         if (!constraints.getIdentifiedRows().empty())
           constraints.finalize();
 
@@ -1743,6 +1755,20 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        for (auto& pbc : pb.getPBCs())
+        {
+          if (pbc.getOperand().getUUID() != u.getUUID())
+            continue;
+          constexpr size_t offset = 0;
+          pbc.assemble();
+          for (const auto& [slave, relation] : pbc.getDOFs())
+          {
+            std::vector<typename ConstraintMap<ScalarType>::Entry> entries;
+            for (Index k = 0; k < static_cast<Index>(relation.first.size()); ++k)
+              entries.push_back({offset + relation.first[k], relation.second[k]});
+            constraints.setIdentification(offset + slave, entries);
+          }
+        }
         if (!constraints.getIdentifiedRows().empty())
           constraints.finalize();
 
@@ -2270,7 +2296,7 @@ namespace Rodin::Assembly
    * matching, no tolerance.
    *
    * For each slave DOF a pair @c (masters, coefficients) is emitted. Each
-   * coefficient is computed as @f$ \ell_s^u(A(\phi_j^v)) @f$: the master
+   * coefficient is computed as @f$ \ell_s^u(A(\phi_j^v)) @f$. The master
    * basis is evaluated through @f$ A(v) @f$ and then sampled by the slave
    * finite element's DOF functional.
    */

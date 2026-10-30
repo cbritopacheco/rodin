@@ -64,7 +64,7 @@ namespace Rodin::Variational
    * @brief Base class for finite elements.
    *
    * This class provides a minimal CRTP interface shared by all finite elements.
-   * Derived classes are expected to implement the following methods:
+   * Derived classes are expected to implement the following methods.
    * - `size_t getCount() const`
    * - `auto getBasis(size_t) const`
    * - `auto getLinearForm(size_t) const`
@@ -204,7 +204,7 @@ namespace Rodin::Variational
       /**
        * @brief Gets the number of degrees of freedom in the finite element.
        *
-       * This forwards to the Derived class via CRTP:
+       * This forwards to the Derived class via CRTP.
        * @code{.cpp}
        * static_cast<const Derived&>(*this).getCount();
        * @endcode
@@ -225,7 +225,7 @@ namespace Rodin::Variational
        *
        * The basis functions @f$ \{\phi_i\} @f$ span the local approximation
        * space on the reference element. For Lagrange elements, they satisfy
-       * the nodal property:
+       * the nodal property.
        * @f[
        *   \phi_i(x_j) = \delta_{ij},
        * @f]
@@ -237,7 +237,7 @@ namespace Rodin::Variational
        * @param i Local basis-function index.
        * @return Basis function object usable as a callable functor.
        *
-       * @note CRTP method: implemented by the Derived class.
+       * @note The Derived class implements this CRTP method.
        */
       constexpr
       decltype(auto) getBasis(size_t i) const
@@ -289,7 +289,7 @@ namespace Rodin::Variational
        * @param i Local DOF index.
        * @return Linear functional object representing the i-th degree of freedom.
        *
-       * @note CRTP method: implemented by the Derived class.
+       * @note The Derived class implements this CRTP method.
        */
       constexpr
       decltype(auto) getLinearForm(size_t i) const

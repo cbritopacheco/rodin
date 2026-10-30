@@ -12,7 +12,7 @@
  * operator for P1 vector-valued GridFunctions and ShapeFunctions.
  *
  * For a vector function @f$ \mathbf{u} : \Omega \to \mathbb{R}^d @f$, the
- * Jacobian is the @f$ d \times d @f$ matrix:
+ * Jacobian is the @f$ d \times d @f$ matrix.
  * @f[
  *   \mathbf{J}(\mathbf{u}) = \begin{pmatrix}
  *     \frac{\partial u_1}{\partial x_1} & \cdots & \frac{\partial u_1}{\partial x_d} \\
@@ -42,7 +42,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Jacobian over a grid function: exposes the finite element
+   * @brief Type traits for @c Jacobian over a grid function, exposing the finite element
    * space and the operand type.
    */
   template <class Range, class Data, class Mesh>
@@ -58,7 +58,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Jacobian over a shape function: exposes the finite element
+   * @brief Type traits for @c Jacobian over a shape function, exposing the finite element
    * space, the shape function space and the operand type.
    */
   template <class NestedDerived, class Range, class Mesh,
@@ -84,7 +84,7 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of a P1 vector GridFunction.
    *
-   * Computes the Jacobian matrix of a P1 vector-valued grid function:
+   * Computes the Jacobian matrix of a P1 vector-valued grid function.
    * @f[
    *   \mathbf{J}(\mathbf{u})|_K = \sum_{i=1}^{n_v \cdot d} u_i \nabla \phi_i \otimes \mathbf{e}_j
    * @f]

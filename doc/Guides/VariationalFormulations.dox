@@ -1,420 +1,186 @@
 /**
   @page guides-variational Variational formulations in Rodin
-  @brief How to define, assemble, and solve variational problems
+  @brief Translate a weak equation into trial fields, test fields, forms, and assembly.
 
-  @m_keywords{Variational, Weak Formulation, Bilinear Form, Linear Form,
-    Problem, Integral, Boundary Condition}
+  A Rodin problem is built from the same objects as a weak formulation, including spaces,
+  unknown fields, test functions, known data, and integrals. This guide explains
+  their roles in code. The @ref guides-weak-formulations "weak formulation guide"
+  supplies the derivation; the @ref examples-pdes-poisson "Poisson tutorial"
+  provides a complete runnable solve.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section guides-variational-intro Introduction
+  @section guides-variational-weak Write the weak equation
 
-  The finite element method works by converting a partial differential equation
-  (PDE) from its **strong form** into a **weak (variational) form**. Rodin's
-  @ref Rodin::Variational "Variational" module provides a form language that
-  lets you express these variational formulations in C++ code that closely
-  mirrors the mathematical notation.
-
-  The cross-module rules behind these examples are summarized in
-  @ref guides-numerical-contracts "Numerical contracts", including the
-  `Problem` sign convention and the distinction between interpolation and
-  `L2` projection.
-
-  @section guides-variational-weak From Strong to Weak Form
-
-  Consider a generic second-order PDE in its strong form:
-
+  For homogeneous Dirichlet Poisson, the weak equation is
   @f[
-    \mathcal{L} u = f \quad \text{in } \Omega
+    a(u,v)=\ell(v),\qquad
+    a(u,v)=\int_\Omega\nabla u\cdot\nabla v\,dx,\qquad
+    \ell(v)=\int_\Omega fv\,dx.
   @f]
+  Rodin writes this as a residual @f$a(u,v)-\ell(v)=0@f$, together with the
+  essential boundary condition.
 
-  with boundary conditions on @f$ \partial\Omega @f$. The standard procedure
-  to obtain the weak form is:
+  @snippet PDEs/Poisson.cpp poisson-form
 
-  1. **Multiply** by a test function @f$ v @f$
-  2. **Integrate** over the domain @f$ \Omega @f$
-  3. **Integrate by parts** to reduce the order of derivatives on @f$ u @f$
-  4. **Apply boundary conditions**
+  Here `mesh` is the previously constructed unit-square mesh. `P1` selects a
+  continuous, piecewise affine space. Trial fields, data and forms then define the discrete equation on that space.
 
-  This produces a variational problem of the form:
+  @section guides-variational-fields Unknown fields and prescribed data
 
-  @f[
-    \text{Find } u \in V \text{ s.t. } \forall v \in V, \quad
-    a(u, v) = \ell(v)
-  @f]
+  | Object | Role during assembly |
+  | :--- | :--- |
+  | `TrialFunction u(vh)` | Unknown field expanded in trial basis functions |
+  | `TestFunction v(vh)` | Test basis functions indexing the equations |
+  | `RealFunction f` | Known scalar coefficient or source |
+  | `VectorFunction g` | Known vector-valued data |
+  | `GridFunction field(vh)` | A field represented by finite element coefficients |
 
-  where @f$ a(u, v) @f$ is a **bilinear form** and @f$ \ell(v) @f$ is a
-  linear form.
+  Trial and test functions are symbolic until integration evaluates their basis
+  functions on a cell. A solved trial function exposes its finite element field
+  through `u.getSolution()`. A separately constructed grid function may instead
+  hold initial data, a previous time step, or another known coefficient.
 
-  @subsection guides-variational-weak-example Example: The Poisson Equation
+  Assignment of a known function to a grid function applies the space's DOF
+  functionals. For nodal P1 this gives interpolation. An @f$L^2@f$ projection is defined by a
+  mass-matrix problem; see @ref guides-numerical-contracts.
 
-  The Poisson equation @f$ -\Delta u = f @f$ with @f$ u = 0 @f$ on
-  @f$ \partial\Omega @f$ has the weak form:
+  @section guides-variational-forms Construct the forms
 
-  @f[
-    \int_\Omega \nabla u \cdot \nabla v \, dx = \int_\Omega f v \, dx
-  @f]
+  The number and role of symbolic arguments determine what an integral produces.
 
-  In Rodin, this translates directly to:
+  | Expression | Role over real fields |
+  | :--- | :--- |
+  | `Integral(Grad(u), Grad(v))` | Diffusion bilinear form |
+  | `Integral(c * u, v)` | Weighted mass bilinear form |
+  | `Integral(f, v)` | Domain load linear form |
+  | `BoundaryIntegral(g, v).over(label)` | Load on selected boundary facets |
 
-  @code{.cpp}
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))   // a(u,v) = integral of grad(u) . grad(v)
-          - Integral(f, v)                // l(v)   = integral of f * v
-          + DirichletBC(u, Zero());       // u = 0 on the boundary
-  @endcode
+  A coefficient such as `c` must be defined before forming the expression. It supplies known data during assembly. With scalar data, these forms represent products;
+  with vector or tensor data, the corresponding inner products must have
+  compatible shapes.
 
-  @section guides-variational-forms Forms in Rodin
+  @subsection guides-variational-forms-assembly Residual signs
 
-  @subsection guides-variational-forms-bilinear Bilinear Forms
+  The matrix and load for basis functions @f$\phi_j@f$ and @f$\psi_i@f$ have
+  entries @f$A_{ij}=a(\phi_j,\psi_i)@f$ and @f$b_i=\ell(\psi_i)@f$ before
+  essential elimination. A linear form subtracted in the residual becomes a
+  positive right-hand-side load.
 
-  A bilinear form @f$ a(u, v) @f$ involves both the trial function @f$ u @f$
-  and the test function @f$ v @f$. In Rodin, bilinear forms are created using
-  `Integral` with both trial and test function arguments:
+  Each bilinear term retains its sign from the weak equation. The Helmholtz residual
+  contains a negative mass term, while the mixed Stokes residual contains signed
+  velocity–pressure coupling blocks.
 
-  @code{.cpp}
-  // Stiffness: integral of grad(u) . grad(v)
-  Integral(Grad(u), Grad(v))
+  @subsection guides-variational-forms-named Select named forms
 
-  // Mass: integral of u * v
-  Integral(u, v)
-
-  // Scaled: integral of k * u * v
-  Integral(k * u, v)
-  @endcode
-
-  @subsection guides-variational-forms-named Named cell forms
-
-  For repeated assembly of common cell operators, Rodin provides
   @ref Rodin::Variational::MassForm "MassForm",
   @ref Rodin::Variational::DiffusionForm "DiffusionForm",
   @ref Rodin::Variational::HelmholtzForm "HelmholtzForm", and
-  @ref Rodin::Variational::LinearElasticityForm "LinearElasticityForm".
-  They assemble the same discrete operators, including quadrature orders, as
-  the corresponding integrals. The first assembly constructs the sparse
-  pattern; later assemblies reuse its map to matrix values. The named forms
-  currently use local sparse matrices with Sequential or OpenMP assembly.
+  @ref Rodin::Variational::LinearElasticityForm "LinearElasticityForm" expose
+  common cell operators. For compatible spaces and the corresponding quadrature
+  order, they represent the same discrete forms as their integral expressions.
+  Their reference pages specify supported field types and assembly backends.
+
+  The following forms use scalar trial and test functions with previously
+  defined coefficients.
 
   @code{.cpp}
-  MassForm mass(c, u, v);                 // Integral(c * u, v)
-  DiffusionForm diffusion(a, u, v);       // Integral(a * Grad(u), Grad(v))
-  HelmholtzForm helmholtz(a, c, u, v);    // Diffusion and mass terms
-  LinearElasticityForm elasticity(lambda, mu, w, z);
+  MassForm mass(c, u, v);
+  DiffusionForm diffusion(a, u, v);
+  HelmholtzForm helmholtz(a, c, u, v);
   @endcode
 
-  Here @c u and @c v use scalar spaces for diffusion and Helmholtz; mass
-  also accepts vector spaces. Elasticity uses vector-valued @c w and @c z
-  whose dimension matches the mesh. Each form can restrict its cell integral
-  with @c .over(attribute). The elasticity form is declared by
-  @c Rodin/Solid.h; the other three are declared by @c Rodin/Variational.h.
+  Named forms restrict their cell domain with `.over(attribute)`. Their
+  coefficients, boundary conditions and quadrature are specified by the
+  mathematical problem.
 
-  @subsection guides-variational-forms-linear Linear Forms
+  @section guides-variational-operators Choose operators by field shape
 
-  A linear form @f$ \ell(v) @f$ involves only the test function @f$ v @f$:
+  | Expression | Meaning |
+  | :--- | :--- |
+  | `Grad(u)` for a scalar field | Gradient vector |
+  | `Jacobian(w)` for a vector field | Matrix with entries @f$\partial_jw_i@f$ |
+  | `Div(w)` | Scalar divergence @f$\sum_i\partial_iw_i@f$ |
+  | `Transpose(Jacobian(w))` | Transposed gradient matrix |
+  | `Mult(Jacobian(w), velocity)` | Directional derivative @f$(\mathrm{velocity}\cdot\nabla)w@f$ |
 
-  @code{.cpp}
-  // Load: integral of f * v
-  Integral(f, v)
+  For linear elasticity, the symmetric strain is
+  @f$\varepsilon(w)=\tfrac12(\nabla w+\nabla w^T)@f$. Omitting the factor
+  @f$1/2@f$ changes the strain energy. The
+  @ref examples-pdes-elasticity "elasticity tutorial" uses
+  `LinearElasticityIntegral` to include the complete Lamé-parameter form.
 
-  // Boundary load: integral of g * v over a boundary
-  BoundaryIntegral(g, v).over(GammaN)
-  @endcode
+  @section guides-variational-complex Complex test convention
 
-  @subsection guides-variational-forms-assembly Problem Assembly
+  Over complex fields, Rodin's bilinear-form interface is sesquilinear. It is linear in the trial argument and conjugate-linear in the test argument. Thus
+  `Integral(c * u, v)` represents
+  @f$\int_\Omega c\,u\overline v\,dx@f$. The coefficient retains its original complex value.
+  The corresponding discrete action is @f$y^*Ax@f$.
 
-  The `Problem` class assembles bilinear
-  and linear forms into a linear system @f$ A\mathbf{x} = \mathbf{b} @f$:
+  The form language and assembly apply this conjugation once. Backend transfer
+  preserves the assembled entries. Hermitian symmetry depends on the particular
+  form and coefficients.
+  See the @ref examples-pdes-helmholtz "complex Helmholtz example".
 
-  @code{.cpp}
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
+  @section guides-variational-bc Apply boundary data
 
-  Problem problem(u, v);
-  problem = Integral(Grad(u), Grad(v))   // bilinear form → goes into A
-          - Integral(f, v)                // linear form   → goes into b
-          + DirichletBC(u, Zero());       // modifies both A and b
-  @endcode
+  An essential condition is appended as a `DirichletBC`. A prescribed natural
+  load is part of the residual through a `BoundaryIntegral`. Their selections
+  have different roles. `.on(label)` selects constrained DOFs, while
+  `.over(label)` selects an integration region.
 
-  Sign convention explained:
+  The @ref guides-boundary-conditions "boundary conditions guide" develops a
+  checked mixed-boundary example, including the normal-derivative sign. It also
+  explains periodic identification and the normalization of nullspaces.
 
-  The mathematical variational problem is:
-  @f[
-    a(u, v) = \ell(v)
-  @f]
+  @section guides-variational-mixed Couple multiple fields
 
-  Rodin moves everything to the left-hand side, giving:
-  @f[
-    a(u, v) - \ell(v) = 0
-  @f]
+  A mixed problem lists all trial fields, followed by all test fields. In the
+  @ref examples-pdes-stokes "Stokes example", velocity, pressure, and a global
+  pressure-mean multiplier have distinct spaces.
 
-  This is why bilinear forms (involving both @f$ u @f$ and @f$ v @f$) are
-  added with `+`, while linear forms (involving only @f$ v @f$) are
-  subtracted with `-`. The `Problem` object recognizes which terms are
-  bilinear (containing both trial and test) and which are linear (containing
-  only the test function), and routes them to the matrix @f$ A @f$ or vector
-  @f$ \mathbf{b} @f$ accordingly.
+  @snippet PDEs/Stokes.cpp stokes-form
 
-  @section guides-variational-operators Differential Operators
+  `P0g` supplies a single global constant. The multiplier imposes zero mean pressure as a constraint. Quadratic velocity and
+  linear pressure form the Taylor–Hood pair.
 
-  Rodin provides standard differential operators that work on trial and
-  test functions. These are **expression templates**: they are not evaluated
-  immediately, but recorded as symbolic expressions and evaluated later during
-  assembly.
+  @section guides-variational-dg Couple discontinuous fields
 
-  | Operator | Mathematical meaning | Result | Code |
-  |----------|---------------------|--------|------|
-  | Gradient | @f$ \nabla u @f$ | Vector (for scalar @f$ u @f$) | `Grad(u)` |
-  | Divergence | @f$ \nabla \cdot \mathbf{u} @f$ | Scalar (for vector @f$ \mathbf{u} @f$) | `Div(u)` |
-  | Jacobian | @f$ \nabla \mathbf{u} @f$ (matrix) | @f$ d \times d @f$ matrix | `Jacobian(u)` |
-  | Transpose | @f$ (\nabla \mathbf{u})^T @f$ | @f$ d \times d @f$ matrix | `Transpose(Jacobian(u))` |
-  | Trace | @f$ \text{tr}(\nabla \mathbf{u}) @f$ | Scalar | `Trace(Jacobian(u))` |
-  | Frobenius norm | @f$ \lVert \nabla \mathbf{u} \rVert_F @f$ | Scalar | `Frobenius(Jacobian(u))` |
-  | Component | @f$ u_i @f$ | Scalar (from vector @f$ \mathbf{u} @f$) | `Component(u, i)` or `u.x()` |
+  A discontinuous method needs numerical coupling between neighboring cells.
+  `Jump`, `Average`, `FaceIntegral`, and `InterfaceIntegral` supply the relevant
+  trace and facet operations; the @ref guides-interfaces-dg "interface and DG guide"
+  defines their side and normal conventions.
 
-  @code{.cpp}
-  // Laplacian-like term: \int \nabla u \cdot \nabla v dx
-  Integral(Grad(u), Grad(v))
+  A P0 field has zero cellwise gradient, so its diffusion coupling must be supplied
+  through the DG formulation. A consistent method specifies numerical fluxes,
+  stabilization, boundary treatment and the mesh/degree scaling of penalty terms.
 
-  // Divergence term (for vector fields): \int (\nabla\cdot u)(\nabla\cdot v) dx
-  Integral(Div(u), Div(v))
+  @section guides-variational-solvers Assemble, solve, and inspect
 
-  // Elasticity: symmetric gradient ε(u) : ε(v)
-  Integral(Jacobian(u) + Transpose(Jacobian(u)),
-           Jacobian(v) + Transpose(Jacobian(v)))
-  @endcode
+  A configured solver retains a reference to its problem. On the first solve,
+  the problem is assembled before the algebraic solver runs. The Poisson example
+  checks the result before export.
 
-  @section guides-variational-bc Boundary Conditions
+  @snippet PDEs/Poisson.cpp poisson-solve
 
-  @subsection guides-variational-bc-dirichlet Dirichlet Conditions
+  Reassigning a `Problem` body marks its assembly stale. When known field data change, explicitly reassemble or rebuild the problem. A new mesh or a different finite
+  element space requires a new problem and linear system, with fresh associated
+  solver objects. See @ref guides-numerical-contracts for the lifetime rules.
 
-  Dirichlet (essential) boundary conditions fix the value of the solution
-  on part of the boundary:
+  @section guides-variational-output Export the solved field
 
-  @code{.cpp}
-  // Homogeneous: u = 0 on entire boundary
-  DirichletBC(u, Zero())
+  @snippet PDEs/Poisson.cpp poisson-export
 
-  // Non-homogeneous: u = g on entire boundary
-  DirichletBC(u, g)
+  `u.getSolution()` supplies the computed grid function for export. Keep referenced HDF5 files alongside the XDMF descriptor.
+  The @ref guides-io "I/O guide" covers multiple fields and time series.
 
-  // On specific boundary segment (by attribute)
-  DirichletBC(u, Zero()).on(1)
+  @section guides-variational-complete Examples
 
-  // Vector-valued: u = (0, 0) on a segment
-  DirichletBC(u, VectorFunction{0, 0}).on(GammaD)
-  @endcode
-
-  @subsection guides-variational-bc-neumann Neumann Conditions
-
-  Neumann (natural) boundary conditions specify the flux or traction on
-  part of the boundary. They appear as boundary integrals in the variational
-  formulation:
-
-  @code{.cpp}
-  // Scalar Neumann: integral of g * v over boundary segment
-  BoundaryIntegral(g, v).over(GammaN)
-
-  // Vector Neumann (traction): integral of f . v over boundary segment
-  BoundaryIntegral(f, v).over(GammaN)
-  @endcode
-
-  @section guides-variational-solvers Solving the Problem
-
-  After defining a problem, use a solver from the @ref Rodin::Solver "Solver"
-  module to solve the resulting linear system:
-
-  @code{.cpp}
-  // Conjugate Gradient (for SPD systems)
-  Solver::CG(problem).solve();
-
-  // Direct sparse LU factorization
-  Solver::SparseLU(problem).solve();
-
-  // Or pass a standalone solver to the problem
-  Solver::CG solver(problem);
-  solver.setTolerance(1e-10);
-  solver.solve();
-  @endcode
-
-  The solution is then accessible via the trial function:
-
-  @code{.cpp}
-  auto& solution = u.getSolution();
-  @endcode
-
-  @section guides-variational-output Saving and Visualizing Results
-
-  After solving, export the results using XDMF for visualization in
-  ParaView:
-
-  @code{.cpp}
-  #include <Rodin/IO/XDMF.h>
-
-  // Export to XDMF
-  IO::XDMF xdmf("Results");
-  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
-  xdmf.write();
-  @endcode
-
-  @section guides-variational-complete Complete Example
-
-  Here is a complete example that defines and solves the Poisson equation,
-  then exports the result using XDMF:
-
-  @code{.cpp}
-  #include <Rodin/Solver.h>
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
-  #include <Rodin/IO/XDMF.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Solver;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
-
-  int main()
-  {
-    // 1. Mesh
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-    mesh.getConnectivity().compute(1, 2);
-
-    // 2. Finite element space
-    P1 Vh(mesh);
-    TrialFunction u(Vh);
-    TestFunction  v(Vh);
-
-    // 3. Source term
-    RealFunction f = 1;
-
-    // 4. Variational problem
-    Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
-
-    // 5. Solve
-    CG(poisson).solve();
-
-    // 6. Output
-    IO::XDMF xdmf("Poisson");
-    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
-    xdmf.write();
-
-    return 0;
-  }
-  @endcode
-
-  @section guides-variational-mixed Mixed Formulations
-
-  Some problems require solving for multiple unknowns simultaneously, such as
-  velocity and pressure in the
-  @ref examples-pdes-navierstokes "Navier-Stokes equations". Rodin's
-  `Problem` class supports mixed formulations
-  with multiple trial/test function pairs:
-
-  @code{.cpp}
-  // Taylor-Hood finite element spaces
-  H1 uh(std::integral_constant<size_t, 2>{}, mesh, d);  // P2 velocity
-  H1 ph(std::integral_constant<size_t, 1>{}, mesh);      // P1 pressure
-
-  TrialFunction u(uh);  // Velocity
-  TrialFunction p(ph);  // Pressure
-  TestFunction  v(uh);
-  TestFunction  q(ph);
-
-  // Mixed problem with multiple trial/test pairs
-  Problem stokes(u, p, v, q);
-  stokes = nu * Integral(Jacobian(u), Jacobian(v))
-         - Integral(p, Div(v))
-         + Integral(Div(u), q)
-         - Integral(f, v)
-         + DirichletBC(u, g);
-  @endcode
-
-  @section guides-variational-dg Discontinuous Galerkin Formulations
-
-  For problems with **discontinuous** finite element spaces (or when penalty
-  methods are needed across element interfaces), Rodin provides specialized
-  integral types and operators:
-
-  @subsection guides-variational-dg-operators DG Operators
-
-  | Operator | Description | Code |
-  |----------|------------|------|
-  | `Jump` | Jump across a face: @f$ [u] = u^+ - u^- @f$ | `Jump(u)` |
-  | `Average` | Average across a face: @f$ \{u\} = \frac{1}{2}(u^+ + u^-) @f$ | `Average(u)` |
-
-  @subsection guides-variational-dg-integrals DG Integral Types
-
-  | Integral type | Region | Description |
-  |---------------|--------|-------------|
-  | `Integral(...)` | Cell interiors @f$ K @f$ | Standard domain integral |
-  | `BoundaryIntegral(...)` | Boundary faces @f$ \partial\Omega @f$ | Boundary-only integration |
-  | `FaceIntegral(...)` | All faces @f$ \mathcal{F}_h @f$ | Interior + boundary faces |
-  | `InterfaceIntegral(...)` | Interior faces @f$ \mathcal{F}_h^i @f$ | Interior faces only |
-
-  @subsection guides-variational-dg-example DG Poisson Example
-
-  The simplest DG approach uses `P0` (piecewise constant) functions. The
-  actual [DG Poisson example](https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp)
-  uses this pattern:
-
-  @code{.cpp}
-  P0 Vh(mesh);           // Discontinuous piecewise-constant space
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
-
-  RealFunction f = 1.0;
-
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-
-  Solver::SparseLU(poisson).solve();
-  @endcode
-
-  For higher-order DG methods, the symmetric interior penalty (SIP) formulation
-  uses explicit jump and average operators:
-
-  @f[
-    \sum_K \int_K \nabla u \cdot \nabla v \, dx
-    - \int_{\mathcal{F}_h^i} \{\nabla u\} \cdot [v] \, ds
-    - \int_{\mathcal{F}_h^i} [u] \cdot \{\nabla v\} \, ds
-    + \frac{\sigma}{h} \int_{\mathcal{F}_h^i} [u] \cdot [v] \, ds
-    = \int_\Omega f v \, dx
-  @f]
-
-  @code{.cpp}
-  Real sigma = 10.0;  // penalty parameter
-
-  Problem dg(u, v);
-  dg = Integral(Grad(u), Grad(v))
-     - InterfaceIntegral(Average(Grad(u)), Jump(v))
-     - InterfaceIntegral(Jump(u), Average(Grad(v)))
-     + InterfaceIntegral(sigma * Jump(u), Jump(v))
-     - Integral(f, v)
-     + DirichletBC(u, Zero());
-  @endcode
-
-  See the [DG Poisson example](https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp)
-  for a complete working implementation.
-
-  @section guides-variational-see-also See Also
-
-  - @ref fem-spaces "Finite element spaces" — Available spaces (P0, P0g, P1, H1)
-  - @ref fem-ciarlet "Ciarlet's definition" — Mathematical foundations
-  - @ref guides-io "I/O in Rodin" — Saving and visualizing results
-  - @ref examples-pdes-poisson "Poisson example"
-  - @ref examples-pdes-elasticity "Elasticity example"
-  - @ref examples-pdes-navierstokes "Navier-Stokes example" — Mixed formulation
-  - @ref Rodin::Solid "Solid module" — Hyperelastic constitutive laws and Newton solvers
-  - @ref Rodin::Advection "Advection module" — Semi-Lagrangian transport
-  - @ref guides-solvers "Solvers guide" — Direct, iterative, and nonlinear solvers
-  - @ref guides-numerical-contracts "Numerical contracts" — Projection,
-    assembly signs, quadrature, constraints, and tangent consistency
-
-  */
+  The @ref examples-pdes-poisson "Poisson tutorial" combines these steps in one
+  program. The @ref examples-pdes-helmholtz "Helmholtz",
+  @ref examples-pdes-stokes "Stokes", and
+  @ref examples-pdes-navierstokes "Navier–Stokes" examples show how a different
+  weak equation changes matrix properties and solver requirements. Use the
+  @ref guides-solvers "solver guide" to interpret those requirements.
+*/

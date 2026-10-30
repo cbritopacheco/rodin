@@ -13,7 +13,7 @@
  * function indicating where one function does not exceed another.
  *
  * # Mathematical Foundation
- * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the LEQ operator:
+ * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the LEQ operator is defined by
  * @f[
  *   (f \leq g)(x) = \begin{cases} 1 & \text{if } f(x) \leq g(x) \\ 0 & \text{otherwise} \end{cases}
  * @f]

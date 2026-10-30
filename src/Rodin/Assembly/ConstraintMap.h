@@ -226,11 +226,11 @@ namespace Rodin::Assembly
       /**
        * @brief Flattens transitive identification constraints.
        *
-       * Example:
+       * The following example illustrates this operation.
        * @f[
        *   x_1 = x_2, \qquad x_2 = x_3
        * @f]
-       * becomes:
+       * becomes
        * @f[
        *   x_1 = x_3, \qquad x_2 = x_3.
        * @f]

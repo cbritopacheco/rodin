@@ -67,7 +67,7 @@ namespace Rodin::Variational
    * @brief Discrete diffusion form
    * @f$ a(u,v) = \int_\Omega a\, \nabla u \cdot \nabla v\,dx @f$.
    *
-   * The coefficient @f$ a @f$ is optional: with @p CoefficientDerived
+   * The coefficient @f$ a @f$ is optional. With @p CoefficientDerived
    * @c void the form is the unweighted diffusion form. It computes the same
    * operator as <tt>Integral(a * Grad(u), Grad(v))</tt>, respectively
    * <tt>Integral(Grad(u), Grad(v))</tt>, including the quadrature order that

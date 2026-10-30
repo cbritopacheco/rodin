@@ -20,7 +20,7 @@
  * - Vector P0g with @p vdim components: @p vdim global DOFs (indices 0 to
  *   vdim-1) shared across all ranks.
  *
- * Ownership convention for PETSc compatibility: rank 0 owns all global DOFs
+ * Rank 0 owns all global DOFs for PETSc compatibility
  * (@f$[0, \text{vdim})@f$); all other ranks own an empty range
  * (@f$[\text{vdim}, \text{vdim})@f$).  This allows PETSc's ADD_MODE assembly
  * to accumulate contributions from every rank into the single owner's storage.
@@ -174,8 +174,8 @@ namespace Rodin::Variational
       /**
        * @brief Returns the ownership range @f$[\text{begin}, \text{end})@f$.
        *
-       * Rank 0 owns the single global DOF: @p begin = 0, @p end = 1.
-       * All other ranks own nothing: @p begin = @p end = 1.
+       * Rank 0 owns the single global DOF, so @p begin = 0, @p end = 1.
+       * All other ranks own nothing, so @p begin = @p end = 1.
        *
        * @param[out] begin First global DOF owned by this rank.
        * @param[out] end   One past the last global DOF owned by this rank.
@@ -451,8 +451,8 @@ namespace Rodin::Variational
       /**
        * @brief Returns the ownership range @f$[\text{begin}, \text{end})@f$.
        *
-       * Rank 0 owns all @p vdim global DOFs: @p begin = 0, @p end = vdim.
-       * All other ranks own nothing: @p begin = @p end = vdim.
+       * Rank 0 owns all @p vdim global DOFs, so @p begin = 0, @p end = vdim.
+       * All other ranks own nothing, so @p begin = @p end = vdim.
        *
        * @param[out] begin First global DOF owned by this rank.
        * @param[out] end   One past the last global DOF owned by this rank.

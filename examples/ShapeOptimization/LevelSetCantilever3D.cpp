@@ -139,7 +139,7 @@ const Real k = 0.5;
 const Real dt = k * (hmax - hmin) / 2;
 static Real alpha = dt;
 
-using FES = VectorP1<Mesh<Context::Local>>;
+using FES = P1<Math::SpatialVector<Real>, Mesh<Context::Local>>;
 
 template <class Data>
 Real compliance(const GridFunction<FES, Data>& w)

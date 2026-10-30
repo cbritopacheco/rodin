@@ -26,7 +26,7 @@ namespace Rodin::Utility
    * member type named @c Type. The primary template handles the case
    * where no such member exists.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * struct WithType { using Type = int; };
    * struct WithoutType { };

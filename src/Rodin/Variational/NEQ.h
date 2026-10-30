@@ -13,7 +13,7 @@
  * differ at each point in the domain.
  *
  * # Mathematical Foundation
- * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the inequality operator:
+ * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the inequality operator is defined by
  * @f[
  *   (f \neq g)(x) = \begin{cases} 1 & \text{if } f(x) \neq g(x) \\ 0 & \text{otherwise} \end{cases}
  * @f]

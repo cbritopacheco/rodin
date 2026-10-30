@@ -216,7 +216,7 @@ namespace Rodin::Solid
        * storage is reserved once up front rather than grown one @c set() at a
        * time.
        *
-       * This is a capacity hint, not a limit: the tag set is open, and setting
+       * The tag set is open. The argument provides a capacity hint, and setting
        * more tags than this simply reallocates. It is sized well above the
        * tags declared in @ref Tags so that user-defined tags also fit without
        * reallocating.

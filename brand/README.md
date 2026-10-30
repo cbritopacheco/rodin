@@ -33,6 +33,8 @@ Start with [the visual identity board](designs/brand-board.svg).
 | Compact color mark | [R monogram](logos/monogram-color.svg) |
 | Compact single-color mark | [R monogram in navy](logos/monogram-navy.svg) |
 | Compact reversed mark | [R monogram in white](logos/monogram-white.svg) |
+| Documentation browser icon | [Navy R monogram](icons/favicon-monogram-light.svg) / [white R monogram](icons/favicon-monogram-dark.svg) |
+| Circular thinker artwork | [Light](logos/thinker-circle-light.svg) / [dark](logos/thinker-circle-dark.svg) |
 | Small interface mark | [Micro R](icons/favicon.svg) |
 
 The color, navy, and white R monograms share the same geometry.

@@ -27,7 +27,7 @@ namespace Rodin::QF
    *
    * # Mathematical Foundation
    *
-   * The centroid rule approximates integrals as:
+   * The centroid rule approximates integrals as
    * @f[
    *   \int_K f(x) \, dx \approx w \cdot f(c)
    * @f]

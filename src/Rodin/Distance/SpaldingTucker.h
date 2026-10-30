@@ -23,19 +23,22 @@ namespace Rodin::Distance
    * @brief Spalding-Tucker normalization for a level set function.
    *
    * This class implements the Spalding-Tucker normalization method, which
-   * transforms an arbitrary level set function into an approximate signed
-   * distance function. The transformation is given by:
+   * evaluates an algebraic approximate-distance construction and interpolates
+   * it into the input finite element space. The pointwise transformation is
    * @f[
    *   d(x) = \frac{2u(x)}{|\nabla u(x)| + \sqrt{|\nabla u(x)|^2 + 2|u(x)|}}
    * @f]
    * where @f$ u @f$ is the input level set function and @f$ d @f$ is the
    * normalized approximate signed distance.
    *
-   * # Mathematical Properties
-   * - Preserves the zero level set: @f$ d(x) = 0 \iff u(x) = 0 @f$
-   * - Preserves the sign: @f$ \text{sign}(d) = \text{sign}(u) @f$
-   * - Better gradient normalization than simple Rvachev method
-   * - More accurate near the interface
+   * # Pointwise properties and discrete output
+   *
+   * A positive denominator preserves the input sign and zero set before
+   * interpolation. The expression is undefined where both the field and its
+   * gradient vanish. Finite element interpolation and one-sided gradient
+   * evaluation affect the discrete result. The input scale and geometry
+   * determine the accuracy of the distance approximation; an analytic
+   * reference or refinement study supplies the relevant numerical check.
    *
    * # References
    * @cite belyaev2015variational @cite spalding1994calculation @cite tucker1998assessment

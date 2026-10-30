@@ -25,7 +25,7 @@ namespace Rodin::Utility
    * The primary template handles the case where Test is not a specialization
    * of the Ref template.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * static_assert(IsSpecialization<std::vector<int>, std::vector>::Value == true);
    * static_assert(IsSpecialization<int, std::vector>::Value == false);

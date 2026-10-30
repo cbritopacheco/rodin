@@ -16,7 +16,7 @@
  * a rank-local P0 space on each shard and maintains local/global degree-of-
  * freedom mappings consistent across ownership and ghost layers.
  *
- * P0 degrees of freedom are associated with mesh cells: each cell carries
+ * P0 degrees of freedom are associated with mesh cells. Each cell carries
  * one DOF per field component. Cells are partitioned across ranks; owned cells receive
  * contiguous global indices, and ghost cells synchronize their global DOF
  * index from the owning rank via a direct owner-push exchange.
@@ -63,7 +63,7 @@ namespace Rodin::Variational
       {
         /**
          * @note The names `left` and `right` mirror bidirectional-map
-         * terminology:
+         * terminology.
          * - `left[local] = global`
          * - `right[global] = local`
          */
@@ -520,7 +520,7 @@ namespace Rodin::Variational
        *
        * For a P0 space, degrees of freedom are associated with mesh cells.
        * The global dimension of the space equals the total number of cells
-       * in the distributed mesh:
+       * in the distributed mesh.
        *
        * @f[
        *   \dim(V_h) = N_c \, k
@@ -529,7 +529,7 @@ namespace Rodin::Variational
        * where @f$ N_c @f$ is the global number of mesh cells and @f$k@f$
        * is the number of field components.
        *
-       * @note Non-collective: returns the size established during construction.
+       * @note This non-collective operation returns the size established during construction.
        * @return Global number of degrees of freedom.
        */
       size_t getSize() const override

@@ -10,7 +10,7 @@
  * formulations (pure displacement and mixed displacement-pressure), written
  * in terms of the first Piola-Kirchhoff stress.
  *
- * Pure displacement block:
+ * The pure-displacement formulation has the following tangent block.
  * @f[
  *   D(\delta W^{\text{int}})[\Delta\mathbf{u}, \mathbf{v}]
  *     = \int_{\Omega_0} D\mathbf{P}[\nabla_0 \Delta\mathbf{u}]
@@ -773,7 +773,7 @@ namespace Rodin::Solid
 
   /**
    * @brief Displacement-pressure coupling block @f$ K_{up} @f$. Bound to the
-   * (p, v) pair: columns are pressure DOFs, rows are displacement test DOFs.
+   * (p, v) pair, where columns are pressure DOFs, rows are displacement test DOFs.
    *
    * @f[
    *   K^e_{ij} = \int_K \psi_j \, J\,\mathbf{F}^{-T} : \nabla_0\phi_i \, dX
@@ -1030,7 +1030,7 @@ namespace Rodin::Solid
 
   /**
    * @brief Pressure-displacement coupling block @f$ K_{pu} @f$ (linearized
-   * incompressibility constraint). Bound to the (u, q) pair: columns are
+   * incompressibility constraint). Bound to the (u, q) pair, where columns are
    * displacement DOFs, rows are pressure test DOFs.
    *
    * @f[

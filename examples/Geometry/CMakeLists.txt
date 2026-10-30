@@ -77,3 +77,9 @@ target_link_libraries(AnnulusClosing PUBLIC Rodin::Geometry)
 
 add_executable(AttributeDetection AttributeDetection.cpp)
 target_link_libraries(AttributeDetection PUBLIC Rodin::Geometry)
+
+add_executable(Quadrature Quadrature.cpp)
+target_link_libraries(Quadrature PUBLIC Rodin::Geometry Rodin::QF)
+
+add_executable(MeshBasics MeshBasics.cpp)
+target_link_libraries(MeshBasics PUBLIC Rodin::Geometry)

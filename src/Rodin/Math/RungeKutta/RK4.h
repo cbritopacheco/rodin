@@ -22,14 +22,14 @@ namespace Rodin::Math::RungeKutta
    * @brief Classical fourth-order Runge-Kutta method (RK4).
    *
    * This method provides fourth-order accurate numerical integration for
-   * ordinary differential equations (ODEs) of the form:
+   * ordinary differential equations (ODEs) of the form
    * @f[
    *   \frac{dq}{dt} = f(q, t)
    * @f]
    *
    * # Algorithm
    * Given a time step @f$ \Delta t @f$ and current state @f$ q_n @f$, the
-   * method computes @f$ q_{n+1} @f$ using four stages:
+   * method computes @f$ q_{n+1} @f$ using four stages.
    * @f[
    *   \begin{aligned}
    *   k_1 &= f(q_n) \\

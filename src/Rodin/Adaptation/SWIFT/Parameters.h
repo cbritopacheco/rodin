@@ -201,7 +201,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param feOrder Displacement finite-element order.
        * @param transformationOrder Geometry transformation order.
        * @param simplex Whether the entity is a simplex.
-       * @returns Subdivisions: two for affine P1, otherwise at least sixteen.
+       * @returns Two subdivisions for affine P1 and at least sixteen otherwise.
        */
       size_t getSubdivision(
         size_t feOrder, size_t transformationOrder = 1, bool simplex = true) const

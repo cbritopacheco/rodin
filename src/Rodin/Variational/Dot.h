@@ -35,7 +35,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Dot over a function expression: exposes the left-hand side
+   * @brief Type traits for @c Dot over a function expression, exposing the left-hand side
    * operand, the right-hand side operand, the scalar type and the range type.
    */
   template <class LHSDerived, class RHSDerived>
@@ -68,7 +68,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Dot over a function expression: exposes the finite element
+   * @brief Type traits for @c Dot over a function expression, exposing the finite element
    * space, the shape function space, the left-hand side operand, the right-hand side
    * operand, the scalar type and the range type.
    */
@@ -109,7 +109,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Dot over a shape function: exposes the left-hand side
+   * @brief Type traits for @c Dot over a shape function, exposing the left-hand side
    * operand, the right-hand side operand, the scalar type and the range type.
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
@@ -172,13 +172,13 @@ namespace Rodin::Variational
    * @ingroup DotSpecializations
    * @brief Dot product between two functions.
    *
-   * Represents the inner product:
+   * Represents the inner product.
    * @f[
    *    (f \cdot g)(x) = f(x) \cdot g(x)
    * @f]
-   * For vectors: @f$ \mathbf{u} \cdot \mathbf{v} = \sum_i u_i v_i @f$
+   * For vectors, @f$ \mathbf{u} \cdot \mathbf{v} = \sum_i u_i v_i @f$
    *
-   * For matrices: @f$ A : B = \sum_{ij} A_{ij} B_{ij} @f$ (Frobenius inner product)
+   * For matrices, @f$ A : B = \sum_{ij} A_{ij} B_{ij} @f$ (Frobenius inner product)
    *
    * @tparam LHSDerived Type of the first function
    * @tparam RHSDerived Type of the second function
@@ -334,12 +334,12 @@ namespace Rodin::Variational
    * @ingroup DotSpecializations
    * @brief Dot product between a function and a shape function.
    *
-   * Represents the mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *   (\Lambda \cdot u)(x) = \Lambda(x) \cdot u(x)
    * @f]
    * with @f$ \Lambda @f$ a function and @f$ u @f$ a shape function.
-   * For matrices: @f$ A : B @f$ denotes the Frobenius inner product.
+   * For matrices, @f$ A : B @f$ denotes the Frobenius inner product.
    *
    * @tparam LHSDerived Type of the function
    * @tparam RHSDerived Type of the shape function
@@ -588,7 +588,7 @@ namespace Rodin::Variational
    * @ingroup DotSpecializations
    * @brief Dot product between a shape function and a function.
    *
-   * Represents the mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *    (u \cdot \Lambda)(x) = u(x) \cdot \Lambda(x)
    * @f]
@@ -821,7 +821,7 @@ namespace Rodin::Variational
    * @ingroup DotSpecializations
    * @brief Dot product of trial and test shape functions for bilinear forms.
    *
-   * Represents the inner product in a bilinear form:
+   * Represents the inner product in a bilinear form.
    * @f[
    *    (u, v) \mapsto u(x) : v(x)
    * @f]

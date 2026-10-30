@@ -19,16 +19,18 @@ Rodin is a modular C++20 finite element framework for solving partial differenti
 
 It is named after the French sculptor Auguste Rodin, considered the founder of modern sculpture.
 
-Any contributors are warmly encouraged and any help or comments are always appreciated!
+Contributions, issue reports and documentation improvements are welcome.
 
-## Getting Started
+## Getting started
 
-New to Rodin? Check out our comprehensive [Getting Started Guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html) which covers:
+The [getting started
+  guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html) covers installation, a first solve and the
+  main library objects:
 
-- **[Installation and Setup](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html)** - Platform-specific installation instructions and verification
-- **[First Steps](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-steps.html)** - Basic concepts, project structure, and your first Rodin program
-- **[Your First Problem](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-problem.html)** - Complete walkthrough solving the Poisson equation
-- **[Core Concepts](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-core-concepts.html)** - Deep dive into meshes, finite elements, and variational formulations
+- **[Installation and setup](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html)** - Platform-specific installation instructions and verification
+- **[First steps](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-steps.html)** - Project structure and a first Rodin program
+- **[A first problem](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-problem.html)** - Complete walkthrough solving the Poisson equation
+- **[Core concepts](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-core-concepts.html)** - Meshes, finite element spaces and variational formulations
 
 ## Status
 
@@ -91,7 +93,7 @@ make -j4
 sudo make install
 ```
 
-If you only need the library and headers, skip resource hydration with
+For a library-and-headers installation, configure resource handling with
 `-DRODIN_INSTALL_RESOURCES=OFF`.
 
 All files under `resources/` are tracked through Git LFS, including test and
@@ -100,7 +102,7 @@ reading a file, run `git lfs pull` from the repository root and retry.
 
 ### User-Local Installation
 
-For installation without sudo (recommended for development):
+A user-local installation avoids sudo and is recommended for development.
 
 ```bash
 # Configure with local prefix
@@ -115,9 +117,10 @@ export CMAKE_PREFIX_PATH=$HOME/.local:$CMAKE_PREFIX_PATH
 
 ### Verifying Installation
 
-After installation, you can verify it works by creating a simple test project:
+The following test project checks the installed headers, library and CMake
+  package.
 
-**CMakeLists.txt:**
+**CMakeLists.txt**
 ```cmake
 cmake_minimum_required(VERSION 3.16)
 project(MyRodinProject CXX)
@@ -128,7 +131,7 @@ add_executable(my_app main.cpp)
 target_link_libraries(my_app PRIVATE Rodin::Geometry Rodin::Variational Rodin::Solver)
 ```
 
-**main.cpp:**
+**main.cpp**
 ```cpp
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
@@ -147,7 +150,7 @@ int main()
 }
 ```
 
-Then build and run:
+Build and run the application with these commands.
 ```bash
 mkdir build && cd build
 cmake ..
@@ -157,13 +160,13 @@ make
 
 ### Platform-Specific Notes
 
-**Ubuntu/Debian:**
+**Ubuntu/Debian**
 ```bash
 sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
 sudo apt-get install git-lfs  # needed for resources
 ```
 
-**macOS (Homebrew):**
+**macOS (Homebrew)**
 ```bash
 brew install cmake boost eigen libomp
 brew install git-lfs  # needed for resources
@@ -194,7 +197,7 @@ make -j4
 Rodin comes with a native C++20 form language for assembling
 and solving variational formulations.
 
-For example, given a domain $\Omega$ with boundary $\Gamma := \partial \Omega$, the Poisson problem:
+Consider a domain $\Omega$ with boundary $\Gamma := \partial \Omega$. The Poisson problem takes the following form.
 ```math
 \left\{
 \begin{aligned}
@@ -203,12 +206,12 @@ For example, given a domain $\Omega$ with boundary $\Gamma := \partial \Omega$, 
 \end{aligned}
 \right.
 ```
-has the associated weak formulation:
+The corresponding weak formulation seeks a function satisfying the following identity.
 ```math
 \text{Find} \ u \in H^1(\Omega) \quad \text{s.t.} \quad \forall v \in H^1_0(\Omega), \quad \int_\Omega \nabla u \cdot \nabla v \ dx = \int_\Omega f v \ dx, \quad \text{with } \quad H^1_0(\Omega) := \{ v \in H^1(\Omega) \mid v = 0 \text{ on } \Gamma \}
 ```
 
-which can be quickly implemented via the following lines of code:
+The following program implements this weak formulation.
 
 ```c++
 #include <Rodin/Types.h>
@@ -216,6 +219,7 @@ which can be quickly implemented via the following lines of code:
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
+#include <Rodin/IO/XDMF.h>
 
 using namespace Rodin;
 using namespace Rodin::Solver;
@@ -226,6 +230,7 @@ int main(int, char**)
 {
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.scale(1.0 / 15.0);
   mesh.getConnectivity().compute(1, 2); // Compute boundary
 
   P1 vh(mesh);
@@ -242,9 +247,10 @@ int main(int, char**)
           + DirichletBC(u, Zero());
   CG(poisson).solve();
 
-  // Save solution
-  u.getSolution().save("Poisson.gf");
-  mesh.save("Poisson.mesh");
+  // Export the solution for visualization.
+  IO::XDMF xdmf("Poisson");
+  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+  xdmf.write().flush();
 
   return 0;
 }
@@ -253,7 +259,7 @@ int main(int, char**)
 <table>
   <tr>
     <td align="center">
-      <img src="doc/README/Poisson.png" alt="Poisson.png" style="width:50%;">
+      <img src="doc/README/Poisson.png" alt="Poisson solution on the unit square" width="360" style="max-width:100%;height:auto;">
     </td>
   </tr>
   <tr>
@@ -267,7 +273,7 @@ int main(int, char**)
 
 #### Cell, Face, Vertex Iterators
 
-The API offers full support for iteration over _all_ polytopes of the mesh of some given dimension:
+The API offers full support for iteration over _all_ polytopes of the mesh of some given dimension.
 
 ```c++
 Mesh mesh;
@@ -299,7 +305,7 @@ for (auto it = mesh.getPolytope(1); it; ++it)
 #### Full connectivity computation
 
 Rodin is able to compute any connectivity information on the mesh. For example, the following computes
-the adjacency information from faces to cells:
+the adjacency information from faces to cells.
 
 ```c++
 Mesh mesh;
@@ -311,7 +317,7 @@ mesh.getConnectivity().compute(1, 2);
 In general, this means that given a face, we are able to obtain the incident (neighboring) cells.
 
 However, one can also compute any connectivity information on different dimensions.
-For example, for a mesh $\mathcal{T}_h \subset \mathbb{R}^d$, $d = 2$ of topological dimension $d$, we have:
+For example, for a mesh $\mathcal{T}_h \subset \mathbb{R}^d$, $d = 2$ of topological dimension $d$, the following relations hold.
 
 ```c++
 // Compute connectivity between vertices and faces
@@ -339,7 +345,7 @@ mesh.getConnectivity().compute(2, 1);
 
 ### Additional Features
 
-Rodin provides many powerful features for finite element analysis:
+Rodin provides many powerful features for finite element analysis.
 
 **Solver Integration:**
 - Direct integration with Eigen for linear algebra operations
@@ -373,14 +379,14 @@ For comprehensive documentation on all features, see the [Documentation](#docume
 
 ## Documentation
 
-Rodin provides comprehensive documentation covering all aspects of the library:
+Rodin provides comprehensive documentation covering all aspects of the library.
 
 ### User Guides
 
 **Getting Started:**
 - Installation and setup instructions
-- Your first Rodin program
-- Solving your first PDE (Poisson equation)
+- A first Rodin program
+- Solving a first PDE (Poisson equation)
 - Understanding core concepts
 
 **Mesh Guide:**
@@ -410,7 +416,7 @@ Complete API documentation is available for all classes, functions, and modules:
 
 ### Building Documentation Locally
 
-To build the documentation yourself:
+Build the documentation with the following commands.
 
 ```bash
 # Clone repository with submodules
@@ -473,6 +479,23 @@ manager.
 | RODIN_USE_SUITESPARSE  | Build with SuiteSparse support                    |
 | RODIN_SILENCE_WARNINGS | Silence warnings outputted by Rodin               |
 | RODIN_BUILD_PY         | Build Python bindings                             |
+
+## Benchmark machine
+
+Published [benchmark histories](https://cbritopacheco.github.io/rodin/docs/refs/heads/develop/benchmarks/)
+run on standard GitHub-hosted `ubuntu-24.04` virtual machines for this public
+repository, using GCC 14 and Release builds.
+
+| System | CPU | Memory | SSD |
+| --- | --- | --- | --- |
+| Ubuntu 24.04, x64 | 4 vCPUs | 16 GB | 14 GB |
+
+Each job runs one benchmark executable at a time. OpenMP, OpenBLAS and MKL use
+one thread, and MPI ranks share the runner's resources. The selected benchmark
+configuration records the build and rank count. CPU models and host load can
+vary between virtual machines, so small timing differences require repeated
+measurements. See the [GitHub runner specifications](https://docs.github.com/en/actions/reference/runners/github-hosted-runners#standard-github-hosted-runners-for-public-repositories)
+and the [testing guide](tests/README.md) for resource budgets.
 
 ## Development
 
@@ -575,21 +598,19 @@ usage guidelines.
 
 Rodin is distributed under the [Boost Software License 1.0](LICENSE), a permissive open-source license.
 
-The choice of this license is intentional. Rodin is intended to be useful both as a research code and as a general-purpose finite element framework. The Boost Software License allows Rodin to be freely used, modified, and redistributed, including in academic, industrial, commercial, and proprietary projects.
+The license permits use, modification and redistribution in academic,
+industrial, commercial and proprietary projects. Software using or linking
+against Rodin can retain its own license and source-distribution policy.
 
-**Using Rodin does not mean that your own project must be licensed under the Boost Software License.** In particular, software that uses or links against Rodin may be distributed under a different open-source license or under a proprietary license. The Boost Software License is not a copyleft license and does not require you to release the source code of software built using Rodin.
-
-If Rodin source code, or modified portions of it, are redistributed in source form, the original copyright notices and the Boost Software License notice must be preserved as required by the license. This requirement applies to the Rodin code being redistributed; it does not require the rest of your project to adopt the Boost Software License.
-
-The aim of this choice is to place as few restrictions as possible on how Rodin may be used, while allowing it to be incorporated into research software, other open-source projects, and proprietary applications.
+Redistribution of Rodin source code or modified portions must preserve the
+original copyright notices and the complete Boost Software License notice.
 
 ### Acknowledgement
 
-The license does not require users to acknowledge Rodin in publications or projects. Nevertheless, if Rodin contributes to your research, software, or other work, an acknowledgement is greatly appreciated.
+Acknowledgement is optional and appreciated. Publications and software using
+Rodin can cite the software reference and link to the
+[project repository](https://github.com/cbritopacheco/rodin).
 
-Please consider mentioning that your project uses **Rodin** and, where appropriate, providing a link to the project repository. For academic work, citing the corresponding Rodin publication (coming soon!) or software reference, is also appreciated.
-
-Such acknowledgements are not a licensing requirement, but they help make the use of Rodin visible and support the continued development of the project.
 
 ## Support Rodin
 

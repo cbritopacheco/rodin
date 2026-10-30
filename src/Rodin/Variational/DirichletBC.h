@@ -18,7 +18,7 @@
  * second argument:
  *
  * 1. **Value-prescribing BC** — `DirichletBC(u, g)` with `g` a
- *    @c FunctionBase (scalar, vector, or matrix-valued):
+ *    @c FunctionBase (scalar, vector, or matrix-valued).
  *    @f[
  *      u(x) \;=\; g(x), \qquad x \in \Gamma_D.
  *    @f]
@@ -27,19 +27,19 @@
  *
  * 2. **Identification BC** — `DirichletBC(u, A(v))` with `A(v)` a
  *    @c ShapeFunctionBase expression linear in another (trial) shape
- *    function @f$ v\in V_h^v @f$:
+ *    function @f$ v\in V_h^v @f$.
  *    @f[
  *      u(x) \;=\; A(v)(x), \qquad x \in \Gamma_D,
  *    @f]
  *    where @f$ A @f$ is any operator producing a `ShapeFunctionBase`
  *    (the identity, a component selection @f$ v_x @f$, a left product
  *    @f$ f\,v @f$, a matrix product @f$ R\,v @f$, sums of these, etc.).
- *    This is *algebraic identification* of the two unknowns' boundary DOFs:
- *    both sides of the constraint involve degrees of freedom that are still
+ *    This is *algebraic identification* of the two unknowns' boundary DOFs.
+ *    Both sides of the constraint involve degrees of freedom that are still
  *    unknown at solve time, not pre-evaluated values.
  *
  *    The optional three-argument spelling `DirichletBC(u, A(v), d)` keeps the
- *    same linear unknown-dependent part and adds a known defect:
+ *    same linear unknown-dependent part and adds a known defect.
  *    @f[
  *      u(x) \;=\; A(v)(x) + d(x), \qquad x \in \Gamma_D.
  *    @f]
@@ -52,7 +52,7 @@
  * DOF functionals @f$ \{\ell_i^u\}_{i=1}^{N_u} @f$ satisfying
  * @f$ \ell_i^u(\varphi_k^u) = \delta_{ik} @f$. Likewise for @f$ V_h^v @f$.
  *
- * The DOF functionals are FE-local: for Lagrange they are nodal point
+ * The DOF functionals are FE-local. For Lagrange they are nodal point
  * evaluations @f$ \ell_i^u(w) = w(x_i^u) @f$, for moment-based or
  * non-nodal elements they are integrals or pairings against dual moments.
  * Both flavours apply the same DOF functional on the slave side; they
@@ -86,10 +86,10 @@
  * an optional defect map for the known @f$ d_s @f$ values. The two-argument
  * spelling is exactly the homogeneous case @f$ d\equiv 0 @f$.
  *
- * For Lagrange + same FES + @f$ A=\mathrm{id} @f$: the dual property gives
+ * For Lagrange + same FES + @f$ A=\mathrm{id} @f$, the dual property gives
  * @f$ C_{sj}=\delta_{sj} @f$, so each slave maps to the same DOF index of
  * @f$ v @f$ with coefficient one. For @f$ A(v)=R(x)\,v @f$ on a vector FES
- * at a Lagrange node @f$ x_s @f$:
+ * at a Lagrange node @f$ x_s @f$.
  * @f$ C_{(s,\alpha),(s,\beta)} = R_{\alpha\beta}(x_s) @f$ — a multi-master
  * row whose coefficients are exact entries of @f$ R @f$ at the slave node.
  *
@@ -131,7 +131,7 @@
  *
  * - For @c DirichletBCBase::IdentifiedDOFs at slave global index
  *   @f$ g_s @f$ with masters @f$ \{g_{m_k}\} @f$ and coefficients
- *   @f$ \{c_k\} @f$:
+ *   @f$ \{c_k\} @f$,
  *   define an expansion map
  *   @f[
  *     \operatorname{expand}(i)=
@@ -156,7 +156,7 @@
  *     A \leftarrow T^* A T,\qquad b \leftarrow T^* b.
  *   @f]
  *   For affine identifications @f$ x = T\hat{x}+\hat{d} @f$, the known
- *   defect also shifts the RHS:
+ *   defect also shifts the RHS.
  *   @f[
  *     A \leftarrow T^* A T,\qquad
  *     b \leftarrow T^*\!\left(b - A\hat{d}\right).
@@ -251,7 +251,7 @@ namespace Rodin::Variational
    *   \quad\text{on}\quad
    *   \Gamma_D \subset \mathcal{B}_h
    * @f]
-   * applied DOF-functional-wise: for each slave DOF @f$ s @f$ on
+   * applied DOF-functional-wise. For each slave DOF @f$ s @f$ on
    * @f$ \Gamma_D @f$ the assembled object encodes a row of the form
    * @f[
    *   \ell_s^u(\text{Operand}) \;=\; \ell_s^u(\text{Value}),
@@ -319,7 +319,7 @@ namespace Rodin::Variational
       /**
        * @brief Variant DOF type covering both Dirichlet semantics.
        *
-       * The active alternative depends on which subclass produced it: a
+       * The active alternative depends on which subclass produced it. A
        * value-prescribing BC writes the @ref ValueDOFs alternative, an
        * identification BC writes the @ref IdentifiedDOFs alternative.
        */
@@ -423,7 +423,7 @@ namespace Rodin::Variational
    * @f[
    *   u(x) \;=\; g(x), \qquad x\in\Gamma_D \subset \mathcal{B}_h,
    * @f]
-   * algebraically: for each slave DOF @f$ s @f$ of @f$ u @f$ on
+   * algebraically. For each slave DOF @f$ s @f$ of @f$ u @f$ on
    * @f$ \Gamma_D @f$,
    * @f[
    *   u_s \;=\; \ell_s^u(g) \;=\; g_s,
@@ -436,7 +436,7 @@ namespace Rodin::Variational
    *
    * In the global linear system the slave row is replaced by an identity
    * row with right-hand side @f$ g_s @f$ and the slave column is moved to
-   * the RHS:
+   * the RHS.
    * @f[
    *   A_{g_s,g_s}\leftarrow 1,\;
    *   A_{g_s,k}\leftarrow 0\;\forall k\neq g_s,\;
@@ -692,7 +692,7 @@ namespace Rodin::Variational
    *
    * Imposes a *linear-in-DOFs* identification of the slave trial function
    * @f$ u\in V_h^u @f$ with a shape-function expression @f$ A(v) @f$ over
-   * @f$ \Gamma_D \subset \mathcal{B}_h @f$:
+   * @f$ \Gamma_D \subset \mathcal{B}_h @f$.
    * @f[
    *   u(x) \;=\; A(v)(x) + d(x), \qquad x\in\Gamma_D,
    * @f]
@@ -709,14 +709,14 @@ namespace Rodin::Variational
    * and @f$ \{\ell_s^u\}_{s=1}^{N_u} @f$ be the dual DOF functionals of
    * @f$ V_h^u @f$ (so @f$ \ell_s^u(\varphi_k^u)=\delta_{sk} @f$). Linearity
    * of @f$ A @f$ in @f$ v @f$ gives, for any
-   * @f$ v=\sum_j v_j\,\varphi_j^v @f$:
+   * @f$ v=\sum_j v_j\,\varphi_j^v @f$.
    * @f[
    *   A(v)(x) \;=\; \sum_j v_j\,A(\varphi_j^v)(x).
    * @f]
    *
    * Applying the slave DOF functional @f$ \ell_s^u @f$ on both sides of
    * @f$ u = A(v) + d @f$ yields the constraint row for each slave DOF
-   * @f$ s @f$ on @f$ \Gamma_D @f$:
+   * @f$ s @f$ on @f$ \Gamma_D @f$.
    * @f[
    *   \boxed{\;
    *     u_s \;=\; \ell_s^u(A(v)) + \ell_s^u(d)
@@ -740,17 +740,17 @@ namespace Rodin::Variational
    * - **Identity, same FES (Lagrange).**  @f$ A=\mathrm{id} @f$,
    *   @f$ V_h^u=V_h^v @f$. Then
    *   @f$ C_{sj} = \ell_s^u(\varphi_j^v) = \delta_{sj} @f$, so each slave
-   *   reduces to one master with coefficient @f$ 1 @f$:
+   *   reduces to one master with coefficient @f$ 1 @f$.
    *   @f$ u_s = v_s @f$.
    *
    * - **Scalar scaling.**  @f$ A(v)(x)=f(x)\,v(x) @f$ for a scalar field
-   *   @f$ f @f$, Lagrange same FES, slave node @f$ x_s @f$:
+   *   @f$ f @f$, Lagrange same FES, slave node @f$ x_s @f$.
    *   @f$ C_{sj} = f(x_s)\,\delta_{sj} @f$, hence
    *   @f$ u_s = f(x_s)\,v_s @f$.
    *
    * - **Matrix rotation, vector FES.**  @f$ A(v)(x)=R(x)\,v(x) @f$ with
    *   @f$ R\in\mathbb{R}^{d\times d} @f$, Lagrange vector @f$ V_h^v @f$,
-   *   slave DOF @f$ (s,\alpha) @f$:
+   *   slave DOF @f$ (s,\alpha) @f$.
    *   @f[
    *     C_{(s,\alpha),(s,\beta)} \;=\; R_{\alpha\beta}(x_s),
    *   @f]
@@ -764,7 +764,7 @@ namespace Rodin::Variational
    *   component, so each slave depends only on the @f$ x @f$-component DOFs
    *   of @f$ v @f$ with coefficient @f$ 1 @f$.
    *
-   * # Assembly: how @f$ C_{sj} @f$ is computed exactly
+   * # Computing the assembly coefficients @f$ C_{sj} @f$ is computed exactly
    *
    * The identification assembler computes
    * @f$ C_{sj}=\ell_s^u(A(\varphi_j^v)) @f$ for every slave/master pair
@@ -787,13 +787,13 @@ namespace Rodin::Variational
    * for Lagrange, an integral over the face for moment-based FEs,
    * directional samples for RT/Nedelec — and the assembler does not
    * branch on the FE type. This is what makes the implementation
-   * **FES-generic**: the only contracts used are
+   * The operation is **FES-generic** and uses only
    * `fes.getDOFs(face)`, `fes.getFiniteElement(face)`,
    * `fe.getLinearForm(s)`, and `fes.getPullback(face, callable)`.
    *
    * # Exactness, by construction
    *
-   * Slave/master DOFs are paired by index on shared faces:
+   * Slave/master DOFs are paired by index on shared faces.
    * @c fes_u.getDOFs(faceDim, fi) and @c fes_v.getDOFs(faceDim, fi) on the
    * *same* face polytope. There is no geometric search, no tolerance, no
    * @f$ \varepsilon @f$ anywhere. Coefficient pruning uses strict

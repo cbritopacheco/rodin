@@ -2,6 +2,9 @@ name: Benchmarks
 on:
   push:
     branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
   workflow_dispatch:
 concurrency:
   group: Benchmarks-${{ github.ref }}
@@ -10,6 +13,7 @@ permissions:
   contents: read
 jobs:
   Infrastructure:
+    if: ${{ !github.event.pull_request.draft }}
     name: Infrastructure checks
     runs-on: ubuntu-24.04
     steps:
@@ -25,12 +29,14 @@ jobs:
       - run: python3 -m unittest discover -s dev -p 'test_benchmark_*.py' -v
       - run: node --check dev/benchmarks/charts.js
   Local:
+    if: ${{ !github.event.pull_request.draft }}
     name: Local
     needs: Infrastructure
     uses: ./.github/workflows/BenchmarkConfiguration.yml
     with:
       configuration: local
   Distributed:
+    if: ${{ !github.event.pull_request.draft }}
     name: MPI and PETSc
     needs: Infrastructure
     uses: ./.github/workflows/BenchmarkConfiguration.yml
@@ -39,7 +45,7 @@ jobs:
   Pool:
     name: Validate complete campaign
     needs: [Local, Distributed]
-    if: always()
+    if: ${{ (always()) && !github.event.pull_request.draft }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -78,7 +84,7 @@ jobs:
   Publish:
     name: Publish documentation and benchmarks
     needs: Pool
-    if: always()
+    if: ${{ (always()) && !github.event.pull_request.draft && github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') }}
     runs-on: ubuntu-24.04
     concurrency:
       group: rodin-gh-pages-publication

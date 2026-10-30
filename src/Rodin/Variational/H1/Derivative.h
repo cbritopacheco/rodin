@@ -13,7 +13,7 @@
  *
  * This file provides specialized implementations of the partial derivative
  * operator for H1 GridFunctions. For an H1<K> function @f$ u @f$, the
- * partial derivative with respect to coordinate @f$ x_i @f$ is:
+ * partial derivative with respect to coordinate @f$ x_i @f$ is
  * @f[
  *   \frac{\partial u}{\partial x_i} = (\nabla u) \cdot \mathbf{e}_i
  * @f]
@@ -39,7 +39,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Derivative over a grid function: exposes the finite
+   * @brief Type traits for @c Derivative over a grid function, exposing the finite
    * element space, the operand type and the range type.
    */
   template <size_t K, class Scalar, class Mesh, class Data>

@@ -8,7 +8,7 @@
  * @file Info.h
  * @brief Status reported by the factorization-based solvers.
  *
- * The solvers that factorize their operator have no common ancestor: each one
+ * The solvers that factorize their operator have no common ancestor. Each one
  * wraps a library of its own. They share this vocabulary instead, and expose
  * it uniformly through `getInfo()` and `success()`.
  *
@@ -19,7 +19,7 @@
  * computed. A solver therefore stops before the solve and reports what
  * happened through its @ref Rodin::Solver::Info "Info", leaving the caller to
  * act on it. A violated contract, such as a matrix that is not square, remains
- * an exception: it is a defect in the calling code rather than an outcome.
+ * an exception because it is a defect in the calling code rather than an outcome.
  */
 #ifndef RODIN_SOLVER_INFO_H
 #define RODIN_SOLVER_INFO_H
@@ -65,7 +65,7 @@ namespace Rodin::Solver
        * @brief Status reported by the underlying solver.
        *
        * Zero denotes success. The meaning of a nonzero value is the backend's
-       * own: each solver documents which status it reports here.
+       * own. Each solver documents which status it reports here.
        */
       Integer status = 0;
   };

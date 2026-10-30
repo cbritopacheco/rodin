@@ -29,7 +29,9 @@ namespace Rodin::Variational
   /**
    * @brief Selects and evaluates distributed interpolation functionals.
    *
-   * Architecture: for each owned DOF @f$ i @f$, select the eligible incident
+   * @par Architecture
+   *
+   * For each owned DOF @f$ i @f$, select the eligible incident
    * entity @f$ K_i @f$ with the smallest distributed index and evaluate
    * @f$ c_i = \ell_{i,K_i}(f) @f$ using the space's pullback and functional.
    * The vertex overlap contains the complete incident star of owned DOFs

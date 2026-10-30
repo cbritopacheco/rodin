@@ -1,9 +1,28 @@
 /**
   @page ci-index Continuous integration
-  @brief Branch status, workflow runs and CI reports.
+  @brief Inspect branch commits, workflow outcomes and generated reports.
 
-  CI status and reports for develop and master.
+  The tables below collect the latest workflow runs for `master` and `develop`.
+  Each branch heading identifies its current commit; each workflow row links
+  to the commit actually checked by that run.
 
   @section ci-status Current status
+
+  The **Workflow run** link opens the execution and job logs. **Report** opens the
+  generated summary when a matching report is available for that commit and
+  run attempt.
+
+  @section ci-reading Interpret a result
+
+  A passing result applies to the commit shown in its row. An **older commit**
+  label identifies a run that predates the current branch head. The Labeler
+  row records pull-request labeling activity; it can therefore refer to a
+  different commit from the branch's build and numerical tests.
+
+  Running and queued states describe work in progress. For coverage, the
+  Tests run's **Coverage / Finalize** job supplies the combined result after
+  all required contributions and publication receipts have been checked.
+  The Benchmarks run contains the campaign validation, pooling and publication
+  jobs. Their outcomes establish whether the complete result set was published.
 
 */

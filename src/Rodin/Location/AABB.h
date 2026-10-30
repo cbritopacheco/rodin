@@ -77,7 +77,7 @@ namespace Rodin::Location
    * and wedges, the collapsed-coordinate basis on pyramids), whose extrema
    * bound the image in exact arithmetic. Numerical boxes include a conversion
    * roundoff allowance. Degree-one
-   * factors need no conversion: the mapped vertices are already the control
+   * factors need no conversion because the mapped vertices are already the control
    * points, so affine and multilinear cells keep the cheap vertex box. If a
    * box cannot be computed reliably, that entry remains unpruned. An
    * exhaustive narrow-phase fallback can also be enabled with
@@ -87,8 +87,8 @@ namespace Rodin::Location
    * Physical tolerance is relative to the mesh bounding-box diagonal. The
    * reference tolerance only permits a small inversion overshoot before
    * clipping; physical residual is checked again after clipping. Queries are
-   * thread-safe for concurrent queries on a fixed mesh and configuration:
-   * setters and mesh mutation must not overlap queries. The lazy build is
+   * thread-safe for concurrent queries on a fixed mesh and configuration.
+   * Setters and mesh mutation must not overlap queries. The lazy build is
    * guarded by a mutex and
    * transformations are immutable after construction.
    */
@@ -106,7 +106,7 @@ namespace Rodin::Location
        * empty lists have no candidates, including in exhaustive fallback.
        * Ownership and other selection policies belong to the caller.
        * The tolerance scale still uses all mesh vertices. The candidate lists
-       * are a snapshot: reconstruct after topology, geometry or selection changes.
+       * are a snapshot. Reconstruct after topology, geometry or selection changes.
        * Empty lists above the mesh dimension are permitted for empty shards.
        * @param mesh Mesh whose original entity indices are retained.
        * @param candidates Local entity indices grouped by topological dimension.
@@ -288,7 +288,7 @@ namespace Rodin::Location
       /// Ambient dimension supported by the spatial coordinate storage.
       static constexpr size_t MaxSpaceDimension = 3;
 
-      /// Leaf capacity: a policy balance between tree traversal and candidate scans.
+      /// Leaf capacity balancing tree traversal and candidate scans.
       static constexpr size_t LeafSize = 8;
 
       /**
@@ -313,7 +313,7 @@ namespace Rodin::Location
       static constexpr Real ReferenceRoundoffFactor = Real(16);
 
       /**
-       * Divergence guard: reference cells have coordinates of order one.
+       * The divergence guard uses the order-one scale of reference-cell coordinates.
        * The generous radius permits intermediate overshoot without accepting it.
        */
       static constexpr Real MaxReferenceNorm = Real(1e3);

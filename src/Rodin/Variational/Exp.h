@@ -30,7 +30,7 @@ namespace Rodin::Variational
    * @ingroup ExpSpecializations
    * @brief Exponential function operation.
    *
-   * This class represents the exponential operation applied to a scalar function:
+   * This class represents the exponential operation applied to a scalar function.
    * @f[
    *    \text{Exp}(f)(x) = e^{f(x)}
    * @f]

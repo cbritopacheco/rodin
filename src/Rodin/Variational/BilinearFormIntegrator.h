@@ -36,7 +36,7 @@ namespace Rodin::Variational
    *
    * BilinearFormIntegratorBase provides the foundation for implementing specific
    * bilinear form terms in variational formulations. A bilinear form integrator
-   * computes the local element matrix contributions:
+   * computes the local element matrix contributions.
    * @f[
    *   A^K_{ij} = \int_K a(\phi_j, \psi_i) \, dx
    * @f]

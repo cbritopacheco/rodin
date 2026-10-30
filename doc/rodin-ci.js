@@ -6,16 +6,33 @@
   const api = 'https://api.github.com/repos/cbritopacheco/rodin';
   const actions = 'https://github.com/cbritopacheco/rodin/actions';
   const workflows = ['Tests', 'Benchmarks', 'Build', 'Style', 'CodeQL', 'Labeler', 'Preflight', 'Copilot setup steps', 'Documentation'];
+  const badgeStates = {passing: 'success', failing: 'failure', running: 'in_progress',
+    queued: 'queued', cancelled: 'cancelled', skipped: 'skipped', unknown: 'unknown'};
+  const statusNames = {success: 'passing', failure: 'failing', in_progress: 'running'};
   const link = (text, url) => {
     const node = document.createElement('a'); node.textContent = text;
     // API metadata is untrusted: link only to this repository's Actions pages.
-    node.href = typeof url === 'string' && url.startsWith(actions + '/') ? url : actions;
+    try {
+      const target = new URL(url);
+      node.href = target.origin === 'https://github.com' && !target.username && !target.password &&
+        (target.pathname === '/cbritopacheco/rodin/actions' || target.pathname.startsWith('/cbritopacheco/rodin/actions/'))
+        ? target.href : actions;
+    } catch {node.href = actions;}
     return node;
   };
   async function read(path) {
     const response = await fetch(api + path, {headers: {Accept: 'application/vnd.github+json'}});
     if (!response.ok) throw new Error('GitHub API returned HTTP ' + response.status);
     return response.json();
+  }
+  async function badge(branch, name) {
+    try {
+      const response = await fetch('https://raw.githubusercontent.com/cbritopacheco/rodin/ci-badges/' +
+        branch + '/' + name.toLowerCase() + '.json', {cache: 'no-store'});
+      if (!response.ok) return null;
+      const value = await response.json();
+      return value.schemaVersion === 1 && Object.hasOwn(badgeStates, value.message) ? value : null;
+    } catch {return null;}
   }
   for (const selected of ['master', 'develop']) {
     const root = document.createElement('section');
@@ -34,11 +51,13 @@
       refresh.disabled = true;
       status.textContent = 'Loading ' + selected + ' CI…'; output.replaceChildren();
       try {
-        const [head, runs, reports] = await Promise.all([
+        const [head, runs, reports, badges] = await Promise.all([
           read('/branches/' + selected),
           read('/actions/runs?branch=' + selected + '&per_page=100'),
-          read('/actions/workflows/RetryInterruptedJobs.yml/runs?status=completed&per_page=100').catch(() => ({workflow_runs: []}))
+          read('/actions/workflows/RetryInterruptedJobs.yml/runs?status=completed&per_page=100').catch(() => ({workflow_runs: []})),
+          Promise.all(['Tests', 'Benchmarks', 'Build', 'Documentation'].map(async name => [name, await badge(selected, name)]))
         ]);
+        const badgeByName = Object.fromEntries(badges);
         const sha = head.commit.sha;
         status.textContent = selected + ' · ';
         const headLink = document.createElement('a');
@@ -53,12 +72,18 @@
         for (const name of workflows) {
           const run = runs.workflow_runs.find(item => item.name === name);
           const row = body.insertRow();
-          row.insertCell().append(link(name, run?.html_url));
+          row.insertCell().append(link(name === 'Labeler' ? 'Labeler (pull requests)' : name, run?.html_url));
           const result = row.insertCell();
-          result.textContent = run ? (run.conclusion || run.status) : 'No recent run';
+          const published = badgeByName[name];
+          // The publisher resolves job activity and verifies documentation deployment.
+          // An older badge never establishes status for the displayed branch head.
+          const sameRun = name !== 'Documentation' || (published?.run === String(run?.id) &&
+            published?.attempt === run?.run_attempt);
+          const outcome = run?.head_sha === sha && published?.commit === sha && sameRun
+            ? badgeStates[published.message] : run?.conclusion || run?.status;
+          result.textContent = run ? (statusNames[outcome] || outcome.replaceAll('_', ' ')) : 'No recent run';
           if (run && run.head_sha !== sha) result.append(' · older commit');
           // Green is reserved for a successful result on the current branch head.
-          const outcome = run?.conclusion || run?.status;
           result.className = 'rodin-ci-status ' + (
             run?.head_sha !== sha ? 'rodin-ci-muted' :
             outcome === 'success' ? 'rodin-ci-success' :
