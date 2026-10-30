@@ -78,7 +78,9 @@ namespace Rodin::Tests::Unit
         ASSERT_EQ(values(i, 4), vertices.size());
         EXPECT_EQ(bool(values(i, 5)), bool(attribute));
         if (attribute)
+        {
           EXPECT_EQ(labels(i), *attribute);
+        }
         for (Index v = 0; v < vertices.size(); ++v)
           EXPECT_EQ(values(i, vertexOffset + v), vertices[v]);
       }
@@ -127,6 +129,72 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Every reference family reuses the indexed region semantics after discovery.
+  /**
+   * @brief Counts candidates accepted by the iteration filter.
+   * NVCC rejects extended lambdas in GoogleTest's private TestBody, so device
+   * reductions used by test bodies live in free functions.
+   * @param mesh Resident mesh supplying the execution instance.
+   * @param iteration Resident traversal.
+   * @returns Number of selected candidates.
+   */
+  Index countSelected(const IterationMesh& mesh, const ResidentIteration& iteration)
+  {
+    Index selected = 0;
+    ::Kokkos::parallel_reduce(
+      "count selected",
+      ::Kokkos::RangePolicy<TestExecutionSpace>(
+        mesh.getContext().getExecutionSpace(), 0, iteration.getCount()),
+      KOKKOS_LAMBDA(Index i, Index & sum) {
+        if (iteration.filter(i))
+          ++sum;
+      },
+      selected);
+    return selected;
+  }
+
+  /**
+   * @brief Counts selected cells with three vertices.
+   * @param mesh Resident mesh supplying the execution instance.
+   * @param cells Resident cell traversal.
+   * @returns Number of selected triangles.
+   */
+  Index countTriangles(const IterationMesh& mesh, const ResidentIteration& cells)
+  {
+    Index visited = 0;
+    ::Kokkos::parallel_reduce(
+      "count triangles",
+      ::Kokkos::RangePolicy<TestExecutionSpace>(
+        mesh.getContext().getExecutionSpace(), 0, cells.getCount()),
+      KOKKOS_LAMBDA(Index i, Index & sum) {
+        if (cells.filter(i) && cells.getPolytope(i).getVertices().size() == 3)
+          ++sum;
+      },
+      visited);
+    return visited;
+  }
+
+  /**
+   * @brief Counts selected point cells whose index matches the candidate position.
+   * @param mesh Resident mesh supplying the execution instance.
+   * @param points Resident traversal of a point mesh.
+   * @returns Number of consistent point cells.
+   */
+  Index countPoints(const IterationMesh& mesh, const ResidentIteration& points)
+  {
+    Index selected = 0;
+    ::Kokkos::parallel_reduce(
+      "count points",
+      ::Kokkos::RangePolicy<TestExecutionSpace>(
+        mesh.getContext().getExecutionSpace(), 0, points.getCount()),
+      KOKKOS_LAMBDA(Index i, Index & sum) {
+        const auto entity = points.getPolytope(i);
+        if (points.filter(i) && entity.getDimension() == 0 && entity.getIndex() == i)
+          ++sum;
+      },
+      selected);
+    return selected;
+  }
+
   TEST(Kokkos_Iteration, ReferenceFamiliesAndRegionFilters)
   {
     checkDiscoveredIteration(
@@ -182,16 +250,7 @@ namespace Rodin::Tests::Unit
     checkIteration(host, mesh);
     const Assembly::KokkosIteration iteration(mesh, Region::Interface);
     EXPECT_EQ(iteration.getCount(), 7);
-    Index selected = 0;
-    ::Kokkos::parallel_reduce(
-      "count nonmanifold interfaces",
-      ::Kokkos::RangePolicy<TestExecutionSpace>(
-        mesh.getContext().getExecutionSpace(), 0, iteration.getCount()),
-      KOKKOS_LAMBDA(Index i, Index & sum) {
-        if (iteration.filter(i))
-          ++sum;
-      },
-      selected);
+    const Index selected = countSelected(mesh, iteration);
     EXPECT_EQ(selected, 1);
   }
 
@@ -213,16 +272,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(mesh.getConnectivity().hasIncidence(1, 2));
     const Assembly::KokkosIteration noFaces(mesh, Region::Boundary);
     EXPECT_EQ(noFaces.getCount(), 0);
-    Index visited = 0;
-    ::Kokkos::parallel_reduce(
-      "visit cells without face incidence",
-      ::Kokkos::RangePolicy<TestExecutionSpace>(
-        mesh.getContext().getExecutionSpace(), 0, cells.getCount()),
-      KOKKOS_LAMBDA(Index i, Index & sum) {
-        if (cells.filter(i) && cells.getPolytope(i).getVertices().size() == 3)
-          ++sum;
-      },
-      visited);
+    const Index visited = countTriangles(mesh, cells);
     EXPECT_EQ(visited, 1);
 
     mesh.getConnectivity().compute(2, 1);
@@ -255,16 +305,7 @@ namespace Rodin::Tests::Unit
     checkIteration(host, mesh);
     const Assembly::KokkosIteration interface(mesh, Region::Interface);
     EXPECT_GT(interface.getCount(), 0);
-    Index selected = 0;
-    ::Kokkos::parallel_reduce(
-      "count empty interface",
-      ::Kokkos::RangePolicy<TestExecutionSpace>(
-        mesh.getContext().getExecutionSpace(), 0, interface.getCount()),
-      KOKKOS_LAMBDA(Index i, Index & sum) {
-        if (interface.filter(i))
-          ++sum;
-      },
-      selected);
+    const Index selected = countSelected(mesh, interface);
     EXPECT_EQ(selected, 0);
   }
 
@@ -276,16 +317,7 @@ namespace Rodin::Tests::Unit
     const Assembly::KokkosIteration cells(mesh, Region::Cells);
     EXPECT_EQ(cells.getDimension(), 0);
     EXPECT_EQ(cells.getCount(), 0);
-    Index emptyCount = 0;
-    ::Kokkos::parallel_reduce(
-      "visit empty cell region",
-      ::Kokkos::RangePolicy<TestExecutionSpace>(
-        mesh.getContext().getExecutionSpace(), 0, cells.getCount()),
-      KOKKOS_LAMBDA(Index i, Index & sum) {
-        if (cells.filter(i))
-          ++sum;
-      },
-      emptyCount);
+    const Index emptyCount = countSelected(mesh, cells);
     EXPECT_EQ(emptyCount, 0);
     EXPECT_THROW((Assembly::KokkosIteration(mesh, Region::Faces)), Alert::Exception);
     EXPECT_THROW((Assembly::KokkosIteration(mesh, Region::Boundary)), Alert::Exception);
@@ -298,17 +330,7 @@ namespace Rodin::Tests::Unit
     mesh = IterationMesh(TestContext{}, point);
     const Assembly::KokkosIteration points(mesh, Region::Cells);
     EXPECT_EQ(points.getCount(), 1);
-    Index selected = 0;
-    ::Kokkos::parallel_reduce(
-      "visit point cells",
-      ::Kokkos::RangePolicy<TestExecutionSpace>(
-        mesh.getContext().getExecutionSpace(), 0, points.getCount()),
-      KOKKOS_LAMBDA(Index i, Index & sum) {
-        const auto entity = points.getPolytope(i);
-        if (points.filter(i) && entity.getDimension() == 0 && entity.getIndex() == i)
-          ++sum;
-      },
-      selected);
+    const Index selected = countPoints(mesh, points);
     EXPECT_EQ(selected, 1);
   }
 }

@@ -419,7 +419,10 @@ namespace Rodin::Geometry
       /// @param d Missing intermediate dimension. @param mode Discovery policy. @returns This connectivity after building cell-to-entity incidence.
       Connectivity& build(size_t d, Mode mode = Mode::Discover);
 
-    private:
+    public:
+      // Kernel functors and the value types they carry are public because
+      // NVCC's generated host launch stubs name them outside the class scope.
+      // They are implementation details, not part of the connectivity API.
       using Descriptor = Rodin::Kokkos::Geometry::IncidenceDescriptor;
       using IncidenceView = Rodin::Kokkos::Geometry::IncidenceView;
       template <class T>
@@ -859,6 +862,7 @@ namespace Rodin::Geometry
         }
       };
 
+    private:
       /// @param count Number of work items. @returns Execution-instance policy.
       auto policy(Index count) const
       {

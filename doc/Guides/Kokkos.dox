@@ -211,7 +211,7 @@
   cmake --install /path/to/kokkos-build
 
   cmake -S . -B build-kokkos-cuda \
-    -DCMAKE_CXX_COMPILER=/path/to/kokkos-install/bin/nvcc_wrapper \
+    -DCMAKE_CXX_COMPILER=g++ \
     -DCMAKE_PREFIX_PATH=/path/to/kokkos-install \
     -DRODIN_USE_KOKKOS=ON \
     -DRODIN_BUILD_UNIT_TESTS=ON \
@@ -226,8 +226,13 @@
   @endcode
 
   Application translation units that instantiate device geometry kernels must
-  be compiled by a CUDA-capable compiler. This setup uses Kokkos's
-  `nvcc_wrapper` as the C++ compiler. A Kokkos build without CUDA cannot
+  be compiled by a CUDA-capable compiler. Rodin is configured with the host
+  compiler that built Kokkos's host code: when it is not `nvcc_wrapper`,
+  `find_package(Kokkos)` installs `kokkos_launch_compiler`, which redirects
+  only targets linked to `Kokkos::kokkos` to `nvcc_wrapper`. The remaining
+  Rodin libraries are compiled by the host compiler. Setting
+  `CMAKE_CXX_COMPILER` to `nvcc_wrapper` also works but compiles every
+  translation unit through NVCC. A Kokkos build without CUDA cannot
   instantiate the CUDA context and never substitutes CPU execution.
 
   See the upstream

@@ -68,6 +68,19 @@ Device spaces, fields, operator assembly,
 solvers, SubMesh and MPI distribution are not provided.
 See [the Kokkos guide](../Guides/Kokkos.dox) for lifecycle and build details.
 
+In CUDA builds, Kokkos's launcher compiles targets linked to `Kokkos::kokkos`
+with `nvcc_wrapper`, together with every Rodin header they include. NVCC
+imposes constraints that host Kokkos backends do not detect:
+
+- Functors launched by class methods must be accessible at namespace scope:
+  NVCC's generated host stubs name them outside the class, so nested kernel
+  functors and the value types they carry cannot be private or protected.
+- Extended lambdas (`KOKKOS_LAMBDA`) cannot appear in private or protected
+  member functions, including GoogleTest's `TestBody`; tests launch device
+  work from free functions.
+- A Kokkos change is CUDA-verified only after building and running the Kokkos
+  tests with a CUDA-enabled Kokkos installation.
+
 ## Common extension decisions
 
 - If the math is backend-independent, implement the core expression or
