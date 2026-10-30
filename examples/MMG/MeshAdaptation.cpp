@@ -48,8 +48,10 @@ int main()
     {
       triangles << cell->getIndex();
       for (auto vertex = cell->getVertex(); !vertex.end(); ++vertex)
+      {
         triangles << ',' << vertex->getCoordinates().x() << ','
                   << vertex->getCoordinates().y();
+      }
       triangles << '\n';
       valid = valid && cell->getMeasure() > 0;
     }
