@@ -278,7 +278,7 @@ def poisson_readme(root, output):
     display.InterpolateScalarsBeforeMapping = 1
     display.SetScalarBarVisibility(target, False)
     display.Representation = 'Surface With Edges'
-    display.EdgeColor = [.18, .30, .40]
+    display.EdgeColor = [0, 0, 0]
     display.LineWidth = .4
     target.CameraPosition = [2.2, -2.8, 2.3]
     target.CameraFocalPoint = [.5, .5, .2]

@@ -256,9 +256,9 @@ int main(int, char**)
 }
 ```
 
-<table align="center">
+<table align="center" width="100%">
   <tr>
-    <td align="center">
+    <td align="center" width="9999">
       <img src="doc/README/Poisson.png" alt="Poisson solution on the unit square" width="360" style="max-width:100%;height:auto;">
     </td>
   </tr>
