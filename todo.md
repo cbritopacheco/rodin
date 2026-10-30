@@ -260,9 +260,37 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       (8 sommets x 3 composantes par côté, soit 576 réels par thread pour
       un couple vectoriel). A revoir pour la performance (taille selon la
       géométrie, ou une équipe par cellule) au jalon benchmark.
-- [ ] `Dot(A, Jac) : Dot(A, Jac)` (coefficient matriciel) et `(Jac w).v`
-      avec w vectoriel demandent des fonctions vectorielles sur device:
-      jalon GridFunction.
-- [ ] Jalons suivants: GridFunction et fonctions vectorielles sur device,
-      LinearForm, Problem et DirichletBC, assemblage COO PETSc, puis le
-      benchmark Oseen.
+- [x] `(Jac w).v` avec w vectoriel: fait au jalon 3.
+- [ ] `Dot(A, Jac) : Dot(A, Jac)` (coefficient matriciel) reste a faire.
+- [x] Jalons suivants: voir les sections 8 et suivantes.
+
+## 8. DSL device, jalon 3: GridFunction et fonctions vectorielles
+
+- [x] `DeviceView<GridFunction<P1 device, Data>>`: les coefficients sont
+      copiés une fois dans une `Kokkos::View` a la construction de la vue
+      (avant le noyau), puis interpolés par les fonctions de base P1 du
+      point de quadrature. Scalaire et vectoriel, même numérotation que
+      l'espace (`q + r * nv`).
+- [x] `Grad(gf)` (P1 scalaire), `Jacobian(gf)` et `Div(gf)` (P1 vectoriel)
+      sur device, via la jacobienne inverse du point.
+- [x] `VectorFunction{f, g, ...}` sur device (au plus 3 composantes),
+      composantes lambdas device, réels ou entiers; la CTAD accepte les
+      lambdas `KOKKOS_LAMBDA` prenant un `PointView`.
+- [x] Produits génériques `mult` (réel, vecteur, matrice) pour `f * A`,
+      `A * f`, `M * v`, `M * N` entre fonctions et fonctions de forme.
+- [x] `GridFunctionBase`: le chemin d'interpolation hôte n'est plus
+      instancié sur un maillage Kokkos (trait `Context::IsKokkos`), ce qui
+      permet d'écrire `GridFunction dg(dfes)` dans les expressions.
+- [x] Tests `RodinKokkosVariationalCoefficientBilinearFormTest`: `g u.v`,
+      `g Grad u.Grad v`, `(g + f) u.v`, `(g f) u.v`, convection
+      `(Jac u) w.v`, Newton `(Jac w) u.v`, `Div(w) u.v`, `w Div(u).v`,
+      `p Grad(g).v`, `VectorFunction` lambda et constante, comparés a
+      l'hôte a 1e-12 sur triangles, maillage mixte et tétraèdres.
+- [ ] Performance: dans `Mult<F, A>` le coefficient est évalué une fois par
+      DOF local et par point de quadrature. Pour une GridFunction cela
+      refait l'interpolation a chaque DOF; il faudra l'évaluer une seule
+      fois par point de quadrature (cache dans le noyau) au jalon
+      benchmark.
+- [ ] `GridFunction` device construite par copie de `getData()` depuis
+      l'hôte; l'interpolation ou la projection directement sur device
+      reste a faire.

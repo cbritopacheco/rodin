@@ -66,6 +66,64 @@ namespace Rodin::Tests::Unit
   }
 
   /**
+   * @brief Compares a device assembled vector with its host reference.
+   * @param host Vector assembled on the local mesh.
+   * @param device Vector assembled on the resident mesh.
+   */
+  inline void expectSameVector(
+    const Math::Vector<Real>& host, const Math::Vector<Real>& device)
+  {
+    ASSERT_EQ(host.size(), device.size());
+    ASSERT_GT(host.norm(), Real(0));
+    EXPECT_LE((host - device).norm(), Real(1e-12) * host.norm());
+  }
+
+  /**
+   * @brief Assembles a host and a device linear form and compares their vectors.
+   * @param hv Host test function.
+   * @param h Host integral.
+   * @param dv Device test function.
+   * @param d Device integral of the same expression.
+   */
+  template <class HostTest, class HostIntegral, class DeviceTest, class DeviceIntegral>
+  void expectSameLinearForm(const HostTest& hv, const HostIntegral& h,
+    const DeviceTest& dv, const DeviceIntegral& d)
+  {
+    static_assert(
+      requires(const DeviceIntegral& i) { i.assemble().values; },
+      "The device expression must lower to a Kokkos integral.");
+    Variational::LinearForm hf(hv);
+    hf = h;
+    hf.assemble();
+    Variational::LinearForm df(dv);
+    df = d;
+    df.assemble();
+    expectSameVector(hf.getVector(), df.getVector());
+  }
+
+  /**
+   * @brief Sets smooth vertex values of a P1 grid function.
+   * @param gf Grid function, component r of vertex i stored at i + r * n.
+   * @param mesh Host mesh of the vertex coordinates.
+   * @param vdim Vector dimension of the grid function.
+   */
+  template <class GF>
+  void fill(GF& gf, const HostMesh& mesh, size_t vdim)
+  {
+    auto& data = gf.getData();
+    const size_t n = mesh.getVertexCount();
+    for (size_t i = 0; i < n; ++i)
+    {
+      const auto x = mesh.getVertexCoordinates(i);
+      for (size_t r = 0; r < vdim; ++r)
+      {
+        data.coeffRef(i + r * n) =
+          1 + Real(0.3) * r + (r + 1) * x(0) - Real(0.5) * x(1) * x(1) + x(0) * x(1);
+      }
+    }
+  }
+
+  /**
    * @brief Two quadrilaterals and two triangles with tagged cells.
    * @return Mixed mesh with cell attributes 1 and 2.
    */

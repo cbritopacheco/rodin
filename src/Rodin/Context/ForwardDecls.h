@@ -11,6 +11,8 @@
 #ifndef RODIN_CONTEXT_FORWARDDECLS_H
 #define RODIN_CONTEXT_FORWARDDECLS_H
 
+#include <type_traits>
+
 namespace Rodin::Context
 {
   class Base;
@@ -23,6 +25,16 @@ namespace Rodin::Context
 
   template <class Distribution, class Backend>
   class Kokkos;
+
+  /// @brief Whether a context executes on a Kokkos device.
+  template <class C>
+  struct IsKokkos : std::false_type
+  {};
+
+  /// @brief Kokkos contexts execute on a Kokkos device.
+  template <class Distribution, class Backend>
+  struct IsKokkos<Kokkos<Distribution, Backend>> : std::true_type
+  {};
 }
 
 #endif

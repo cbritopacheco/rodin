@@ -69,6 +69,7 @@
 #include "Rodin/Geometry/PolytopeIterator.h"
 
 #include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Context/ForwardDecls.h"
 
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/IO/MEDIT.h"
@@ -290,7 +291,7 @@ namespace Rodin::Variational
        * @brief Returns a constant reference to the GridFunction data.
        * @returns A constant reference to the GridFunction data.
        */
-      constexpr const auto& getData()
+      constexpr const auto& getData() const
       {
         return getReferencedGridFunction().getData();
       }
@@ -433,6 +434,13 @@ namespace Rodin::Variational
 
       /// @brief Parent CRTP reference type.
       using Parent = GridFunctionBaseReference<Derived>;
+
+      /// @brief Whether the space lives on a Kokkos device mesh.
+      ///
+      /// Device grid functions are evaluated through Kokkos device views, so
+      /// the host interpolation path is not instantiated for them.
+      static constexpr bool IsDevice =
+        Context::IsKokkos<typename FESType::MeshType::Context>::value;
 
       static_assert(std::is_same_v<RangeType, ScalarType> ||
         FormLanguage::IsVectorRange<RangeType>::Value ||
@@ -817,6 +825,14 @@ namespace Rodin::Variational
        */
       constexpr void interpolate(RangeType& res, const Geometry::Point& p) const
       {
+        if constexpr (IsDevice)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Device grid functions are evaluated on Kokkos devices only."
+            << Alert::Raise;
+        }
+        else
+        {
         const auto& fes = this->getFiniteElementSpace();
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
@@ -834,6 +850,7 @@ namespace Rodin::Variational
         };
         const auto mapping = fes.getPushforward({d, i}, expansion);
         res = mapping(p);
+        }
       }
 
       /**
@@ -843,6 +860,14 @@ namespace Rodin::Variational
        */
       constexpr void interpolate(RangeType& res, const IntegrationPoint& ip) const
       {
+        if constexpr (IsDevice)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Device grid functions are evaluated on Kokkos devices only."
+            << Alert::Raise;
+        }
+        else
+        {
         if (ip.getReferenceQuadratureFormula() == nullptr)
         {
           static_cast<const Derived&>(*this).interpolate(res, ip.getPoint());
@@ -887,6 +912,7 @@ namespace Rodin::Variational
           res = mapping(ip);
         else
           res = mapping(p);
+        }
       }
 
       /**

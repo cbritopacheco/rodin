@@ -12,6 +12,8 @@
  * @brief Lowering of form language expressions to device-callable views.
  */
 
+#include <string>
+#include <tuple>
 #include <type_traits>
 
 #include <Kokkos_Core.hpp>
@@ -20,6 +22,8 @@
 
 #include "Rodin/Variational/Function.h"
 #include "Rodin/Variational/RealFunction.h"
+#include "Rodin/Variational/VectorFunction.h"
+#include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/Sum.h"
 #include "Rodin/Variational/Mult.h"
@@ -72,15 +76,15 @@ namespace Rodin::Kokkos::Variational
   using DeviceVectorP1 = DeviceP1Space<Math::SpatialVector<Real>, Backend>;
 
   /**
-   * @brief Scales a scalar value.
-   * @param s Scaling factor.
-   * @param v Scalar value.
-   * @return Product @f$ s v @f$.
+   * @brief Multiplies two scalar values.
+   * @param a First factor.
+   * @param b Second factor.
+   * @return Product @f$ a b @f$.
    */
   KOKKOS_INLINE_FUNCTION
-  Real scale(Real s, Real v)
+  Real mult(Real a, Real b)
   {
-    return s * v;
+    return a * b;
   }
 
   /**
@@ -90,12 +94,24 @@ namespace Rodin::Kokkos::Variational
    * @return Vector @f$ s v @f$.
    */
   KOKKOS_INLINE_FUNCTION
-  Geometry::Vector scale(Real s, const Geometry::Vector& v)
+  Geometry::Vector mult(Real s, const Geometry::Vector& v)
   {
     Geometry::Vector result(v.size());
     for (Index i = 0; i < v.size(); ++i)
       result(i) = s * v(i);
     return result;
+  }
+
+  /**
+   * @brief Scales a device vector.
+   * @param v Device vector.
+   * @param s Scaling factor.
+   * @return Vector @f$ v s @f$.
+   */
+  KOKKOS_INLINE_FUNCTION
+  Geometry::Vector mult(const Geometry::Vector& v, Real s)
+  {
+    return mult(s, v);
   }
 
   /**
@@ -105,13 +121,66 @@ namespace Rodin::Kokkos::Variational
    * @return Matrix @f$ s m @f$.
    */
   KOKKOS_INLINE_FUNCTION
-  Geometry::Matrix scale(Real s, const Geometry::Matrix& m)
+  Geometry::Matrix mult(Real s, const Geometry::Matrix& m)
   {
     Geometry::Matrix result(m.rows(), m.cols());
     for (Index i = 0; i < m.rows(); ++i)
     {
       for (Index j = 0; j < m.cols(); ++j)
         result(i, j) = s * m(i, j);
+    }
+    return result;
+  }
+
+  /**
+   * @brief Scales a device matrix.
+   * @param m Device matrix.
+   * @param s Scaling factor.
+   * @return Matrix @f$ m s @f$.
+   */
+  KOKKOS_INLINE_FUNCTION
+  Geometry::Matrix mult(const Geometry::Matrix& m, Real s)
+  {
+    return mult(s, m);
+  }
+
+  /**
+   * @brief Multiplies a device vector by a device matrix.
+   * @param m Device matrix.
+   * @param v Device vector, with as many entries as @p m has columns.
+   * @return Vector @f$ m v @f$.
+   */
+  KOKKOS_INLINE_FUNCTION
+  Geometry::Vector mult(const Geometry::Matrix& m, const Geometry::Vector& v)
+  {
+    KOKKOS_ASSERT(m.cols() == v.size());
+    Geometry::Vector result(m.rows());
+    for (Index i = 0; i < m.rows(); ++i)
+    {
+      for (Index j = 0; j < m.cols(); ++j)
+        result(i) += m(i, j) * v(j);
+    }
+    return result;
+  }
+
+  /**
+   * @brief Multiplies two device matrices.
+   * @param a First matrix.
+   * @param b Second matrix, with as many rows as @p a has columns.
+   * @return Matrix @f$ a b @f$.
+   */
+  KOKKOS_INLINE_FUNCTION
+  Geometry::Matrix mult(const Geometry::Matrix& a, const Geometry::Matrix& b)
+  {
+    KOKKOS_ASSERT(a.cols() == b.rows());
+    Geometry::Matrix result(a.rows(), b.cols());
+    for (Index i = 0; i < a.rows(); ++i)
+    {
+      for (Index j = 0; j < b.cols(); ++j)
+      {
+        for (Index k = 0; k < a.cols(); ++k)
+          result(i, j) += a(i, k) * b(k, j);
+      }
     }
     return result;
   }
@@ -333,6 +402,12 @@ namespace Rodin::Kokkos::Variational
    * | `DeviceView<Sum<FunctionBase<L>, FunctionBase<R>>>` | Sum of functions. |
    * | `DeviceView<Mult<FunctionBase<L>, FunctionBase<R>>>` | Product of functions. |
    * | `DeviceView<UnaryMinus<FunctionBase<N>>>` | Negated function. |
+   * | `DeviceView<RealFunction<Integer>>` | Integer constant. |
+   * | `DeviceView<VectorFunction<V, Values...>>` | Vector function given component-wise. |
+   * | `DeviceView<GridFunction<DeviceP1Space<R, B>, Data>>` | P1 grid function. |
+   * | `DeviceView<Grad<GridFunction<DeviceP1<B>, Data>>>` | Physical gradient of a P1 grid function. |
+   * | `DeviceView<Jacobian<GridFunction<DeviceVectorP1<B>, Data>>>` | Physical Jacobian of a vector P1 grid function. |
+   * | `DeviceView<Div<GridFunction<DeviceVectorP1<B>, Data>>>` | Divergence of a vector P1 grid function. |
    * | `DeviceView<ShapeFunctionBase<Derived, FES, Space>>` | Forwards to the derived shape function. |
    * | `DeviceView<ShapeFunction<Derived, DeviceP1<B>, Space>>` | P1 basis value. |
    * | `DeviceView<Grad<ShapeFunction<Derived, DeviceP1<B>, Space>>>` | Physical P1 gradient. |
@@ -441,9 +516,9 @@ namespace Rodin::Kokkos::Variational
 
     /// @param p Device point. @return Function value.
     KOKKOS_INLINE_FUNCTION
-    Real getValue(const Geometry::PointView& p) const
+    auto getValue(const Geometry::PointView& p) const
     {
-      return lhs.getValue(p) + rhs.getValue(p);
+      return add(lhs.getValue(p), rhs.getValue(p));
     }
 
     /// @brief Left operand.
@@ -469,9 +544,9 @@ namespace Rodin::Kokkos::Variational
 
     /// @param p Device point. @return Function value.
     KOKKOS_INLINE_FUNCTION
-    Real getValue(const Geometry::PointView& p) const
+    auto getValue(const Geometry::PointView& p) const
     {
-      return lhs.getValue(p) * rhs.getValue(p);
+      return mult(lhs.getValue(p), rhs.getValue(p));
     }
 
     /// @brief Left operand.
@@ -494,13 +569,409 @@ namespace Rodin::Kokkos::Variational
 
     /// @param p Device point. @return Function value.
     KOKKOS_INLINE_FUNCTION
-    Real getValue(const Geometry::PointView& p) const
+    auto getValue(const Geometry::PointView& p) const
     {
-      return -operand.getValue(p);
+      return mult(Real(-1), operand.getValue(p));
     }
 
     /// @brief Operand.
     DeviceView<::Rodin::Variational::FunctionBase<NestedDerived>> operand;
+  };
+
+  /// @brief Integer constant.
+  template <>
+  struct DeviceView<::Rodin::Variational::RealFunction<Integer>>
+  {
+    /// @param node Function expression.
+    DeviceView(const ::Rodin::Variational::RealFunction<Integer>& node)
+      : value(node.getValue())
+    {}
+
+    /// @param p Device point, unused. @return Constant value.
+    KOKKOS_INLINE_FUNCTION
+    Real getValue([[maybe_unused]] const Geometry::PointView& p) const
+    {
+      return value;
+    }
+
+    /// @brief Constant value.
+    Real value;
+  };
+
+  /// @brief Forwards a vector function to its derived type.
+  template <class Scalar, class Derived>
+  struct DeviceView<::Rodin::Variational::VectorFunctionBase<Scalar, Derived>>
+    : DeviceView<Derived>
+  {
+    /// @param node Function expression.
+    DeviceView(const ::Rodin::Variational::VectorFunctionBase<Scalar, Derived>& node)
+      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    {}
+  };
+
+  /// @brief Forwards a matrix function to its derived type.
+  template <class Scalar, class Derived>
+  struct DeviceView<::Rodin::Variational::MatrixFunctionBase<Scalar, Derived>>
+    : DeviceView<Derived>
+  {
+    /// @param node Function expression.
+    DeviceView(const ::Rodin::Variational::MatrixFunctionBase<Scalar, Derived>& node)
+      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    {}
+  };
+
+  /// @brief Forwards a gradient of a function to its derived type.
+  template <class Operand, class Derived>
+  struct DeviceView<::Rodin::Variational::GradBase<Operand, Derived>>
+    : DeviceView<Derived>
+  {
+    /// @param node Function expression.
+    DeviceView(const ::Rodin::Variational::GradBase<Operand, Derived>& node)
+      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    {}
+  };
+
+  /// @brief Forwards a Jacobian of a function to its derived type.
+  template <class Operand, class Derived>
+  struct DeviceView<::Rodin::Variational::JacobianBase<Operand, Derived>>
+    : DeviceView<Derived>
+  {
+    /// @param node Function expression.
+    DeviceView(const ::Rodin::Variational::JacobianBase<Operand, Derived>& node)
+      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    {}
+  };
+
+  /// @brief Forwards a divergence of a function to its derived type.
+  template <class Operand, class Derived>
+  struct DeviceView<::Rodin::Variational::DivBase<Operand, Derived>> : DeviceView<Derived>
+  {
+    /// @param node Function expression.
+    DeviceView(const ::Rodin::Variational::DivBase<Operand, Derived>& node)
+      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    {}
+  };
+}
+
+namespace Rodin::Kokkos::Variational::Internal
+{
+  /**
+   * @brief Device views of the components of a vector function.
+   *
+   * Recursive storage, so that the views of components of distinct types are
+   * held by value without std::tuple in device code.
+   *
+   * @tparam Nodes Component expression types.
+   */
+  template <class... Nodes>
+  struct DeviceViewPack
+  {
+    /// @brief Evaluates no component.
+    KOKKOS_INLINE_FUNCTION
+    void evaluate([[maybe_unused]] Geometry::Vector& out,
+      [[maybe_unused]] const Geometry::PointView& p, [[maybe_unused]] Index i) const
+    {}
+  };
+
+  /// @brief Device views of a first component and of the remaining ones.
+  template <class Head, class... Tail>
+  struct DeviceViewPack<Head, Tail...>
+  {
+    /// @param head First component. @param tail Remaining components.
+    DeviceViewPack(const Head& head, const Tail&... tail)
+      : first(head),
+        rest(tail...)
+    {}
+
+    /**
+     * @brief Evaluates the components from a given position.
+     * @param out Vector receiving the values.
+     * @param p Device point.
+     * @param i Position of the first component.
+     */
+    KOKKOS_INLINE_FUNCTION
+    void evaluate(Geometry::Vector& out, const Geometry::PointView& p, Index i) const
+    {
+      out(i) = first.getValue(p);
+      rest.evaluate(out, p, i + 1);
+    }
+
+    /// @brief First component.
+    DeviceView<Head> first;
+
+    /// @brief Remaining components.
+    DeviceViewPack<Tail...> rest;
+  };
+}
+
+namespace Rodin::Kokkos::Variational
+{
+  /**
+   * @brief Vector function given component-wise.
+   *
+   * Each component is a real constant or a callable taking a device point.
+   */
+  template <class V, class... Values>
+  struct DeviceView<::Rodin::Variational::VectorFunction<V, Values...>>
+  {
+    static_assert(1 + sizeof...(Values) <= 3,
+      "Vector functions on Kokkos meshes have at most three components.");
+
+    /// @brief Component views.
+    using PackType = Internal::DeviceViewPack<::Rodin::Variational::RealFunction<V>,
+      ::Rodin::Variational::RealFunction<Values>...>;
+
+    /// @param node Function expression.
+    DeviceView(const ::Rodin::Variational::VectorFunction<V, Values...>& node)
+      : components(std::make_from_tuple<PackType>(node.getFunctions()))
+    {}
+
+    /// @param p Device point. @return Function value.
+    KOKKOS_INLINE_FUNCTION
+    Geometry::Vector getValue(const Geometry::PointView& p) const
+    {
+      Geometry::Vector result(1 + sizeof...(Values));
+      components.evaluate(result, p, 0);
+      return result;
+    }
+
+    /// @brief Component views.
+    PackType components;
+  };
+
+  /**
+   * @brief Coefficients of a P1 grid function in device memory.
+   *
+   * The coefficients are copied to the mesh memory space when the view is
+   * built, so the view reflects the grid function at lowering time. Values and
+   * derivatives are interpolated from the vertices of the polytope holding the
+   * point, as on the host.
+   *
+   * @tparam Range Range type of the space, Real or a spatial vector.
+   * @tparam Backend Kokkos backend of the mesh context.
+   */
+  template <class Range, class Backend>
+  class P1GridFunctionView
+  {
+    public:
+      /// @brief Finite element space.
+      using FESType = DeviceP1Space<Range, Backend>;
+
+      /// @brief Memory space of the coefficients.
+      using MemorySpace = typename FESType::MeshType::MemorySpace;
+
+      /**
+       * @brief Copies the coefficients of a grid function to the device.
+       * @param fes Space of the grid function.
+       * @param data Coefficients, numbered as by the space.
+       */
+      template <class Data>
+      P1GridFunctionView(const FESType& fes, const Data& data)
+        : m_vdim(fes.getVectorDimension()),
+          m_vertexCount(fes.getMesh().getVertexCount())
+      {
+        const auto& execution = fes.getMesh().getContext().getExecutionSpace();
+        const Index size = data.size();
+        m_data = ::Kokkos::View<Real*, MemorySpace>(
+          ::Kokkos::view_alloc(execution, std::string("Rodin grid function")), size);
+        auto host = ::Kokkos::create_mirror_view(m_data);
+        for (Index i = 0; i < size; ++i)
+          host(i) = data.coeff(i);
+        ::Kokkos::deep_copy(execution, m_data, host);
+        execution.fence("Rodin grid function transfer");
+      }
+
+      /// @brief Returns the vector dimension. @return Component count.
+      KOKKOS_INLINE_FUNCTION
+      Index getVectorDimension() const
+      {
+        return m_vdim;
+      }
+
+      /**
+       * @brief Interpolates one component.
+       * @param p Device point.
+       * @param r Component index.
+       * @return Component @f$ u_r(p) @f$.
+       */
+      KOKKOS_INLINE_FUNCTION
+      Real interpolate(const Geometry::PointView& p, Index r) const
+      {
+        const auto vertices = p.getPolytope().getVertices();
+        Geometry::Vector reference(p.getReferenceCoordinates().size());
+        Real result = 0;
+        for (Index a = 0; a < vertices.size(); ++a)
+        {
+          Real phi;
+          p.evaluateBasis(a, phi, reference);
+          result += phi * m_data(vertices[a] + r * m_vertexCount);
+        }
+        return result;
+      }
+
+      /**
+       * @brief Interpolates the physical Jacobian.
+       * @param p Device point.
+       * @return Matrix with one row per component, row @f$ r @f$ holding
+       * @f$ \nabla u_r(p) @f$.
+       */
+      KOKKOS_INLINE_FUNCTION
+      Geometry::Matrix interpolateJacobian(const Geometry::PointView& p) const
+      {
+        const auto vertices = p.getPolytope().getVertices();
+        const Geometry::Matrix inverse = p.getJacobianInverse();
+        const Index rdim = inverse.rows();
+        const Index sdim = inverse.cols();
+        Geometry::Matrix result(m_vdim, sdim);
+        for (Index a = 0; a < vertices.size(); ++a)
+        {
+          Real phi;
+          Geometry::Vector reference(rdim);
+          p.evaluateBasis(a, phi, reference);
+          for (Index c = 0; c < sdim; ++c)
+          {
+            Real gradient = 0;
+            for (Index k = 0; k < rdim; ++k)
+              gradient += inverse(k, c) * reference(k);
+            for (Index r = 0; r < m_vdim; ++r)
+              result(r, c) += gradient * m_data(vertices[a] + r * m_vertexCount);
+          }
+        }
+        return result;
+      }
+
+    private:
+      Index m_vdim;
+      Index m_vertexCount;
+      ::Kokkos::View<Real*, MemorySpace> m_data;
+  };
+
+  /// @brief P1 grid function.
+  template <class Range, class Backend, class Data>
+  struct DeviceView<
+    ::Rodin::Variational::GridFunction<DeviceP1Space<Range, Backend>, Data>>
+  {
+    /// @param node Grid function.
+    DeviceView(
+      const ::Rodin::Variational::GridFunction<DeviceP1Space<Range, Backend>, Data>&
+        node)
+      : u(node.getFiniteElementSpace(), node.getData())
+    {}
+
+    /// @param fes Space of the grid function. @param data Coefficients.
+    DeviceView(const DeviceP1Space<Range, Backend>& fes, const Data& data)
+      : u(fes, data)
+    {}
+
+    /// @param p Device point. @return Function value.
+    KOKKOS_INLINE_FUNCTION
+    auto getValue(const Geometry::PointView& p) const
+    {
+      if constexpr (std::is_same_v<Range, Real>)
+      {
+        return u.interpolate(p, 0);
+      }
+      else
+      {
+        Geometry::Vector result(u.getVectorDimension());
+        for (Index r = 0; r < u.getVectorDimension(); ++r)
+          result(r) = u.interpolate(p, r);
+        return result;
+      }
+    }
+
+    /// @brief Device coefficients.
+    P1GridFunctionView<Range, Backend> u;
+  };
+
+  /// @brief Grid function referenced by an expression.
+  template <class Range, class Backend, class Data>
+  struct DeviceView<::Rodin::Variational::GridFunctionBaseReference<
+    ::Rodin::Variational::GridFunction<DeviceP1Space<Range, Backend>, Data>>>
+    : DeviceView<::Rodin::Variational::GridFunction<DeviceP1Space<Range, Backend>, Data>>
+  {
+    /// @param node Reference to a grid function.
+    DeviceView(const ::Rodin::Variational::GridFunctionBaseReference<
+      ::Rodin::Variational::GridFunction<DeviceP1Space<Range, Backend>, Data>>& node)
+      : DeviceView<
+          ::Rodin::Variational::GridFunction<DeviceP1Space<Range, Backend>, Data>>(
+          node.getFiniteElementSpace(), node.getData())
+    {}
+  };
+
+  /// @brief Physical gradient of a scalar P1 grid function.
+  template <class Backend, class Data>
+  struct DeviceView<::Rodin::Variational::Grad<
+    ::Rodin::Variational::GridFunction<DeviceP1<Backend>, Data>>>
+  {
+    /// @param node Gradient expression.
+    DeviceView(const ::Rodin::Variational::Grad<
+      ::Rodin::Variational::GridFunction<DeviceP1<Backend>, Data>>& node)
+      : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData())
+    {}
+
+    /// @param p Device point. @return Gradient @f$ \nabla u(p) @f$.
+    KOKKOS_INLINE_FUNCTION
+    Geometry::Vector getValue(const Geometry::PointView& p) const
+    {
+      const Geometry::Matrix jacobian = u.interpolateJacobian(p);
+      Geometry::Vector result(jacobian.cols());
+      for (Index c = 0; c < jacobian.cols(); ++c)
+        result(c) = jacobian(0, c);
+      return result;
+    }
+
+    /// @brief Device coefficients.
+    P1GridFunctionView<Real, Backend> u;
+  };
+
+  /// @brief Physical Jacobian of a vector P1 grid function.
+  template <class Backend, class Data>
+  struct DeviceView<::Rodin::Variational::Jacobian<
+    ::Rodin::Variational::GridFunction<DeviceVectorP1<Backend>, Data>>>
+  {
+    /// @param node Jacobian expression.
+    DeviceView(const ::Rodin::Variational::Jacobian<
+      ::Rodin::Variational::GridFunction<DeviceVectorP1<Backend>, Data>>& node)
+      : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData())
+    {}
+
+    /// @param p Device point. @return Jacobian @f$ \nabla u(p) @f$.
+    KOKKOS_INLINE_FUNCTION
+    Geometry::Matrix getValue(const Geometry::PointView& p) const
+    {
+      return u.interpolateJacobian(p);
+    }
+
+    /// @brief Device coefficients.
+    P1GridFunctionView<Math::SpatialVector<Real>, Backend> u;
+  };
+
+  /// @brief Divergence of a vector P1 grid function.
+  template <class Backend, class Data>
+  struct DeviceView<::Rodin::Variational::Div<
+    ::Rodin::Variational::GridFunction<DeviceVectorP1<Backend>, Data>>>
+  {
+    /// @param node Divergence expression.
+    DeviceView(const ::Rodin::Variational::Div<
+      ::Rodin::Variational::GridFunction<DeviceVectorP1<Backend>, Data>>& node)
+      : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData())
+    {}
+
+    /// @param p Device point. @return Divergence @f$ \nabla \cdot u(p) @f$.
+    KOKKOS_INLINE_FUNCTION
+    Real getValue(const Geometry::PointView& p) const
+    {
+      const Geometry::Matrix jacobian = u.interpolateJacobian(p);
+      KOKKOS_ASSERT(jacobian.rows() == jacobian.cols());
+      Real result = 0;
+      for (Index r = 0; r < jacobian.rows(); ++r)
+        result += jacobian(r, r);
+      return result;
+    }
+
+    /// @brief Device coefficients.
+    P1GridFunctionView<Math::SpatialVector<Real>, Backend> u;
   };
 
   /// @brief Forwards a shape function to its derived type.
@@ -571,7 +1042,7 @@ namespace Rodin::Kokkos::Variational
     KOKKOS_INLINE_FUNCTION
     auto getBasis(const IntegrationPointView& ip, Index local) const
     {
-      return scale(lhs.getValue(ip.getPoint()), rhs.getBasis(ip, local));
+      return mult(lhs.getValue(ip.getPoint()), rhs.getBasis(ip, local));
     }
 
     /// @brief Function factor.
@@ -600,7 +1071,7 @@ namespace Rodin::Kokkos::Variational
     KOKKOS_INLINE_FUNCTION
     auto getBasis(const IntegrationPointView& ip, Index local) const
     {
-      return scale(rhs.getValue(ip.getPoint()), lhs.getBasis(ip, local));
+      return mult(lhs.getBasis(ip, local), rhs.getValue(ip.getPoint()));
     }
 
     /// @brief Shape function factor.
@@ -747,7 +1218,7 @@ namespace Rodin::Kokkos::Variational
     KOKKOS_INLINE_FUNCTION
     auto getBasis(const IntegrationPointView& ip, Index local) const
     {
-      return scale(Real(-1), operand.getBasis(ip, local));
+      return mult(Real(-1), operand.getBasis(ip, local));
     }
 
     /// @brief Operand.

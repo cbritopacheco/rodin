@@ -437,6 +437,15 @@ namespace Rodin::Variational
       {}
 
       /**
+       * @brief Gets the constant value.
+       * @returns Constant value converted to Real
+       */
+      constexpr Real getValue() const noexcept
+      {
+        return m_x;
+      }
+
+      /**
        * @brief Evaluates the constant function at a point.
        * @returns Constant value converted to Real
        * @param point Evaluation point; the result is independent of this argument.
