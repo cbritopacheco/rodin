@@ -938,14 +938,17 @@ namespace Rodin::Geometry
         return measure(getDimension() ? getDimension() - 1 : 0, &attributes, true);
       }
 
-    private:
+    public:
+      // Kernel functors are public because NVCC's generated host launch stubs
+      // name them outside the class scope. They are implementation details,
+      // not part of the mesh API.
       using GeometryKind = Rodin::Kokkos::Geometry::GeometryKind;
       template <class T>
       using DeviceArray = ::Kokkos::View<T*, MemorySpace>;
 
       /**
        * @brief One resident quadrature reduction over entities of a reference family.
-       * Named functors permit use from private host methods with NVCC.
+       * NVCC rejects extended lambdas in private host methods; named functors do not.
        */
       struct Measure
       {
@@ -1035,6 +1038,7 @@ namespace Rodin::Geometry
         }
       };
 
+    private:
       /**
        * @brief Extends resident entity slots on first use after connectivity discovery.
        * Like the core attribute and transformation indices, const queries may
@@ -1204,14 +1208,14 @@ namespace Rodin::Geometry
             !getPolytopeCount(geometry))
             continue;
           const Polytope::Traits traits(geometry);
-          const Variational::RealP1Element element(geometry);
-          // Match Polytope::getMeasure's degree policy, including its curved-map floor.
+          // Resident maps are first order: match Polytope::getMeasure's
+          // first-order policy, including its curved-map floor.
           constexpr size_t MinimumCurvedMeasureOrder = 8;
-          size_t order = std::max(MinimumCurvedMeasureOrder, 2 * element.getOrder() + 2);
+          size_t order = MinimumCurvedMeasureOrder;
           if (traits.isSimplex())
             order = 0;
           else if (dimension == m_sdim && geometry != Polytope::Type::Pyramid)
-            order = dimension * element.getFactorOrder() - 1;
+            order = dimension - 1;
           const auto& formula = QF::QuadratureFormula::get(order, geometry);
           std::vector<Real> points, weights;
           for (size_t q = 0; q < formula.getSize(); ++q)
