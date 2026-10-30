@@ -111,40 +111,105 @@ namespace Rodin::Kokkos::Variational
 namespace Rodin::Kokkos::Variational::Internal
 {
   /**
-   * @brief Whether the host integrates a trial/test pair with a P1 gradient
+   * @brief Whether the host integrates a trial/test pair with a P1 derivative
    * handler.
    *
-   * The host P1 handlers of @f$ \nabla u \cdot \nabla v @f$ and
-   * @f$ f \nabla u \cdot \nabla v @f$ have their own quadrature order
-   * fallback, which the device reproduces.
+   * The host P1 handlers of forms with derivatives on both sides, such as
+   * @f$ \nabla u \cdot \nabla v @f$, @f$ \nabla u : \nabla v @f$ or
+   * @f$ (\nabla \cdot u) q @f$, fall back to the quadrature order
+   * @f$ k_u + k_v - 2 @f$, which the device reproduces.
    */
   template <class LHSDerived, class RHSDerived>
-  struct IsP1GradientForm
+  struct IsP1DerivativeForm
   {
     static constexpr bool Value = false;
   };
 
   /// @brief Gradient trial and test operators.
-  template <class LHSDerived, class RHSDerived, class FES>
-  struct IsP1GradientForm<
-    ::Rodin::Variational::Grad<::Rodin::Variational::ShapeFunction<LHSDerived, FES,
+  template <class LHSDerived, class RHSDerived, class TrialFES, class TestFES>
+  struct IsP1DerivativeForm<
+    ::Rodin::Variational::Grad<::Rodin::Variational::ShapeFunction<LHSDerived, TrialFES,
       ::Rodin::Variational::ShapeFunctionSpaceType::Trial>>,
-    ::Rodin::Variational::Grad<::Rodin::Variational::ShapeFunction<RHSDerived, FES,
+    ::Rodin::Variational::Grad<::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
       ::Rodin::Variational::ShapeFunctionSpaceType::Test>>>
   {
     static constexpr bool Value = true;
   };
 
   /// @brief Scaled gradient trial operator and gradient test operator.
-  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class FES>
-  struct IsP1GradientForm<
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class TrialFES,
+    class TestFES>
+  struct IsP1DerivativeForm<
     ::Rodin::Variational::Mult<::Rodin::Variational::FunctionBase<CoefficientDerived>,
       ::Rodin::Variational::ShapeFunctionBase<
-        ::Rodin::Variational::Grad<::Rodin::Variational::ShapeFunction<LHSDerived, FES,
-          ::Rodin::Variational::ShapeFunctionSpaceType::Trial>>,
-        FES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial>>,
-    ::Rodin::Variational::Grad<::Rodin::Variational::ShapeFunction<RHSDerived, FES,
+        ::Rodin::Variational::Grad<::Rodin::Variational::ShapeFunction<LHSDerived,
+          TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial>>,
+        TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial>>,
+    ::Rodin::Variational::Grad<::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
       ::Rodin::Variational::ShapeFunctionSpaceType::Test>>>
+  {
+    static constexpr bool Value = true;
+  };
+
+  /// @brief Divergence trial operator and scalar test function.
+  template <class LHSDerived, class RHSDerived, class TrialFES, class TestFES>
+  struct IsP1DerivativeForm<
+    ::Rodin::Variational::Div<::Rodin::Variational::ShapeFunction<LHSDerived, TrialFES,
+      ::Rodin::Variational::ShapeFunctionSpaceType::Trial>>,
+    ::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
+      ::Rodin::Variational::ShapeFunctionSpaceType::Test>>
+  {
+    static constexpr bool Value = std::is_same_v<typename TestFES::RangeType, Real>;
+  };
+
+  /// @brief Scalar trial function and divergence test operator.
+  template <class LHSDerived, class RHSDerived, class TrialFES, class TestFES>
+  struct IsP1DerivativeForm<::Rodin::Variational::ShapeFunction<LHSDerived, TrialFES,
+                              ::Rodin::Variational::ShapeFunctionSpaceType::Trial>,
+    ::Rodin::Variational::Div<::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
+      ::Rodin::Variational::ShapeFunctionSpaceType::Test>>>
+  {
+    static constexpr bool Value = std::is_same_v<typename TrialFES::RangeType, Real>;
+  };
+
+  /// @brief Jacobian trial and test operators.
+  template <class LHSDerived, class RHSDerived, class TrialFES, class TestFES>
+  struct IsP1DerivativeForm<
+    ::Rodin::Variational::Jacobian<::Rodin::Variational::ShapeFunction<LHSDerived,
+      TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial>>,
+    ::Rodin::Variational::Jacobian<::Rodin::Variational::ShapeFunction<RHSDerived,
+      TestFES, ::Rodin::Variational::ShapeFunctionSpaceType::Test>>>
+  {
+    static constexpr bool Value = true;
+  };
+
+  /// @brief Scaled Jacobian trial operator and Jacobian test operator.
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class TrialFES,
+    class TestFES>
+  struct IsP1DerivativeForm<
+    ::Rodin::Variational::Mult<::Rodin::Variational::FunctionBase<CoefficientDerived>,
+      ::Rodin::Variational::ShapeFunctionBase<
+        ::Rodin::Variational::Jacobian<::Rodin::Variational::ShapeFunction<LHSDerived,
+          TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial>>,
+        TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial>>,
+    ::Rodin::Variational::Jacobian<::Rodin::Variational::ShapeFunction<RHSDerived,
+      TestFES, ::Rodin::Variational::ShapeFunctionSpaceType::Test>>>
+  {
+    static constexpr bool Value = true;
+  };
+
+  /// @brief Jacobian trial operator times a function, against a test function.
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class TrialFES,
+    class TestFES>
+  struct IsP1DerivativeForm<
+    ::Rodin::Variational::Mult<
+      ::Rodin::Variational::ShapeFunctionBase<
+        ::Rodin::Variational::Jacobian<::Rodin::Variational::ShapeFunction<LHSDerived,
+          TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial>>,
+        TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial>,
+      ::Rodin::Variational::FunctionBase<CoefficientDerived>>,
+    ::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
+      ::Rodin::Variational::ShapeFunctionSpaceType::Test>>
   {
     static constexpr bool Value = true;
   };
@@ -160,7 +225,9 @@ namespace Rodin::Variational
    * @f[
    *   \int_{\mathcal{T}_h} A(u) \cdot B(v) \ dx
    * @f]
-   * for scalar P1 trial and test spaces on a resident Kokkos mesh. The
+   * for scalar or vector P1 trial and test spaces on a resident Kokkos mesh,
+   * possibly different, such as the velocity and pressure spaces of a
+   * Stokes problem. The
    * operators @f$ A @f$ and @f$ B @f$ are lowered once to
    * Rodin::Kokkos::Variational::DeviceView, then a kernel integrates every
    * cell with one thread and writes its local matrix as device triplets.
@@ -174,23 +241,28 @@ namespace Rodin::Variational
    * The host evaluation interface (setPolytope(), integrate()) is not
    * available and raises; the form is assembled by Assembly::Kokkos.
    */
-  template <class LHSDerived, class RHSDerived, class Backend>
-  class Integral<Dot<ShapeFunctionBase<LHSDerived,
-                       Rodin::Kokkos::Variational::DeviceP1<Backend>, TrialSpace>,
-    ShapeFunctionBase<RHSDerived, Rodin::Kokkos::Variational::DeviceP1<Backend>,
-      TestSpace>>>
+  template <class LHSDerived, class RHSDerived, class TrialRange, class TestRange,
+    class Backend>
+  class Integral<
+    Dot<ShapeFunctionBase<LHSDerived,
+          Rodin::Kokkos::Variational::DeviceP1Space<TrialRange, Backend>, TrialSpace>,
+      ShapeFunctionBase<RHSDerived,
+        Rodin::Kokkos::Variational::DeviceP1Space<TestRange, Backend>, TestSpace>>>
     final : public LocalBilinearFormIntegratorBase<Real>,
             public Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>
   {
     public:
-      /// @brief Finite element space of the trial and test functions.
-      using FESType = Rodin::Kokkos::Variational::DeviceP1<Backend>;
+      /// @brief Finite element space of the trial functions.
+      using TrialFESType = Rodin::Kokkos::Variational::DeviceP1Space<TrialRange, Backend>;
+
+      /// @brief Finite element space of the test functions.
+      using TestFESType = Rodin::Kokkos::Variational::DeviceP1Space<TestRange, Backend>;
 
       /// @brief Type of the left operand of the dot product.
-      using LHSType = ShapeFunctionBase<LHSDerived, FESType, TrialSpace>;
+      using LHSType = ShapeFunctionBase<LHSDerived, TrialFESType, TrialSpace>;
 
       /// @brief Type of the right operand of the dot product.
-      using RHSType = ShapeFunctionBase<RHSDerived, FESType, TestSpace>;
+      using RHSType = ShapeFunctionBase<RHSDerived, TestFESType, TestSpace>;
 
       /// @brief Type of the integrand.
       using IntegrandType = Dot<LHSType, RHSType>;
@@ -206,7 +278,7 @@ namespace Rodin::Variational
       using TripletsType = typename DeviceParent::TripletsType;
 
       /// @brief Mesh type.
-      using MeshType = typename FESType::MeshType;
+      using MeshType = typename TrialFESType::MeshType;
 
       /// @brief Kokkos execution space.
       using ExecutionSpace = typename MeshType::ExecutionSpace;
@@ -306,8 +378,18 @@ namespace Rodin::Variational
         using Rodin::Kokkos::Variational::IntegrationPointView;
 
         const auto& integrand = getIntegrand();
-        const auto& fes = integrand.getLHS().getFiniteElementSpace();
-        const MeshType& mesh = fes.getMesh();
+        const auto& trialfes = integrand.getLHS().getFiniteElementSpace();
+        const auto& testfes = integrand.getRHS().getFiniteElementSpace();
+        const MeshType& mesh = trialfes.getMesh();
+        if (&testfes.getMesh() != &mesh)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Kokkos integrals require trial and test spaces on the same mesh."
+            << Alert::Raise;
+        }
+        const Index trialVDim = trialfes.getVectorDimension();
+        const Index testVDim = testfes.getVectorDimension();
+        const Index vertexCount = mesh.getVertexCount();
         const auto& execution = mesh.getContext().getExecutionSpace();
         const size_t dimension = mesh.getDimension();
         const Index cellCount = mesh.getCellCount();
@@ -352,7 +434,8 @@ namespace Rodin::Variational
         const auto attributes = Rodin::Kokkos::Internal::upload(
           execution, attributeList, "Rodin integration attributes");
 
-        // Entry offsets of the cells, each selected cell owning n * n entries.
+        // Entry offsets of the cells, each selected cell with n vertices
+        // owning n * trialVDim * n * testVDim entries.
         ::Kokkos::View<Index*, MemorySpace> offsets(
           ::Kokkos::view_alloc(execution, std::string("Rodin triplet offsets")),
           cellCount);
@@ -366,7 +449,7 @@ namespace Rodin::Variational
             if (Rodin::Kokkos::Variational::isSelected(cell, attributes))
             {
               const Index n = cell.getVertices().size();
-              update += n * n;
+              update += n * trialVDim * n * testVDim;
             }
           },
           total);
@@ -386,7 +469,10 @@ namespace Rodin::Variational
         const DeviceView<RHSType> test(integrand.getRHS());
         using TestValue = std::decay_t<decltype(test.getBasis(
           std::declval<const IntegrationPointView&>(), Index(0)))>;
-        constexpr Index Capacity = IntegrationPointView::Capacity;
+        constexpr Index TrialCapacity =
+          IntegrationPointView::Capacity * VectorCapacity<TrialRange>;
+        constexpr Index TestCapacity =
+          IntegrationPointView::Capacity * VectorCapacity<TestRange>;
 
         ::Kokkos::parallel_for(
           "Rodin bilinear form integration", policy(execution, cellCount),
@@ -395,11 +481,12 @@ namespace Rodin::Variational
             if (!Rodin::Kokkos::Variational::isSelected(cell, attributes))
               return;
             const auto vertices = cell.getVertices();
-            const Index n = vertices.size();
+            const Index ntr = vertices.size() * trialVDim;
+            const Index nte = vertices.size() * testVDim;
             const Index rdim = cell.getDimension();
             const Index g = static_cast<Index>(cell.getGeometry());
-            ::Kokkos::Array<Real, Capacity * Capacity> local{};
-            ::Kokkos::Array<TestValue, Capacity> phi;
+            ::Kokkos::Array<Real, TrialCapacity * TestCapacity> local{};
+            ::Kokkos::Array<TestValue, TestCapacity> phi;
             for (Index q = qoffsets(g); q < qoffsets(g + 1); ++q)
             {
               Rodin::Kokkos::Geometry::Vector reference(rdim);
@@ -407,25 +494,28 @@ namespace Rodin::Variational
                 reference(k) = qpoints(q * ReferenceStride + k);
               const IntegrationPointView ip(cell.getPoint(reference));
               const Real wdet = qweights(q) * ip.getPoint().getDistortion();
-              for (Index te = 0; te < n; ++te)
+              for (Index te = 0; te < nte; ++te)
                 phi[te] = test.getBasis(ip, te);
-              for (Index tr = 0; tr < n; ++tr)
+              for (Index tr = 0; tr < ntr; ++tr)
               {
                 const auto psi = trial.getBasis(ip, tr);
-                for (Index te = 0; te < n; ++te)
-                  local[te * n + tr] +=
+                for (Index te = 0; te < nte; ++te)
+                  local[te * ntr + tr] +=
                     wdet * Rodin::Kokkos::Variational::dot(psi, phi[te]);
               }
             }
+            // Local index a * vdim + r is component r of local vertex a,
+            // numbered globally as vertex + r * vertexCount.
             const Index offset = offsets(c);
-            for (Index te = 0; te < n; ++te)
+            for (Index te = 0; te < nte; ++te)
             {
-              for (Index tr = 0; tr < n; ++tr)
+              const Index row = vertices[te / testVDim] + (te % testVDim) * vertexCount;
+              for (Index tr = 0; tr < ntr; ++tr)
               {
-                const Index e = offset + te * n + tr;
-                rows(e) = vertices[te];
-                cols(e) = vertices[tr];
-                values(e) = local[te * n + tr];
+                const Index e = offset + te * ntr + tr;
+                rows(e) = row;
+                cols(e) = vertices[tr / trialVDim] + (tr % trialVDim) * vertexCount;
+                values(e) = local[te * ntr + tr];
               }
             }
           });
@@ -444,6 +534,11 @@ namespace Rodin::Variational
 
       /// @brief Stride of the flattened reference coordinates.
       static constexpr Index ReferenceStride = 3;
+
+      /// @brief Maximum number of components of a value of the given range.
+      template <class Range>
+      static constexpr Index VectorCapacity =
+        std::is_same_v<Range, Real> ? 1 : RODIN_MAXIMAL_SPACE_DIMENSION;
 
       /**
        * @brief Builds a range policy on the mesh execution space.
@@ -514,7 +609,7 @@ namespace Rodin::Variational
        * @return Order chosen as by the host QuadratureRule handling the same
        * integrand on a local mesh.
        *
-       * The P1 gradient handlers fall back to @f$ k_u + k_v - 2 @f$, the
+       * The P1 derivative handlers fall back to @f$ k_u + k_v - 2 @f$, the
        * generic handler to the sum of the leaf orders.
        */
       size_t getOrder(
@@ -524,7 +619,7 @@ namespace Rodin::Variational
         if (!order)
           order = integrand.getOrder(polytope);
         if (!order &&
-          Rodin::Kokkos::Variational::Internal::IsP1GradientForm<LHSDerived,
+          Rodin::Kokkos::Variational::Internal::IsP1DerivativeForm<LHSDerived,
             RHSDerived>::Value)
         {
           const size_t d = polytope.getDimension();

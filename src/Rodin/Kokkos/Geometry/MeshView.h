@@ -120,6 +120,14 @@ namespace Rodin::Kokkos::Geometry
   class Matrix
   {
     public:
+      /// @brief Constructs the empty matrix.
+      KOKKOS_INLINE_FUNCTION
+      Matrix()
+        : m_rows(0),
+          m_cols(0),
+          m_data{}
+      {}
+
       /**
        * @brief Constructs a zero matrix.
        * @param rows Active row count.

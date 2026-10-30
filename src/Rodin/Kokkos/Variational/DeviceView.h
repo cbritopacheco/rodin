@@ -24,7 +24,10 @@
 #include "Rodin/Variational/Sum.h"
 #include "Rodin/Variational/Mult.h"
 #include "Rodin/Variational/UnaryMinus.h"
+#include "Rodin/Variational/Transpose.h"
+#include "Rodin/Variational/P1/Div.h"
 #include "Rodin/Variational/P1/Grad.h"
+#include "Rodin/Variational/P1/Jacobian.h"
 #include "Rodin/Variational/P1/ShapeFunction.h"
 
 #include "Rodin/Kokkos/Geometry/MeshView.h"
@@ -55,10 +58,18 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Kokkos::Variational
 {
+  /// @brief P1 space of the given range on a resident mesh with the given backend.
+  template <class Range, class Backend>
+  using DeviceP1Space = ::Rodin::Variational::P1<Range,
+    ::Rodin::Geometry::Mesh<::Rodin::Context::Kokkos<::Rodin::Context::Local, Backend>>>;
+
   /// @brief Scalar P1 space on a resident mesh with the given backend.
   template <class Backend>
-  using DeviceP1 = ::Rodin::Variational::P1<Real,
-    ::Rodin::Geometry::Mesh<::Rodin::Context::Kokkos<::Rodin::Context::Local, Backend>>>;
+  using DeviceP1 = DeviceP1Space<Real, Backend>;
+
+  /// @brief Vector P1 space on a resident mesh with the given backend.
+  template <class Backend>
+  using DeviceVectorP1 = DeviceP1Space<Math::SpatialVector<Real>, Backend>;
 
   /**
    * @brief Scales a scalar value.
@@ -88,6 +99,88 @@ namespace Rodin::Kokkos::Variational
   }
 
   /**
+   * @brief Scales a device matrix.
+   * @param s Scaling factor.
+   * @param m Device matrix.
+   * @return Matrix @f$ s m @f$.
+   */
+  KOKKOS_INLINE_FUNCTION
+  Geometry::Matrix scale(Real s, const Geometry::Matrix& m)
+  {
+    Geometry::Matrix result(m.rows(), m.cols());
+    for (Index i = 0; i < m.rows(); ++i)
+    {
+      for (Index j = 0; j < m.cols(); ++j)
+        result(i, j) = s * m(i, j);
+    }
+    return result;
+  }
+
+  /**
+   * @brief Adds two scalar values.
+   * @param a First value.
+   * @param b Second value.
+   * @return Sum @f$ a + b @f$.
+   */
+  KOKKOS_INLINE_FUNCTION
+  Real add(Real a, Real b)
+  {
+    return a + b;
+  }
+
+  /**
+   * @brief Adds two device vectors.
+   * @param a First vector.
+   * @param b Second vector, with the dimension of @p a.
+   * @return Sum @f$ a + b @f$.
+   */
+  KOKKOS_INLINE_FUNCTION
+  Geometry::Vector add(const Geometry::Vector& a, const Geometry::Vector& b)
+  {
+    KOKKOS_ASSERT(a.size() == b.size());
+    Geometry::Vector result(a.size());
+    for (Index i = 0; i < a.size(); ++i)
+      result(i) = a(i) + b(i);
+    return result;
+  }
+
+  /**
+   * @brief Adds two device matrices.
+   * @param a First matrix.
+   * @param b Second matrix, with the shape of @p a.
+   * @return Sum @f$ a + b @f$.
+   */
+  KOKKOS_INLINE_FUNCTION
+  Geometry::Matrix add(const Geometry::Matrix& a, const Geometry::Matrix& b)
+  {
+    KOKKOS_ASSERT(a.rows() == b.rows() && a.cols() == b.cols());
+    Geometry::Matrix result(a.rows(), a.cols());
+    for (Index i = 0; i < a.rows(); ++i)
+    {
+      for (Index j = 0; j < a.cols(); ++j)
+        result(i, j) = a(i, j) + b(i, j);
+    }
+    return result;
+  }
+
+  /**
+   * @brief Transposes a device matrix.
+   * @param m Device matrix.
+   * @return Transpose @f$ m^T @f$.
+   */
+  KOKKOS_INLINE_FUNCTION
+  Geometry::Matrix transpose(const Geometry::Matrix& m)
+  {
+    Geometry::Matrix result(m.cols(), m.rows());
+    for (Index i = 0; i < m.rows(); ++i)
+    {
+      for (Index j = 0; j < m.cols(); ++j)
+        result(j, i) = m(i, j);
+    }
+    return result;
+  }
+
+  /**
    * @brief Multiplies two scalar values.
    * @param a First value.
    * @param b Second value.
@@ -112,6 +205,25 @@ namespace Rodin::Kokkos::Variational
     Real result = 0;
     for (Index i = 0; i < a.size(); ++i)
       result += a(i) * b(i);
+    return result;
+  }
+
+  /**
+   * @brief Computes the Frobenius inner product of two device matrices.
+   * @param a First matrix.
+   * @param b Second matrix, with the shape of @p a.
+   * @return Inner product @f$ a : b @f$.
+   */
+  KOKKOS_INLINE_FUNCTION
+  Real dot(const Geometry::Matrix& a, const Geometry::Matrix& b)
+  {
+    KOKKOS_ASSERT(a.rows() == b.rows() && a.cols() == b.cols());
+    Real result = 0;
+    for (Index i = 0; i < a.rows(); ++i)
+    {
+      for (Index j = 0; j < a.cols(); ++j)
+        result += a(i, j) * b(i, j);
+    }
     return result;
   }
 
@@ -224,7 +336,14 @@ namespace Rodin::Kokkos::Variational
    * | `DeviceView<ShapeFunctionBase<Derived, FES, Space>>` | Forwards to the derived shape function. |
    * | `DeviceView<ShapeFunction<Derived, DeviceP1<B>, Space>>` | P1 basis value. |
    * | `DeviceView<Grad<ShapeFunction<Derived, DeviceP1<B>, Space>>>` | Physical P1 gradient. |
+   * | `DeviceView<ShapeFunction<Derived, DeviceVectorP1<B>, Space>>` | Vector P1 basis value. |
+   * | `DeviceView<Jacobian<ShapeFunction<Derived, DeviceVectorP1<B>, Space>>>` | Physical vector P1 Jacobian. |
+   * | `DeviceView<Div<ShapeFunction<Derived, DeviceVectorP1<B>, Space>>>` | Vector P1 divergence. |
+   * | `DeviceView<Sum<ShapeFunctionBase<L, FES, Space>, ShapeFunctionBase<R, FES, Space>>>` | Sum of shape functions. |
+   * | `DeviceView<UnaryMinus<ShapeFunctionBase<N, FES, Space>>>` | Negated shape function. |
+   * | `DeviceView<Transpose<ShapeFunctionBase<N, FES, Space>>>` | Transposed shape function. |
    * | `DeviceView<Mult<FunctionBase<L>, ShapeFunctionBase<R, FES, Space>>>` | Function times shape function. |
+   * | `DeviceView<Mult<ShapeFunctionBase<L, FES, Space>, FunctionBase<R>>>` | Shape function times function. |
    *
    * @tparam Node Form language expression type.
    */
@@ -460,6 +579,204 @@ namespace Rodin::Kokkos::Variational
 
     /// @brief Shape function factor.
     DeviceView<::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>> rhs;
+  };
+
+  /// @brief Function multiplying a shape function on the right.
+  template <class LHSDerived, class RHSDerived, class FES,
+    ::Rodin::Variational::ShapeFunctionSpaceType Space>
+  struct DeviceView<::Rodin::Variational::Mult<
+    ::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
+    ::Rodin::Variational::FunctionBase<RHSDerived>>>
+  {
+    /// @param node Shape function expression.
+    DeviceView(const ::Rodin::Variational::Mult<
+      ::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
+      ::Rodin::Variational::FunctionBase<RHSDerived>>& node)
+      : lhs(node.getLHS()),
+        rhs(node.getRHS())
+    {}
+
+    /// @param ip Quadrature point. @param local Local index. @return Scaled basis value.
+    KOKKOS_INLINE_FUNCTION
+    auto getBasis(const IntegrationPointView& ip, Index local) const
+    {
+      return scale(rhs.getValue(ip.getPoint()), lhs.getBasis(ip, local));
+    }
+
+    /// @brief Shape function factor.
+    DeviceView<::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>> lhs;
+
+    /// @brief Function factor.
+    DeviceView<::Rodin::Variational::FunctionBase<RHSDerived>> rhs;
+  };
+
+  /**
+   * @brief Vector P1 basis.
+   *
+   * Local index @f$ a\,d + r @f$ is the basis function
+   * @f$ \phi_a e_r @f$, as on the host.
+   */
+  template <class Derived, class Backend,
+    ::Rodin::Variational::ShapeFunctionSpaceType Space>
+  struct DeviceView<
+    ::Rodin::Variational::ShapeFunction<Derived, DeviceVectorP1<Backend>, Space>>
+  {
+    /// @param node Shape function expression.
+    DeviceView(const ::Rodin::Variational::ShapeFunction<Derived,
+      DeviceVectorP1<Backend>, Space>& node)
+      : vdim(node.getFiniteElementSpace().getVectorDimension())
+    {}
+
+    /// @param ip Quadrature point. @param local Local index. @return Basis value.
+    KOKKOS_INLINE_FUNCTION
+    Geometry::Vector getBasis(const IntegrationPointView& ip, Index local) const
+    {
+      Geometry::Vector result(vdim);
+      result(local % vdim) = ip.getBasis(local / vdim);
+      return result;
+    }
+
+    /// @brief Vector dimension.
+    Index vdim;
+  };
+
+  /**
+   * @brief Physical Jacobian of the vector P1 basis.
+   *
+   * Row @f$ r @f$ of the Jacobian of @f$ \phi_a e_r @f$ is
+   * @f$ \nabla \phi_a @f$, the other rows vanish.
+   */
+  template <class Derived, class Backend,
+    ::Rodin::Variational::ShapeFunctionSpaceType Space>
+  struct DeviceView<::Rodin::Variational::Jacobian<
+    ::Rodin::Variational::ShapeFunction<Derived, DeviceVectorP1<Backend>, Space>>>
+  {
+    /// @param node Shape function expression.
+    DeviceView(
+      const ::Rodin::Variational::Jacobian<::Rodin::Variational::ShapeFunction<Derived,
+        DeviceVectorP1<Backend>, Space>>& node)
+      : vdim(node.getFiniteElementSpace().getVectorDimension())
+    {}
+
+    /// @param ip Quadrature point. @param local Local index. @return Jacobian.
+    KOKKOS_INLINE_FUNCTION
+    Geometry::Matrix getBasis(const IntegrationPointView& ip, Index local) const
+    {
+      const auto& gradient = ip.getGradient(local / vdim);
+      const Index r = local % vdim;
+      Geometry::Matrix result(vdim, gradient.size());
+      for (Index c = 0; c < gradient.size(); ++c)
+        result(r, c) = gradient(c);
+      return result;
+    }
+
+    /// @brief Vector dimension.
+    Index vdim;
+  };
+
+  /**
+   * @brief Divergence of the vector P1 basis.
+   *
+   * The divergence of @f$ \phi_a e_r @f$ is @f$ \partial_r \phi_a @f$.
+   */
+  template <class Derived, class Backend,
+    ::Rodin::Variational::ShapeFunctionSpaceType Space>
+  struct DeviceView<::Rodin::Variational::Div<
+    ::Rodin::Variational::ShapeFunction<Derived, DeviceVectorP1<Backend>, Space>>>
+  {
+    /// @param node Shape function expression.
+    DeviceView(
+      const ::Rodin::Variational::Div<::Rodin::Variational::ShapeFunction<Derived,
+        DeviceVectorP1<Backend>, Space>>& node)
+      : vdim(node.getFiniteElementSpace().getVectorDimension())
+    {}
+
+    /// @param ip Quadrature point. @param local Local index. @return Divergence.
+    KOKKOS_INLINE_FUNCTION
+    Real getBasis(const IntegrationPointView& ip, Index local) const
+    {
+      return ip.getGradient(local / vdim)(local % vdim);
+    }
+
+    /// @brief Vector dimension.
+    Index vdim;
+  };
+
+  /// @brief Sum of two shape functions.
+  template <class LHSDerived, class RHSDerived, class FES,
+    ::Rodin::Variational::ShapeFunctionSpaceType Space>
+  struct DeviceView<::Rodin::Variational::Sum<
+    ::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
+    ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
+  {
+    /// @param node Shape function expression.
+    DeviceView(const ::Rodin::Variational::Sum<
+      ::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
+      ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>& node)
+      : lhs(node.getLHS()),
+        rhs(node.getRHS())
+    {}
+
+    /// @param ip Quadrature point. @param local Local index. @return Basis value.
+    KOKKOS_INLINE_FUNCTION
+    auto getBasis(const IntegrationPointView& ip, Index local) const
+    {
+      return add(lhs.getBasis(ip, local), rhs.getBasis(ip, local));
+    }
+
+    /// @brief Left operand.
+    DeviceView<::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>> lhs;
+
+    /// @brief Right operand.
+    DeviceView<::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>> rhs;
+  };
+
+  /// @brief Negated shape function.
+  template <class NestedDerived, class FES,
+    ::Rodin::Variational::ShapeFunctionSpaceType Space>
+  struct DeviceView<::Rodin::Variational::UnaryMinus<
+    ::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
+  {
+    /// @param node Shape function expression.
+    DeviceView(const ::Rodin::Variational::UnaryMinus<
+      ::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>>& node)
+      : operand(node.getOperand())
+    {}
+
+    /// @param ip Quadrature point. @param local Local index. @return Basis value.
+    KOKKOS_INLINE_FUNCTION
+    auto getBasis(const IntegrationPointView& ip, Index local) const
+    {
+      return scale(Real(-1), operand.getBasis(ip, local));
+    }
+
+    /// @brief Operand.
+    DeviceView<::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>>
+      operand;
+  };
+
+  /// @brief Transposed matrix valued shape function.
+  template <class NestedDerived, class FES,
+    ::Rodin::Variational::ShapeFunctionSpaceType Space>
+  struct DeviceView<::Rodin::Variational::Transpose<
+    ::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
+  {
+    /// @param node Shape function expression.
+    DeviceView(const ::Rodin::Variational::Transpose<
+      ::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>>& node)
+      : operand(node.getOperand())
+    {}
+
+    /// @param ip Quadrature point. @param local Local index. @return Basis value.
+    KOKKOS_INLINE_FUNCTION
+    Geometry::Matrix getBasis(const IntegrationPointView& ip, Index local) const
+    {
+      return transpose(operand.getBasis(ip, local));
+    }
+
+    /// @brief Operand.
+    DeviceView<::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>>
+      operand;
   };
 }
 

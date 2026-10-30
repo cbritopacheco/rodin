@@ -237,6 +237,32 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       `k_u + k_v`, le handler générique la somme des ordres des feuilles. Le
       `-2` de Div(u).q n'est pas un bug: l'ordre 0 (point milieu) est exact
       sur simplexe pour P1 fois constante.
-- [ ] Jalons suivants: P1 vectoriel, Div, GridFunction sur device,
+
+## 7. DSL device, jalon 2: P1 vectoriel et espaces mixtes
+
+- [x] `Kokkos/Variational/P1.h`: `P1<SpatialVector<Real>, Mesh<Kokkos>>`,
+      construit par `P1 fes(mesh, d)` comme sur l'hôte, même numérotation
+      (composante r du sommet q en `q + r * nv`, local `a * d + r`).
+- [x] `DeviceView`: valeur vectorielle, `Jacobian`, `Div`, somme, opposé et
+      transposée de fonctions de forme, `f * A` et `A * f` (f scalaire),
+      produit de Frobenius pour `Jac : Jac`.
+- [x] `Integral` device généralisée a deux espaces P1 de rangs différents
+      (essai vectoriel et test scalaire, et inversement): couplage
+      vitesse/pression `Integral(Div(u), q)` et `Integral(p, Div(v))`.
+- [x] Règle d'ordre `k_u + k_v - 2` étendue aux handlers hôte Div(u).q,
+      p.Div(v), Jac:Jac, f Jac:Jac et (Jac f).v.
+- [x] Tests `RodinKokkosVariationalVectorBilinearFormTest`: masse
+      vectorielle, Jac:Jac, Div.Div, -Div.Div, gradient symétrique,
+      coefficients, formes mixtes, sur triangles, tétraèdres déformés et
+      maillage mixte quad/tri. Chaque test vérifie statiquement que
+      l'intégrale device est bien sélectionnée.
+- [ ] Mémoire locale: la matrice locale est dimensionnée a la compilation
+      (8 sommets x 3 composantes par côté, soit 576 réels par thread pour
+      un couple vectoriel). A revoir pour la performance (taille selon la
+      géométrie, ou une équipe par cellule) au jalon benchmark.
+- [ ] `Dot(A, Jac) : Dot(A, Jac)` (coefficient matriciel) et `(Jac w).v`
+      avec w vectoriel demandent des fonctions vectorielles sur device:
+      jalon GridFunction.
+- [ ] Jalons suivants: GridFunction et fonctions vectorielles sur device,
       LinearForm, Problem et DirichletBC, assemblage COO PETSc, puis le
       benchmark Oseen.
