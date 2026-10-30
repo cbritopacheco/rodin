@@ -19,7 +19,7 @@ can share compilation without sharing runtime state.
 | [Build.yml](Build.yml) | Independent compilation checks across build types, threading and backend configurations. |
 | [Style.yml](Style.yml) | Formatting, house-style, naming and documentation-warning checks, including their tooling regressions. |
 | [Documentation.yml](Documentation.yml) | Independent documentation build and publication on master/develop pushes; build and checks only on pull requests. |
-| [Benchmarks.yml](Benchmarks.yml) | Runs and publishes performance benchmarks on pushes to the main development branches. |
+| [Benchmarks.yml](Benchmarks.yml) | Validates performance benchmarks on ready PRs and main-branch pushes; publishes complete campaigns from master/develop. |
 | [Preflight.yml](Preflight.yml) | Validates label metadata, matching rules and pinned labeler API behavior with read-only permissions and local fixtures. |
 | [Labeler.yml](Labeler.yml) | Maintains pull-request labels. |
 | [copilot-setup-steps.yml](copilot-setup-steps.yml) | Provisions the GitHub coding-agent environment; it is separate from numerical test scheduling. |
@@ -28,6 +28,27 @@ The trigger declarations in each workflow define when it runs. The reusable
 test, build and publication workflows are called by `Tests.yml`; they do not
 start a second independent test campaign. A newer push cancels superseded runs according to
 the top-level workflows' concurrency policies.
+
+## Automatic run policy
+
+| Source event | Behavior |
+| --- | --- |
+| Push to a topic branch | No push-triggered CI. |
+| Draft PR targeting master/develop | All repository-workflow jobs are skipped. |
+| Ready PR targeting master/develop | Validation runs on opened, reopened, synchronize and ready-for-review events. |
+| Conversion back to draft | A skipped run supersedes the existing PR campaign through workflow concurrency. |
+| Push or merge to master/develop | Validation runs on the resulting push. Documentation and complete benchmark campaigns can publish. |
+
+Draft guards apply before matrix expansion and also cover `always()` finalizers.
+Ready-PR validation includes benchmark execution and complete-campaign pooling.
+PR jobs preserve build, numerical and coverage requirements; publication is
+restricted to the main branches. The path-scoped Copilot setup check follows
+the same branch and draft policy. Existing manual and reusable entry points
+remain available for explicit invocation.
+
+The labeler retains its trusted `pull_request_target` execution path and skips
+draft PRs. The reports/recovery and badge helpers handle main-branch push runs.
+CodeQL remains under GitHub-managed default setup and its event policy.
 
 ## Linux dependencies and disk headroom
 

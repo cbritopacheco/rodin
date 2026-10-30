@@ -96,7 +96,7 @@ class HierarchicalScheduleTest(unittest.TestCase):
         top = yaml.safe_load((tests.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
         for name, job in top.items():
             if name.startswith(('Configurations_', 'Installation')):
-                self.assertEqual(job['if'], '${{ !cancelled() }}')
+                self.assertEqual(job['if'], '${{ (!cancelled()) && !github.event.pull_request.draft }}')
 
     def test_diagrams_follow_actual_workflow_dependencies(self):
         for name, document in schedule.generated().items():

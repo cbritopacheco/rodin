@@ -5,9 +5,8 @@ on:
   push:
     branches: [master, develop]
   pull_request:
-    branches:
-      - master
-      - develop
+    branches: [master, develop]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
 
 concurrency:
   group: Documentation-${{ github.ref }}
@@ -15,6 +14,7 @@ concurrency:
 
 jobs:
   Build-And-Deploy:
+    if: ${{ !github.event.pull_request.draft }}
     permissions:
       contents: write
       actions: read

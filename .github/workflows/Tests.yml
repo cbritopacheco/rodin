@@ -6,9 +6,8 @@ name: Tests
     - master
     - develop
   pull_request:
-    branches:
-    - master
-    - develop
+    branches: [master, develop]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
 permissions:
   contents: read
   actions: read
@@ -17,6 +16,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   Plan:
+    if: ${{ !github.event.pull_request.draft }}
     name: CMake / CI
     runs-on: ubuntu-latest
     outputs:
@@ -74,7 +74,7 @@ jobs:
     name: Baseline / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_baseline) }}
@@ -87,7 +87,7 @@ jobs:
     name: Complex / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_complex) }}
@@ -100,7 +100,7 @@ jobs:
     name: Default / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_default_coverage) }}
@@ -113,7 +113,7 @@ jobs:
     name: Default / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_default_sanitized) }}
@@ -126,7 +126,7 @@ jobs:
     name: MPI / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_mpi) }}
@@ -139,7 +139,7 @@ jobs:
     name: Native / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_native) }}
@@ -152,7 +152,7 @@ jobs:
     name: Optional / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_optional_coverage) }}
@@ -165,7 +165,7 @@ jobs:
     name: Optional / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_optional_sanitized) }}
@@ -178,7 +178,7 @@ jobs:
     name: PETSc / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_petsc) }}
@@ -191,7 +191,7 @@ jobs:
     name: PETSc / MatrixRanges / Complex / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_ranges_complex) }}
@@ -204,7 +204,7 @@ jobs:
     name: PETSc / MatrixRanges / Real / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_ranges_real) }}
@@ -216,7 +216,7 @@ jobs:
   InstallationUbuntu:
     needs:
     - Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -275,7 +275,7 @@ jobs:
   InstallationMacOS:
     needs:
     - Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -338,7 +338,7 @@ jobs:
     name: Installation / macOS (OS=${{ matrix.os }}, MPI=${{ matrix.mpi }}, PETSc=${{ matrix.petsc }})
   CoverageFinalize:
     name: Coverage / Finalize
-    if: always()
+    if: ${{ (always()) && !github.event.pull_request.draft }}
     needs:
     - Plan
     - Configurations_baseline
