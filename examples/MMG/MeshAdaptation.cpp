@@ -48,17 +48,19 @@ int main()
     {
       triangles << cell->getIndex();
       for (auto vertex = cell->getVertex(); !vertex.end(); ++vertex)
-        triangles << ',' << vertex->getCoordinates().x() << ',' << vertex->getCoordinates().y();
+        triangles << ',' << vertex->getCoordinates().x() << ','
+                  << vertex->getCoordinates().y();
       triangles << '\n';
       valid = valid && cell->getMeasure() > 0;
     }
     triangles.flush();
     constexpr Real areaTolerance = 1e-10;
-    valid = valid && bool(triangles) && !mesh.isEmpty()
-      && std::abs(mesh.getArea() - 1) < areaTolerance;
+    valid = valid && bool(triangles) && !mesh.isEmpty() &&
+      std::abs(mesh.getArea() - 1) < areaTolerance;
     mesh.save(stem + ".medit.mesh", IO::FileFormat::MEDIT);
     std::cout << stem << ": " << mesh.getVertexCount() << " vertices, "
-              << mesh.getCellCount() << " triangles, area " << mesh.getArea() << std::endl;
+              << mesh.getCellCount() << " triangles, area " << mesh.getArea()
+              << std::endl;
   }
   return valid ? EXIT_SUCCESS : EXIT_FAILURE;
 }
