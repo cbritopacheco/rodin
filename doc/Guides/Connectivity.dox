@@ -34,17 +34,17 @@
 
   Common connectivity relations:
 
-  | Relation | Meaning | Use Case |
+  | Relation | Meaning | Use case |
   |----------|---------|----------|
   | @f$ (0, 2) @f$ | Vertices → Cells | Which cells share a vertex |
   | @f$ (1, 2) @f$ | Edges → Cells | Boundary detection (edges with 1 cell) |
   | @f$ (2, 0) @f$ | Cells → Vertices | Cell vertex lookup |
   | @f$ (2, 1) @f$ | Cells → Edges | Cell edge lookup |
 
-  @section guides-connectivity-compute Computing Connectivity
+  @section guides-connectivity-compute Computing connectivity
 
   Connectivity relations are computed on demand using the
-  @ref Rodin::Geometry::Connectivity "compute()" method:
+  @ref Rodin::Geometry::Connectivity "compute()" method.
 
   @code{.cpp}
   Mesh mesh;
@@ -58,7 +58,7 @@
   faces → cells in 3D) is required before imposing `DirichletBC`, since
   boundary detection relies on finding entities that belong to only one cell.
 
-  @subsection guides-connectivity-compute-modes Computation Modes
+  @subsection guides-connectivity-compute-modes Computation modes
 
   The `compute()` method accepts an optional **mode** parameter that controls
   how sub-entities are handled:
@@ -66,7 +66,7 @@
   | Mode | Behavior |
   |------|----------|
   | `Connectivity::Mode::Discover` (default) | Creates any missing sub-polytopes that are needed for the relation. For example, computing @f$ (1, 2) @f$ on a triangle mesh will create edge entities if they do not yet exist. |
-  | `Connectivity::Mode::Restrict` | Only uses polytopes that already exist in the mesh. Does not create new entities. Use this when you only want to relate entities that have been explicitly added. |
+  | `Connectivity::Mode::Restrict` | Restricts the relation to existing polytopes. Entity creation remains under the control of the mesh builder. |
 
   @code{.cpp}
   // Default mode: discovers (creates) edges if needed
@@ -76,35 +76,24 @@
   mesh.getConnectivity().compute(1, 2, Connectivity::Mode::Restrict);
   @endcode
 
-  In most workflows, the default `Discover` mode is what you want.
+  The default `Discover` mode constructs the sub-polytopes required by each
+  requested relation.
 
-  @section guides-connectivity-boundary Boundary Detection
+  @section guides-connectivity-boundary Boundary detection
 
   Once the @f$ (d-1, d) @f$ connectivity is computed (where @f$ d @f$ is the
   mesh dimension), Rodin can identify boundary entities — those that are
   incident to exactly one cell. This is how `DirichletBC` finds the boundary
   DOFs automatically.
 
-  @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-  mesh.getConnectivity().compute(1, 2);  // Required for boundary detection
+  @snippet PDEs/Poisson.cpp poisson-form
 
-  P1 Vh(mesh);
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
 
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());  // Automatically detects boundary
-  @endcode
-
-  @section guides-connectivity-attributes Boundary Attributes
+  @section guides-connectivity-attributes Boundary attributes
 
   Different parts of the boundary can be distinguished by **attributes**
   (integer labels). This is useful when different boundary conditions are
-  applied to different segments:
+  applied to different segments.
 
   @code{.cpp}
   Attribute GammaD = 2, GammaN = 3;
@@ -119,10 +108,10 @@
   Boundary attributes are typically set when loading a mesh from a file or
   when building a mesh programmatically.
 
-  @section guides-connectivity-see-also See Also
+  @section guides-connectivity-see-also See also
 
   - @ref guides-polytopes "Polytopes" — The geometric entities
   - @ref guides-meshes "Meshes" — Working with meshes
-  - @ref Rodin::Geometry::Connectivity "Connectivity class reference"
+  - @ref Rodin::Geometry::Connectivity "compute()"
 
   */

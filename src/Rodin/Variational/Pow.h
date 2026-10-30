@@ -31,7 +31,7 @@ namespace Rodin::Variational
    * @ingroup PowSpecializations
    * @brief Represents the power function.
    *
-   * This class represents the exponentiation operation applied to a function:
+   * This class represents the exponentiation operation applied to a function.
    * @f[
    *  \text{Pow}(f, p)(x) = f(x)^p
    * @f]

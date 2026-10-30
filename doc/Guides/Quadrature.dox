@@ -1,6 +1,6 @@
 /**
   @page guides-quadrature Quadrature formulas
-  @brief Exactness ranges and default quadrature dispatch
+  @brief Integrate on reference and physical cells, then select a rule.
 
   @m_keywords{Quadrature, Cubature, Xiao-Gimbutas, Witherden-Vincent, Gauss-Jacobi}
 
@@ -15,69 +15,51 @@
     \simeq \sum_q w_q f(\widehat x_q).
   @f]
   In Rodin, the requested order @f$ p @f$ denotes the polynomial degree of
-  exactness, not the number of quadrature points. The default dispatcher
+  exactness; the selected rule determines the number of points. The default dispatcher
   returns a rule exact on @f$ \mathbb P_p(\widehat K) @f$ with positive
   weights and points inside @f$ \widehat K @f$.
 
-  This exactness choice is part of the assembled mathematical problem, not
-  just a performance setting. See @ref guides-numerical-contracts "Numerical contracts"
+  The exactness choice determines the discrete integrals used in assembly. See @ref guides-numerical-contracts "Numerical contracts"
   for how quadrature interacts with interpolation, projection,
   manufactured solutions, and specialized integrators.
 
-  @section guides-quadrature-objects Formulas, mapped points, and basis tables
+  @section guides-quadrature-mapping From a reference rule to a physical integral
 
-  @ref Rodin::QF::QuadratureFormulaBase provides read-only access to reference
-  points and weights. Concrete families such as @ref Rodin::QF::GaussLegendre
-  can be constructed locally for immediate calculations. The interface carries
-  no polymorphic-copy or cache-identity contract.
+  On an orientation-preserving full-dimensional cell with map
+  @f$F_K:\widehat K\to K@f$, integration uses
+  @f[
+    \int_K f(x)\,dx \simeq
+    \sum_q w_q f(F_K(\widehat x_q))\,|\det DF_K(\widehat x_q)|.
+  @f]
+  The formula supplies reference weights. The geometric point supplies the
+  physical coordinates and Jacobian. For a surface cell, the measure factor
+  is @f$\sqrt{\det(DF_K^T DF_K)}@f$.
 
-  @ref Rodin::QF::QuadratureFormula owns immutable reference samples retained
-  until process termination. Its factory constructs a concrete family on demand:
+  On the unit reference triangle, @f$\int rs\,dr\,ds=1/24@f$.
+  The example requests degree four, which also integrates this quadratic
+  monomial exactly.
 
-  @code{.cpp}
-  const auto& formula = QF::QuadratureFormula::get<QF::GaussLegendre>(
-    geometry, size_t{4});
-  @endcode
+  @snippet Geometry/Quadrature.cpp quadrature-reference
 
-  The family and constructor argument value types select a shared pool. Integer
-  and enum values, and references to published formulas, form its tuple key.
-  The pool uses FlatMap with ordinary tuple comparison; formula references use
-  total pointer ordering internally. A bounded thread-local lookup avoids
-  repeated locking. Construction occurs outside the pool mutex; insertion
-  publishes one immutable object even when several threads miss concurrently.
-  Each pool entry constructs its concrete family and published interface in one
-  allocation. The interface reads the retained rule directly; no second point
-  or weight array is created. Optional read-only sample views provide direct
-  point access and strided weight access, including uniform weights, without
-  per-sample virtual dispatch. Pointwise-only families remain supported.
-  Generators must own their samples or borrow only
-  storage with process lifetime, must not retain caller-owned constructor
-  arguments, and must be determined by their arguments and safe to construct
-  concurrently. Counts and orders should be passed as size_t.
+  The physical triangle has vertices @f$(1,1),(3,1),(1,4)@f$. Its affine map
+  is @f$F(r,s)=(1+2r,1+3s)@f$, with determinant six. Expanding the product gives
+  @f[
+    \int_K xy\,dx\,dy
+    =6\int_{\widehat K}(1+2r)(1+3s)\,dr\,ds
+    =\frac{19}{2}.
+  @f]
 
-  @ref Rodin::QF::QuadratureFormula selects a family from geometry and
-  requested exactness. Its get operation, and @ref Rodin::QF::GaussLobatto::get,
-  return published formulas through the same factory. Changing an integrator's
-  order chooses another formula; it never modifies an existing formula.
+  @snippet Geometry/Quadrature.cpp quadrature-map
 
-  @ref Rodin::Geometry::PolytopeQuadrature owns points mapped to one physical
-  polytope. It accepts only a published formula, so its borrowed source cannot
-  expire. Mesh-owned quadratures remain valid until geometry flush; assembly
-  rules instead own quadratures for their currently bound polytope.
+  @m_class{rodin-mesh-stages}
 
-  @ref Rodin::Variational::ReferenceTabulation stores basis values and reference
-  derivatives at those reference samples. Persistent table lookup accepts only
-  a published formula. Tables belong to a bounded thread-local cache: formula
-  permanence does not extend a borrowed table's lifetime across eviction.
-  Immediate element.tabulate(table, localFormula) accepts a caller-owned
-  QuadratureFormulaBase and leaves the result in caller-owned numerical storage.
+  @parblock
+  @image html Quadrature-reference.png "Reference quadrature points. Marker area is proportional to the reference weight."
+  @image html Quadrature-physical.png "The same quadrature points mapped to the physical triangle."
+  @endparblock
 
-  @ref Rodin::Variational::QuadratureRule binds the integrand and physical
-  polytope, selects the reference formula, and consumes mapped points and basis
-  values during integration. Geometry-specific quantities remain separate from
-  reusable reference-element values. A copied geometric point owns its reference
-  coordinates and may retain a permanent formula pointer and index for lazy
-  coordinate evaluation; if its basis table is absent, direct evaluation applies.
+  Build and run the `Quadrature` example target. It writes `Quadrature.csv`
+  and checks both analytic integrals with tolerance @f$10^{-12}@f$.
 
   @section guides-quadrature-dispatch Default dispatch
 
@@ -93,7 +75,7 @@
     <tr><td>Pyramid</td><td>Witherden--Vincent, degrees 1--10</td><td>Positive conical product</td></tr>
   </table>
 
-  The complete directly constructible table ranges are:
+  The following table lists the complete directly constructible ranges.
 
   <table>
     <tr><th>Family</th><th>Triangle</th><th>Quadrilateral</th><th>Tetrahedron</th><th>Hexahedron</th><th>Wedge</th><th>Pyramid</th></tr>
@@ -136,8 +118,7 @@
   Gauss--Jacobi factor.
 
   These fallbacks are deterministic, positive, interior, and available at
-  arbitrary order. They are not fully symmetric and can use more points than
-  optimized tabulated formulas.
+  arbitrary order. Their point counts can exceed those of optimized fully symmetric formulas.
 
   @section guides-quadrature-api API and caching
 
@@ -156,8 +137,7 @@
   Published formulas are immutable and cannot be copied or moved. Concrete
   family constructors remain available for locally owned formulas. `XiaoGimbutas`, `WitherdenVincent`, `GaussLegendre`,
   `GaussLobatto`, and `GrundmannMoller` can also be selected explicitly.
-  Grundmann--Moller is not a default because its weights are signed above
-  degree one.
+  Grundmann--Moller is selected explicitly; its weights are signed above degree one.
 
   @section guides-quadrature-curved Curved elements
 
@@ -168,10 +148,67 @@
   inside the reference polytope because a curved transformation is not
   required to extend beyond it.
 
-  @section guides-quadrature-see-also See Also
+  @section guides-quadrature-objects Ownership and reuse
+
+  @ref Rodin::QF::QuadratureFormulaBase provides read-only access to reference
+  points and weights. Concrete families such as @ref Rodin::QF::GaussLegendre
+  can be constructed locally for immediate calculations. The interface carries
+  no polymorphic-copy or cache-identity contract.
+
+  @ref Rodin::QF::QuadratureFormula owns immutable reference samples retained
+  until process termination. Its factory constructs a concrete family on demand.
+
+  @code{.cpp}
+  const auto& formula = QF::QuadratureFormula::get<QF::GaussLegendre>(
+    geometry, size_t{4});
+  @endcode
+
+  The family and constructor argument value types select a shared pool. Integer
+  and enum values, and references to published formulas, form its tuple key.
+  The pool uses FlatMap with ordinary tuple comparison; formula references use
+  total pointer ordering internally. A bounded thread-local lookup avoids
+  repeated locking. Construction occurs outside the pool mutex; insertion
+  publishes one immutable object even when several threads miss concurrently.
+  Each pool entry constructs its concrete family and published interface in one
+  allocation. The interface reads the retained rule directly; no second point
+  or weight array is created. Optional read-only sample views provide direct
+  point access and strided weight access, including uniform weights, without
+  per-sample virtual dispatch. Pointwise-only families remain supported.
+  Generators must own their samples or borrow only
+  storage with process lifetime, must not retain caller-owned constructor
+  arguments, and must be determined by their arguments and safe to construct
+  concurrently. Counts and orders should be passed as size_t.
+
+  @ref Rodin::QF::QuadratureFormula selects a family from geometry and
+  requested exactness. Its get operation, and @ref Rodin::QF::GaussLobatto::get,
+  return published formulas through the same factory. Changing an integrator's
+  order chooses another formula; it never modifies an existing formula.
+
+  @ref Rodin::Geometry::PolytopeQuadrature owns points mapped to one physical
+  polytope. It accepts only a published formula, so its borrowed source cannot
+  expire. Mesh-owned quadratures remain valid until geometry flush; assembly
+  rules instead own quadratures for their currently bound polytope.
+
+  @ref Rodin::Variational::ReferenceTabulation stores basis values and reference
+  derivatives at those reference samples. Persistent table lookup accepts only
+  a published formula. Tables belong to a bounded thread-local cache, so formula
+  permanence does not extend a borrowed table's lifetime across eviction.
+  Immediate element.tabulate(table, localFormula) accepts a caller-owned
+  QuadratureFormulaBase and leaves the result in caller-owned numerical storage.
+
+  @ref Rodin::Variational::QuadratureRule binds the integrand and physical
+  polytope, selects the reference formula, and consumes mapped points and basis
+  values during integration. Geometry-specific quantities remain separate from
+  reusable reference-element values. A copied geometric point owns its reference
+  coordinates and may retain a permanent formula pointer and index for lazy
+  coordinate evaluation; if its basis table is absent, direct evaluation applies.
+
+  @section guides-quadrature-see-also See also
 
   - @ref guides-numerical-contracts "Numerical contracts"
   - @ref guides-variational "Variational formulations"
+  - @ref Geometry/Quadrature.cpp "Complete checked quadrature program"
 
+  @example Geometry/Quadrature.cpp
   @m_footernavigation
 */

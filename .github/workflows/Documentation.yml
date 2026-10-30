@@ -5,9 +5,8 @@ on:
   push:
     branches: [master, develop]
   pull_request:
-    branches:
-      - master
-      - develop
+    branches: [master, develop]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
 
 concurrency:
   group: Documentation-${{ github.ref }}
@@ -15,6 +14,10 @@ concurrency:
 
 jobs:
   Build-And-Deploy:
+    if: ${{ !github.event.pull_request.draft }}
+    permissions:
+      contents: write
+      actions: read
     runs-on: ubuntu-latest
     env:
       MAKEFLAGS: "-j2"
@@ -24,6 +27,21 @@ jobs:
         with:
           submodules: recursive
           lfs: false
+          persist-credentials: false
+      - name: Mark documentation as running
+        if: github.event_name == 'push'
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+          RUN: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          ATTEMPT: ${{ github.run_attempt }}
+        run: >-
+          python3 dev/ci_badges.py --documentation-only --branch "$BRANCH"
+          --documentation running --source-run "$RUN" --source-sha "$SHA"
+          --source-attempt "$ATTEMPT"
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -63,6 +81,23 @@ jobs:
           name: documentation
           path: ${{ github.workspace }}/build/doc/html
           if-no-files-found: error
+      - name: Report documentation build outcome
+        if: ${{ always() && github.event_name == 'push' }}
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+          RUN: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          ATTEMPT: ${{ github.run_attempt }}
+          OUTCOME: ${{ job.status }}
+        run: |
+          status="$OUTCOME"
+          if [ "$status" = success ]; then status=queued; fi
+          python3 dev/ci_badges.py --documentation-only --branch "$BRANCH" \
+            --documentation "$status" --source-run "$RUN" --source-sha "$SHA" \
+            --source-attempt "$ATTEMPT"
   PublishDocumentation:
     name: Publish documentation
     needs: Build-And-Deploy
@@ -73,7 +108,7 @@ jobs:
       cancel-in-progress: false
     permissions:
       contents: write
-      actions: write
+      actions: read
       pages: write
       id-token: write
     environment:
@@ -83,6 +118,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: false
+      - name: Mark documentation publication as running
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+          RUN: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          ATTEMPT: ${{ github.run_attempt }}
+        run: >-
+          python3 dev/ci_badges.py --documentation-only --branch "$BRANCH"
+          --documentation running --source-run "$RUN" --source-sha "$SHA"
+          --source-attempt "$ATTEMPT"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -118,17 +166,18 @@ jobs:
         with:
           checkout: .ci-pages
           artifact-name: documentation-pages
-      - name: Refresh documentation badge
-        if: ${{ always() && !cancelled() && (steps.deployment.outcome == 'success' || steps.deployment.outcome == 'failure') }}
+      - name: Report documentation deployment outcome
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 2
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH: ${{ github.ref_name }}
-          OUTCOME: ${{ steps.deployment.outcome }}
           RUN: ${{ github.run_id }}
           SHA: ${{ github.sha }}
-        run: |
-          if gh api "repos/$GITHUB_REPOSITORY/actions/workflows/CIBadges.yml" >/dev/null 2>&1; then
-            gh workflow run CIBadges.yml --repo "$GITHUB_REPOSITORY" -f branch="$BRANCH" -f documentation="$OUTCOME" -f source_run="$RUN" -f source_sha="$SHA"
-          else
-            echo 'Badge publisher is not yet installed on the default branch.'
-          fi
+          ATTEMPT: ${{ github.run_attempt }}
+          OUTCOME: ${{ steps.deployment.outcome == 'success' && 'success' || job.status }}
+        run: >-
+          python3 dev/ci_badges.py --documentation-only --branch "$BRANCH"
+          --documentation "$OUTCOME" --source-run "$RUN" --source-sha "$SHA"
+          --source-attempt "$ATTEMPT"

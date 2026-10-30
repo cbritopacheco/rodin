@@ -13,7 +13,7 @@
  * indicates where one function exceeds another.
  *
  * # Mathematical Foundation
- * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the greater-than operator:
+ * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the greater-than operator is defined by
  * @f[
  *   (f > g)(x) = \begin{cases} 1 & \text{if } f(x) > g(x) \\ 0 & \text{otherwise} \end{cases}
  * @f]

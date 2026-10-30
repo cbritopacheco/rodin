@@ -1,55 +1,76 @@
 /**
   @page credits-index Credits
-  @brief People and third-party software who make Rodin possible
+  @brief People, research laboratories and software used by Rodin.
+
+  Rodin brings together contributions from its scientific community and
+  established numerical software. The acknowledgments below identify people
+  and laboratories, followed by the roles of runtime libraries, optional
+  backends and development tools.
 
   @tableofcontents
 
-  @section credits-index-3rd-party Third-party Software
+  @section credits-index-people People
+
+  Scientific discussions and collaboration support the development of Rodin
+  and its applications. This section acknowledges members of that community.
+
+  @m_class{m-block m-info m-badge rodin-credit-person}
+
+  @parblock
+  <img src="Images/OscarRuz.jpeg" alt="Portrait of Oscar Ruz" />
+  <h3>Oscar Ruz</h3>
+
+  Universidad de Santiago de Chile. Member of the
+  [Computational Heat and Fluid Flow Lab](https://cfdusach.cl/).
+  @endparblock
+
+  @section credits-index-laboratories Laboratories
+
+  Research laboratories provide a setting for applications, numerical-method
+  development and scientific exchange. The laboratory below is part of that
+  research community.
+
+  @m_class{m-block m-info m-badge rodin-credit-lab}
+
+  @parblock
+  <img src="Images/CFDLab.png" alt="CFD-LAB logo" />
+  <h3>Computational Heat and Fluid Flow Lab</h3>
+
+  [CFD-LAB](https://cfdusach.cl/), Universidad de Santiago de Chile.
+  Research in computational heat transfer, fluid flow, and fluid–structure
+  interaction.
+  @endparblock
+
+  @section credits-index-3rd-party Third-party software
+
+  Libraries support algebra, geometry processing, data exchange and execution.
+  Optional components are enabled according to the build configuration; their
+  inclusion and license terms are documented by the linked projects. See
+  @ref configuration "Configuration" for Rodin's build options.
 
   @subsection credits-index-boost Boost
 
-  Boost libraries are intended to be widely useful, and usable across a broad
-  spectrum of applications. The libraries are licensed under the [Boost
-  Software License](https://www.boost.org/users/license.html), which is the
-  same license Rodin utilizes.
-
-  @par Links
-  @parblock
-  - https://www.boost.org/
-  - https://www.boost.org/users/license.html
-  @endparblock
+  [Boost](https://www.boost.org/) provides C++ utility libraries used by Rodin.
+  Its libraries are distributed under the
+  [Boost Software License](https://www.boost.org/users/license.html),
+  also used by Rodin.
 
   @subsection credits-index-eigen Eigen
 
-  Eigen is a C++ template library for linear algebra. Eigen provides a wide
-  range of mathematical operations, data structures, and algorithms for
-  performing linear algebra operations efficiently and with a syntax that
-  resembles mathematical notation. It is especially useful for tasks such as
-  matrix and vector operations, solving linear systems, eigenvalue problems,
-  and more. Eigen is
-  [Free Software](https://www.gnu.org/philosophy/free-sw.html).
-  Starting from the 3.1.1 version, it is licensed under the
-  [MPL2](https://www.mozilla.org/en-US/MPL/2.0/),
-  which is a simple weak copyleft license. Common questions about the MPL2 are
-  answered in the official [MPL2 FAQ](https://www.mozilla.org/en-US/MPL/2.0/FAQ/).
-
-  @par Links
-  @parblock
-  - https://eigen.tuxfamily.org/
-  - https://eigen.tuxfamily.org/index.php?title=Main_Page#License
-  @endparblock
+  [Eigen](https://eigen.tuxfamily.org/) supplies dense and sparse linear
+  algebra, expression templates and local solver implementations. Its
+  [licensing page](https://eigen.tuxfamily.org/index.php?title=Main_Page#License)
+  describes the Mozilla Public License 2.0 terms and applicable component
+  details.
 
   @subsection credits-index-mmg MMG
 
-  MMG is an open source software for bidimensional and tridimensional surface
-  and volume remeshing. It is licensed under the
-  [LGPL](https://github.com/MmgTools/mmg/blob/master/LICENSE) and is originally
-  based on @cite dapogny2014three .
-
-  @par Links
-  @parblock
-  - https://www.mmgtools.org/
-  @endparblock
+  [MMG](https://www.mmgtools.org/) provides two- and three-dimensional mesh
+  adaptation, quality optimization and level-set reconstruction through
+  Rodin's MMG interfaces. The project distributes its
+  [license terms](https://github.com/MmgTools/mmg/blob/master/LICENSE).
+  @cite dapogny2014three describes three-dimensional mesh adaptation and
+  level-set domain meshing.
 
   @subsection credits-index-hdf5 HDF5
 
@@ -107,6 +128,9 @@
 
   @section credits-index-development Development and documentation tools
 
+  These tools build the test and benchmark evidence and render the
+  documentation. They support development, validation and presentation.
+
   @subsection credits-index-googletest GoogleTest
 
   [GoogleTest](https://google.github.io/googletest/) supplies the C++
@@ -144,8 +168,10 @@
   expressions, and [dvisvgm](https://dvisvgm.de/) converts the results
   into SVG images for the documentation.
 
-  @section References
+  @section credits-index-references Scientific references
 
-  See the @ref citelist "full reference list" to the scientific papers which have been
-  used or provide sources of inspiration for the library.
+  The @ref citelist "reference list" collects the publications cited in the
+  mathematical guides, numerical methods and API documentation. Citations on
+  each page identify the source associated with the construction being
+  discussed.
 */

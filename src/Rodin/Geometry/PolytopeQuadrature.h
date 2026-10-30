@@ -27,7 +27,7 @@
  *
  * For a polytope @f$ \tau @f$ and a reference quadrature formula
  * @f$ \{ (\hat x_q, w_q) \}_{q=1}^{n_q} @f$, the realized quadrature consists
- * of the mapped geometric points:
+ * of the mapped geometric points.
  *
  * @f[
  *   p_q = x_\tau(\hat x_q), \qquad q = 1, \dots, n_q,
@@ -37,13 +37,13 @@
  *
  * # Cache organization
  *
- * The cache is organized as:
+ * The cache maps each dimension/index pair to its slot.
  *
  * @f[
  *   (d, i) \mapsto \text{Slot}_{d,i}
  * @f]
  *
- * where:
+ * Here,
  * - @f$ d @f$ is the polytope dimension,
  * - @f$ i @f$ is the polytope index within that dimension.
  *

@@ -5,6 +5,14 @@ from matplotlib import cm
 from scipy.interpolate import make_interp_spline
 from scipy.interpolate import CubicSpline, PchipInterpolator, Akima1DInterpolator
 plt.style.use('grayscale')
+from pathlib import Path as _PlotPath
+import sys as _plot_sys
+from pathlib import Path as _PlotPath
+_plot_examples = next(parent for parent in _PlotPath(__file__).resolve().parents
+                      if (parent / 'rodin.mplstyle').is_file())
+_plot_sys.path.insert(0, str(_plot_examples))
+from plot_style import apply_style
+apply_style()
 # plt.style.use('seaborn-paper')
 
 prefix = 'L2ErrorPhysical_'

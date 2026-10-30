@@ -40,13 +40,13 @@ namespace Rodin::Geometry
    *
    * # Mathematical Foundation
    *
-   * A Point represents the tuple @f$ (x, r, p, \tau) @f$ where:
+   * A Point represents the tuple @f$ (x, r, p, \tau) @f$ Here,
    * - @f$ \tau @f$ is a polytope in the mesh @f$ \mathcal{T}_h @f$
    * - @f$ x : K \rightarrow \tau @f$ is the geometric transformation
    * - @f$ r \in K @f$ are the reference coordinates
    * - @f$ p = x(r) \in \tau @f$ are the physical coordinates
    *
-   * The transformation satisfies:
+   * The transformation satisfies the following relation.
    * @f[
    *  p = x(r)
    * @f]

@@ -1,5 +1,5 @@
 /**
-  @page guides-meshes-io Mesh Input/Output
+  @page guides-meshes-io Mesh input/output
   @brief Saving and loading meshes
 
   @tableofcontents
@@ -11,13 +11,13 @@
 
   @section guides-meshes-io-intro Introduction
 
-  Mesh I/O operations allow you to:
+  Mesh I/O operations provide:
   - Load meshes from external mesh generators
   - Save computed meshes for later use
   - Exchange meshes with other software
   - Archive simulation data
 
-  @section guides-meshes-io-formats Supported Formats
+  @section guides-meshes-io-formats Supported formats
 
   The file format is specified explicitly via the
   @ref Rodin::IO::FileFormat "IO::FileFormat" enumeration:
@@ -28,12 +28,12 @@
   | MEDIT | `.mesh` | MEDIT format from INRIA (used by MMG) |
   | HDF5 | `.h5` | High-performance binary format |
 
-  @section guides-meshes-io-loading Loading Meshes
+  @section guides-meshes-io-loading Loading meshes
 
-  @subsection guides-meshes-io-loading-basic Basic Loading
+  @subsection guides-meshes-io-loading-basic Basic loading
 
   Use @ref Rodin::Geometry::Mesh "Mesh::load()" with an explicit
-  @ref Rodin::IO::FileFormat "IO::FileFormat":
+  @ref Rodin::IO::FileFormat "IO::FileFormat".
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -41,80 +41,54 @@
   using namespace Rodin;
   using namespace Rodin::Geometry;
 
-  int main() {
+  int main()
+  {
     Mesh mesh;
 
     // Load MFEM format
-    mesh.load("domain.mesh", IO::FileFormat::MFEM);
+    mesh.load("domain.mfem.mesh", IO::FileFormat::MFEM);
 
     // Load MEDIT format
-    mesh.load("domain.mesh", IO::FileFormat::MEDIT);
+    mesh.load("domain.medit.mesh", IO::FileFormat::MEDIT);
 
     return 0;
   }
   @endcode
 
-  @section guides-meshes-io-saving Saving Meshes
+  @section guides-meshes-io-saving Saving meshes
 
-  @subsection guides-meshes-io-saving-basic Basic Saving
+  @subsection guides-meshes-io-saving-basic Basic saving
 
-  Use @ref Rodin::Geometry::Mesh "Mesh::save()" with an explicit format:
+  Use @ref Rodin::Geometry::Mesh "Mesh::save()" with an explicit format.
 
   @code{.cpp}
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
 
   // Save in MFEM format
-  mesh.save("output.mesh", IO::FileFormat::MFEM);
+  mesh.save("output.mfem.mesh", IO::FileFormat::MFEM);
 
   // Save in MEDIT format
-  mesh.save("output.mesh", IO::FileFormat::MEDIT);
+  mesh.save("output.medit.mesh", IO::FileFormat::MEDIT);
   @endcode
 
-  @subsection guides-meshes-io-saving-medit MEDIT Format
+  @subsection guides-meshes-io-saving-medit MEDIT format
 
   The MEDIT format is commonly used with the
-  @ref Rodin::MMG "MMG" mesh adaptation tools:
+  @ref Rodin::MMG "MMG" mesh adaptation tools.
 
   @code{.cpp}
   mesh.save("domain.mesh", IO::FileFormat::MEDIT);
   @endcode
 
-  @section guides-meshes-io-example Complete Example
+  @section guides-meshes-io-example Complete example
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
+  The complete program is available in @ref IO/MEDIT.cpp "MEDIT.cpp".
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
+  The generated input makes the program self-contained. Its output files use
+  distinct names for each representation.
 
-  int main() {
-    // Generate a mesh
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {32, 32});
-
-    std::cout << "Generated mesh with:" << std::endl;
-    std::cout << "  Vertices: " << mesh.getVertexCount() << std::endl;
-    std::cout << "  Cells: " << mesh.getCellCount() << std::endl;
-
-    // Save in different formats
-    mesh.save("output_mfem.mesh", IO::FileFormat::MFEM);
-    mesh.save("output_medit.mesh", IO::FileFormat::MEDIT);
-    std::cout << "Saved mesh in MFEM and MEDIT formats" << std::endl;
-
-    // Load the mesh back
-    Mesh loadedMesh;
-    loadedMesh.load("output_mfem.mesh", IO::FileFormat::MFEM);
-
-    std::cout << "Loaded mesh with:" << std::endl;
-    std::cout << "  Vertices: " << loadedMesh.getVertexCount() << std::endl;
-    std::cout << "  Cells: " << loadedMesh.getCellCount() << std::endl;
-
-    return 0;
-  }
-  @endcode
-
-  @section guides-meshes-io-external External Mesh Generators
+  @section guides-meshes-io-external External mesh generators
 
   @subsection guides-meshes-io-external-mmg MMG
 
@@ -123,37 +97,41 @@
   @ref Rodin::MMG "MMG" module. See the
   @ref examples-mmg-index "MMG examples" for details.
 
-  @section guides-meshes-io-paths File Paths
+  @section guides-meshes-io-paths File paths
 
-  @subsection guides-meshes-io-paths-absolute Absolute Paths
+  @subsection guides-meshes-io-paths-absolute Absolute paths
 
   @code{.cpp}
   mesh.load("/home/user/meshes/domain.mesh", IO::FileFormat::MFEM);
   @endcode
 
-  @subsection guides-meshes-io-paths-relative Relative Paths
+  @subsection guides-meshes-io-paths-relative Relative paths
+
+  Relative paths are resolved from the executable's working directory. Create
+  output directories before saving files into them.
 
   @code{.cpp}
   mesh.load("../data/domain.mesh", IO::FileFormat::MFEM);
   mesh.save("./output/result.mesh", IO::FileFormat::MFEM);
   @endcode
 
-  @section guides-meshes-io-considerations Format Considerations
+  @section guides-meshes-io-considerations Format considerations
 
   @subsection guides-meshes-io-considerations-compatibility Compatibility
 
-  - **MFEM**: Best for MFEM-based workflows
-  - **MEDIT**: Required for MMG tools
+  - **MFEM** supports MFEM-based workflows.
+  - **MEDIT** supplies the format required by MMG tools.
 
   @subsection guides-meshes-io-considerations-attributes Attributes
 
-  All formats preserve:
+  Select a supported mesh representation and verify its round trip. The core
+  geometry data comprises:
   - Vertex coordinates
   - Element connectivity
   - Element attributes (region markers)
   - Boundary attributes
 
-  @section guides-meshes-io-see-also See Also
+  @section guides-meshes-io-see-also See also
 
   - @ref guides-io "I/O in Rodin" — Comprehensive I/O guide including XDMF
   - @ref guides-meshes-creation "Mesh creation"

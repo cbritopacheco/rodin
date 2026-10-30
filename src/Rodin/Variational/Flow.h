@@ -15,7 +15,7 @@
  *
  * # Mathematical foundation
  * Given a velocity field @f$ \mathbf{v}(x,t) @f$, the flow map @f$ \Phi_t @f$
- * satisfies:
+ * satisfies
  * @f[
  *   \frac{d\Phi}{dt}(x,t) = \mathbf{v}(\Phi(x,t), t), \qquad \Phi(x,0) = x.
  * @f]
@@ -66,7 +66,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Flow over a shape function: exposes the finite element
+   * @brief Type traits for @c Flow over a shape function, exposing the finite element
    * space, the shape function space and the operand type.
    */
   template <class Derived, class FES, class VectorField, class Step, class BoundaryPolicy>
@@ -1136,7 +1136,7 @@ namespace Rodin::Variational
       /**
        * @brief Sets the maximum number of zero-time face hops.
        *
-       * Default value: 128.
+       * The default is 128.
        * @param value Value to store or assign.
        * @returns Reference to this object after the operation.
        */
@@ -1150,7 +1150,7 @@ namespace Rodin::Variational
        * @brief Sets the maximum number of bisection iterations used to refine a
        *        face hit time.
        *
-       * Default value: 16.
+       * The default is 16.
        * @param value Value to store or assign.
        * @returns Reference to this object after the operation.
        */
@@ -1164,7 +1164,7 @@ namespace Rodin::Variational
        * @brief Sets the maximum number of adaptive subdivisions used when
        *        bracketing fails.
        *
-       * Default value: 8.
+       * The default is 8.
        * @param value Value to store or assign.
        * @returns Reference to this object after the operation.
        */
@@ -1177,7 +1177,7 @@ namespace Rodin::Variational
       /**
        * @brief Sets the maximum number of outer trace loop iterations.
        *
-       * Default value: 100000.
+       * The default is 100000.
        * @param value Value to store or assign.
        * @returns Reference to this object after the operation.
        */
@@ -1191,7 +1191,7 @@ namespace Rodin::Variational
        * @brief Sets the maximum number of consecutive stagnating iterations
        *        tolerated before aborting.
        *
-       * Default value: 512.
+       * The default is 512.
        * @param value Value to store or assign.
        * @returns Reference to this object after the operation.
        */
@@ -1205,7 +1205,7 @@ namespace Rodin::Variational
        * @brief Sets how many candidate faces are tried first after sorting by
        *        predicted hit time.
        *
-       * Default value: 6.
+       * The default is 6.
        * @param value Value to store or assign.
        * @returns Reference to this object after the operation.
        */
@@ -1219,7 +1219,7 @@ namespace Rodin::Variational
        * @brief Sets the multiplicative growth factor used when expanding a face
        *        hit bracket.
        *
-       * Default value: 2.0.
+       * The default is 2.0.
        * @param value Value to store or assign.
        * @returns Reference to this object after the operation.
        */
@@ -1232,7 +1232,7 @@ namespace Rodin::Variational
       /**
        * @brief Sets the maximum number of bracket expansion attempts per face.
        *
-       * Default value: 3.
+       * The default is 3.
        * @param value Value to store or assign.
        * @returns Reference to this object after the operation.
        */
@@ -1247,7 +1247,7 @@ namespace Rodin::Variational
        *
        * Smaller values are more conservative.
        *
-       * Default value: 0.5.
+       * The default is 0.5.
        * @param value Value to store or assign.
        * @returns Reference to this object after the operation.
        */
@@ -1260,7 +1260,7 @@ namespace Rodin::Variational
       /**
        * @brief Sets the factor used to define the minimum admissible substep.
        *
-       * Default value: 10.
+       * The default is 10.
        * @param value Value to store or assign.
        * @returns Reference to this object after the operation.
        */
@@ -1274,7 +1274,7 @@ namespace Rodin::Variational
        * @brief Sets the factor multiplying @f$ \sqrt{\varepsilon} @f$ in the
        *        geometric and directional tolerances.
        *
-       * Default value: 50.
+       * The default is 50.
        * @param value Value to store or assign.
        * @returns Reference to this object after the operation.
        */
@@ -1288,7 +1288,7 @@ namespace Rodin::Variational
        * @brief Sets the factor controlling when a point is considered far enough
        *        outside a cell to be clamped back inside.
        *
-       * Default value: 10.
+       * The default is 10.
        * @param value Value to store or assign.
        * @returns Reference to this object after the operation.
        */
@@ -1317,7 +1317,7 @@ namespace Rodin::Variational
       /// @brief Heuristic sqrt(epsilon) multiplier for near-tangential reference normal velocity.
       static constexpr Real TangentialVelocityRoundoffFactor = Real(10);
 
-      /// @brief Squared reference-motion threshold multiplier of epsilon: (10 sqrt(epsilon)) squared.
+      /// @brief Squared reference-motion threshold multiplier of epsilon, given by (10 sqrt(epsilon)) squared.
       static constexpr Real ReferenceProgressRoundoffFactorSquared = Real(100);
 
       /// @brief Halves a rejected cell substep during subdivision.

@@ -11,7 +11,7 @@
  * @file
  * @brief Gradient operator specialization for P1 (piecewise linear) functions.
  *
- * On affine simplices, the gradient of a P1 function is constant on each element:
+ * On affine simplices, the gradient of a P1 function is constant on each element.
  * @f[
  *   \nabla u|_K = \sum_{i=1}^{n+1} u_i \nabla \phi_i
  * @f]

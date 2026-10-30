@@ -13,7 +13,7 @@
  * logical conditions in variational formulations.
  *
  * # Mathematical Foundation
- * For boolean functions @f$ p, q : \Omega \to \{0,1\} @f$, the OR operator:
+ * For boolean functions @f$ p, q : \Omega \to \{0,1\} @f$, the OR operator is defined by
  * @f[
  *   (p \lor q)(x) = \begin{cases} 1 & \text{if } p(x) = 1 \text{ or } q(x) = 1 \\ 0 & \text{otherwise} \end{cases}
  * @f]

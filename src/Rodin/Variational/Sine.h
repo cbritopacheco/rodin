@@ -28,7 +28,7 @@ namespace Rodin::Variational
   /**
    * @brief Sine function operator for real-valued scalar functions.
    *
-   * Applies the sine function pointwise to a given function:
+   * Applies the sine function pointwise to a given function.
    * @f[
    *    \text{Sin}(f)(x) = \sin(f(x))
    * @f]

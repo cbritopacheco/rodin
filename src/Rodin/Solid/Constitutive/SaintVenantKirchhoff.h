@@ -8,7 +8,7 @@
  * @file SaintVenantKirchhoff.h
  * @brief Saint-Venant-Kirchhoff hyperelastic constitutive law.
  *
- * Implements the stored energy density:
+ * Implements the following stored energy density.
  * @f[
  *   W(\mathbf{E}) = \frac{\lambda}{2}(\operatorname{tr}\mathbf{E})^2
  *                 + \mu \, \mathbf{E} : \mathbf{E}
@@ -16,12 +16,12 @@
  * where @f$ \mathbf{E} = \tfrac{1}{2}(\mathbf{F}^T\mathbf{F} - \mathbf{I}) @f$
  * is the Green-Lagrange strain tensor.
  *
- * The second Piola-Kirchhoff stress is:
+ * The second Piola-Kirchhoff stress is
  * @f[
  *   \mathbf{S} = \lambda (\operatorname{tr}\mathbf{E})\mathbf{I} + 2\mu\mathbf{E}
  * @f]
  *
- * The first Piola-Kirchhoff stress is:
+ * The first Piola-Kirchhoff stress is
  * @f[
  *   \mathbf{P} = \mathbf{F}\mathbf{S}
  * @f]

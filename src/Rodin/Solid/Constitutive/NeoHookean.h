@@ -8,7 +8,7 @@
  * @file NeoHookean.h
  * @brief Compressible Neo-Hookean hyperelastic constitutive law.
  *
- * Implements the stored energy density:
+ * Implements the following stored energy density.
  * @f[
  *   W(\mathbf{F}) = \frac{\mu}{2}(I_1 - d) - \mu \ln J
  *                 + \frac{\lambda}{2}(\ln J)^2
@@ -16,13 +16,13 @@
  * where @f$ I_1 = \operatorname{tr}(\mathbf{F}^T \mathbf{F}) @f$,
  * @f$ J = \det(\mathbf{F}) @f$, and @f$ d @f$ is the spatial dimension.
  *
- * The first Piola-Kirchhoff stress is:
+ * The first Piola-Kirchhoff stress is
  * @f[
  *   \mathbf{P} = \mu(\mathbf{F} - \mathbf{F}^{-T})
  *              + \lambda \ln(J) \, \mathbf{F}^{-T}
  * @f]
  *
- * The material tangent action on @f$ \delta\mathbf{F} @f$ is:
+ * The material tangent action on @f$ \delta\mathbf{F} @f$ is
  * @f[
  *   D\mathbf{P}[\delta\mathbf{F}]
  *     = \mu \, \delta\mathbf{F}

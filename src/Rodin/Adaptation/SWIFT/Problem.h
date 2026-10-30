@@ -214,7 +214,7 @@ namespace Rodin::Adaptation::SWIFT
    * @subsection swift-usage-boundaries Boundary conditions and metric extensions
    * If a boundary has been marked with an application-defined `FixedBoundary`
    * attribute, its current position can be held fixed by adding a homogeneous
-   * increment condition before solving:
+   * increment condition before solving.
    * @code{.cpp}
    * const auto fixed =
    *   DirichletBC(u, VectorFunction(Real(0), Real(0))).on(FixedBoundary);
@@ -226,7 +226,7 @@ namespace Rodin::Adaptation::SWIFT
    * Additional bilinear metric terms can be added and removed through
    * getMetric(); they alter the direction model, not the fitting objective or
    * force. For example, adding a mass term also penalizes translations and is
-   * therefore a different motion model. See @ref guides-swift-extension.
+   * therefore a different motion model. See @ref swift-reference-extension.
    *
    * @subsection swift-usage-lifetime Ownership, reuse and geometry application
    * The mesh is obtained from the trial function's finite element space.
@@ -385,13 +385,13 @@ namespace Rodin::Adaptation::SWIFT
    * (\bar M_k+D^2B_k(v_m))\,\delta v_m
    *       =f_k-\bar M_kv_m-DB_k(v_m).
    * @f]
-   * Merit backtracking decreases @f$\Psi_k@f$. The model is piecewise quadratic:
+   * Merit backtracking decreases @f$\Psi_k@f$. The model is piecewise quadratic.
    * within a fixed active hinge set its Hessian is constant. Affine slacks
    * contribute rank-one row products, not @f$D^2j@f$ or @f$D^2Q@f$.
    * These finite penalties are not hard constraints; actual nonlinear quality
    * is checked again by the outer line search. Inactive hinges require no
    * correction. Inner stopping uses the Euclidean stationarity residual on
-   * the free solve coordinates:
+   * the free solve coordinates.
    * @f[
    * \|\nabla\Psi_k(v_m)\|_2\le\tau_{\mathrm{abs}}
    *       +\tau_{\mathrm{rel}}\|f_k\|_2.
@@ -423,7 +423,7 @@ namespace Rodin::Adaptation::SWIFT
    * reference size must be supplied by the application. Automatically selected
    * scales are fixed for the duration of a solve; they are not recomputed from
    * the shrinking or expanding mesh. The corresponding C++ fields are listed
-   * in @ref guides-swift-controls and @ref Parameters.
+   * in @ref swift-reference-controls and @ref Parameters.
    *
    * | Parameter | C++ | Description | Value |
    * |-----------|-----|-------------|-------|
@@ -506,13 +506,13 @@ namespace Rodin::Adaptation::SWIFT
    * produce best-effort exits. The report distinguishes these exits from a
    * geometric target hit and records fitting energy, maximum sampled error,
    * quality and iteration counts. Defaults and diagnostic fields are listed
-   * in @ref guides-swift-controls and @ref guides-swift-results.
+   * in @ref swift-reference-controls and @ref swift-reference-results.
    *
    * @section swift-theory Theory
    * @subsection swift-structure Metric structure and solvability
    * For positive metric weights and @f$j_k>0@f$, both terms are integrals of
    * squares. With nonnegative quadrature weights this property also holds for
-   * the assembled form:
+   * the assembled form.
    * @f[
    * M_k[v,v]=F_k[v,v]+D_k[v,v]\ge0.
    * @f]
@@ -535,7 +535,7 @@ namespace Rodin::Adaptation::SWIFT
    *
    * On a fixed finite-dimensional quotient, a symmetric positive-semidefinite
    * form is positive definite after its complete kernel has been removed.
-   * A mesh-uniform @f$H^1@f$ estimate is a stronger, separate statement:
+   * A mesh-uniform @f$H^1@f$ estimate is a stronger, separate statement.
    * @f[
    * M_k[v,v]\ge c\inf_{w\in\mathcal N_k}
    *             \|v-w\|_{H^1(\Omega_0)}^2.
@@ -546,7 +546,7 @@ namespace Rodin::Adaptation::SWIFT
    *
    * @subsection swift-convergence Scope of convergence diagnostics
    * Affine squared hinges are convex. Their active-region Hessian therefore
-   * preserves positive semidefiniteness:
+   * preserves positive semidefiniteness.
    * @f[
    * D^2B_k(v)[z,z]\ge0,\qquad
    * D^2\Psi_k(v)[z,z]=\bar M_k[z,z]+D^2B_k(v)[z,z]\ge0.

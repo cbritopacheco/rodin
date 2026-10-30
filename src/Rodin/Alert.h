@@ -15,7 +15,7 @@
  * exceptions, warnings, info messages, and success notifications with
  * colored terminal output support.
  *
- * Include this header to use the Alert module:
+ * Include this header to use the Alert module.
  * @code{.cpp}
  * #include <Rodin/Alert.h>
  * @endcode

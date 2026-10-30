@@ -40,7 +40,7 @@ namespace Rodin::Variational
    * @tparam Args Additional arguments
    *
    * Represents the finite element space composed of discontinuous, piecewise
-   * constant functions:
+   * constant functions.
    * @f[
    *  \mathbb{P}_0 (\mathcal{T}_h)^d = \{ v : \mathcal{T}_h \rightarrow \mathbb{R}^d : v|_{\tau} \in \mathbb{P}_0(\tau), \ \tau \in \mathcal{T}_h \} \ ,
    * @f]

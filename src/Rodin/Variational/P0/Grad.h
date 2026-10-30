@@ -27,7 +27,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Grad over a grid function: exposes the finite element
+   * @brief Type traits for @c Grad over a grid function, exposing the finite element
    * space and the operand type.
    */
   template <class Range, class Data, class Mesh>
@@ -43,7 +43,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Grad over a shape function: exposes the finite element
+   * @brief Type traits for @c Grad over a shape function, exposing the finite element
    * space, the shape function space and the operand type.
    */
   template <class NestedDerived, class Range, class Mesh,
@@ -70,7 +70,7 @@ namespace Rodin::Variational
    * @brief Gradient of a P0 GridFunction.
    *
    * Since P0 functions are piecewise constant on each element,
-   * their gradient is identically zero: @f$ \nabla u|_K = 0 @f$.
+   * their gradient is identically zero, satisfying @f$ \nabla u|_K = 0 @f$.
    */
   template <class Range, class Data, class Mesh>
     requires(!FormLanguage::IsMatrixRange<Range>::Value)

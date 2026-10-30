@@ -29,7 +29,7 @@ namespace Rodin::Distance
    * @brief Poisson approximation to the distance function.
    *
    * This class computes an approximation to the distance function by solving
-   * a Poisson equation with appropriate boundary conditions. The method solves:
+   * a Poisson equation with appropriate boundary conditions. The method solves the following equation.
    * @f[
    *   -\Delta u = 1 \quad \text{in } \Omega
    * @f]

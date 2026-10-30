@@ -33,7 +33,7 @@ namespace Rodin::Variational
    *
    * LinearFormIntegratorBase provides the foundation for implementing specific
    * linear form terms in variational formulations. A linear form integrator
-   * computes the local element vector contributions:
+   * computes the local element vector contributions.
    * @f[
    *   b^K_i = \int_K l(\psi_i) \, dx
    * @f]
@@ -54,7 +54,7 @@ namespace Rodin::Variational
    *
    * # Domain Specification
    * Linear form integrators support the `over()` method to restrict integration
-   * to specific mesh regions identified by attributes:
+   * to specific mesh regions identified by attributes.
    * ```cpp
    * auto load = Integral(f, v).over(1, 2);  // Integrate over regions 1 and 2
    * ```

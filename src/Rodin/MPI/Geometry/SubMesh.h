@@ -45,7 +45,7 @@ namespace Rodin::Geometry
    *
    * # Usage
    *
-   * ## Creating a distributed boundary submesh:
+   * ## Creating a distributed boundary submesh.
    * @code{.cpp}
    * SubMesh<Context::MPI>::Builder builder;
    * builder.initialize(mpiMesh);
@@ -75,7 +75,9 @@ namespace Rodin::Geometry
        * a parent `Mesh<Context::MPI>` by selecting specific polytopes. Each
        * rank includes entities independently using parent-shard-local indices.
        *
-       * Architecture: the global top-dimensional selection is the union of
+       * @par Architecture
+       *
+       * The global top-dimensional selection is the union of
        * rank-local requests. Finalization first reconciles that selection at
        * parent owners and publishes it to parent holders, then includes those
        * entities and their subentities before resolving ownership. For a parent

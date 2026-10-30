@@ -22,12 +22,12 @@ namespace Rodin::Math
    * @brief Represents a linear system of equations.
    *
    * Forward declaration for the LinearSystem class template, which represents
-   * systems of linear equations in the form:
+   * systems of linear equations in the form.
    * @f[
    *   \text{Operator} \cdot \text{Solution} = \text{Vector}
    * @f]
    *
-   * For example, @f$ Ax = b @f$ where:
+   * For example, @f$ Ax = b @f$ Here,
    * - @f$ A @f$ is the operator (matrix)
    * - @f$ x @f$ is the solution vector (unknown)
    * - @f$ b @f$ is the right-hand side vector

@@ -8,7 +8,7 @@
  * @file Fields/CauchyStress.h
  * @brief Cauchy (true) stress tensor computation from the first Piola-Kirchhoff stress.
  *
- * Computes the Cauchy stress tensor via the Piola transform:
+ * Computes the Cauchy stress tensor via the Piola transform.
  * @f[
  *   \boldsymbol{\sigma} = \frac{1}{J} \mathbf{P} \mathbf{F}^T
  * @f]

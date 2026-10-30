@@ -13,7 +13,7 @@
  * are equal at each point in the domain.
  *
  * # Mathematical Foundation
- * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the equality operator:
+ * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the equality operator is defined by
  * @f[
  *   (f = g)(x) = \begin{cases} 1 & \text{if } f(x) = g(x) \\ 0 & \text{otherwise} \end{cases}
  * @f]

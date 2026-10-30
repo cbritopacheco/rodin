@@ -13,7 +13,7 @@
  * than the standard Bi-Conjugate Gradient method.
  *
  * # Algorithm
- * BiCGSTAB solves:
+ * BiCGSTAB solves the linear system
  * @f[
  *   Ax = b
  * @f]
@@ -91,7 +91,7 @@ namespace Rodin::Solver
    *
    * @tparam Scalar The scalar type (e.g., Real, Complex)
    *
-   * **Example usage:**
+   * **The following example illustrates usage.**
    * @code{.cpp}
    * Problem problem(u, v);
    * problem = Integral(Grad(u), Grad(v)) + Integral(beta * Grad(u), v) - Integral(f, v);

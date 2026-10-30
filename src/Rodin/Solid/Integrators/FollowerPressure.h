@@ -32,7 +32,7 @@
  *       \cdot \mathbf{w} ,
  * @f]
  * (cf. Bonet & Wood, Nonlinear Continuum Mechanics for Finite Element
- * Analysis, ch. 8).  Only SURFACE-parametric derivatives appear: the
+ * Analysis, ch. 8).  Only SURFACE-parametric derivatives appear. The
  * operators are assembled face-locally, with no volume trace required.  The
  * load-stiffness @f$ K_p @f$ is generally NONSYMMETRIC; use a direct solver
  * or a nonsymmetric Krylov method.
@@ -46,13 +46,13 @@
  * a built-in verification limit.
  *
  * Both integrators support the standard @c .over(attribute) restriction.
- * Supported spaces: vector P1 (the local basis is evaluated analytically
+ * Supported spaces include vector P1 (the local basis is evaluated analytically
  * with the framework's @f$ \text{local} = \text{vertex} \cdot d_v +
- * \text{component} @f$ layout). Supported dimensions: 3D (triangular faces)
+ * \text{component} @f$ layout). Supported dimensions include 3D (triangular faces)
  * and 2D (segment faces, where the "cross product" is the +90-degree
  * rotation of the tangent).
  *
- * Usage (static prestress with FULL Newton convergence):
+ * Usage (static prestress with FULL Newton convergence).
  * @code
  * Real p = 0.0; // ramped externally
  * Solid::FollowerPressureForce   load(p, w, dState);    // residual, "+"
@@ -130,8 +130,8 @@ namespace Rodin::Solid
     }
 
     /**
-     * "Cross product" carrying normal direction and area element:
-     * 3D: t1 x t2; 2D: +90-degree rotation of t1 (t2 ignored).
+     * "Cross product" carrying normal direction and area element.
+     * Uses t1 x t2 in 3D and a +90-degree rotation of t1 in 2D, where t2 is ignored.
      * @param out Storage for the computed result.
      * @param sdim Dimension of the embedding space.
      * @param t1 First tangent vector.
@@ -235,7 +235,7 @@ namespace Rodin::Solid
         }
 
         /**
-         * Deformed tangents at this face (P1: constant over the face).
+         * Deformed tangents at this face (constant over a P1 face).
          * @param fes Finite element space.
          * @param xjac Storage for the deformed tangent matrix.
          * @param d Surface kinematic state.
@@ -260,7 +260,7 @@ namespace Rodin::Solid
   }
 
   /**
-   * @brief Linear-form integrator: follower pressure residual
+   * @brief Integrates the follower-pressure residual as a linear form.
    * @f$ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
    *      \cdot \mathbf{w} @f$. Add it with "+" to the Problem (it already
    * carries the residual-convention sign of a pressure pushing along the
@@ -287,7 +287,7 @@ namespace Rodin::Solid
         "Solid::FollowerPressureForce expects a Rodin test function.");
 
       /**
-       * Pressure captured BY REFERENCE: all copies follow the variable.
+       * Pressure is captured BY REFERENCE, so all copies follow the variable.
        * @param displacement Displacement field.
        * @param pressure Pressure applied on the surface.
        * @param v Test shape-function expression.
@@ -418,7 +418,7 @@ namespace Rodin::Solid
       std::decay_t<DisplacementType>>;
 
   /**
-   * @brief Bilinear-form integrator: the EXACT load stiffness of the
+   * @brief Integrates the EXACT load stiffness of the
    * follower pressure,
    * @f$ +p \int (\delta\mathbf{d}_{,\xi} \times \mathbf{x}_{,\eta}
    *    + \mathbf{x}_{,\xi} \times \delta\mathbf{d}_{,\eta})

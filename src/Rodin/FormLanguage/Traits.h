@@ -54,7 +54,7 @@ namespace Rodin::FormLanguage
    *
    * # Common Trait Members
    * While the primary template is intentionally incomplete, specializations
-   * typically provide some or all of the following:
+   * typically provide some or all of the members listed below.
    *
    * ## Type Members
    * - **FESType**: Associated finite element space type
@@ -88,7 +88,7 @@ namespace Rodin::FormLanguage
    * inherits from.
    *
    * Function expressions do not name themselves as their FunctionBase
-   * parameter: a RealFunction, for one, derives from a FunctionBase over a
+   * parameter. A RealFunction, for one, derives from a FunctionBase over a
    * ScalarFunctionBase. Anything that stores a function through its
    * FunctionBase, the way the form language's own operators do, needs this
    * type rather than the function's.
@@ -117,7 +117,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type trait: whether @c T is a named bilinear form.
+   * @brief Indicates whether @c T is a named bilinear form.
    *
    * A named form names its integrand instead of building it through the form
    * language and brings its own local kernel, which lets it be assembled

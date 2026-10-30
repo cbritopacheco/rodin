@@ -269,7 +269,7 @@ namespace Rodin::Variational
        *        initial guess.
        *
        * After assembly, the linear system's solution vector holds the trial
-       * function data as the initial guess: on entry to a linear solver the
+       * function data as the initial guess. On entry to a linear solver the
        * solution vector is the guess, on exit it is the solution. Trial
        * functions are zero-initialized, so the guess is zero unless set.
        * @returns Reference to this object after the operation.
@@ -666,8 +666,8 @@ namespace Rodin::Variational
        *        establishes the initial guess.
        *
        * After assembly, the linear system's solution vector holds the trial
-       * function data, gathered at the trial offsets, as the initial guess:
-       * on entry to a linear solver the solution vector is the guess, on
+       * function data, gathered at the trial offsets, as the initial guess.
+       * On entry to a linear solver the solution vector is the guess, on
        * exit it is the solution.
        * @returns Reference to this object after the operation.
        */

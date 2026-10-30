@@ -45,7 +45,7 @@ namespace Rodin::Geometry::Euclidean
        * @brief Evaluates the parametric representation at parameter @f$ t @f$.
        *
        * Given @f$ t \in \mathbb{R} @f$, computes the parametric point
-       * @f$ s(t) @f$ of the line segment parametrization:
+       * @f$ s(t) @f$ of the line segment parametrization.
        * @f[
        *   s(t) = p + t \left(q - p\right)
        * @f]
@@ -70,7 +70,7 @@ namespace Rodin::Geometry::Euclidean
        * @brief Gets the unit direction vector.
        * @returns Unit vector from `start()` to `end()`
        *
-       * Computes:
+       * Computes the following quantity.
        * @f[
        *   \frac{q - p}{\|q - p\|}
        * @f]

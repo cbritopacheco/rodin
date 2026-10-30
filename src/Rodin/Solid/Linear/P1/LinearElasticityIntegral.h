@@ -15,7 +15,7 @@
  * integrator for P1 vector finite element spaces.
  *
  * # Bilinear Form
- * The integrator assembles the elasticity bilinear form:
+ * The integrator assembles the elasticity bilinear form.
  * @f[
  *   a(\mathbf{u}, \mathbf{v}) = \int_\Omega 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v}) + \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v}) \, dx
  * @f]
@@ -56,7 +56,7 @@ namespace Rodin::Variational
    * Jacobians of P1 basis functions.
    *
    * # Local Stiffness Matrix
-   * For element @f$ K @f$, computes the local matrix entries:
+   * For element @f$ K @f$, computes the local matrix entries.
    * @f[
    *   A^K_{ij} = |K| \left[ 2\mu \, \boldsymbol{\varepsilon}(\phi_j) : \boldsymbol{\varepsilon}(\phi_i) + \lambda (\nabla \cdot \phi_j)(\nabla \cdot \phi_i) \right]
    * @f]

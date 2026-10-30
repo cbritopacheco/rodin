@@ -21,7 +21,7 @@ namespace Rodin::MMG
    * @brief Printer for @ref Rodin::MMG::Mesh in MEDIT/MMG-compatible syntax.
    *
    * In addition to standard mesh topology/geometry, this printer serializes
-   * MMG-specific sections:
+   * MMG-specific sections.
    * - `Corners`
    * - `Ridges`
    * - `RequiredVertices`

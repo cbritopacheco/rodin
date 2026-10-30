@@ -11,7 +11,7 @@
  * @file
  * @brief Gradient operator specialization for H1 (higher-order Lagrange) functions.
  *
- * For H1<K> functions, the gradient is polynomial of degree K-1 on each element:
+ * For H1<K> functions, the gradient is polynomial of degree K-1 on each element.
  * @f[
  *   \nabla u|_K = \sum_{i=1}^{n} u_i \nabla \phi_i
  * @f]
@@ -404,7 +404,7 @@ namespace Rodin::Variational
        *
        * Each explicit bind prepares the physical gradients from the supplied
        * point's inverse Jacobian. Cell and quadrature indices do not identify
-       * geometry state: a deformation can preserve all of them. Storage is
+       * geometry state because a deformation can preserve all of them. Storage is
        * retained for subsequent basis access, while reference tabulation keeps
        * its existing formula-identity lifetime contract.
        *

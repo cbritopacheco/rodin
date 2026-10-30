@@ -13,7 +13,7 @@
  * values match across opposite boundaries of the domain.
  *
  * # Mathematical Foundation
- * A periodic boundary condition specifies:
+ * A periodic boundary condition specifies.
  * @f[
  *   u(x + L) = u(x) \quad \text{for} \quad x \in \Gamma_-
  * @f]

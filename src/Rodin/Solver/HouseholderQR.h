@@ -12,7 +12,7 @@
  * implementing QR decomposition using Householder reflections.
  *
  * # Algorithm
- * The solver computes:
+ * The solver computes the following quantity.
  * @f[
  *   A = QR
  * @f]

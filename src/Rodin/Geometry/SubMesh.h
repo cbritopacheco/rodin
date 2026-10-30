@@ -113,7 +113,7 @@ namespace Rodin::Geometry
    *
    * # Mathematical Foundation
    *
-   * For a parent mesh @f$ \mathcal{T}_h @f$ and submesh @f$ \mathcal{S} @f$:
+   * For a parent mesh @f$ \mathcal{T}_h @f$ and submesh @f$ \mathcal{S} @f$.
    * @f[
    *   \mathcal{S} \subseteq \mathcal{T}_h
    * @f]
@@ -122,7 +122,7 @@ namespace Rodin::Geometry
    *
    * # Usage Examples
    *
-   * ## Creating a boundary submesh:
+   * ## Creating a boundary submesh.
    * @code{.cpp}
    * SubMesh<Context::Local>::Builder builder;
    * builder.initialize(mesh);
@@ -135,7 +135,7 @@ namespace Rodin::Geometry
    * SubMesh<Context::Local> boundary = builder.finalize();
    * @endcode
    *
-   * ## Accessing as submesh:
+   * ## Accessing as submesh.
    * @code{.cpp}
    * if (mesh.isSubMesh())
    * {

@@ -14,7 +14,7 @@
  * This file provides specialized implementations of the divergence operator
  * for P1 vector-valued GridFunctions and ShapeFunctions.
  *
- * For P1 elements, the divergence is computed as:
+ * For P1 elements, the divergence is computed as
  * @f[
  *   \nabla \cdot \mathbf{u}|_K = \sum_{i=1}^{n_v} \sum_{j=1}^d u_{i,j} \frac{\partial \phi_i}{\partial x_j}
  * @f]
@@ -31,7 +31,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Div over a grid function: exposes the finite element
+   * @brief Type traits for @c Div over a grid function, exposing the finite element
    * space, the scalar type and the operand type.
    */
   template <class Scalar, class Data, class Mesh>
@@ -51,7 +51,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Div over a shape function: exposes the finite element
+   * @brief Type traits for @c Div over a shape function, exposing the finite element
    * space, the shape function space, the scalar type and the operand type.
    */
   template <class NestedDerived, class Scalar, class Mesh,
@@ -81,7 +81,7 @@ namespace Rodin::Variational
    * @brief Divergence of a P1 vector GridFunction.
    *
    * Computes @f$ \nabla \cdot \mathbf{u} @f$ for vector-valued P1 functions.
-   * On affine simplices, the divergence is constant on each element:
+   * On affine simplices, the divergence is constant on each element.
    * @f[
    *   (\nabla \cdot \mathbf{u})|_K = \sum_{i=1}^{n_v} \mathbf{u}_i \cdot \nabla \phi_i
    * @f]
@@ -339,7 +339,7 @@ namespace Rodin::Variational
    * @brief Divergence of a P1 vector ShapeFunction.
    *
    * Represents @f$ \nabla \cdot \mathbf{v} @f$ for P1 test/trial functions.
-   * Used in weak formulations like:
+   * Used in weak formulations containing
    * @f[
    *   \int_\Omega p (\nabla \cdot \mathbf{v}) \, dx
    * @f]

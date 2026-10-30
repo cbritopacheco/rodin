@@ -24,7 +24,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for a Math::LinearSystem: exposes the operator,
+   * @brief Type traits for a Math::LinearSystem, exposing the operator,
    * vector, and scalar types.
    */
   template <class Operator, class Vector>
@@ -361,7 +361,7 @@ namespace Rodin::Math
        *
        * A byte per row identifies constraints. Adjacent constrained columns
        * are cleared as contiguous storage ranges. Between these ranges,
-       * blocks of sixteen row indices form a bit mask: empty masks require no
+       * blocks of sixteen row indices form a bit mask. Empty masks require no
        * coefficient stores, while nonempty masks visit only their set bits.
        * Sixteen is a kernel granularity, not a numerical threshold. The tail
        * uses bit masking for Real and conditional zero assignment for other
@@ -372,7 +372,7 @@ namespace Rodin::Math
        * select exact row-range pruning. This heuristic requires at least eight
        * entries per column on average and at least half of sixteen storage-
        * quantile samples to reject the interval. These measured policy choices
-       * select a kernel only: each skipped column is independently certified
+       * select a kernel only. Each skipped column is independently certified
        * by its actual row bounds. Partial columns use binary searches.
        * Fragmented constraints always use the block kernel.
        *
@@ -594,7 +594,7 @@ namespace Rodin::Math
        *
        * @tparam DOFScalar Scalar type for DOF values
        * @param[in] dofs Map from DOF index to (dependent indices, coefficients) pairs
-       * @param[in] offset Index offset applied to DOF indices (default: 0)
+       * @param[in] offset Index offset applied to DOF indices (default 0)
        * @return Reference to @f$ *this @f$
        */
       template <class DOFScalar>
@@ -898,7 +898,7 @@ namespace Rodin::Math
        *
        * @tparam DOFScalar Scalar type for DOF values
        * @param[in] dofs Map from DOF index to prescribed value
-       * @param[in] offset Index offset applied to DOF indices (default: 0)
+       * @param[in] offset Index offset applied to DOF indices (default 0)
        * @return Reference to @f$ *this @f$
        */
       template <class DOFScalar>
@@ -939,7 +939,7 @@ namespace Rodin::Math
        *
        * @tparam DOFScalar Scalar type for DOF values
        * @param[in] dofs Map from DOF index to (dependent indices, coefficients) pairs
-       * @param[in] offset Index offset applied to DOF indices (default: 0)
+       * @param[in] offset Index offset applied to DOF indices (default 0)
        * @return Reference to @f$ *this @f$
        */
       template <class DOFScalar>
@@ -1149,7 +1149,7 @@ namespace std
     : std::integral_constant<std::size_t, 3>
   {};
 
-  /// @brief Structured-binding element 0 of a LinearSystem: the operator @f$ A @f$.
+  /// @brief Structured-binding element 0 of a LinearSystem holding the operator @f$ A @f$.
   template <class Matrix, class Vector>
   struct tuple_element<0, Rodin::Math::LinearSystem<Matrix, Vector>>
   {
@@ -1157,7 +1157,7 @@ namespace std
     using type = Matrix;
   };
 
-  /// @brief Structured-binding element 1 of a LinearSystem: the solution @f$ x @f$.
+  /// @brief Structured-binding element 1 of a LinearSystem holding the solution @f$ x @f$.
   template <class Matrix, class Vector>
   struct tuple_element<1, Rodin::Math::LinearSystem<Matrix, Vector>>
   {
@@ -1165,7 +1165,7 @@ namespace std
     using type = Vector;
   };
 
-  /// @brief Structured-binding element 2 of a LinearSystem: the right-hand side @f$ b @f$.
+  /// @brief Structured-binding element 2 of a LinearSystem holding the right-hand side @f$ b @f$.
   template <class Matrix, class Vector>
   struct tuple_element<2, Rodin::Math::LinearSystem<Matrix, Vector>>
   {
@@ -1177,7 +1177,7 @@ namespace std
 namespace Rodin::Math
 {
   /**
-   * @brief Structured-binding accessor: element @p I of @p ls
+   * @brief Accesses element @p I of @p ls for structured binding.
    * (0 = operator @f$ A @f$, 1 = solution @f$ x @f$, 2 = right-hand side @f$ b @f$).
    * @param ls Linear system to solve.
    * @returns The .

@@ -573,7 +573,7 @@ namespace Rodin::Variational
        * @brief Assembles the linear system and establishes the initial guess.
        *
        * After assembly, the linear system's solution vector holds the trial
-       * function data as the initial guess: on entry to a linear solver the
+       * function data as the initial guess. On entry to a linear solver the
        * solution vector is the guess, on exit it is the solution. Trial
        * functions are zero-initialized, so the guess is zero unless set.
        * @returns Reference to this object after the operation.
@@ -695,12 +695,12 @@ namespace Rodin::Variational
    * Trial/test identities and cumulative DOF offsets are passed directly to
    * the problem assembly selected by @ref Rodin::Assembly::Default. That single
    * assembler owns block insertion and completion. No auxiliary sequential
-   * tuple assembler is constructed: its availability must not restrict the
+   * tuple assembler is constructed. Its availability must not restrict the
    * scalar or storage types supported by the selected problem assembler.
    * The formulation and assembled system are owned; trial/test functions are
    * borrowed. Assignment replaces these values and bindings while retaining
    * the destination identity. Cumulative offsets are established at construction
-   * and refreshed at assembly: @f$\sigma_j^U=\sum_{i<j}\dim U_i@f$ and
+   * and refreshed at assembly, giving @f$\sigma_j^U=\sum_{i<j}\dim U_i@f$ and
    * @f$\sigma_j^V=\sum_{i<j}\dim V_i@f$ for the ordered trial/test spaces.
    * Unused per-block forms are not materialized.
    */

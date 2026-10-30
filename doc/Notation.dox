@@ -25,7 +25,7 @@
 | @f$ K @f$         | A single cell (element) of the mesh @f$ \mathcal{T}_h @f$. Each cell is a @ref Rodin::Geometry::Polytope "Polytope" (triangle, tetrahedron, etc.). |
 | @f$ \hat{K} @f$   | The reference element. All local computations (basis function evaluation, quadrature) are performed on @f$ \hat{K} @f$ and mapped to each physical cell @f$ K @f$. |
 | @f$ F_K @f$       | The geometric transformation @f$ F_K : \hat{K} \to K @f$ mapping the reference element to the physical cell. Its Jacobian is accessible via @ref Rodin::Geometry::Point::getJacobian "Point::getJacobian()". |
-| @f$ h @f$         | Mesh size parameter: the maximum diameter over all cells @f$ K \in \mathcal{T}_h @f$. |
+| @f$ h @f$         | Mesh size parameter given by the maximum diameter over all cells @f$ K \in \mathcal{T}_h @f$. |
 | @f$ d @f$         | The topological dimension of the mesh (2 for surface meshes, 3 for volumetric). Retrieved by @ref Rodin::Geometry::Mesh "Mesh::getDimension()". |
 | @f$ \mathbf{n} @f$ | The outward unit normal vector on @f$ \partial \Omega @f$ or on a face. |
 
@@ -38,9 +38,9 @@
 | @f$ H^1_0(\Omega) @f$     | The subspace of @f$ H^1(\Omega) @f$ with zero trace on @f$ \partial \Omega @f$ (homogeneous Dirichlet). |
 | @f$ V_h @f$               | A finite element space built on the mesh @f$ \mathcal{T}_h @f$. Subscript @f$ h @f$ indicates discrete. In Rodin, created by instantiating `P0`, `P1`, or `H1`. |
 | @f$ \mathbb{P}_k @f$      | The space of polynomials of total degree at most @f$ k @f$. |
-| @f$ P_0 @f$               | Piecewise constant functions on each cell. In Rodin: `P0`. One DOF per cell, discontinuous across cell boundaries. |
-| @f$ P_1 @f$               | Piecewise linear, globally continuous functions. In Rodin: `P1`. One DOF per vertex, @f$ H^1 @f$-conforming. |
-| @f$ H^1_k @f$             | Continuous piecewise polynomials of degree @f$ k @f$. In Rodin: `H1<k>`. DOFs on vertices, edges, and cell interiors. |
+| @f$ P_0 @f$               | Piecewise constant functions on each cell. In Rodin this is `P0`. One DOF per cell, discontinuous across cell boundaries. |
+| @f$ P_1 @f$               | Continuous vertex-based family. On affine simplices its scalar fields are piecewise affine; product cells and pyramids use their corresponding reference spaces. In Rodin this is `P1`, with one scalar DOF per vertex. |
+| @f$ H^1_k @f$             | Continuous degree-@f$k@f$ reference family transported by the cell maps, with @f$k\geq1@f$. In Rodin this is `H1` with a compile-time degree. DOFs lie on the relevant vertices, edges, faces and cell interiors. See @ref fem-ciarlet for the geometry-dependent reference spaces. |
 
   @section notation-variational Notation regarding variational methods
 
@@ -57,7 +57,7 @@
   @subsection notation-complex-forms Real and complex form convention
 
   Rodin writes form arguments in **trial-first, test-second** order. Its scalar
-  product conjugates the right-hand operand:
+  product conjugates the right-hand operand.
   @f[
     \operatorname{dot}(x,y) = \sum_i x_i \overline{y_i}.
   @f]
@@ -70,7 +70,7 @@
     \ell(\alpha v_1 + \beta v_2)
       = \overline{\alpha}\,\ell(v_1) + \overline{\beta}\,\ell(v_2),
   @f]
-  and a `BilinearForm` is sesquilinear: linear in its trial argument and
+  and a `BilinearForm` is sesquilinear, linear in its trial argument and
   conjugate-linear in its test argument,
   @f[
     a(u,v) = \mathbf{v}^* A \mathbf{u},
@@ -92,7 +92,7 @@
     A_{ij} = a(\phi_j,\psi_i).
   @f]
   For example, `Integral(c * u, v)` represents an integrand proportional to
-  @f$ c\,u\,\overline{v} @f$: neither the coefficient @f$ c @f$ nor the trial
+  @f$ c\,u\,\overline{v} @f$. Neither the coefficient @f$ c @f$ nor the trial
   function is conjugated. An explicit `Conjugate` expression may be used when
   a different mathematical form is required.
 
@@ -103,9 +103,8 @@
 
   The class names `LinearForm` and `BilinearForm` are retained for the common
   real and complex APIs. Over real-valued spaces conjugation is the identity,
-  so the forms reduce to ordinary linear and bilinear forms. Sesquilinearity
-  alone does not imply that @f$ A @f$ is Hermitian; @f$ A = A^* @f$ is a
-  separate property of a particular form.
+  so the forms reduce to ordinary linear and bilinear forms. Hermitian symmetry is the additional property @f$ A = A^* @f$, determined by the
+  form and its coefficients.
 
   @section notation-operators Notation regarding differential operators
 
@@ -113,17 +112,17 @@
 | ----------------- | ---------- | -------------------------------------------- |
 | @f$ \nabla u @f$  | `Grad(u)`  | Gradient of a scalar field. Returns a vector of dimension @f$ d @f$. |
 | @f$ \nabla \cdot \mathbf{u} @f$ | `Div(u)` | Divergence of a vector field. Returns a scalar. |
-| @f$ \Delta u @f$  | —          | Laplacian. Not used directly; appears via integration by parts as `Integral(Grad(u), Grad(v))`. |
+| @f$ \Delta u @f$  | —          | Laplacian, represented after integration by parts by `Integral(Grad(u), Grad(v))`. |
 | @f$ \nabla \mathbf{u} @f$ | `Jacobian(u)` | Jacobian (gradient) of a vector field. Returns a @f$ d \times d @f$ matrix. |
 | @f$ \nabla \mathbf{u}^T @f$ | `Transpose(Jacobian(u))` | Transpose of the Jacobian. |
-| @f$ \varepsilon(\mathbf{u}) @f$ | See below | Symmetric gradient (linearized strain tensor): @f$ \frac{1}{2}(\nabla \mathbf{u} + \nabla \mathbf{u}^T) @f$. |
-| @f$ \mathrm{tr}(A) @f$ | `Trace(A)` | Trace of a matrix: @f$ \mathrm{tr}(A) = \sum_i A_{ii} @f$. |
-| @f$ A : B @f$    | `Dot(A, B)` | Frobenius (double-contraction) inner product of two matrices: @f$ A : B = \sum_{ij} A_{ij} \overline{B_{ij}} @f$. For real matrices the conjugation is the identity. |
-| @f$ \lVert A\rVert_F @f$  | `Frobenius(A)` | Frobenius norm: @f$ \lVert A\rVert_F = \sqrt{A : A} @f$. |
-| @f$ u_i @f$      | `Component(u, i)` | The @f$ i @f$-th component of a vector function (0-indexed). Shorthand: `u.x()`, `u.y()`, `u.z()`. |
+| @f$ \varepsilon(\mathbf{u}) @f$ | See below | Symmetric gradient (linearized strain tensor), given by @f$ \frac{1}{2}(\nabla \mathbf{u} + \nabla \mathbf{u}^T) @f$. |
+| @f$ \mathrm{tr}(A) @f$ | `Trace(A)` | Trace of a matrix, given by @f$ \mathrm{tr}(A) = \sum_i A_{ii} @f$. |
+| @f$ A : B @f$    | `Dot(A, B)` | Frobenius (double-contraction) inner product of two matrices, given by @f$ A : B = \sum_{ij} A_{ij} \overline{B_{ij}} @f$. For real matrices the conjugation is the identity. |
+| @f$ \lVert A\rVert_F @f$  | `Frobenius(A)` | Frobenius norm given by @f$ \lVert A\rVert_F = \sqrt{A : A} @f$. |
+| @f$ u_i @f$      | `Component(u, i)` | The @f$ i @f$-th component of a vector function (0-indexed). Component accessors include `u.x()`, `u.y()`, `u.z()`. |
 
   @note The symmetric gradient @f$ \varepsilon(\mathbf{u}) @f$ can be built
-  from Rodin operators as:
+  by combining Rodin operators.
   @code{.cpp}
   auto eps_u = 0.5 * (Jacobian(u) + Transpose(Jacobian(u)));
   @endcode
@@ -146,7 +145,7 @@
 | @f$ [u] = u^+ - u^- @f$                         | `Jump(u)`         | Jump of @f$ u @f$ across an internal face. |
 | @f$ \{u\} = \frac{1}{2}(u^+ + u^-) @f$          | `Average(u)`      | Average of @f$ u @f$ across an internal face. |
 
-  @section notation-special Special Functions and Operators
+  @section notation-special Special functions and operators
 
 | Notation                     | Rodin code           | Description |
 | ---------------------------- | -------------------- | ----------- |
@@ -165,7 +164,7 @@
 | ------------------------------ | ---------- | ----------- |
 | @f$ \boldsymbol{\varepsilon}(\mathbf{u}) @f$ | `0.5 * (Jacobian(u) + Transpose(Jacobian(u)))` | Infinitesimal (linearized) strain tensor. |
 | @f$ \boldsymbol{\sigma} @f$    | — | Cauchy stress tensor (Hooke's law). |
-| @f$ \lambda, \mu @f$          | `lambda`, `mu` | Lamé parameters: @f$ \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)} @f$, @f$ \mu = \frac{E}{2(1+\nu)} @f$. |
+| @f$ \lambda, \mu @f$          | `lambda`, `mu` | Lamé parameters given by @f$ \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)} @f$, @f$ \mu = \frac{E}{2(1+\nu)} @f$. |
 | @f$ \mathbf{F} @f$            | `KinematicState::getDeformationGradient()` | Deformation gradient @f$ \mathbf{F} = \mathbf{I} + \nabla\mathbf{u} @f$. |
 | @f$ J @f$                     | `KinematicState::getJacobian()` | @f$ J = \det\mathbf{F} @f$. |
 | @f$ \mathbf{C} @f$            | `KinematicState::getRightCauchyGreenTensor()` | Right Cauchy-Green tensor @f$ \mathbf{C} = \mathbf{F}^T\mathbf{F} @f$. |

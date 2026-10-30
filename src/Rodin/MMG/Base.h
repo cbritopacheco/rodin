@@ -168,7 +168,7 @@ namespace Rodin::MMG
        * The `hgrad` option allows to set the gradation value. It controls the
        * ratio between two adjacent edges. With a gradation of @f$ h @f$, two
        * adjacent edges @f$ e_1 @f$ and @f$ e_2 @f$ must respect the following
-       * constraint:
+       * constraint.
        *
        * @f[
        *  \dfrac{1}{h} \leq \dfrac{ |e_1| }{ |e_2| } \leq h

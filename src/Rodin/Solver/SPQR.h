@@ -12,7 +12,7 @@
  * a high-performance direct solver using multifrontal sparse QR factorization.
  *
  * # Algorithm
- * SPQR computes:
+ * SPQR computes the factorization
  * @f[
  *   AP = QR
  * @f]

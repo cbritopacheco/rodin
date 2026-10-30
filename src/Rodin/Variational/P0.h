@@ -12,7 +12,7 @@
  * space, which consists of piecewise constant functions over mesh elements.
  *
  * # Mathematical Foundation
- * The P0 space is defined as:
+ * The P0 space is defined as
  * @f[
  *   P_0(\mathcal{T}_h) = \{u \in L^2(\Omega) : u|_K \in \mathbb{P}_0(K) \, \forall K \in \mathcal{T}_h\}
  * @f]

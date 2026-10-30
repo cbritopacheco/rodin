@@ -9,7 +9,7 @@
  * @brief DGMRES solver for (generally) non-symmetric linear systems.
  *
  * This header provides the DGMRES (Deflated GMRES) solver class, an iterative
- * method for solving linear systems:
+ * method for solving linear systems.
  * @f[
  *   Ax = b
  * @f]

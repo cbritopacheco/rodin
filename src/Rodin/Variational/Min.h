@@ -30,7 +30,7 @@ namespace Rodin::Variational
    * @ingroup MinSpecializations
    * @brief Represents the minimum operation between two functions.
    *
-   * This class represents the pointwise minimum of two functions:
+   * This class represents the pointwise minimum of two functions.
    * @f[
    *    \text{Min}(f, g)(x) = \min(f(x), g(x))
    * @f]

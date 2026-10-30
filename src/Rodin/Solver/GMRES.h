@@ -9,7 +9,7 @@
  * @brief GMRES solver for (generally) non-symmetric linear systems.
  *
  * This header provides the GMRES (Generalized Minimal Residual) solver class, an
- * iterative method for solving linear systems:
+ * iterative method for solving linear systems.
  * @f[
  *   Ax = b
  * @f]
