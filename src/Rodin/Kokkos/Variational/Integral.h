@@ -13,10 +13,12 @@
  * meshes.
  */
 
+#include <algorithm>
 #include <array>
 #include <cstdlib>
 #include <limits>
 #include <memory>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -56,10 +58,35 @@ namespace Rodin::Kokkos::Variational
   };
 
   /**
+   * @brief Arrangement of the entries of a device integrator.
+   *
+   * Integrators with equal layouts list the same coordinates in the same
+   * order, so their values can be summed entry by entry.
+   */
+  struct DeviceLayout
+  {
+    /// @brief Integrated mesh.
+    const void* mesh = nullptr;
+
+    /// @brief Vector dimension of the trial space, zero for linear forms.
+    Index trialVDim = 0;
+
+    /// @brief Vector dimension of the test space.
+    Index testVDim = 0;
+
+    /// @brief Selected attributes; empty selects every cell.
+    std::vector<::Rodin::Geometry::Attribute> attributes;
+
+    bool operator==(const DeviceLayout&) const = default;
+  };
+
+  /**
    * @brief Interface of bilinear form integrators evaluated on the device.
    *
    * Assembly::Kokkos discovers this interface on the local integrators of a
    * bilinear form and asks each one for its contributions as device triplets.
+   * An integration is a call to prepare(), which locates the entries of the
+   * cells, followed by fill(), which writes them.
    *
    * @tparam Backend Kokkos backend of the mesh context.
    */
@@ -78,12 +105,58 @@ namespace Rodin::Kokkos::Variational
 
       virtual ~DeviceBilinearFormIntegrator() = default;
 
+      /// @brief Gets the arrangement of the entries. @return Entry layout.
+      virtual DeviceLayout getLayout() const = 0;
+
+      /**
+       * @brief Locates the entries of every selected cell.
+       * @return Number of entries.
+       */
+      virtual size_t prepare() const = 0;
+
       /**
        * @brief Integrates the form over its region.
+       * @param values Entry values, entry e being written at offset + e.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values
+       * instead of replacing them.
+       * @param rows Row indices, test degrees of freedom, written as the
+       * values unless empty.
+       * @param cols Column indices, trial degrees of freedom, written as the
+       * values unless empty.
+       *
+       * The entries are the ones located by the last call to prepare().
+       */
+      virtual void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
+        Real sign, bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
+        const ::Kokkos::View<Index*, MemorySpace>& cols) const = 0;
+
+      /**
+       * @brief Integrates the form over its region into new triplets.
        * @return Local contributions, with rows indexing test and columns
        * indexing trial degrees of freedom.
        */
-      virtual TripletsType assemble() const = 0;
+      TripletsType assemble() const
+      {
+        const size_t count = prepare();
+        TripletsType result;
+        result.rows = ::Kokkos::View<Index*, MemorySpace>(
+          ::Kokkos::view_alloc(
+            ::Kokkos::WithoutInitializing, std::string("Rodin triplet rows")),
+          count);
+        result.cols = ::Kokkos::View<Index*, MemorySpace>(
+          ::Kokkos::view_alloc(
+            ::Kokkos::WithoutInitializing, std::string("Rodin triplet columns")),
+          count);
+        result.values = ::Kokkos::View<Real*, MemorySpace>(
+          ::Kokkos::view_alloc(
+            ::Kokkos::WithoutInitializing, std::string("Rodin triplet values")),
+          count);
+        fill(result.values, 0, Real(1), false, result.rows, result.cols);
+        ::Kokkos::fence("Rodin bilinear form integration");
+        return result;
+      }
   };
 
   /**
@@ -108,6 +181,8 @@ namespace Rodin::Kokkos::Variational
    *
    * Assembly::Kokkos discovers this interface on the integrators of a
    * linear form and asks each one for its contributions as device entries.
+   * An integration is a call to prepare(), which locates the entries of the
+   * cells, followed by fill(), which writes them.
    *
    * @tparam Backend Kokkos backend of the mesh context.
    */
@@ -126,11 +201,51 @@ namespace Rodin::Kokkos::Variational
 
       virtual ~DeviceLinearFormIntegrator() = default;
 
+      /// @brief Gets the arrangement of the entries. @return Entry layout.
+      virtual DeviceLayout getLayout() const = 0;
+
+      /**
+       * @brief Locates the entries of every selected cell.
+       * @return Number of entries.
+       */
+      virtual size_t prepare() const = 0;
+
       /**
        * @brief Integrates the form over its region.
+       * @param values Entry values, entry e being written at offset + e.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values
+       * instead of replacing them.
+       * @param indices Entry indices, test degrees of freedom, written as the
+       * values unless empty.
+       *
+       * The entries are the ones located by the last call to prepare().
+       */
+      virtual void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
+        Real sign, bool accumulate,
+        const ::Kokkos::View<Index*, MemorySpace>& indices) const = 0;
+
+      /**
+       * @brief Integrates the form over its region into new entries.
        * @return Local contributions, indexed by test degrees of freedom.
        */
-      virtual EntriesType assemble() const = 0;
+      EntriesType assemble() const
+      {
+        const size_t count = prepare();
+        EntriesType result;
+        result.indices = ::Kokkos::View<Index*, MemorySpace>(
+          ::Kokkos::view_alloc(
+            ::Kokkos::WithoutInitializing, std::string("Rodin entry indices")),
+          count);
+        result.values = ::Kokkos::View<Real*, MemorySpace>(
+          ::Kokkos::view_alloc(
+            ::Kokkos::WithoutInitializing, std::string("Rodin entry values")),
+          count);
+        fill(result.values, 0, Real(1), false, result.indices);
+        ::Kokkos::fence("Rodin linear form integration");
+        return result;
+      }
   };
 
   /**
@@ -301,7 +416,8 @@ namespace Rodin::Kokkos::Variational::Internal
       {
         const auto& execution = mesh.getContext().getExecutionSpace();
         const size_t dimension = mesh.getDimension();
-        const auto representatives = getRepresentatives(mesh);
+        m_representatives = getRepresentatives(mesh);
+        const auto& representatives = m_representatives;
         std::vector<Index> offsets(GeometryCount + 1, 0);
         std::vector<Real> weights;
         std::vector<Real> points;
@@ -312,8 +428,13 @@ namespace Rodin::Kokkos::Variational::Internal
             continue;
           const auto it = mesh.getPolytope(dimension, *representatives[g]);
           const ::Rodin::Geometry::Polytope& polytope = *it;
+          m_vertices = std::max<Index>(m_vertices, polytope.getVertices().size());
+          m_minimum = m_minimum
+            ? std::min<Index>(m_minimum, polytope.getVertices().size())
+            : polytope.getVertices().size();
+          m_orders[g] = order(polytope);
           const auto& qf =
-            QF::QuadratureFormula::get(order(polytope), polytope.getGeometry());
+            QF::QuadratureFormula::get(m_orders[g], polytope.getGeometry());
           for (size_t qp = 0; qp < qf.getSize(); ++qp)
           {
             weights.push_back(qf.getWeight(qp));
@@ -330,6 +451,42 @@ namespace Rodin::Kokkos::Variational::Internal
           Rodin::Kokkos::Internal::upload(execution, weights, "Rodin quadrature weights");
         m_points =
           Rodin::Kokkos::Internal::upload(execution, points, "Rodin quadrature points");
+      }
+
+      /**
+       * @brief Tests whether the tables were built with the given orders.
+       * @param mesh Resident mesh the tables were built on.
+       * @param order Callable giving the quadrature order on a host cell.
+       * @return Whether every geometry present has the same order.
+       */
+      template <class Order>
+      bool hasOrders(const Mesh& mesh, const Order& order) const
+      {
+        const size_t dimension = mesh.getDimension();
+        for (size_t g = 0; g < GeometryCount; ++g)
+        {
+          if (!m_representatives[g])
+            continue;
+          const auto it = mesh.getPolytope(dimension, *m_representatives[g]);
+          if (order(*it) != m_orders[g])
+            return false;
+        }
+        return true;
+      }
+
+      /// @brief Gets the largest vertex count of the cells. @return Vertex count.
+      Index getMaximumVertexCount() const
+      {
+        return m_vertices;
+      }
+
+      /**
+       * @brief Returns the smallest vertex count of the geometries present.
+       * @return Minimum vertex count, zero on an empty mesh.
+       */
+      Index getMinimumVertexCount() const
+      {
+        return m_minimum;
       }
 
       /// @param g Reference geometry. @return First quadrature point of the geometry.
@@ -357,17 +514,30 @@ namespace Rodin::Kokkos::Variational::Internal
        * @brief Maps a quadrature point onto a cell.
        * @param cell Device cell.
        * @param q Quadrature point of the cell geometry.
-       * @return Integration point on the cell.
+       * @return Point on the cell.
        */
       KOKKOS_INLINE_FUNCTION
-      IntegrationPointView getIntegrationPoint(
+      Rodin::Kokkos::Geometry::PointView getPoint(
         const Rodin::Kokkos::Geometry::PolytopeView& cell, Index q) const
       {
         const Index rdim = cell.getDimension();
         Rodin::Kokkos::Geometry::Vector reference(rdim);
         for (Index k = 0; k < rdim; ++k)
           reference(k) = m_points(q * ReferenceStride + k);
-        return IntegrationPointView(cell.getPoint(reference));
+        return cell.getPoint(reference);
+      }
+
+      /**
+       * @brief Maps a quadrature point onto a cell.
+       * @param cell Device cell.
+       * @param q Quadrature point of the cell geometry.
+       * @return Integration point on the cell.
+       */
+      KOKKOS_INLINE_FUNCTION
+      IntegrationPointView getIntegrationPoint(
+        const Rodin::Kokkos::Geometry::PolytopeView& cell, Index q) const
+      {
+        return IntegrationPointView(getPoint(cell, q));
       }
 
       /**
@@ -434,6 +604,10 @@ namespace Rodin::Kokkos::Variational::Internal
       ::Kokkos::View<Index*, MemorySpace> m_offsets;
       ::Kokkos::View<Real*, MemorySpace> m_weights;
       ::Kokkos::View<Real*, MemorySpace> m_points;
+      std::array<Optional<Index>, GeometryCount> m_representatives;
+      std::array<size_t, GeometryCount> m_orders{};
+      Index m_vertices = 0;
+      Index m_minimum = 0;
   };
 
   /**
@@ -451,6 +625,134 @@ namespace Rodin::Kokkos::Variational::Internal
     return Rodin::Kokkos::Internal::upload(
       execution, list, "Rodin integration attributes");
   }
+
+  /**
+   * @brief Cells integrated by a device integrator and the position of their
+   * entries.
+   *
+   * The quadrature tables and the attribute selection are uploaded on the
+   * first integration and again only when the mesh, the quadrature orders
+   * or the selection change, so that repeated integrations do not allocate
+   * device memory.
+   *
+   * @tparam Mesh Resident Kokkos mesh type.
+   */
+  template <class Mesh>
+  class DeviceCells
+  {
+    public:
+      /// @brief Kokkos execution space.
+      using ExecutionSpace = typename Mesh::ExecutionSpace;
+
+      /// @brief Kokkos memory space.
+      using MemorySpace = typename Mesh::MemorySpace;
+
+      /// @brief Device quadrature tables.
+      using QuadratureType = DeviceQuadrature<Mesh>;
+
+      /// @brief Device attribute selection.
+      using AttributesType = ::Kokkos::View<::Rodin::Geometry::Attribute*, MemorySpace>;
+
+      /**
+       * @brief Locates the entries of every selected cell.
+       * @param mesh Resident mesh.
+       * @param attributes Selected attributes; empty selects every cell.
+       * @param stride Entry count of a cell is stride times the square of its
+       * vertex count for bilinear forms, or stride times its vertex count.
+       * @param square Whether the entry count grows with the square of the
+       * vertex count.
+       * @param order Callable giving the quadrature order on a host cell.
+       * @return Number of entries.
+       */
+      template <class Order>
+      size_t prepare(const Mesh& mesh,
+        const FlatSet<::Rodin::Geometry::Attribute>& attributes, Index stride,
+        bool square, const Order& order)
+      {
+        const auto& execution = mesh.getContext().getExecutionSpace();
+        const Index cellCount = mesh.getCellCount();
+        if (m_mesh != &mesh || m_cellCount != cellCount || !m_quadrature ||
+          !m_quadrature->hasOrders(mesh, order))
+        {
+          m_quadrature.emplace(mesh, order);
+          m_offsets = ::Kokkos::View<Index*, MemorySpace>(
+            ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+              std::string("Rodin entry offsets")),
+            cellCount);
+          m_mesh = &mesh;
+          m_cellCount = cellCount;
+        }
+        if (!m_selection || *m_selection != attributes)
+        {
+          m_attributes = uploadAttributes(execution, attributes);
+          m_selection = attributes;
+        }
+        m_count = locate(execution, mesh.getDeviceView(), m_attributes, m_offsets,
+          cellCount, stride, square);
+        return m_count;
+      }
+
+      /// @brief Gets the quadrature tables. @return Tables of the last integration.
+      const QuadratureType& getQuadrature() const
+      {
+        assert(m_quadrature);
+        return *m_quadrature;
+      }
+
+      /// @brief Gets the selection. @return Device attributes.
+      const AttributesType& getAttributes() const
+      {
+        return m_attributes;
+      }
+
+      /// @brief Gets the position of the first entry of every cell. @return Offsets.
+      const ::Kokkos::View<Index*, MemorySpace>& getOffsets() const
+      {
+        return m_offsets;
+      }
+
+      /// @brief Gets the entry count of the last integration. @return Count.
+      size_t getCount() const
+      {
+        return m_count;
+      }
+
+      /**
+       * @brief Computes the entry offsets of the cells.
+       *
+       * Public as the enclosing function of a device lambda.
+       */
+      static size_t locate(const ExecutionSpace& execution,
+        const Rodin::Kokkos::Geometry::MeshView& view, const AttributesType& attributes,
+        const ::Kokkos::View<Index*, MemorySpace>& offsets, Index cellCount, Index stride,
+        bool square)
+      {
+        Index total = 0;
+        ::Kokkos::parallel_scan(
+          "Rodin entry offsets", QuadratureType::policy(execution, cellCount),
+          KOKKOS_LAMBDA(Index c, Index & update, bool final) {
+            if (final)
+              offsets(c) = update;
+            const auto cell = view.getCell(c);
+            if (Rodin::Kokkos::Variational::isSelected(cell, attributes))
+            {
+              const Index n = cell.getVertices().size();
+              update += (square ? n * n : n) * stride;
+            }
+          },
+          total);
+        return total;
+      }
+
+    private:
+      const Mesh* m_mesh = nullptr;
+      Index m_cellCount = 0;
+      Optional<QuadratureType> m_quadrature;
+      Optional<FlatSet<::Rodin::Geometry::Attribute>> m_selection;
+      AttributesType m_attributes;
+      ::Kokkos::View<Index*, MemorySpace> m_offsets;
+      size_t m_count = 0;
+  };
 }
 
 namespace Rodin::Variational
@@ -525,6 +827,9 @@ namespace Rodin::Variational
       /// @brief Device quadrature tables.
       using QuadratureType =
         Rodin::Kokkos::Variational::Internal::DeviceQuadrature<MeshType>;
+
+      /// @brief Integrated cells.
+      using CellsType = Rodin::Kokkos::Variational::Internal::DeviceCells<MeshType>;
 
       /**
        * @brief Constructs the integral of the dot product of two operators.
@@ -607,16 +912,25 @@ namespace Rodin::Variational
         return Geometry::Region::Cells;
       }
 
-      /**
-       * @brief Integrates every selected cell on the device.
-       * @return Local matrices as triplets, with one entry per pair of local
-       * trial and test degrees of freedom of each cell.
-       */
-      TripletsType assemble() const override
+      /// @brief Gets the arrangement of the entries. @return Entry layout.
+      Rodin::Kokkos::Variational::DeviceLayout getLayout() const override
       {
-        using Rodin::Kokkos::Variational::DeviceView;
-        using Rodin::Kokkos::Variational::IntegrationPointView;
+        const auto& integrand = getIntegrand();
+        const auto& trialfes = integrand.getLHS().getFiniteElementSpace();
+        const auto& testfes = integrand.getRHS().getFiniteElementSpace();
+        const auto& attributes = this->getAttributes();
+        return {&trialfes.getMesh(), static_cast<Index>(trialfes.getVectorDimension()),
+          static_cast<Index>(testfes.getVectorDimension()),
+          {attributes.begin(), attributes.end()}};
+      }
 
+      /**
+       * @brief Locates the entries of every selected cell.
+       * @return Number of entries, each selected cell with n vertices owning
+       * n * trialVDim * n * testVDim entries.
+       */
+      size_t prepare() const override
+      {
         const auto& integrand = getIntegrand();
         const auto& trialfes = integrand.getLHS().getFiniteElementSpace();
         const auto& testfes = integrand.getRHS().getFiniteElementSpace();
@@ -627,101 +941,147 @@ namespace Rodin::Variational
             << "Kokkos integrals require trial and test spaces on the same mesh."
             << Alert::Raise;
         }
-        const Index trialVDim = trialfes.getVectorDimension();
-        const Index testVDim = testfes.getVectorDimension();
-        const Index vertexCount = mesh.getVertexCount();
-        const auto& execution = mesh.getContext().getExecutionSpace();
-        const Index cellCount = mesh.getCellCount();
-        const auto view = mesh.getDeviceView();
-        const QuadratureType quadrature(mesh, [&](const Geometry::Polytope& polytope) {
-          return getOrder(integrand, polytope);
-        });
-        const auto attributes = Rodin::Kokkos::Variational::Internal::uploadAttributes(
-          execution, this->getAttributes());
+        return m_cells.prepare(mesh, this->getAttributes(),
+          trialfes.getVectorDimension() * testfes.getVectorDimension(), true,
+          [&](const Geometry::Polytope& polytope) {
+            return getOrder(integrand, polytope);
+          });
+      }
 
-        // Entry offsets of the cells, each selected cell with n vertices
-        // owning n * trialVDim * n * testVDim entries.
-        ::Kokkos::View<Index*, MemorySpace> offsets(
-          ::Kokkos::view_alloc(execution, std::string("Rodin triplet offsets")),
-          cellCount);
-        Index total = 0;
-        ::Kokkos::parallel_scan(
-          "Rodin triplet offsets", QuadratureType::policy(execution, cellCount),
-          KOKKOS_LAMBDA(Index c, Index & update, bool final) {
-            if (final)
-              offsets(c) = update;
-            const auto cell = view.getCell(c);
-            if (Rodin::Kokkos::Variational::isSelected(cell, attributes))
-            {
-              const Index n = cell.getVertices().size();
-              update += n * trialVDim * n * testVDim;
-            }
-          },
-          total);
-
-        TripletsType result;
-        result.rows = ::Kokkos::View<Index*, MemorySpace>(
-          ::Kokkos::view_alloc(execution, std::string("Rodin triplet rows")), total);
-        result.cols = ::Kokkos::View<Index*, MemorySpace>(
-          ::Kokkos::view_alloc(execution, std::string("Rodin triplet columns")), total);
-        result.values = ::Kokkos::View<Real*, MemorySpace>(
-          ::Kokkos::view_alloc(execution, std::string("Rodin triplet values")), total);
-        const auto rows = result.rows;
-        const auto cols = result.cols;
-        const auto values = result.values;
-
+      /**
+       * @brief Integrates every selected cell on the device.
+       *
+       * Each selected cell writes its local matrix, the entry of local test
+       * index te and local trial index tr at te * ntr + tr past the offset of
+       * the cell.
+       */
+      void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
+        Real sign, bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
+        const ::Kokkos::View<Index*, MemorySpace>& cols) const override
+      {
+        using Rodin::Kokkos::Variational::DeviceView;
+        const auto& integrand = getIntegrand();
+        const auto& trialfes = integrand.getLHS().getFiniteElementSpace();
+        const auto& testfes = integrand.getRHS().getFiniteElementSpace();
+        const MeshType& mesh = trialfes.getMesh();
         const DeviceView<LHSType> trial(integrand.getLHS());
         const DeviceView<RHSType> test(integrand.getRHS());
+        const auto& quadrature = m_cells.getQuadrature();
+        const Index vertices = quadrature.getMaximumVertexCount();
+        if (vertices == 4 && quadrature.getMinimumVertexCount() == 4 &&
+          trialfes.getVectorDimension() == VectorCapacity<TrialRange> &&
+          testfes.getVectorDimension() == VectorCapacity<TestRange>)
+        {
+          integrateCells<4, true>(mesh, m_cells, trial, test,
+            trialfes.getVectorDimension(), testfes.getVectorDimension(), values, offset,
+            sign, accumulate, rows, cols);
+        }
+        else if (vertices <= 4)
+        {
+          integrateCells<4>(mesh, m_cells, trial, test, trialfes.getVectorDimension(),
+            testfes.getVectorDimension(), values, offset, sign, accumulate, rows, cols);
+        }
+        else
+        {
+          integrateCells<Rodin::Kokkos::Variational::IntegrationPointView::Capacity>(mesh,
+            m_cells, trial, test, trialfes.getVectorDimension(),
+            testfes.getVectorDimension(), values, offset, sign, accumulate, rows, cols);
+        }
+      }
+
+      /**
+       * @brief Integrates the cells of at most Vertices vertices.
+       *
+       * When Exact, every cell has Vertices vertices and both vector
+       * dimensions are maximal, so the local loops have static bounds.
+       * Public as the enclosing function of a device lambda.
+       */
+      template <Index Vertices, bool Exact = false, class Trial, class Test>
+      static void integrateCells(const MeshType& mesh, const CellsType& cells,
+        const Trial& trial, const Test& test, Index trialVDim, Index testVDim,
+        const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset, Real sign,
+        bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
+        const ::Kokkos::View<Index*, MemorySpace>& cols)
+      {
+        using Rodin::Kokkos::Variational::IntegrationPointView;
         using TestValue = std::decay_t<decltype(test.getBasis(
           std::declval<const IntegrationPointView&>(), Index(0)))>;
-        constexpr Index TrialCapacity =
-          IntegrationPointView::Capacity * VectorCapacity<TrialRange>;
-        constexpr Index TestCapacity =
-          IntegrationPointView::Capacity * VectorCapacity<TestRange>;
-
+        constexpr Index TrialCapacity = Vertices * VectorCapacity<TrialRange>;
+        constexpr Index TestCapacity = Vertices * VectorCapacity<TestRange>;
+        const Index vertexCount = mesh.getVertexCount();
+        const auto& execution = mesh.getContext().getExecutionSpace();
+        const auto view = mesh.getDeviceView();
+        const auto quadrature = cells.getQuadrature();
+        const auto attributes = cells.getAttributes();
+        const auto offsets = cells.getOffsets();
+        const bool index = rows.extent(0) > 0;
         ::Kokkos::parallel_for(
-          "Rodin bilinear form integration", QuadratureType::policy(execution, cellCount),
-          KOKKOS_LAMBDA(Index c) {
+          "Rodin bilinear form integration",
+          QuadratureType::policy(execution, mesh.getCellCount()), KOKKOS_LAMBDA(Index c) {
             const auto cell = view.getCell(c);
             if (!Rodin::Kokkos::Variational::isSelected(cell, attributes))
               return;
             const auto vertices = cell.getVertices();
-            const Index ntr = vertices.size() * trialVDim;
-            const Index nte = vertices.size() * testVDim;
+            KOKKOS_ASSERT(
+              Exact ? vertices.size() == Vertices : vertices.size() <= Vertices);
+            const Index ntr = Exact ? TrialCapacity : vertices.size() * trialVDim;
+            const Index nte = Exact ? TestCapacity : vertices.size() * testVDim;
+            const Index trialStride = Exact ? VectorCapacity<TrialRange> : trialVDim;
+            const Index testStride = Exact ? VectorCapacity<TestRange> : testVDim;
             const Index g = static_cast<Index>(cell.getGeometry());
             ::Kokkos::Array<Real, TrialCapacity * TestCapacity> local{};
             ::Kokkos::Array<TestValue, TestCapacity> phi;
-            for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
+            const Index begin = quadrature.begin(g);
+            const Index end = quadrature.end(g);
+            if (begin < end)
             {
-              const IntegrationPointView ip = quadrature.getIntegrationPoint(cell, q);
-              const Real wdet = quadrature.getWeight(q) * ip.getPoint().getDistortion();
-              for (Index te = 0; te < nte; ++te)
-                phi[te] = test.getBasis(ip, te);
-              for (Index tr = 0; tr < ntr; ++tr)
+              IntegrationPointView ip = quadrature.getIntegrationPoint(cell, begin);
+              for (Index q = begin; q < end; ++q)
               {
-                const auto psi = trial.getBasis(ip, tr);
+                if (q > begin)
+                  ip.setPoint(quadrature.getPoint(cell, q));
+                const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
+                const auto testBasis = Rodin::Kokkos::Variational::bindBasis(test, ip);
+                const auto trialBasis = Rodin::Kokkos::Variational::bindBasis(trial, ip);
                 for (Index te = 0; te < nte; ++te)
-                  local[te * ntr + tr] +=
-                    wdet * Rodin::Kokkos::Variational::dot(psi, phi[te]);
+                  phi[te] = testBasis.getBasis(te);
+                for (Index tr = 0; tr < ntr; ++tr)
+                {
+                  const auto psi = trialBasis.getBasis(tr);
+                  for (Index te = 0; te < nte; ++te)
+                  {
+                    if (Rodin::Kokkos::Variational::overlaps(psi, phi[te]))
+                    {
+                      local[te * ntr + tr] +=
+                        wdet * Rodin::Kokkos::Variational::dot(psi, phi[te]);
+                    }
+                  }
+                }
               }
             }
             // Local index a * vdim + r is component r of local vertex a,
             // numbered globally as vertex + r * vertexCount.
-            const Index offset = offsets(c);
+            const size_t base = offset + offsets(c);
             for (Index te = 0; te < nte; ++te)
             {
-              const Index row = vertices[te / testVDim] + (te % testVDim) * vertexCount;
+              const Index row =
+                vertices[te / testStride] + (te % testStride) * vertexCount;
               for (Index tr = 0; tr < ntr; ++tr)
               {
-                const Index e = offset + te * ntr + tr;
-                rows(e) = row;
-                cols(e) = vertices[tr / trialVDim] + (tr % trialVDim) * vertexCount;
-                values(e) = local[te * ntr + tr];
+                const size_t e = base + te * ntr + tr;
+                const Real v = sign * local[te * ntr + tr];
+                if (accumulate)
+                  values(e) += v;
+                else
+                  values(e) = v;
+                if (index)
+                {
+                  rows(e) = row;
+                  cols(e) = vertices[tr / trialStride] + (tr % trialStride) * vertexCount;
+                }
               }
             }
           });
-        execution.fence("Rodin bilinear form integration");
-        return result;
       }
 
       Integral* copy() const noexcept override
@@ -795,6 +1155,7 @@ namespace Rodin::Variational
       }
 
       std::unique_ptr<IntegrandType> m_integrand;
+      mutable CellsType m_cells;
   };
 
   /**
@@ -854,6 +1215,9 @@ namespace Rodin::Variational
       /// @brief Device quadrature tables.
       using QuadratureType =
         Rodin::Kokkos::Variational::Internal::DeviceQuadrature<MeshType>;
+
+      /// @brief Integrated cells.
+      using CellsType = Rodin::Kokkos::Variational::Internal::DeviceCells<MeshType>;
 
       /**
        * @brief Constructs the integral of the dot product of a function and a
@@ -939,86 +1303,126 @@ namespace Rodin::Variational
         return Geometry::Region::Cells;
       }
 
-      /**
-       * @brief Integrates every selected cell on the device.
-       * @return Local vectors as entries, one per local test degree of
-       * freedom of each cell.
-       */
-      EntriesType assemble() const override
+      /// @brief Gets the arrangement of the entries. @return Entry layout.
+      Rodin::Kokkos::Variational::DeviceLayout getLayout() const override
       {
-        using Rodin::Kokkos::Variational::DeviceView;
-        using Rodin::Kokkos::Variational::IntegrationPointView;
+        const auto& fes = getIntegrand().getFiniteElementSpace();
+        const auto& attributes = this->getAttributes();
+        return {&fes.getMesh(), 0, static_cast<Index>(fes.getVectorDimension()),
+          {attributes.begin(), attributes.end()}};
+      }
 
+      /**
+       * @brief Locates the entries of every selected cell.
+       * @return Number of entries, each selected cell with n vertices owning
+       * n * vdim entries.
+       */
+      size_t prepare() const override
+      {
         const auto& integrand = getIntegrand();
         const auto& fes = integrand.getFiniteElementSpace();
-        const MeshType& mesh = fes.getMesh();
-        const Index vdim = fes.getVectorDimension();
+        return m_cells.prepare(fes.getMesh(), this->getAttributes(),
+          fes.getVectorDimension(), false, [&](const Geometry::Polytope& polytope) {
+            return getOrder(integrand, polytope);
+          });
+      }
+
+      /// @brief Integrates every selected cell on the device.
+      void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
+        Real sign, bool accumulate,
+        const ::Kokkos::View<Index*, MemorySpace>& indices) const override
+      {
+        using Rodin::Kokkos::Variational::DeviceView;
+        const auto& integrand = getIntegrand();
+        const auto& fes = integrand.getFiniteElementSpace();
+        const DeviceView<IntegrandType> test(integrand);
+        const auto& quadrature = m_cells.getQuadrature();
+        const Index vertices = quadrature.getMaximumVertexCount();
+        if (vertices == 4 && quadrature.getMinimumVertexCount() == 4 &&
+          fes.getVectorDimension() ==
+            (std::is_same_v<Range, Real> ? 1 : RODIN_MAXIMAL_SPACE_DIMENSION))
+        {
+          integrateCells<4, true>(fes.getMesh(), m_cells, test, fes.getVectorDimension(),
+            values, offset, sign, accumulate, indices);
+        }
+        else if (vertices <= 4)
+        {
+          integrateCells<4>(fes.getMesh(), m_cells, test, fes.getVectorDimension(),
+            values, offset, sign, accumulate, indices);
+        }
+        else
+        {
+          integrateCells<Rodin::Kokkos::Variational::IntegrationPointView::Capacity>(
+            fes.getMesh(), m_cells, test, fes.getVectorDimension(), values, offset, sign,
+            accumulate, indices);
+        }
+      }
+
+      /**
+       * @brief Integrates the cells of at most Vertices vertices.
+       *
+       * When Exact, every cell has Vertices vertices and the vector dimension
+       * is maximal, so the local loop has a static bound. Public as the
+       * enclosing function of a device lambda.
+       */
+      template <Index Vertices, bool Exact = false, class Test>
+      static void integrateCells(const MeshType& mesh, const CellsType& cells,
+        const Test& test, Index vdim, const ::Kokkos::View<Real*, MemorySpace>& values,
+        size_t offset, Real sign, bool accumulate,
+        const ::Kokkos::View<Index*, MemorySpace>& indices)
+      {
+        using Rodin::Kokkos::Variational::IntegrationPointView;
+        constexpr Index Capacity =
+          Vertices * (std::is_same_v<Range, Real> ? 1 : RODIN_MAXIMAL_SPACE_DIMENSION);
         const Index vertexCount = mesh.getVertexCount();
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const Index cellCount = mesh.getCellCount();
         const auto view = mesh.getDeviceView();
-        const QuadratureType quadrature(mesh, [&](const Geometry::Polytope& polytope) {
-          return getOrder(integrand, polytope);
-        });
-        const auto attributes = Rodin::Kokkos::Variational::Internal::uploadAttributes(
-          execution, this->getAttributes());
-
-        // Entry offsets of the cells, each selected cell with n vertices
-        // owning n * vdim entries.
-        ::Kokkos::View<Index*, MemorySpace> offsets(
-          ::Kokkos::view_alloc(execution, std::string("Rodin entry offsets")), cellCount);
-        Index total = 0;
-        ::Kokkos::parallel_scan(
-          "Rodin entry offsets", QuadratureType::policy(execution, cellCount),
-          KOKKOS_LAMBDA(Index c, Index & update, bool final) {
-            if (final)
-              offsets(c) = update;
-            const auto cell = view.getCell(c);
-            if (Rodin::Kokkos::Variational::isSelected(cell, attributes))
-              update += cell.getVertices().size() * vdim;
-          },
-          total);
-
-        EntriesType result;
-        result.indices = ::Kokkos::View<Index*, MemorySpace>(
-          ::Kokkos::view_alloc(execution, std::string("Rodin entry indices")), total);
-        result.values = ::Kokkos::View<Real*, MemorySpace>(
-          ::Kokkos::view_alloc(execution, std::string("Rodin entry values")), total);
-        const auto indices = result.indices;
-        const auto values = result.values;
-
-        const DeviceView<IntegrandType> test(integrand);
-        constexpr Index Capacity = IntegrationPointView::Capacity *
-          (std::is_same_v<Range, Real> ? 1 : RODIN_MAXIMAL_SPACE_DIMENSION);
-
+        const auto quadrature = cells.getQuadrature();
+        const auto attributes = cells.getAttributes();
+        const auto offsets = cells.getOffsets();
+        const bool index = indices.extent(0) > 0;
         ::Kokkos::parallel_for(
-          "Rodin linear form integration", QuadratureType::policy(execution, cellCount),
-          KOKKOS_LAMBDA(Index c) {
+          "Rodin linear form integration",
+          QuadratureType::policy(execution, mesh.getCellCount()), KOKKOS_LAMBDA(Index c) {
             const auto cell = view.getCell(c);
             if (!Rodin::Kokkos::Variational::isSelected(cell, attributes))
               return;
             const auto vertices = cell.getVertices();
-            const Index nte = vertices.size() * vdim;
+            KOKKOS_ASSERT(
+              Exact ? vertices.size() == Vertices : vertices.size() <= Vertices);
+            const Index nte = Exact ? Capacity : vertices.size() * vdim;
+            const Index stride = Exact ? Capacity / Vertices : vdim;
             const Index g = static_cast<Index>(cell.getGeometry());
             ::Kokkos::Array<Real, Capacity> local{};
-            for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
+            const Index begin = quadrature.begin(g);
+            const Index end = quadrature.end(g);
+            if (begin < end)
             {
-              const IntegrationPointView ip = quadrature.getIntegrationPoint(cell, q);
-              const Real wdet = quadrature.getWeight(q) * ip.getPoint().getDistortion();
-              for (Index te = 0; te < nte; ++te)
-                local[te] += wdet * test.getBasis(ip, te);
+              IntegrationPointView ip = quadrature.getIntegrationPoint(cell, begin);
+              for (Index q = begin; q < end; ++q)
+              {
+                if (q > begin)
+                  ip.setPoint(quadrature.getPoint(cell, q));
+                const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
+                const auto basis = Rodin::Kokkos::Variational::bindBasis(test, ip);
+                for (Index te = 0; te < nte; ++te)
+                  local[te] += wdet * basis.getBasis(te);
+              }
             }
             // Local index a * vdim + r is component r of local vertex a,
             // numbered globally as vertex + r * vertexCount.
-            const Index offset = offsets(c);
+            const size_t base = offset + offsets(c);
             for (Index te = 0; te < nte; ++te)
             {
-              indices(offset + te) = vertices[te / vdim] + (te % vdim) * vertexCount;
-              values(offset + te) = local[te];
+              const Real v = sign * local[te];
+              if (accumulate)
+                values(base + te) += v;
+              else
+                values(base + te) = v;
+              if (index)
+                indices(base + te) = vertices[te / stride] + (te % stride) * vertexCount;
             }
           });
-        execution.fence("Rodin linear form integration");
-        return result;
       }
 
       Integral* copy() const noexcept override
@@ -1059,6 +1463,7 @@ namespace Rodin::Variational
       }
 
       std::unique_ptr<IntegrandType> m_integrand;
+      mutable CellsType m_cells;
   };
 }
 

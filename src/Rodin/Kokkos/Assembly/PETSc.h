@@ -41,26 +41,98 @@
 namespace Rodin::Assembly::Internal
 {
   /**
-   * @brief Sparsity pattern last handed to a PETSc matrix.
+   * @brief Block of the coordinate list shared by integrators with the same
+   * entries.
+   */
+  struct COOSegment
+  {
+    /// @brief Arrangement of the entries.
+    ::Rodin::Kokkos::Variational::DeviceLayout layout;
+
+    /// @brief Offset of the test space in the system.
+    Index row = 0;
+
+    /// @brief Offset of the trial space in the system.
+    Index col = 0;
+
+    /// @brief Number of entries.
+    size_t count = 0;
+
+    bool operator==(const COOSegment&) const = default;
+  };
+
+  /**
+   * @brief Device buffers and sparsity pattern kept between the assemblies
+   * of a PETSc system.
    *
    * PETSc analyses the coordinate list in MatSetPreallocationCOO, which is
    * much more expensive than MatSetValuesCOO. The pattern is kept to skip
-   * that analysis when the same matrix is assembled again with the same
-   * coordinates.
+   * that analysis, and the coordinates are not even listed again, when the
+   * same matrix is assembled again with the same segments. Integrators
+   * restricted to attributes list their coordinates at every assembly,
+   * since the attributes of the cells may change. The buffers are reused
+   * while their size does not change.
    *
-   * @tparam MemorySpace Kokkos memory space of the coordinates.
+   * A copy starts empty, so copies never share buffers.
+   *
+   * @tparam MemorySpace Kokkos memory space of the buffers.
    */
   template <class MemorySpace>
-  struct COOPattern
+  struct COOCache
   {
-    /// @brief PETSc identifier of the matrix, or -1 before the first assembly.
+    COOCache() = default;
+
+    COOCache(const COOCache&) {}
+
+    COOCache& operator=(const COOCache& other)
+    {
+      if (this != &other)
+        *this = COOCache();
+      return *this;
+    }
+
+    COOCache(COOCache&&) = default;
+
+    COOCache& operator=(COOCache&&) = default;
+
+    /// @brief PETSc identifier of the matrix preallocated with the pattern, or -1.
     PetscInt64 matrix = -1;
 
+    /// @brief Whether the coordinates hold the pattern of the segments.
+    bool indexed = false;
+
+    /// @brief Segments of the pattern.
+    std::vector<COOSegment> segments;
+
     /// @brief Row coordinates.
-    ::Kokkos::View<PetscInt*, MemorySpace> rows;
+    ::Kokkos::View<Index*, MemorySpace> rows;
 
     /// @brief Column coordinates.
-    ::Kokkos::View<PetscInt*, MemorySpace> cols;
+    ::Kokkos::View<Index*, MemorySpace> cols;
+
+    /// @brief Row coordinates being listed.
+    ::Kokkos::View<Index*, MemorySpace> nextRows;
+
+    /// @brief Column coordinates being listed.
+    ::Kokkos::View<Index*, MemorySpace> nextCols;
+
+    /// @brief Matrix values.
+    ::Kokkos::View<PetscScalar*, MemorySpace> values;
+
+    /// @brief Right-hand side.
+    ::Kokkos::View<Real*, MemorySpace> rhs;
+
+    /// @brief Indices of the linear integrator entries.
+    ::Kokkos::View<Index*, MemorySpace> entryIndices;
+
+    /// @brief Values of the linear integrator entries.
+    ::Kokkos::View<Real*, MemorySpace> entryValues;
+
+    /// @brief Whether each degree of freedom is fixed.
+    ::Kokkos::View<unsigned char*, MemorySpace> fixed;
+
+    /// @brief Values of the fixed degrees of freedom.
+    ::Kokkos::View<Real*, MemorySpace> fixedValues;
   };
 
   /**
@@ -73,6 +145,11 @@ namespace Rodin::Assembly::Internal
    * Eliminated entries keep their coordinates with a zero value, and every
    * diagonal entry is listed, so the pattern of the matrix does not depend
    * on the constraints.
+   *
+   * Integrators with the same layout between the same spaces share one
+   * segment of the coordinate list, their values being summed in place, so
+   * a sum of integrands such as the terms of an Oseen operator lists each
+   * local matrix entry once.
    *
    * @tparam Backend Kokkos backend of the mesh context.
    */
@@ -89,14 +166,16 @@ namespace Rodin::Assembly::Internal
       /// @brief Memory space of the system.
       using MemorySpace = typename ContextType::MemorySpaceType;
 
-      /// @brief Device integrator triplets.
-      using TripletsType = ::Rodin::Kokkos::Variational::DeviceTriplets<MemorySpace>;
+      /// @brief Cache type.
+      using CacheType = COOCache<MemorySpace>;
 
-      /// @brief Device integrator entries.
-      using EntriesType = ::Rodin::Kokkos::Variational::DeviceEntries<MemorySpace>;
+      /// @brief Device bilinear integrator.
+      using BilinearType =
+        ::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>;
 
-      /// @brief Pattern cache type.
-      using PatternType = COOPattern<MemorySpace>;
+      /// @brief Device linear integrator.
+      using LinearType =
+        ::Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>;
 
       static_assert(std::is_same_v<PetscScalar, Real>,
         "Device assembly of PETSc problems requires real PETSc scalars.");
@@ -153,7 +232,7 @@ namespace Rodin::Assembly::Internal
       }
 
       /**
-       * @brief Integrates a local integrator on the device.
+       * @brief Adds a local integrator to the system.
        * @param lbfi Local integrator, possibly negated.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
@@ -161,11 +240,11 @@ namespace Rodin::Assembly::Internal
         Index row, Index col)
       {
         const auto [integrator, sign] = getDeviceIntegrator<Backend>(lbfi);
-        m_matrices.push_back({integrator->assemble(), row, col, sign});
+        m_matrices.push_back({integrator, row, col, sign});
       }
 
       /**
-       * @brief Integrates a linear integrator on the device.
+       * @brief Adds a linear integrator to the system.
        * @param lfi Integrator, possibly negated.
        * @param row Offset of its test space.
        * @param sign Sign of the contributions.
@@ -174,112 +253,123 @@ namespace Rodin::Assembly::Internal
         const Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
       {
         const auto [integrator, s] = getDeviceIntegrator<Backend>(lfi, sign);
-        m_vectors.push_back({integrator->assemble(), row, s});
+        m_vectors.push_back({integrator, row, s});
       }
 
       /**
-       * @brief Eliminates the constraints and fills the PETSc objects.
-       * @param pattern Pattern last handed to the matrix.
+       * @brief Integrates, eliminates the constraints and fills the PETSc
+       * objects.
+       * @param cache Buffers and pattern of the previous assemblies.
        * @param A Matrix, filled when not null.
        * @param b Right-hand side, filled when not null.
        */
-      void finish(PatternType& pattern, ::Mat A, ::Vec b)
+      void finish(CacheType& cache, ::Mat A, ::Vec b)
       {
         const size_t n = std::max(m_rows, m_cols);
-        const size_t diagonal = std::min(m_rows, m_cols);
-        const auto fixed = upload(m_fixed, "Rodin fixed DOFs");
-        const auto values = upload(m_values, "Rodin fixed values");
-        ::Kokkos::View<Real*, MemorySpace> rhs(
-          ::Kokkos::view_alloc(m_execution, std::string("Rodin right-hand side")), n);
-
-        size_t count = diagonal;
-        for (const auto& m : m_matrices)
-          count += m.triplets.values.extent(0);
-        ::Kokkos::View<PetscInt*, MemorySpace> rows(
-          ::Kokkos::view_alloc(
-            m_execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO rows")),
-          count);
-        ::Kokkos::View<PetscInt*, MemorySpace> cols(
-          ::Kokkos::view_alloc(
-            m_execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO cols")),
-          count);
-        ::Kokkos::View<PetscScalar*, MemorySpace> coo(
-          ::Kokkos::view_alloc(
-            m_execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO values")),
-          count);
-
-        size_t offset = 0;
-        for (const auto& m : m_matrices)
+        const bool fixed = hasFixed();
+        if (fixed)
         {
-          scatterMatrix(m_execution, m.triplets, m.row, m.col, m.sign, offset, fixed,
-            values, rows, cols, coo, rhs);
-          offset += m.triplets.values.extent(0);
+          copy(cache.fixed, m_fixed, "Rodin fixed DOFs");
+          copy(cache.fixedValues, m_values, "Rodin fixed values");
         }
-        scatterDiagonal(m_execution, offset, diagonal, fixed, rows, cols, coo);
-        for (const auto& v : m_vectors)
-          scatterVector(m_execution, v.entries, v.row, v.sign, fixed, rhs);
-        imposeFixed(m_execution, m_rows, fixed, values, rhs);
+        resize(cache.rhs, n, "Rodin right-hand side");
+        ::Kokkos::deep_copy(m_execution, cache.rhs, Real(0));
+
+        if (A || !m_matrices.empty())
+          integrateMatrices(cache, fixed);
+        integrateVectors(cache, fixed);
+        if (fixed)
+          imposeFixed(m_execution, m_rows, cache.fixed, cache.fixedValues, cache.rhs);
         m_execution.fence("Rodin PETSc system");
 
         if (A)
-          setMatrix(pattern, A, rows, cols, coo);
+          setMatrix(cache, A);
         if (b)
-          setVector(b, rhs);
+          setVector(b, cache.rhs);
+        // PETSc reads the buffers on its own execution space instance, and
+        // the next assembly overwrites them.
+        ::Kokkos::fence("Rodin PETSc system");
       }
 
       /**
-       * @brief Writes the entries of a local integrator.
+       * @brief Adds the block offsets to the coordinates of a segment.
        *
        * Public as the enclosing function of device lambdas.
        */
-      template <class Fixed, class Values, class Indices, class Scalars, class RHS>
-      static void scatterMatrix(const ExecutionSpace& execution,
-        const TripletsType& triplets, Index rowOffset, Index colOffset, Real sign,
-        size_t offset, const Fixed& fixed, const Values& values, const Indices& rows,
-        const Indices& cols, const Scalars& coo, const RHS& rhs)
+      template <class Indices>
+      static void shift(const ExecutionSpace& execution, const Indices& rows,
+        const Indices& cols, size_t offset, size_t count, Index row, Index col)
       {
-        const auto tr = triplets.rows;
-        const auto tc = triplets.cols;
-        const auto tv = triplets.values;
         ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::PETSc::matrix",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, tv.extent(0)),
+          "Rodin::Assembly::Kokkos::PETSc::shift",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, offset, offset + count),
           KOKKOS_LAMBDA(const size_t e) {
-            const Index r = rowOffset + tr(e);
-            const Index c = colOffset + tc(e);
-            PetscScalar v = sign * tv(e);
-            if (fixed(r))
-            {
-              v = 0;
-            }
-            else if (fixed(c))
-            {
-              ::Kokkos::atomic_add(&rhs(r), -v * values(c));
-              v = 0;
-            }
-            rows(offset + e) = static_cast<PetscInt>(r);
-            cols(offset + e) = static_cast<PetscInt>(c);
-            coo(offset + e) = v;
+            rows(e) += row;
+            cols(e) += col;
           });
       }
 
       /**
-       * @brief Lists every diagonal entry, one on fixed rows.
+       * @brief Lists every diagonal entry.
        *
        * Public as the enclosing function of device lambdas.
        */
-      template <class Fixed, class Indices, class Scalars>
-      static void scatterDiagonal(const ExecutionSpace& execution, size_t offset,
-        size_t count, const Fixed& fixed, const Indices& rows, const Indices& cols,
-        const Scalars& coo)
+      template <class Indices>
+      static void listDiagonal(const ExecutionSpace& execution, size_t offset,
+        size_t count, const Indices& rows, const Indices& cols)
       {
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::diagonal",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
           KOKKOS_LAMBDA(const size_t i) {
-            rows(offset + i) = static_cast<PetscInt>(i);
-            cols(offset + i) = static_cast<PetscInt>(i);
-            coo(offset + i) = fixed(i) ? PetscScalar(1) : PetscScalar(0);
+            rows(offset + i) = i;
+            cols(offset + i) = i;
+          });
+      }
+
+      /**
+       * @brief Writes the diagonal values, one on fixed rows.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Fixed, class Scalars>
+      static void fillDiagonal(const ExecutionSpace& execution, size_t offset,
+        size_t count, bool hasFixed, const Fixed& fixed, const Scalars& coo)
+      {
+        ::Kokkos::parallel_for(
+          "Rodin::Assembly::Kokkos::PETSc::diagonal",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          KOKKOS_LAMBDA(const size_t i) {
+            coo(offset + i) = hasFixed && fixed(i) ? PetscScalar(1) : PetscScalar(0);
+          });
+      }
+
+      /**
+       * @brief Clears the rows of the fixed degrees of freedom and moves their
+       * columns to the right-hand side.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Indices, class Fixed, class Values, class Scalars, class RHS>
+      static void eliminate(const ExecutionSpace& execution, size_t count,
+        const Indices& rows, const Indices& cols, const Fixed& fixed,
+        const Values& values, const Scalars& coo, const RHS& rhs)
+      {
+        ::Kokkos::parallel_for(
+          "Rodin::Assembly::Kokkos::PETSc::eliminate",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          KOKKOS_LAMBDA(const size_t e) {
+            const Index r = rows(e);
+            const Index c = cols(e);
+            if (fixed(r))
+            {
+              coo(e) = 0;
+            }
+            else if (fixed(c))
+            {
+              ::Kokkos::atomic_add(&rhs(r), -coo(e) * values(c));
+              coo(e) = 0;
+            }
           });
       }
 
@@ -288,20 +378,18 @@ namespace Rodin::Assembly::Internal
        *
        * Public as the enclosing function of device lambdas.
        */
-      template <class Fixed, class RHS>
-      static void scatterVector(const ExecutionSpace& execution,
-        const EntriesType& entries, Index rowOffset, Real sign, const Fixed& fixed,
-        const RHS& rhs)
+      template <class Indices, class Values, class Fixed, class RHS>
+      static void scatterVector(const ExecutionSpace& execution, size_t offset,
+        size_t count, const Indices& indices, const Values& values, Index row,
+        bool hasFixed, const Fixed& fixed, const RHS& rhs)
       {
-        const auto indices = entries.indices;
-        const auto values = entries.values;
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::vector",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, values.extent(0)),
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, offset, offset + count),
           KOKKOS_LAMBDA(const size_t e) {
-            const Index i = rowOffset + indices(e);
-            if (!fixed(i))
-              ::Kokkos::atomic_add(&rhs(i), sign * values(e));
+            const Index i = row + indices(e);
+            if (!hasFixed || !fixed(i))
+              ::Kokkos::atomic_add(&rhs(i), values(e));
           });
       }
 
@@ -346,7 +434,7 @@ namespace Rodin::Assembly::Internal
     private:
       struct Matrix
       {
-        TripletsType triplets;
+        const BilinearType* integrator;
         Index row;
         Index col;
         Real sign;
@@ -354,47 +442,144 @@ namespace Rodin::Assembly::Internal
 
       struct Vector
       {
-        EntriesType entries;
+        const LinearType* integrator;
         Index row;
         Real sign;
       };
 
       template <class T>
-      ::Kokkos::View<T*, MemorySpace> upload(
-        const std::vector<T>& host, const char* label) const
+      void resize(
+        ::Kokkos::View<T*, MemorySpace>& view, size_t size, const char* label) const
       {
-        ::Kokkos::View<T*, MemorySpace> res(
-          ::Kokkos::view_alloc(
-            m_execution, ::Kokkos::WithoutInitializing, std::string(label)),
-          host.size());
+        if (view.extent(0) != size)
+        {
+          view = ::Kokkos::View<T*, MemorySpace>(
+            ::Kokkos::view_alloc(
+              m_execution, ::Kokkos::WithoutInitializing, std::string(label)),
+            size);
+        }
+      }
+
+      template <class T>
+      void copy(::Kokkos::View<T*, MemorySpace>& view, const std::vector<T>& host,
+        const char* label) const
+      {
+        resize(view, host.size(), label);
         const ::Kokkos::View<const T*, ::Kokkos::HostSpace,
           ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>
           source(host.data(), host.size());
-        ::Kokkos::deep_copy(m_execution, res, source);
-        return res;
+        ::Kokkos::deep_copy(m_execution, view, source);
+      }
+
+      /**
+       * @brief Integrates the local integrators into the coordinate list.
+       */
+      void integrateMatrices(CacheType& cache, bool fixed)
+      {
+        // Integrators with equal segments share their entries.
+        std::vector<COOSegment> segments;
+        std::vector<size_t> segment(m_matrices.size());
+        bool restricted = false;
+        for (size_t k = 0; k < m_matrices.size(); ++k)
+        {
+          const auto& m = m_matrices[k];
+          COOSegment key{
+            m.integrator->getLayout(), m.row, m.col, m.integrator->prepare()};
+          restricted = restricted || !key.layout.attributes.empty();
+          const auto it = std::find(segments.begin(), segments.end(), key);
+          segment[k] = it - segments.begin();
+          if (it == segments.end())
+            segments.push_back(std::move(key));
+        }
+        std::vector<size_t> offsets(segments.size() + 1, 0);
+        for (size_t s = 0; s < segments.size(); ++s)
+          offsets[s + 1] = offsets[s] + segments[s].count;
+        const size_t diagonal = std::min(m_rows, m_cols);
+        const size_t count = offsets.back() + diagonal;
+
+        const bool index = !cache.indexed || restricted || cache.segments != segments ||
+          cache.rows.extent(0) != count;
+        resize(cache.values, count, "Rodin COO values");
+        if (index)
+        {
+          resize(cache.nextRows, count, "Rodin COO rows");
+          resize(cache.nextCols, count, "Rodin COO cols");
+        }
+        const ::Kokkos::View<Index*, MemorySpace> none;
+        std::vector<bool> filled(segments.size(), false);
+        for (size_t k = 0; k < m_matrices.size(); ++k)
+        {
+          const auto& m = m_matrices[k];
+          const size_t s = segment[k];
+          const bool first = !filled[s];
+          m.integrator->fill(cache.values, offsets[s], m.sign, !first,
+            first && index ? cache.nextRows : none,
+            first && index ? cache.nextCols : none);
+          filled[s] = true;
+        }
+        if (index)
+        {
+          for (size_t s = 0; s < segments.size(); ++s)
+          {
+            shift(m_execution, cache.nextRows, cache.nextCols, offsets[s],
+              segments[s].count, segments[s].row, segments[s].col);
+          }
+          listDiagonal(
+            m_execution, offsets.back(), diagonal, cache.nextRows, cache.nextCols);
+          const bool changed = !cache.indexed || cache.rows.extent(0) != count ||
+            countChanges(
+              m_execution, cache.nextRows, cache.nextCols, cache.rows, cache.cols) > 0;
+          std::swap(cache.rows, cache.nextRows);
+          std::swap(cache.cols, cache.nextCols);
+          cache.segments = std::move(segments);
+          cache.indexed = true;
+          if (changed)
+            cache.matrix = -1;
+        }
+        fillDiagonal(
+          m_execution, offsets.back(), diagonal, fixed, cache.fixed, cache.values);
+        if (fixed)
+        {
+          eliminate(m_execution, offsets.back(), cache.rows, cache.cols, cache.fixed,
+            cache.fixedValues, cache.values, cache.rhs);
+        }
+      }
+
+      /**
+       * @brief Integrates the linear integrators into the right-hand side.
+       */
+      void integrateVectors(CacheType& cache, bool fixed)
+      {
+        std::vector<size_t> offsets(m_vectors.size() + 1, 0);
+        for (size_t k = 0; k < m_vectors.size(); ++k)
+          offsets[k + 1] = offsets[k] + m_vectors[k].integrator->prepare();
+        resize(cache.entryIndices, offsets.back(), "Rodin entry indices");
+        resize(cache.entryValues, offsets.back(), "Rodin entry values");
+        for (size_t k = 0; k < m_vectors.size(); ++k)
+        {
+          const auto& v = m_vectors[k];
+          v.integrator->fill(
+            cache.entryValues, offsets[k], v.sign, false, cache.entryIndices);
+          scatterVector(m_execution, offsets[k], offsets[k + 1] - offsets[k],
+            cache.entryIndices, cache.entryValues, v.row, fixed, cache.fixed, cache.rhs);
+        }
       }
 
       /**
        * @brief Hands the coordinate list to the matrix.
        *
        * The matrix is laid out as a PETSc Kokkos matrix unless it already has
-       * a type. The pattern is analysed again only when the coordinates
-       * changed since the last assembly of the same matrix.
+       * a type. The pattern is analysed again only when it is not the one the
+       * matrix was last preallocated with.
        */
-      void setMatrix(PatternType& pattern, ::Mat A,
-        const ::Kokkos::View<PetscInt*, MemorySpace>& rows,
-        const ::Kokkos::View<PetscInt*, MemorySpace>& cols,
-        const ::Kokkos::View<PetscScalar*, MemorySpace>& coo) const
+      void setMatrix(CacheType& cache, ::Mat A) const
       {
         PetscErrorCode ierr;
         PetscInt64 id = -1;
         ierr = PetscObjectGetId(reinterpret_cast<PetscObject>(A), &id);
         assert(ierr == PETSC_SUCCESS);
 
-        const bool reuse = pattern.matrix == id &&
-          pattern.rows.extent(0) == rows.extent(0) &&
-          countChanges(m_execution, rows, cols, pattern.rows, pattern.cols) == 0;
-        if (!reuse)
+        if (cache.matrix != id)
         {
           PetscBool assembled = PETSC_FALSE;
           ierr = MatAssembled(A, &assembled);
@@ -414,15 +599,20 @@ namespace Rodin::Assembly::Internal
               assert(ierr == PETSC_SUCCESS);
             }
           }
+          const auto hostRows =
+            ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), cache.rows);
+          const auto hostCols =
+            ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), cache.cols);
+          const std::vector<PetscInt> rows(
+            hostRows.data(), hostRows.data() + hostRows.extent(0));
+          std::vector<PetscInt> cols(
+            hostCols.data(), hostCols.data() + hostCols.extent(0));
           // PETSc may reorder the coordinates it is given, so it gets copies.
-          auto hostRows = ::Kokkos::create_mirror(::Kokkos::HostSpace(), rows);
-          auto hostCols = ::Kokkos::create_mirror(::Kokkos::HostSpace(), cols);
-          ::Kokkos::deep_copy(hostRows, rows);
-          ::Kokkos::deep_copy(hostCols, cols);
+          std::vector<PetscInt> r = rows;
           ierr = MatSetPreallocationCOO(
-            A, static_cast<PetscCount>(rows.extent(0)), hostRows.data(), hostCols.data());
+            A, static_cast<PetscCount>(r.size()), r.data(), cols.data());
           assert(ierr == PETSC_SUCCESS);
-          pattern = {id, rows, cols};
+          cache.matrix = id;
         }
 
         PetscBool device = PETSC_FALSE;
@@ -432,12 +622,12 @@ namespace Rodin::Assembly::Internal
         if (device ||
           ::Kokkos::SpaceAccessibility<::Kokkos::HostSpace, MemorySpace>::accessible)
         {
-          ierr = MatSetValuesCOO(A, coo.data(), INSERT_VALUES);
+          ierr = MatSetValuesCOO(A, cache.values.data(), INSERT_VALUES);
         }
         else
         {
           const auto host =
-            ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), coo);
+            ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), cache.values);
           ierr = MatSetValuesCOO(A, host.data(), INSERT_VALUES);
         }
         assert(ierr == PETSC_SUCCESS);
@@ -583,7 +773,7 @@ namespace Rodin::Assembly
        */
       Kokkos(Kokkos&& other)
         : Parent(std::move(other)),
-          m_pattern(std::move(other.m_pattern))
+          m_cache(std::move(other.m_cache))
       {}
 
       /**
@@ -594,7 +784,7 @@ namespace Rodin::Assembly
       Kokkos& operator=(const Kokkos& other)
       {
         Parent::operator=(other);
-        m_pattern = {};
+        m_cache = {};
         return *this;
       }
 
@@ -669,11 +859,11 @@ namespace Rodin::Assembly
             system.addVector(lfi, 0, Real(-1));
         }
         Internal::prepareDeviceSystem(axb, rows, cols, doVector);
-        system.finish(m_pattern, doMatrix ? axb.getOperator() : nullptr,
+        system.finish(m_cache, doMatrix ? axb.getOperator() : nullptr,
           doVector ? axb.getVector() : nullptr);
       }
 
-      Internal::COOPattern<typename SystemType::MemorySpace> m_pattern;
+      typename SystemType::CacheType m_cache;
   };
 
   /**
@@ -729,7 +919,7 @@ namespace Rodin::Assembly
        */
       Kokkos(Kokkos&& other)
         : Parent(std::move(other)),
-          m_pattern(std::move(other.m_pattern))
+          m_cache(std::move(other.m_cache))
       {}
 
       /**
@@ -740,7 +930,7 @@ namespace Rodin::Assembly
       Kokkos& operator=(const Kokkos& other)
       {
         Parent::operator=(other);
-        m_pattern = {};
+        m_cache = {};
         return *this;
       }
 
@@ -827,11 +1017,11 @@ namespace Rodin::Assembly
             system.addVector(lfi, testOffset(lfi.getTestFunction().getUUID()), Real(-1));
         }
         Internal::prepareDeviceSystem(axb, rows, cols, doVector);
-        system.finish(m_pattern, doMatrix ? axb.getOperator() : nullptr,
+        system.finish(m_cache, doMatrix ? axb.getOperator() : nullptr,
           doVector ? axb.getVector() : nullptr);
       }
 
-      Internal::COOPattern<typename SystemType::MemorySpace> m_pattern;
+      typename SystemType::CacheType m_cache;
   };
 }
 
