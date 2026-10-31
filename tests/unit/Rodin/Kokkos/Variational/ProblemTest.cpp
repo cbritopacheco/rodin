@@ -121,125 +121,119 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     VectorFunction hf{[](const Geometry::Point& p) { return 1 + p.x(); }, Real(-1)};
-    VectorFunction df{
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real{return 1 + p.x();
-  }
-  , Real(-1)
-};
-VectorFunction hg{[](const Geometry::Point& p) { return p.y(); }, Real(2)};
-VectorFunction dg{KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real{return p.y();
-}
-, Real(2)
-}
-;
+    VectorFunction df(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 1 + p.x(); },
+      Real(-1));
+    VectorFunction hg{[](const Geometry::Point& p) { return p.y(); }, Real(2)};
+    VectorFunction dg(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.y(); }, Real(2));
 
-Problem hp(hu, hv);
-hp = Integral(Jacobian(hu), Jacobian(hv)) + Integral(Div(hu), Div(hv)) -
-  Integral(hf, hv) + DirichletBC(hu, hg).on(FlatSet<Geometry::Attribute>{1, 3});
-Problem dp(du, dv);
-dp = Integral(Jacobian(du), Jacobian(dv)) + Integral(Div(du), Div(dv)) -
-  Integral(df, dv) + DirichletBC(du, dg).on(FlatSet<Geometry::Attribute>{1, 3});
-expectSameSystem(hp, dp);
-}
+    Problem hp(hu, hv);
+    hp = Integral(Jacobian(hu), Jacobian(hv)) + Integral(Div(hu), Div(hv)) -
+      Integral(hf, hv) + DirichletBC(hu, hg).on(FlatSet<Geometry::Attribute>{1, 3});
+    Problem dp(du, dv);
+    dp = Integral(Jacobian(du), Jacobian(dv)) + Integral(Div(du), Div(dv)) -
+      Integral(df, dv) + DirichletBC(du, dg).on(FlatSet<Geometry::Attribute>{1, 3});
+    expectSameSystem(hp, dp);
+  }
 
 /// @brief Mixed velocity and pressure problems match the host.
-void checkMixedProblem(const HostMesh& source)
-{
-  ASSERT_EQ(source.getSpaceDimension(), 2);
-  const DeviceMesh mesh(TestContext{}, source);
-  P1 hvh(source, 2);
-  P1 hqh(source);
-  P1 dvh(mesh, 2);
-  P1 dqh(mesh);
-  TrialFunction hu(hvh);
-  TrialFunction hp(hqh);
-  TestFunction hv(hvh);
-  TestFunction hq(hqh);
-  TrialFunction du(dvh);
-  TrialFunction dp(dqh);
-  TestFunction dv(dvh);
-  TestFunction dq(dqh);
+  void checkMixedProblem(const HostMesh& source)
+  {
+    ASSERT_EQ(source.getSpaceDimension(), 2);
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 hvh(source, 2);
+    P1 hqh(source);
+    P1 dvh(mesh, 2);
+    P1 dqh(mesh);
+    TrialFunction hu(hvh);
+    TrialFunction hp(hqh);
+    TestFunction hv(hvh);
+    TestFunction hq(hqh);
+    TrialFunction du(dvh);
+    TrialFunction dp(dqh);
+    TestFunction dv(dvh);
+    TestFunction dq(dqh);
 
-  VectorFunction hf{[](const Geometry::Point& p) { return p.x() * p.y(); }, Real(1)};
-  VectorFunction df{
-    KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real{return p.x() * p.y();
-}
-, Real(1)
-}
-;
-RealFunction hs([](const Geometry::Point& p) { return p.x() - p.y(); });
-RealFunction ds(
-  KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() - p.y(); });
-const Real eps = 1e-3;
+    VectorFunction hf{[](const Geometry::Point& p) { return p.x() * p.y(); }, Real(1)};
+    VectorFunction df(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() * p.y(); },
+      Real(1));
+    RealFunction hs([](const Geometry::Point& p) { return p.x() - p.y(); });
+    RealFunction ds(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() - p.y(); });
+    const Real eps = 1e-3;
 
-Problem hstokes(hu, hp, hv, hq);
-hstokes = Integral(Jacobian(hu), Jacobian(hv)) - Integral(hp, Div(hv)) +
-  Integral(Div(hu), hq) + Integral(eps * hp, hq) - Integral(hf, hv) - Integral(hs, hq) +
-  DirichletBC(hu, VectorFunction{0, 0}).on(1) + DirichletBC(hp, RealFunction(1)).on(2);
-Problem dstokes(du, dp, dv, dq);
-dstokes = Integral(Jacobian(du), Jacobian(dv)) - Integral(dp, Div(dv)) +
-  Integral(Div(du), dq) + Integral(eps * dp, dq) - Integral(df, dv) - Integral(ds, dq) +
-  DirichletBC(du, VectorFunction{0, 0}).on(1) + DirichletBC(dp, RealFunction(1)).on(2);
-expectSameSystem(hstokes, dstokes);
-}
+    Problem hstokes(hu, hp, hv, hq);
+    hstokes = Integral(Jacobian(hu), Jacobian(hv)) - Integral(hp, Div(hv)) +
+      Integral(Div(hu), hq) + Integral(eps * hp, hq) - Integral(hf, hv) -
+      Integral(hs, hq) + DirichletBC(hu, VectorFunction{0, 0}).on(1) +
+      DirichletBC(hp, RealFunction(1)).on(2);
+    Problem dstokes(du, dp, dv, dq);
+    dstokes = Integral(Jacobian(du), Jacobian(dv)) - Integral(dp, Div(dv)) +
+      Integral(Div(du), dq) + Integral(eps * dp, dq) - Integral(df, dv) -
+      Integral(ds, dq) + DirichletBC(du, VectorFunction{0, 0}).on(1) +
+      DirichletBC(dp, RealFunction(1)).on(2);
+    expectSameSystem(hstokes, dstokes);
+  }
 
 /// @brief Boundary conditions without face to cell incidence raise.
-void checkMissingIncidenceRaises()
-{
-  auto source = makeMixedMesh();
-  const DeviceMesh mesh(TestContext{}, source);
-  if (mesh.getConnectivity().hasIncidence(1, 2))
-    GTEST_SKIP() << "The mixed mesh already has its face to cell incidence.";
-  P1 dfes(mesh);
-  TrialFunction du(dfes);
-  TestFunction dv(dfes);
-  Problem dp(du, dv);
-  dp = Integral(Grad(du), Grad(dv)) + DirichletBC(du, RealFunction(0));
-  EXPECT_ANY_THROW(dp.assemble());
-}
+  void checkMissingIncidenceRaises()
+  {
+    auto source = makeMixedMesh();
+    const DeviceMesh mesh(TestContext{}, source);
+    if (mesh.getConnectivity().hasIncidence(1, 2))
+      GTEST_SKIP() << "The mixed mesh already has its face to cell incidence.";
+    P1 dfes(mesh);
+    TrialFunction du(dfes);
+    TestFunction dv(dfes);
+    Problem dp(du, dv);
+    dp = Integral(Grad(du), Grad(dv)) + DirichletBC(du, RealFunction(0));
+    EXPECT_ANY_THROW(dp.assemble());
+  }
 
-TEST(Kokkos_Variational_Problem, PoissonOnTriangles)
-{
-  checkPoisson(withFaces(makeTriangleMesh()));
-}
+  TEST(Kokkos_Variational_Problem, PoissonOnTriangles)
+  {
+    checkPoisson(withFaces(makeTriangleMesh()));
+  }
 
-TEST(Kokkos_Variational_Problem, PoissonOnMixedMesh)
-{
-  checkPoisson(withFaces(makeMixedMesh()));
-}
+  TEST(Kokkos_Variational_Problem, PoissonOnMixedMesh)
+  {
+    checkPoisson(withFaces(makeMixedMesh()));
+  }
 
-TEST(Kokkos_Variational_Problem, PoissonOnTetrahedra)
-{
-  checkPoisson(withFaces(makeTetrahedronMesh()));
-}
+  TEST(Kokkos_Variational_Problem, PoissonOnTetrahedra)
+  {
+    checkPoisson(withFaces(makeTetrahedronMesh()));
+  }
 
-TEST(Kokkos_Variational_Problem, GridFunctionDataOnMixedMesh)
-{
-  checkGridFunctionData(withFaces(makeMixedMesh()));
-}
+  TEST(Kokkos_Variational_Problem, GridFunctionDataOnMixedMesh)
+  {
+    checkGridFunctionData(withFaces(makeMixedMesh()));
+  }
 
-TEST(Kokkos_Variational_Problem, VectorOnTriangles)
-{
-  checkVectorProblem(withFaces(makeTriangleMesh()));
-}
+  TEST(Kokkos_Variational_Problem, VectorOnTriangles)
+  {
+    checkVectorProblem(withFaces(makeTriangleMesh()));
+  }
 
-TEST(Kokkos_Variational_Problem, VectorOnMixedMesh)
-{
-  checkVectorProblem(withFaces(makeMixedMesh()));
-}
+  TEST(Kokkos_Variational_Problem, VectorOnMixedMesh)
+  {
+    checkVectorProblem(withFaces(makeMixedMesh()));
+  }
 
-TEST(Kokkos_Variational_Problem, MixedOnTriangles)
-{
-  checkMixedProblem(withFaces(makeTriangleMesh()));
-}
+  TEST(Kokkos_Variational_Problem, MixedOnTriangles)
+  {
+    checkMixedProblem(withFaces(makeTriangleMesh()));
+  }
 
-TEST(Kokkos_Variational_Problem, MixedOnMixedMesh)
-{
-  checkMixedProblem(withFaces(makeMixedMesh()));
-}
+  TEST(Kokkos_Variational_Problem, MixedOnMixedMesh)
+  {
+    checkMixedProblem(withFaces(makeMixedMesh()));
+  }
 
-TEST(Kokkos_Variational_Problem, MissingIncidenceRaises)
-{
-  checkMissingIncidenceRaises();
-}
+  TEST(Kokkos_Variational_Problem, MissingIncidenceRaises)
+  {
+    checkMissingIncidenceRaises();
+  }
 }

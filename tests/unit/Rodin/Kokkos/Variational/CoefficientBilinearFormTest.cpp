@@ -92,57 +92,57 @@ namespace Rodin::Tests::Unit
 
     VectorFunction hw{
       [](const Geometry::Point& p) { return 1 + p.x() * p.y(); }, Real(0.5)};
-    VectorFunction dw{
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real{return 1 + p.x() * p.y();
+    VectorFunction dw(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+        return 1 + p.x() * p.y();
+      },
+      Real(0.5));
+    expectSameForm(
+      hu, hv, Integral(Jacobian(hu) * hw, hv), du, dv, Integral(Jacobian(du) * dw, dv));
+
+    VectorFunction hc{2, -1};
+    VectorFunction dc{2, -1};
+    expectSameForm(
+      hu, hv, Integral(Jacobian(hu) * hc, hv), du, dv, Integral(Jacobian(du) * dc, dv));
   }
-  , Real(0.5)
-};
-expectSameForm(
-  hu, hv, Integral(Jacobian(hu) * hw, hv), du, dv, Integral(Jacobian(du) * dw, dv));
 
-VectorFunction hc{2, -1};
-VectorFunction dc{2, -1};
-expectSameForm(
-  hu, hv, Integral(Jacobian(hu) * hc, hv), du, dv, Integral(Jacobian(du) * dc, dv));
-}
+  TEST(Kokkos_Variational_CoefficientBilinearForm, ScalarGridFunctionOnTriangles)
+  {
+    checkScalarGridFunction(makeTriangleMesh());
+  }
 
-TEST(Kokkos_Variational_CoefficientBilinearForm, ScalarGridFunctionOnTriangles)
-{
-  checkScalarGridFunction(makeTriangleMesh());
-}
+  TEST(Kokkos_Variational_CoefficientBilinearForm, ScalarGridFunctionOnMixedMesh)
+  {
+    checkScalarGridFunction(makeMixedMesh());
+  }
 
-TEST(Kokkos_Variational_CoefficientBilinearForm, ScalarGridFunctionOnMixedMesh)
-{
-  checkScalarGridFunction(makeMixedMesh());
-}
+  TEST(Kokkos_Variational_CoefficientBilinearForm, ScalarGridFunctionOnTetrahedra)
+  {
+    checkScalarGridFunction(makeTetrahedronMesh());
+  }
 
-TEST(Kokkos_Variational_CoefficientBilinearForm, ScalarGridFunctionOnTetrahedra)
-{
-  checkScalarGridFunction(makeTetrahedronMesh());
-}
+  TEST(Kokkos_Variational_CoefficientBilinearForm, VectorGridFunctionOnTriangles)
+  {
+    checkVectorGridFunction(makeTriangleMesh());
+  }
 
-TEST(Kokkos_Variational_CoefficientBilinearForm, VectorGridFunctionOnTriangles)
-{
-  checkVectorGridFunction(makeTriangleMesh());
-}
+  TEST(Kokkos_Variational_CoefficientBilinearForm, VectorGridFunctionOnMixedMesh)
+  {
+    checkVectorGridFunction(makeMixedMesh());
+  }
 
-TEST(Kokkos_Variational_CoefficientBilinearForm, VectorGridFunctionOnMixedMesh)
-{
-  checkVectorGridFunction(makeMixedMesh());
-}
+  TEST(Kokkos_Variational_CoefficientBilinearForm, VectorGridFunctionOnTetrahedra)
+  {
+    checkVectorGridFunction(makeTetrahedronMesh());
+  }
 
-TEST(Kokkos_Variational_CoefficientBilinearForm, VectorGridFunctionOnTetrahedra)
-{
-  checkVectorGridFunction(makeTetrahedronMesh());
-}
+  TEST(Kokkos_Variational_CoefficientBilinearForm, VectorFunctionOnTriangles)
+  {
+    checkVectorFunction(makeTriangleMesh());
+  }
 
-TEST(Kokkos_Variational_CoefficientBilinearForm, VectorFunctionOnTriangles)
-{
-  checkVectorFunction(makeTriangleMesh());
-}
-
-TEST(Kokkos_Variational_CoefficientBilinearForm, VectorFunctionOnMixedMesh)
-{
-  checkVectorFunction(makeMixedMesh());
-}
+  TEST(Kokkos_Variational_CoefficientBilinearForm, VectorFunctionOnMixedMesh)
+  {
+    checkVectorFunction(makeMixedMesh());
+  }
 }

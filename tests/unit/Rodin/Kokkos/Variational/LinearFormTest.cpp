@@ -84,76 +84,76 @@ namespace Rodin::Tests::Unit
 
     VectorFunction hf{
       [](const Geometry::Point& p) { return 1 + p.x() * p.y(); }, Real(0.5)};
-    VectorFunction df{
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real{return 1 + p.x() * p.y();
+    VectorFunction df(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+        return 1 + p.x() * p.y();
+      },
+      Real(0.5));
+    expectSameLinearForm(hv, Integral(hf, hv), dv, Integral(df, dv));
   }
-  , Real(0.5)
-};
-expectSameLinearForm(hv, Integral(hf, hv), dv, Integral(df, dv));
-}
 
 /// @brief Subtracted and restricted integrators match the host.
-void checkCombinedLinearForm(const HostMesh& source)
-{
-  const DeviceMesh mesh(TestContext{}, source);
-  P1 hfes(source);
-  P1 dfes(mesh);
-  TestFunction hv(hfes);
-  TestFunction dv(dfes);
+  void checkCombinedLinearForm(const HostMesh& source)
+  {
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 hfes(source);
+    P1 dfes(mesh);
+    TestFunction hv(hfes);
+    TestFunction dv(dfes);
 
-  RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() * p.x(); });
-  RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-    return 1 + p.x() * p.x();
-  });
+    RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() * p.x(); });
+    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      return 1 + p.x() * p.x();
+    });
 
-  LinearForm hl(hv);
-  hl = Integral(hv);
-  hl -= Integral(hf, hv).over(2);
-  hl.assemble();
-  LinearForm dl(dv);
-  dl = Integral(dv);
-  dl -= Integral(df, dv).over(2);
-  dl.assemble();
-  expectSameVector(hl.getVector(), dl.getVector());
-}
+    LinearForm hl(hv);
+    hl = Integral(hv);
+    hl -= Integral(hf, hv).over(2);
+    hl.assemble();
+    LinearForm dl(dv);
+    dl = Integral(dv);
+    dl -= Integral(df, dv).over(2);
+    dl.assemble();
+    expectSameVector(hl.getVector(), dl.getVector());
+  }
 
-TEST(Kokkos_Variational_LinearForm, ScalarOnTriangles)
-{
-  checkScalarLinearForms(makeTriangleMesh());
-}
+  TEST(Kokkos_Variational_LinearForm, ScalarOnTriangles)
+  {
+    checkScalarLinearForms(makeTriangleMesh());
+  }
 
-TEST(Kokkos_Variational_LinearForm, ScalarOnMixedMesh)
-{
-  checkScalarLinearForms(makeMixedMesh());
-}
+  TEST(Kokkos_Variational_LinearForm, ScalarOnMixedMesh)
+  {
+    checkScalarLinearForms(makeMixedMesh());
+  }
 
-TEST(Kokkos_Variational_LinearForm, ScalarOnTetrahedra)
-{
-  checkScalarLinearForms(makeTetrahedronMesh());
-}
+  TEST(Kokkos_Variational_LinearForm, ScalarOnTetrahedra)
+  {
+    checkScalarLinearForms(makeTetrahedronMesh());
+  }
 
-TEST(Kokkos_Variational_LinearForm, VectorOnTriangles)
-{
-  checkVectorLinearForms(makeTriangleMesh());
-}
+  TEST(Kokkos_Variational_LinearForm, VectorOnTriangles)
+  {
+    checkVectorLinearForms(makeTriangleMesh());
+  }
 
-TEST(Kokkos_Variational_LinearForm, VectorOnMixedMesh)
-{
-  checkVectorLinearForms(makeMixedMesh());
-}
+  TEST(Kokkos_Variational_LinearForm, VectorOnMixedMesh)
+  {
+    checkVectorLinearForms(makeMixedMesh());
+  }
 
-TEST(Kokkos_Variational_LinearForm, VectorOnTetrahedra)
-{
-  checkVectorLinearForms(makeTetrahedronMesh());
-}
+  TEST(Kokkos_Variational_LinearForm, VectorOnTetrahedra)
+  {
+    checkVectorLinearForms(makeTetrahedronMesh());
+  }
 
-TEST(Kokkos_Variational_LinearForm, VectorFunctionOnTriangles)
-{
-  checkVectorFunctionSource(makeTriangleMesh());
-}
+  TEST(Kokkos_Variational_LinearForm, VectorFunctionOnTriangles)
+  {
+    checkVectorFunctionSource(makeTriangleMesh());
+  }
 
-TEST(Kokkos_Variational_LinearForm, CombinedOnMixedMesh)
-{
-  checkCombinedLinearForm(makeMixedMesh());
-}
+  TEST(Kokkos_Variational_LinearForm, CombinedOnMixedMesh)
+  {
+    checkCombinedLinearForm(makeMixedMesh());
+  }
 }
