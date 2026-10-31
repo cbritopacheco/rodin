@@ -317,3 +317,31 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
 - [ ] Performance: la somme des entrées dans le vecteur se fait sur
       l'hôte; une réduction atomique sur device (ou l'assemblage COO PETSc
       du jalon 6) évitera la copie.
+
+## 10. DSL device, jalon 5: problèmes et conditions de Dirichlet
+
+- [x] `Assembly::Kokkos<IndexMap<Real>, DirichletBC<TrialFunction<P1 device>,
+      FunctionBase<...>>>`: deux noyaux sur les faces de codimension un.
+      Sélection par attribut (faces intérieures comprises, comme l'hôte)
+      ou par incidence face-maille quand `.on()` est absent; chaque sommet
+      contraint est attribué a sa première face (`atomic_min`), où la
+      valeur est évaluée au sommet.
+- [x] `Assembly::Kokkos<LinearSystem<SparseMatrix, Vector>, Problem<...>>`
+      simple champ et multi-champs (`Problem(u, p, v, q)`, blocs par
+      UUID): intégrateurs locaux et linéaires sur device, formes
+      préassemblées et élimination des valeurs de Dirichlet sur l'hôte,
+      identiques aux assemblages hôtes.
+- [x] `Internal::forEachDeviceEntry` et `Internal::ConstrainedSystem`
+      partagés par les assemblages de formes et de problèmes.
+- [x] Tests `RodinKokkosVariationalProblemTest` comparés a l'hôte a 1e-12:
+      Poisson avec lambda, constante, `.on()` et bord complet (triangles,
+      mixte, tétraèdres), donnée `GridFunction`, problème vectoriel,
+      Stokes mixte `(u, p, v, q)`, erreur sans incidence face-maille.
+- [ ] Non supportés sur device: intégrateurs globaux, conditions
+      périodiques et d'identification (`DirichletBC(u, A(v))`), qui
+      lèvent une exception.
+- [ ] `DirichletBC::on(1, 3)` avec des littéraux `int` ne compile pas
+      sous nvcc (conversion rétrécissante dans `FlatSet<Attribute>{a1,
+      a2, as...}`); les tests passent un `FlatSet<Geometry::Attribute>`.
+- [ ] Performance: l'élimination et `setFromTriplets` restent sur l'hôte
+      (jalon 6: COO PETSc).
