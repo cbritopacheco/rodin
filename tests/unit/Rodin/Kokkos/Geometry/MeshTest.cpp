@@ -566,6 +566,42 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(boost::filesystem::remove_all(directory), 0u);
   }
 
+  /// @brief The host copy keeps the vertices, entities, attributes and incidences.
+  TEST(Kokkos_Mesh, ToHostRoundTrip)
+  {
+    auto source = makeMesh(Polytope::Type::Triangle, 2);
+    source.getConnectivity().compute(1, 2);
+    for (Index i = 0; i < source.getFaceCount(); ++i)
+      source.setAttribute({1, i}, Geometry::Attribute(3 + i % 2));
+    const DeviceMesh mesh(TestContext{}, source);
+    const HostMesh copy = mesh.toHost();
+    ASSERT_EQ(copy.getDimension(), source.getDimension());
+    ASSERT_EQ(copy.getSpaceDimension(), source.getSpaceDimension());
+    for (Index v = 0; v < source.getVertexCount(); ++v)
+    {
+      const auto expected = source.getVertexCoordinates(v);
+      const auto actual = copy.getVertexCoordinates(v);
+      for (size_t s = 0; s < source.getSpaceDimension(); ++s)
+        EXPECT_DOUBLE_EQ(actual(s), expected(s));
+    }
+    for (size_t d = 1; d <= source.getDimension(); ++d)
+    {
+      ASSERT_EQ(copy.getPolytopeCount(d), source.getPolytopeCount(d));
+      for (Index i = 0; i < source.getPolytopeCount(d); ++i)
+      {
+        EXPECT_EQ(copy.getGeometry(d, i), source.getGeometry(d, i));
+        EXPECT_EQ(copy.getAttribute(d, i), source.getAttribute(d, i));
+        const auto expected = source.getPolytope(d, i)->getVertices();
+        const auto actual = copy.getPolytope(d, i)->getVertices();
+        ASSERT_EQ(actual.size(), expected.size());
+        for (Index a = 0; a < expected.size(); ++a)
+          EXPECT_EQ(actual[a], expected[a]);
+      }
+    }
+    EXPECT_FALSE(copy.getConnectivity().getIncidence(1, 2).empty());
+    EXPECT_NEAR(copy.getMeasure(2), source.getMeasure(2), 1e-12);
+  }
+
   /// @brief Device discovery creates usable mesh entities on every supported reference family.
   TEST(Kokkos_Mesh, DiscoveryBuildsResidentGeometry)
   {

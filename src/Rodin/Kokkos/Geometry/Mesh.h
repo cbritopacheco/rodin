@@ -14,6 +14,7 @@
 
 #include <cmath>
 #include <memory>
+#include <typeinfo>
 #include <utility>
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/IdentityTransformation.h"
@@ -184,10 +185,11 @@ namespace Rodin::Geometry
             << "Invalid Kokkos mesh embedding dimension." << Alert::Raise;
         }
         std::vector<Real> coordinates;
+        coordinates.reserve(source.getVertexCount() * m_sdim);
         std::vector<Attribute> attributes;
         std::vector<unsigned char> present;
         std::vector<GeometryKind> kinds;
-        IndexVector controlOffsets(1, 0);
+        IndexVector controlOffsets;
         std::vector<Real> controls;
         for (Index vertex = 0; vertex < source.getVertexCount(); ++vertex)
         {
@@ -198,21 +200,53 @@ namespace Rodin::Geometry
             coordinates.push_back(point(s));
           }
         }
+        // A local mesh builds its missing transformations from the vertices, so
+        // only the stored ones need inspecting. A derived mesh may override its
+        // default transformations, hence the exact type.
+        using LocalMesh = Geometry::Mesh<Rodin::Context::Local>;
+        const auto* local = typeid(source) == typeid(LocalMesh)
+          ? static_cast<const LocalMesh*>(&source)
+          : nullptr;
+        size_t entityCount = 0;
         for (size_t d = 0; d <= getDimension(); ++d)
+          entityCount += getPolytopeCount(d);
+        attributes.resize(entityCount);
+        present.resize(entityCount);
+        kinds.resize(entityCount, GeometryKind::VertexP1);
+        controlOffsets.resize(entityCount + 1, 0);
+        // The local queries below are concurrent reads. Few local entities store
+        // a transformation, so only those take the serial pass.
+        std::vector<unsigned char> mapped(entityCount, 1);
+        for (size_t d = 0, first = 0; d <= getDimension(); first += getPolytopeCount(d++))
+        {
+          Rodin::Kokkos::Internal::forEachOnHost(
+            local != nullptr, getPolytopeCount(d), [&](Index i) {
+              const auto attribute = source.getAttribute(d, i);
+              attributes[first + i] = attribute.value_or(Attribute{});
+              present[first + i] = attribute.has_value();
+              if (local)
+                mapped[first + i] =
+                  local->getPolytopeTransformationIndex().find(d, i) != nullptr;
+            });
+        }
+        for (size_t d = 0, first = 0; d <= getDimension(); first += getPolytopeCount(d++))
         {
           for (Index i = 0; i < getPolytopeCount(d); ++i)
           {
-            const auto attribute = source.getAttribute(d, i);
-            attributes.push_back(attribute.value_or(Attribute{}));
-            present.push_back(attribute.has_value());
-            const auto& map = source.getPolytopeTransformation(d, i);
+            const size_t entity = first + i;
+            controlOffsets[entity + 1] = controlOffsets[entity];
+            if (!mapped[entity])
+              continue;
+            const PolytopeTransformation* stored =
+              local ? local->getPolytopeTransformationIndex().find(d, i) : nullptr;
+            const auto& map = stored ? *stored : source.getPolytopeTransformation(d, i);
             validateTransformation(d, source.getGeometry(d, i), map);
             const auto* parametric =
               dynamic_cast<const ParametricTransformation<Variational::RealP1Element>*>(
                 &map);
             const auto& key = source.getConnectivity().getPolytope(d, i);
             bool vertexMap = parametric != nullptr;
-            std::vector<Real> entityControls;
+            const size_t start = controls.size();
             for (Index a = 0; a < key.size(); ++a)
             {
               const auto point = source.getVertexCoordinates(key[a]);
@@ -221,20 +255,17 @@ namespace Rodin::Geometry
                 const Real value =
                   parametric ? parametric->getPointMatrix()(s, a) : Real(0);
                 requireFinite(value);
-                entityControls.push_back(value);
+                controls.push_back(value);
                 vertexMap = vertexMap && value == point(s);
               }
             }
-            kinds.push_back(parametric
-                ? (vertexMap ? GeometryKind::VertexP1 : GeometryKind::ParametricP1)
-                : GeometryKind::Identity);
-            if (parametric && !vertexMap)
-            {
-              controls.insert(
-                controls.end(), entityControls.begin(), entityControls.end());
-            }
-            controlOffsets.push_back(
-              controlOffsets.back() + (parametric && !vertexMap ? key.size() : 0));
+            kinds[entity] = parametric
+              ? (vertexMap ? GeometryKind::VertexP1 : GeometryKind::ParametricP1)
+              : GeometryKind::Identity;
+            if (!parametric || vertexMap)
+              controls.resize(start);
+            else
+              controlOffsets[entity + 1] += key.size();
           }
         }
         m_coordinates = upload(coordinates, "mesh coordinates");
@@ -640,8 +671,14 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      /// @param path Output path. @param format Existing Rodin file format.
-      void save(const boost::filesystem::path& path, IO::FileFormat format) const override
+      /**
+       * @brief Copies the mesh back to the host.
+       *
+       * The copy carries the vertices, every polytope, the attributes, the
+       * transformations, the computed incidences and the name.
+       * @returns Local mesh equal to this one.
+       */
+      Mesh<Rodin::Context::Local> toHost() const
       {
         typename Mesh<Rodin::Context::Local>::Builder builder;
         builder.initialize(m_sdim).nodes(getVertexCount());
@@ -679,7 +716,13 @@ namespace Rodin::Geometry
         }
         if (const auto name = getName())
           output.setName(std::string(*name));
-        output.save(path, format);
+        return output;
+      }
+
+      /// @param path Output path. @param format Existing Rodin file format.
+      void save(const boost::filesystem::path& path, IO::FileFormat format) const override
+      {
+        toHost().save(path, format);
       }
 
       /**

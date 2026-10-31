@@ -28,6 +28,7 @@
 #include "Rodin/Variational/DirichletBC.h"
 #include "Rodin/Variational/LinearForm.h"
 #include "Rodin/Variational/Problem.h"
+#include "Rodin/Variational/Mult.h"
 #include "Rodin/Variational/UnaryMinus.h"
 
 #include "Rodin/Kokkos/ForwardDecls.h"
@@ -38,9 +39,9 @@ namespace Rodin::Assembly::Internal
   /**
    * @brief Finds the device implementation of a local integrator.
    * @tparam Backend Kokkos backend of the mesh context.
-   * @param lbfi Local integrator, possibly negated.
-   * @param sign Sign of the contributions.
-   * @return Device integrator and the sign of its contributions.
+   * @param lbfi Local integrator, possibly negated or scaled by a real.
+   * @param sign Factor of the contributions.
+   * @return Device integrator and the factor of its contributions.
    */
   template <class Backend>
   std::pair<const ::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*,
@@ -50,8 +51,12 @@ namespace Rodin::Assembly::Internal
   {
     using Negated =
       Variational::UnaryMinus<Variational::LocalBilinearFormIntegratorBase<Real>>;
+    using Scaled =
+      Variational::Mult<Real, Variational::LocalBilinearFormIntegratorBase<Real>>;
     if (const auto* negated = dynamic_cast<const Negated*>(&lbfi))
       return getDeviceIntegrator<Backend>(negated->getOperand(), -sign);
+    if (const auto* scaled = dynamic_cast<const Scaled*>(&lbfi))
+      return getDeviceIntegrator<Backend>(scaled->getRHS(), scaled->getLHS() * sign);
     const auto* integrator = dynamic_cast<
       const ::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*>(&lbfi);
     if (!integrator)
@@ -63,9 +68,9 @@ namespace Rodin::Assembly::Internal
   /**
    * @brief Finds the device implementation of a linear integrator.
    * @tparam Backend Kokkos backend of the mesh context.
-   * @param lfi Integrator, possibly negated.
-   * @param sign Sign of the contributions.
-   * @return Device integrator and the sign of its contributions.
+   * @param lfi Integrator, possibly negated or scaled by a real.
+   * @param sign Factor of the contributions.
+   * @return Device integrator and the factor of its contributions.
    */
   template <class Backend>
   std::pair<const ::Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>*,
@@ -74,8 +79,11 @@ namespace Rodin::Assembly::Internal
     const Variational::LinearFormIntegratorBase<Real>& lfi, Real sign = Real(1))
   {
     using Negated = Variational::UnaryMinus<Variational::LinearFormIntegratorBase<Real>>;
+    using Scaled = Variational::Mult<Real, Variational::LinearFormIntegratorBase<Real>>;
     if (const auto* negated = dynamic_cast<const Negated*>(&lfi))
       return getDeviceIntegrator<Backend>(negated->getOperand(), -sign);
+    if (const auto* scaled = dynamic_cast<const Scaled*>(&lfi))
+      return getDeviceIntegrator<Backend>(scaled->getRHS(), scaled->getLHS() * sign);
     const auto* integrator = dynamic_cast<
       const ::Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>*>(&lfi);
     if (!integrator)
@@ -773,35 +781,35 @@ namespace Rodin::Assembly
 
   /**
    * @ingroup RodinAssembly
-   * @brief Device assembly of a value Dirichlet condition on a P1 Kokkos space.
+   * @brief Device assembly of a value Dirichlet condition on a Lagrange
+   * Kokkos space.
    *
    * The constrained faces are the faces of codimension one carrying one of
    * the essential attributes or, when no attribute is given, the boundary
-   * faces. Each constrained vertex is assigned to its first face, where the
-   * value is evaluated at the vertex. Grid function values are therefore
-   * interpolated from the vertices of that face, which matches the host for
-   * continuous P1 data.
+   * faces. Each constrained degree of freedom is assigned to its first face,
+   * where the value is evaluated at its node. Grid function values are
+   * therefore interpolated from the degrees of freedom of that face, which
+   * matches the host for continuous data.
    *
    * @tparam Solution Solution variable type.
-   * @tparam Range Range type of the space, Real or a spatial vector.
-   * @tparam Backend Kokkos backend of the mesh context.
+   * @tparam FES Device space, whose degrees of freedom provide their nodes.
    * @tparam ValueDerived Value function type.
    */
-  template <class Solution, class Range, class Backend, class ValueDerived>
+  template <class Solution, class FES, class ValueDerived>
+    requires ::Rodin::Kokkos::Variational::DeviceSpace<FES>
   class Kokkos<IndexMap<Real>,
-    Variational::DirichletBC<
-      Variational::TrialFunction<Solution,
-        ::Rodin::Kokkos::Variational::DeviceP1Space<Range, Backend>>,
+    Variational::DirichletBC<Variational::TrialFunction<Solution, FES>,
       Variational::FunctionBase<ValueDerived>>>
     final : public AssemblyBase<IndexMap<Real>,
-              Variational::DirichletBC<
-                Variational::TrialFunction<Solution,
-                  ::Rodin::Kokkos::Variational::DeviceP1Space<Range, Backend>>,
+              Variational::DirichletBC<Variational::TrialFunction<Solution, FES>,
                 Variational::FunctionBase<ValueDerived>>>
   {
     public:
       /// @brief Finite element space type.
-      using FESType = ::Rodin::Kokkos::Variational::DeviceP1Space<Range, Backend>;
+      using FESType = FES;
+
+      /// @brief Device degrees of freedom.
+      using DOFsType = typename FESType::DOFsType;
 
       /// @brief Dirichlet condition type.
       using DirichletBCType =
@@ -863,22 +871,22 @@ namespace Rodin::Assembly
             << Alert::Raise;
         }
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const Index vertexCount = mesh.getVertexCount();
+        const DOFsType dofs = fes.getDeviceDOFs();
+        const Index stride = dofs.getStride();
         const Index vdim = fes.getVectorDimension();
         const auto attributes =
           ::Rodin::Kokkos::Variational::Internal::uploadAttributes(execution, essBdr);
         ::Kokkos::View<Index*, MemorySpace> owners(
-          ::Kokkos::view_alloc(execution, std::string("Rodin boundary owners")),
-          vertexCount);
+          ::Kokkos::view_alloc(execution, std::string("Rodin boundary owners")), stride);
         ::Kokkos::deep_copy(execution, owners, std::numeric_limits<Index>::max());
         ::Kokkos::View<Real*, MemorySpace> values(
           ::Kokkos::view_alloc(execution, std::string("Rodin boundary values")),
-          vertexCount * vdim);
+          stride * vdim);
         const ::Rodin::Kokkos::Variational::DeviceView<
           Variational::FunctionBase<ValueDerived>>
           value(input.getValue());
-        evaluate(execution, mesh.getDeviceView(), attributes, owners, values, value,
-          mesh.getFaceCount(), vertexCount, vdim);
+        evaluate(execution, mesh.getDeviceView(), attributes, owners, values, value, dofs,
+          mesh.getFaceCount(), vdim);
 
         const auto host = ::Kokkos::create_mirror_view(owners);
         const auto hostValues = ::Kokkos::create_mirror_view(values);
@@ -887,11 +895,10 @@ namespace Rodin::Assembly
         execution.fence("Rodin boundary values");
         for (Index r = 0; r < vdim; ++r)
         {
-          for (Index i = 0; i < vertexCount; ++i)
+          for (Index i = 0; i < stride; ++i)
           {
             if (host(i) != std::numeric_limits<Index>::max())
-              res.insert(
-                res.end(), {i + r * vertexCount, hostValues(i + r * vertexCount)});
+              res.insert(res.end(), {i + r * stride, hostValues(i + r * stride)});
           }
         }
       }
@@ -901,11 +908,12 @@ namespace Rodin::Assembly
        * @param execution Execution space instance.
        * @param view Device mesh.
        * @param attributes Essential attributes; empty selects the boundary.
-       * @param owners First constrained face of every vertex.
-       * @param values Value of component r of vertex i at i + r * vertexCount.
+       * @param owners First constrained face of every scalar degree of freedom.
+       * @param values Value of component r of the degree of freedom i at
+       * i + r * stride.
        * @param value Device view of the value function.
+       * @param dofs Device degrees of freedom.
        * @param faceCount Number of faces.
-       * @param vertexCount Number of vertices.
        * @param vdim Vector dimension of the space.
        *
        * The counts are given by the host, since the topology of the device
@@ -917,8 +925,9 @@ namespace Rodin::Assembly
         const ::Rodin::Kokkos::Geometry::MeshView& view, const AttributeView& attributes,
         const ::Kokkos::View<Index*, MemorySpace>& owners,
         const ::Kokkos::View<Real*, MemorySpace>& values, const ValueView& value,
-        Index faceCount, Index vertexCount, Index vdim)
+        const DOFsType& dofs, Index faceCount, Index vdim)
       {
+        const Index stride = dofs.getStride();
         const auto policy =
           ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>(
             execution, 0, faceCount);
@@ -927,57 +936,57 @@ namespace Rodin::Assembly
           "Rodin boundary owners", policy, KOKKOS_LAMBDA(Index f) {
             if (!isConstrained(view, attributes, f))
               return;
-            const auto vertices = view.getPolytope(faceDim, f).getVertices();
-            for (Index a = 0; a < vertices.size(); ++a)
-              ::Kokkos::atomic_min(&owners(vertices[a]), f);
+            const auto indices = dofs.bind(view.getPolytope(faceDim, f));
+            for (Index q = 0; q < indices.size(); ++q)
+              ::Kokkos::atomic_min(&owners(indices[q]), f);
           });
         ::Kokkos::parallel_for(
           "Rodin boundary values", policy, KOKKOS_LAMBDA(Index f) {
             if (!isConstrained(view, attributes, f))
               return;
             const auto face = view.getPolytope(faceDim, f);
-            const auto vertices = face.getVertices();
-            for (Index a = 0; a < vertices.size(); ++a)
+            const auto indices = dofs.bind(face);
+            for (Index q = 0; q < indices.size(); ++q)
             {
-              const Index vertex = vertices[a];
-              if (owners(vertex) != f)
+              const Index dof = indices[q];
+              if (owners(dof) != f)
                 continue;
-              const auto p = face.getPoint(getReferenceVertex(face, a));
-              store(values, vertex, vertexCount, vdim, value.getValue(p));
+              const auto p = face.getPoint(dofs.getNode(face, q));
+              store(values, dof, stride, vdim, value.getValue(p));
             }
           });
       }
 
       /**
-       * @brief Stores a scalar value of a vertex.
+       * @brief Stores a scalar value of a degree of freedom.
        * @param values Boundary values.
-       * @param vertex Vertex index.
-       * @param vertexCount Number of vertices.
+       * @param dof Scalar degree of freedom.
+       * @param stride Offset between components.
        * @param vdim Vector dimension of the space.
-       * @param v Value at the vertex.
+       * @param v Value at the node.
        */
       KOKKOS_INLINE_FUNCTION static void store(
-        const ::Kokkos::View<Real*, MemorySpace>& values, Index vertex,
-        [[maybe_unused]] Index vertexCount, [[maybe_unused]] Index vdim, Real v)
+        const ::Kokkos::View<Real*, MemorySpace>& values, Index dof,
+        [[maybe_unused]] Index stride, [[maybe_unused]] Index vdim, Real v)
       {
-        values(vertex) = v;
+        values(dof) = v;
       }
 
       /**
-       * @brief Stores the components of a vector value of a vertex.
-       * @param values Boundary values, component r of vertex i at
-       * i + r * vertexCount.
-       * @param vertex Vertex index.
-       * @param vertexCount Number of vertices.
+       * @brief Stores the components of a vector value of a degree of freedom.
+       * @param values Boundary values, component r of the degree of freedom i
+       * at i + r * stride.
+       * @param dof Scalar degree of freedom.
+       * @param stride Offset between components.
        * @param vdim Vector dimension of the space.
-       * @param v Value at the vertex.
+       * @param v Value at the node.
        */
       KOKKOS_INLINE_FUNCTION static void store(
-        const ::Kokkos::View<Real*, MemorySpace>& values, Index vertex, Index vertexCount,
+        const ::Kokkos::View<Real*, MemorySpace>& values, Index dof, Index stride,
         Index vdim, const ::Rodin::Kokkos::Geometry::Vector& v)
       {
         for (Index r = 0; r < vdim; ++r)
-          values(vertex + r * vertexCount) = v(r);
+          values(dof + r * stride) = v(r);
       }
 
       /**

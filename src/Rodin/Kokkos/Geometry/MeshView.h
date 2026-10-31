@@ -686,6 +686,104 @@ namespace Rodin::Kokkos::Geometry
   };
 
   /**
+   * @brief P1 basis of a reference geometry known at compile time.
+   *
+   * The values and reference gradients are those of
+   * PointView::evaluateBasis, evaluated for every vertex at once with static
+   * bounds. Only the simplices, the quadrilateral and the hexahedron are
+   * provided.
+   *
+   * @tparam G Reference geometry.
+   */
+  template <::Rodin::Geometry::Polytope::Type G>
+  struct StaticBasis
+  {
+    /// @brief Whether the geometry is a simplex, whose P1 map is affine.
+    static constexpr bool Affine = G == ::Rodin::Geometry::Polytope::Type::Segment ||
+      G == ::Rodin::Geometry::Polytope::Type::Triangle ||
+      G == ::Rodin::Geometry::Polytope::Type::Tetrahedron;
+
+    static_assert(Affine || G == ::Rodin::Geometry::Polytope::Type::Quadrilateral ||
+      G == ::Rodin::Geometry::Polytope::Type::Hexahedron);
+
+    /// @brief Reference dimension.
+    static constexpr Index Dimension = G == ::Rodin::Geometry::Polytope::Type::Segment
+      ? 1
+      : G == ::Rodin::Geometry::Polytope::Type::Triangle ||
+        G == ::Rodin::Geometry::Polytope::Type::Quadrilateral
+      ? 2
+      : 3;
+
+    /// @brief Number of basis functions, one per vertex.
+    static constexpr Index Count = Affine ? Dimension + 1 : Index(1) << Dimension;
+
+    /**
+     * @brief Evaluates the basis values at a reference point.
+     * @param r Reference coordinates.
+     * @param value Indexable receiving the Count values.
+     */
+    template <class Values>
+    KOKKOS_INLINE_FUNCTION static void evaluate(const Vector& r, Values& value)
+    {
+      for (Index a = 0; a < Count; ++a)
+      {
+        if constexpr (Affine)
+        {
+          value[a] = a == 0 ? Real(1) : r(a - 1);
+          if (a == 0)
+          {
+            for (Index d = 0; d < Dimension; ++d)
+              value[a] -= r(d);
+          }
+        }
+        else
+        {
+          value[a] = 1;
+          for (Index d = 0; d < Dimension; ++d)
+            value[a] *= isUpper(a, d) ? r(d) : 1 - r(d);
+        }
+      }
+    }
+
+    /**
+     * @brief Evaluates the basis values and reference gradients at a reference point.
+     * @param r Reference coordinates.
+     * @param value Indexable receiving the Count values.
+     * @param gradient Indexable receiving the Count gradients of Dimension components.
+     */
+    template <class Values, class Gradients>
+    KOKKOS_INLINE_FUNCTION static void evaluate(
+      const Vector& r, Values& value, Gradients& gradient)
+    {
+      evaluate(r, value);
+      for (Index a = 0; a < Count; ++a)
+      {
+        for (Index d = 0; d < Dimension; ++d)
+        {
+          if constexpr (Affine)
+            gradient[a][d] = a == 0 ? Real(-1) : a == d + 1 ? Real(1) : Real(0);
+          else
+          {
+            gradient[a][d] = isUpper(a, d) ? Real(1) : Real(-1);
+            for (Index k = 0; k < Dimension; ++k)
+            {
+              if (k != d)
+                gradient[a][d] *= isUpper(a, k) ? r(k) : 1 - r(k);
+            }
+          }
+        }
+      }
+    }
+
+    private:
+      /// @param a Vertex. @param d Direction. @return Whether the vertex is at the upper end of the direction.
+      KOKKOS_INLINE_FUNCTION static constexpr bool isUpper(Index a, Index d)
+      {
+        return d == 0 ? a % 4 == 1 || a % 4 == 2 : d == 1 ? a % 4 >= 2 : a >= 4;
+      }
+  };
+
+  /**
    * @brief Thread-local reference point on a device mesh entity.
    *
    * ## Architecture
@@ -712,6 +810,21 @@ namespace Rodin::Kokkos::Geometry
       {
         KOKKOS_ASSERT(reference.size() == polytope.getDimension());
         m_physical = computePhysicalCoordinates();
+      }
+
+      /**
+       * @brief Binds a point whose physical coordinates are already evaluated.
+       * @param polytope Borrowed device entity.
+       * @param reference Owned reference coordinate tuple.
+       * @param physical Image of @p reference under the geometric map.
+       */
+      KOKKOS_INLINE_FUNCTION
+      PointView(PolytopeView polytope, const Vector& reference, const Vector& physical)
+        : m_polytope(polytope),
+          m_reference(reference),
+          m_physical(physical)
+      {
+        KOKKOS_ASSERT(reference.size() == polytope.getDimension());
       }
 
       /// @brief Returns the bound entity. @return Borrowed polytope handle.

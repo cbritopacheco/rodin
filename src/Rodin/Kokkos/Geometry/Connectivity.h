@@ -13,8 +13,11 @@
  */
 
 #include <array>
+#include <atomic>
 #include <map>
 #include <mutex>
+#include <numeric>
+#include <utility>
 #include <Kokkos_Sort.hpp>
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Geometry/Connectivity.h"
@@ -86,43 +89,66 @@ namespace Rodin::Geometry
             << "Kokkos connectivity supports dimensions zero through three."
             << Alert::Raise;
         }
-        IndexVector offsets(m_dimension + 2, 0), vertexOffsets(1, 0), vertices;
-        std::vector<Polytope::Type> geometries;
+        // Local queries are plain reads; other sources may materialize entries.
+        const auto* local =
+          dynamic_cast<const Connectivity<Rodin::Context::Local>*>(&source);
+        const auto* resident = dynamic_cast<const Connectivity*>(&source);
+        const bool concurrent = local != nullptr;
+        IndexVector offsets(m_dimension + 2, 0);
+        for (size_t d = 0; d <= m_dimension; ++d)
+          offsets[d + 1] = offsets[d] + source.getCount(d);
+        IndexVector vertexOffsets(offsets.back() + 1, 0);
+        std::vector<Polytope::Type> geometries(offsets.back());
+        std::atomic<bool> invalid = false;
         for (size_t d = 0; d <= m_dimension; ++d)
         {
-          offsets[d + 1] = offsets[d] + source.getCount(d);
-          for (Index i = 0; i < source.getCount(d); ++i)
-          {
-            const auto geometry = source.getGeometry(d, i);
-            const auto& key = source.getPolytope(d, i);
-            const Polytope::Traits traits(geometry);
-            if (traits.getDimension() != d || traits.getVertexCount() != key.size())
-            {
-              Alert::MemberFunctionException(*this, __func__)
-                << "Inconsistent input entity." << Alert::Raise;
-            }
-            geometries.push_back(geometry);
-            ++m_geometryCounts[static_cast<size_t>(geometry)];
-            for (const Index vertex : key)
-            {
-              if (vertex >= source.getCount(0))
-              {
-                Alert::MemberFunctionException(*this, __func__)
-                  << "Invalid input vertex index." << Alert::Raise;
-              }
-              vertices.push_back(vertex);
-            }
-            vertexOffsets.push_back(vertices.size());
-          }
+          Rodin::Kokkos::Internal::forEachOnHost(
+            concurrent, source.getCount(d), [&](Index i) {
+              const Index entity = offsets[d] + i;
+              const auto geometry = source.getGeometry(d, i);
+              const size_t size = source.getPolytope(d, i).size();
+              const Polytope::Traits traits(geometry);
+              if (traits.getDimension() != d || traits.getVertexCount() != size)
+                invalid.store(true, std::memory_order_relaxed);
+              geometries[entity] = geometry;
+              vertexOffsets[entity + 1] = size;
+            });
         }
+        if (invalid)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Inconsistent input entity." << Alert::Raise;
+        }
+        for (Index entity = 0; entity < geometries.size(); ++entity)
+          ++m_geometryCounts[static_cast<size_t>(geometries[entity])];
+        std::partial_sum(
+          vertexOffsets.begin(), vertexOffsets.end(), vertexOffsets.begin());
         std::copy(offsets.begin(), offsets.end(), m_offsets.begin());
         m_entityOffsets = upload(offsets, "entity offsets");
         m_geometries = upload(geometries, "entity geometries");
         m_vertexOffsets = upload(vertexOffsets, "vertex offsets");
-        m_vertices = upload(vertices, "entity vertices");
-        const auto* local =
-          dynamic_cast<const Connectivity<Rodin::Context::Local>*>(&source);
-        const auto* resident = dynamic_cast<const Connectivity*>(&source);
+        m_vertices =
+          upload<Index>(vertexOffsets.back(), "entity vertices", [&](Index* out) {
+            const size_t vertices = source.getCount(0);
+            for (size_t d = 0; d <= m_dimension; ++d)
+            {
+              Rodin::Kokkos::Internal::forEachOnHost(
+                concurrent, source.getCount(d), [&](Index i) {
+                  Index* entry = out + vertexOffsets[offsets[d] + i];
+                  for (const Index vertex : source.getPolytope(d, i))
+                  {
+                    if (vertex >= vertices)
+                      invalid.store(true, std::memory_order_relaxed);
+                    *entry++ = vertex;
+                  }
+                });
+            }
+            if (invalid)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Invalid input vertex index." << Alert::Raise;
+            }
+          });
         for (size_t d = 0; d <= m_dimension; ++d)
         {
           for (size_t dp = 0; dp <= m_dimension; ++dp)
@@ -141,22 +167,30 @@ namespace Rodin::Geometry
               Alert::MemberFunctionException(*this, __func__)
                 << "Invalid input incidence row count." << Alert::Raise;
             }
-            IndexVector rows(1, 0), indices;
-            for (const auto& row : input)
-            {
-              for (const Index target : row)
-              {
-                if (target >= source.getCount(dp))
+            // The rows are already materialized, so any source reads them concurrently.
+            IndexVector rows(input.size() + 1, 0);
+            Rodin::Kokkos::Internal::forEachOnHost(
+              true, input.size(), [&](size_t r) { rows[r + 1] = input[r].size(); });
+            std::partial_sum(rows.begin(), rows.end(), rows.begin());
+            relation.offsets = upload(rows, "incidence offsets");
+            relation.indices =
+              upload<Index>(rows.back(), "incidence indices", [&](Index* out) {
+                const size_t targets = source.getCount(dp);
+                Rodin::Kokkos::Internal::forEachOnHost(true, input.size(), [&](size_t r) {
+                  const auto& row = input[r];
+                  for (const Index target : row)
+                  {
+                    if (target >= targets)
+                      invalid.store(true, std::memory_order_relaxed);
+                  }
+                  std::copy(row.begin(), row.end(), out + rows[r]);
+                });
+                if (invalid)
                 {
                   Alert::MemberFunctionException(*this, __func__)
                     << "Invalid input incidence target." << Alert::Raise;
                 }
-                indices.push_back(target);
-              }
-              rows.push_back(indices.size());
-            }
-            relation.offsets = upload(rows, "incidence offsets");
-            relation.indices = upload(indices, "incidence indices");
+              });
             relation.present = true;
           }
         }
@@ -884,6 +918,14 @@ namespace Rodin::Geometry
       {
         return Rodin::Kokkos::Internal::upload(
           m_context.getExecutionSpace(), values, label);
+      }
+
+      /// @tparam T Entry type. @param count Entry count. @param label Allocation label. @param fill Writes the entries through a host pointer. @returns Resident array.
+      template <class T, class Fill>
+      DeviceArray<T> upload(size_t count, const char* label, Fill&& fill) const
+      {
+        return Rodin::Kokkos::Internal::upload<T>(
+          m_context.getExecutionSpace(), count, label, std::forward<Fill>(fill));
       }
 
       /// @param d First dimension. @param dp Second dimension.

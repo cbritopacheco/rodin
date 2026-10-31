@@ -167,6 +167,43 @@ namespace Rodin::Tests::Unit
     expectSameSystem(sstokes, pstokes);
   }
 
+  /// @brief Boundary terms and linear elasticity match the sparse device assembly.
+  void checkBoundaryTerms(const HostMesh& source)
+  {
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 fes(mesh);
+    TrialFunction su(fes);
+    TestFunction sv(fes);
+    PETSc::Variational::TrialFunction pu(fes);
+    PETSc::Variational::TestFunction pv(fes);
+    RealFunction g(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      return 2 * p.x() - p.y() + 1;
+    });
+
+    Problem sp(su, sv);
+    sp = Integral(Grad(su), Grad(sv)) + BoundaryIntegral(su, sv).over(2) -
+      BoundaryIntegral(g, sv).over(3) + DirichletBC(su, g).on(1);
+    Problem pp(pu, pv);
+    pp = Integral(Grad(pu), Grad(pv)) + BoundaryIntegral(pu, pv).over(2) -
+      BoundaryIntegral(g, pv).over(3) + DirichletBC(pu, g).on(1);
+    expectSameSystem(sp, pp);
+
+    P1 vfes(mesh, source.getSpaceDimension());
+    TrialFunction sw(vfes);
+    TestFunction sz(vfes);
+    PETSc::Variational::TrialFunction pw(vfes);
+    PETSc::Variational::TestFunction pz(vfes);
+    Problem se(sw, sz);
+    se = LinearElasticityIntegral(sw, sz)(Real(1.5), Real(0.7)) -
+      BoundaryIntegral(Dot(BoundaryNormal(mesh), sz)).over(3) +
+      DirichletBC(sw, VectorFunction{0, 0}).on(1);
+    Problem pe(pw, pz);
+    pe = LinearElasticityIntegral(pw, pz)(Real(1.5), Real(0.7)) -
+      BoundaryIntegral(Dot(BoundaryNormal(mesh), pz)).over(3) +
+      DirichletBC(pw, VectorFunction{0, 0}).on(1);
+    expectSameSystem(se, pe);
+  }
+
   /// @brief Assembling again keeps the pattern and the values.
   void checkReassembly(const HostMesh& source)
   {
@@ -263,6 +300,16 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_PETSc_Problem, MixedOnMixedMesh)
   {
     checkMixedProblem(withFaces(makeMixedMesh()));
+  }
+
+  TEST(Kokkos_PETSc_Problem, BoundaryTermsOnTriangles)
+  {
+    checkBoundaryTerms(withFaces(makeTriangleMesh()));
+  }
+
+  TEST(Kokkos_PETSc_Problem, BoundaryTermsOnMixedMesh)
+  {
+    checkBoundaryTerms(withFaces(makeMixedMesh()));
   }
 
   TEST(Kokkos_PETSc_Problem, Reassembly)

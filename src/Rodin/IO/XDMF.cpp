@@ -253,6 +253,8 @@ namespace Rodin::IO
   {
     auto& gr = m_owner->m_grids[m_index];
     gr.mesh = nullptr;
+    gr.mirror = nullptr;
+    gr.mirrorMesh.reset();
     gr.sourceMesh = nullptr;
     gr.options = GridOptions{};
     gr.staticMeshWritten = false;
@@ -366,6 +368,12 @@ namespace Rodin::IO
 
     for (auto& gr : m_grids)
     {
+      // A transient device mesh may have moved since the last snapshot.
+      if (gr.mirror && (!gr.mirrorMesh || gr.options.meshPolicy == MeshPolicy::Transient))
+      {
+        gr.mirrorMesh = gr.mirror();
+        gr.mesh = gr.mirrorMesh.get();
+      }
       if (!gr.mesh)
       {
         Alert::MemberFunctionException(*this, __func__)

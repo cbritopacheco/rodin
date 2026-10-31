@@ -19,11 +19,13 @@
  */
 
 #include <algorithm>
+#include <cstdint>
 #include <limits>
 #include <string>
 #include <vector>
 
 #include <Kokkos_Core.hpp>
+#include <Kokkos_Sort.hpp>
 
 #include <petscmat.h>
 #include <petscvec.h>
@@ -68,7 +70,9 @@ namespace Rodin::Assembly::Internal
    * PETSc analyses the coordinate list in MatSetPreallocationCOO, which is
    * much more expensive than MatSetValuesCOO. The pattern is kept to skip
    * that analysis, and the coordinates are not even listed again, when the
-   * same matrix is assembled again with the same segments. Integrators
+   * same matrix is assembled again with the same segments. PETSc is given
+   * the distinct coordinates sorted by row then column, which it analyses
+   * in linear time, and the values summed per coordinate on the device. Integrators
    * restricted to attributes list their coordinates at every assembly,
    * since the attributes of the cells may change. The buffers are reused
    * while their size does not change.
@@ -118,6 +122,16 @@ namespace Rodin::Assembly::Internal
 
     /// @brief Matrix values.
     ::Kokkos::View<PetscScalar*, MemorySpace> values;
+
+    /// @brief Coordinates sorted by row then column, as indices in the list.
+    ::Kokkos::View<Index*, MemorySpace> order;
+
+    /// @brief Start in the sorted coordinates of each distinct coordinate,
+    /// and the list size.
+    ::Kokkos::View<Index*, MemorySpace> starts;
+
+    /// @brief Sum of the values of each distinct coordinate.
+    ::Kokkos::View<PetscScalar*, MemorySpace> merged;
 
     /// @brief Right-hand side.
     ::Kokkos::View<Real*, MemorySpace> rhs;
@@ -233,7 +247,7 @@ namespace Rodin::Assembly::Internal
 
       /**
        * @brief Adds a local integrator to the system.
-       * @param lbfi Local integrator, possibly negated.
+       * @param lbfi Local integrator, possibly negated or scaled by a real.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
       void addMatrix(const Variational::LocalBilinearFormIntegratorBase<Real>& lbfi,
@@ -247,7 +261,7 @@ namespace Rodin::Assembly::Internal
        * @brief Adds a linear integrator to the system.
        * @param lfi Integrator, possibly negated.
        * @param row Offset of its test space.
-       * @param sign Sign of the contributions.
+       * @param sign Factor of the contributions.
        */
       void addVector(
         const Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
@@ -431,6 +445,121 @@ namespace Rodin::Assembly::Internal
         return changes;
       }
 
+      /**
+       * @brief Sorts the coordinates by row then column.
+       * @param columns Column count of the system.
+       * @param rows Row coordinates. @param cols Column coordinates.
+       * @param order Receives the indices of the sorted coordinates.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Indices>
+      static void sortPattern(const ExecutionSpace& execution, size_t columns,
+        const Indices& rows, const Indices& cols, Indices& order)
+      {
+        const size_t count = rows.extent(0);
+        order = Indices(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+                          std::string("Rodin COO order")),
+          count);
+        if (count == 0)
+          return;
+        const ::Kokkos::View<std::uint64_t*, MemorySpace> keys(
+          ::Kokkos::view_alloc(
+            execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO keys")),
+          count);
+        ::Kokkos::parallel_for(
+          "Rodin::Assembly::Kokkos::PETSc::keys",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          KOKKOS_LAMBDA(const size_t e) {
+            keys(e) = std::uint64_t(rows(e)) * columns + cols(e);
+            order(e) = e;
+          });
+        ::Kokkos::Experimental::sort_by_key(execution, keys, order);
+      }
+
+      /**
+       * @brief Finds where each distinct coordinate starts in the sorted
+       * coordinates.
+       * @returns Starts of the distinct coordinates, followed by the list size.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Indices>
+      static Indices distinctStarts(const ExecutionSpace& execution, const Indices& rows,
+        const Indices& cols, const Indices& order)
+      {
+        const size_t count = order.extent(0);
+        const auto head = KOKKOS_LAMBDA(const size_t i)
+        {
+          const Index e = order(i);
+          if (i == 0)
+            return true;
+          const Index p = order(i - 1);
+          return rows(e) != rows(p) || cols(e) != cols(p);
+        };
+        size_t distinct = 0;
+        ::Kokkos::parallel_reduce(
+          "Rodin::Assembly::Kokkos::PETSc::distinct",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          KOKKOS_LAMBDA(const size_t i, size_t& sum) { sum += head(i); }, distinct);
+        Indices starts(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+                         std::string("Rodin COO starts")),
+          distinct + 1);
+        ::Kokkos::parallel_scan(
+          "Rodin::Assembly::Kokkos::PETSc::starts",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          KOKKOS_LAMBDA(const size_t i, size_t& update, const bool final) {
+            if (head(i))
+            {
+              if (final)
+                starts(update) = i;
+              ++update;
+            }
+          });
+        ::Kokkos::deep_copy(execution, ::Kokkos::subview(starts, distinct), count);
+        return starts;
+      }
+
+      /**
+       * @brief Lists the distinct coordinates in the PETSc index type.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Indices, class Coordinates>
+      static void listDistinct(const ExecutionSpace& execution, const Indices& rows,
+        const Indices& cols, const Indices& order, const Indices& starts,
+        const Coordinates& distinctRows, const Coordinates& distinctCols)
+      {
+        ::Kokkos::parallel_for(
+          "Rodin::Assembly::Kokkos::PETSc::distinctCoordinates",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, distinctRows.extent(0)),
+          KOKKOS_LAMBDA(const size_t u) {
+            const Index e = order(starts(u));
+            distinctRows(u) = static_cast<PetscInt>(rows(e));
+            distinctCols(u) = static_cast<PetscInt>(cols(e));
+          });
+      }
+
+      /**
+       * @brief Sums the values of each distinct coordinate.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Indices, class Scalars>
+      static void merge(const ExecutionSpace& execution, const Indices& order,
+        const Indices& starts, const Scalars& values, const Scalars& merged)
+      {
+        ::Kokkos::parallel_for(
+          "Rodin::Assembly::Kokkos::PETSc::merge",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, merged.extent(0)),
+          KOKKOS_LAMBDA(const size_t u) {
+            PetscScalar sum = 0;
+            for (Index i = starts(u); i < starts(u + 1); ++i)
+              sum += values(order(i));
+            merged(u) = sum;
+          });
+      }
+
     private:
       struct Matrix
       {
@@ -534,7 +663,12 @@ namespace Rodin::Assembly::Internal
           cache.segments = std::move(segments);
           cache.indexed = true;
           if (changed)
+          {
+            sortPattern(m_execution, m_cols, cache.rows, cache.cols, cache.order);
+            cache.starts =
+              distinctStarts(m_execution, cache.rows, cache.cols, cache.order);
             cache.matrix = -1;
+          }
         }
         fillDiagonal(
           m_execution, offsets.back(), diagonal, fixed, cache.fixed, cache.values);
@@ -599,21 +733,31 @@ namespace Rodin::Assembly::Internal
               assert(ierr == PETSC_SUCCESS);
             }
           }
+          const size_t distinct = cache.starts.extent(0) - 1;
+          const ::Kokkos::View<PetscInt*, MemorySpace> rows(
+            ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
+              std::string("Rodin PETSc rows")),
+            distinct);
+          const ::Kokkos::View<PetscInt*, MemorySpace> cols(
+            ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
+              std::string("Rodin PETSc cols")),
+            distinct);
+          listDistinct(
+            m_execution, cache.rows, cache.cols, cache.order, cache.starts, rows, cols);
+          // PETSc may modify the coordinates it is given, which are temporaries.
           const auto hostRows =
-            ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), cache.rows);
+            ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), rows);
           const auto hostCols =
-            ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), cache.cols);
-          const std::vector<PetscInt> rows(
-            hostRows.data(), hostRows.data() + hostRows.extent(0));
-          std::vector<PetscInt> cols(
-            hostCols.data(), hostCols.data() + hostCols.extent(0));
-          // PETSc may reorder the coordinates it is given, so it gets copies.
-          std::vector<PetscInt> r = rows;
+            ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), cols);
           ierr = MatSetPreallocationCOO(
-            A, static_cast<PetscCount>(r.size()), r.data(), cols.data());
+            A, static_cast<PetscCount>(distinct), hostRows.data(), hostCols.data());
           assert(ierr == PETSC_SUCCESS);
           cache.matrix = id;
         }
+
+        resize(cache.merged, cache.starts.extent(0) - 1, "Rodin COO merged values");
+        merge(m_execution, cache.order, cache.starts, cache.values, cache.merged);
+        m_execution.fence("Rodin COO merge");
 
         PetscBool device = PETSC_FALSE;
         ierr = PetscObjectTypeCompareAny(reinterpret_cast<PetscObject>(A), &device,
@@ -622,12 +766,12 @@ namespace Rodin::Assembly::Internal
         if (device ||
           ::Kokkos::SpaceAccessibility<::Kokkos::HostSpace, MemorySpace>::accessible)
         {
-          ierr = MatSetValuesCOO(A, cache.values.data(), INSERT_VALUES);
+          ierr = MatSetValuesCOO(A, cache.merged.data(), INSERT_VALUES);
         }
         else
         {
           const auto host =
-            ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), cache.values);
+            ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), cache.merged);
           ierr = MatSetValuesCOO(A, host.data(), INSERT_VALUES);
         }
         assert(ierr == PETSC_SUCCESS);

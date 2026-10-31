@@ -120,6 +120,28 @@ namespace Rodin::Tests::Unit
     EXPECT_ANY_THROW(integral.integrate(0, 0));
   }
 
+  /// @brief Stored identity and first-order maps reach the geometry specialized kernels.
+  HostMesh withStoredTransformations(HostMesh mesh)
+  {
+    const size_t d = mesh.getDimension();
+    const auto geometry = mesh.getGeometry(d, 0);
+    mesh.setPolytopeTransformation({d, 0}, new Geometry::IdentityTransformation(d));
+    const auto& map = mesh.getPolytopeTransformation(d, 1);
+    RealP1Element element(geometry);
+    Geometry::PointCloud controls(mesh.getSpaceDimension(), element.getCount());
+    for (Index a = 0; a < element.getCount(); ++a)
+    {
+      Math::SpatialPoint x;
+      map.transform(x, element.getNode(a));
+      for (size_t c = 0; c < controls.getDimension(); ++c)
+        controls(c, a) = x(c) + Real(0.01) * (a + c);
+    }
+    mesh.setPolytopeTransformation({d, 1},
+      new Geometry::ParametricTransformation<RealP1Element>(
+        std::move(controls), std::move(element)));
+    return mesh;
+  }
+
   TEST(Kokkos_Variational_BilinearForm, MassAndStiffnessOnTriangles)
   {
     checkMassAndStiffness(makeTriangleMesh());
@@ -133,6 +155,22 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_Variational_BilinearForm, MassAndStiffnessOnTetrahedra)
   {
     checkMassAndStiffness(HostMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 4, 3}));
+  }
+
+  TEST(Kokkos_Variational_BilinearForm, MassAndStiffnessOnQuadrilaterals)
+  {
+    checkMassAndStiffness(makeQuadrilateralMesh());
+  }
+
+  TEST(Kokkos_Variational_BilinearForm, MassAndStiffnessOnHexahedra)
+  {
+    checkMassAndStiffness(makeHexahedronMesh());
+  }
+
+  TEST(Kokkos_Variational_BilinearForm, MassAndStiffnessWithStoredTransformations)
+  {
+    checkMassAndStiffness(withStoredTransformations(makeQuadrilateralMesh()));
+    checkMassAndStiffness(withStoredTransformations(makeHexahedronMesh()));
   }
 
   TEST(Kokkos_Variational_BilinearForm, CoefficientOnTriangles)

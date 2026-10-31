@@ -12,8 +12,12 @@
  * @brief Form language lowering to Kokkos devices.
  */
 
+#include "Variational/DOFs.h"
 #include "Variational/P1.h"
+#include "Variational/P0g.h"
+#include "Variational/H1.h"
 #include "Variational/DeviceView.h"
 #include "Variational/Integral.h"
+#include "Variational/LinearElasticityIntegral.h"
 
 #endif

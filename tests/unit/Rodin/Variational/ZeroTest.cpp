@@ -95,3 +95,12 @@ TEST(Rodin_Variational_Zero, VectorGetOrder)
   ASSERT_TRUE(order.has_value());
   EXPECT_EQ(*order, 0u);
 }
+
+/// @brief Verifies the vector zero reports its dimension through the function base.
+TEST(Rodin_Variational_Zero, VectorDimension)
+{
+  Zero z(3);
+  const VectorFunctionBase<Real, Zero<Math::SpatialVector<Real>>>& base = z;
+  EXPECT_EQ(z.getDimension(), 3u);
+  EXPECT_EQ(base.getDimension(), 3u);
+}

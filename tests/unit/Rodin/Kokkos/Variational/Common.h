@@ -25,6 +25,19 @@ namespace Rodin::Tests::Unit
   using Polytope = Geometry::Polytope;
 
   /**
+   * @brief Restricts an integral to attributes, keeping its type.
+   * @param integral Integral to restrict.
+   * @param attributes Attributes of the integrated polytopes.
+   * @return Restricted integral.
+   */
+  template <class Form, class... Attributes>
+  Form restricted(Form integral, Attributes... attributes)
+  {
+    integral.over(Geometry::Attribute(attributes)...);
+    return integral;
+  }
+
+  /**
    * @brief Compares a device assembled operator with its host reference.
    * @param host Operator assembled on the local mesh.
    * @param device Operator assembled on the resident mesh.
@@ -177,6 +190,45 @@ namespace Rodin::Tests::Unit
   inline HostMesh makeTetrahedronMesh()
   {
     auto mesh = HostMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 4, 3});
+    mesh.scale(Real(1) / 3);
+    for (Index i = 0; i < mesh.getVertexCount(); ++i)
+    {
+      const auto x = mesh.getVertexCoordinates(i);
+      Math::SpatialPoint y(3);
+      y(0) = x(0) + Real(0.02) * std::sin(Real(2) * x(1));
+      y(1) = x(1) + Real(0.03) * std::cos(Real(3) * x(2));
+      y(2) = x(2) + Real(0.02) * std::sin(Real(2) * x(0));
+      mesh.setVertexCoordinates(i, y);
+    }
+    return mesh;
+  }
+
+  /**
+   * @brief Distorted quadrilateral grid.
+   * @return Uniform quadrilateral grid with displaced vertices, so the maps are bilinear.
+   */
+  inline HostMesh makeQuadrilateralMesh()
+  {
+    auto mesh = HostMesh::UniformGrid(Polytope::Type::Quadrilateral, {6, 5});
+    mesh.scale(Real(1) / 5);
+    for (Index i = 0; i < mesh.getVertexCount(); ++i)
+    {
+      const auto x = mesh.getVertexCoordinates(i);
+      Math::SpatialPoint y(2);
+      y(0) = x(0) + Real(0.03) * std::sin(Real(3) * x(1));
+      y(1) = x(1) + Real(0.02) * std::cos(Real(2) * x(0));
+      mesh.setVertexCoordinates(i, y);
+    }
+    return mesh;
+  }
+
+  /**
+   * @brief Distorted hexahedral grid.
+   * @return Uniform hexahedral grid with displaced vertices, so the maps are trilinear.
+   */
+  inline HostMesh makeHexahedronMesh()
+  {
+    auto mesh = HostMesh::UniformGrid(Polytope::Type::Hexahedron, {3, 4, 3});
     mesh.scale(Real(1) / 3);
     for (Index i = 0; i < mesh.getVertexCount(); ++i)
     {

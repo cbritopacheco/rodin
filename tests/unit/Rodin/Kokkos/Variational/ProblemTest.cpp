@@ -108,7 +108,7 @@ namespace Rodin::Tests::Unit
     expectSameSystem(hp, dp);
   }
 
-  /// @brief Vector problems with boundary data match the host.
+  /// @brief Vector problems with scaled terms and boundary data match the host.
   void checkVectorProblem(const HostMesh& source)
   {
     ASSERT_EQ(source.getSpaceDimension(), 2);
@@ -129,11 +129,13 @@ namespace Rodin::Tests::Unit
       KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.y(); }, Real(2));
 
     Problem hp(hu, hv);
-    hp = Integral(Jacobian(hu), Jacobian(hv)) + Integral(Div(hu), Div(hv)) -
-      Integral(hf, hv) + DirichletBC(hu, hg).on(FlatSet<Geometry::Attribute>{1, 3});
+    hp = Integral(Jacobian(hu), Jacobian(hv)) + Real(0.5) * Integral(Div(hu), Div(hv)) -
+      Real(3) * Integral(hf, hv) +
+      DirichletBC(hu, hg).on(FlatSet<Geometry::Attribute>{1, 3});
     Problem dp(du, dv);
-    dp = Integral(Jacobian(du), Jacobian(dv)) + Integral(Div(du), Div(dv)) -
-      Integral(df, dv) + DirichletBC(du, dg).on(FlatSet<Geometry::Attribute>{1, 3});
+    dp = Integral(Jacobian(du), Jacobian(dv)) + Real(0.5) * Integral(Div(du), Div(dv)) -
+      Real(3) * Integral(df, dv) +
+      DirichletBC(du, dg).on(FlatSet<Geometry::Attribute>{1, 3});
     expectSameSystem(hp, dp);
   }
 
@@ -175,6 +177,54 @@ namespace Rodin::Tests::Unit
       Integral(ds, dq) + DirichletBC(du, VectorFunction{0, 0}).on(1) +
       DirichletBC(dp, RealFunction(1)).on(2);
     expectSameSystem(hstokes, dstokes);
+  }
+
+  /// @brief Robin and Neumann boundary terms match the host.
+  void checkBoundaryTerms(const HostMesh& source)
+  {
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 hfes(source);
+    P1 dfes(mesh);
+    TrialFunction hu(hfes);
+    TestFunction hv(hfes);
+    TrialFunction du(dfes);
+    TestFunction dv(dfes);
+
+    RealFunction hg([](const Geometry::Point& p) { return 2 * p.x() - p.y() + 1; });
+    RealFunction dg(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      return 2 * p.x() - p.y() + 1;
+    });
+
+    Problem hp(hu, hv);
+    hp = Integral(Grad(hu), Grad(hv)) + BoundaryIntegral(hu, hv).over(2) -
+      BoundaryIntegral(hg, hv).over(3) + DirichletBC(hu, hg).on(1);
+    Problem dp(du, dv);
+    dp = Integral(Grad(du), Grad(dv)) + BoundaryIntegral(du, dv).over(2) -
+      BoundaryIntegral(dg, dv).over(3) + DirichletBC(du, dg).on(1);
+    expectSameSystem(hp, dp);
+  }
+
+  /// @brief Linear elasticity with a normal traction matches the host.
+  void checkElasticityProblem(const HostMesh& source)
+  {
+    const DeviceMesh mesh(TestContext{}, source);
+    const size_t d = source.getSpaceDimension();
+    P1 hfes(source, d);
+    P1 dfes(mesh, d);
+    TrialFunction hu(hfes);
+    TestFunction hv(hfes);
+    TrialFunction du(dfes);
+    TestFunction dv(dfes);
+
+    Problem hp(hu, hv);
+    hp = LinearElasticityIntegral(hu, hv)(Real(1.5), Real(0.7)) -
+      BoundaryIntegral(Dot(BoundaryNormal(source), hv)).over(3) +
+      DirichletBC(hu, VectorFunction{0, 0}).on(1);
+    Problem dp(du, dv);
+    dp = LinearElasticityIntegral(du, dv)(Real(1.5), Real(0.7)) -
+      BoundaryIntegral(Dot(BoundaryNormal(mesh), dv)).over(3) +
+      DirichletBC(du, VectorFunction{0, 0}).on(1);
+    expectSameSystem(hp, dp);
   }
 
 /// @brief Boundary conditions without face to cell incidence raise.
@@ -230,6 +280,21 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_Variational_Problem, MixedOnMixedMesh)
   {
     checkMixedProblem(withFaces(makeMixedMesh()));
+  }
+
+  TEST(Kokkos_Variational_Problem, BoundaryTermsOnTriangles)
+  {
+    checkBoundaryTerms(withFaces(makeTriangleMesh()));
+  }
+
+  TEST(Kokkos_Variational_Problem, BoundaryTermsOnTetrahedra)
+  {
+    checkBoundaryTerms(withFaces(makeTetrahedronMesh()));
+  }
+
+  TEST(Kokkos_Variational_Problem, ElasticityOnMixedMesh)
+  {
+    checkElasticityProblem(withFaces(makeMixedMesh()));
   }
 
   TEST(Kokkos_Variational_Problem, MissingIncidenceRaises)

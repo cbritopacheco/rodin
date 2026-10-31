@@ -196,6 +196,18 @@ namespace Rodin::Variational
       ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
   /**
+   * @brief Tells whether an integrand takes scalar values.
+   *
+   * The integrals of test operators require it.
+   *
+   * @tparam Integrand Form language expression.
+   */
+  template <class Integrand>
+  concept ScalarValuedIntegrand =
+    std::is_same_v<typename FormLanguage::Traits<Integrand>::RangeType,
+      typename FormLanguage::Traits<Integrand>::ScalarType>;
+
+  /**
    * @ingroup IntegralSpecializations
    * @brief Integration of a test operator.
    *
@@ -209,11 +221,7 @@ namespace Rodin::Variational
    * @f]
    */
   template <class NestedDerived, class FES>
-    requires(
-      std::is_same_v<typename FormLanguage::Traits<
-                       ShapeFunctionBase<NestedDerived, FES, TestSpace>>::RangeType,
-        typename FormLanguage::Traits<
-          ShapeFunctionBase<NestedDerived, FES, TestSpace>>::ScalarType>)
+    requires ScalarValuedIntegrand<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   class Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
     : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   {
@@ -274,10 +282,7 @@ namespace Rodin::Variational
    * @param integrand Expression to integrate.
    */
   template <class NestedDerived, class FES>
-    requires(std::is_same_v<typename FormLanguage::Traits<ShapeFunctionBase<NestedDerived,
-                              FES, TestSpace>>::RangeType,
-              typename FormLanguage::Traits<
-                ShapeFunctionBase<NestedDerived, FES, TestSpace>>::ScalarType>)
+    requires ScalarValuedIntegrand<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   Integral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>& integrand)
     -> Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 

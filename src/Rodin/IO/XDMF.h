@@ -54,6 +54,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -758,6 +759,10 @@ namespace Rodin::IO
           nullptr; ///< Effective mesh for visualization (shard for MPI).
         const Geometry::MeshBase* sourceMesh =
           nullptr; ///< Original mesh for identity checks.
+        std::function<std::shared_ptr<const Geometry::MeshBase>()>
+          mirror; ///< Copies a device mesh to the host, empty for host meshes.
+        std::shared_ptr<const Geometry::MeshBase>
+          mirrorMesh; ///< Host copy of a device mesh, written in its place.
         GridOptions options; ///< Per-grid export options.
         bool staticMeshWritten = false; ///< Whether the static mesh has been exported.
         boost::filesystem::path staticMeshFile; ///< Path to the static mesh file.
@@ -817,8 +822,18 @@ namespace Rodin::IO
     // For distributed (MPI) meshes, store the shard for visualization
     // since the writeXDMF helpers require a local mesh. The original mesh
     // pointer is kept in sourceMesh for identity checks in add().
+    // Device meshes are written through a local copy, built by write().
+    gr.mirror = nullptr;
+    gr.mirrorMesh.reset();
     if constexpr (requires { mesh.getShard(); })
       gr.mesh = &mesh.getShard();
+    else if constexpr (requires { mesh.toHost(); })
+    {
+      gr.mesh = nullptr;
+      gr.mirror = [&mesh]() -> std::shared_ptr<const Geometry::MeshBase> {
+        return std::make_shared<const decltype(mesh.toHost())>(mesh.toHost());
+      };
+    }
     else
       gr.mesh = &mesh;
     gr.sourceMesh = &mesh;
@@ -882,14 +897,39 @@ namespace Rodin::IO
     // for serial). The attribute write helpers iterate over this mesh's
     // vertices/cells, not over gf.getFiniteElementSpace().getMesh(), which
     // may be a distributed MPI mesh with global counts.
-    const auto* visMesh = [&] {
+    // A device mesh has no visualization mesh until write() copies it to
+    // the host, so the callback looks it up when it runs.
+    const auto* visMesh = [&]() -> const Geometry::MeshBase* {
       const auto& source = gf.getFiniteElementSpace().getMesh();
       if constexpr (requires { source.getShard(); })
         return &source.getShard();
+      else if constexpr (requires { source.toHost(); })
+        return nullptr;
       else
         return &source;
     }();
-    rec.write = [&gf, visMesh](const boost::filesystem::path& path, Center center) {
+    rec.write = [&gf, visMesh, owner = m_owner, index = m_index](
+                  const boost::filesystem::path& path, Center center) {
+      // A device field is copied onto the host copy of its mesh, which
+      // write() builds since the field's mesh is the mesh of the grid.
+      if constexpr (requires { gf.getFiniteElementSpace().getMesh().toHost(); })
+      {
+        const auto& mesh =
+          static_cast<const Geometry::Mesh<Context::Local>&>(*owner->m_grids[index].mesh);
+        const auto fes = gf.getFiniteElementSpace().toHost(mesh);
+        Variational::GridFunction host(fes);
+        host.getData() = gf.getData();
+        switch (center)
+        {
+          case Center::Node:
+            HDF5::writeXDMFNodeAttribute(host, mesh, path);
+            return;
+          case Center::Cell:
+            HDF5::writeXDMFCellAttribute(host, mesh, path);
+            return;
+        }
+        return;
+      }
       switch (center)
       {
         case Center::Node:

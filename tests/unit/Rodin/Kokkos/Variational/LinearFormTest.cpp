@@ -132,6 +132,16 @@ namespace Rodin::Tests::Unit
     checkScalarLinearForms(makeTetrahedronMesh());
   }
 
+  TEST(Kokkos_Variational_LinearForm, ScalarOnQuadrilaterals)
+  {
+    checkScalarLinearForms(makeQuadrilateralMesh());
+  }
+
+  TEST(Kokkos_Variational_LinearForm, ScalarOnHexahedra)
+  {
+    checkScalarLinearForms(makeHexahedronMesh());
+  }
+
   TEST(Kokkos_Variational_LinearForm, VectorOnTriangles)
   {
     checkVectorLinearForms(makeTriangleMesh());
@@ -145,6 +155,16 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_Variational_LinearForm, VectorOnTetrahedra)
   {
     checkVectorLinearForms(makeTetrahedronMesh());
+  }
+
+  TEST(Kokkos_Variational_LinearForm, VectorOnQuadrilaterals)
+  {
+    checkVectorLinearForms(makeQuadrilateralMesh());
+  }
+
+  TEST(Kokkos_Variational_LinearForm, VectorOnHexahedra)
+  {
+    checkVectorLinearForms(makeHexahedronMesh());
   }
 
   TEST(Kokkos_Variational_LinearForm, VectorFunctionOnTriangles)

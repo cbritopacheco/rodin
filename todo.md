@@ -413,3 +413,155 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       en paramètre, ordre exact pour les formes dérivées vectorielles
       (aussi côté hôte), découpage de la matrice locale par blocs de
       composantes.
+
+## 13. DSL device, jalon 8: intégrales de bord, de faces et élasticité
+
+- [x] `BoundaryIntegral`, `FaceIntegral` et `InterfaceIntegral` sur device
+      (formes bilinéaires et linéaires), mêmes intégrandes que
+      `Integral`: le noyau est générique en région
+      (`Internal::DevicePolytopes`), parcourt les polytopes de dimension
+      D - 1 et garde ceux de la région (bord: une maille incidente,
+      interface: plus d'une) et des attributs demandés, comme l'hôte. La
+      base P1 et les sommets sont ceux de la face, donc les mêmes degrés
+      de liberté que l'hôte.
+- [x] La région fait partie de `DeviceLayout`: les segments COO PETSc
+      séparent les intégrales de mailles et de faces.
+- [x] Sans incidence face-maille sur le maillage, une intégrale de bord ou
+      d'interface lève une exception.
+- [x] `DeviceView<BoundaryNormal>`: normale unitaire extérieure calculée
+      sur device a partir de la jacobienne de la face, orientée par le
+      barycentre de la maille incidente.
+- [x] `LinearElasticityIntegrator` pour le P1 vectoriel device
+      (`Kokkos/Variational/LinearElasticityIntegral.h`): somme des deux
+      intégrales device `lambda Div(u) Div(v)` et
+      `mu (Jac(u) + Jac(u)^T) : Jac(v)`, avec l'ordre de quadrature de
+      l'hôte (`max(k_lambda, k_mu) + k_u + k_v`); le second terme
+      s'accumule sur les entrées du premier.
+- [x] Tests a 1e-12 contre l'hôte (`RodinKokkosVariationalFaceIntegralTest`):
+      formes de bord, de faces et d'interface scalaires et vectorielles,
+      avec attributs et coefficients, formes linéaires dont `Dot(n, v)`,
+      élasticité avec Lamé constants et variables (triangles, mixte,
+      tétraèdres), erreur sans faces. Problèmes Robin/Neumann et
+      élasticité avec traction normale dans `RodinKokkosVariationalProblemTest`
+      et `RodinKokkosPETScProblemTest`.
+- [ ] `.over()` renvoie la base de l'intégrateur: les tests passent par une
+      copie typée pour garder le type device.
+- [ ] Non supportés sur device: `Dot` de deux fonctions (par exemple
+      `Dot(g, n)` comme coefficient), `Grad` d'une fonction test sur une
+      face, élasticité sur d'autres espaces que le P1 vectoriel.
+
+## 14. DSL device, jalon 9: exemples sur GPU
+
+- [x] `examples/Kokkos/PDEs`: variantes device de `Poisson`,
+      `MixedBoundary`, `Elasticity` (CG Eigen sur un `Problem` device) et
+      `Seq_Poisson` (PETSc, hexaèdres 16^3, assemblage COO device). Le
+      maillage hôte est construit puis copié sur le device; le reste du
+      code est celui de l'exemple hôte.
+- [x] Sorties comparées aux exemples hôte: maillages identiques,
+      solutions à 1e-16 (Poisson, MixedBoundary, Seq_Poisson) et 3e-13
+      (élasticité, CG à 1e-10).
+- [x] `Mesh<Kokkos>::toHost()`: copie hôte du maillage (sommets,
+      polytopes, attributs, transformations, incidences, nom), utilisée
+      par `save()`.
+- [x] `IO::XDMF` accepte un maillage et des `GridFunction` device: le
+      maillage est recopié sur l'hôte par `write()` (à chaque instantané
+      en `MeshPolicy::Transient`), le champ est recopié sur l'espace hôte
+      de même numérotation (`P1::toHost(mesh)`). Tests
+      `RodinKokkosIOXDMFTest` (fichiers identiques à l'hôte, maillage
+      mobile) et `Kokkos_Mesh.ToHostRoundTrip`.
+- [x] `DeviceView<Zero>` scalaire et vectoriel, pour `DirichletBC(u, Zero())`.
+- [x] Correctif hôte: `Zero<SpatialVector>::getDimension()` manquait, et
+      `VectorFunctionBase::getDimension()` se rappelait à l'infini.
+- [ ] Une directive `using namespace Rodin;` globale rend `Kokkos` ambigu
+      dans les en-têtes Kokkos sous nvcc: les exemples la placent dans
+      `main`.
+- [ ] Non portés: `BlockGravity` et `CantileverBeam` (néo-hookéen et
+      Newton, hôte seulement), `Darcy` (vide), les exemples P2 (`Stokes`,
+      `NavierStokes`, jalon 10) et les autres thèmes.
+
+## 15. DSL device, jalon 10: H1 d'ordre 2, Taylor-Hood et P0g
+
+- [x] `H1<2>` scalaire et vectoriel sur un maillage Kokkos simplicial
+      (`Kokkos/Variational/H1.h`): degrés de liberté des sommets puis des
+      arêtes, même numérotation que l'espace hôte construit sur
+      `Mesh::toHost()` (`H1::toHost(mesh)`). Un maillage avec des
+      quadrilatères lève une exception.
+- [x] `P0g` sur device (`Kokkos/Variational/P0g.h`): un seul degré de
+      liberté, base constante, pour le multiplicateur de moyenne de
+      pression.
+- [x] Degrés de liberté device génériques (`Kokkos/Variational/DOFs.h`):
+      `VertexDOFs` (P1), `QuadraticDOFs` (H1 d'ordre 2) et `ConstantDOFs`
+      (P0g, et espace d'essai implicite des formes linéaires). Les noyaux,
+      les vues device et `DirichletBC` sont écrits contre le concept
+      `DeviceSpace`; la capacité locale est fixée a la compilation par
+      espace.
+- [x] Ordre de quadrature identique à l'hôte, y compris pour les paires
+      mixtes (H1 d'ordre 2 et P1, P0g).
+- [x] `DirichletBC` sur H1 d'ordre 2: valeurs aux noeuds de Lagrange de
+      la face (sommets et milieux d'arêtes, `getNode`).
+- [x] Tests à 1e-12 contre l'hôte (`RodinKokkosVariationalH1Test`, 13
+      tests): formes scalaires et vectorielles (masse, gradient,
+      jacobienne, divergence, coefficients et `GridFunction` H1), couplages
+      Taylor-Hood, formes de bord, de faces et d'interface, problèmes avec
+      Dirichlet, Stokes Taylor-Hood avec multiplicateur P0g, refus des
+      quadrilatères.
+- [x] Correctif hôte: la forme linéaire `Integral` exige un intégrande
+      scalaire (`ScalarValuedIntegrand`).
+- [x] Un intégrateur multiplié par un réel (`viscosity * Integral(...)`)
+      est accepté par l'assemblage device, Eigen et PETSc, comme la
+      négation: le facteur multiplie les contributions.
+- [x] `DeviceView` d'une `RealFunction` qui enveloppe une `RealFunction`,
+      composante d'une `VectorFunction{RealFunction(f), ...}`.
+- [x] `examples/Kokkos/PDEs/Stokes.cpp`: cavité entraînée Taylor-Hood
+      P2/P1 avec multiplicateur P0g sur device, résolue par `SparseLU`.
+      Sorties comparées à l'exemple hôte: maillage identique, vitesse à
+      1e-14, pression à 2e-11 pour un maximum de 10.
+- [ ] H1 d'ordre 3 et plus, H1 sur quadrilatères et hexaèdres.
+
+## 16. Optimisations génériques de l'assemblage device
+
+Mesures sur `KokkosSeq_Poisson 100` (hexaèdres Q1, un million de
+cellules, CUDA sm_75).
+
+- [x] Construction du maillage device: lecture directe de l'index des
+      transformations du maillage local (une transformation absente est
+      la transformation P1 par défaut, sans la construire), contrôles
+      écrits sans vecteur intermédiaire par entité. Boucle sur les
+      entités de 2.3 s à 0.15 s.
+- [x] Copie de la connectivité: deux passes (tailles puis remplissage par
+      index), remplissage direct du miroir hôte de la vue device
+      (`upload` avec un remplisseur). De 2.83 s à 1.5 s; le reste est
+      limité par les accès indirects de `getPolytope`.
+- [x] COO PETSc: tri des coordonnées par ligne puis colonne sur le device
+      (`sort_by_key`), coordonnées distinctes et valeurs sommées par
+      coordonnée sur le device, de façon déterministe. PETSc reçoit des
+      coordonnées triées et distinctes et ne trie plus. Premier
+      assemblage de 6.96 s à 1.47 s (`MatSetPreallocationCOO` de 4.93 s
+      à 0.62 s), copies hôte des coordonnées supprimées.
+- [x] `IntegrationPointView::setPoint` réévalue le point en place au lieu
+      de reconstruire la vue. Assemblages suivants de 525 ms à 423 ms
+      (matrice de 416 à 334 ms, second membre de 92 à 72 ms).
+- [x] Noyaux de points spécialisés par géométrie statique: quand le
+      domaine d'intégration ne contient qu'une géométrie de la dimension
+      de l'espace (triangle, quadrangle, tétraèdre ou hexaèdre), les
+      noyaux évaluent la base de la transformation et la jacobienne à
+      dimensions et nombre de nœuds statiques (`StaticBasis`,
+      `StaticGeometry`). Les transformations identité et paramétriques
+      stockées restent lues par entité. Noyau de la matrice de 337 à
+      205 ms par appel, second membre de 73 à 4.3 ms. Hexaèdres: 125
+      registres et 1.35 Ko de pile pour la matrice (matrice locale 8×8),
+      94 registres sans pile pour le second membre.
+- [ ] Ordre de quadrature de Grad·Grad sur hexaèdres Q1 (somme des degrés
+      moins deux, comme l'hôte, soit 27 points): sur une transformation
+      affine, le degré par direction est au plus 2 et la règle tensorielle
+      d'ordre 2 (8 points) est exacte; sur une transformation trilinéaire
+      l'intégrande est rationnel et aucune règle n'est exacte. Passer à un
+      ordre par direction change le contrat numérique de l'hôte et du
+      device (`doc/agents/quadrature.md`) et attend une décision. Gain
+      attendu sur le noyau de la matrice: environ 3x.
+- [x] Copie de la connectivité parallélisée côté hôte (`forEachOnHost`,
+      OpenMP, lectures concurrentes du maillage local): copie de 1.79 s à
+      environ 0.75 s avec 36 threads. Le reste est surtout le coût des
+      fautes de page des tampons fraîchement alloués. Avec les 112 threads
+      par défaut de demeter, la copie prend 1.1 à 1.4 s: l'attente active
+      des threads ralentit les parties séquentielles.

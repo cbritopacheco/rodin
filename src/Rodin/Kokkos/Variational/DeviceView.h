@@ -30,6 +30,8 @@
 #include "Rodin/Variational/Dot.h"
 #include "Rodin/Variational/UnaryMinus.h"
 #include "Rodin/Variational/Transpose.h"
+#include "Rodin/Variational/BoundaryNormal.h"
+#include "Rodin/Variational/Zero.h"
 #include "Rodin/Variational/P1/Div.h"
 #include "Rodin/Variational/P1/Grad.h"
 #include "Rodin/Variational/P1/Jacobian.h"
@@ -75,6 +77,16 @@ namespace Rodin::Kokkos::Variational
   /// @brief Vector P1 space on a resident mesh with the given backend.
   template <class Backend>
   using DeviceVectorP1 = DeviceP1Space<Math::SpatialVector<Real>, Backend>;
+
+  /// @brief Tells whether a space is a real valued device space.
+  template <class FES>
+  concept ScalarDeviceSpace =
+    DeviceSpace<FES> && std::is_same_v<typename FES::RangeType, Real>;
+
+  /// @brief Tells whether a space is a vector valued device space.
+  template <class FES>
+  concept VectorDeviceSpace = DeviceSpace<FES> &&
+    std::is_same_v<typename FES::RangeType, Math::SpatialVector<Real>>;
 
   /**
    * @brief Multiplies two scalar values.
@@ -300,7 +312,7 @@ namespace Rodin::Kokkos::Variational
   /**
    * @brief Device vector with a single nonzero component.
    *
-   * Value of the vector P1 basis @f$ \phi_a e_r @f$. The operations without
+   * Value of a vector Lagrange basis @f$ \phi_a e_r @f$. The operations without
    * a dedicated overload use its conversion to a dense device vector.
    */
   struct UnitVector
@@ -327,7 +339,7 @@ namespace Rodin::Kokkos::Variational
   /**
    * @brief Device matrix with a single nonzero row.
    *
-   * Jacobian of the vector P1 basis @f$ \phi_a e_r @f$, whose row
+   * Jacobian of a vector Lagrange basis @f$ \phi_a e_r @f$, whose row
    * @f$ r @f$ is @f$ \nabla \phi_a @f$. The operations without a dedicated
    * overload use its conversion to a dense device matrix.
    */
@@ -470,12 +482,30 @@ namespace Rodin::Kokkos::Variational
     return a.row == b.row;
   }
 
+  /// @brief Tag of polytopes whose geometry is known at run time only.
+  struct DynamicGeometry
+  {};
+
+  /**
+   * @brief Tag of polytopes of geometry G whose dimension is the spatial dimension.
+   * @tparam G Reference geometry, as supported by Geometry::StaticBasis.
+   */
+  template <::Rodin::Geometry::Polytope::Type G>
+  struct StaticGeometry
+  {
+    /// @brief Reference geometry.
+    static constexpr ::Rodin::Geometry::Polytope::Type Value = G;
+  };
+
   /**
    * @brief P1 basis values and physical gradients at one quadrature point.
    *
    * The point is evaluated once per quadrature point and shared by every
    * shape function of the integrand. Gradients are mapped to physical space
    * by @f$ \nabla \phi = J^{-T} \hat{\nabla} \hat{\phi} @f$, as on the host.
+   *
+   * A StaticGeometry tag evaluates the point with static bounds, getting the
+   * physical point and the Jacobian in one pass over the vertices.
    */
   class IntegrationPointView
   {
@@ -493,33 +523,36 @@ namespace Rodin::Kokkos::Variational
           m_count(point.getPolytope().getVertices().size())
       {
         KOKKOS_ASSERT(m_count <= Capacity);
-        // The inverse and the measure of a square map share one Jacobian.
-        const Geometry::Matrix jacobian = point.getJacobian();
-        Geometry::Matrix inverse;
-        if (jacobian.cols() > 0 && jacobian.rows() == jacobian.cols())
-        {
-          inverse = jacobian.inverse();
-          m_distortion = ::Kokkos::abs(jacobian.determinant());
-        }
-        else
-        {
-          inverse = point.getJacobianInverse();
-          m_distortion = point.getDistortion();
-        }
-        const Index rdim = inverse.rows();
-        const Index sdim = inverse.cols();
-        for (Index a = 0; a < m_count; ++a)
-        {
-          Geometry::Vector reference(rdim);
-          point.evaluateBasis(a, m_basis[a], reference);
-          Geometry::Vector gradient(sdim);
-          for (Index c = 0; c < sdim; ++c)
-          {
-            for (Index k = 0; k < rdim; ++k)
-              gradient(c) += inverse(k, c) * reference(k);
-          }
-          m_gradients[a] = gradient;
-        }
+        evaluate(point);
+      }
+
+      /**
+       * @brief Evaluates the P1 basis at a reference point of a polytope.
+       * @param polytope Device polytope.
+       * @param reference Reference coordinates.
+       */
+      KOKKOS_INLINE_FUNCTION
+      IntegrationPointView(const Geometry::PolytopeView& polytope,
+        const Geometry::Vector& reference, DynamicGeometry)
+        : IntegrationPointView(polytope.getPoint(reference))
+      {}
+
+      /**
+       * @brief Evaluates the P1 basis at a reference point of a polytope of geometry G.
+       * @param polytope Device polytope of geometry G, in a mesh of spatial
+       * dimension the dimension of G.
+       * @param reference Reference coordinates.
+       */
+      template <::Rodin::Geometry::Polytope::Type G>
+      KOKKOS_INLINE_FUNCTION IntegrationPointView(const Geometry::PolytopeView& polytope,
+        const Geometry::Vector& reference, StaticGeometry<G>)
+        : m_point(polytope, reference, reference),
+          m_count(Geometry::StaticBasis<G>::Count)
+      {
+        KOKKOS_ASSERT(polytope.getGeometry() == G);
+        KOKKOS_ASSERT(
+          polytope.mesh.spatialDimension == Geometry::StaticBasis<G>::Dimension);
+        evaluate<G, true>(polytope, reference);
       }
 
       /**
@@ -536,16 +569,42 @@ namespace Rodin::Kokkos::Variational
       {
         using Type = ::Rodin::Geometry::Polytope::Type;
         const Type type = point.getPolytope().getGeometry();
+        m_point = point;
         if (type != Type::Point && type != Type::Segment && type != Type::Triangle &&
           type != Type::Tetrahedron)
         {
-          *this = IntegrationPointView(point);
+          evaluate(point);
           return;
         }
-        m_point = point;
         Geometry::Vector reference(point.getReferenceCoordinates().size());
         for (Index a = 0; a < m_count; ++a)
           point.evaluateBasis(a, m_basis[a], reference);
+      }
+
+      /**
+       * @brief Moves the integration point within its polytope.
+       * @param reference Reference coordinates in the current polytope.
+       */
+      KOKKOS_INLINE_FUNCTION
+      void setPoint(const Geometry::Vector& reference, DynamicGeometry)
+      {
+        setPoint(m_point.getPolytope().getPoint(reference));
+      }
+
+      /**
+       * @brief Moves the integration point within its polytope of geometry G.
+       *
+       * As for a dynamic geometry, a simplex keeps its Jacobian, distortion
+       * and basis gradients.
+       *
+       * @param reference Reference coordinates in the current polytope.
+       */
+      template <::Rodin::Geometry::Polytope::Type G>
+      KOKKOS_INLINE_FUNCTION void setPoint(
+        const Geometry::Vector& reference, StaticGeometry<G>)
+      {
+        const Geometry::PolytopeView polytope = m_point.getPolytope();
+        evaluate<G, !Geometry::StaticBasis<G>::Affine>(polytope, reference);
       }
 
       /// @brief Returns the evaluation point. @return Device point.
@@ -594,6 +653,109 @@ namespace Rodin::Kokkos::Variational
       }
 
     private:
+      /// @brief Evaluates the basis, the gradients and the distortion at a point of the polytope.
+      KOKKOS_INLINE_FUNCTION
+      void evaluate(const Geometry::PointView& point)
+      {
+        // The inverse and the measure of a square map share one Jacobian.
+        const Geometry::Matrix jacobian = point.getJacobian();
+        Geometry::Matrix inverse;
+        if (jacobian.cols() > 0 && jacobian.rows() == jacobian.cols())
+        {
+          inverse = jacobian.inverse();
+          m_distortion = ::Kokkos::abs(jacobian.determinant());
+        }
+        else
+        {
+          inverse = point.getJacobianInverse();
+          m_distortion = point.getDistortion();
+        }
+        const Index rdim = inverse.rows();
+        const Index sdim = inverse.cols();
+        for (Index a = 0; a < m_count; ++a)
+        {
+          Geometry::Vector reference(rdim);
+          point.evaluateBasis(a, m_basis[a], reference);
+          Geometry::Vector gradient(sdim);
+          for (Index c = 0; c < sdim; ++c)
+          {
+            for (Index k = 0; k < rdim; ++k)
+              gradient(c) += inverse(k, c) * reference(k);
+          }
+          m_gradients[a] = gradient;
+        }
+      }
+
+      /**
+       * @brief Evaluates the point on a polytope of geometry G.
+       * @tparam G Reference geometry.
+       * @tparam Full Whether to evaluate the Jacobian, the distortion and the
+       * gradients, or only the basis values and the physical point.
+       * @param polytope Polytope of geometry G filling its space.
+       * @param reference Reference coordinates.
+       */
+      template <::Rodin::Geometry::Polytope::Type G, bool Full>
+      KOKKOS_INLINE_FUNCTION void evaluate(
+        const Geometry::PolytopeView& polytope, const Geometry::Vector& reference)
+      {
+        using Basis = Geometry::StaticBasis<G>;
+        constexpr Index D = Basis::Dimension;
+        constexpr Index N = Basis::Count;
+        ::Kokkos::Array<::Kokkos::Array<Real, D>, N> gradients;
+        if constexpr (Full)
+          Basis::evaluate(reference, m_basis, gradients);
+        else
+          Basis::evaluate(reference, m_basis);
+        const auto& mesh = polytope.mesh;
+        const Index entity = mesh.entityOffsets[polytope.dimension] + polytope.index;
+        const Geometry::GeometryKind kind = mesh.geometryKinds[entity];
+        Geometry::Vector physical(D);
+        Geometry::Matrix jacobian(D, D);
+        if (kind == Geometry::GeometryKind::Identity)
+        {
+          physical = reference;
+          for (Index d = 0; d < D; ++d)
+            jacobian(d, d) = 1;
+        }
+        else
+        {
+          const bool vertexMap = kind == Geometry::GeometryKind::VertexP1;
+          const Index begin =
+            vertexMap ? mesh.vertexOffsets[entity] : mesh.controlOffsets[entity];
+          for (Index a = 0; a < N; ++a)
+          {
+            const Real* control = vertexMap
+              ? mesh.coordinates + mesh.vertexIndices[begin + a] * D
+              : mesh.controls + (begin + a) * D;
+            for (Index c = 0; c < D; ++c)
+            {
+              physical(c) += control[c] * m_basis[a];
+              if constexpr (Full)
+              {
+                for (Index d = 0; d < D; ++d)
+                  jacobian(c, d) += control[c] * gradients[a][d];
+              }
+            }
+          }
+        }
+        m_point = Geometry::PointView(polytope, reference, physical);
+        if constexpr (Full)
+        {
+          const Geometry::Matrix inverse = jacobian.inverse();
+          m_distortion = ::Kokkos::abs(jacobian.determinant());
+          for (Index a = 0; a < N; ++a)
+          {
+            Geometry::Vector gradient(D);
+            for (Index c = 0; c < D; ++c)
+            {
+              for (Index k = 0; k < D; ++k)
+                gradient(c) += inverse(k, c) * gradients[a][k];
+            }
+            m_gradients[a] = gradient;
+          }
+        }
+      }
+
       Geometry::PointView m_point;
       Real m_distortion;
       Index m_count;
@@ -629,17 +791,19 @@ namespace Rodin::Kokkos::Variational
    * | `DeviceView<JacobianBase<Operand, Derived>>` | Forwards to the derived function. |
    * | `DeviceView<DivBase<Operand, Derived>>` | Forwards to the derived function. |
    * | `DeviceView<VectorFunction<V, Values...>>` | Vector function given component-wise. |
-   * | `DeviceView<GridFunctionBaseReference<GridFunction<DeviceP1Space<R, B>, Data>>>` | Referenced P1 grid function. |
-   * | `DeviceView<GridFunction<DeviceP1Space<R, B>, Data>>` | P1 grid function. |
-   * | `DeviceView<Grad<GridFunction<DeviceP1<B>, Data>>>` | Physical gradient of a P1 grid function. |
-   * | `DeviceView<Jacobian<GridFunction<DeviceVectorP1<B>, Data>>>` | Physical Jacobian of a vector P1 grid function. |
-   * | `DeviceView<Div<GridFunction<DeviceVectorP1<B>, Data>>>` | Divergence of a vector P1 grid function. |
+   * | `DeviceView<Zero<Real>>` | Scalar zero. |
+   * | `DeviceView<Zero<SpatialVector<Real>>>` | Vector zero. |
+   * | `DeviceView<BoundaryNormal>` | Outward unit normal of the boundary faces. |
+   * | `DeviceView<GridFunctionBaseReference<GridFunction<FES, Data>>>` | Referenced grid function of a device space. |
+   * | `DeviceView<GridFunction<FES, Data>>` | Grid function of a device space. |
+   * | `DeviceView<Grad<GridFunction<FES, Data>>>` | Physical gradient of a scalar grid function. |
+   * | `DeviceView<Jacobian<GridFunction<FES, Data>>>` | Physical Jacobian of a vector grid function. |
+   * | `DeviceView<Div<GridFunction<FES, Data>>>` | Divergence of a vector grid function. |
    * | `DeviceView<ShapeFunctionBase<Derived, FES, Space>>` | Forwards to the derived shape function. |
-   * | `DeviceView<ShapeFunction<Derived, DeviceP1<B>, Space>>` | P1 basis value. |
-   * | `DeviceView<Grad<ShapeFunction<Derived, DeviceP1<B>, Space>>>` | Physical P1 gradient. |
-   * | `DeviceView<ShapeFunction<Derived, DeviceVectorP1<B>, Space>>` | Vector P1 basis value. |
-   * | `DeviceView<Jacobian<ShapeFunction<Derived, DeviceVectorP1<B>, Space>>>` | Physical vector P1 Jacobian. |
-   * | `DeviceView<Div<ShapeFunction<Derived, DeviceVectorP1<B>, Space>>>` | Vector P1 divergence. |
+   * | `DeviceView<ShapeFunction<Derived, FES, Space>>` | Scalar or vector basis value of a device space. |
+   * | `DeviceView<Grad<ShapeFunction<Derived, FES, Space>>>` | Physical gradient of a scalar basis. |
+   * | `DeviceView<Jacobian<ShapeFunction<Derived, FES, Space>>>` | Physical Jacobian of a vector basis. |
+   * | `DeviceView<Div<ShapeFunction<Derived, FES, Space>>>` | Divergence of a vector basis. |
    * | `DeviceView<Sum<ShapeFunctionBase<L, FES, Space>, ShapeFunctionBase<R, FES, Space>>>` | Sum of shape functions. |
    * | `DeviceView<UnaryMinus<ShapeFunctionBase<N, FES, Space>>>` | Negated shape function. |
    * | `DeviceView<Transpose<ShapeFunctionBase<N, FES, Space>>>` | Transposed shape function. |
@@ -871,6 +1035,20 @@ namespace Rodin::Kokkos::Variational
     F f;
   };
 
+  /// @brief Real function wrapping a real function, as a vector component.
+  template <class F>
+  struct DeviceView<
+    ::Rodin::Variational::RealFunction<::Rodin::Variational::RealFunction<F>>>
+    : DeviceView<::Rodin::Variational::RealFunction<F>>
+  {
+    /// @param node Function expression.
+    DeviceView(
+      const ::Rodin::Variational::RealFunction<::Rodin::Variational::RealFunction<F>>&
+        node)
+      : DeviceView<::Rodin::Variational::RealFunction<F>>(node.getFunction())
+    {}
+  };
+
   /// @brief Real constant.
   template <>
   struct DeviceView<::Rodin::Variational::RealFunction<Real>>
@@ -1042,6 +1220,99 @@ namespace Rodin::Kokkos::Variational
       : DeviceView<Derived>(static_cast<const Derived&>(node))
     {}
   };
+
+  /// @brief Scalar zero.
+  template <>
+  struct DeviceView<::Rodin::Variational::Zero<Real>>
+  {
+    /// @param node Function expression, unused.
+    DeviceView([[maybe_unused]] const ::Rodin::Variational::Zero<Real>& node) {}
+
+    /// @param p Device point, unused. @return Zero.
+    KOKKOS_INLINE_FUNCTION
+    Real getValue([[maybe_unused]] const Geometry::PointView& p) const
+    {
+      return 0;
+    }
+  };
+
+  /// @brief Vector zero.
+  template <>
+  struct DeviceView<::Rodin::Variational::Zero<Math::SpatialVector<Real>>>
+  {
+    /// @param node Function expression.
+    DeviceView(const ::Rodin::Variational::Zero<Math::SpatialVector<Real>>& node)
+      : dimension(node.getDimension())
+    {}
+
+    /// @param p Device point, unused. @return Zero vector.
+    KOKKOS_INLINE_FUNCTION
+    Geometry::Vector getValue([[maybe_unused]] const Geometry::PointView& p) const
+    {
+      return Geometry::Vector(dimension);
+    }
+
+    /// @brief Number of components.
+    size_t dimension;
+  };
+
+  /**
+   * @brief Outward unit normal of the boundary faces.
+   *
+   * The normal of a face of a mesh of dimension two or three, embedded in a
+   * space of the same dimension, is computed from the face Jacobian as on
+   * the host: @f$ (J_{10}, -J_{00}) @f$ for an edge and the cross product of
+   * the Jacobian columns for a surface. It is oriented away from the cell
+   * incident to the face, whose vertex mean stands for its interior, then
+   * normalized. Evaluating it needs the face to cell incidence. Surface
+   * meshes embedded in three dimensions and codimension two entities are not
+   * supported.
+   */
+  template <>
+  struct DeviceView<::Rodin::Variational::BoundaryNormal>
+  {
+    /// @param node Function expression.
+    DeviceView([[maybe_unused]] const ::Rodin::Variational::BoundaryNormal& node) {}
+
+    /// @param p Point on a boundary face. @return Outward unit normal.
+    KOKKOS_INLINE_FUNCTION
+    Geometry::Vector getValue(const Geometry::PointView& p) const
+    {
+      const auto& face = p.getPolytope();
+      const Geometry::MeshView& mesh = face.mesh;
+      const Index d = face.getDimension();
+      const Index sdim = mesh.getSpaceDimension();
+      KOKKOS_ASSERT(d + 1 == mesh.getDimension() && sdim == d + 1);
+      const Geometry::Matrix jacobian = p.getJacobian();
+      Geometry::Vector normal(sdim);
+      if (sdim == 2)
+      {
+        normal(0) = jacobian(1, 0);
+        normal(1) = -jacobian(0, 0);
+      }
+      else
+      {
+        normal(0) = jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
+        normal(1) = jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
+        normal(2) = jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
+      }
+      const auto cells = mesh.getConnectivity().getIncidence(d, d + 1, face.getIndex());
+      KOKKOS_ASSERT(cells.size() > 0);
+      const auto vertices = mesh.getPolytope(d + 1, cells[0]).getVertices();
+      const Geometry::Vector& x = p.getPhysicalCoordinates();
+      Geometry::Vector centroid(sdim);
+      for (Index a = 0; a < vertices.size(); ++a)
+        centroid = add(centroid, mesh.getVertexCoordinates(vertices[a]));
+      Real side = 0;
+      for (Index c = 0; c < sdim; ++c)
+        side += normal(c) * (centroid(c) / vertices.size() - x(c));
+      const Real norm = ::Kokkos::sqrt(dot(normal, normal));
+      const Real scale = (side > 0 ? Real(-1) : Real(1)) / norm;
+      for (Index c = 0; c < sdim; ++c)
+        normal(c) *= scale;
+      return normal;
+    }
+  };
 }
 
 namespace Rodin::Kokkos::Variational::Internal
@@ -1132,22 +1403,25 @@ namespace Rodin::Kokkos::Variational
   };
 
   /**
-   * @brief Coefficients of a P1 grid function in device memory.
+   * @brief Coefficients of a grid function of a device space in device
+   * memory.
    *
    * The coefficients are copied to the mesh memory space when the view is
    * built, so the view reflects the grid function at lowering time. Values and
-   * derivatives are interpolated from the vertices of the polytope holding the
-   * point, as on the host.
+   * derivatives are interpolated from the degrees of freedom of the polytope
+   * holding the point, as on the host.
    *
-   * @tparam Range Range type of the space, Real or a spatial vector.
-   * @tparam Backend Kokkos backend of the mesh context.
+   * @tparam FES Device space of the grid function.
    */
-  template <class Range, class Backend>
-  class P1GridFunctionView
+  template <DeviceSpace FES>
+  class GridFunctionView
   {
     public:
       /// @brief Finite element space.
-      using FESType = DeviceP1Space<Range, Backend>;
+      using FESType = FES;
+
+      /// @brief Device degrees of freedom.
+      using DOFsType = typename FESType::DOFsType;
 
       /// @brief Memory space of the coefficients.
       using MemorySpace = typename FESType::MeshType::MemorySpace;
@@ -1158,9 +1432,9 @@ namespace Rodin::Kokkos::Variational
        * @param data Coefficients, numbered as by the space.
        */
       template <class Data>
-      P1GridFunctionView(const FESType& fes, const Data& data)
+      GridFunctionView(const FESType& fes, const Data& data)
         : m_vdim(fes.getVectorDimension()),
-          m_vertexCount(fes.getMesh().getVertexCount())
+          m_dofs(fes.getDeviceDOFs())
       {
         const auto& execution = fes.getMesh().getContext().getExecutionSpace();
         const Index size = data.size();
@@ -1185,20 +1459,30 @@ namespace Rodin::Kokkos::Variational
        * @param p Device point.
        * @param r Component index.
        * @return Component @f$ u_r(p) @f$.
+       *
+       * The P1 basis is evaluated directly at the point, the other bases
+       * through an IntegrationPointView of the point.
        */
       KOKKOS_INLINE_FUNCTION
       Real interpolate(const Geometry::PointView& p, Index r) const
       {
-        const auto vertices = p.getPolytope().getVertices();
-        Geometry::Vector reference(p.getReferenceCoordinates().size());
-        Real result = 0;
-        for (Index a = 0; a < vertices.size(); ++a)
+        if constexpr (std::is_same_v<DOFsType, VertexDOFs>)
         {
-          Real phi;
-          p.evaluateBasis(a, phi, reference);
-          result += phi * m_data(vertices[a] + r * m_vertexCount);
+          const auto vertices = p.getPolytope().getVertices();
+          Geometry::Vector reference(p.getReferenceCoordinates().size());
+          Real result = 0;
+          for (Index a = 0; a < vertices.size(); ++a)
+          {
+            Real phi;
+            p.evaluateBasis(a, phi, reference);
+            result += phi * m_data(vertices[a] + r * m_dofs.getStride());
+          }
+          return result;
         }
-        return result;
+        else
+        {
+          return interpolate(IntegrationPointView(p), r);
+        }
       }
 
       /**
@@ -1210,64 +1494,71 @@ namespace Rodin::Kokkos::Variational
       KOKKOS_INLINE_FUNCTION
       Geometry::Matrix interpolateJacobian(const Geometry::PointView& p) const
       {
-        const auto vertices = p.getPolytope().getVertices();
-        const Geometry::Matrix inverse = p.getJacobianInverse();
-        const Index rdim = inverse.rows();
-        const Index sdim = inverse.cols();
-        Geometry::Matrix result(m_vdim, sdim);
-        for (Index a = 0; a < vertices.size(); ++a)
+        if constexpr (std::is_same_v<DOFsType, VertexDOFs>)
         {
-          Real phi;
-          Geometry::Vector reference(rdim);
-          p.evaluateBasis(a, phi, reference);
-          for (Index c = 0; c < sdim; ++c)
+          const auto vertices = p.getPolytope().getVertices();
+          const Geometry::Matrix inverse = p.getJacobianInverse();
+          const Index rdim = inverse.rows();
+          const Index sdim = inverse.cols();
+          Geometry::Matrix result(m_vdim, sdim);
+          for (Index a = 0; a < vertices.size(); ++a)
           {
-            Real gradient = 0;
-            for (Index k = 0; k < rdim; ++k)
-              gradient += inverse(k, c) * reference(k);
-            for (Index r = 0; r < m_vdim; ++r)
-              result(r, c) += gradient * m_data(vertices[a] + r * m_vertexCount);
+            Real phi;
+            Geometry::Vector reference(rdim);
+            p.evaluateBasis(a, phi, reference);
+            for (Index c = 0; c < sdim; ++c)
+            {
+              Real gradient = 0;
+              for (Index k = 0; k < rdim; ++k)
+                gradient += inverse(k, c) * reference(k);
+              for (Index r = 0; r < m_vdim; ++r)
+                result(r, c) += gradient * m_data(vertices[a] + r * m_dofs.getStride());
+            }
           }
+          return result;
         }
-        return result;
+        else
+        {
+          return interpolateJacobian(IntegrationPointView(p));
+        }
       }
 
       /**
        * @brief Interpolates one component with the basis of an integration
        * point.
-       * @param ip Integration point on a cell of the space mesh.
+       * @param ip Integration point on a polytope of the space mesh.
        * @param r Component index.
        * @return Component @f$ u_r(p) @f$.
        */
       KOKKOS_INLINE_FUNCTION
       Real interpolate(const IntegrationPointView& ip, Index r) const
       {
-        const auto vertices = ip.getPoint().getPolytope().getVertices();
+        const auto dofs = m_dofs.bind(ip.getPoint().getPolytope());
         Real result = 0;
-        for (Index a = 0; a < vertices.size(); ++a)
-          result += ip.getBasis(a) * m_data(vertices[a] + r * m_vertexCount);
+        for (Index q = 0; q < dofs.size(); ++q)
+          result += m_dofs.getBasis(ip, q) * m_data(dofs[q] + r * m_dofs.getStride());
         return result;
       }
 
       /**
        * @brief Interpolates the physical Jacobian with the basis gradients of
        * an integration point.
-       * @param ip Integration point on a cell of the space mesh.
+       * @param ip Integration point on a polytope of the space mesh.
        * @return Matrix with one row per component, row @f$ r @f$ holding
        * @f$ \nabla u_r(p) @f$.
        */
       KOKKOS_INLINE_FUNCTION
       Geometry::Matrix interpolateJacobian(const IntegrationPointView& ip) const
       {
-        const auto vertices = ip.getPoint().getPolytope().getVertices();
+        const auto dofs = m_dofs.bind(ip.getPoint().getPolytope());
         const Index sdim = ip.getGradient(0).size();
         Geometry::Matrix result(m_vdim, sdim);
-        for (Index a = 0; a < vertices.size(); ++a)
+        for (Index q = 0; q < dofs.size(); ++q)
         {
-          const auto& gradient = ip.getGradient(a);
+          const auto& gradient = m_dofs.getGradient(ip, q);
           for (Index r = 0; r < m_vdim; ++r)
           {
-            const Real value = m_data(vertices[a] + r * m_vertexCount);
+            const Real value = m_data(dofs[q] + r * m_dofs.getStride());
             for (Index c = 0; c < sdim; ++c)
               result(r, c) += gradient(c) * value;
           }
@@ -1277,24 +1568,21 @@ namespace Rodin::Kokkos::Variational
 
     private:
       Index m_vdim;
-      Index m_vertexCount;
+      DOFsType m_dofs;
       ::Kokkos::View<Real*, MemorySpace> m_data;
   };
 
-  /// @brief P1 grid function.
-  template <class Range, class Backend, class Data>
-  struct DeviceView<
-    ::Rodin::Variational::GridFunction<DeviceP1Space<Range, Backend>, Data>>
+  /// @brief Grid function of a device space.
+  template <DeviceSpace FES, class Data>
+  struct DeviceView<::Rodin::Variational::GridFunction<FES, Data>>
   {
     /// @param node Grid function.
-    DeviceView(
-      const ::Rodin::Variational::GridFunction<DeviceP1Space<Range, Backend>, Data>&
-        node)
+    DeviceView(const ::Rodin::Variational::GridFunction<FES, Data>& node)
       : u(node.getFiniteElementSpace(), node.getData())
     {}
 
     /// @param fes Space of the grid function. @param data Coefficients.
-    DeviceView(const DeviceP1Space<Range, Backend>& fes, const Data& data)
+    DeviceView(const FES& fes, const Data& data)
       : u(fes, data)
     {}
 
@@ -1302,7 +1590,7 @@ namespace Rodin::Kokkos::Variational
     template <class Point>
     KOKKOS_INLINE_FUNCTION auto getValue(const Point& p) const
     {
-      if constexpr (std::is_same_v<Range, Real>)
+      if constexpr (std::is_same_v<typename FES::RangeType, Real>)
       {
         return u.interpolate(p, 0);
       }
@@ -1316,32 +1604,32 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Device coefficients.
-    P1GridFunctionView<Range, Backend> u;
+    GridFunctionView<FES> u;
   };
 
   /// @brief Grid function referenced by an expression.
-  template <class Range, class Backend, class Data>
+  template <DeviceSpace FES, class Data>
   struct DeviceView<::Rodin::Variational::GridFunctionBaseReference<
-    ::Rodin::Variational::GridFunction<DeviceP1Space<Range, Backend>, Data>>>
-    : DeviceView<::Rodin::Variational::GridFunction<DeviceP1Space<Range, Backend>, Data>>
+    ::Rodin::Variational::GridFunction<FES, Data>>>
+    : DeviceView<::Rodin::Variational::GridFunction<FES, Data>>
   {
     /// @param node Reference to a grid function.
     DeviceView(const ::Rodin::Variational::GridFunctionBaseReference<
-      ::Rodin::Variational::GridFunction<DeviceP1Space<Range, Backend>, Data>>& node)
-      : DeviceView<
-          ::Rodin::Variational::GridFunction<DeviceP1Space<Range, Backend>, Data>>(
+      ::Rodin::Variational::GridFunction<FES, Data>>& node)
+      : DeviceView<::Rodin::Variational::GridFunction<FES, Data>>(
           node.getFiniteElementSpace(), node.getData())
     {}
   };
 
-  /// @brief Physical gradient of a scalar P1 grid function.
-  template <class Backend, class Data>
-  struct DeviceView<::Rodin::Variational::Grad<
-    ::Rodin::Variational::GridFunction<DeviceP1<Backend>, Data>>>
+  /// @brief Physical gradient of a scalar grid function.
+  template <ScalarDeviceSpace FES, class Data>
+  struct DeviceView<
+    ::Rodin::Variational::Grad<::Rodin::Variational::GridFunction<FES, Data>>>
   {
     /// @param node Gradient expression.
-    DeviceView(const ::Rodin::Variational::Grad<
-      ::Rodin::Variational::GridFunction<DeviceP1<Backend>, Data>>& node)
+    DeviceView(
+      const ::Rodin::Variational::Grad<::Rodin::Variational::GridFunction<FES, Data>>&
+        node)
       : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData())
     {}
 
@@ -1357,17 +1645,17 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Device coefficients.
-    P1GridFunctionView<Real, Backend> u;
+    GridFunctionView<FES> u;
   };
 
-  /// @brief Physical Jacobian of a vector P1 grid function.
-  template <class Backend, class Data>
-  struct DeviceView<::Rodin::Variational::Jacobian<
-    ::Rodin::Variational::GridFunction<DeviceVectorP1<Backend>, Data>>>
+  /// @brief Physical Jacobian of a vector grid function.
+  template <VectorDeviceSpace FES, class Data>
+  struct DeviceView<
+    ::Rodin::Variational::Jacobian<::Rodin::Variational::GridFunction<FES, Data>>>
   {
     /// @param node Jacobian expression.
     DeviceView(const ::Rodin::Variational::Jacobian<
-      ::Rodin::Variational::GridFunction<DeviceVectorP1<Backend>, Data>>& node)
+      ::Rodin::Variational::GridFunction<FES, Data>>& node)
       : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData())
     {}
 
@@ -1379,17 +1667,18 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Device coefficients.
-    P1GridFunctionView<Math::SpatialVector<Real>, Backend> u;
+    GridFunctionView<FES> u;
   };
 
-  /// @brief Divergence of a vector P1 grid function.
-  template <class Backend, class Data>
-  struct DeviceView<::Rodin::Variational::Div<
-    ::Rodin::Variational::GridFunction<DeviceVectorP1<Backend>, Data>>>
+  /// @brief Divergence of a vector grid function.
+  template <VectorDeviceSpace FES, class Data>
+  struct DeviceView<
+    ::Rodin::Variational::Div<::Rodin::Variational::GridFunction<FES, Data>>>
   {
     /// @param node Divergence expression.
-    DeviceView(const ::Rodin::Variational::Div<
-      ::Rodin::Variational::GridFunction<DeviceVectorP1<Backend>, Data>>& node)
+    DeviceView(
+      const ::Rodin::Variational::Div<::Rodin::Variational::GridFunction<FES, Data>>&
+        node)
       : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData())
     {}
 
@@ -1406,7 +1695,7 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Device coefficients.
-    P1GridFunctionView<Math::SpatialVector<Real>, Backend> u;
+    GridFunctionView<FES> u;
   };
 
   /// @brief Forwards a shape function to its derived type.
@@ -1420,42 +1709,48 @@ namespace Rodin::Kokkos::Variational
     {}
   };
 
-  /// @brief Scalar P1 basis.
-  template <class Derived, class Backend,
+  /// @brief Scalar basis of a device space.
+  template <class Derived, ScalarDeviceSpace FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<
-    ::Rodin::Variational::ShapeFunction<Derived, DeviceP1<Backend>, Space>>
+  struct DeviceView<::Rodin::Variational::ShapeFunction<Derived, FES, Space>>
   {
     /// @param node Shape function expression.
-    DeviceView([[maybe_unused]] const ::Rodin::Variational::ShapeFunction<Derived,
-      DeviceP1<Backend>, Space>& node)
+    DeviceView(const ::Rodin::Variational::ShapeFunction<Derived, FES, Space>& node)
+      : dofs(node.getFiniteElementSpace().getDeviceDOFs())
     {}
 
     /// @param ip Quadrature point. @param local Local index. @return Basis value.
     KOKKOS_INLINE_FUNCTION
     Real getBasis(const IntegrationPointView& ip, Index local) const
     {
-      return ip.getBasis(local);
+      return dofs.getBasis(ip, local);
     }
+
+    /// @brief Device degrees of freedom.
+    typename FES::DOFsType dofs;
   };
 
-  /// @brief Physical gradient of the scalar P1 basis.
-  template <class Derived, class Backend,
+  /// @brief Physical gradient of the scalar basis of a device space.
+  template <class Derived, ScalarDeviceSpace FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<::Rodin::Variational::Grad<
-    ::Rodin::Variational::ShapeFunction<Derived, DeviceP1<Backend>, Space>>>
+  struct DeviceView<
+    ::Rodin::Variational::Grad<::Rodin::Variational::ShapeFunction<Derived, FES, Space>>>
   {
     /// @param node Shape function expression.
-    DeviceView([[maybe_unused]] const ::Rodin::Variational::Grad<
-      ::Rodin::Variational::ShapeFunction<Derived, DeviceP1<Backend>, Space>>& node)
+    DeviceView(const ::Rodin::Variational::Grad<
+      ::Rodin::Variational::ShapeFunction<Derived, FES, Space>>& node)
+      : dofs(node.getOperand().getFiniteElementSpace().getDeviceDOFs())
     {}
 
     /// @param ip Quadrature point. @param local Local index. @return Gradient.
     KOKKOS_INLINE_FUNCTION
-    const Geometry::Vector& getBasis(const IntegrationPointView& ip, Index local) const
+    decltype(auto) getBasis(const IntegrationPointView& ip, Index local) const
     {
-      return ip.getGradient(local);
+      return dofs.getGradient(ip, local);
     }
+
+    /// @brief Device degrees of freedom.
+    typename FES::DOFsType dofs;
   };
 
   /// @brief Function multiplying a shape function on the left.
@@ -1576,88 +1871,96 @@ namespace Rodin::Kokkos::Variational
   };
 
   /**
-   * @brief Vector P1 basis.
+   * @brief Vector basis of a device space.
    *
    * Local index @f$ a\,d + r @f$ is the basis function
    * @f$ \phi_a e_r @f$, as on the host.
    */
-  template <class Derived, class Backend,
+  template <class Derived, VectorDeviceSpace FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<
-    ::Rodin::Variational::ShapeFunction<Derived, DeviceVectorP1<Backend>, Space>>
+  struct DeviceView<::Rodin::Variational::ShapeFunction<Derived, FES, Space>>
   {
     /// @param node Shape function expression.
-    DeviceView(const ::Rodin::Variational::ShapeFunction<Derived,
-      DeviceVectorP1<Backend>, Space>& node)
-      : vdim(node.getFiniteElementSpace().getVectorDimension())
+    DeviceView(const ::Rodin::Variational::ShapeFunction<Derived, FES, Space>& node)
+      : vdim(node.getFiniteElementSpace().getVectorDimension()),
+        dofs(node.getFiniteElementSpace().getDeviceDOFs())
     {}
 
     /// @param ip Quadrature point. @param local Local index. @return Basis value.
     KOKKOS_INLINE_FUNCTION
     UnitVector getBasis(const IntegrationPointView& ip, Index local) const
     {
-      return {vdim, local % vdim, ip.getBasis(local / vdim)};
+      return {vdim, local % vdim, dofs.getBasis(ip, local / vdim)};
     }
 
     /// @brief Vector dimension.
     Index vdim;
+
+    /// @brief Device degrees of freedom.
+    typename FES::DOFsType dofs;
   };
 
   /**
-   * @brief Physical Jacobian of the vector P1 basis.
+   * @brief Physical Jacobian of the vector basis of a device space.
    *
    * Row @f$ r @f$ of the Jacobian of @f$ \phi_a e_r @f$ is
    * @f$ \nabla \phi_a @f$, the other rows vanish.
    */
-  template <class Derived, class Backend,
+  template <class Derived, VectorDeviceSpace FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
   struct DeviceView<::Rodin::Variational::Jacobian<
-    ::Rodin::Variational::ShapeFunction<Derived, DeviceVectorP1<Backend>, Space>>>
+    ::Rodin::Variational::ShapeFunction<Derived, FES, Space>>>
   {
     /// @param node Shape function expression.
-    DeviceView(
-      const ::Rodin::Variational::Jacobian<::Rodin::Variational::ShapeFunction<Derived,
-        DeviceVectorP1<Backend>, Space>>& node)
-      : vdim(node.getFiniteElementSpace().getVectorDimension())
+    DeviceView(const ::Rodin::Variational::Jacobian<
+      ::Rodin::Variational::ShapeFunction<Derived, FES, Space>>& node)
+      : vdim(node.getFiniteElementSpace().getVectorDimension()),
+        dofs(node.getFiniteElementSpace().getDeviceDOFs())
     {}
 
     /// @param ip Quadrature point. @param local Local index. @return Jacobian.
     KOKKOS_INLINE_FUNCTION
     RowMatrix getBasis(const IntegrationPointView& ip, Index local) const
     {
-      return {vdim, local % vdim, ip.getGradient(local / vdim)};
+      return {vdim, local % vdim, dofs.getGradient(ip, local / vdim)};
     }
 
     /// @brief Vector dimension.
     Index vdim;
+
+    /// @brief Device degrees of freedom.
+    typename FES::DOFsType dofs;
   };
 
   /**
-   * @brief Divergence of the vector P1 basis.
+   * @brief Divergence of the vector basis of a device space.
    *
    * The divergence of @f$ \phi_a e_r @f$ is @f$ \partial_r \phi_a @f$.
    */
-  template <class Derived, class Backend,
+  template <class Derived, VectorDeviceSpace FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<::Rodin::Variational::Div<
-    ::Rodin::Variational::ShapeFunction<Derived, DeviceVectorP1<Backend>, Space>>>
+  struct DeviceView<
+    ::Rodin::Variational::Div<::Rodin::Variational::ShapeFunction<Derived, FES, Space>>>
   {
     /// @param node Shape function expression.
-    DeviceView(
-      const ::Rodin::Variational::Div<::Rodin::Variational::ShapeFunction<Derived,
-        DeviceVectorP1<Backend>, Space>>& node)
-      : vdim(node.getFiniteElementSpace().getVectorDimension())
+    DeviceView(const ::Rodin::Variational::Div<
+      ::Rodin::Variational::ShapeFunction<Derived, FES, Space>>& node)
+      : vdim(node.getFiniteElementSpace().getVectorDimension()),
+        dofs(node.getFiniteElementSpace().getDeviceDOFs())
     {}
 
     /// @param ip Quadrature point. @param local Local index. @return Divergence.
     KOKKOS_INLINE_FUNCTION
     Real getBasis(const IntegrationPointView& ip, Index local) const
     {
-      return ip.getGradient(local / vdim)(local % vdim);
+      return dofs.getGradient(ip, local / vdim)(local % vdim);
     }
 
     /// @brief Vector dimension.
     Index vdim;
+
+    /// @brief Device degrees of freedom.
+    typename FES::DOFsType dofs;
   };
 
   /// @brief Sum of two shape functions.

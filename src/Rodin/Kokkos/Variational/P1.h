@@ -21,6 +21,8 @@
 
 #include "Rodin/Kokkos/Geometry/Mesh.h"
 
+#include "DOFs.h"
+
 namespace Rodin::Variational
 {
   /**
@@ -62,6 +64,9 @@ namespace Rodin::Variational
 
       /// @brief Parent class.
       using Parent = FiniteElementSpace<MeshType, P1<RangeType, MeshType>>;
+
+      /// @brief Device degrees of freedom.
+      using DOFsType = Rodin::Kokkos::Variational::VertexDOFs;
 
       /**
        * @brief Constructs the P1 space on a resident mesh.
@@ -155,6 +160,17 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Builds the host space with the same numbering.
+       * @param[in] mesh Host copy of the mesh, see Geometry::Mesh::toHost().
+       * @return Scalar P1 space on @p mesh.
+       */
+      P1<RangeType, Geometry::Mesh<Context::Local>> toHost(
+        const Geometry::Mesh<Context::Local>& mesh) const
+      {
+        return P1<RangeType, Geometry::Mesh<Context::Local>>(mesh);
+      }
+
+      /**
        * @brief Gets the global degrees of freedom of a polytope.
        * @param[in] d Dimension of the polytope.
        * @param[in] i Index of the polytope.
@@ -182,6 +198,12 @@ namespace Rodin::Variational
         const auto& key = getMesh().getConnectivity().getPolytope(d, i);
         assert(local < static_cast<size_t>(key.size()));
         return key(local);
+      }
+
+      /// @brief Gets the device degrees of freedom. @return One per vertex.
+      DOFsType getDeviceDOFs() const
+      {
+        return {static_cast<Index>(getMesh().getVertexCount())};
       }
 
     private:
@@ -226,6 +248,9 @@ namespace Rodin::Variational
 
       /// @brief Parent class.
       using Parent = FiniteElementSpace<MeshType, P1<RangeType, MeshType>>;
+
+      /// @brief Device degrees of freedom.
+      using DOFsType = Rodin::Kokkos::Variational::VertexDOFs;
 
       /**
        * @brief Constructs the vector P1 space on a resident mesh.
@@ -333,6 +358,17 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Builds the host space with the same numbering.
+       * @param[in] mesh Host copy of the mesh, see Geometry::Mesh::toHost().
+       * @return Vector P1 space on @p mesh.
+       */
+      P1<RangeType, Geometry::Mesh<Context::Local>> toHost(
+        const Geometry::Mesh<Context::Local>& mesh) const
+      {
+        return P1<RangeType, Geometry::Mesh<Context::Local>>(mesh, m_vdim);
+      }
+
+      /**
        * @brief Gets the global degrees of freedom of a polytope.
        * @param[in] d Dimension of the polytope.
        * @param[in] i Index of the polytope.
@@ -363,6 +399,12 @@ namespace Rodin::Variational
         const auto& key = getMesh().getConnectivity().getPolytope(d, i);
         assert(local / m_vdim < static_cast<size_t>(key.size()));
         return key(local / m_vdim) + (local % m_vdim) * getMesh().getVertexCount();
+      }
+
+      /// @brief Gets the device degrees of freedom. @return One per vertex.
+      DOFsType getDeviceDOFs() const
+      {
+        return {static_cast<Index>(getMesh().getVertexCount())};
       }
 
     private:
