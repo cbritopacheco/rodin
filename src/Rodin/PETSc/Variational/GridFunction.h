@@ -280,7 +280,7 @@ namespace Rodin::Variational
 
       using Parent::max;
 
-      static_assert(std::is_same_v<FESMeshContextType, Context::Local> ||
+      static_assert(Context::IsLocal<FESMeshContextType>::value ||
         std::is_same_v<FESMeshContextType, Context::MPI>);
 
       /**
@@ -315,13 +315,20 @@ namespace Rodin::Variational
       {
         PetscErrorCode ierr;
         auto& data = this->getData();
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        if constexpr (Context::IsLocal<FESMeshContextType>::value)
         {
           ierr = VecCreate(PETSC_COMM_SELF, &data);
           assert(ierr == PETSC_SUCCESS);
 
           ierr = VecSetSizes(data, fes.getSize(), PETSC_DECIDE);
           assert(ierr == PETSC_SUCCESS);
+
+          // Device meshes keep their data where PETSc Kokkos solvers read it.
+          if constexpr (Context::IsKokkos<FESMeshContextType>::value)
+          {
+            ierr = VecSetType(data, VECKOKKOS);
+            assert(ierr == PETSC_SUCCESS);
+          }
 
           ierr = VecSetFromOptions(data);
           assert(ierr == PETSC_SUCCESS);
@@ -713,7 +720,7 @@ namespace Rodin::Variational
       {
         this->acquire();
 
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        if constexpr (Context::IsLocal<FESMeshContextType>::value)
         {
           return m_write.raw[global];
         }
@@ -746,7 +753,7 @@ namespace Rodin::Variational
         if (!m_readAcquired.load(std::memory_order_acquire))
           this->acquire();
 
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        if constexpr (Context::IsLocal<FESMeshContextType>::value)
         {
           return m_read.raw[global];
         }
@@ -1040,7 +1047,7 @@ namespace Rodin::Variational
         assert(off >= 0);
         assert(off + nDst <= nSrc);
 
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        if constexpr (Context::IsLocal<FESMeshContextType>::value)
         {
           // Sequential: simple local slice
           IS is = nullptr;
@@ -1271,7 +1278,7 @@ namespace Rodin::Variational
         if (!m_write.acquired)
           static_cast<const GridFunction&>(*this).flush();
         PetscErrorCode ierr;
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        if constexpr (Context::IsLocal<FESMeshContextType>::value)
         {
           if (!m_write.acquired)
           {
@@ -1331,7 +1338,7 @@ namespace Rodin::Variational
         }
 
         PetscErrorCode ierr;
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        if constexpr (Context::IsLocal<FESMeshContextType>::value)
         {
           ierr = VecGetArrayRead(m_data, &m_read.raw);
           assert(ierr == PETSC_SUCCESS);
@@ -1391,7 +1398,7 @@ namespace Rodin::Variational
       GridFunction& flush()
       {
         PetscErrorCode ierr;
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        if constexpr (Context::IsLocal<FESMeshContextType>::value)
         {
           if (m_write.acquired)
           {
@@ -1449,7 +1456,7 @@ namespace Rodin::Variational
 
         std::lock_guard<std::mutex> lock(m_readMutex);
         PetscErrorCode ierr;
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        if constexpr (Context::IsLocal<FESMeshContextType>::value)
         {
           if (m_read.acquired)
           {
@@ -1616,7 +1623,7 @@ namespace Rodin::Variational
         {
           std::lock_guard<std::mutex> lock(m_readMutex);
           assert(m_read.raw);
-          if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+          if constexpr (Context::IsLocal<FESMeshContextType>::value)
           {
             ierr = VecRestoreArrayRead(m_data, &m_read.raw);
             assert(ierr == PETSC_SUCCESS);
@@ -1638,7 +1645,7 @@ namespace Rodin::Variational
         if (m_write.acquired)
         {
           assert(m_write.raw);
-          if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+          if constexpr (Context::IsLocal<FESMeshContextType>::value)
           {
             ierr = VecRestoreArrayWrite(m_data, &m_write.raw);
             assert(ierr == PETSC_SUCCESS);

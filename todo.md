@@ -345,3 +345,27 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       a2, as...}`); les tests passent un `FlatSet<Geometry::Attribute>`.
 - [ ] Performance: l'élimination et `setFromTriplets` restent sur l'hôte
       (jalon 6: COO PETSc).
+
+## 11. DSL device, jalon 6: assemblage COO PETSc
+
+- [x] `Assembly::Kokkos<PETSc::Math::LinearSystem, Problem<...>>` simple
+      champ et multi-champs (cible `Rodin::KokkosPETSc`, en-tête
+      `Rodin/Kokkos/PETSc.h`): les triplets device des intégrateurs sont
+      écrits dans une liste COO en mémoire device, avec l'élimination des
+      valeurs de Dirichlet sur device (coefficients mis a zéro, relèvement
+      par `atomic_add`, diagonale toujours listée, donc motif indépendant
+      des conditions).
+- [x] `MatSetPreallocationCOO` seulement si la matrice ou les coordonnées
+      changent (comparaison sur device), puis `MatSetValuesCOO` avec un
+      pointeur device; matrice `MATAIJKOKKOS` et vecteurs `VECKOKKOS` par
+      défaut, second membre copié par `VecGetArrayWriteAndMemType`.
+- [x] `PETSc::Variational::GridFunction` et `Problem` acceptent les
+      contextes `Context::Kokkos<Local, B>` (trait `Context::IsLocal`),
+      avec des données `VECKOKKOS`.
+- [x] Tests `RodinKokkosPETScProblemTest`: système identique a
+      l'assemblage device Eigen (Poisson, Stokes mixte), réassemblage sans
+      nouvelle analyse du motif, cibles LHS et RHS, résolution CG Jacobi
+      sur GPU comparée a SparseLU.
+- [ ] Formes PETSc préassemblées dans un problème device: lèvent une
+      exception.
+- [ ] MPI (`Context::Kokkos<MPI, B>`) non supporté.

@@ -41,6 +41,25 @@ target_sources(RodinKokkos INTERFACE
 
 install(TARGETS RodinKokkos EXPORT RodinTargets)
 
+if (RODIN_USE_PETSC)
+  add_library(RodinKokkosPETSc INTERFACE)
+  add_library(Rodin::KokkosPETSc ALIAS RodinKokkosPETSc)
+  set_target_properties(RodinKokkosPETSc PROPERTIES EXPORT_NAME KokkosPETSc)
+
+  target_link_libraries(RodinKokkosPETSc
+    INTERFACE
+      Rodin::Kokkos
+      Rodin::PETSc
+  )
+
+  target_sources(RodinKokkosPETSc INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PETSc.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly/PETSc.h>
+  )
+
+  install(TARGETS RodinKokkosPETSc EXPORT RodinTargets)
+endif()
+
 rodin_install_headers(
   DIRECTORIES .
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Kokkos

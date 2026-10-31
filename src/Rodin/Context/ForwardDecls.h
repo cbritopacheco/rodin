@@ -35,6 +35,16 @@ namespace Rodin::Context
   template <class Distribution, class Backend>
   struct IsKokkos<Kokkos<Distribution, Backend>> : std::true_type
   {};
+
+  /// @brief Whether a context runs its mesh in a single process.
+  template <class C>
+  struct IsLocal : std::is_same<C, Local>
+  {};
+
+  /// @brief Kokkos contexts of a local mesh run in a single process.
+  template <class Backend>
+  struct IsLocal<Kokkos<Local, Backend>> : std::true_type
+  {};
 }
 
 #endif

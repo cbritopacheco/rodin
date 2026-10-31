@@ -42,6 +42,7 @@
 
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Alert/Raise.h"
+#include "Rodin/Context/ForwardDecls.h"
 #include "Rodin/Context/Local.h"
 #include "Rodin/MPI/Context/MPI.h"
 #include "Rodin/PETSc/Variational/TestFunction.h"
@@ -172,7 +173,7 @@ namespace Rodin::Variational
         : Parent(u, v),
           m_assembled(false),
           m_axb([&]() -> MPI_Comm {
-            if constexpr (std::is_same_v<TrialFESMeshContextType, Context::Local>)
+            if constexpr (Context::IsLocal<TrialFESMeshContextType>::value)
             {
               return PETSC_COMM_SELF;
             }
@@ -998,7 +999,7 @@ namespace Rodin::Variational
           using MeshType = std::decay_t<decltype(mesh)>;
           using Ctx = typename FormLanguage::Traits<MeshType>::ContextType;
 
-          if constexpr (std::is_same_v<Ctx, Context::Local>)
+          if constexpr (Context::IsLocal<Ctx>::value)
           {
             comm = PETSC_COMM_SELF;
           }
