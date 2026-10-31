@@ -27,7 +27,8 @@ import ci_tests as tests
 ROOT = tests.ROOT
 # Source scheduling bounds for optional directories. Configured manifests still
 # certify every selected target and reject an omitted producer.
-DIRECTORY_REQUIREMENTS = {'unit/Rodin/Scotch': 'RODIN_USE_SCOTCH'}
+DIRECTORY_REQUIREMENTS = {'unit/Rodin/Scotch': 'RODIN_USE_SCOTCH',
+                          'unit/Rodin/Kokkos': 'RODIN_USE_KOKKOS'}
 
 
 def key(prefix, value):
@@ -121,8 +122,10 @@ def layout(variant=None):
                 raise ValueError('Dedicated targets need explicit source dependency edges: ' + str(missing))
             dependencies = {declared[t] for t in required}
             label = ' + '.join(tests.display_group(s) for s in sorted(dependencies))
-        dependencies = {s for s in dependencies if s not in DIRECTORY_REQUIREMENTS or
-                        spec['cmake'].get(DIRECTORY_REQUIREMENTS[s]) == 'ON'}
+        dependencies = {s for s in dependencies if all(
+                        spec['cmake'].get(option) == 'ON'
+                        for directory, option in DIRECTORY_REQUIREMENTS.items()
+                        if s == directory or s.startswith(directory + '/'))}
         executions[identity] = {'job': job, 'family': family, 'name': label,
                                 'dependencies': sorted({key('b', graph.build_group(s)) for s in dependencies})}
     required = {k for e in executions.values() for k in e['dependencies']}

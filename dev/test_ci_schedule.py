@@ -75,6 +75,20 @@ class HierarchicalScheduleTest(unittest.TestCase):
             self.assertNotIn(scotch, schedule.layout(variant)[0])
         self.assertIn(scotch, schedule.layout('baseline')[0])
 
+    def test_disabled_kokkos_excludes_all_descendant_producers(self):
+        scopes, _ = schedule.source_scopes()
+        children = {'unit/Rodin/Kokkos/Context', 'unit/Rodin/Kokkos/Geometry',
+                    'unit/Rodin/Kokkos/Assembly'}
+        self.assertTrue(children <= scopes.keys())
+        kokkos = schedule.key('b', 'unit/Rodin/Kokkos')
+        ordinary, targeted = schedule.requests()
+        variants = {graph.configuration_variant(entry['definition'])
+                    for entry in graph.prepare(ordinary, targeted)}
+        for variant in variants:
+            producers, executions = schedule.layout(variant)
+            self.assertNotIn(kokkos, producers)
+            self.assertTrue(all(kokkos not in e['dependencies'] for e in executions.values()))
+
     def test_every_declared_execution_is_required_in_each_configuration(self):
         ordinary, targeted = schedule.requests()
         families = {r['id']: f for f, rows in ordinary.items() for r in rows}
