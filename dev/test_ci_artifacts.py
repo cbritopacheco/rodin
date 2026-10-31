@@ -103,6 +103,21 @@ class ArtifactPlanTest(unittest.TestCase):
         self.assertIn('python3 dev/ci_coverage.py threshold', commands)
         self.assertIn('python3 dev/ci_artifacts.py final --output ci-final-inputs.json', commands)
 
+    def test_benchmark_restore_uses_retrying_exact_names_and_preserves_uploads(self):
+        workflow = yaml.safe_load((tests.ROOT / '.github/workflows/BenchmarkGroup.yml').read_text())
+        for job, artifact, output in [('Build', 'benchmark-common-${{ inputs.configuration }}', 'benchmark-group'),
+                                      ('Run', 'benchmark-group-${{ inputs.group }}', 'benchmark-result')]:
+            steps = workflow['jobs'][job]['steps']
+            self.assertFalse(any(s.get('uses', '').startswith('actions/download-artifact@') for s in steps))
+            restore = next(s for s in steps if s.get('uses') == './.github/actions/download-artifacts')
+            self.assertEqual(json.loads(restore['with']['names']), [artifact])
+            self.assertEqual(restore['with']['path'], 'benchmark-inputs')
+            execute = next(s for s in steps if '--source "$SOURCE"' in s.get('run', ''))
+            self.assertEqual(execute['env']['SOURCE'], 'benchmark-inputs/' + artifact)
+            upload = next(s for s in steps if s.get('uses') == 'actions/upload-artifact@v4')
+            self.assertEqual(upload['with']['path'], output)
+            self.assertIn('name', upload['with'])
+
     def test_runtime_downloads_and_retries(self):
         subprocess.run(['node', '--test', '--test-concurrency=1', 'dev/test_ci_artifact_downloads.js'],
                        cwd=tests.ROOT, check=True)

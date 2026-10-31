@@ -103,3 +103,23 @@ test('incorrect resolved name fails before download', async () => {
     await assert.rejects(downloadArtifacts(client, ['expected'], folder, core), /wrong name/);
   });
 });
+
+test('digest mismatch is retried and never published as valid input', async () => {
+  await temporary(async folder => {
+    let attempts = 0;
+    const client = {
+      async getArtifact(name) { return {artifact: {name, id: 9, digest: 'sha256:expected'}}; },
+      async downloadArtifact(id, {path: staging, expectedHash}) {
+        assert.equal(expectedHash, 'sha256:expected');
+        assert.deepEqual(await fs.readdir(staging), []);
+        await fs.writeFile(path.join(staging, 'payload'), 'corrupted');
+        ++attempts;
+        return {digestMismatch: true};
+      }
+    };
+    await assert.rejects(downloadArtifacts(client, ['benchmark-group-a'], folder, core,
+      async () => {}), /digest mismatch/);
+    assert.equal(attempts, 3);
+    assert.deepEqual(await fs.readdir(folder), []);
+  });
+});

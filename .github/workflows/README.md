@@ -280,7 +280,7 @@ restores their compatible artifacts. CMake regeneration is suppressed;
 execution lanes do not rebuild test targets.
 
 Execution lanes download only the exact archive names in their build index.
-Single-artifact steps use the named download action; multi-artifact steps use
+Benchmark build/execution and documentation/benchmark publication downloads use
 [the exact-name downloader](../actions/download-artifacts/action.yml). It uses
 GitHub's official artifact client with the current-run runtime credentials,
 resolves each name once, then downloads that artifact ID. It never lists every
@@ -293,6 +293,11 @@ with fresh staging on each attempt. A missing name fails immediately. Each
 artifact gets its own subdirectory. Restoration still requires `manifest.json`
 and `build.tar.gz`; source/configuration, runtime compatibility and archive
 SHA256 validation remain mandatory. Incomplete restoration fails the lane.
+Benchmark and publication inputs use the same three-attempt transfer policy as
+coverage inputs. Each retry discards partial extraction and obtains a fresh
+transfer URL for the resolved artifact ID. A reported digest mismatch fails the
+transfer; an exhausted or missing artifact remains a hard failure.
+
 The downloader's official client dependency is pinned in a lockfile and installed
 once per runner in `RUNNER_TEMP`; its JavaScript action uses Node 24.
 Client 4.0.0 rejects interrupted streams that could leave 2.3.2 with an unresolved
@@ -454,8 +459,11 @@ It does not wait for benchmark builds, execution or pooling. After successful po
 updates only complete benchmark histories; it cannot replace newer documentation. Missing or failed
 benchmark contributions leave the previous complete results intact. The independent documentation and benchmark workflows hold the same `rodin-gh-pages-publication` lock
 while writing and deploying. Each publisher uploads the locked `gh-pages`
-checkout as its own Pages artifact and uses `actions/deploy-pages` in that
-same job. This avoids a second hosted-runner queue for a legacy Pages build;
+checkout as its own Pages artifact and deploys its exact artifact ID in that
+same job. The Pages API build version is the published `gh-pages` commit,
+which distinguishes master, develop and benchmark updates even when they share
+one source commit. The deployment retains the workflow OIDC token and protected
+environment. This avoids a second hosted-runner queue for a legacy Pages build;
 that queue delayed one deployment by almost eleven hours. A successful branch
 push alone is never treated as deployment success. After the deployment action
 succeeds, `dev/deploy_pages.py` checks the served `rodin-publication.json` marker
@@ -472,8 +480,7 @@ Repository setup for these publishers:
   and require `pages: write` and `id-token: write`.
 
 The local workflow repair does not change these repository settings. A legacy
-Pages source fails preparation with an actionable diagnostic. The automatic documentation and complete-benchmark publishers, together with
-the manual documentation publisher, use the same artifact deployment path.
+Pages source fails preparation with an actionable diagnostic. The automatic documentation and complete-benchmark publishers use the same artifact deployment path.
 The unused include-dependency-graph workflow has been removed.
 
 Component histories live

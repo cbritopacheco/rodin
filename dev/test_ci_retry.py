@@ -178,7 +178,8 @@ class RecoveryTest(unittest.TestCase):
         self.assertNotIn("secrets.", str(steps))
         publication = yaml.safe_load((root / ".github/actions/publish-pages/action.yml").read_text())
         upload, deploy = publication["runs"]["steps"][1:3]
-        self.assertEqual(upload["with"]["name"], deploy["with"]["artifact_name"])
+        self.assertEqual(deploy["env"]["ARTIFACT_ID"], "${{ steps.artifact.outputs.artifact_id }}")
+        self.assertEqual(deploy["env"]["SNAPSHOT"], "${{ steps.snapshot.outputs.commit }}")
         self.assertIn("github.run_attempt", upload["with"]["name"])
         for name in ("BenchmarkGroup", "BenchmarkConfiguration", "Benchmarks", "Documentation"):
             data = yaml.safe_load((root / f".github/workflows/{name}.yml").read_text())

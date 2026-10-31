@@ -32,6 +32,16 @@ class PagesTest(unittest.TestCase):
             self.assertEqual(deploy_pages.prepare('owner/repo', checkout), marker)
             self.assertEqual(json.loads((checkout / deploy_pages.MARKER).read_text()), marker)
 
+    def test_preparation_exports_snapshot_version_for_deployment(self):
+        checkout, _ = self.marker()
+        output = checkout / 'outputs'
+        with patch.dict('os.environ', GITHUB_OUTPUT=str(output)), \
+                patch('deploy_pages.api', side_effect=[dict(SITE, build_type='workflow'),
+                      {'object': {'sha': COMMIT}}]), \
+                patch('deploy_pages.subprocess.check_output', return_value=COMMIT + '\n'):
+            deploy_pages.prepare('owner/repo', checkout)
+        self.assertEqual(output.read_text(), f'commit={COMMIT}\n')
+
     def test_waits_through_stale_content_and_verifies_exact_commit(self):
         checkout, marker = self.marker()
         with patch('deploy_pages.fetch_marker', side_effect=[dict(marker, commit='old'), marker]) as fetch, \
@@ -84,9 +94,16 @@ class PagesTest(unittest.TestCase):
         action = yaml.safe_load((ROOT / '.github/actions/publish-pages/action.yml').read_text())
         steps = action['runs']['steps']
         self.assertEqual(steps[1]['uses'], 'actions/upload-pages-artifact@v4')
-        self.assertEqual(steps[2]['uses'], 'actions/deploy-pages@v4')
+        self.assertEqual(steps[2]['uses'], 'actions/github-script@v8')
+        self.assertEqual(steps[2]['env']['SNAPSHOT'], '${{ steps.snapshot.outputs.commit }}')
+        self.assertEqual(steps[2]['env']['ARTIFACT_ID'], '${{ steps.artifact.outputs.artifact_id }}')
         self.assertIn(' prepare ', steps[0]['run'])
         self.assertIn(' verify ', steps[3]['run'])
+
+    def test_snapshot_deployment_request_and_failure_handling(self):
+        import subprocess
+        subprocess.run(['node', '--test', '--test-concurrency=1', 'dev/test_ci_pages_deploy.js'],
+                       cwd=ROOT, check=True)
 
     def test_documentation_is_independent_and_pull_requests_do_not_deploy(self):
         docs = yaml.safe_load((ROOT / '.github/workflows/Documentation.yml').read_text())

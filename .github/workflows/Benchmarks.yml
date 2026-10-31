@@ -108,10 +108,10 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r doc/requirements.txt
-      - uses: actions/download-artifact@v4
+      - uses: ./.github/actions/download-artifacts
         with:
-          name: benchmark-complete
-          path: benchmark-complete
+          names: '["benchmark-complete"]'
+          path: benchmark-inputs
       - uses: actions/checkout@v4
         with:
           ref: gh-pages
@@ -121,7 +121,7 @@ jobs:
         env:
           REF: ${{ github.ref }}
           RUN: ${{ github.run_id }}.${{ github.run_attempt }}
-        run: python3 dev/benchmark_publish.py --results benchmark-complete --site ".ci-pages/docs/$REF" --pages .ci-pages --ref "$REF" --run "$RUN"
+        run: python3 dev/benchmark_publish.py --results benchmark-inputs/benchmark-complete --site ".ci-pages/docs/$REF" --pages .ci-pages --ref "$REF" --run "$RUN"
       - name: Publish one atomic Pages update
         working-directory: .ci-pages
         env:

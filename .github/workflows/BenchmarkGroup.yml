@@ -34,15 +34,16 @@ jobs:
       - uses: ./.github/actions/benchmark-environment
         with:
           configuration: ${{ inputs.configuration }}
-      - uses: actions/download-artifact@v4
+      - uses: ./.github/actions/download-artifacts
         with:
-          name: benchmark-common-${{ inputs.configuration }}
-          path: benchmark-common
+          names: '["benchmark-common-${{ inputs.configuration }}"]'
+          path: benchmark-inputs
       - name: Restore shared libraries, build components and discover cases
         id: build
         env:
           GROUP: ${{ inputs.group }}
-        run: python3 dev/benchmark_ci.py build --source benchmark-common --id "$GROUP" --output benchmark-group
+          SOURCE: benchmark-inputs/benchmark-common-${{ inputs.configuration }}
+        run: python3 dev/benchmark_ci.py build --source "$SOURCE" --id "$GROUP" --output benchmark-group
       - uses: actions/upload-artifact@v4
         with:
           overwrite: true
@@ -90,15 +91,16 @@ jobs:
       - name: Hydrate benchmark resources
         id: resources
         run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/medit/UniformTriangular64.medit.mesh"
-      - uses: actions/download-artifact@v4
+      - uses: ./.github/actions/download-artifacts
         id: restore
         with:
-          name: benchmark-group-${{ inputs.group }}
-          path: benchmark-group
+          names: '["benchmark-group-${{ inputs.group }}"]'
+          path: benchmark-inputs
       - name: Run one benchmark executable at a time
         id: execution
         env:
           LANE: ${{ matrix.lane.id }}
+          SOURCE: benchmark-inputs/benchmark-group-${{ inputs.group }}
         run: |
           mkdir -p benchmark-diagnostics
           set -o pipefail
@@ -106,7 +108,7 @@ jobs:
           monitor_pid=$!
           trap 'kill "$monitor_pid" 2>/dev/null || true; wait "$monitor_pid" 2>/dev/null || true' EXIT
           /usr/bin/time -v -o benchmark-diagnostics/resources.txt \
-            python3 -u dev/benchmark_ci.py run --source benchmark-group --id "$LANE" --output benchmark-result \
+            python3 -u dev/benchmark_ci.py run --source "$SOURCE" --id "$LANE" --output benchmark-result \
             2>&1 | tee benchmark-diagnostics/execution.log
       - uses: actions/upload-artifact@v4
         with:

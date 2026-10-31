@@ -36,7 +36,12 @@ async function downloadArtifacts(client, names, destination, core,
       for (let attempt = 1; ; ++attempt) {
         try {
           core.info(`Downloading ${name} (ID ${artifact.id}, attempt ${attempt})`);
-          await client.downloadArtifact(artifact.id, {path: staging});
+          const result = await client.downloadArtifact(artifact.id, {
+            path: staging, ...(artifact.digest ? {expectedHash: artifact.digest} : {})
+          });
+          if (result?.digestMismatch) {
+            throw new Error(`Artifact digest mismatch: ${name}`);
+          }
           if (!(await fs.readdir(staging)).length) {
             throw new Error(`Empty artifact download: ${name}`);
           }

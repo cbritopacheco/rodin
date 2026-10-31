@@ -135,10 +135,10 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r doc/requirements.txt
-      - uses: actions/download-artifact@v4
+      - uses: ./.github/actions/download-artifacts
         with:
-          name: documentation
-          path: documentation-site
+          names: '["documentation"]'
+          path: documentation-inputs
       - uses: actions/checkout@v4
         with:
           ref: gh-pages
@@ -147,7 +147,7 @@ jobs:
       - name: Integrate documentation with the latest complete benchmark histories
         env:
           REF: ${{ github.ref }}
-        run: python3 dev/benchmark_publish.py --documentation-only --site documentation-site --pages .ci-pages --ref "$REF"
+        run: python3 dev/benchmark_publish.py --documentation-only --site documentation-inputs/documentation --pages .ci-pages --ref "$REF"
       - name: Publish documentation Pages update
         working-directory: .ci-pages
         env:

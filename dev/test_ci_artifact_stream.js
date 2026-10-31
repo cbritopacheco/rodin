@@ -31,10 +31,12 @@ async function fixture(t, interrupted) {
   archive.append(payload, {name: 'payload.bin'});
   await archive.finalize();
   const zip = await finished;
+  let requests = 0;
   const server = http.createServer((request, response) => {
     response.writeHead(200, {'Content-Type': 'application/zip', 'Content-Length': zip.length});
     // Close a valid ZIP stream before its advertised payload has arrived.
-    response.end(interrupted ? zip.subarray(0, 1024) : zip);
+    const partial = typeof interrupted === 'function' ? interrupted(++requests) : interrupted;
+    response.end(partial ? zip.subarray(0, 1024) : zip);
   });
   t.after(async () => {
     server.closeAllConnections();
@@ -79,4 +81,28 @@ test('interrupted ZIP rejects instead of exiting successfully with an unresolved
   assert.equal(result.error && result.error.code, 1, result.stderr);
   assert.match(result.stdout, /settled=true/);
   assert.match(result.stderr, /Blob storage chunk did not respond/);
+});
+
+
+test('mandatory download recovers a real interrupted ZIP with clean staging', async t => {
+  const {downloadArtifacts} = require('../.github/actions/download-artifacts/download.js');
+  const {folder, payload, zip, url} = await fixture(t, request => request === 1);
+  let attempts = 0;
+  const digest = 'sha256:' + crypto.createHash('sha256').update(zip).digest('hex');
+  const client = {
+    async getArtifact(name) { return {artifact: {name, id: 17, digest}}; },
+    async downloadArtifact(id, options) {
+      assert.equal(id, 17);
+      assert.equal(options.expectedHash, digest);
+      assert.deepEqual(await fs.readdir(options.path), []);
+      ++attempts;
+      const result = await streamExtractExternal(url, options.path, {timeout: 50});
+      return {digestMismatch: result.sha256Digest !== digest};
+    }
+  };
+  await downloadArtifacts(client, ['benchmark-group-a'], folder,
+    {info() {}, warning() {}}, async () => {});
+  assert.equal(attempts, 2);
+  assert.deepEqual(await fs.readFile(path.join(folder, 'benchmark-group-a/payload.bin')), payload);
+  assert.deepEqual(await fs.readdir(folder), ['benchmark-group-a']);
 });

@@ -37,6 +37,10 @@ def prepare(repository, checkout):
         raise ValueError('Published branch changed before deployment')
     marker = {'commit': commit, 'repository': repository}
     (checkout / MARKER).write_text(json.dumps(marker) + '\n')
+    output = os.environ.get('GITHUB_OUTPUT')
+    if output:
+        with Path(output).open('a') as stream:
+            stream.write(f'commit={commit}\n')
     print(f'Prepared Pages snapshot {commit}')
     return marker
 

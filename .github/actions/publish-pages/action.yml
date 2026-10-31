@@ -15,20 +15,30 @@ runs:
   using: composite
   steps:
     - name: Validate and identify the Pages snapshot
+      id: snapshot
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
         CHECKOUT: ${{ inputs.checkout }}
       run: python3 dev/deploy_pages.py prepare --checkout "$CHECKOUT"
     - uses: actions/upload-pages-artifact@v4
+      id: artifact
       with:
         name: ${{ inputs.artifact-name }}-${{ github.run_attempt }}
         path: ${{ inputs.checkout }}
     - name: Deploy the exact uploaded artifact
       id: deployment
-      uses: actions/deploy-pages@v4
+      uses: actions/github-script@v8
+      env:
+        ARTIFACT_ID: ${{ steps.artifact.outputs.artifact_id }}
+        SNAPSHOT: ${{ steps.snapshot.outputs.commit }}
+        ACTION_PATH: ${{ github.action_path }}
       with:
-        artifact_name: ${{ inputs.artifact-name }}-${{ github.run_attempt }}
+        script: |
+          const path = require('node:path');
+          const {deployPages} = require(path.join(process.env.ACTION_PATH, 'deploy.js'));
+          await deployPages(github, core, process.env.GITHUB_REPOSITORY,
+            process.env.ARTIFACT_ID, process.env.SNAPSHOT);
     - name: Verify the served publication marker
       shell: bash
       env:
