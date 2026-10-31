@@ -30,6 +30,10 @@ if (RODIN_BUILD_EXAMPLES)
     add_subdirectory(PETSc)
   endif()
 
+  if (RODIN_USE_KOKKOS)
+    add_subdirectory(Kokkos)
+  endif()
+
   if (RODIN_USE_MFEM)
     add_subdirectory(MFEM)
   endif()

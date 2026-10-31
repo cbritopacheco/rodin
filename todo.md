@@ -369,3 +369,47 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
 - [ ] Formes PETSc préassemblées dans un problème device: lèvent une
       exception.
 - [ ] MPI (`Context::Kokkos<MPI, B>`) non supporté.
+
+## 12. DSL device, jalon 7: benchmark Oseen
+
+- [x] Exemple `examples/Kokkos/OseenAssembly.cpp` (cible
+      `KokkosOseenAssembly`, `KokkosOseenAssembly [mesh | n] [reps]`):
+      même pas d'Oseen P1/P1 stabilisé assemblé dans PETSc par le DSL
+      (`Problem` + COO device, un noyau par intégrateur) et par un noyau
+      écrit a la main (matrice locale 16 x 16 par maille, intégrales P1
+      exactes en forme close, sans quadrature). Résultats identiques a
+      1e-15 près.
+- [x] Optimisations génériques, temps DSL sur la grille 30 (162000
+      tétraèdres, noyau manuel 6.4 ms dont 3.5 ms de `MatSetValuesCOO`):
+
+      | étape | DSL | ratio |
+      |---|---|---|
+      | départ | | 38-58x |
+      | cache COO, intégrateurs groupés par segment | 116 ms | 18x |
+      | une jacobienne par point, coefficients sur le point | 94 ms | 14.5x |
+      | fonctions liées une fois par point (`bindBasis`) | 84.7 ms | 13.1x |
+      | bases P1 vectorielles creuses (`UnitVector`, `RowMatrix`) | 68.4 ms | 10.6x |
+      | jacobienne affine réutilisée entre points (simplexes) | 59.0 ms | 9.1x |
+      | bornes statiques (tétraèdres, dimension maximale) | 54.6 ms | 8.4x |
+      | produits structurellement nuls sautés (`overlaps`) | 45.2 ms | 7.0x |
+
+      Grille 16: 6.9 ms contre 1.1 ms (6.0x). Atrium `Coarse.mesh`
+      (683704 tétraèdres): 234 ms contre 36.6 ms (6.4x).
+- [x] Essai `TeamPolicy` (une équipe par maille): correct mais 2x plus
+      lent (occupation faible a ~160 registres), abandonné.
+- [ ] Objectif 10-20% non atteint, et pas atteignable avec une quadrature
+      générique: le noyau manuel est une formule analytique, fusionne les
+      8 termes en un seul passage et garde sa matrice locale en registres.
+      Ecarts restants:
+      - accumulateur local de 144 réels en mémoire locale (pile 2-8 Ko
+        par thread, 160-250 registres), qui domine le coût par entrée;
+      - 8 noyaux et 8 lectures-écritures du segment COO au lieu d'un;
+      - quadrature d'ordre 2 (4 points) pour `Jacobian:Jacobian`, comme
+        l'hôte, alors que l'intégrande est constant;
+      - `IntegrationPointView` dimensionné pour 8 sommets même sur les
+        tétraèdres.
+- [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
+      noyau (somme des intégrandes), capacité de `IntegrationPointView`
+      en paramètre, ordre exact pour les formes dérivées vectorielles
+      (aussi côté hôte), découpage de la matrice locale par blocs de
+      composantes.
