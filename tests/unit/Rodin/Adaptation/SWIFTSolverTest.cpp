@@ -491,6 +491,126 @@ namespace Rodin::Tests::Unit
       Alert::Exception);
   }
 
+  TEST(Rodin_Adaptation_SWIFTSolver, FixedBoundaryAndPenalizedTangency)
+  {
+    constexpr Attribute Fixed = 20;
+    constexpr Attribute Slip = 21;
+    for (const size_t dimension : {2u, 3u})
+    {
+      for (const Real tangencyPenalty : {Real(-1), Real(0), Real(1e7)})
+      {
+        const bool sliding = tangencyPenalty >= Real(0);
+        auto mesh = dimension == 2
+          ? LocalMesh::UniformGrid(Polytope::Type::Triangle, {5, 5})
+          : LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {5, 5, 5});
+        mesh.scale(Real(0.25));
+        mesh.getConnectivity().compute(dimension - 1, dimension);
+        std::vector<Index> interface;
+        for (auto face = mesh.getPolytope(dimension - 1); face; ++face)
+        {
+          bool onInterface = true;
+          bool onFixed = false;
+          for (const Index vertex : face->getVertices())
+          {
+            onInterface &=
+              std::abs(mesh.getVertexCoordinates(vertex)(0) - Real(0.5)) < Real(1e-12);
+          }
+          if (onInterface)
+          {
+            mesh.setAttribute({dimension - 1, face->getIndex()}, Interface);
+            interface.push_back(face->getIndex());
+          }
+          const auto& incident = mesh.getConnectivity().getIncidence(
+            {dimension - 1, dimension}, face->getIndex());
+          if (incident.size() != 1)
+            continue;
+          for (const Real x : {Real(0), Real(1)})
+          {
+            bool onPlane = true;
+            for (const Index vertex : face->getVertices())
+              onPlane &= std::abs(mesh.getVertexCoordinates(vertex)(0) - x) < Real(1e-12);
+            onFixed |= onPlane;
+          }
+          mesh.setAttribute(
+            {dimension - 1, face->getIndex()}, !sliding || onFixed ? Fixed : Slip);
+        }
+        // An oblique cut exercises coupled components, not coordinate pinning.
+        for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+        {
+          Math::SpatialPoint x = mesh.getVertexCoordinates(vertex);
+          x(1) += Real(0.3) * x(0);
+          mesh.setVertexCoordinates(vertex, x);
+        }
+        P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, dimension);
+        TrialFunction trial(fes);
+        TestFunction test(fes);
+        SWIFT::Problem solver(trial, test);
+        SWIFT::Parameters parameters;
+        parameters.model.h = Real(0.25);
+        // Require motion: the automatic h^2 target exceeds this initial offset.
+        parameters.convergence.tolerance.geometric = Real(1e-3);
+        parameters.interfaceAttribute = Interface;
+        parameters.convergence.iterations.outer = 3;
+        parameters.linear.solver = SWIFT::Parameters::LinearSolver::SparseLU;
+        solver.setParameters(parameters);
+        const Math::Vector<Real> zero = Math::Vector<Real>::Zero(dimension);
+        solver += DirichletBC(trial, VectorFunction(zero)).on(Fixed);
+        if (tangencyPenalty > Real(0))
+        {
+          const FaceNormal normal(mesh);
+          solver.getMetric() +=
+            FaceIntegral((tangencyPenalty / parameters.model.h) * Dot(normal, trial),
+              Dot(normal, test))
+              .over(Slip);
+        }
+        RealFunction phi([](const Point& point) { return point.x() - Real(0.55); });
+        VectorFunction grad(dimension, [dimension](const Point&) {
+          Math::SpatialVector<Real> value(dimension);
+          value.setZero();
+          value(0) = Real(1);
+          return value;
+        });
+        const auto report = solver.solve(phi, grad);
+        EXPECT_GT(report.iterations, 0u) << report.getReasonString();
+        EXPECT_GT(trial.getSolution().getData().norm(), Real(1e-5));
+        Real maximumNormal = 0;
+        for (auto face = mesh.getPolytope(dimension - 1); face; ++face)
+        {
+          if (face->getAttribute() != Fixed && face->getAttribute() != Slip)
+            continue;
+          const auto& qf = QF::QuadratureFormula::get(2, face->getGeometry());
+          const auto& quadrature = face->getQuadrature(qf);
+          for (size_t q = 0; q < quadrature.getSize(); ++q)
+          {
+            const auto& point = quadrature.getPoint(q);
+            const auto value = trial.getSolution().getValue(point);
+            if (face->getAttribute() == Fixed)
+            {
+              EXPECT_LT(value.norm(), Real(1e-10));
+            }
+            else
+            {
+              maximumNormal = std::max(
+                maximumNormal, std::abs(FaceNormal(mesh).getValue(point).dot(value)));
+            }
+          }
+        }
+        if (sliding)
+        {
+          if (tangencyPenalty > Real(0))
+          {
+            EXPECT_LT(maximumNormal, Real(1e-6));
+          }
+          else
+          {
+            // Without the penalty, this oblique cut has non-tangential motion.
+            EXPECT_GT(maximumNormal, Real(1e-5));
+          }
+        }
+      }
+    }
+  }
+
   TEST(Rodin_Adaptation_SWIFTSolver, SmallDirectionCanProduceLargeAcceptedStep)
   {
     constexpr Real tolerance = Real(0.01);
@@ -1186,8 +1306,9 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(state.report.geometricTargetReached);
   }
 
-  TEST(Rodin_Adaptation_SWIFTSolver, InterfaceVerticesContributeToSupremum)
+  TEST(Rodin_Adaptation_SWIFTSolver, InterfaceCoveringDeterminesSupremum)
   {
+    const auto check = []<size_t Order>() {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh.scale(Real(0.5));
     mesh.getConnectivity().compute(2, 1);
@@ -1208,7 +1329,12 @@ namespace Rodin::Tests::Unit
         mesh.setAttribute({1, face->getIndex()}, Interface);
       }
     }
-    P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, 2);
+      auto fes = [&] {
+        if constexpr (Order == 1)
+          return P1<Math::SpatialVector<Real>, LocalMesh>(mesh, 2);
+        else
+          return H1(std::integral_constant<size_t, Order>{}, mesh, 2);
+      }();
     TrialFunction trial(fes);
     TestFunction test(fes);
     SWIFT::Problem solver(trial, test);
@@ -1216,6 +1342,7 @@ namespace Rodin::Tests::Unit
     p.model.h = Real(0.5);
     p.interfaceAttribute = Interface;
     p.convergence.tolerance.geometric = Real(0.1);
+      p.sampling.subdivision = 2;
     solver.setParameters(p);
     RealFunction phi([](const Point& point) {
       const Real y = Real(2) * point.y() - Real(1);
@@ -1227,7 +1354,25 @@ namespace Rodin::Tests::Unit
     });
     const auto report = solver.solve(phi, grad);
     EXPECT_EQ(report.iterations, 0u);
-    EXPECT_NEAR(report.geometricSup, Real(0.05) / std::sqrt(Real(1.04)), Real(1e-12));
+      const Real sampledY = Real(5) / Real(6);
+      const Real expected = Real(0.05) * sampledY * sampledY /
+        std::sqrt(Real(1) + Real(0.04) * sampledY * sampledY);
+      EXPECT_NEAR(report.geometricSup, expected, Real(1e-12));
+      p.quadrature.validation = 4;
+      solver.setParameters(p);
+      const auto lowerOrder = solver.solve(phi, grad);
+      EXPECT_NEAR(lowerOrder.geometricSup, expected, Real(1e-12));
+      p.sampling.subdivision = 4;
+      solver.setParameters(p);
+      const auto refined = solver.solve(phi, grad);
+      const Real refinedY = Real(9) / Real(10);
+      const Real refinedExpected = Real(0.05) * refinedY * refinedY /
+        std::sqrt(Real(1) + Real(0.04) * refinedY * refinedY);
+      EXPECT_NEAR(refined.geometricSup, refinedExpected, Real(1e-12));
+      EXPECT_GT(refined.geometricSup, report.geometricSup);
+    };
+    check.template operator()<1>();
+    check.template operator()<2>();
   }
 
   TEST(Rodin_Adaptation_SWIFTSolver, InvalidGeometryCannotReachAutomaticTarget)

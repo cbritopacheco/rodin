@@ -119,6 +119,10 @@ int main(int argc, char** argv)
         mesh.setAttribute({dimension - 1, face->getIndex()}, Boundary);
     }
 
+    Alert::Info() << "MinSTCut classification: " << classified.inside.size()
+                  << " solid cells, " << classified.outside.size() << " fluid cells, "
+                  << classified.cut.size() << " interface facets." << Alert::Raise;
+
     // The only degree-dependent choice: all spaces use the same SWIFT problem.
     //! [swift-problem]
     H1 space(std::integral_constant<size_t, Degree>{}, mesh, dimension);
