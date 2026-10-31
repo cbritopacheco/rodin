@@ -543,10 +543,12 @@ namespace Rodin::Examples::Heart::Atrium
     const auto uNormal = Dot(m_u, normal) * normal;
     const auto uTangential = m_u - uNormal;
 
+    // Both pressure openings may reverse flow. With the outward normal,
+    // inward relative advection supplies the potentially negative energy flux.
     const auto inletBackflow =
-      0.5 * rho * m_cfg.inletBackflowStabilization * Max(Dot(m_uOld, normal), 0.0);
+      0.5 * rho * m_cfg.inletBackflowStabilization * Max(-Dot(transport, normal), 0.0);
     const auto outletBackflow =
-      0.5 * rho * m_cfg.outletBackflowStabilization * Max(-Dot(m_uOld, normal), 0.0);
+      0.5 * rho * m_cfg.outletBackflowStabilization * Max(-Dot(transport, normal), 0.0);
 
     // Time-dependent scalars enter through these, so the form is assigned once
     // and only reassembled.

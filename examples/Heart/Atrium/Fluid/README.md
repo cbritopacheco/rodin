@@ -40,6 +40,20 @@ are retained in the flow problem. The default uses a prescribed outlet pressure.
 Ventricular coupling, species transport, and orthogonal-subscale corrections are
 optional parameters, disabled by default.
 
+Open pressure boundaries permit flow reversal. With outward normal $n$ and
+relative advecting velocity $b=u^n-a$, both inlet and outlet residuals include
+
+$$
+\int_{\Gamma_o}\frac{\rho}{2}[-b\cdot n]_+\,u^{n+1}\cdot v\,dS.
+$$
+
+The correction acts on the full velocity, including normal and tangential
+components. For fixed openings, its sum with the convective boundary-energy
+term is $\frac{\rho}{2}\int_{\Gamma_o}[b\cdot n]_+|u^{n+1}|^2\,dS\geq0$
+when the backflow coefficient is one. It supplies no prescribed flow and does
+not introduce a valve. Opening impedance and tangential damping, when enabled,
+remain separate terms.
+
 All reported opening fluxes use the outward fluid normal: inflow is negative
 and outflow is positive. For pressure-penalty coefficient $\epsilon_p$, the
 constant pressure test gives the global balance

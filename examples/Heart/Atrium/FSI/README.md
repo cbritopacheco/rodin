@@ -101,7 +101,10 @@ of the two nodal Robin residual blocks, in kPa. This norm is mesh dependent;
 it is not a normalized interface error. `-atrium_fsi_solid_atol` defaults to
 $10^{-10}$ for the inner solid solve. Native interface SNES/KSP options use
 `-atrium_fsi_interface_`, for example
-`-atrium_fsi_interface_ksp_monitor`. Newton failure rejects the step.
+`-atrium_fsi_interface_ksp_monitor`. A trial exceeding the fluid velocity guard is reported to SNES as a function-domain
+error, allowing line-search backtracking. Such trials do not publish a valid
+evaluated-state cache or commit physical histories. An invalid initial state,
+unrecoverable solver error, or Newton failure rejects the step.
 `-atrium_fsi_check_tangent` enables residual Taylor checks for verification.
 
 ## Budgeted Robin sweeps

@@ -51,20 +51,31 @@ namespace Rodin::Examples::Heart::Atrium
 
     struct InterfaceNewtonContext
     {
-      std::function<void(::Vec, ::Vec)> residual;
+      std::function<bool(::Vec, ::Vec)> residual;
       std::function<void(::Vec, ::Vec)> multiply;
       std::function<void(::Vec)> linearize;
       std::function<void()> observe;
       std::string failure;
-      size_t evaluations = 0, products = 0;
+      size_t evaluations = 0, products = 0, rejectedTrials = 0;
       bool root = false;
 
-      static PetscErrorCode function(::SNES, ::Vec x, ::Vec f, void* data)
+      static PetscErrorCode function(::SNES snes, ::Vec x, ::Vec f, void* data)
       {
         auto& c = *static_cast<InterfaceNewtonContext*>(data);
         try
         {
-          c.residual(x, f);
+          if (!c.residual(x, f))
+          {
+            ++c.rejectedTrials;
+            if (c.root)
+            {
+              Log("FSI/Newton trial", false, Log::Status::Retry)
+                << "rejected: " << c.failure << Alert::Raise;
+            }
+            const PetscErrorCode ierr = SNESSetFunctionDomainError(snes);
+            assert(ierr == PETSC_SUCCESS);
+            return ierr;
+          }
           return PETSC_SUCCESS;
         }
         catch (const std::exception& e)
@@ -200,7 +211,7 @@ namespace Rodin::Examples::Heart::Atrium
         ierr = VecCopy(evaluatedResidual, output);
         assert(ierr == PETSC_SUCCESS);
         ++stateCacheHits;
-        return;
+        return true;
       }
       evaluatedStateValid = false;
       ierr = VecCopy(input, evaluatedInput);
@@ -229,8 +240,11 @@ namespace Rodin::Examples::Heart::Atrium
       moveFluidMesh();
       if (!m_fluid.solveFlow())
       {
-        Alert::Exception() << "FSI fluid trial failed the numerical velocity guard"
-                           << Alert::Raise;
+        context.failure =
+          "fluid velocity guard: speed=" + std::to_string(m_fluid.m_speed) +
+          " m/s, limit=" + std::to_string(m_fluid.m_cfg.maxVelocity) + " m/s";
+        residualSeconds += MPI_Wtime() - residualStart;
+        return false;
       }
       updateTraction();
       ierr = VecWAXPY(rg, -1, m_solid.m_robinData.sync().getData(), g);
@@ -241,9 +255,15 @@ namespace Rodin::Examples::Heart::Atrium
       assert(ierr == PETSC_SUCCESS);
       evaluatedStateValid = true;
       residualSeconds += MPI_Wtime() - residualStart;
+      context.failure.clear();
+      return true;
     };
     context.residual = evaluate;
-    evaluate(x, residual);
+    if (!evaluate(x, residual))
+    {
+      Alert::Exception() << "Invalid initial interface state: " << context.failure
+                         << Alert::Raise;
+    }
     ierr = VecDuplicate(m_solid.m_mechanics.getLinearSystem().getSolution(), &solidRhs);
     assert(ierr == PETSC_SUCCESS);
     ierr = VecDuplicate(solidRhs, &solidDelta);
@@ -517,7 +537,11 @@ namespace Rodin::Examples::Heart::Atrium
     const bool checkTangent = m_parameters.checkTangent;
     bool checked = false;
     context.linearize = [&](::Vec input) {
-      evaluate(input, residual);
+      if (!evaluate(input, residual))
+      {
+        Alert::Exception() << "Invalid interface linearization state: " << context.failure
+                           << Alert::Raise;
+      }
       const auto assembleTangent = [&]() {
         const double setupStart = MPI_Wtime();
         m_solid.m_mechanics.assemble(AssemblyTarget::LHS);
@@ -569,7 +593,11 @@ namespace Rodin::Examples::Heart::Atrium
           {
             ierr = VecWAXPY(xh, h, v, input);
             assert(ierr == PETSC_SUCCESS);
-            evaluate(xh, fh);
+            if (!evaluate(xh, fh))
+            {
+              Alert::Exception()
+                << "Invalid interface Taylor point: " << context.failure << Alert::Raise;
+            }
             ierr = VecAXPY(fh, -1, base);
             assert(ierr == PETSC_SUCCESS);
             ierr = VecAXPY(fh, -h, jv);
@@ -616,7 +644,11 @@ namespace Rodin::Examples::Heart::Atrium
           ierr = VecDestroy(v);
           assert(ierr == PETSC_SUCCESS);
         }
-        evaluate(input, residual);
+        if (!evaluate(input, residual))
+        {
+          Alert::Exception() << "Cannot restore interface Taylor state: "
+                             << context.failure << Alert::Raise;
+        }
         assembleTangent();
       }
     };
@@ -682,7 +714,11 @@ namespace Rodin::Examples::Heart::Atrium
       Alert::Exception() << "Analytic interface Newton failed, reason " << int(reason)
                          << Alert::Raise;
     }
-    evaluate(x, residual);
+    if (!evaluate(x, residual))
+    {
+      Alert::Exception() << "Invalid accepted interface state: " << context.failure
+                         << Alert::Raise;
+    }
     PetscReal norm = 0;
     ierr = VecNorm(residual, NORM_2, &norm);
     assert(ierr == PETSC_SUCCESS);
@@ -704,6 +740,7 @@ namespace Rodin::Examples::Heart::Atrium
     {
       Log("FSI/Newton timing") << "cache_hits=" << stateCacheHits
                                << " actual_evaluations=" << context.evaluations
+                               << " rejected_trials=" << context.rejectedTrials
                                << " sensitivity_actions=" << sensitivityActions
                                << " residual_seconds=" << residualSeconds
                                << " tangent_setup_seconds=" << tangentSetupSeconds
