@@ -578,7 +578,7 @@ namespace Rodin::Tests::Unit
         {
           if (face->getAttribute() != Fixed && face->getAttribute() != Slip)
             continue;
-          const auto& qf = QF::PolytopeQuadratureFormula::get(2, face->getGeometry());
+          const auto& qf = QF::QuadratureFormula::get(2, face->getGeometry());
           const auto& quadrature = face->getQuadrature(qf);
           for (size_t q = 0; q < quadrature.getSize(); ++q)
           {

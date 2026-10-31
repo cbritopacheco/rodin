@@ -367,7 +367,7 @@ namespace KelvinBall
       {
         if (face->getAttribute() != pair.slave)
           continue;
-        const auto& qf = QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
+        const auto& qf = QF::QuadratureFormula::get(4, face->getGeometry());
         const auto& quadrature = face->getQuadrature(qf);
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {
@@ -538,7 +538,7 @@ namespace KelvinBall
       {
         if (face->getAttribute() != pair.slave)
           continue;
-        const auto& qf = QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
+        const auto& qf = QF::QuadratureFormula::get(4, face->getGeometry());
         const auto& quadrature = face->getQuadrature(qf);
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {
@@ -610,7 +610,7 @@ namespace KelvinBall
       {
         if (face->getAttribute() != pair.slave)
           continue;
-        const auto& qf = QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
+        const auto& qf = QF::QuadratureFormula::get(4, face->getGeometry());
         const auto& quadrature = face->getQuadrature(qf);
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {
@@ -650,7 +650,7 @@ namespace KelvinBall
       {
         if (face->getAttribute() != pair.slave)
           continue;
-        const auto& qf = QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
+        const auto& qf = QF::QuadratureFormula::get(4, face->getGeometry());
         const auto& quadrature = face->getQuadrature(qf);
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {
@@ -680,7 +680,7 @@ namespace KelvinBall
       {
         if (face->getAttribute() != pair.slave)
           continue;
-        const auto& qf = QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
+        const auto& qf = QF::QuadratureFormula::get(4, face->getGeometry());
         const auto& quadrature = face->getQuadrature(qf);
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {

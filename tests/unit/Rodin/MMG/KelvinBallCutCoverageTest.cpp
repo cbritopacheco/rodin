@@ -112,7 +112,7 @@ namespace KelvinBall
         const auto face = mesh.getPolytope(2, faces[local]);
         if (face->getAttribute() != SigmaMinus)
           continue;
-        const auto& formula = QF::PolytopeQuadratureFormula::get(2, face->getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(2, face->getGeometry());
         const auto& point = face->getQuadrature(formula).getPoint(0);
         Math::SpatialPoint reference;
         cell->getTransformation().inverse(reference, point.getPhysicalCoordinates());
@@ -279,7 +279,7 @@ namespace KelvinBall
       {
         if (face->getAttribute() != pair.slave)
           continue;
-        const auto& formula = QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(4, face->getGeometry());
         const auto& quadrature = face->getQuadrature(formula);
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {

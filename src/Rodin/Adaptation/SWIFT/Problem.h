@@ -2244,8 +2244,9 @@ namespace Rodin::Adaptation::SWIFT
             const auto& quadrature = face->getQuadrature(qf);
             const Geometry::Polytope::Traits traits(face->getGeometry());
             const auto& witnesses = QualityCovering::get(face->getGeometry(),
-              m_parameters.sampling.getSubdivision(fe.getOrder(),
-                face->getTransformation().getOrder(),
+              m_parameters.sampling.getSubdivision(
+                fe.getDegree().value_or(2 * fe.getOrder()),
+                face->getTransformation().getDegree().value_or(2),
                 traits.getVertexCount() == face->getDimension() + 1));
             const auto& samples = face->getQuadrature(witnesses);
             for (std::size_t q = 0; q < samples.getSize(); ++q)
