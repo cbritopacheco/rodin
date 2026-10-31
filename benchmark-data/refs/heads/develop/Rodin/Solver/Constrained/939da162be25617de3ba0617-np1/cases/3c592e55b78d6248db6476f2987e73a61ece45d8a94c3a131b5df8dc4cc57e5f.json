@@ -94,6 +94,96 @@
           }
         }
       ]
+    },
+    {
+      "commit": "0a1918166d3a6cca7d1fffe4e6e58120d08c16ff",
+      "date": "2026-10-31T23:52:04.088297+00:00",
+      "run": "41194332747.1",
+      "results": [
+        {
+          "name": "ReactionDiffusion/Constrained/H1/P1/Complex/Quadrilateral/3/real_time",
+          "value": 1661.8681328962825,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            1661.8681328962825
+          ],
+          "records": [
+            {
+              "name": "ReactionDiffusion/Constrained/H1/P1/Complex/Quadrilateral/3/real_time",
+              "family_index": 23,
+              "per_family_instance_index": 0,
+              "run_name": "ReactionDiffusion/Constrained/H1/P1/Complex/Quadrilateral/3/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 167593,
+              "real_time": 1661.8681328962825,
+              "cpu_time": 1673.5351715038437,
+              "time_unit": "ns",
+              "cells": 4.0,
+              "degree": 1.0,
+              "dofs": 9.0,
+              "initial_relative_residual": 0.9999999999999999,
+              "local_entries_per_operator_term": 64.0,
+              "nnz": 9.0,
+              "quadrature_order": 8.0,
+              "quadrature_points_per_cell": 25.0,
+              "relative_coefficient_error": 3.555559264902523e-17,
+              "relative_residual": 0.0,
+              "solver_reported_iterations": 0.0,
+              "system_rows": 9.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-31T12:51:59+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinConstrainedSolveBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2652,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.897949,
+              0.27002,
+              0.0952148
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "CG setup and solve; zero initial guess"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

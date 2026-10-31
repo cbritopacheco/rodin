@@ -100,6 +100,102 @@
           }
         }
       ]
+    },
+    {
+      "commit": "0a1918166d3a6cca7d1fffe4e6e58120d08c16ff",
+      "date": "2026-10-31T23:52:04.088297+00:00",
+      "run": "41194332747.1",
+      "results": [
+        {
+          "name": "BasisScaling/Right/H1/P4/Complex/Vector/Tetrahedron/2/1/8/real_time",
+          "value": 60577.84698742781,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            60577.84698742781
+          ],
+          "records": [
+            {
+              "name": "BasisScaling/Right/H1/P4/Complex/Vector/Tetrahedron/2/1/8/real_time",
+              "family_index": 19,
+              "per_family_instance_index": 7,
+              "run_name": "BasisScaling/Right/H1/P4/Complex/Vector/Tetrahedron/2/1/8/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 4614,
+              "real_time": 60577.84698742781,
+              "cpu_time": 60573.159947984444,
+              "time_unit": "ns",
+              "ambient_dimension": 3.0,
+              "basis_values": 3080.0,
+              "cells": 1.0,
+              "components": 2.0,
+              "degree": 4.0,
+              "dimension": 3.0,
+              "field_columns": 1.0,
+              "field_rows": 2.0,
+              "fixture_cells": 6.0,
+              "global_dofs": 250.0,
+              "local_basis": 70.0,
+              "quadrature_order": 8.0,
+              "quadrature_points": 44.0,
+              "reference_prepared_protocol": 0.0,
+              "reference_table_present_after": 1.0,
+              "reference_table_present_before": 1.0,
+              "retained_output_bytes": 98560.0,
+              "scalar_basis": 35.0,
+              "stored_scalar_values": 6160.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-31T15:38:23+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinBasisScalingBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3247,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.69873,
+              0.310547,
+              0.134766
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "Warmed basis-value production; no pair contraction, integration or assembly"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

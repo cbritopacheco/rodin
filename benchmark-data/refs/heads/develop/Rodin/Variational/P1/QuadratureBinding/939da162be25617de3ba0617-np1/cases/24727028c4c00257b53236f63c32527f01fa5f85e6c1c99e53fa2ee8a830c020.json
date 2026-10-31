@@ -93,6 +93,95 @@
           }
         }
       ]
+    },
+    {
+      "commit": "0a1918166d3a6cca7d1fffe4e6e58120d08c16ff",
+      "date": "2026-10-31T23:52:04.088297+00:00",
+      "run": "41194332747.1",
+      "results": [
+        {
+          "name": "P1/Binding/Mass/Complex/Point/Refresh/2/16/real_time",
+          "value": 231.85269330428068,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            231.85269330428068
+          ],
+          "records": [
+            {
+              "name": "P1/Binding/Mass/Complex/Point/Refresh/2/16/real_time",
+              "family_index": 12,
+              "per_family_instance_index": 8,
+              "run_name": "P1/Binding/Mass/Complex/Point/Refresh/2/16/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 1207216,
+              "real_time": 231.85269330428068,
+              "cpu_time": 231.82498078223432,
+              "time_unit": "ns",
+              "alternate_order": 20.0,
+              "alternate_samples": 1.0,
+              "ambient_dimension": 3.0,
+              "base_order": 16.0,
+              "base_samples": 1.0,
+              "columns": 2.0,
+              "components": 2.0,
+              "dimension": 0.0,
+              "entries": 4.0,
+              "reference_error": 0.0,
+              "rows": 2.0,
+              "specialized": 1.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-31T16:32:06+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinP1QuadratureBindingBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3244,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.70752,
+              0.210449,
+              0.0732422
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "One-cell P1 binding; warm and order-refresh preparation"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

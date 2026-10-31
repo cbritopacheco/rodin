@@ -102,6 +102,104 @@
           }
         }
       ]
+    },
+    {
+      "commit": "0a1918166d3a6cca7d1fffe4e6e58120d08c16ff",
+      "date": "2026-10-31T23:52:04.088297+00:00",
+      "run": "41194332747.1",
+      "results": [
+        {
+          "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Wedge/3/real_time",
+          "value": 68664.07948982496,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            68664.07948982496
+          ],
+          "records": [
+            {
+              "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Wedge/3/real_time",
+              "family_index": 13,
+              "per_family_instance_index": 0,
+              "run_name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Wedge/3/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 4076,
+              "real_time": 68664.07948982496,
+              "cpu_time": 68717.28631007395,
+              "time_unit": "ns",
+              "cells": 16.0,
+              "degree": 1.0,
+              "dimension": 3.0,
+              "local_basis_per_cell": 6.0,
+              "local_entries_per_operator_term": 576.0,
+              "mass_imaginary": 1.0,
+              "mass_real": -64.0,
+              "nnz": 27.0,
+              "omitted_mass_normalized_residual": 1.0000000000000004,
+              "omitted_mass_relative_action": 0.5047546941497515,
+              "probe_real_rayleigh": -0.8333333333333343,
+              "quadrature_order": 12.0,
+              "quadrature_points_per_cell": 224.0,
+              "relative_coefficient_error": 1.611648293269684e-15,
+              "relative_residual": 3.5685548418572275e-16,
+              "restart": 50.0,
+              "rows": 27.0,
+              "scalar_bytes": 16.0,
+              "solver_reported_error": 0.0,
+              "solver_reported_iterations": 27.0
+            }
+          ],
+          "context": {
+            "date": "2026-10-31T12:56:07+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinHelmholtzSolveBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3682,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.0332,
+              0.361816,
+              0.130859
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "GMRES setup and solve; zero initial guess"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",
