@@ -1186,8 +1186,9 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(state.report.geometricTargetReached);
   }
 
-  TEST(Rodin_Adaptation_SWIFTSolver, InterfaceVerticesContributeToSupremum)
+  TEST(Rodin_Adaptation_SWIFTSolver, InterfaceCoveringDeterminesSupremum)
   {
+    const auto check = []<size_t Order>() {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh.scale(Real(0.5));
     mesh.getConnectivity().compute(2, 1);
@@ -1208,7 +1209,12 @@ namespace Rodin::Tests::Unit
         mesh.setAttribute({1, face->getIndex()}, Interface);
       }
     }
-    P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, 2);
+      auto fes = [&] {
+        if constexpr (Order == 1)
+          return P1<Math::SpatialVector<Real>, LocalMesh>(mesh, 2);
+        else
+          return H1(std::integral_constant<size_t, Order>{}, mesh, 2);
+      }();
     TrialFunction trial(fes);
     TestFunction test(fes);
     SWIFT::Problem solver(trial, test);
@@ -1216,6 +1222,7 @@ namespace Rodin::Tests::Unit
     p.model.h = Real(0.5);
     p.interfaceAttribute = Interface;
     p.convergence.tolerance.geometric = Real(0.1);
+      p.sampling.subdivision = 2;
     solver.setParameters(p);
     RealFunction phi([](const Point& point) {
       const Real y = Real(2) * point.y() - Real(1);
@@ -1227,7 +1234,25 @@ namespace Rodin::Tests::Unit
     });
     const auto report = solver.solve(phi, grad);
     EXPECT_EQ(report.iterations, 0u);
-    EXPECT_NEAR(report.geometricSup, Real(0.05) / std::sqrt(Real(1.04)), Real(1e-12));
+      const Real sampledY = Real(5) / Real(6);
+      const Real expected = Real(0.05) * sampledY * sampledY /
+        std::sqrt(Real(1) + Real(0.04) * sampledY * sampledY);
+      EXPECT_NEAR(report.geometricSup, expected, Real(1e-12));
+      p.quadrature.validation = 4;
+      solver.setParameters(p);
+      const auto lowerOrder = solver.solve(phi, grad);
+      EXPECT_NEAR(lowerOrder.geometricSup, expected, Real(1e-12));
+      p.sampling.subdivision = 4;
+      solver.setParameters(p);
+      const auto refined = solver.solve(phi, grad);
+      const Real refinedY = Real(9) / Real(10);
+      const Real refinedExpected = Real(0.05) * refinedY * refinedY /
+        std::sqrt(Real(1) + Real(0.04) * refinedY * refinedY);
+      EXPECT_NEAR(refined.geometricSup, refinedExpected, Real(1e-12));
+      EXPECT_GT(refined.geometricSup, report.geometricSup);
+    };
+    check.template operator()<1>();
+    check.template operator()<2>();
   }
 
   TEST(Rodin_Adaptation_SWIFTSolver, InvalidGeometryCannotReachAutomaticTarget)
