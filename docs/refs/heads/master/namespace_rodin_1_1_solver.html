@@ -5,11 +5,11 @@
   <title>Rodin::Solver module | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -172,7 +172,7 @@ $ LDL^T $
 <use x='18.008982' y='0' xlink:href='#eq4-g1-76'/>
 <use x='25.973488' y='-4.338437' xlink:href='#eq4-g0-84'/>
 </g>
-</svg></li></ul><p>Iterative solvers (for large systems):</p><ul><li><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> — Conjugate Gradient (SPD systems)</li><li><a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> — Bi-conjugate gradient stabilized</li><li><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> — Generalized Minimum Residual</li><li><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> — Deflated GMRES</li><li><a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a> — Minimum Residual (symmetric systems)</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s.html" class="m-doc">IDRS</a> — Induced Dimension Reduction</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a> — IDR(s) with stabilization</li><li><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a> — Least-squares CG</li></ul><p>Usage:</p><pre class="m-code"><span class="c1">// Inline iterative solver — most common pattern</span>
+</svg></li></ul><p>Iterative solvers (for large systems):</p><ul><li><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> — Conjugate Gradient (SPD systems)</li><li><a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> — Bi-conjugate gradient stabilized</li><li><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> — Generalized Minimum Residual</li><li><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> — Deflated GMRES</li><li><a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a> — Minimum Residual (symmetric systems)</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s.html" class="m-doc">IDRS</a> — Induced Dimension Reduction</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a> — IDR(s) with stabilization</li><li><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a> — Least-squares CG</li></ul><p>A solver can be constructed from an assembled form or problem.</p><pre class="m-code"><span class="c1">// Inline iterative solver — most common pattern</span>
 <span class="n">Solver</span><span class="o">::</span><span class="nc">CG</span><span class="p">(</span><span class="n">problem</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
 
 <span class="c1">// Configured iterative solver</span>

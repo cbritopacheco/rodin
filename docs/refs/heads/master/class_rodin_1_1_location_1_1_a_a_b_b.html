@@ -5,11 +5,11 @@
   <title>Rodin::Location::AABB class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -217,7 +217,7 @@ $ B_K $
 <use x='218.453888' y='-1.195529' xlink:href='#eq7-g2-75'/>
 <use x='226.656557' y='-2.988792' xlink:href='#eq7-g3-58'/>
 </g>
-</svg></div><p>Tree nodes reject groups of polytopes, and leaf entries reject individual polytopes, using componentwise box containment. Optional control-hull projections reject further candidates before inversion.</p></li><li>Narrow phase. For each surviving candidate, the actual transformation is inverted by controlled Newton iteration, retrying from other reference points if the centroid attempt fails. A reference coordinate slightly outside the polytope is clipped back to it, then accepted only if the clipped point maps within physical tolerance of the query. The AABB never certifies membership; it only selects candidates to test.</li></ul><p>Boxes bound the whole curved image, not just sampled points on it. The transformation is resampled on a unisolvent reference lattice and converted into control points of a non-negative partition of unity (Bernstein on simplices, tensor Bernstein on quadrilaterals, hexahedra and wedges, the collapsed-coordinate basis on pyramids), whose extrema bound the image in exact arithmetic. Numerical boxes include a conversion roundoff allowance. Degree-one factors need no conversion: the mapped vertices are already the control points, so affine and multilinear cells keep the cheap vertex box. If a box cannot be computed reliably, that entry remains unpruned. An exhaustive narrow-phase fallback can also be enabled with setExhaustiveFallback(). The degree is obtained from PolytopeTransformation::getBounds(); unsupported maps remain unpruned.</p><p>Physical tolerance is relative to the mesh bounding-box diagonal. The reference tolerance only permits a small inversion overshoot before clipping; physical residual is checked again after clipping. Queries are thread-safe for concurrent queries on a fixed mesh and configuration: setters and mesh mutation must not overlap queries. The lazy build is guarded by a mutex and transformations are immutable after construction.</p></section>
+</svg></div><p>Tree nodes reject groups of polytopes, and leaf entries reject individual polytopes, using componentwise box containment. Optional control-hull projections reject further candidates before inversion.</p></li><li>Narrow phase. For each surviving candidate, the actual transformation is inverted by controlled Newton iteration, retrying from other reference points if the centroid attempt fails. A reference coordinate slightly outside the polytope is clipped back to it, then accepted only if the clipped point maps within physical tolerance of the query. The AABB never certifies membership; it only selects candidates to test.</li></ul><p>Boxes bound the whole curved image, not just sampled points on it. The transformation is resampled on a unisolvent reference lattice and converted into control points of a non-negative partition of unity (Bernstein on simplices, tensor Bernstein on quadrilaterals, hexahedra and wedges, the collapsed-coordinate basis on pyramids), whose extrema bound the image in exact arithmetic. Numerical boxes include a conversion roundoff allowance. Degree-one factors need no conversion because the mapped vertices are already the control points, so affine and multilinear cells keep the cheap vertex box. If a box cannot be computed reliably, that entry remains unpruned. An exhaustive narrow-phase fallback can also be enabled with setExhaustiveFallback(). The degree is obtained from PolytopeTransformation::getBounds(); unsupported maps remain unpruned.</p><p>Physical tolerance is relative to the mesh bounding-box diagonal. The reference tolerance only permits a small inversion overshoot before clipping; physical residual is checked again after clipping. Queries are thread-safe for concurrent queries on a fixed mesh and configuration. Setters and mesh mutation must not overlap queries. The lazy build is guarded by a mutex and transformations are immutable after construction.</p></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -312,7 +312,7 @@ $ B_K $
                 </tr>
               </tbody>
             </table>
-<p>Entries retain their original mesh indices. Omitted dimensions and empty lists have no candidates, including in exhaustive fallback. Ownership and other selection policies belong to the caller. The tolerance scale still uses all mesh vertices. The candidate lists are a snapshot: reconstruct after topology, geometry or selection changes. Empty lists above the mesh dimension are permitted for empty shards.</p>
+<p>Entries retain their original mesh indices. Omitted dimensions and empty lists have no candidates, including in exhaustive fallback. Ownership and other selection policies belong to the caller. The tolerance scale still uses all mesh vertices. The candidate lists are a snapshot. Reconstruct after topology, geometry or selection changes. Empty lists above the mesh dimension are permitted for empty shards.</p>
           </div></section>
           <section class="m-doc-details" id="a63801bfa6ec89ed42b04b98140540687"><div>
             <h3>

@@ -5,11 +5,11 @@
   <title>Rodin::Variational::ReferenceTabulationCache class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -78,7 +78,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md527">Architecture</a></li>
+            <li><a href="#autotoc_md524">Architecture</a></li>
             <li>
               Reference
               <ul>
@@ -162,7 +162,7 @@ $\partial_i\phi_a(\widehat x_q)$
 <use x='32.689464' y='1.793263' xlink:href='#eq4-g1-113'/>
 <use x='37.254347' y='0' xlink:href='#eq4-g3-41'/>
 </g>
-</svg> in quadrature-major order. No basis conversion, physical coordinates or mapped derivatives are stored.</p><section id="autotoc_md527"><h2><a href="#autotoc_md527">Architecture</a></h2><p>The bounded thread-local store is distinct for each element/scalar type. Persistent formula address and reference geometry identify an entry. Published formulas own immutable samples until process termination. Borrowed tables are valid only until a subsequent insertion evicts their slot; callers must consume them immediately. Arbitrary coefficient callbacks can insert tables even when their returned mathematical value is constant. Evaluate such callbacks before borrowing each table, and finish consuming it before invoking another callback. Eviction and cross-thread misses permit direct pointwise evaluation. Cells share reference data, not geometry-dependent matrices. Both public lookup operations use the same formula search. Construction is a separate stage: it retires an evicted key before changing storage and publishes the new key only after the element has filled the complete table. A request obtains its thread-local cache once and shares that reference between its lookup and construction stages. An element&#x27;s basis must be determined solely by its type and reference geometry, as for P1 and fixed-degree H1; mutable basis parameters are not represented by this key. An element may supply a public bulk tabulation operation. It sizes and fills the caller-owned table; cache ownership, lookup, eviction and publication stay here. Elements without that operation use direct basis evaluation.</p></section>
+</svg> in quadrature-major order. No basis conversion, physical coordinates or mapped derivatives are stored.</p><section id="autotoc_md524"><h2><a href="#autotoc_md524">Architecture</a></h2><p>The bounded thread-local store is distinct for each element/scalar type. Persistent formula address and reference geometry identify an entry. Published formulas own immutable samples until process termination. Borrowed tables are valid only until a subsequent insertion evicts their slot; callers must consume them immediately. Arbitrary coefficient callbacks can insert tables even when their returned mathematical value is constant. Evaluate such callbacks before borrowing each table, and finish consuming it before invoking another callback. Eviction and cross-thread misses permit direct pointwise evaluation. Cells share reference data, not geometry-dependent matrices. Both public lookup operations use the same formula search. Construction is a separate stage that retires an evicted key before changing storage and publishes the new key only after the element has filled the complete table. A request obtains its thread-local cache once and shares that reference between its lookup and construction stages. An element&#x27;s basis must be determined solely by its type and reference geometry, as for P1 and fixed-degree H1; mutable basis parameters are not represented by this key. An element may supply a public bulk tabulation operation. It sizes and fills the caller-owned table; cache ownership, lookup, eviction and publication stay here. Elements without that operation use direct basis evaluation.</p></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">

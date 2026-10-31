@@ -5,11 +5,11 @@
   <title>Rodin/Variational/DirichletBC.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -109,7 +109,7 @@ $ u\in V_h^u $
 <use x='30.699916' y='-4.338437' xlink:href='#eq1-g1-117'/>
 <use x='28.098587' y='3.109114' xlink:href='#eq1-g1-104'/>
 </g>
-</svg> over selected codimension-one mesh facets. With no <code>.on(...)</code> selector, this means the exterior boundary. With attributes, this also includes tagged interior facets such as FSI interfaces. Two flavours share the same template name and the same abstract base <code>Rodin::Variational::DirichletBCBase</code>, separated only by the type of the second argument:</p><ol><li><p><strong>Value-prescribing BC</strong> — <code>DirichletBC(u, g)</code> with <code>g</code> a <code>FunctionBase</code> (scalar, vector, or matrix-valued):</p><div class="m-math"><svg style="width: 14.090em; height: 1.245em;" viewBox="126.639953 -11.955168 135.263088 11.955168">
+</svg> over selected codimension-one mesh facets. With no <code>.on(...)</code> selector, this means the exterior boundary. With attributes, this also includes tagged interior facets such as FSI interfaces. Two flavours share the same template name and the same abstract base <code>Rodin::Variational::DirichletBCBase</code>, separated only by the type of the second argument:</p><ol><li><p><strong>Value-prescribing BC</strong> — <code>DirichletBC(u, g)</code> with <code>g</code> a <code>FunctionBase</code> (scalar, vector, or matrix-valued).</p><div class="m-math"><svg style="width: 14.090em; height: 1.245em;" viewBox="126.639953 -11.955168 135.263088 11.955168">
 <title>
 \[     u(x) \;=\; g(x), \qquad x \in \Gamma_D.
 \]
@@ -176,7 +176,7 @@ $ v\in V_h^v $
 <use x='30.125695' y='-4.338437' xlink:href='#eq4-g1-118'/>
 <use x='27.524366' y='3.109114' xlink:href='#eq4-g1-104'/>
 </g>
-</svg>:</p><div class="m-math"><svg style="width: 15.958em; height: 1.245em;" viewBox="117.672984 -11.955168 153.197049 11.955168">
+</svg>.</p><div class="m-math"><svg style="width: 15.958em; height: 1.245em;" viewBox="117.672984 -11.955168 153.197049 11.955168">
 <title>
 \[     u(x) \;=\; A(v)(x), \qquad x \in \Gamma_D,
 \]
@@ -260,7 +260,7 @@ $ R\,v $
 <use x='0' y='0' xlink:href='#eq9-g0-82'/>
 <use x='11.001013' y='0' xlink:href='#eq9-g0-118'/>
 </g>
-</svg>, sums of these, etc.). This is <em>algebraic identification</em> of the two unknowns&#x27; boundary DOFs: both sides of the constraint involve degrees of freedom that are still unknown at solve time, not pre-evaluated values.</p><p>The optional three-argument spelling <code>DirichletBC(u, A(v), d)</code> keeps the same linear unknown-dependent part and adds a known defect:</p><div class="m-math"><svg style="width: 19.735em; height: 1.245em;" viewBox="99.544281 -11.955168 189.454459 11.955168">
+</svg>, sums of these, etc.). This is <em>algebraic identification</em> of the two unknowns&#x27; boundary DOFs. Both sides of the constraint involve degrees of freedom that are still unknown at solve time, not pre-evaluated values.</p><p>The optional three-argument spelling <code>DirichletBC(u, A(v), d)</code> keeps the same linear unknown-dependent part and adds a known defect.</p><div class="m-math"><svg style="width: 19.735em; height: 1.245em;" viewBox="99.544281 -11.955168 189.454459 11.955168">
 <title>
 \[     u(x) \;=\; A(v)(x) + d(x), \qquad x \in \Gamma_D.
 \]
@@ -444,7 +444,7 @@ $ V_h^v $
 <use x='9.425679' y='-4.338437' xlink:href='#eq16-g0-118'/>
 <use x='6.82435' y='3.109114' xlink:href='#eq16-g0-104'/>
 </g>
-</svg>.</p><p>The DOF functionals are FE-local: for Lagrange they are nodal point evaluations <svg class="m-math" style="width: 7.677em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 73.701091 11.955168">
+</svg>.</p><p>The DOF functionals are FE-local. For Lagrange they are nodal point evaluations <svg class="m-math" style="width: 7.677em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 73.701091 11.955168">
 <title>
 $ \ell_i^u(w) = w(x_i^u) $
 </title>
@@ -835,7 +835,7 @@ $ A=\mathrm{id} $
 <use x='24.521657' y='0' xlink:href='#eq31-g1-105'/>
 <use x='27.773318' y='0' xlink:href='#eq31-g1-100'/>
 </g>
-</svg>: the dual property gives <svg class="m-math" style="width: 4.730em; height: 1.213em; vertical-align: -0.350em;" viewBox="0 -8.302191 45.40403 11.6452">
+</svg>, the dual property gives <svg class="m-math" style="width: 4.730em; height: 1.213em; vertical-align: -0.350em;" viewBox="0 -8.302191 45.40403 11.6452">
 <title>
 $ C_{sj}=\delta_{sj} $
 </title>
@@ -902,7 +902,7 @@ $ x_s $
 <use x='0' y='0' xlink:href='#eq35-g1-120'/>
 <use x='6.652087' y='1.793263' xlink:href='#eq35-g0-115'/>
 </g>
-</svg>: <svg class="m-math" style="width: 10.777em; height: 1.335em; vertical-align: -0.403em;" viewBox="0 -8.966376 103.460705 12.818614">
+</svg>. <svg class="m-math" style="width: 10.777em; height: 1.335em; vertical-align: -0.403em;" viewBox="0 -8.966376 103.460705 12.818614">
 <title>
 $ C_{(s,\alpha),(s,\beta)} = R_{\alpha\beta}(x_s) $
 </title>
@@ -1120,7 +1120,7 @@ $ \{c_k\} $
 <use x='11.015595' y='1.793263' xlink:href='#eq44-g1-107'/>
 <use x='16.135343' y='0' xlink:href='#eq44-g0-103'/>
 </g>
-</svg>: define an expansion map</p><div class="m-math"><svg style="width: 23.677em; height: 3.736em;" viewBox="80.025132 -35.865862 227.297187 35.865869">
+</svg>, define an expansion map</p><div class="m-math"><svg style="width: 23.677em; height: 3.736em;" viewBox="80.025132 -35.865862 227.297187 35.865869">
 <title>
 \[    \operatorname{expand}(i)=
       \begin{cases}
@@ -1443,7 +1443,7 @@ $ x = T\hat{x}+\hat{d} $
 <use x='54.021145' y='-3.154811' xlink:href='#eq51-g1-94'/>
 <use x='51.955299' y='0' xlink:href='#eq51-g0-100'/>
 </g>
-</svg>, the known defect also shifts the RHS:</p><div class="m-math"><svg style="width: 18.450em; height: 2.242em;" viewBox="105.710641 -21.519514 177.121739 21.519522">
+</svg>, the known defect also shifts the RHS.</p><div class="m-math"><svg style="width: 18.450em; height: 2.242em;" viewBox="105.710641 -21.519514 177.121739 21.519522">
 <title>
 \[    A \leftarrow T^* A T,\qquad
     b \leftarrow T^*\!\left(b - A\hat{d}\right).

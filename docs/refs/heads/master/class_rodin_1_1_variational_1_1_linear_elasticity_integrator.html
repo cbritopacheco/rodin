@@ -5,11 +5,11 @@
   <title>Rodin::Variational::LinearElasticityIntegrator class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -114,7 +114,7 @@
             </li>
           </ul>
         </nav>
-<p>Assembles the bilinear form:</p><div class="m-math"><svg style="width: 25.052em; height: 2.819em;" viewBox="74.02026 -27.065451 240.502462 27.065451">
+<p>Assembles the bilinear form.</p><div class="m-math"><svg style="width: 25.052em; height: 2.819em;" viewBox="74.02026 -27.065451 240.502462 27.065451">
 <title>
 \[  a(u, v) = \int_\Omega \left[\lambda (\nabla \cdot u)
     \overline{\nabla \cdot v}
@@ -426,7 +426,7 @@ $ \varepsilon(u) = \frac{1}{2}(\nabla u + (\nabla u)^T) $
                 </tr>
               </tfoot>
             </table>
-<p>Computes the local elasticity matrix over the given element using quadrature derived from the FE basis order and Lamé parameter orders. At each quadrature point, builds the physical-space Jacobian of each basis function via the reference-to-physical map, then accumulates:</p><div class="m-math"><svg style="width: 37.922em; height: 3.026em;" viewBox="12.243607 -30.242327 364.055785 29.046813">
+<p>Computes the local elasticity matrix over the given element using quadrature derived from the FE basis order and Lamé parameter orders. At each quadrature point, builds the physical-space Jacobian of each basis function via the reference-to-physical map, then accumulates.</p><div class="m-math"><svg style="width: 37.922em; height: 3.026em;" viewBox="12.243607 -30.242327 364.055785 29.046813">
 <title>
 \[  A^K_{ij} = \sum_q w_q |J_q|
     \left[ \lambda \, (\nabla \cdot \phi_j)
@@ -519,7 +519,7 @@ $ \varepsilon(u) = \frac{1}{2}(\nabla u + (\nabla u)^T) $
 <use x='365.40975' y='-29.764132' xlink:href='#eq3-g0-105'/>
 <use x='373.04773' y='-16.493782' xlink:href='#eq3-g3-58'/>
 </g>
-</svg></div><p>Coincident spaces with real-valued parameter ranges use Hermitian reconstruction to halve work. Complex parameter ranges require both triangles: space identity does not imply a Hermitian material operator. Real parameters may act on complex fields through scalar promotion; complex material values are not narrowed into real field storage.</p>
+</svg></div><p>Coincident spaces with real-valued parameter ranges use Hermitian reconstruction to halve work. Complex parameter ranges require both triangles. Space identity does not imply a Hermitian material operator. Real parameters may act on complex fields through scalar promotion; complex material values are not narrowed into real field storage.</p>
           </div></section>
           <section class="m-doc-details" id="a6c0d10cae5d2dba713631afd1af6b991"><div>
             <h3>

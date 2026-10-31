@@ -5,11 +5,11 @@
   <title>Rodin::Alert::RaiseT struct | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -72,7 +72,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_alert.html">Alert</a></div><h1>RaiseT</h1><p class="rodin-reference-brief">Empty tag type for raising an Alert message.</p><p class="rodin-reference-include">Defined in <a href="_raise_8h.html"><code>Rodin/Alert/Raise.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">struct</span><span class="w"> </span><span class="nc">RaiseT</span><span class="p">;</span>
 </pre>
-<p>Tag type used to trigger the raising (output) of an Alert message. When streamed into a Message object using operator&lt;&lt;, it causes the message to be displayed and potentially triggers other actions (such as program termination for Exception types).</p><p>Example usage: <code class="m-code"><span class="nc">Exception</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"An error occurred"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></code></p>
+<p>Tag type used to trigger the raising (output) of an Alert message. When streamed into a Message object using operator&lt;&lt;, it causes the message to be displayed and potentially triggers other actions (such as program termination for Exception types).</p><p>The following example illustrates usage. <code class="m-code"><span class="nc">Exception</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"An error occurred"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></code></p>
       </div>
     </div>
   </div>

@@ -5,11 +5,11 @@
   <title>Rodin::Distance::Rvachev class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -86,7 +86,7 @@
             </li>
           </ul>
         </nav>
-<p>This class implements the Rvachev normalization method, which transforms an arbitrary level set function into an approximate signed distance function. The transformation is given by:</p><div class="m-math"><svg style="width: 14.173em; height: 3.184em;" viewBox="125.642792 -30.563518 136.06187 30.563526">
+<p>This class implements the Rvachev normalization method, which transforms an arbitrary level set function into an approximate signed distance function. The transformation is given by</p><div class="m-math"><svg style="width: 14.173em; height: 3.184em;" viewBox="125.642792 -30.563518 136.06187 30.563526">
 <title>
 \[       d(x) = \frac{u(x)}{\sqrt{u(x)^2 + |\nabla u(x)|^2}}
 \]
@@ -215,7 +215,7 @@ $ \text{sign}(d) = \text{sign}(u) $
 <use x='75.344507' y='0' xlink:href='#eq5-g0-117'/>
 <use x='82.006946' y='0' xlink:href='#eq5-g4-41'/>
 </g>
-</svg></li><li>Gradient magnitude approaches 1 near the interface</li></ul></section><section id="autotoc_md36"><h2><a href="#autotoc_md36">References</a></h2><p><a href="citelist.html#CITEREF_rvachev1974methods" class="m-doc">[9]</a> <a href="citelist.html#CITEREF_rvachev2001transfinite" class="m-doc">[8]</a></p></section><section id="autotoc_md37"><h2><a href="#autotoc_md37">Usage Example</a></h2><pre class="m-code"><span class="nc">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span><span class="w">  </span><span class="c1">// Some level set function</span>
+</svg></li><li>Gradient magnitude approaches 1 near the interface</li></ul></section><section id="autotoc_md36"><h2><a href="#autotoc_md36">References</a></h2><p><a href="citelist.html#CITEREF_rvachev1974methods" class="m-doc">[10]</a> <a href="citelist.html#CITEREF_rvachev2001transfinite" class="m-doc">[9]</a></p></section><section id="autotoc_md37"><h2><a href="#autotoc_md37">Usage Example</a></h2><pre class="m-code"><span class="nc">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span><span class="w">  </span><span class="c1">// Some level set function</span>
 <span class="nc">Rvachev</span><span class="w"> </span><span class="n">rvachev</span><span class="p">;</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">dist</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rvachev</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// Normalized distance approximation</span></pre></section>
         <section id="pub-methods">

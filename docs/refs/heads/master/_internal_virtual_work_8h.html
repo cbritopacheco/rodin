@@ -5,11 +5,11 @@
   <title>Rodin/Solid/Integrators/InternalVirtualWork.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -86,7 +86,7 @@
             </li>
           </ul>
         </nav>
-<p>Provides the unified API for constructing the internal virtual work contributions to a nonlinear solid mechanics problem:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">ivw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">InternalVirtualWork</span><span class="p">(</span><span class="n">law</span><span class="p">,</span><span class="w"> </span><span class="n">displacement</span><span class="p">);</span>
+<p>Provides the unified API for constructing the internal virtual work contributions to a nonlinear solid mechanics problem.</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">ivw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">InternalVirtualWork</span><span class="p">(</span><span class="n">law</span><span class="p">,</span><span class="w"> </span><span class="n">displacement</span><span class="p">);</span>
 
 <span class="c1">// Residual contribution (linear form):</span>
 <span class="nc">LinearForm</span><span class="w"> </span><span class="nf">F</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span>
@@ -223,7 +223,7 @@ $\mathbf{u}^{k+1}
 <use x='66.168433' y='0' xlink:href='#eq4-g3-1'/>
 <use x='75.923417' y='0' xlink:href='#eq4-g0-117'/>
 </g>
-</svg>. Do not write <code>Tangent(du, v)</code> - Residual(v) for this Newton form: the <code>Problem</code> assembly will negate the already-negated residual and produce <svg class="m-math" style="width: 6.448em; height: 0.946em; vertical-align: -0.095em;" viewBox="0 -8.169366 61.904121 9.082567">
+</svg>. Do not write <code>Tangent(du, v)</code> - Residual(v) for this Newton form because the <code>Problem</code> assembly will negate the already-negated residual and produce <svg class="m-math" style="width: 6.448em; height: 0.946em; vertical-align: -0.095em;" viewBox="0 -8.169366 61.904121 9.082567">
 <title>
 $K\Delta\mathbf{u}=+R$
 </title>
@@ -250,7 +250,7 @@ $K\Delta\mathbf{u}=+R$
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solid.html" class="m-doc">Rodin::Solid</a></dt>
-            <dd>Constitutive laws, kinematics, and solid-mechanics integration.</dd>
+            <dd>Finite-strain kinematics, constitutive responses and virtual-work forms.</dd>
           </dl>
         </section>
         <section id="nested-classes">

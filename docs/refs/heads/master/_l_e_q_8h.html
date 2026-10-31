@@ -5,11 +5,11 @@
   <title>Rodin/Variational/LEQ.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -77,9 +77,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md452">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md453">Applications</a></li>
-            <li><a href="#autotoc_md454">Usage Example</a></li>
+            <li><a href="#autotoc_md450">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md451">Applications</a></li>
+            <li><a href="#autotoc_md452">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the LEQ class, which implements the less-than-or-equal comparison operation between functions. This operator creates a boolean function indicating where one function does not exceed another.</p><section id="autotoc_md452"><h2><a href="#autotoc_md452">Mathematical Foundation</a></h2><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
+<p>This file defines the LEQ class, which implements the less-than-or-equal comparison operation between functions. This operator creates a boolean function indicating where one function does not exceed another.</p><section id="autotoc_md450"><h2><a href="#autotoc_md450">Mathematical Foundation</a></h2><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
 <title>
 $ f, g : \Omega \to \mathbb{R} $
 </title>
@@ -111,7 +111,7 @@ $ f, g : \Omega \to \mathbb{R} $
 <use x='39.342988' y='0' xlink:href='#eq1-g1-33'/>
 <use x='54.61902' y='0' xlink:href='#eq1-g0-82'/>
 </g>
-</svg>, the LEQ operator:</p><div class="m-math"><svg style="width: 17.489em; height: 3.736em;" viewBox="109.726222 -35.865862 167.895037 35.865869">
+</svg>, the LEQ operator is defined by</p><div class="m-math"><svg style="width: 17.489em; height: 3.736em;" viewBox="109.726222 -35.865862 167.895037 35.865869">
 <title>
 \[     (f \leq g)(x) = \begin{cases} 1 &amp; \text{if } f(x) \leq g(x) \\ 0 &amp; \text{otherwise} \end{cases}
 \]
@@ -171,7 +171,7 @@ $ f, g : \Omega \to \mathbb{R} $
 <use x='243.555683' y='-5.798537' xlink:href='#eq2-g5-115'/>
 <use x='248.206243' y='-5.798537' xlink:href='#eq2-g5-101'/>
 </g>
-</svg></div></section><section id="autotoc_md453"><h2><a href="#autotoc_md453">Applications</a></h2><ul><li>Bounded region indicators: <svg class="m-math" style="width: 3.032em; height: 1.185em; vertical-align: -0.328em;" viewBox="0 -8.235778 29.105488 11.372894">
+</svg></div></section><section id="autotoc_md451"><h2><a href="#autotoc_md451">Applications</a></h2><ul><li>Bounded region indicators: <svg class="m-math" style="width: 3.032em; height: 1.185em; vertical-align: -0.328em;" viewBox="0 -8.235778 29.105488 11.372894">
 <title>
 $ \mathbb{1}_{u \leq M} $
 </title>
@@ -214,7 +214,7 @@ $ \{x : \phi(x) \leq 0\} $
 <use x='61.14801' y='0' xlink:href='#eq4-g2-48'/>
 <use x='67.001001' y='0' xlink:href='#eq4-g0-103'/>
 </g>
-</svg></li><li>Truncation and clipping operations</li></ul></section><section id="autotoc_md454"><h2><a href="#autotoc_md454">Usage Example</a></h2><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">bounded_region</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean: true where u ≤ 1</span></pre></section>
+</svg></li><li>Truncation and clipping operations</li></ul></section><section id="autotoc_md452"><h2><a href="#autotoc_md452">Usage Example</a></h2><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">bounded_region</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean: true where u ≤ 1</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

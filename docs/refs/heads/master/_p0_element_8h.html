@@ -5,11 +5,11 @@
   <title>Rodin/Variational/P0/P0Element.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -77,8 +77,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md479">Supported Specializations</a></li>
-            <li><a href="#autotoc_md480">Usage Example</a></li>
+            <li><a href="#autotoc_md477">Supported Specializations</a></li>
+            <li><a href="#autotoc_md478">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -124,7 +124,7 @@ $ \nabla \phi = 0 $
 <use x='20.211602' y='0' xlink:href='#eq2-g2-61'/>
 <use x='32.637083' y='0' xlink:href='#eq2-g2-48'/>
 </g>
-</svg></li></ul><section id="autotoc_md479"><h2><a href="#autotoc_md479">Supported Specializations</a></h2><p><strong>Scalar P0Element&lt;Scalar&gt;:</strong></p><ul><li>Works with Real and Complex scalar types</li><li>Single DOF at element barycenter</li><li>Constant value throughout element</li></ul><p><strong>Vector P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;:</strong></p><ul><li>Component-wise constant vector fields</li><li><svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+</svg></li></ul><section id="autotoc_md477"><h2><a href="#autotoc_md477">Supported Specializations</a></h2><aside class="m-note m-default"><h4>Scalar elements</h4><ul><li>Works with Real and Complex scalar types</li><li>Single DOF at element barycenter</li><li>Constant value throughout element</li></ul></aside><aside class="m-note m-default"><h4>Vector elements</h4><ul><li>Component-wise constant vector fields</li><li><svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
 $ d $
 </title>
@@ -174,7 +174,7 @@ $ j = i \mod d $
 <use x='49.158369' y='0' xlink:href='#eq5-g1-100'/>
 <use x='59.646686' y='0' xlink:href='#eq5-g0-100'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md480"><h2><a href="#autotoc_md480">Usage Example</a></h2><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
+</svg></li></ul></aside></section><section id="autotoc_md478"><h2><a href="#autotoc_md478">Usage Example</a></h2><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
 
 <span class="c1">// Scalar P0 element (real or complex)</span>
 <span class="nc">RealP0Element</span><span class="w"> </span><span class="nf">p0_real</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">);</span>
@@ -200,7 +200,7 @@ $ j = i \mod d $
               <div class="m-doc-template">template&lt;class Range&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0_element_3_01_range_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::P0Element&lt;Range&gt;&gt;</a>
             </dt>
-            <dd>Type traits for <code>P0Element:</code> exposes the scalar type and the range type of the element.</dd>
+            <dd>Type traits for <code>P0Element</code>, exposing the scalar type and the range type of the element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">Rodin::Variational::P0Element</a>

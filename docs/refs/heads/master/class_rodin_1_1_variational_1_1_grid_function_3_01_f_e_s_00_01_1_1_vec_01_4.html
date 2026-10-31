@@ -5,11 +5,11 @@
   <title>Rodin::Variational::GridFunction&lt;FES, ::Vec&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -257,7 +257,7 @@ $ \mathbf{u} $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Adds a scalar to every DOF value: <svg class="m-math" style="width: 6.056em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 58.14025 8.684049">
+            <dd>Adds a scalar to every DOF value with <svg class="m-math" style="width: 6.056em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 58.14025 8.684049">
 <title>
 $ u_i \leftarrow u_i + c $
 </title>
@@ -281,7 +281,7 @@ $ u_i \leftarrow u_i + c $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Subtracts a scalar from every DOF value: <svg class="m-math" style="width: 6.076em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 58.334096 8.767119">
+            <dd>Subtracts a scalar from every DOF value with <svg class="m-math" style="width: 6.076em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 58.334096 8.767119">
 <title>
 $ u_i \leftarrow u_i - c $
 </title>
@@ -305,7 +305,7 @@ $ u_i \leftarrow u_i - c $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Scales every DOF value by a scalar: <svg class="m-math" style="width: 4.710em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 45.216638 6.940636">
+            <dd>Scales every DOF value by a scalar with <svg class="m-math" style="width: 4.710em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 45.216638 6.940636">
 <title>
 $ u_i \leftarrow c \, u_i $
 </title>
@@ -327,7 +327,7 @@ $ u_i \leftarrow c \, u_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Divides every DOF value by a scalar: <svg class="m-math" style="width: 5.164em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.575262 11.955168">
+            <dd>Divides every DOF value by a scalar with <svg class="m-math" style="width: 5.164em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.575262 11.955168">
 <title>
 $ u_i \leftarrow u_i / c $
 </title>
@@ -352,7 +352,7 @@ $ u_i \leftarrow u_i / c $
               <span class="m-doc-wrap-bumper">auto <a href="#a03cae69d82ab55fb284b0e355b2f19b5" class="m-doc">axpy</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; a,
               const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; other) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Scaled accumulation of another grid function: <svg class="m-math" style="width: 7.269em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 69.782114 8.684049">
+            <dd>Scaled accumulation of another grid function. <svg class="m-math" style="width: 7.269em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 69.782114 8.684049">
 <title>
 $ u_i \leftarrow u_i + a\, v_i $
 </title>
@@ -379,7 +379,7 @@ $ u_i \leftarrow u_i + a\, v_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Component-wise addition of another grid function: <svg class="m-math" style="width: 6.421em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 61.644672 8.684049">
+            <dd>Component-wise addition of another grid function. <svg class="m-math" style="width: 6.421em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 61.644672 8.684049">
 <title>
 $ u_i \leftarrow u_i + v_i $
 </title>
@@ -404,7 +404,7 @@ $ u_i \leftarrow u_i + v_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Component-wise subtraction of another grid function: <svg class="m-math" style="width: 6.442em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 61.838517 8.767119">
+            <dd>Component-wise subtraction of another grid function. <svg class="m-math" style="width: 6.442em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 61.838517 8.767119">
 <title>
 $ u_i \leftarrow u_i - v_i $
 </title>
@@ -429,7 +429,7 @@ $ u_i \leftarrow u_i - v_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Component-wise (Hadamard) multiplication by another grid function: <svg class="m-math" style="width: 5.819em; height: 0.740em; vertical-align: -0.187em;" viewBox="0 -5.313422 55.86091 7.106685">
+            <dd>Component-wise (Hadamard) multiplication by another grid function with <svg class="m-math" style="width: 5.819em; height: 0.740em; vertical-align: -0.187em;" viewBox="0 -5.313422 55.86091 7.106685">
 <title>
 $ u_i \leftarrow u_i \cdot v_i $
 </title>
@@ -454,7 +454,7 @@ $ u_i \leftarrow u_i \cdot v_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Component-wise division by another grid function: <svg class="m-math" style="width: 5.529em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 53.079683 11.955168">
+            <dd>Component-wise division by another grid function. <svg class="m-math" style="width: 5.529em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 53.079683 11.955168">
 <title>
 $ u_i \leftarrow u_i / v_i $
 </title>
@@ -704,7 +704,7 @@ $[\text{m\_begin},
                 </tr>
               </tfoot>
             </table>
-<p>Deep-copies the DOF values of <code>other</code> into this grid function with <code>VecCopy</code>, followed by a forward ghost update in MPI mode.</p><p>The underlying <code>Vec</code> is <strong>reused</strong>: both operands are required to live on the same finite element space, so their layouts (ownership range and ghost mapping) are identical by construction and a fresh allocation would produce a vector indistinguishable from the one already held. Reuse also keeps the <code>Vec</code> handle stable, so a <code>KSP</code>, a <code>LinearForm</code>, or user code that cached <code>getData()</code> is not left holding a destroyed handle after an assignment. A new vector is created with <code>VecDuplicate</code> only when this instance holds none, which is the case for a moved-from object.</p><p>The destination completes its own pending writes. The source must have completed writes through its mutable owner before this const borrow.</p><aside class="m-note m-info"><h4>Precondition</h4><p>Both grid functions must reference the same finite element space.</p></aside>
+<p>Deep-copies the DOF values of <code>other</code> into this grid function with <code>VecCopy</code>, followed by a forward ghost update in MPI mode.</p><p>The underlying <code>Vec</code> is <strong>reused</strong>, and both operands are required to live on the same finite element space, so their layouts (ownership range and ghost mapping) are identical by construction and a fresh allocation would produce a vector indistinguishable from the one already held. Reuse also keeps the <code>Vec</code> handle stable, so a <code>KSP</code>, a <code>LinearForm</code>, or user code that cached <code>getData()</code> is not left holding a destroyed handle after an assignment. A new vector is created with <code>VecDuplicate</code> only when this instance holds none, which is the case for a moved-from object.</p><p>The destination completes its own pending writes. The source must have completed writes through its mutable owner before this const borrow.</p><aside class="m-note m-info"><h4>Precondition</h4><p>Both grid functions must reference the same finite element space.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ac7108dc6c770e0642feadb5250a6c0cb"><div>
             <h3>
@@ -951,7 +951,7 @@ $ \|\mathbf{u}\| $
                 </tr>
               </tfoot>
             </table>
-<p>Synchronizes any pending array access, then delegates to <code>VecNorm</code>. In MPI mode the norm is taken over the globally owned entries and the call is collective: every rank must reach it.</p>
+<p>Synchronizes any pending array access, then delegates to <code>VecNorm</code>. In MPI mode the norm is taken over the globally owned entries and the call is collective, so every rank must reach it.</p>
           </div></section>
           <section class="m-doc-details" id="aa40b9fd92d45801380c5354c8822b016"><div>
             <h3>
@@ -1064,7 +1064,7 @@ $ u_i $
               
               <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
-            <p>Adds a scalar to every DOF value: <svg class="m-math" style="width: 6.056em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 58.14025 8.684049">
+            <p>Adds a scalar to every DOF value with <svg class="m-math" style="width: 6.056em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 58.14025 8.684049">
 <title>
 $ u_i \leftarrow u_i + c $
 </title>
@@ -1119,7 +1119,7 @@ $ c $
               
               <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
-            <p>Subtracts a scalar from every DOF value: <svg class="m-math" style="width: 6.076em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 58.334096 8.767119">
+            <p>Subtracts a scalar from every DOF value with <svg class="m-math" style="width: 6.076em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 58.334096 8.767119">
 <title>
 $ u_i \leftarrow u_i - c $
 </title>
@@ -1174,7 +1174,7 @@ $ c $
               
               <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
-            <p>Scales every DOF value by a scalar: <svg class="m-math" style="width: 4.710em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 45.216638 6.940636">
+            <p>Scales every DOF value by a scalar with <svg class="m-math" style="width: 4.710em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 45.216638 6.940636">
 <title>
 $ u_i \leftarrow c \, u_i $
 </title>
@@ -1227,7 +1227,7 @@ $ c $
               
               <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
-            <p>Divides every DOF value by a scalar: <svg class="m-math" style="width: 5.164em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.575262 11.955168">
+            <p>Divides every DOF value by a scalar with <svg class="m-math" style="width: 5.164em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.575262 11.955168">
 <title>
 $ u_i \leftarrow u_i / c $
 </title>
@@ -1283,7 +1283,7 @@ $ c $
               <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a03cae69d82ab55fb284b0e355b2f19b5" class="m-doc-self">axpy</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; a,
               const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; other)</span></span>
             </h3>
-            <p>Scaled accumulation of another grid function: <svg class="m-math" style="width: 7.269em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 69.782114 8.684049">
+            <p>Scaled accumulation of another grid function. <svg class="m-math" style="width: 7.269em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 69.782114 8.684049">
 <title>
 $ u_i \leftarrow u_i + a\, v_i $
 </title>
@@ -1348,7 +1348,7 @@ $ v $
                 </tr>
               </tfoot>
             </table>
-<p>Both grid functions must live on the same finite element space. Delegates to <code>VecAXPY(data, a, other.getData())</code>, followed by a forward ghost update in MPI mode.</p><p>This is the fused form of <code>*this += a * other</code>, which the operators cannot express without materialising a scaled temporary: it is the operation time integrators and cycle accumulators need ( <svg class="m-math" style="width: 7.419em; height: 0.946em; vertical-align: -0.095em;" viewBox="0 -8.169366 71.218621 9.082567">
+<p>Both grid functions must live on the same finite element space. Delegates to <code>VecAXPY(data, a, other.getData())</code>, followed by a forward ghost update in MPI mode.</p><p>This is the fused form of <code>*this += a * other</code>, which the operators cannot express without materialising a scaled temporary. It is the operation time integrators and cycle accumulators need ( <svg class="m-math" style="width: 7.419em; height: 0.946em; vertical-align: -0.095em;" viewBox="0 -8.169366 71.218621 9.082567">
 <title>
 $ \mathbf{u} \leftarrow \mathbf{u} + \Delta t\, \mathbf{v} $
 </title>
@@ -1376,7 +1376,7 @@ $ \mathbf{u} \leftarrow \mathbf{u} + \Delta t\, \mathbf{v} $
               
               <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
-            <p>Component-wise addition of another grid function: <svg class="m-math" style="width: 6.421em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 61.644672 8.684049">
+            <p>Component-wise addition of another grid function. <svg class="m-math" style="width: 6.421em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 61.644672 8.684049">
 <title>
 $ u_i \leftarrow u_i + v_i $
 </title>
@@ -1432,7 +1432,7 @@ $ v $
               
               <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
-            <p>Component-wise subtraction of another grid function: <svg class="m-math" style="width: 6.442em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 61.838517 8.767119">
+            <p>Component-wise subtraction of another grid function. <svg class="m-math" style="width: 6.442em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 61.838517 8.767119">
 <title>
 $ u_i \leftarrow u_i - v_i $
 </title>
@@ -1488,7 +1488,7 @@ $ v $
               
               <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
-            <p>Component-wise (Hadamard) multiplication by another grid function: <svg class="m-math" style="width: 5.819em; height: 0.740em; vertical-align: -0.187em;" viewBox="0 -5.313422 55.86091 7.106685">
+            <p>Component-wise (Hadamard) multiplication by another grid function with <svg class="m-math" style="width: 5.819em; height: 0.740em; vertical-align: -0.187em;" viewBox="0 -5.313422 55.86091 7.106685">
 <title>
 $ u_i \leftarrow u_i \cdot v_i $
 </title>
@@ -1544,7 +1544,7 @@ $ v $
               
               <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
-            <p>Component-wise division by another grid function: <svg class="m-math" style="width: 5.529em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 53.079683 11.955168">
+            <p>Component-wise division by another grid function. <svg class="m-math" style="width: 5.529em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 53.079683 11.955168">
 <title>
 $ u_i \leftarrow u_i / v_i $
 </title>
@@ -1749,7 +1749,7 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<p>Iterates over the polytopes in <code>region</code>, applies the predicate <code>pred</code> to each polytope, and for those that pass, sets the corresponding DOF values by evaluating the function <code>v</code>.</p><p>In local mode functional values are staged before acquiring write access. In MPI mode interpolation is collective: the backend-independent <a href="class_rodin_1_1_variational_1_1_interpolation.html" class="m-doc">Interpolation</a> selects and evaluates functionals, then each owner commits its coefficients and refreshes ghost copies. Unselected coefficients retain their previous values. Source values are evaluated before any destination coefficient is replaced, including when the source references this grid function.</p><aside class="m-note m-info"><h4>Precondition</h4><p>In MPI mode the predicate and source function must agree on replicas of the same entity. Pending direct writes must obey the existing collective <a href="#af09b1f551c2dd058e29be87808693d5d" class="m-doc">sync()</a> contract.</p></aside>
+<p>Iterates over the polytopes in <code>region</code>, applies the predicate <code>pred</code> to each polytope, and for those that pass, sets the corresponding DOF values by evaluating the function <code>v</code>.</p><p>In local mode functional values are staged before acquiring write access. In MPI mode interpolation is collective, so the backend-independent <a href="class_rodin_1_1_variational_1_1_interpolation.html" class="m-doc">Interpolation</a> selects and evaluates functionals, then each owner commits its coefficients and refreshes ghost copies. Unselected coefficients retain their previous values. Source values are evaluated before any destination coefficient is replaced, including when the source references this grid function.</p><aside class="m-note m-info"><h4>Precondition</h4><p>In MPI mode the predicate and source function must agree on replicas of the same entity. Pending direct writes must obey the existing collective <a href="#af09b1f551c2dd058e29be87808693d5d" class="m-doc">sync()</a> contract.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ac2d041132b1540469de13585c1c12a7f"><div>
             <h3>
@@ -1765,7 +1765,7 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<p>This is the entry point of the array access protocol. If the array has not already been acquired (<code>m_write.acquired == false</code>), the method:</p><h4 id="autotoc_md209">Local mode</h4><ul><li>Calls <code>VecGetArrayWrite(m_data, &amp;raw)</code>.</li></ul><h4 id="autotoc_md210">MPI mode</h4><ol><li>Obtains the local (ghosted) form via <code>VecGhostGetLocalForm</code>.</li><li>Locks the local form with <code>VecGetArrayWrite</code>.</li></ol><p>Ghost synchronization is deliberately not done here because element access may happen on only a subset of ranks during filtered assembly.</p><p>Subsequent calls while the array is already acquired are no-ops.</p>
+<p>This is the entry point of the array access protocol. If the array has not already been acquired (<code>m_write.acquired == false</code>), the method.</p><h4 id="autotoc_md209">Local mode</h4><ul><li>Calls <code>VecGetArrayWrite(m_data, &amp;raw)</code>.</li></ul><h4 id="autotoc_md210">MPI mode</h4><ol><li>Obtains the local (ghosted) form via <code>VecGhostGetLocalForm</code>.</li><li>Locks the local form with <code>VecGetArrayWrite</code>.</li></ol><p>Ghost synchronization is deliberately not done here because element access may happen on only a subset of ranks during filtered assembly.</p><p>Subsequent calls while the array is already acquired are no-ops.</p>
           </div></section>
           <section class="m-doc-details" id="a35095eb434070fff88abb65b08387c7e"><div>
             <h3>
@@ -1797,7 +1797,7 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<h4 id="autotoc_md211">Local mode</h4><ul><li>Calls <code>VecRestoreArrayWrite(m_data, &amp;raw)</code>.</li></ul><h4 id="autotoc_md212">MPI mode</h4><ol><li>Restores the array with <code>VecRestoreArrayWrite(ghost, &amp;raw)</code>.</li><li>Returns the local form via <code>VecGhostRestoreLocalForm</code>.</li><li>Performs a <strong>reverse</strong> ghost update (<code>VecGhostUpdateBegin/End(INSERT_VALUES, SCATTER_REVERSE)</code>) to propagate ghost modifications back to owners.</li><li>Refreshes ghosts from owner values with a forward update.</li></ol><p>After this call, <code>m_write.acquired</code> is <code>false</code> and subsequent reads of the owned portion will reflect any changes that were made through ghost entries.</p><aside class="m-note m-warning"><h4>Warning</h4><p>In MPI mode the reverse scatter uses <code>INSERT_VALUES</code>, so ghost entries always win over the owner&#x27;s value — including ghost entries that were never written. A rank that assigns through <code>operator[]</code> must therefore cover every DOF of its shard, owned and ghost alike (as element-wise assembly does), not just its ownership range: leaving the ghost slots at their previous values overwrites whatever the owning ranks wrote. Collective assignments (<code>operator=</code>, <code>project()</code>, <code>setData()</code>, <code>axpy()</code>, …) are unaffected; they end with a forward update from the owners.</p></aside>
+<h4 id="autotoc_md211">Local mode</h4><ul><li>Calls <code>VecRestoreArrayWrite(m_data, &amp;raw)</code>.</li></ul><h4 id="autotoc_md212">MPI mode</h4><ol><li>Restores the array with <code>VecRestoreArrayWrite(ghost, &amp;raw)</code>.</li><li>Returns the local form via <code>VecGhostRestoreLocalForm</code>.</li><li>Performs a <strong>reverse</strong> ghost update (<code>VecGhostUpdateBegin/End(INSERT_VALUES, SCATTER_REVERSE)</code>) to propagate ghost modifications back to owners.</li><li>Refreshes ghosts from owner values with a forward update.</li></ol><p>After this call, <code>m_write.acquired</code> is <code>false</code> and subsequent reads of the owned portion will reflect any changes that were made through ghost entries.</p><aside class="m-note m-warning"><h4>Warning</h4><p>In MPI mode the reverse scatter uses <code>INSERT_VALUES</code>, so ghost entries always win over the owner&#x27;s value — including ghost entries that were never written. A rank that assigns through <code>operator[]</code> must therefore cover every DOF of its shard, owned and ghost alike (as element-wise assembly does), not just its ownership range. Leaving the ghost slots at their previous values overwrites whatever the owning ranks wrote. Collective assignments (<code>operator=</code>, <code>project()</code>, <code>setData()</code>, <code>axpy()</code>, …) are unaffected; they end with a forward update from the owners.</p></aside>
           </div></section>
           <section class="m-doc-details" id="aa7e59253edaf70947f510c9bec12a2a4"><div>
             <h3>
@@ -1829,7 +1829,7 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<p>Releases any outstanding read access and then flushes any outstanding write access. In MPI mode the write flush performs the reverse ghost scatter followed by a forward refresh, so PETSc routines called on <code>getData()</code> afterwards see the current owned coefficients and an up-to-date ghost layer.</p><p>Use this before passing the raw <code>Vec</code> handle to PETSc. Member operations call it internally.</p><aside class="m-note m-warning"><h4>Warning</h4><p>In MPI mode this is collective if a write array is acquired: every rank that participates in the vector must reach the ghost update.</p></aside>
+<p>Releases any outstanding read access and then flushes any outstanding write access. In MPI mode the write flush performs the reverse ghost scatter followed by a forward refresh, so PETSc routines called on <code>getData()</code> afterwards see the current owned coefficients and an up-to-date ghost layer.</p><p>Use this before passing the raw <code>Vec</code> handle to PETSc. Member operations call it internally.</p><aside class="m-note m-warning"><h4>Warning</h4><p>In MPI mode this is collective if a write array is acquired. Every rank that participates in the vector must reach the ghost update.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a240da77ccbdc2ac0dcc52b6b302f5b97"><div>
             <h3>
@@ -1861,7 +1861,7 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-warning"><h4>Warning</h4><p>This accessor performs <strong>no</strong> synchronization: it hands out the handle exactly as it is. If an array is currently acquired — which <code>operator[]</code>, <code>operator()</code>, and <code>getValue()</code> do lazily, and which in MPI mode means this object holds the ghosted local form obtained from <code>VecGhostGetLocalForm</code> — then calling PETSc on the returned handle operates on a vector whose local form is still checked out, and skips the reverse ghost scatter that <code>sync()</code> performs. Call <code>sync()</code> before using the handle, exactly as the operators of this class do:</p></aside><pre class="m-code"><span class="n">u</span><span class="p">.</span><span class="n">sync</span><span class="p">();</span>
+<aside class="m-note m-warning"><h4>Warning</h4><p>This accessor performs <strong>no</strong> synchronization and hands out the handle exactly as it is. If an array is currently acquired — which <code>operator[]</code>, <code>operator()</code>, and <code>getValue()</code> do lazily, and which in MPI mode means this object holds the ghosted local form obtained from <code>VecGhostGetLocalForm</code> — then calling PETSc on the returned handle operates on a vector whose local form is still checked out, and skips the reverse ghost scatter that <code>sync()</code> performs. Call <code>sync()</code> before using the handle, exactly as the operators of this class do.</p></aside><pre class="m-code"><span class="n">u</span><span class="p">.</span><span class="n">sync</span><span class="p">();</span>
 <span class="n">VecAXPY</span><span class="p">(</span><span class="n">u</span><span class="p">.</span><span class="n">getData</span><span class="p">(),</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">getData</span><span class="p">());</span></pre><p>Prefer the member operations (<code>axpy</code>, <code>norm</code>, <code>min</code>, <code>max</code>, <code>operator+=</code>, <code>operator*=</code>, <code>setData</code>, …) — they flush, call the same PETSc routine, and restore the ghost values afterwards. Reach for the raw handle only for operations this class does not expose, such as block-vector manipulation.</p><aside class="m-note m-default"><h4>See also</h4><p>sync(), flush(), release(), axpy(), setData()</p></aside>
           </div></section>
           <section class="m-doc-details" id="af16e5366aeae1176230b9c40b60fd8d7"><div>

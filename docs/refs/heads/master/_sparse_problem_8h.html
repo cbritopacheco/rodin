@@ -5,11 +5,11 @@
   <title>Rodin/Variational/SparseProblem.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -77,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md533">Sparse Matrix Storage</a></li>
-            <li><a href="#autotoc_md534">Sparsity Pattern</a></li>
-            <li><a href="#autotoc_md535">Advantages</a></li>
-            <li><a href="#autotoc_md536">Usage Example</a></li>
+            <li><a href="#autotoc_md530">Sparse Matrix Storage</a></li>
+            <li><a href="#autotoc_md531">Sparsity Pattern</a></li>
+            <li><a href="#autotoc_md532">Advantages</a></li>
+            <li><a href="#autotoc_md533">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the SparseProblem class, a specialization of the Problem class that uses sparse matrix storage for efficient handling of large-scale finite element systems. Sparse storage is the standard choice for most FEM problems as system matrices are typically very sparse.</p><section id="autotoc_md533"><h2><a href="#autotoc_md533">Sparse Matrix Storage</a></h2><p>For a typical FEM problem with <svg class="m-math" style="width: 1.107em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.622614 8.169366">
+<p>This file defines the SparseProblem class, a specialization of the Problem class that uses sparse matrix storage for efficient handling of large-scale finite element systems. Sparse storage is the standard choice for most FEM problems as system matrices are typically very sparse.</p><section id="autotoc_md530"><h2><a href="#autotoc_md530">Sparse Matrix Storage</a></h2><p>For a typical FEM problem with <svg class="m-math" style="width: 1.107em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.622614 8.169366">
 <title>
 $ N $
 </title>
@@ -134,7 +134,7 @@ $ O(N) $
 <use x='13.823574' y='0' xlink:href='#eq3-g0-78'/>
 <use x='24.446184' y='0' xlink:href='#eq3-g1-41'/>
 </g>
-</svg> memory (for 2D/3D problems)</li></ul></section><section id="autotoc_md534"><h2><a href="#autotoc_md534">Sparsity Pattern</a></h2><p>The sparsity pattern is determined by the mesh connectivity:</p><div class="m-math"><svg style="width: 22.965em; height: 1.213em;" viewBox="84.037414 -11.645211 220.467669 11.645211">
+</svg> memory (for 2D/3D problems)</li></ul></section><section id="autotoc_md531"><h2><a href="#autotoc_md531">Sparsity Pattern</a></h2><p>The sparsity pattern is determined by the mesh connectivity.</p><div class="m-math"><svg style="width: 22.965em; height: 1.213em;" viewBox="84.037414 -11.645211 220.467669 11.645211">
 <title>
 \[     A_{ij} \neq 0 \iff \text{DOFs } i \text{ and } j \text{ share an element}
 \]
@@ -197,7 +197,7 @@ $ O(N) $
 <use x='295.204465' y='-3.343009' xlink:href='#eq4-g5-110'/>
 <use x='301.182049' y='-3.343009' xlink:href='#eq4-g5-116'/>
 </g>
-</svg></div></section><section id="autotoc_md535"><h2><a href="#autotoc_md535">Advantages</a></h2><ul><li>Memory efficient for large problems</li><li>Faster matrix-vector products</li><li>Enables iterative solvers (CG, GMRES, etc.)</li><li>Essential for 3D problems</li></ul></section><section id="autotoc_md536"><h2><a href="#autotoc_md536">Usage Example</a></h2><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></div></section><section id="autotoc_md532"><h2><a href="#autotoc_md532">Advantages</a></h2><ul><li>Memory efficient for large problems</li><li>Faster matrix-vector products</li><li>Enables iterative solvers (CG, GMRES, etc.)</li><li>Essential for 3D problems</li></ul></section><section id="autotoc_md533"><h2><a href="#autotoc_md533">Usage Example</a></h2><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="nc">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 

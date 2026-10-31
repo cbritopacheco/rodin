@@ -5,11 +5,11 @@
   <title>Rodin::Variational::BilinearFormBase class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -134,7 +134,7 @@ $ a(u,v) : U \times V \to \mathbb{K} $
 <use x='79.695116' y='0' xlink:href='#eq1-g1-33'/>
 <use x='94.971148' y='0' xlink:href='#eq1-g0-75'/>
 </g>
-</svg> in finite element computations. Over the reals the form is bilinear. Over the complex numbers Rodin uses the standard finite element convention: the form is linear in the trial argument and conjugate-linear in the test argument.</p><section id="autotoc_md308"><h2><a href="#autotoc_md308">Mathematical Foundation</a></h2><p>A real bilinear form <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
+</svg> in finite element computations. Over the reals the form is bilinear. Over the complex numbers Rodin uses the standard finite element convention. The form is linear in the trial argument and conjugate-linear in the test argument.</p><section id="autotoc_md308"><h2><a href="#autotoc_md308">Mathematical Foundation</a></h2><p>A real bilinear form <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
 <title>
 $ a(u,v) $
 </title>
@@ -254,7 +254,7 @@ $ a(u, \alpha v_1 + \beta v_2) = \alpha a(u,v_1) + \beta a(u,v_2) $
 <use x='187.918539' y='1.793263' xlink:href='#eq4-g1-50'/>
 <use x='192.650854' y='0' xlink:href='#eq4-g2-41'/>
 </g>
-</svg></li></ul><p>For complex scalars, the second identity instead carries conjugated coefficients:  <svg class="m-math" style="width: 20.542em; height: 1.375em; vertical-align: -0.312em;" viewBox="0 -10.214929 197.203176 13.203721">
+</svg></li></ul><p>For complex scalars, the second identity instead carries conjugated coefficients according to  <svg class="m-math" style="width: 20.542em; height: 1.375em; vertical-align: -0.312em;" viewBox="0 -10.214929 197.203176 13.203721">
 <title>
 $ a(u, \alpha v_1 + \beta v_2) = \overline{\alpha}
 a(u,v_1) + \overline{\beta} a(u,v_2) $
@@ -361,7 +361,7 @@ $ \psi_i $
 <use x='0' y='0' xlink:href='#eq8-g1-32'/>
 <use x='7.610267' y='1.793263' xlink:href='#eq8-g0-105'/>
 </g>
-</svg> are test basis functions.</p><p>Represents a bilinear form:</p><div class="m-math"><svg style="width: 8.689em; height: 1.045em;" viewBox="152.565529 -10.029041 83.411948 10.029041">
+</svg> are test basis functions.</p><p>Represents a bilinear form.</p><div class="m-math"><svg style="width: 8.689em; height: 1.045em;" viewBox="152.565529 -10.029041 83.411948 10.029041">
 <title>
 \[a : V_h \times U_h \rightarrow \mathbb{R}
 \]
@@ -891,7 +891,7 @@ $ a(u,v) $
                 </tr>
               </tfoot>
             </table>
-<p>Local integrators operate element-by-element, contributing to matrix entries through local assembly: <svg class="m-math" style="width: 15.127em; height: 1.489em; vertical-align: -0.471em;" viewBox="0 -9.784673 145.217101 14.289934">
+<p>Local integrators operate element-by-element, contributing to matrix entries through local assembly. <svg class="m-math" style="width: 15.127em; height: 1.489em; vertical-align: -0.471em;" viewBox="0 -9.784673 145.217101 14.289934">
 <title>
 $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
 </title>
@@ -1311,11 +1311,11 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object</td>
+                  <td>Newly allocated copy whose ownership passes to the caller.</td>
                 </tr>
               </tfoot>
             </table>
-<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
+<p>Derived classes implement this pure virtual function to support polymorphic copying. The caller must adopt the returned pointer into owned storage or otherwise release it.</p><aside class="m-note m-info"><h4>Note</h4><p>Copy dispatch through this base is virtual.</p></aside>
           </div></section>
         </section>
       </div>

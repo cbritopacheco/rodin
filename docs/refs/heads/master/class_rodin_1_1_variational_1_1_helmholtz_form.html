@@ -5,11 +5,11 @@
   <title>Rodin::Variational::HelmholtzForm class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -168,7 +168,7 @@ $ c $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-99'/>
 </g>
-</svg> is the caller&#x27;s: a negative <svg class="m-math" style="width: 4.251em; height: 1.091em; vertical-align: -0.104em;" viewBox="0 -9.474739 40.806483 10.471011">
+</svg> is the caller&#x27;s. A negative <svg class="m-math" style="width: 4.251em; height: 1.091em; vertical-align: -0.104em;" viewBox="0 -9.474739 40.806483 10.471011">
 <title>
 $ c = -k^2 $
 </title>
@@ -609,11 +609,11 @@ $ c = -k^2 $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object</td>
+                  <td>Newly allocated copy whose ownership passes to the caller.</td>
                 </tr>
               </tfoot>
             </table>
-<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
+<p>Derived classes implement this pure virtual function to support polymorphic copying. The caller must adopt the returned pointer into owned storage or otherwise release it.</p><aside class="m-note m-info"><h4>Note</h4><p>Copy dispatch through this base is virtual.</p></aside>
           </div></section>
         </section>
       </div>

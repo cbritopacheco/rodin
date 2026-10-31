@@ -5,11 +5,11 @@
   <title>Rodin/Variational/P1/QuadratureRule.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -77,8 +77,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md494">Quadrature Strategies</a></li>
-            <li><a href="#autotoc_md495">Supported Integrands</a></li>
+            <li><a href="#autotoc_md491">Quadrature Strategies</a></li>
+            <li><a href="#autotoc_md492">Supported Integrands</a></li>
             <li>
               Reference
               <ul>
@@ -88,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<p>This file provides specialized quadrature rules for P1 spaces that exploit the constant gradient property of P1 basis functions to achieve exact integration with minimal quadrature points.</p><section id="autotoc_md494"><h2><a href="#autotoc_md494">Quadrature Strategies</a></h2><ul><li><strong>Centroid quadrature</strong>: Uses single point at element barycenter</li><li><strong>Exact for P1 bilinear forms</strong>: <svg class="m-math" style="width: 6.213em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 59.643684 13.283652">
+<p>This file provides specialized quadrature rules for P1 spaces that exploit the constant gradient property of P1 basis functions to achieve exact integration with minimal quadrature points.</p><section id="autotoc_md491"><h2><a href="#autotoc_md491">Quadrature Strategies</a></h2><ul><li><strong>Centroid quadrature</strong>: Uses single point at element barycenter</li><li><strong>Exact for P1 bilinear forms</strong>: <svg class="m-math" style="width: 6.213em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 59.643684 13.283652">
 <title>
 $ \int \nabla \phi_i \cdot \nabla \phi_j $
 </title>
@@ -110,7 +110,7 @@ $ \int \nabla \phi_i \cdot \nabla \phi_j $
 <use x='48.831557' y='0' xlink:href='#eq1-g3-30'/>
 <use x='55.759659' y='1.793263' xlink:href='#eq1-g2-106'/>
 </g>
-</svg></li><li><strong>Reduced integration</strong>: Enables efficient assembly</li></ul></section><section id="autotoc_md495"><h2><a href="#autotoc_md495">Supported Integrands</a></h2><ul><li>Scalar P1 shape functions: <svg class="m-math" style="width: 3.206em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 30.778121 13.283652">
+</svg></li><li><strong>Reduced integration</strong>: Enables efficient assembly</li></ul></section><section id="autotoc_md492"><h2><a href="#autotoc_md492">Supported Integrands</a></h2><ul><li>Scalar P1 shape functions: <svg class="m-math" style="width: 3.206em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 30.778121 13.283652">
 <title>
 $ \int v \, dx $
 </title>

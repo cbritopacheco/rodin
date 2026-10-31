@@ -5,11 +5,11 @@
   <title>Rodin::Variational::H1Element&lt;K, Math::SpatialVector&lt;Scalar&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -80,10 +80,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md402">Mathematical Properties</a></li>
-            <li><a href="#autotoc_md403">Component Structure</a></li>
-            <li><a href="#autotoc_md404">Applications</a></li>
-            <li><a href="#autotoc_md405">Usage Example</a></li>
+            <li><a href="#autotoc_md400">Mathematical Properties</a></li>
+            <li><a href="#autotoc_md401">Component Structure</a></li>
+            <li><a href="#autotoc_md402">Applications</a></li>
+            <li><a href="#autotoc_md403">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -96,7 +96,7 @@
             </li>
           </ul>
         </nav>
-<p>Vector-valued H1 element for approximating vector fields (e.g., displacement, velocity).</p><section id="autotoc_md402"><h2><a href="#autotoc_md402">Mathematical Properties</a></h2><ul><li><strong>DOF count</strong>: <svg class="m-math" style="width: 3.291em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 31.598041 10.095454">
+<p>Vector-valued H1 element for approximating vector fields (e.g., displacement, velocity).</p><section id="autotoc_md400"><h2><a href="#autotoc_md400">Mathematical Properties</a></h2><ul><li><strong>DOF count</strong>: <svg class="m-math" style="width: 3.291em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 31.598041 10.095454">
 <title>
 $ d \times n_s $
 </title>
@@ -112,7 +112,7 @@ $ d \times n_s $
 <use x='20.694517' y='0' xlink:href='#eq1-g2-110'/>
 <use x='27.682123' y='1.793263' xlink:href='#eq1-g1-115'/>
 </g>
-</svg> where:<ul><li><svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+</svg> Here,<ul><li><svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
 $ d $
 </title>
@@ -167,7 +167,7 @@ $ \boldsymbol{\phi}_{i,c}(x) = \phi_i(x) \mathbf{e}_c $
 <use x='75.488536' y='0' xlink:href='#eq4-g1-101'/>
 <use x='81.625248' y='1.793263' xlink:href='#eq4-g2-99'/>
 </g>
-</svg> where:<ul><li><svg class="m-math" style="width: 2.715em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.066112 11.955168">
+</svg> Here,<ul><li><svg class="m-math" style="width: 2.715em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.066112 11.955168">
 <title>
 $ \phi_i(x) $
 </title>
@@ -235,7 +235,7 @@ $ \mathbf{u} $
 <g id='eq8-page1'>
 <use x='0' y='0' xlink:href='#eq8-g0-117'/>
 </g>
-</svg> is the vector field</li><li><strong>Continuity</strong>: C⁰ continuous vector field (each component is C⁰ continuous, H¹-conforming)</li></ul></section><section id="autotoc_md403"><h2><a href="#autotoc_md403">Component Structure</a></h2><p>Each vector basis function is non-zero in only one component:</p><ul><li>Basis function <code>i*vdim + c</code> has value <svg class="m-math" style="width: 2.715em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.066112 11.955168">
+</svg> is the vector field</li><li><strong>Continuity</strong>: C⁰ continuous vector field (each component is C⁰ continuous, H¹-conforming)</li></ul></section><section id="autotoc_md401"><h2><a href="#autotoc_md401">Component Structure</a></h2><p>Each vector basis function is non-zero in only one component:</p><ul><li>Basis function <code>i*vdim + c</code> has value <svg class="m-math" style="width: 2.715em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.066112 11.955168">
 <title>
 $ \phi_i(x) $
 </title>
@@ -253,7 +253,7 @@ $ \phi_i(x) $
 <use x='14.8617' y='0' xlink:href='#eq9-g1-120'/>
 <use x='21.513787' y='0' xlink:href='#eq9-g2-41'/>
 </g>
-</svg> in component c, zero elsewhere</li><li>This allows efficient assembly and clear physical interpretation</li></ul></section><section id="autotoc_md404"><h2><a href="#autotoc_md404">Applications</a></h2><ul><li><strong>Linear elasticity</strong>: Displacement field <svg class="m-math" style="width: 2.420em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 23.228719 11.955168">
+</svg> in component c, zero elsewhere</li><li>This allows efficient assembly and clear physical interpretation</li></ul></section><section id="autotoc_md402"><h2><a href="#autotoc_md402">Applications</a></h2><ul><li><strong>Linear elasticity</strong>: Displacement field <svg class="m-math" style="width: 2.420em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 23.228719 11.955168">
 <title>
 $ \mathbf{u}(x) $
 </title>
@@ -301,7 +301,7 @@ $ \mathbf{E}(x) $
 <use x='13.380335' y='0' xlink:href='#eq12-g1-120'/>
 <use x='20.032422' y='0' xlink:href='#eq12-g2-41'/>
 </g>
-</svg></li><li><strong>General vector PDEs</strong>: Any vector-valued unknown</li></ul></section><section id="autotoc_md405"><h2><a href="#autotoc_md405">Usage Example</a></h2><pre class="m-code"><span class="c1">// 2D vector H1 element of degree 2 on triangle - 6 nodes × 2 components = 12 DOFs</span>
+</svg></li><li><strong>General vector PDEs</strong>: Any vector-valued unknown</li></ul></section><section id="autotoc_md403"><h2><a href="#autotoc_md403">Usage Example</a></h2><pre class="m-code"><span class="c1">// 2D vector H1 element of degree 2 on triangle - 6 nodes × 2 components = 12 DOFs</span>
 <span class="nc">VectorH1Element</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vec_h1</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">vec_h1</span><span class="p">.</span><span class="n">getCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">// Output: 12</span>
 

@@ -5,11 +5,11 @@
   <title>Rodin::Variational::VectorFunctionBase class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -93,7 +93,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md549">Component Access</a></li>
+            <li><a href="#autotoc_md546">Component Access</a></li>
             <li>
               Reference
               <ul>
@@ -105,7 +105,7 @@
             </li>
           </ul>
         </nav>
-<aside class="m-note m-info"><h4>Note</h4><p>Vectors are zero indexed. This means that the 0-index corresponds to the 1st entry of the vector.</p></aside><p>VectorFunctionBase extends FunctionBase to represent vector-valued functions:</p><div class="m-math"><svg style="width: 5.757em; height: 1.091em;" viewBox="166.387278 -10.470988 55.270298 10.470988">
+<aside class="m-note m-info"><h4>Note</h4><p>Vectors are zero indexed. This means that the 0-index corresponds to the 1st entry of the vector.</p></aside><p>VectorFunctionBase extends FunctionBase to represent vector-valued functions.</p><div class="m-math"><svg style="width: 5.757em; height: 1.091em;" viewBox="166.387278 -10.470988 55.270298 10.470988">
 <title>
 \[   \mathbf{f}: \Omega \to \mathbb{R}^d
 \]
@@ -180,7 +180,7 @@ $ \nabla u $
 <use x='0' y='0' xlink:href='#eq5-g0-114'/>
 <use x='9.962671' y='0' xlink:href='#eq5-g1-117'/>
 </g>
-</svg> for scalar fields</li><li><strong>Fluxes</strong>: Heat flux, mass flux</li></ul><section id="autotoc_md549"><h2><a href="#autotoc_md549">Component Access</a></h2><p>Vector components can be accessed via:</p><ul><li>Index notation: <code>f(i)</code> for the i-th component</li><li>Coordinate accessors: <code>f.x()</code>, <code>f.y()</code>, <code>f.z()</code> for first three components</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="_real_function_8h.html">RealFunction</a></p><p><a href="_matrix_function_8h.html">MatrixFunction</a></p></aside></section>
+</svg> for scalar fields</li><li><strong>Fluxes</strong>: Heat flux, mass flux</li></ul><section id="autotoc_md546"><h2><a href="#autotoc_md546">Component Access</a></h2><p>Vector components can be accessed via:</p><ul><li>Index notation: <code>f(i)</code> for the i-th component</li><li>Coordinate accessors: <code>f.x()</code>, <code>f.y()</code>, <code>f.z()</code> for first three components</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="_real_function_8h.html">RealFunction</a></p><p><a href="_matrix_function_8h.html">MatrixFunction</a></p></aside></section>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_function_base.html" title="FunctionBase&lt; VectorFunctionBase&lt; Scalar, Derived &gt; &gt;">FunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">VectorFunctionBase</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#ad42a88d23d9d12ac0280d0abae88875e"><span class="nc">VectorFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><span class="n">Derived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
 </pre></details></td><td>Base class for function objects which can be evaluated over a mesh.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#a6049a2e88f41fa0b9ed05157cb23f772"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_function_base.html#ad29a755240e4c6938395b937a1c4a132">FunctionBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>9 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#aa75b0ee8f7f82337ebf0b88abfa91b18"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ad722433deff18a068eb7bd27da532d45"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#aba5919eddb1f90f8ca65bbd25d065d60"><code>traceOf()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
@@ -376,7 +376,7 @@ $ \nabla u $
                 </tr>
               </tfoot>
             </table>
-<p>Returns a scalar function representing the specified component: <svg class="m-math" style="width: 7.681em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 73.733007 11.955168">
+<p>Returns a scalar function representing the specified component. <svg class="m-math" style="width: 7.681em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 73.733007 11.955168">
 <title>
 $ f_i(x) = (\mathbf{f}(x))_i $
 </title>

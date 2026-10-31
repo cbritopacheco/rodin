@@ -5,11 +5,11 @@
   <title>Rodin::Variational::LinearFormBase class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -88,9 +88,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md455">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md456">Discrete Representation</a></li>
-            <li><a href="#autotoc_md457">Common Examples</a></li>
+            <li><a href="#autotoc_md453">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md454">Discrete Representation</a></li>
+            <li><a href="#autotoc_md455">Common Examples</a></li>
             <li>
               Reference
               <ul>
@@ -137,7 +137,7 @@ $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-118'/>
 </g>
-</svg>. Such forms typically represent loads, sources, or boundary data in variational formulations.</p><section id="autotoc_md455"><h2><a href="#autotoc_md455">Mathematical Foundation</a></h2><p>A real linear form <svg class="m-math" style="width: 1.973em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 18.942679 11.955168">
+</svg>. Such forms typically represent loads, sources, or boundary data in variational formulations.</p><section id="autotoc_md453"><h2><a href="#autotoc_md453">Mathematical Foundation</a></h2><p>A real linear form <svg class="m-math" style="width: 1.973em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 18.942679 11.955168">
 <title>
 $ l(v) $
 </title>
@@ -234,7 +234,7 @@ $ C $
 <g id='eq6-page1'>
 <use x='0' y='0' xlink:href='#eq6-g0-67'/>
 </g>
-</svg></li></ul><p>For complex scalars, the first identity instead carries conjugated coefficients.</p></section><section id="autotoc_md456"><h2><a href="#autotoc_md456">Discrete Representation</a></h2><p>The discrete vector representation satisfies <svg class="m-math" style="width: 4.995em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 47.950686 11.955168">
+</svg></li></ul><p>For complex scalars, the first identity instead carries conjugated coefficients.</p></section><section id="autotoc_md454"><h2><a href="#autotoc_md454">Discrete Representation</a></h2><p>The discrete vector representation satisfies <svg class="m-math" style="width: 4.995em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 47.950686 11.955168">
 <title>
 $ b_i = l(\psi_i) $
 </title>
@@ -269,7 +269,7 @@ $ \psi_i $
 <use x='0' y='0' xlink:href='#eq8-g1-32'/>
 <use x='7.610267' y='1.793263' xlink:href='#eq8-g0-105'/>
 </g>
-</svg> are test basis functions.</p></section><section id="autotoc_md457"><h2><a href="#autotoc_md457">Common Examples</a></h2><ul><li><strong>Load vector</strong>: <svg class="m-math" style="width: 8.900em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 85.437312 13.781784">
+</svg> are test basis functions.</p></section><section id="autotoc_md455"><h2><a href="#autotoc_md455">Common Examples</a></h2><ul><li><strong>Load vector</strong>: <svg class="m-math" style="width: 8.900em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 85.437312 13.781784">
 <title>
 $ l(v) = \int_\Omega f \cdot v \, dx $
 </title>
@@ -583,7 +583,7 @@ $ l(v) = \sum_k f_k v(x_k) $
                 </tr>
               </tfoot>
             </table>
-<p>Linear form integrators define contributions to the right-hand side: <svg class="m-math" style="width: 17.025em; height: 1.547em; vertical-align: -0.546em;" viewBox="0 -9.630618 163.442887 14.848614">
+<p>Linear form integrators define contributions to the right-hand side. <svg class="m-math" style="width: 17.025em; height: 1.547em; vertical-align: -0.546em;" viewBox="0 -9.630618 163.442887 14.848614">
 <title>
 $ b_i = \sum_{\text{integrators}} \int \text{integrand}(\psi_i) \, dx $
 </title>
@@ -708,7 +708,7 @@ $ l_i(v) $
 <use x='11.420491' y='0' xlink:href='#eq13-g1-118'/>
 <use x='17.50871' y='0' xlink:href='#eq13-g2-41'/>
 </g>
-</svg> to the linear form: <svg class="m-math" style="width: 12.926em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 124.089083 11.955168">
+</svg> to the linear form. <svg class="m-math" style="width: 12.926em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 124.089083 11.955168">
 <title>
 $ l(v) = l_1(v) + l_2(v) + \ldots $
 </title>
@@ -794,7 +794,7 @@ $ l(v) = l_1(v) + l_2(v) + \ldots $
                 </tr>
               </tfoot>
             </table>
-<p>Subtracts a contribution: <svg class="m-math" style="width: 9.407em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 90.304527 11.955168">
+<p>Subtracts a contribution according to <svg class="m-math" style="width: 9.407em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 90.304527 11.955168">
 <title>
 $ l(v) = l(v) - l_i(v) $
 </title>
@@ -962,11 +962,11 @@ $ l(v) = l(v) - l_i(v) $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object</td>
+                  <td>Newly allocated copy whose ownership passes to the caller.</td>
                 </tr>
               </tfoot>
             </table>
-<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
+<p>Derived classes implement this pure virtual function to support polymorphic copying. The caller must adopt the returned pointer into owned storage or otherwise release it.</p><aside class="m-note m-info"><h4>Note</h4><p>Copy dispatch through this base is virtual.</p></aside>
           </div></section>
         </section>
       </div>

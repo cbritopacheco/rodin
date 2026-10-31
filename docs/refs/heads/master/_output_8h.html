@@ -5,11 +5,11 @@
   <title>Rodin/Solid/Local/Output.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -88,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<p>An Output is the dual of Input: where an Input populates a ConstitutivePoint with auxiliary data before the constitutive law is evaluated, an Output reads the prepared law at each quadrature point afterwards. This is the extraction site for quantities derived from the evaluation &ndash; committed internal variables, recovered stresses, strain energy, diagnostics &ndash; without hard-coding them into the integrator or the constitutive law, and without recomputing the kinematics at the call site.</p><p>An Output receives a const prepared law, so it is written against a specific law. The ConstitutivePoint carries <code>Tags::CellIndex</code> and <code>Tags::QuadraturePointIndex</code>, so an Output and an Input driven by the same pass address the same quadrature point.</p><section id="autotoc_md248"><h2><a href="#autotoc_md248">Usage with CRTP</a></h2><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">MyOutput</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">Output</span><span class="o">&lt;</span><span class="n">MyOutput</span><span class="o">&gt;</span>
+<p>An Output is the dual of Input. An Input populates a ConstitutivePoint with auxiliary data before the constitutive law is evaluated, while an Output reads the prepared law at each quadrature point afterwards. This is the extraction site for quantities derived from the evaluation &ndash; committed internal variables, recovered stresses, strain energy, diagnostics &ndash; without hard-coding them into the integrator or the constitutive law, and without recomputing the kinematics at the call site.</p><p>An Output receives a const prepared law, so it is written against a specific law. The ConstitutivePoint carries <code>Tags::CellIndex</code> and <code>Tags::QuadraturePointIndex</code>, so an Output and an Input driven by the same pass address the same quadrature point.</p><section id="autotoc_md248"><h2><a href="#autotoc_md248">Usage with CRTP</a></h2><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">MyOutput</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">Output</span><span class="o">&lt;</span><span class="n">MyOutput</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="n">MyOutput</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
 
@@ -115,7 +115,7 @@
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solid.html" class="m-doc">Rodin::Solid</a></dt>
-            <dd>Constitutive laws, kinematics, and solid-mechanics integration.</dd>
+            <dd>Finite-strain kinematics, constitutive responses and virtual-work forms.</dd>
           </dl>
         </section>
         <section id="nested-classes">

@@ -5,11 +5,11 @@
   <title>Rodin::Variational::DubinerTriangle class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -184,7 +184,7 @@ $ (0,0), (1,0), (0,1) $
 <use x='78.247374' y='0' xlink:href='#eq3-g1-49'/>
 <use x='84.100365' y='0' xlink:href='#eq3-g1-41'/>
 </g>
-</svg>.</p><p>The Dubiner basis is constructed as a product of Jacobi polynomials:</p><div class="m-math"><svg style="width: 23.425em; height: 3.018em;" viewBox="81.581399 -28.969413 224.882076 28.969421">
+</svg>.</p><p>The Dubiner basis is constructed as a product of Jacobi polynomials.</p><div class="m-math"><svg style="width: 23.425em; height: 3.018em;" viewBox="81.581399 -28.969413 224.882076 28.969421">
 <title>
 \[  \psi_{p,q}(r,s) = P_p^{(0,0)}(a) \cdot P_q^{(2p+1,0)}(b)
     \cdot \left(\frac{1-b}{2}\right)^p
@@ -469,7 +469,7 @@ $\psi_{P,Q}$
                 </tr>
               </tbody>
             </table>
-<p>Computes: dψ/da, dψ/db</p><aside class="m-note m-info"><h4>Note</h4><p>This function returns derivatives in (a,b). If you need derivatives w.r.t. (x,y) on the reference triangle, apply the outer chain rule:</p></aside><p>a = 2x/(1-y) - 1, b = 2y - 1 da/dx = 2/(1-y), da/dy = 2x/(1-y)^2 db/dx = 0, db/dy = 2</p><p>so: dψ/dx = dψ/da * da/dx + dψ/db * db/dx dψ/dy = dψ/da * da/dy + dψ/db * db/dy</p>
+<p>Computes the following quantity. dψ/da, dψ/db</p><aside class="m-note m-info"><h4>Note</h4><p>This function returns derivatives in (a,b). If you need derivatives w.r.t. (x,y) on the reference triangle, apply the outer chain rule.</p></aside><p>a = 2x/(1-y) - 1, b = 2y - 1 da/dx = 2/(1-y), da/dy = 2x/(1-y)^2 db/dx = 0, db/dy = 2</p><p>Applying the chain rule gives dψ/dx = dψ/da * da/dx + dψ/db * db/dx dψ/dy = dψ/da * da/dy + dψ/db * db/dy</p>
           </div></section>
           <section class="m-doc-details" id="a919d291813e89c1d7b0792ae361d82ff"><div>
             <h3>
@@ -681,7 +681,7 @@ $1-y$
                 </tr>
               </tbody>
             </table>
-<p>Reference triangle vertices: (0,0), (1,0), (0,1).</p><p>Mapping: b = 2y - 1 a = 2x/(1-y) - 1 if y != 1 a = -1 at the collapsed vertex y=1</p>
+<p>The reference triangle has vertices (0,0), (1,0) and (0,1).</p><p>The following relations define the collapsed coordinates. b = 2y - 1 a = 2x/(1-y) - 1 if y != 1 a = -1 at the collapsed vertex y=1</p>
           </div></section>
         </section>
       </div>

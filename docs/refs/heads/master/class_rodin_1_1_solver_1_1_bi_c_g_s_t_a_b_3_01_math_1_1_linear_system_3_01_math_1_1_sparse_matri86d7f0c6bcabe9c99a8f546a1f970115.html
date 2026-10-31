@@ -5,11 +5,11 @@
   <title>Rodin::Solver::BiCGSTAB&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -116,7 +116,7 @@ $ Ax = b $
 <use x='18.748263' y='0' xlink:href='#eq1-g1-61'/>
 <use x='31.173744' y='0' xlink:href='#eq1-g0-98'/>
 </g>
-</svg>. It combines ideas from the BiCG algorithm with stabilization to avoid the irregular convergence patterns often seen in the Bi-Conjugate Gradient method.</p><p>BiCGSTAB is particularly suitable for:</p><ul><li>Non-symmetric matrices</li><li>Large sparse systems</li><li>Problems where direct solvers are too expensive</li></ul><p><strong>Example usage:</strong></p><pre class="m-code"><span class="nc">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg>. It combines ideas from the BiCG algorithm with stabilization to avoid the irregular convergence patterns often seen in the Bi-Conjugate Gradient method.</p><p>BiCGSTAB is particularly suitable for:</p><ul><li>Non-symmetric matrices</li><li>Large sparse systems</li><li>Problems where direct solvers are too expensive</li></ul><p><strong>The following example illustrates usage.</strong></p><pre class="m-code"><span class="nc">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">beta</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="nc">BiCGSTAB</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>

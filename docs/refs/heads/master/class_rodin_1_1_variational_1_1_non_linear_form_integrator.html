@@ -5,11 +5,11 @@
   <title>Rodin::Variational::NonLinearFormIntegrator class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -85,11 +85,11 @@
             </li>
           </ul>
         </nav>
-<p>Derived classes must implement:</p><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="no">Test</span><span class="o">&gt;</span>
+<p>Derived classes implement the following operations.</p><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="no">Test</span><span class="o">&gt;</span>
 <span class="k">auto</span><span class="w"> </span><span class="nc">Residual</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="no">Test</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">   </span><span class="c1">// LinearFormIntegrator</span>
 
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="no">Trial</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="no">Test</span><span class="o">&gt;</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">Tangent</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="no">Trial</span><span class="o">&amp;</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="no">Test</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">  </span><span class="c1">// BilinearFormIntegrator</span></pre><p>This mixin then provides:</p><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="no">Trial</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="no">Test</span><span class="o">&gt;</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">Tangent</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="no">Trial</span><span class="o">&amp;</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="no">Test</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">  </span><span class="c1">// BilinearFormIntegrator</span></pre><p>This mixin then provides the following call interface.</p><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="no">Trial</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="no">Test</span><span class="o">&gt;</span>
 <span class="k">auto</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="no">Trial</span><span class="o">&amp;</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="no">Test</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">  </span><span class="c1">// ProblemBody</span></pre><p>so that <code>obj(u, v)</code> can be used directly in a Problem assignment, registering both the residual and tangent contributions at once.</p>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>

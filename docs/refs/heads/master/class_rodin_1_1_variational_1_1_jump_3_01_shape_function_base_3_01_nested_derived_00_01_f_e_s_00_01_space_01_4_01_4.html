@@ -5,11 +5,11 @@
   <title>Rodin::Variational::Jump&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -80,7 +80,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md451">Usage Example</a></li>
+            <li><a href="#autotoc_md449">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>Computes the jump of shape (trial or test) functions across element interfaces in finite element formulations. This is used in DG bilinear and linear form assembly.</p><section id="autotoc_md451"><h2><a href="#autotoc_md451">Usage Example</a></h2><pre class="m-code"><span class="c1">// DG interior penalty term</span>
+<p>Computes the jump of shape (trial or test) functions across element interfaces in finite element formulations. This is used in DG bilinear and linear form assembly.</p><section id="autotoc_md449"><h2><a href="#autotoc_md449">Usage Example</a></h2><pre class="m-code"><span class="c1">// DG interior penalty term</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">penalty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">InterfaceIntegral</span><span class="p">(</span><span class="nc">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span></pre></section>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_interface_shape_function_base.html" title="InterfaceShapeFunctionBase&lt; Jump&lt; ShapeFunctionBase&lt; NestedDerived, FES, Space &gt; &gt;, ShapeFunctionBase&lt; NestedDerived, FES, Space &gt; &gt;">InterfaceShapeFunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Jump</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_interface_shape_function_base.html"><code>InterfaceShapeFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_interface_shape_function_base.html"><span class="nc">InterfaceShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_jump_3_01_shape_function_base_3_01_nested_derived_00_01_f_e_s_00_01_space_01_4_01_4.html#a1a28c93b3705d68891cb77fcd710864c"><span class="nc">Jump</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="p">,</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="nc">Space</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="p">,</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="nc">Space</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
 </pre></details></td><td>Evaluation base for a two-sided shape trace.</td></tr></tbody></table></section>

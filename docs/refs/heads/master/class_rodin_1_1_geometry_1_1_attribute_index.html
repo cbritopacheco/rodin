@@ -5,11 +5,11 @@
   <title>Rodin::Geometry::AttributeIndex class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -189,7 +189,7 @@
                 </tr>
               </tbody>
             </table>
-<p>Copies all dimensions from <code>other</code>.</p><p>Thread-safety:</p><ul><li>Safe if <code>other</code> is not being moved concurrently.</li><li>Copy is not a globally atomic snapshot across dimensions.</li></ul>
+<p>Copies all dimensions from <code>other</code>.</p><aside class="m-note m-default"><h4>Thread safety</h4><ul><li>Safe if <code>other</code> is not being moved concurrently.</li><li>Copy is not a globally atomic snapshot across dimensions.</li></ul></aside>
           </div></section>
           <section class="m-doc-details" id="a70350396ca1f778d966cf61522a257fb"><div>
             <h3>
@@ -207,7 +207,7 @@
                 </tr>
               </tbody>
             </table>
-<p>Transfers internal dimension storage from <code>other</code>.</p><p>Thread-safety:</p><ul><li>Requires external synchronization: no concurrent access to either object.</li></ul>
+<p>Transfers internal dimension storage from <code>other</code>.</p><aside class="m-note m-default"><h4>Thread safety</h4><ul><li>Requires external synchronization: no concurrent access to either object.</li></ul></aside>
           </div></section>
           <section class="m-doc-details" id="a4f749c4cf8d1c63e403bf5b8897240d5"><div>
             <h3>
@@ -231,7 +231,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>Copies all dimensions from <code>other</code> into <code>*this</code>.</p><p>Preconditions:</p><ul><li>Both objects must already be initialized with the same mesh dimension (i.e. same <code>m_dimensions.size()</code>).</li></ul><p>Thread-safety:</p><ul><li>Serializes storage growth per dimension; slot snapshots are atomic.</li><li>Not an atomic snapshot across dimensions.</li></ul>
+<p>Copies all dimensions from <code>other</code> into <code>*this</code>.</p><p>Preconditions:</p><ul><li>Both objects must already be initialized with the same mesh dimension (i.e. same <code>m_dimensions.size()</code>).</li></ul><aside class="m-note m-default"><h4>Thread safety</h4><ul><li>Serializes storage growth per dimension; slot snapshots are atomic.</li><li>Not an atomic snapshot across dimensions.</li></ul></aside>
           </div></section>
           <section class="m-doc-details" id="a81d3450255206ec86309d1d64a233391"><div>
             <h3>
@@ -255,7 +255,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>Transfers internal dimension storage from <code>other</code> into <code>*this</code>.</p><p>Thread-safety:</p><ul><li>Requires external synchronization: no concurrent access to either object.</li></ul>
+<p>Transfers internal dimension storage from <code>other</code> into <code>*this</code>.</p><aside class="m-note m-default"><h4>Thread safety</h4><ul><li>Requires external synchronization: no concurrent access to either object.</li></ul></aside>
           </div></section>
           <section class="m-doc-details" id="a77a1d55dead131c3707395c06f7b0b2b"><div>
             <h3>
@@ -273,7 +273,7 @@
                 </tr>
               </tbody>
             </table>
-<p>Allocates per-dimension storage for dimensions <code>0</code>..meshDim.</p><p>Structural immutability:</p><ul><li>After initialization, the dimension count is immutable.</li><li>Calling initialize again is only valid if called idempotently with the same <code>meshDim</code>.</li></ul><p>Thread-safety:</p><ul><li>Not thread-safe. Must be called before any concurrent access.</li></ul>
+<p>Allocates per-dimension storage for dimensions <code>0</code>..meshDim.</p><p>Structural immutability:</p><ul><li>After initialization, the dimension count is immutable.</li><li>Calling initialize again is only valid if called idempotently with the same <code>meshDim</code>.</li></ul><aside class="m-note m-default"><h4>Thread safety</h4><ul><li>Not thread-safe. Must be called before any concurrent access.</li></ul></aside>
           </div></section>
           <section class="m-doc-details" id="aacead788d9511da9aac886f19c4b966f"><div>
             <h3>
@@ -296,7 +296,7 @@
                 </tr>
               </tbody>
             </table>
-<p>Grows the slot vector for dimension <code>d</code> to at least <code>count</code>, filling new entries with <code>std::nullopt</code>.</p><p>Thread-safety:</p><ul><li>Thread-safe w.r.t. other operations on the same dimension (protected by that dimension&#x27;s mutex).</li></ul>
+<p>Grows the slot vector for dimension <code>d</code> to at least <code>count</code>, filling new entries with <code>std::nullopt</code>.</p><aside class="m-note m-default"><h4>Thread safety</h4><ul><li>Thread-safe w.r.t. other operations on the same dimension (protected by that dimension&#x27;s mutex).</li></ul></aside>
           </div></section>
           <section class="m-doc-details" id="ae2c5ae1e43c31e7358688d2c41c3fd0e"><div>
             <h3>
@@ -319,7 +319,7 @@
                 </tr>
               </tbody>
             </table>
-<p>If storage is insufficient, grows the slot vector to include <code>idx</code> and assigns <code>attr</code>.</p><p>Thread-safety:</p><ul><li>Thread-safe (dimension growth and slot writes are serialized).</li></ul>
+<p>If storage is insufficient, grows the slot vector to include <code>idx</code> and assigns <code>attr</code>.</p><aside class="m-note m-default"><h4>Thread safety</h4><ul><li>Thread-safe (dimension growth and slot writes are serialized).</li></ul></aside>
           </div></section>
           <section class="m-doc-details" id="a450936c754394940738b55219749bb2b"><div>
             <h3>
@@ -347,7 +347,7 @@
                 </tr>
               </tbody>
             </table>
-<p>Ensures the dimension has at least <code>count</code> slots (growing if necessary), then assigns <code>attr</code> at <code>idx</code>.</p><p>Preconditions:</p><ul><li><code>idx</code> &lt; <code>count</code>.</li></ul><p>Thread-safety:</p><ul><li>Thread-safe (dimension growth and slot writes are serialized).</li></ul>
+<p>Ensures the dimension has at least <code>count</code> slots (growing if necessary), then assigns <code>attr</code> at <code>idx</code>.</p><p>Preconditions:</p><ul><li><code>idx</code> &lt; <code>count</code>.</li></ul><aside class="m-note m-default"><h4>Thread safety</h4><ul><li>Thread-safe (dimension growth and slot writes are serialized).</li></ul></aside>
           </div></section>
           <section class="m-doc-details" id="a286c6601a055b29be8fc642881c8ba9c"><div>
             <h3>
@@ -370,7 +370,7 @@
                 </tr>
               </tbody>
             </table>
-<p>Ensures the dimension has at least <code>count</code> slots (growing if necessary), then resets the entry at <code>idx</code> to <code>std::nullopt</code>.</p><p>Thread-safety:</p><ul><li>Thread-safe (dimension growth and slot writes are serialized).</li></ul>
+<p>Ensures the dimension has at least <code>count</code> slots (growing if necessary), then resets the entry at <code>idx</code> to <code>std::nullopt</code>.</p><aside class="m-note m-default"><h4>Thread safety</h4><ul><li>Thread-safe (dimension growth and slot writes are serialized).</li></ul></aside>
           </div></section>
           <section class="m-doc-details" id="a7b1d700027d13dd3c0d01ba92e45ec1f"><div>
             <h3>
@@ -399,7 +399,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>Reads an atomic snapshot of the slot at <code>idx</code>.</p><p>Notes:</p><ul><li>This method does not resize. If <code>idx</code> is out of range, returns <code>std::nullopt</code>.</li></ul><p>Preconditions:</p><ul><li><code>idx</code> &lt; <code>count</code> (debug-checked).</li></ul><p>Thread-safety:</p><ul><li>Thread-safe and does not acquire a mutex when the slot has been published.</li></ul>
+<p>Reads an atomic snapshot of the slot at <code>idx</code>.</p><p>Notes:</p><ul><li>This method does not resize. If <code>idx</code> is out of range, returns <code>std::nullopt</code>.</li></ul><p>Preconditions:</p><ul><li><code>idx</code> &lt; <code>count</code> (debug-checked).</li></ul><aside class="m-note m-default"><h4>Thread safety</h4><ul><li>Thread-safe and does not acquire a mutex when the slot has been published.</li></ul></aside>
           </div></section>
           <section class="m-doc-details" id="a57cb0d488137c714837aef2837441e9f"><div>
             <h3>
@@ -423,7 +423,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>Iterates over all slots in dimension <code>d</code> and collects all engaged attributes.</p><p>Thread-safety:</p><ul><li>Thread-safe; each published slot is read atomically.</li></ul>
+<p>Iterates over all slots in dimension <code>d</code> and collects all engaged attributes.</p><aside class="m-note m-default"><h4>Thread safety</h4><ul><li>Thread-safe; each published slot is read atomically.</li></ul></aside>
           </div></section>
           <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
             <h3>

@@ -5,11 +5,11 @@
   <title>Rodin/Variational/NEQ.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -77,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md466">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md467">Numerical Considerations</a></li>
-            <li><a href="#autotoc_md468">Applications</a></li>
-            <li><a href="#autotoc_md469">Usage Example</a></li>
+            <li><a href="#autotoc_md464">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md465">Numerical Considerations</a></li>
+            <li><a href="#autotoc_md466">Applications</a></li>
+            <li><a href="#autotoc_md467">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the NEQ class, which implements the not-equal comparison operation between functions. This operator tests whether two function values differ at each point in the domain.</p><section id="autotoc_md466"><h2><a href="#autotoc_md466">Mathematical Foundation</a></h2><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
+<p>This file defines the NEQ class, which implements the not-equal comparison operation between functions. This operator tests whether two function values differ at each point in the domain.</p><section id="autotoc_md464"><h2><a href="#autotoc_md464">Mathematical Foundation</a></h2><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
 <title>
 $ f, g : \Omega \to \mathbb{R} $
 </title>
@@ -112,7 +112,7 @@ $ f, g : \Omega \to \mathbb{R} $
 <use x='39.342988' y='0' xlink:href='#eq1-g1-33'/>
 <use x='54.61902' y='0' xlink:href='#eq1-g0-82'/>
 </g>
-</svg>, the inequality operator:</p><div class="m-math"><svg style="width: 17.449em; height: 3.736em;" viewBox="109.92006 -35.865862 167.507346 35.865869">
+</svg>, the inequality operator is defined by</p><div class="m-math"><svg style="width: 17.449em; height: 3.736em;" viewBox="109.92006 -35.865862 167.507346 35.865869">
 <title>
 \[     (f \neq g)(x) = \begin{cases} 1 &amp; \text{if } f(x) \neq g(x) \\ 0 &amp; \text{otherwise} \end{cases}
 \]
@@ -174,7 +174,7 @@ $ f, g : \Omega \to \mathbb{R} $
 <use x='243.555676' y='-5.798537' xlink:href='#eq2-g5-115'/>
 <use x='248.206235' y='-5.798537' xlink:href='#eq2-g5-101'/>
 </g>
-</svg></div></section><section id="autotoc_md467"><h2><a href="#autotoc_md467">Numerical Considerations</a></h2><p>For floating-point comparisons, consider using approximate equality tests rather than strict inequality, due to numerical precision limitations.</p></section><section id="autotoc_md468"><h2><a href="#autotoc_md468">Applications</a></h2><ul><li>Complement of indicator functions</li><li>Non-zero region detection</li><li>Logical complement of equality conditions</li></ul></section><section id="autotoc_md469"><h2><a href="#autotoc_md469">Usage Example</a></h2><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">is_nonzero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean function, true where u is non-zero</span></pre></section>
+</svg></div></section><section id="autotoc_md465"><h2><a href="#autotoc_md465">Numerical Considerations</a></h2><p>For floating-point comparisons, consider using approximate equality tests rather than strict inequality, due to numerical precision limitations.</p></section><section id="autotoc_md466"><h2><a href="#autotoc_md466">Applications</a></h2><ul><li>Complement of indicator functions</li><li>Non-zero region detection</li><li>Logical complement of equality conditions</li></ul></section><section id="autotoc_md467"><h2><a href="#autotoc_md467">Usage Example</a></h2><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">is_nonzero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean function, true where u is non-zero</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

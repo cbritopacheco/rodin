@@ -5,11 +5,11 @@
   <title>Rodin::PETSc::Assembly::VectorSetup class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -106,7 +106,7 @@ $ \mathbf{x} $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-120'/>
 </g>
-</svg> therefore retain their global sizes throughout its lifetime. The first call establishes the vector layout; subsequent calls reuse that layout.</p><aside class="m-note m-info"><h4>Note</h4><p>PETSc does not support resizing a vector after its layout has been established. Reuse requires the existing global size to match the requested size; this precondition is checked by a debug assertion. A change of finite element space or mesh requires a new <code>LinearSystem</code>.</p></aside><section id="autotoc_md193"><h2><a href="#autotoc_md193">Zeroing</a></h2><p>The right-hand side and residual vectors are rebuilt from scratch on every assembly and must therefore be zeroed each time (<code>zeroOnReuse</code> = true, the default). The solution vector must <em>not</em> be zeroed on reuse: it carries the previous iterate, which iterative/Newton solvers consume as the initial guess. It is still zeroed once, when first laid out, to provide a defined starting point.</p></section>
+</svg> therefore retain their global sizes throughout its lifetime. The first call establishes the vector layout; subsequent calls reuse that layout.</p><aside class="m-note m-info"><h4>Note</h4><p>PETSc does not support resizing a vector after its layout has been established. Reuse requires the existing global size to match the requested size; this precondition is checked by a debug assertion. A change of finite element space or mesh requires a new <code>LinearSystem</code>.</p></aside><section id="autotoc_md193"><h2><a href="#autotoc_md193">Zeroing</a></h2><p>The right-hand side and residual vectors are rebuilt from scratch on every assembly and must therefore be zeroed each time (<code>zeroOnReuse</code> = true, the default). The solution vector must <em>not</em> be zeroed on reuse because it carries the previous iterate, which iterative/Newton solvers consume as the initial guess. It is still zeroed once, when first laid out, to provide a defined starting point.</p></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">

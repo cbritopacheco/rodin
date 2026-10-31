@@ -5,11 +5,11 @@
   <title>Rodin/Solid/Integrators/InternalVirtualWorkTangent.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -86,7 +86,7 @@
             </li>
           </ul>
         </nav>
-<p>Pure displacement block:</p><div class="m-math"><svg style="width: 23.546em; height: 2.935em;" viewBox="81.25114 -28.172399 226.040733 28.172399">
+<p>The pure-displacement formulation has the following tangent block.</p><div class="m-math"><svg style="width: 23.546em; height: 2.935em;" viewBox="81.25114 -28.172399 226.040733 28.172399">
 <title>
 \[  D(\delta W^{\text{int}})[\Delta\mathbf{u}, \mathbf{v}]
     = \int_{\Omega_0} D\mathbf{P}[\nabla_0 \Delta\mathbf{u}]
@@ -260,7 +260,7 @@ $ K_{pu} $
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solid.html" class="m-doc">Rodin::Solid</a></dt>
-            <dd>Constitutive laws, kinematics, and solid-mechanics integration.</dd>
+            <dd>Finite-strain kinematics, constitutive responses and virtual-work forms.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -307,7 +307,7 @@ $ K_{up} $
 <use x='9.959113' y='1.793263' xlink:href='#eq39-g0-117'/>
 <use x='14.862083' y='1.793263' xlink:href='#eq39-g0-112'/>
 </g>
-</svg>. Bound to the (p, v) pair: columns are pressure DOFs, rows are displacement test DOFs.</dd>
+</svg>. Bound to the (p, v) pair, where columns are pressure DOFs, rows are displacement test DOFs.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class TrialFunctionType, class TestPressFunctionType, class DisplacementType&gt;</div>
               class <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent_p_u.html" class="m-doc">Rodin::Solid::InternalVirtualWorkTangentPU</a>
@@ -326,7 +326,7 @@ $ K_{pu} $
 <use x='9.959113' y='1.793263' xlink:href='#eq22-g0-112'/>
 <use x='14.221891' y='1.793263' xlink:href='#eq22-g0-117'/>
 </g>
-</svg> (linearized incompressibility constraint). Bound to the (u, q) pair: columns are displacement DOFs, rows are pressure test DOFs.</dd>
+</svg> (linearized incompressibility constraint). Bound to the (u, q) pair, where columns are displacement DOFs, rows are pressure test DOFs.</dd>
           </dl>
         </section>
       </div>

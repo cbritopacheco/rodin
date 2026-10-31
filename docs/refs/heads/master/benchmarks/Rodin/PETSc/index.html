@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,7 +9,7 @@
   <title>PETSc · Rodin benchmarks</title>
   <link rel="stylesheet" href="../../assets/mcss-22c93d2587ab.css">
   <link rel="stylesheet" href="../../assets/rodin-62701ba7f0b9.css">
-  <link rel="stylesheet" href="../../assets/rodin-theme-cb2530ea8c22.css">
+  <link rel="stylesheet" href="../../assets/rodin-theme-1337632f765f.css">
   <link rel="stylesheet" href="../../assets/rodin.css">
   <link rel="stylesheet" href="../../assets/rodin-theme.css">
   <link rel="stylesheet" href="../../assets/site.css">
@@ -80,7 +81,13 @@
       <h1>PETSc</h1>
       <p class="benchmark-configuration">Published configurations</p>
       
-      <p class="m-text m-dim"><em>PETSc integration module for Rodin.</em></p><div class="benchmark-representative"><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="nc">KSP</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></div><div class="m-block m-flat"><p><a href="../../../namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">PETSc::<wbr />Math::<wbr />LinearSystem</a> groups PETSc matrix and vector handles, while <a href="../../../class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> and <a href="../../../class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> expose linear and nonlinear solvers. PETSc-backed variational and assembly specializations connect the same weak-form interfaces to distributed algebra, preconditioning, and solver configuration for larger PDE systems.</p></div>
+      <p class="m-text m-dim"><em>PETSc storage, assembly and linear/nonlinear solver adapters.</em></p><div class="benchmark-representative"><pre class="m-code"><span class="n">PetscErrorCode</span><span class="w"> </span><span class="n">ierr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PetscInitialize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">argv</span><span class="p">,</span><span class="w"> </span><span class="n">PETSC_NULLPTR</span><span class="p">,</span><span class="w"> </span><span class="n">PETSC_NULLPTR</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">ierr</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PETSC_SUCCESS</span><span class="p">);</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// Construct and use PETSc-backed spaces, fields, forms and solvers here.</span>
+<span class="p">}</span>
+<span class="n">ierr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PetscFinalize</span><span class="p">();</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">ierr</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PETSC_SUCCESS</span><span class="p">);</span></pre></div><div class="m-block m-flat"><p>PETSc-backed trial/test functions connect Rodin variational forms to PETSc matrices, vectors, Krylov solvers and nonlinear solvers. The mesh execution context determines whether those objects are local or distributed. <a href="../../../guides-backends.html" class="m-doc">Backends and supported configurations</a> describes the relationship between context, assembly strategy and algebraic storage.</p></div>
       
       <h2>Benchmarks</h2>
       <div class="benchmark-children">
@@ -123,7 +130,7 @@
   </div></div></div>
 </div>
 <script src="../../assets/search-57e2ce511c71.js"></script>
-<script src="../../assets/searchdata-002d6b9fc803.js"></script>
+<script src="../../assets/searchdata-3859e4a19098.js"></script>
   <footer><nav>
   <div class="m-container">
     <div class="m-row">

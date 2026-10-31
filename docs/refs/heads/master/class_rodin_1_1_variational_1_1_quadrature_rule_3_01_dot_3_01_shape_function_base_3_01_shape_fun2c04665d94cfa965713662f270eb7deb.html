@@ -5,11 +5,11 @@
   <title>Rodin::Variational::QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -83,7 +83,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md498">Architecture</a></li>
+            <li><a href="#autotoc_md495">Architecture</a></li>
             <li>
               Reference
               <ul>
@@ -96,7 +96,7 @@
             </li>
           </ul>
         </nav>
-<p>This class represents the CTAD for the expression:</p><div class="m-math"><svg style="width: 5.934em; height: 2.767em;" viewBox="165.789255 -26.567319 56.964469 26.567327">
+<p>This class provides class template argument deduction for the following expression.</p><div class="m-math"><svg style="width: 5.934em; height: 2.767em;" viewBox="165.789255 -26.567319 56.964469 26.567327">
 <title>
 \[\int u \cdot v \ dx \: ,
 \]
@@ -151,7 +151,7 @@ $ v \in \mathbb{P}_1 $
 <use x='20.700016' y='0' xlink:href='#eq3-g0-80'/>
 <use x='28.00597' y='1.793263' xlink:href='#eq3-g3-49'/>
 </g>
-</svg>.</p><p>The specialization evaluates the selected quadrature formula and supports distinct P1 trial and test spaces.</p><section id="autotoc_md498"><h2><a href="#autotoc_md498">Architecture</a></h2><p>Binding selects the formula, owns its mapped samples and sizes the local matrix before scalar reference preparation. Zero components give a <svg class="m-math" style="width: 2.741em; height: 0.906em; vertical-align: -0.104em;" viewBox="0 -7.704442 26.317805 8.700714">
+</svg>.</p><p>The specialization evaluates the selected quadrature formula and supports distinct P1 trial and test spaces.</p><section id="autotoc_md495"><h2><a href="#autotoc_md495">Architecture</a></h2><p>Binding selects the formula, owns its mapped samples and sizes the local matrix before scalar reference preparation. Zero components give a <svg class="m-math" style="width: 2.741em; height: 0.906em; vertical-align: -0.104em;" viewBox="0 -7.704442 26.317805 8.700714">
 <title>
 $0\times0$
 </title>

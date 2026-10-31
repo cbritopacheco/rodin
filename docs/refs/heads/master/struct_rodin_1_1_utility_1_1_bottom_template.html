@@ -5,11 +5,11 @@
   <title>Rodin::Utility::BottomTemplate struct | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -101,7 +101,7 @@
             </li>
           </ul>
         </nav>
-<p>BottomTemplate recursively unwraps template wrappers to find the innermost type. For a non-template type T, the result is T itself. For a nested template like A&lt;B&lt;C&lt;D&gt;&gt;&gt;, the result is D.</p><p>Example usage:</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="nc">Nested</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<p>BottomTemplate recursively unwraps template wrappers to find the innermost type. For a non-template type T, the result is T itself. For a nested template like A&lt;B&lt;C&lt;D&gt;&gt;&gt;, the result is D.</p><p>The following example illustrates usage.</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="nc">Nested</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="n">Bottom</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">BottomTemplate</span><span class="o">&lt;</span><span class="nc">Nested</span><span class="o">&gt;::</span><span class="nc">Type</span><span class="p">;</span>
 <span class="c1">// Bottom is int (assuming single-param template specialization)</span></pre>
         <section id="pub-types">

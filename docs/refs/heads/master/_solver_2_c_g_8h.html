@@ -5,11 +5,11 @@
   <title>Rodin/Solver/CG.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This header provides the CG (Conjugate Gradient) solver class, an iterative method for solving linear systems with symmetric positive definite matrices.</p><section id="autotoc_md253"><h2><a href="#autotoc_md253">Algorithm</a></h2><p>The conjugate gradient method solves:</p><div class="m-math"><svg style="width: 3.766em; height: 0.865em;" viewBox="176.196076 -8.302191 36.150849 8.302191">
+<p>This header provides the CG (Conjugate Gradient) solver class, an iterative method for solving linear systems with symmetric positive definite matrices.</p><section id="autotoc_md253"><h2><a href="#autotoc_md253">Algorithm</a></h2><p>The conjugate gradient method solves the linear system</p><div class="m-math"><svg style="width: 3.766em; height: 0.865em;" viewBox="176.196076 -8.302191 36.150849 8.302191">
 <title>
 \[     Ax = b
 \]
@@ -153,7 +153,7 @@ $ n $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-110'/>
 </g>
-</svg> iterations in exact arithmetic. The error decreases as:</p><div class="m-math"><svg style="width: 20.864em; height: 3.270em;" viewBox="93.872998 -31.392684 200.29889 31.392692">
+</svg> iterations in exact arithmetic. The error decreases as</p><div class="m-math"><svg style="width: 20.864em; height: 3.270em;" viewBox="93.872998 -31.392684 200.29889 31.392692">
 <title>
 \[     \|x_k - x^*\|_A \leq 2 \left( \frac{\sqrt{\kappa} - 1}{\sqrt{\kappa} + 1} \right)^k \|x_0 - x^*\|_A
 \]

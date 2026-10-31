@@ -5,11 +5,11 @@
   <title>Rodin::Utility::HasValueMember struct | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -102,7 +102,7 @@
             </li>
           </ul>
         </nav>
-<p>This trait uses SFINAE to detect whether a type T has a nested member type named <code>Value</code>. The primary template handles the case where no such member exists.</p><p>Example usage:</p><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">WithValue</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="nc">Value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">int</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+<p>This trait uses SFINAE to detect whether a type T has a nested member type named <code>Value</code>. The primary template handles the case where no such member exists.</p><p>The following example illustrates usage.</p><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">WithValue</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="nc">Value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">int</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">WithoutValue</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">};</span>
 
 <span class="k">static_assert</span><span class="p">(</span><span class="nc">HasValueMember</span><span class="o">&lt;</span><span class="n">WithValue</span><span class="o">&gt;::</span><span class="nc">Value</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>

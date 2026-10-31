@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Examples and tutorials &raquo; Input/output examples &raquo; MEDIT format | Rodin</title>
+  <title>Examples and tutorials &raquo; Input/output examples &raquo; Converting a MEDIT mesh | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <link rel="prev" href="examples-io-mfem.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -74,46 +74,29 @@
         <h1>
           <span class="m-breadcrumb"><a href="examples-index.html">Examples and tutorials</a> &raquo;</span>
           <span class="m-breadcrumb"><a href="examples-io-index.html">Input/output examples</a> &raquo;</span>
-          MEDIT format
+          Converting a MEDIT mesh
         </h1>
-        <p>How to load and convert MEDIT-format meshes.</p>
+        <p>Write a mesh, load it again and convert it to MFEM format.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#examples-io-medit-intro">Introduction</a></li>
-            <li><a href="#examples-io-medit-load">Loading a MEDIT mesh</a></li>
-            <li><a href="#examples-io-medit-convert">Format conversion</a></li>
-            <li><a href="#examples-io-medit-mmg">Using with MMG</a></li>
-            <li><a href="#examples-io-medit-full">Full source code</a></li>
-            <li><a href="#examples-io-medit-see-also">See also</a></li>
+            <li><a href="#examples-io-medit-intro">Mesh data and file formats</a></li>
+            <li><a href="#examples-io-medit-load">Write and reload the mesh</a></li>
+            <li><a href="#examples-io-medit-convert">Convert the loaded mesh</a></li>
+            <li><a href="#examples-io-medit-mmg">Continue with MMG</a></li>
+            <li><a href="#examples-io-medit-full">Build and run</a></li>
+            <li><a href="#examples-io-medit-see-also">Next steps</a></li>
           </ul>
         </nav>
-<section id="examples-io-medit-intro"><h2><a href="#examples-io-medit-intro">Introduction</a></h2><p>The MEDIT format (<code>.mesh</code>) is developed by INRIA and is the native format for the <a href="https://www.mmgtools.org/">MMG</a> mesh tools. It stores vertex coordinates, element connectivity, and integer attributes (material tags, boundary labels).</p><p>Use <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat::<wbr />MEDIT</a> when saving or loading.</p></section><section id="examples-io-medit-load"><h2><a href="#examples-io-medit-load">Loading a MEDIT mesh</a></h2><p>A mesh in MEDIT format can be loaded into either a standard <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> or an <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG::<wbr />Mesh</a>:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<section id="examples-io-medit-intro"><h2><a href="#examples-io-medit-intro">Mesh data and file formats</a></h2><p>A mesh file stores coordinates, element connectivity and integer attributes. MEDIT is used by MMG for mesh exchange. MFEM provides another text representation of the same basic mesh data. Both formats use the <code>.mesh</code> extension; the format argument selects the reader or writer.</p><p>This program creates a unit-square mesh with 25 vertices and 32 triangles, saves it in MEDIT format and converts the saved mesh to MFEM format.</p></section><section id="examples-io-medit-load"><h2><a href="#examples-io-medit-load">Write and reload the mesh</a></h2><p>Five vertices in each coordinate direction give four intervals. Scaling by one quarter places the grid on the unit square.</p><pre class="m-code"><span class="w">  </span><span class="nc">Mesh</span><span class="w"> </span><span class="n">square</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Mesh</span><span class="p">().</span><span class="n">UniformGrid</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">});</span>
+<span class="w">  </span><span class="n">square</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="mf">0.25</span><span class="p">);</span>
+<span class="w">  </span><span class="n">square</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"Square.medit.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MEDIT</span><span class="p">);</span></pre><p>The output is <code>Square.medit.mesh</code>. The program takes no arguments and writes into its working directory.</p></section><section id="examples-io-medit-convert"><h2><a href="#examples-io-medit-convert">Convert the loaded mesh</a></h2><p>Loading fills a new mesh object. Saving that object with a different format performs the conversion; changing the filename extension alone leaves the stored representation unchanged.</p><pre class="m-code"><span class="w">  </span><span class="nc">Mesh</span><span class="w"> </span><span class="n">loaded</span><span class="p">;</span>
+<span class="w">  </span><span class="n">loaded</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">"Square.medit.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MEDIT</span><span class="p">);</span>
+<span class="w">  </span><span class="n">loaded</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"Square.mfem.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span>
 
-<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
-<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
-
-<span class="kt">int</span><span class="w"> </span><span class="fm">main</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="w"> </span><span class="n">argv</span><span class="p">)</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MEDIT</span><span class="p">);</span>
-
-<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Loaded mesh with "</span>
-<span class="w">            </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getVertexCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" vertices and "</span>
-<span class="w">            </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCellCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" cells"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre></section><section id="examples-io-medit-convert"><h2><a href="#examples-io-medit-convert">Format conversion</a></h2><p>A common workflow is to convert a MEDIT mesh produced by MMG into MFEM format for use with other tools:</p><pre class="m-code"><span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">"input.medit.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MEDIT</span><span class="p">);</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"output.mfem.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span></pre></section><section id="examples-io-medit-mmg"><h2><a href="#examples-io-medit-mmg">Using with MMG</a></h2><p>When working with the <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG::<wbr />Mesh</a> module, MEDIT is the recommended format because it preserves MMG-specific metadata:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MMG.h&gt;</span>
-
-<span class="n">MMG</span><span class="o">::</span><span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">"domain.medit.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MEDIT</span><span class="p">);</span>
-
-<span class="c1">// Optimize and save</span>
-<span class="n">MMG</span><span class="o">::</span><span class="nc">Optimizer</span><span class="p">().</span><span class="n">setHMax</span><span class="p">(</span><span class="mf">0.1</span><span class="p">).</span><span class="n">optimize</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"optimized.medit.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MEDIT</span><span class="p">);</span></pre></section><section id="examples-io-medit-full"><h2><a href="#examples-io-medit-full">Full source code</a></h2><ul><li><a href="_i_o_2_m_e_d_i_t_8cpp-example.html" class="m-doc">MEDIT.cpp</a></li></ul></section><section id="examples-io-medit-see-also"><h2><a href="#examples-io-medit-see-also">See also</a></h2><ul><li><a href="examples-io-mfem.html" class="m-doc">MFEM format</a> — Alternative text format</li><li><a href="examples-io-xdmf.html" class="m-doc">XDMF format</a> — Recommended for visualization</li><li><a href="examples-mmg-simple_io.html" class="m-doc">MMG I/O</a> — MMG-specific I/O</li><li><a href="guides-io.html" class="m-doc">I/O in Rodin</a></li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="examples-io-mfem.html" class="m-doc">&laquo; MFEM format</a> | <a href="examples-io-index.html" class="m-doc">Input/output examples</a></div>
+<span class="w">  </span><span class="nc">Mesh</span><span class="w"> </span><span class="n">converted</span><span class="p">;</span>
+<span class="w">  </span><span class="n">converted</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">"Square.mfem.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">);</span></pre><p>The program reloads <code>Square.mfem.mesh</code> and compares its vertex and cell counts with the original. It returns <code>EXIT_FAILURE</code> if this count check fails. Applications exchanging curved geometry or specialized metadata should also check that their required features are supported by both formats.</p></section><section id="examples-io-medit-mmg"><h2><a href="#examples-io-medit-mmg">Continue with MMG</a></h2><p>The <a href="examples-mmg-simple_io.html" class="m-doc">MMG I/O example</a> covers loading and saving meshes through the MMG integration. Conversion through the generic mesh interface is useful when only the supported geometry, connectivity and attributes are required.</p></section><section id="examples-io-medit-full"><h2><a href="#examples-io-medit-full">Build and run</a></h2><p>Build the <code>Rodin_IO_MEDIT</code> example target and run the resulting executable from a scratch directory. The expected output reports 25 vertices, 32 triangles and a successful mesh count round trip.</p><p>The complete program is available in <a href="_i_o_2_m_e_d_i_t_8cpp-example.html" class="m-doc">MEDIT.cpp</a>.</p></section><section id="examples-io-medit-see-also"><h2><a href="#examples-io-medit-see-also">Next steps</a></h2><ul><li><a href="examples-io-mfem.html" class="m-doc">Save and reload a finite element field</a></li><li><a href="examples-io-xdmf.html" class="m-doc">Export a time series for ParaView</a></li><li><a href="guides-io-meshformats.html" class="m-doc">Supported mesh formats</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="examples-io-mfem.html" class="m-doc">&laquo; Saving and reloading an MFEM field</a> | <a href="examples-io-index.html" class="m-doc">Input/output examples</a></div>
       </div>
     </div>
   </div>

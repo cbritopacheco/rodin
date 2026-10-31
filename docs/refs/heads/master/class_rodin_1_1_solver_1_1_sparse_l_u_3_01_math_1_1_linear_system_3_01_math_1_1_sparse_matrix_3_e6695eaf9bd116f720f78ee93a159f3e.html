@@ -5,11 +5,11 @@
   <title>Rodin::Solver::SparseLU&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -167,7 +167,7 @@ $ O(nnz) $
 <use x='27.798785' y='0' xlink:href='#eq5-g0-122'/>
 <use x='33.769391' y='0' xlink:href='#eq5-g1-41'/>
 </g>
-</svg> for the factorization</li><li><strong>Complexity</strong>: Depends on sparsity pattern and fill-in</li></ul><p>Info::status holds the <code>Eigen::ComputationInfo</code> of the most recent operation, and getLastErrorMessage() its diagnostic.</p><aside class="m-note m-default"><h4>Architecture</h4><p>The operator is factorized once and the right-hand side is solved with those factors. Optional iterative refinement reuses the same factors:</p><div class="m-math"><svg style="width: 27.301em; height: 1.138em;" viewBox="63.224988 -10.925715 262.093067 10.925715">
+</svg> for the factorization</li><li><strong>Complexity</strong>: Depends on sparsity pattern and fill-in</li></ul><p>Info::status holds the <code>Eigen::ComputationInfo</code> of the most recent operation, and getLastErrorMessage() its diagnostic.</p><aside class="m-note m-default"><h4>Architecture</h4><p>The operator is factorized once and the right-hand side is solved with those factors. Optional iterative refinement reuses the same factors.</p><div class="m-math"><svg style="width: 27.301em; height: 1.138em;" viewBox="63.224988 -10.925715 262.093067 10.925715">
 <title>
 \[r_k=b-Ax_k,\qquad A\delta x_k=r_k,\qquad x_{k+1}=x_k+\delta x_k.
 \]

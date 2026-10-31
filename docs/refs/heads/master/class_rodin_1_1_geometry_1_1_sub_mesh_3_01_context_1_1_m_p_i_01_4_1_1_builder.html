@@ -5,11 +5,11 @@
   <title>Rodin::Geometry::SubMesh&lt;Context::MPI&gt;::Builder class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -85,7 +85,7 @@
             </li>
           </ul>
         </nav>
-<p>Provides a fluent interface for incrementally building submeshes from a parent <code>Mesh&lt;Context::MPI&gt;</code> by selecting specific polytopes. Each rank includes entities independently using parent-shard-local indices.</p><p>Architecture: the global top-dimensional selection is the union of rank-local requests. Finalization first reconciles that selection at parent owners and publishes it to parent holders, then includes those entities and their subentities before resolving ownership. For a parent with complete vertex-star overlap, the selected mesh inherits that overlap. No entities outside the global selection are imported. Parent-local maps and distributed identities are preserved. Partition membership (Shared versus Ghost) is recomputed for the selected mesh.</p>
+<p>Provides a fluent interface for incrementally building submeshes from a parent <code>Mesh&lt;Context::MPI&gt;</code> by selecting specific polytopes. Each rank includes entities independently using parent-shard-local indices.</p><aside class="m-note m-default"><h4>Architecture</h4></aside><p>The global top-dimensional selection is the union of rank-local requests. Finalization first reconciles that selection at parent owners and publishes it to parent holders, then includes those entities and their subentities before resolving ownership. For a parent with complete vertex-star overlap, the selected mesh inherits that overlap. No entities outside the global selection are imported. Parent-local maps and distributed identities are preserved. Partition membership (Shared versus Ghost) is recomputed for the selected mesh.</p>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">

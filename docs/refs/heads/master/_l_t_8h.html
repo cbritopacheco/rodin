@@ -5,11 +5,11 @@
   <title>Rodin/Variational/LT.h file | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -77,9 +77,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md461">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md462">Applications</a></li>
-            <li><a href="#autotoc_md463">Usage Example</a></li>
+            <li><a href="#autotoc_md459">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md460">Applications</a></li>
+            <li><a href="#autotoc_md461">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the LT class, which implements the less-than comparison operation between functions. This operator creates a boolean function indicating where one function is less than another.</p><section id="autotoc_md461"><h2><a href="#autotoc_md461">Mathematical Foundation</a></h2><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
+<p>This file defines the LT class, which implements the less-than comparison operation between functions. This operator creates a boolean function indicating where one function is less than another.</p><section id="autotoc_md459"><h2><a href="#autotoc_md459">Mathematical Foundation</a></h2><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
 <title>
 $ f, g : \Omega \to \mathbb{R} $
 </title>
@@ -111,7 +111,7 @@ $ f, g : \Omega \to \mathbb{R} $
 <use x='39.342988' y='0' xlink:href='#eq1-g1-33'/>
 <use x='54.61902' y='0' xlink:href='#eq1-g0-82'/>
 </g>
-</svg>, the less-than operator:</p><div class="m-math"><svg style="width: 17.449em; height: 3.736em;" viewBox="109.92006 -35.865862 167.507346 35.865869">
+</svg>, the less-than operator is defined by</p><div class="m-math"><svg style="width: 17.449em; height: 3.736em;" viewBox="109.92006 -35.865862 167.507346 35.865869">
 <title>
 \[     (f &lt; g)(x) = \begin{cases} 1 &amp; \text{if } f(x) &lt; g(x) \\ 0 &amp; \text{otherwise} \end{cases}
 \]
@@ -171,7 +171,7 @@ $ f, g : \Omega \to \mathbb{R} $
 <use x='243.555676' y='-5.798537' xlink:href='#eq2-g4-115'/>
 <use x='248.206235' y='-5.798537' xlink:href='#eq2-g4-101'/>
 </g>
-</svg></div></section><section id="autotoc_md462"><h2><a href="#autotoc_md462">Applications</a></h2><ul><li>Negative region indicators: <svg class="m-math" style="width: 2.537em; height: 1.097em; vertical-align: -0.240em;" viewBox="0 -8.235778 24.357972 10.53216">
+</svg></div></section><section id="autotoc_md460"><h2><a href="#autotoc_md460">Applications</a></h2><ul><li>Negative region indicators: <svg class="m-math" style="width: 2.537em; height: 1.097em; vertical-align: -0.240em;" viewBox="0 -8.235778 24.357972 10.53216">
 <title>
 $ \mathbb{1}_{u &lt; 0} $
 </title>
@@ -187,7 +187,7 @@ $ \mathbb{1}_{u &lt; 0} $
 <use x='13.537282' y='1.793263' xlink:href='#eq3-g1-60'/>
 <use x='20.123789' y='1.793263' xlink:href='#eq3-g2-48'/>
 </g>
-</svg></li><li>Subdomain identification</li><li>Constraint violation detection</li><li>Thresholding operations</li></ul></section><section id="autotoc_md463"><h2><a href="#autotoc_md463">Usage Example</a></h2><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">negative_region</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean: true where u is negative</span></pre></section>
+</svg></li><li>Subdomain identification</li><li>Constraint violation detection</li><li>Thresholding operations</li></ul></section><section id="autotoc_md461"><h2><a href="#autotoc_md461">Usage Example</a></h2><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">negative_region</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean: true where u is negative</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

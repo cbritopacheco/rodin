@@ -5,11 +5,11 @@
   <title>Rodin::Variational::TestFunction class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -88,8 +88,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md537">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md538">Usage Example</a></li>
+            <li><a href="#autotoc_md534">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md535">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -131,7 +131,7 @@ $ v \in V_h $
 <use x='20.700016' y='0' xlink:href='#eq2-g2-86'/>
 <use x='27.524366' y='1.793263' xlink:href='#eq2-g1-104'/>
 </g>
-</svg> is chosen from this space.</p><section id="autotoc_md537"><h2><a href="#autotoc_md537">Mathematical Foundation</a></h2><p>The weak formulation seeks <svg class="m-math" style="width: 3.553em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 34.104401 9.962629">
+</svg> is chosen from this space.</p><section id="autotoc_md534"><h2><a href="#autotoc_md534">Mathematical Foundation</a></h2><p>The weak formulation seeks <svg class="m-math" style="width: 3.553em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 34.104401 9.962629">
 <title>
 $ u \in U_h $
 </title>
@@ -147,7 +147,7 @@ $ u \in U_h $
 <use x='21.274237' y='0' xlink:href='#eq3-g2-85'/>
 <use x='29.224492' y='1.793263' xlink:href='#eq3-g1-104'/>
 </g>
-</svg> such that:</p><div class="m-math"><svg style="width: 12.389em; height: 1.245em;" viewBox="134.555141 -11.955168 118.934626 11.955168">
+</svg> such that</p><div class="m-math"><svg style="width: 12.389em; height: 1.245em;" viewBox="134.555141 -11.955168 118.934626 11.955168">
 <title>
 \[       a(u, v) = l(v) \quad \forall v \in V_h
 \]
@@ -184,7 +184,7 @@ $ u \in U_h $
 <use x='241.785508' y='-2.988792' xlink:href='#eq4-g2-86'/>
 <use x='248.609858' y='-1.195529' xlink:href='#eq4-g1-104'/>
 </g>
-</svg></div><p>where:</p><ul><li><svg class="m-math" style="width: 0.634em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.088223 5.147373">
+</svg></div><p>Here,</p><ul><li><svg class="m-math" style="width: 0.634em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.088223 5.147373">
 <title>
 $ v $
 </title>
@@ -253,7 +253,7 @@ $ U_h $
 <use x='0' y='0' xlink:href='#eq9-g1-85'/>
 <use x='7.950255' y='1.793263' xlink:href='#eq9-g0-104'/>
 </g>
-</svg>)</li></ul></section><section id="autotoc_md538"><h2><a href="#autotoc_md538">Usage Example</a></h2><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">                    </span><span class="c1">// Define finite element space</span>
+</svg>)</li></ul></section><section id="autotoc_md535"><h2><a href="#autotoc_md535">Usage Example</a></h2><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">                    </span><span class="c1">// Define finite element space</span>
 <span class="nc">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w">              </span><span class="c1">// Define test function</span>
 
 <span class="c1">// Use in variational formulation</span>

@@ -5,11 +5,11 @@
   <title>Rodin::Geometry::SubMesh class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -88,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<section id="autotoc_md79"><h2><a href="#autotoc_md79">Overview</a></h2><p>A SubMesh is a mesh that represents a subset of another mesh, typically corresponding to a specific region or boundary. It maintains references to its parent mesh and provides mappings between polytope indices in the child and parent meshes.</p></section><section id="autotoc_md80"><h2><a href="#autotoc_md80">Mapping Between SubMesh and Parent Mesh</a></h2><p>A SubMesh object holds a reference to its parent Mesh and includes information about how polytopes and vertices are mapped between the child and parent. This allows finite element operations on the SubMesh to properly reference degrees of freedom in the parent mesh.</p></section><section id="autotoc_md81"><h2><a href="#autotoc_md81">Downcasting</a></h2><p>A Mesh that is also a SubMesh can be downcasted to access SubMesh functionality. For instance:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
+<section id="autotoc_md79"><h2><a href="#autotoc_md79">Overview</a></h2><p>A SubMesh is a mesh that represents a subset of another mesh, typically corresponding to a specific region or boundary. It maintains references to its parent mesh and provides mappings between polytope indices in the child and parent meshes.</p></section><section id="autotoc_md80"><h2><a href="#autotoc_md80">Mapping Between SubMesh and Parent Mesh</a></h2><p>A SubMesh object holds a reference to its parent Mesh and includes information about how polytopes and vertices are mapped between the child and parent. This allows finite element operations on the SubMesh to properly reference degrees of freedom in the parent mesh.</p></section><section id="autotoc_md81"><h2><a href="#autotoc_md81">Downcasting</a></h2><p>A Mesh that is also a SubMesh can be downcasted to access SubMesh functionality. The following example uses that interface.</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="c1">// The cast is well defined</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="nc">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>

@@ -5,11 +5,11 @@
   <title>Rodin::Variational::QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;RHSDerived, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -114,8 +114,8 @@ $\int (A J u) : J v \ dx$
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md423">Architecture</a></li>
-            <li><a href="#autotoc_md424">Judgement</a></li>
+            <li><a href="#autotoc_md421">Architecture</a></li>
+            <li><a href="#autotoc_md422">Judgement</a></li>
             <li>
               Reference
               <ul>
@@ -128,7 +128,7 @@ $\int (A J u) : J v \ dx$
             </li>
           </ul>
         </nav>
-<p>This class represents the CTAD for the expression:</p><div class="m-math"><svg style="width: 9.298em; height: 2.767em;" viewBox="149.638851 -26.567319 89.265311 26.567327">
+<p>This class provides class template argument deduction for the following expression.</p><div class="m-math"><svg style="width: 9.298em; height: 2.767em;" viewBox="149.638851 -26.567319 89.265311 26.567327">
 <title>
 \[\int (A J u) : J v \ dx \: ,
 \]
@@ -190,7 +190,7 @@ $A$
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-65'/>
 </g>
-</svg> is a coefficient function.</p><section id="autotoc_md423"><h2><a href="#autotoc_md423">Architecture</a></h2><p>Reference gradients have <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+</svg> is a coefficient function.</p><section id="autotoc_md421"><h2><a href="#autotoc_md421">Architecture</a></h2><p>Reference gradients have <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
 $d$
 </title>
@@ -260,7 +260,7 @@ $A_{bm+e,am+c}=\delta_{ec}S_{ba}$
 <use x='91.721227' y='1.793263' xlink:href='#eq9-g0-98'/>
 <use x='95.343812' y='1.793263' xlink:href='#eq9-g0-97'/>
 </g>
-</svg>. The first component block retains the original quadrature accumulation order; its completed entries are replicated into the other component-diagonal blocks at the final sample, before mirroring. A zero contribution is omitted unless the final sample must copy earlier accumulated entries. At index zero no earlier contributions exist, so a zero first contribution requires no component copy. An empty component range has a zero-sized operator and requires neither coefficient evaluation nor scalar reference preparation. Matrix coefficients act on field components and need not be symmetric; their complete component blocks are retained without mirroring. Equal degrees use the same scalar element type, formula and geometry, so physical-gradient scratch is shared within the current quadrature point. Otherwise separate trial/test storage is used. Gradients are recomputed for every point and polytope; no table pointer or physical derivative is cached across binds.</p></section><section id="autotoc_md424"><h2><a href="#autotoc_md424">Judgement</a></h2><p>The following judgement specifies that the expression is a well formed type of QuadratureRule.</p><div class="m-math"><svg style="width: 20.168em; height: 2.966em;" viewBox="97.466258 -28.471357 193.610474 28.471369">
+</svg>. The first component block retains the original quadrature accumulation order; its completed entries are replicated into the other component-diagonal blocks at the final sample, before mirroring. A zero contribution is omitted unless the final sample must copy earlier accumulated entries. At index zero no earlier contributions exist, so a zero first contribution requires no component copy. An empty component range has a zero-sized operator and requires neither coefficient evaluation nor scalar reference preparation. Matrix coefficients act on field components and need not be symmetric; their complete component blocks are retained without mirroring. Equal degrees use the same scalar element type, formula and geometry, so physical-gradient scratch is shared within the current quadrature point. Otherwise separate trial/test storage is used. Gradients are recomputed for every point and polytope; no table pointer or physical derivative is cached across binds.</p></section><section id="autotoc_md422"><h2><a href="#autotoc_md422">Judgement</a></h2><p>The following judgement specifies that the expression is a well formed type of QuadratureRule.</p><div class="m-math"><svg style="width: 20.168em; height: 2.966em;" viewBox="97.466258 -28.471357 193.610474 28.471369">
 <title>
 \[\dfrac
 {\vdash \int (A J u) : J v \ dx : \texttt{QuadratureRule}}

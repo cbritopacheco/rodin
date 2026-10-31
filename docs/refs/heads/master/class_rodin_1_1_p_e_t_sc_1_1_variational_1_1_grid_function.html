@@ -5,11 +5,11 @@
   <title>Rodin::PETSc::Variational::GridFunction class | Rodin</title>
   <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
-  <link rel="stylesheet" href="rodin-theme-cb2530ea8c22.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
   <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#18191c" />
-  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script>
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -98,7 +98,7 @@
             </li>
           </ul>
         </nav>
-<p>This thin derived class lives in the <code>Rodin::PETSc::Variational</code> namespace and pulls in all base-class constructors, operators, and methods via <code>using</code> declarations. Its sole purpose is to enable cleaner user-facing syntax:</p><pre class="m-code"><span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="nc">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre><p>instead of the fully-qualified specialization name.</p>
+<p>This thin derived class lives in the <code>Rodin::PETSc::Variational</code> namespace and pulls in all base-class constructors, operators, and methods via <code>using</code> declarations. Its sole purpose is to enable cleaner user-facing syntax.</p><pre class="m-code"><span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="nc">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre><p>instead of the fully-qualified specialization name.</p>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_grid_function.html" title="Variational::GridFunction&lt; FES, ::Vec &gt;">Variational::GridFunction</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">GridFunction</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html"><code>Variational::GridFunction&lt;FES,::Vec&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Variational</span><span class="o">::</span><span class="nc">GridFunction</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="o">::</span><span class="n">Vec</span><span class="w"> </span><span class="o">&gt;</span>
 </pre></details></td><td>Grid function specialization storing DOF coefficients in a PETSc vector (<code>Vec</code>).</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html"><code>Variational::GridFunction&lt;FES,::Vec&gt;</code></a></td><td><details><summary>35 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#ac2d041132b1540469de13585c1c12a7f"><code>acquire()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a35095eb434070fff88abb65b08387c7e"><code>acquire()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a03cae69d82ab55fb284b0e355b2f19b5"><code>axpy()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a688b92a0c3e16ec579786a89a3580d88"><code>DataType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#ad980588765c41e2644b1a45742605a38"><code>FESMeshContextType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#af9f9ef5d4081fd438cba6ccaa30a0547"><code>FESMeshType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#aeb764ef99b9fe43949b7e3d34f279e53"><code>FESType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7134d5d6b568f5867a8efcc25d8bc761"><code>flush()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#aa7e59253edaf70947f510c9bec12a2a4"><code>flush()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#ac426c8f959950337f8d6998fc68b367b"><code>getArrayRead()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a8cccbb23ce582a87ab435d57b28d628d"><code>getArrayWrite()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7f5e920f4d3240a62c4969abbb757e41"><code>getData()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#af16e5366aeae1176230b9c40b60fd8d7"><code>getData()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a0c21372c3892376cf9c9e0787ab526d9"><code>max()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980"><code>max()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a83722b0cf86912c8e1cf177c0ede4d5d"><code>max()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#ae352c7c4c1cabae4d93873febc1ce228"><code>min()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a8663bf2c2b14b0c0f1654dccf636f74c"><code>min()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a762bdb82b08a0ed44679c8d5c4a000f4"><code>min()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#af01677c51c8a95685542f891beaff66a"><code>norm()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a82b0899f6f77c5146af48ce47b2ec950"><code>norm()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#afd36bdbdf224fea5a7acb4f6a6ed71fe"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7bf67f07be076e2023ed7da153504931"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#acc12aa01caaf34c26e5615735516eaaa"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a1aeb6e2b409c636d8f489065acda20ec"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#abaf16594e87535115421632ef23aff1b"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#abae738f0e1d5e7b6d873e6be20e3c863"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a624c1be80463014f636d8680f3480a29"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a3dd174cc366d482f7ce05866b178d0df"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5c7fc1cee1343f294d68ab9388bbfe78"><code>RangeType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a23b477d0e2d399f75d585d154c346591"><code>release()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb"><code>ScalarType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a69779584238dac7b4e23d9ff0a7b78b9"><code>setData()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#af09b1f551c2dd058e29be87808693d5d"><code>sync()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a240da77ccbdc2ac0dcc52b6b302f5b97"><code>sync()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base.html"><code>Variational::GridFunctionBase</code></a></td><td><details><summary>25 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a2b5727340d5581d5b23e24cd47652a5c"><code>argmax()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#af9f4820ea5fb253ead68bf314e38d456"><code>argmin()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4a1c0b519f1e883b370f4fd6c3b76ee5"><code>ContextType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a076499a78a29517d137192da51112c84"><code>ElementType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ab5a2f5705f2c21ba72347ecc0f50d556"><code>getColumns()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#aad8f738241426a32d95c3696395698d3"><code>getDimension()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4758cdb6b0d7f09e6719a7bfa884e86e"><code>getFiniteElementSpace()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a55906fdb64ef621b6b153e7d8d8adf35"><code>getName()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ac5827caceb168f6993f153e631adc85b"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a966cd5d873768a5a9b294a66c673785b"><code>getRows()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a3677f5a27ad4efb8d5567634bf0940e9"><code>getSize()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#af0e2923caa24f35613d3cc8427bdc6bb"><code>getValue()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a86092c214e872b8e109dce71824c1255"><code>interpolate()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a8988d177e65dc802b5e4b03bfdb47d55"><code>load()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#afd2113abcfab004d55f4bcbd6f904362"><code>MeshType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#adea726551c987314e1902d77cd2ab503"><code>operator*=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a81973aa8994c2d25436498f9952b5902"><code>operator+=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#acf8fa02997445865a88f27c83dad4354"><code>operator-=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a3c09ef73cc0a8e6bb07faec534393383"><code>operator/=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ad1ee35b232ba18e7f94fee522ab836ee"><code>save()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a3c0409f55497ff28ac68da355f3f64aa"><code>setData()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ad387f7268267dcfadf5a851549224848"><code>setName()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html"><code>Variational::GridFunctionBaseReference</code></a></td><td><details><summary>4 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a992cc9631a9fa2be535cf7e9a6789503"><code>copy()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a7c866cf8be951c464aceeb788579b29a"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a11cae0eed7fc3211076c29a6552091ab"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a00dc82bfe030a25cc55d89b93cf4b5a2"><code>setData()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>Variational::FunctionBase</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
@@ -148,7 +148,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Adds a scalar to every DOF value: <svg class="m-math" style="width: 6.056em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 58.14025 8.684049">
+            <dd>Adds a scalar to every DOF value with <svg class="m-math" style="width: 6.056em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 58.14025 8.684049">
 <title>
 $ u_i \leftarrow u_i + c $
 </title>
@@ -172,7 +172,7 @@ $ u_i \leftarrow u_i + c $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Component-wise addition of another grid function: <svg class="m-math" style="width: 6.421em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 61.644672 8.684049">
+            <dd>Component-wise addition of another grid function. <svg class="m-math" style="width: 6.421em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 61.644672 8.684049">
 <title>
 $ u_i \leftarrow u_i + v_i $
 </title>
@@ -197,7 +197,7 @@ $ u_i \leftarrow u_i + v_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Subtracts a scalar from every DOF value: <svg class="m-math" style="width: 6.076em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 58.334096 8.767119">
+            <dd>Subtracts a scalar from every DOF value with <svg class="m-math" style="width: 6.076em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 58.334096 8.767119">
 <title>
 $ u_i \leftarrow u_i - c $
 </title>
@@ -221,7 +221,7 @@ $ u_i \leftarrow u_i - c $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Component-wise subtraction of another grid function: <svg class="m-math" style="width: 6.442em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 61.838517 8.767119">
+            <dd>Component-wise subtraction of another grid function. <svg class="m-math" style="width: 6.442em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 61.838517 8.767119">
 <title>
 $ u_i \leftarrow u_i - v_i $
 </title>
@@ -246,7 +246,7 @@ $ u_i \leftarrow u_i - v_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Scales every DOF value by a scalar: <svg class="m-math" style="width: 4.710em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 45.216638 6.940636">
+            <dd>Scales every DOF value by a scalar with <svg class="m-math" style="width: 4.710em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 45.216638 6.940636">
 <title>
 $ u_i \leftarrow c \, u_i $
 </title>
@@ -268,7 +268,7 @@ $ u_i \leftarrow c \, u_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Component-wise (Hadamard) multiplication by another grid function: <svg class="m-math" style="width: 5.819em; height: 0.740em; vertical-align: -0.187em;" viewBox="0 -5.313422 55.86091 7.106685">
+            <dd>Component-wise (Hadamard) multiplication by another grid function with <svg class="m-math" style="width: 5.819em; height: 0.740em; vertical-align: -0.187em;" viewBox="0 -5.313422 55.86091 7.106685">
 <title>
 $ u_i \leftarrow u_i \cdot v_i $
 </title>
@@ -293,7 +293,7 @@ $ u_i \leftarrow u_i \cdot v_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Divides every DOF value by a scalar: <svg class="m-math" style="width: 5.164em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.575262 11.955168">
+            <dd>Divides every DOF value by a scalar with <svg class="m-math" style="width: 5.164em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.575262 11.955168">
 <title>
 $ u_i \leftarrow u_i / c $
 </title>
@@ -317,7 +317,7 @@ $ u_i \leftarrow u_i / c $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Component-wise division by another grid function: <svg class="m-math" style="width: 5.529em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 53.079683 11.955168">
+            <dd>Component-wise division by another grid function. <svg class="m-math" style="width: 5.529em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 53.079683 11.955168">
 <title>
 $ u_i \leftarrow u_i / v_i $
 </title>
@@ -472,7 +472,7 @@ $ u_i $
                 </tr>
               </tfoot>
             </table>
-<p>Deep-copies the DOF values of <code>other</code> into this grid function with <code>VecCopy</code>, followed by a forward ghost update in MPI mode.</p><p>The underlying <code>Vec</code> is <strong>reused</strong>: both operands are required to live on the same finite element space, so their layouts (ownership range and ghost mapping) are identical by construction and a fresh allocation would produce a vector indistinguishable from the one already held. Reuse also keeps the <code>Vec</code> handle stable, so a <code>KSP</code>, a <code>LinearForm</code>, or user code that cached <code>getData()</code> is not left holding a destroyed handle after an assignment. A new vector is created with <code>VecDuplicate</code> only when this instance holds none, which is the case for a moved-from object.</p><p>The destination completes its own pending writes. The source must have completed writes through its mutable owner before this const borrow.</p><aside class="m-note m-info"><h4>Precondition</h4><p>Both grid functions must reference the same finite element space.</p></aside>
+<p>Deep-copies the DOF values of <code>other</code> into this grid function with <code>VecCopy</code>, followed by a forward ghost update in MPI mode.</p><p>The underlying <code>Vec</code> is <strong>reused</strong>, and both operands are required to live on the same finite element space, so their layouts (ownership range and ghost mapping) are identical by construction and a fresh allocation would produce a vector indistinguishable from the one already held. Reuse also keeps the <code>Vec</code> handle stable, so a <code>KSP</code>, a <code>LinearForm</code>, or user code that cached <code>getData()</code> is not left holding a destroyed handle after an assignment. A new vector is created with <code>VecDuplicate</code> only when this instance holds none, which is the case for a moved-from object.</p><p>The destination completes its own pending writes. The source must have completed writes through its mutable owner before this const borrow.</p><aside class="m-note m-info"><h4>Precondition</h4><p>Both grid functions must reference the same finite element space.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ac7108dc6c770e0642feadb5250a6c0cb"><div>
             <h3>
@@ -601,7 +601,7 @@ $ u_i $
               
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
-            <p>Adds a scalar to every DOF value: <svg class="m-math" style="width: 6.056em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 58.14025 8.684049">
+            <p>Adds a scalar to every DOF value with <svg class="m-math" style="width: 6.056em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 58.14025 8.684049">
 <title>
 $ u_i \leftarrow u_i + c $
 </title>
@@ -656,7 +656,7 @@ $ c $
               
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
-            <p>Component-wise addition of another grid function: <svg class="m-math" style="width: 6.421em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 61.644672 8.684049">
+            <p>Component-wise addition of another grid function. <svg class="m-math" style="width: 6.421em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 61.644672 8.684049">
 <title>
 $ u_i \leftarrow u_i + v_i $
 </title>
@@ -712,7 +712,7 @@ $ v $
               
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
-            <p>Subtracts a scalar from every DOF value: <svg class="m-math" style="width: 6.076em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 58.334096 8.767119">
+            <p>Subtracts a scalar from every DOF value with <svg class="m-math" style="width: 6.076em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 58.334096 8.767119">
 <title>
 $ u_i \leftarrow u_i - c $
 </title>
@@ -767,7 +767,7 @@ $ c $
               
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
-            <p>Component-wise subtraction of another grid function: <svg class="m-math" style="width: 6.442em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 61.838517 8.767119">
+            <p>Component-wise subtraction of another grid function. <svg class="m-math" style="width: 6.442em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 61.838517 8.767119">
 <title>
 $ u_i \leftarrow u_i - v_i $
 </title>
@@ -823,7 +823,7 @@ $ v $
               
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
-            <p>Scales every DOF value by a scalar: <svg class="m-math" style="width: 4.710em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 45.216638 6.940636">
+            <p>Scales every DOF value by a scalar with <svg class="m-math" style="width: 4.710em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 45.216638 6.940636">
 <title>
 $ u_i \leftarrow c \, u_i $
 </title>
@@ -876,7 +876,7 @@ $ c $
               
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
-            <p>Component-wise (Hadamard) multiplication by another grid function: <svg class="m-math" style="width: 5.819em; height: 0.740em; vertical-align: -0.187em;" viewBox="0 -5.313422 55.86091 7.106685">
+            <p>Component-wise (Hadamard) multiplication by another grid function with <svg class="m-math" style="width: 5.819em; height: 0.740em; vertical-align: -0.187em;" viewBox="0 -5.313422 55.86091 7.106685">
 <title>
 $ u_i \leftarrow u_i \cdot v_i $
 </title>
@@ -932,7 +932,7 @@ $ v $
               
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
-            <p>Divides every DOF value by a scalar: <svg class="m-math" style="width: 5.164em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.575262 11.955168">
+            <p>Divides every DOF value by a scalar with <svg class="m-math" style="width: 5.164em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.575262 11.955168">
 <title>
 $ u_i \leftarrow u_i / c $
 </title>
@@ -987,7 +987,7 @@ $ c $
               
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
-            <p>Component-wise division by another grid function: <svg class="m-math" style="width: 5.529em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 53.079683 11.955168">
+            <p>Component-wise division by another grid function. <svg class="m-math" style="width: 5.529em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 53.079683 11.955168">
 <title>
 $ u_i \leftarrow u_i / v_i $
 </title>
