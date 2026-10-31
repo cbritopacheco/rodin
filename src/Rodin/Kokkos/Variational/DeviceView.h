@@ -27,6 +27,7 @@
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/Sum.h"
 #include "Rodin/Variational/Mult.h"
+#include "Rodin/Variational/Dot.h"
 #include "Rodin/Variational/UnaryMinus.h"
 #include "Rodin/Variational/Transpose.h"
 #include "Rodin/Variational/P1/Div.h"
@@ -403,7 +404,13 @@ namespace Rodin::Kokkos::Variational
    * | `DeviceView<Mult<FunctionBase<L>, FunctionBase<R>>>` | Product of functions. |
    * | `DeviceView<UnaryMinus<FunctionBase<N>>>` | Negated function. |
    * | `DeviceView<RealFunction<Integer>>` | Integer constant. |
+   * | `DeviceView<VectorFunctionBase<Scalar, Derived>>` | Forwards to the derived function. |
+   * | `DeviceView<MatrixFunctionBase<Scalar, Derived>>` | Forwards to the derived function. |
+   * | `DeviceView<GradBase<Operand, Derived>>` | Forwards to the derived function. |
+   * | `DeviceView<JacobianBase<Operand, Derived>>` | Forwards to the derived function. |
+   * | `DeviceView<DivBase<Operand, Derived>>` | Forwards to the derived function. |
    * | `DeviceView<VectorFunction<V, Values...>>` | Vector function given component-wise. |
+   * | `DeviceView<GridFunctionBaseReference<GridFunction<DeviceP1Space<R, B>, Data>>>` | Referenced P1 grid function. |
    * | `DeviceView<GridFunction<DeviceP1Space<R, B>, Data>>` | P1 grid function. |
    * | `DeviceView<Grad<GridFunction<DeviceP1<B>, Data>>>` | Physical gradient of a P1 grid function. |
    * | `DeviceView<Jacobian<GridFunction<DeviceVectorP1<B>, Data>>>` | Physical Jacobian of a vector P1 grid function. |
@@ -419,6 +426,7 @@ namespace Rodin::Kokkos::Variational
    * | `DeviceView<Transpose<ShapeFunctionBase<N, FES, Space>>>` | Transposed shape function. |
    * | `DeviceView<Mult<FunctionBase<L>, ShapeFunctionBase<R, FES, Space>>>` | Function times shape function. |
    * | `DeviceView<Mult<ShapeFunctionBase<L, FES, Space>, FunctionBase<R>>>` | Shape function times function. |
+   * | `DeviceView<Dot<FunctionBase<L>, ShapeFunctionBase<R, FES, Space>>>` | Dot product of a function and a shape function. |
    *
    * @tparam Node Form language expression type.
    */
@@ -1079,6 +1087,35 @@ namespace Rodin::Kokkos::Variational
 
     /// @brief Function factor.
     DeviceView<::Rodin::Variational::FunctionBase<RHSDerived>> rhs;
+  };
+
+  /// @brief Dot product of a function and a shape function.
+  template <class LHSDerived, class RHSDerived, class FES,
+    ::Rodin::Variational::ShapeFunctionSpaceType Space>
+  struct DeviceView<
+    ::Rodin::Variational::Dot<::Rodin::Variational::FunctionBase<LHSDerived>,
+      ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
+  {
+    /// @param node Shape function expression.
+    DeviceView(
+      const ::Rodin::Variational::Dot<::Rodin::Variational::FunctionBase<LHSDerived>,
+        ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>& node)
+      : lhs(node.getLHS()),
+        rhs(node.getRHS())
+    {}
+
+    /// @param ip Quadrature point. @param local Local index. @return Dot product value.
+    KOKKOS_INLINE_FUNCTION
+    Real getBasis(const IntegrationPointView& ip, Index local) const
+    {
+      return dot(lhs.getValue(ip.getPoint()), rhs.getBasis(ip, local));
+    }
+
+    /// @brief Function factor.
+    DeviceView<::Rodin::Variational::FunctionBase<LHSDerived>> lhs;
+
+    /// @brief Shape function factor.
+    DeviceView<::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>> rhs;
   };
 
   /**

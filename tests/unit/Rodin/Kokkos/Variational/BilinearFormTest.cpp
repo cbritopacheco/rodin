@@ -46,6 +46,14 @@ namespace Rodin::Tests::Unit
     ds = Integral(Grad(du), Grad(dv)) + Integral(Real(3) * du, dv);
     ds.assemble();
     expectSameOperator(hs.getOperator(), ds.getOperator());
+
+    BilinearForm hn(hu, hv);
+    hn = Integral(Grad(hu), Grad(hv)) - Integral(Real(3) * hu, hv);
+    hn.assemble();
+    BilinearForm dn(du, dv);
+    dn = Integral(Grad(du), Grad(dv)) - Integral(Real(3) * du, dv);
+    dn.assemble();
+    expectSameOperator(hn.getOperator(), dn.getOperator());
   }
 
   /// @brief A device coefficient matches the same host coefficient.

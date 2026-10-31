@@ -294,3 +294,26 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
 - [ ] `GridFunction` device construite par copie de `getData()` depuis
       l'hôte; l'interpolation ou la projection directement sur device
       reste a faire.
+
+## 9. DSL device, jalon 4: formes linéaires
+
+- [x] `Integral` d'une fonction de forme test P1 device a valeur réelle:
+      `Integral(v)`, `Integral(f, v)` (lowering en `Dot(f, v)`),
+      `Integral(g, Div(v))`, `Integral(w, Grad(v))`,
+      `Integral(Jacobian(w), Jacobian(v))`. Un thread par maille, vecteur
+      local en registres, entrées `(indice, valeur)` écrites sur device.
+- [x] `Internal::DeviceQuadrature`: tables de quadrature par géométrie de
+      référence partagées par les intégrales bilinéaires et linéaires
+      (même choix d'ordre que la `QuadratureRule` hôte).
+- [x] `Assembly::Kokkos<Math::Vector<Real>, LinearForm<...>>`: les entrées
+      sont rapatriées puis sommées dans le vecteur hôte, et
+      `Default<Context::Kokkos<...>>` (un seul espace) choisit cet
+      assemblage.
+- [x] Intégrateurs négatifs (`lf -= ...`, `a - b`) déroulés par
+      l'assemblage, linéaire et bilinéaire.
+- [x] Tests `RodinKokkosVariationalLinearFormTest` comparés a l'hôte a
+      1e-12 (scalaire, vectoriel, `VectorFunction`, `-=` avec `.over()`),
+      et cas `a - b` ajouté a `RodinKokkosVariationalBilinearFormTest`.
+- [ ] Performance: la somme des entrées dans le vecteur se fait sur
+      l'hôte; une réduction atomique sur device (ou l'assemblage COO PETSc
+      du jalon 6) évitera la copie.

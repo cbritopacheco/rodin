@@ -9,7 +9,8 @@
 
 /**
  * @file
- * @brief Device integration of bilinear forms on resident Kokkos meshes.
+ * @brief Device integration of bilinear and linear forms on resident Kokkos
+ * meshes.
  */
 
 #include <array>
@@ -26,6 +27,7 @@
 #include "Rodin/Variational/Dot.h"
 #include "Rodin/Variational/Integral.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
+#include "Rodin/Variational/LinearFormIntegrator.h"
 
 #include "Rodin/Kokkos/Utility.h"
 
@@ -82,6 +84,53 @@ namespace Rodin::Kokkos::Variational
        * indexing trial degrees of freedom.
        */
       virtual TripletsType assemble() const = 0;
+  };
+
+  /**
+   * @brief Coordinate list of a vector in device memory.
+   *
+   * Duplicate entries are summed by the consumer.
+   *
+   * @tparam MemorySpace Kokkos memory space of the arrays.
+   */
+  template <class MemorySpace>
+  struct DeviceEntries
+  {
+    /// @brief Entry indices, test degrees of freedom.
+    ::Kokkos::View<Index*, MemorySpace> indices;
+
+    /// @brief Entry values.
+    ::Kokkos::View<Real*, MemorySpace> values;
+  };
+
+  /**
+   * @brief Interface of linear form integrators evaluated on the device.
+   *
+   * Assembly::Kokkos discovers this interface on the integrators of a
+   * linear form and asks each one for its contributions as device entries.
+   *
+   * @tparam Backend Kokkos backend of the mesh context.
+   */
+  template <class Backend>
+  class DeviceLinearFormIntegrator
+  {
+    public:
+      /// @brief Mesh context.
+      using ContextType = ::Rodin::Context::Kokkos<::Rodin::Context::Local, Backend>;
+
+      /// @brief Memory space of the entries.
+      using MemorySpace = typename ContextType::MemorySpaceType;
+
+      /// @brief Device entry type.
+      using EntriesType = DeviceEntries<MemorySpace>;
+
+      virtual ~DeviceLinearFormIntegrator() = default;
+
+      /**
+       * @brief Integrates the form over its region.
+       * @return Local contributions, indexed by test degrees of freedom.
+       */
+      virtual EntriesType assemble() const = 0;
   };
 
   /**
@@ -213,6 +262,195 @@ namespace Rodin::Kokkos::Variational::Internal
   {
     static constexpr bool Value = true;
   };
+
+  /**
+   * @brief Quadrature tables of a resident mesh, one formula per reference
+   * geometry.
+   *
+   * The quadrature order is selected on the host, once per reference
+   * geometry, using the first cell of each geometry. It must therefore
+   * depend only on the geometry, which holds for meshes whose cells of a
+   * given geometry share one transformation degree. The reference
+   * coordinates are flattened and padded to three components.
+   *
+   * @tparam Mesh Resident Kokkos mesh type.
+   */
+  template <class Mesh>
+  class DeviceQuadrature
+  {
+    public:
+      /// @brief Kokkos execution space.
+      using ExecutionSpace = typename Mesh::ExecutionSpace;
+
+      /// @brief Kokkos memory space.
+      using MemorySpace = typename Mesh::MemorySpace;
+
+      /// @brief Number of reference geometries.
+      static constexpr size_t GeometryCount = ::Rodin::Geometry::Polytope::Types.size();
+
+      /// @brief Stride of the flattened reference coordinates.
+      static constexpr Index ReferenceStride = 3;
+
+      /**
+       * @brief Builds and uploads the tables of every geometry present.
+       * @param mesh Resident mesh.
+       * @param order Callable giving the quadrature order on a host cell.
+       */
+      template <class Order>
+      DeviceQuadrature(const Mesh& mesh, const Order& order)
+      {
+        const auto& execution = mesh.getContext().getExecutionSpace();
+        const size_t dimension = mesh.getDimension();
+        const auto representatives = getRepresentatives(mesh);
+        std::vector<Index> offsets(GeometryCount + 1, 0);
+        std::vector<Real> weights;
+        std::vector<Real> points;
+        for (size_t g = 0; g < GeometryCount; ++g)
+        {
+          offsets[g] = weights.size();
+          if (!representatives[g])
+            continue;
+          const auto it = mesh.getPolytope(dimension, *representatives[g]);
+          const ::Rodin::Geometry::Polytope& polytope = *it;
+          const auto& qf =
+            QF::QuadratureFormula::get(order(polytope), polytope.getGeometry());
+          for (size_t qp = 0; qp < qf.getSize(); ++qp)
+          {
+            weights.push_back(qf.getWeight(qp));
+            const auto& point = qf.getPoint(qp);
+            for (size_t k = 0; k < ReferenceStride; ++k)
+              points.push_back(
+                k < static_cast<size_t>(point.size()) ? point(k) : Real(0));
+          }
+        }
+        offsets[GeometryCount] = weights.size();
+        m_offsets =
+          Rodin::Kokkos::Internal::upload(execution, offsets, "Rodin quadrature offsets");
+        m_weights =
+          Rodin::Kokkos::Internal::upload(execution, weights, "Rodin quadrature weights");
+        m_points =
+          Rodin::Kokkos::Internal::upload(execution, points, "Rodin quadrature points");
+      }
+
+      /// @param g Reference geometry. @return First quadrature point of the geometry.
+      KOKKOS_INLINE_FUNCTION
+      Index begin(Index g) const
+      {
+        return m_offsets(g);
+      }
+
+      /// @param g Reference geometry. @return Past the last quadrature point of the geometry.
+      KOKKOS_INLINE_FUNCTION
+      Index end(Index g) const
+      {
+        return m_offsets(g + 1);
+      }
+
+      /// @param q Quadrature point. @return Reference weight.
+      KOKKOS_INLINE_FUNCTION
+      Real getWeight(Index q) const
+      {
+        return m_weights(q);
+      }
+
+      /**
+       * @brief Maps a quadrature point onto a cell.
+       * @param cell Device cell.
+       * @param q Quadrature point of the cell geometry.
+       * @return Integration point on the cell.
+       */
+      KOKKOS_INLINE_FUNCTION
+      IntegrationPointView getIntegrationPoint(
+        const Rodin::Kokkos::Geometry::PolytopeView& cell, Index q) const
+      {
+        const Index rdim = cell.getDimension();
+        Rodin::Kokkos::Geometry::Vector reference(rdim);
+        for (Index k = 0; k < rdim; ++k)
+          reference(k) = m_points(q * ReferenceStride + k);
+        return IntegrationPointView(cell.getPoint(reference));
+      }
+
+      /**
+       * @brief Builds a range policy on the mesh execution space.
+       * @param execution Execution space instance.
+       * @param count Iteration count.
+       * @return Range policy over @f$ [0, count) @f$.
+       */
+      static auto policy(const ExecutionSpace& execution, Index count)
+      {
+        return ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>(
+          execution, 0, count);
+      }
+
+      /**
+       * @brief Finds the first cell of every reference geometry.
+       * @param mesh Resident mesh.
+       * @return Index of the first cell per geometry, empty when absent.
+       */
+      static std::array<Optional<Index>, GeometryCount> getRepresentatives(
+        const Mesh& mesh)
+      {
+        const auto& execution = mesh.getContext().getExecutionSpace();
+        constexpr Index None = std::numeric_limits<Index>::max();
+        ::Kokkos::View<Index[GeometryCount], MemorySpace> first(
+          ::Kokkos::view_alloc(execution, std::string("Rodin geometry representatives")));
+        ::Kokkos::deep_copy(execution, first, None);
+        const auto view = mesh.getDeviceView();
+        findRepresentatives(execution, view, first, mesh.getCellCount());
+        auto host = ::Kokkos::create_mirror_view(first);
+        ::Kokkos::deep_copy(execution, host, first);
+        execution.fence("Rodin geometry representatives");
+        std::array<Optional<Index>, GeometryCount> result;
+        for (size_t g = 0; g < GeometryCount; ++g)
+        {
+          if (host(g) != None)
+            result[g] = host(g);
+        }
+        return result;
+      }
+
+      /**
+       * @brief Records the minimum cell index of every geometry.
+       * @param execution Execution space instance.
+       * @param view Device mesh.
+       * @param first Per-geometry minimum, initialized to the maximum index.
+       * @param count Cell count.
+       *
+       * Public as the enclosing function of a device lambda.
+       */
+      static void findRepresentatives(const ExecutionSpace& execution,
+        const Rodin::Kokkos::Geometry::MeshView& view,
+        const ::Kokkos::View<Index[GeometryCount], MemorySpace>& first, Index count)
+      {
+        ::Kokkos::parallel_for(
+          "Rodin geometry representatives", policy(execution, count),
+          KOKKOS_LAMBDA(Index c) {
+            const Index g = static_cast<Index>(view.getCell(c).getGeometry());
+            ::Kokkos::atomic_min(&first(g), c);
+          });
+      }
+
+    private:
+      ::Kokkos::View<Index*, MemorySpace> m_offsets;
+      ::Kokkos::View<Real*, MemorySpace> m_weights;
+      ::Kokkos::View<Real*, MemorySpace> m_points;
+  };
+
+  /**
+   * @brief Uploads the attribute selection of an integrator.
+   * @param execution Execution space instance.
+   * @param attributes Selected attributes; empty selects every cell.
+   * @return Device copy of the selection.
+   */
+  template <class Execution>
+  auto uploadAttributes(
+    const Execution& execution, const FlatSet<::Rodin::Geometry::Attribute>& attributes)
+  {
+    const std::vector<::Rodin::Geometry::Attribute> list(
+      attributes.begin(), attributes.end());
+    return Rodin::Kokkos::Internal::upload(
+      execution, list, "Rodin integration attributes");
+  }
 }
 
 namespace Rodin::Variational
@@ -233,10 +471,8 @@ namespace Rodin::Variational
    * cell with one thread and writes its local matrix as device triplets.
    *
    * The quadrature order is selected on the host as by the QuadratureRule
-   * the host would use, once per reference geometry, using the first cell of
-   * each geometry. It must therefore depend only on the geometry, which
-   * holds for meshes whose cells of a given geometry share one
-   * transformation degree.
+   * the host would use, once per reference geometry, as described in
+   * Rodin::Kokkos::Variational::Internal::DeviceQuadrature.
    *
    * The host evaluation interface (setPolytope(), integrate()) is not
    * available and raises; the form is assembled by Assembly::Kokkos.
@@ -285,6 +521,10 @@ namespace Rodin::Variational
 
       /// @brief Kokkos memory space.
       using MemorySpace = typename MeshType::MemorySpace;
+
+      /// @brief Device quadrature tables.
+      using QuadratureType =
+        Rodin::Kokkos::Variational::Internal::DeviceQuadrature<MeshType>;
 
       /**
        * @brief Constructs the integral of the dot product of two operators.
@@ -391,48 +631,13 @@ namespace Rodin::Variational
         const Index testVDim = testfes.getVectorDimension();
         const Index vertexCount = mesh.getVertexCount();
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const size_t dimension = mesh.getDimension();
         const Index cellCount = mesh.getCellCount();
         const auto view = mesh.getDeviceView();
-
-        // Quadrature tables per reference geometry, flattened with the
-        // reference coordinates padded to three components.
-        const auto representatives = getRepresentatives(mesh);
-        std::vector<Index> quadratureOffsets(GeometryCount + 1, 0);
-        std::vector<Real> weights;
-        std::vector<Real> points;
-        for (size_t g = 0; g < GeometryCount; ++g)
-        {
-          quadratureOffsets[g] = weights.size();
-          if (!representatives[g])
-            continue;
-          const auto it = mesh.getPolytope(dimension, *representatives[g]);
-          const Geometry::Polytope& polytope = *it;
-          const auto& qf = QF::QuadratureFormula::get(
-            getOrder(integrand, polytope), polytope.getGeometry());
-          for (size_t qp = 0; qp < qf.getSize(); ++qp)
-          {
-            weights.push_back(qf.getWeight(qp));
-            const auto& point = qf.getPoint(qp);
-            for (size_t k = 0; k < ReferenceStride; ++k)
-              points.push_back(
-                k < static_cast<size_t>(point.size()) ? point(k) : Real(0));
-          }
-        }
-        quadratureOffsets[GeometryCount] = weights.size();
-
-        const auto& attributeSet = this->getAttributes();
-        const std::vector<Geometry::Attribute> attributeList(
-          attributeSet.begin(), attributeSet.end());
-
-        const auto qoffsets = Rodin::Kokkos::Internal::upload(
-          execution, quadratureOffsets, "Rodin quadrature offsets");
-        const auto qweights =
-          Rodin::Kokkos::Internal::upload(execution, weights, "Rodin quadrature weights");
-        const auto qpoints =
-          Rodin::Kokkos::Internal::upload(execution, points, "Rodin quadrature points");
-        const auto attributes = Rodin::Kokkos::Internal::upload(
-          execution, attributeList, "Rodin integration attributes");
+        const QuadratureType quadrature(mesh, [&](const Geometry::Polytope& polytope) {
+          return getOrder(integrand, polytope);
+        });
+        const auto attributes = Rodin::Kokkos::Variational::Internal::uploadAttributes(
+          execution, this->getAttributes());
 
         // Entry offsets of the cells, each selected cell with n vertices
         // owning n * trialVDim * n * testVDim entries.
@@ -441,7 +646,7 @@ namespace Rodin::Variational
           cellCount);
         Index total = 0;
         ::Kokkos::parallel_scan(
-          "Rodin triplet offsets", policy(execution, cellCount),
+          "Rodin triplet offsets", QuadratureType::policy(execution, cellCount),
           KOKKOS_LAMBDA(Index c, Index & update, bool final) {
             if (final)
               offsets(c) = update;
@@ -475,7 +680,7 @@ namespace Rodin::Variational
           IntegrationPointView::Capacity * VectorCapacity<TestRange>;
 
         ::Kokkos::parallel_for(
-          "Rodin bilinear form integration", policy(execution, cellCount),
+          "Rodin bilinear form integration", QuadratureType::policy(execution, cellCount),
           KOKKOS_LAMBDA(Index c) {
             const auto cell = view.getCell(c);
             if (!Rodin::Kokkos::Variational::isSelected(cell, attributes))
@@ -483,17 +688,13 @@ namespace Rodin::Variational
             const auto vertices = cell.getVertices();
             const Index ntr = vertices.size() * trialVDim;
             const Index nte = vertices.size() * testVDim;
-            const Index rdim = cell.getDimension();
             const Index g = static_cast<Index>(cell.getGeometry());
             ::Kokkos::Array<Real, TrialCapacity * TestCapacity> local{};
             ::Kokkos::Array<TestValue, TestCapacity> phi;
-            for (Index q = qoffsets(g); q < qoffsets(g + 1); ++q)
+            for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
             {
-              Rodin::Kokkos::Geometry::Vector reference(rdim);
-              for (Index k = 0; k < rdim; ++k)
-                reference(k) = qpoints(q * ReferenceStride + k);
-              const IntegrationPointView ip(cell.getPoint(reference));
-              const Real wdet = qweights(q) * ip.getPoint().getDistortion();
+              const IntegrationPointView ip = quadrature.getIntegrationPoint(cell, q);
+              const Real wdet = quadrature.getWeight(q) * ip.getPoint().getDistortion();
               for (Index te = 0; te < nte; ++te)
                 phi[te] = test.getBasis(ip, te);
               for (Index tr = 0; tr < ntr; ++tr)
@@ -529,79 +730,11 @@ namespace Rodin::Variational
       }
 
     private:
-      /// @brief Number of reference geometries.
-      static constexpr size_t GeometryCount = Geometry::Polytope::Types.size();
-
-      /// @brief Stride of the flattened reference coordinates.
-      static constexpr Index ReferenceStride = 3;
-
       /// @brief Maximum number of components of a value of the given range.
       template <class Range>
       static constexpr Index VectorCapacity =
         std::is_same_v<Range, Real> ? 1 : RODIN_MAXIMAL_SPACE_DIMENSION;
 
-      /**
-       * @brief Builds a range policy on the mesh execution space.
-       * @param execution Execution space instance.
-       * @param count Iteration count.
-       * @return Range policy over @f$ [0, count) @f$.
-       */
-      static auto policy(const ExecutionSpace& execution, Index count)
-      {
-        return ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>(
-          execution, 0, count);
-      }
-
-      /**
-       * @brief Finds the first cell of every reference geometry.
-       * @param mesh Resident mesh.
-       * @return Index of the first cell per geometry, empty when absent.
-       */
-      static std::array<Optional<Index>, GeometryCount> getRepresentatives(
-        const MeshType& mesh)
-      {
-        const auto& execution = mesh.getContext().getExecutionSpace();
-        constexpr Index None = std::numeric_limits<Index>::max();
-        ::Kokkos::View<Index[GeometryCount], MemorySpace> first(
-          ::Kokkos::view_alloc(execution, std::string("Rodin geometry representatives")));
-        ::Kokkos::deep_copy(execution, first, None);
-        const auto view = mesh.getDeviceView();
-        findRepresentatives(execution, view, first, mesh.getCellCount());
-        auto host = ::Kokkos::create_mirror_view(first);
-        ::Kokkos::deep_copy(execution, host, first);
-        execution.fence("Rodin geometry representatives");
-        std::array<Optional<Index>, GeometryCount> result;
-        for (size_t g = 0; g < GeometryCount; ++g)
-        {
-          if (host(g) != None)
-            result[g] = host(g);
-        }
-        return result;
-      }
-
-    public:
-      /**
-       * @brief Records the minimum cell index of every geometry.
-       * @param execution Execution space instance.
-       * @param view Device mesh.
-       * @param first Per-geometry minimum, initialized to the maximum index.
-       * @param count Cell count.
-       *
-       * Public as the enclosing function of a device lambda.
-       */
-      static void findRepresentatives(const ExecutionSpace& execution,
-        const Rodin::Kokkos::Geometry::MeshView& view,
-        const ::Kokkos::View<Index[GeometryCount], MemorySpace>& first, Index count)
-      {
-        ::Kokkos::parallel_for(
-          "Rodin geometry representatives", policy(execution, count),
-          KOKKOS_LAMBDA(Index c) {
-            const Index g = static_cast<Index>(view.getCell(c).getGeometry());
-            ::Kokkos::atomic_min(&first(g), c);
-          });
-      }
-
-    private:
       /**
        * @brief Selects the quadrature order on a polytope.
        * @param integrand Integrated dot product.
@@ -651,6 +784,270 @@ namespace Rodin::Variational
                           .getDegree();
           if (trialOrder && testOrder)
             order = *trialOrder + *testOrder;
+        }
+        if (!order)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "No automatic quadrature order is established. "
+            << "Specify an integration order with setOrder()." << Alert::Raise;
+        }
+        return *order;
+      }
+
+      std::unique_ptr<IntegrandType> m_integrand;
+  };
+
+  /**
+   * @ingroup IntegralSpecializations
+   * @brief Device integration of a test operator on a Kokkos mesh.
+   *
+   * Represents
+   * @f[
+   *   \int_{\mathcal{T}_h} A(v) \ dx
+   * @f]
+   * for a scalar valued operator @f$ A @f$ of a scalar or vector P1 test
+   * function on a resident Kokkos mesh, such as @f$ f \cdot v @f$ or
+   * @f$ g \nabla \cdot v @f$. The operator is lowered once to
+   * Rodin::Kokkos::Variational::DeviceView, then a kernel integrates every
+   * cell with one thread and writes its local vector as device entries.
+   *
+   * The quadrature order is selected on the host as by the generic
+   * QuadratureRule, once per reference geometry, as described in
+   * Rodin::Kokkos::Variational::Internal::DeviceQuadrature.
+   *
+   * The host evaluation interface (setPolytope(), integrate()) is not
+   * available and raises; the form is assembled by Assembly::Kokkos.
+   */
+  template <class NestedDerived, class Range, class Backend>
+    requires(std::is_same_v<typename FormLanguage::Traits<ShapeFunctionBase<NestedDerived,
+                              Rodin::Kokkos::Variational::DeviceP1Space<Range, Backend>,
+                              TestSpace>>::RangeType,
+              Real>)
+  class Integral<ShapeFunctionBase<NestedDerived,
+    Rodin::Kokkos::Variational::DeviceP1Space<Range, Backend>, TestSpace>>
+    final : public LinearFormIntegratorBase<Real>,
+            public Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>
+  {
+    public:
+      /// @brief Finite element space of the test functions.
+      using FESType = Rodin::Kokkos::Variational::DeviceP1Space<Range, Backend>;
+
+      /// @brief Type of the integrand.
+      using IntegrandType = ShapeFunctionBase<NestedDerived, FESType, TestSpace>;
+
+      /// @brief Host integrator interface.
+      using Parent = LinearFormIntegratorBase<Real>;
+
+      /// @brief Device integrator interface.
+      using DeviceParent =
+        Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>;
+
+      /// @brief Device entry type.
+      using EntriesType = typename DeviceParent::EntriesType;
+
+      /// @brief Mesh type.
+      using MeshType = typename FESType::MeshType;
+
+      /// @brief Kokkos memory space.
+      using MemorySpace = typename MeshType::MemorySpace;
+
+      /// @brief Device quadrature tables.
+      using QuadratureType =
+        Rodin::Kokkos::Variational::Internal::DeviceQuadrature<MeshType>;
+
+      /**
+       * @brief Constructs the integral of the dot product of a function and a
+       * test operator.
+       * @param[in] lhs Function @f$ f @f$.
+       * @param[in] rhs Test operator @f$ B(v) @f$.
+       */
+      template <class LHSDerived, class RHSDerived>
+      Integral(const FunctionBase<LHSDerived>& lhs,
+        const ShapeFunctionBase<RHSDerived, FESType, TestSpace>& rhs)
+        : Integral(Dot(lhs, rhs))
+      {}
+
+      /**
+       * @brief Constructs the integral of a test operator.
+       * @param[in] integrand Scalar valued test operator.
+       */
+      Integral(const IntegrandType& integrand)
+        : Parent(integrand.getLeaf()),
+          m_integrand(integrand.copy())
+      {}
+
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Integral to copy.
+       */
+      Integral(const Integral& other)
+        : Parent(other),
+          DeviceParent(other),
+          m_integrand(other.m_integrand->copy())
+      {}
+
+      /**
+       * @brief Move constructor.
+       * @param[in] other Integral to move from.
+       */
+      Integral(Integral&& other)
+        : Parent(std::move(other)),
+          DeviceParent(std::move(other)),
+          m_integrand(std::move(other.m_integrand))
+      {}
+
+      /// @brief Gets the integrand. @return Test operator being integrated.
+      const IntegrandType& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      /// @brief Unavailable; the integral has no host evaluation. @throws Alert::Exception Always.
+      const Geometry::Polytope& getPolytope() const override
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Kokkos integrals are evaluated on the device by Assembly::Kokkos."
+          << Alert::Raise;
+        std::abort();
+      }
+
+      /// @brief Unavailable; the integral has no host evaluation. @throws Alert::Exception Always.
+      Integral& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope) override
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Kokkos integrals are evaluated on the device by Assembly::Kokkos."
+          << Alert::Raise;
+        std::abort();
+      }
+
+      /// @brief Unavailable; the integral has no host evaluation. @throws Alert::Exception Always.
+      Real integrate([[maybe_unused]] size_t local) override
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Kokkos integrals are evaluated on the device by Assembly::Kokkos."
+          << Alert::Raise;
+        std::abort();
+      }
+
+      /**
+       * @brief Gets the integration region.
+       * @return Region::Cells, the integral running over mesh cells.
+       */
+      Geometry::Region getRegion() const override
+      {
+        return Geometry::Region::Cells;
+      }
+
+      /**
+       * @brief Integrates every selected cell on the device.
+       * @return Local vectors as entries, one per local test degree of
+       * freedom of each cell.
+       */
+      EntriesType assemble() const override
+      {
+        using Rodin::Kokkos::Variational::DeviceView;
+        using Rodin::Kokkos::Variational::IntegrationPointView;
+
+        const auto& integrand = getIntegrand();
+        const auto& fes = integrand.getFiniteElementSpace();
+        const MeshType& mesh = fes.getMesh();
+        const Index vdim = fes.getVectorDimension();
+        const Index vertexCount = mesh.getVertexCount();
+        const auto& execution = mesh.getContext().getExecutionSpace();
+        const Index cellCount = mesh.getCellCount();
+        const auto view = mesh.getDeviceView();
+        const QuadratureType quadrature(mesh, [&](const Geometry::Polytope& polytope) {
+          return getOrder(integrand, polytope);
+        });
+        const auto attributes = Rodin::Kokkos::Variational::Internal::uploadAttributes(
+          execution, this->getAttributes());
+
+        // Entry offsets of the cells, each selected cell with n vertices
+        // owning n * vdim entries.
+        ::Kokkos::View<Index*, MemorySpace> offsets(
+          ::Kokkos::view_alloc(execution, std::string("Rodin entry offsets")), cellCount);
+        Index total = 0;
+        ::Kokkos::parallel_scan(
+          "Rodin entry offsets", QuadratureType::policy(execution, cellCount),
+          KOKKOS_LAMBDA(Index c, Index & update, bool final) {
+            if (final)
+              offsets(c) = update;
+            const auto cell = view.getCell(c);
+            if (Rodin::Kokkos::Variational::isSelected(cell, attributes))
+              update += cell.getVertices().size() * vdim;
+          },
+          total);
+
+        EntriesType result;
+        result.indices = ::Kokkos::View<Index*, MemorySpace>(
+          ::Kokkos::view_alloc(execution, std::string("Rodin entry indices")), total);
+        result.values = ::Kokkos::View<Real*, MemorySpace>(
+          ::Kokkos::view_alloc(execution, std::string("Rodin entry values")), total);
+        const auto indices = result.indices;
+        const auto values = result.values;
+
+        const DeviceView<IntegrandType> test(integrand);
+        constexpr Index Capacity = IntegrationPointView::Capacity *
+          (std::is_same_v<Range, Real> ? 1 : RODIN_MAXIMAL_SPACE_DIMENSION);
+
+        ::Kokkos::parallel_for(
+          "Rodin linear form integration", QuadratureType::policy(execution, cellCount),
+          KOKKOS_LAMBDA(Index c) {
+            const auto cell = view.getCell(c);
+            if (!Rodin::Kokkos::Variational::isSelected(cell, attributes))
+              return;
+            const auto vertices = cell.getVertices();
+            const Index nte = vertices.size() * vdim;
+            const Index g = static_cast<Index>(cell.getGeometry());
+            ::Kokkos::Array<Real, Capacity> local{};
+            for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
+            {
+              const IntegrationPointView ip = quadrature.getIntegrationPoint(cell, q);
+              const Real wdet = quadrature.getWeight(q) * ip.getPoint().getDistortion();
+              for (Index te = 0; te < nte; ++te)
+                local[te] += wdet * test.getBasis(ip, te);
+            }
+            // Local index a * vdim + r is component r of local vertex a,
+            // numbered globally as vertex + r * vertexCount.
+            const Index offset = offsets(c);
+            for (Index te = 0; te < nte; ++te)
+            {
+              indices(offset + te) = vertices[te / vdim] + (te % vdim) * vertexCount;
+              values(offset + te) = local[te];
+            }
+          });
+        execution.fence("Rodin linear form integration");
+        return result;
+      }
+
+      Integral* copy() const noexcept override
+      {
+        return new Integral(*this);
+      }
+
+    private:
+      /**
+       * @brief Selects the quadrature order on a polytope.
+       * @param integrand Integrated test operator.
+       * @param polytope Host polytope.
+       * @return Order chosen as by the generic host QuadratureRule: the
+       * integrand order, else the test function order, else the element
+       * degree.
+       */
+      size_t getOrder(
+        const IntegrandType& integrand, const Geometry::Polytope& polytope) const
+      {
+        auto order = this->Parent::getOrder(polytope);
+        if (!order)
+          order = integrand.getOrder(polytope);
+        if (!order)
+          order = integrand.getLeaf().getOrder(polytope);
+        if (!order)
+        {
+          order = integrand.getFiniteElementSpace()
+                    .getFiniteElement(polytope.getDimension(), polytope.getIndex())
+                    .getDegree();
         }
         if (!order)
         {
