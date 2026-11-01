@@ -549,6 +549,11 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       (`EIGEN_GPUCC` coupe `EIGEN_VECTORIZE`): SparseLU seul sur la même
       matrice, 9.7 s sous nvcc contre 7.9 s sous g++. Pistes: instancier
       les solveurs Eigen dans une unité g++, ou résoudre sur le GPU.
+- [x] `KSP::solve` et `SNES::solve` ignoraient les erreurs PETSc en
+      Release (`assert` seulement): `-pc_factor_mat_solver_type cusparse`
+      sur `seqaijkokkos` annonçait un succès en 1 ms avec une solution
+      fausse. `*SetType`, `*SetFromOptions` et `*Solve` lèvent maintenant
+      une `Alert::MemberFunctionException` avec le message PETSc.
 - [ ] `Darcy` reste vide côté hôte, rien a porter.
 - [ ] Néo-hookéen device seulement: les autres lois de
       `Solid::InternalVirtualWork` restent hôte.

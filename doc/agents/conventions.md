@@ -150,9 +150,14 @@ inside third-party libraries merely to change their type.
 
 **Use `assert(ierr == PETSC_SUCCESS)` after PETSc calls.** This is the
 uniform house idiom. Do not introduce a checking macro, and do not convert
-existing asserts to one. Better still: backend-independent code (form
-language, `Problem`, `LinearSolverBase`) should not touch PETSc at all —
-keep PETSc calls inside `src/Rodin/PETSc/`.
+existing asserts to one. The exception is a call whose failure can come from
+the user's choices, such as a solver type, runtime options or a
+preconditioner: `KSP::solve` and `SNES::solve` raise an
+`Alert::MemberFunctionException` with the PETSc message when `*SetType`,
+`*SetFromOptions` or `*Solve` fail, because an assert would let a failed
+solve pass silently in release builds. Better still: backend-independent
+code (form language, `Problem`, `LinearSolverBase`) should not touch PETSc
+at all — keep PETSc calls inside `src/Rodin/PETSc/`.
 
 ## MPI collectives
 

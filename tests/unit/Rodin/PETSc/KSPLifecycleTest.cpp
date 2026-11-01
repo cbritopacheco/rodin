@@ -266,6 +266,34 @@ TYPED_TEST(KSPLifecycle, ReconfigurationClearsStoredPETScState)
   EXPECT_EQ(nonzero, PETSC_TRUE);
 }
 
+/// @brief Failures caused by the requested type or runtime options are raised, also in release builds.
+TYPED_TEST(KSPLifecycle, PETScFailuresRaise)
+{
+  auto& system = this->m_problem.getLinearSystem();
+  {
+    TypeParam solver(this->m_problem);
+    this->configure(solver);
+    solver.setType("rodin_unknown_ksp");
+    EXPECT_THROW(solver.solve(system), Alert::Exception);
+  }
+  {
+    // The factorization package is only requested when the preconditioner is set up.
+    TypeParam solver(this->m_problem);
+    this->configure(solver);
+    ASSERT_EQ(PetscOptionsSetValue(nullptr, "-lifecycle_pc_type", "lu"), PETSC_SUCCESS);
+    ASSERT_EQ(PetscOptionsSetValue(
+                nullptr, "-lifecycle_pc_factor_mat_solver_type", "rodin_unknown_package"),
+      PETSC_SUCCESS);
+    EXPECT_THROW(solver.solve(system), Alert::Exception);
+    ASSERT_EQ(PetscOptionsClearValue(nullptr, "-lifecycle_pc_type"), PETSC_SUCCESS);
+    ASSERT_EQ(PetscOptionsClearValue(nullptr, "-lifecycle_pc_factor_mat_solver_type"),
+      PETSC_SUCCESS);
+  }
+  TypeParam solver(this->m_problem);
+  this->configure(solver);
+  this->check(solver);
+}
+
 int main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, nullptr, nullptr);

@@ -21,7 +21,8 @@ doc/agents/conventions.md. Remember asserts compile out under `-DNDEBUG`
 (Release/RelWithDebInfo), so a swallowed failure surfaces later as a
 confusing downstream error (historically: "Row too large" long after a failed
 resize). When debugging such symptoms, suspect an earlier silently-failed
-PETSc call.
+PETSc call. The user-driven calls of `KSP::solve` and `SNES::solve` are the
+exception and raise in every build (see conventions.md).
 
 ## No in-place resize — LinearSystem lifetime contract
 

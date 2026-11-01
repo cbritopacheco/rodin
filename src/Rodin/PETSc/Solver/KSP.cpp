@@ -11,6 +11,7 @@
 #include <petscsys.h>
 #include <petscksp.h>
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Variational/Problem.h"
 
 #include "Rodin/PETSc/Math/LinearSystem.h"
@@ -93,6 +94,16 @@ namespace Rodin::Solver
     auto& [a, x, b] = axb;
     PetscErrorCode ierr;
 
+    // The type, the options and the preconditioner are chosen by the user, so
+    // their failures must also be reported in release builds.
+    const auto raise = [&, function = __func__](const char* call) {
+      const char* text = nullptr;
+      PetscErrorMessage(ierr, &text, nullptr);
+      Alert::MemberFunctionException(*this, function)
+        << call << " failed with PETSc error " << ierr << ": "
+        << (text ? text : "unknown error") << "." << Alert::Raise;
+    };
+
     ierr = KSPSetTolerances(m_ksp, m_rtol, m_abstol, m_dtol, m_maxIt);
     assert(ierr == PETSC_SUCCESS);
 
@@ -114,11 +125,13 @@ namespace Rodin::Solver
     if (m_type)
     {
       ierr = KSPSetType(m_ksp, m_type);
-      assert(ierr == PETSC_SUCCESS);
+      if (ierr != PETSC_SUCCESS)
+        raise("KSPSetType");
     }
 
     ierr = KSPSetFromOptions(m_ksp);
-    assert(ierr == PETSC_SUCCESS);
+    if (ierr != PETSC_SUCCESS)
+      raise("KSPSetFromOptions");
 
     ::PC pc = PETSC_NULLPTR;
     ierr = KSPGetPC(m_ksp, &pc);
@@ -154,7 +167,8 @@ namespace Rodin::Solver
     assert(ierr == PETSC_SUCCESS);
 
     ierr = KSPSolve(m_ksp, b, x);
-    assert(ierr == PETSC_SUCCESS);
+    if (ierr != PETSC_SUCCESS)
+      raise("KSPSolve");
 
     (void)ierr;
   }
