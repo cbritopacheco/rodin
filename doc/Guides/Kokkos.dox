@@ -210,6 +210,16 @@
   a reassembly with the same sizes reuses the device arrays. Such a problem
   takes no preassembled bilinear form; mixed problems are supported.
 
+  With `RODIN_USE_KOKKOSKERNELS`, `Rodin/Kokkos/Solver.h` specializes
+  `Solver::CG` and `Solver::GMRES` for such a system. Both iterate on the
+  device with a Jacobi preconditioner and link `Rodin::KokkosKernels`:
+  @code{.cpp}
+  #include <Rodin/Kokkos/Solver.h>
+
+  Solver::CG solver(poisson);
+  solver.setTolerance(1e-8).solve();
+  @endcode
+
   @section guides-kokkos-mpi Distributed Meshes
 
   `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the shard of a

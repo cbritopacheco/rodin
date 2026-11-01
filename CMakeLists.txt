@@ -69,6 +69,7 @@ option(RODIN_WITH_PY                  "Build Python bindings"                   
 option(RODIN_USE_MCSS                 "Build documentation with m.css"            OFF)
 option(RODIN_USE_MPI                  "Use Rodin with MPI support"                OFF)
 option(RODIN_USE_KOKKOS               "Use Rodin with Kokkos support"             OFF)
+option(RODIN_USE_KOKKOSKERNELS        "Use Rodin with Kokkos-Kernels support"     OFF)
 option(RODIN_USE_OPENMP               "Use Rodin with OpenMP support"             OFF)
 option(RODIN_USE_UMFPACK              "Use Rodin with UMFPACK support"            OFF)
 option(RODIN_USE_PARU                 "Use Rodin with ParU support"               OFF)
@@ -306,6 +307,14 @@ if (RODIN_BUILD_SRC)
   # ---- Kokkos ----
   if (RODIN_USE_KOKKOS)
     find_package(Kokkos 4.2 CONFIG REQUIRED)
+  endif()
+
+  # ---- Kokkos-Kernels ----
+  if (RODIN_USE_KOKKOSKERNELS)
+    if (NOT RODIN_USE_KOKKOS)
+      message(FATAL_ERROR "RODIN_USE_KOKKOSKERNELS requires RODIN_USE_KOKKOS.")
+    endif()
+    find_package(KokkosKernels CONFIG REQUIRED)
   endif()
 
   # ---- Scotch ----

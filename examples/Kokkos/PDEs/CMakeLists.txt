@@ -87,3 +87,16 @@ target_link_libraries(KokkosNavierStokes
   Rodin::Variational
   Rodin::IO
   )
+
+if (TARGET Rodin::KokkosKernels)
+  add_executable(KokkosKrylov_Poisson Krylov_Poisson.cpp)
+  target_link_libraries(KokkosKrylov_Poisson
+    PUBLIC
+    Rodin::KokkosKernels
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly
+    Rodin::Variational
+    Rodin::IO
+    )
+endif()

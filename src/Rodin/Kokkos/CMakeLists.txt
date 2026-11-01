@@ -89,6 +89,28 @@ if (RODIN_USE_PETSC)
   endif()
 endif()
 
+if (RODIN_USE_KOKKOSKERNELS)
+  add_library(RodinKokkosKernels INTERFACE)
+  add_library(Rodin::KokkosKernels ALIAS RodinKokkosKernels)
+  set_target_properties(RodinKokkosKernels PROPERTIES EXPORT_NAME KokkosKernels)
+
+  target_link_libraries(RodinKokkosKernels
+    INTERFACE
+      Rodin::Kokkos
+      Rodin::Solver
+      Kokkos::kokkoskernels
+  )
+
+  target_sources(RodinKokkosKernels INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/Krylov.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/CG.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/GMRES.h>
+  )
+
+  install(TARGETS RodinKokkosKernels EXPORT RodinTargets)
+endif()
+
 rodin_install_headers(
   DIRECTORIES .
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Kokkos

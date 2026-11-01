@@ -70,7 +70,8 @@ hyperelasticity) into Eigen or PETSc systems solved by Rodin solvers. A
 Problem named with a `Math::LinearSystem<Kokkos::SparseMatrix<Real, Backend>,
 Math::Vector<Real>>` keeps its matrix in device memory as a CSR, equal
 coefficient by coefficient to the host matrix of the same assembly, and copies
-only the right-hand side to the host; `CuDSS` reads it in place. Such a
+only the right-hand side to the host; `CuDSS` and the Kokkos-Kernels `CG`
+and `GMRES` (`Rodin/Kokkos/Solver.h`) read it in place. Such a
 problem takes no preassembled bilinear form. SubMesh
 is not provided. `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the
 shard of a `Mesh<Context::MPI>` resident and marks owned entities in its

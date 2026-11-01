@@ -747,5 +747,15 @@ Mesures sur demeter (RTX 2080 Ti, 32 coeurs), exemples
       Test `RodinKokkosVariationalDeviceSystemTest` (Poisson, périodique,
       Stokes mixte, CuDSS). `NavierStokes` 160 pas: 3.3 s au lieu de
       3.6 s (assemblage 1.19 s en 1.06 s, résolution 1.06 s en 0.94 s).
-- [ ] Krylov sur Kokkos-Kernels sans PETSc.
+- [x] Krylov sur Kokkos-Kernels sans PETSc (`RODIN_USE_KOKKOSKERNELS`,
+      Kokkos-Kernels 4.7.4 sur le même Kokkos, ordinal et offset `int`):
+      `Solver::CG` et `Solver::GMRES` spécialisés pour un système à
+      `Kokkos::SparseMatrix`, Jacobi, CSR lue en place. CG écrit sur Kokkos
+      (sémantique du CG Eigen, mise à jour fusionnée avec deux réductions,
+      `SPMVHandle` gardé pendant la résolution: 208 ms sans, 121 ms avec),
+      GMRES de Kokkos-Kernels avec redémarrage. Poisson 3D Q1 à 1M
+      (`Krylov_Poisson.cpp`): 171 ms et 158 itérations à 1e-10 contre
+      210 ms et 159 itérations pour PETSc Jacobi, assemblage 211 ms contre
+      1056 ms. Test `RodinKokkosSolverKrylovTest` (CG et GMRES contre
+      `SparseLU`).
 - [ ] AmgX, ou hypre appelé directement.

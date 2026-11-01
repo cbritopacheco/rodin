@@ -34,6 +34,10 @@ if(@RODIN_USE_KOKKOS@)
   find_dependency(Kokkos 4.2 CONFIG REQUIRED)
 endif()
 
+if(@RODIN_USE_KOKKOSKERNELS@)
+  find_dependency(KokkosKernels CONFIG REQUIRED)
+endif()
+
 if(@RODIN_USE_PETSC@)
   find_dependency(PETSc REQUIRED)
 endif()

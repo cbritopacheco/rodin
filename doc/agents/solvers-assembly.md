@@ -72,6 +72,17 @@ from the system type.
   checked against the analysis. `setSymmetric` selects `LDL^T` or `LL^T`,
   `setRefinementSteps` adds iterative refinement. Configure with
   `-Dcudss_DIR=<cudss>/lib/cmake/cudss`.
+- Kokkos-Kernels (`RODIN_USE_KOKKOSKERNELS`, target `Rodin::KokkosKernels`,
+  header `Rodin/Kokkos/Solver.h`): `CG` and `GMRES` specialized for a system
+  whose matrix is a `Kokkos::SparseMatrix`, so a device assembly is solved
+  without PETSc. Both are Jacobi preconditioned and read the CSR arrays in
+  place; only the right-hand side and the solution cross to the host. `CG`
+  is written on Kokkos with one SpMV handle per solve and keeps the
+  iteration, defaults and stopping test of the sparse Eigen CG. `GMRES` is
+  the restarted GMRES of Kokkos-Kernels (`setRestart`, 30 by default), with
+  the iteration limit rounded up to whole cycles. Configure with
+  `-DKokkosKernels_DIR=<prefix>/lib/cmake/KokkosKernels`; Kokkos-Kernels must
+  be built on the Kokkos Rodin uses, with `int` ordinals and offsets.
 
 Factorization-based solvers share no base class, but report uniformly through
 `getInfo()` and `success()` (`Solver/Info.h`): the success of the most recent
@@ -109,8 +120,10 @@ PETSc on the device, measured on the Kokkos examples (RTX 2080 Ti,
   where hypre takes 14 s, ILU 27 s and SuperLU_DIST 19 s, and Jacobi does not
   converge. The vector P1 numbering is component-major, so the modes are
   built by hand: a block size cannot describe them.
-- Scalar 3D Poisson, Q1: Jacobi CG solves 1M unknowns in 208 ms, GAMG in
-  6.1 s. The default BoomerAMG settings run out of device memory at 1M
+- Scalar 3D Poisson, Q1: Jacobi CG solves 1M unknowns in 208 ms (159
+  iterations at the default `rtol` of the wrapper), GAMG in 6.1 s. The
+  Kokkos-Kernels `CG` on the device matrix (`Krylov_Poisson.cpp`) takes
+  171 ms for 158 iterations at 1e-10 and 121 ms at 1e-5. The default BoomerAMG settings run out of device memory at 1M
   unknowns (5 GB at 262k); `-pc_hypre_boomeramg_strong_threshold 0.7
   -pc_hypre_boomeramg_agg_nl 2 -pc_hypre_boomeramg_P_max 4` solves it in
   1.9 s and is also faster at 262k.
