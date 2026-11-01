@@ -172,6 +172,19 @@
 #cmakedefine RODIN_USE_CUDSS
 
 /**
+ * @brief Indicates if Rodin is built with hypre support.
+ *
+ * # Utilization
+ *
+ * @code{.cpp}
+ * #ifdef RODIN_USE_HYPRE
+ * // Code depending on hypre
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_HYPRE
+
+/**
  * @brief Indicates if Rodin is built with SuiteSparse support.
  *
  * # Utilization

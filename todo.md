@@ -758,4 +758,18 @@ Mesures sur demeter (RTX 2080 Ti, 32 coeurs), exemples
       210 ms et 159 itérations pour PETSc Jacobi, assemblage 211 ms contre
       1056 ms. Test `RodinKokkosSolverKrylovTest` (CG et GMRES contre
       `SparseLU`).
-- [ ] AmgX, ou hypre appelé directement.
+- [x] hypre appelé directement (`RODIN_USE_HYPRE`, `FindHYPRE.cmake`,
+      hypre 3.2.0 CUDA de petsc-kokkos-install, AmgX non installé):
+      `Solver::BoomerAMG`, PCG de hypre préconditionné par un V-cycle
+      BoomerAMG, pour un système à `Kokkos::SparseMatrix`. CSR passée par
+      `HYPRE_IJMatrixSetValues2` en mémoire device, réglages GPU de PETSc
+      (PMIS, ext+i, l1-Jacobi, élimination de Gauss au niveau grossier),
+      seuil, niveaux agressifs et P_max réglables, norme 2 non
+      préconditionnée. MPI et hypre initialisés au besoin, finalisation
+      laissée à l'application comme `MUMPS`. Hiérarchie refaite à chaque
+      résolution, hypre fait toujours au moins une itération et ne signale
+      pas la convergence pour b = 0 (traité avant). Poisson 3D Q1
+      (`BoomerAMG_Poisson.cpp`, 0.7, 2, 4): 644 ms et 42 itérations à 1M
+      contre 1.9 s et 32 itérations pour PETSc en norme non préconditionnée
+      (27 en norme préconditionnée), 404 ms contre 592 ms à 262k. L'écart
+      d'itérations n'est pas expliqué. Test `RodinKokkosSolverBoomerAMGTest`.

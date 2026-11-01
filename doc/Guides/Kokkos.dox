@@ -220,6 +220,18 @@
   solver.setTolerance(1e-8).solve();
   @endcode
 
+  With `RODIN_USE_HYPRE`, `Rodin/Kokkos/Solver/BoomerAMG.h` provides
+  `Solver::BoomerAMG`, the conjugate gradient of hypre preconditioned by
+  BoomerAMG, which builds its hierarchy from the device arrays and links
+  `Rodin::KokkosHypre`. It initializes MPI and hypre if the application has
+  not; the application finalizes them after the last solver:
+  @code{.cpp}
+  #include <Rodin/Kokkos/Solver/BoomerAMG.h>
+
+  Solver::BoomerAMG solver(poisson);
+  solver.setStrongThreshold(0.7).setAggressiveLevels(2).solve();
+  @endcode
+
   @section guides-kokkos-mpi Distributed Meshes
 
   `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the shard of a

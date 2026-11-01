@@ -111,6 +111,25 @@ if (RODIN_USE_KOKKOSKERNELS)
   install(TARGETS RodinKokkosKernels EXPORT RodinTargets)
 endif()
 
+if (RODIN_USE_HYPRE)
+  add_library(RodinKokkosHypre INTERFACE)
+  add_library(Rodin::KokkosHypre ALIAS RodinKokkosHypre)
+  set_target_properties(RodinKokkosHypre PROPERTIES EXPORT_NAME KokkosHypre)
+
+  target_link_libraries(RodinKokkosHypre
+    INTERFACE
+      Rodin::Kokkos
+      Rodin::Solver
+      HYPRE::HYPRE
+  )
+
+  target_sources(RodinKokkosHypre INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/BoomerAMG.h>
+  )
+
+  install(TARGETS RodinKokkosHypre EXPORT RodinTargets)
+endif()
+
 rodin_install_headers(
   DIRECTORIES .
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Kokkos

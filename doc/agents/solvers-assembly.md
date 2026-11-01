@@ -83,6 +83,19 @@ from the system type.
   the iteration limit rounded up to whole cycles. Configure with
   `-DKokkosKernels_DIR=<prefix>/lib/cmake/KokkosKernels`; Kokkos-Kernels must
   be built on the Kokkos Rodin uses, with `int` ordinals and offsets.
+- hypre (`RODIN_USE_HYPRE`, target `Rodin::KokkosHypre`, header
+  `Rodin/Kokkos/Solver/BoomerAMG.h`): `BoomerAMG`, the conjugate gradient of
+  hypre preconditioned by one BoomerAMG V-cycle, for an SPD system whose
+  matrix is a `Kokkos::SparseMatrix`. hypre copies the CSR arrays in the
+  memory of the backend (`HYPRE_IJMatrixSetValues2`), so nothing but the
+  right-hand side and the solution crosses to the host. The hierarchy uses
+  GPU settings (PMIS, ext+i, l1 Jacobi, Gaussian elimination on the coarsest
+  grid) and is set up again at every solve; `setStrongThreshold`,
+  `setAggressiveLevels` and `setMaxInterpolationElements` tune it. The stop
+  test is the unpreconditioned relative residual, 1e-10 by default. MPI and
+  hypre are initialized on the first solve if needed, their finalization is
+  left to the application. hypre must use 32-bit indices and doubles.
+  Configure with `-DHYPRE_DIR=<prefix>`.
 
 Factorization-based solvers share no base class, but report uniformly through
 `getInfo()` and `success()` (`Solver/Info.h`): the success of the most recent
@@ -126,7 +139,10 @@ PETSc on the device, measured on the Kokkos examples (RTX 2080 Ti,
   171 ms for 158 iterations at 1e-10 and 121 ms at 1e-5. The default BoomerAMG settings run out of device memory at 1M
   unknowns (5 GB at 262k); `-pc_hypre_boomeramg_strong_threshold 0.7
   -pc_hypre_boomeramg_agg_nl 2 -pc_hypre_boomeramg_P_max 4` solves it in
-  1.9 s and is also faster at 262k.
+  1.9 s and is also faster at 262k. `BoomerAMG` with the same settings on
+  the device matrix (`BoomerAMG_Poisson.cpp`) takes 644 ms at 1M (42
+  iterations, against 32 for PETSc with the unpreconditioned norm) and
+  404 ms at 262k, against 592 ms.
 - Taylor-Hood Oseen steps: FGMRES with a Schur field split (`selfp`, GAMG
   on the velocity block, a few GMRES iterations on the pressure) beats ILU
   and SuperLU_DIST, 6.1 s against 29 s and 25 s for 5 steps at 149k

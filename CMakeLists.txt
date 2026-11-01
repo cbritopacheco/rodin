@@ -75,6 +75,7 @@ option(RODIN_USE_UMFPACK              "Use Rodin with UMFPACK support"          
 option(RODIN_USE_PARU                 "Use Rodin with ParU support"               OFF)
 option(RODIN_USE_MUMPS                "Use Rodin with MUMPS support"              OFF)
 option(RODIN_USE_CUDSS                "Use Rodin with NVIDIA cuDSS support"       OFF)
+option(RODIN_USE_HYPRE                "Use Rodin with hypre support"              OFF)
 option(RODIN_USE_PASTIX               "Use Rodin with PaStiX support"             OFF)
 option(RODIN_USE_KLU                  "Use Rodin with KLU support"                OFF)
 option(RODIN_USE_SUPERLU              "Use Rodin with SuperLU support"            OFF)
@@ -333,6 +334,14 @@ if (RODIN_BUILD_SRC)
     find_package(cudss CONFIG REQUIRED)
   endif()
 
+  # ---- hypre ----
+  if (RODIN_USE_HYPRE)
+    if (NOT RODIN_USE_KOKKOS)
+      message(FATAL_ERROR "RODIN_USE_HYPRE requires RODIN_USE_KOKKOS.")
+    endif()
+    find_package(HYPRE REQUIRED)
+  endif()
+
   # ---- SuiteSparse ---------------------------------------------------------
   set(_RODIN_SUITESPARSE_COMPONENTS)
 
@@ -445,6 +454,7 @@ install(FILES
   "${PROJECT_SOURCE_DIR}/cmake/FindPETSc.cmake"
   "${PROJECT_SOURCE_DIR}/cmake/FindSuiteSparse.cmake"
   "${PROJECT_SOURCE_DIR}/cmake/FindMUMPS.cmake"
+  "${PROJECT_SOURCE_DIR}/cmake/FindHYPRE.cmake"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Rodin
 )
 

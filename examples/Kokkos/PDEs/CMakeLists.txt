@@ -100,3 +100,16 @@ if (TARGET Rodin::KokkosKernels)
     Rodin::IO
     )
 endif()
+
+if (TARGET Rodin::KokkosHypre)
+  add_executable(KokkosBoomerAMG_Poisson BoomerAMG_Poisson.cpp)
+  target_link_libraries(KokkosBoomerAMG_Poisson
+    PUBLIC
+    Rodin::KokkosHypre
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly
+    Rodin::Variational
+    Rodin::IO
+    )
+endif()
