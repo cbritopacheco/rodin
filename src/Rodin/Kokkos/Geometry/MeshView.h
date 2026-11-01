@@ -538,6 +538,9 @@ namespace Rodin::Kokkos::Geometry
     /// @brief Explicit relation descriptors indexed by dimension pairs.
     const IncidenceDescriptor* incidenceDescriptors;
 
+    /// @brief Ownership per flattened entity; null when every entity is owned.
+    const std::uint8_t* owned;
+
     /// @brief Returns the mesh dimension. @return Topological dimension.
     KOKKOS_INLINE_FUNCTION
     Index getDimension() const
@@ -569,6 +572,21 @@ namespace Rodin::Kokkos::Geometry
     Index getCount(Index d) const
     {
       return getConnectivity().getCount(d);
+    }
+
+    /**
+     * @brief Tests whether this process owns an entity.
+     * @param d Entity dimension.
+     * @param i Entity index within its dimension.
+     * @return Whether the entity is owned.
+     *
+     * Entities of a distributed mesh are owned by one process. The other
+     * processes hold them as ghosts and do not integrate over them.
+     */
+    KOKKOS_INLINE_FUNCTION
+    bool isOwned(Index d, Index i) const
+    {
+      return !owned || owned[entityOffsets[d] + i] != 0;
     }
 
     /// @brief Returns the vertex count. @return Number of vertices.

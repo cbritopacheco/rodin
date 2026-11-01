@@ -214,11 +214,11 @@ namespace Rodin::Tests::Unit
       }
     };
     Problem sb(sw, su, sz, sv);
-    sb = Integral(Jacobian(sw), Jacobian(sz)) + -Integral(Potential(m, sw), sz) +
+    sb = Integral(Jacobian(sw), Jacobian(sz)) - Integral(Potential(m, sw), sz) +
       Integral(Grad(su), Grad(sv)) + Integral(Potential(k, su), sv) - Integral(f, sv) +
       DirichletBC(sw, VectorFunction{0, 0}).on(1);
     Problem pb(pw, pu, pz, pv);
-    pb = Integral(Jacobian(pw), Jacobian(pz)) + -Integral(Potential(m, pw), pz) +
+    pb = Integral(Jacobian(pw), Jacobian(pz)) - Integral(Potential(m, pw), pz) +
       Integral(Grad(pu), Grad(pv)) + Integral(Potential(k, pu), pv) - Integral(f, pv) +
       DirichletBC(pw, VectorFunction{0, 0}).on(1);
     expectSameSystem(sb, pb);
@@ -259,6 +259,149 @@ namespace Rodin::Tests::Unit
       BoundaryIntegral(Dot(BoundaryNormal(mesh), pz)).over(3) +
       DirichletBC(pw, VectorFunction{0, 0}).on(1);
     expectSameSystem(se, pe);
+  }
+
+  /// @brief Periodic conditions and identifications match the sparse device assembly.
+  /// @param source Mesh tagged by withTaggedFace().
+  void checkConstraints(const HostMesh& source)
+  {
+    ASSERT_EQ(source.getSpaceDimension(), 2);
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 fes(mesh);
+    TrialFunction su(fes);
+    TestFunction sv(fes);
+    PETSc::Variational::TrialFunction pu(fes);
+    PETSc::Variational::TestFunction pv(fes);
+    const auto pairs = makePairs(fes.getSize(), fixedDOFs(su, 5));
+    RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      return 1 + p.x() * p.y();
+    });
+    RealFunction g(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 2 - p.x(); });
+
+    Problem sp(su, sv);
+    sp = Integral(Grad(su), Grad(sv)) + Integral(su, sv) - Integral(f, sv) +
+      DirichletBC(su, g).on(5) + PeriodicBC(su, pairs);
+    Problem pp(pu, pv);
+    pp = Integral(Grad(pu), Grad(pv)) + Integral(pu, pv) - Integral(f, pv) +
+      DirichletBC(pu, g).on(5) + PeriodicBC(pu, pairs);
+    expectSameSystem(sp, pp);
+
+    Problem si(su, sv);
+    si = Integral(Grad(su), Grad(sv)) - Integral(f, sv) + DirichletBC(su, -su).on(1) +
+      DirichletBC(su, RealFunction(3)).on(2);
+    Problem pi(pu, pv);
+    pi = Integral(Grad(pu), Grad(pv)) - Integral(f, pv) + DirichletBC(pu, -pu).on(1) +
+      DirichletBC(pu, RealFunction(3)).on(2);
+    expectSameSystem(si, pi);
+
+    P1 vh(mesh, 2);
+    TrialFunction sw(vh);
+    TrialFunction sa(fes);
+    TestFunction sz(vh);
+    TestFunction sb(fes);
+    PETSc::Variational::TrialFunction pw(vh);
+    PETSc::Variational::TrialFunction pa(fes);
+    PETSc::Variational::TestFunction pz(vh);
+    PETSc::Variational::TestFunction pb(fes);
+    const Real eps = 1e-3;
+    Problem sstokes(sw, sa, sz, sb);
+    sstokes = Integral(Jacobian(sw), Jacobian(sz)) - Integral(sa, Div(sz)) +
+      Integral(Div(sw), sb) + Integral(eps * sa, sb) - Integral(f, sb) +
+      DirichletBC(sw, VectorFunction{0, 0}).on(1) + DirichletBC(sa, g).on(5) +
+      PeriodicBC(sa, pairs);
+    Problem pstokes(pw, pa, pz, pb);
+    pstokes = Integral(Jacobian(pw), Jacobian(pz)) - Integral(pa, Div(pz)) +
+      Integral(Div(pw), pb) + Integral(eps * pa, pb) - Integral(f, pb) +
+      DirichletBC(pw, VectorFunction{0, 0}).on(1) + DirichletBC(pa, g).on(5) +
+      PeriodicBC(pa, pairs);
+    expectSameSystem(sstokes, pstokes);
+
+    Problem scoupled(su, sa, sv, sb);
+    scoupled = Integral(Grad(su), Grad(sv)) + Integral(sa, sv) +
+      Integral(Grad(sa), Grad(sb)) - Integral(f, sv) - Integral(f, sb) +
+      DirichletBC(su, Real(0.5) * sa, RealFunction(2)).on(1) +
+      DirichletBC(sa, RealFunction(1)).on(2);
+    Problem pcoupled(pu, pa, pv, pb);
+    pcoupled = Integral(Grad(pu), Grad(pv)) + Integral(pa, pv) +
+      Integral(Grad(pa), Grad(pb)) - Integral(f, pv) - Integral(f, pb) +
+      DirichletBC(pu, Real(0.5) * pa, RealFunction(2)).on(1) +
+      DirichletBC(pa, RealFunction(1)).on(2);
+    expectSameSystem(scoupled, pcoupled);
+
+    pcoupled.assemble();
+    expectSameSystem(scoupled, pcoupled);
+  }
+
+  /// @brief Device PETSc forms and problems with preassembled forms match the
+  /// sparse device assembly.
+  /// @param source Mesh tagged by withTaggedFace().
+  void checkPreassembled(const HostMesh& source)
+  {
+    ASSERT_EQ(source.getSpaceDimension(), 2);
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 fes(mesh);
+    TrialFunction su(fes);
+    TestFunction sv(fes);
+    PETSc::Variational::TrialFunction pu(fes);
+    PETSc::Variational::TestFunction pv(fes);
+    RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      return 1 + p.x() * p.y();
+    });
+    RealFunction g(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 2 - p.x(); });
+
+    BilinearForm sm(su, sv);
+    sm = Integral(su, sv) + BoundaryIntegral(su, sv).over(2);
+    sm.assemble();
+    BilinearForm pm(pu, pv);
+    pm = Integral(pu, pv) + BoundaryIntegral(pu, pv).over(2);
+    pm.assemble();
+    EXPECT_TRUE(hasType(pm.getOperator(), MATSEQAIJKOKKOS));
+    expectSameOperator(sm.getOperator(), toSparse(pm.getOperator()));
+    LinearForm sl(sv);
+    sl = Integral(f, sv);
+    sl.assemble();
+    LinearForm pl(pv);
+    pl = Integral(f, pv);
+    pl.assemble();
+    EXPECT_TRUE(hasType(pl.getVector(), VECSEQKOKKOS));
+    expectSameVector(sl.getVector(), toVector(pl.getVector()));
+
+    const auto pairs = makePairs(fes.getSize(), fixedDOFs(su, 5));
+    Problem sp(su, sv);
+    sp = Integral(Grad(su), Grad(sv)) + Integral(su, sv) +
+      BoundaryIntegral(su, sv).over(2) - Integral(f, sv) + DirichletBC(su, g).on(5) +
+      PeriodicBC(su, pairs);
+    using Body = ProblemBody<::Mat, ::Vec, PetscScalar>;
+    const BilinearFormBase<::Mat>& mass = pm;
+    const LinearFormBase<::Vec>& load = pl;
+    Problem pp(pu, pv);
+    pp = Body(Integral(Grad(pu), Grad(pv))) + mass - load + DirichletBC(pu, g).on(5) +
+      PeriodicBC(pu, pairs);
+    expectSameSystem(sp, pp);
+    pp.assemble();
+    expectSameSystem(sp, pp);
+
+    P1 vh(mesh, 2);
+    TrialFunction sw(vh);
+    TestFunction sz(vh);
+    PETSc::Variational::TrialFunction pw(vh);
+    PETSc::Variational::TestFunction pz(vh);
+    const Real eps = 1e-3;
+    BilinearForm pe(pu, pv);
+    pe = Integral(eps * pu, pv);
+    pe.assemble();
+    const BilinearFormBase<::Mat>& penalty = pe;
+    Problem sstokes(sw, su, sz, sv);
+    sstokes = Integral(Jacobian(sw), Jacobian(sz)) - Integral(su, Div(sz)) +
+      Integral(Div(sw), sv) + Integral(eps * su, sv) - Integral(f, sv) +
+      DirichletBC(sw, VectorFunction{0, 0}).on(1) + DirichletBC(su, g).on(5);
+    Problem pstokes(pw, pu, pz, pv);
+    pstokes = Body(Integral(Jacobian(pw), Jacobian(pz))) - Integral(pu, Div(pz)) +
+      Integral(Div(pw), pv) + penalty - load +
+      DirichletBC(pw, VectorFunction{0, 0}).on(1) + DirichletBC(pu, g).on(5);
+    expectSameSystem(sstokes, pstokes);
   }
 
   /// @brief Assembling again keeps the pattern and the values.
@@ -372,6 +515,16 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_PETSc_Problem, PotentialOnMixedMesh)
   {
     checkPotential(withFaces(makeMixedMesh()));
+  }
+
+  TEST(Kokkos_PETSc_Problem, ConstraintsOnTriangles)
+  {
+    checkConstraints(withTaggedFace(makeTriangleMesh()));
+  }
+
+  TEST(Kokkos_PETSc_Problem, PreassembledOnTriangles)
+  {
+    checkPreassembled(withTaggedFace(makeTriangleMesh()));
   }
 
   TEST(Kokkos_PETSc_Problem, Reassembly)

@@ -136,7 +136,8 @@ namespace Rodin::Assembly
        */
       MPI* copy() const noexcept override
       {
-        return new MPI(*this);
+        // The CUDA front end does not parse the injected class name here.
+        return new auto(*this);
       }
   };
 
@@ -245,7 +246,8 @@ namespace Rodin::Assembly
        */
       MPI* copy() const noexcept override
       {
-        return new MPI(*this);
+        // The CUDA front end does not parse the injected class name here.
+        return new auto(*this);
       }
   };
 
@@ -430,7 +432,8 @@ namespace Rodin::Assembly
        */
       MPI* copy() const noexcept override
       {
-        return new MPI(*this);
+        // The CUDA front end does not parse the injected class name here.
+        return new auto(*this);
       }
   };
 
@@ -1130,7 +1133,8 @@ namespace Rodin::Assembly
        */
       MPI* copy() const noexcept override
       {
-        return new MPI(*this);
+        // The CUDA front end does not parse the injected class name here.
+        return new auto(*this);
       }
   };
 
@@ -1945,7 +1949,8 @@ namespace Rodin::Assembly
        */
       MPI* copy() const noexcept override
       {
-        return new MPI(*this);
+        // The CUDA front end does not parse the injected class name here.
+        return new auto(*this);
       }
   };
 }

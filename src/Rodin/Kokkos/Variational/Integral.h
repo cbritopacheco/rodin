@@ -362,13 +362,16 @@ namespace Rodin::Kokkos::Variational
    *
    * Boundary faces are incident to one cell and interface faces to more
    * than one, as on the host. These regions need the face to cell
-   * incidence.
+   * incidence. Polytopes of a distributed mesh are integrated by their
+   * owner only.
    */
   template <class AttributeView>
   KOKKOS_INLINE_FUNCTION bool isIntegrated(const Geometry::MeshView& view,
     ::Rodin::Geometry::Region region, const Geometry::PolytopeView& polytope,
     const AttributeView& attributes)
   {
+    if (!view.isOwned(polytope.getDimension(), polytope.getIndex()))
+      return false;
     if (region == ::Rodin::Geometry::Region::Boundary ||
       region == ::Rodin::Geometry::Region::Interface)
     {
@@ -392,6 +395,14 @@ namespace Rodin::Kokkos::Variational::Internal
   template <class Backend>
   struct MeshBackend<
     ::Rodin::Geometry::Mesh<::Rodin::Context::Kokkos<::Rodin::Context::Local, Backend>>>
+  {
+    using Type = Backend;
+  };
+
+  /// @brief Backend of a distributed resident mesh.
+  template <class Backend>
+  struct MeshBackend<
+    ::Rodin::Geometry::Mesh<::Rodin::Context::Kokkos<::Rodin::Context::MPI, Backend>>>
   {
     using Type = Backend;
   };
@@ -1963,6 +1974,20 @@ namespace Rodin::Variational
         return Geometry::Region::Cells;
       }
 
+      /**
+       * @brief Restricts the integration to mesh attributes, as the parent
+       * over().
+       * @param[in] attrs Attribute, attributes or set of attributes of the
+       * integrated polytopes.
+       * @return Reference to this integrator, which keeps its device type.
+       */
+      template <class... Attributes>
+      Integral& over(const Attributes&... attrs)
+      {
+        Parent::over(attrs...);
+        return *this;
+      }
+
       Integral* copy() const noexcept override
       {
         return new Integral(*this);
@@ -2030,6 +2055,20 @@ namespace Rodin::Variational
       Geometry::Region getRegion() const override
       {
         return Geometry::Region::Cells;
+      }
+
+      /**
+       * @brief Restricts the integration to mesh attributes, as the parent
+       * over().
+       * @param[in] attrs Attribute, attributes or set of attributes of the
+       * integrated polytopes.
+       * @return Reference to this integrator, which keeps its device type.
+       */
+      template <class... Attributes>
+      Integral& over(const Attributes&... attrs)
+      {
+        Parent::over(attrs...);
+        return *this;
       }
 
       Integral* copy() const noexcept override
@@ -2104,6 +2143,20 @@ namespace Rodin::Variational
         return Geometry::Region::Boundary;
       }
 
+      /**
+       * @brief Restricts the integration to mesh attributes, as the parent
+       * over().
+       * @param[in] attrs Attribute, attributes or set of attributes of the
+       * integrated polytopes.
+       * @return Reference to this integrator, which keeps its device type.
+       */
+      template <class... Attributes>
+      BoundaryIntegral& over(const Attributes&... attrs)
+      {
+        Parent::over(attrs...);
+        return *this;
+      }
+
       BoundaryIntegral* copy() const noexcept override
       {
         return new BoundaryIntegral(*this);
@@ -2171,6 +2224,20 @@ namespace Rodin::Variational
       Geometry::Region getRegion() const override
       {
         return Geometry::Region::Boundary;
+      }
+
+      /**
+       * @brief Restricts the integration to mesh attributes, as the parent
+       * over().
+       * @param[in] attrs Attribute, attributes or set of attributes of the
+       * integrated polytopes.
+       * @return Reference to this integrator, which keeps its device type.
+       */
+      template <class... Attributes>
+      BoundaryIntegral& over(const Attributes&... attrs)
+      {
+        Parent::over(attrs...);
+        return *this;
       }
 
       BoundaryIntegral* copy() const noexcept override
@@ -2245,6 +2312,20 @@ namespace Rodin::Variational
         return Geometry::Region::Faces;
       }
 
+      /**
+       * @brief Restricts the integration to mesh attributes, as the parent
+       * over().
+       * @param[in] attrs Attribute, attributes or set of attributes of the
+       * integrated polytopes.
+       * @return Reference to this integrator, which keeps its device type.
+       */
+      template <class... Attributes>
+      FaceIntegral& over(const Attributes&... attrs)
+      {
+        Parent::over(attrs...);
+        return *this;
+      }
+
       FaceIntegral* copy() const noexcept override
       {
         return new FaceIntegral(*this);
@@ -2312,6 +2393,20 @@ namespace Rodin::Variational
       Geometry::Region getRegion() const override
       {
         return Geometry::Region::Faces;
+      }
+
+      /**
+       * @brief Restricts the integration to mesh attributes, as the parent
+       * over().
+       * @param[in] attrs Attribute, attributes or set of attributes of the
+       * integrated polytopes.
+       * @return Reference to this integrator, which keeps its device type.
+       */
+      template <class... Attributes>
+      FaceIntegral& over(const Attributes&... attrs)
+      {
+        Parent::over(attrs...);
+        return *this;
       }
 
       FaceIntegral* copy() const noexcept override
@@ -2386,6 +2481,20 @@ namespace Rodin::Variational
         return Geometry::Region::Interface;
       }
 
+      /**
+       * @brief Restricts the integration to mesh attributes, as the parent
+       * over().
+       * @param[in] attrs Attribute, attributes or set of attributes of the
+       * integrated polytopes.
+       * @return Reference to this integrator, which keeps its device type.
+       */
+      template <class... Attributes>
+      InterfaceIntegral& over(const Attributes&... attrs)
+      {
+        Parent::over(attrs...);
+        return *this;
+      }
+
       InterfaceIntegral* copy() const noexcept override
       {
         return new InterfaceIntegral(*this);
@@ -2453,6 +2562,20 @@ namespace Rodin::Variational
       Geometry::Region getRegion() const override
       {
         return Geometry::Region::Interface;
+      }
+
+      /**
+       * @brief Restricts the integration to mesh attributes, as the parent
+       * over().
+       * @param[in] attrs Attribute, attributes or set of attributes of the
+       * integrated polytopes.
+       * @return Reference to this integrator, which keeps its device type.
+       */
+      template <class... Attributes>
+      InterfaceIntegral& over(const Attributes&... attrs)
+      {
+        Parent::over(attrs...);
+        return *this;
       }
 
       InterfaceIntegral* copy() const noexcept override

@@ -53,3 +53,16 @@ target_link_libraries(RodinKokkosVariationalPotentialTest PRIVATE
   GTest::gtest Rodin::Kokkos Rodin::Variational Rodin::Assembly)
 rodin_discover_tests(RodinKokkosVariationalPotentialTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinKokkosVariationalConstraintTest ConstraintTest.cpp ../Main.cpp)
+target_link_libraries(RodinKokkosVariationalConstraintTest PRIVATE
+  GTest::gtest Rodin::Kokkos Rodin::Variational Rodin::Assembly)
+rodin_discover_tests(RodinKokkosVariationalConstraintTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinKokkosVariationalInternalVirtualWorkTest InternalVirtualWorkTest.cpp
+  ../Main.cpp)
+target_link_libraries(RodinKokkosVariationalInternalVirtualWorkTest PRIVATE
+  GTest::gtest Rodin::Kokkos Rodin::Variational Rodin::Assembly Rodin::Solver)
+rodin_discover_tests(RodinKokkosVariationalInternalVirtualWorkTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)

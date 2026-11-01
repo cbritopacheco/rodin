@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <limits>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -32,6 +33,8 @@
 
 #include "Rodin/PETSc/Assembly/VectorSetup.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
+#include "Rodin/PETSc/Variational/BilinearForm.h"
+#include "Rodin/PETSc/Variational/LinearForm.h"
 #include "Rodin/PETSc/Variational/Problem.h"
 
 #include "Rodin/Kokkos/Assembly/Kokkos.h"
@@ -105,6 +108,10 @@ namespace Rodin::Assembly::Internal
     /// @brief PETSc identifier of the matrix preallocated with the pattern, or -1.
     PetscInt64 matrix = -1;
 
+    /// @brief PETSc identifier of the distributed right-hand side
+    /// preallocated with the local coordinates, or -1.
+    PetscInt64 vector = -1;
+
     /// @brief Whether the coordinates hold the pattern of the segments.
     bool indexed = false;
 
@@ -150,6 +157,34 @@ namespace Rodin::Assembly::Internal
 
     /// @brief Values of the fixed degrees of freedom.
     ::Kokkos::View<Real*, MemorySpace> fixedValues;
+
+    /// @brief Whether the right-hand side of each row is imposed, when
+    /// degrees of freedom are identified.
+    ::Kokkos::View<unsigned char*, MemorySpace> imposed;
+
+    /// @brief Whether the matrix was preallocated with the expanded pattern.
+    bool expanded = false;
+
+    /// @brief Row coordinates expanded on the masters.
+    ::Kokkos::View<Index*, MemorySpace> expandedRows;
+
+    /// @brief Column coordinates expanded on the masters.
+    ::Kokkos::View<Index*, MemorySpace> expandedCols;
+
+    /// @brief Expanded coordinates being listed.
+    ::Kokkos::View<Index*, MemorySpace> nextExpandedRows;
+
+    /// @brief Expanded coordinates being listed.
+    ::Kokkos::View<Index*, MemorySpace> nextExpandedCols;
+
+    /// @brief Expanded matrix values.
+    ::Kokkos::View<PetscScalar*, MemorySpace> expandedValues;
+
+    /// @brief Expanded coordinates sorted by row then column.
+    ::Kokkos::View<Index*, MemorySpace> expandedOrder;
+
+    /// @brief Start of each distinct expanded coordinate, and the list size.
+    ::Kokkos::View<Index*, MemorySpace> expandedStarts;
   };
 
   /**
@@ -168,8 +203,68 @@ namespace Rodin::Assembly::Internal
    * a sum of integrands such as the terms of an Oseen operator lists each
    * local matrix entry once.
    *
+   * Identification constraints are resolved on the host, see
+   * DeviceConstraints. The coordinate list is then expanded on the masters
+   * of the rows and columns, the identified columns lifting their affine
+   * values to the right-hand side, and the identified rows become the rows
+   * of their constraints. The expanded pattern is kept as the plain one.
+   *
    * @tparam Backend Kokkos backend of the mesh context.
    */
+  /**
+   * @brief Distribution of the degrees of freedom of a system over MPI
+   * processes.
+   *
+   * The local degrees of freedom, ghosts included, are those the device
+   * integrators number. Each one has a global index, and the process owns
+   * the contiguous global range @f$ [b, e) @f$.
+   */
+  struct COODistribution
+  {
+    /// @brief Communicator of the processes.
+    MPI_Comm comm = MPI_COMM_NULL;
+
+    /// @brief First owned global index.
+    PetscInt begin = 0;
+
+    /// @brief One past the last owned global index.
+    PetscInt end = 0;
+
+    /// @brief Global number of degrees of freedom.
+    PetscInt size = 0;
+
+    /// @brief Global index of each local degree of freedom.
+    std::vector<PetscInt> globals;
+
+    /// @brief Gets the number of owned degrees of freedom. @return Owned count.
+    PetscInt getOwnedSize() const
+    {
+      return end - begin;
+    }
+
+    /**
+     * @brief Distribution of a distributed device space.
+     * @param fes Space numbering the local degrees of freedom.
+     * @return Distribution of the space.
+     */
+    template <class FES>
+    static COODistribution of(const FES& fes)
+    {
+      COODistribution res;
+      res.comm = fes.getMesh().getContext().getCommunicator();
+      Index begin = 0, end = 0;
+      fes.getOwnershipRange(begin, end);
+      res.begin = static_cast<PetscInt>(begin);
+      res.end = static_cast<PetscInt>(end);
+      res.size = static_cast<PetscInt>(fes.getSize());
+      res.globals.resize(fes.getLocalSize());
+      for (size_t i = 0; i < res.globals.size(); ++i)
+        res.globals[i] =
+          static_cast<PetscInt>(fes.getGlobalIndex(static_cast<Index>(i)));
+      return res;
+    }
+  };
+
   template <class Backend>
   class DeviceCOOSystem
   {
@@ -185,6 +280,12 @@ namespace Rodin::Assembly::Internal
 
       /// @brief Cache type.
       using CacheType = COOCache<MemorySpace>;
+
+      /// @brief Constraints of the system.
+      using ConstraintsType = DeviceConstraints<Backend>;
+
+      /// @brief Expansions of the degrees of freedom on their masters.
+      using Expansions = typename ConstraintsType::Expansions;
 
       /// @brief Device bilinear integrator.
       using BilinearType =
@@ -207,8 +308,7 @@ namespace Rodin::Assembly::Internal
         : m_execution(execution),
           m_rows(rows),
           m_cols(cols),
-          m_fixed(std::max(rows, cols), 0),
-          m_values(std::max(rows, cols), Real(0))
+          m_constraints(rows, std::max(rows, cols))
       {
         if (std::max(rows, cols) >
           static_cast<size_t>(std::numeric_limits<PetscInt>::max()))
@@ -219,33 +319,79 @@ namespace Rodin::Assembly::Internal
       }
 
       /**
-       * @brief Assembles a Dirichlet condition and fixes its degrees of
+       * @brief Assembles a Dirichlet condition and constrains its degrees of
        * freedom.
-       * @param dbc Value Dirichlet condition.
+       * @param dbc Value or identification Dirichlet condition.
+       * @param offset Offset of the constrained space in the system.
+       * @param masterOffset Offset of the space of the masters of an
+       * identification.
+       */
+      void fix(
+        Variational::DirichletBCBase<Real>& dbc, size_t offset, size_t masterOffset)
+      {
+        m_constraints.fix(dbc, offset, masterOffset);
+      }
+
+      /**
+       * @brief Assembles a Dirichlet condition whose masters, if any, are in
+       * the constrained space.
+       * @param dbc Value or identification Dirichlet condition.
        * @param offset Offset of the constrained space in the system.
        */
       void fix(Variational::DirichletBCBase<Real>& dbc, size_t offset)
       {
-        using ValueDOFs = typename Variational::DirichletBCBase<Real>::ValueDOFs;
-        dbc.assemble();
-        const auto* dofs = std::get_if<ValueDOFs>(&dbc.getDOFs());
-        if (!dofs)
-        {
-          Alert::Exception()
-            << "Identification conditions are not supported on Kokkos meshes."
-            << Alert::Raise;
-        }
-        for (const auto& [local, value] : *dofs)
-        {
-          m_fixed[offset + local] = 1;
-          m_values[offset + local] = value;
-        }
+        fix(dbc, offset, offset);
       }
 
-      /// @brief Whether a degree of freedom is fixed.
-      bool hasFixed() const
+      /**
+       * @brief Assembles a periodic condition and identifies its degrees of
+       * freedom.
+       * @param pbc Periodic condition.
+       * @param offset Offset of the constrained space in the system.
+       */
+      void identify(Variational::PeriodicBCBase<Real>& pbc, size_t offset)
       {
-        return std::find(m_fixed.begin(), m_fixed.end(), 1) != m_fixed.end();
+        m_constraints.identify(pbc, offset);
+      }
+
+      /**
+       * @brief Whether the matrix contributes to the right-hand side;
+       * collective once the system is distributed, since a process may hold
+       * degrees of freedom fixed by another one.
+       */
+      bool hasConstraints() const
+      {
+        const bool local = m_constraints.isConstrained() || m_constraints.isIdentified();
+        return m_distribution ? isFixed(local) : local;
+      }
+
+      /**
+       * @brief Distributes the system over MPI processes.
+       * @param distribution Global numbering of the local rows and columns.
+       *
+       * The rows and columns of the system are then the local degrees of
+       * freedom. Their entries are sent to the owners of their global
+       * indices, which sum them. Every process eliminates the fixed degrees
+       * of freedom it holds, and their owner alone writes the diagonal and
+       * the fixed value.
+       */
+      void distribute(COODistribution distribution)
+      {
+        if (distribution.globals.size() != m_rows || m_rows != m_cols)
+        {
+          Alert::Exception()
+            << "A distributed device system requires the local trial and test "
+               "degrees of freedom to be the same."
+            << Alert::Raise;
+        }
+        std::vector<unsigned char> owned(m_rows);
+        for (size_t i = 0; i < m_rows; ++i)
+        {
+          const PetscInt g = distribution.globals[i];
+          owned[i] = g >= distribution.begin && g < distribution.end;
+        }
+        copy(m_owned, owned, "Rodin owned DOFs");
+        m_distribution = std::move(distribution);
       }
 
       /**
@@ -286,6 +432,26 @@ namespace Rodin::Assembly::Internal
       }
 
       /**
+       * @brief Adds the entries of a preassembled operator to the matrix.
+       * @param op Operator, alive until finish() returns.
+       * @param row Offset of its test space. @param col Offset of its trial space.
+       */
+      void addMatrix(::Mat op, Index row, Index col)
+      {
+        m_operators.push_back({op, row, col});
+      }
+
+      /**
+       * @brief Adds a preassembled vector to the right-hand side.
+       * @param vec Vector, alive until finish() returns.
+       * @param row Offset of its test space.
+       */
+      void addVector(::Vec vec, Index row)
+      {
+        m_preassembled.push_back({vec, row});
+      }
+
+      /**
        * @brief Integrates, eliminates the constraints and fills the PETSc
        * objects.
        * @param cache Buffers and pattern of the previous assemblies.
@@ -295,25 +461,73 @@ namespace Rodin::Assembly::Internal
       void finish(CacheType& cache, ::Mat A, ::Vec b)
       {
         const size_t n = std::max(m_rows, m_cols);
-        const bool fixed = hasFixed();
-        if (fixed)
+        if (m_distribution &&
+          (m_constraints.isIdentified() || !m_operators.empty() ||
+            !m_preassembled.empty()))
         {
-          copy(cache.fixed, m_fixed, "Rodin fixed DOFs");
-          copy(cache.fixedValues, m_values, "Rodin fixed values");
+          Alert::Exception()
+            << "Periodic conditions and preassembled forms are not supported by "
+               "distributed device systems."
+            << Alert::Raise;
         }
+        typename ConstraintsType::Resolved constraints;
+        if (m_constraints.isIdentified())
+          constraints = m_constraints.resolve(m_execution);
+        const bool expanded = constraints.isExpanded();
+        // A degree of freedom fixed on one process is fixed on all of them.
+        const bool fixed = m_distribution ? isFixed(m_constraints.isConstrained())
+                                          : m_constraints.isConstrained();
+        if (m_distribution && fixed)
+        {
+          auto mask = m_constraints.getFixed();
+          auto values = m_constraints.getValues();
+          mask.resize(m_rows, 0);
+          values.resize(m_rows, Real(0));
+          synchronize(mask, values);
+          copy(cache.fixed, mask, "Rodin fixed DOFs");
+          copy(cache.fixedValues, values, "Rodin fixed values");
+        }
+        else if (fixed || expanded)
+        {
+          copy(cache.fixed, m_constraints.getFixed(), "Rodin fixed DOFs");
+          copy(cache.fixedValues, m_constraints.getValues(), "Rodin fixed values");
+        }
+        if (expanded)
+          copy(cache.imposed, constraints.imposed, "Rodin imposed DOFs");
         resize(cache.rhs, n, "Rodin right-hand side");
         ::Kokkos::deep_copy(m_execution, cache.rhs, Real(0));
 
-        if (A || !m_matrices.empty())
-          integrateMatrices(cache, fixed);
-        integrateVectors(cache, fixed);
-        if (fixed)
-          imposeFixed(m_execution, m_rows, cache.fixed, cache.fixedValues, cache.rhs);
+        if (A || !m_matrices.empty() || !m_operators.empty())
+        {
+          // The constraints are eliminated after the expansion.
+          integrateMatrices(cache, fixed && !expanded);
+          if (expanded)
+            expandMatrices(cache, constraints, fixed);
+        }
+        integrateVectors(cache, fixed, expanded ? &constraints.expansions : nullptr);
+        if (expanded)
+          imposeFixed(
+            m_execution, m_rows, cache.imposed, cache.fixedValues, m_owned, cache.rhs);
+        else if (fixed)
+        {
+          imposeFixed(
+            m_execution, m_rows, cache.fixed, cache.fixedValues, m_owned, cache.rhs);
+        }
         m_execution.fence("Rodin PETSc system");
 
-        if (A)
-          setMatrix(cache, A);
-        if (b)
+        if (A && expanded)
+        {
+          setMatrix(cache, A, true, cache.expandedRows, cache.expandedCols,
+            cache.expandedOrder, cache.expandedStarts, cache.expandedValues);
+        }
+        else if (A)
+        {
+          setMatrix(cache, A, false, cache.rows, cache.cols, cache.order, cache.starts,
+            cache.values);
+        }
+        if (b && m_distribution)
+          setDistributedVector(cache, b);
+        else if (b)
           setVector(b, cache.rhs);
         // PETSc reads the buffers on its own execution space instance, and
         // the next assembly overwrites them.
@@ -361,15 +575,18 @@ namespace Rodin::Assembly::Internal
        *
        * Public as the enclosing function of device lambdas.
        */
-      template <class Fixed, class Scalars>
+      template <class Fixed, class Owned, class Scalars>
       static void fillDiagonal(const ExecutionSpace& execution, size_t offset,
-        size_t count, bool hasFixed, const Fixed& fixed, const Scalars& coo)
+        size_t count, bool hasFixed, const Fixed& fixed, const Owned& owned,
+        const Scalars& coo)
       {
+        const bool distributed = owned.extent(0) > 0;
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::diagonal",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
           KOKKOS_LAMBDA(const size_t i) {
-            coo(offset + i) = hasFixed && fixed(i) ? PetscScalar(1) : PetscScalar(0);
+            const bool one = hasFixed && fixed(i) && (!distributed || owned(i));
+            coo(offset + i) = one ? PetscScalar(1) : PetscScalar(0);
           });
       }
 
@@ -427,16 +644,128 @@ namespace Rodin::Assembly::Internal
        *
        * Public as the enclosing function of device lambdas.
        */
-      template <class Fixed, class Values, class RHS>
+      template <class Fixed, class Values, class Owned, class RHS>
       static void imposeFixed(const ExecutionSpace& execution, size_t count,
-        const Fixed& fixed, const Values& values, const RHS& rhs)
+        const Fixed& fixed, const Values& values, const Owned& owned, const RHS& rhs)
       {
+        const bool distributed = owned.extent(0) > 0;
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::fixed",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
           KOKKOS_LAMBDA(const size_t i) {
             if (fixed(i))
-              rhs(i) = values(i);
+              rhs(i) = !distributed || owned(i) ? values(i) : Real(0);
+          });
+      }
+
+      /**
+       * @brief Numbers the entries of a dense vector.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Indices>
+      static void sequence(const ExecutionSpace& execution, const Indices& res)
+      {
+        ::Kokkos::parallel_for(
+          "Rodin::Assembly::Kokkos::PETSc::sequence",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, res.extent(0)),
+          KOKKOS_LAMBDA(const size_t i) { res(i) = i; });
+      }
+
+      /**
+       * @brief Counts the contributions of the coordinate list expanded on
+       * the masters.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Indices, class Scalars>
+      static size_t countExpanded(const ExecutionSpace& execution, size_t count,
+        const Indices& rows, const Indices& cols, const Scalars& values,
+        const Expansions& x)
+      {
+        size_t res = 0;
+        ::Kokkos::parallel_reduce(
+          "Rodin::Assembly::Kokkos::PETSc::countExpanded",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          KOKKOS_LAMBDA(const size_t e, size_t& sum) {
+            if (values(e) != PetscScalar(0))
+              sum += x.count(rows(e)) * x.count(cols(e));
+          },
+          res);
+        return res;
+      }
+
+      /**
+       * @brief Expands the coordinate list on the masters.
+       *
+       * The nonzero value @f$ a @f$ of row @f$ i @f$ and column @f$ j @f$
+       * becomes the values @f$ (c_r a) c_s @f$ of the masters @f$ r @f$ of
+       * @f$ i @f$ and @f$ s @f$ of @f$ j @f$, and lifts @f$ -(c_r a) d_j @f$
+       * to row @f$ r @f$ when @f$ j @f$ has a nonzero affine value
+       * @f$ d_j @f$, as the host assemblies do.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Indices, class Scalars, class RHS>
+      static void expand(const ExecutionSpace& execution, size_t count,
+        const Indices& rows, const Indices& cols, const Scalars& values,
+        const Expansions& x, const Indices& resRows, const Indices& resCols,
+        const Scalars& resValues, const RHS& rhs)
+      {
+        ::Kokkos::parallel_scan(
+          "Rodin::Assembly::Kokkos::PETSc::expand",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          KOKKOS_LAMBDA(const size_t e, size_t& update, const bool final) {
+            const PetscScalar v = values(e);
+            if (v == PetscScalar(0))
+              return;
+            const size_t nr = x.count(rows(e));
+            const size_t nc = x.count(cols(e));
+            if (final)
+            {
+              const Index r0 = x.starts(rows(e));
+              const Index c0 = x.starts(cols(e));
+              const Real d = x.values(cols(e));
+              for (size_t ri = 0; ri < nr; ++ri)
+              {
+                const Real rv = x.coefficients(r0 + ri) * v;
+                for (size_t ci = 0; ci < nc; ++ci)
+                {
+                  const size_t q = update + ri * nc + ci;
+                  resRows(q) = x.indices(r0 + ri);
+                  resCols(q) = x.indices(c0 + ci);
+                  resValues(q) = rv * x.coefficients(c0 + ci);
+                }
+                if (d != Real(0))
+                  ::Kokkos::atomic_add(&rhs(x.indices(r0 + ri)), -(rv * d));
+              }
+            }
+            update += nr * nc;
+          });
+      }
+
+      /**
+       * @brief Adds the entries of a linear integrator to the masters of
+       * their rows.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Indices, class Values, class RHS>
+      static void scatterExpanded(const ExecutionSpace& execution, size_t offset,
+        size_t count, const Indices& indices, const Values& values, Index row,
+        const Expansions& x, const RHS& rhs)
+      {
+        ::Kokkos::parallel_for(
+          "Rodin::Assembly::Kokkos::PETSc::expandedVector",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, offset, offset + count),
+          KOKKOS_LAMBDA(const size_t e) {
+            const Real v = values(e);
+            if (v == Real(0))
+              return;
+            const Index i = row + indices(e);
+            const Index r0 = x.starts(i);
+            for (Index r = r0; r < x.starts(i + 1); ++r)
+              ::Kokkos::atomic_add(&rhs(x.indices(r)), x.coefficients(r) * v);
           });
       }
 
@@ -607,6 +936,65 @@ namespace Rodin::Assembly::Internal
         Real sign;
       };
 
+      struct Operator
+      {
+        ::Mat op;
+        Index row;
+        Index col;
+      };
+
+      struct Preassembled
+      {
+        ::Vec vec;
+        Index row;
+      };
+
+      /// @brief Coordinates and values of the preassembled operators, by row.
+      struct Entries
+      {
+        std::vector<Index> rows;
+        std::vector<Index> cols;
+        std::vector<PetscScalar> values;
+      };
+
+      /// @brief Lists the entries of the preassembled operators.
+      Entries listOperators() const
+      {
+        Entries res;
+        for (const auto& o : m_operators)
+        {
+          PetscInt begin = 0, end = 0;
+          PetscErrorCode ierr = MatGetOwnershipRange(o.op, &begin, &end);
+          assert(ierr == PETSC_SUCCESS);
+          for (PetscInt i = begin; i < end; ++i)
+          {
+            PetscInt count = 0;
+            const PetscInt* cols = nullptr;
+            const PetscScalar* values = nullptr;
+            ierr = MatGetRow(o.op, i, &count, &cols, &values);
+            assert(ierr == PETSC_SUCCESS);
+            for (PetscInt k = 0; k < count; ++k)
+            {
+              res.rows.push_back(o.row + static_cast<Index>(i));
+              res.cols.push_back(o.col + static_cast<Index>(cols[k]));
+              res.values.push_back(values[k]);
+            }
+            ierr = MatRestoreRow(o.op, i, &count, &cols, &values);
+            assert(ierr == PETSC_SUCCESS);
+          }
+          (void)ierr;
+        }
+        return res;
+      }
+
+      /// @brief Unmanaged host view of a vector.
+      template <class T>
+      static auto host(const std::vector<T>& data)
+      {
+        return ::Kokkos::View<const T*, ::Kokkos::HostSpace,
+          ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(data.data(), data.size());
+      }
+
       template <class T>
       void resize(
         ::Kokkos::View<T*, MemorySpace>& view, size_t size, const char* label) const
@@ -656,11 +1044,14 @@ namespace Rodin::Assembly::Internal
         std::vector<size_t> offsets(segments.size() + 1, 0);
         for (size_t s = 0; s < segments.size(); ++s)
           offsets[s + 1] = offsets[s] + segments[s].count;
+        // The preassembled entries precede the diagonal, after the segments.
+        const Entries entries = listOperators();
+        const size_t tail = offsets.back() + entries.values.size();
         const size_t diagonal = std::min(m_rows, m_cols);
-        const size_t count = offsets.back() + diagonal;
+        const size_t count = tail + diagonal;
 
-        const bool index = !cache.indexed || restricted || cache.segments != segments ||
-          cache.rows.extent(0) != count;
+        const bool index = !cache.indexed || restricted || !m_operators.empty() ||
+          cache.segments != segments || cache.rows.extent(0) != count;
         resize(cache.values, count, "Rodin COO values");
         if (index)
         {
@@ -679,6 +1070,9 @@ namespace Rodin::Assembly::Internal
             first && index ? cache.nextCols : none);
           filled[s] = true;
         }
+        const auto range = std::make_pair(offsets.back(), tail);
+        ::Kokkos::deep_copy(
+          m_execution, ::Kokkos::subview(cache.values, range), host(entries.values));
         if (index)
         {
           for (size_t s = 0; s < segments.size(); ++s)
@@ -686,8 +1080,11 @@ namespace Rodin::Assembly::Internal
             shift(m_execution, cache.nextRows, cache.nextCols, offsets[s],
               segments[s].count, segments[s].row, segments[s].col);
           }
-          listDiagonal(
-            m_execution, offsets.back(), diagonal, cache.nextRows, cache.nextCols);
+          ::Kokkos::deep_copy(
+            m_execution, ::Kokkos::subview(cache.nextRows, range), host(entries.rows));
+          ::Kokkos::deep_copy(
+            m_execution, ::Kokkos::subview(cache.nextCols, range), host(entries.cols));
+          listDiagonal(m_execution, tail, diagonal, cache.nextRows, cache.nextCols);
           const bool changed = !cache.indexed || cache.rows.extent(0) != count ||
             countChanges(
               m_execution, cache.nextRows, cache.nextCols, cache.rows, cache.cols) > 0;
@@ -705,18 +1102,69 @@ namespace Rodin::Assembly::Internal
           }
         }
         fillDiagonal(
-          m_execution, offsets.back(), diagonal, fixed, cache.fixed, cache.values);
+          m_execution, tail, diagonal, fixed, cache.fixed, m_owned, cache.values);
         if (fixed)
         {
-          eliminate(m_execution, offsets.back(), cache.rows, cache.cols, cache.fixed,
+          eliminate(m_execution, tail, cache.rows, cache.cols, cache.fixed,
             cache.fixedValues, cache.values, cache.rhs);
+        }
+      }
+
+      /**
+       * @brief Expands the coordinate list on the masters, appends the rows
+       * of the identified degrees of freedom and every diagonal entry, then
+       * eliminates the fixed degrees of freedom.
+       */
+      void expandMatrices(CacheType& cache,
+        const typename ConstraintsType::Resolved& constraints, bool fixed)
+      {
+        const size_t listed = cache.values.extent(0);
+        const size_t entries = countExpanded(m_execution, listed, cache.rows, cache.cols,
+          cache.values, constraints.expansions);
+        const size_t extra = constraints.rows.size();
+        const size_t diagonal = std::min(m_rows, m_cols);
+        const size_t count = entries + extra + diagonal;
+        resize(cache.nextExpandedRows, count, "Rodin expanded COO rows");
+        resize(cache.nextExpandedCols, count, "Rodin expanded COO cols");
+        resize(cache.expandedValues, count, "Rodin expanded COO values");
+        expand(m_execution, listed, cache.rows, cache.cols, cache.values,
+          constraints.expansions, cache.nextExpandedRows, cache.nextExpandedCols,
+          cache.expandedValues, cache.rhs);
+        const auto range = std::make_pair(entries, entries + extra);
+        ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(cache.nextExpandedRows, range),
+          host(constraints.rows));
+        ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(cache.nextExpandedCols, range),
+          host(constraints.cols));
+        ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(cache.expandedValues, range),
+          host(constraints.values));
+        listDiagonal(m_execution, entries + extra, diagonal, cache.nextExpandedRows,
+          cache.nextExpandedCols);
+        const bool changed = cache.expandedRows.extent(0) != count ||
+          countChanges(m_execution, cache.nextExpandedRows, cache.nextExpandedCols,
+            cache.expandedRows, cache.expandedCols) > 0;
+        std::swap(cache.expandedRows, cache.nextExpandedRows);
+        std::swap(cache.expandedCols, cache.nextExpandedCols);
+        if (changed)
+        {
+          sortPattern(m_execution, m_cols, {}, {0}, cache.expandedRows,
+            cache.expandedCols, cache.expandedOrder);
+          cache.expandedStarts = distinctStarts(
+            m_execution, cache.expandedRows, cache.expandedCols, cache.expandedOrder);
+          cache.matrix = -1;
+        }
+        fillDiagonal(m_execution, entries + extra, diagonal, fixed, cache.fixed, m_owned,
+          cache.expandedValues);
+        if (fixed)
+        {
+          eliminate(m_execution, entries + extra, cache.expandedRows, cache.expandedCols,
+            cache.fixed, cache.fixedValues, cache.expandedValues, cache.rhs);
         }
       }
 
       /**
        * @brief Integrates the linear integrators into the right-hand side.
        */
-      void integrateVectors(CacheType& cache, bool fixed)
+      void integrateVectors(CacheType& cache, bool fixed, const Expansions* x)
       {
         std::vector<size_t> offsets(m_vectors.size() + 1, 0);
         for (size_t k = 0; k < m_vectors.size(); ++k)
@@ -728,9 +1176,75 @@ namespace Rodin::Assembly::Internal
           const auto& v = m_vectors[k];
           v.integrator->fill(
             cache.entryValues, offsets[k], v.sign, false, cache.entryIndices);
-          scatterVector(m_execution, offsets[k], offsets[k + 1] - offsets[k],
-            cache.entryIndices, cache.entryValues, v.row, fixed, cache.fixed, cache.rhs);
+          if (x)
+          {
+            scatterExpanded(m_execution, offsets[k], offsets[k + 1] - offsets[k],
+              cache.entryIndices, cache.entryValues, v.row, *x, cache.rhs);
+          }
+          else
+          {
+            scatterVector(m_execution, offsets[k], offsets[k + 1] - offsets[k],
+              cache.entryIndices, cache.entryValues, v.row, fixed, cache.fixed,
+              cache.rhs);
+          }
         }
+        // The integrators may still read the buffers the vectors reuse.
+        if (!m_preassembled.empty())
+          m_execution.fence("Rodin linear integrators");
+        for (const auto& p : m_preassembled)
+        {
+          PetscInt n = 0;
+          PetscErrorCode ierr = VecGetLocalSize(p.vec, &n);
+          assert(ierr == PETSC_SUCCESS);
+          const size_t count = static_cast<size_t>(n);
+          resize(cache.entryIndices, count, "Rodin entry indices");
+          resize(cache.entryValues, count, "Rodin entry values");
+          getVector(p.vec, cache.entryValues);
+          sequence(m_execution, cache.entryIndices);
+          if (x)
+          {
+            scatterExpanded(m_execution, 0, count, cache.entryIndices, cache.entryValues,
+              p.row, *x, cache.rhs);
+          }
+          else
+          {
+            scatterVector(m_execution, 0, count, cache.entryIndices, cache.entryValues,
+              p.row, fixed, cache.fixed, cache.rhs);
+          }
+          // The buffers are reused by the next vector.
+          m_execution.fence("Rodin preassembled vector");
+          (void)ierr;
+        }
+      }
+
+      /**
+       * @brief Copies a vector, wherever it stores its values.
+       */
+      void getVector(::Vec vec, const ::Kokkos::View<Real*, MemorySpace>& res) const
+      {
+        using Unmanaged = ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>;
+        const size_t count = res.extent(0);
+        const PetscScalar* array = nullptr;
+        PetscMemType type;
+        PetscErrorCode ierr = VecGetArrayReadAndMemType(vec, &array, &type);
+        assert(ierr == PETSC_SUCCESS);
+        if (PetscMemTypeHost(type))
+        {
+          ::Kokkos::deep_copy(m_execution, res,
+            ::Kokkos::View<const PetscScalar*, ::Kokkos::HostSpace, Unmanaged>(
+              array, count));
+        }
+        else
+        {
+          ::Kokkos::deep_copy(m_execution, res,
+            ::Kokkos::View<const PetscScalar*,
+              ::Kokkos::DefaultExecutionSpace::memory_space, Unmanaged>(array, count));
+        }
+        // PETSc may release the array once it is restored.
+        m_execution.fence("Rodin preassembled vector");
+        ierr = VecRestoreArrayReadAndMemType(vec, &array);
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
       }
 
       /**
@@ -739,24 +1253,36 @@ namespace Rodin::Assembly::Internal
        * The matrix is laid out as a PETSc Kokkos matrix unless it already has
        * a type. The pattern is analysed again only when it is not the one the
        * matrix was last preallocated with.
+       * @param expanded Whether the coordinates are expanded on the masters.
        */
-      void setMatrix(CacheType& cache, ::Mat A) const
+      template <class Indices, class Scalars>
+      void setMatrix(CacheType& cache, ::Mat A, bool expanded, const Indices& coordRows,
+        const Indices& coordCols, const Indices& order, const Indices& starts,
+        const Scalars& values) const
       {
         PetscErrorCode ierr;
         PetscInt64 id = -1;
         ierr = PetscObjectGetId(reinterpret_cast<PetscObject>(A), &id);
         assert(ierr == PETSC_SUCCESS);
 
-        if (cache.matrix != id)
+        if (cache.matrix != id || cache.expanded != expanded)
         {
           PetscBool assembled = PETSC_FALSE;
           ierr = MatAssembled(A, &assembled);
           assert(ierr == PETSC_SUCCESS);
           if (!assembled)
           {
-            const PetscInt m = static_cast<PetscInt>(m_rows);
-            const PetscInt n = static_cast<PetscInt>(m_cols);
-            ierr = MatSetSizes(A, m, n, m, n);
+            if (m_distribution)
+            {
+              const PetscInt m = m_distribution->getOwnedSize();
+              ierr = MatSetSizes(A, m, m, m_distribution->size, m_distribution->size);
+            }
+            else
+            {
+              const PetscInt m = static_cast<PetscInt>(m_rows);
+              const PetscInt n = static_cast<PetscInt>(m_cols);
+              ierr = MatSetSizes(A, m, n, m, n);
+            }
             assert(ierr == PETSC_SUCCESS);
             MatType type = nullptr;
             ierr = MatGetType(A, &type);
@@ -767,7 +1293,7 @@ namespace Rodin::Assembly::Internal
               assert(ierr == PETSC_SUCCESS);
             }
           }
-          const size_t distinct = cache.starts.extent(0) - 1;
+          const size_t distinct = starts.extent(0) - 1;
           const ::Kokkos::View<PetscInt*, MemorySpace> rows(
             ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
               std::string("Rodin PETSc rows")),
@@ -776,21 +1302,30 @@ namespace Rodin::Assembly::Internal
             ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
               std::string("Rodin PETSc cols")),
             distinct);
-          listDistinct(
-            m_execution, cache.rows, cache.cols, cache.order, cache.starts, rows, cols);
+          listDistinct(m_execution, coordRows, coordCols, order, starts, rows, cols);
           // PETSc may modify the coordinates it is given, which are temporaries.
           const auto hostRows =
             ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), rows);
           const auto hostCols =
             ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), cols);
+          if (m_distribution)
+          {
+            const auto& globals = m_distribution->globals;
+            for (size_t i = 0; i < distinct; ++i)
+            {
+              hostRows(i) = globals[hostRows(i)];
+              hostCols(i) = globals[hostCols(i)];
+            }
+          }
           ierr = MatSetPreallocationCOO(
             A, static_cast<PetscCount>(distinct), hostRows.data(), hostCols.data());
           assert(ierr == PETSC_SUCCESS);
           cache.matrix = id;
+          cache.expanded = expanded;
         }
 
-        resize(cache.merged, cache.starts.extent(0) - 1, "Rodin COO merged values");
-        merge(m_execution, cache.order, cache.starts, cache.values, cache.merged);
+        resize(cache.merged, starts.extent(0) - 1, "Rodin COO merged values");
+        merge(m_execution, order, starts, values, cache.merged);
         m_execution.fence("Rodin COO merge");
 
         PetscBool device = PETSC_FALSE;
@@ -841,14 +1376,186 @@ namespace Rodin::Assembly::Internal
         (void)ierr;
       }
 
+      /**
+       * @brief Whether a process fixes a degree of freedom; collective.
+       * @param local Whether this process fixes one.
+       */
+      bool isFixed(bool local) const
+      {
+        int in = local ? 1 : 0, out = 0;
+        MPI_Allreduce(&in, &out, 1, MPI_INT, MPI_LOR, m_distribution->comm);
+        return out != 0;
+      }
+
+      /**
+       * @brief Sums a value per local degree of freedom over the processes
+       * holding it; collective.
+       * @param[in,out] local Value per local degree of freedom, replaced by
+       * the sum over the processes.
+       */
+      void sum(std::vector<PetscScalar>& local) const
+      {
+        const auto& dist = *m_distribution;
+        const PetscInt owned = dist.getOwnedSize();
+        std::vector<PetscInt> ghosts;
+        std::vector<PetscInt> position(m_rows);
+        for (size_t i = 0; i < m_rows; ++i)
+        {
+          const PetscInt g = dist.globals[i];
+          if (g >= dist.begin && g < dist.end)
+          {
+            position[i] = g - dist.begin;
+          }
+          else
+          {
+            position[i] = owned + static_cast<PetscInt>(ghosts.size());
+            ghosts.push_back(g);
+          }
+        }
+        ::Vec v;
+        PetscErrorCode ierr = VecCreateGhost(dist.comm, owned, dist.size,
+          static_cast<PetscInt>(ghosts.size()), ghosts.data(), &v);
+        assert(ierr == PETSC_SUCCESS);
+        ::Vec form;
+        ierr = VecGhostGetLocalForm(v, &form);
+        assert(ierr == PETSC_SUCCESS);
+        PetscScalar* array = nullptr;
+        ierr = VecGetArray(form, &array);
+        assert(ierr == PETSC_SUCCESS);
+        for (size_t i = 0; i < m_rows; ++i)
+          array[position[i]] = local[i];
+        ierr = VecRestoreArray(form, &array);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecGhostUpdateBegin(v, ADD_VALUES, SCATTER_REVERSE);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecGhostUpdateEnd(v, ADD_VALUES, SCATTER_REVERSE);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecGhostUpdateBegin(v, INSERT_VALUES, SCATTER_FORWARD);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecGhostUpdateEnd(v, INSERT_VALUES, SCATTER_FORWARD);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecGetArray(form, &array);
+        assert(ierr == PETSC_SUCCESS);
+        for (size_t i = 0; i < m_rows; ++i)
+          local[i] = array[position[i]];
+        ierr = VecRestoreArray(form, &array);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecGhostRestoreLocalForm(v, &form);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecDestroy(&v);
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+      }
+
+      /**
+       * @brief Makes the fixed degrees of freedom the same on every process
+       * holding them; collective.
+       *
+       * A degree of freedom is fixed when one process fixes it, to the mean
+       * of the values the processes fixing it impose.
+       * @param[in,out] mask Whether each local degree of freedom is fixed.
+       * @param[in,out] values Fixed value of each local degree of freedom.
+       */
+      void synchronize(std::vector<unsigned char>& mask, std::vector<Real>& values) const
+      {
+        std::vector<PetscScalar> count(m_rows), value(m_rows);
+        for (size_t i = 0; i < m_rows; ++i)
+        {
+          count[i] = mask[i] ? PetscScalar(1) : PetscScalar(0);
+          value[i] = mask[i] ? PetscScalar(values[i]) : PetscScalar(0);
+        }
+        sum(count);
+        sum(value);
+        for (size_t i = 0; i < m_rows; ++i)
+        {
+          const Real c = PetscRealPart(count[i]);
+          mask[i] = c > Real(0.5);
+          values[i] = mask[i] ? PetscRealPart(value[i]) / c : Real(0);
+        }
+      }
+
+      /**
+       * @brief Sends the right-hand side to the owners of its rows.
+       *
+       * The vector is preallocated with the global index of each local row,
+       * once per vector, and PETSc sums the entries of the rows held by
+       * several processes.
+       */
+      void setDistributedVector(CacheType& cache, ::Vec b) const
+      {
+        PetscErrorCode ierr;
+        PetscInt64 id = -1;
+        ierr = PetscObjectGetId(reinterpret_cast<PetscObject>(b), &id);
+        assert(ierr == PETSC_SUCCESS);
+        if (cache.vector != id)
+        {
+          // PETSc may modify the coordinates it is given.
+          std::vector<PetscInt> globals = m_distribution->globals;
+          ierr =
+            VecSetPreallocationCOO(b, static_cast<PetscCount>(m_rows), globals.data());
+          assert(ierr == PETSC_SUCCESS);
+          cache.vector = id;
+        }
+        const auto source =
+          ::Kokkos::subview(cache.rhs, std::make_pair(size_t(0), m_rows));
+        PetscBool device = PETSC_FALSE;
+        ierr = PetscObjectTypeCompareAny(reinterpret_cast<PetscObject>(b), &device,
+          VECSEQKOKKOS, VECMPIKOKKOS, VECSEQCUDA, VECMPICUDA, "");
+        assert(ierr == PETSC_SUCCESS);
+        if (device ||
+          ::Kokkos::SpaceAccessibility<::Kokkos::HostSpace, MemorySpace>::accessible)
+        {
+          ierr = VecSetValuesCOO(b, source.data(), INSERT_VALUES);
+        }
+        else
+        {
+          const auto host =
+            ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), source);
+          ierr = VecSetValuesCOO(b, host.data(), INSERT_VALUES);
+        }
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+      }
+
       ExecutionSpace m_execution;
       size_t m_rows;
       size_t m_cols;
-      std::vector<unsigned char> m_fixed;
-      std::vector<Real> m_values;
+      ConstraintsType m_constraints;
       std::vector<Matrix> m_matrices;
       std::vector<Vector> m_vectors;
+      std::vector<Operator> m_operators;
+      std::vector<Preassembled> m_preassembled;
+      std::optional<COODistribution> m_distribution;
+      ::Kokkos::View<unsigned char*, MemorySpace> m_owned;
   };
+
+  /**
+   * @brief Prepares the PETSc objects of a distributed device assembly.
+   * @param axb PETSc linear system.
+   * @param rows Number of owned rows. @param globalRows Global number of rows.
+   * @param cols Number of owned columns. @param globalCols Global number of columns.
+   * @param doVector Whether the right-hand side is assembled.
+   */
+  inline void prepareDeviceSystem(PETSc::Math::LinearSystem& axb, size_t rows,
+    size_t globalRows, size_t cols, size_t globalCols, bool doVector)
+  {
+    PetscErrorCode ierr;
+    const PetscInt m = static_cast<PetscInt>(rows);
+    const PetscInt n = static_cast<PetscInt>(cols);
+    const PetscInt M = static_cast<PetscInt>(globalRows);
+    const PetscInt N = static_cast<PetscInt>(globalCols);
+    if (doVector)
+    {
+      ierr = PETSc::Assembly::VectorSetup(axb.getVector())
+               .prepare({m, M, VECKOKKOS, false, false});
+      assert(ierr == PETSC_SUCCESS);
+    }
+    // The solution carries the previous iterate as the initial guess.
+    ierr = PETSc::Assembly::VectorSetup(axb.getSolution())
+             .prepare({n, N, VECKOKKOS, false, false});
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+  }
 
   /**
    * @brief Prepares the PETSc objects of a device assembly.
@@ -859,35 +1566,7 @@ namespace Rodin::Assembly::Internal
   inline void prepareDeviceSystem(
     PETSc::Math::LinearSystem& axb, size_t rows, size_t cols, bool doVector)
   {
-    PetscErrorCode ierr;
-    const PetscInt m = static_cast<PetscInt>(rows);
-    const PetscInt n = static_cast<PetscInt>(cols);
-    if (doVector)
-    {
-      ierr = PETSc::Assembly::VectorSetup(axb.getVector())
-               .prepare({m, m, VECKOKKOS, false, false});
-      assert(ierr == PETSC_SUCCESS);
-    }
-    // The solution carries the previous iterate as the initial guess.
-    ierr = PETSc::Assembly::VectorSetup(axb.getSolution())
-             .prepare({n, n, VECKOKKOS, false, false});
-    assert(ierr == PETSC_SUCCESS);
-    (void)ierr;
-  }
-
-  /**
-   * @brief Rejects the PETSc problem terms without a device implementation.
-   * @param pb Problem body.
-   */
-  template <class ProblemBody>
-  void requireDevicePETScProblem(const ProblemBody& pb)
-  {
-    requireDeviceProblem(pb);
-    if (pb.getBFs().size() > 0 || pb.getLFs().size() > 0)
-    {
-      Alert::Exception() << "Preassembled PETSc forms are not supported on Kokkos meshes."
-                         << Alert::Raise;
-    }
+    prepareDeviceSystem(axb, rows, rows, cols, cols, doVector);
   }
 }
 
@@ -895,15 +1574,226 @@ namespace Rodin::Assembly
 {
   /**
    * @ingroup RodinAssembly
+   * @brief Device assembly of a PETSc bilinear form on a Kokkos mesh.
+   *
+   * The integrators of the form, possibly negated, are integrated on the
+   * device and handed to PETSc as a coordinate list in device memory, as in
+   * the problem assemblies. The pattern holds the diagonal.
+   *
+   * @tparam Solution Solution variable type.
+   * @tparam TrialFES Trial space on a resident Kokkos mesh.
+   * @tparam TestFES Test space on the same resident Kokkos mesh.
+   */
+  template <class Solution, class TrialFES, class TestFES>
+  class Kokkos<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>> final
+    : public AssemblyBase<::Mat,
+        Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
+  {
+    public:
+      /// @brief Operator type.
+      using OperatorType = ::Mat;
+
+      /// @brief Bilinear form type.
+      using BilinearFormType =
+        Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
+
+      /// @brief Parent class.
+      using Parent = AssemblyBase<OperatorType, BilinearFormType>;
+
+      /// @brief Input type.
+      using InputType = typename Parent::InputType;
+
+      /// @brief Kokkos backend of the trial mesh context.
+      using BackendType = typename FormLanguage::Traits<
+        typename FormLanguage::Traits<TrialFES>::MeshType>::ContextType::BackendType;
+
+      /// @brief Device system type.
+      using SystemType = Internal::DeviceCOOSystem<BackendType>;
+
+      /// @brief Default constructor.
+      Kokkos() = default;
+
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      Kokkos(const Kokkos& other)
+        : Parent(other)
+      {}
+
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      Kokkos(Kokkos&& other)
+        : Parent(std::move(other)),
+          m_cache(std::move(other.m_cache))
+      {}
+
+      /**
+       * @brief Assigns the assembly policy, forgetting the cached pattern.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      Kokkos& operator=(const Kokkos& other)
+      {
+        Parent::operator=(other);
+        m_cache = {};
+        return *this;
+      }
+
+      /**
+       * @brief Moves the assembly policy.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      Kokkos& operator=(Kokkos&& other) = default;
+
+      /**
+       * @brief Integrates the form on the device and fills its matrix.
+       * @param res Matrix of the form.
+       * @param input Input data.
+       */
+      void execute(OperatorType& res, const InputType& input) override
+      {
+        SystemType system(input.getTrialFES().getMesh().getContext().getExecutionSpace(),
+          input.getTestFES().getSize(), input.getTrialFES().getSize());
+        for (const auto& lbfi : input.getLocalBFIs())
+          system.addMatrix(lbfi, 0, 0);
+        for (const auto& gbfi : input.getGlobalBFIs())
+          system.addMatrix(gbfi, 0, 0);
+        system.finish(m_cache, res, nullptr);
+      }
+
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
+      Kokkos* copy() const noexcept override
+      {
+        return new Kokkos(*this);
+      }
+
+    private:
+      typename SystemType::CacheType m_cache;
+  };
+
+  /**
+   * @ingroup RodinAssembly
+   * @brief Device assembly of a PETSc linear form on a Kokkos mesh.
+   *
+   * The integrators of the form, possibly negated, are integrated on the
+   * device and summed into a PETSc Kokkos vector.
+   *
+   * @tparam FES Test space on a resident Kokkos mesh.
+   */
+  template <class FES>
+  class Kokkos<::Vec, Variational::LinearForm<FES, ::Vec>> final
+    : public AssemblyBase<::Vec, Variational::LinearForm<FES, ::Vec>>
+  {
+    public:
+      /// @brief Vector type.
+      using VectorType = ::Vec;
+
+      /// @brief Linear form type.
+      using LinearFormType = Variational::LinearForm<FES, VectorType>;
+
+      /// @brief Parent class.
+      using Parent = AssemblyBase<VectorType, LinearFormType>;
+
+      /// @brief Input type.
+      using InputType = typename Parent::InputType;
+
+      /// @brief Kokkos backend of the test mesh context.
+      using BackendType = typename FormLanguage::Traits<
+        typename FormLanguage::Traits<FES>::MeshType>::ContextType::BackendType;
+
+      /// @brief Device system type.
+      using SystemType = Internal::DeviceCOOSystem<BackendType>;
+
+      /// @brief Default constructor.
+      Kokkos() = default;
+
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      Kokkos(const Kokkos& other)
+        : Parent(other)
+      {}
+
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      Kokkos(Kokkos&& other)
+        : Parent(std::move(other)),
+          m_cache(std::move(other.m_cache))
+      {}
+
+      /**
+       * @brief Assigns the assembly policy, forgetting the cached buffers.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      Kokkos& operator=(const Kokkos& other)
+      {
+        Parent::operator=(other);
+        m_cache = {};
+        return *this;
+      }
+
+      /**
+       * @brief Moves the assembly policy.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      Kokkos& operator=(Kokkos&& other) = default;
+
+      /**
+       * @brief Integrates the form on the device and fills its vector.
+       * @param res Vector of the form.
+       * @param input Input data.
+       */
+      void execute(VectorType& res, const InputType& input) override
+      {
+        const size_t size = input.getFES().getSize();
+        SystemType system(
+          input.getFES().getMesh().getContext().getExecutionSpace(), size, 0);
+        for (const auto& lfi : input.getLFIs())
+          system.addVector(lfi, 0, Real(1));
+        const PetscInt n = static_cast<PetscInt>(size);
+        PetscErrorCode ierr =
+          PETSc::Assembly::VectorSetup(res).prepare({n, n, VECKOKKOS, false, false});
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+        system.finish(m_cache, nullptr, res);
+      }
+
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
+      Kokkos* copy() const noexcept override
+      {
+        return new Kokkos(*this);
+      }
+
+    private:
+      typename SystemType::CacheType m_cache;
+  };
+
+  /**
+   * @ingroup RodinAssembly
    * @brief Device assembly of a single field PETSc problem on a Kokkos mesh.
    *
    * The integrators of the problem, possibly negated, are integrated on the
    * device and handed to PETSc as coordinate lists in device memory. The
-   * value Dirichlet conditions are eliminated on the device, as the host
-   * assemblies do.
+   * Dirichlet and periodic conditions are imposed on the device, as the
+   * host assemblies do.
    *
-   * Preassembled forms, periodic conditions and identification conditions
-   * are not supported.
+   * The entries of the preassembled forms are copied from their PETSc
+   * objects and combined with the integrated ones.
    *
    * @tparam U Trial function on a resident Kokkos mesh.
    * @tparam V Test function on the same mesh.
@@ -1006,39 +1896,84 @@ namespace Rodin::Assembly
       }
 
     private:
+      /// @brief Whether the mesh is distributed over MPI processes.
+      static constexpr bool IsDistributed =
+        Context::IsMPI<typename FormLanguage::Traits<typename FormLanguage::Traits<
+          typename FormLanguage::Traits<U>::FESType>::MeshType>::ContextType>::value;
+
       void assemble(
         LinearSystemType& axb, const InputType& input, bool doMatrix, bool doVector)
       {
         auto& pb = input.getProblemBody();
         const auto& u = input.getTrialFunction();
         const auto& v = input.getTestFunction();
-        Internal::requireDevicePETScProblem(pb);
-        const size_t rows = v.getFiniteElementSpace().getSize();
-        const size_t cols = u.getFiniteElementSpace().getSize();
-        SystemType system(
-          u.getFiniteElementSpace().getMesh().getContext().getExecutionSpace(), rows,
-          cols);
+        const auto& trial = u.getFiniteElementSpace();
+        const auto& test = v.getFiniteElementSpace();
+        // The kernels number the local degrees of freedom, ghosts included.
+        size_t rows, cols;
+        if constexpr (IsDistributed)
+        {
+          rows = test.getLocalSize();
+          cols = trial.getLocalSize();
+        }
+        else
+        {
+          rows = test.getSize();
+          cols = trial.getSize();
+        }
+        SystemType system(trial.getMesh().getContext().getExecutionSpace(), rows, cols);
+        if constexpr (IsDistributed)
+        {
+          if (&trial.getMesh() != &test.getMesh() || rows != cols)
+          {
+            Alert::Exception()
+              << "A distributed device problem requires the trial and test "
+                 "functions to share their space."
+              << Alert::Raise;
+          }
+          system.distribute(Internal::COODistribution::of(trial));
+        }
         for (auto& dbc : pb.getDBCs())
         {
           if (dbc.getOperand().getUUID() == u.getUUID())
             system.fix(dbc, 0);
         }
+        for (auto& pbc : pb.getPBCs())
+        {
+          if (pbc.getOperand().getUUID() == u.getUUID())
+            system.identify(pbc, 0);
+        }
         // The matrix is still needed on the right-hand side to lift the
-        // fixed values.
-        if (doMatrix || system.hasFixed())
+        // constrained values.
+        if (doMatrix || system.hasConstraints())
         {
           for (const auto& lbfi : pb.getLocalBFIs())
             system.addMatrix(lbfi, 0, 0);
           for (const auto& gbfi : pb.getGlobalBFIs())
             system.addMatrix(gbfi, 0, 0);
+          for (const auto& bf : pb.getBFs())
+            system.addMatrix(bf.getOperator(), 0, 0);
         }
         // The problem reads a(u, v) + l(v) = 0, so b = -l.
         if (doVector)
         {
           for (const auto& lfi : pb.getLFIs())
             system.addVector(lfi, 0, Real(-1));
+          for (const auto& lf : pb.getLFs())
+            system.addVector(lf.getVector(), 0);
         }
-        Internal::prepareDeviceSystem(axb, rows, cols, doVector);
+        if constexpr (IsDistributed)
+        {
+          Index begin = 0, end = 0;
+          trial.getOwnershipRange(begin, end);
+          const size_t owned = end - begin;
+          Internal::prepareDeviceSystem(
+            axb, owned, test.getSize(), owned, trial.getSize(), doVector);
+        }
+        else
+        {
+          Internal::prepareDeviceSystem(axb, rows, cols, doVector);
+        }
         system.finish(m_cache, doMatrix ? axb.getOperator() : nullptr,
           doVector ? axb.getVector() : nullptr);
       }
@@ -1052,9 +1987,6 @@ namespace Rodin::Assembly
    *
    * Each field occupies a block of the system, at the offsets given by the
    * problem input, and the system is assembled as in the single field case.
-   *
-   * Preassembled forms, periodic conditions and identification conditions
-   * are not supported.
    */
   template <class U1, class U2, class U3, class... Us>
   class Kokkos<PETSc::Math::LinearSystem,
@@ -1173,7 +2105,6 @@ namespace Rodin::Assembly
           return static_cast<Index>(testOffsets[it->second]);
         };
 
-        Internal::requireDevicePETScProblem(pb);
         const size_t rows = input.getTotalTestSize();
         const size_t cols = input.getTotalTrialSize();
         const auto& u1 = input.getTrialFunctions().template get<0>().get();
@@ -1181,8 +2112,14 @@ namespace Rodin::Assembly
           u1.getFiniteElementSpace().getMesh().getContext().getExecutionSpace(), rows,
           cols);
         for (auto& dbc : pb.getDBCs())
-          system.fix(dbc, trialOffset(dbc.getOperand().getUUID()));
-        if (doMatrix || system.hasFixed())
+        {
+          const Index offset = trialOffset(dbc.getOperand().getUUID());
+          const auto master = dbc.getValueUUID();
+          system.fix(dbc, offset, master ? trialOffset(*master) : offset);
+        }
+        for (auto& pbc : pb.getPBCs())
+          system.identify(pbc, trialOffset(pbc.getOperand().getUUID()));
+        if (doMatrix || system.hasConstraints())
         {
           for (const auto& lbfi : pb.getLocalBFIs())
           {
@@ -1194,12 +2131,19 @@ namespace Rodin::Assembly
             system.addMatrix(gbfi, testOffset(gbfi.getTestFunction().getUUID()),
               trialOffset(gbfi.getTrialFunction().getUUID()));
           }
+          for (const auto& bf : pb.getBFs())
+          {
+            system.addMatrix(bf.getOperator(), testOffset(bf.getTestFunction().getUUID()),
+              trialOffset(bf.getTrialFunction().getUUID()));
+          }
         }
         // The problem reads a(u, v) + l(v) = 0, so b = -l.
         if (doVector)
         {
           for (const auto& lfi : pb.getLFIs())
             system.addVector(lfi, testOffset(lfi.getTestFunction().getUUID()), Real(-1));
+          for (const auto& lf : pb.getLFs())
+            system.addVector(lf.getVector(), testOffset(lf.getTestFunction().getUUID()));
         }
         Internal::prepareDeviceSystem(axb, rows, cols, doVector);
         system.finish(m_cache, doMatrix ? axb.getOperator() : nullptr,

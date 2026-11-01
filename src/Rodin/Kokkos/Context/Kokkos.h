@@ -83,7 +83,9 @@ namespace Rodin::Context
         "A Kokkos backend must select a Kokkos execution space.");
 
       /// Constructs the default distribution and execution instances.
-      Kokkos() = default;
+      Kokkos()
+        requires std::is_default_constructible_v<Distribution>
+      = default;
 
       /**
        * @brief Constructs a context from distribution and execution instances.

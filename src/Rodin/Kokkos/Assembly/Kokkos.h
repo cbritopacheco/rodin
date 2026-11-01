@@ -27,9 +27,12 @@
 
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Assembly/AssemblyBase.h"
+#include "Rodin/Assembly/ConstraintMap.h"
+#include "Rodin/Assembly/Sequential.h"
 #include "Rodin/Variational/BilinearForm.h"
 #include "Rodin/Variational/DirichletBC.h"
 #include "Rodin/Variational/LinearForm.h"
+#include "Rodin/Variational/PeriodicBC.h"
 #include "Rodin/Variational/Problem.h"
 #include "Rodin/Variational/Mult.h"
 #include "Rodin/Variational/UnaryMinus.h"
@@ -120,16 +123,304 @@ namespace Rodin::Assembly::Internal
   }
 
   /**
+   * @brief Constraints of a device system, resolved on the host.
+   *
+   * Value constraints are recorded as they are assembled. When an
+   * identification Dirichlet condition or a periodic condition is present,
+   * resolve() replays every condition, in order, in a host ConstraintMap,
+   * as the host assemblies do, and uploads the expansion of every degree
+   * of freedom on its masters.
+   *
+   * @tparam Backend Kokkos backend of the mesh context.
+   */
+  template <class Backend>
+  class DeviceConstraints
+  {
+    public:
+      /// @brief Mesh context.
+      using ContextType = ::Rodin::Context::Kokkos<::Rodin::Context::Local, Backend>;
+
+      /// @brief Execution space of the kernels.
+      using ExecutionSpace = typename ContextType::ExecutionSpaceType;
+
+      /// @brief Memory space of the expansions.
+      using MemorySpace = typename ContextType::MemorySpaceType;
+
+      /// @brief Device array.
+      template <class T>
+      using Array = ::Kokkos::View<T*, MemorySpace>;
+
+      /// @brief Expansions of the degrees of freedom on their masters.
+      struct Expansions
+      {
+        /// @brief Start of every expansion, followed by the entry count.
+        Array<Index> starts;
+
+        /// @brief Masters.
+        Array<Index> indices;
+
+        /// @brief Coefficients of the masters.
+        Array<Real> coefficients;
+
+        /// @brief Affine values of the identified degrees of freedom, zero
+        /// for the others.
+        Array<Real> values;
+
+        /// @brief Number of masters of a degree of freedom.
+        KOKKOS_INLINE_FUNCTION size_t count(Index i) const
+        {
+          return starts(i + 1) - starts(i);
+        }
+      };
+
+      /// @brief Identification constraints resolved on the host.
+      struct Resolved
+      {
+        /// @brief Expansions, empty when no degree of freedom stays identified.
+        Expansions expansions;
+
+        /// @brief Rows of the constraints of the identified rows, by
+        /// increasing row.
+        std::vector<Index> rows;
+
+        /// @brief Columns of the constraint rows.
+        std::vector<Index> cols;
+
+        /// @brief Values of the constraint rows.
+        std::vector<Real> values;
+
+        /// @brief Whether the right-hand side of each row is imposed, the
+        /// rows being fixed or identified.
+        std::vector<unsigned char> imposed;
+
+        /// @brief Whether some degree of freedom stays identified.
+        bool isExpanded() const
+        {
+          return expansions.starts.extent(0) > 0;
+        }
+      };
+
+      /**
+       * @brief Creates empty constraints.
+       * @param rows Number of rows of the system.
+       * @param size Number of degrees of freedom, the larger of the row
+       * and column counts.
+       */
+      DeviceConstraints(size_t rows, size_t size)
+        : m_rows(rows),
+          m_fixed(size, 0),
+          m_values(size, Real(0)),
+          m_constrained(false),
+          m_identified(false)
+      {}
+
+      /**
+       * @brief Assembles a Dirichlet condition and records its constraints.
+       * @param dbc Value or identification Dirichlet condition.
+       * @param offset Offset of the constrained space in the system.
+       * @param masterOffset Offset of the space of the masters of an
+       * identification.
+       */
+      void fix(
+        Variational::DirichletBCBase<Real>& dbc, size_t offset, size_t masterOffset)
+      {
+        using ValueDOFs = typename Variational::DirichletBCBase<Real>::ValueDOFs;
+        dbc.assemble();
+        m_conditions.push_back({&dbc, nullptr, offset, masterOffset});
+        const auto* dofs = std::get_if<ValueDOFs>(&dbc.getDOFs());
+        if (!dofs)
+        {
+          m_identified = true;
+          return;
+        }
+        for (const auto& [local, value] : *dofs)
+        {
+          m_fixed[offset + local] = 1;
+          m_values[offset + local] = value;
+          m_constrained = true;
+        }
+      }
+
+      /**
+       * @brief Assembles a periodic condition and records its constraints.
+       * @param pbc Periodic condition.
+       * @param offset Offset of the constrained space in the system.
+       */
+      void identify(Variational::PeriodicBCBase<Real>& pbc, size_t offset)
+      {
+        pbc.assemble();
+        m_conditions.push_back({nullptr, &pbc, offset, offset});
+        m_identified = true;
+      }
+
+      /// @brief Whether some degree of freedom is fixed.
+      bool isConstrained() const
+      {
+        return m_constrained;
+      }
+
+      /// @brief Whether some condition identifies degrees of freedom.
+      bool isIdentified() const
+      {
+        return m_identified;
+      }
+
+      /// @brief Whether each degree of freedom is fixed.
+      const std::vector<unsigned char>& getFixed() const
+      {
+        return m_fixed;
+      }
+
+      /**
+       * @brief Values of the fixed degrees of freedom, and of the
+       * identified ones once resolved.
+       */
+      const std::vector<Real>& getValues() const
+      {
+        return m_values;
+      }
+
+      /**
+       * @brief Replays the conditions in a host constraint map and uploads
+       * the expansions of the degrees of freedom identified after
+       * flattening.
+       *
+       * The fixed degrees of freedom are those of the flattened map, which
+       * may fix degrees of freedom identified on fixed masters.
+       */
+      Resolved resolve(const ExecutionSpace& execution)
+      {
+        using DBC = Variational::DirichletBCBase<Real>;
+        using Entry = typename ConstraintMap<Real>::Entry;
+        ConstraintMap<Real> map(m_fixed.size());
+        for (const auto& c : m_conditions)
+        {
+          if (c.pbc)
+          {
+            for (const auto& [slave, relation] : c.pbc->getDOFs())
+            {
+              std::vector<Entry> entries;
+              for (Index k = 0; k < static_cast<Index>(relation.first.size()); ++k)
+                entries.push_back({c.offset + relation.first[k], relation.second[k]});
+              map.setIdentification(c.offset + slave, entries);
+            }
+            continue;
+          }
+          if (const auto* dofs = std::get_if<typename DBC::ValueDOFs>(&c.dbc->getDOFs()))
+          {
+            for (const auto& [local, value] : *dofs)
+              map.setFixed(c.offset + local, value);
+            continue;
+          }
+          const auto& affine = c.dbc->getIdentificationValues();
+          for (const auto& [slave, relation] :
+            std::get<typename DBC::IdentifiedDOFs>(c.dbc->getDOFs()))
+          {
+            std::vector<Entry> entries;
+            for (Index k = 0; k < static_cast<Index>(relation.first.size()); ++k)
+              entries.push_back({c.masterOffset + relation.first[k], relation.second[k]});
+            const auto it = affine.find(slave);
+            map.setIdentification(
+              c.offset + slave, entries, it == affine.end() ? Real(0) : it->second);
+          }
+        }
+        if (!map.getIdentifiedRows().empty())
+          map.finalize();
+
+        const size_t size = map.size();
+        m_constrained = false;
+        for (size_t i = 0; i < size; ++i)
+        {
+          const bool fixed = map.isFixed(i);
+          m_fixed[i] = fixed;
+          m_values[i] = fixed ? map.getFixedValue(i) : Real(0);
+          m_constrained = m_constrained || fixed;
+        }
+        Resolved res;
+        if (map.getIdentifiedRows().empty())
+          return res;
+        res.imposed.assign(m_fixed.begin(), m_fixed.begin() + m_rows);
+        std::vector<Index> starts(size + 1, 0), indices;
+        std::vector<Real> coefficients, values(size, Real(0));
+        for (size_t i = 0; i < size; ++i)
+        {
+          for (const auto& e : map.expand(i))
+          {
+            indices.push_back(e.index);
+            coefficients.push_back(e.coefficient);
+          }
+          starts[i + 1] = indices.size();
+        }
+        for (const Index gs : map.getIdentifiedRows())
+        {
+          values[gs] = map.getIdentificationValue(gs);
+          // The value of an identified row is imposed with the fixed ones.
+          m_values[gs] = values[gs];
+          if (static_cast<size_t>(gs) >= m_rows)
+            continue;
+          res.imposed[gs] = 1;
+          res.rows.push_back(gs);
+          res.cols.push_back(gs);
+          res.values.push_back(Real(1));
+          for (const auto& e : map.expand(gs))
+          {
+            res.rows.push_back(gs);
+            res.cols.push_back(e.index);
+            res.values.push_back(-e.coefficient);
+          }
+        }
+        res.expansions.starts = upload(execution, starts, "Rodin expansion starts");
+        res.expansions.indices = upload(execution, indices, "Rodin expansion masters");
+        res.expansions.coefficients =
+          upload(execution, coefficients, "Rodin expansion coefficients");
+        res.expansions.values = upload(execution, values, "Rodin expansion values");
+        execution.fence("Rodin expansions");
+        return res;
+      }
+
+    private:
+      struct Condition
+      {
+        Variational::DirichletBCBase<Real>* dbc;
+        Variational::PeriodicBCBase<Real>* pbc;
+        size_t offset;
+        size_t masterOffset;
+      };
+
+      template <class T>
+      static Array<T> upload(
+        const ExecutionSpace& execution, const std::vector<T>& data, const char* label)
+      {
+        const Array<T> res(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+                             std::string(label)),
+          data.size());
+        ::Kokkos::deep_copy(execution, res,
+          ::Kokkos::View<const T*, ::Kokkos::HostSpace,
+            ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(data.data(), data.size()));
+        return res;
+      }
+
+      size_t m_rows;
+      std::vector<unsigned char> m_fixed;
+      std::vector<Real> m_values;
+      bool m_constrained;
+      bool m_identified;
+      std::vector<Condition> m_conditions;
+  };
+
+  /**
    * @brief Linear system assembled in device memory with value constraints
    * eliminated, then copied to Eigen.
    *
-   * The system is bitwise the one of the host assemblies. The nonzero
-   * entries of the local integrators, then of the global integrators, in
-   * rank order, followed by the entries of the preassembled forms make the
-   * list of matrix
-   * contributions. Rows of fixed degrees of freedom are dropped and become
-   * identity rows holding the fixed value, and the columns of fixed degrees
-   * of freedom move to the right-hand side. The contributions to every
+   * The system is the one of the host assemblies up to rounding, since the
+   * integrators sharing a pattern sum their local matrices in place and
+   * the multithreaded host assemblies sum in an order that depends on the
+   * thread count. The nonzero entries of the local integrators, then of
+   * the global integrators, in rank order, followed by the entries of the
+   * preassembled forms make the list of matrix contributions. Rows of fixed
+   * degrees of freedom are dropped and become identity rows holding the
+   * fixed value, and the columns of fixed degrees of freedom move to the
+   * right-hand side. The contributions to every
    * coefficient are summed in list order, as
    * Eigen::SparseMatrix::setFromTriplets() sums duplicates, and products
    * are rounded before being summed. The entries stay where the
@@ -137,7 +428,12 @@ namespace Rodin::Assembly::Internal
    * position, and only the compressed matrix and the right-hand side are
    * copied to the host.
    *
-   * Identification constraints are not supported.
+   * Identification constraints, from identification Dirichlet conditions
+   * and periodic conditions, are resolved on the host as in the host
+   * assemblies. Each contribution is then expanded on the device on the
+   * masters of its row and column, in rank order, the identified columns
+   * lifting their affine values to the right-hand side, and the identified
+   * rows become the rows of their constraints.
    *
    * @tparam Backend Kokkos backend of the mesh context.
    */
@@ -365,6 +661,47 @@ namespace Rodin::Assembly::Internal
         }
       };
 
+      /// @brief Constraints of the system.
+      using ConstraintsType = DeviceConstraints<Backend>;
+
+      /// @brief Expansions of the degrees of freedom on their masters.
+      using Expansions = typename ConstraintsType::Expansions;
+
+      /// @brief Numbers of expanded contributions.
+      struct Sizes
+      {
+        /// @brief Matrix or vector entries.
+        size_t entries = 0;
+
+        /// @brief Affine values lifted to the right-hand side.
+        size_t lifts = 0;
+
+        /// @brief Adds sizes.
+        KOKKOS_INLINE_FUNCTION Sizes& operator+=(const Sizes& other)
+        {
+          entries += other.entries;
+          lifts += other.lifts;
+          return *this;
+        }
+      };
+
+      /// @brief Expanded matrix contributions.
+      struct Lifted
+      {
+        /// @brief Contributions, followed by the rows of the identified
+        /// degrees of freedom.
+        Triplets triplets;
+
+        /// @brief Rows of the lifted affine values.
+        Array<Index> rows;
+
+        /// @brief Lifted affine values.
+        Array<Real> values;
+
+        /// @brief Number of lifts before every rank, followed by their count.
+        Array<Index> starts;
+      };
+
       /**
        * @brief Creates an empty system.
        * @param execution Execution space instance of the mesh.
@@ -375,34 +712,43 @@ namespace Rodin::Assembly::Internal
         : m_execution(execution),
           m_rows(rows),
           m_cols(cols),
-          m_fixed(std::max(rows, cols), 0),
-          m_values(std::max(rows, cols), Real(0)),
-          m_constrained(false)
+          m_constraints(rows, std::max(rows, cols))
       {}
 
       /**
-       * @brief Assembles a Dirichlet condition and fixes its degrees of
+       * @brief Assembles a Dirichlet condition and constrains its degrees of
        * freedom.
-       * @param dbc Value Dirichlet condition.
+       * @param dbc Value or identification Dirichlet condition.
+       * @param offset Offset of the constrained space in the system.
+       * @param masterOffset Offset of the space of the masters of an
+       * identification.
+       */
+      void fix(
+        Variational::DirichletBCBase<Real>& dbc, size_t offset, size_t masterOffset)
+      {
+        m_constraints.fix(dbc, offset, masterOffset);
+      }
+
+      /**
+       * @brief Assembles a Dirichlet condition whose masters, if any, are in
+       * the constrained space.
+       * @param dbc Value or identification Dirichlet condition.
        * @param offset Offset of the constrained space in the system.
        */
       void fix(Variational::DirichletBCBase<Real>& dbc, size_t offset)
       {
-        using ValueDOFs = typename Variational::DirichletBCBase<Real>::ValueDOFs;
-        dbc.assemble();
-        const auto* dofs = std::get_if<ValueDOFs>(&dbc.getDOFs());
-        if (!dofs)
-        {
-          Alert::Exception()
-            << "Identification conditions are not supported on Kokkos meshes."
-            << Alert::Raise;
-        }
-        for (const auto& [local, value] : *dofs)
-        {
-          m_fixed[offset + local] = 1;
-          m_values[offset + local] = value;
-          m_constrained = true;
-        }
+        fix(dbc, offset, offset);
+      }
+
+      /**
+       * @brief Assembles a periodic condition and identifies its degrees of
+       * freedom.
+       * @param pbc Periodic condition.
+       * @param offset Offset of the constrained space in the system.
+       */
+      void identify(Variational::PeriodicBCBase<Real>& pbc, size_t offset)
+      {
+        m_constraints.identify(pbc, offset);
       }
 
       /**
@@ -441,6 +787,9 @@ namespace Rodin::Assembly::Internal
 
       /**
        * @brief Adds the entries of a linear integrator to the right-hand side.
+       *
+       * The affine values lifted by the matrices added before are summed
+       * first, as the host assemblies lift them while adding the matrices.
        * @param lfi Integrator, possibly negated or scaled by a real.
        * @param row Offset of its test space.
        * @param sign Factor of the contributions.
@@ -449,7 +798,7 @@ namespace Rodin::Assembly::Internal
         const Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
       {
         const auto [integrator, s] = getDeviceIntegrator<Backend>(lfi, sign);
-        m_vectors.push_back({integrator, nullptr, row, s});
+        m_vectors.push_back({integrator, nullptr, row, s, m_matrices.size()});
       }
 
       /**
@@ -459,7 +808,7 @@ namespace Rodin::Assembly::Internal
        */
       void addVector(const Math::Vector<Real>& vec, Index row)
       {
-        m_vectors.push_back({nullptr, &vec, row, Real(1)});
+        m_vectors.push_back({nullptr, &vec, row, Real(1), m_matrices.size()});
       }
 
       /**
@@ -467,26 +816,38 @@ namespace Rodin::Assembly::Internal
        * @param A Matrix, built when not null.
        * @param b Right-hand side, built when not null.
        */
-      void finish(Math::SparseMatrix<Real>* A, Math::Vector<Real>* b) const
+      void finish(Math::SparseMatrix<Real>* A, Math::Vector<Real>* b)
       {
+        typename ConstraintsType::Resolved constraints;
+        if (m_constraints.isIdentified())
+          constraints = m_constraints.resolve(m_execution);
+        const bool expanded = constraints.isExpanded();
+        const bool constrained = m_constraints.isConstrained();
         Array<unsigned char> fixed;
         Array<Real> fixedValues;
-        if (m_constrained)
+        if (constrained || expanded)
         {
-          fixed = upload(m_fixed, "Rodin fixed DOFs");
-          fixedValues = upload(m_values, "Rodin fixed values");
+          fixed = upload(m_constraints.getFixed(), "Rodin fixed DOFs");
+          fixedValues = upload(m_constraints.getValues(), "Rodin fixed values");
         }
         // The identity rows come last, ranked by position.
-        const size_t diagonal = A && m_constrained ? std::min(m_rows, m_cols) : 0;
-        const bool eliminate = b && m_constrained;
+        const size_t diagonal = A && constrained ? std::min(m_rows, m_cols) : 0;
+        const bool eliminate = b && constrained;
         const auto coefficientRanks = [&](const Ranks& ranks) {
           return ranks.sorting(m_rows * m_cols);
         };
         Triplets triplets;
+        Lifted lifted;
+        std::vector<size_t> offsets;
         Listed coefficients, eliminated;
-        if (A || eliminate)
+        if (A || eliminate || (b && expanded))
         {
-          triplets = listMatrix();
+          triplets = listMatrix(offsets);
+          if (expanded)
+          {
+            lifted = expand(triplets, constraints);
+            triplets = lifted.triplets;
+          }
           listContributions(m_execution, m_rows, diagonal, triplets, fixed,
             coefficientRanks(triplets.ranks), triplets.ranks.sorting(m_rows),
             A != nullptr, eliminate, coefficients, eliminated);
@@ -498,15 +859,39 @@ namespace Rodin::Assembly::Internal
           const Array<Real> rhs(
             ::Kokkos::view_alloc(m_execution, std::string("Rodin right-hand side")),
             m_rows);
-          sumVectors(rhs);
-          if (m_constrained)
+          std::vector<Index> bounds;
+          if (expanded)
+            bounds = download(lifted.starts, offsets);
+          size_t done = 0;
+          const auto lift = [&](size_t matrices) {
+            if (!expanded || matrices <= done)
+              return;
+            const auto range = std::make_pair(
+              static_cast<size_t>(bounds[done]), static_cast<size_t>(bounds[matrices]));
+            done = matrices;
+            if (range.first < range.second)
+            {
+              addEntries(Array<Index>(::Kokkos::subview(lifted.rows, range)),
+                Array<Real>(::Kokkos::subview(lifted.values, range)), Ranks(), nullptr,
+                rhs);
+            }
+          };
+          sumVectors(rhs, expanded ? &constraints.expansions : nullptr, lift);
+          lift(m_matrices.size());
+          if (constrained)
           {
             accumulate(m_execution, eliminated.positions,
               group(m_execution, eliminated.keys, eliminated.positions,
                 triplets.ranks.sorting(m_rows)),
               Eliminated{triplets.values, triplets.cols, fixedValues}, rhs);
-            imposeFixed(m_execution, m_rows, fixed, fixedValues, rhs);
           }
+          if (expanded)
+          {
+            imposeFixed(m_execution, m_rows,
+              upload(constraints.imposed, "Rodin imposed DOFs"), fixedValues, rhs);
+          }
+          else if (constrained)
+            imposeFixed(m_execution, m_rows, fixed, fixedValues, rhs);
           b->resize(m_rows);
           ::Kokkos::deep_copy(m_execution, host(b->data(), m_rows), rhs);
         }
@@ -842,6 +1227,199 @@ namespace Rodin::Assembly::Internal
           });
       }
 
+      /**
+       * @brief Inverts the ranks of entries.
+       * @param count Number of entries.
+       * @returns Position of the entry of every rank.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      static Array<Index> order(
+        const ExecutionSpace& execution, size_t count, const Ranks& ranks)
+      {
+        const Array<Index> res(
+          ::Kokkos::view_alloc(
+            execution, ::Kokkos::WithoutInitializing, std::string("Rodin rank order")),
+          count);
+        ::Kokkos::parallel_for(
+          "Rodin::Assembly::Kokkos::rankOrder",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          KOKKOS_LAMBDA(const size_t e) { res(ranks(e)) = e; });
+        return res;
+      }
+
+      /**
+       * @brief Expands the matrix contributions on the masters of their rows
+       * and columns, in rank order.
+       * @param extra Number of entries reserved after the expanded ones.
+       * @param res Receives the contributions, without their ranks, and the
+       * lifted affine values.
+       *
+       * The nonzero contribution @f$ a @f$ of row @f$ i @f$ and column
+       * @f$ j @f$ becomes the contributions @f$ (c_r a) c_s @f$ of the
+       * masters @f$ r @f$ of @f$ i @f$ and @f$ s @f$ of @f$ j @f$, and lifts
+       * @f$ -(c_r a) d_j @f$ to row @f$ r @f$ when @f$ j @f$ has a nonzero
+       * affine value @f$ d_j @f$, as the host assemblies do.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      static void expandMatrix(const ExecutionSpace& execution, const Triplets& triplets,
+        const Expansions& x, size_t extra, Lifted& res)
+      {
+        const size_t size = triplets.size;
+        const auto rows = triplets.rows;
+        const auto cols = triplets.cols;
+        const auto values = triplets.values;
+        const auto positions = order(execution, size, triplets.ranks);
+        const auto sizes = KOKKOS_LAMBDA(const size_t k)->Sizes
+        {
+          Sizes c;
+          const Index e = positions(k);
+          if (values(e) == Real(0))
+            return c;
+          const size_t nr = x.count(rows(e));
+          c.entries = nr * x.count(cols(e));
+          c.lifts = x.values(cols(e)) != Real(0) ? nr : 0;
+          return c;
+        };
+        const auto policy = ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, size);
+        Sizes total;
+        ::Kokkos::parallel_reduce(
+          "Rodin::Assembly::Kokkos::countExpansions", policy,
+          KOKKOS_LAMBDA(const size_t k, Sizes& sum) { sum += sizes(k); }, total);
+        const auto allocate = [&](auto& array, size_t n, const char* label) {
+          using ArrayType = std::decay_t<decltype(array)>;
+          array = ArrayType(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+                              std::string(label)),
+            n);
+        };
+        res.triplets.size = total.entries + extra;
+        allocate(res.triplets.rows, res.triplets.size, "Rodin expanded rows");
+        allocate(res.triplets.cols, res.triplets.size, "Rodin expanded columns");
+        allocate(res.triplets.values, res.triplets.size, "Rodin expanded values");
+        allocate(res.rows, total.lifts, "Rodin lifted rows");
+        allocate(res.values, total.lifts, "Rodin lifted values");
+        allocate(res.starts, size + 1, "Rodin lifted starts");
+        const auto er = res.triplets.rows;
+        const auto ec = res.triplets.cols;
+        const auto ev = res.triplets.values;
+        const auto lr = res.rows;
+        const auto lv = res.values;
+        const auto ls = res.starts;
+        ::Kokkos::parallel_scan(
+          "Rodin::Assembly::Kokkos::expandMatrix", policy,
+          KOKKOS_LAMBDA(const size_t k, Sizes& update, const bool final) {
+            const Sizes c = sizes(k);
+            if (final)
+            {
+              ls(k) = update.lifts;
+              if (c.entries > 0)
+              {
+                const Index e = positions(k);
+                const Real v = values(e);
+                const Index r0 = x.starts(rows(e));
+                const Index c0 = x.starts(cols(e));
+                const size_t nr = x.count(rows(e));
+                const size_t nc = x.count(cols(e));
+                const Real d = x.values(cols(e));
+                for (size_t ri = 0; ri < nr; ++ri)
+                {
+                  const Real rv = x.coefficients(r0 + ri) * v;
+                  for (size_t ci = 0; ci < nc; ++ci)
+                  {
+                    const size_t q = update.entries + ri * nc + ci;
+                    er(q) = x.indices(r0 + ri);
+                    ec(q) = x.indices(c0 + ci);
+                    ev(q) = rv * x.coefficients(c0 + ci);
+                  }
+                  if (c.lifts > 0)
+                  {
+                    lr(update.lifts + ri) = x.indices(r0 + ri);
+                    lv(update.lifts + ri) = -(rv * d);
+                  }
+                }
+              }
+            }
+            update += c;
+          });
+        ::Kokkos::deep_copy(execution, ::Kokkos::subview(ls, size), total.lifts);
+      }
+
+      /**
+       * @brief Expands the vector contributions on the masters of their
+       * indices, in rank order.
+       * @param res Receives the indices and the contributions, by rank.
+       *
+       * The nonzero contribution @f$ a @f$ of index @f$ i @f$ becomes the
+       * contributions @f$ c_r a @f$ of the masters @f$ r @f$ of @f$ i @f$.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      static void expandVector(const ExecutionSpace& execution,
+        const Array<Index>& indices, const Array<Real>& values, const Ranks& ranks,
+        const Expansions& x, Array<Index>& resIndices, Array<Real>& resValues)
+      {
+        const size_t size = indices.extent(0);
+        const auto positions = order(execution, size, ranks);
+        const auto sizes = KOKKOS_LAMBDA(const size_t k)->size_t
+        {
+          const Index e = positions(k);
+          return values(e) != Real(0) ? x.count(indices(e)) : 0;
+        };
+        const auto policy = ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, size);
+        size_t total = 0;
+        ::Kokkos::parallel_reduce(
+          "Rodin::Assembly::Kokkos::countVectorExpansions", policy,
+          KOKKOS_LAMBDA(const size_t k, size_t& sum) { sum += sizes(k); }, total);
+        resIndices =
+          Array<Index>(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+                         std::string("Rodin expanded indices")),
+            total);
+        resValues =
+          Array<Real>(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+                        std::string("Rodin expanded contributions")),
+            total);
+        const auto ei = resIndices;
+        const auto ev = resValues;
+        ::Kokkos::parallel_scan(
+          "Rodin::Assembly::Kokkos::expandVector", policy,
+          KOKKOS_LAMBDA(const size_t k, size_t& update, const bool final) {
+            const size_t n = sizes(k);
+            if (final && n > 0)
+            {
+              const Index e = positions(k);
+              const Real v = values(e);
+              const Index r0 = x.starts(indices(e));
+              for (size_t ri = 0; ri < n; ++ri)
+              {
+                ei(update + ri) = x.indices(r0 + ri);
+                ev(update + ri) = x.coefficients(r0 + ri) * v;
+              }
+            }
+            update += n;
+          });
+      }
+
+      /**
+       * @brief Indices of a preassembled vector in the system.
+       * @param count Size of the vector. @param first Offset of its space.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      static Array<Index> sequence(
+        const ExecutionSpace& execution, size_t count, Index first)
+      {
+        const Array<Index> res(
+          ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+            std::string("Rodin preassembled indices")),
+          count);
+        ::Kokkos::parallel_for(
+          "Rodin::Assembly::Kokkos::sequence",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          KOKKOS_LAMBDA(const size_t i) { res(i) = first + i; });
+        return res;
+      }
+
     private:
       struct Matrix
       {
@@ -858,6 +1436,8 @@ namespace Rodin::Assembly::Internal
         const Math::Vector<Real>* vec;
         Index row;
         Real sign;
+        // Number of matrices added before.
+        size_t matrices;
       };
 
       template <class T>
@@ -897,15 +1477,17 @@ namespace Rodin::Assembly::Internal
        * @brief Integrates the local integrators and lists the matrix
        * contributions.
        */
-      Triplets listMatrix() const
+      Triplets listMatrix(std::vector<size_t>& offsets) const
       {
         std::vector<Segment> segments;
         std::vector<size_t> counts;
         size_t total = 0;
+        offsets.assign(1, 0);
         for (const auto& m : m_matrices)
         {
           const size_t count = m.integrator ? m.integrator->prepare() : m.op->nonZeros();
           counts.push_back(count);
+          offsets.push_back(total + count);
           if (count > 0)
           {
             segments.push_back({total, count,
@@ -1008,24 +1590,102 @@ namespace Rodin::Assembly::Internal
       }
 
       /**
+       * @brief Expands the matrix contributions and appends the rows of the
+       * identified degrees of freedom, as the host assemblies do.
+       */
+      Lifted expand(const Triplets& triplets,
+        const typename ConstraintsType::Resolved& constraints) const
+      {
+        Lifted res;
+        const size_t extra = constraints.rows.size();
+        expandMatrix(m_execution, triplets, constraints.expansions, extra, res);
+        const size_t count = res.triplets.size - extra;
+        const auto range = std::make_pair(count, res.triplets.size);
+        ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(res.triplets.rows, range),
+          host(constraints.rows.data(), extra));
+        ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(res.triplets.cols, range),
+          host(constraints.cols.data(), extra));
+        ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(res.triplets.values, range),
+          host(constraints.values.data(), extra));
+        // Every expanded contribution is kept, zero or not, as on the host.
+        std::vector<Segment> segments;
+        if (res.triplets.size > 0)
+          segments.push_back({0, res.triplets.size, 1, 0, true});
+        res.triplets.ranks = rank(segments, "Rodin expanded segments");
+        return res;
+      }
+
+      /**
+       * @brief Downloads the number of lifts before the contributions of
+       * every matrix.
+       * @param starts Number of lifts before every rank.
+       * @param offsets Rank of the first contribution of every matrix,
+       * followed by their count.
+       */
+      std::vector<Index> download(
+        const Array<Index>& starts, const std::vector<size_t>& offsets) const
+      {
+        std::vector<Index> res(offsets.size());
+        for (size_t k = 0; k < offsets.size(); ++k)
+        {
+          ::Kokkos::deep_copy(m_execution,
+            ::Kokkos::View<Index, ::Kokkos::HostSpace,
+              ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(&res[k]),
+            ::Kokkos::subview(starts, offsets[k]));
+        }
+        m_execution.fence("Rodin lifts");
+        return res;
+      }
+
+      /**
+       * @brief Adds listed contributions to the right-hand side, in rank
+       * order.
+       * @param x Expansions on the masters, or null.
+       */
+      void addEntries(const Array<Index>& indices, const Array<Real>& values,
+        const Ranks& ranks, const Expansions* x, const Array<Real>& rhs) const
+      {
+        if (x)
+        {
+          Array<Index> ei;
+          Array<Real> ev;
+          expandVector(m_execution, indices, values, ranks, *x, ei, ev);
+          addEntries(ei, ev, Ranks(), nullptr, rhs);
+          return;
+        }
+        const auto sorted = ranks.sorting(m_rows);
+        Array<Index> keys, positions;
+        listEntries(m_execution, indices, values, sorted, keys, positions);
+        accumulate(m_execution, positions, group(m_execution, keys, positions, sorted),
+          values, rhs);
+      }
+
+      /**
        * @brief Sums the linear integrators and the preassembled vectors into
        * the right-hand side, in the order they were added.
+       * @param x Expansions on the masters, or null.
+       * @param lift Sums the values lifted by a number of first matrices.
        */
-      void sumVectors(const Array<Real>& rhs) const
+      template <class Lift>
+      void sumVectors(const Array<Real>& rhs, const Expansions* x, const Lift& lift) const
       {
         for (size_t begin = 0; begin < m_vectors.size();)
         {
+          lift(m_vectors[begin].matrices);
           if (!m_vectors[begin].integrator)
           {
             const auto& v = m_vectors[begin++];
-            addDense(m_execution,
-              upload(v.vec->data(), static_cast<size_t>(v.vec->size()),
-                "Rodin preassembled vector"),
-              v.row, rhs);
+            const size_t count = static_cast<size_t>(v.vec->size());
+            const auto values = upload(v.vec->data(), count, "Rodin preassembled vector");
+            if (x)
+              addEntries(sequence(m_execution, count, v.row), values, Ranks(), x, rhs);
+            else
+              addDense(m_execution, values, v.row, rhs);
             continue;
           }
           size_t end = begin;
-          while (end < m_vectors.size() && m_vectors[end].integrator)
+          while (end < m_vectors.size() && m_vectors[end].integrator &&
+            m_vectors[end].matrices == m_vectors[begin].matrices)
             ++end;
           std::vector<Segment> segments;
           std::vector<size_t> counts;
@@ -1051,11 +1711,7 @@ namespace Rodin::Assembly::Internal
               shift(m_execution, offset, count, v.row, 0, indices, Array<Index>());
             offset += count;
           }
-          const auto ranks = rank(segments, "Rodin vector segments").sorting(m_rows);
-          Array<Index> keys, positions;
-          listEntries(m_execution, indices, values, ranks, keys, positions);
-          accumulate(m_execution, positions, group(m_execution, keys, positions, ranks),
-            values, rhs);
+          addEntries(indices, values, rank(segments, "Rodin vector segments"), x, rhs);
           begin = end;
         }
       }
@@ -1063,26 +1719,10 @@ namespace Rodin::Assembly::Internal
       ExecutionSpace m_execution;
       size_t m_rows;
       size_t m_cols;
-      std::vector<unsigned char> m_fixed;
-      std::vector<Real> m_values;
-      bool m_constrained;
+      ConstraintsType m_constraints;
       std::vector<Matrix> m_matrices;
       std::vector<Vector> m_vectors;
   };
-
-  /**
-   * @brief Rejects the problem terms without a device implementation.
-   * @param pb Problem body.
-   */
-  template <class ProblemBody>
-  void requireDeviceProblem(const ProblemBody& pb)
-  {
-    if (pb.getPBCs().size() > 0)
-    {
-      Alert::Exception() << "Periodic conditions are not supported on Kokkos meshes."
-                         << Alert::Raise;
-    }
-  }
 }
 
 namespace Rodin::Assembly
@@ -1270,11 +1910,9 @@ namespace Rodin::Assembly
    *
    * The local integrators and linear integrators of the problem, possibly
    * negated, are integrated on the device. Their entries, the preassembled
-   * forms and the value Dirichlet conditions are combined on the device,
-   * eliminating the constrained degrees of freedom as the host assemblies
-   * do, and only the system is copied to the host.
-   *
-   * Periodic conditions and identification conditions are not supported.
+   * forms and the Dirichlet and periodic conditions are combined on the
+   * device, eliminating the constrained degrees of freedom as the host
+   * assemblies do, and only the system is copied to the host.
    *
    * @tparam TrialFunction Trial function on a resident Kokkos mesh.
    * @tparam TestFunction Test function on the same mesh.
@@ -1352,7 +1990,6 @@ namespace Rodin::Assembly
         auto& pb = input.getProblemBody();
         const auto& u = input.getTrialFunction();
         const auto& v = input.getTestFunction();
-        Internal::requireDeviceProblem(pb);
         Internal::DeviceSystem<BackendType> system(
           u.getFiniteElementSpace().getMesh().getContext().getExecutionSpace(),
           v.getFiniteElementSpace().getSize(), u.getFiniteElementSpace().getSize());
@@ -1360,6 +1997,11 @@ namespace Rodin::Assembly
         {
           if (dbc.getOperand().getUUID() == u.getUUID())
             system.fix(dbc, 0);
+        }
+        for (auto& pbc : pb.getPBCs())
+        {
+          if (pbc.getOperand().getUUID() == u.getUUID())
+            system.identify(pbc, 0);
         }
         for (const auto& lbfi : pb.getLocalBFIs())
           system.addMatrix(lbfi, 0, 0);
@@ -1409,9 +2051,8 @@ namespace Rodin::Assembly
    * Each field occupies a block of the system, at the offsets given by the
    * problem input. Integrators are integrated on the device and their entries
    * are shifted to the blocks of their trial and test functions, then the
-   * constraints are eliminated as in the single field assembly.
-   *
-   * Periodic conditions and identification conditions are not supported.
+   * constraints are eliminated as in the single field assembly. The masters
+   * of an identification Dirichlet condition may belong to another field.
    */
   template <class U1, class U2, class U3, class... Us>
   class Kokkos<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>,
@@ -1497,13 +2138,18 @@ namespace Rodin::Assembly
           return static_cast<Index>(testOffsets[it->second]);
         };
 
-        Internal::requireDeviceProblem(pb);
         const auto& u1 = input.getTrialFunctions().template get<0>().get();
         Internal::DeviceSystem<BackendType> system(
           u1.getFiniteElementSpace().getMesh().getContext().getExecutionSpace(),
           input.getTotalTestSize(), input.getTotalTrialSize());
         for (auto& dbc : pb.getDBCs())
-          system.fix(dbc, trialOffset(dbc.getOperand().getUUID()));
+        {
+          const Index offset = trialOffset(dbc.getOperand().getUUID());
+          const auto master = dbc.getValueUUID();
+          system.fix(dbc, offset, master ? trialOffset(*master) : offset);
+        }
+        for (auto& pbc : pb.getPBCs())
+          system.identify(pbc, trialOffset(pbc.getOperand().getUUID()));
         for (const auto& lbfi : pb.getLocalBFIs())
         {
           system.addMatrix(lbfi, testOffset(lbfi.getTestFunction().getUUID()),
@@ -1514,14 +2160,16 @@ namespace Rodin::Assembly
           system.addMatrix(gbfi, testOffset(gbfi.getTestFunction().getUUID()),
             trialOffset(gbfi.getTrialFunction().getUUID()));
         }
+        // The problem reads a(u, v) + l(v) = 0, so b = -l. The host adds the
+        // linear integrators before the preassembled forms, which matters
+        // for the values they lift.
+        for (const auto& lfi : pb.getLFIs())
+          system.addVector(lfi, testOffset(lfi.getTestFunction().getUUID()), Real(-1));
         for (const auto& bf : pb.getBFs())
         {
           system.addMatrix(bf.getOperator(), testOffset(bf.getTestFunction().getUUID()),
             trialOffset(bf.getTrialFunction().getUUID()));
         }
-        // The problem reads a(u, v) + l(v) = 0, so b = -l.
-        for (const auto& lfi : pb.getLFIs())
-          system.addVector(lfi, testOffset(lfi.getTestFunction().getUUID()), Real(-1));
         for (const auto& lf : pb.getLFs())
           system.addVector(lf.getVector(), testOffset(lf.getTestFunction().getUUID()));
         system.finish(&axb.getOperator(), &axb.getVector());
@@ -1770,6 +2418,9 @@ namespace Rodin::Assembly
        * @param attributes Essential attributes; empty selects the boundary.
        * @param f Face index.
        * @return Whether the face carries the condition.
+       *
+       * On a distributed mesh, a ghost face incident to one local cell may
+       * be interior, so the boundary is read from the owned faces.
        */
       template <class AttributeView>
       KOKKOS_INLINE_FUNCTION static bool isConstrained(
@@ -1778,7 +2429,10 @@ namespace Rodin::Assembly
       {
         const Index d = view.getDimension();
         if (attributes.extent(0) == 0)
-          return view.getConnectivity().getIncidence(d - 1, d, f).size() == 1;
+        {
+          return view.isOwned(d - 1, f) &&
+            view.getConnectivity().getIncidence(d - 1, d, f).size() == 1;
+        }
         const auto face = view.getPolytope(d - 1, f);
         return ::Rodin::Kokkos::Variational::isSelected(face, attributes);
       }
@@ -1794,11 +2448,92 @@ namespace Rodin::Assembly
   };
 
   /**
+   * @ingroup RodinAssembly
+   * @brief Identification Dirichlet condition @f$ u = A(v) @f$ on a Kokkos
+   * space.
+   *
+   * The coefficients are the slave degrees of freedom functionals applied to
+   * the master basis, evaluated on the host from the host finite elements of
+   * the device space. This is the host algorithm, so the coefficients are
+   * identical.
+   *
+   * @tparam Solution Solution variable type.
+   * @tparam FES1 Device space of the slave function.
+   * @tparam Derived2 Type of @f$ A(v) @f$.
+   * @tparam FES2 Space of the master function.
+   * @tparam Sp Shape function space type of @f$ A(v) @f$.
+   */
+  template <class Solution, class FES1, class Derived2, class FES2,
+    Variational::ShapeFunctionSpaceType Sp>
+    requires ::Rodin::Kokkos::Variational::DeviceSpace<FES1>
+  class Kokkos<IndexMap<std::pair<IndexArray, Math::Vector<Real>>>,
+    Variational::DirichletBC<Variational::TrialFunction<Solution, FES1>,
+      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+    final : public AssemblyBase<IndexMap<std::pair<IndexArray, Math::Vector<Real>>>,
+              Variational::DirichletBC<Variational::TrialFunction<Solution, FES1>,
+                Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+  {
+    public:
+      /// @brief Slave to master coefficients.
+      using OutputType = IndexMap<std::pair<IndexArray, Math::Vector<Real>>>;
+
+      /// @brief Dirichlet condition type.
+      using DirichletBCType =
+        Variational::DirichletBC<Variational::TrialFunction<Solution, FES1>,
+          Variational::ShapeFunctionBase<Derived2, FES2, Sp>>;
+
+      /// @brief Parent class.
+      using Parent = AssemblyBase<OutputType, DirichletBCType>;
+
+      /// @brief Input type.
+      using InputType = typename Parent::InputType;
+
+      /// @brief Default constructor.
+      Kokkos() = default;
+
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      Kokkos(const Kokkos& other)
+        : Parent(other)
+      {}
+
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      Kokkos(Kokkos&& other)
+        : Parent(std::move(other))
+      {}
+
+      /**
+       * @brief Computes the identification coefficients.
+       * @param res Slave degrees of freedom and their master coefficients.
+       * @param input Boundary condition input.
+       */
+      void execute(OutputType& res, const InputType& input) override
+      {
+        Sequential<OutputType, DirichletBCType>().execute(res, input);
+      }
+
+      /**
+       * @brief Copies the assembly.
+       * @return Copy.
+       */
+      Kokkos* copy() const noexcept override
+      {
+        return new Kokkos(*this);
+      }
+  };
+
+  /**
    * @brief Default assembly for a test space on a Kokkos mesh.
+   * @tparam Host Host context of the mesh, local or distributed.
    * @tparam Backend Kokkos backend of the mesh context.
    */
-  template <class Backend>
-  class Default<Context::Kokkos<Context::Local, Backend>>
+  template <class Host, class Backend>
+  class Default<Context::Kokkos<Host, Backend>>
   {
     public:
       /**
@@ -1812,11 +2547,11 @@ namespace Rodin::Assembly
 
   /**
    * @brief Default assembly for trial and test spaces on Kokkos meshes.
+   * @tparam Host Host context of both meshes, local or distributed.
    * @tparam Backend Kokkos backend of both mesh contexts.
    */
-  template <class Backend>
-  class Default<Context::Kokkos<Context::Local, Backend>,
-    Context::Kokkos<Context::Local, Backend>>
+  template <class Host, class Backend>
+  class Default<Context::Kokkos<Host, Backend>, Context::Kokkos<Host, Backend>>
   {
     public:
       /**

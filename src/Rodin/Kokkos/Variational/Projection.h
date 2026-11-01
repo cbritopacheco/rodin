@@ -61,6 +61,17 @@ namespace Rodin::Kokkos::Variational
     /// @brief Device copy of the callable.
     F f;
   };
+
+  /// @brief Device predicate selecting every polytope of a projection.
+  struct SelectAll
+  {
+    /// @param p Device polytope. @return true.
+    KOKKOS_INLINE_FUNCTION
+    bool operator()([[maybe_unused]] const Geometry::PolytopeView& p) const
+    {
+      return true;
+    }
+  };
 }
 
 namespace Rodin::Variational
@@ -76,7 +87,9 @@ namespace Rodin::Variational
    * freedom outside the selection keep their values.
    *
    * The source is a function expression with a device lowering, a callable
-   * taking a const Rodin::Kokkos::Geometry::PointView&, or a constant.
+   * taking a const Rodin::Kokkos::Geometry::PointView&, or a constant. A
+   * device predicate, callable on a const Rodin::Kokkos::Geometry::PolytopeView&
+   * and returning bool, further restricts the selected polytopes.
    *
    * @tparam Backend Kokkos backend of the mesh context.
    */
@@ -95,6 +108,11 @@ namespace Rodin::Variational
     /// @brief Memory space of the mesh context.
     using MemorySpace = typename MeshType::MemorySpace;
 
+    /// @brief Tells whether a callable is a device predicate on polytopes.
+    template <class Pred>
+    static constexpr bool IsPredicate = std::is_invocable_r_v<bool, const Pred&,
+      const ::Rodin::Kokkos::Geometry::PolytopeView&>;
+
     /**
      * @brief Projects a source on a grid function.
      * @param gf Grid function of a device space.
@@ -102,10 +120,12 @@ namespace Rodin::Variational
      * @param fn Source to evaluate.
      * @param attrs Mesh attributes selecting the region; empty selects it
      * all.
+     * @param select Device predicate selecting the polytopes.
      */
-    template <class GridFunction, class Function>
+    template <class GridFunction, class Function,
+      class Select = ::Rodin::Kokkos::Variational::SelectAll>
     static void project(GridFunction& gf, Geometry::Region region, const Function& fn,
-      const FlatSet<Geometry::Attribute>& attrs)
+      const FlatSet<Geometry::Attribute>& attrs, const Select& select = {})
     {
       const auto& fes = gf.getFiniteElementSpace();
       const auto& mesh = fes.getMesh();
@@ -134,8 +154,8 @@ namespace Rodin::Variational
       ::Kokkos::View<Real*, MemorySpace> values(
         ::Kokkos::view_alloc(execution, std::string("Rodin projection values")),
         stride * vdim);
-      evaluate(execution, mesh.getDeviceView(), region, d, attributes, owners, values,
-        lower(fn, vdim), dofs, mesh.getPolytopeCount(d), vdim);
+      evaluate(execution, mesh.getDeviceView(), region, d, attributes, select, owners,
+        values, lower(fn, vdim), dofs, mesh.getPolytopeCount(d), vdim);
 
       const auto hostOwners = ::Kokkos::create_mirror_view(owners);
       const auto hostValues = ::Kokkos::create_mirror_view(values);
@@ -216,6 +236,7 @@ namespace Rodin::Variational
      * @param region Region on which to project.
      * @param d Dimension of the polytopes of the region.
      * @param attributes Selected attributes; empty selects the whole region.
+     * @param select Device predicate selecting the polytopes.
      * @param owners One plus the largest selected polytope of every scalar
      * degree of freedom, zero when none is.
      * @param values Value of component r of the degree of freedom i at
@@ -229,10 +250,10 @@ namespace Rodin::Variational
      * is not readable on the host. Public as the enclosing function of
      * device lambdas.
      */
-    template <class AttributeView, class ValueView, class DOFs>
+    template <class AttributeView, class Select, class ValueView, class DOFs>
     static void evaluate(const ExecutionSpace& execution,
       const ::Rodin::Kokkos::Geometry::MeshView& view, Geometry::Region region, Index d,
-      const AttributeView& attributes,
+      const AttributeView& attributes, const Select& select,
       const ::Kokkos::View<Index*, MemorySpace>& owners,
       const ::Kokkos::View<Real*, MemorySpace>& values, const ValueView& value,
       const DOFs& dofs, Index count, Index vdim)
@@ -245,7 +266,8 @@ namespace Rodin::Variational
         "Rodin projection owners", policy, KOKKOS_LAMBDA(Index i) {
           const auto polytope = view.getPolytope(d, i);
           if (!::Rodin::Kokkos::Variational::isIntegrated(
-                view, region, polytope, attributes))
+                view, region, polytope, attributes) ||
+            !select(polytope))
             return;
           const auto indices = dofs.bind(polytope);
           for (Index q = 0; q < indices.size(); ++q)
@@ -255,7 +277,8 @@ namespace Rodin::Variational
         "Rodin projection values", policy, KOKKOS_LAMBDA(Index i) {
           const auto polytope = view.getPolytope(d, i);
           if (!::Rodin::Kokkos::Variational::isIntegrated(
-                view, region, polytope, attributes))
+                view, region, polytope, attributes) ||
+            !select(polytope))
             return;
           const auto indices = dofs.bind(polytope);
           for (Index q = 0; q < indices.size(); ++q)

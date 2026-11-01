@@ -287,6 +287,20 @@ namespace Rodin::Variational
 
       using Parent::Parent;
 
+      /**
+       * @brief Restricts the integration to mesh attributes, as the parent
+       * over().
+       * @param[in] attrs Attribute, attributes or set of attributes of the
+       * integrated polytopes.
+       * @return Reference to this integrator, which keeps its device type.
+       */
+      template <class... Attributes>
+      LinearElasticityIntegrator& over(const Attributes&... attrs)
+      {
+        Parent::over(attrs...);
+        return *this;
+      }
+
       /// @brief Copies the integrator. @return Heap allocated copy.
       LinearElasticityIntegrator* copy() const noexcept override
       {
@@ -318,6 +332,20 @@ namespace Rodin::Variational
         LambdaDerived, MuDerived>;
 
       using Parent::Parent;
+
+      /**
+       * @brief Restricts the integration to mesh attributes, as the parent
+       * over().
+       * @param[in] attrs Attribute, attributes or set of attributes of the
+       * integrated polytopes.
+       * @return Reference to this integrator, which keeps its device type.
+       */
+      template <class... Attributes>
+      LinearElasticityIntegrator& over(const Attributes&... attrs)
+      {
+        Parent::over(attrs...);
+        return *this;
+      }
 
       /// @brief Copies the integrator. @return Heap allocated copy.
       LinearElasticityIntegrator* copy() const noexcept override

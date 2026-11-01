@@ -177,8 +177,8 @@ namespace Rodin::Tests::Unit
     dg.getData() = hg.getData();
 
     expectSameForm(hu, hv, BoundaryIntegral(hu, hv), du, dv, BoundaryIntegral(du, dv));
-    expectSameForm(hu, hv, restricted(FaceIntegral(hu, hv), 2), du, dv,
-      restricted(FaceIntegral(du, dv), 2));
+    expectSameForm(
+      hu, hv, FaceIntegral(hu, hv).over(2), du, dv, FaceIntegral(du, dv).over(2));
     expectSameLinearForm(hv, BoundaryIntegral(hf, hv), dv, BoundaryIntegral(df, dv));
     expectSameLinearForm(hv, InterfaceIntegral(hg, hv), dv, InterfaceIntegral(dg, dv));
   }

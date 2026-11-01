@@ -93,18 +93,14 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     BilinearForm ha(hu, hv);
-    auto hak = Integral(Grad(hu), Grad(hv));
-    hak.over(1);
-    auto ham = Integral(hu, hv);
-    ham.over(2);
-    ha = hak + ham;
+    // NVCC with GCC rejects a deduced Integral(Grad(u), Grad(v)).over(1) as the
+    // first term of a sum, see doc/agents/backend-support.md.
+    ha = Integral(hu, hv).over(2) + Integral(Grad(hu), Grad(hv)).over(1);
     ha.assemble();
     BilinearForm da(du, dv);
-    auto dak = Integral(Grad(du), Grad(dv));
-    dak.over(1);
-    auto dam = Integral(du, dv);
-    dam.over(2);
-    da = dak + dam;
+    static_assert(std::is_same_v<decltype(Integral(Grad(du), Grad(dv)).over(1)),
+      decltype(Integral(Grad(du), Grad(dv)))&>);
+    da = Integral(du, dv).over(2) + Integral(Grad(du), Grad(dv)).over(1);
     da.assemble();
     expectSameOperator(ha.getOperator(), da.getOperator());
   }

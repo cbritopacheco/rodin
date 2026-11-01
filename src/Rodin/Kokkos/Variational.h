@@ -19,6 +19,7 @@
 #include "Variational/DeviceView.h"
 #include "Variational/Integral.h"
 #include "Variational/LinearElasticityIntegral.h"
+#include "Variational/InternalVirtualWork.h"
 #include "Variational/Potential.h"
 #include "Variational/Projection.h"
 

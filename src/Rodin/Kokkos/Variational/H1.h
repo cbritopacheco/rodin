@@ -944,6 +944,21 @@ namespace Rodin::Variational
           std::integral_constant<size_t, K>{}, mesh);
       }
 
+      /**
+       * @brief Gets the pullback of a callable on a polytope, as on the host.
+       * @param[in] idx Pair of dimension and polytope index.
+       * @param[in] v Callable of the physical points.
+       * @return Callable of the reference coordinates.
+       */
+      template <class Callable>
+      auto getPullback(const std::pair<size_t, Index>& idx, Callable&& v) const
+      {
+        using Pullback = typename H1<K, RangeType,
+          Geometry::Mesh<Context::Local>>::template Pullback<Callable>;
+        const auto& [d, i] = idx;
+        return Pullback(*getMesh().getPolytope(d, i), std::forward<Callable>(v));
+      }
+
       /// @brief Gets the device degrees of freedom. @return Device numbering and basis.
       const DOFsType& getDeviceDOFs() const
       {
@@ -1135,6 +1150,21 @@ namespace Rodin::Variational
       {
         return H1<K, RangeType, Geometry::Mesh<Context::Local>>(
           std::integral_constant<size_t, K>{}, mesh, m_vdim);
+      }
+
+      /**
+       * @brief Gets the pullback of a callable on a polytope, as on the host.
+       * @param[in] idx Pair of dimension and polytope index.
+       * @param[in] v Callable of the physical points.
+       * @return Callable of the reference coordinates.
+       */
+      template <class Callable>
+      auto getPullback(const std::pair<size_t, Index>& idx, Callable&& v) const
+      {
+        using Pullback = typename H1<K, RangeType,
+          Geometry::Mesh<Context::Local>>::template Pullback<Callable>;
+        const auto& [d, i] = idx;
+        return Pullback(*getMesh().getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /// @brief Gets the device degrees of freedom. @return Scalar device numbering and basis.

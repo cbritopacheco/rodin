@@ -31,6 +31,10 @@ coeurs).
 - [x] MPI: OpenMPI 5.0.10 (apt, `/usr/bin/mpicc`, seul MPI; `/bin` est un
       lien vers `/usr/bin`). Pas CUDA-aware
       (`opal_built_with_cuda_support:value:false`).
+- [x] OpenMPI 5.0.11 CUDA-aware dans `/opt/openmpi`, PETSc 3.26
+      `arch-cuda-kokkos-ompi` (prefix `~/Documents/petsc-kokkos-ompi-install`),
+      Boost 1.90 (`~/Documents/boost-1.90-ompi-install`), build Rodin
+      `build-mpi` (`RODIN_USE_MPI=ON`).
 - [x] CMake 4.2.3: exporter `CMAKE_POLICY_VERSION_MINIMUM=3.5`.
 - [x] 112 coeurs, 750 Go de RAM: `-j64`.
 
@@ -304,10 +308,12 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       gardent leur valeur. Tests `RodinKokkosVariationalProjectionTest`
       (P1, H1 degrés 2 et 3, scalaire et vectoriel) comparés a l'hôte a
       1e-12.
-- [ ] Projection device avec un prédicat: `project(region, f, pred)` prend
-      un prédicat hôte sur `Geometry::Polytope` et reste sur le chemin hôte.
-- [ ] `project(region, f, 2)`: un attribut entier choisit la surcharge a
-      prédicat, il faut écrire `Geometry::Attribute(2)`.
+- [x] Projection device avec un prédicat: `project(region, f, pred)` avec
+      un `KOKKOS_LAMBDA` sur `const Kokkos::Geometry::PolytopeView&`
+      évalué dans le noyau de projection; un prédicat hôte sur
+      `Geometry::Polytope` reste sur le chemin hôte.
+- [x] `project(region, f, 2)`: les surcharges a prédicat sont contraintes,
+      un attribut entier choisit la surcharge `Geometry::Attribute`.
 
 ## 9. DSL device, jalon 4: formes linéaires
 
@@ -344,7 +350,8 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       UUID): intégrateurs locaux et linéaires sur device, formes
       préassemblées, élimination des valeurs de Dirichlet et matrice
       compressée sur le device (`DeviceSystem`, section 16), identiques
-      bit à bit aux assemblages hôtes.
+      aux assemblages hôtes aux arrondis près (l'hôte OpenMP somme dans un
+      ordre qui dépend de `OMP_NUM_THREADS`, écart de l'ordre de 1e-15).
 - [x] `DeviceSystem` partagé par les assemblages de formes et de
       problèmes.
 - [x] Tests `RodinKokkosVariationalProblemTest` comparés a l'hôte a 1e-12:
@@ -360,15 +367,15 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       sinon. Tests `RodinKokkosVariationalPotentialTest` et
       `Kokkos_PETSc_Problem.PotentialOnMixedMesh` comparés a l'hôte a
       1e-12 (triangles, tétraèdres, mixte, noyau singulier, négation).
-- [ ] Non supportés sur device: conditions périodiques et
-      d'identification (`DirichletBC(u, A(v))`), qui lèvent une
-      exception.
-- [ ] L'hôte n'a pas d'opérateur binaire `local - global` entre
-      intégrateurs bilinéaires: il faut écrire `a + -Integral(Potential(k,
-      u), v)`, et `BilinearForm` n'a que `+=` pour les globaux.
-- [ ] `DirichletBC::on(1, 3)` avec des littéraux `int` ne compile pas
-      sous nvcc (conversion rétrécissante dans `FlatSet<Attribute>{a1,
-      a2, as...}`); les tests passent un `FlatSet<Geometry::Attribute>`.
+- [x] Conditions périodiques et d'identification (`DirichletBC(u, A(v))`)
+      sur device, Eigen (`DeviceSystem`) et PETSc (`DeviceCOOSystem`), via
+      `DeviceConstraints`. Tests `RodinKokkosVariationalConstraintTest` et
+      `Kokkos_PETSc_Problem.ConstraintsOnTriangles`.
+- [x] Opérateurs `local - global`, `liste - global` et `corps - global`;
+      `BilinearForm` accepte `=` pour les globaux, et `=` remplace
+      désormais tous les intégrateurs (locaux et globaux).
+- [x] `DirichletBC::on(1, 3)` et `over(1, 3)` avec des littéraux `int`:
+      chaque attribut est converti explicitement en `Geometry::Attribute`.
 - [x] Performance: l'élimination et `setFromTriplets` sont faits sur le
       device (section 16).
 
@@ -392,9 +399,25 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       l'assemblage device Eigen (Poisson, Stokes mixte), réassemblage sans
       nouvelle analyse du motif, cibles LHS et RHS, résolution CG Jacobi
       sur GPU comparée a SparseLU.
-- [ ] Formes PETSc préassemblées dans un problème device: lèvent une
-      exception.
-- [ ] MPI (`Context::Kokkos<MPI, B>`) non supporté.
+- [x] Formes PETSc préassemblées dans un problème device (simple champ et
+      multi-champs): `BilinearForm` et `LinearForm` PETSc device autonomes
+      (`MATSEQAIJKOKKOS`, `VECSEQKOKKOS`), entrées recopiées depuis les
+      objets PETSc et combinées aux intégrateurs. Test
+      `Kokkos_PETSc_Problem.PreassembledOnTriangles`.
+- [x] MPI v1 (`Context::Kokkos<MPI, B>`, cible `Rodin::KokkosMPI`,
+      `Rodin/Kokkos/MPI.h`): `Mesh<Kokkos<MPI, B>>` rend le shard d'un
+      `Mesh<MPI>` résident (numérotation locale, fantômes compris) et marque
+      les entités possédées dans la vue device; les intégrateurs ne visitent
+      que les polytopes possédés. `P1<R, Mesh<Kokkos<MPI, B>>>`: membres hôte
+      globaux (comme le P1 MPI hôte), membres device locaux. Problème PETSc
+      simple champ assemblé sur le device en indices globaux
+      (`MATMPIAIJKOKKOS`, COO `VecSetValuesCOO` pour le second membre),
+      Dirichlet synchronisé par Vec fantôme (fixé partout dès qu'un
+      processus le fixe). GridFunction PETSc en Vec Kokkos fantôme. Test
+      `RodinKokkosMPIPoissonTest_np{1,2,4}` (build-mpi) contre l'hôte MPI.
+- [ ] MPI: PBC, formes préassemblées, multi-champs, H1<2>, P0g et systèmes
+      Eigen non distribués; vues device de `GridFunction<..., ::Vec>` non
+      supportées.
 
 ## 12. DSL device, jalon 7: benchmark Oseen
 
@@ -470,8 +493,8 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       tétraèdres), erreur sans faces. Problèmes Robin/Neumann et
       élasticité avec traction normale dans `RodinKokkosVariationalProblemTest`
       et `RodinKokkosPETScProblemTest`.
-- [ ] `.over()` renvoie la base de l'intégrateur: les tests passent par une
-      copie typée pour garder le type device.
+- [x] `.over()` des intégrales device renvoie le type device (surcharge
+      dans chaque classe finale).
 - [x] `Dot` de deux fonctions sur device (par exemple `Dot(Grad(g), n)`
       comme coefficient). `Grad`, `Jacobian` et `Div` d'une GridFunction
       évalués sur une face le sont dans la maille incidente, comme l'hôte:
@@ -507,12 +530,33 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
 - [x] `DeviceView<Zero>` scalaire et vectoriel, pour `DirichletBC(u, Zero())`.
 - [x] Correctif hôte: `Zero<SpatialVector>::getDimension()` manquait, et
       `VectorFunctionBase::getDimension()` se rappelait à l'infini.
-- [ ] Une directive `using namespace Rodin;` globale rend `Kokkos` ambigu
-      dans les en-têtes Kokkos sous nvcc: les exemples la placent dans
-      `main`.
-- [ ] Non portés: `BlockGravity` et `CantileverBeam` (néo-hookéen et
-      Newton, hôte seulement), `Darcy` (vide), `NavierStokes` et les
-      autres thèmes. `Stokes` est porté au jalon 10.
+- [x] Une directive `using namespace Rodin;` globale rend `Kokkos` ambigu
+      dans les en-têtes Kokkos sous nvcc (`using namespace Kokkos;` de
+      `Kokkos_CopyViews.hpp` résolu a l'instanciation). Inhérent au nom
+      `Rodin::Kokkos`: documenté dans le guide Kokkos, la directive se met
+      dans une fonction.
+- [x] Portés: `BlockGravity` et `CantileverBeam`
+      (`examples/Kokkos/Solid`, noyau device néo-hookéen
+      `Kokkos/Variational/InternalVirtualWork.h`) et `NavierStokes`
+      (`examples/Kokkos/PDEs/NavierStokes.cpp`). `Stokes` est porté au
+      jalon 10.
+- [x] `NavierStokes` device plus lent que l'hôte (1272 s contre 974 s):
+      l'assemblage est 2 fois plus rapide sur le device, mais SparseLU
+      domine. Pression passée de `P1` à `H1<1>` comme sur l'hôte: même
+      espace, numérotation différente, et COLAMD remplissait davantage
+      (60 s contre 44 s pour 100 pas).
+- [ ] Eigen n'est pas vectorisé dans une unité compilée par nvcc
+      (`EIGEN_GPUCC` coupe `EIGEN_VECTORIZE`): SparseLU seul sur la même
+      matrice, 9.7 s sous nvcc contre 7.9 s sous g++. Pistes: instancier
+      les solveurs Eigen dans une unité g++, ou résoudre sur le GPU.
+- [ ] `Darcy` reste vide côté hôte, rien a porter.
+- [ ] Néo-hookéen device seulement: les autres lois de
+      `Solid::InternalVirtualWork` restent hôte.
+- [x] Bogue cudafe++ (nvcc 13.1, gcc 14): `Integral(Grad(u), Grad(v)).over(1)`
+      en premier terme d'une somme est mal parenthésé; le mettre ailleurs
+      dans la somme. Contraintes nvcc gardées: noyaux en membres statiques
+      publics, pas de première capture dans un `if constexpr` d'une lambda
+      device, `using namespace` dans une fonction.
 
 ## 15. DSL device, jalon 10: H1 d'ordre 2, Taylor-Hood et P0g
 
@@ -630,3 +674,16 @@ cellules, CUDA sm_75).
 - [ ] Assemblage COO PETSc (`DeviceCOOSystem`): l'élimination et le
       second membre utilisent encore `atomic_add`, donc un ordre de somme
       non déterministe.
+
+## 17. Temps de compilation des tests Kokkos
+
+- [ ] Découper les tests Kokkos les plus lents en plusieurs unités de
+      compilation. Dans build-mpi, `BilinearFormTest.cpp`,
+      `VectorBilinearFormTest.cpp` et `CoefficientBilinearFormTest.cpp`
+      (`tests/unit/Rodin/Kokkos/Variational`) passent chacun plus de
+      26 minutes dans un seul nvcc, en fin de build: `-j36` n'y change rien.
+      Les fichiers sont courts (150 à 200 lignes, 8 à 15 `TEST`), le coût
+      vient de l'instanciation des noyaux par intégrande et par géométrie.
+      Piste: un fichier par groupe de `TEST`, liés dans le même exécutable,
+      puis mesurer le temps de chaque unité (`-time` de nvcc ou
+      `-ftime-report`) pour équilibrer les groupes.

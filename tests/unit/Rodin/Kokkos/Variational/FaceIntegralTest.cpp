@@ -42,13 +42,13 @@ namespace Rodin::Tests::Unit
     });
 
     expectSameForm(hu, hv, BoundaryIntegral(hu, hv), du, dv, BoundaryIntegral(du, dv));
-    expectSameForm(hu, hv, restricted(BoundaryIntegral(hu, hv), 2), du, dv,
-      restricted(BoundaryIntegral(du, dv), 2));
+    expectSameForm(
+      hu, hv, BoundaryIntegral(hu, hv).over(2), du, dv, BoundaryIntegral(du, dv).over(2));
     expectSameForm(
       hu, hv, BoundaryIntegral(hf * hu, hv), du, dv, BoundaryIntegral(df * du, dv));
     expectSameForm(hu, hv, FaceIntegral(hu, hv), du, dv, FaceIntegral(du, dv));
-    expectSameForm(hu, hv, restricted(FaceIntegral(hu, hv), 1, 3), du, dv,
-      restricted(FaceIntegral(du, dv), 1, 3));
+    expectSameForm(
+      hu, hv, FaceIntegral(hu, hv).over(1, 3), du, dv, FaceIntegral(du, dv).over(1, 3));
     expectSameForm(hu, hv, InterfaceIntegral(hu, hv), du, dv, InterfaceIntegral(du, dv));
     expectSameForm(hu, hv, BoundaryIntegral(Grad(hu), Grad(hv)), du, dv,
       BoundaryIntegral(Grad(du), Grad(dv)));
@@ -69,8 +69,8 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     expectSameForm(hu, hv, BoundaryIntegral(hu, hv), du, dv, BoundaryIntegral(du, dv));
-    expectSameForm(hu, hv, restricted(FaceIntegral(hu, hv), 2), du, dv,
-      restricted(FaceIntegral(du, dv), 2));
+    expectSameForm(
+      hu, hv, FaceIntegral(hu, hv).over(2), du, dv, FaceIntegral(du, dv).over(2));
     expectSameForm(hu, hv, BoundaryIntegral(Jacobian(hu), Jacobian(hv)), du, dv,
       BoundaryIntegral(Jacobian(du), Jacobian(dv)));
   }
@@ -100,8 +100,8 @@ namespace Rodin::Tests::Unit
     });
 
     expectSameLinearForm(hv, BoundaryIntegral(hf, hv), dv, BoundaryIntegral(df, dv));
-    expectSameLinearForm(hv, restricted(BoundaryIntegral(hg, hv), 1), dv,
-      restricted(BoundaryIntegral(dg, dv), 1));
+    expectSameLinearForm(
+      hv, BoundaryIntegral(hg, hv).over(1), dv, BoundaryIntegral(dg, dv).over(1));
     expectSameLinearForm(hv, FaceIntegral(hf, hv), dv, FaceIntegral(df, dv));
     expectSameLinearForm(hv, InterfaceIntegral(hg, hv), dv, InterfaceIntegral(dg, dv));
     expectSameLinearForm(hw, BoundaryIntegral(Dot(BoundaryNormal(source), hw)), dw,

@@ -83,8 +83,11 @@
   incidence computation including discovery of missing entities.
   Host iterators and reference-returning accessors use compatibility adapters.
 
-  Device finite element spaces, grid functions, form evaluation, assembly,
-  solvers and MPI distribution are not provided.
+  Device kernels assemble variational problems on this mesh into Eigen or
+  PETSc systems. Distributed meshes are made resident by
+  `Mesh<Context::Kokkos<Context::MPI, Backend>>`, on which `P1` problems are
+  assembled into distributed PETSc Kokkos systems; see
+  @ref guides-kokkos-mpi "Distributed Meshes".
   See @ref guides-kokkos "Kokkos local mesh" for supported geometry,
   ownership, host interfaces and CUDA build setup.
 

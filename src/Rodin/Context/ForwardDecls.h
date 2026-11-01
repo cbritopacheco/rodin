@@ -45,6 +45,16 @@ namespace Rodin::Context
   template <class Backend>
   struct IsLocal<Kokkos<Local, Backend>> : std::true_type
   {};
+
+  /// @brief Whether a context distributes its mesh over MPI processes.
+  template <class C>
+  struct IsMPI : std::is_same<C, MPI>
+  {};
+
+  /// @brief Kokkos contexts of a distributed mesh run over MPI processes.
+  template <class Backend>
+  struct IsMPI<Kokkos<MPI, Backend>> : std::true_type
+  {};
 }
 
 #endif

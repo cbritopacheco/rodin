@@ -25,19 +25,6 @@ namespace Rodin::Tests::Unit
   using Polytope = Geometry::Polytope;
 
   /**
-   * @brief Restricts an integral to attributes, keeping its type.
-   * @param integral Integral to restrict.
-   * @param attributes Attributes of the integrated polytopes.
-   * @return Restricted integral.
-   */
-  template <class Form, class... Attributes>
-  Form restricted(Form integral, Attributes... attributes)
-  {
-    integral.over(Geometry::Attribute(attributes)...);
-    return integral;
-  }
-
-  /**
    * @brief Compares a device assembled operator with its host reference.
    * @param host Operator assembled on the local mesh.
    * @param device Operator assembled on the resident mesh.
@@ -268,6 +255,72 @@ namespace Rodin::Tests::Unit
   {
     for (Index i = 0; i < static_cast<Index>(data.size()); ++i)
       data.coeffRef(i) = 1 + Real(0.5) * std::sin(Real(0.7) * i);
+  }
+
+  /**
+   * @brief Degrees of freedom fixed by a Dirichlet condition.
+   * @param u Host trial function.
+   * @param attribute Constrained face attribute.
+   * @return Fixed degrees of freedom.
+   */
+  template <class Trial>
+  inline IndexSet fixedDOFs(const Trial& u, Geometry::Attribute attribute)
+  {
+    Variational::DirichletBC dbc(u, Variational::RealFunction(1));
+    dbc.on(attribute);
+    dbc.assemble();
+    IndexSet res;
+    for (const auto& [dof, value] :
+      std::get<Variational::DirichletBCBase<Real>::ValueDOFs>(dbc.getDOFs()))
+      res.insert(dof);
+    return res;
+  }
+
+  /**
+   * @brief Tags one boundary face, so that a Dirichlet condition leaves most
+   * degrees of freedom free.
+   * @param source Mesh.
+   * @return Mesh as in withClosure(), with attribute 5 on its first boundary face.
+   */
+  inline HostMesh withTaggedFace(HostMesh source)
+  {
+    auto mesh = withClosure(std::move(source));
+    const size_t d = mesh.getDimension();
+    for (Index i = 0; i < mesh.getFaceCount(); ++i)
+    {
+      if (mesh.isBoundary(i))
+      {
+        mesh.setAttribute({d - 1, i}, Geometry::Attribute(5));
+        break;
+      }
+    }
+    return mesh;
+  }
+
+  /**
+   * @brief Builds periodic pairs that exercise the constraint resolution.
+   * @param size Number of degrees of freedom.
+   * @param fixed Degrees of freedom fixed by a Dirichlet condition.
+   * @return Slaves with their masters: a plain pair, a slave with two masters,
+   * a chain and a slave whose master is fixed.
+   */
+  inline IndexMap<IndexSet> makePairs(size_t size, const IndexSet& fixed)
+  {
+    std::vector<Index> free;
+    for (Index i = 0; i < size; ++i)
+    {
+      if (!fixed.contains(i))
+        free.push_back(i);
+    }
+    EXPECT_GE(free.size(), 9);
+    EXPECT_FALSE(fixed.empty());
+    IndexMap<IndexSet> res;
+    res[free[0]] = {free[1]};
+    res[free[2]] = {free[3], free[4]};
+    res[free[5]] = {free[6]};
+    res[free[6]] = {free[7]};
+    res[free[8]] = {*fixed.begin()};
+    return res;
   }
 }
 

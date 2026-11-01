@@ -77,9 +77,8 @@ namespace Rodin::Tests::Unit
       hfes, dfes, [&](auto& g) { g.project(Geometry::Region::Boundary, hf); },
       [&](auto& g) { g.project(Geometry::Region::Boundary, df); });
     expectSameProjection(
-      hfes, dfes,
-      [&](auto& g) { g.project(Geometry::Region::Faces, hfn, Geometry::Attribute(2)); },
-      [&](auto& g) { g.project(Geometry::Region::Faces, dfn, Geometry::Attribute(2)); });
+      hfes, dfes, [&](auto& g) { g.project(Geometry::Region::Faces, hfn, 2); },
+      [&](auto& g) { g.project(Geometry::Region::Faces, dfn, 2); });
     expectSameProjection(
       hfes, dfes,
       [&](auto& g) {
@@ -88,6 +87,18 @@ namespace Rodin::Tests::Unit
       [&](auto& g) {
         g.project(Geometry::Region::Interface, ds, FlatSet<Geometry::Attribute>{1, 3});
       });
+
+    const auto hp = [](const Polytope& polytope) { return polytope.getIndex() % 3 != 0; };
+    const auto dp = KOKKOS_LAMBDA(const DeviceGeometry::PolytopeView& polytope)->bool
+    {
+      return polytope.getIndex() % 3 != 0;
+    };
+    expectSameProjection(
+      hfes, dfes, [&](auto& g) { g.project(Geometry::Region::Cells, hfn, hp); },
+      [&](auto& g) { g.project(Geometry::Region::Cells, dfn, dp); });
+    expectSameProjection(
+      hfes, dfes, [&](auto& g) { g.project(Geometry::Region::Boundary, Real(-1), hp); },
+      [&](auto& g) { g.project(Geometry::Region::Boundary, Real(-1), dp); });
   }
 
   /**
@@ -107,9 +118,8 @@ namespace Rodin::Tests::Unit
       return 2 - p.x() * p.x() * p.y();
     });
     expectSameProjection(
-      hfes, dfes,
-      [&](auto& g) { g.project(Geometry::Region::Cells, hfn, Geometry::Attribute(1)); },
-      [&](auto& g) { g.project(Geometry::Region::Cells, dfn, Geometry::Attribute(1)); });
+      hfes, dfes, [&](auto& g) { g.project(Geometry::Region::Cells, hfn, 1); },
+      [&](auto& g) { g.project(Geometry::Region::Cells, dfn, 1); });
   }
 
   /**

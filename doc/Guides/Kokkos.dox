@@ -185,11 +185,57 @@
   independent until geometry invalidation, matching the local mesh. Other
   transformations are rejected without silently approximating their geometry.
 
-  Assembly region traversal is available through KokkosIteration. Device finite
-  element spaces, grid functions, variational expression evaluation, operator
-  assembly, solvers and MPI distribution
-  remain outside this module's current support. MeshBase compatibility does
-  not establish device support for its higher-level consumers.
+  Assembly region traversal is available through KokkosIteration. On this
+  mesh, `P1`, `H1<2>` and `P0g` spaces, grid functions, variational
+  expressions, integrals over cells, boundaries, interfaces and faces,
+  `LinearElasticityIntegral`, `Solid::InternalVirtualWork` with
+  `Solid::NeoHookean`, projections, Dirichlet, periodic and identification
+  constraints, and problems are assembled by device kernels into Eigen or
+  PETSc systems. Rodin solvers, including `Solver::NewtonSolver`, act on the
+  assembled systems. Other constitutive laws are not provided.
+
+  @section guides-kokkos-mpi Distributed Meshes
+
+  `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the shard of a
+  distributed mesh resident on the device. It is built from a
+  `Mesh<Context::MPI>`, which must outlive it, and answers every query in the
+  local numbering of the shard, ghosts included. The boundary, the interface
+  and the measures are those of the distributed mesh. The device view marks
+  the entities the process owns, so that integrators visit each polytope on
+  one process only.
+
+  @code{.cpp}
+  #include <Rodin/Kokkos/MPI.h>
+
+  using DeviceContext = Context::Kokkos<Context::MPI, Context::CUDA>;
+  Mesh<Context::MPI> host = ...; // distributed and reconciled
+  const Mesh<DeviceContext> mesh(DeviceContext(Context::MPI(env, world)), host);
+  P1<Real, Mesh<DeviceContext>> vh(mesh);
+  PETSc::Variational::TrialFunction u(vh);
+  PETSc::Variational::TestFunction v(vh);
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, g);
+  PETSc::Solver::CG(poisson).solve();
+  @endcode
+
+  The `P1` space on this mesh answers its host members, getSize(),
+  getDOFs() and getGlobalIndex(), as the distributed host space does, while
+  the device members, getLocalSize() and getDeviceDOFs(), refer to the local
+  numbering of the kernels. Single field PETSc problems are assembled on the
+  device into `MATMPIAIJKOKKOS` and `VECMPIKOKKOS` objects: each process
+  hands its entries in global indices to PETSc, which sums them on their
+  owners. A degree of freedom fixed on one process is fixed on every process
+  holding it. Grid functions store their coefficients in ghosted Kokkos
+  vectors.
+
+  Distributed device assembly covers `P1` spaces, integrals and Dirichlet
+  conditions. Periodic conditions, preassembled forms, mixed problems and
+  Eigen systems are rejected or not provided on distributed meshes. Link the
+  `Rodin::KokkosMPI` target, available when Rodin is configured with both
+  `RODIN_USE_MPI` and `RODIN_USE_PETSC`. PETSc must be built with Kokkos;
+  with a CUDA-aware MPI, such as Open MPI configured `--with-cuda`, device
+  buffers are exchanged directly, otherwise run with
+  `-use_gpu_aware_mpi 0`.
 
   @section guides-kokkos-build CUDA Build
 
@@ -234,6 +280,19 @@
   `CMAKE_CXX_COMPILER` to `nvcc_wrapper` also works but compiles every
   translation unit through NVCC. A Kokkos build without CUDA cannot
   instantiate the CUDA context and never substitutes CPU execution.
+
+  Place `using namespace Rodin;` inside a function, as in the examples, not
+  at namespace scope. Rodin has its own `Rodin::Kokkos` namespace, and a
+  directive at global scope makes the name `Kokkos` ambiguous at global
+  scope. NVCC resolves the `using namespace Kokkos;` directives of the Kokkos
+  templates where they are instantiated, after such a directive, and
+  reports `"Kokkos" is ambiguous` in `Kokkos_CopyViews.hpp`.
+
+  NVCC parenthesizes host expressions before handing them to GCC, which then
+  rejects a restricted integral of deduced operands as the first term of a
+  sum, `Integral(Grad(u), Grad(v)).over(1) + Integral(u, v)`, with "template
+  placeholder not permitted in parameter". Place such a term after another
+  term, or name it.
 
   See the upstream
   [Kokkos configuration guide](https://kokkos.org/kokkos-core-wiki/get-started/configuration-guide.html)

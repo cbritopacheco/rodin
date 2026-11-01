@@ -54,3 +54,14 @@ if (TARGET Rodin::KokkosPETSc)
     Rodin::IO
     )
 endif()
+
+add_executable(KokkosNavierStokes NavierStokes.cpp)
+target_link_libraries(KokkosNavierStokes
+  PUBLIC
+  Rodin::Kokkos
+  Rodin::Solver
+  Rodin::Geometry
+  Rodin::Assembly
+  Rodin::Variational
+  Rodin::IO
+  )

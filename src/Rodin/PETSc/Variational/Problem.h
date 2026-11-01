@@ -177,7 +177,7 @@ namespace Rodin::Variational
             {
               return PETSC_COMM_SELF;
             }
-            else if constexpr (std::is_same_v<TrialFESMeshContextType, Context::MPI>)
+            else if constexpr (Context::IsMPI<TrialFESMeshContextType>::value)
             {
               const auto& fes = u.getFiniteElementSpace();
               const auto& mesh = fes.getMesh();
@@ -1003,7 +1003,7 @@ namespace Rodin::Variational
           {
             comm = PETSC_COMM_SELF;
           }
-          else if constexpr (std::is_same_v<Ctx, Context::MPI>)
+          else if constexpr (Context::IsMPI<Ctx>::value)
           {
             comm = mesh.getContext().getCommunicator();
           }

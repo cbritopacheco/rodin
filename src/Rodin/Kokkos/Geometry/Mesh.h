@@ -383,7 +383,8 @@ namespace Rodin::Geometry
         return {getDimension(), m_sdim, topology.entityOffsets, topology.geometries,
           topology.vertexOffsets, topology.vertexIndices, m_coordinates.data(),
           m_attributes.data(), m_attributePresent.data(), m_geometryKinds.data(),
-          m_controlOffsets.data(), m_controls.data(), topology.incidenceDescriptors};
+          m_controlOffsets.data(), m_controls.data(), topology.incidenceDescriptors,
+          nullptr};
       }
 
       /// @param d Entity dimension. @returns Entity count.

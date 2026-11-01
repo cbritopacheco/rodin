@@ -4,3 +4,4 @@ if (TARGET Rodin::KokkosPETSc)
 endif()
 
 add_subdirectory(PDEs)
+add_subdirectory(Solid)

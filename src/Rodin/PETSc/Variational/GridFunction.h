@@ -281,7 +281,7 @@ namespace Rodin::Variational
       using Parent::max;
 
       static_assert(Context::IsLocal<FESMeshContextType>::value ||
-        std::is_same_v<FESMeshContextType, Context::MPI>);
+        Context::IsMPI<FESMeshContextType>::value);
 
       /**
        * @brief Constructs a zero-initialised grid function on the given
@@ -339,7 +339,7 @@ namespace Rodin::Variational
           ierr = VecZeroEntries(data);
           assert(ierr == PETSC_SUCCESS);
         }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        else if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           const auto& mesh = fes.getMesh();
           const auto& ctx = mesh.getContext();
@@ -375,6 +375,12 @@ namespace Rodin::Variational
 
           ierr = VecSetSizes(data, ownedSize, globalSize);
           assert(ierr == PETSC_SUCCESS);
+
+          if constexpr (Context::IsKokkos<FESMeshContextType>::value)
+          {
+            ierr = VecSetType(data, VECKOKKOS);
+            assert(ierr == PETSC_SUCCESS);
+          }
 
           ierr = VecSetFromOptions(data);
           assert(ierr == PETSC_SUCCESS);
@@ -426,7 +432,7 @@ namespace Rodin::Variational
         assert(ierr == PETSC_SUCCESS);
         ierr = VecCopy(other.m_data, m_data);
         assert(ierr == PETSC_SUCCESS);
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
@@ -515,7 +521,7 @@ namespace Rodin::Variational
         ierr = VecCopy(other.m_data, m_data);
         assert(ierr == PETSC_SUCCESS);
 
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
@@ -585,7 +591,7 @@ namespace Rodin::Variational
         this->flush();
         PetscErrorCode ierr = VecSet(m_data, value);
         assert(ierr == PETSC_SUCCESS);
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
@@ -724,7 +730,7 @@ namespace Rodin::Variational
         {
           return m_write.raw[global];
         }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        else if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           PetscInt local;
           if (m_begin <= global && global < m_end)
@@ -757,7 +763,7 @@ namespace Rodin::Variational
         {
           return m_read.raw[global];
         }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        else if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           PetscInt local;
           if (m_begin <= global && global < m_end)
@@ -790,7 +796,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecShift(data, rhs);
         assert(ierr == PETSC_SUCCESS);
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
@@ -818,7 +824,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecShift(data, -rhs);
         assert(ierr == PETSC_SUCCESS);
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
@@ -845,7 +851,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecScale(data, rhs);
         assert(ierr == PETSC_SUCCESS);
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
@@ -872,7 +878,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecScale(data, 1.0 / rhs);
         assert(ierr == PETSC_SUCCESS);
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
@@ -913,7 +919,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecAXPY(data, a, other.getData());
         assert(ierr == PETSC_SUCCESS);
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
@@ -974,7 +980,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecPointwiseMult(data, data, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
@@ -1003,7 +1009,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecPointwiseDivide(data, data, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
@@ -1069,7 +1075,7 @@ namespace Rodin::Variational
         }
         else
         {
-          static_assert(std::is_same_v<FESMeshContextType, Context::MPI>);
+          static_assert(Context::IsMPI<FESMeshContextType>::value);
 
           // MPI: copy only the owned range of m_data on this rank
           PetscInt rb = 0, re = 0;
@@ -1164,6 +1170,7 @@ namespace Rodin::Variational
        * @returns Reference to `*this`.
        */
       template <class Function, class Pred>
+        requires std::is_invocable_r_v<bool, const Pred&, const Geometry::Polytope&>
       GridFunction& project(
         const Geometry::Region& region, const Function& v, const Pred& pred)
       {
@@ -1171,7 +1178,7 @@ namespace Rodin::Variational
         const auto& mesh = fes.getMesh();
 
 #ifdef RODIN_USE_MPI
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           this->sync();
           Interpolation interpolation(fes, region, pred);
@@ -1288,7 +1295,7 @@ namespace Rodin::Variational
             m_write.acquired = true;
           }
         }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        else if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           if (!m_write.acquired)
           {
@@ -1345,7 +1352,7 @@ namespace Rodin::Variational
 
           m_read.acquired = true;
         }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        else if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           ierr = VecGhostGetLocalForm(m_data, &m_read.ghost);
           assert(ierr == PETSC_SUCCESS);
@@ -1408,7 +1415,7 @@ namespace Rodin::Variational
             m_write.acquired = false;
           }
         }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        else if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           if (m_write.acquired)
           {
@@ -1466,7 +1473,7 @@ namespace Rodin::Variational
             m_read.acquired = false;
           }
         }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        else if constexpr (Context::IsMPI<FESMeshContextType>::value)
         {
           if (m_read.acquired)
           {
@@ -1628,7 +1635,7 @@ namespace Rodin::Variational
             ierr = VecRestoreArrayRead(m_data, &m_read.raw);
             assert(ierr == PETSC_SUCCESS);
           }
-          else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+          else if constexpr (Context::IsMPI<FESMeshContextType>::value)
           {
             ierr = VecRestoreArrayRead(m_read.ghost, &m_read.raw);
             assert(ierr == PETSC_SUCCESS);
@@ -1650,7 +1657,7 @@ namespace Rodin::Variational
             ierr = VecRestoreArrayWrite(m_data, &m_write.raw);
             assert(ierr == PETSC_SUCCESS);
           }
-          else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+          else if constexpr (Context::IsMPI<FESMeshContextType>::value)
           {
             ierr = VecRestoreArrayWrite(m_write.ghost, &m_write.raw);
             assert(ierr == PETSC_SUCCESS);

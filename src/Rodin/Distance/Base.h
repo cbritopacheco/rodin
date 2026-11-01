@@ -54,8 +54,8 @@ namespace Rodin::Distance
       template <class A1, class ... As>
       Derived& setInterior(A1&& a1, As&& ... as)
       {
-        m_interior =
-          FlatSet<Geometry::Attribute>{std::forward<A1>(a1), std::forward<As>(as)...};
+        m_interior = FlatSet<Geometry::Attribute>{
+          Geometry::Attribute(a1), Geometry::Attribute(as)...};
         return static_cast<Derived&>(*this);
       }
 
@@ -83,8 +83,8 @@ namespace Rodin::Distance
       template <class A1, class ... As>
       Derived& setInterface(A1&& a1, As&& ... as)
       {
-        m_interface =
-          FlatSet<Geometry::Attribute>{std::forward<A1>(a1), std::forward<As>(as)...};
+        m_interface = FlatSet<Geometry::Attribute>{
+          Geometry::Attribute(a1), Geometry::Attribute(as)...};
         return static_cast<Derived&>(*this);
       }
 

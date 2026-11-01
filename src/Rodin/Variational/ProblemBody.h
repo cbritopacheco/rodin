@@ -981,6 +981,43 @@ namespace Rodin::Variational
 
   /**
    * @brief Subtracts variational terms to construct a problem body.
+   * @param lbfi Local bilinear form integrator.
+   * @param gbfi Global bilinear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
+  template <class LHSScalar, class RHSScalar>
+  auto operator-(const LocalBilinearFormIntegratorBase<LHSScalar>& lbfi,
+    const GlobalBilinearFormIntegratorBase<RHSScalar>& gbfi)
+  {
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
+    res.getLocalBFIs().add(lbfi);
+    res.getGlobalBFIs().add(UnaryMinus(gbfi));
+    return res;
+  }
+
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
+   * @param lbfis Local bilinear form integrators.
+   * @param gbfi Global bilinear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
+  template <class LHSScalar, class RHSScalar>
+  auto operator-(
+    const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& lbfis,
+    const GlobalBilinearFormIntegratorBase<RHSScalar>& gbfi)
+  {
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
+    res.getLocalBFIs().add(lbfis);
+    res.getGlobalBFIs().add(UnaryMinus(gbfi));
+    return res;
+  }
+
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
    * @param bfis Bilinear form integrators.
    * @param lfi Linear form integrator.
    * @returns Problem body owning the supplied terms with their algebraic signs.
@@ -1197,6 +1234,23 @@ namespace Rodin::Variational
     using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
     ProblemBody<Operator, Vector, ScalarType> res(pb);
     res.getGlobalBFIs().add(gbfi);
+    return res;
+  }
+
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param gbfi Global bilinear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
+  template <class Operator, class Vector, class LHSScalar, class RHSScalar>
+  auto operator-(const ProblemBody<Operator, Vector, LHSScalar>& pb,
+    const GlobalBilinearFormIntegratorBase<RHSScalar>& gbfi)
+  {
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<Operator, Vector, ScalarType> res(pb);
+    res.getGlobalBFIs().add(UnaryMinus(gbfi));
     return res;
   }
 

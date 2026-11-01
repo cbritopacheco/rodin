@@ -238,27 +238,58 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Builds the bilinear form the given bilinear integrator
-       * @param[in] bfi Bilinear integrator which will be used to
-       * build the bilinear form.
-       * @returns Reference to this (for method chaining)
+       * @brief Replaces the integrators of the bilinear form by a local
+       * integrator.
+       * @param[in] bfi Local bilinear integrator.
+       * @returns Reference to this bilinear form.
        */
       BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         m_lbfis.clear();
+        m_gbfis.clear();
         m_lbfis.add(bfi);
         return *this;
       }
 
       /**
-       * @brief Replaces the local integrator list.
-       * @param[in] bfi List of local bilinear integrators
-       * @returns Reference to this bilinear form
+       * @brief Replaces the integrators of the bilinear form by local
+       * integrators.
+       * @param[in] bfis Local bilinear integrators.
+       * @returns Reference to this bilinear form.
        */
-      BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseListType& bfi)
+      BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseListType& bfis)
       {
         m_lbfis.clear();
-        m_lbfis.add(bfi);
+        m_gbfis.clear();
+        m_lbfis.add(bfis);
+        return *this;
+      }
+
+      /**
+       * @brief Replaces the integrators of the bilinear form by a global
+       * integrator.
+       * @param[in] bfi Global bilinear integrator.
+       * @returns Reference to this bilinear form.
+       */
+      BilinearFormBase& operator=(const GlobalBilinearFormIntegratorBaseType& bfi)
+      {
+        m_lbfis.clear();
+        m_gbfis.clear();
+        m_gbfis.add(bfi);
+        return *this;
+      }
+
+      /**
+       * @brief Replaces the integrators of the bilinear form by global
+       * integrators.
+       * @param[in] bfis Global bilinear integrators.
+       * @returns Reference to this bilinear form.
+       */
+      BilinearFormBase& operator=(const GlobalBilinearFormIntegratorBaseListType& bfis)
+      {
+        m_lbfis.clear();
+        m_gbfis.clear();
+        m_gbfis.add(bfis);
         return *this;
       }
 

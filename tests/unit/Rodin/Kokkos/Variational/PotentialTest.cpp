@@ -73,18 +73,18 @@ namespace Rodin::Tests::Unit
     };
 
     expectSameGlobalForm(
-      hu, hv, [&](auto& f) { f += Integral(Potential(hk, hu), hv); }, du, dv,
-      [&](auto& f) { f += Integral(Potential(dk, du), dv); });
+      hu, hv, [&](auto& f) { f = Integral(Potential(hk, hu), hv); }, du, dv,
+      [&](auto& f) { f = Integral(Potential(dk, du), dv); });
     expectSameGlobalForm(
       hu, hv,
       [&](auto& f) {
         f = Integral(hu, hv);
-        f += -Integral(Potential(hk, hu), hv);
+        f -= Integral(Potential(hk, hu), hv);
       },
       du, dv,
       [&](auto& f) {
         f = Integral(du, dv);
-        f += -Integral(Potential(dk, du), dv);
+        f -= Integral(Potential(dk, du), dv);
       });
     if (singular)
     {
@@ -172,18 +172,18 @@ namespace Rodin::Tests::Unit
       }
     };
     expectSameGlobalForm(
-      hu, hv, [&](auto& f) { f += Integral(Potential(hk, hu), hv); }, du, dv,
-      [&](auto& f) { f += Integral(Potential(dk, du), dv); });
+      hu, hv, [&](auto& f) { f = Integral(Potential(hk, hu), hv); }, du, dv,
+      [&](auto& f) { f = Integral(Potential(dk, du), dv); });
     expectSameGlobalForm(
       hu, hv,
       [&](auto& f) {
         f = Integral(Jacobian(hu), Jacobian(hv));
-        f += -Integral(Potential(hk, hu), hv);
+        f -= Integral(Potential(hk, hu), hv);
       },
       du, dv,
       [&](auto& f) {
         f = Integral(Jacobian(du), Jacobian(dv));
-        f += -Integral(Potential(dk, du), dv);
+        f -= Integral(Potential(dk, du), dv);
       });
   }
 

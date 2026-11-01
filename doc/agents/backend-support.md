@@ -64,8 +64,14 @@ indexed assembly region contract and keeps device handles private. Boundary
 and Interface require explicit face-to-cell incidence; their counts include
 all face candidates, and filtering uses exactly one or more than one incident
 cell respectively. Launching kernels remains the assembly backend's concern.
-Device spaces, fields, operator assembly,
-solvers, SubMesh and MPI distribution are not provided.
+Device kernels assemble variational problems on this mesh (P1, H1<2> and P0g
+spaces, integrals, constraints, linear elasticity and Neo-Hookean
+hyperelasticity) into Eigen or PETSc systems solved by Rodin solvers. SubMesh
+is not provided. `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the
+shard of a `Mesh<Context::MPI>` resident and marks owned entities in its
+device view; single field `P1` PETSc problems are assembled on it into
+distributed Kokkos systems (`Rodin::KokkosMPI`). Periodic conditions,
+preassembled forms, mixed problems and Eigen systems are not distributed.
 See [the Kokkos guide](../Guides/Kokkos.dox) for lifecycle and build details.
 
 In CUDA builds, Kokkos's launcher compiles targets linked to `Kokkos::kokkos`
@@ -78,6 +84,15 @@ imposes constraints that host Kokkos backends do not detect:
 - Extended lambdas (`KOKKOS_LAMBDA`) cannot appear in private or protected
   member functions, including GoogleTest's `TestBody`; tests launch device
   work from free functions.
+- A `using namespace Rodin;` directive at namespace scope makes `Kokkos`
+  ambiguous with `Rodin::Kokkos`; NVCC resolves the `using namespace Kokkos;`
+  directives of the Kokkos templates at instantiation and fails. Examples and
+  tests place the directive in a function.
+- NVCC parenthesizes host expressions before handing them to GCC, and GCC
+  then rejects `Integral(Grad(u), Grad(v)).over(1) + ...` with "template
+  placeholder not permitted in parameter": the deduced `Grad(u)` is parsed as
+  a parameter type. Such a restricted term goes after another term of the sum,
+  or in a named variable.
 - A Kokkos change is CUDA-verified only after building and running the Kokkos
   tests with a CUDA-enabled Kokkos installation.
 

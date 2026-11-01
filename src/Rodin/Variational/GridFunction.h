@@ -451,8 +451,8 @@ namespace Rodin::Variational
       ///
       /// Device grid functions are evaluated through Kokkos device views, so
       /// the host interpolation path is not instantiated for them.
-      static constexpr bool IsDevice =
-        Context::IsKokkos<typename FESType::MeshType::Context>::value;
+      static constexpr bool IsDevice = Context::IsKokkos<
+        typename FormLanguage::Traits<typename FESType::MeshType>::ContextType>::value;
 
       static_assert(std::is_same_v<RangeType, ScalarType> ||
         FormLanguage::IsVectorRange<RangeType>::Value ||
@@ -1076,6 +1076,36 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Projects a source on entities of a region selected by a device
+       * predicate.
+       * @tparam T Function, expression, or constant source type
+       * @tparam Pred Device predicate type
+       *
+       * The predicate is evaluated on the device on each polytope of
+       * @p region, as given by the device projection of the mesh context, for
+       * instance a `KOKKOS_LAMBDA` taking a
+       * `const Rodin::Kokkos::Geometry::PolytopeView&`.
+       *
+       * @returns Reference to this grid function
+       * @param region Region on which to apply the operation.
+       * @param fn Function to evaluate.
+       * @param pred Device predicate selecting the entities on which to project.
+       */
+      template <class T, class Pred>
+        requires IsDevice &&
+        (!std::is_invocable_r_v<bool, const Pred&, const Geometry::Polytope&>) &&
+        DeviceProjection<typename FormLanguage::Traits<
+          typename FESType::MeshType>::ContextType>::template
+      IsPredicate<Pred> Derived& project(
+        const Geometry::Region& region, const T& fn, const Pred& pred)
+      {
+        DeviceProjection<typename FormLanguage::Traits<
+          typename FESType::MeshType>::ContextType>::project(static_cast<Derived&>(*this),
+          region, fn, {}, pred);
+        return static_cast<Derived&>(*this);
+      }
+
+      /**
        * @brief Projects a constant value over a filtered region.
        * @tparam Pred Predicate type selecting mesh entities
        *
@@ -1104,6 +1134,7 @@ namespace Rodin::Variational
        * @returns Reference to this object after the operation.
        */
       template <class Function, class Pred>
+        requires std::is_invocable_r_v<bool, const Pred&, const Geometry::Polytope&>
       Derived& project(
         const Geometry::Region& region, const Function& fn, const Pred& pred)
       {
@@ -1346,8 +1377,9 @@ namespace Rodin::Variational
       Derived& projectOnDevice(const Geometry::Region& region, const T& fn,
         const FlatSet<Geometry::Attribute>& attrs)
       {
-        DeviceProjection<typename FESType::MeshType::Context>::project(
-          static_cast<Derived&>(*this), region, fn, attrs);
+        DeviceProjection<typename FormLanguage::Traits<
+          typename FESType::MeshType>::ContextType>::project(static_cast<Derived&>(*this),
+          region, fn, attrs);
         return static_cast<Derived&>(*this);
       }
 
@@ -1718,6 +1750,7 @@ namespace Rodin::Variational
        * @returns Reference to this grid function
        */
       template <class Function, class Pred>
+        requires std::is_invocable_r_v<bool, const Pred&, const Geometry::Polytope&>
       GridFunction& project(
         const Geometry::Region& region, const Function& v, const Pred& pred)
       {

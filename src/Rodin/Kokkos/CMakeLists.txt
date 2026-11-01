@@ -38,6 +38,7 @@ target_sources(RodinKokkos INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/DeviceView.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/H1.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Integral.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/InternalVirtualWork.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/LinearElasticityIntegral.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/P0g.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/P1.h>
@@ -64,6 +65,26 @@ if (RODIN_USE_PETSC)
   )
 
   install(TARGETS RodinKokkosPETSc EXPORT RodinTargets)
+
+  if (RODIN_USE_MPI)
+    add_library(RodinKokkosMPI INTERFACE)
+    add_library(Rodin::KokkosMPI ALIAS RodinKokkosMPI)
+    set_target_properties(RodinKokkosMPI PROPERTIES EXPORT_NAME KokkosMPI)
+
+    target_link_libraries(RodinKokkosMPI
+      INTERFACE
+        Rodin::KokkosPETSc
+        Rodin::MPI
+    )
+
+    target_sources(RodinKokkosMPI INTERFACE
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Geometry/Mesh.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Variational/P1.h>
+    )
+
+    install(TARGETS RodinKokkosMPI EXPORT RodinTargets)
+  endif()
 endif()
 
 rodin_install_headers(

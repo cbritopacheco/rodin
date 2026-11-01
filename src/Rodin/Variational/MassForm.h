@@ -441,7 +441,8 @@ namespace Rodin::Variational
       template <class A1, class... As>
       MassForm& over(const A1& a1, const As&... as)
       {
-        return over(FlatSet<Geometry::Attribute>{a1, as...});
+        return over(FlatSet<Geometry::Attribute>{
+          Geometry::Attribute(a1), Geometry::Attribute(as)...});
       }
 
       /**
