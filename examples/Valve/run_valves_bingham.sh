@@ -10,6 +10,10 @@
 #   plastic viscosity  0.0182 Pa s
 #   flow rate           188.8 m^3/h  (U = Q/A = 1.62 m/s in D = 203.2 mm)
 #
+# FPC16 (16"): same pulp, 873 m^3/h (16" row, U = 2.12 m/s), meshes
+# resources/examples/Valve/wake/FPC16_open*.mesh (same sizes relative to D):
+#   VALVES=FPC16 bash examples/Valve/run_valves_bingham.sh
+#
 # Open gate: velocity inlet with flow rate Q (developed profile chosen from
 # Re_B and Hanks' critical Reynolds number: Re_B ~ 3.2e4 > Re_c ~ 1.8e4, so
 # the 1/7 law), outlet at atmospheric pressure (p = 0 gauge).
@@ -31,7 +35,7 @@ RODIN_ROOT="${RODIN_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
 export NP="${NP:-32}"
 export NJOBS="${NJOBS:-1}"
-export VALVES="${VALVES:-FPC8}"
+export VALVES="${VALVES:-FPC8}"           # FPC16 too: VALVES="FPC8 FPC16"
 export OPENINGS="${OPENINGS:-0 25 75 100}"
 export MESH_DIR="${MESH_DIR:-$RODIN_ROOT/resources/examples/Valve/wake}"
 export OUT_DIR="${OUT_DIR:-$PWD/runs_bingham}"
@@ -40,7 +44,8 @@ export MODEL=bingham
 export RHO="${RHO:-1770}"             # kg/m^3
 export TAU_Y="${TAU_Y:-7.0}"          # Pa
 export MU_P="${MU_P:-0.0182}"         # Pa s
-export Q_FPC8="${Q_FPC8:-188.8}"      # m^3/h
+export Q_FPC8="${Q_FPC8:-188.8}"      # m^3/h, 8" row of the pulp table (U = 1.62 m/s)
+export Q_FPC16="${Q_FPC16:-873}"      # m^3/h, 16" row (U = 2.12 m/s in D = 382 mm)
 export POUT="${POUT:-0}"              # Pa, atmospheric outlet
 export PIN_CLOSED="${PIN_CLOSED:-1.0342e6}"   # Pa, 150 psi held by the closed gate
 export POUT_CLOSED="${POUT_CLOSED:-0}"

@@ -195,6 +195,10 @@ post-proceso es el mismo: `python3 postprocess_valves.py runs_bingham`.
   | FPC8_open100.mesh | 130 041 | 673 435 | 0.15 |
 
   ~1.7 veces las celdas de las mallas anteriores (~545 k incógnitas).
+  FPC16 con los mismos tamaños relativos a D (`--only FPC16`): 739 k,
+  716 k, 658 k y 670 k tetraedros (0/25/75/100 %), γ mín 0.13–0.17.
+  Corrida: `VALVES=FPC16 bash run_valves_bingham.sh` (873 m³/h, fila de
+  16" de la tabla, U = 2.12 m/s; Re_B ≈ 7.9e4).
 - **Solver iterativo (por defecto en este script).** El LU de MUMPS de estas
   mallas pide 25–30 GB (crece como N^(4/3); el MUMPS de Ubuntu sólo trae el
   ordenamiento PORD). `-kv_solver iterative` usa FGMRES con un
