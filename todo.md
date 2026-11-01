@@ -192,7 +192,7 @@ A copier sur demeter.
   Ms par itération: coarse 0.13 (fp32) et 0.16 (fp64), fine 0.22 et 0.35.
   Le fp64 est relativement cher sur Turing (débit fp64 au 1/32), et
   l'écart avec la 5090 est de x2.5 (coarse) a x3.4 (fine) en fp32.
-- [ ] Bug du prototype: BiCGStab sans détection de breakdown. Sur
+- [x] Bug du prototype: BiCGStab sans détection de breakdown. Sur
       AtriumCoarse fp64 (rtol 1e-8), environ 1 run sur 3 tombe sur
       `(rh, r) = 0` a l'arrondi près (valeur exacte 1e-27 pour
       |rh||r| = 4e-10), `alpha = 0` puis `beta = rho/rhoOld` divise par 0
@@ -203,10 +203,18 @@ A copier sur demeter.
       proposé (non appliqué): redémarrer BiCGStab avec `rh = r`, `p = v = 0`
       quand `|rho| <= 1e-14 |rh| |r|` ou `omega == 0`. Validé sur 20 runs
       coarse (0 échec, même coût) et 3 runs fine.
-- [ ] Brancher le prototype (ou le module Kokkos de Rodin) sur PETSc:
+      Clos: le prototype est hors du dépôt et remplacé par le module
+      Kokkos de Rodin, dont le GMRES et le CG device (section 18) ne
+      dépendent pas de ce BiCGStab.
+- [x] Brancher le prototype (ou le module Kokkos de Rodin) sur PETSc:
       GAMG ou hypre BoomerAMG, ou fieldsplit vitesse/pression.
-- [ ] Refaire l'étude de raffinement (REFINE=1, 2) avec multigrille.
-- [ ] Comparer avec SuperLU_DIST GPU et MUMPS (CPU, MPI) en direct.
+      Fait pour le module Kokkos de Rodin en section 18 (GAMG, hypre
+      BoomerAMG via PETSc et en direct, fieldsplit sur Navier-Stokes).
+- [x] Refaire l'étude de raffinement (REFINE=1, 2) avec multigrille.
+      Clos: l'étude portait sur le prototype. Les mesures multigrilles
+      du module Kokkos par taille de maillage sont en section 18.
+- [x] Comparer avec SuperLU_DIST GPU et MUMPS (CPU, MPI) en direct.
+      Fait en section 18, avec cuDSS.
 
 ## 6. DSL device (Kokkos/CUDA), jalon 1: formes bilinéaires P1 scalaires
 
@@ -556,7 +564,7 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       sur `seqaijkokkos` annonçait un succès en 1 ms avec une solution
       fausse. `*SetType`, `*SetFromOptions` et `*Solve` lèvent maintenant
       une `Alert::MemberFunctionException` avec le message PETSc.
-- [ ] `Darcy` reste vide côté hôte, rien a porter.
+- [x] `Darcy` reste vide côté hôte, rien a porter.
 - [ ] Néo-hookéen device seulement: les autres lois de
       `Solid::InternalVirtualWork` restent hôte.
 - [x] Bogue cudafe++ (nvcc 13.1, gcc 14): `Integral(Grad(u), Grad(v)).over(1)`
