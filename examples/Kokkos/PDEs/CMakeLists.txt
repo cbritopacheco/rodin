@@ -53,6 +53,28 @@ if (TARGET Rodin::KokkosPETSc)
     Rodin::Variational
     Rodin::IO
     )
+
+  add_executable(KokkosSeq_NavierStokes Seq_NavierStokes.cpp)
+  target_link_libraries(KokkosSeq_NavierStokes
+    PUBLIC
+    Rodin::KokkosPETSc
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly
+    Rodin::Variational
+    Rodin::IO
+    )
+
+  add_executable(KokkosSeq_Elasticity Seq_Elasticity.cpp)
+  target_link_libraries(KokkosSeq_Elasticity
+    PUBLIC
+    Rodin::KokkosPETSc
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly
+    Rodin::Variational
+    Rodin::IO
+    )
 endif()
 
 add_executable(KokkosNavierStokes NavierStokes.cpp)

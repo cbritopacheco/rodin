@@ -81,6 +81,29 @@ nonsymmetric → BiCGSTAB/GMRES or SparseLU/UMFPack/ParU; symmetric indefinite
 PartialPivLU. Examples default to CG for Poisson-like and SparseLU/LDLT
 for Newton tangents.
 
+PETSc on the device, measured on the Kokkos examples (RTX 2080 Ti,
+32 cores, `examples/Kokkos/PDEs/Seq_*.cpp`):
+
+- Vector elasticity: CG with `-pc_type gamg` and the rigid body modes given
+  by `MatSetNearNullSpace` takes 28 iterations and 3.1 s at 822k unknowns,
+  where hypre takes 14 s, ILU 27 s and SuperLU_DIST 19 s, and Jacobi does not
+  converge. The vector P1 numbering is component-major, so the modes are
+  built by hand: a block size cannot describe them.
+- Scalar 3D Poisson, Q1: Jacobi CG solves 1M unknowns in 208 ms, GAMG in
+  6.1 s. The default BoomerAMG settings run out of device memory at 1M
+  unknowns (5 GB at 262k); `-pc_hypre_boomeramg_strong_threshold 0.7
+  -pc_hypre_boomeramg_agg_nl 2 -pc_hypre_boomeramg_P_max 4` solves it in
+  1.9 s and is also faster at 262k.
+- Taylor-Hood Oseen steps: FGMRES with a Schur field split (`selfp`, GAMG
+  on the velocity block, a few GMRES iterations on the pressure) beats ILU
+  and SuperLU_DIST, 6.1 s against 29 s and 25 s for 5 steps at 149k
+  unknowns. `Problem::setFieldSplits` names the blocks after the trial
+  functions.
+- SuperLU_DIST on one process uses the GPU for a handful of large Schur
+  updates only (about 12 ms of DGEMM in a 3 s factorization).
+  `-mat_superlu_dist_3d -mat_superlu_dist_d 1` divides the factorization
+  time by three; `SUPERLU_ACC_SOLVE=1` makes it ten times slower.
+
 `RodinSolver` is a compiled library. It instantiates the sparse `CG` and
 `SparseLU` for `Real` and `Complex` (`CG.cpp`, `SparseLU.cpp`), and its
 `RODIN_SOLVER_EXTERN_TEMPLATES` definition turns the matching

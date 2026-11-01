@@ -4,6 +4,23 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file Seq_Poisson.cpp
+ * @brief Poisson problem on a hexahedral grid, assembled and solved on the device through PETSc.
+ *
+ * The first argument is the number of grid nodes per side. The default
+ * BoomerAMG settings of hypre run out of device memory near one million
+ * degrees of freedom on an 11 GB card, because a strength threshold of 0.25
+ * keeps too many couplings of the 27 point stencil. Usage, with settings
+ * suited to three dimensional problems:
+ * @code
+ *   KokkosSeq_Poisson 100 -pc_type hypre
+ *     -pc_hypre_boomeramg_strong_threshold 0.7
+ *     -pc_hypre_boomeramg_agg_nl 2 -pc_hypre_boomeramg_P_max 4
+ *     -ksp_converged_reason
+ * @endcode
+ */
 #include <chrono>
 
 #include <Rodin/PETSc.h>

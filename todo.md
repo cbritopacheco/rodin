@@ -693,3 +693,32 @@ cellules, CUDA sm_75).
       Piste: un fichier par groupe de `TEST`, liés dans le même exécutable,
       puis mesurer le temps de chaque unité (`-time` de nvcc ou
       `-ftime-report`) pour équilibrer les groupes.
+
+## 18. Solveurs sur le GPU
+
+Mesures sur demeter (RTX 2080 Ti, 32 coeurs), exemples
+`examples/Kokkos/PDEs/Seq_*.cpp` pour PETSc.
+
+- [x] Élasticité PETSc: CG avec GAMG et les modes rigides passés par
+      `MatSetNearNullSpace` (construits à la main, la numérotation P1
+      vectorielle est par composante): 28 itérations et 3.1 s à 822k
+      inconnues, contre 14 s pour hypre, 27 s pour ILU, 19 s pour
+      SuperLU_DIST; Jacobi ne converge pas.
+- [x] Poisson 3D Q1 PETSc: Jacobi 208 ms à 1M inconnues, GAMG 6.1 s.
+      hypre plantait à 1M (`CUDA ERROR out of memory`): BoomerAMG par défaut
+      prend 5 Go à 262k. Avec `-pc_hypre_boomeramg_strong_threshold 0.7
+      -pc_hypre_boomeramg_agg_nl 2 -pc_hypre_boomeramg_P_max 4`: 1.6 Go et
+      647 ms à 262k (912 ms par défaut), 1.9 s à 1M. Documenté dans
+      `Seq_Poisson.cpp`.
+- [x] Navier-Stokes PETSc (`Seq_NavierStokes.cpp`, Taylor-Hood,
+      `Problem::setFieldSplits`): FGMRES avec un split de Schur (`selfp`,
+      GAMG sur la vitesse, quelques GMRES sur la pression), 6.1 s pour
+      5 pas à 149k inconnues, contre 29 s pour ILU et 25 s pour
+      SuperLU_DIST.
+- [x] SuperLU_DIST sur un processus: l'offload GPU (actif par défaut) ne
+      fait que 38 DGEMM, 12 ms sur 3 s de factorisation. Le mode
+      `-mat_superlu_dist_3d -mat_superlu_dist_d 1` divise la factorisation
+      par 3 (Poisson 3D, 33k: 3.1 s en 0.94 s; 262k: 130 s sur 32 coeurs
+      en 2D, 48 s sur 8 coeurs en 3D, pendant un build).
+      `SUPERLU_ACC_SOLVE=1` rend la factorisation 10 fois plus lente.
+      PETSc n'a pas d'interface cuDSS.
