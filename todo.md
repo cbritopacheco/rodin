@@ -261,7 +261,10 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       un couple vectoriel). A revoir pour la performance (taille selon la
       géométrie, ou une équipe par cellule) au jalon benchmark.
 - [x] `(Jac w).v` avec w vectoriel: fait au jalon 3.
-- [ ] `Dot(A, Jac) : Dot(A, Jac)` (coefficient matriciel) reste a faire.
+- [x] `Dot(A, Jac) : Dot(A, Jac)` (coefficient matriciel): matrice
+      constante et `Jacobian` d'une GridFunction comme coefficient, testés
+      sur triangles, maillage mixte et tétraèdres. Les fonctions
+      matricielles lambda device restent non supportées.
 - [x] Jalons suivants: voir les sections 8 et suivantes.
 
 ## 8. DSL device, jalon 3: GridFunction et fonctions vectorielles
@@ -286,14 +289,25 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       `(Jac u) w.v`, Newton `(Jac w) u.v`, `Div(w) u.v`, `w Div(u).v`,
       `p Grad(g).v`, `VectorFunction` lambda et constante, comparés a
       l'hôte a 1e-12 sur triangles, maillage mixte et tétraèdres.
-- [ ] Performance: dans `Mult<F, A>` le coefficient est évalué une fois par
-      DOF local et par point de quadrature. Pour une GridFunction cela
-      refait l'interpolation a chaque DOF; il faudra l'évaluer une seule
-      fois par point de quadrature (cache dans le noyau) au jalon
-      benchmark.
-- [ ] `GridFunction` device construite par copie de `getData()` depuis
-      l'hôte; l'interpolation ou la projection directement sur device
-      reste a faire.
+- [x] Performance de `Mult<F, A>`: le coefficient est lié une fois par
+      point de quadrature (`bindBasis`, jalon 7).
+- [x] Projection sur device des `GridFunction` d'un espace device
+      (`gf = f`, `project(f)`, `project(region, f)`, avec un attribut ou un
+      ensemble d'attributs): point de personnalisation
+      `Variational::DeviceProjection<Context>` déclaré dans le coeur et
+      spécialisé par le module Kokkos (`Kokkos/Variational/Projection.h`).
+      La source (expression avec descente device, lambda `KOKKOS_LAMBDA`
+      prenant un `PointView`, constante réelle ou vectorielle) est évaluée
+      aux noeuds des DOFs des polytopes sélectionnés (cellules, faces, bord,
+      interfaces); un DOF partagé prend la valeur du polytope d'indice
+      maximal, comme le dernier visité sur l'hôte; les DOFs hors sélection
+      gardent leur valeur. Tests `RodinKokkosVariationalProjectionTest`
+      (P1, H1 degrés 2 et 3, scalaire et vectoriel) comparés a l'hôte a
+      1e-12.
+- [ ] Projection device avec un prédicat: `project(region, f, pred)` prend
+      un prédicat hôte sur `Geometry::Polytope` et reste sur le chemin hôte.
+- [ ] `project(region, f, 2)`: un attribut entier choisit la surcharge a
+      prédicat, il faut écrire `Geometry::Attribute(2)`.
 
 ## 9. DSL device, jalon 4: formes linéaires
 
@@ -306,7 +320,7 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       référence partagées par les intégrales bilinéaires et linéaires
       (même choix d'ordre que la `QuadratureRule` hôte).
 - [x] `Assembly::Kokkos<Math::Vector<Real>, LinearForm<...>>`: les entrées
-      sont rapatriées puis sommées dans le vecteur hôte, et
+      sont sommées dans le vecteur sur le device (section 16), et
       `Default<Context::Kokkos<...>>` (un seul espace) choisit cet
       assemblage.
 - [x] Intégrateurs négatifs (`lf -= ...`, `a - b`) déroulés par
@@ -314,9 +328,8 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
 - [x] Tests `RodinKokkosVariationalLinearFormTest` comparés a l'hôte a
       1e-12 (scalaire, vectoriel, `VectorFunction`, `-=` avec `.over()`),
       et cas `a - b` ajouté a `RodinKokkosVariationalBilinearFormTest`.
-- [ ] Performance: la somme des entrées dans le vecteur se fait sur
-      l'hôte; une réduction atomique sur device (ou l'assemblage COO PETSc
-      du jalon 6) évitera la copie.
+- [x] Performance: la somme des entrées dans le vecteur se fait sur le
+      device, dans l'ordre de l'hôte (section 16).
 
 ## 10. DSL device, jalon 5: problèmes et conditions de Dirichlet
 
@@ -329,22 +342,35 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
 - [x] `Assembly::Kokkos<LinearSystem<SparseMatrix, Vector>, Problem<...>>`
       simple champ et multi-champs (`Problem(u, p, v, q)`, blocs par
       UUID): intégrateurs locaux et linéaires sur device, formes
-      préassemblées et élimination des valeurs de Dirichlet sur l'hôte,
-      identiques aux assemblages hôtes.
-- [x] `Internal::forEachDeviceEntry` et `Internal::ConstrainedSystem`
-      partagés par les assemblages de formes et de problèmes.
+      préassemblées, élimination des valeurs de Dirichlet et matrice
+      compressée sur le device (`DeviceSystem`, section 16), identiques
+      bit à bit aux assemblages hôtes.
+- [x] `DeviceSystem` partagé par les assemblages de formes et de
+      problèmes.
 - [x] Tests `RodinKokkosVariationalProblemTest` comparés a l'hôte a 1e-12:
       Poisson avec lambda, constante, `.on()` et bord complet (triangles,
       mixte, tétraèdres), donnée `GridFunction`, problème vectoriel,
       Stokes mixte `(u, p, v, q)`, erreur sans incidence face-maille.
-- [ ] Non supportés sur device: intégrateurs globaux, conditions
-      périodiques et d'identification (`DirichletBC(u, A(v))`), qui
-      lèvent une exception.
+- [x] Intégrateurs globaux sur device: `Integral(Potential(k, u), v)`
+      sur P1 scalaire ou vectoriel (noyau `Real(x, y)` ou
+      `void(Matrix&, x, y)`), dans les formes, les problèmes simples et
+      multi-champs et l'assemblage COO PETSc, attributs de test et de
+      trial compris. Une paire de mailles par thread, dans l'ordre de
+      l'hôte: Sauter-Schwab sur les triangles coïncidents, centroïdes
+      sinon. Tests `RodinKokkosVariationalPotentialTest` et
+      `Kokkos_PETSc_Problem.PotentialOnMixedMesh` comparés a l'hôte a
+      1e-12 (triangles, tétraèdres, mixte, noyau singulier, négation).
+- [ ] Non supportés sur device: conditions périodiques et
+      d'identification (`DirichletBC(u, A(v))`), qui lèvent une
+      exception.
+- [ ] L'hôte n'a pas d'opérateur binaire `local - global` entre
+      intégrateurs bilinéaires: il faut écrire `a + -Integral(Potential(k,
+      u), v)`, et `BilinearForm` n'a que `+=` pour les globaux.
 - [ ] `DirichletBC::on(1, 3)` avec des littéraux `int` ne compile pas
       sous nvcc (conversion rétrécissante dans `FlatSet<Attribute>{a1,
       a2, as...}`); les tests passent un `FlatSet<Geometry::Attribute>`.
-- [ ] Performance: l'élimination et `setFromTriplets` restent sur l'hôte
-      (jalon 6: COO PETSc).
+- [x] Performance: l'élimination et `setFromTriplets` sont faits sur le
+      device (section 16).
 
 ## 11. DSL device, jalon 6: assemblage COO PETSc
 
@@ -446,9 +472,18 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       et `RodinKokkosPETScProblemTest`.
 - [ ] `.over()` renvoie la base de l'intégrateur: les tests passent par une
       copie typée pour garder le type device.
-- [ ] Non supportés sur device: `Dot` de deux fonctions (par exemple
-      `Dot(g, n)` comme coefficient), `Grad` d'une fonction test sur une
-      face, élasticité sur d'autres espaces que le P1 vectoriel.
+- [x] `Dot` de deux fonctions sur device (par exemple `Dot(Grad(g), n)`
+      comme coefficient). `Grad`, `Jacobian` et `Div` d'une GridFunction
+      évalués sur une face le sont dans la maille incidente, comme l'hôte:
+      la seule sur le bord, celle du trace domain sur une interface (le
+      noyau s'arrête s'il n'y en a pas). Testé sur le bord et sur les
+      interfaces avec `traceOf`.
+- [x] `Grad` et `Jacobian` d'une fonction test sur une face (bord et
+      faces intérieures): gradient tangentiel de la face, comme l'hôte.
+- [x] Élasticité sur les espaces H1 vectoriels device: une base commune
+      `Kokkos::Variational::LinearElasticityIntegratorBase` et deux
+      spécialisations (P1 et H1 vectoriels). Testé en H1 quadratique sur
+      triangles et tétraèdres (`RodinKokkosVariationalH1Test`).
 
 ## 14. DSL device, jalon 9: exemples sur GPU
 
@@ -476,8 +511,8 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       dans les en-têtes Kokkos sous nvcc: les exemples la placent dans
       `main`.
 - [ ] Non portés: `BlockGravity` et `CantileverBeam` (néo-hookéen et
-      Newton, hôte seulement), `Darcy` (vide), les exemples P2 (`Stokes`,
-      `NavierStokes`, jalon 10) et les autres thèmes.
+      Newton, hôte seulement), `Darcy` (vide), `NavierStokes` et les
+      autres thèmes. `Stokes` est porté au jalon 10.
 
 ## 15. DSL device, jalon 10: H1 d'ordre 2, Taylor-Hood et P0g
 
@@ -503,8 +538,7 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       tests): formes scalaires et vectorielles (masse, gradient,
       jacobienne, divergence, coefficients et `GridFunction` H1), couplages
       Taylor-Hood, formes de bord, de faces et d'interface, problèmes avec
-      Dirichlet, Stokes Taylor-Hood avec multiplicateur P0g, refus des
-      quadrilatères.
+      Dirichlet, Stokes Taylor-Hood avec multiplicateur P0g.
 - [x] Correctif hôte: la forme linéaire `Integral` exige un intégrande
       scalaire (`ScalarValuedIntegrand`).
 - [x] Un intégrateur multiplié par un réel (`viscosity * Integral(...)`)
@@ -516,7 +550,20 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       P2/P1 avec multiplicateur P0g sur device, résolue par `SparseLU`.
       Sorties comparées à l'exemple hôte: maillage identique, vitesse à
       1e-14, pression à 2e-11 pour un maximum de 10.
-- [ ] H1 d'ordre 3 et plus, H1 sur quadrilatères et hexaèdres.
+- [x] H1 d'ordre K quelconque sur toutes les géométries sauf la pyramide
+      (`LagrangeBasis`, `LagrangeDOFs`): base en monômes des coordonnées
+      de référence, coefficients par inversion de la Vandermonde aux noeuds
+      hôtes (Fekete, GLL) en précision étendue. La forme close de l'ordre 2
+      reste sur les simplexes (Stokes identique au bit près). Numérotation
+      à pas fixe par dimension, avec offsets sur les maillages mixtes.
+      Tests à 1e-12: K=3 sur triangles et tétraèdres, K=2 sur quadrangles,
+      hexaèdres et maillage mixte, K=3 sur quadrangles, refus des pyramides
+      (29 tests).
+- [ ] Matrice locale par thread limitée à 8192 coefficients
+      (`LocalCapacity`): hexaèdres vectoriels d'ordre 3 refusés. Une
+      stratégie par équipe (une équipe par cellule, matrice en mémoire
+      partagée) serait nécessaire pour les ordres élevés, et pour les
+      performances dès l'ordre 2 sur hexaèdres.
 
 ## 16. Optimisations génériques de l'assemblage device
 
@@ -565,3 +612,21 @@ cellules, CUDA sm_75).
       fautes de page des tampons fraîchement alloués. Avec les 112 threads
       par défaut de demeter, la copie prend 1.1 à 1.4 s: l'attente active
       des threads ralentit les parties séquentielles.
+- [x] Systèmes Eigen construits sur le device (`DeviceSystem`): les
+      contributions restent là où les intégrateurs les écrivent, leur rang
+      dans la liste de l'hôte est calculé à partir de leur position. Le
+      tri par coefficient (puis par ligne pour l'élimination et le second
+      membre) porte le numéro de la maille dans les bits de poids faible
+      de la clé, ce qui laisse les contributions d'un coefficient dans
+      l'ordre de l'hôte; un tri par insertion par groupe rattrape un tri
+      instable. Les sommes suivent l'ordre de `setFromTriplets()`, les
+      produits de l'élimination sont arrondis avant d'être sommés (pas de
+      FMA), et seuls la matrice compressée et le second membre sont
+      copiés sur l'hôte. Systèmes identiques bit à bit à l'assemblage
+      précédent (Poisson, élasticité, bord mixte, Stokes). Poisson P1 sur
+      706k tétraèdres: de 750 ms à 36.3 ms par assemblage; problème
+      vectoriel: de 4516 ms à 92.6 ms. Il reste environ 10 ms de tris
+      radix et 10 ms de copie vers l'hôte (mémoire non épinglée).
+- [ ] Assemblage COO PETSc (`DeviceCOOSystem`): l'élimination et le
+      second membre utilisent encore `atomic_add`, donc un ordre de somme
+      non déterministe.

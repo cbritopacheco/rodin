@@ -77,6 +77,36 @@ namespace Rodin::Tests::Unit
     expectSameForm(hu, hv, Integral(hf * hu, hv), du, dv, Integral(df * du, dv));
   }
 
+  /// @brief Matrix coefficients contracted with Jacobians match the host.
+  void checkMatrixCoefficient(const HostMesh& source)
+  {
+    const DeviceMesh mesh(TestContext{}, source);
+    const size_t d = source.getSpaceDimension();
+    P1 hfes(source, d);
+    P1 dfes(mesh, d);
+    TrialFunction hu(hfes);
+    TestFunction hv(hfes);
+    TrialFunction du(dfes);
+    TestFunction dv(dfes);
+
+    Math::SpatialMatrix<Real> a(d, d);
+    for (size_t i = 0; i < d; ++i)
+      for (size_t j = 0; j < d; ++j)
+        a(i, j) = 1 + Real(i) - 2 * Real(j) + Real(i == j);
+    MatrixFunction ha(a);
+    MatrixFunction da(a);
+    expectSameForm(hu, hv, Integral(Dot(ha, Jacobian(hu)), Dot(ha, Jacobian(hv))), du, dv,
+      Integral(Dot(da, Jacobian(du)), Dot(da, Jacobian(dv))));
+
+    GridFunction hw(hfes);
+    GridFunction dw(dfes);
+    fill(hw, source, d);
+    fill(dw, source, d);
+    expectSameForm(hu, hv,
+      Integral(Dot(Jacobian(hw), Jacobian(hu)), Dot(ha, Jacobian(hv))), du, dv,
+      Integral(Dot(Jacobian(dw), Jacobian(du)), Dot(da, Jacobian(dv))));
+  }
+
   /// @brief Velocity and pressure coupling forms match the host.
   void checkMixedForms(const HostMesh& source)
   {
@@ -142,6 +172,21 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_Variational_VectorBilinearForm, CoefficientOnMixedMesh)
   {
     checkVectorCoefficient(makeMixedMesh());
+  }
+
+  TEST(Kokkos_Variational_VectorBilinearForm, MatrixCoefficientOnTriangles)
+  {
+    checkMatrixCoefficient(makeTriangleMesh());
+  }
+
+  TEST(Kokkos_Variational_VectorBilinearForm, MatrixCoefficientOnMixedMesh)
+  {
+    checkMatrixCoefficient(makeMixedMesh());
+  }
+
+  TEST(Kokkos_Variational_VectorBilinearForm, MatrixCoefficientOnTetrahedra)
+  {
+    checkMatrixCoefficient(makeTetrahedronMesh());
   }
 
   TEST(Kokkos_Variational_VectorBilinearForm, MixedFormsOnTriangles)

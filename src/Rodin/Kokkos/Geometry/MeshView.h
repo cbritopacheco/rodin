@@ -834,6 +834,19 @@ namespace Rodin::Kokkos::Geometry
         return m_polytope;
       }
 
+      /**
+       * @brief Carries a point of a face to an incident cell.
+       * @param cell Index of a cell incident to the face of the point.
+       * @return Same physical point, bound to the cell.
+       *
+       * The cell reference coordinates interpolate, with the P1 basis of the
+       * face, the reference vertices of the cell at the vertices of the face.
+       * This is exact since every reference face is mapped onto the
+       * reference cell by an affine map.
+       */
+      KOKKOS_INLINE_FUNCTION
+      PointView getCellPoint(Index cell) const;
+
       /// @brief Returns reference coordinates. @return Owned reference tuple.
       KOKKOS_INLINE_FUNCTION
       const Vector& getReferenceCoordinates() const
@@ -1184,6 +1197,61 @@ namespace Rodin::Kokkos::Geometry
   PointView PolytopeView::getPoint(const Vector& reference) const
   {
     return {*this, reference};
+  }
+
+  /**
+   * @brief Gets a coordinate of a reference vertex.
+   *
+   * The reference vertices follow Rodin::Geometry::Polytope::Traits: the
+   * origin and the unit vectors on a simplex, the counterclockwise unit
+   * square or cube on a quadrilateral or hexahedron, the reference triangle
+   * extruded along @f$ z @f$ on a wedge, and the unit square with the apex
+   * @f$ (0, 0, 1) @f$ on a pyramid.
+   *
+   * @param type Reference geometry.
+   * @param a Local vertex index.
+   * @param d Coordinate index.
+   * @return Coordinate @f$ d @f$ of vertex @f$ a @f$, zero or one.
+   */
+  KOKKOS_INLINE_FUNCTION
+  Real getReferenceVertexCoordinate(
+    ::Rodin::Geometry::Polytope::Type type, Index a, Index d)
+  {
+    using Type = ::Rodin::Geometry::Polytope::Type;
+    bool upper;
+    if (type == Type::Point || type == Type::Segment || type == Type::Triangle ||
+      type == Type::Tetrahedron)
+      upper = a == d + 1;
+    else if (type == Type::Quadrilateral || type == Type::Hexahedron)
+      upper = d == 0 ? a % 4 == 1 || a % 4 == 2 : d == 1 ? a % 4 >= 2 : a >= 4;
+    else if (type == Type::Wedge)
+      upper = d < 2 ? a % 3 == d + 1 : a >= 3;
+    else
+      upper = a == 4 ? d == 2 : d == 0 ? a == 1 || a == 2 : d == 1 && a >= 2;
+    return upper ? Real(1) : Real(0);
+  }
+
+  KOKKOS_INLINE_FUNCTION
+  PointView PointView::getCellPoint(Index cell) const
+  {
+    const PolytopeView polytope = m_polytope.mesh.getCell(cell);
+    const auto type = polytope.getGeometry();
+    const IndexView cellVertices = polytope.getVertices();
+    const IndexView faceVertices = m_polytope.getVertices();
+    Vector reference(polytope.getDimension());
+    for (Index a = 0; a < faceVertices.size(); ++a)
+    {
+      Index local = 0;
+      while (local < cellVertices.size() && cellVertices[local] != faceVertices[a])
+        ++local;
+      KOKKOS_ASSERT(local < cellVertices.size());
+      Real value;
+      Vector gradient(m_reference.size());
+      evaluateBasis(a, value, gradient);
+      for (Index d = 0; d < reference.size(); ++d)
+        reference(d) += value * getReferenceVertexCoordinate(type, local, d);
+    }
+    return {polytope, reference, m_physical};
   }
 }
 

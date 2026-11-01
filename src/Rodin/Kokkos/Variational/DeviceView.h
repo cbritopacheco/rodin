@@ -23,6 +23,7 @@
 #include "Rodin/Variational/Function.h"
 #include "Rodin/Variational/RealFunction.h"
 #include "Rodin/Variational/VectorFunction.h"
+#include "Rodin/Variational/MatrixFunction.h"
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/Sum.h"
@@ -769,7 +770,9 @@ namespace Rodin::Kokkos::Variational
    * A view is built on the host from the expression and copied by value into
    * kernels. It holds no host pointer and no virtual function. Function views
    * provide `getValue(const Geometry::PointView&)`, while shape function views
-   * provide `getBasis(const IntegrationPointView&, Index)`.
+   * provide `getBasis(const IntegrationPointView&, Index, Index)`, which
+   * returns the value of component r of the basis function of the local scalar
+   * degree of freedom a. A scalar view has the single component 0.
    *
    * The primary template is left undefined so that an expression without a
    * device lowering is rejected at compile time.
@@ -783,10 +786,12 @@ namespace Rodin::Kokkos::Variational
    * | `DeviceView<RealFunction<Real>>` | Real constant. |
    * | `DeviceView<Sum<FunctionBase<L>, FunctionBase<R>>>` | Sum of functions. |
    * | `DeviceView<Mult<FunctionBase<L>, FunctionBase<R>>>` | Product of functions. |
+   * | `DeviceView<Dot<FunctionBase<L>, FunctionBase<R>>>` | Dot product of functions. |
    * | `DeviceView<UnaryMinus<FunctionBase<N>>>` | Negated function. |
    * | `DeviceView<RealFunction<Integer>>` | Integer constant. |
    * | `DeviceView<VectorFunctionBase<Scalar, Derived>>` | Forwards to the derived function. |
    * | `DeviceView<MatrixFunctionBase<Scalar, Derived>>` | Forwards to the derived function. |
+   * | `DeviceView<MatrixFunction<Matrix>>` | Constant matrix. |
    * | `DeviceView<GradBase<Operand, Derived>>` | Forwards to the derived function. |
    * | `DeviceView<JacobianBase<Operand, Derived>>` | Forwards to the derived function. |
    * | `DeviceView<DivBase<Operand, Derived>>` | Forwards to the derived function. |
@@ -842,11 +847,12 @@ namespace Rodin::Kokkos::Variational
     template <class View>
     struct BoundBasis
     {
-      /// @param local Local index. @return Basis value.
+      /// @param dof Local scalar degree of freedom.
+      /// @param component Vector component. @return Basis value.
       KOKKOS_INLINE_FUNCTION
-      decltype(auto) getBasis(Index local) const
+      decltype(auto) getBasis(Index dof, Index component) const
       {
-        return view.getBasis(ip, local);
+        return view.getBasis(ip, dof, component);
       }
 
       /// @brief Shape function view.
@@ -860,11 +866,12 @@ namespace Rodin::Kokkos::Variational
     template <class Value, class Basis>
     struct LeftScaledBasis
     {
-      /// @param local Local index. @return Scaled basis value.
+      /// @param dof Local scalar degree of freedom.
+      /// @param component Vector component. @return Scaled basis value.
       KOKKOS_INLINE_FUNCTION
-      auto getBasis(Index local) const
+      auto getBasis(Index dof, Index component) const
       {
-        return mult(value, basis.getBasis(local));
+        return mult(value, basis.getBasis(dof, component));
       }
 
       /// @brief Function value.
@@ -878,11 +885,12 @@ namespace Rodin::Kokkos::Variational
     template <class Basis, class Value>
     struct RightScaledBasis
     {
-      /// @param local Local index. @return Scaled basis value.
+      /// @param dof Local scalar degree of freedom.
+      /// @param component Vector component. @return Scaled basis value.
       KOKKOS_INLINE_FUNCTION
-      auto getBasis(Index local) const
+      auto getBasis(Index dof, Index component) const
       {
-        return mult(basis.getBasis(local), value);
+        return mult(basis.getBasis(dof, component), value);
       }
 
       /// @brief Bound basis.
@@ -896,11 +904,12 @@ namespace Rodin::Kokkos::Variational
     template <class Value, class Basis>
     struct DotBasis
     {
-      /// @param local Local index. @return Dot product value.
+      /// @param dof Local scalar degree of freedom.
+      /// @param component Vector component. @return Dot product value.
       KOKKOS_INLINE_FUNCTION
-      Real getBasis(Index local) const
+      Real getBasis(Index dof, Index component) const
       {
-        return dot(value, basis.getBasis(local));
+        return dot(value, basis.getBasis(dof, component));
       }
 
       /// @brief Function value.
@@ -914,11 +923,12 @@ namespace Rodin::Kokkos::Variational
     template <class LHS, class RHS>
     struct SumBasis
     {
-      /// @param local Local index. @return Sum of the basis values.
+      /// @param dof Local scalar degree of freedom.
+      /// @param component Vector component. @return Sum of the basis values.
       KOKKOS_INLINE_FUNCTION
-      auto getBasis(Index local) const
+      auto getBasis(Index dof, Index component) const
       {
-        return add(lhs.getBasis(local), rhs.getBasis(local));
+        return add(lhs.getBasis(dof, component), rhs.getBasis(dof, component));
       }
 
       /// @brief Left bound basis.
@@ -932,11 +942,12 @@ namespace Rodin::Kokkos::Variational
     template <class Basis>
     struct NegatedBasis
     {
-      /// @param local Local index. @return Opposite basis value.
+      /// @param dof Local scalar degree of freedom.
+      /// @param component Vector component. @return Opposite basis value.
       KOKKOS_INLINE_FUNCTION
-      auto getBasis(Index local) const
+      auto getBasis(Index dof, Index component) const
       {
-        return mult(Real(-1), basis.getBasis(local));
+        return mult(Real(-1), basis.getBasis(dof, component));
       }
 
       /// @brief Bound basis.
@@ -947,11 +958,12 @@ namespace Rodin::Kokkos::Variational
     template <class Basis>
     struct TransposedBasis
     {
-      /// @param local Local index. @return Transposed basis value.
+      /// @param dof Local scalar degree of freedom.
+      /// @param component Vector component. @return Transposed basis value.
       KOKKOS_INLINE_FUNCTION
-      Geometry::Matrix getBasis(Index local) const
+      Geometry::Matrix getBasis(Index dof, Index component) const
       {
-        return transpose(basis.getBasis(local));
+        return transpose(basis.getBasis(dof, component));
       }
 
       /// @brief Bound basis.
@@ -965,11 +977,11 @@ namespace Rodin::Kokkos::Variational
    * The functions multiplying the basis are evaluated once at the point,
    * instead of once per local basis function. Views that hold no function
    * are evaluated through their `getBasis(const IntegrationPointView&,
-   * Index)`.
+   * Index, Index)`.
    *
    * @param view Shape function view.
    * @param ip Integration point, which must outlive the result.
-   * @return Object providing `getBasis(Index)`.
+   * @return Object providing `getBasis(Index, Index)`.
    */
   template <class View>
   KOKKOS_INLINE_FUNCTION auto bindBasis(const View& view, const IntegrationPointView& ip)
@@ -1125,6 +1137,34 @@ namespace Rodin::Kokkos::Variational
     DeviceView<::Rodin::Variational::FunctionBase<RHSDerived>> rhs;
   };
 
+  /// @brief Dot product of two functions.
+  template <class LHSDerived, class RHSDerived>
+  struct DeviceView<
+    ::Rodin::Variational::Dot<::Rodin::Variational::FunctionBase<LHSDerived>,
+      ::Rodin::Variational::FunctionBase<RHSDerived>>>
+  {
+    /// @param node Function expression.
+    DeviceView(
+      const ::Rodin::Variational::Dot<::Rodin::Variational::FunctionBase<LHSDerived>,
+        ::Rodin::Variational::FunctionBase<RHSDerived>>& node)
+      : lhs(node.getLHS()),
+        rhs(node.getRHS())
+    {}
+
+    /// @param p Device or integration point. @return Function value.
+    template <class Point>
+    KOKKOS_INLINE_FUNCTION Real getValue(const Point& p) const
+    {
+      return dot(evaluate(lhs, p), evaluate(rhs, p));
+    }
+
+    /// @brief Left operand.
+    DeviceView<::Rodin::Variational::FunctionBase<LHSDerived>> lhs;
+
+    /// @brief Right operand.
+    DeviceView<::Rodin::Variational::FunctionBase<RHSDerived>> rhs;
+  };
+
   /// @brief Negated function.
   template <class NestedDerived>
   struct DeviceView<
@@ -1187,6 +1227,41 @@ namespace Rodin::Kokkos::Variational
     DeviceView(const ::Rodin::Variational::MatrixFunctionBase<Scalar, Derived>& node)
       : DeviceView<Derived>(static_cast<const Derived&>(node))
     {}
+  };
+
+  /// @brief Constant matrix of at most three rows and three columns.
+  template <class Matrix>
+    requires std::is_same_v<Matrix, Math::Matrix<Real>> ||
+    std::is_same_v<Matrix, Math::SpatialMatrix<Real>>
+  struct DeviceView<::Rodin::Variational::MatrixFunction<Matrix>>
+  {
+    /// @param node Function expression.
+    DeviceView(const ::Rodin::Variational::MatrixFunction<Matrix>& node)
+    {
+      const auto& matrix = node.getValue();
+      if (matrix.rows() > 3 || matrix.cols() > 3)
+      {
+        Alert::Exception()
+          << "Matrix functions on Kokkos meshes have at most three rows and three "
+             "columns."
+          << Alert::Raise;
+      }
+      value = Geometry::Matrix(matrix.rows(), matrix.cols());
+      for (Index r = 0; r < value.rows(); ++r)
+        for (Index c = 0; c < value.cols(); ++c)
+          value(r, c) = matrix(r, c);
+    }
+
+    /// @param p Device or integration point, unused. @return Constant value.
+    template <class Point>
+    KOKKOS_INLINE_FUNCTION Geometry::Matrix getValue(
+      [[maybe_unused]] const Point& p) const
+    {
+      return value;
+    }
+
+    /// @brief Constant value.
+    Geometry::Matrix value;
   };
 
   /// @brief Forwards a gradient of a function to its derived type.
@@ -1403,6 +1478,87 @@ namespace Rodin::Kokkos::Variational
   };
 
   /**
+   * @brief Trace domain of a function, in device memory.
+   *
+   * A derivative of a grid function evaluated on a face is that of an
+   * incident cell, as on the host. A boundary face has a single incident
+   * cell. On an interface, the cell is the one whose attribute is in the
+   * trace domain, and a kernel evaluating it with no such cell aborts.
+   */
+  class TraceDomainView
+  {
+    public:
+      /// @brief Maximum number of attributes.
+      static constexpr Index Capacity = 16;
+
+      /// @brief Constructs the empty trace domain.
+      TraceDomainView() = default;
+
+      /**
+       * @brief Copies a trace domain.
+       * @param domain Attributes of the cells giving the trace.
+       */
+      explicit TraceDomainView(const FlatSet<::Rodin::Geometry::Attribute>& domain)
+        : m_count(domain.size())
+      {
+        if (m_count > Capacity)
+        {
+          Alert::Exception() << "Device trace domains hold at most " << Capacity
+                             << " attributes." << Alert::Raise;
+        }
+        Index i = 0;
+        for (const auto& attribute : domain)
+          m_attributes[i++] = attribute;
+      }
+
+      /**
+       * @brief Tests whether a point lies on a face.
+       * @param p Device point. @return Whether the point is bound to a face.
+       */
+      KOKKOS_INLINE_FUNCTION
+      static bool isFace(const Geometry::PointView& p)
+      {
+        const auto& polytope = p.getPolytope();
+        return polytope.getDimension() + 1 == polytope.mesh.getDimension();
+      }
+
+      /**
+       * @brief Carries a point of a face to the cell giving the trace.
+       * @param p Point on a face; face-to-cell incidence must be computed.
+       * @return Same physical point, bound to the cell.
+       */
+      KOKKOS_INLINE_FUNCTION
+      Geometry::PointView getCellPoint(const Geometry::PointView& p) const
+      {
+        const auto& face = p.getPolytope();
+        const Index d = face.mesh.getDimension();
+        const auto connectivity = face.mesh.getConnectivity();
+        KOKKOS_ASSERT(connectivity.hasIncidence(d - 1, d));
+        const auto cells = connectivity.getIncidence(d - 1, d, face.getIndex());
+        if (cells.size() == 1)
+          return p.getCellPoint(cells[0]);
+        for (Index c = 0; c < cells.size(); ++c)
+        {
+          const auto cell = face.mesh.getCell(cells[c]);
+          if (!cell.hasAttribute())
+            continue;
+          for (Index i = 0; i < m_count; ++i)
+          {
+            if (m_attributes[i] == cell.getAttribute())
+              return p.getCellPoint(cells[c]);
+          }
+        }
+        ::Kokkos::abort(
+          "Rodin: derivative at an interface with no cell in the trace domain.");
+        return p;
+      }
+
+    private:
+      Index m_count = 0;
+      ::Kokkos::Array<::Rodin::Geometry::Attribute, Capacity> m_attributes = {};
+  };
+
+  /**
    * @brief Coefficients of a grid function of a device space in device
    * memory.
    *
@@ -1488,11 +1644,93 @@ namespace Rodin::Kokkos::Variational
       /**
        * @brief Interpolates the physical Jacobian.
        * @param p Device point.
+       * @param trace Trace domain, used when the point lies on an interface.
+       * @return Matrix with one row per component, row @f$ r @f$ holding
+       * @f$ \nabla u_r(p) @f$.
+       *
+       * On a face, the Jacobian is that of an incident cell.
+       */
+      KOKKOS_INLINE_FUNCTION
+      Geometry::Matrix interpolateJacobian(
+        const Geometry::PointView& p, const TraceDomainView& trace = {}) const
+      {
+        return TraceDomainView::isFace(p) ? getCellJacobian(trace.getCellPoint(p))
+                                          : getCellJacobian(p);
+      }
+
+      /**
+       * @brief Interpolates the divergence.
+       * @param p Device point.
+       * @param trace Trace domain, used when the point lies on an interface.
+       * @return Trace of interpolateJacobian(p), summed in the same order.
+       */
+      KOKKOS_INLINE_FUNCTION
+      Real interpolateDivergence(
+        const Geometry::PointView& p, const TraceDomainView& trace = {}) const
+      {
+        return TraceDomainView::isFace(p) ? getCellDivergence(trace.getCellPoint(p))
+                                          : getCellDivergence(p);
+      }
+
+      /**
+       * @brief Interpolates one component with the basis of an integration
+       * point.
+       * @param ip Integration point on a polytope of the space mesh.
+       * @param r Component index.
+       * @return Component @f$ u_r(p) @f$.
+       */
+      KOKKOS_INLINE_FUNCTION
+      Real interpolate(const IntegrationPointView& ip, Index r) const
+      {
+        const auto dofs = m_dofs.bind(ip.getPoint().getPolytope());
+        Real result = 0;
+        for (Index q = 0; q < dofs.size(); ++q)
+          result += m_dofs.getBasis(ip, q) * m_data(dofs[q] + r * m_dofs.getStride());
+        return result;
+      }
+
+      /**
+       * @brief Interpolates the physical Jacobian with the basis gradients of
+       * an integration point.
+       * @param ip Integration point on a polytope of the space mesh.
+       * @param trace Trace domain, used when the point lies on an interface.
        * @return Matrix with one row per component, row @f$ r @f$ holding
        * @f$ \nabla u_r(p) @f$.
        */
       KOKKOS_INLINE_FUNCTION
-      Geometry::Matrix interpolateJacobian(const Geometry::PointView& p) const
+      Geometry::Matrix interpolateJacobian(
+        const IntegrationPointView& ip, const TraceDomainView& trace = {}) const
+      {
+        return TraceDomainView::isFace(ip.getPoint())
+          ? getCellJacobian(trace.getCellPoint(ip.getPoint()))
+          : getCellJacobian(ip);
+      }
+
+      /**
+       * @brief Interpolates the divergence with the basis gradients of an
+       * integration point.
+       * @param ip Integration point on a polytope of the space mesh.
+       * @param trace Trace domain, used when the point lies on an interface.
+       * @return Trace of interpolateJacobian(ip), summed in the same order.
+       */
+      KOKKOS_INLINE_FUNCTION
+      Real interpolateDivergence(
+        const IntegrationPointView& ip, const TraceDomainView& trace = {}) const
+      {
+        return TraceDomainView::isFace(ip.getPoint())
+          ? getCellDivergence(trace.getCellPoint(ip.getPoint()))
+          : getCellDivergence(ip);
+      }
+
+    private:
+      /**
+       * @brief Interpolates the physical Jacobian at a point of a cell.
+       *
+       * The P1 basis is evaluated directly at the point, the other bases
+       * through an IntegrationPointView of the point.
+       */
+      KOKKOS_INLINE_FUNCTION
+      Geometry::Matrix getCellJacobian(const Geometry::PointView& p) const
       {
         if constexpr (std::is_same_v<DOFsType, VertexDOFs>)
         {
@@ -1519,36 +1757,47 @@ namespace Rodin::Kokkos::Variational
         }
         else
         {
-          return interpolateJacobian(IntegrationPointView(p));
+          return getCellJacobian(IntegrationPointView(p));
         }
       }
 
-      /**
-       * @brief Interpolates one component with the basis of an integration
-       * point.
-       * @param ip Integration point on a polytope of the space mesh.
-       * @param r Component index.
-       * @return Component @f$ u_r(p) @f$.
-       */
+      /// @brief Interpolates the divergence at a point of a cell.
       KOKKOS_INLINE_FUNCTION
-      Real interpolate(const IntegrationPointView& ip, Index r) const
+      Real getCellDivergence(const Geometry::PointView& p) const
       {
-        const auto dofs = m_dofs.bind(ip.getPoint().getPolytope());
-        Real result = 0;
-        for (Index q = 0; q < dofs.size(); ++q)
-          result += m_dofs.getBasis(ip, q) * m_data(dofs[q] + r * m_dofs.getStride());
-        return result;
+        if constexpr (std::is_same_v<DOFsType, VertexDOFs>)
+        {
+          const auto vertices = p.getPolytope().getVertices();
+          const Geometry::Matrix inverse = p.getJacobianInverse();
+          const Index rdim = inverse.rows();
+          KOKKOS_ASSERT(m_vdim == inverse.cols());
+          Real result = 0;
+          for (Index r = 0; r < m_vdim; ++r)
+          {
+            Real diagonal = 0;
+            for (Index a = 0; a < vertices.size(); ++a)
+            {
+              Real phi;
+              Geometry::Vector reference(rdim);
+              p.evaluateBasis(a, phi, reference);
+              Real gradient = 0;
+              for (Index k = 0; k < rdim; ++k)
+                gradient += inverse(k, r) * reference(k);
+              diagonal += gradient * m_data(vertices[a] + r * m_dofs.getStride());
+            }
+            result += diagonal;
+          }
+          return result;
+        }
+        else
+        {
+          return getCellDivergence(IntegrationPointView(p));
+        }
       }
 
-      /**
-       * @brief Interpolates the physical Jacobian with the basis gradients of
-       * an integration point.
-       * @param ip Integration point on a polytope of the space mesh.
-       * @return Matrix with one row per component, row @f$ r @f$ holding
-       * @f$ \nabla u_r(p) @f$.
-       */
+      /// @brief Interpolates the physical Jacobian at an integration point of a cell.
       KOKKOS_INLINE_FUNCTION
-      Geometry::Matrix interpolateJacobian(const IntegrationPointView& ip) const
+      Geometry::Matrix getCellJacobian(const IntegrationPointView& ip) const
       {
         const auto dofs = m_dofs.bind(ip.getPoint().getPolytope());
         const Index sdim = ip.getGradient(0).size();
@@ -1566,7 +1815,25 @@ namespace Rodin::Kokkos::Variational
         return result;
       }
 
-    private:
+      /// @brief Interpolates the divergence at an integration point of a cell.
+      KOKKOS_INLINE_FUNCTION
+      Real getCellDivergence(const IntegrationPointView& ip) const
+      {
+        const auto dofs = m_dofs.bind(ip.getPoint().getPolytope());
+        KOKKOS_ASSERT(m_vdim == ip.getGradient(0).size());
+        Real result = 0;
+        for (Index r = 0; r < m_vdim; ++r)
+        {
+          Real diagonal = 0;
+          for (Index q = 0; q < dofs.size(); ++q)
+          {
+            diagonal +=
+              m_dofs.getGradient(ip, q)(r) * m_data(dofs[q] + r * m_dofs.getStride());
+          }
+          result += diagonal;
+        }
+        return result;
+      }
       Index m_vdim;
       DOFsType m_dofs;
       ::Kokkos::View<Real*, MemorySpace> m_data;
@@ -1630,14 +1897,15 @@ namespace Rodin::Kokkos::Variational
     DeviceView(
       const ::Rodin::Variational::Grad<::Rodin::Variational::GridFunction<FES, Data>>&
         node)
-      : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData())
+      : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData()),
+        trace(node.getTraceDomain())
     {}
 
     /// @param p Device or integration point. @return Gradient @f$ \nabla u(p) @f$.
     template <class Point>
     KOKKOS_INLINE_FUNCTION Geometry::Vector getValue(const Point& p) const
     {
-      const Geometry::Matrix jacobian = u.interpolateJacobian(p);
+      const Geometry::Matrix jacobian = u.interpolateJacobian(p, trace);
       Geometry::Vector result(jacobian.cols());
       for (Index c = 0; c < jacobian.cols(); ++c)
         result(c) = jacobian(0, c);
@@ -1646,6 +1914,9 @@ namespace Rodin::Kokkos::Variational
 
     /// @brief Device coefficients.
     GridFunctionView<FES> u;
+
+    /// @brief Trace domain of the derivative on interfaces.
+    TraceDomainView trace;
   };
 
   /// @brief Physical Jacobian of a vector grid function.
@@ -1656,18 +1927,22 @@ namespace Rodin::Kokkos::Variational
     /// @param node Jacobian expression.
     DeviceView(const ::Rodin::Variational::Jacobian<
       ::Rodin::Variational::GridFunction<FES, Data>>& node)
-      : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData())
+      : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData()),
+        trace(node.getTraceDomain())
     {}
 
     /// @param p Device or integration point. @return Jacobian @f$ \nabla u(p) @f$.
     template <class Point>
     KOKKOS_INLINE_FUNCTION Geometry::Matrix getValue(const Point& p) const
     {
-      return u.interpolateJacobian(p);
+      return u.interpolateJacobian(p, trace);
     }
 
     /// @brief Device coefficients.
     GridFunctionView<FES> u;
+
+    /// @brief Trace domain of the derivative on interfaces.
+    TraceDomainView trace;
   };
 
   /// @brief Divergence of a vector grid function.
@@ -1679,23 +1954,22 @@ namespace Rodin::Kokkos::Variational
     DeviceView(
       const ::Rodin::Variational::Div<::Rodin::Variational::GridFunction<FES, Data>>&
         node)
-      : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData())
+      : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData()),
+        trace(node.getTraceDomain())
     {}
 
     /// @param p Device or integration point. @return Divergence @f$ \nabla \cdot u(p) @f$.
     template <class Point>
     KOKKOS_INLINE_FUNCTION Real getValue(const Point& p) const
     {
-      const Geometry::Matrix jacobian = u.interpolateJacobian(p);
-      KOKKOS_ASSERT(jacobian.rows() == jacobian.cols());
-      Real result = 0;
-      for (Index r = 0; r < jacobian.rows(); ++r)
-        result += jacobian(r, r);
-      return result;
+      return u.interpolateDivergence(p, trace);
     }
 
     /// @brief Device coefficients.
     GridFunctionView<FES> u;
+
+    /// @brief Trace domain of the derivative on interfaces.
+    TraceDomainView trace;
   };
 
   /// @brief Forwards a shape function to its derived type.
@@ -1719,11 +1993,13 @@ namespace Rodin::Kokkos::Variational
       : dofs(node.getFiniteElementSpace().getDeviceDOFs())
     {}
 
-    /// @param ip Quadrature point. @param local Local index. @return Basis value.
+    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
+    /// @param component Vector component. @return Basis value.
     KOKKOS_INLINE_FUNCTION
-    Real getBasis(const IntegrationPointView& ip, Index local) const
+    Real getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
-      return dofs.getBasis(ip, local);
+      KOKKOS_ASSERT(component == 0);
+      return dofs.getBasis(ip, dof);
     }
 
     /// @brief Device degrees of freedom.
@@ -1742,11 +2018,14 @@ namespace Rodin::Kokkos::Variational
       : dofs(node.getOperand().getFiniteElementSpace().getDeviceDOFs())
     {}
 
-    /// @param ip Quadrature point. @param local Local index. @return Gradient.
+    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
+    /// @param component Vector component. @return Gradient.
     KOKKOS_INLINE_FUNCTION
-    decltype(auto) getBasis(const IntegrationPointView& ip, Index local) const
+    decltype(auto) getBasis(
+      const IntegrationPointView& ip, Index dof, Index component) const
     {
-      return dofs.getGradient(ip, local);
+      KOKKOS_ASSERT(component == 0);
+      return dofs.getGradient(ip, dof);
     }
 
     /// @brief Device degrees of freedom.
@@ -1768,11 +2047,12 @@ namespace Rodin::Kokkos::Variational
         rhs(node.getRHS())
     {}
 
-    /// @param ip Quadrature point. @param local Local index. @return Scaled basis value.
+    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
+    /// @param component Vector component. @return Scaled basis value.
     KOKKOS_INLINE_FUNCTION
-    auto getBasis(const IntegrationPointView& ip, Index local) const
+    auto getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
-      return mult(evaluate(lhs, ip), rhs.getBasis(ip, local));
+      return mult(evaluate(lhs, ip), rhs.getBasis(ip, dof, component));
     }
 
     /// @param ip Integration point. @return View bound to the point.
@@ -1807,11 +2087,12 @@ namespace Rodin::Kokkos::Variational
         rhs(node.getRHS())
     {}
 
-    /// @param ip Quadrature point. @param local Local index. @return Scaled basis value.
+    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
+    /// @param component Vector component. @return Scaled basis value.
     KOKKOS_INLINE_FUNCTION
-    auto getBasis(const IntegrationPointView& ip, Index local) const
+    auto getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
-      return mult(lhs.getBasis(ip, local), evaluate(rhs, ip));
+      return mult(lhs.getBasis(ip, dof, component), evaluate(rhs, ip));
     }
 
     /// @param ip Integration point. @return View bound to the point.
@@ -1846,11 +2127,12 @@ namespace Rodin::Kokkos::Variational
         rhs(node.getRHS())
     {}
 
-    /// @param ip Quadrature point. @param local Local index. @return Dot product value.
+    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
+    /// @param component Vector component. @return Dot product value.
     KOKKOS_INLINE_FUNCTION
-    Real getBasis(const IntegrationPointView& ip, Index local) const
+    Real getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
-      return dot(evaluate(lhs, ip), rhs.getBasis(ip, local));
+      return dot(evaluate(lhs, ip), rhs.getBasis(ip, dof, component));
     }
 
     /// @param ip Integration point. @return View bound to the point.
@@ -1886,11 +2168,14 @@ namespace Rodin::Kokkos::Variational
         dofs(node.getFiniteElementSpace().getDeviceDOFs())
     {}
 
-    /// @param ip Quadrature point. @param local Local index. @return Basis value.
+    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
+    /// @param component Vector component. @return Basis value.
     KOKKOS_INLINE_FUNCTION
-    UnitVector getBasis(const IntegrationPointView& ip, Index local) const
+    UnitVector getBasis(
+      const IntegrationPointView& ip, Index dof, Index component) const
     {
-      return {vdim, local % vdim, dofs.getBasis(ip, local / vdim)};
+      KOKKOS_ASSERT(component < vdim);
+      return {vdim, component, dofs.getBasis(ip, dof)};
     }
 
     /// @brief Vector dimension.
@@ -1918,11 +2203,13 @@ namespace Rodin::Kokkos::Variational
         dofs(node.getFiniteElementSpace().getDeviceDOFs())
     {}
 
-    /// @param ip Quadrature point. @param local Local index. @return Jacobian.
+    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
+    /// @param component Vector component. @return Jacobian.
     KOKKOS_INLINE_FUNCTION
-    RowMatrix getBasis(const IntegrationPointView& ip, Index local) const
+    RowMatrix getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
-      return {vdim, local % vdim, dofs.getGradient(ip, local / vdim)};
+      KOKKOS_ASSERT(component < vdim);
+      return {vdim, component, dofs.getGradient(ip, dof)};
     }
 
     /// @brief Vector dimension.
@@ -1949,11 +2236,13 @@ namespace Rodin::Kokkos::Variational
         dofs(node.getFiniteElementSpace().getDeviceDOFs())
     {}
 
-    /// @param ip Quadrature point. @param local Local index. @return Divergence.
+    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
+    /// @param component Vector component. @return Divergence.
     KOKKOS_INLINE_FUNCTION
-    Real getBasis(const IntegrationPointView& ip, Index local) const
+    Real getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
-      return dofs.getGradient(ip, local / vdim)(local % vdim);
+      KOKKOS_ASSERT(component < vdim);
+      return dofs.getGradient(ip, dof)(component);
     }
 
     /// @brief Vector dimension.
@@ -1978,11 +2267,12 @@ namespace Rodin::Kokkos::Variational
         rhs(node.getRHS())
     {}
 
-    /// @param ip Quadrature point. @param local Local index. @return Basis value.
+    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
+    /// @param component Vector component. @return Basis value.
     KOKKOS_INLINE_FUNCTION
-    auto getBasis(const IntegrationPointView& ip, Index local) const
+    auto getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
-      return add(lhs.getBasis(ip, local), rhs.getBasis(ip, local));
+      return add(lhs.getBasis(ip, dof, component), rhs.getBasis(ip, dof, component));
     }
 
     /// @param ip Integration point. @return View bound to the point.
@@ -2014,11 +2304,12 @@ namespace Rodin::Kokkos::Variational
       : operand(node.getOperand())
     {}
 
-    /// @param ip Quadrature point. @param local Local index. @return Basis value.
+    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
+    /// @param component Vector component. @return Basis value.
     KOKKOS_INLINE_FUNCTION
-    auto getBasis(const IntegrationPointView& ip, Index local) const
+    auto getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
-      return mult(Real(-1), operand.getBasis(ip, local));
+      return mult(Real(-1), operand.getBasis(ip, dof, component));
     }
 
     /// @param ip Integration point. @return View bound to the point.
@@ -2046,11 +2337,13 @@ namespace Rodin::Kokkos::Variational
       : operand(node.getOperand())
     {}
 
-    /// @param ip Quadrature point. @param local Local index. @return Basis value.
+    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
+    /// @param component Vector component. @return Basis value.
     KOKKOS_INLINE_FUNCTION
-    Geometry::Matrix getBasis(const IntegrationPointView& ip, Index local) const
+    Geometry::Matrix getBasis(
+      const IntegrationPointView& ip, Index dof, Index component) const
     {
-      return transpose(operand.getBasis(ip, local));
+      return transpose(operand.getBasis(ip, dof, component));
     }
 
     /// @param ip Integration point. @return View bound to the point.

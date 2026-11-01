@@ -253,6 +253,12 @@ namespace Rodin::Variational
         return m_matrix;
       }
 
+      /// @brief Returns the constant value. @return Constant matrix.
+      constexpr const MatrixType& getValue() const noexcept
+      {
+        return m_matrix;
+      }
+
       /**
        * @brief Gets the number of rows.
        * @returns The number of rows.
@@ -360,6 +366,12 @@ namespace Rodin::Variational
        * @param point Evaluation point; the result is independent of this argument.
        */
       constexpr MatrixType getValue([[maybe_unused]] const Geometry::Point& point) const
+      {
+        return m_matrix;
+      }
+
+      /// @brief Returns the constant value. @return Constant matrix.
+      constexpr const MatrixType& getValue() const noexcept
       {
         return m_matrix;
       }

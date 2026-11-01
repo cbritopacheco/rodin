@@ -241,6 +241,34 @@ namespace Rodin::Tests::Unit
     }
     return mesh;
   }
+
+  /**
+   * @brief Computes the incidences of the device spaces and tags the faces.
+   * @param source Mesh.
+   * @return Mesh with the incidences @f$ d \to d - 1 @f$, the face to cell
+   * incidence and face attributes 1, 2 and 3 in turn.
+   */
+  inline HostMesh withClosure(HostMesh source)
+  {
+    const size_t d = source.getDimension();
+    for (size_t k = d; k > 0; --k)
+      source.getConnectivity().compute(k, k - 1);
+    source.getConnectivity().compute(d - 1, d);
+    for (Index i = 0; i < source.getFaceCount(); ++i)
+      source.setAttribute({d - 1, i}, Geometry::Attribute(1 + i % 3));
+    return source;
+  }
+
+  /**
+   * @brief Sets smooth coefficients of a grid function.
+   * @param data Coefficients.
+   */
+  template <class Data>
+  void fillCoefficients(Data& data)
+  {
+    for (Index i = 0; i < static_cast<Index>(data.size()); ++i)
+      data.coeffRef(i) = 1 + Real(0.5) * std::sin(Real(0.7) * i);
+  }
 }
 
 #endif

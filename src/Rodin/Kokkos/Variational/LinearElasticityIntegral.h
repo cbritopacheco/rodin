@@ -20,13 +20,13 @@
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Transpose.h"
 
+#include "H1.h"
 #include "Integral.h"
 
-namespace Rodin::Variational
+namespace Rodin::Kokkos::Variational
 {
   /**
-   * @ingroup LinearElasticitySpecializations
-   * @brief Linear elasticity integrator for vector P1 spaces on a resident
+   * @brief Linear elasticity integrator for vector spaces on a resident
    * Kokkos mesh.
    *
    * Assembles
@@ -35,33 +35,34 @@ namespace Rodin::Variational
    *     + \mu (\nabla u + \nabla u^T) : \nabla v \ dx
    * @f]
    * on the device as the sum of two device integrals, which is the bilinear
-   * form of the host P1 specialization. Both integrals use the quadrature
-   * order of the host,
+   * form of the host integrators. Both integrals use the quadrature order of
+   * the host,
    * @f$ \max(k_\lambda, k_\mu) + k_u + k_v @f$, with @f$ k_\lambda @f$ and
    * @f$ k_\mu @f$ the orders of the Lamé parameters, zero when they report
    * none, and @f$ k_u @f$, @f$ k_v @f$ the degrees of the trial and test
    * elements.
    *
    * The host evaluation interface (setPolytope(), integrate()) is not
-   * available and raises; the form is assembled by Assembly::Kokkos.
+   * available and raises; the form is assembled by Assembly::Kokkos. The
+   * specializations of Rodin::Variational::LinearElasticityIntegrator for the
+   * vector P1 and H1 spaces of a resident mesh derive from this class.
    *
    * @tparam Solution Solution type of the trial function.
-   * @tparam Backend Kokkos backend of the mesh context.
+   * @tparam FES Vector device space of the trial and test functions.
    * @tparam LambdaDerived Type of the first Lamé parameter.
    * @tparam MuDerived Type of the second Lamé parameter.
    */
-  template <class Solution, class Backend, class LambdaDerived, class MuDerived>
-  class LinearElasticityIntegrator<Solution,
-    Rodin::Kokkos::Variational::DeviceVectorP1<Backend>, LambdaDerived, MuDerived>
-    final : public LocalBilinearFormIntegratorBase<Real>,
-            public Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>
+  template <class Solution, VectorDeviceSpace FES, class LambdaDerived, class MuDerived>
+  class LinearElasticityIntegratorBase
+    : public ::Rodin::Variational::LocalBilinearFormIntegratorBase<Real>,
+      public DeviceBilinearFormIntegrator<Internal::BackendOf<FES>>
   {
     public:
       /// @brief Scalar type of the entries.
       using ScalarType = Real;
 
       /// @brief Finite element space of the trial and test functions.
-      using FESType = Rodin::Kokkos::Variational::DeviceVectorP1<Backend>;
+      using FESType = FES;
 
       /// @brief Trial function space type.
       using TrialFESType = FESType;
@@ -70,37 +71,39 @@ namespace Rodin::Variational
       using TestFESType = FESType;
 
       /// @brief First Lamé parameter type.
-      using LambdaType = FunctionBase<LambdaDerived>;
+      using LambdaType = ::Rodin::Variational::FunctionBase<LambdaDerived>;
 
       /// @brief Second Lamé parameter (shear modulus) type.
-      using MuType = FunctionBase<MuDerived>;
+      using MuType = ::Rodin::Variational::FunctionBase<MuDerived>;
 
       /// @brief Trial function type.
-      using TrialFunctionType = TrialFunction<Solution, FESType>;
+      using TrialFunctionType = ::Rodin::Variational::TrialFunction<Solution, FESType>;
 
       /// @brief Test function type.
-      using TestFunctionType = TestFunction<FESType>;
+      using TestFunctionType = ::Rodin::Variational::TestFunction<FESType>;
 
       /// @brief Host integrator interface.
-      using Parent = LocalBilinearFormIntegratorBase<Real>;
+      using Parent = ::Rodin::Variational::LocalBilinearFormIntegratorBase<Real>;
 
       /// @brief Device integrator interface.
-      using DeviceParent =
-        Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>;
+      using DeviceParent = DeviceBilinearFormIntegrator<Internal::BackendOf<FES>>;
 
       /// @brief Kokkos memory space.
       using MemorySpace = typename DeviceParent::MemorySpace;
 
       /// @brief Device integral of the dilatation term.
-      using DilatationType = decltype(Integral(
-        std::declval<const LambdaType&>() * Div(std::declval<const TrialFunctionType&>()),
-        Div(std::declval<const TestFunctionType&>())));
+      using DilatationType =
+        decltype(::Rodin::Variational::Integral(std::declval<const LambdaType&>() *
+            ::Rodin::Variational::Div(std::declval<const TrialFunctionType&>()),
+          ::Rodin::Variational::Div(std::declval<const TestFunctionType&>())));
 
       /// @brief Device integral of the shear term.
-      using ShearType = decltype(Integral(std::declval<const MuType&>() *
-          (Jacobian(std::declval<const TrialFunctionType&>()) +
-            Transpose(Jacobian(std::declval<const TrialFunctionType&>()))),
-        Jacobian(std::declval<const TestFunctionType&>())));
+      using ShearType =
+        decltype(::Rodin::Variational::Integral(std::declval<const MuType&>() *
+            (::Rodin::Variational::Jacobian(std::declval<const TrialFunctionType&>()) +
+              ::Rodin::Variational::Transpose(::Rodin::Variational::Jacobian(
+                std::declval<const TrialFunctionType&>()))),
+          ::Rodin::Variational::Jacobian(std::declval<const TestFunctionType&>())));
 
       /**
        * @brief Constructs the linear elasticity integrator.
@@ -109,17 +112,22 @@ namespace Rodin::Variational
        * @param lambda First Lamé parameter.
        * @param mu Second Lamé parameter (shear modulus).
        */
-      LinearElasticityIntegrator(const TrialFunctionType& u, const TestFunctionType& v,
-        const LambdaType& lambda, const MuType& mu)
+      LinearElasticityIntegratorBase(const TrialFunctionType& u,
+        const TestFunctionType& v, const LambdaType& lambda, const MuType& mu)
         : Parent(u, v),
           m_lambda(lambda.copy()),
           m_mu(mu.copy()),
-          m_dilatation(Integral(lambda * Div(u), Div(v))),
-          m_shear(Integral(mu * (Jacobian(u) + Transpose(Jacobian(u))), Jacobian(v)))
+          m_dilatation(::Rodin::Variational::Integral(
+            lambda * ::Rodin::Variational::Div(u), ::Rodin::Variational::Div(v))),
+          m_shear(::Rodin::Variational::Integral(mu *
+              (::Rodin::Variational::Jacobian(u) +
+                ::Rodin::Variational::Transpose(::Rodin::Variational::Jacobian(u))),
+            ::Rodin::Variational::Jacobian(v)))
       {
         const auto order =
           [lambda = m_lambda, mu = m_mu, &trialfes = u.getFiniteElementSpace(),
-            &testfes = v.getFiniteElementSpace()](const Geometry::Polytope& polytope) {
+            &testfes = v.getFiniteElementSpace()](
+            const ::Rodin::Geometry::Polytope& polytope) {
             const size_t d = polytope.getDimension();
             const Index i = polytope.getIndex();
             const auto trialDegree = trialfes.getFiniteElement(d, i).getDegree();
@@ -142,13 +150,14 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param other Integrator to copy.
        */
-      LinearElasticityIntegrator(const LinearElasticityIntegrator& other) = default;
+      LinearElasticityIntegratorBase(
+        const LinearElasticityIntegratorBase& other) = default;
 
       /**
        * @brief Move constructor.
        * @param other Integrator to move from.
        */
-      LinearElasticityIntegrator(LinearElasticityIntegrator&& other) = default;
+      LinearElasticityIntegratorBase(LinearElasticityIntegratorBase&& other) = default;
 
       /// @brief Gets the first Lamé parameter. @return First Lamé parameter.
       const LambdaType& getLameFirstParameter() const
@@ -163,7 +172,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
-      const Geometry::Polytope& getPolytope() const override
+      const ::Rodin::Geometry::Polytope& getPolytope() const override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "Kokkos integrals are evaluated on the device by Assembly::Kokkos."
@@ -172,8 +181,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
-      LinearElasticityIntegrator& setPolytope(
-        [[maybe_unused]] const Geometry::Polytope& polytope) override
+      LinearElasticityIntegratorBase& setPolytope(
+        [[maybe_unused]] const ::Rodin::Geometry::Polytope& polytope) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "Kokkos integrals are evaluated on the device by Assembly::Kokkos."
@@ -191,7 +200,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the arrangement of the entries. @return Entry layout.
-      Rodin::Kokkos::Variational::DeviceLayout getLayout() const override
+      DeviceLayout getLayout() const override
       {
         restrict();
         return m_dilatation.getLayout();
@@ -210,6 +219,13 @@ namespace Rodin::Variational
         return count;
       }
 
+      /// @brief Gets the spacing of the entries, shared by both terms. @return Spacing.
+      size_t getSpacing() const override
+      {
+        assert(m_shear.getSpacing() == m_dilatation.getSpacing());
+        return m_dilatation.getSpacing();
+      }
+
       /**
        * @brief Integrates both terms on the device.
        *
@@ -225,15 +241,9 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the integration region. @return Cells.
-      Geometry::Region getRegion() const override
+      ::Rodin::Geometry::Region getRegion() const override
       {
-        return Geometry::Region::Cells;
-      }
-
-      /// @brief Copies the integrator. @return Heap allocated copy.
-      LinearElasticityIntegrator* copy() const noexcept override
-      {
-        return new LinearElasticityIntegrator(*this);
+        return ::Rodin::Geometry::Region::Cells;
       }
 
     private:
@@ -252,6 +262,68 @@ namespace Rodin::Variational
       std::shared_ptr<const MuType> m_mu;
       mutable DilatationType m_dilatation;
       mutable ShearType m_shear;
+  };
+}
+
+namespace Rodin::Variational
+{
+  /**
+   * @ingroup LinearElasticitySpecializations
+   * @brief Linear elasticity integrator for vector P1 spaces on a resident
+   * Kokkos mesh.
+   * @see Rodin::Kokkos::Variational::LinearElasticityIntegratorBase
+   */
+  template <class Solution, class Backend, class LambdaDerived, class MuDerived>
+  class LinearElasticityIntegrator<Solution,
+    Rodin::Kokkos::Variational::DeviceVectorP1<Backend>, LambdaDerived, MuDerived>
+    final
+    : public Rodin::Kokkos::Variational::LinearElasticityIntegratorBase<Solution,
+        Rodin::Kokkos::Variational::DeviceVectorP1<Backend>, LambdaDerived, MuDerived>
+  {
+    public:
+      /// @brief Device integrator.
+      using Parent = Rodin::Kokkos::Variational::LinearElasticityIntegratorBase<Solution,
+        Rodin::Kokkos::Variational::DeviceVectorP1<Backend>, LambdaDerived, MuDerived>;
+
+      using Parent::Parent;
+
+      /// @brief Copies the integrator. @return Heap allocated copy.
+      LinearElasticityIntegrator* copy() const noexcept override
+      {
+        return new LinearElasticityIntegrator(*this);
+      }
+  };
+
+  /**
+   * @ingroup LinearElasticitySpecializations
+   * @brief Linear elasticity integrator for vector H1 spaces on a resident
+   * Kokkos mesh.
+   * @see Rodin::Kokkos::Variational::LinearElasticityIntegratorBase
+   */
+  template <class Solution, size_t K, class Backend, class LambdaDerived, class MuDerived>
+  class LinearElasticityIntegrator<Solution,
+    H1<K, Math::SpatialVector<Real>,
+      Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>>,
+    LambdaDerived, MuDerived>
+    final : public Rodin::Kokkos::Variational::LinearElasticityIntegratorBase<Solution,
+              H1<K, Math::SpatialVector<Real>,
+                Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>>,
+              LambdaDerived, MuDerived>
+  {
+    public:
+      /// @brief Device integrator.
+      using Parent = Rodin::Kokkos::Variational::LinearElasticityIntegratorBase<Solution,
+        H1<K, Math::SpatialVector<Real>,
+          Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>>,
+        LambdaDerived, MuDerived>;
+
+      using Parent::Parent;
+
+      /// @brief Copies the integrator. @return Heap allocated copy.
+      LinearElasticityIntegrator* copy() const noexcept override
+      {
+        return new LinearElasticityIntegrator(*this);
+      }
   };
 }
 

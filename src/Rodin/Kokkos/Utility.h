@@ -20,6 +20,22 @@
 #include <Kokkos_Core.hpp>
 #include "Rodin/Configure.h"
 
+/**
+ * @def RODIN_KOKKOS_UNROLL
+ * @brief Unrolls the following loop completely when its trip count is static.
+ *
+ * Kernel loops over the local basis functions have a static trip count when
+ * the polytope and the spaces are known at compile time. Unrolled, their local
+ * indices are constants, so the per-component structure of vector bases folds
+ * away and the local arrays stay in registers. The pragma is a no-op for a
+ * dynamic trip count and on compilers that do not support it.
+ */
+#ifdef KOKKOS_ENABLE_PRAGMA_UNROLL
+#define RODIN_KOKKOS_UNROLL _Pragma("unroll")
+#else
+#define RODIN_KOKKOS_UNROLL
+#endif
+
 namespace Rodin::Kokkos::Internal
 {
   /**

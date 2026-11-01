@@ -14,34 +14,6 @@ namespace Rodin::Tests::Unit
   constexpr std::integral_constant<size_t, 2> Quadratic{};
 
   /**
-   * @brief Computes the incidences of the quadratic spaces and tags the faces.
-   * @param source Simplicial mesh.
-   * @return Mesh with the incidences @f$ d \to d - 1 @f$, the face to cell
-   * incidence and face attributes 1, 2 and 3 in turn.
-   */
-  HostMesh withClosure(HostMesh source)
-  {
-    const size_t d = source.getDimension();
-    for (size_t k = d; k > 0; --k)
-      source.getConnectivity().compute(k, k - 1);
-    source.getConnectivity().compute(d - 1, d);
-    for (Index i = 0; i < source.getFaceCount(); ++i)
-      source.setAttribute({d - 1, i}, Geometry::Attribute(1 + i % 3));
-    return source;
-  }
-
-  /**
-   * @brief Sets smooth coefficients of a grid function.
-   * @param data Coefficients.
-   */
-  template <class Data>
-  void fillCoefficients(Data& data)
-  {
-    for (Index i = 0; i < static_cast<Index>(data.size()); ++i)
-      data.coeffRef(i) = 1 + Real(0.5) * std::sin(Real(0.7) * i);
-  }
-
-  /**
    * @brief Compares a device assembled problem with its host reference.
    * @param host Problem assembled on the local mesh.
    * @param device Problem assembled on the resident mesh.
@@ -58,11 +30,13 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Scalar quadratic forms match the host.
+  template <size_t K = 2>
   void checkScalarForms(const HostMesh& source)
   {
+    constexpr std::integral_constant<size_t, K> degree{};
     const DeviceMesh mesh(TestContext{}, source);
-    H1 hfes(Quadratic, source);
-    H1 dfes(Quadratic, mesh);
+    H1 hfes(degree, source);
+    H1 dfes(degree, mesh);
     ASSERT_EQ(hfes.getSize(), dfes.getSize());
     TrialFunction hu(hfes);
     TestFunction hv(hfes);
@@ -94,12 +68,14 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Vector quadratic forms match the host.
+  template <size_t K = 2>
   void checkVectorForms(const HostMesh& source)
   {
+    constexpr std::integral_constant<size_t, K> degree{};
     const DeviceMesh mesh(TestContext{}, source);
     const size_t d = source.getSpaceDimension();
-    H1 hfes(Quadratic, source, d);
-    H1 dfes(Quadratic, mesh, d);
+    H1 hfes(degree, source, d);
+    H1 dfes(degree, mesh, d);
     ASSERT_EQ(hfes.getSize(), dfes.getSize());
     TrialFunction hu(hfes);
     TestFunction hv(hfes);
@@ -132,6 +108,29 @@ namespace Rodin::Tests::Unit
       Integral(Dot(Jacobian(dg), Jacobian(dv))));
   }
 
+  /// @brief Linear elasticity on vector quadratic spaces matches the host.
+  void checkLinearElasticity(const HostMesh& source)
+  {
+    const DeviceMesh mesh(TestContext{}, source);
+    const size_t d = source.getSpaceDimension();
+    H1 hfes(Quadratic, source, d);
+    H1 dfes(Quadratic, mesh, d);
+    TrialFunction hu(hfes);
+    TestFunction hv(hfes);
+    TrialFunction du(dfes);
+    TestFunction dv(dfes);
+
+    RealFunction hlambda([](const Geometry::Point& p) { return 2 + p.x() * p.y(); });
+    RealFunction dlambda(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      return 2 + p.x() * p.y();
+    });
+
+    expectSameForm(hu, hv, LinearElasticityIntegral(hu, hv)(Real(1.5), Real(0.7)), du, dv,
+      LinearElasticityIntegral(du, dv)(Real(1.5), Real(0.7)));
+    expectSameForm(hu, hv, LinearElasticityIntegral(hu, hv)(hlambda, Real(0.7)), du, dv,
+      LinearElasticityIntegral(du, dv)(dlambda, Real(0.7)));
+  }
+
   /// @brief Taylor-Hood coupling forms, with a P1 pressure, match the host.
   void checkTaylorHoodForms(const HostMesh& source)
   {
@@ -156,11 +155,13 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Quadratic face forms match the host.
+  template <size_t K = 2>
   void checkFaceForms(const HostMesh& source)
   {
+    constexpr std::integral_constant<size_t, K> degree{};
     const DeviceMesh mesh(TestContext{}, source);
-    H1 hfes(Quadratic, source);
-    H1 dfes(Quadratic, mesh);
+    H1 hfes(degree, source);
+    H1 dfes(degree, mesh);
     TrialFunction hu(hfes);
     TestFunction hv(hfes);
     TrialFunction du(dfes);
@@ -183,11 +184,13 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Quadratic problems with boundary data match the host.
+  template <size_t K = 2>
   void checkProblems(const HostMesh& source)
   {
+    constexpr std::integral_constant<size_t, K> degree{};
     const DeviceMesh mesh(TestContext{}, source);
-    H1 hfes(Quadratic, source);
-    H1 dfes(Quadratic, mesh);
+    H1 hfes(degree, source);
+    H1 dfes(degree, mesh);
     TrialFunction hu(hfes);
     TestFunction hv(hfes);
     TrialFunction du(dfes);
@@ -203,27 +206,33 @@ namespace Rodin::Tests::Unit
     dw.getData() = hw.getData();
 
     Problem hp(hu, hv);
-    hp = Integral(Grad(hu), Grad(hv)) - Integral(RealFunction(1), hv) +
-      DirichletBC(hu, hg).on(1) + DirichletBC(hu, hw).on(2);
+    const auto hgu = Grad(hu);
+    const auto hgv = Grad(hv);
+    hp = Integral(hgu, hgv) - Integral(RealFunction(1), hv) + DirichletBC(hu, hg).on(1) +
+      DirichletBC(hu, hw).on(2);
     Problem dp(du, dv);
-    dp = Integral(Grad(du), Grad(dv)) - Integral(RealFunction(1), dv) +
-      DirichletBC(du, dg).on(1) + DirichletBC(du, dw).on(2);
+    const auto dgu = Grad(du);
+    const auto dgv = Grad(dv);
+    dp = Integral(dgu, dgv) - Integral(RealFunction(1), dv) + DirichletBC(du, dg).on(1) +
+      DirichletBC(du, dw).on(2);
     expectSameSystem(hp, dp);
 
     const size_t d = source.getSpaceDimension();
-    H1 hvh(Quadratic, source, d);
-    H1 dvh(Quadratic, mesh, d);
+    H1 hvh(degree, source, d);
+    H1 dvh(degree, mesh, d);
     TrialFunction hx(hvh);
     TestFunction hy(hvh);
     TrialFunction dx(dvh);
     TestFunction dy(dvh);
     Problem hq(hx, hy);
-    hq = Integral(Jacobian(hx), Jacobian(hy)) -
-      BoundaryIntegral(Dot(BoundaryNormal(source), hy)) +
+    const auto hjx = Jacobian(hx);
+    const auto hjy = Jacobian(hy);
+    hq = Integral(hjx, hjy) - BoundaryIntegral(Dot(BoundaryNormal(source), hy)) +
       DirichletBC(hx, VectorFunction{RealFunction(hg), Real(1), Real(-1)}).on(1);
     Problem dq(dx, dy);
-    dq = Integral(Jacobian(dx), Jacobian(dy)) -
-      BoundaryIntegral(Dot(BoundaryNormal(mesh), dy)) +
+    const auto djx = Jacobian(dx);
+    const auto djy = Jacobian(dy);
+    dq = Integral(djx, djy) - BoundaryIntegral(Dot(BoundaryNormal(mesh), dy)) +
       DirichletBC(dx, VectorFunction{RealFunction(dg), Real(1), Real(-1)}).on(1);
     if (d == 3)
       expectSameSystem(hq, dq);
@@ -289,6 +298,16 @@ namespace Rodin::Tests::Unit
     checkVectorForms(withClosure(makeTetrahedronMesh()));
   }
 
+  TEST(Kokkos_Variational_H1, LinearElasticityOnTriangles)
+  {
+    checkLinearElasticity(withClosure(makeTriangleMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, LinearElasticityOnTetrahedra)
+  {
+    checkLinearElasticity(withClosure(makeTetrahedronMesh()));
+  }
+
   TEST(Kokkos_Variational_H1, TaylorHoodFormsOnTriangles)
   {
     checkTaylorHoodForms(withClosure(makeTriangleMesh()));
@@ -334,9 +353,89 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(dfes.getSize(), hfes.getSize());
   }
 
-  TEST(Kokkos_Variational_H1, NonSimplicialMeshRaises)
+  TEST(Kokkos_Variational_H1, ScalarFormsOfDegreeThreeOnTriangles)
   {
-    const DeviceMesh mesh(TestContext{}, makeMixedMesh());
+    checkScalarForms<3>(withClosure(makeTriangleMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, ScalarFormsOfDegreeThreeOnTetrahedra)
+  {
+    checkScalarForms<3>(withClosure(makeTetrahedronMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, VectorFormsOfDegreeThreeOnTriangles)
+  {
+    checkVectorForms<3>(withClosure(makeTriangleMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, ProblemsOfDegreeThreeOnTetrahedra)
+  {
+    checkProblems<3>(withClosure(makeTetrahedronMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, ScalarFormsOnQuadrilaterals)
+  {
+    checkScalarForms(withClosure(makeQuadrilateralMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, ScalarFormsOnHexahedra)
+  {
+    checkScalarForms(withClosure(makeHexahedronMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, ScalarFormsOnMixedMesh)
+  {
+    checkScalarForms(withClosure(makeMixedMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, ScalarFormsOfDegreeThreeOnQuadrilaterals)
+  {
+    checkScalarForms<3>(withClosure(makeQuadrilateralMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, VectorFormsOnQuadrilaterals)
+  {
+    checkVectorForms(withClosure(makeQuadrilateralMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, VectorFormsOnHexahedra)
+  {
+    checkVectorForms(withClosure(makeHexahedronMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, FaceFormsOnMixedMesh)
+  {
+    checkFaceForms(withClosure(makeMixedMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, FaceFormsOnHexahedra)
+  {
+    checkFaceForms(withClosure(makeHexahedronMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, ProblemsOnMixedMesh)
+  {
+    checkProblems(withClosure(makeMixedMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, ProblemsOnHexahedra)
+  {
+    checkProblems(withClosure(makeHexahedronMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, PyramidMeshRaises)
+  {
+    const HostMesh source = HostMesh::Builder()
+                              .initialize(3)
+                              .nodes(5)
+                              .vertex({0, 0, 0})
+                              .vertex({1, 0, 0})
+                              .vertex({1, 1, 0})
+                              .vertex({0, 1, 0})
+                              .vertex({0, 0, 1})
+                              .polytope(Polytope::Type::Pyramid, {0, 1, 2, 3, 4})
+                              .finalize();
+    const DeviceMesh mesh(TestContext{}, source);
     EXPECT_THROW(H1(Quadratic, mesh), Alert::Exception);
   }
 }

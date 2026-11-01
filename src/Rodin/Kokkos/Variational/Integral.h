@@ -96,8 +96,51 @@ namespace Rodin::Kokkos::Variational
     /// @brief Maximum scalar local count of the test space.
     Index testCapacity = 0;
 
+    /// @brief Whether the entries couple pairs of polytopes, as global integrators do.
+    bool global = false;
+
+    /// @brief Selected trial attributes of a global integrator, the
+    /// attributes and the region above selecting its test polytopes.
+    std::vector<::Rodin::Geometry::Attribute> trialAttributes = {};
+
     bool operator==(const DeviceLayout&) const = default;
   };
+
+  /**
+   * @brief Finds where an entry of a device integrator is stored.
+   * @param rank Rank of the entry, the entries of each polytope following
+   * the entries of the previous polytope.
+   * @param count Number of entries.
+   * @param spacing Spacing of the entries, as given by the integrator.
+   * @return Position of the entry past the offset of the integrator.
+   *
+   * When every integrated polytope owns the same number n of entries and
+   * there are M > 1 polytopes, entry j of the k-th polytope is stored at
+   * k + j * M and the spacing is M, so that the threads of consecutive
+   * polytopes write contiguous memory. Otherwise the spacing is one and
+   * the entries are stored in rank order.
+   */
+  KOKKOS_INLINE_FUNCTION size_t getEntryPosition(
+    size_t rank, size_t count, size_t spacing)
+  {
+    const size_t n = count / spacing;
+    return rank / n + (rank % n) * spacing;
+  }
+
+  /**
+   * @brief Finds the rank of the entry stored at a position, the inverse
+   * of getEntryPosition().
+   * @param position Position of the entry past the offset of the integrator.
+   * @param count Number of entries.
+   * @param spacing Spacing of the entries, as given by the integrator.
+   * @return Rank of the entry.
+   */
+  KOKKOS_INLINE_FUNCTION size_t getEntryRank(
+    size_t position, size_t count, size_t spacing)
+  {
+    const size_t n = count / spacing;
+    return (position % spacing) * n + position / spacing;
+  }
 
   /**
    * @brief Interface of bilinear form integrators evaluated on the device.
@@ -134,8 +177,16 @@ namespace Rodin::Kokkos::Variational
       virtual size_t prepare() const = 0;
 
       /**
+       * @brief Gets the spacing of the entries located by the last call to
+       * prepare().
+       * @return Spacing given to getEntryPosition().
+       */
+      virtual size_t getSpacing() const = 0;
+
+      /**
        * @brief Integrates the form over its region.
-       * @param values Entry values, entry e being written at offset + e.
+       * @param values Entry values, the entry of rank r being written at
+       * offset + getEntryPosition(r, count, getSpacing()).
        * @param offset Position of the first entry.
        * @param sign Factor of the contributions.
        * @param accumulate Whether the contributions are added to the values
@@ -154,7 +205,8 @@ namespace Rodin::Kokkos::Variational
       /**
        * @brief Integrates the form over its region into new triplets.
        * @return Local contributions, with rows indexing test and columns
-       * indexing trial degrees of freedom.
+       * indexing trial degrees of freedom, arranged as by fill() at offset
+       * zero.
        */
       TripletsType assemble() const
       {
@@ -230,8 +282,16 @@ namespace Rodin::Kokkos::Variational
       virtual size_t prepare() const = 0;
 
       /**
+       * @brief Gets the spacing of the entries located by the last call to
+       * prepare().
+       * @return Spacing given to getEntryPosition().
+       */
+      virtual size_t getSpacing() const = 0;
+
+      /**
        * @brief Integrates the form over its region.
-       * @param values Entry values, entry e being written at offset + e.
+       * @param values Entry values, the entry of rank r being written at
+       * offset + getEntryPosition(r, count, getSpacing()).
        * @param offset Position of the first entry.
        * @param sign Factor of the contributions.
        * @param accumulate Whether the contributions are added to the values
@@ -247,7 +307,8 @@ namespace Rodin::Kokkos::Variational
 
       /**
        * @brief Integrates the form over its region into new entries.
-       * @return Local contributions, indexed by test degrees of freedom.
+       * @return Local contributions, indexed by test degrees of freedom and
+       * arranged as by fill() at offset zero.
        */
       EntriesType assemble() const
       {
@@ -884,7 +945,7 @@ namespace Rodin::Kokkos::Variational::Internal
         }
         m_region = region;
         m_count = locate(execution, mesh.getDeviceView(), region, dimension, m_attributes,
-          m_offsets, count, trialDOFs, trialVDim, testDOFs, testVDim);
+          m_offsets, count, trialDOFs, trialVDim, testDOFs, testVDim, m_spacing);
         return m_count;
       }
 
@@ -905,6 +966,15 @@ namespace Rodin::Kokkos::Variational::Internal
       const ::Kokkos::View<Index*, MemorySpace>& getOffsets() const
       {
         return m_offsets;
+      }
+
+      /**
+       * @brief Gets the spacing of the entries of the last integration.
+       * @return Distance between consecutive entries of one polytope.
+       */
+      size_t getSpacing() const
+      {
+        return m_spacing;
       }
 
       /// @brief Gets the integration region. @return Region of the last integration.
@@ -934,7 +1004,12 @@ namespace Rodin::Kokkos::Variational::Internal
       /**
        * @brief Computes the entry offsets of the polytopes.
        *
-       * A polytope owns the product of its trial and test local counts.
+       * A polytope owns the product of its trial and test local counts. When
+       * every integrated polytope owns the same count and there are more
+       * than one, the offset of a polytope is its rank among them and the
+       * spacing is their number, as described by getEntryPosition().
+       * Otherwise the offset of a polytope is the count of the previous
+       * ones and the spacing is one.
        *
        * Public as the enclosing function of a device lambda.
        */
@@ -944,24 +1019,45 @@ namespace Rodin::Kokkos::Variational::Internal
         Index dimension, const AttributesType& attributes,
         const ::Kokkos::View<Index*, MemorySpace>& offsets, Index count,
         const TrialDOFs& trialDOFs, Index trialVDim, const TestDOFs& testDOFs,
-        Index testVDim)
+        Index testVDim, size_t& spacing)
       {
+        const auto local = KOKKOS_LAMBDA(Index p)->Index
+        {
+          const auto polytope = view.getPolytope(dimension, p);
+          if (!Rodin::Kokkos::Variational::isIntegrated(
+                view, region, polytope, attributes))
+            return 0;
+          return trialDOFs.bind(polytope).size() * trialVDim *
+            testDOFs.bind(polytope).size() * testVDim;
+        };
+        Index selected = 0;
+        Index smallest = 0;
+        Index largest = 0;
+        ::Kokkos::parallel_reduce(
+          "Rodin entry counts", QuadratureType::policy(execution, count),
+          KOKKOS_LAMBDA(Index p, Index & m, Index & lo, Index & hi) {
+            const Index n = local(p);
+            if (n == 0)
+              return;
+            m += 1;
+            lo = n < lo ? n : lo;
+            hi = n > hi ? n : hi;
+          },
+          ::Kokkos::Sum<Index>(selected), ::Kokkos::Min<Index>(smallest),
+          ::Kokkos::Max<Index>(largest));
+        const bool uniform = selected > 1 && smallest == largest;
         Index total = 0;
         ::Kokkos::parallel_scan(
           "Rodin entry offsets", QuadratureType::policy(execution, count),
           KOKKOS_LAMBDA(Index p, Index & update, bool final) {
             if (final)
               offsets(p) = update;
-            const auto polytope = view.getPolytope(dimension, p);
-            if (Rodin::Kokkos::Variational::isIntegrated(
-                  view, region, polytope, attributes))
-            {
-              update += trialDOFs.bind(polytope).size() * trialVDim *
-                testDOFs.bind(polytope).size() * testVDim;
-            }
+            const Index n = local(p);
+            update += uniform && n > 0 ? 1 : n;
           },
           total);
-        return total;
+        spacing = uniform ? selected : 1;
+        return uniform ? size_t(selected) * smallest : total;
       }
 
     private:
@@ -974,6 +1070,7 @@ namespace Rodin::Kokkos::Variational::Internal
       AttributesType m_attributes;
       ::Kokkos::View<Index*, MemorySpace> m_offsets;
       size_t m_count = 0;
+      size_t m_spacing = 1;
   };
 }
 
@@ -1172,12 +1269,18 @@ namespace Rodin::Kokkos::Variational
           });
       }
 
+      /// @brief Gets the spacing of the entries. @return Spacing of the last integration.
+      size_t getSpacing() const override
+      {
+        return m_polytopes.getSpacing();
+      }
+
       /**
        * @brief Integrates every selected polytope on the device.
        *
        * Each selected polytope writes its local matrix, the entry of local
-       * test index te and local trial index tr at te * ntr + tr past the
-       * offset of the polytope.
+       * test index te and local trial index tr having rank te * ntr + tr
+       * among the entries of the polytope.
        */
       void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
         Real sign, bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
@@ -1226,25 +1329,38 @@ namespace Rodin::Kokkos::Variational
             return;
           }
         }
+        constexpr Index Capacity = IntegrationPointView::Capacity;
         if (vertices <= 4)
         {
-          integratePolytopes<4>(mesh, m_polytopes, trial, test, trialDOFs, trialVDim,
-            testDOFs, testVDim, values, offset, sign, accumulate, rows, cols);
-          return;
+          if constexpr (getLocalSize<4>() <= LocalCapacity)
+          {
+            integratePolytopes<4>(mesh, m_polytopes, trial, test, trialDOFs, trialVDim,
+              testDOFs, testVDim, values, offset, sign, accumulate, rows, cols);
+            return;
+          }
         }
-        constexpr Index Capacity = IntegrationPointView::Capacity;
-        if constexpr (TrialDOFsType::getCapacity(Capacity) <= Capacity &&
-          TestDOFsType::getCapacity(Capacity) <= Capacity)
+        else if constexpr (getLocalSize<Capacity>() <= LocalCapacity)
         {
           integratePolytopes<Capacity>(mesh, m_polytopes, trial, test, trialDOFs,
             trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, rows, cols);
+          return;
         }
-        else
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Kokkos integrals of these spaces support polytopes of at most four "
-            << "vertices." << Alert::Raise;
-        }
+        Alert::MemberFunctionException(*this, __func__)
+          << "Kokkos integrals of these spaces on polytopes of " << vertices
+          << " vertices need local matrices of more than " << LocalCapacity
+          << " entries, lower the polynomial degree." << Alert::Raise;
+      }
+
+      /**
+       * @brief Gets the number of entries of the local matrix of a polytope.
+       * @tparam Vertices Maximum vertex count of the polytopes.
+       * @return Entry count of the local matrix in the kernel.
+       */
+      template <Index Vertices>
+      static constexpr Index getLocalSize()
+      {
+        return TrialDOFsType::getCapacity(Vertices) * VectorCapacity<TrialRange> *
+          TestDOFsType::getCapacity(Vertices) * VectorCapacity<TestRange>;
       }
 
       /**
@@ -1265,7 +1381,7 @@ namespace Rodin::Kokkos::Variational
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
         using TestValue = std::decay_t<decltype(test.getBasis(
-          std::declval<const IntegrationPointView&>(), Index(0)))>;
+          std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
         constexpr Index TrialCapacity =
           TrialDOFsType::getCapacity(Vertices) * VectorCapacity<TrialRange>;
         constexpr Index TestCapacity =
@@ -1275,6 +1391,7 @@ namespace Rodin::Kokkos::Variational
         const auto quadrature = polytopes.getQuadrature();
         const auto attributes = polytopes.getAttributes();
         const auto offsets = polytopes.getOffsets();
+        const size_t spacing = polytopes.getSpacing();
         const auto region = polytopes.getRegion();
         const Index dimension = polytopes.getDimension();
         const bool index = rows.extent(0) > 0;
@@ -1310,11 +1427,15 @@ namespace Rodin::Kokkos::Variational
                 const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
                 const auto testBasis = Rodin::Kokkos::Variational::bindBasis(test, ip);
                 const auto trialBasis = Rodin::Kokkos::Variational::bindBasis(trial, ip);
+                RODIN_KOKKOS_UNROLL
                 for (Index te = 0; te < nte; ++te)
-                  phi[te] = testBasis.getBasis(te);
+                  phi[te] = testBasis.getBasis(te / testStride, te % testStride);
+                RODIN_KOKKOS_UNROLL
                 for (Index tr = 0; tr < ntr; ++tr)
                 {
-                  const auto psi = trialBasis.getBasis(tr);
+                  const auto psi =
+                    trialBasis.getBasis(tr / trialStride, tr % trialStride);
+                  RODIN_KOKKOS_UNROLL
                   for (Index te = 0; te < nte; ++te)
                   {
                     if (Rodin::Kokkos::Variational::overlaps(psi, phi[te]))
@@ -1327,13 +1448,15 @@ namespace Rodin::Kokkos::Variational
             // Local index a * vdim + r is component r of the scalar degree of
             // freedom a, numbered globally as dof + r * stride.
             const size_t base = offset + offsets(p);
+            RODIN_KOKKOS_UNROLL
             for (Index te = 0; te < nte; ++te)
             {
               const Index row =
                 testIndices[te / testStride] + (te % testStride) * testDOFs.getStride();
+              RODIN_KOKKOS_UNROLL
               for (Index tr = 0; tr < ntr; ++tr)
               {
-                const size_t e = base + te * ntr + tr;
+                const size_t e = base + size_t(te * ntr + tr) * spacing;
                 const Real v = sign * local[te * ntr + tr];
                 if (accumulate)
                   values(e) += v;
@@ -1357,6 +1480,14 @@ namespace Rodin::Kokkos::Variational
       template <class Range>
       static constexpr Index VectorCapacity =
         std::is_same_v<Range, Real> ? 1 : RODIN_MAXIMAL_SPACE_DIMENSION;
+
+      /**
+       * @brief Maximum number of entries of the local matrix of a kernel.
+       *
+       * Each thread holds its local matrix, which spills beyond the
+       * registers, so higher degrees on large polytopes are rejected.
+       */
+      static constexpr Index LocalCapacity = 8192;
 
       /**
        * @brief Selects the quadrature order on a polytope.
@@ -1591,6 +1722,12 @@ namespace Rodin::Kokkos::Variational
           });
       }
 
+      /// @brief Gets the spacing of the entries. @return Spacing of the last integration.
+      size_t getSpacing() const override
+      {
+        return m_polytopes.getSpacing();
+      }
+
       /// @brief Integrates every selected polytope on the device.
       void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
         Real sign, bool accumulate,
@@ -1636,18 +1773,8 @@ namespace Rodin::Kokkos::Variational
             offset, sign, accumulate, indices);
           return;
         }
-        constexpr Index Capacity = IntegrationPointView::Capacity;
-        if constexpr (DOFsType::getCapacity(Capacity) <= Capacity)
-        {
-          integratePolytopes<Capacity>(fes.getMesh(), m_polytopes, test, dofs, vdim,
-            values, offset, sign, accumulate, indices);
-        }
-        else
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Kokkos integrals of this space support polytopes of at most four "
-            << "vertices." << Alert::Raise;
-        }
+        integratePolytopes<IntegrationPointView::Capacity>(fes.getMesh(), m_polytopes,
+          test, dofs, vdim, values, offset, sign, accumulate, indices);
       }
 
       /**
@@ -1671,6 +1798,7 @@ namespace Rodin::Kokkos::Variational
         const auto quadrature = polytopes.getQuadrature();
         const auto attributes = polytopes.getAttributes();
         const auto offsets = polytopes.getOffsets();
+        const size_t spacing = polytopes.getSpacing();
         const auto region = polytopes.getRegion();
         const Index dimension = polytopes.getDimension();
         const bool index = indices.extent(0) > 0;
@@ -1701,23 +1829,25 @@ namespace Rodin::Kokkos::Variational
                   ip.setPoint(quadrature.getReference(polytope, q), Shape{});
                 const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
                 const auto basis = Rodin::Kokkos::Variational::bindBasis(test, ip);
+                RODIN_KOKKOS_UNROLL
                 for (Index te = 0; te < nte; ++te)
-                  local[te] += wdet * basis.getBasis(te);
+                  local[te] += wdet * basis.getBasis(te / stride, te % stride);
               }
             }
             // Local index a * vdim + r is component r of the scalar degree of
             // freedom a, numbered globally as dof + r * stride.
             const size_t base = offset + offsets(p);
+            RODIN_KOKKOS_UNROLL
             for (Index te = 0; te < nte; ++te)
             {
+              const size_t e = base + te * spacing;
               const Real v = sign * local[te];
               if (accumulate)
-                values(base + te) += v;
+                values(e) += v;
               else
-                values(base + te) = v;
+                values(e) = v;
               if (index)
-                indices(base + te) =
-                  testIndices[te / stride] + (te % stride) * dofs.getStride();
+                indices(e) = testIndices[te / stride] + (te % stride) * dofs.getStride();
             }
           });
       }

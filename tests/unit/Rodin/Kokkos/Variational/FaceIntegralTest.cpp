@@ -50,6 +50,10 @@ namespace Rodin::Tests::Unit
     expectSameForm(hu, hv, restricted(FaceIntegral(hu, hv), 1, 3), du, dv,
       restricted(FaceIntegral(du, dv), 1, 3));
     expectSameForm(hu, hv, InterfaceIntegral(hu, hv), du, dv, InterfaceIntegral(du, dv));
+    expectSameForm(hu, hv, BoundaryIntegral(Grad(hu), Grad(hv)), du, dv,
+      BoundaryIntegral(Grad(du), Grad(dv)));
+    expectSameForm(
+      hu, hv, FaceIntegral(Grad(hu), Grad(hv)), du, dv, FaceIntegral(Grad(du), Grad(dv)));
   }
 
   /// @brief Vector face bilinear forms match the host.
@@ -67,6 +71,8 @@ namespace Rodin::Tests::Unit
     expectSameForm(hu, hv, BoundaryIntegral(hu, hv), du, dv, BoundaryIntegral(du, dv));
     expectSameForm(hu, hv, restricted(FaceIntegral(hu, hv), 2), du, dv,
       restricted(FaceIntegral(du, dv), 2));
+    expectSameForm(hu, hv, BoundaryIntegral(Jacobian(hu), Jacobian(hv)), du, dv,
+      BoundaryIntegral(Jacobian(du), Jacobian(dv)));
   }
 
   /// @brief Face linear forms, including the boundary normal, match the host.
@@ -100,6 +106,35 @@ namespace Rodin::Tests::Unit
     expectSameLinearForm(hv, InterfaceIntegral(hg, hv), dv, InterfaceIntegral(dg, dv));
     expectSameLinearForm(hw, BoundaryIntegral(Dot(BoundaryNormal(source), hw)), dw,
       BoundaryIntegral(Dot(BoundaryNormal(mesh), dw)));
+    expectSameLinearForm(hv, BoundaryIntegral(Dot(Grad(hg), BoundaryNormal(source)), hv),
+      dv, BoundaryIntegral(Dot(Grad(dg), BoundaryNormal(mesh)), dv));
+    expectSameLinearForm(hv, Integral(Dot(Grad(hg), Grad(hg)), hv), dv,
+      Integral(Dot(Grad(dg), Grad(dg)), dv));
+  }
+
+  /// @brief A gradient on interfaces is taken in the cell of its trace domain, as on the host.
+  void checkInterfaceTrace(HostMesh source)
+  {
+    const size_t d = source.getDimension();
+    for (Index i = 0; i < source.getCellCount(); ++i)
+      source.setAttribute({d, i}, Geometry::Attribute(1 + i % 2));
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 hfes(source);
+    P1 dfes(mesh);
+    TestFunction hv(hfes);
+    TestFunction dv(dfes);
+
+    GridFunction hg(hfes);
+    fill(hg, source, 1);
+    GridFunction dg(dfes);
+    dg.getData() = hg.getData();
+
+    auto hgrad = Grad(hg);
+    hgrad.traceOf(FlatSet<Geometry::Attribute>{1, 2});
+    auto dgrad = Grad(dg);
+    dgrad.traceOf(FlatSet<Geometry::Attribute>{1, 2});
+    expectSameLinearForm(hv, InterfaceIntegral(Dot(hgrad, hgrad), hv), dv,
+      InterfaceIntegral(Dot(dgrad, dgrad), dv));
   }
 
   /// @brief Linear elasticity matches the host P1 integrator.
@@ -163,6 +198,16 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_Variational_FaceIntegral, LinearFormsOnTetrahedra)
   {
     checkFaceLinearForms(withFaces(makeTetrahedronMesh()));
+  }
+
+  TEST(Kokkos_Variational_FaceIntegral, InterfaceTraceOnTriangles)
+  {
+    checkInterfaceTrace(withFaces(makeTriangleMesh()));
+  }
+
+  TEST(Kokkos_Variational_FaceIntegral, InterfaceTraceOnTetrahedra)
+  {
+    checkInterfaceTrace(withFaces(makeTetrahedronMesh()));
   }
 
   TEST(Kokkos_Variational_FaceIntegral, MissingFacesRaise)

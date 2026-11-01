@@ -46,7 +46,7 @@ namespace Rodin::Kokkos::Variational
 
   /**
    * @brief Reference coordinates of a vertex of a polytope.
-   * @param polytope Device polytope, a simplex or a quadrilateral.
+   * @param polytope Device polytope.
    * @param a Local vertex index.
    * @return Reference coordinates of the P1 node of local vertex a.
    */
@@ -55,15 +55,8 @@ namespace Rodin::Kokkos::Variational
   {
     const Index rdim = polytope.getDimension();
     Geometry::Vector result(rdim);
-    if (polytope.getGeometry() == ::Rodin::Geometry::Polytope::Type::Quadrilateral)
-    {
-      result(0) = (a == 1 || a == 2) ? Real(1) : Real(0);
-      result(1) = (a == 2 || a == 3) ? Real(1) : Real(0);
-    }
-    else if (a > 0)
-    {
-      result(a - 1) = Real(1);
-    }
+    for (Index d = 0; d < rdim; ++d)
+      result(d) = Geometry::getReferenceVertexCoordinate(polytope.getGeometry(), a, d);
     return result;
   }
 

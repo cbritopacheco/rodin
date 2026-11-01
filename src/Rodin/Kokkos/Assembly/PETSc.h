@@ -60,6 +60,9 @@ namespace Rodin::Assembly::Internal
     /// @brief Number of entries.
     size_t count = 0;
 
+    /// @brief Spacing of the entries, as given to getEntryPosition().
+    size_t spacing = 1;
+
     bool operator==(const COOSegment&) const = default;
   };
 
@@ -153,7 +156,7 @@ namespace Rodin::Assembly::Internal
    * @brief PETSc linear system assembled in device memory, with value
    * constraints eliminated.
    *
-   * The elimination is the one of ConstrainedSystem: rows of fixed degrees
+   * The elimination is the one of DeviceSystem: rows of fixed degrees
    * of freedom become identity rows holding the fixed value, and the
    * columns of fixed degrees of freedom move to the right-hand side.
    * Eliminated entries keep their coordinates with a zero value, and every
@@ -254,6 +257,18 @@ namespace Rodin::Assembly::Internal
         Index row, Index col)
       {
         const auto [integrator, sign] = getDeviceIntegrator<Backend>(lbfi);
+        m_matrices.push_back({integrator, row, col, sign});
+      }
+
+      /**
+       * @brief Adds a global integrator to the system.
+       * @param gbfi Global integrator, possibly negated.
+       * @param row Offset of its test space. @param col Offset of its trial space.
+       */
+      void addMatrix(const Variational::GlobalBilinearFormIntegratorBase<Real>& gbfi,
+        Index row, Index col)
+      {
+        const auto [integrator, sign] = getDeviceIntegrator<Backend>(gbfi);
         m_matrices.push_back({integrator, row, col, sign});
       }
 
@@ -448,13 +463,21 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Sorts the coordinates by row then column.
        * @param columns Column count of the system.
+       * @param segments Segments of the coordinates.
+       * @param offsets Position of the first entry of every segment, the
+       * entries past the last segment being stored in rank order.
        * @param rows Row coordinates. @param cols Column coordinates.
        * @param order Receives the indices of the sorted coordinates.
+       *
+       * The coordinates are handed to the sort in rank order, so that the
+       * duplicates of a coordinate follow one another as the integrators
+       * ranked them, whatever the spacing of their entries.
        *
        * Public as the enclosing function of device lambdas.
        */
       template <class Indices>
       static void sortPattern(const ExecutionSpace& execution, size_t columns,
+        const std::vector<COOSegment>& segments, const std::vector<size_t>& offsets,
         const Indices& rows, const Indices& cols, Indices& order)
       {
         const size_t count = rows.extent(0);
@@ -467,13 +490,21 @@ namespace Rodin::Assembly::Internal
           ::Kokkos::view_alloc(
             execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO keys")),
           count);
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::PETSc::keys",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t e) {
-            keys(e) = std::uint64_t(rows(e)) * columns + cols(e);
-            order(e) = e;
-          });
+        for (size_t s = 0; s <= segments.size(); ++s)
+        {
+          const size_t begin = offsets[s];
+          const size_t size = (s < segments.size() ? offsets[s + 1] : count) - begin;
+          const size_t spacing = s < segments.size() ? segments[s].spacing : 1;
+          ::Kokkos::parallel_for(
+            "Rodin::Assembly::Kokkos::PETSc::keys",
+            ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, size),
+            KOKKOS_LAMBDA(const size_t r) {
+              const size_t e =
+                begin + ::Rodin::Kokkos::Variational::getEntryPosition(r, size, spacing);
+              keys(begin + r) = std::uint64_t(rows(e)) * columns + cols(e);
+              order(begin + r) = e;
+            });
+        }
         ::Kokkos::Experimental::sort_by_key(execution, keys, order);
       }
 
@@ -612,9 +643,11 @@ namespace Rodin::Assembly::Internal
         for (size_t k = 0; k < m_matrices.size(); ++k)
         {
           const auto& m = m_matrices[k];
+          const size_t entries = m.integrator->prepare();
           COOSegment key{
-            m.integrator->getLayout(), m.row, m.col, m.integrator->prepare()};
-          restricted = restricted || !key.layout.attributes.empty();
+            m.integrator->getLayout(), m.row, m.col, entries, m.integrator->getSpacing()};
+          restricted = restricted || !key.layout.attributes.empty() ||
+            !key.layout.trialAttributes.empty();
           const auto it = std::find(segments.begin(), segments.end(), key);
           segment[k] = it - segments.begin();
           if (it == segments.end())
@@ -664,7 +697,8 @@ namespace Rodin::Assembly::Internal
           cache.indexed = true;
           if (changed)
           {
-            sortPattern(m_execution, m_cols, cache.rows, cache.cols, cache.order);
+            sortPattern(m_execution, m_cols, cache.segments, offsets, cache.rows,
+              cache.cols, cache.order);
             cache.starts =
               distinctStarts(m_execution, cache.rows, cache.cols, cache.order);
             cache.matrix = -1;
@@ -868,8 +902,8 @@ namespace Rodin::Assembly
    * value Dirichlet conditions are eliminated on the device, as the host
    * assemblies do.
    *
-   * Global integrators, preassembled forms, periodic conditions and
-   * identification conditions are not supported.
+   * Preassembled forms, periodic conditions and identification conditions
+   * are not supported.
    *
    * @tparam U Trial function on a resident Kokkos mesh.
    * @tparam V Test function on the same mesh.
@@ -995,6 +1029,8 @@ namespace Rodin::Assembly
         {
           for (const auto& lbfi : pb.getLocalBFIs())
             system.addMatrix(lbfi, 0, 0);
+          for (const auto& gbfi : pb.getGlobalBFIs())
+            system.addMatrix(gbfi, 0, 0);
         }
         // The problem reads a(u, v) + l(v) = 0, so b = -l.
         if (doVector)
@@ -1017,8 +1053,8 @@ namespace Rodin::Assembly
    * Each field occupies a block of the system, at the offsets given by the
    * problem input, and the system is assembled as in the single field case.
    *
-   * Global integrators, preassembled forms, periodic conditions and
-   * identification conditions are not supported.
+   * Preassembled forms, periodic conditions and identification conditions
+   * are not supported.
    */
   template <class U1, class U2, class U3, class... Us>
   class Kokkos<PETSc::Math::LinearSystem,
@@ -1152,6 +1188,11 @@ namespace Rodin::Assembly
           {
             system.addMatrix(lbfi, testOffset(lbfi.getTestFunction().getUUID()),
               trialOffset(lbfi.getTrialFunction().getUUID()));
+          }
+          for (const auto& gbfi : pb.getGlobalBFIs())
+          {
+            system.addMatrix(gbfi, testOffset(gbfi.getTestFunction().getUUID()),
+              trialOffset(gbfi.getTrialFunction().getUUID()));
           }
         }
         // The problem reads a(u, v) + l(v) = 0, so b = -l.

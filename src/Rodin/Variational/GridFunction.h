@@ -109,6 +109,18 @@ namespace Rodin::FormLanguage
 namespace Rodin::Variational
 {
   /**
+   * @brief Projection of a source on a grid function of a device space.
+   *
+   * Specialized by the device backend owning the mesh context. Grid
+   * functions of a device space project through it, since the host
+   * interpolation path is not instantiated for them.
+   *
+   * @tparam Context Mesh context of the space.
+   */
+  template <class Context>
+  struct DeviceProjection;
+
+  /**
    * @defgroup GridFunctionSpecializations GridFunction Template Specializations
    * @brief Template specializations of the GridFunction class.
    * @see <a href="_variational_2_grid_function_8h.html">GridFunction</a>
@@ -984,8 +996,11 @@ namespace Rodin::Variational
       template <class T>
       Derived& project(const T& fn)
       {
-        return static_cast<Derived&>(*this).project(
-          Geometry::Region::Cells, fn, [](const Geometry::Polytope&) { return true; });
+        if constexpr (IsDevice)
+          return projectOnDevice(Geometry::Region::Cells, fn, {});
+        else
+          return static_cast<Derived&>(*this).project(
+            Geometry::Region::Cells, fn, [](const Geometry::Polytope&) { return true; });
       }
 
       /**
@@ -1001,8 +1016,11 @@ namespace Rodin::Variational
       template <class T>
       Derived& project(const Geometry::Region& region, const T& fn)
       {
-        return static_cast<Derived&>(*this).project(
-          region, fn, [](const Geometry::Polytope&) { return true; });
+        if constexpr (IsDevice)
+          return projectOnDevice(region, fn, {});
+        else
+          return static_cast<Derived&>(*this).project(
+            region, fn, [](const Geometry::Polytope&) { return true; });
       }
 
       /**
@@ -1021,10 +1039,13 @@ namespace Rodin::Variational
       Derived& project(
         const Geometry::Region& region, const T& fn, const Geometry::Attribute& attr)
       {
-        return static_cast<Derived&>(*this).project(
-          region, fn, [&](const Geometry::Polytope& polytope) {
-            return polytope.getAttribute() == attr;
-          });
+        if constexpr (IsDevice)
+          return projectOnDevice(region, fn, {attr});
+        else
+          return static_cast<Derived&>(*this).project(
+            region, fn, [&](const Geometry::Polytope& polytope) {
+              return polytope.getAttribute() == attr;
+            });
       }
 
       /**
@@ -1044,11 +1065,14 @@ namespace Rodin::Variational
       Derived& project(const Geometry::Region& region, const T& fn,
         const FlatSet<Geometry::Attribute>& attrs)
       {
-        return static_cast<Derived&>(*this).project(
-          region, fn, [&](const Geometry::Polytope& polytope) {
-            const auto attribute = polytope.getAttribute();
-            return attrs.empty() || (attribute && attrs.count(*attribute));
-          });
+        if constexpr (IsDevice)
+          return projectOnDevice(region, fn, attrs);
+        else
+          return static_cast<Derived&>(*this).project(
+            region, fn, [&](const Geometry::Polytope& polytope) {
+              const auto attribute = polytope.getAttribute();
+              return attrs.empty() || (attribute && attrs.count(*attribute));
+            });
       }
 
       /**
@@ -1310,6 +1334,23 @@ namespace Rodin::Variational
       }
 
     private:
+      /**
+       * @brief Projects a source through the device backend of the space.
+       * @param region Region on which to project.
+       * @param fn Function, expression, or constant to evaluate.
+       * @param attrs Mesh attributes selecting the region; empty selects it
+       * all.
+       * @returns Reference to this grid function.
+       */
+      template <class T>
+      Derived& projectOnDevice(const Geometry::Region& region, const T& fn,
+        const FlatSet<Geometry::Attribute>& attrs)
+      {
+        DeviceProjection<typename FESType::MeshType::Context>::project(
+          static_cast<Derived&>(*this), region, fn, attrs);
+        return static_cast<Derived&>(*this);
+      }
+
       /**
        * @brief Uses a generic element's established polynomial information.
        * @param element Reference element, with no required family index.

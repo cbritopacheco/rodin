@@ -167,6 +167,63 @@ namespace Rodin::Tests::Unit
     expectSameSystem(sstokes, pstokes);
   }
 
+  /// @brief Potentials, restricted or in a block, match the sparse device assembly.
+  void checkPotential(const HostMesh& source)
+  {
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 fes(mesh);
+    TrialFunction su(fes);
+    TestFunction sv(fes);
+    PETSc::Variational::TrialFunction pu(fes);
+    PETSc::Variational::TestFunction pv(fes);
+
+    const auto k = KOKKOS_LAMBDA(
+      const DeviceGeometry::PointView& x, const DeviceGeometry::PointView& y)
+                     ->Real
+    {
+      return 1 + x.x() * y.y();
+    };
+    RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      return 1 + p.x() * p.y();
+    });
+
+    auto si = Integral(Potential(k, su), sv);
+    si.setTrialAttributes({1});
+    auto pi = Integral(Potential(k, pu), pv);
+    pi.setTrialAttributes({1});
+    Problem sp(su, sv);
+    sp = Integral(Grad(su), Grad(sv)) + si - Integral(f, sv) +
+      DirichletBC(su, RealFunction(3)).on(2);
+    Problem pp(pu, pv);
+    pp = Integral(Grad(pu), Grad(pv)) + pi - Integral(f, pv) +
+      DirichletBC(pu, RealFunction(3)).on(2);
+    expectSameSystem(sp, pp);
+
+    P1 vh(mesh, 2);
+    TrialFunction sw(vh);
+    TestFunction sz(vh);
+    PETSc::Variational::TrialFunction pw(vh);
+    PETSc::Variational::TestFunction pz(vh);
+    const auto m = KOKKOS_LAMBDA(DeviceGeometry::Matrix & a,
+      const DeviceGeometry::PointView& x, const DeviceGeometry::PointView& y)
+    {
+      for (Index i = 0; i < a.rows(); ++i)
+      {
+        for (Index j = 0; j < a.cols(); ++j)
+          a(i, j) = (i == j ? 2 : 0) + (i + 1) * x.x() * y.y() - Real(0.25) * j * y.x();
+      }
+    };
+    Problem sb(sw, su, sz, sv);
+    sb = Integral(Jacobian(sw), Jacobian(sz)) + -Integral(Potential(m, sw), sz) +
+      Integral(Grad(su), Grad(sv)) + Integral(Potential(k, su), sv) - Integral(f, sv) +
+      DirichletBC(sw, VectorFunction{0, 0}).on(1);
+    Problem pb(pw, pu, pz, pv);
+    pb = Integral(Jacobian(pw), Jacobian(pz)) + -Integral(Potential(m, pw), pz) +
+      Integral(Grad(pu), Grad(pv)) + Integral(Potential(k, pu), pv) - Integral(f, pv) +
+      DirichletBC(pw, VectorFunction{0, 0}).on(1);
+    expectSameSystem(sb, pb);
+  }
+
   /// @brief Boundary terms and linear elasticity match the sparse device assembly.
   void checkBoundaryTerms(const HostMesh& source)
   {
@@ -310,6 +367,11 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_PETSc_Problem, BoundaryTermsOnMixedMesh)
   {
     checkBoundaryTerms(withFaces(makeMixedMesh()));
+  }
+
+  TEST(Kokkos_PETSc_Problem, PotentialOnMixedMesh)
+  {
+    checkPotential(withFaces(makeMixedMesh()));
   }
 
   TEST(Kokkos_PETSc_Problem, Reassembly)

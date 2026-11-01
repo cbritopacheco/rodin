@@ -41,3 +41,15 @@ target_link_libraries(RodinKokkosVariationalH1Test PRIVATE
   GTest::gtest Rodin::Kokkos Rodin::Variational Rodin::Assembly)
 rodin_discover_tests(RodinKokkosVariationalH1Test
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinKokkosVariationalProjectionTest ProjectionTest.cpp ../Main.cpp)
+target_link_libraries(RodinKokkosVariationalProjectionTest PRIVATE
+  GTest::gtest Rodin::Kokkos Rodin::Variational Rodin::Assembly)
+rodin_discover_tests(RodinKokkosVariationalProjectionTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinKokkosVariationalPotentialTest PotentialTest.cpp ../Main.cpp)
+target_link_libraries(RodinKokkosVariationalPotentialTest PRIVATE
+  GTest::gtest Rodin::Kokkos Rodin::Variational Rodin::Assembly)
+rodin_discover_tests(RodinKokkosVariationalPotentialTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)

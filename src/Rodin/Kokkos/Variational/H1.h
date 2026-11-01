@@ -9,7 +9,7 @@
 
 /**
  * @file
- * @brief Quadratic H1 Lagrange spaces on a resident Kokkos mesh.
+ * @brief H1 Lagrange spaces on a resident Kokkos mesh.
  */
 
 #include <array>
@@ -17,6 +17,9 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
+
+#include <Eigen/LU>
 
 #include "Rodin/Variational/H1/H1.h"
 #include "Rodin/Variational/H1/Div.h"
@@ -180,64 +183,403 @@ namespace Rodin::Kokkos::Variational
   };
 
   /**
-   * @brief Degrees of freedom of a quadratic H1 space on the device.
+   * @brief Lagrange basis of degree K on the device.
    *
-   * Holds the local to global numbering of every polytope of a simplicial
-   * mesh, copied from the host space, and the quadratic basis. Component
-   * @f$ r @f$ of the scalar degree of freedom @f$ q @f$ has the global index
-   * @f$ q + r n @f$, where @f$ n @f$ is the stride, the size of the scalar
-   * space.
+   * The basis function of node @f$ q @f$ of a reference geometry is
+   * expanded in monomials of the reference coordinates,
+   * @f[
+   *   \phi_q(r) = \sum_m C_{qm} r^{\alpha_m} ,
+   * @f]
+   * over @f$ P_K @f$ on the simplices, @f$ Q_K @f$ on the quadrilateral and
+   * the hexahedron, and @f$ P_K \otimes P_K @f$ on the wedge, so that it
+   * spans the space of Rodin::Variational::H1Element. The coefficients
+   * @f$ C = V^{-T} @f$ invert the Vandermonde matrix @f$ V_{im} @f$ of the
+   * monomials at the host nodes, computed once on the host in extended
+   * precision.
    *
+   * The physical gradient follows from the reference one through
+   * @f$ \nabla r_k = \sum_a \hat{x}_{a,k} \nabla \lambda_a @f$, where
+   * @f$ \lambda_a @f$ is the P1 basis cached by IntegrationPointView and
+   * @f$ \hat{x}_a @f$ its reference vertex, the P1 basis reproducing the
+   * reference coordinates. Pyramids are not supported.
+   *
+   * @tparam K Polynomial degree.
    * @tparam MemorySpace Kokkos memory space of the tables.
    */
-  template <class MemorySpace>
-  class QuadraticDOFs
+  template <size_t K, class MemorySpace>
+  class LagrangeBasis
+  {
+    public:
+      /// @brief Number of reference geometries.
+      static constexpr Index GeometryCount = 8;
+
+      /**
+       * @brief Gets the number of nodes of a reference geometry.
+       * @param g Reference geometry.
+       * @return Number of nodes, zero for the unsupported pyramid.
+       */
+      KOKKOS_INLINE_FUNCTION
+      static constexpr Index getCount(::Rodin::Geometry::Polytope::Type g)
+      {
+        using Type = ::Rodin::Geometry::Polytope::Type;
+        constexpr Index n = K + 1;
+        switch (g)
+        {
+          case Type::Point:
+            return 1;
+          case Type::Segment:
+            return n;
+          case Type::Triangle:
+            return n * (n + 1) / 2;
+          case Type::Quadrilateral:
+            return n * n;
+          case Type::Tetrahedron:
+            return n * (n + 1) * (n + 2) / 6;
+          case Type::Hexahedron:
+            return n * n * n;
+          case Type::Wedge:
+            return n * n * (n + 1) / 2;
+          case Type::Pyramid:
+            return 0;
+        }
+        return 0;
+      }
+
+      /// @brief Empty tables.
+      LagrangeBasis() = default;
+
+      /**
+       * @brief Builds the tables of every supported geometry.
+       * @param execution Execution space ordering the transfers.
+       */
+      template <class ExecutionSpace>
+      explicit LagrangeBasis(const ExecutionSpace& execution)
+      {
+        using Type = ::Rodin::Geometry::Polytope::Type;
+        using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
+        Index nodes = 0;
+        Index coefficients = 0;
+        for (Index g = 0; g < GeometryCount; ++g)
+        {
+          const Index n = getCount(static_cast<Type>(g));
+          m_count[g] = n;
+          m_nodeOffsets[g] = nodes;
+          m_coefficientOffsets[g] = coefficients;
+          nodes += n;
+          coefficients += n * n;
+        }
+        m_exponents = ::Kokkos::View<std::uint8_t*, MemorySpace>(
+          ::Kokkos::view_alloc(execution, std::string("Rodin H1 monomials")), 3 * nodes);
+        m_nodes = ::Kokkos::View<Real*, MemorySpace>(
+          ::Kokkos::view_alloc(execution, std::string("Rodin H1 nodes")), 3 * nodes);
+        m_coefficients = ::Kokkos::View<Real*, MemorySpace>(
+          ::Kokkos::view_alloc(execution, std::string("Rodin H1 coefficients")),
+          coefficients);
+        auto exponents = ::Kokkos::create_mirror_view(m_exponents);
+        auto points = ::Kokkos::create_mirror_view(m_nodes);
+        auto values = ::Kokkos::create_mirror_view(m_coefficients);
+        for (Index g = 0; g < GeometryCount; ++g)
+        {
+          const Type type = static_cast<Type>(g);
+          const Index n = m_count[g];
+          if (n == 0)
+            continue;
+          const auto alpha = getExponents(type);
+          const auto& reference =
+            ::Rodin::Variational::H1Element<K, Real>::getNodes(type);
+          assert(alpha.size() == n && reference.size() == n);
+          Matrix vandermonde(n, n);
+          for (Index i = 0; i < n; ++i)
+          {
+            const Index rdim = reference[i].size();
+            for (Index k = 0; k < 3; ++k)
+              points(3 * (m_nodeOffsets[g] + i) + k) =
+                k < rdim ? reference[i](k) : Real(0);
+            for (Index m = 0; m < n; ++m)
+            {
+              long double monomial = 1;
+              for (Index k = 0; k < rdim; ++k)
+              {
+                for (Index p = 0; p < alpha[m][k]; ++p)
+                  monomial *= static_cast<long double>(reference[i](k));
+              }
+              vandermonde(i, m) = monomial;
+            }
+          }
+          const Matrix inverse = vandermonde.transpose().fullPivLu().inverse();
+          for (Index m = 0; m < n; ++m)
+          {
+            for (Index k = 0; k < 3; ++k)
+              exponents(3 * (m_nodeOffsets[g] + m) + k) = alpha[m][k];
+          }
+          for (Index q = 0; q < n; ++q)
+          {
+            for (Index m = 0; m < n; ++m)
+              values(m_coefficientOffsets[g] + q * n + m) =
+                static_cast<Real>(inverse(q, m));
+          }
+        }
+        ::Kokkos::deep_copy(execution, m_exponents, exponents);
+        ::Kokkos::deep_copy(execution, m_nodes, points);
+        ::Kokkos::deep_copy(execution, m_coefficients, values);
+        execution.fence("Rodin H1 basis transfer");
+      }
+
+      /**
+       * @brief Evaluates a basis function.
+       * @param ip Integration point.
+       * @param q Local node index.
+       * @return Basis value @f$ \phi_q @f$.
+       */
+      template <class Point>
+      KOKKOS_INLINE_FUNCTION Real getBasis(const Point& ip, Index q) const
+      {
+        const Geometry::PointView& p = ip.getPoint();
+        const Index g = static_cast<Index>(p.getPolytope().getGeometry());
+        const Geometry::Vector& r = p.getReferenceCoordinates();
+        const Index n = m_count[g];
+        KOKKOS_ASSERT(q < n);
+        const Powers powers = getPowers(r);
+        const Real* c = m_coefficients.data() + m_coefficientOffsets[g] + q * n;
+        const std::uint8_t* alpha = m_exponents.data() + 3 * m_nodeOffsets[g];
+        Real result = 0;
+        for (Index m = 0; m < n; ++m)
+        {
+          Real monomial = 1;
+          for (Index k = 0; k < r.size(); ++k)
+            monomial *= powers[k][alpha[3 * m + k]];
+          result += c[m] * monomial;
+        }
+        return result;
+      }
+
+      /**
+       * @brief Evaluates the physical gradient of a basis function.
+       * @param ip Integration point.
+       * @param q Local node index.
+       * @return Gradient @f$ \nabla \phi_q @f$.
+       */
+      template <class Point>
+      KOKKOS_INLINE_FUNCTION Geometry::Vector getGradient(const Point& ip, Index q) const
+      {
+        const Geometry::PointView& p = ip.getPoint();
+        const auto type = p.getPolytope().getGeometry();
+        const Index g = static_cast<Index>(type);
+        const Geometry::Vector& r = p.getReferenceCoordinates();
+        const Index n = m_count[g];
+        KOKKOS_ASSERT(q < n);
+        const Powers powers = getPowers(r);
+        const Real* c = m_coefficients.data() + m_coefficientOffsets[g] + q * n;
+        const std::uint8_t* alpha = m_exponents.data() + 3 * m_nodeOffsets[g];
+        const Index rdim = r.size();
+        ::Kokkos::Array<Real, 3> reference = {0, 0, 0};
+        for (Index m = 0; m < n; ++m)
+        {
+          for (Index k = 0; k < rdim; ++k)
+          {
+            const Index e = alpha[3 * m + k];
+            if (e == 0)
+              continue;
+            Real derivative = c[m] * e * powers[k][e - 1];
+            for (Index l = 0; l < rdim; ++l)
+            {
+              if (l != k)
+                derivative *= powers[l][alpha[3 * m + l]];
+            }
+            reference[k] += derivative;
+          }
+        }
+        // The P1 basis reproduces the reference coordinates.
+        const Index sdim = ip.getGradient(0).size();
+        Geometry::Vector result(sdim);
+        for (Index a = 0; a < ip.getCount(); ++a)
+        {
+          Real weight = 0;
+          for (Index k = 0; k < rdim; ++k)
+            weight += reference[k] * Geometry::getReferenceVertexCoordinate(type, a, k);
+          if (weight == 0)
+            continue;
+          const Geometry::Vector& gradient = ip.getGradient(a);
+          for (Index s = 0; s < sdim; ++s)
+            result(s) += weight * gradient(s);
+        }
+        return result;
+      }
+
+      /**
+       * @brief Gets the reference coordinates of a node.
+       * @param polytope Polytope of the mesh.
+       * @param q Local node index.
+       * @return Node of Rodin::Variational::H1Element.
+       */
+      KOKKOS_INLINE_FUNCTION
+      Geometry::Vector getNode(const Geometry::PolytopeView& polytope, Index q) const
+      {
+        const Index g = static_cast<Index>(polytope.getGeometry());
+        KOKKOS_ASSERT(q < m_count[g]);
+        const Index rdim = polytope.getDimension();
+        Geometry::Vector result(rdim);
+        for (Index k = 0; k < rdim; ++k)
+          result(k) = m_nodes(3 * (m_nodeOffsets[g] + q) + k);
+        return result;
+      }
+
+    private:
+      using Powers = ::Kokkos::Array<::Kokkos::Array<Real, K + 1>, 3>;
+
+      /// @brief Gets the powers @f$ r_k^p @f$, @f$ p \leq K @f$.
+      KOKKOS_INLINE_FUNCTION
+      static Powers getPowers(const Geometry::Vector& r)
+      {
+        Powers powers;
+        for (Index k = 0; k < r.size(); ++k)
+        {
+          powers[k][0] = 1;
+          for (Index p = 1; p <= K; ++p)
+            powers[k][p] = powers[k][p - 1] * r(k);
+        }
+        return powers;
+      }
+
+      /// @brief Gets the exponents of the monomials of a reference geometry.
+      static std::vector<std::array<std::uint8_t, 3>> getExponents(
+        ::Rodin::Geometry::Polytope::Type g)
+      {
+        using Type = ::Rodin::Geometry::Polytope::Type;
+        const bool simplex = g == Type::Triangle || g == Type::Tetrahedron;
+        const size_t dim = ::Rodin::Geometry::Polytope::Traits(g).getDimension();
+        const size_t ki = dim > 0 ? K : 0;
+        const size_t kj = dim > 1 ? K : 0;
+        const size_t kk = dim > 2 ? K : 0;
+        std::vector<std::array<std::uint8_t, 3>> result;
+        for (size_t k = 0; k <= kk; ++k)
+        {
+          for (size_t j = 0; j <= kj; ++j)
+          {
+            for (size_t i = 0; i <= ki; ++i)
+            {
+              if ((simplex && i + j + k > K) || (g == Type::Wedge && i + j > K))
+                continue;
+              result.push_back({static_cast<std::uint8_t>(i),
+                static_cast<std::uint8_t>(j), static_cast<std::uint8_t>(k)});
+            }
+          }
+        }
+        return result;
+      }
+
+      ::Kokkos::Array<Index, GeometryCount> m_count = {};
+      ::Kokkos::Array<Index, GeometryCount> m_nodeOffsets = {};
+      ::Kokkos::Array<Index, GeometryCount> m_coefficientOffsets = {};
+      ::Kokkos::View<std::uint8_t*, MemorySpace> m_exponents;
+      ::Kokkos::View<Real*, MemorySpace> m_nodes;
+      ::Kokkos::View<Real*, MemorySpace> m_coefficients;
+  };
+
+  /**
+   * @brief Degrees of freedom of an H1 space of degree K on the device.
+   *
+   * Holds the local to global numbering of every polytope of the mesh,
+   * copied from the host space, and the basis. Component @f$ r @f$ of the
+   * scalar degree of freedom @f$ q @f$ has the global index @f$ q + r n @f$,
+   * where @f$ n @f$ is the stride, the size of the scalar space.
+   *
+   * The quadratic simplices keep the closed form of QuadraticBasis, the
+   * other polytopes take LagrangeBasis.
+   *
+   * @tparam K Polynomial degree.
+   * @tparam MemorySpace Kokkos memory space of the tables.
+   */
+  template <size_t K, class MemorySpace>
+  class LagrangeDOFs
   {
     public:
       /// @brief Empty tables.
-      QuadraticDOFs() = default;
+      LagrangeDOFs() = default;
 
       /**
        * @brief Copies the numbering of a scalar host space to the device.
-       * @param fes Scalar quadratic host space.
+       * @param fes Scalar host space of degree K.
        * @param execution Execution space ordering the transfers.
        */
       template <class FES, class ExecutionSpace>
-      QuadraticDOFs(const FES& fes, const ExecutionSpace& execution)
+      LagrangeDOFs(const FES& fes, const ExecutionSpace& execution)
         : m_stride(fes.getSize()),
-          m_basis(QuadraticBasis::get())
+          m_basis(execution)
       {
+        if constexpr (K == 2)
+          m_quadratic = QuadraticBasis::get();
         const auto& mesh = fes.getMesh();
         assert(mesh.getDimension() < m_dofs.size());
         for (size_t d = 0; d <= mesh.getDimension(); ++d)
         {
+          // Polytopes of one node count take a fixed stride, others offsets.
           const Index count = mesh.getPolytopeCount(d);
-          const Index n = QuadraticBasis::getCount(d);
+          Index uniform = count > 0 ? fes.getDOFs(d, 0).size() : 0;
+          Index total = 0;
+          for (Index i = 0; i < count; ++i)
+          {
+            const Index n = fes.getDOFs(d, i).size();
+            total += n;
+            if (n != uniform)
+              uniform = 0;
+          }
+          m_counts[d] = uniform;
           m_dofs[d] = ::Kokkos::View<Index*, MemorySpace>(
             ::Kokkos::view_alloc(execution, std::string("Rodin H1 degrees of freedom")),
-            count * n);
+            total);
           auto host = ::Kokkos::create_mirror_view(m_dofs[d]);
+          Index position = 0;
           for (Index i = 0; i < count; ++i)
           {
             const auto& dofs = fes.getDOFs(d, i);
-            assert(static_cast<Index>(dofs.size()) == n);
-            for (Index q = 0; q < n; ++q)
-              host(i * n + q) = dofs(q);
+            for (Index q = 0; q < static_cast<Index>(dofs.size()); ++q)
+              host(position++) = dofs(q);
           }
           ::Kokkos::deep_copy(execution, m_dofs[d], host);
+          if (uniform == 0)
+          {
+            m_offsets[d] = ::Kokkos::View<Index*, MemorySpace>(
+              ::Kokkos::view_alloc(execution, std::string("Rodin H1 offsets")),
+              count + 1);
+            auto offsets = ::Kokkos::create_mirror_view(m_offsets[d]);
+            offsets(0) = 0;
+            for (Index i = 0; i < count; ++i)
+              offsets(i + 1) = offsets(i) + fes.getDOFs(d, i).size();
+            ::Kokkos::deep_copy(execution, m_offsets[d], offsets);
+          }
         }
         execution.fence("Rodin H1 degrees of freedom transfer");
       }
 
       /**
        * @brief Gets the number of local degrees of freedom of a polytope.
-       * @param vertices Number of vertices of a simplex.
-       * @return @f$ n (n + 1) / 2 @f$ for @f$ n @f$ vertices.
+       * @param vertices Number of vertices of a polytope.
+       * @return Maximum node count over the geometries of at most
+       * @p vertices vertices.
        */
       KOKKOS_INLINE_FUNCTION
       static constexpr Index getCapacity(Index vertices)
       {
-        return vertices * (vertices + 1) / 2;
+        using Type = ::Rodin::Geometry::Polytope::Type;
+        using Basis = LagrangeBasis<K, MemorySpace>;
+        Index result = 1;
+        if (vertices >= 2)
+          result = Basis::getCount(Type::Segment);
+        if (vertices >= 3)
+          result = Basis::getCount(Type::Triangle);
+        if (vertices >= 4)
+        {
+          result =
+            Basis::getCount(Type::Quadrilateral) > Basis::getCount(Type::Tetrahedron)
+            ? Basis::getCount(Type::Quadrilateral)
+            : Basis::getCount(Type::Tetrahedron);
+        }
+        if (vertices >= 6 && Basis::getCount(Type::Wedge) > result)
+          result = Basis::getCount(Type::Wedge);
+        if (vertices >= 8 && Basis::getCount(Type::Hexahedron) > result)
+          result = Basis::getCount(Type::Hexahedron);
+        return result;
       }
 
       /// @brief Gets the offset between components. @return Scalar space size.
@@ -249,21 +591,30 @@ namespace Rodin::Kokkos::Variational
 
       /**
        * @brief Gets the global degrees of freedom of a polytope.
-       * @param polytope Simplex of the mesh.
+       * @param polytope Polytope of the mesh.
        * @return Scalar global indices in local order.
        */
       KOKKOS_INLINE_FUNCTION
       Geometry::IndexView bind(const Geometry::PolytopeView& polytope) const
       {
         const Index d = polytope.getDimension();
-        const Index n = QuadraticBasis::getCount(d);
-        return {m_dofs[d].data() + polytope.getIndex() * n, n};
+        const Index i = polytope.getIndex();
+        const Index n = m_counts[d];
+        if (n > 0)
+          return {m_dofs[d].data() + i * n, n};
+        const Index begin = m_offsets[d](i);
+        return {m_dofs[d].data() + begin, m_offsets[d](i + 1) - begin};
       }
 
       /// @param ip Integration point. @param q Local index. @return Basis value.
       template <class Point>
       KOKKOS_INLINE_FUNCTION Real getBasis(const Point& ip, Index q) const
       {
+        if constexpr (K == 2)
+        {
+          if (isSimplex(ip.getPoint().getPolytope()))
+            return m_quadratic.getBasis(ip, q);
+        }
         return m_basis.getBasis(ip, q);
       }
 
@@ -271,36 +622,60 @@ namespace Rodin::Kokkos::Variational
       template <class Point>
       KOKKOS_INLINE_FUNCTION Geometry::Vector getGradient(const Point& ip, Index q) const
       {
+        if constexpr (K == 2)
+        {
+          if (isSimplex(ip.getPoint().getPolytope()))
+            return m_quadratic.getGradient(ip, q);
+        }
         return m_basis.getGradient(ip, q);
       }
 
-      /// @param polytope Simplex. @param q Local index. @return Reference node.
+      /// @param polytope Polytope. @param q Local index. @return Reference node.
       KOKKOS_INLINE_FUNCTION
       Geometry::Vector getNode(const Geometry::PolytopeView& polytope, Index q) const
       {
+        if constexpr (K == 2)
+        {
+          if (isSimplex(polytope))
+            return m_quadratic.getNode(polytope, q);
+        }
         return m_basis.getNode(polytope, q);
       }
 
     private:
+      /// @brief Tells whether a polytope is a simplex.
+      KOKKOS_INLINE_FUNCTION
+      static bool isSimplex(const Geometry::PolytopeView& polytope)
+      {
+        using Type = ::Rodin::Geometry::Polytope::Type;
+        const Type g = polytope.getGeometry();
+        return g == Type::Point || g == Type::Segment || g == Type::Triangle ||
+          g == Type::Tetrahedron;
+      }
+
       Index m_stride = 0;
-      QuadraticBasis m_basis;
+      QuadraticBasis m_quadratic;
+      LagrangeBasis<K, MemorySpace> m_basis;
+      ::Kokkos::Array<Index, 4> m_counts = {};
       ::Kokkos::Array<::Kokkos::View<Index*, MemorySpace>, 4> m_dofs;
+      ::Kokkos::Array<::Kokkos::View<Index*, MemorySpace>, 4> m_offsets;
   };
 }
 
 namespace Rodin::Kokkos::Variational::Internal
 {
   /**
-   * @brief Host copy of a resident mesh with the quadratic spaces built on
-   * it.
+   * @brief Host copy of a resident mesh with the H1 spaces of degree K built
+   * on it.
    *
    * The host spaces number the degrees of freedom and answer the form
    * language queries; the scalar numbering is copied to the device.
    *
+   * @tparam K Polynomial degree.
    * @tparam Backend Kokkos backend of the mesh context.
    */
-  template <class Backend>
-  class QuadraticMirror
+  template <size_t K, class Backend>
+  class LagrangeMirror
   {
     public:
       /// @brief Resident mesh type.
@@ -314,30 +689,30 @@ namespace Rodin::Kokkos::Variational::Internal
       using MemorySpace = typename DeviceMeshType::MemorySpace;
 
       /// @brief Scalar host space.
-      using ScalarSpace = ::Rodin::Variational::H1<2, Real, HostMeshType>;
+      using ScalarSpace = ::Rodin::Variational::H1<K, Real, HostMeshType>;
 
       /// @brief Vector host space.
       using VectorSpace =
-        ::Rodin::Variational::H1<2, Math::SpatialVector<Real>, HostMeshType>;
+        ::Rodin::Variational::H1<K, Math::SpatialVector<Real>, HostMeshType>;
 
       /**
        * @brief Builds the host spaces and copies the numbering to the device.
-       * @param mesh Resident simplicial mesh. The incidences
+       * @param mesh Resident mesh without pyramids. The incidences
        * @f$ d \to d - 1 @f$ it lacks are computed on the host copy.
        * @param vdim Vector dimension, zero for a scalar space only.
        */
-      QuadraticMirror(const DeviceMeshType& mesh, size_t vdim)
-        : m_mesh(simplicial(mesh)),
-          m_scalar(std::integral_constant<size_t, 2>{}, m_mesh),
+      LagrangeMirror(const DeviceMeshType& mesh, size_t vdim)
+        : m_mesh(supported(mesh)),
+          m_scalar(std::integral_constant<size_t, K>{}, m_mesh),
           m_dofs(m_scalar, mesh.getContext().getExecutionSpace())
       {
         if (vdim > 0)
-          m_vector.emplace(std::integral_constant<size_t, 2>{}, m_mesh, vdim);
+          m_vector.emplace(std::integral_constant<size_t, K>{}, m_mesh, vdim);
       }
 
-      QuadraticMirror(const QuadraticMirror&) = delete;
+      LagrangeMirror(const LagrangeMirror&) = delete;
 
-      QuadraticMirror& operator=(const QuadraticMirror&) = delete;
+      LagrangeMirror& operator=(const LagrangeMirror&) = delete;
 
       /// @brief Gets the scalar host space. @return Scalar space.
       const ScalarSpace& getScalar() const
@@ -353,7 +728,7 @@ namespace Rodin::Kokkos::Variational::Internal
       }
 
       /// @brief Gets the device numbering. @return Scalar degrees of freedom.
-      const QuadraticDOFs<MemorySpace>& getDOFs() const
+      const LagrangeDOFs<K, MemorySpace>& getDOFs() const
       {
         return m_dofs;
       }
@@ -364,19 +739,18 @@ namespace Rodin::Kokkos::Variational::Internal
        * @param mesh Resident mesh.
        * @return Host copy of @p mesh, with the incidences @f$ d \to d - 1 @f$.
        */
-      static HostMeshType simplicial(const DeviceMeshType& mesh)
+      static HostMeshType supported(const DeviceMeshType& mesh)
       {
         using Type = ::Rodin::Geometry::Polytope::Type;
         for (size_t d = 1; d <= mesh.getDimension(); ++d)
         {
           for (Index i = 0; i < mesh.getPolytopeCount(d); ++i)
           {
-            const Type g = mesh.getGeometry(d, i);
-            if (g != Type::Segment && g != Type::Triangle && g != Type::Tetrahedron)
+            if (mesh.getGeometry(d, i) == Type::Pyramid)
             {
               Alert::Exception()
-                << "Kokkos H1 spaces of degree 2 require a simplicial mesh, found " << g
-                << " at (" << d << ", " << i << ")." << Alert::Raise;
+                << "Kokkos H1 spaces do not support pyramids, found one at (" << d << ", "
+                << i << ")." << Alert::Raise;
             }
           }
         }
@@ -394,7 +768,7 @@ namespace Rodin::Kokkos::Variational::Internal
       HostMeshType m_mesh;
       ScalarSpace m_scalar;
       std::optional<VectorSpace> m_vector;
-      QuadraticDOFs<MemorySpace> m_dofs;
+      LagrangeDOFs<K, MemorySpace> m_dofs;
   };
 }
 
@@ -402,19 +776,17 @@ namespace Rodin::Variational
 {
   /**
    * @ingroup H1Specializations
-   * @brief Real valued quadratic H1 Lagrange space on a resident simplicial
-   * Kokkos mesh.
+   * @brief Real valued H1 Lagrange space on a resident Kokkos mesh.
    *
    * The space numbers its degrees of freedom as the host space of the same
    * degree built on Geometry::Mesh::toHost(), so the two share their global
    * numbering. The host space is kept for the form language queries, and
    * its numbering is copied to the device, where the basis is evaluated by
-   * Rodin::Kokkos::Variational::QuadraticBasis.
+   * Rodin::Kokkos::Variational::LagrangeDOFs.
    *
-   * Only the degree two is available on the device, on meshes made of
-   * segments, triangles and tetrahedra.
+   * Every geometry but the pyramid is available on the device.
    *
-   * @tparam K Polynomial degree, two.
+   * @tparam K Polynomial degree.
    * @tparam Backend Kokkos backend of the mesh context.
    */
   template <size_t K, class Backend>
@@ -422,8 +794,6 @@ namespace Rodin::Variational
     : public FiniteElementSpace<Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>,
         H1<K, Real, Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>>>
   {
-    static_assert(K == 2, "Kokkos H1 spaces are available for K = 2.");
-
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
@@ -445,12 +815,12 @@ namespace Rodin::Variational
 
       /// @brief Device degrees of freedom.
       using DOFsType =
-        Rodin::Kokkos::Variational::QuadraticDOFs<typename MeshType::MemorySpace>;
+        Rodin::Kokkos::Variational::LagrangeDOFs<K, typename MeshType::MemorySpace>;
 
       /**
        * @brief Constructs the space on a resident mesh.
        * @param[in] degree Polynomial degree.
-       * @param[in] mesh Simplicial mesh supporting the space, which must
+       * @param[in] mesh Mesh without pyramids supporting the space, which must
        * outlive it.
        */
       H1([[maybe_unused]] std::integral_constant<size_t, K> degree, const MeshType& mesh)
@@ -581,7 +951,7 @@ namespace Rodin::Variational
       }
 
     private:
-      using MirrorType = Rodin::Kokkos::Variational::Internal::QuadraticMirror<Backend>;
+      using MirrorType = Rodin::Kokkos::Variational::Internal::LagrangeMirror<K, Backend>;
 
       std::reference_wrapper<const MeshType> m_mesh;
       std::shared_ptr<const MirrorType> m_mirror;
@@ -589,8 +959,7 @@ namespace Rodin::Variational
 
   /**
    * @ingroup H1Specializations
-   * @brief Vector valued quadratic H1 Lagrange space on a resident
-   * simplicial Kokkos mesh.
+   * @brief Vector valued H1 Lagrange space on a resident Kokkos mesh.
    *
    * The space numbers its degrees of freedom as the host vector space:
    * component @f$ r @f$ of the scalar degree of freedom @f$ q @f$ has the
@@ -598,7 +967,7 @@ namespace Rodin::Variational
    * space, and the local index @f$ a\,d + r @f$ when @f$ q @f$ is the local
    * node @f$ a @f$ of a polytope and @f$ d @f$ the vector dimension.
    *
-   * @tparam K Polynomial degree, two.
+   * @tparam K Polynomial degree.
    * @tparam Backend Kokkos backend of the mesh context.
    */
   template <size_t K, class Backend>
@@ -609,8 +978,6 @@ namespace Rodin::Variational
         H1<K, Math::SpatialVector<Real>,
           Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>>>
   {
-    static_assert(K == 2, "Kokkos H1 spaces are available for K = 2.");
-
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
@@ -632,12 +999,12 @@ namespace Rodin::Variational
 
       /// @brief Device degrees of freedom.
       using DOFsType =
-        Rodin::Kokkos::Variational::QuadraticDOFs<typename MeshType::MemorySpace>;
+        Rodin::Kokkos::Variational::LagrangeDOFs<K, typename MeshType::MemorySpace>;
 
       /**
        * @brief Constructs the vector space on a resident mesh.
        * @param[in] degree Polynomial degree.
-       * @param[in] mesh Simplicial mesh supporting the space, which must
+       * @param[in] mesh Mesh without pyramids supporting the space, which must
        * outlive it.
        * @param[in] vdim Vector dimension, at most three.
        */
@@ -777,7 +1144,7 @@ namespace Rodin::Variational
       }
 
     private:
-      using MirrorType = Rodin::Kokkos::Variational::Internal::QuadraticMirror<Backend>;
+      using MirrorType = Rodin::Kokkos::Variational::Internal::LagrangeMirror<K, Backend>;
 
       std::reference_wrapper<const MeshType> m_mesh;
       size_t m_vdim;

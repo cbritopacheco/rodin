@@ -41,6 +41,8 @@ target_sources(RodinKokkos INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/LinearElasticityIntegral.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/P0g.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/P1.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Potential.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Projection.h>
 )
 
 install(TARGETS RodinKokkos EXPORT RodinTargets)
