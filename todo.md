@@ -684,16 +684,23 @@ cellules, CUDA sm_75).
 
 ## 17. Temps de compilation des tests Kokkos
 
-- [ ] Découper les tests Kokkos les plus lents en plusieurs unités de
-      compilation. Dans build-mpi, `BilinearFormTest.cpp`,
-      `VectorBilinearFormTest.cpp` et `CoefficientBilinearFormTest.cpp`
-      (`tests/unit/Rodin/Kokkos/Variational`) passent chacun plus de
-      26 minutes dans un seul nvcc, en fin de build: `-j36` n'y change rien.
-      Les fichiers sont courts (150 à 200 lignes, 8 à 15 `TEST`), le coût
-      vient de l'instanciation des noyaux par intégrande et par géométrie.
-      Piste: un fichier par groupe de `TEST`, liés dans le même exécutable,
-      puis mesurer le temps de chaque unité (`-time` de nvcc ou
-      `-ftime-report`) pour équilibrer les groupes.
+- [x] Tests Kokkos les plus lents découpés en plusieurs unités de
+      compilation, liées dans le même exécutable. Dans build-mpi,
+      `BilinearFormTest.cpp`, `VectorBilinearFormTest.cpp` et
+      `CoefficientBilinearFormTest.cpp` (`tests/unit/Rodin/Kokkos/Variational`)
+      passaient chacun plus de 26 minutes dans un seul nvcc en fin de build.
+      Mesures dans build-petsc, compilés seuls en parallèle: 173 s, 635 s et
+      398 s. Chaque unité paie environ 110 s d'en-têtes (un fichier d'un seul
+      `TEST` sans noyau lourd: 112 s), et chaque fonction `check*` instancie
+      ses noyaux; un fichier par `check` (12 unités) donne 320 s de temps mur
+      mais double le temps CPU, et `BilinearFormTest.cpp` n'y gagne rien
+      (172 s pour sa plus grosse fonction seule). Seuls les `check` lourds
+      sortent dans leur propre fichier: `VectorBilinearFormFormsTest.cpp`,
+      `VectorBilinearFormSymmetricGradientTest.cpp`,
+      `VectorBilinearFormCoefficientTest.cpp` et
+      `CoefficientBilinearFormVectorGridFunctionTest.cpp`. 7 unités, 349 s de
+      temps mur au lieu de 635 s, la plus lente étant le gradient de
+      `GridFunction` vectorielle (convection), qui ne se découpe plus.
 
 ## 18. Solveurs sur le GPU
 

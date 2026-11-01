@@ -4,15 +4,19 @@ target_link_libraries(RodinKokkosVariationalBilinearFormTest PRIVATE
 rodin_discover_tests(RodinKokkosVariationalBilinearFormTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
 
+# The heaviest checks of a form have their own translation units, which
+# compile in parallel, since each check instantiates its own kernels.
 add_executable(RodinKokkosVariationalVectorBilinearFormTest VectorBilinearFormTest.cpp
-  ../Main.cpp)
+  VectorBilinearFormFormsTest.cpp VectorBilinearFormSymmetricGradientTest.cpp
+  VectorBilinearFormCoefficientTest.cpp ../Main.cpp)
 target_link_libraries(RodinKokkosVariationalVectorBilinearFormTest PRIVATE
   GTest::gtest Rodin::Kokkos Rodin::Variational Rodin::Assembly)
 rodin_discover_tests(RodinKokkosVariationalVectorBilinearFormTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
 
 add_executable(RodinKokkosVariationalCoefficientBilinearFormTest
-  CoefficientBilinearFormTest.cpp ../Main.cpp)
+  CoefficientBilinearFormTest.cpp CoefficientBilinearFormVectorGridFunctionTest.cpp
+  ../Main.cpp)
 target_link_libraries(RodinKokkosVariationalCoefficientBilinearFormTest PRIVATE
   GTest::gtest Rodin::Kokkos Rodin::Variational Rodin::Assembly)
 rodin_discover_tests(RodinKokkosVariationalCoefficientBilinearFormTest
