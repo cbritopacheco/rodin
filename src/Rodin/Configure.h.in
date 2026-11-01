@@ -145,6 +145,19 @@
 #cmakedefine RODIN_USE_MUMPS
 
 /**
+ * @brief Indicates if Rodin is built with NVIDIA cuDSS support.
+ *
+ * # Utilization
+ *
+ * @code{.cpp}
+ * #ifdef RODIN_USE_CUDSS
+ * // Code depending on cuDSS
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_CUDSS
+
+/**
  * @brief Indicates if Rodin is built with SuiteSparse support.
  *
  * # Utilization

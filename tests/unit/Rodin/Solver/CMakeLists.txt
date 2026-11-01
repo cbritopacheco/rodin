@@ -113,6 +113,21 @@ if (RODIN_USE_MUMPS)
   )
 endif()
 
+if (RODIN_USE_CUDSS)
+  add_executable(RodinCuDSSTest CuDSSTest.cpp)
+  target_link_libraries(RodinCuDSSTest
+    GTest::gtest
+    GTest::gtest_main
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::Solver
+  )
+  rodin_discover_tests(RodinCuDSSTest
+    PROPERTIES
+      LABELS unit
+  )
+endif()
+
 add_executable(RodinDenseSolverTest DenseSolverTest.cpp)
 target_link_libraries(RodinDenseSolverTest
   GTest::gtest

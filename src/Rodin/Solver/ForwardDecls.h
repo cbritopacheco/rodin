@@ -350,6 +350,21 @@ namespace Rodin::Solver
   class MUMPS;
 #endif
 
+#ifdef RODIN_USE_CUDSS
+  /**
+   * @brief NVIDIA cuDSS sparse direct factorization on the GPU.
+   * @tparam LinearSystem Type of linear system to solve
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref CuDSS "CuDSS<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>" | cuDSS factorization for real sparse systems. |
+   *
+   * @see @ref CuDSSSpecializations "CuDSS Template Specializations"
+   */
+  template <class LinearSystem>
+  class CuDSS;
+#endif
+
 #ifdef RODIN_USE_CHOLMOD
   /**
    * @brief CHOLMOD solver implementations from SuiteSparse.

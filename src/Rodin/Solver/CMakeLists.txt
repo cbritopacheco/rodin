@@ -49,6 +49,11 @@ if (RODIN_USE_MUMPS)
   target_link_libraries(RodinSolver PUBLIC MUMPS::MUMPS)
 endif()
 
+# ---- cuDSS -----------------------------------------------------------------
+if (RODIN_USE_CUDSS)
+  target_link_libraries(RodinSolver PUBLIC cudss CUDA::cudart)
+endif()
+
 if (RODIN_USE_SPQR)
   target_link_libraries(RodinSolver PUBLIC SuiteSparse::SPQR)
 endif()

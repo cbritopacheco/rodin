@@ -550,6 +550,7 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       matrice, 9.7 s sous nvcc contre 7.9 s sous g++. `CG` et `SparseLU`
       creux sont maintenant instanciés dans `RodinSolver`, compilé par g++,
       avec des `extern template` activés par `RODIN_SOLVER_EXTERN_TEMPLATES`.
+      La résolution sur le GPU passe par `Solver::CuDSS` (section 18).
 - [x] `KSP::solve` et `SNES::solve` ignoraient les erreurs PETSc en
       Release (`assert` seulement): `-pc_factor_mat_solver_type cusparse`
       sur `seqaijkokkos` annonçait un succès en 1 ms avec une solution
@@ -699,6 +700,18 @@ cellules, CUDA sm_75).
 Mesures sur demeter (RTX 2080 Ti, 32 coeurs), exemples
 `examples/Kokkos/PDEs/Seq_*.cpp` pour PETSc.
 
+- [x] `Solver::CuDSS` (`RODIN_USE_CUDSS`, cuDSS 1.0): LU, LDL^T ou LL^T sur
+      le GPU, analyse et facteurs gardés comme `MUMPS`. La CSC de A est
+      passée comme la CSR de A^T avec résolution transposée. Poisson 2D à
+      1M inconnues: 6.6 s pour la première résolution contre 38 s pour
+      `SparseLU`, puis 234 ms par refactorisation et 15 ms par résolution.
+      Test `RodinCuDSSTest`.
+- [x] `NavierStokes` Kokkos: problème et solveur gardés d'un pas à l'autre,
+      `CuDSS` refactorise à chaque pas quand `RODIN_USE_CUDSS` est actif,
+      `SparseLU` sinon. 160 pas (33 noeuds, Taylor-Hood avec P0g): 4.8 s
+      au total, dont 1.7 s d'assemblage et 1.3 s de résolution, contre
+      60 s avec `SparseLU` refait à chaque pas. Centre du couvercle
+      identique à la référence sur les 160 pas.
 - [x] Élasticité PETSc: CG avec GAMG et les modes rigides passés par
       `MatSetNearNullSpace` (construits à la main, la numérotation P1
       vectorielle est par composante): 28 itérations et 3.1 s à 822k
@@ -722,3 +735,7 @@ Mesures sur demeter (RTX 2080 Ti, 32 coeurs), exemples
       en 2D, 48 s sur 8 coeurs en 3D, pendant un build).
       `SUPERLU_ACC_SOLVE=1` rend la factorisation 10 fois plus lente.
       PETSc n'a pas d'interface cuDSS.
+- [ ] `CuDSS` sur la CSR device sortie de l'assemblage Kokkos, sans
+      passer par la matrice hôte.
+- [ ] Krylov sur Kokkos-Kernels sans PETSc.
+- [ ] AmgX, ou hypre appelé directement.

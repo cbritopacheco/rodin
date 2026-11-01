@@ -80,9 +80,15 @@ int main(int argc, char** argv)
   xdmf.grid().setMesh(mesh).add("velocity", velocity).add("pressure", pressure);
   xdmf.write(0).flush();
 
-  // The problem and the solver outlive the time loop.
+  // The problem and the solver outlive the time loop: the sparsity pattern is
+  // the same at every step, so cuDSS keeps its symbolic analysis and only
+  // refactorizes the matrix.
   Problem flow(u, p, multiplier, v, q, meanTest);
+#ifdef RODIN_USE_CUDSS
+  Solver::CuDSS solver(flow);
+#else
   Solver::SparseLU solver(flow);
+#endif
   std::chrono::duration<double> assembly{0}, solve{0};
   for (size_t step = 1; step <= steps; ++step)
   {
@@ -106,6 +112,11 @@ int main(int argc, char** argv)
     auto t0 = std::chrono::steady_clock::now();
     flow.assemble();
     auto t1 = std::chrono::steady_clock::now();
+#ifdef RODIN_USE_CUDSS
+    solver.factorize(flow.getLinearSystem());
+    if (!solver.success())
+      return EXIT_FAILURE;
+#endif
     solver.solve();
     if (!solver.success())
       return EXIT_FAILURE;

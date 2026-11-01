@@ -59,6 +59,16 @@ from the system type.
 - SuiteSparse (configure-gated): `UMFPack`, `ParU`, `CHOLMOD`, `SPQR`.
 - MUMPS (configure-gated): `MUMPS`, the only direct solver that exploits a
   symmetric matrix (`setSymmetric`), halving the factor it stores.
+- cuDSS (`RODIN_USE_CUDSS`): `CuDSS`, a direct solver on an NVIDIA GPU for
+  real `Math::SparseMatrix` systems. It copies the CSC arrays to the device
+  as the CSR arrays of the transpose and solves with the transpose, so a
+  general matrix needs no conversion. Like `MUMPS`, it retains the analysis
+  and the factors: `solve` reuses them, `factorize(axb)` refactorizes after
+  the values change and keeps the analysis, and a changed pattern requires
+  `clear(Factorization::Symbolic)`. Only the row and nonzero counts are
+  checked against the analysis. `setSymmetric` selects `LDL^T` or `LL^T`,
+  `setRefinementSteps` adds iterative refinement. Configure with
+  `-Dcudss_DIR=<cudss>/lib/cmake/cudss`.
 
 Factorization-based solvers share no base class, but report uniformly through
 `getInfo()` and `success()` (`Solver/Info.h`): the success of the most recent
@@ -79,7 +89,13 @@ Choosing: SPD → CG (iterative) or SimplicialLDLT/CHOLMOD (direct);
 nonsymmetric → BiCGSTAB/GMRES or SparseLU/UMFPack/ParU; symmetric indefinite
 (saddle point) → MUMPS with `setSymmetric`; small dense → LDLT/
 PartialPivLU. Examples default to CG for Poisson-like and SparseLU/LDLT
-for Newton tangents.
+for Newton tangents. A sequence of systems with one sparsity pattern, such
+as the time steps of a flow, keeps one `CuDSS` or `MUMPS` instance and calls
+`factorize` at each step. On a 2D Poisson system with 1M unknowns, `CuDSS`
+takes 6.6 s for the first solve against 38 s for `SparseLU`, then 234 ms per
+refactorization and 15 ms per solve (RTX 2080 Ti, 32 cores). The Kokkos
+`NavierStokes` example does this: 160 steps take 4.8 s with `CuDSS`
+against 60 s with a new `SparseLU` at each step.
 
 PETSc on the device, measured on the Kokkos examples (RTX 2080 Ti,
 32 cores, `examples/Kokkos/PDEs/Seq_*.cpp`):

@@ -42,6 +42,11 @@ if(@RODIN_USE_MUMPS@)
   find_dependency(MUMPS REQUIRED)
 endif()
 
+if(@RODIN_USE_CUDSS@)
+  find_dependency(CUDAToolkit REQUIRED)
+  find_dependency(cudss CONFIG REQUIRED)
+endif()
+
 set(_RODIN_SUITESPARSE_COMPONENTS)
 if(@RODIN_USE_UMFPACK@)
   list(APPEND _RODIN_SUITESPARSE_COMPONENTS UMFPACK)

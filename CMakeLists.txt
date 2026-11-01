@@ -73,6 +73,7 @@ option(RODIN_USE_OPENMP               "Use Rodin with OpenMP support"           
 option(RODIN_USE_UMFPACK              "Use Rodin with UMFPACK support"            OFF)
 option(RODIN_USE_PARU                 "Use Rodin with ParU support"               OFF)
 option(RODIN_USE_MUMPS                "Use Rodin with MUMPS support"              OFF)
+option(RODIN_USE_CUDSS                "Use Rodin with NVIDIA cuDSS support"       OFF)
 option(RODIN_USE_PASTIX               "Use Rodin with PaStiX support"             OFF)
 option(RODIN_USE_KLU                  "Use Rodin with KLU support"                OFF)
 option(RODIN_USE_SUPERLU              "Use Rodin with SuperLU support"            OFF)
@@ -315,6 +316,12 @@ if (RODIN_BUILD_SRC)
   # ---- MUMPS ----
   if (RODIN_USE_MUMPS)
     find_package(MUMPS REQUIRED)
+  endif()
+
+  # ---- cuDSS ----
+  if (RODIN_USE_CUDSS)
+    find_package(CUDAToolkit REQUIRED)
+    find_package(cudss CONFIG REQUIRED)
   endif()
 
   # ---- SuiteSparse ---------------------------------------------------------
