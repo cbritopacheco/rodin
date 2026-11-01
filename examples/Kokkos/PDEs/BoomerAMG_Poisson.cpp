@@ -14,7 +14,8 @@
  * The matrix stays on the device from the assembly to the solve. The
  * arguments are the number of grid nodes per side, the strength threshold,
  * the levels of aggressive coarsening and the maximum number of elements per
- * row of the interpolation. Settings suited to three dimensional problems:
+ * row of the interpolation. The hierarchy is built once and reused by the
+ * solve that follows a second assembly. Settings suited to three dimensional problems:
  * @code
  *   KokkosBoomerAMG_Poisson 100 0.7 2 4
  * @endcode
@@ -95,10 +96,22 @@ int main(int argc, char** argv)
       .setAggressiveLevels(aggressive)
       .setMaxInterpolationElements(interpolation);
     t0 = std::chrono::high_resolution_clock::now();
-    solver.solve(poisson.getLinearSystem());
-    Alert::Success() << "Solved the linear system in " << since(t0) << " ms, "
-                     << solver.getIterationNumber() << " iterations, relative residual "
-                     << solver.getError() << "." << Alert::Raise;
+    solver.setup(poisson.getLinearSystem());
+    Alert::Success() << "Built the hierarchy in " << since(t0) << " ms." << Alert::Raise;
+
+    // The second solve, after a new assembly, reuses the hierarchy, as a time
+    // step would.
+    for (size_t step = 1; step <= 2; ++step)
+    {
+      if (step > 1)
+        poisson.assemble();
+      t0 = std::chrono::high_resolution_clock::now();
+      solver.solve(poisson.getLinearSystem());
+      Alert::Success() << "Solved linear system " << step << " in " << since(t0)
+                       << " ms, " << solver.getIterationNumber()
+                       << " iterations, relative residual " << solver.getError() << "."
+                       << Alert::Raise;
+    }
   }
   // The solver initialized hypre and MPI, whose finalization is left to the
   // application.

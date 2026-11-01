@@ -90,11 +90,18 @@ from the system type.
   memory of the backend (`HYPRE_IJMatrixSetValues2`), so nothing but the
   right-hand side and the solution crosses to the host. The hierarchy uses
   GPU settings (PMIS, ext+i, l1 Jacobi, Gaussian elimination on the coarsest
-  grid) and is set up again at every solve; `setStrongThreshold`,
-  `setAggressiveLevels` and `setMaxInterpolationElements` tune it. The stop
-  test is the unpreconditioned relative residual, 1e-10 by default. MPI and
-  hypre are initialized on the first solve if needed, their finalization is
-  left to the application. hypre must use 32-bit indices and doubles.
+  grid); `setStrongThreshold`, `setAggressiveLevels` and
+  `setMaxInterpolationElements` tune it and release the retained hierarchy.
+  The hierarchy and the hypre copy of the matrix it comes from are retained
+  across solves (`setup` rebuilds them from the current matrix, `clear`
+  releases them, a copy of the solver does not share them), like
+  `KSPSetReusePreconditioner`: the CG runs on a fresh copy of the current
+  matrix and the V-cycle on the retained one (`HYPRE_PCGSetPrecondMatrix`,
+  with a no-op preconditioner setup), so a stale hierarchy only costs
+  iterations. A size change raises. The stop test is the unpreconditioned
+  relative residual, 1e-10 by default. MPI and hypre are initialized on the
+  first setup if needed, their finalization is left to the application,
+  after the last solver is destroyed. hypre must use 32-bit indices and doubles.
   Configure with `-DHYPRE_DIR=<prefix>`.
 
 Factorization-based solvers share no base class, but report uniformly through
@@ -142,7 +149,9 @@ PETSc on the device, measured on the Kokkos examples (RTX 2080 Ti,
   1.9 s and is also faster at 262k. `BoomerAMG` with the same settings on
   the device matrix (`BoomerAMG_Poisson.cpp`) takes 644 ms at 1M (42
   iterations, against 32 for PETSc with the unpreconditioned norm) and
-  404 ms at 262k, against 592 ms.
+  404 ms at 262k, against 592 ms. Of these, the setup takes 463 ms at 1M
+  (343 ms at 262k, MPI and hypre initialization included) and a solve with
+  the retained hierarchy 260 to 280 ms (90 to 113 ms).
 - Taylor-Hood Oseen steps: FGMRES with a Schur field split (`selfp`, GAMG
   on the velocity block, a few GMRES iterations on the pressure) beats ILU
   and SuperLU_DIST, 6.1 s against 29 s and 25 s for 5 steps at 149k

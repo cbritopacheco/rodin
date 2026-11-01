@@ -223,13 +223,20 @@
   With `RODIN_USE_HYPRE`, `Rodin/Kokkos/Solver/BoomerAMG.h` provides
   `Solver::BoomerAMG`, the conjugate gradient of hypre preconditioned by
   BoomerAMG, which builds its hierarchy from the device arrays and links
-  `Rodin::KokkosHypre`. It initializes MPI and hypre if the application has
-  not; the application finalizes them after the last solver:
+  `Rodin::KokkosHypre`. The hierarchy is kept from one solve to the next and
+  preconditions the conjugate gradient on the current matrix; `setup()`
+  builds it again when the matrix has changed too much. It initializes MPI
+  and hypre if the application has not; the application finalizes them after
+  the last solver:
   @code{.cpp}
   #include <Rodin/Kokkos/Solver/BoomerAMG.h>
 
   Solver::BoomerAMG solver(poisson);
   solver.setStrongThreshold(0.7).setAggressiveLevels(2).solve();
+  // Later steps reuse the hierarchy of the first matrix.
+  solver.solve();
+  // Rebuild it from the current matrix.
+  solver.setup(poisson.getLinearSystem());
   @endcode
 
   @section guides-kokkos-mpi Distributed Meshes

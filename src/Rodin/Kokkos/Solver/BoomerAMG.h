@@ -14,6 +14,7 @@
  */
 
 #include <limits>
+#include <memory>
 #include <string>
 #include <type_traits>
 
@@ -67,8 +68,18 @@ namespace Rodin::Solver
    * The matrix must be symmetric positive definite. hypre copies the CSR
    * arrays of the device matrix in the memory of the backend, sets up the
    * hierarchy and solves there; only the right-hand side and the solution
-   * cross to the host. Every solve sets the hierarchy up again and performs at
-   * least one iteration, even from the solution.
+   * cross to the host. A solve performs at least one iteration, even from the
+   * solution.
+   *
+   * The hierarchy is retained from one solve to the next, together with the
+   * copy of the matrix it was built from, as PETSc does with
+   * @c KSPSetReusePreconditioner. The ordinary @ref solve entry point builds
+   * a hierarchy only when none is retained; the conjugate gradient always
+   * runs on the current matrix, so a hierarchy built from an older matrix of
+   * the same size still gives the solution of the current system, in more
+   * iterations as the matrix drifts away. Call @ref setup to build the
+   * hierarchy again from the current matrix, and @ref clear to release it.
+   * Changing the coarsening settings releases the hierarchy.
    *
    * The solve stops when @f$ \|b - Ax\| \leq \text{tol} \|b\| @f$, with a
    * tolerance of @f$ 10^{-10} @f$ and at most 1000 iterations by default.
@@ -80,9 +91,10 @@ namespace Rodin::Solver
    * dimensional problems usually need a threshold of 0.5 to 0.7 and
    * aggressive coarsening to fit in the memory of the device.
    *
-   * MPI and hypre are initialized on the first solve when the application
+   * MPI and hypre are initialized on the first setup when the application
    * has not done so. Their finalization is left to the application, after the
-   * last solver is destroyed. The solve runs on @c MPI_COMM_SELF.
+   * last solver is destroyed, since a solver releases its hierarchy on
+   * destruction. The solve runs on @c MPI_COMM_SELF.
    *
    * @tparam Backend Kokkos backend of the matrix.
    */
@@ -134,10 +146,21 @@ namespace Rodin::Solver
       {}
 
       /**
-       * @brief Copies the settings and the outcome of the last solve.
+       * @brief Copies the settings and the outcome of the last solve, without
+       * the hierarchy.
        * @param other Solver to copy.
        */
-      BoomerAMG(const BoomerAMG& other) = default;
+      BoomerAMG(const BoomerAMG& other)
+        : Parent(other),
+          m_tolerance(other.m_tolerance),
+          m_maxIterations(other.m_maxIterations),
+          m_strongThreshold(other.m_strongThreshold),
+          m_aggressiveLevels(other.m_aggressiveLevels),
+          m_maxInterpolationElements(other.m_maxInterpolationElements),
+          m_converged(other.m_converged),
+          m_iterations(other.m_iterations),
+          m_error(other.m_error)
+      {}
 
       /// @brief Moves the solver.
       BoomerAMG(BoomerAMG&& other) = default;
@@ -170,22 +193,26 @@ namespace Rodin::Solver
       /**
        * @brief Sets the strength threshold of the coarsening.
        * @param threshold Threshold in @f$ (0, 1) @f$.
+       * Releases the retained hierarchy.
        * @returns This solver.
        */
       BoomerAMG& setStrongThreshold(Real threshold)
       {
         m_strongThreshold = threshold;
+        clear();
         return *this;
       }
 
       /**
        * @brief Sets the number of levels of aggressive coarsening.
        * @param count Number of levels, from the finest.
+       * Releases the retained hierarchy.
        * @returns This solver.
        */
       BoomerAMG& setAggressiveLevels(size_t count)
       {
         m_aggressiveLevels = count;
+        clear();
         return *this;
       }
 
@@ -193,37 +220,75 @@ namespace Rodin::Solver
        * @brief Sets the maximum number of elements per row of the
        * interpolation.
        * @param count Number of elements, or zero for no truncation.
+       * Releases the retained hierarchy.
        * @returns This solver.
        */
       BoomerAMG& setMaxInterpolationElements(size_t count)
       {
         m_maxInterpolationElements = count;
+        clear();
         return *this;
+      }
+
+      /**
+       * @brief Builds the hierarchy from the current matrix of a system.
+       * @param system System whose matrix is copied for the hierarchy.
+       *
+       * Replaces any retained hierarchy.
+       */
+      void setup(const LinearSystemType& system)
+      {
+        const auto& matrix = system.getOperator();
+        validate(matrix);
+        clear();
+        const size_t n = matrix.getRowCount();
+        if (n == 0)
+          return;
+        initializeSession();
+        configure();
+        // The setup only reads the partition of the vectors.
+        const Array<Real> zero("Rodin::Solver::BoomerAMG::zero", n);
+        ::Kokkos::fence();
+        Objects objects;
+        const HYPRE_ParVector B = createVector(objects.b, zero);
+        const HYPRE_ParVector X = createVector(objects.x, zero);
+        build(matrix, B, X);
+      }
+
+      /// @brief Releases the retained hierarchy.
+      void clear() noexcept
+      {
+        m_hierarchy.reset();
+      }
+
+      /// @brief Whether a hierarchy is retained.
+      Boolean isSetup() const noexcept
+      {
+        return static_cast<bool>(m_hierarchy);
       }
 
       /**
        * @brief Solves the system.
        * @param[in,out] system System, whose solution is the initial guess when
        * its size matches.
+       *
+       * Builds the hierarchy from the current matrix when none is retained.
        */
       void solve(LinearSystemType& system) override
       {
         const auto& matrix = system.getOperator();
+        validate(matrix);
         const size_t n = matrix.getRowCount();
-        if (matrix.getColumnCount() != n)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "BoomerAMG requires a square matrix." << Alert::Raise;
-        }
         if (static_cast<size_t>(system.getVector().size()) != n)
         {
           Alert::MemberFunctionException(*this, __func__)
             << "The right-hand side size does not match the matrix." << Alert::Raise;
         }
-        if (n > static_cast<size_t>(std::numeric_limits<HYPRE_Int>::max()))
+        if (m_hierarchy && m_hierarchy->rows != n)
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "The system is too large for the indices of hypre." << Alert::Raise;
+            << "The matrix size changed since the setup of the hierarchy."
+            << Alert::Raise;
         }
         // hypre returns a zero solution for a zero right-hand side without
         // reporting convergence.
@@ -236,29 +301,7 @@ namespace Rodin::Solver
           return;
         }
         initializeSession();
-
-        const auto location = s_memoryLocation;
-        check(HYPRE_SetMemoryLocation(location), "HYPRE_SetMemoryLocation");
-        check(HYPRE_SetExecutionPolicy(
-                location == HYPRE_MEMORY_HOST ? HYPRE_EXEC_HOST : HYPRE_EXEC_DEVICE),
-          "HYPRE_SetExecutionPolicy");
-
-        // Row counts and row numbers, which the IJ interface takes with the
-        // row starts.
-        const auto rowCount = static_cast<HYPRE_Int>(n);
-        Array<HYPRE_Int> counts(::Kokkos::view_alloc(::Kokkos::WithoutInitializing,
-                                  "Rodin::Solver::BoomerAMG::counts"),
-          n);
-        Array<HYPRE_BigInt> rows(::Kokkos::view_alloc(::Kokkos::WithoutInitializing,
-                                   "Rodin::Solver::BoomerAMG::rows"),
-          n);
-        const auto starts = matrix.getRowStarts();
-        ::Kokkos::parallel_for(
-          "Rodin::Solver::BoomerAMG::rows", ::Kokkos::RangePolicy<ExecutionSpace>(0, n),
-          KOKKOS_LAMBDA(const size_t i) {
-            counts(i) = starts(i + 1) - starts(i);
-            rows(i) = static_cast<HYPRE_BigInt>(i);
-          });
+        configure();
 
         Array<Real> b(::Kokkos::view_alloc(
                         ::Kokkos::WithoutInitializing, "Rodin::Solver::BoomerAMG::b"),
@@ -275,45 +318,15 @@ namespace Rodin::Solver
         ::Kokkos::fence();
 
         Objects objects;
-        const HYPRE_BigInt last = rowCount - 1;
-        check(HYPRE_IJMatrixCreate(MPI_COMM_SELF, 0, last, 0, last, &objects.matrix),
-          "HYPRE_IJMatrixCreate");
-        check(HYPRE_IJMatrixSetObjectType(objects.matrix, HYPRE_PARCSR),
-          "HYPRE_IJMatrixSetObjectType");
-        check(HYPRE_IJMatrixInitialize_v2(objects.matrix, location),
-          "HYPRE_IJMatrixInitialize_v2");
-        check(
-          HYPRE_IJMatrixSetValues2(objects.matrix, rowCount, counts.data(), rows.data(),
-            starts.data(), matrix.getColumns().data(), matrix.getValues().data()),
-          "HYPRE_IJMatrixSetValues2");
-        check(HYPRE_IJMatrixAssemble(objects.matrix), "HYPRE_IJMatrixAssemble");
+        const HYPRE_ParVector B = createVector(objects.b, b);
+        const HYPRE_ParVector X = createVector(objects.x, x);
+        // A hierarchy built here comes from the current matrix, whose copy
+        // serves the conjugate gradient as well.
         HYPRE_ParCSRMatrix A = nullptr;
-        check(HYPRE_IJMatrixGetObject(objects.matrix, reinterpret_cast<void**>(&A)),
-          "HYPRE_IJMatrixGetObject");
-
-        const HYPRE_ParVector B = createVector(objects.b, b, last, location);
-        const HYPRE_ParVector X = createVector(objects.x, x, last, location);
-
-        check(HYPRE_BoomerAMGCreate(&objects.amg), "HYPRE_BoomerAMGCreate");
-        check(
-          HYPRE_BoomerAMGSetCoarsenType(objects.amg, 8), "HYPRE_BoomerAMGSetCoarsenType");
-        check(
-          HYPRE_BoomerAMGSetInterpType(objects.amg, 6), "HYPRE_BoomerAMGSetInterpType");
-        check(
-          HYPRE_BoomerAMGSetRelaxType(objects.amg, 18), "HYPRE_BoomerAMGSetRelaxType");
-        check(HYPRE_BoomerAMGSetCycleRelaxType(objects.amg, 9, 3),
-          "HYPRE_BoomerAMGSetCycleRelaxType");
-        check(HYPRE_BoomerAMGSetNumSweeps(objects.amg, 1), "HYPRE_BoomerAMGSetNumSweeps");
-        check(HYPRE_BoomerAMGSetStrongThreshold(objects.amg, m_strongThreshold),
-          "HYPRE_BoomerAMGSetStrongThreshold");
-        check(HYPRE_BoomerAMGSetAggNumLevels(
-                objects.amg, static_cast<HYPRE_Int>(m_aggressiveLevels)),
-          "HYPRE_BoomerAMGSetAggNumLevels");
-        check(HYPRE_BoomerAMGSetPMaxElmts(
-                objects.amg, static_cast<HYPRE_Int>(m_maxInterpolationElements)),
-          "HYPRE_BoomerAMGSetPMaxElmts");
-        check(HYPRE_BoomerAMGSetMaxIter(objects.amg, 1), "HYPRE_BoomerAMGSetMaxIter");
-        check(HYPRE_BoomerAMGSetTol(objects.amg, 0), "HYPRE_BoomerAMGSetTol");
+        if (m_hierarchy)
+          A = createMatrix(objects.matrix, matrix);
+        else
+          A = build(matrix, B, X);
 
         check(
           HYPRE_ParCSRPCGCreate(MPI_COMM_SELF, &objects.pcg), "HYPRE_ParCSRPCGCreate");
@@ -321,11 +334,15 @@ namespace Rodin::Solver
         check(HYPRE_PCGSetMaxIter(objects.pcg, static_cast<HYPRE_Int>(m_maxIterations)),
           "HYPRE_PCGSetMaxIter");
         check(HYPRE_PCGSetTwoNorm(objects.pcg, 1), "HYPRE_PCGSetTwoNorm");
-        check(
-          HYPRE_PCGSetPrecond(objects.pcg,
-            reinterpret_cast<HYPRE_PtrToSolverFcn>(HYPRE_BoomerAMGSolve),
-            reinterpret_cast<HYPRE_PtrToSolverFcn>(HYPRE_BoomerAMGSetup), objects.amg),
+        // The V-cycle runs on the matrix of the hierarchy, which the setup of
+        // the conjugate gradient leaves untouched.
+        check(HYPRE_PCGSetPrecond(objects.pcg,
+                reinterpret_cast<HYPRE_PtrToSolverFcn>(HYPRE_BoomerAMGSolve), &skipSetup,
+                m_hierarchy->amg),
           "HYPRE_PCGSetPrecond");
+        check(HYPRE_PCGSetPrecondMatrix(
+                objects.pcg, reinterpret_cast<HYPRE_Matrix>(m_hierarchy->A)),
+          "HYPRE_PCGSetPrecondMatrix");
         check(HYPRE_ParCSRPCGSetup(objects.pcg, A, B, X), "HYPRE_ParCSRPCGSetup");
         // A solve that does not converge reports it through the error flag,
         // which is an outcome rather than a defect.
@@ -345,7 +362,8 @@ namespace Rodin::Solver
         m_converged = converged != 0;
         m_error = static_cast<Real>(error);
 
-        check(HYPRE_IJVectorGetValues(objects.x, rowCount, nullptr, x.data()),
+        check(HYPRE_IJVectorGetValues(
+                objects.x, static_cast<HYPRE_Int>(n), nullptr, x.data()),
           "HYPRE_IJVectorGetValues");
         ::Kokkos::fence();
         download(x, system.getSolution());
@@ -378,6 +396,27 @@ namespace Rodin::Solver
         return new BoomerAMG(*this);
       }
 
+      /**
+       * @brief Writes the row counts and the row numbers of a CSR matrix.
+       * @param starts Row starts.
+       * @param counts Row counts, one per row.
+       * @param rows Row numbers, one per row.
+       *
+       * Public because nvcc does not compile a device lambda in a private
+       * member function.
+       */
+      template <class Starts, class Counts, class Rows>
+      static void fillRows(const Starts& starts, const Counts& counts, const Rows& rows)
+      {
+        ::Kokkos::parallel_for(
+          "Rodin::Solver::BoomerAMG::rows",
+          ::Kokkos::RangePolicy<ExecutionSpace>(0, counts.extent(0)),
+          KOKKOS_LAMBDA(const size_t i) {
+            counts(i) = starts(i + 1) - starts(i);
+            rows(i) = static_cast<HYPRE_BigInt>(i);
+          });
+      }
+
     private:
       template <class T>
       using Array = ::Kokkos::View<T*, MemorySpace>;
@@ -394,7 +433,6 @@ namespace Rodin::Solver
         HYPRE_IJMatrix matrix = nullptr;
         HYPRE_IJVector b = nullptr;
         HYPRE_IJVector x = nullptr;
-        HYPRE_Solver amg = nullptr;
         HYPRE_Solver pcg = nullptr;
 
         Objects() = default;
@@ -407,8 +445,6 @@ namespace Rodin::Solver
         {
           if (pcg)
             HYPRE_ParCSRPCGDestroy(pcg);
-          if (amg)
-            HYPRE_BoomerAMGDestroy(amg);
           if (x)
             HYPRE_IJVectorDestroy(x);
           if (b)
@@ -417,6 +453,145 @@ namespace Rodin::Solver
             HYPRE_IJMatrixDestroy(matrix);
         }
       };
+
+      /// @brief Retained hierarchy and the copy of the matrix it comes from.
+      struct Hierarchy
+      {
+        HYPRE_IJMatrix matrix = nullptr;
+        HYPRE_ParCSRMatrix A = nullptr;
+        HYPRE_Solver amg = nullptr;
+        size_t rows = 0;
+
+        Hierarchy() = default;
+
+        Hierarchy(const Hierarchy&) = delete;
+
+        Hierarchy& operator=(const Hierarchy&) = delete;
+
+        ~Hierarchy()
+        {
+          if (amg)
+            HYPRE_BoomerAMGDestroy(amg);
+          if (matrix)
+            HYPRE_IJMatrixDestroy(matrix);
+        }
+      };
+
+      /**
+       * @brief Preconditioner setup that the conjugate gradient calls, the
+       * hierarchy being built beforehand.
+       */
+      static HYPRE_Int skipSetup(HYPRE_Solver, HYPRE_Matrix, HYPRE_Vector, HYPRE_Vector)
+      {
+        return 0;
+      }
+
+      /**
+       * @brief Checks that hypre can take a matrix.
+       * @param matrix Matrix of the system.
+       */
+      void validate(const OperatorType& matrix) const
+      {
+        const size_t n = matrix.getRowCount();
+        if (matrix.getColumnCount() != n)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "BoomerAMG requires a square matrix." << Alert::Raise;
+        }
+        if (n > static_cast<size_t>(std::numeric_limits<HYPRE_Int>::max()))
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "The system is too large for the indices of hypre." << Alert::Raise;
+        }
+      }
+
+      /// @brief Places the next hypre objects and computations on the backend.
+      void configure() const
+      {
+        check(HYPRE_SetMemoryLocation(s_memoryLocation), "HYPRE_SetMemoryLocation");
+        check(
+          HYPRE_SetExecutionPolicy(
+            s_memoryLocation == HYPRE_MEMORY_HOST ? HYPRE_EXEC_HOST : HYPRE_EXEC_DEVICE),
+          "HYPRE_SetExecutionPolicy");
+      }
+
+      /**
+       * @brief Creates a hypre matrix holding a copy of the device matrix.
+       * @param ij Created matrix.
+       * @param matrix Device matrix.
+       * @returns Parallel matrix of @p ij.
+       */
+      HYPRE_ParCSRMatrix createMatrix(
+        HYPRE_IJMatrix& ij, const OperatorType& matrix) const
+      {
+        // Row counts and row numbers, which the IJ interface takes with the
+        // row starts.
+        const size_t n = matrix.getRowCount();
+        const auto rowCount = static_cast<HYPRE_Int>(n);
+        Array<HYPRE_Int> counts(::Kokkos::view_alloc(::Kokkos::WithoutInitializing,
+                                  "Rodin::Solver::BoomerAMG::counts"),
+          n);
+        Array<HYPRE_BigInt> rows(::Kokkos::view_alloc(::Kokkos::WithoutInitializing,
+                                   "Rodin::Solver::BoomerAMG::rows"),
+          n);
+        const auto starts = matrix.getRowStarts();
+        fillRows(starts, counts, rows);
+        ::Kokkos::fence();
+
+        const HYPRE_BigInt last = rowCount - 1;
+        check(HYPRE_IJMatrixCreate(MPI_COMM_SELF, 0, last, 0, last, &ij),
+          "HYPRE_IJMatrixCreate");
+        check(
+          HYPRE_IJMatrixSetObjectType(ij, HYPRE_PARCSR), "HYPRE_IJMatrixSetObjectType");
+        check(HYPRE_IJMatrixInitialize_v2(ij, s_memoryLocation),
+          "HYPRE_IJMatrixInitialize_v2");
+        check(HYPRE_IJMatrixSetValues2(ij, rowCount, counts.data(), rows.data(),
+                starts.data(), matrix.getColumns().data(), matrix.getValues().data()),
+          "HYPRE_IJMatrixSetValues2");
+        check(HYPRE_IJMatrixAssemble(ij), "HYPRE_IJMatrixAssemble");
+        // The row counts are released on return.
+        ::Kokkos::fence();
+        HYPRE_ParCSRMatrix res = nullptr;
+        check(HYPRE_IJMatrixGetObject(ij, reinterpret_cast<void**>(&res)),
+          "HYPRE_IJMatrixGetObject");
+        return res;
+      }
+
+      /**
+       * @brief Builds and retains the hierarchy of a matrix.
+       * @param matrix Device matrix.
+       * @param B Right-hand side, whose partition the setup reads.
+       * @param X Solution, whose partition the setup reads.
+       * @returns Copy of @p matrix in the hierarchy.
+       */
+      HYPRE_ParCSRMatrix build(
+        const OperatorType& matrix, HYPRE_ParVector B, HYPRE_ParVector X)
+      {
+        auto hierarchy = std::make_unique<Hierarchy>();
+        hierarchy->rows = matrix.getRowCount();
+        hierarchy->A = createMatrix(hierarchy->matrix, matrix);
+        HYPRE_Solver& amg = hierarchy->amg;
+        check(HYPRE_BoomerAMGCreate(&amg), "HYPRE_BoomerAMGCreate");
+        check(HYPRE_BoomerAMGSetCoarsenType(amg, 8), "HYPRE_BoomerAMGSetCoarsenType");
+        check(HYPRE_BoomerAMGSetInterpType(amg, 6), "HYPRE_BoomerAMGSetInterpType");
+        check(HYPRE_BoomerAMGSetRelaxType(amg, 18), "HYPRE_BoomerAMGSetRelaxType");
+        check(HYPRE_BoomerAMGSetCycleRelaxType(amg, 9, 3),
+          "HYPRE_BoomerAMGSetCycleRelaxType");
+        check(HYPRE_BoomerAMGSetNumSweeps(amg, 1), "HYPRE_BoomerAMGSetNumSweeps");
+        check(HYPRE_BoomerAMGSetStrongThreshold(amg, m_strongThreshold),
+          "HYPRE_BoomerAMGSetStrongThreshold");
+        check(
+          HYPRE_BoomerAMGSetAggNumLevels(amg, static_cast<HYPRE_Int>(m_aggressiveLevels)),
+          "HYPRE_BoomerAMGSetAggNumLevels");
+        check(HYPRE_BoomerAMGSetPMaxElmts(
+                amg, static_cast<HYPRE_Int>(m_maxInterpolationElements)),
+          "HYPRE_BoomerAMGSetPMaxElmts");
+        check(HYPRE_BoomerAMGSetMaxIter(amg, 1), "HYPRE_BoomerAMGSetMaxIter");
+        check(HYPRE_BoomerAMGSetTol(amg, 0), "HYPRE_BoomerAMGSetTol");
+        check(HYPRE_BoomerAMGSetup(amg, hierarchy->A, B, X), "HYPRE_BoomerAMGSetup");
+        m_hierarchy = std::move(hierarchy);
+        return m_hierarchy->A;
+      }
 
       /**
        * @brief Raises the error of a hypre call.
@@ -469,19 +644,18 @@ namespace Rodin::Solver
        * @brief Creates a hypre vector holding a copy of an array.
        * @param vector Created vector.
        * @param values Values in the memory of the backend.
-       * @param last Last row.
-       * @param location Memory of the vector.
        * @returns Parallel vector of @p vector.
        */
-      HYPRE_ParVector createVector(HYPRE_IJVector& vector, const Array<Real>& values,
-        HYPRE_BigInt last, HYPRE_MemoryLocation location) const
+      HYPRE_ParVector createVector(
+        HYPRE_IJVector& vector, const Array<Real>& values) const
       {
+        const auto last = static_cast<HYPRE_BigInt>(values.extent(0)) - 1;
         check(
           HYPRE_IJVectorCreate(MPI_COMM_SELF, 0, last, &vector), "HYPRE_IJVectorCreate");
         check(HYPRE_IJVectorSetObjectType(vector, HYPRE_PARCSR),
           "HYPRE_IJVectorSetObjectType");
-        check(
-          HYPRE_IJVectorInitialize_v2(vector, location), "HYPRE_IJVectorInitialize_v2");
+        check(HYPRE_IJVectorInitialize_v2(vector, s_memoryLocation),
+          "HYPRE_IJVectorInitialize_v2");
         check(HYPRE_IJVectorSetValues(
                 vector, static_cast<HYPRE_Int>(values.extent(0)), nullptr, values.data()),
           "HYPRE_IJVectorSetValues");
@@ -525,6 +699,7 @@ namespace Rodin::Solver
       Boolean m_converged = false;
       size_t m_iterations = 0;
       Real m_error = 0;
+      std::unique_ptr<Hierarchy> m_hierarchy;
   };
 }
 

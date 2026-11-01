@@ -32,8 +32,21 @@ namespace Rodin::Tests::Unit
     return (a - b).norm() / b.norm();
   }
 
+  /// @brief Scales the values of a device matrix.
+  void scale(DeviceLinearSystem& system, Real factor)
+  {
+    const auto values = system.getOperator().getValues();
+    ::Kokkos::parallel_for(
+      ::Kokkos::RangePolicy<
+        Rodin::Kokkos::SparseMatrix<Real, TestBackend>::ExecutionSpace>(
+        0, values.extent(0)),
+      KOKKOS_LAMBDA(const size_t i) { values(i) *= factor; });
+    ::Kokkos::fence();
+  }
+
   /// @brief BoomerAMG preconditioned CG matches a direct solve, restarts from
-  /// its solution, and reports a solve that does not converge.
+  /// its solution, reuses its hierarchy, and reports a solve that does not
+  /// converge.
   void checkBoomerAMG()
   {
     const auto mesh = makeSquare(32);
@@ -73,19 +86,48 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(solver.getIterationNumber(), 1u);
     EXPECT_LE(distance(axb.getSolution(), reference), 1e-10);
 
+    // The retained hierarchy preconditions the conjugate gradient on a
+    // matrix that changed since its setup. Doubling the values is exact, so
+    // the solution is half the reference.
+    ASSERT_TRUE(solver.isSetup());
+    scale(axb, 2);
+    axb.getSolution().resize(0);
+    solver.solve(axb);
+    ASSERT_TRUE(solver.success());
+    EXPECT_LT(solver.getIterationNumber(), 30u);
+    EXPECT_LE(distance(2 * axb.getSolution(), reference), 1e-10);
+
+    // An explicit setup builds the hierarchy again from the current matrix.
+    scale(axb, 0.5);
+    solver.setup(axb);
+    ASSERT_TRUE(solver.isSetup());
+    axb.getSolution().resize(0);
+    solver.solve(axb);
+    ASSERT_TRUE(solver.success());
+    EXPECT_LT(solver.getIterationNumber(), 30u);
+    EXPECT_LE(distance(axb.getSolution(), reference), 1e-10);
+
+    // A copy leaves the hierarchy to the original, which releases it on
+    // request.
+    {
+      Solver::BoomerAMG<DeviceLinearSystem> copy(solver);
+      EXPECT_FALSE(copy.isSetup());
+    }
+    solver.clear();
+    EXPECT_FALSE(solver.isSetup());
+
     // An iteration limit that is too small fails without raising.
     axb.getSolution().resize(0);
     solver.setTolerance(1e-14).setMaxIterations(1).solve(axb);
     EXPECT_FALSE(solver.success());
     EXPECT_EQ(solver.getIterationNumber(), 1u);
 
-    // The coarsening settings apply.
-    solver.setTolerance(1e-12)
-      .setMaxIterations(100)
-      .setStrongThreshold(0.5)
-      .setAggressiveLevels(1)
-      .setMaxInterpolationElements(2)
-      .solve(axb);
+    // The coarsening settings apply, since changing them releases the
+    // hierarchy.
+    ASSERT_TRUE(solver.isSetup());
+    solver.setTolerance(1e-12).setMaxIterations(100).setStrongThreshold(0.5);
+    EXPECT_FALSE(solver.isSetup());
+    solver.setAggressiveLevels(1).setMaxInterpolationElements(2).solve(axb);
     ASSERT_TRUE(solver.success());
     EXPECT_LE(distance(axb.getSolution(), reference), 1e-10);
 

@@ -766,10 +766,23 @@ Mesures sur demeter (RTX 2080 Ti, 32 coeurs), exemples
       (PMIS, ext+i, l1-Jacobi, élimination de Gauss au niveau grossier),
       seuil, niveaux agressifs et P_max réglables, norme 2 non
       préconditionnée. MPI et hypre initialisés au besoin, finalisation
-      laissée à l'application comme `MUMPS`. Hiérarchie refaite à chaque
-      résolution, hypre fait toujours au moins une itération et ne signale
+      laissée à l'application comme `MUMPS`. hypre fait toujours au moins
+      une itération et ne signale
       pas la convergence pour b = 0 (traité avant). Poisson 3D Q1
       (`BoomerAMG_Poisson.cpp`, 0.7, 2, 4): 644 ms et 42 itérations à 1M
       contre 1.9 s et 32 itérations pour PETSc en norme non préconditionnée
       (27 en norme préconditionnée), 404 ms contre 592 ms à 262k. L'écart
       d'itérations n'est pas expliqué. Test `RodinKokkosSolverBoomerAMGTest`.
+- [x] Hiérarchie BoomerAMG gardée d'une résolution à l'autre, avec la
+      copie hypre de la matrice dont elle vient, comme
+      `KSPSetReusePreconditioner`: le CG tourne sur une copie de la matrice
+      courante et le V-cycle sur la matrice gardée
+      (`HYPRE_PCGSetPrecondMatrix`, setup du préconditionneur vide), donc
+      une hiérarchie périmée ne coûte que des itérations. `setup()` la
+      refait, `clear()` la libère, les réglages de la hiérarchie la
+      libèrent, une copie du solveur ne la partage pas, un changement de
+      taille lève une erreur. Poisson 3D Q1 (0.7, 2, 4): setup 463 ms puis
+      260 à 280 ms par résolution à 1M, contre 644 ms quand tout était
+      refait; 343 ms (initialisation MPI et hypre comprise) puis 90 à
+      113 ms à 262k. Test: matrice doublée résolue avec l'ancienne
+      hiérarchie, `setup`, `clear`, copie.
