@@ -735,7 +735,17 @@ Mesures sur demeter (RTX 2080 Ti, 32 coeurs), exemples
       en 2D, 48 s sur 8 coeurs en 3D, pendant un build).
       `SUPERLU_ACC_SOLVE=1` rend la factorisation 10 fois plus lente.
       PETSc n'a pas d'interface cuDSS.
-- [ ] `CuDSS` sur la CSR device sortie de l'assemblage Kokkos, sans
-      passer par la matrice hôte.
+- [x] `CuDSS` sur la CSR device sortie de l'assemblage Kokkos, sans
+      passer par la matrice hôte: un `Problem` nommé avec
+      `Math::LinearSystem<Kokkos::SparseMatrix<Real, Backend>,
+      Math::Vector<Real>>` garde sa matrice sur le device (CSR, clés
+      ligne-majeure, mêmes sommes que la CSC hôte donc mêmes coefficients au
+      bit près, tableaux réutilisés d'un assemblage à l'autre), seul le
+      second membre est copié. `CuDSS` lit les tableaux en place (mode
+      NORMAL, `cudssMatrixSetCsrPointers` à chaque refactorisation), via le
+      trait `Internal::CuDSSOperator`. Pas de forme bilinéaire préassemblée.
+      Test `RodinKokkosVariationalDeviceSystemTest` (Poisson, périodique,
+      Stokes mixte, CuDSS). `NavierStokes` 160 pas: 3.3 s au lieu de
+      3.6 s (assemblage 1.19 s en 1.06 s, résolution 1.06 s en 0.94 s).
 - [ ] Krylov sur Kokkos-Kernels sans PETSc.
 - [ ] AmgX, ou hypre appelé directement.

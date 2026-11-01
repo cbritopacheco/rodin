@@ -357,13 +357,33 @@ namespace Rodin::Solver
    *
    * | Specialization | Description |
    * |----------------|-------------|
-   * | @ref CuDSS "CuDSS<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>" | cuDSS factorization for real sparse systems. |
+   * | @ref CuDSS "CuDSS<Math::LinearSystem<Matrix, Math::Vector<Real>>>" | cuDSS factorization for real sparse systems whose matrix has a CuDSSOperator. |
    *
    * @see @ref CuDSSSpecializations "CuDSS Template Specializations"
    */
   template <class LinearSystem>
   class CuDSS;
 #endif
+
+  namespace Internal
+  {
+    /**
+     * @brief How CuDSS reads the compressed arrays of a matrix type.
+     * @tparam Matrix Operator type of the linear system.
+     *
+     * A specialization provides the compressed arrays as the CSR arrays of
+     * the matrix, or of its transpose, and tells whether they are in device
+     * memory. It needs no cuDSS header, so that the module defining the
+     * matrix type defines it.
+     *
+     * | Specialization | Description |
+     * |----------------|-------------|
+     * | CuDSSOperator<Math::SparseMatrix<Real>> | Host CSC arrays, the CSR arrays of the transpose. |
+     * | CuDSSOperator<Kokkos::SparseMatrix<Real, Backend>> | CSR arrays in the memory of a Kokkos backend. |
+     */
+    template <class Matrix>
+    struct CuDSSOperator;
+  }
 
 #ifdef RODIN_USE_CHOLMOD
   /**

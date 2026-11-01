@@ -66,3 +66,9 @@ target_link_libraries(RodinKokkosVariationalInternalVirtualWorkTest PRIVATE
   GTest::gtest Rodin::Kokkos Rodin::Variational Rodin::Assembly Rodin::Solver)
 rodin_discover_tests(RodinKokkosVariationalInternalVirtualWorkTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinKokkosVariationalDeviceSystemTest DeviceSystemTest.cpp ../Main.cpp)
+target_link_libraries(RodinKokkosVariationalDeviceSystemTest PRIVATE
+  GTest::gtest Rodin::Kokkos Rodin::Variational Rodin::Assembly Rodin::Solver)
+rodin_discover_tests(RodinKokkosVariationalDeviceSystemTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)

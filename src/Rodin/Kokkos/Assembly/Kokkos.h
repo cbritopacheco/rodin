@@ -38,6 +38,7 @@
 #include "Rodin/Variational/UnaryMinus.h"
 
 #include "Rodin/Kokkos/ForwardDecls.h"
+#include "Rodin/Kokkos/LinearSystem.h"
 #include "Rodin/Kokkos/Variational/Integral.h"
 
 namespace Rodin::Assembly::Internal
@@ -454,6 +455,9 @@ namespace Rodin::Assembly::Internal
       template <class T>
       using Array = ::Kokkos::View<T*, MemorySpace>;
 
+      /// @brief Matrix left on the device.
+      using DeviceMatrix = ::Rodin::Kokkos::SparseMatrix<Real, Backend>;
+
       /// @brief Device bilinear integrator.
       using BilinearType =
         ::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>;
@@ -818,6 +822,30 @@ namespace Rodin::Assembly::Internal
        */
       void finish(Math::SparseMatrix<Real>* A, Math::Vector<Real>* b)
       {
+        build(A, b);
+      }
+
+      /**
+       * @brief Integrates, eliminates the constraints and builds the system,
+       * leaving the matrix on the device.
+       * @param A Matrix, in compressed rows.
+       * @param b Right-hand side.
+       *
+       * The arrays of the matrix are reused when their sizes are unchanged.
+       * The coefficients are summed in the same order as for finish() into a
+       * host matrix, so both matrices are equal.
+       */
+      void finish(DeviceMatrix& A, Math::Vector<Real>& b)
+      {
+        build(&A, &b);
+      }
+
+    private:
+      /// @brief Builds the system into a host or a device matrix.
+      template <class Matrix>
+      void build(Matrix* A, Math::Vector<Real>* b)
+      {
+        constexpr bool rowMajor = std::is_same_v<Matrix, DeviceMatrix>;
         typename ConstraintsType::Resolved constraints;
         if (m_constraints.isIdentified())
           constraints = m_constraints.resolve(m_execution);
@@ -848,9 +876,10 @@ namespace Rodin::Assembly::Internal
             lifted = expand(triplets, constraints);
             triplets = lifted.triplets;
           }
-          listContributions(m_execution, m_rows, diagonal, triplets, fixed,
-            coefficientRanks(triplets.ranks), triplets.ranks.sorting(m_rows),
-            A != nullptr, eliminate, coefficients, eliminated);
+          listContributions(m_execution, rowMajor ? m_cols : m_rows, rowMajor, diagonal,
+            triplets, fixed, coefficientRanks(triplets.ranks),
+            triplets.ranks.sorting(m_rows), A != nullptr, eliminate, coefficients,
+            eliminated);
         }
         if (A)
           compress(triplets, coefficientRanks(triplets.ranks), coefficients, *A);
@@ -898,6 +927,7 @@ namespace Rodin::Assembly::Internal
         m_execution.fence("Rodin linear system");
       }
 
+    public:
       /**
        * @brief Adds the offsets of their spaces to the indices of entries.
        * @param cols Column indices, empty for a vector.
@@ -1003,6 +1033,9 @@ namespace Rodin::Assembly::Internal
        * @brief Lists the matrix contributions kept on their coefficients
        * with the identity rows, and the contributions moved to the
        * right-hand side by the columns of the fixed degrees of freedom.
+       * @param innerCount Number of columns of a row major matrix, of rows
+       * of a column major one.
+       * @param rowMajor Whether the coefficient keys are row major.
        * @param diagonal Number of identity rows listed.
        * @param coefficientRanks Ranks of the contributions, with the layout
        * of the coefficient sort keys.
@@ -1010,18 +1043,18 @@ namespace Rodin::Assembly::Internal
        * of the row sort keys.
        * @param listCoefficients Whether the coefficients are listed.
        * @param listEliminated Whether the eliminated contributions are listed.
-       * @param coefficients Receives the coefficients, as column major sort
-       * keys, the diagonal of the fixed row i being at position size + i.
+       * @param coefficients Receives the coefficients, as row or column
+       * major sort keys, the diagonal of the fixed row i being at position size + i.
        * @param eliminated Receives the eliminated contributions, as row sort
        * keys.
        *
        * Public as the enclosing function of device lambdas.
        */
-      static void listContributions(const ExecutionSpace& execution, size_t rowCount,
-        size_t diagonal, const Triplets& triplets, const Array<unsigned char>& fixed,
-        const Ranks& coefficientRanks, const Ranks& eliminatedRanks,
-        bool listCoefficients, bool listEliminated, Listed& coefficients,
-        Listed& eliminated)
+      static void listContributions(const ExecutionSpace& execution, size_t innerCount,
+        bool rowMajor, size_t diagonal, const Triplets& triplets,
+        const Array<unsigned char>& fixed, const Ranks& coefficientRanks,
+        const Ranks& eliminatedRanks, bool listCoefficients, bool listEliminated,
+        Listed& coefficients, Listed& eliminated)
       {
         const size_t size = triplets.size;
         const auto rows = triplets.rows;
@@ -1074,7 +1107,9 @@ namespace Rodin::Assembly::Internal
             {
               const Index row = e < size ? rows(e) : e - size;
               const Index col = e < size ? cols(e) : e - size;
-              ck(update.coefficients) = coefficientRanks.sortKey(col * rowCount + row, e);
+              const Index key =
+                rowMajor ? row * innerCount + col : col * innerCount + row;
+              ck(update.coefficients) = coefficientRanks.sortKey(key, e);
               cp(update.coefficients) = e;
             }
             if (final && c.eliminated)
@@ -1088,12 +1123,16 @@ namespace Rodin::Assembly::Internal
 
       /**
        * @brief Sums the contributions of every coefficient into the
-       * compressed column storage.
+       * compressed storage.
+       * @param innerCount Number of columns of a row major matrix, of rows
+       * of a column major one.
+       * @param outerCount Number of rows of a row major matrix, of columns
+       * of a column major one.
        *
        * Public as the enclosing function of device lambdas.
        */
-      static void sumCoefficients(const ExecutionSpace& execution, size_t rowCount,
-        size_t colCount, const Triplets& triplets, const Array<Index>& positions,
+      static void sumCoefficients(const ExecutionSpace& execution, size_t innerCount,
+        size_t outerCount, const Triplets& triplets, const Array<Index>& positions,
         const Groups& groups, const Array<Math::SparseIndex>& outer,
         const Array<Math::SparseIndex>& inner, const Array<Real>& data)
       {
@@ -1113,15 +1152,15 @@ namespace Rodin::Assembly::Internal
             for (Index i = starts(u) + 1; i < starts(u + 1); ++i)
               sum += value(positions(i));
             data(u) = sum;
-            inner(u) = static_cast<Math::SparseIndex>(keys(u) % rowCount);
+            inner(u) = static_cast<Math::SparseIndex>(keys(u) % innerCount);
           });
         ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::columns",
+          "Rodin::Assembly::Kokkos::outer",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, nnz + 1),
           KOKKOS_LAMBDA(const size_t u) {
-            const Index col = u < nnz ? keys(u) / rowCount : colCount;
-            const Index begin = u > 0 ? keys(u - 1) / rowCount + 1 : 0;
-            for (Index j = begin; j <= col; ++j)
+            const Index end = u < nnz ? keys(u) / innerCount : outerCount;
+            const Index begin = u > 0 ? keys(u - 1) / innerCount + 1 : 0;
+            for (Index j = begin; j <= end; ++j)
               outer(j) = static_cast<Math::SparseIndex>(u);
           });
       }
@@ -1590,6 +1629,41 @@ namespace Rodin::Assembly::Internal
       }
 
       /**
+       * @brief Sums the listed coefficients into compressed rows on the
+       * device.
+       * @param ranks Ranks of the contributions, with the layout of the
+       * coefficient sort keys.
+       */
+      void compress(const Triplets& triplets, const Ranks& ranks, const Listed& listed,
+        DeviceMatrix& A) const
+      {
+        if (m_rows == 0 || m_cols == 0)
+        {
+          A = DeviceMatrix(m_rows, m_cols, {}, {}, {});
+          return;
+        }
+        const auto groups = group(m_execution, listed.keys, listed.positions, ranks);
+        const size_t nnz = groups.size();
+        if (nnz > static_cast<size_t>(std::numeric_limits<Math::SparseIndex>::max()))
+        {
+          Alert::Exception() << "The matrix is too large for the sparse index type."
+                             << Alert::Raise;
+        }
+        // A sequence of systems with one pattern keeps its arrays.
+        const auto reuse = [this](const auto& a, size_t size, const char* label) {
+          using T = typename std::decay_t<decltype(a)>::value_type;
+          return a.extent(0) == size ? a : allocate<T>(size, label);
+        };
+        const auto starts =
+          reuse(A.getRowStarts(), m_rows + 1, "Rodin matrix row starts");
+        const auto columns = reuse(A.getColumns(), nnz, "Rodin matrix columns");
+        const auto values = reuse(A.getValues(), nnz, "Rodin matrix values");
+        sumCoefficients(m_execution, m_cols, m_rows, triplets, listed.positions, groups,
+          starts, columns, values);
+        A = DeviceMatrix(m_rows, m_cols, starts, columns, values);
+      }
+
+      /**
        * @brief Expands the matrix contributions and appends the rows of the
        * identified degrees of freedom, as the host assemblies do.
        */
@@ -1904,6 +1978,65 @@ namespace Rodin::Assembly
       }
   };
 
+  namespace Internal
+  {
+    /// @brief Whether a matrix is a Rodin::Kokkos::SparseMatrix of reals.
+    template <class Matrix>
+    struct IsKokkosMatrix : std::false_type
+    {};
+
+    /// @brief A Rodin::Kokkos::SparseMatrix of reals.
+    template <class Backend>
+    struct IsKokkosMatrix<::Rodin::Kokkos::SparseMatrix<Real, Backend>> : std::true_type
+    {};
+
+    /// @brief Matrix of a system assembled from a Problem on a Kokkos mesh.
+    template <class Matrix>
+    concept KokkosProblemMatrix =
+      std::is_same_v<Matrix, Math::SparseMatrix<Real>> || IsKokkosMatrix<Matrix>::value;
+
+    /**
+     * @brief Builds a system on the host or with its matrix on the device.
+     * @param system Contributions of the problem.
+     * @param axb System receiving the matrix and the right-hand side.
+     */
+    template <class Backend, class Matrix>
+    void finish(
+      DeviceSystem<Backend>& system, Math::LinearSystem<Matrix, Math::Vector<Real>>& axb)
+    {
+      if constexpr (IsKokkosMatrix<Matrix>::value)
+      {
+        static_assert(
+          std::is_same_v<Matrix, typename DeviceSystem<Backend>::DeviceMatrix>,
+          "The matrix of the system must have the backend of the mesh.");
+        system.finish(axb.getOperator(), axb.getVector());
+      }
+      else
+      {
+        system.finish(&axb.getOperator(), &axb.getVector());
+      }
+    }
+
+    /**
+     * @brief Rejects the preassembled forms of a problem whose matrix stays
+     * on the device.
+     * @param forms Preassembled bilinear forms.
+     *
+     * No form assembles into a device matrix, so the list is empty unless a
+     * form is added by hand.
+     */
+    template <class Forms>
+    void rejectForms(const Forms& forms)
+    {
+      if (!forms.empty())
+      {
+        Alert::Exception() << "A problem with a device matrix takes no preassembled "
+                              "bilinear form."
+                           << Alert::Raise;
+      }
+    }
+  }
+
   /**
    * @ingroup RodinAssembly
    * @brief Device assembly of a single field problem on a Kokkos mesh.
@@ -1912,25 +2045,26 @@ namespace Rodin::Assembly
    * negated, are integrated on the device. Their entries, the preassembled
    * forms and the Dirichlet and periodic conditions are combined on the
    * device, eliminating the constrained degrees of freedom as the host
-   * assemblies do, and only the system is copied to the host.
+   * assemblies do. The system is then copied to the host, or only its
+   * right-hand side when the matrix stays on the device.
    *
+   * @tparam Matrix Math::SparseMatrix<Real>, copied to the host, or
+   * Rodin::Kokkos::SparseMatrix<Real, Backend>, left on the device.
    * @tparam TrialFunction Trial function on a resident Kokkos mesh.
    * @tparam TestFunction Test function on the same mesh.
    */
-  template <class TrialFunction, class TestFunction>
-  class Kokkos<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>,
-    Variational::Problem<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>,
-      TrialFunction, TestFunction>>
-    final : public AssemblyBase<
-              Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>,
-              Variational::Problem<
-                Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>,
+  template <class Matrix, class TrialFunction, class TestFunction>
+    requires Internal::KokkosProblemMatrix<Matrix>
+  class Kokkos<Math::LinearSystem<Matrix, Math::Vector<Real>>,
+    Variational::Problem<Math::LinearSystem<Matrix, Math::Vector<Real>>, TrialFunction,
+      TestFunction>>
+    final : public AssemblyBase<Math::LinearSystem<Matrix, Math::Vector<Real>>,
+              Variational::Problem<Math::LinearSystem<Matrix, Math::Vector<Real>>,
                 TrialFunction, TestFunction>>
   {
     public:
       /// @brief Linear system type.
-      using LinearSystemType =
-        Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+      using LinearSystemType = Math::LinearSystem<Matrix, Math::Vector<Real>>;
 
       /// @brief Problem type.
       using ProblemType =
@@ -2007,14 +2141,19 @@ namespace Rodin::Assembly
           system.addMatrix(lbfi, 0, 0);
         for (const auto& gbfi : pb.getGlobalBFIs())
           system.addMatrix(gbfi, 0, 0);
-        for (const auto& bf : pb.getBFs())
-          system.addMatrix(bf.getOperator(), 0, 0);
+        if constexpr (Internal::IsKokkosMatrix<Matrix>::value)
+          Internal::rejectForms(pb.getBFs());
+        else
+        {
+          for (const auto& bf : pb.getBFs())
+            system.addMatrix(bf.getOperator(), 0, 0);
+        }
         // The problem reads a(u, v) + l(v) = 0, so b = -l.
         for (const auto& lfi : pb.getLFIs())
           system.addVector(lfi, 0, Real(-1));
         for (const auto& lf : pb.getLFs())
           system.addVector(lf.getVector(), 0);
-        system.finish(&axb.getOperator(), &axb.getVector());
+        Internal::finish(system, axb);
       }
 
       /**
@@ -2053,21 +2192,21 @@ namespace Rodin::Assembly
    * are shifted to the blocks of their trial and test functions, then the
    * constraints are eliminated as in the single field assembly. The masters
    * of an identification Dirichlet condition may belong to another field.
+   *
+   * @tparam Matrix As for the single field assembly.
    */
-  template <class U1, class U2, class U3, class... Us>
-  class Kokkos<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>,
-    Variational::Problem<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>,
-      U1, U2, U3, Us...>>
-    final : public AssemblyBase<
-              Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>,
-              Variational::Problem<
-                Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>, U1, U2,
+  template <class Matrix, class U1, class U2, class U3, class... Us>
+    requires Internal::KokkosProblemMatrix<Matrix>
+  class Kokkos<Math::LinearSystem<Matrix, Math::Vector<Real>>,
+    Variational::Problem<Math::LinearSystem<Matrix, Math::Vector<Real>>, U1, U2, U3,
+      Us...>>
+    final : public AssemblyBase<Math::LinearSystem<Matrix, Math::Vector<Real>>,
+              Variational::Problem<Math::LinearSystem<Matrix, Math::Vector<Real>>, U1, U2,
                 U3, Us...>>
   {
     public:
       /// @brief Linear system type.
-      using LinearSystemType =
-        Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+      using LinearSystemType = Math::LinearSystem<Matrix, Math::Vector<Real>>;
 
       /// @brief Problem type.
       using ProblemType = Variational::Problem<LinearSystemType, U1, U2, U3, Us...>;
@@ -2165,14 +2304,19 @@ namespace Rodin::Assembly
         // for the values they lift.
         for (const auto& lfi : pb.getLFIs())
           system.addVector(lfi, testOffset(lfi.getTestFunction().getUUID()), Real(-1));
-        for (const auto& bf : pb.getBFs())
+        if constexpr (Internal::IsKokkosMatrix<Matrix>::value)
+          Internal::rejectForms(pb.getBFs());
+        else
         {
-          system.addMatrix(bf.getOperator(), testOffset(bf.getTestFunction().getUUID()),
-            trialOffset(bf.getTrialFunction().getUUID()));
+          for (const auto& bf : pb.getBFs())
+          {
+            system.addMatrix(bf.getOperator(), testOffset(bf.getTestFunction().getUUID()),
+              trialOffset(bf.getTrialFunction().getUUID()));
+          }
         }
         for (const auto& lf : pb.getLFs())
           system.addVector(lf.getVector(), testOffset(lf.getTestFunction().getUUID()));
-        system.finish(&axb.getOperator(), &axb.getVector());
+        Internal::finish(system, axb);
       }
 
       /**

@@ -60,9 +60,12 @@ from the system type.
 - MUMPS (configure-gated): `MUMPS`, the only direct solver that exploits a
   symmetric matrix (`setSymmetric`), halving the factor it stores.
 - cuDSS (`RODIN_USE_CUDSS`): `CuDSS`, a direct solver on an NVIDIA GPU for
-  real `Math::SparseMatrix` systems. It copies the CSC arrays to the device
-  as the CSR arrays of the transpose and solves with the transpose, so a
-  general matrix needs no conversion. Like `MUMPS`, it retains the analysis
+  real systems. On a `Math::SparseMatrix` it copies the CSC arrays to the
+  device as the CSR arrays of the transpose and solves with the transpose,
+  so a general matrix needs no conversion. On a `Kokkos::SparseMatrix` in
+  device memory it reads the CSR arrays in place and only copies the
+  right-hand side and the solution; `Internal::CuDSSOperator` describes
+  both layouts. Like `MUMPS`, it retains the analysis
   and the factors: `solve` reuses them, `factorize(axb)` refactorizes after
   the values change and keeps the analysis, and a changed pattern requires
   `clear(Factorization::Symbolic)`. Only the row and nonzero counts are
@@ -94,8 +97,9 @@ as the time steps of a flow, keeps one `CuDSS` or `MUMPS` instance and calls
 `factorize` at each step. On a 2D Poisson system with 1M unknowns, `CuDSS`
 takes 6.6 s for the first solve against 38 s for `SparseLU`, then 234 ms per
 refactorization and 15 ms per solve (RTX 2080 Ti, 32 cores). The Kokkos
-`NavierStokes` example does this: 160 steps take 4.8 s with `CuDSS`
-against 60 s with a new `SparseLU` at each step.
+`NavierStokes` example does this on a device matrix: 160 steps take 3.3 s
+with `CuDSS` (3.6 s through the host matrix) against 60 s with a new
+`SparseLU` at each step.
 
 PETSc on the device, measured on the Kokkos examples (RTX 2080 Ti,
 32 cores, `examples/Kokkos/PDEs/Seq_*.cpp`):

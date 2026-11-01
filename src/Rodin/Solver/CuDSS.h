@@ -11,10 +11,12 @@
  * cuDSS factorizes a sparse matrix on an NVIDIA GPU, as @f$ LU @f$ for a
  * general matrix and as @f$ LDL^T @f$ or @f$ LL^T @f$ for a symmetric one.
  *
- * cuDSS reads the matrix in CSR format, whereas Rodin stores it as CSC. The
- * CSC arrays of @f$ A @f$ are the CSR arrays of @f$ A^T @f$, so they are
- * copied to the device unchanged and cuDSS is asked to solve with the
- * transpose of the matrix it holds. A symmetric matrix needs no transpose.
+ * cuDSS reads the matrix in CSR format, whereas Math::SparseMatrix stores
+ * it as CSC. The CSC arrays of @f$ A @f$ are the CSR arrays of @f$ A^T @f$,
+ * so they are copied to the device unchanged and cuDSS is asked to solve
+ * with the transpose of the matrix it holds. A symmetric matrix needs no
+ * transpose. A Kokkos::SparseMatrix is stored as CSR, and cuDSS reads it in
+ * place when it is in device memory.
  *
  * @note This solver requires cuDSS and RODIN_USE_CUDSS.
  */
@@ -50,6 +52,65 @@ namespace Rodin::FormLanguage
   };
 }
 
+namespace Rodin::Solver::Internal
+{
+  /// @brief Host CSC arrays, read as the CSR arrays of the transpose.
+  template <>
+  struct CuDSSOperator<Math::SparseMatrix<Real>>
+  {
+    /// @brief Matrix type.
+    using MatrixType = Math::SparseMatrix<Real>;
+
+    /// @brief Whether the arrays are those of the transpose.
+    static constexpr bool Transposed = true;
+
+    /// @brief Whether the arrays are in device memory.
+    static constexpr bool Resident = false;
+
+    /// @brief Compresses the matrix.
+    static void prepare(MatrixType& matrix)
+    {
+      matrix.makeCompressed();
+    }
+
+    /// @brief Number of rows.
+    static size_t getRowCount(const MatrixType& matrix)
+    {
+      return static_cast<size_t>(matrix.rows());
+    }
+
+    /// @brief Number of columns.
+    static size_t getColumnCount(const MatrixType& matrix)
+    {
+      return static_cast<size_t>(matrix.cols());
+    }
+
+    /// @brief Number of stored coefficients.
+    static size_t getNonZeroCount(const MatrixType& matrix)
+    {
+      return static_cast<size_t>(matrix.nonZeros());
+    }
+
+    /// @brief Start of every compressed row, followed by the coefficient count.
+    static const Math::SparseIndex* getStarts(const MatrixType& matrix)
+    {
+      return matrix.outerIndexPtr();
+    }
+
+    /// @brief Index of every coefficient in its compressed row.
+    static const Math::SparseIndex* getIndices(const MatrixType& matrix)
+    {
+      return matrix.innerIndexPtr();
+    }
+
+    /// @brief Value of every coefficient.
+    static const Real* getValues(const MatrixType& matrix)
+    {
+      return matrix.valuePtr();
+    }
+  };
+}
+
 namespace Rodin::Solver
 {
   /**
@@ -70,7 +131,9 @@ namespace Rodin::Solver
    * @brief GPU direct solver for real sparse square systems.
    *
    * The matrix, the right-hand side and the solution are copied to the
-   * device, factorized and solved there, and the solution is copied back.
+   * device, factorized and solved there, and the solution is copied back. A
+   * matrix already in device memory, such as a Kokkos::SparseMatrix on the
+   * CUDA backend, is read in place and only the vectors are copied.
    * Symbolic analysis (reordering and symbolic factorization) is reused
    * across explicit @ref factorize calls, which assume that the sparsity
    * pattern is unchanged; only the values are copied again. The numeric
@@ -84,10 +147,12 @@ namespace Rodin::Solver
    * symmetric only after @ref setSymmetric.
    *
    * @par Architecture
-   * 1. Copy the CSC arrays to the device once per sparsity pattern, and the
-   *    values once per factorization.
-   * 2. Hand them to cuDSS as the CSR arrays of @f$ A^T @f$ and solve with
-   *    the transpose, so that no conversion is needed.
+   * 1. Copy the compressed arrays of a host matrix to the device once per
+   *    sparsity pattern, and the values once per factorization. Hand the
+   *    arrays of a device matrix to cuDSS at every factorization, as the
+   *    assembly may have moved them.
+   * 2. Hand CSC arrays to cuDSS as the CSR arrays of @f$ A^T @f$ and solve
+   *    with the transpose, so that no conversion is needed.
    * 3. Reuse symbolic analysis until explicitly cleared.
    * 4. Retain the numeric factorization for explicit repeated solves.
    *
@@ -104,17 +169,21 @@ namespace Rodin::Solver
    *
    * | Specialization | Description |
    * |----------------|-------------|
-   * | @ref CuDSS "CuDSS<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>" | Real double-precision sparse systems. |
+   * | @ref CuDSS "CuDSS<Math::LinearSystem<Matrix, Math::Vector<Real>>>" | Real double-precision sparse systems whose matrix has an Internal::CuDSSOperator. |
+   *
+   * @tparam Matrix Math::SparseMatrix<Real> or Kokkos::SparseMatrix<Real, Backend>.
    */
-  template <>
-  class CuDSS<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>> final
-    : public LinearSolverBase<
-        Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>
+  template <class Matrix>
+  class CuDSS<Math::LinearSystem<Matrix, Math::Vector<Real>>> final
+    : public LinearSolverBase<Math::LinearSystem<Matrix, Math::Vector<Real>>>
   {
+    /// @brief Access to the compressed arrays of the matrix.
+    using Arrays = Internal::CuDSSOperator<Matrix>;
+
     public:
       using ScalarType = Real;
       using VectorType = Math::Vector<ScalarType>;
-      using OperatorType = Math::SparseMatrix<ScalarType>;
+      using OperatorType = Matrix;
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
       using Parent = LinearSolverBase<LinearSystemType>;
@@ -210,13 +279,13 @@ namespace Rodin::Solver
         /// @brief Dense descriptor over the device solution.
         cudssMatrix_t solution = nullptr;
 
-        /// @brief Column starts of the CSC matrix, row starts of its transpose.
+        /// @brief Row starts of the CSR arrays, copied from a host matrix.
         DeviceArray<Math::SparseIndex> outer;
 
-        /// @brief Row indices of the CSC matrix, column indices of its transpose.
+        /// @brief Column indices of the CSR arrays, copied from a host matrix.
         DeviceArray<Math::SparseIndex> inner;
 
-        /// @brief Matrix values.
+        /// @brief Values, copied from a host matrix.
         DeviceArray<ScalarType> values;
 
         /// @brief Right-hand side on the device.
@@ -371,18 +440,18 @@ namespace Rodin::Solver
       void factorize(LinearSystemType& axb)
       {
         auto& matrix = axb.getOperator();
-        if (matrix.rows() != matrix.cols())
+        if (Arrays::getRowCount(matrix) != Arrays::getColumnCount(matrix))
         {
           Alert::MemberFunctionException(*this, __func__)
             << "cuDSS requires a square matrix." << Alert::Raise;
         }
 
-        matrix.makeCompressed();
+        Arrays::prepare(matrix);
         initialize();
 
         auto& res = m_resources;
-        const Index rows = static_cast<Index>(matrix.rows());
-        const Index nonzeros = static_cast<Index>(matrix.nonZeros());
+        const Index rows = static_cast<Index>(Arrays::getRowCount(matrix));
+        const Index nonzeros = static_cast<Index>(Arrays::getNonZeroCount(matrix));
         if (res.symbolic && (rows != res.rows || nonzeros != res.nonzeros))
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -391,18 +460,38 @@ namespace Rodin::Solver
         }
 
         res.numeric = false;
-        if (!res.symbolic)
+        const Math::SparseIndex* starts = res.outer.data;
+        const Math::SparseIndex* indices = res.inner.data;
+        const ScalarType* values = res.values.data;
+        if constexpr (Arrays::Resident)
         {
-          allocate(rows, nonzeros);
-          upload(res.outer.data, matrix.outerIndexPtr(), rows + 1);
-          upload(res.inner.data, matrix.innerIndexPtr(), nonzeros);
+          if (!res.symbolic)
+            allocate(rows);
+          starts = Arrays::getStarts(matrix);
+          indices = Arrays::getIndices(matrix);
+          values = Arrays::getValues(matrix);
         }
-        upload(res.values.data, matrix.valuePtr(), nonzeros);
+        else
+        {
+          if (!res.symbolic)
+          {
+            allocate(rows);
+            check(res.outer.resize(rows + 1), "allocate the matrix on the device");
+            check(res.inner.resize(nonzeros), "allocate the matrix on the device");
+            check(res.values.resize(nonzeros), "allocate the matrix on the device");
+            upload(res.outer.data, Arrays::getStarts(matrix), rows + 1);
+            upload(res.inner.data, Arrays::getIndices(matrix), nonzeros);
+            starts = res.outer.data;
+            indices = res.inner.data;
+            values = res.values.data;
+          }
+          upload(res.values.data, Arrays::getValues(matrix), nonzeros);
+        }
 
         configure();
         if (!res.symbolic)
         {
-          if (!describe(rows, nonzeros) ||
+          if (!describe(rows, nonzeros, starts, indices, values) ||
             !execute(CUDSS_PHASE_ANALYSIS, Optional<Factorization>{}))
           {
             res.clear(Factorization::Symbolic);
@@ -411,6 +500,11 @@ namespace Rodin::Solver
           res.symbolic = true;
           res.rows = rows;
           res.nonzeros = nonzeros;
+        }
+        else if constexpr (Arrays::Resident)
+        {
+          check(cudssMatrixSetCsrPointers(res.matrix, starts, nullptr, indices, values),
+            "update the matrix arrays");
         }
 
         if (!execute(CUDSS_PHASE_FACTORIZATION, Factorization::Symbolic))
@@ -478,7 +572,8 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& axb) override
       {
-        if (axb.getVector().size() != axb.getOperator().rows())
+        if (static_cast<size_t>(axb.getVector().size()) !=
+          Arrays::getRowCount(axb.getOperator()))
         {
           Alert::MemberFunctionException(*this, __func__)
             << "The right-hand side size does not match the matrix." << Alert::Raise;
@@ -520,12 +615,10 @@ namespace Rodin::Solver
           check(cudssConfigCreate(&res.config), "create the cuDSS configuration");
       }
 
-      void allocate(Index rows, Index nonzeros)
+      /// @brief Allocates the vectors on the device.
+      void allocate(Index rows)
       {
         auto& res = m_resources;
-        check(res.outer.resize(rows + 1), "allocate the matrix on the device");
-        check(res.inner.resize(nonzeros), "allocate the matrix on the device");
-        check(res.values.resize(nonzeros), "allocate the matrix on the device");
         check(res.b.resize(rows), "allocate the right-hand side on the device");
         check(res.x.resize(rows), "allocate the solution on the device");
       }
@@ -538,7 +631,8 @@ namespace Rodin::Solver
       }
 
       /// @brief Creates the descriptors over the device arrays.
-      bool describe(Index rows, Index nonzeros)
+      bool describe(Index rows, Index nonzeros, const Math::SparseIndex* starts,
+        const Math::SparseIndex* indices, const ScalarType* values)
       {
         auto& res = m_resources;
         res.destroyDescriptors();
@@ -548,9 +642,11 @@ namespace Rodin::Solver
         else if (m_symmetry == Symmetry::PositiveDefinite)
           type = CUDSS_MTYPE_SPD;
         static_assert(sizeof(Math::SparseIndex) == 4);
+        // cuDSS reads the arrays without writing them.
         cudssStatus_t status = cudssMatrixCreateCsr(&res.matrix, rows, rows, nonzeros,
-          res.outer.data, nullptr, res.inner.data, res.values.data, CUDA_R_32I,
-          CUDA_R_32I, CUDA_R_64F, type, CUDSS_MVIEW_FULL, CUDSS_BASE_ZERO);
+          const_cast<Math::SparseIndex*>(starts), nullptr,
+          const_cast<Math::SparseIndex*>(indices), const_cast<ScalarType*>(values),
+          CUDA_R_32I, CUDA_R_32I, CUDA_R_64F, type, CUDSS_MVIEW_FULL, CUDSS_BASE_ZERO);
         if (status == CUDSS_STATUS_SUCCESS)
         {
           status = cudssMatrixCreateDn(
@@ -574,9 +670,10 @@ namespace Rodin::Solver
       void configure()
       {
         auto& res = m_resources;
-        // The device holds A^T, so an unsymmetric system is solved with its
-        // transpose. A symmetric matrix is its own transpose.
-        const cudssSolveMode_t mode = m_symmetry == Symmetry::Unsymmetric
+        // CSC arrays describe A^T, so an unsymmetric system is solved with
+        // its transpose. A symmetric matrix is its own transpose.
+        const cudssSolveMode_t mode =
+          Arrays::Transposed && m_symmetry == Symmetry::Unsymmetric
           ? CUDSS_SOLVE_MODE_TRANSPOSE
           : CUDSS_SOLVE_MODE_NORMAL;
         check(cudssConfigSet(res.config, CUDSS_CONFIG_SOLVE_MODE, &mode, sizeof(mode)),

@@ -194,6 +194,22 @@
   PETSc systems. Rodin solvers, including `Solver::NewtonSolver`, act on the
   assembled systems. Other constitutive laws are not provided.
 
+  The matrix can also stay on the device. A problem named with a linear
+  system whose operator is a `Rodin::Kokkos::SparseMatrix` receives the
+  compressed rows built by the kernels, and only the right-hand side is
+  copied to the host:
+  @code{.cpp}
+  using System =
+    Math::LinearSystem<Rodin::Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>;
+  Problem<System, decltype(u), decltype(v)> poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero());
+  Solver::CuDSS solver(poisson); // reads the device arrays in place
+  solver.solve();
+  @endcode
+  The coefficients equal those of the host matrix of the same assembly, and
+  a reassembly with the same sizes reuses the device arrays. Such a problem
+  takes no preassembled bilinear form; mixed problems are supported.
+
   @section guides-kokkos-mpi Distributed Meshes
 
   `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the shard of a
