@@ -93,6 +93,12 @@ imposes constraints that host Kokkos backends do not detect:
   placeholder not permitted in parameter": the deduced `Grad(u)` is parsed as
   a parameter type. Such a restricted term goes after another term of the sum,
   or in a named variable.
+- NVCC defines `EIGEN_GPUCC`, which turns off Eigen's vectorization in host
+  code too. A sparse factorization or Krylov solve instantiated in an NVCC
+  translation unit is about 20% slower than under GCC. The sparse `CG` and
+  `SparseLU` are therefore instantiated in `RodinSolver`, which is compiled by
+  the host compiler (solvers-assembly.md). Their layout does not depend on
+  the compiler: `EIGEN_MAX_ALIGN_BYTES` is 16 under both.
 - A Kokkos change is CUDA-verified only after building and running the Kokkos
   tests with a CUDA-enabled Kokkos installation.
 

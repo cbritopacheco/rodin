@@ -199,31 +199,7 @@ namespace Rodin::Solver
        * This method computes the LU factorization of the system matrix and
        * uses forward and backward substitution to solve for the solution vector.
        */
-      void solve(LinearSystemType& axb) override
-      {
-        m_info = Info{};
-        m_solver.compute(axb.getOperator());
-        if (!record())
-        {
-          // Eigen guards its solve with an assertion that a release build
-          // compiles out, so solving with a failed factorization reads
-          // uninitialized state. Leave the solution untouched instead.
-          return;
-        }
-        m_info.factorization = Factorization::Numeric;
-        axb.getSolution() = m_solver.solve(axb.getVector());
-        if (!record())
-          return;
-        for (size_t step = 0; step < m_refinementSteps; ++step)
-        {
-          const VectorType residual =
-            axb.getVector() - axb.getOperator() * axb.getSolution();
-          const VectorType correction = m_solver.solve(residual);
-          if (!record())
-            return;
-          axb.getSolution() += correction;
-        }
-      }
+      void solve(LinearSystemType& axb) override;
 
       /**
        * @brief Returns the diagnostic of the most recent failure, if any.
@@ -285,6 +261,43 @@ namespace Rodin::Solver
       /// Underlying Eigen SparseLU solver
       Eigen::SparseLU<OperatorType> m_solver;
   };
+
+  // Defined out of class so that it is not inline, which lets RodinSolver
+  // compile it once with the host compiler. See SparseLU.cpp.
+  template <class Scalar>
+  void
+  SparseLU<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>::solve(
+    LinearSystemType& axb)
+  {
+    m_info = Info{};
+    m_solver.compute(axb.getOperator());
+    if (!record())
+    {
+      // Eigen guards its solve with an assertion that a release build
+      // compiles out, so solving with a failed factorization reads
+      // uninitialized state. Leave the solution untouched instead.
+      return;
+    }
+    m_info.factorization = Factorization::Numeric;
+    axb.getSolution() = m_solver.solve(axb.getVector());
+    if (!record())
+      return;
+    for (size_t step = 0; step < m_refinementSteps; ++step)
+    {
+      const VectorType residual = axb.getVector() - axb.getOperator() * axb.getSolution();
+      const VectorType correction = m_solver.solve(residual);
+      if (!record())
+        return;
+      axb.getSolution() += correction;
+    }
+  }
+
+#ifdef RODIN_SOLVER_EXTERN_TEMPLATES
+  extern template class SparseLU<
+    Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>;
+  extern template class SparseLU<
+    Math::LinearSystem<Math::SparseMatrix<Complex>, Math::Vector<Complex>>>;
+#endif
 }
 
 #endif

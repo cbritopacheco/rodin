@@ -545,10 +545,11 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       domine. Pression passée de `P1` à `H1<1>` comme sur l'hôte: même
       espace, numérotation différente, et COLAMD remplissait davantage
       (60 s contre 44 s pour 100 pas).
-- [ ] Eigen n'est pas vectorisé dans une unité compilée par nvcc
+- [x] Eigen n'est pas vectorisé dans une unité compilée par nvcc
       (`EIGEN_GPUCC` coupe `EIGEN_VECTORIZE`): SparseLU seul sur la même
-      matrice, 9.7 s sous nvcc contre 7.9 s sous g++. Pistes: instancier
-      les solveurs Eigen dans une unité g++, ou résoudre sur le GPU.
+      matrice, 9.7 s sous nvcc contre 7.9 s sous g++. `CG` et `SparseLU`
+      creux sont maintenant instanciés dans `RodinSolver`, compilé par g++,
+      avec des `extern template` activés par `RODIN_SOLVER_EXTERN_TEMPLATES`.
 - [x] `KSP::solve` et `SNES::solve` ignoraient les erreurs PETSc en
       Release (`assert` seulement): `-pc_factor_mat_solver_type cusparse`
       sur `seqaijkokkos` annonçait un succès en 1 ms avec une solution

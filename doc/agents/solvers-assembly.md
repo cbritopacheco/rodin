@@ -81,6 +81,17 @@ nonsymmetric → BiCGSTAB/GMRES or SparseLU/UMFPack/ParU; symmetric indefinite
 PartialPivLU. Examples default to CG for Poisson-like and SparseLU/LDLT
 for Newton tangents.
 
+`RodinSolver` is a compiled library. It instantiates the sparse `CG` and
+`SparseLU` for `Real` and `Complex` (`CG.cpp`, `SparseLU.cpp`), and its
+`RODIN_SOLVER_EXTERN_TEMPLATES` definition turns the matching
+`extern template` declarations on in every target that links it. Their
+`solve` is defined out of class so that it is not inline. This keeps the
+Eigen kernels out of NVCC translation units, which run Eigen without
+vectorization (backend-support.md). A target that includes these headers
+without linking `Rodin::Solver` still instantiates them itself. Another
+wrapper used by device code gets the same treatment: an out-of-class `solve`,
+the `extern template` lines, and a `.cpp` added to `RodinSolver_SRCS`.
+
 ## Nonlinear: NewtonSolver
 
 `Solver::NewtonSolver` drives residual/tangent pairs assembled from the
