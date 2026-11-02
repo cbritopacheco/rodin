@@ -597,11 +597,30 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       Tests `GridFunctionChangeOn*` (contenu changé, échangé, rétabli
       entre assemblages) et `Kokkos_TransferCache`; comparer seulement
       la taille ou réécrire une copie référencée les fait échouer.
+- [x] Second membre sans contraintes lu en place: sans condition
+      essentielle, identification ni vecteur préassemblé, les entrées des
+      intégrateurs linéaires sont les contributions elles-mêmes
+      (`sumEntries`, PETSc.h). Le comptage (`countVector`, lu sur l'hôte),
+      la liste par balayage (`listVector`) et la comparaison des lignes
+      regroupées (`countDifferences`, lue sur l'hôte) disparaissent: le
+      regroupement par ligne est gardé tant que les intégrateurs gardent
+      leur disposition et leur nombre d'entrées, comme le motif de la
+      matrice, et refait à chaque assemblage s'ils sont restreints à des
+      attributs. Les entrées nulles sont sommées au lieu d'être écartées,
+      ce qui ne change aucun bit. Oseen (2080 Ti): grille 16 0.93 ms
+      contre 1.14 ms (0.82x du noyau manuel), grille 30 4.63 ms contre
+      6.45 ms (0.72x). Tests `UnconstrainedOn*` (réassemblage au bit près,
+      avec puis sans condition, autres intégrateurs dont un restreint);
+      ne jamais regrouper à nouveau, ou garder `vectorSegments` après un
+      regroupement du chemin général, les fait échouer.
 - [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
       noyau (somme des intégrandes), capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles
       (aussi côté hôte), découpage de la matrice locale par blocs de
-      composantes.
+      composantes. Ajouter les entrées par atomiques directement dans les
+      coordonnées distinctes supprimerait la fusion COO (environ 200 µs
+      sur 1 ms à la grille 16), mais la somme ne serait plus
+      déterministe: décision à prendre.
 
 ## 13. DSL device, jalon 8: intégrales de bord, de faces et élasticité
 

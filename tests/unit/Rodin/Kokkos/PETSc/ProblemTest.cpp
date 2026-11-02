@@ -459,6 +459,78 @@ namespace Rodin::Tests::Unit
     expectSameOperator(A, toSparse(axb.getOperator()));
   }
 
+  /**
+   * @brief Unconstrained right-hand sides, summed from the entries of the
+   * linear integrators in place, match the sparse device assembly when
+   * assembled again and when the linear integrators change.
+   */
+  void checkUnconstrained(const HostMesh& source)
+  {
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 vh(mesh, 2);
+    P1 qh(mesh);
+    TrialFunction su(vh);
+    TrialFunction sp(qh);
+    TestFunction sv(vh);
+    TestFunction sq(qh);
+    PETSc::Variational::TrialFunction pu(vh);
+    PETSc::Variational::TrialFunction pp(qh);
+    PETSc::Variational::TestFunction pv(vh);
+    PETSc::Variational::TestFunction pq(qh);
+    VectorFunction f(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() * p.y(); },
+      Real(1));
+    RealFunction s(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() - p.y(); });
+    RealFunction g(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      return 2 * p.x() - p.y() + 1;
+    });
+    const Real eps = 1e-3;
+
+    Problem sstokes(su, sp, sv, sq);
+    Problem pstokes(pu, pp, pv, pq);
+    const auto stokes = [&] {
+      sstokes = Integral(Jacobian(su), Jacobian(sv)) - Integral(sp, Div(sv)) +
+        Integral(Div(su), sq) + Integral(eps * sp, sq) - Integral(f, sv) -
+        Integral(s, sq);
+      pstokes = Integral(Jacobian(pu), Jacobian(pv)) - Integral(pp, Div(pv)) +
+        Integral(Div(pu), pq) + Integral(eps * pp, pq) - Integral(f, pv) -
+        Integral(s, pq);
+    };
+    stokes();
+    expectSameSystem(sstokes, pstokes);
+    const auto b = toVector(pstokes.getLinearSystem().getVector());
+    for (int k = 0; k < 3; ++k)
+    {
+      pstokes.assemble();
+      const auto again = toVector(pstokes.getLinearSystem().getVector());
+      ASSERT_EQ(again.size(), b.size());
+      for (Eigen::Index i = 0; i < b.size(); ++i)
+        EXPECT_EQ(again(i), b(i)) << "entry " << i;
+    }
+
+    // Constrained, then unconstrained again with the same integrators.
+    sstokes = Integral(Jacobian(su), Jacobian(sv)) - Integral(sp, Div(sv)) +
+      Integral(Div(su), sq) + Integral(eps * sp, sq) - Integral(f, sv) - Integral(s, sq) +
+      DirichletBC(su, VectorFunction{0, 0}).on(1);
+    pstokes = Integral(Jacobian(pu), Jacobian(pv)) - Integral(pp, Div(pv)) +
+      Integral(Div(pu), pq) + Integral(eps * pp, pq) - Integral(f, pv) - Integral(s, pq) +
+      DirichletBC(pu, VectorFunction{0, 0}).on(1);
+    expectSameSystem(sstokes, pstokes);
+    stokes();
+    expectSameSystem(sstokes, pstokes);
+
+    // Other linear integrators, one of them restricted to attributes.
+    sstokes = Integral(Jacobian(su), Jacobian(sv)) - Integral(sp, Div(sv)) +
+      Integral(Div(su), sq) + Integral(eps * sp, sq) - Integral(s, sq) - Integral(f, sv) +
+      BoundaryIntegral(g, sq).over(2);
+    pstokes = Integral(Jacobian(pu), Jacobian(pv)) - Integral(pp, Div(pv)) +
+      Integral(Div(pu), pq) + Integral(eps * pp, pq) - Integral(s, pq) - Integral(f, pv) +
+      BoundaryIntegral(g, pq).over(2);
+    expectSameSystem(sstokes, pstokes);
+    expectSameSystem(sstokes, pstokes);
+  }
+
   /// @brief A Krylov solve on the device matches a sparse direct solve.
   void checkSolve(const HostMesh& source)
   {
@@ -552,6 +624,16 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_PETSc_Problem, Reassembly)
   {
     checkReassembly(withFaces(makeTriangleMesh()));
+  }
+
+  TEST(Kokkos_PETSc_Problem, UnconstrainedOnTriangles)
+  {
+    checkUnconstrained(withFaces(makeTriangleMesh()));
+  }
+
+  TEST(Kokkos_PETSc_Problem, UnconstrainedOnMixedMesh)
+  {
+    checkUnconstrained(withFaces(makeMixedMesh()));
   }
 
   TEST(Kokkos_PETSc_Problem, SolveOnTriangles)

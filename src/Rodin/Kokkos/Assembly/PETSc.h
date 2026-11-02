@@ -179,6 +179,10 @@ namespace Rodin::Assembly::Internal
     /// @brief Row of every group.
     ::Kokkos::View<Index*, MemorySpace> groupKeys;
 
+    /// @brief Linear integrators whose entries were grouped at the last
+    /// assembly, when the entries were the contributions themselves.
+    std::vector<COOSegment> vectorSegments;
+
     /// @brief Whether each degree of freedom is fixed.
     ::Kokkos::View<unsigned char*, MemorySpace> fixed;
 
@@ -806,6 +810,24 @@ namespace Rodin::Assembly::Internal
       }
 
       /**
+       * @brief Writes the rows of the entries of a linear integrator.
+       * @param indices Entry indices. @param begin Position of the first
+       * entry. @param end Position past the last one.
+       * @param row Offset of the test space. @param res Receives the rows.
+       *
+       * Public as the enclosing function of a device lambda.
+       */
+      template <class Indices>
+      static void shiftEntries(const ExecutionSpace& execution, const Indices& indices,
+        size_t begin, size_t end, Index row, const Indices& res)
+      {
+        ::Kokkos::parallel_for(
+          "Rodin::Assembly::Kokkos::PETSc::rows",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, begin, end),
+          KOKKOS_LAMBDA(const size_t e) { res(e) = row + indices(e); });
+      }
+
+      /**
        * @brief Numbers the entries of a dense vector.
        *
        * Public as the enclosing function of device lambdas.
@@ -1411,10 +1433,69 @@ namespace Rodin::Assembly::Internal
             ReferenceType::group(m_execution, keys, cache.groupedPositions, ranks);
           cache.groupStarts = groups.starts;
           cache.groupKeys = groups.keys;
+          cache.vectorSegments.clear();
         }
         const typename ReferenceType::Groups groups{cache.groupStarts, cache.groupKeys};
         ReferenceType::accumulate(m_execution, cache.groupedPositions, groups,
           cache.contributionValues, cache.rhs);
+      }
+
+      /**
+       * @brief Adds the entries of the linear integrators to the right-hand
+       * side, as contributions listed in entry order.
+       * @param offsets Position of the first entry of every integrator,
+       * followed by the entry count.
+       *
+       * The grouping of the entries by row is kept while the integrators
+       * keep their layouts and entry counts, which fix the entry indices.
+       * Integrators restricted to attributes group their entries at every
+       * assembly, since the attributes of the cells may change.
+       */
+      void sumEntries(CacheType& cache, const std::vector<size_t>& offsets) const
+      {
+        assert(cache.contributions == 0);
+        const size_t count = offsets.back();
+        if (count == 0)
+          return;
+        std::vector<COOSegment> segments;
+        bool restricted = false;
+        for (size_t k = 0; k < m_vectors.size(); ++k)
+        {
+          const auto& v = m_vectors[k];
+          COOSegment key{v.integrator->getLayout(), v.row, 0, offsets[k + 1] - offsets[k],
+            v.integrator->getSpacing(), false};
+          restricted = restricted || !key.layout.attributes.empty();
+          segments.push_back(std::move(key));
+        }
+        if (restricted || cache.vectorSegments != segments)
+        {
+          const ::Kokkos::View<Index*, MemorySpace> keys(
+            ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
+              std::string("Rodin contribution keys")),
+            count);
+          for (size_t k = 0; k < m_vectors.size(); ++k)
+          {
+            shiftEntries(m_execution, cache.entryIndices, offsets[k], offsets[k + 1],
+              m_vectors[k].row, keys);
+          }
+          cache.groupedPositions = ::Kokkos::View<Index*, MemorySpace>(
+            ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
+              std::string("Rodin contribution positions")),
+            count);
+          sequence(m_execution, cache.groupedPositions);
+          const typename ReferenceType::Ranks ranks;
+          const auto groups =
+            ReferenceType::group(m_execution, keys, cache.groupedPositions, ranks);
+          cache.groupStarts = groups.starts;
+          cache.groupKeys = groups.keys;
+          // The listed contributions are grouped again.
+          cache.groupedRows = ::Kokkos::View<Index*, MemorySpace>();
+          cache.vectorSegments =
+            restricted ? std::vector<COOSegment>{} : std::move(segments);
+        }
+        const typename ReferenceType::Groups groups{cache.groupStarts, cache.groupKeys};
+        ReferenceType::accumulate(
+          m_execution, cache.groupedPositions, groups, cache.entryValues, cache.rhs);
       }
 
       /**
@@ -1449,6 +1530,9 @@ namespace Rodin::Assembly::Internal
         resize(cache.entryValues, offsets.back(), "Rodin entry values");
         const Expansions none;
         const Expansions& expansions = x ? *x : none;
+        // Without constraints nor preassembled vectors, the entries are the
+        // contributions, read in place.
+        const bool direct = !fixed && !x && m_preassembled.empty();
         ::Rodin::Kokkos::Internal::clearLaunches();
         for (size_t k = 0; k < m_vectors.size(); ++k)
         {
@@ -1456,8 +1540,16 @@ namespace Rodin::Assembly::Internal
           v.integrator->fill(
             cache.entryValues, offsets[k], v.sign, false, cache.entryIndices);
           ::Rodin::Kokkos::Internal::checkLaunches("A device linear integrator");
-          listEntries(cache, offsets[k], offsets[k + 1] - offsets[k], v.row, fixed,
-            expansions, x != nullptr);
+          if (!direct)
+          {
+            listEntries(cache, offsets[k], offsets[k + 1] - offsets[k], v.row, fixed,
+              expansions, x != nullptr);
+          }
+        }
+        if (direct)
+        {
+          sumEntries(cache, offsets);
+          return;
         }
         // The integrators may still read the buffers the vectors reuse.
         if (!m_preassembled.empty())
