@@ -46,6 +46,23 @@ OMP_NUM_THREADS=4 /Users/carlos/Projects/rodin.worktrees/KelvinBall/build-kelvin
   --swift-convergence-iterations-inner=15
 ```
 
+## Plotting histories
+
+From the run directory, generate a parameter-first PDF containing the objective,
+constraints, resistance coefficients, mesh diagnostics and stage timings:
+
+```sh
+python3 /path/to/rodin/examples/ShapeOptimization/KelvinBall/plot_histories.py \
+  kelvin-ball.csv --output KelvinBall-Histories.pdf
+```
+
+The script requires Python 3.9 or newer and `pdflatex` with PGFPlots, Latin
+Modern, booktabs, microtype and the float package. No third-party Python
+packages are required. The LaTeX source is saved beside the PDF; use
+`--source-only` to generate it without compiling, or `--latex` to select the
+LaTeX executable. Nonfinite values are shown as gaps, and an incomplete trailing
+CSV record from an active run is ignored. All CSV columns are accounted for.
+
 ## The problem
 
 ### Geometry and Stokes states
