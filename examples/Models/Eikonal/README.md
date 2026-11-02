@@ -31,9 +31,8 @@ background is transparent. Contours clarify the front without dense mesh edges.
 
 ## Native-cell fast iteration
 
-`Rodin/Eikonal/FIM.h` supplies a local fast iterative solver with optional OpenMP and
-an output `GridFunction<P1<Real, LocalMesh>>`. Its calling pattern matches
-fast marching:
+`Rodin/Eikonal/FIM.h` supplies a local real P1 arrival-time solver on native
+first-order straight cells, with optional OpenMP execution:
 
 ```cpp
 #include <Rodin/Eikonal/FIM.h>
@@ -56,10 +55,8 @@ Eikonal::FIM solver(arrival, speed);
 solver.seed(seeds).solve();
 ```
 
-A scalar coefficient is a positive propagation speed. A matrix-valued Rodin
-function or callable supplies the symmetric positive definite squared-velocity
-tensor. For a constant tensor in two dimensions, replace the solver construction
-with:
+Scalar coefficients specify positive speeds; matrix coefficients supply ambient
+symmetric positive definite squared-velocity tensors. For example:
 
 ```cpp
 Math::SpatialMatrix<Real> tensor(2, 2);
@@ -71,7 +68,7 @@ Eikonal::FIM solver(arrival, coefficient);
 solver.seed(seeds).solve();
 ```
 
-The scalar and tensor equations are respectively
+The equations are
 
 \[
 c|\nabla T|=1,
@@ -79,102 +76,113 @@ c|\nabla T|=1,
 \sqrt{\nabla T^T M\nabla T}=1.
 \]
 
-Every source receives time zero; seeding resets all other times to positive
-infinity. Duplicate source indices are harmless, invalid or empty source lists
-raise, and disconnected components without sources remain unreachable. Reseed
-after changing geometry, coefficient data, or numerical controls. The output
-field and its mesh must outlive the solver. Function expressions and callables
-are owned by value; borrowed data captured by a callable must remain valid.
+Every source receives time zero; seeding resets other times to positive
+infinity. Invalid or empty source lists raise; duplicate indices are harmless.
+Disconnected components without sources remain unreachable. The field and mesh
+must outlive the solver. Coefficient expressions and callables are owned by
+value; borrowed data captured by a callable must remain valid.
 
-### Native geometry and curved paths
+### Cellwise coefficients and straight travel costs
 
-The implementation covers point, segment, triangle, quadrilateral, tetrahedron,
-hexahedron, wedge, and pyramid reference types, including mixed meshes. It uses
-the existing native P1 traces on boundary points, edges, triangles, and
-quadrilaterals. No cell is subdivided into simplices. The arrival-time space
-remains first order even when the geometric transformation has higher order.
+Before a pending solve begins iteration, the coefficient is evaluated once at
+each cell's reference centroid, using a cell-associated `Geometry::Point`.
+Scalar speeds are validated and tensor metrics are factored once. These fixed
+cellwise inputs are reused by every local search, active-list revisit, and
+OpenMP worker. No coefficient evaluation occurs inside the face minimization.
 
-For a native cell map \(X_K\), a target reference vertex \(r_i\), and a boundary
-entry \(r_F\), the admissible path is
-
-\[
-x(s)=X_K\bigl(r_i+s(r_F-r_i)\bigr),\qquad 0\le s\le1.
-\]
-
-The local candidate is the native face interpolation of the entry time plus
+For a cell \(K\) with native map \(X_K\) and reference centroid \(\widehat x_K\),
+the prescribed input discretization is
 
 \[
-\int_0^1\frac{|\dot x(s)|}{c(x(s))}\,ds
-\quad\text{or}\quad
-\int_0^1\sqrt{\dot x(s)^T M(x(s))^{-1}\dot x(s)}\,ds.
+c_K=c(X_K(\widehat x_K)),
+\qquad M_K=M(X_K(\widehat x_K)).
 \]
 
-Geometry and coefficients are evaluated on the owning cell trace through
-`Geometry::Point`; this retains discontinuous material traces and the cell's
-actual Jacobian. Reference cells are convex, so the mapped reference segments
-stay within their cells. On a curved embedded mesh these are mapped paths,
-rather than physical endpoint chords. Valid regular maps and conforming
-interfaces are preconditions.
+This is an explicit piecewise-constant approximation for spatially varying
+coefficients. Discontinuous coefficients are evaluated on the owning cell
+trace. It does not integrate within-cell coefficient variation along a path.
+Reseed after changing geometry or borrowed coefficient data; the next pending
+solve rebuilds all cell samples. To replace the owned coefficient expression,
+construct a new solver. Calling `solve()` again with no pending active vertices
+leaves the converged field unchanged.
 
-A tensor on an embedded mesh has the ambient embedding size and defines an
-ambient path metric whose restriction is used on tangents. A tangential velocity
-tensor can be completed by a decoupled positive normal block. Coupled tangent
-and normal entries instead define a different induced metric and must be chosen
-intentionally.
+A native boundary entity \(F\), not containing target vertex \(x_i\), supplies
+an interpolated entry time and physical entry point. The local candidate is
 
-### Approximation controls and validation
+\[
+\min_{q\in\widehat F}
+\left[
+  \sum_j N_j(q)T_j+
+  \sqrt{d(q)^T M_K^{-1}d(q)}
+\right],
+\qquad d(q)=\sum_jN_j(q)x_j-x_i.
+\]
+
+The scalar travel cost is \(|d|/c_K\). Physical vertices are evaluated through
+`Geometry::Point`, retaining the supplied first-order chart. Native point,
+segment, triangle, and quadrilateral traces are used directly; no cell is
+subdivided into simplices. There is no path quadrature or integration-order
+setting.
+
+Point, segment, triangle, quadrilateral, tetrahedron, hexahedron, wedge, and
+pyramid reference types are covered, including mixed meshes. The input geometry
+must be native first order, straight, convex, and have planar faces; embedded
+surface cells must be planar. Higher-order geometric charts are rejected,
+including higher-order representations of straight cells. First-order
+multilinear geometry alone does not certify validity, convexity, or planar
+faces: these are caller preconditions. Curved cells and high-order arrival-time
+spaces are unsupported.
+
+On embedded planar cells, tensor dimensions match the ambient embedding. The
+restriction of the ambient inverse-velocity metric is used on tangential
+displacements. A tangential velocity tensor may be completed with a decoupled
+positive normal block.
+
+### Iteration and OpenMP
 
 `setTolerance` controls absolute accepted time decreases. `setLocalTolerance`
-controls reference-coordinate search resolution; `setIntegrationOrder` controls
-positive segment quadrature along each path. `setMaxIterations` limits
-active-list rounds; exhaustion raises while retaining the last iterate.
-`getIterations` reports the last solve's round count.
+controls the reference-coordinate resolution of the multistart projected face
+search. `setMaxIterations` limits active-list rounds; exhaustion raises and
+retains the last iterate. `getIterations` reports the last solve's round count.
+Face search remains approximate, without a global-minimum certificate for
+arbitrary native quadrilateral traces. Search resolution, spatial refinement,
+and coefficient discretization must be assessed for the intended problem.
 
-Native face minimization uses a deterministic multistart projected pattern
-search. This is an approximate semi-Lagrangian discretization, not a certified
-global optimizer on arbitrary curved maps or heterogeneous coefficients.
-Reducing the search resolution does not certify discovery of every nonconvex
-minimum. Neither quadrature order nor active-list convergence alone establishes
-arrival-time accuracy. Check path quadrature, search resolution, and spatial
-refinement for the intended geometry and anisotropy. There is no GPU,
-MPI, PETSc, or high-order arrival-space specialization in this implementation.
-
-Build and run `RodinFIMTest` and `RodinManufacturedEikonalFIMTest`. The tests
-exercise every reference type, native face-interior minima, scalar/tensor
-reduction, quadratic cell maps, embedded curved paths, mixed cells with
-material jumps, invalid inputs, reseeding, and convergence of constant-tensor
-point-source fields. The point-source check integrates field error over the
-fixed physical domain. A nodal average can increase on the coarsest meshes
-because the changing sample set overweights the source-cell stencil, where
-direct source-to-vertex paths are exact.
-
-### OpenMP execution
-
-Configure Rodin with `RODIN_USE_OPENMP=ON`, then opt in before solving:
+Configure Rodin with `RODIN_USE_OPENMP=ON`, then opt in:
 
 ```cpp
 Eikonal::FIM solver(arrival, coefficient);
 solver.setThreadCount(4).seed(seeds).solve();
 ```
 
-The default worker count is one. A build without OpenMP rejects a request for
-more than one worker. Dependency levels preserve the serial active-list order
-between all vertices sharing a cell. Updates within a level have no co-cell
-read/write conflicts and may run concurrently. Next-round vertices are collected
-in the original order after workers join. Deterministic coefficients therefore
-produce the same values and iteration counts as the serial algorithm; this is
-checked by exact field comparisons, including curved tensor cases.
+The default worker count is one. Builds without OpenMP reject requests for more
+workers. Dependency levels preserve the serial Gauss-Seidel order between
+vertices sharing a cell, and next-round vertices are collected in the original
+order. Serial and parallel executions therefore retain identical fields and
+iteration counts for the same sampled inputs.
 
-Each worker owns a copy of the coefficient expression. External data captured
-by a callback must allow concurrent reads and must remain fixed during a solve.
-Worker exceptions are rethrown after joining. Level construction, barriers, and
-coefficient copying have a cost, so additional workers need not improve small
-problems. This implementation preserves Gauss-Seidel dependencies rather than
-changing the iteration to simultaneous Jacobi updates.
+Coefficient callbacks and tensor validation run serially before iteration.
+Workers only read the prepared cell coefficients and factors. No worker-local
+coefficient copies are needed. Worker exceptions from local updates are rethrown
+after joining. Level construction and barriers have a cost, so additional
+workers need not improve small problems. GPU, MPI, and PETSc implementations
+are not supplied.
+
+Build and run `RodinFIMTest` and `RodinManufacturedEikonalFIMTest`. Tests cover
+every reference type, native face-interior minima, scalar/tensor reduction,
+embedded planar cells, mixed material traces, exactly one coefficient sample
+per cell, reseeding after coefficient changes, rejection of higher-order
+geometry, and exact serial/parallel agreement. Manufactured checks cover plane
+waves, constant-tensor point-source refinement, and refinement of a cellwise
+variable-speed approximation.
+
+The point-source error is integrated over a fixed physical domain. Nodal
+averages alone can increase on very coarse meshes because the changing sample
+set overweights the exact direct-source stencil.
 
 ### Tensor FMM and matched comparisons
 
-FMM also accepts the squared-velocity tensor through the same coefficient API:
+FMM accepts the same scalar-speed or tensor coefficient interface:
 
 ```cpp
 Eikonal::FMM solver(arrival, coefficient);
@@ -182,51 +190,45 @@ solver.seed(seeds).solve();
 ```
 
 The tensor overload freezes the coefficient at each cell centroid. It requires
-native first-order affine simplices, nonobtuse in the inverse-velocity metric;
-unsupported cells raise. Matrix dimensions, symmetry, and positive definiteness
-are checked by the shared `Eikonal::Metric` implementation. FMM uses metric Gram
-entries in its analytic simplex updates and metric lengths in edge updates.
-The scalar-speed path retains its original arithmetic and behavior.
+native first-order affine simplices nonobtuse in the inverse-velocity metric;
+unsupported cells raise. Shared `Eikonal::Metric` validation checks matrix
+dimensions, symmetry, and positive definiteness. FMM uses metric Gram entries
+in analytic simplex updates. The original scalar-speed path is unchanged.
 
-The metric angle condition is sufficient for causal acceptance. For an upwind
-simplex update, let the Gram matrix be \(G\) and the supporting-time vector be
-\(u\). An admissible update satisfies
+For an upwind simplex update with Gram matrix \(G\) and supporting times \(u\),
 
 \[
-t\mathbf 1-u=G\mu,\qquad \mu\ge0.
+t\mathbf 1-u=G\mu,\qquad\mu\ge0.
 \]
 
-Nonnegative Gram entries ensure that every supporting time precedes the
-candidate. FIM can revisit values and does not impose this FMM mesh condition.
-Its approximate local face search still needs its own accuracy assessment.
-Anisotropy alone is therefore not a reason to choose FIM; native/curved geometry,
-mesh restrictions, and parallel execution are separate considerations.
+Nonnegative Gram entries ensure that supporting times precede the candidate.
+FIM revisits values and does not impose this FMM metric-angle condition.
+Anisotropy, native geometry, and parallel execution are separate reasons to
+assess the methods for a particular problem.
 
-Build `RodinEikonalPropagationBenchmarks` with `RODIN_BUILD_BENCHMARKS=ON` to
-compare seeded propagation on matched constant-tensor triangle and tetrahedron
-meshes. For example:
+Enable `RODIN_BUILD_BENCHMARKS` and `RODIN_USE_OPENMP`, then run the registered
+matched comparison:
 
 ```sh
 cmake --build build --target RodinEikonalPropagationBenchmarks -j
 ./build/tests/benchmarks/RodinEikonalPropagationBenchmarks \
   --benchmark_filter='Eikonal/(FMM|FIM)/2/32/2/' \
-  --benchmark_min_time=0.01s --benchmark_repetitions=5 \
+  --benchmark_min_time=0.03s --benchmark_repetitions=5 \
   --benchmark_out=propagation.json --benchmark_out_format=json
 ```
 
 Case arguments are dimension, reference-grid intervals, velocity ratio, and
-requested workers. A rotation and stretch make the mesh nonobtuse in the tensor
-metric. Different velocity ratios change the physical domain stretch while
-holding the reference travel-time domain fixed. Within each case, FMM and FIM
-use identical physical meshes, coefficients, and sources. Timing includes
-seeding and solving; setup, reference solves, and error checks are excluded.
-FIM quadrature order and search resolution, cells, vertices, analytic maximum
-errors, differences from FMM, and iteration counts are reported as counters.
+requested workers. A rotation and stretch make the affine simplex mesh
+nonobtuse in the constant tensor metric. Different velocity ratios change the
+physical stretch while fixing the reference travel-time domain. Within each
+case the physical mesh, coefficients, and sources are identical for both
+methods. Timing includes coefficient preparation, seeding, and iteration;
+setup, reference solves, and error checks are excluded.
 
-This compares the complete current implementations. FMM uses analytic simplex
-updates, whereas native FIM performs numerical face minimization and path
-quadrature. Runtime differences include that local-update work as well as queue
-versus active-list scheduling. FMM can be substantially faster on these simple
-causal meshes, even when OpenMP accelerates FIM. The comparison is not evidence
-that FIM is intrinsically slower or that either method is more accurate on
-arbitrary anisotropic or curved domains.
+Counters report cells, vertices, local-search resolution, coefficient
+evaluations per solve (counted in untimed reference solves), analytic maximum
+error, difference from FMM, and iteration count. The benchmark checks exactly
+one FIM coefficient evaluation per cell and exact worker-count invariance.
+FMM uses analytic simplex updates while FIM retains numerical native-face
+minimization, so runtime differences include local-solver work as well as
+queue versus active-list scheduling.

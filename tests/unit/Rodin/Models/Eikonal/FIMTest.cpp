@@ -5,7 +5,6 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
-#include <stdexcept>
 
 #include "Rodin/Eikonal/FIM.h"
 #include "Rodin/Geometry/ParametricTransformation.h"
@@ -146,79 +145,6 @@ TEST(FIM, NativePyramidAndTetrahedronFaceInteriors)
   }
 }
 
-/// @brief Higher-order maps are used along paths for all native reference families.
-TEST(FIM, CurvedNativeCellsWithPullbackMetric)
-{
-  for (auto geometry : Geometries)
-  {
-    SCOPED_TRACE(static_cast<int>(geometry));
-    auto mesh = referenceCell(geometry);
-    const size_t dimension = mesh.getDimension();
-    RealH1Element<2> element(geometry);
-    PointCloud controls(dimension, element.getCount());
-    for (size_t node = 0; node < element.getCount(); ++node)
-    {
-      const auto& reference = element.getNode(node);
-      for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
-      {
-        controls(coordinate, node) = reference(coordinate) +
-          Real(0.2) * reference(coordinate) * reference(coordinate);
-      }
-    }
-    mesh.setPolytopeTransformation(
-      {dimension, 0}, new ParametricTransformation(controls, element));
-    P1 space(mesh);
-    GridFunction arrival(space);
-    MatrixFunction metric(dimension, dimension, [](const Point& point) {
-      const auto& jacobian = point.getJacobian();
-      return jacobian * jacobian.transpose();
-    });
-    Eikonal::FIM solver(arrival, metric);
-    solver.seed(planeSeeds(geometry)).solve();
-    const Polytope::Traits traits(geometry);
-    for (Index vertex = 0; vertex < traits.getVertexCount(); ++vertex)
-    {
-      EXPECT_NEAR(
-        arrival[space.getDOFs(0, vertex)[0]], traits.getVertex(vertex)(0), 1e-8);
-    }
-  }
-}
-
-/// @brief A curved embedded segment uses arc length rather than its endpoint chord.
-TEST(FIM, EmbeddedCurvedSegmentAndQuadratureRefinement)
-{
-  auto mesh = LocalMesh::Builder()
-                .initialize(2)
-                .nodes(2)
-                .vertex({0, 0})
-                .vertex({1, Real(0.5)})
-                .polytope(Polytope::Type::Segment, {0, 1})
-                .finalize();
-  mesh.getConnectivity().compute(1, 0);
-  mesh.getConnectivity().compute(0, 1);
-  RealH1Element<2> element(Polytope::Type::Segment);
-  PointCloud controls(2, element.getCount());
-  for (size_t node = 0; node < element.getCount(); ++node)
-  {
-    const Real coordinate = element.getNode(node)(0);
-    controls(0, node) = coordinate;
-    controls(1, node) = Real(0.5) * coordinate * coordinate;
-  }
-  mesh.setPolytopeTransformation({1, 0}, new ParametricTransformation(controls, element));
-  P1 space(mesh);
-  GridFunction arrival(space);
-  Eikonal::FIM solver(arrival, [](const Point&) { return Real(1); });
-  const IndexVector seeds{0};
-  const Real exact = (std::sqrt(Real(2)) + std::asinh(Real(1))) / 2;
-  solver.setIntegrationOrder(1).seed(seeds).solve();
-  const Real coarseError = std::abs(arrival[space.getDOFs(0, 1)[0]] - exact);
-  solver.setIntegrationOrder(20).seed(seeds).solve();
-  const Real fineError = std::abs(arrival[space.getDOFs(0, 1)[0]] - exact);
-  EXPECT_GT(coarseError, 1e-3);
-  EXPECT_LT(fineError, 1e-12);
-  EXPECT_GT(arrival[space.getDOFs(0, 1)[0]], std::sqrt(Real(1.25)));
-}
-
 /// @brief Invalid public inputs fail without relying on assertions.
 TEST(FIM, InputContracts)
 {
@@ -233,7 +159,6 @@ TEST(FIM, InputContracts)
   EXPECT_THROW(
     solver.setTolerance(std::numeric_limits<Real>::infinity()), Alert::Exception);
   EXPECT_THROW(solver.setLocalTolerance(1), Alert::Exception);
-  EXPECT_THROW(solver.setIntegrationOrder(0), Alert::Exception);
   EXPECT_THROW(solver.setMaxIterations(0), Alert::Exception);
   for (Real speed : {Real(0), Real(-1), std::numeric_limits<Real>::quiet_NaN()})
   {
@@ -342,60 +267,6 @@ TEST(FIM, MixedCellsAndCoefficientTraces)
     EXPECT_NEAR(arrival[space.getDOFs(0, vertex)[0]], 1.5, 1e-9);
 }
 
-/// @brief Triangle and quadrilateral paths follow a curved surface with an ambient tensor.
-TEST(FIM, EmbeddedCurvedSurfaces)
-{
-  for (auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral})
-  {
-    const Polytope::Traits traits(geometry);
-    LocalMesh::Builder builder;
-    builder.initialize(3).nodes(traits.getVertexCount());
-    IndexArray vertices(traits.getVertexCount());
-    for (Index vertex = 0; vertex < traits.getVertexCount(); ++vertex)
-    {
-      const auto& r = traits.getVertex(vertex);
-      builder.vertex({r(0), r(1), Real(0.2) * r(0) * r(1)});
-      vertices[vertex] = vertex;
-    }
-    builder.polytope(geometry, vertices);
-    auto mesh = builder.finalize();
-    mesh.getConnectivity().compute(2, 0);
-    mesh.getConnectivity().compute(0, 2);
-    RealH1Element<2> element(geometry);
-    PointCloud controls(3, element.getCount());
-    for (size_t node = 0; node < element.getCount(); ++node)
-    {
-      const auto& r = element.getNode(node);
-      controls(0, node) = r(0);
-      controls(1, node) = r(1);
-      controls(2, node) = Real(0.2) * r(0) * r(1);
-    }
-    mesh.setPolytopeTransformation(
-      {2, 0}, new ParametricTransformation(controls, element));
-    P1 space(mesh);
-    GridFunction arrival(space);
-    MatrixFunction coefficient(3, 3, [](const Point& point) {
-      const auto& j = point.getJacobian();
-      Math::SpatialVector<Real> normal{j(1, 0) * j(2, 1) - j(2, 0) * j(1, 1),
-        j(2, 0) * j(0, 1) - j(0, 0) * j(2, 1), j(0, 0) * j(1, 1) - j(1, 0) * j(0, 1)};
-      Math::SpatialMatrix<Real> tensor = j * j.transpose();
-      for (size_t row = 0; row < 3; ++row)
-      {
-        for (size_t column = 0; column < 3; ++column)
-          tensor(row, column) += normal(row) * normal(column);
-      }
-      return tensor;
-    });
-    Eikonal::FIM solver(arrival, coefficient);
-    solver.seed(planeSeeds(geometry)).solve();
-    for (Index vertex = 0; vertex < traits.getVertexCount(); ++vertex)
-    {
-      EXPECT_NEAR(
-        arrival[space.getDOFs(0, vertex)[0]], traits.getVertex(vertex)(0), 1e-8);
-    }
-  }
-}
-
 /// @brief Active-list exhaustion is explicit and retains the latest iterate.
 TEST(FIM, IterationLimit)
 {
@@ -438,44 +309,22 @@ TEST(FIM, OpenMPMatchesSerialNativeCells)
       EXPECT_EQ(solver.getIterations(), iterations);
       EXPECT_TRUE((arrival.getData().array() == reference.array()).all());
     }
-  }
-}
-
-/// @brief Curved quadrilateral maps and tensor expressions remain deterministic across workers.
-TEST(FIM, OpenMPCurvedTensorPaths)
-{
-  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
-  mesh.scale(Real(1) / 3);
-  mesh.getConnectivity().compute(2, 0);
-  mesh.getConnectivity().compute(0, 2);
-  RealH1Element<2> element(Polytope::Type::Quadrilateral);
-  for (auto cell = mesh.getCell(); cell; ++cell)
-  {
-    PointCloud controls(2, element.getCount());
-    for (size_t node = 0; node < element.getCount(); ++node)
+    Math::SpatialMatrix<Real> tensor =
+      Math::SpatialMatrix<Real>::Identity(dimension, dimension);
+    tensor(0, 0) = 4;
+    if (dimension > 1)
+      tensor(0, 1) = tensor(1, 0) = Real(0.2);
+    Eikonal::FIM tensorSolver(arrival, MatrixFunction(tensor));
+    tensorSolver.seed(IndexVector{0}).solve();
+    const auto tensorReference = arrival.getData();
+    const size_t tensorIterations = tensorSolver.getIterations();
+    for (size_t threads : {2u, 4u})
     {
-      const auto& r = element.getNode(node);
-      const Point point(*cell, r);
-      const auto physical = point.getPhysicalCoordinates();
-      controls(0, node) = physical(0);
-      controls(1, node) =
-        physical(1) + Real(0.05) * r(0) * (1 - r(0)) * r(1) * (1 - r(1));
+      tensorSolver.setThreadCount(threads).seed(IndexVector{0}).solve();
+      EXPECT_EQ(tensorSolver.getIterations(), tensorIterations);
+      EXPECT_TRUE((arrival.getData().array() == tensorReference.array()).all());
     }
-    mesh.setPolytopeTransformation(
-      {2, cell->getIndex()}, new ParametricTransformation(controls, element));
   }
-  P1 space(mesh);
-  GridFunction arrival(space);
-  Math::SpatialMatrix<Real> tensor = Math::SpatialMatrix<Real>::Identity(2, 2);
-  tensor(0, 0) = 4;
-  tensor(0, 1) = tensor(1, 0) = Real(0.5);
-  Eikonal::FIM solver(arrival, MatrixFunction(tensor));
-  solver.seed(IndexVector{0}).solve();
-  const auto reference = arrival.getData();
-  const size_t iterations = solver.getIterations();
-  solver.setThreadCount(4).seed(IndexVector{0}).solve();
-  EXPECT_EQ(solver.getIterations(), iterations);
-  EXPECT_TRUE((arrival.getData().array() == reference.array()).all());
 }
 
 /// @brief Worker exceptions are propagated after joining, without terminating OpenMP workers.
@@ -486,43 +335,14 @@ TEST(FIM, OpenMPExceptions)
   mesh.getConnectivity().compute(0, 2);
   P1 space(mesh);
   GridFunction arrival(space);
-  Eikonal::FIM solver(arrival, [](const Point&) { return Real(-1); });
+  // Collapse the source edge to make a worker's local travel cost invalid.
+  mesh.setVertexCoordinates(1, mesh.getVertexCoordinates(0));
+  Eikonal::FIM solver(arrival, [](const Point&) { return Real(1); });
   solver.setThreadCount(4).seed(IndexVector{0});
   EXPECT_THROW(solver.solve(), Alert::Exception);
   EXPECT_THROW(solver.setThreadCount(0), Alert::Exception);
 }
 
-/// @brief A coefficient copy failure is caught even before a worker has an expression.
-TEST(FIM, OpenMPCoefficientCopyException)
-{
-  struct Coefficient
-  {
-    bool* fail;
-    explicit Coefficient(bool& flag)
-      : fail(&flag)
-    {}
-    Coefficient(const Coefficient& other)
-      : fail(other.fail)
-    {
-      if (*fail)
-        throw std::runtime_error("User coefficient copy failed");
-    }
-    Real operator()(const Point&) const
-    {
-      return 1;
-    }
-  };
-  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
-  mesh.getConnectivity().compute(2, 0);
-  mesh.getConnectivity().compute(0, 2);
-  P1 space(mesh);
-  GridFunction arrival(space);
-  bool fail = false;
-  Eikonal::FIM solver(arrival, Coefficient(fail));
-  solver.setThreadCount(4).seed(IndexVector{0});
-  fail = true;
-  EXPECT_THROW(solver.solve(), std::runtime_error);
-}
 #else
 /// @brief Builds without OpenMP reject an unavailable execution backend explicitly.
 TEST(FIM, UnavailableOpenMP)
@@ -536,3 +356,145 @@ TEST(FIM, UnavailableOpenMP)
   EXPECT_NEAR(arrival[space.getDOFs(0, 1)[0]], 1, 1e-12);
 }
 #endif
+
+/// @brief Higher-order charts are rejected for every nonpoint native reference family.
+TEST(FIM, RejectsHigherOrderGeometry)
+{
+  for (auto geometry : Geometries)
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    auto mesh = referenceCell(geometry);
+    const size_t dimension = mesh.getDimension();
+    RealH1Element<2> element(geometry);
+    PointCloud controls(dimension, element.getCount());
+    for (size_t node = 0; node < element.getCount(); ++node)
+    {
+      const auto& reference = element.getNode(node);
+      for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+        controls(coordinate, node) = reference(coordinate);
+    }
+    mesh.setPolytopeTransformation(
+      {dimension, 0}, new ParametricTransformation(controls, element));
+    P1 space(mesh);
+    GridFunction arrival(space);
+    Eikonal::FIM solver(arrival, [](const Point&) { return Real(1); });
+    solver.seed(IndexVector{0});
+    EXPECT_THROW(solver.solve(), Alert::Exception);
+  }
+}
+
+/// @brief Flat embedded native cells use physical straight distances and ambient metrics.
+TEST(FIM, EmbeddedFirstOrderCells)
+{
+  for (auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral})
+  {
+    const Polytope::Traits traits(geometry);
+    LocalMesh::Builder builder;
+    builder.initialize(3).nodes(traits.getVertexCount());
+    IndexArray vertices(traits.getVertexCount());
+    for (Index vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+    {
+      const auto& r = traits.getVertex(vertex);
+      builder.vertex({r(0), r(1), 0});
+      vertices[vertex] = vertex;
+    }
+    builder.polytope(geometry, vertices);
+    auto mesh = builder.finalize();
+    mesh.getConnectivity().compute(2, 0);
+    mesh.getConnectivity().compute(0, 2);
+    P1 space(mesh);
+    GridFunction arrival(space);
+    auto tensor = Math::SpatialMatrix<Real>::Identity(3, 3);
+    tensor(0, 0) = 4;
+    tensor(2, 2) = 9;
+    Eikonal::FIM solver(arrival, MatrixFunction(tensor));
+    solver.seed(planeSeeds(geometry)).solve();
+    for (Index vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+    {
+      EXPECT_NEAR(
+        arrival[space.getDOFs(0, vertex)[0]], traits.getVertex(vertex)(0) / 2, 1e-10);
+    }
+  }
+}
+
+/// @brief Each solve samples scalar and tensor inputs once per cell, outside worker regions.
+TEST(FIM, CoefficientSamplingIsCellwise)
+{
+  for (auto geometry : Geometries)
+  {
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    auto mesh = dimension == 1 ? LocalMesh::UniformGrid(geometry, {4})
+      : dimension == 2         ? LocalMesh::UniformGrid(geometry, {3, 3})
+                               : LocalMesh::UniformGrid(geometry, {3, 3, 3});
+    mesh.getConnectivity().compute(dimension, 0);
+    mesh.getConnectivity().compute(0, dimension);
+    P1 space(mesh);
+    GridFunction arrival(space);
+    std::vector<size_t> visits(mesh.getCellCount(), 0);
+    bool wrongPoint = false, workerCallback = false;
+    Real speed = 1;
+    auto sample = [&](const Point& point) {
+      const auto& cell = point.getPolytope();
+      ++visits.at(cell.getIndex());
+      wrongPoint = wrongPoint || cell.getDimension() != dimension ||
+        (point.getReferenceCoordinates() -
+          Polytope::Traits(cell.getGeometry()).getCentroid())
+            .squaredNorm() != 0;
+#ifdef RODIN_USE_OPENMP
+      workerCallback = workerCallback || omp_in_parallel();
+#endif
+      return speed;
+    };
+    Eikonal::FIM solver(arrival, sample);
+#ifdef RODIN_USE_OPENMP
+    solver.setThreadCount(4);
+#endif
+    solver.seed(IndexVector{0}).solve();
+    EXPECT_FALSE(wrongPoint);
+    EXPECT_FALSE(workerCallback);
+    for (size_t count : visits)
+      EXPECT_EQ(count, 1);
+    const auto first = arrival.getData();
+    std::fill(visits.begin(), visits.end(), 0);
+    speed = 2;
+    solver.seed(IndexVector{0}).solve();
+    for (size_t count : visits)
+      EXPECT_EQ(count, 1);
+    EXPECT_LT((arrival.getData() - first / 2).norm(), 1e-8);
+    std::fill(visits.begin(), visits.end(), 0);
+    MatrixFunction tensor(dimension, dimension, [&](const Point& point) {
+      sample(point);
+      return Math::SpatialMatrix<Real>::Identity(dimension, dimension);
+    });
+    Eikonal::FIM tensorSolver(arrival, tensor);
+#ifdef RODIN_USE_OPENMP
+    tensorSolver.setThreadCount(4);
+#endif
+    tensorSolver.seed(IndexVector{0}).solve();
+    for (size_t count : visits)
+      EXPECT_EQ(count, 1);
+    EXPECT_FALSE(wrongPoint);
+    EXPECT_FALSE(workerCallback);
+    EXPECT_LT((arrival.getData() - first).norm(), 1e-8);
+  }
+}
+
+/// @brief A varying speed uses the explicit midpoint cell value, not a path integral.
+TEST(FIM, SpatialCoefficientDiscretization)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {5});
+  mesh.scale(Real(0.25));
+  mesh.getConnectivity().compute(1, 0);
+  mesh.getConnectivity().compute(0, 1);
+  P1 space(mesh);
+  GridFunction arrival(space);
+  Eikonal::FIM solver(arrival, [](const Point& point) { return 1 + point.x(); });
+  solver.seed(IndexVector{0}).solve();
+  Real expected = 0;
+  for (Index vertex = 1; vertex < mesh.getVertexCount(); ++vertex)
+  {
+    const Real midpoint = (Real(vertex) - Real(0.5)) / 4;
+    expected += Real(0.25) / (1 + midpoint);
+    EXPECT_NEAR(arrival[space.getDOFs(0, vertex)[0]], expected, 1e-12);
+  }
+}

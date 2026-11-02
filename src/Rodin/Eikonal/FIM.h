@@ -9,7 +9,7 @@
 
 /**
  * @file
- * @brief Native-cell fast iterative arrival times on mapped local meshes.
+ * @brief Native first-order-cell fast iterative arrival times.
  */
 
 #include <algorithm>
@@ -33,7 +33,6 @@
 #endif
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/PolytopeIterator.h"
-#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/P1/P1.h"
 
@@ -46,7 +45,7 @@ namespace Rodin::Eikonal
    *
    * | Specialization | Description |
    * |----------------|-------------|
-   * | @ref FIM "FIM<GridFunction<P1<Real, Mesh<Context::Local>>, Data>, Coefficient>" | Local scalar vertex space, all native cell types and mapped geometry. |
+   * | @ref FIM "FIM<GridFunction<P1<Real, Mesh<Context::Local>>, Data>, Coefficient>" | Local scalar vertex space on native first-order straight convex cells. |
    */
   template <class Solution, class Coefficient>
   class FIM;
@@ -68,34 +67,39 @@ namespace Rodin::Eikonal
    *
    * ## Architecture
    *
-   * The active list revisits vertices when any co-cell vertex decreases.
-   * At target reference vertex @f$r_i@f$, each native boundary entity not
-   * containing that vertex supplies an interpolated time @f$I_F T(q)@f$.
-   * Its candidate is
-   * @f[
-   * I_F T(q)+\int_0^1
-   * \sqrt{\dot x(s)^T M(x(s))^{-1}\dot x(s)}\,ds,
-   * \quad x(s)=X_K(r_i+s(E_F(q)-r_i)).
-   * @f]
-   * Here @f$E_F@f$ embeds the native point, segment, triangle or quadrilateral
-   * face in the reference cell. Scalar costs use @f$|\dot x|/c@f$.
-   * Reference cells are convex, so these paths stay in the mapped cell.
-   * Native P1 face bases have nonnegative weights; no simplex subdivision,
-   * physical chord approximation, or high-order solution DOFs are introduced.
-   * Lower-dimensional entities supply candidates while other times are infinite.
+   * A pending solve samples the coefficient once at each cell's reference
+   * centroid, before starting the active-list iteration. Scalars are validated
+   * and tensor metrics factored once. Samples remain fixed throughout the solve,
+   * including all OpenMP workers. Reseed after changing prescribed coefficient
+   * data or geometry; the next solve rebuilds every cell sample.
    *
-   * Path integrals use positive segment quadrature. Face minimization uses a
-   * deterministic multistart projected pattern search. Search resolution and
-   * quadrature order are numerical approximation controls, not certificates of
-   * global minimization or exact geodesics on curved cells. Arbitrary curved
-   * maps and heterogeneous coefficients can give nonconvex local objectives.
-   * Refining these controls and the mesh is required for an accuracy claim.
+   * At a target physical vertex @f$x_i@f$, the candidate from a native boundary
+   * entity @f$F@f$ not containing that vertex is
+   * @f[
+   * \min_{q\in\widehat F}\left[
+   *   \sum_j N_j(q)T_j+
+   *   \sqrt{d(q)^T M_K^{-1}d(q)}\right],\qquad
+   * d(q)=\sum_jN_j(q)x_j-x_i.
+   * @f]
+   * Scalar speeds use @f$|d|/c_K@f$. Physical boundary points use the existing
+   * native P1 trace basis. Lower-dimensional entities provide candidates while
+   * higher-dimensional traces contain infinite times. No simplex subdivision
+   * or path quadrature is used.
+   *
+   * Geometry is restricted to native first-order straight convex cells with
+   * planar faces (planar cells for embedded surfaces). Higher-order charts are
+   * rejected, including higher-order representations of straight cells.
+   * Validity, convexity and planar-face conformity are caller preconditions;
+   * first-order multilinear geometry alone does not certify these properties.
+   * Spatially varying coefficients are explicitly approximated as cellwise
+   * constants; they are not integrated along a path. Face minimization remains
+   * a deterministic multistart projected pattern search, with no certificate
+   * of global minimization on arbitrary native quadrilateral traces.
    *
    * OpenMP is opt-in through setThreadCount(). Dependency levels preserve
    * serial co-cell read/write ordering and active-list reconstruction, giving
-   * identical iterates and iteration counts for deterministic coefficients.
-   * Coefficient expressions are copied per worker. Captured external state must
-   * permit concurrent reads; stateful shared callback captures are unsupported.
+   * identical iterates and iteration counts. Workers only read immutable cell
+   * coefficients; user coefficient callbacks run serially during preparation.
    * Worker exceptions are rethrown after the parallel region.
    * Geometry and coefficients must remain fixed during a solve; coefficient callables must be deterministic.
    * Incidences @f$0\to D@f$ and @f$D\to0@f$ must be computed explicitly.
@@ -120,14 +124,17 @@ namespace Rodin::Eikonal
       using CoefficientType = Coefficient;
 
     private:
+      using CoefficientValue =
+        std::remove_cvref_t<decltype(std::declval<const CoefficientType&>()(
+          std::declval<const Geometry::Point&>()))>;
+      using CellCoefficient =
+        std::conditional_t<std::is_arithmetic_v<CoefficientValue>, Real, Metric>;
+
       /// @brief Absolute time decrease below which an active update is converged.
       static constexpr Real DefaultTolerance = Real(1e-10);
 
       /// @brief Reference-coordinate pattern-search resolution; a heuristic policy.
       static constexpr Real DefaultLocalTolerance = Real(1e-5);
-
-      /// @brief Positive Gauss segment quadrature order; not a curved-path exactness claim.
-      static constexpr size_t DefaultIntegrationOrder = 8;
 
       /// @brief Safety limit on active-list rounds; exhaustion is reported as failure.
       static constexpr size_t DefaultMaxIterations = 10000;
@@ -149,7 +156,6 @@ namespace Rodin::Eikonal
           m_coefficient(coefficient),
           m_tolerance(DefaultTolerance),
           m_localTolerance(DefaultLocalTolerance),
-          m_integrationOrder(DefaultIntegrationOrder),
           m_maxIterations(DefaultMaxIterations),
           m_iterations(0),
           m_threadCount(1),
@@ -186,22 +192,6 @@ namespace Rodin::Eikonal
             << Alert::Raise;
         }
         m_localTolerance = tolerance;
-        return *this;
-      }
-
-      /**
-       * @brief Sets path-integral segment quadrature order.
-       * @param order Positive integration order, to be checked by quadrature refinement.
-       * @returns This solver.
-       */
-      FIM& setIntegrationOrder(size_t order)
-      {
-        if (order == 0)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Expected a positive path integration order." << Alert::Raise;
-        }
-        m_integrationOrder = order;
         return *this;
       }
 
@@ -327,6 +317,35 @@ namespace Rodin::Eikonal
         const auto& connectivity = mesh.getConnectivity();
         const size_t dimension = mesh.getDimension();
         m_iterations = 0;
+        if (!m_active.empty() && dimension > 0)
+        {
+          // Discretize the prescribed coefficient once per cell for this solve.
+          m_cellCoefficients.clear();
+          m_cellCoefficients.reserve(mesh.getCellCount());
+          for (auto cell = mesh.getCell(); cell; ++cell)
+          {
+            if (!cell->getTransformation().isFirstOrder())
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "FIM requires native first-order cell geometry; curved/high-order "
+                << "transformations are unsupported." << Alert::Raise;
+            }
+            const Geometry::Polytope::Traits traits(cell->getGeometry());
+            const Geometry::Point center(*cell, traits.getCentroid());
+            const auto value = m_coefficient(center);
+            if constexpr (std::is_arithmetic_v<CoefficientValue>)
+            {
+              if (!(value > 0) || !std::isfinite(value))
+              {
+                Alert::MemberFunctionException(*this, __func__)
+                  << "Speed must be finite and strictly positive." << Alert::Raise;
+              }
+              m_cellCoefficients.emplace_back(value);
+            }
+            else
+              m_cellCoefficients.emplace_back(value, mesh.getSpaceDimension());
+          }
+        }
         while (!m_active.empty())
         {
           if (m_iterations == m_maxIterations)
@@ -337,9 +356,9 @@ namespace Rodin::Eikonal
           }
           ++m_iterations;
           std::vector<uint8_t> changed(m_active.size(), 0);
-          auto update = [&](Index position, const CoefficientType& coefficient) {
+          auto update = [&](Index position) {
             const Index vertex = m_active[position];
-            const Real candidate = local(vertex, coefficient);
+            const Real candidate = local(vertex);
             Real& time = arrival[space.getDOFs(0, vertex)[0]];
             if (std::isfinite(candidate) && time - candidate > m_tolerance)
             {
@@ -350,7 +369,7 @@ namespace Rodin::Eikonal
           if (m_threadCount == 1 || dimension == 0)
           {
             for (Index position = 0; position < m_active.size(); ++position)
-              update(position, m_coefficient);
+              update(position);
           }
 #ifdef RODIN_USE_OPENMP
           else
@@ -375,7 +394,6 @@ namespace Rodin::Eikonal
             std::atomic<bool> failed(false);
 #pragma omp parallel num_threads(m_threadCount)
             {
-              Optional<CoefficientType> coefficient;
               auto capture = [&]() {
 #pragma omp critical(RodinEikonalFIMException)
                 {
@@ -384,14 +402,6 @@ namespace Rodin::Eikonal
                 }
                 failed.store(true, std::memory_order_relaxed);
               };
-              try
-              {
-                coefficient.emplace(m_coefficient);
-              }
-              catch (...)
-              {
-                capture();
-              }
               for (const auto& level : levels)
               {
 #pragma omp for schedule(static)
@@ -401,7 +411,7 @@ namespace Rodin::Eikonal
                     continue;
                   try
                   {
-                    update(level[entry], *coefficient);
+                    update(level[entry]);
                   }
                   catch (...)
                   {
@@ -439,59 +449,11 @@ namespace Rodin::Eikonal
 
     private:
       /**
-       * @brief Integrates cost along a mapped reference segment in one native cell.
-       * @param cell Cell whose mapping and coefficient traces are used.
-       * @param origin Target reference vertex.
-       * @param entry Reference boundary point supplying the arrival time.
-       * @param coefficient Worker-local coefficient expression.
-       * @returns Quadrature approximation of positive travel time.
-       */
-      Real travel(const Geometry::Polytope& cell, const Math::SpatialPoint& origin,
-        const Math::SpatialPoint& entry, const CoefficientType& coefficient) const
-      {
-        const Math::SpatialVector<Real> direction = entry - origin;
-        const auto& formula = QF::QuadratureFormula::get(
-          m_integrationOrder, Geometry::Polytope::Type::Segment);
-        Real cost = 0;
-        for (size_t sample = 0; sample < formula.getSize(); ++sample)
-        {
-          const Math::SpatialPoint reference =
-            origin + formula.getPoint(sample)(0) * direction;
-          const Geometry::Point point(cell, reference);
-          const Math::SpatialVector<Real> tangent = point.getJacobian() * direction;
-          const auto value = coefficient(point);
-          Real density;
-          if constexpr (std::is_arithmetic_v<std::remove_cvref_t<decltype(value)>>)
-          {
-            if (!(value > 0) || !std::isfinite(value))
-            {
-              Alert::MemberFunctionException(*this, __func__)
-                << "Speed must be finite and strictly positive." << Alert::Raise;
-            }
-            density = tangent.norm() / value;
-          }
-          else
-          {
-            const Metric metric(value, tangent.size());
-            density = std::sqrt(metric.dot(tangent, tangent));
-          }
-          if (!(density > 0) || !std::isfinite(density))
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Invalid mapped path or nonfinite travel density." << Alert::Raise;
-          }
-          cost += formula.getWeight(sample) * density;
-        }
-        return cost;
-      }
-
-      /**
        * @brief Minimizes the native trace candidate at one vertex.
        * @param vertex Target global vertex index.
-       * @param coefficient Worker-local coefficient expression.
        * @returns Best finite candidate found, or infinity when no support is reached.
        */
-      Real local(Index vertex, const CoefficientType& coefficient) const
+      Real local(Index vertex) const
       {
         const auto& arrival = m_arrival.get();
         const auto& space = arrival.getFiniteElementSpace();
@@ -512,7 +474,10 @@ namespace Rodin::Eikonal
             return static_cast<size_t>(
               std::find(vertices.begin(), vertices.end(), global) - vertices.begin());
           };
-          const auto& origin = cellTraits.getVertex(cellVertex(vertex));
+          const Math::SpatialPoint origin =
+            Geometry::Point(*cell, cellTraits.getVertex(cellVertex(vertex)))
+              .getPhysicalCoordinates();
+          const auto& coefficient = m_cellCoefficients[cellIndex];
           for (size_t entityDimension = 0; entityDimension < dimension; ++entityDimension)
           {
             connectivity.getSubPolytopes(entities, cellIndex, entityDimension);
@@ -522,7 +487,7 @@ namespace Rodin::Eikonal
                 entity.vertices.end())
                 continue;
               std::array<Real, 4> times;
-              std::array<Math::SpatialPoint, 4> references;
+              std::array<Math::SpatialPoint, 4> positions;
               bool reached = true;
               Real minimumTime = std::numeric_limits<Real>::infinity();
               for (size_t localVertex = 0; localVertex < entity.vertices.size();
@@ -533,14 +498,16 @@ namespace Rodin::Eikonal
                 reached = reached && std::isfinite(time);
                 times[localVertex] = time;
                 minimumTime = std::min(minimumTime, time);
-                references[localVertex] = cellTraits.getVertex(cellVertex(global));
+                positions[localVertex] =
+                  Geometry::Point(*cell, cellTraits.getVertex(cellVertex(global)))
+                    .getPhysicalCoordinates();
               }
               if (!reached || minimumTime >= best)
                 continue;
               const Variational::P1Element<Real> element(entity.geometry);
               const Geometry::Polytope::Traits traits(entity.geometry);
               auto objective = [&](const Math::SpatialPoint& parameter) {
-                Math::SpatialPoint entry(dimension);
+                Math::SpatialPoint entry(origin.size());
                 entry.setZero();
                 Real time = 0;
                 for (size_t localVertex = 0; localVertex < entity.vertices.size();
@@ -548,9 +515,21 @@ namespace Rodin::Eikonal
                 {
                   const Real weight = element.getBasis(localVertex)(parameter);
                   time += weight * times[localVertex];
-                  entry += weight * references[localVertex];
+                  entry += weight * positions[localVertex];
                 }
-                return time + travel(*cell, origin, entry, coefficient);
+                const Math::SpatialVector<Real> displacement = entry - origin;
+                Real cost;
+                if constexpr (std::is_arithmetic_v<CellCoefficient>)
+                  cost = displacement.norm() / coefficient;
+                else
+                  cost = std::sqrt(coefficient.dot(displacement, displacement));
+                if (!(cost > 0) || !std::isfinite(cost))
+                {
+                  Alert::MemberFunctionException(*this, __func__)
+                    << "Invalid straight-cell geometry or nonfinite travel cost."
+                    << Alert::Raise;
+                }
+                return time + cost;
               };
               if (entityDimension == 0)
               {
@@ -617,9 +596,9 @@ namespace Rodin::Eikonal
 
       std::reference_wrapper<SolutionType> m_arrival;
       CoefficientType m_coefficient;
+      std::vector<CellCoefficient> m_cellCoefficients;
       Real m_tolerance;
       Real m_localTolerance;
-      size_t m_integrationOrder;
       size_t m_maxIterations;
       size_t m_iterations;
       size_t m_threadCount;

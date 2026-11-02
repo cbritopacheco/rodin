@@ -61,22 +61,33 @@ namespace
     mesh.getConnectivity().compute(0, 0);
     P1 space(mesh);
     GridFunction arrival(space), marchingReference(space), iterativeReference(space);
-    MatrixFunction coefficient(transform * transform.transpose());
-    Eikonal::FMM referenceMarching(marchingReference, coefficient);
-    Eikonal::FIM referenceIterative(iterativeReference, coefficient);
+    const auto tensor = transform * transform.transpose();
+    MatrixFunction coefficient(tensor);
+    size_t marchingEvaluations = 0, iterativeEvaluations = 0;
+    MatrixFunction marchingCoefficient(dimension, dimension, [&](const Point&) {
+      ++marchingEvaluations;
+      return tensor;
+    });
+    MatrixFunction iterativeCoefficient(dimension, dimension, [&](const Point&) {
+      ++iterativeEvaluations;
+      return tensor;
+    });
+    Eikonal::FMM referenceMarching(marchingReference, marchingCoefficient);
+    Eikonal::FIM referenceIterative(iterativeReference, iterativeCoefficient);
     static constexpr Real LocalTolerance = Real(1e-6);
-    static constexpr size_t IntegrationOrder = 8;
-    referenceIterative.setLocalTolerance(LocalTolerance)
-      .setIntegrationOrder(IntegrationOrder);
+    referenceIterative.setLocalTolerance(LocalTolerance);
     Eikonal::FMM marching(arrival, coefficient);
     Eikonal::FIM iterative(arrival, coefficient);
-    iterative.setLocalTolerance(LocalTolerance)
-      .setIntegrationOrder(IntegrationOrder)
-      .setThreadCount(threads);
+    iterative.setLocalTolerance(LocalTolerance).setThreadCount(threads);
     try
     {
       referenceMarching.seed(seeds).solve();
       referenceIterative.seed(seeds).solve();
+      if (iterativeEvaluations != mesh.getCellCount())
+      {
+        state.SkipWithError("FIM must evaluate the coefficient exactly once per cell");
+        return;
+      }
       for (auto _ : state)
       {
         if constexpr (Marching)
@@ -117,7 +128,8 @@ namespace
     state.counters["max_error"] = maximumError;
     state.counters["max_difference_fmm"] = maximumDifference;
     state.counters["search_resolution"] = Marching ? 0 : LocalTolerance;
-    state.counters["path_order"] = Marching ? 0 : IntegrationOrder;
+    state.counters["coefficient_evaluations"] =
+      Marching ? marchingEvaluations : iterativeEvaluations;
   }
 
   /**

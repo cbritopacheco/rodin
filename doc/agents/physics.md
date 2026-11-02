@@ -58,15 +58,15 @@ examples/Models).
   shared inverse-velocity `Eikonal::Metric`, frozen per cell, and require native
   first-order affine simplices nonobtuse in that metric. Unsupported tensor
   stencils raise; the scalar path is unchanged.
-- **Eikonal/FIM** — local active-list solver with native P1 boundary
-  interpolation on every reference-cell type and mapped reference-path costs.
-  Accepts scalar speeds or ambient SPD squared-velocity tensors. Curved maps
-  use their actual Jacobians; the arrival-time space remains P1. Face search
-  and path quadrature are approximations, with no certified global local
-  minimum for arbitrary curved maps. No simplex subdivision or MPI/PETSc
-  specialization. OpenMP is opt-in with `setThreadCount`, using dependency
-  levels and worker-local coefficient copies to retain serial values and round
-  counts. See `examples/Models/Eikonal/README.md` for its contract.
+- **Eikonal/FIM** — local real P1 active-list solver on native first-order
+  straight convex cells with planar faces. Scalar speeds or SPD tensor metrics
+  are sampled/factored once per cell before each pending solve, then shared
+  read-only by all updates. Native face interpolation and numerical face search
+  use straight travel costs without path quadrature or simplex subdivision.
+  Higher-order geometric charts are rejected; cell validity, convexity and
+  planar-face conformity are caller preconditions. OpenMP dependency levels
+  preserve serial values and round counts. No MPI/PETSc specialization.
+  See `examples/Models/Eikonal/README.md` for the coefficient discretization.
 - **Advection/Lagrangian** — Lagrangian variational advection of scalar
   fields (level-set transport).
 - **Hilbert/H1a** — the Hilbertian H¹ extension-regularization of shape

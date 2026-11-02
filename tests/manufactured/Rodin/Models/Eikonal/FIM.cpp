@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Eikonal/FIM.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Geometry/SubMesh.h"
 #include "Rodin/Variational/MatrixFunction.h"
 
@@ -121,5 +122,27 @@ TEST(FIMManufactured, AnisotropicPointSourceRefinement)
       EXPECT_LT(integratedError, previousError);
       previousError = integratedError;
     }
+  }
+}
+
+/// @brief Cellwise sampling converges to the one-dimensional variable-speed arrival time.
+TEST(FIMManufactured, CellwiseSpeedRefinement)
+{
+  Real previousError = std::numeric_limits<Real>::infinity();
+  for (size_t intervals : {4u, 8u, 16u, 32u})
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {intervals + 1});
+    mesh.scale(Real(1) / intervals);
+    mesh.getConnectivity().compute(1, 0);
+    mesh.getConnectivity().compute(0, 1);
+    P1 space(mesh);
+    GridFunction arrival(space);
+    Eikonal::FIM solver(arrival, [](const Point& point) { return 1 + point.x(); });
+    solver.seed(IndexVector{0}).solve();
+    const Index endpoint = mesh.getVertexCount() - 1;
+    const Real error =
+      std::abs(arrival[space.getDOFs(0, endpoint)[0]] - std::log(Real(2)));
+    EXPECT_LT(error, previousError);
+    previousError = error;
   }
 }
