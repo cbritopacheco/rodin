@@ -5,8 +5,8 @@ Nagel et al., *Comparison of Propagation Models and Forward Calculation Methods
 on Cellular, Tissue and Organ Scale Atrial Electrophysiology*, IEEE TBME 70(2),
 2023, [doi:10.1109/TBME.2022.3196144](https://doi.org/10.1109/TBME.2022.3196144).
 An anisotropic FIM solve schedules a foot current in a Courtemanche
-reaction–diffusion simulation. A separate tensor FMM solve checks the eikonal
-field. Monodomain strand simulations calibrate the squared-velocity tensor.
+reaction–diffusion simulation on an axis-aligned uniform grid. Monodomain
+strand simulations calibrate the squared-velocity tensor.
 
 The example uses a homogeneous two-dimensional sheet, baseline ionic kinetics
 and explicitly chosen conductivities. The paper's anatomical mesh, regional
@@ -46,15 +46,28 @@ The chosen parameters are \(\beta=140000\,\mathrm{m^{-1}}\),
 longitudinal conductivity is \(\sigma_l=r^2\sigma_t\). These are illustrative
 inputs, not the paper's regional fitted values.
 
-The fiber directions are \(f=(0.8,0.6)^T\) and \(s=(-0.6,0.8)^T\), with
-\(R=[f,s]\). An equilateral triangular lattice spans the reference parallelogram with
-vertices \(0\), \((10,0)\), \((5,5\sqrt{3})\), and
-\((15,5\sqrt{3})\) mm. It is mapped by
-\(x=R\operatorname{diag}(r,1)\xi\). Both the geometry and diffusion tensor
-are transformed consistently. This also provides a useful numerical control:
-changing \(r\) changes the physical propagation distances, while preserving
-the normalized reference problem. The triangles are strictly acute in the
-calibrated inverse-velocity metric, as required by tensor FMM.
+The physical domain is the fixed square \(\Omega=[0,10]^2\,\mathrm{mm^2}\).
+`LocalMesh::UniformGrid(Triangle, {n+1,n+1})` supplies regularly spaced,
+axis-aligned vertices and two native right triangles per Cartesian grid cell.
+The mesh is scaled by \(h=10/n\) mm, with no rotation, shear or stretch.
+The isotropic and anisotropic runs therefore have identical physical meshes
+and source nodes.
+
+Fiber orientation is prescribed independently as \(f=(0.8,0.6)^T\), with
+transverse direction \(s=(-0.6,0.8)^T\) and \(R=[f,s]\). This rotation acts
+only on the conductivity and squared-velocity tensors:
+
+\[
+\sigma_m=\sigma_t R\operatorname{diag}(r^2,1)R^T,
+\qquad M=R\operatorname{diag}(c_l^2,c_t^2)R^T.
+\]
+
+The example uses FIM for the activation schedule. At this off-axis fiber
+orientation, the standard right triangles are metric-obtuse for the
+anisotropic tensor, so they violate the current tensor FMM causal-stencil
+contract. FMM is not run on this RE+ setup. The separate
+`RodinEikonalPropagationBenchmarks` comparison retains its supported causal
+simplex meshes.
 
 ## Ionic kinetics and foot current
 
@@ -96,19 +109,19 @@ regional remodeling of this example. Such changes require refitting.
 
 The squared-velocity tensor is not set equal to conductivity. Two monodomain
 strand simulations measure longitudinal and transverse velocities between
-probes near reference coordinates 3 and 7 mm:
+probes near physical coordinates 3 and 7 mm:
 
 \[
 c_a=\frac{x_{a,2}-x_{a,1}}{t_{a,2}-t_{a,1}},
 \qquad M=R\operatorname{diag}(c_l^2,c_t^2)R^T.
 \]
 
-The strand spacing matches the nominal reference edge length, stretched
-by the corresponding principal factor. Each strand
-receives a 20 pA/pF depolarizing pulse for 2 ms on its first reference 0.5 mm.
-The sheet source set contains vertices within reference radius 0.5 mm of the
-corner. FIM onset times drive the foot current at every sheet node; the RE+
-sheet does not receive the rectangular monodomain stimulus.
+Both strands have physical length 10 mm and spacing \(h=10/n\) mm. Each
+receives a 20 pA/pF depolarizing pulse for 2 ms on its first 1 mm. Their
+principal diffusion coefficients differ according to the requested conductivity
+ratio. The sheet source set contains vertices within physical radius 0.5 mm of the
+bottom-right corner \((10,0)\) mm. FIM onset times drive the foot current
+at every sheet node; the RE+ sheet does not receive the rectangular monodomain stimulus.
 
 Rodin assembles the mass and anisotropic stiffness forms as
 
@@ -170,10 +183,10 @@ Eikonal_ReactionEikonal 40 0.02 500 10 2 1 # include repolarization
 `ReactionEikonalVoltage.xdmf` contains the RE+ voltage/calcium time series,
 sampled approximately every millisecond.
 `ReactionEikonalActivation.xdmf` contains the RE+ LATs,
-FIM/FMM foot-onset fields and onset-to-upstroke lag. The associated CSV gives
+the FIM foot-onset field and onset-to-upstroke lag. The associated CSV gives
 these quantities at every vertex. `ReactionEikonalCell.csv` records the final
 conditioning beat. The console reports calibrated velocities, FIM rounds,
-FIM/FMM differences and lag statistics outside the stimulated region.
+and lag statistics outside the stimulated region.
 Plot the exported native triangle fields with NumPy, Matplotlib and h5py:
 
 ```sh
@@ -182,30 +195,31 @@ python3 /path/to/rodin/examples/Models/Eikonal/plot_reaction_eikonal.py . --time
 
 The script produces `ReactionEikonal.png` and `ReactionEikonal.svg`.
 
-Invalid ionic states, unactivated tissue or disagreement between FIM and FMM
-on this matched stencil cause failure. Agreement with FMM checks the eikonal
-calculation; it does not validate the ionic kinetics or physiology.
+Invalid ionic states or unactivated tissue cause failure. Mesh and time-step
+refinement remain necessary for numerical-convergence assessment.
 
 ## Observed numerical checks
 
-The following runs used ten conditioning beats and an 80 ms activation window.
-All nodes activated, all ionic states remained finite, and concentrations stayed
-positive. Both principal velocities were recalibrated for every run.
+The current uniform-grid setup is checked with isotropic and anisotropic
+500 ms runs, default settings and four FIM workers. Physical grid coordinates,
+source sets, finite ionic states and complete activation are checked. The
+nodal fields and repolarization estimates for the bottom-right source are:
 
-| Intervals | Time step (ms) | Velocity ratio | Transverse velocity (mm/ms) | Latest RE+ LAT (ms) | Maximum FIM/FMM difference (ms) |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| 40 | 0.02 | 1 | 0.361664 | 45.110 | \(1.55\times10^{-12}\) |
-| 40 | 0.02 | 2 | 0.361664 | 45.110 | \(1.31\times10^{-12}\) |
-| 40 | 0.01 | 2 | 0.364964 | 44.655 | \(3.49\times10^{-12}\) |
-| 80 | 0.02 | 2 | 0.400000 | 41.290 | \(4.52\times10^{-12}\) |
+| Quantity | Isotropic | Anisotropic |
+| --- | ---: | ---: |
+| Latest RE+ LAT (ms) | 36.49 | 29.91 |
+| Activated nodes at 20 ms | 44.1% | 70.8% |
+| Latest estimated 90% repolarization (ms) | 340.7 | 329.1 |
+| Estimated mean nodal APD90 (ms) | 314.4 | 307.4 |
+| FIM active-list rounds | 39 | 41 |
 
-Four FIM workers reproduced the default CSV exactly. Comparing corresponding
-vertices in the isotropic and stretched cases gave identical RE+ LATs and FIM
-onset differences below \(3\times10^{-14}\) ms. The physical coordinates
-differ according to the prescribed stretch. In the default case,
-\(t_{\mathrm{LAT}}-T\) ranged from approximately -1.808 to 1.610 ms;
-negative values are consistent with activation by diffusion before the local
-foot current begins.
+Each run used 1,681 vertices and 3,200 triangles. All six source vertices lie
+within 0.5 mm of \((10,0)\) mm. Exact Cartesian coordinates, identical meshes
+and source sets, complete activation and complete 90% repolarization were
+checked. Default serial and four-worker FIM runs reproduced the CSV fields
+and exported voltage snapshots exactly. The larger round counts reflect
+propagation from the opposite end of the serial vertex order.
+
 
 A separate Python evaluation of the original CellML right-hand sides was
 integrated with adaptive BDF at relative tolerance \(10^{-9}\) and absolute
@@ -216,9 +230,7 @@ frozen-gate step produced peaks 26.292, 25.382 and 24.935 mV at steps 0.02,
 through -68.9665, -68.9130 and -68.8759 mV. This checks approach to the
 source ODE trajectory; it is not validation against experimental data.
 The observed changes with mesh and time step prevent treating the default
-run as a numerically converged reproduction of the paper. A separate 500 ms
-run with 20 intervals completed through repolarization; final voltages ranged
-from approximately -78.98 to -78.55 mV.
+run as a numerically converged reproduction of the paper.
 
 ## Ionic model provenance
 
@@ -245,30 +257,23 @@ The repository reference is Lloyd et al., *The CellML Model Repository*,
 Bioinformatics 24, 2122–2123 (2008),
 [doi:10.1093/bioinformatics/btn390](https://doi.org/10.1093/bioinformatics/btn390).
 
-## Animation on identical geometry
+## Animation on identical uniform grids
 
-Append `fixed` to hold the physical sheet and source region fixed while changing
-the conductivity tensor. In this mode both calibration strands also retain their
-physical length and spacing. Their stimulated segment is 1 mm in both cases,
-which launches propagation at the larger longitudinal conductivity. Velocities
-are measured independently, so their ratio can differ from the nominal ratio
-because of spatial and temporal discretization. The original mode, without
-`fixed`, retains the geometry/stretch covariance check described above.
-
-Run each case in a separate directory, for example:
+Run the two cases from separate output directories:
 
 ```sh
 mkdir -p isotropic anisotropic
-(cd isotropic && /path/to/Eikonal_ReactionEikonal 40 0.02 80 10 1 1 fixed > run.log)
-(cd anisotropic && /path/to/Eikonal_ReactionEikonal 40 0.02 80 10 2 1 fixed > run.log)
+(cd isotropic && /path/to/Eikonal_ReactionEikonal 40 0.02 80 10 1 1 > run.log)
+(cd anisotropic && /path/to/Eikonal_ReactionEikonal 40 0.02 80 10 2 1 > run.log)
 python3 /path/to/rodin/examples/Models/Eikonal/animate_reaction_eikonal.py \
   isotropic anisotropic animation --end-ms 50 --duration 10
 ```
 
 The renderer requires NumPy, Matplotlib, h5py, and FFmpeg with `libvpx-vp9` and
-`libx264`. It verifies identical native mesh coordinates, connectivity, source
-nodes, output times, time steps and conditioning counts. Run parameters and
-calibrated velocities are read from `ReactionEikonalParameters.csv`.
+`libx264`. It verifies the regular axis-aligned square lattice, identical native
+coordinates, connectivity, source nodes, output times, time steps and
+conditioning counts. Run inputs, fiber directions and calibrated velocities
+are read from `ReactionEikonalParameters.csv`.
 
 `REPlusComparison.webm` retains a transparent background; the MP4 version uses
 a white background for player compatibility. Both are encoded at 30 fps.
@@ -276,30 +281,27 @@ The first 50 ms of simulated time are shown over approximately ten seconds,
 with physical time labelled explicitly. Voltage is interpolated linearly
 between exported snapshots; both panels use the same -85 to 35 mV color scale,
 camera bounds and physical coordinate scale. The arrow marks the anisotropic
-fiber direction. The activated-node percentage uses the measured RE+ LATs,
-not the instantaneous voltage threshold.
+fiber direction. The activated-node percentage uses the measured RE+ LATs.
+A poster PNG and JSON record of inputs, latest activation and playback are
+also written.
 
-The renderer also writes a poster PNG and a JSON record of the input parameters,
-latest activation times and playback settings. This comparison isolates the
-conductivity/velocity change on a common domain; it differs from the original
-stretched-domain invariance experiment.
+Preview the fiber axes on the actual uniform mesh with:
 
-In the fixed-geometry comparison with 40 intervals, 0.02 ms steps and ten
-conditioning beats, calibrated longitudinal/transverse velocities were
-0.361664/0.361664 mm/ms for the isotropic case and 0.800000/0.361664 mm/ms
-for the anisotropic case. The latest RE+ LAT changed from 45.11 to 28.53 ms.
-At 20 ms, 34.6% and 71.9% of nodes, respectively, had activated. FIM/FMM
-onset differences stayed below \(4\times10^{-12}\) ms in both runs. These
-are activation-time comparisons, not measurements of computational speed.
+```sh
+python3 /path/to/rodin/examples/Models/Eikonal/plot_reaction_eikonal.py anisotropic --fibers
+```
+
+This writes `ReactionEikonalFibers.png` and `.svg`. Uniform fibers remain at
+\(36.87^\circ\) while the grid edges remain aligned with the coordinate axes.
 
 ## Repolarization comparison
 
-For the complete action potential, rerun both fixed-geometry cases to 500 ms
+For the complete action potential, rerun both uniform-grid cases to 500 ms
 and enable the repolarization display:
 
 ```sh
-(cd isotropic && /path/to/Eikonal_ReactionEikonal 40 0.02 500 10 1 1 fixed > run.log)
-(cd anisotropic && /path/to/Eikonal_ReactionEikonal 40 0.02 500 10 2 1 fixed > run.log)
+(cd isotropic && /path/to/Eikonal_ReactionEikonal 40 0.02 500 10 1 1 > run.log)
+(cd anisotropic && /path/to/Eikonal_ReactionEikonal 40 0.02 500 10 2 1 > run.log)
 python3 /path/to/rodin/examples/Models/Eikonal/animate_reaction_eikonal.py \
   isotropic anisotropic repolarization --end-ms 500 --duration 20 --repolarization
 ```
@@ -320,12 +322,6 @@ steepest-upstroke LAT. Unobserved crossings retain infinity internally and are
 excluded from reported APD statistics. The nodal mean is unweighted.
 Both the peak and crossing estimates use the approximately 1 ms output cadence;
 they do not have the full time integrator's 0.02 ms resolution.
-
-For the 500 ms runs, every node crossed its 90% repolarization level. The latest
-crossings were approximately 348.7 ms in the isotropic case and 332.3 ms in the
-anisotropic case. Estimated mean nodal APD90 values were approximately 315.4
-and 312.1 ms. These finite-resolution observations depend on this homogeneous
-example's kinetics, diffusion and conditioning.
 
 `REPlusRepolarizationTraces.png` and `.svg` compare voltage at the same central
 mesh vertex in absolute time and after alignment by local LAT. Markers indicate

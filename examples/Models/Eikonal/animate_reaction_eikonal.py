@@ -88,13 +88,13 @@ def main():
         raise RuntimeError('ffmpeg with libvpx-vp9 and libx264 is required')
     cases = [read_case(args.isotropic), read_case(args.anisotropic)]
     first, second = cases
-    for key in ['intervals', 'dt_ms', 'conditioning_beats', 'fixed_geometry']:
+    for key in ['intervals', 'dt_ms', 'conditioning_beats', 'axis_aligned_geometry', 'fiber_x', 'fiber_y', 'source_x_mm', 'source_y_mm', 'source_radius_mm']:
         if first[0][key] != second[0][key]:
             raise ValueError(f'Comparison differs in {key}')
-    if (first[0]['fixed_geometry'] != 1
+    if (first[0]['axis_aligned_geometry'] != 1
             or first[0]['nominal_velocity_ratio'] != 1
             or second[0]['nominal_velocity_ratio'] <= 1):
-        raise ValueError('Use fixed-geometry runs with isotropic and anisotropic tensors')
+        raise ValueError('Use axis-aligned uniform-grid runs with isotropic and anisotropic tensors')
     if (first[2].shape != second[2].shape
             or not np.allclose(first[2], second[2], rtol=0, atol=1e-12)
             or not np.array_equal(first[3], second[3])
@@ -105,6 +105,12 @@ def main():
             and 0 < args.duration):
         raise ValueError('Requested duration/end time is outside the exported series')
     repolarization = [repolarization_times(case) for case in cases] if args.repolarization else []
+    coordinates = first[2]
+    nx = int(first[0]['intervals']) + 1
+    if (len(coordinates) != nx**2
+            or not np.allclose(np.unique(coordinates[:, 0]), np.linspace(0, 10, nx))
+            or not np.allclose(np.unique(coordinates[:, 1]), np.linspace(0, 10, nx))):
+        raise ValueError('Expected an axis-aligned uniform 10 mm square grid')
     args.output.mkdir(parents=True, exist_ok=True)
     apply_style()
     plt.rcParams['animation.ffmpeg_path'] = ffmpeg
@@ -113,7 +119,10 @@ def main():
     title = ('RE+ depolarization and repolarization' if args.repolarization
              else 'RE+ propagation on the same tissue sheet')
     figure.suptitle(title, fontsize=17, y=0.98)
-    figure.text(0.5, 0.905, 'Same mesh, source region, ionic kinetics and time step',
+    source_x, source_y = first[0]['source_x_mm'], first[0]['source_y_mm']
+    source_point = np.array([source_x, source_y])
+    figure.text(0.5, 0.905,
+                rf'Source at $({source_x:g},{source_y:g})\,\mathrm{{mm}}$ • same mesh, kinetics and time step',
                 ha='center', fontsize=11)
     surfaces, percentages = [], []
     for axis, case, title in zip(axes, cases, ['Isotropic', 'Anisotropic']):
@@ -129,12 +138,17 @@ def main():
         surface = axis.tripcolor(triangulation, values[0], shading='gouraud',
                                  cmap='turbo', vmin=-85, vmax=35, rasterized=True)
         surfaces.append(surface)
+        axis.scatter(*source_point, marker='*', s=75, facecolor='white',
+                     edgecolor='#303b49', linewidth=1, zorder=5)
         axis.set(xlabel=r'$x\;[\mathrm{mm}]$', ylabel=r'$y\;[\mathrm{mm}]$', aspect='equal')
         axis.set_xlim(vertices[:, 0].min() - 0.5, vertices[:, 0].max() + 0.5)
         axis.set_ylim(vertices[:, 1].min() - 0.5, vertices[:, 1].max() + 0.5)
-        percentages.append(axis.text(0.5, -0.14, '', transform=axis.transAxes,
-                                     ha='center', fontsize=10))
-    axes[1].annotate(r'$\mathbf{f}$', xy=(6.5, 4), xytext=(4.5, 2.5),
+        box = axis.get_position()
+        percentages.append(figure.text(box.x0 + box.width / 2, 0.12, '',
+                                       ha='center', fontsize=10))
+    fiber = np.array([first[0]['fiber_x'], first[0]['fiber_y']])
+    fiber_origin = np.array([0.8, 1.0])
+    axes[1].annotate(r'$\mathbf{f}$', xy=fiber_origin + 1.5 * fiber, xytext=fiber_origin,
                      arrowprops=dict(arrowstyle='->', color='#303b49', lw=1.8),
                      fontsize=14, color='#303b49')
     colorbar = figure.colorbar(surfaces[0], cax=figure.add_axes([0.9, 0.25, 0.022, 0.48]))

@@ -6,10 +6,10 @@
  */
 /**
  * @file
- * @brief Courtemanche RE+ driven by anisotropic FIM, with tensor FMM comparison.
+ * @brief Courtemanche RE+ driven by anisotropic FIM on an axis-aligned uniform grid.
  *
  * Implements the monodomain structure of Nagel et al. (2023), equation (12),
- * on a rotated, stretched tissue sheet. See ReactionEikonal.md for units, parameter
+ * on an axis-aligned square tissue sheet. See ReactionEikonal.md for units, parameter
  * provenance, velocity calibration, time discretization and comparison limits.
  */
 #include <algorithm>
@@ -27,7 +27,6 @@
 #include <Eigen/SparseCholesky>
 #include <Rodin/Assembly.h>
 #include <Rodin/Eikonal/FIM.h>
-#include <Rodin/Eikonal/FMM.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Variational.h>
@@ -216,10 +215,10 @@ int main(int argc, char** argv)
   using namespace Rodin::Examples;
   try
   {
-    if (argc > 8 || (argc == 8 && std::string(argv[7]) != "fixed"))
+    if (argc > 7)
     {
       throw std::runtime_error("Usage: Eikonal_ReactionEikonal [intervals dt_ms end_ms "
-                               "pace_beats velocity_ratio workers [fixed]]");
+                               "pace_beats velocity_ratio workers]");
     }
     const size_t intervals = argc > 1 ? std::stoul(argv[1]) : 40;
     const Real dt = argc > 2 ? std::stod(argv[2]) : Real(0.02);
@@ -227,7 +226,6 @@ int main(int argc, char** argv)
     const size_t paceBeats = argc > 4 ? std::stoul(argv[4]) : 10;
     const Real ratio = argc > 5 ? std::stod(argv[5]) : Real(2);
     const size_t workers = argc > 6 ? std::stoul(argv[6]) : 1;
-    const bool fixedGeometry = argc == 8;
     if (intervals < 20 || !(dt > 0 && dt <= Real(0.02)) ||
       !(endTime >= 40 && endTime <= 1000) || !(ratio >= 1 && ratio <= 4) ||
       !std::isfinite(dt) || !std::isfinite(endTime) || !std::isfinite(ratio) ||
@@ -236,10 +234,11 @@ int main(int argc, char** argv)
       throw std::runtime_error("Require intervals >= 20, 0 < dt <= 0.02 ms, 40 <= end <= "
                                "1000 ms, 1 <= ratio <= 4, workers >= 1");
     }
-    constexpr Real length = 10; // Unstretched sheet and strand length in mm.
+    constexpr Real length = 10; // Fixed square-sheet and strand length in mm.
     // Illustrative tissue values: sigma_t=0.1 S/m, beta=140000 1/m,
     // membrane capacitance=0.01 F/m^2. Convert m^2/s to mm^2/ms by 1000.
     constexpr Real diffusionT = 1000 * Real(0.1) / (140000 * Real(0.01));
+    const Math::SpatialVector<Real> fiber{Real(0.8), Real(0.6)};
     auto initial = Courtemanche1998::initialState();
     std::ofstream cellTrace("ReactionEikonalCell.csv");
     cellTrace << std::setprecision(17) << "time_ms,voltage_mV,calcium_mM\n";
@@ -273,24 +272,23 @@ int main(int argc, char** argv)
     for (size_t axis = 0; axis < 2; ++axis)
     {
       const Real velocityStretch = axis == 0 ? ratio : Real(1);
-      const Real stretch = fixedGeometry ? Real(1) : velocityStretch;
       auto strand = LocalMesh::UniformGrid(Polytope::Type::Segment, {intervals + 1});
-      strand.scale(length * stretch / intervals);
+      strand.scale(length / intervals);
       strand.getConnectivity().compute(1, 0);
       strand.getConnectivity().compute(0, 1);
       IndexVector seeds;
       Index first = 0, second = 0;
       for (auto vertex = strand.getVertex(); vertex; ++vertex)
       {
-        const Real coordinate = vertex->getCoordinates()(0) / stretch;
-        const Real stimulatedLength = fixedGeometry ? Real(1) : Real(0.5);
+        const Real coordinate = vertex->getCoordinates()(0);
+        const Real stimulatedLength = Real(1);
         if (coordinate <= stimulatedLength + Real(1e-12))
           seeds.push_back(vertex->getIndex());
         if (std::abs(coordinate - 3) <
-          std::abs(strand.getVertexCoordinates(first)(0) / stretch - 3))
+          std::abs(strand.getVertexCoordinates(first)(0) - 3))
           first = vertex->getIndex();
         if (std::abs(coordinate - 7) <
-          std::abs(strand.getVertexCoordinates(second)(0) / stretch - 7))
+          std::abs(strand.getVertexCoordinates(second)(0) - 7))
           second = vertex->getIndex();
       }
       Math::SpatialMatrix<Real> diffusion(1, 1);
@@ -313,24 +311,24 @@ int main(int argc, char** argv)
     parameters << std::setprecision(17) << "parameter,value\n"
                << "intervals," << intervals << "\ndt_ms," << dt << "\nend_ms," << endTime
                << "\nconditioning_beats," << paceBeats << "\nnominal_velocity_ratio,"
-               << ratio << "\nfixed_geometry," << fixedGeometry
+               << ratio << "\naxis_aligned_geometry,1\nfiber_x," << fiber(0)
+               << "\nfiber_y," << fiber(1) << "\nsource_x_mm," << length
+               << "\nsource_y_mm,0\nsource_radius_mm,0.5"
                << "\nlongitudinal_velocity_mm_per_ms," << velocity[0]
                << "\ntransverse_velocity_mm_per_ms," << velocity[1] << '\n';
 
-    // Rotate the fiber axes; optionally hold geometry fixed across tensor ratios.
+    // Uniform physical grid: fiber orientation acts only on material tensors.
     auto mesh =
       LocalMesh::UniformGrid(Polytope::Type::Triangle, {intervals + 1, intervals + 1});
     mesh.scale(length / intervals);
     Math::SpatialMatrix<Real> rotation(2, 2);
-    rotation(0, 0) = Real(0.8);
-    rotation(0, 1) = Real(-0.6);
-    rotation(1, 0) = Real(0.6);
-    rotation(1, 1) = Real(0.8);
-    Math::SpatialMatrix<Real> stretch = Math::SpatialMatrix<Real>::Identity(2, 2);
-    stretch(0, 0) = fixedGeometry ? Real(1) : ratio;
-    const Math::SpatialMatrix<Real> transform = rotation * stretch;
-    stretch(0, 0) = ratio;
-    const Math::SpatialMatrix<Real> velocityTransform = rotation * stretch;
+    rotation(0, 0) = fiber(0);
+    rotation(0, 1) = -fiber(1);
+    rotation(1, 0) = fiber(1);
+    rotation(1, 1) = fiber(0);
+    Math::SpatialMatrix<Real> velocityTransform = rotation;
+    velocityTransform(0, 0) *= ratio;
+    velocityTransform(1, 0) *= ratio;
     Math::SpatialMatrix<Real> squaredVelocity(2, 2);
     squaredVelocity.setZero();
     squaredVelocity(0, 0) = velocity[0] * velocity[0];
@@ -343,33 +341,28 @@ int main(int argc, char** argv)
     std::vector<bool> source(mesh.getVertexCount(), false);
     for (auto vertex = mesh.getVertex(); vertex; ++vertex)
     {
-      Math::SpatialPoint reference = vertex->getCoordinates();
-      // Equilateral reference triangles provide a strict causal angle margin.
-      reference(0) += Real(0.5) * reference(1);
-      reference(1) *= std::sqrt(Real(3)) / 2;
-      if (reference.norm() <= Real(0.5) + Real(1e-12))
+      const Math::SpatialPoint position = vertex->getCoordinates();
+      if (std::hypot(position(0) - length, position(1)) <= Real(0.5) + Real(1e-12))
       {
         seeds.push_back(vertex->getIndex());
         source[vertex->getIndex()] = true;
       }
-      mesh.setVertexCoordinates(vertex->getIndex(), transform * reference);
     }
     mesh.getConnectivity().compute(2, 0);
     mesh.getConnectivity().compute(0, 2);
     mesh.getConnectivity().compute(0, 0);
     ReactionDiffusion tissue(mesh, diffusion, dt, initial);
     const auto& space = tissue.getSpace();
-    GridFunction iterative(space), marching(space), difference(space);
+    GridFunction iterative(space), difference(space);
     MatrixFunction coefficient(tensor);
     Eikonal::FIM solver(iterative, coefficient);
     solver.setThreadCount(workers).seed(seeds).solve();
-    Eikonal::FMM(marching, coefficient).seed(seeds).solve();
     tissue.run(endTime, seeds, "ReactionEikonalVoltage", &iterative);
     std::ofstream comparison("ReactionEikonalActivation.csv");
     comparison << std::setprecision(17)
                << "x_mm,y_mm,stimulated,replus_lat_ms,fim_foot_onset_"
-                  "ms,fmm_foot_onset_ms,lat_minus_foot_onset_ms\n";
-    Real maximumDifference = 0, sum = 0, maximumMarchingDifference = 0;
+                  "ms,lat_minus_foot_onset_ms\n";
+    Real maximumDifference = 0, sum = 0;
     size_t count = 0;
     for (auto vertex = mesh.getVertex(); vertex; ++vertex)
     {
@@ -385,26 +378,20 @@ int main(int argc, char** argv)
         sum += difference[dof] * difference[dof];
         ++count;
       }
-      maximumMarchingDifference =
-        std::max(maximumMarchingDifference, std::abs(iterative[dof] - marching[dof]));
       comparison << vertex->getCoordinates()(0) << ',' << vertex->getCoordinates()(1)
                  << ',' << source[index] << ',' << activation << ',' << iterative[dof]
-                 << ',' << marching[dof] << ',' << difference[dof] << '\n';
+                 << ',' << difference[dof] << '\n';
     }
     IO::XDMF output("ReactionEikonalActivation");
     output.grid()
       .setMesh(mesh)
       .add("replus_lat_ms", tissue.getActivation())
       .add("fim_foot_onset_ms", iterative)
-      .add("fmm_foot_onset_ms", marching)
       .add("lat_minus_foot_onset_ms", difference);
     output.write().close();
     std::cout << "fim_rounds=" << solver.getIterations()
-              << " max_fim_fmm_ms=" << maximumMarchingDifference
               << " max_abs_lat_minus_onset_ms=" << maximumDifference
               << " rms_lat_minus_onset_ms=" << std::sqrt(sum / count) << '\n';
-    if (maximumMarchingDifference > 1e-8)
-      throw std::runtime_error("FIM and FMM disagree on the matched causal mesh");
     return cellTrace && comparison && parameters ? EXIT_SUCCESS : EXIT_FAILURE;
   }
   catch (const std::exception& error)
