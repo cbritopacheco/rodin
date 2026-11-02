@@ -429,6 +429,17 @@ namespace Rodin::Tests::Unit
     expectSameOperator(A, toSparse(axb.getOperator()));
     expectSameVector(b, toVector(axb.getVector()));
 
+    // The right-hand side, eliminated values included, is summed in a fixed
+    // order.
+    for (int k = 0; k < 4; ++k)
+    {
+      pb.assemble();
+      const auto again = toVector(axb.getVector());
+      ASSERT_EQ(again.size(), b.size());
+      for (Eigen::Index i = 0; i < b.size(); ++i)
+        EXPECT_EQ(again(i), b(i)) << "entry " << i;
+    }
+
     ASSERT_EQ(VecZeroEntries(axb.getVector()), PETSC_SUCCESS);
     pb.assemble(AssemblyTarget::RHS);
     expectSameVector(b, toVector(axb.getVector()));

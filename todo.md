@@ -268,10 +268,10 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       coefficients, formes mixtes, sur triangles, tétraèdres déformés et
       maillage mixte quad/tri. Chaque test vérifie statiquement que
       l'intégrale device est bien sélectionnée.
-- [ ] Mémoire locale: la matrice locale est dimensionnée a la compilation
+- [x] Mémoire locale: la matrice locale est dimensionnée a la compilation
       (8 sommets x 3 composantes par côté, soit 576 réels par thread pour
-      un couple vectoriel). A revoir pour la performance (taille selon la
-      géométrie, ou une équipe par cellule) au jalon benchmark.
+      un couple vectoriel). Les matrices locales qui dépassent la capacité
+      par thread sont intégrées avec une équipe par cellule (section 15).
 - [x] `(Jac w).v` avec w vectoriel: fait au jalon 3.
 - [x] `Dot(A, Jac) : Dot(A, Jac)` (coefficient matriciel): matrice
       constante et `Jacobian` d'une GridFunction comme coefficient, testés
@@ -718,9 +718,16 @@ cellules, CUDA sm_75).
       706k tétraèdres: de 750 ms à 36.3 ms par assemblage; problème
       vectoriel: de 4516 ms à 92.6 ms. Il reste environ 10 ms de tris
       radix et 10 ms de copie vers l'hôte (mémoire non épinglée).
-- [ ] Assemblage COO PETSc (`DeviceCOOSystem`): l'élimination et le
-      second membre utilisent encore `atomic_add`, donc un ordre de somme
-      non déterministe.
+- [x] Assemblage COO PETSc (`DeviceCOOSystem`): l'élimination, le
+      relèvement des valeurs affines des degrés de liberté identifiés et
+      les intégrateurs linéaires listent leurs contributions au second
+      membre à des positions fixes (comptage puis `parallel_scan`), au
+      lieu de les ajouter par `atomic_add`. La liste est regroupée par
+      ligne (`group` de `DeviceSystem`, le rang d'une contribution étant
+      sa position) et chaque ligne est sommée dans l'ordre de la liste.
+      Second membre identique bit à bit d'un assemblage à l'autre (test
+      `Reassembly`). `KokkosSeq_Poisson 100`: noyaux du second membre de
+      2.9 ms à environ 10 ms, premier assemblage inchangé (environ 1.1 s).
 
 ## 17. Temps de compilation des tests Kokkos
 

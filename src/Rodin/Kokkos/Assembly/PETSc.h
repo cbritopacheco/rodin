@@ -152,6 +152,16 @@ namespace Rodin::Assembly::Internal
     /// @brief Values of the linear integrator entries.
     ::Kokkos::View<Real*, MemorySpace> entryValues;
 
+    /// @brief Rows of the contributions to the right-hand side, listed in a
+    /// fixed order.
+    ::Kokkos::View<Index*, MemorySpace> contributionRows;
+
+    /// @brief Contributions to the right-hand side.
+    ::Kokkos::View<Real*, MemorySpace> contributionValues;
+
+    /// @brief Number of listed contributions to the right-hand side.
+    size_t contributions = 0;
+
     /// @brief Whether each degree of freedom is fixed.
     ::Kokkos::View<unsigned char*, MemorySpace> fixed;
 
@@ -286,6 +296,25 @@ namespace Rodin::Assembly::Internal
 
       /// @brief Expansions of the degrees of freedom on their masters.
       using Expansions = typename ConstraintsType::Expansions;
+
+      /// @brief Device system whose grouping sums the right-hand side.
+      using ReferenceType = DeviceSystem<Backend>;
+
+      /// @brief Numbers of expanded contributions.
+      using Sizes = typename ReferenceType::Sizes;
+
+      /// @brief Contributions to the right-hand side reserved in the list.
+      struct Contributions
+      {
+        /// @brief Rows of the listed contributions.
+        ::Kokkos::View<Index*, MemorySpace> rows;
+
+        /// @brief Listed contributions.
+        ::Kokkos::View<Real*, MemorySpace> values;
+
+        /// @brief Position of the first reserved contribution.
+        size_t offset = 0;
+      };
 
       /// @brief Device bilinear integrator.
       using BilinearType =
@@ -496,6 +525,7 @@ namespace Rodin::Assembly::Internal
           copy(cache.imposed, constraints.imposed, "Rodin imposed DOFs");
         resize(cache.rhs, n, "Rodin right-hand side");
         ::Kokkos::deep_copy(m_execution, cache.rhs, Real(0));
+        cache.contributions = 0;
 
         if (A || !m_matrices.empty() || !m_operators.empty())
         {
@@ -505,6 +535,7 @@ namespace Rodin::Assembly::Internal
             expandMatrices(cache, constraints, fixed);
         }
         integrateVectors(cache, fixed, expanded ? &constraints.expansions : nullptr);
+        sumContributions(cache);
         if (expanded)
           imposeFixed(
             m_execution, m_rows, cache.imposed, cache.fixedValues, m_owned, cache.rhs);
@@ -591,51 +622,150 @@ namespace Rodin::Assembly::Internal
       }
 
       /**
-       * @brief Clears the rows of the fixed degrees of freedom and moves their
-       * columns to the right-hand side.
+       * @brief Counts the matrix values moved to the right-hand side by the
+       * columns of the fixed degrees of freedom.
        *
        * Public as the enclosing function of device lambdas.
        */
-      template <class Indices, class Fixed, class Values, class Scalars, class RHS>
+      template <class Indices, class Fixed>
+      static size_t countEliminated(const ExecutionSpace& execution, size_t count,
+        const Indices& rows, const Indices& cols, const Fixed& fixed)
+      {
+        size_t res = 0;
+        ::Kokkos::parallel_reduce(
+          "Rodin::Assembly::Kokkos::PETSc::countEliminated",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          KOKKOS_LAMBDA(
+            const size_t e, size_t& sum) { sum += !fixed(rows(e)) && fixed(cols(e)); },
+          res);
+        return res;
+      }
+
+      /**
+       * @brief Clears the rows of the fixed degrees of freedom and lists the
+       * values of their columns moved to the right-hand side.
+       * @param res Receives the moved values, in coordinate order.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Indices, class Fixed, class Values, class Scalars>
       static void eliminate(const ExecutionSpace& execution, size_t count,
         const Indices& rows, const Indices& cols, const Fixed& fixed,
-        const Values& values, const Scalars& coo, const RHS& rhs)
+        const Values& values, const Scalars& coo, const Contributions& res)
       {
-        ::Kokkos::parallel_for(
+        const auto resRows = res.rows;
+        const auto resValues = res.values;
+        const size_t offset = res.offset;
+        ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::PETSc::eliminate",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t e) {
+          KOKKOS_LAMBDA(const size_t e, size_t& update, const bool final) {
             const Index r = rows(e);
             const Index c = cols(e);
-            if (fixed(r))
+            const bool moved = !fixed(r) && fixed(c);
+            if (final && (moved || fixed(r)))
             {
+              if (moved)
+              {
+                resRows(offset + update) = r;
+                resValues(offset + update) = -(coo(e) * values(c));
+              }
               coo(e) = 0;
             }
-            else if (fixed(c))
-            {
-              ::Kokkos::atomic_add(&rhs(r), -coo(e) * values(c));
-              coo(e) = 0;
-            }
+            update += moved;
           });
       }
 
       /**
-       * @brief Adds the entries of a linear integrator to the free rows.
+       * @brief Number of contributions of an entry of a linear integrator.
+       * @param row Offset of the space of the integrator.
+       * @param x Expansions on the masters, used when @p expanded is set.
+       * @param expanded Whether an entry goes to the masters of its row, with
+       * their coefficients, rather than to its row when it is free.
+       */
+      template <class Indices, class Values, class Fixed>
+      KOKKOS_INLINE_FUNCTION static size_t countEntry(size_t e, const Indices& indices,
+        const Values& values, Index row, bool hasFixed, const Fixed& fixed,
+        const Expansions& x, bool expanded)
+      {
+        if (values(e) == Real(0))
+          return 0;
+        const Index i = row + indices(e);
+        if (expanded)
+          return x.count(i);
+        return !hasFixed || !fixed(i);
+      }
+
+      /**
+       * @brief Counts the contributions of the entries of a linear
+       * integrator to the right-hand side.
+       * @param begin Position of the first entry. @param count Entry count.
+       *
+       * See countEntry for the other parameters.
        *
        * Public as the enclosing function of device lambdas.
        */
-      template <class Indices, class Values, class Fixed, class RHS>
-      static void scatterVector(const ExecutionSpace& execution, size_t offset,
+      template <class Indices, class Values, class Fixed>
+      static size_t countVector(const ExecutionSpace& execution, size_t begin,
         size_t count, const Indices& indices, const Values& values, Index row,
-        bool hasFixed, const Fixed& fixed, const RHS& rhs)
+        bool hasFixed, const Fixed& fixed, const Expansions& x, bool expanded)
       {
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::PETSc::vector",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, offset, offset + count),
-          KOKKOS_LAMBDA(const size_t e) {
-            const Index i = row + indices(e);
-            if (!hasFixed || !fixed(i))
-              ::Kokkos::atomic_add(&rhs(i), values(e));
+        size_t res = 0;
+        ::Kokkos::parallel_reduce(
+          "Rodin::Assembly::Kokkos::PETSc::countVector",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, begin, begin + count),
+          KOKKOS_LAMBDA(const size_t e, size_t& sum) {
+            sum += countEntry(e, indices, values, row, hasFixed, fixed, x, expanded);
+          },
+          res);
+        return res;
+      }
+
+      /**
+       * @brief Lists the nonzero entries of a linear integrator as
+       * contributions to the right-hand side.
+       * @param res Receives the contributions, counted by countVector.
+       *
+       * The contributions follow the order of the entries, and of the masters
+       * of an entry. See countVector for the other parameters.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Indices, class Values, class Fixed>
+      static void listVector(const ExecutionSpace& execution, size_t begin, size_t count,
+        const Indices& indices, const Values& values, Index row, bool hasFixed,
+        const Fixed& fixed, const Expansions& x, bool expanded, const Contributions& res)
+      {
+        const auto policy =
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, begin, begin + count);
+        const auto resRows = res.rows;
+        const auto resValues = res.values;
+        const size_t offset = res.offset;
+        ::Kokkos::parallel_scan(
+          "Rodin::Assembly::Kokkos::PETSc::vector", policy,
+          KOKKOS_LAMBDA(const size_t e, size_t& update, const bool final) {
+            const size_t n =
+              countEntry(e, indices, values, row, hasFixed, fixed, x, expanded);
+            if (final && n > 0)
+            {
+              const Real v = values(e);
+              const Index i = row + indices(e);
+              if (expanded)
+              {
+                const Index r0 = x.starts(i);
+                for (size_t r = 0; r < n; ++r)
+                {
+                  resRows(offset + update + r) = x.indices(r0 + r);
+                  resValues(offset + update + r) = x.coefficients(r0 + r) * v;
+                }
+              }
+              else
+              {
+                resRows(offset + update) = i;
+                resValues(offset + update) = v;
+              }
+            }
+            update += n;
           });
       }
 
@@ -674,22 +804,27 @@ namespace Rodin::Assembly::Internal
 
       /**
        * @brief Counts the contributions of the coordinate list expanded on
-       * the masters.
+       * the masters, and the affine values they lift.
        *
        * Public as the enclosing function of device lambdas.
        */
       template <class Indices, class Scalars>
-      static size_t countExpanded(const ExecutionSpace& execution, size_t count,
+      static Sizes countExpanded(const ExecutionSpace& execution, size_t count,
         const Indices& rows, const Indices& cols, const Scalars& values,
         const Expansions& x)
       {
-        size_t res = 0;
+        Sizes res;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::countExpanded",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t e, size_t& sum) {
-            if (values(e) != PetscScalar(0))
-              sum += x.count(rows(e)) * x.count(cols(e));
+          KOKKOS_LAMBDA(const size_t e, Sizes& sum) {
+            if (values(e) == PetscScalar(0))
+              return;
+            const size_t nr = x.count(rows(e));
+            Sizes c;
+            c.entries = nr * x.count(cols(e));
+            c.lifts = x.values(cols(e)) != Real(0) ? nr : 0;
+            sum += c;
           },
           res);
         return res;
@@ -697,6 +832,7 @@ namespace Rodin::Assembly::Internal
 
       /**
        * @brief Expands the coordinate list on the masters.
+       * @param lifts Receives the lifted affine values, in coordinate order.
        *
        * The nonzero value @f$ a @f$ of row @f$ i @f$ and column @f$ j @f$
        * becomes the values @f$ (c_r a) c_s @f$ of the masters @f$ r @f$ of
@@ -706,66 +842,50 @@ namespace Rodin::Assembly::Internal
        *
        * Public as the enclosing function of device lambdas.
        */
-      template <class Indices, class Scalars, class RHS>
+      template <class Indices, class Scalars>
       static void expand(const ExecutionSpace& execution, size_t count,
         const Indices& rows, const Indices& cols, const Scalars& values,
         const Expansions& x, const Indices& resRows, const Indices& resCols,
-        const Scalars& resValues, const RHS& rhs)
+        const Scalars& resValues, const Contributions& lifts)
       {
+        const auto liftRows = lifts.rows;
+        const auto liftValues = lifts.values;
+        const size_t offset = lifts.offset;
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::PETSc::expand",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t e, size_t& update, const bool final) {
+          KOKKOS_LAMBDA(const size_t e, Sizes& update, const bool final) {
             const PetscScalar v = values(e);
             if (v == PetscScalar(0))
               return;
             const size_t nr = x.count(rows(e));
             const size_t nc = x.count(cols(e));
+            const Real d = x.values(cols(e));
             if (final)
             {
               const Index r0 = x.starts(rows(e));
               const Index c0 = x.starts(cols(e));
-              const Real d = x.values(cols(e));
               for (size_t ri = 0; ri < nr; ++ri)
               {
                 const Real rv = x.coefficients(r0 + ri) * v;
                 for (size_t ci = 0; ci < nc; ++ci)
                 {
-                  const size_t q = update + ri * nc + ci;
+                  const size_t q = update.entries + ri * nc + ci;
                   resRows(q) = x.indices(r0 + ri);
                   resCols(q) = x.indices(c0 + ci);
                   resValues(q) = rv * x.coefficients(c0 + ci);
                 }
                 if (d != Real(0))
-                  ::Kokkos::atomic_add(&rhs(x.indices(r0 + ri)), -(rv * d));
+                {
+                  liftRows(offset + update.lifts + ri) = x.indices(r0 + ri);
+                  liftValues(offset + update.lifts + ri) = -(rv * d);
+                }
               }
             }
-            update += nr * nc;
-          });
-      }
-
-      /**
-       * @brief Adds the entries of a linear integrator to the masters of
-       * their rows.
-       *
-       * Public as the enclosing function of device lambdas.
-       */
-      template <class Indices, class Values, class RHS>
-      static void scatterExpanded(const ExecutionSpace& execution, size_t offset,
-        size_t count, const Indices& indices, const Values& values, Index row,
-        const Expansions& x, const RHS& rhs)
-      {
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::PETSc::expandedVector",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, offset, offset + count),
-          KOKKOS_LAMBDA(const size_t e) {
-            const Real v = values(e);
-            if (v == Real(0))
-              return;
-            const Index i = row + indices(e);
-            const Index r0 = x.starts(i);
-            for (Index r = r0; r < x.starts(i + 1); ++r)
-              ::Kokkos::atomic_add(&rhs(x.indices(r)), x.coefficients(r) * v);
+            Sizes c;
+            c.entries = nr * nc;
+            c.lifts = d != Real(0) ? nr : 0;
+            update += c;
           });
       }
 
@@ -1105,8 +1225,10 @@ namespace Rodin::Assembly::Internal
           m_execution, tail, diagonal, fixed, cache.fixed, m_owned, cache.values);
         if (fixed)
         {
+          const size_t moved =
+            countEliminated(m_execution, tail, cache.rows, cache.cols, cache.fixed);
           eliminate(m_execution, tail, cache.rows, cache.cols, cache.fixed,
-            cache.fixedValues, cache.values, cache.rhs);
+            cache.fixedValues, cache.values, reserve(cache, moved));
         }
       }
 
@@ -1119,8 +1241,9 @@ namespace Rodin::Assembly::Internal
         const typename ConstraintsType::Resolved& constraints, bool fixed)
       {
         const size_t listed = cache.values.extent(0);
-        const size_t entries = countExpanded(m_execution, listed, cache.rows, cache.cols,
+        const Sizes sizes = countExpanded(m_execution, listed, cache.rows, cache.cols,
           cache.values, constraints.expansions);
+        const size_t entries = sizes.entries;
         const size_t extra = constraints.rows.size();
         const size_t diagonal = std::min(m_rows, m_cols);
         const size_t count = entries + extra + diagonal;
@@ -1129,7 +1252,7 @@ namespace Rodin::Assembly::Internal
         resize(cache.expandedValues, count, "Rodin expanded COO values");
         expand(m_execution, listed, cache.rows, cache.cols, cache.values,
           constraints.expansions, cache.nextExpandedRows, cache.nextExpandedCols,
-          cache.expandedValues, cache.rhs);
+          cache.expandedValues, reserve(cache, sizes.lifts));
         const auto range = std::make_pair(entries, entries + extra);
         ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(cache.nextExpandedRows, range),
           host(constraints.rows));
@@ -1156,13 +1279,93 @@ namespace Rodin::Assembly::Internal
           cache.expandedValues);
         if (fixed)
         {
+          const size_t moved = countEliminated(m_execution, entries + extra,
+            cache.expandedRows, cache.expandedCols, cache.fixed);
           eliminate(m_execution, entries + extra, cache.expandedRows, cache.expandedCols,
-            cache.fixed, cache.fixedValues, cache.expandedValues, cache.rhs);
+            cache.fixed, cache.fixedValues, cache.expandedValues, reserve(cache, moved));
         }
       }
 
       /**
-       * @brief Integrates the linear integrators into the right-hand side.
+       * @brief Reserves contributions to the right-hand side at the end of
+       * the list.
+       * @param count Number of contributions.
+       * @returns Buffers of the list and position of the first reserved
+       * contribution.
+       */
+      Contributions reserve(CacheType& cache, size_t count) const
+      {
+        Contributions res;
+        res.offset = cache.contributions;
+        const size_t size = res.offset + count;
+        const size_t capacity = cache.contributionRows.extent(0);
+        if (size > capacity)
+        {
+          // The list keeps its listed contributions and grows geometrically,
+          // the cache keeping it for the next assemblies.
+          const size_t grown = std::max(size, 2 * capacity);
+          const auto alloc =
+            ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing);
+          ::Kokkos::resize(alloc, cache.contributionRows, grown);
+          ::Kokkos::resize(alloc, cache.contributionValues, grown);
+        }
+        cache.contributions = size;
+        res.rows = cache.contributionRows;
+        res.values = cache.contributionValues;
+        return res;
+      }
+
+      /**
+       * @brief Adds the listed contributions to the right-hand side.
+       *
+       * The contributions to a row are summed in list order, so the
+       * right-hand side does not depend on the scheduling of the kernels.
+       */
+      void sumContributions(CacheType& cache) const
+      {
+        const size_t count = cache.contributions;
+        if (count == 0)
+          return;
+        const ::Kokkos::View<Index*, MemorySpace> keys(
+          ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
+            std::string("Rodin contribution keys")),
+          count);
+        const ::Kokkos::View<Index*, MemorySpace> positions(
+          ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
+            std::string("Rodin contribution positions")),
+          count);
+        ::Kokkos::deep_copy(m_execution, keys,
+          ::Kokkos::subview(cache.contributionRows, std::make_pair(size_t(0), count)));
+        sequence(m_execution, positions);
+        // Without segments, the rank of a contribution is its position.
+        const typename ReferenceType::Ranks ranks;
+        ReferenceType::accumulate(m_execution, positions,
+          ReferenceType::group(m_execution, keys, positions, ranks),
+          cache.contributionValues, cache.rhs);
+      }
+
+      /**
+       * @brief Lists buffered entries of a vector as contributions to the
+       * right-hand side.
+       * @param begin Position of the first entry in the buffers.
+       * @param count Entry count. @param row Offset of the space.
+       * @param fixed Whether degrees of freedom are fixed.
+       * @param x Expansions on the masters. @param expanded Whether they apply.
+       */
+      void listEntries(CacheType& cache, size_t begin, size_t count, Index row,
+        bool fixed, const Expansions& x, bool expanded) const
+      {
+        const size_t n = countVector(m_execution, begin, count, cache.entryIndices,
+          cache.entryValues, row, fixed, cache.fixed, x, expanded);
+        if (n == 0)
+          return;
+        listVector(m_execution, begin, count, cache.entryIndices, cache.entryValues, row,
+          fixed, cache.fixed, x, expanded, reserve(cache, n));
+      }
+
+      /**
+       * @brief Lists the entries of the linear integrators and of the
+       * preassembled vectors as contributions to the right-hand side.
        */
       void integrateVectors(CacheType& cache, bool fixed, const Expansions* x)
       {
@@ -1171,22 +1374,15 @@ namespace Rodin::Assembly::Internal
           offsets[k + 1] = offsets[k] + m_vectors[k].integrator->prepare();
         resize(cache.entryIndices, offsets.back(), "Rodin entry indices");
         resize(cache.entryValues, offsets.back(), "Rodin entry values");
+        const Expansions none;
+        const Expansions& expansions = x ? *x : none;
         for (size_t k = 0; k < m_vectors.size(); ++k)
         {
           const auto& v = m_vectors[k];
           v.integrator->fill(
             cache.entryValues, offsets[k], v.sign, false, cache.entryIndices);
-          if (x)
-          {
-            scatterExpanded(m_execution, offsets[k], offsets[k + 1] - offsets[k],
-              cache.entryIndices, cache.entryValues, v.row, *x, cache.rhs);
-          }
-          else
-          {
-            scatterVector(m_execution, offsets[k], offsets[k + 1] - offsets[k],
-              cache.entryIndices, cache.entryValues, v.row, fixed, cache.fixed,
-              cache.rhs);
-          }
+          listEntries(cache, offsets[k], offsets[k + 1] - offsets[k], v.row, fixed,
+            expansions, x != nullptr);
         }
         // The integrators may still read the buffers the vectors reuse.
         if (!m_preassembled.empty())
@@ -1201,16 +1397,7 @@ namespace Rodin::Assembly::Internal
           resize(cache.entryValues, count, "Rodin entry values");
           getVector(p.vec, cache.entryValues);
           sequence(m_execution, cache.entryIndices);
-          if (x)
-          {
-            scatterExpanded(m_execution, 0, count, cache.entryIndices, cache.entryValues,
-              p.row, *x, cache.rhs);
-          }
-          else
-          {
-            scatterVector(m_execution, 0, count, cache.entryIndices, cache.entryValues,
-              p.row, fixed, cache.fixed, cache.rhs);
-          }
+          listEntries(cache, 0, count, p.row, fixed, expansions, x != nullptr);
           // The buffers are reused by the next vector.
           m_execution.fence("Rodin preassembled vector");
           (void)ierr;
