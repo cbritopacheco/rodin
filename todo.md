@@ -639,8 +639,12 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       partagée. Tests Q3 scalaire et vectoriel sur hexaèdres.
 - [ ] Equipe vectorielle plus rapide: ne calculer par bloc que les lignes
       de bases utiles, éviter de recalculer géométrie et bases à chaque
-      bloc de coefficients. Même stratégie à appliquer à
-      `InternalVirtualWork` (`LocalCapacity` séparé).
+      bloc de coefficients.
+- [x] Tangente hyperélastique (`InternalVirtualWork`) au delà de
+      `LocalCapacity`: une équipe par cellule, points et cinématique par
+      groupes en mémoire partagée, gradients et tirés en arrière par
+      paire point et fonction de base, blocs de 32 coefficients par thread.
+      Test Q3 vectoriel sur hexaèdres (refusé avant) identique à l'hôte.
 
 ## 16. Optimisations génériques de l'assemblage device
 

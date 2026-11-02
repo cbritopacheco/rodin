@@ -16,6 +16,8 @@ namespace Rodin::Tests::Unit
 
   constexpr std::integral_constant<size_t, 2> Quadratic{};
 
+  constexpr std::integral_constant<size_t, 3> Cubic{};
+
   /**
    * @brief Sets a small displacement, keeping the deformation invertible.
    * @param data Coefficients.
@@ -116,6 +118,14 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_Variational_InternalVirtualWork, FormsOnMixedMesh)
   {
     checkForms(withClosure(makeMixedMesh()));
+  }
+
+  /// One team per cell holds the local matrices beyond the thread capacity.
+  TEST(Kokkos_Variational_InternalVirtualWork, FormsOfDegreeThreeOnHexahedra)
+  {
+    const auto source = withClosure(makeHexahedronMesh());
+    const DeviceMesh mesh(TestContext{}, source);
+    checkForms(H1(Cubic, source, 3), H1(Cubic, mesh, 3));
   }
 
   TEST(Kokkos_Variational_InternalVirtualWork, NewtonOnTriangles)
