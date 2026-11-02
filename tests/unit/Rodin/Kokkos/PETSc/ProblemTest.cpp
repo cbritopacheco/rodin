@@ -165,6 +165,17 @@ namespace Rodin::Tests::Unit
       DirichletBC(pu, VectorFunction{0, 0}).on(1) +
       DirichletBC(pp, RealFunction(1)).on(2);
     expectSameSystem(sstokes, pstokes);
+
+    // The block diagonal terms share the full entries of the divergence term.
+    Problem sgrad(su, sv);
+    sgrad = Integral(su, sv) + Integral(Jacobian(su), Jacobian(sv)) +
+      Integral(Div(su), Div(sv)) - Integral(f, sv) +
+      DirichletBC(su, VectorFunction{0, 0}).on(1);
+    Problem pgrad(pu, pv);
+    pgrad = Integral(pu, pv) + Integral(Jacobian(pu), Jacobian(pv)) +
+      Integral(Div(pu), Div(pv)) - Integral(f, pv) +
+      DirichletBC(pu, VectorFunction{0, 0}).on(1);
+    expectSameSystem(sgrad, pgrad);
   }
 
   /// @brief Potentials, restricted or in a block, match the sparse device assembly.

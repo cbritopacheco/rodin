@@ -210,11 +210,11 @@ namespace Rodin::Kokkos::Variational
        * @brief Locates the entries of every selected cell.
        * @return Number of entries, shared by both terms.
        */
-      size_t prepare() const override
+      size_t prepare(bool) const override
       {
         restrict();
-        const size_t count = m_dilatation.prepare();
-        [[maybe_unused]] const size_t shear = m_shear.prepare();
+        const size_t count = m_dilatation.prepare(false);
+        [[maybe_unused]] const size_t shear = m_shear.prepare(false);
         assert(shear == count);
         return count;
       }

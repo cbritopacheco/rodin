@@ -66,6 +66,9 @@ namespace Rodin::Assembly::Internal
     /// @brief Spacing of the entries, as given to getEntryPosition().
     size_t spacing = 1;
 
+    /// @brief Whether the entries are the diagonals of the component blocks only.
+    bool diagonal = false;
+
     bool operator==(const COOSegment&) const = default;
   };
 
@@ -1177,16 +1180,35 @@ namespace Rodin::Assembly::Internal
        */
       void integrateMatrices(CacheType& cache, bool fixed)
       {
-        // Integrators with equal segments share their entries.
+        // Integrators with equal layouts and blocks share their entries,
+        // listed on the diagonals of the component blocks when every one of
+        // them vanishes elsewhere.
+        std::vector<COOSegment> blocks;
+        std::vector<bool> diagonals;
+        std::vector<size_t> block(m_matrices.size());
+        for (size_t k = 0; k < m_matrices.size(); ++k)
+        {
+          const auto& m = m_matrices[k];
+          COOSegment key{m.integrator->getLayout(), m.row, m.col};
+          const auto it = std::find(blocks.begin(), blocks.end(), key);
+          block[k] = it - blocks.begin();
+          if (it == blocks.end())
+          {
+            blocks.push_back(std::move(key));
+            diagonals.push_back(true);
+          }
+          diagonals[block[k]] = diagonals[block[k]] && m.integrator->isBlockDiagonal();
+        }
         std::vector<COOSegment> segments;
         std::vector<size_t> segment(m_matrices.size());
         bool restricted = false;
         for (size_t k = 0; k < m_matrices.size(); ++k)
         {
           const auto& m = m_matrices[k];
-          const size_t entries = m.integrator->prepare();
-          COOSegment key{
-            m.integrator->getLayout(), m.row, m.col, entries, m.integrator->getSpacing()};
+          const bool diagonal = diagonals[block[k]];
+          const size_t entries = m.integrator->prepare(diagonal);
+          COOSegment key{m.integrator->getLayout(), m.row, m.col, entries,
+            m.integrator->getSpacing(), diagonal};
           restricted = restricted || !key.layout.attributes.empty() ||
             !key.layout.trialAttributes.empty();
           const auto it = std::find(segments.begin(), segments.end(), key);

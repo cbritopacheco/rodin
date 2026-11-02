@@ -171,10 +171,24 @@ namespace Rodin::Kokkos::Variational
       virtual DeviceLayout getLayout() const = 0;
 
       /**
+       * @brief Tells whether the entries vanish off the diagonal of the
+       * component blocks, so that prepare() can list the diagonals only.
+       * @return Whether the local matrices are diagonal by component blocks.
+       */
+      virtual bool isBlockDiagonal() const
+      {
+        return false;
+      }
+
+      /**
        * @brief Locates the entries of every selected cell.
+       * @param diagonal Whether to list only the entries on the diagonal of
+       * the component blocks, honored when isBlockDiagonal(). Integrators
+       * with equal layouts prepared with the same honored choice list the
+       * same coordinates in the same order.
        * @return Number of entries.
        */
-      virtual size_t prepare() const = 0;
+      virtual size_t prepare(bool diagonal) const = 0;
 
       /**
        * @brief Gets the spacing of the entries located by the last call to
@@ -210,7 +224,7 @@ namespace Rodin::Kokkos::Variational
        */
       TripletsType assemble() const
       {
-        const size_t count = prepare();
+        const size_t count = prepare(false);
         TripletsType result;
         result.rows = ::Kokkos::View<Index*, MemorySpace>(
           ::Kokkos::view_alloc(
@@ -396,7 +410,9 @@ namespace Rodin::Kokkos::Variational::Internal
    * index a * vdim + r is component r of the scalar degree of freedom a,
    * numbered globally as dof + r * stride, with vdim the product of the
    * integrated components and the copies. The entry of local test index i
-   * and local trial index j has rank i * ntr * copies + j.
+   * and local trial index j has rank i * ntr * copies + j. When @p compact,
+   * only the entries on the diagonal of the blocks are listed, the copy t
+   * having rank (te * ntr + tr) * copies + t.
    *
    * @param values Values of the entries.
    * @param rows Rows of the entries, written when @p index.
@@ -417,6 +433,7 @@ namespace Rodin::Kokkos::Variational::Internal
    * @param trialComponents Integrated trial components per scalar degree
    * of freedom.
    * @param copies Copies of each entry on the diagonal of its block.
+   * @param compact Whether to list the diagonal entries of the blocks only.
    * @param ntr Number of integrated trial indices.
    * @param te Integrated test index.
    * @param tr Integrated trial index.
@@ -427,17 +444,19 @@ namespace Rodin::Kokkos::Variational::Internal
     const Indices& cols, size_t base, size_t spacing, bool accumulate, bool index,
     const TestIndices& testIndices, Index testStride, Index testComponents,
     const TrialIndices& trialIndices, Index trialStride, Index trialComponents,
-    Index copies, Index ntr, Index te, Index tr, Real v)
+    Index copies, bool compact, Index ntr, Index te, Index tr, Real v)
   {
     const Index testVDim = testComponents * copies;
     const Index trialVDim = trialComponents * copies;
     for (Index t = 0; t < copies; ++t)
     {
       const Index i = te * copies + t;
-      for (Index s = 0; s < copies; ++s)
+      // The compact listing visits the diagonal copy only.
+      for (Index s = compact ? t : 0; s < (compact ? t + 1 : copies); ++s)
       {
         const Index j = tr * copies + s;
-        const size_t e = base + size_t(i * ntr * copies + j) * spacing;
+        const Index rank = compact ? (te * ntr + tr) * copies + t : i * ntr * copies + j;
+        const size_t e = base + size_t(rank) * spacing;
         // The entries off the diagonal of a block vanish.
         if (t == s)
         {
@@ -1327,12 +1346,25 @@ namespace Rodin::Kokkos::Variational
       }
 
       /**
+       * @brief Tells whether the entries vanish off the diagonal of the
+       * component blocks.
+       * @return Whether the integrand is component diagonal
+       * (isComponentDiagonal()).
+       */
+      bool isBlockDiagonal() const override
+      {
+        return isComponentDiagonal<DeviceView<LHSType>, DeviceView<RHSType>>();
+      }
+
+      /**
        * @brief Locates the entries of every selected polytope.
+       * @param diagonal Whether to list the diagonals of the component
+       * blocks only, honored when isBlockDiagonal().
        * @return Number of entries, each selected polytope with m trial and
        * n test scalar degrees of freedom owning m * trialVDim * n * testVDim
-       * entries.
+       * entries, or m * n * testVDim for the diagonals only.
        */
-      size_t prepare() const override
+      size_t prepare(bool diagonal) const override
       {
         const auto& integrand = getIntegrand();
         const auto& trialfes = integrand.getLHS().getFiniteElementSpace();
@@ -1344,8 +1376,11 @@ namespace Rodin::Kokkos::Variational
             << "Kokkos integrals require trial and test spaces on the same mesh."
             << Alert::Raise;
         }
+        m_compact = diagonal && isBlockDiagonal();
+        // The diagonals hold one entry per component of each pair of scalar
+        // degrees of freedom.
         return m_polytopes.prepare(mesh, this->getRegion(), this->getAttributes(),
-          trialfes.getDeviceDOFs(), trialfes.getVectorDimension(),
+          trialfes.getDeviceDOFs(), m_compact ? 1 : trialfes.getVectorDimension(),
           testfes.getDeviceDOFs(), testfes.getVectorDimension(),
           [&](const ::Rodin::Geometry::Polytope& polytope) {
             return getOrder(integrand, polytope);
@@ -1363,7 +1398,9 @@ namespace Rodin::Kokkos::Variational
        *
        * Each selected polytope writes its local matrix, the entry of local
        * test index te and local trial index tr having rank te * ntr + tr
-       * among the entries of the polytope.
+       * among the entries of the polytope, or the diagonals of its
+       * component blocks as described by Internal::writeEntries() when
+       * prepared so.
        */
       void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
         Real sign, bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
@@ -1381,6 +1418,7 @@ namespace Rodin::Kokkos::Variational
         const Index testVDim = testfes.getVectorDimension();
         const auto& quadrature = m_polytopes.getQuadrature();
         const Index vertices = quadrature.getMaximumVertexCount();
+        const bool compact = m_compact;
         constexpr bool p1 = std::is_same_v<TrialDOFsType, VertexDOFs> &&
           std::is_same_v<TestDOFsType, VertexDOFs>;
         const bool maximal = trialVDim == VectorCapacity<TrialRange> &&
@@ -1395,8 +1433,8 @@ namespace Rodin::Kokkos::Variational
               TestDOFsType::getCapacity(N) <= Capacity)
             {
               integratePolytopes<N, p1, Shape>(mesh, m_polytopes, trial, test, trialDOFs,
-                trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, rows,
-                cols);
+                trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, compact,
+                rows, cols);
               return true;
             }
             return false;
@@ -1407,18 +1445,19 @@ namespace Rodin::Kokkos::Variational
           if (vertices == 4 && quadrature.getMinimumVertexCount() == 4 && maximal)
           {
             integratePolytopes<4, true>(mesh, m_polytopes, trial, test, trialDOFs,
-              trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, rows,
-              cols);
+              trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, compact,
+              rows, cols);
             return;
           }
         }
         constexpr Index Capacity = IntegrationPointView::Capacity;
         if (vertices <= 4)
           integratePolytopes<4>(mesh, m_polytopes, trial, test, trialDOFs, trialVDim,
-            testDOFs, testVDim, values, offset, sign, accumulate, rows, cols);
+            testDOFs, testVDim, values, offset, sign, accumulate, compact, rows, cols);
         else
           integratePolytopes<Capacity>(mesh, m_polytopes, trial, test, trialDOFs,
-            trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, rows, cols);
+            trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, compact,
+            rows, cols);
       }
 
       /**
@@ -1519,7 +1558,7 @@ namespace Rodin::Kokkos::Variational
         const Trial& trial, const Test& test, const TrialDOFsType& trialDOFs,
         Index trialVDim, const TestDOFsType& testDOFs, Index testVDim,
         const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset, Real sign,
-        bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
+        bool accumulate, bool compact, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
         constexpr Index size = getLocalSize<Vertices, Trial, Test>();
@@ -1531,13 +1570,14 @@ namespace Rodin::Kokkos::Variational
             getTeamPoints<Vertices, Trial, Test>() >= TeamMinimumPoints))
         {
           integrateTeams<Vertices, Exact, Shape>(mesh, polytopes, trial, test, trialDOFs,
-            trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, rows, cols);
+            trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, compact,
+            rows, cols);
         }
         else
         {
           integrateThreads<Vertices, Exact, Shape>(mesh, polytopes, trial, test,
             trialDOFs, trialVDim, testDOFs, testVDim, values, offset, sign, accumulate,
-            rows, cols);
+            compact, rows, cols);
         }
       }
 
@@ -1566,7 +1606,7 @@ namespace Rodin::Kokkos::Variational
         const Trial& trial, const Test& test, const TrialDOFsType& trialDOFs,
         Index trialVDim, const TestDOFsType& testDOFs, Index testVDim,
         const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset, Real sign,
-        bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
+        bool accumulate, bool compact, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
         using TestValue = StoredValue<Test, Trial, Test>;
@@ -1651,7 +1691,7 @@ namespace Rodin::Kokkos::Variational
             Rodin::Kokkos::Variational::Internal::writeEntries(values, rows, cols, base,
               spacing, accumulate, index, testIndices, testDOFs.getStride(),
               testComponents, trialIndices, trialDOFs.getStride(), trialComponents,
-              copies, ntr, te, tr, v);
+              copies, compact, ntr, te, tr, v);
           };
           for (Index first = 0; first < entries; first += threads * E)
           {
@@ -1747,7 +1787,7 @@ namespace Rodin::Kokkos::Variational
         const Trial& trial, const Test& test, const TrialDOFsType& trialDOFs,
         Index trialVDim, const TestDOFsType& testDOFs, Index testVDim,
         const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset, Real sign,
-        bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
+        bool accumulate, bool compact, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
         using TestValue = StoredValue<Test, Trial, Test>;
@@ -1835,7 +1875,7 @@ namespace Rodin::Kokkos::Variational
                 Rodin::Kokkos::Variational::Internal::writeEntries(values, rows, cols,
                   base, spacing, accumulate, index, testIndices, testDOFs.getStride(),
                   testComponents, trialIndices, trialDOFs.getStride(), trialComponents,
-                  copies, ntr, te, tr, sign * local[te * ntr + tr]);
+                  copies, compact, ntr, te, tr, sign * local[te * ntr + tr]);
               }
             }
           });
@@ -1960,6 +2000,7 @@ namespace Rodin::Kokkos::Variational
 
       std::unique_ptr<IntegrandType> m_integrand;
       mutable PolytopesType m_polytopes;
+      mutable bool m_compact = false;
   };
 
   /**

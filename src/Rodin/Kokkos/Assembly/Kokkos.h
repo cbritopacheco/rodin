@@ -1525,7 +1525,10 @@ namespace Rodin::Assembly::Internal
         offsets.assign(1, 0);
         for (const auto& m : m_matrices)
         {
-          const size_t count = m.integrator ? m.integrator->prepare() : m.op->nonZeros();
+          // Each integrator owns its entries, listed on the diagonals of the
+          // component blocks when the others vanish.
+          const size_t count =
+            m.integrator ? m.integrator->prepare(true) : m.op->nonZeros();
           counts.push_back(count);
           offsets.push_back(total + count);
           if (count > 0)

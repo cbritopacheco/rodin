@@ -65,6 +65,37 @@ namespace Rodin::Tests::Unit
     expectSameForm(hp, hv, Integral(hp, Div(hv)), dp, dv, Integral(dp, Div(dv)));
   }
 
+  /// @brief Block diagonal integrals can list the diagonals of their blocks only.
+  void checkBlockDiagonal(const HostMesh& source)
+  {
+    const DeviceMesh mesh(TestContext{}, source);
+    const size_t d = source.getSpaceDimension();
+    P1 fes(mesh, d);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    auto mass = Integral(u, v);
+    auto jacobian = Integral(Jacobian(u), Jacobian(v));
+    auto divergence = Integral(Div(u), Div(v));
+    EXPECT_TRUE(mass.isBlockDiagonal());
+    EXPECT_TRUE(jacobian.isBlockDiagonal());
+    EXPECT_FALSE(divergence.isBlockDiagonal());
+    const size_t full = mass.prepare(false);
+    EXPECT_GT(full, 0);
+    EXPECT_EQ(mass.prepare(true) * d, full);
+    EXPECT_EQ(jacobian.prepare(true) * d, full);
+    EXPECT_EQ(divergence.prepare(true), full);
+  }
+
+  TEST(Kokkos_Variational_VectorBilinearForm, BlockDiagonalOnTriangles)
+  {
+    checkBlockDiagonal(makeTriangleMesh());
+  }
+
+  TEST(Kokkos_Variational_VectorBilinearForm, BlockDiagonalOnTetrahedra)
+  {
+    checkBlockDiagonal(makeTetrahedronMesh());
+  }
+
   TEST(Kokkos_Variational_VectorBilinearForm, MatrixCoefficientOnTriangles)
   {
     checkMatrixCoefficient(makeTriangleMesh());

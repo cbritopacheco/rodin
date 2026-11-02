@@ -296,7 +296,7 @@ namespace Rodin::Solid
        * @brief Locates the entries of every cell.
        * @return Number of entries, laid out as by the device integrals.
        */
-      size_t prepare() const override
+      size_t prepare(bool) const override
       {
         const auto& trialfes = m_trial.get().getFiniteElementSpace();
         const auto& testfes = m_test.get().getFiniteElementSpace();
@@ -1380,7 +1380,7 @@ namespace Rodin::Solid
        * @brief Locates the entries of every cell.
        * @return Number of entries, laid out as by the device integrals.
        */
-      size_t prepare() const override
+      size_t prepare(bool) const override
       {
         const auto& trialfes = m_trial.get().getFiniteElementSpace();
         const auto& testfes = m_test.get().getFiniteElementSpace();

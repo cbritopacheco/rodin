@@ -262,7 +262,7 @@ namespace Rodin::Kokkos::Variational
        * trial cell with m trial local degrees of freedom owning n * m
        * entries.
        */
-      size_t prepare() const override
+      size_t prepare(bool) const override
       {
         const auto& integrand = getIntegrand();
         const auto& trialfes = integrand.getLHS().getOperand().getFiniteElementSpace();

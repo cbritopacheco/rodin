@@ -452,6 +452,7 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       | optimisations des jalons 10 et 16 (mesure du 2026-11-02) | 14.3 ms | 2.2x |
       | formes diagonales par composante intégrées une fois | 13.1 ms | 2.0x |
       | groupement du second membre gardé entre assemblages | 9.7 ms | 1.5x |
+      | diagonales des blocs de composantes seules listées | 9.0 ms | 1.4x |
 
       Grille 16: 6.9 ms contre 1.1 ms (6.0x). Atrium `Coarse.mesh`
       (683704 tétraèdres): 234 ms contre 36.6 ms (6.4x).
@@ -475,6 +476,17 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       assemblage: 7 intégrateurs bilinéaires 3.9 ms, linéaire 1.0 ms,
       `merge` des doublons dans l'ordre hôte 2.45 ms (le noyau manuel paie
       le même gather dans `MatSetValuesCOO`, 2.6 ms), petits noyaux 1 ms.
+- [x] Liste compacte des formes diagonales par composante: un intégrateur
+      dont les blocs de composantes sont diagonaux (`isBlockDiagonal()`)
+      peut ne lister que leurs diagonales (`prepare(true)`, rang
+      `(te * ntr + tr) * copies + t` dans `Internal::writeEntries`), soit
+      3 fois moins d'entrées en 3D. `Assembly::Kokkos` le fait pour chaque
+      intégrateur, le COO PETSc pour un segment dont tous les intégrateurs
+      le permettent (sinon liste pleine partagée, test mixte masse +
+      jacobienne + divergence). Oseen grille 30 (2080 Ti): 9.7 ms contre
+      9.0 ms. `KokkosH1_Assembly` vectoriel sur ares (5090): Q2 191 contre
+      182 ms, Q3 276 contre 271 ms, P2 tétraèdres 36 contre 25 ms, P3
+      tétraèdres 16 contre 12 ms.
 - [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
       noyau (somme des intégrandes), capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles
