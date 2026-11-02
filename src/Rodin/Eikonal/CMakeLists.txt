@@ -8,6 +8,7 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinEikonal_HEADERS
   FMM.h
   FIM.h
+  Metric.h
 )
 
 # Header-only / interface library
@@ -50,3 +51,7 @@ rodin_install_headers(
   DIRECTORIES .
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Eikonal
 )
+
+if (RODIN_USE_OPENMP)
+  target_link_libraries(RodinEikonal INTERFACE OpenMP::OpenMP_CXX)
+endif()

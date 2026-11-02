@@ -13,6 +13,8 @@
  */
 
 #include <algorithm>
+#include <atomic>
+#include <exception>
 #include <array>
 #include <cmath>
 #include <functional>
@@ -21,10 +23,14 @@
 #include <utility>
 #include <vector>
 
-#include <Eigen/Cholesky>
-
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Context/Local.h"
+#include "Rodin/Configure.h"
+#include "Metric.h"
+
+#ifdef RODIN_USE_OPENMP
+#include <omp.h>
+#endif
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/PolytopeIterator.h"
 #include "Rodin/QF/QuadratureFormula.h"
@@ -85,8 +91,13 @@ namespace Rodin::Eikonal
    * maps and heterogeneous coefficients can give nonconvex local objectives.
    * Refining these controls and the mesh is required for an accuracy claim.
    *
-   * Only local serial execution is implemented. Geometry and coefficients must
-   * remain fixed during a solve; coefficient callables must be deterministic.
+   * OpenMP is opt-in through setThreadCount(). Dependency levels preserve
+   * serial co-cell read/write ordering and active-list reconstruction, giving
+   * identical iterates and iteration counts for deterministic coefficients.
+   * Coefficient expressions are copied per worker. Captured external state must
+   * permit concurrent reads; stateful shared callback captures are unsupported.
+   * Worker exceptions are rethrown after the parallel region.
+   * Geometry and coefficients must remain fixed during a solve; coefficient callables must be deterministic.
    * Incidences @f$0\to D@f$ and @f$D\to0@f$ must be computed explicitly.
    * Valid, regular, mutually conforming cell maps are a caller precondition.
    */
@@ -127,9 +138,6 @@ namespace Rodin::Eikonal
       /// @brief Initial reference search step; all nonpoint faces use unit reference edges.
       static constexpr Real InitialSearchStep = Real(0.5);
 
-      /// @brief Roundoff allowance for checking tensor symmetry relative to its entries.
-      static constexpr Real SymmetryRoundoffFactor = Real(64);
-
     public:
       /**
        * @brief Binds the output field and owns the coefficient.
@@ -144,6 +152,7 @@ namespace Rodin::Eikonal
           m_integrationOrder(DefaultIntegrationOrder),
           m_maxIterations(DefaultMaxIterations),
           m_iterations(0),
+          m_threadCount(1),
           m_seeded(false)
       {}
 
@@ -210,6 +219,36 @@ namespace Rodin::Eikonal
         }
         m_maxIterations = iterations;
         return *this;
+      }
+
+      /**
+       * @brief Sets the OpenMP worker count, defaulting to serial execution.
+       * @param threads Positive worker count; values above one require an OpenMP build.
+       * @returns This solver.
+       */
+      FIM& setThreadCount(size_t threads)
+      {
+        if (threads == 0 ||
+          threads > static_cast<size_t>(std::numeric_limits<int>::max()))
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Expected a positive representable OpenMP thread count." << Alert::Raise;
+        }
+#ifndef RODIN_USE_OPENMP
+        if (threads != 1)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Multiple FIM threads require an OpenMP-enabled build." << Alert::Raise;
+        }
+#endif
+        m_threadCount = threads;
+        return *this;
+      }
+
+      /// @returns Requested worker count; the default is one.
+      size_t getThreadCount() const
+      {
+        return m_threadCount;
       }
 
       /// @returns Number of active-list rounds in the last solve.
@@ -297,15 +336,91 @@ namespace Rodin::Eikonal
               << " active-list rounds." << Alert::Raise;
           }
           ++m_iterations;
+          std::vector<uint8_t> changed(m_active.size(), 0);
+          auto update = [&](Index position, const CoefficientType& coefficient) {
+            const Index vertex = m_active[position];
+            const Real candidate = local(vertex, coefficient);
+            Real& time = arrival[space.getDOFs(0, vertex)[0]];
+            if (std::isfinite(candidate) && time - candidate > m_tolerance)
+            {
+              time = candidate;
+              changed[position] = 1;
+            }
+          };
+          if (m_threadCount == 1 || dimension == 0)
+          {
+            for (Index position = 0; position < m_active.size(); ++position)
+              update(position, m_coefficient);
+          }
+#ifdef RODIN_USE_OPENMP
+          else
+          {
+            // Preserve every co-cell dependency of the serial active-list order.
+            // A level contains no pair of target vertices sharing a cell.
+            IndexVector cellLevel(mesh.getCellCount(), 0);
+            std::vector<IndexVector> levels;
+            for (Index position = 0; position < m_active.size(); ++position)
+            {
+              const Index vertex = m_active[position];
+              Index level = 0;
+              for (Index cell : connectivity.getIncidence(0, dimension).at(vertex))
+                level = std::max(level, cellLevel[cell]);
+              if (levels.size() <= level)
+                levels.resize(level + 1);
+              levels[level].push_back(position);
+              for (Index cell : connectivity.getIncidence(0, dimension).at(vertex))
+                cellLevel[cell] = level + 1;
+            }
+            std::exception_ptr error;
+            std::atomic<bool> failed(false);
+#pragma omp parallel num_threads(m_threadCount)
+            {
+              Optional<CoefficientType> coefficient;
+              auto capture = [&]() {
+#pragma omp critical(RodinEikonalFIMException)
+                {
+                  if (!error)
+                    error = std::current_exception();
+                }
+                failed.store(true, std::memory_order_relaxed);
+              };
+              try
+              {
+                coefficient.emplace(m_coefficient);
+              }
+              catch (...)
+              {
+                capture();
+              }
+              for (const auto& level : levels)
+              {
+#pragma omp for schedule(static)
+                for (Index entry = 0; entry < level.size(); ++entry)
+                {
+                  if (failed.load(std::memory_order_relaxed))
+                    continue;
+                  try
+                  {
+                    update(level[entry], *coefficient);
+                  }
+                  catch (...)
+                  {
+                    capture();
+                  }
+                }
+              }
+            }
+            if (error)
+              std::rethrow_exception(error);
+          }
+#endif
           IndexVector next;
           std::vector<bool> queued(mesh.getVertexCount(), false);
-          for (Index vertex : m_active)
+          for (Index position = 0; position < m_active.size(); ++position)
           {
-            const Real candidate = local(vertex);
-            Real& time = arrival[space.getDOFs(0, vertex)[0]];
-            if (!std::isfinite(candidate) || !(time - candidate > m_tolerance))
+            if (!changed[position])
               continue;
-            time = candidate;
+            const Index vertex = m_active[position];
             for (Index cell : connectivity.getIncidence(0, dimension).at(vertex))
             {
               for (Index neighbor : connectivity.getIncidence(dimension, 0).at(cell))
@@ -328,10 +443,11 @@ namespace Rodin::Eikonal
        * @param cell Cell whose mapping and coefficient traces are used.
        * @param origin Target reference vertex.
        * @param entry Reference boundary point supplying the arrival time.
+       * @param coefficient Worker-local coefficient expression.
        * @returns Quadrature approximation of positive travel time.
        */
       Real travel(const Geometry::Polytope& cell, const Math::SpatialPoint& origin,
-        const Math::SpatialPoint& entry) const
+        const Math::SpatialPoint& entry, const CoefficientType& coefficient) const
       {
         const Math::SpatialVector<Real> direction = entry - origin;
         const auto& formula = QF::QuadratureFormula::get(
@@ -343,7 +459,7 @@ namespace Rodin::Eikonal
             origin + formula.getPoint(sample)(0) * direction;
           const Geometry::Point point(cell, reference);
           const Math::SpatialVector<Real> tangent = point.getJacobian() * direction;
-          const auto value = m_coefficient(point);
+          const auto value = coefficient(point);
           Real density;
           if constexpr (std::is_arithmetic_v<std::remove_cvref_t<decltype(value)>>)
           {
@@ -356,58 +472,8 @@ namespace Rodin::Eikonal
           }
           else
           {
-            const size_t size = tangent.size();
-            if (value.rows() != size || value.cols() != size)
-            {
-              Alert::MemberFunctionException(*this, __func__)
-                << "Velocity tensor must match the physical embedding dimension."
-                << Alert::Raise;
-            }
-            using Storage = typename Math::SpatialMatrix<Real>::Data;
-            Storage matrix = Storage::Identity();
-            Real scale = 0;
-            for (size_t row = 0; row < size; ++row)
-            {
-              for (size_t column = 0; column < size; ++column)
-              {
-                const Real entryValue = value(row, column);
-                if (!std::isfinite(entryValue))
-                {
-                  Alert::MemberFunctionException(*this, __func__)
-                    << "Velocity tensor entries must be finite." << Alert::Raise;
-                }
-                matrix(row, column) = entryValue;
-                scale = std::max(scale, std::abs(entryValue));
-              }
-            }
-            const Real symmetryTolerance =
-              SymmetryRoundoffFactor * std::numeric_limits<Real>::epsilon() * scale;
-            for (size_t row = 0; row < size; ++row)
-            {
-              for (size_t column = 0; column < row; ++column)
-              {
-                if (std::abs(matrix(row, column) - matrix(column, row)) >
-                  symmetryTolerance)
-                {
-                  Alert::MemberFunctionException(*this, __func__)
-                    << "Velocity tensor must be symmetric." << Alert::Raise;
-                }
-                matrix(row, column) = matrix(column, row) =
-                  (matrix(row, column) + matrix(column, row)) / 2;
-              }
-            }
-            const Eigen::LLT<Storage> factor(matrix);
-            if (factor.info() != Eigen::Success)
-            {
-              Alert::MemberFunctionException(*this, __func__)
-                << "Velocity tensor must be positive definite." << Alert::Raise;
-            }
-            Math::FixedSizeVector<Real, 3> right;
-            right.setZero();
-            for (size_t row = 0; row < size; ++row)
-              right(row) = tangent(row);
-            const Math::FixedSizeVector<Real, 3> inverseTangent = factor.solve(right);
-            density = std::sqrt(Math::dot(right, inverseTangent));
+            const Metric metric(value, tangent.size());
+            density = std::sqrt(metric.dot(tangent, tangent));
           }
           if (!(density > 0) || !std::isfinite(density))
           {
@@ -422,9 +488,10 @@ namespace Rodin::Eikonal
       /**
        * @brief Minimizes the native trace candidate at one vertex.
        * @param vertex Target global vertex index.
+       * @param coefficient Worker-local coefficient expression.
        * @returns Best finite candidate found, or infinity when no support is reached.
        */
-      Real local(Index vertex) const
+      Real local(Index vertex, const CoefficientType& coefficient) const
       {
         const auto& arrival = m_arrival.get();
         const auto& space = arrival.getFiniteElementSpace();
@@ -483,7 +550,7 @@ namespace Rodin::Eikonal
                   time += weight * times[localVertex];
                   entry += weight * references[localVertex];
                 }
-                return time + travel(*cell, origin, entry);
+                return time + travel(*cell, origin, entry, coefficient);
               };
               if (entityDimension == 0)
               {
@@ -555,6 +622,7 @@ namespace Rodin::Eikonal
       size_t m_integrationOrder;
       size_t m_maxIterations;
       size_t m_iterations;
+      size_t m_threadCount;
       bool m_seeded;
       std::vector<bool> m_prescribed;
       IndexVector m_active;

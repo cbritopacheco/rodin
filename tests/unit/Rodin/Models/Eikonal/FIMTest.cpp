@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <stdexcept>
 
 #include "Rodin/Eikonal/FIM.h"
 #include "Rodin/Geometry/ParametricTransformation.h"
@@ -408,3 +409,130 @@ TEST(FIM, IterationLimit)
   EXPECT_THROW(solver.solve(), Alert::Exception);
   EXPECT_EQ(solver.getIterations(), 1);
 }
+
+#ifdef RODIN_USE_OPENMP
+/// @brief Dependency-level OpenMP updates preserve every serial iterate on native cells.
+TEST(FIM, OpenMPMatchesSerialNativeCells)
+{
+  for (auto geometry : Geometries)
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    auto mesh = dimension == 1 ? LocalMesh::UniformGrid(geometry, {4})
+      : dimension == 2         ? LocalMesh::UniformGrid(geometry, {4, 4})
+                               : LocalMesh::UniformGrid(geometry, {3, 3, 3});
+    mesh.getConnectivity().compute(dimension, 0);
+    mesh.getConnectivity().compute(0, dimension);
+    P1 space(mesh);
+    GridFunction arrival(space);
+    Eikonal::FIM solver(arrival, [](const Point& point) {
+      return Real(1) + Real(0.1) * point.getPhysicalCoordinates()(0);
+    });
+    EXPECT_EQ(solver.getThreadCount(), 1);
+    solver.seed(IndexVector{0}).solve();
+    const auto reference = arrival.getData();
+    const size_t iterations = solver.getIterations();
+    for (size_t threads : {2u, 4u})
+    {
+      solver.setThreadCount(threads).seed(IndexVector{0}).solve();
+      EXPECT_EQ(solver.getIterations(), iterations);
+      EXPECT_TRUE((arrival.getData().array() == reference.array()).all());
+    }
+  }
+}
+
+/// @brief Curved quadrilateral maps and tensor expressions remain deterministic across workers.
+TEST(FIM, OpenMPCurvedTensorPaths)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
+  mesh.scale(Real(1) / 3);
+  mesh.getConnectivity().compute(2, 0);
+  mesh.getConnectivity().compute(0, 2);
+  RealH1Element<2> element(Polytope::Type::Quadrilateral);
+  for (auto cell = mesh.getCell(); cell; ++cell)
+  {
+    PointCloud controls(2, element.getCount());
+    for (size_t node = 0; node < element.getCount(); ++node)
+    {
+      const auto& r = element.getNode(node);
+      const Point point(*cell, r);
+      const auto physical = point.getPhysicalCoordinates();
+      controls(0, node) = physical(0);
+      controls(1, node) =
+        physical(1) + Real(0.05) * r(0) * (1 - r(0)) * r(1) * (1 - r(1));
+    }
+    mesh.setPolytopeTransformation(
+      {2, cell->getIndex()}, new ParametricTransformation(controls, element));
+  }
+  P1 space(mesh);
+  GridFunction arrival(space);
+  Math::SpatialMatrix<Real> tensor = Math::SpatialMatrix<Real>::Identity(2, 2);
+  tensor(0, 0) = 4;
+  tensor(0, 1) = tensor(1, 0) = Real(0.5);
+  Eikonal::FIM solver(arrival, MatrixFunction(tensor));
+  solver.seed(IndexVector{0}).solve();
+  const auto reference = arrival.getData();
+  const size_t iterations = solver.getIterations();
+  solver.setThreadCount(4).seed(IndexVector{0}).solve();
+  EXPECT_EQ(solver.getIterations(), iterations);
+  EXPECT_TRUE((arrival.getData().array() == reference.array()).all());
+}
+
+/// @brief Worker exceptions are propagated after joining, without terminating OpenMP workers.
+TEST(FIM, OpenMPExceptions)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
+  mesh.getConnectivity().compute(2, 0);
+  mesh.getConnectivity().compute(0, 2);
+  P1 space(mesh);
+  GridFunction arrival(space);
+  Eikonal::FIM solver(arrival, [](const Point&) { return Real(-1); });
+  solver.setThreadCount(4).seed(IndexVector{0});
+  EXPECT_THROW(solver.solve(), Alert::Exception);
+  EXPECT_THROW(solver.setThreadCount(0), Alert::Exception);
+}
+
+/// @brief A coefficient copy failure is caught even before a worker has an expression.
+TEST(FIM, OpenMPCoefficientCopyException)
+{
+  struct Coefficient
+  {
+    bool* fail;
+    explicit Coefficient(bool& flag)
+      : fail(&flag)
+    {}
+    Coefficient(const Coefficient& other)
+      : fail(other.fail)
+    {
+      if (*fail)
+        throw std::runtime_error("User coefficient copy failed");
+    }
+    Real operator()(const Point&) const
+    {
+      return 1;
+    }
+  };
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+  mesh.getConnectivity().compute(2, 0);
+  mesh.getConnectivity().compute(0, 2);
+  P1 space(mesh);
+  GridFunction arrival(space);
+  bool fail = false;
+  Eikonal::FIM solver(arrival, Coefficient(fail));
+  solver.setThreadCount(4).seed(IndexVector{0});
+  fail = true;
+  EXPECT_THROW(solver.solve(), std::runtime_error);
+}
+#else
+/// @brief Builds without OpenMP reject an unavailable execution backend explicitly.
+TEST(FIM, UnavailableOpenMP)
+{
+  auto mesh = referenceCell(Polytope::Type::Segment);
+  P1 space(mesh);
+  GridFunction arrival(space);
+  Eikonal::FIM solver(arrival, [](const Point&) { return Real(1); });
+  EXPECT_THROW(solver.setThreadCount(2), Alert::Exception);
+  solver.setThreadCount(1).seed(IndexVector{0}).solve();
+  EXPECT_NEAR(arrival[space.getDOFs(0, 1)[0]], 1, 1e-12);
+}
+#endif

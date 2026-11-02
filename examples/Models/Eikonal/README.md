@@ -31,7 +31,7 @@ background is transparent. Contours clarify the front without dense mesh edges.
 
 ## Native-cell fast iteration
 
-`Rodin/Eikonal/FIM.h` supplies a local, serial fast iterative solver with
+`Rodin/Eikonal/FIM.h` supplies a local fast iterative solver with optional OpenMP and
 an output `GridFunction<P1<Real, LocalMesh>>`. Its calling pattern matches
 fast marching:
 
@@ -136,7 +136,7 @@ global optimizer on arbitrary curved maps or heterogeneous coefficients.
 Reducing the search resolution does not certify discovery of every nonconvex
 minimum. Neither quadrature order nor active-list convergence alone establishes
 arrival-time accuracy. Check path quadrature, search resolution, and spatial
-refinement for the intended geometry and anisotropy. There is no OpenMP, GPU,
+refinement for the intended geometry and anisotropy. There is no GPU,
 MPI, PETSc, or high-order arrival-space specialization in this implementation.
 
 Build and run `RodinFIMTest` and `RodinManufacturedEikonalFIMTest`. The tests
@@ -147,3 +147,86 @@ point-source fields. The point-source check integrates field error over the
 fixed physical domain. A nodal average can increase on the coarsest meshes
 because the changing sample set overweights the source-cell stencil, where
 direct source-to-vertex paths are exact.
+
+### OpenMP execution
+
+Configure Rodin with `RODIN_USE_OPENMP=ON`, then opt in before solving:
+
+```cpp
+Eikonal::FIM solver(arrival, coefficient);
+solver.setThreadCount(4).seed(seeds).solve();
+```
+
+The default worker count is one. A build without OpenMP rejects a request for
+more than one worker. Dependency levels preserve the serial active-list order
+between all vertices sharing a cell. Updates within a level have no co-cell
+read/write conflicts and may run concurrently. Next-round vertices are collected
+in the original order after workers join. Deterministic coefficients therefore
+produce the same values and iteration counts as the serial algorithm; this is
+checked by exact field comparisons, including curved tensor cases.
+
+Each worker owns a copy of the coefficient expression. External data captured
+by a callback must allow concurrent reads and must remain fixed during a solve.
+Worker exceptions are rethrown after joining. Level construction, barriers, and
+coefficient copying have a cost, so additional workers need not improve small
+problems. This implementation preserves Gauss-Seidel dependencies rather than
+changing the iteration to simultaneous Jacobi updates.
+
+### Tensor FMM and matched comparisons
+
+FMM also accepts the squared-velocity tensor through the same coefficient API:
+
+```cpp
+Eikonal::FMM solver(arrival, coefficient);
+solver.seed(seeds).solve();
+```
+
+The tensor overload freezes the coefficient at each cell centroid. It requires
+native first-order affine simplices, nonobtuse in the inverse-velocity metric;
+unsupported cells raise. Matrix dimensions, symmetry, and positive definiteness
+are checked by the shared `Eikonal::Metric` implementation. FMM uses metric Gram
+entries in its analytic simplex updates and metric lengths in edge updates.
+The scalar-speed path retains its original arithmetic and behavior.
+
+The metric angle condition is sufficient for causal acceptance. For an upwind
+simplex update, let the Gram matrix be \(G\) and the supporting-time vector be
+\(u\). An admissible update satisfies
+
+\[
+t\mathbf 1-u=G\mu,\qquad \mu\ge0.
+\]
+
+Nonnegative Gram entries ensure that every supporting time precedes the
+candidate. FIM can revisit values and does not impose this FMM mesh condition.
+Its approximate local face search still needs its own accuracy assessment.
+Anisotropy alone is therefore not a reason to choose FIM; native/curved geometry,
+mesh restrictions, and parallel execution are separate considerations.
+
+Build `RodinEikonalPropagationBenchmarks` with `RODIN_BUILD_BENCHMARKS=ON` to
+compare seeded propagation on matched constant-tensor triangle and tetrahedron
+meshes. For example:
+
+```sh
+cmake --build build --target RodinEikonalPropagationBenchmarks -j
+./build/tests/benchmarks/RodinEikonalPropagationBenchmarks \
+  --benchmark_filter='Eikonal/(FMM|FIM)/2/32/2/' \
+  --benchmark_min_time=0.01s --benchmark_repetitions=5 \
+  --benchmark_out=propagation.json --benchmark_out_format=json
+```
+
+Case arguments are dimension, reference-grid intervals, velocity ratio, and
+requested workers. A rotation and stretch make the mesh nonobtuse in the tensor
+metric. Different velocity ratios change the physical domain stretch while
+holding the reference travel-time domain fixed. Within each case, FMM and FIM
+use identical physical meshes, coefficients, and sources. Timing includes
+seeding and solving; setup, reference solves, and error checks are excluded.
+FIM quadrature order and search resolution, cells, vertices, analytic maximum
+errors, differences from FMM, and iteration counts are reported as counters.
+
+This compares the complete current implementations. FMM uses analytic simplex
+updates, whereas native FIM performs numerical face minimization and path
+quadrature. Runtime differences include that local-update work as well as queue
+versus active-list scheduling. FMM can be substantially faster on these simple
+causal meshes, even when OpenMP accelerates FIM. The comparison is not evidence
+that FIM is intrinsically slower or that either method is more accurate on
+arbitrary anisotropic or curved domains.
