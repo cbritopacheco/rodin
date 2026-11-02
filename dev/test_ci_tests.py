@@ -76,7 +76,9 @@ endforeach()
 add_library(GTest::gtest INTERFACE IMPORTED)
 function(rodin_suppress_external_mpi_lsan_for_test name)
 endfunction()
-set(MPIEXEC_EXECUTABLE mpiexec)
+# Registration-only fixture; the guard runner need not have MPI installed.
+# CTest omits command when its launcher cannot be resolved.
+set(MPIEXEC_EXECUTABLE "${CMAKE_COMMAND}")
 set(MPIEXEC_NUMPROC_FLAG -n)
 include(assembly.cmake)
 """)
