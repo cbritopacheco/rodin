@@ -1720,7 +1720,9 @@ namespace Rodin::Assembly::Internal
         }
         else
         {
-          ::Kokkos::deep_copy(
+          // Ordered after the kernels that sum the right-hand side, waited
+          // for before finish() returns.
+          ::Kokkos::deep_copy(m_execution,
             ::Kokkos::View<PetscScalar*, ::Kokkos::DefaultExecutionSpace::memory_space,
               Unmanaged>(array, m_rows),
             source);
