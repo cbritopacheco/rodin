@@ -250,6 +250,7 @@ namespace Rodin::Geometry
           m_incidence = std::move(other.m_incidence);
           m_reference = std::move(other.m_reference);
           m_keys.clear();
+          m_types.clear();
           m_relations.clear();
         }
         return *this;
@@ -299,12 +300,22 @@ namespace Rodin::Geometry
         return m_offsets[d];
       }
 
-      /// @param d Entity dimension. @param i Local index. @returns Reference family.
+      /// @param d Entity dimension. @param i Local index. @returns Reference family, read once.
       Polytope::Type getGeometry(size_t d, Index i) const override
       {
         assert(i < getCount(d));
-        return Rodin::Kokkos::Internal::read(
-          m_context.getExecutionSpace(), m_geometries, m_offsets[d] + i);
+        std::lock_guard<std::mutex> lock(m_mutex);
+        const Index entity = m_offsets[d] + i;
+        auto it = m_types.find(entity);
+        if (it == m_types.end())
+        {
+          it = m_types
+                 .emplace(entity,
+                   Rodin::Kokkos::Internal::read(
+                     m_context.getExecutionSpace(), m_geometries, entity))
+                 .first;
+        }
+        return it->second;
       }
 
       /// @param d Entity dimension. @param i Local index. @returns Host key, materialized on demand.
@@ -990,6 +1001,7 @@ namespace Rodin::Geometry
       DeviceArray<Reference> m_reference;
       mutable std::mutex m_mutex;
       mutable std::map<Index, Polytope::Key> m_keys;
+      mutable std::map<Index, Polytope::Type> m_types;
       mutable std::map<std::pair<size_t, size_t>, Incidence> m_relations;
   };
 
@@ -1237,6 +1249,7 @@ namespace Rodin::Geometry
       m_relations.erase({k, d});
     }
     m_keys.clear();
+    m_types.clear();
   }
 
   template <class Backend>

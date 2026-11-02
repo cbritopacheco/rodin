@@ -573,6 +573,16 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       politique de `QuadratureType` les garde dans les arguments (limite
       de 4 Ko). Oseen (2080 Ti): grille 16 1.345 ms contre 1.42 ms (1.18x
       du noyau manuel), grille 30 5.96 ms contre 6.07 ms (0.93x).
+- [x] Géométrie des polytopes lue une fois: `Connectivity::getGeometry`
+      lisait le type sur le device à chaque appel (copie de 4 octets et
+      synchronisation), et `hasOrders` le demandait pour chaque
+      intégrateur à chaque assemblage (environ 17 lectures). Le type est
+      gardé côté hôte comme les sommets (`m_types`, vidé avec `m_keys`
+      quand des entités sont découvertes). Plus aucune copie du device
+      vers l'hôte par assemblage. Oseen (2080 Ti): grille 16 1.18 ms
+      contre 1.345 ms (1.04x du noyau manuel), grille 30 5.68 ms contre
+      5.96 ms (0.88x). Retirer le vidage fait échouer 4 tests
+      `Kokkos_Connectivity` et `Kokkos_Mesh`.
 - [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
       noyau (somme des intégrandes), capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles
