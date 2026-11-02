@@ -882,8 +882,14 @@ namespace Rodin::Kokkos::Variational::Internal
        */
       static auto policy(const ExecutionSpace& execution, Index count)
       {
-        return ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>(
-          execution, 0, count);
+        // The kernels capture the mesh view, the quadrature tables and the
+        // integrand, more than the 512 bytes CUDA passes as arguments by
+        // default; the hint keeps them in the kernel arguments instead of
+        // the constant memory copy, which waits for an event at each launch.
+        return ::Kokkos::Experimental::require(
+          ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>(
+            execution, 0, count),
+          ::Kokkos::Experimental::WorkItemProperty::HintLightWeight);
       }
 
       /**

@@ -566,6 +566,13 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       au lieu de 1.5x), grille 30 6.07 ms contre 6.60 ms (0.94x). Test
       `AttributeChangeBetweenAssemblies`, qui échoue si `setAttribute` ne
       change pas la révision.
+- [x] Foncteurs passés en arguments du noyau: les foncteurs des
+      intégrateurs dépassent les 512 octets au-delà desquels Kokkos CUDA
+      les copie en mémoire constante, avec une attente d'événement à
+      chaque lancement. `WorkItemProperty::HintLightWeight` sur la
+      politique de `QuadratureType` les garde dans les arguments (limite
+      de 4 Ko). Oseen (2080 Ti): grille 16 1.345 ms contre 1.42 ms (1.18x
+      du noyau manuel), grille 30 5.96 ms contre 6.07 ms (0.93x).
 - [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
       noyau (somme des intégrandes), capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles
