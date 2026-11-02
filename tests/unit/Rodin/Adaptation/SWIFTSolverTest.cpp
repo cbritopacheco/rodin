@@ -1125,7 +1125,7 @@ namespace Rodin::Tests::Unit
       solver.setCentering(factor);
       solver.solve(system);
       ASSERT_TRUE(solver.success());
-      const SWIFT::LowRankDowndate<Real> op(system.getOperator(), factor);
+      const SWIFT::LowRankUpdate<Real> op(system.getOperator(), factor);
       const Real residual = (op * system.getSolution() - system.getVector()).norm();
       EXPECT_LT(residual, Real(1e-12));
       EXPECT_GT(residual, parameters.convergence.tolerance.linearRelative);
@@ -1146,7 +1146,7 @@ namespace Rodin::Tests::Unit
     const Math::SparseMatrix<Real> sparse = core.sparseView();
     Math::Matrix<Real> factor(4, 2);
     factor << 0.2, 0.3, 0.4, 0.1, 0.1, 0.5, 0.3, 0.2;
-    const SWIFT::LowRankDowndate<Real> op(sparse, factor);
+    const SWIFT::LowRankUpdate<Real> op(sparse, factor);
     const Math::Matrix<Real> expected = core - factor * factor.transpose();
     Math::Vector<Real> x(4);
     x << 1, -2, 3, -4;
@@ -1160,11 +1160,11 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(image.tail(2).norm(), Real(1e-12));
 
     const Math::Matrix<Real> empty;
-    const SWIFT::LowRankDowndate<Real> uncentered(sparse, empty);
+    const SWIFT::LowRankUpdate<Real> uncentered(sparse, empty);
     EXPECT_LT((uncentered * x - core * x).norm(), Real(1e-12));
     EXPECT_EQ((uncentered.getAugmented() - sparse).norm(), Real(0));
     const Math::Matrix<Real> wrong = Math::Matrix<Real>::Zero(2, 1);
-    EXPECT_ANY_THROW((SWIFT::LowRankDowndate<Real>(sparse, wrong)));
+    EXPECT_ANY_THROW((SWIFT::LowRankUpdate<Real>(sparse, wrong)));
   }
 
   TEST(Rodin_Adaptation_SWIFTSolver, CanonicalBackend)
