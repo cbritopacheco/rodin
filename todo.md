@@ -758,6 +758,11 @@ cellules, CUDA sm_75).
       sur la 2080 Ti: vectoriel Q2 en 89 ms avec 0 non nuls.
       `Kokkos::Internal::checkLaunches()` lève une exception après chaque
       `fill()` des assembleurs Kokkos et PETSc.
+- [x] Tests Kokkos sur RTX 5090 (ares, sm_120, CUDA 12.9, Boost 1.74,
+      GCC 13.4 de conda-forge, sans PETSc): 16 passent. Correctifs pour
+      NVCC 12: concept nommé pour la clause requires de
+      `GridFunction::project` avec prédicat device, `emplace_hint` au lieu
+      d'un `insert` avec accolades sur un `flat_map`.
 
 ## 17. Temps de compilation des tests Kokkos
 

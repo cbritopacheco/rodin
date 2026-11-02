@@ -106,6 +106,12 @@ imposes constraints that host Kokkos backends do not detect:
   `SparseLU` are therefore instantiated in `RodinSolver`, which is compiled by
   the host compiler (solvers-assembly.md). Their layout does not depend on
   the compiler: `EIGEN_MAX_ALIGN_BYTES` is 16 under both.
+- The NVCC 12 front end checks a requires clause of a member template when
+  its class is instantiated, so a clause naming a member of an incomplete
+  specialization (such as `DeviceProjection<Context::Local>`) fails on
+  host spaces; such a clause goes through a named concept. It also finds a
+  braced hinted `insert` of a Boost 1.74 `flat_map` ambiguous;
+  `emplace_hint` is used instead.
 - Kokkos checks kernel launches only when its bounds checks are enabled. A
   kernel refused at launch, for instance when a nearly full device has no
   memory left for its local arrays, leaves its outputs unwritten without an

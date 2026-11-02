@@ -2470,7 +2470,7 @@ namespace Rodin::Assembly
           for (Index i = 0; i < stride; ++i)
           {
             if (host(i) != std::numeric_limits<Index>::max())
-              res.insert(res.end(), {i + r * stride, hostValues(i + r * stride)});
+              res.emplace_hint(res.end(), i + r * stride, hostValues(i + r * stride));
           }
         }
       }

@@ -121,6 +121,21 @@ namespace Rodin::Variational
   struct DeviceProjection;
 
   /**
+   * @brief Tells whether a callable is a predicate of the device projection
+   * of a mesh context.
+   *
+   * A named concept defers the lookup of the projection to the satisfaction
+   * check: a requires clause naming `DeviceProjection<Context>` directly is
+   * rejected by NVCC 12 for host contexts, whose projection is incomplete.
+   *
+   * @tparam Context Mesh context, whose projection must be complete.
+   * @tparam Pred Callable type.
+   */
+  template <class Context, class Pred>
+  concept IsDeviceProjectionPredicate =
+    DeviceProjection<Context>::template IsPredicate<Pred>;
+
+  /**
    * @defgroup GridFunctionSpecializations GridFunction Template Specializations
    * @brief Template specializations of the GridFunction class.
    * @see <a href="_variational_2_grid_function_8h.html">GridFunction</a>
@@ -845,23 +860,23 @@ namespace Rodin::Variational
         }
         else
         {
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
+          const auto& fes = this->getFiniteElementSpace();
+          const auto& polytope = p.getPolytope();
+          const size_t d = polytope.getDimension();
+          const Index i = polytope.getIndex();
 
-        const auto& dofs = getCachedDOFs(d, i);
-        const auto coefficient = [&](size_t local) -> decltype(auto) {
-          return this->operator[](dofs[local]);
-        };
-        const auto& element = fes.getFiniteElement(d, i);
-        const auto expansion = [&](const Math::SpatialPoint& coordinates) {
-          RangeType value;
-          element.evaluate(value, coefficient, coordinates);
-          return value;
-        };
-        const auto mapping = fes.getPushforward({d, i}, expansion);
-        res = mapping(p);
+          const auto& dofs = getCachedDOFs(d, i);
+          const auto coefficient = [&](size_t local) -> decltype(auto) {
+            return this->operator[](dofs[local]);
+          };
+          const auto& element = fes.getFiniteElement(d, i);
+          const auto expansion = [&](const Math::SpatialPoint& coordinates) {
+            RangeType value;
+            element.evaluate(value, coefficient, coordinates);
+            return value;
+          };
+          const auto mapping = fes.getPushforward({d, i}, expansion);
+          res = mapping(p);
         }
       }
 
@@ -880,50 +895,51 @@ namespace Rodin::Variational
         }
         else
         {
-        if (ip.getReferenceQuadratureFormula() == nullptr)
-        {
-          static_cast<const Derived&>(*this).interpolate(res, ip.getPoint());
-          return;
-        }
-        const auto& p = ip.getPoint();
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
-
-        const auto& dofs = getCachedDOFs(d, i);
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& element = fes.getFiniteElement(d, i);
-        const auto coefficient = [&](size_t local) -> decltype(auto) {
-          return this->operator[](dofs[local]);
-        };
-        const auto expansion = [&](const auto& sample) {
-          RangeType value;
-          if constexpr (std::is_same_v<std::decay_t<decltype(sample)>, IntegrationPoint>)
+          if (ip.getReferenceQuadratureFormula() == nullptr)
           {
-            const auto* formula = sample.getReferenceQuadratureFormula();
-            if constexpr (requires {
-                            element.evaluate(
-                              value, coefficient, *formula, sample.getIndex());
-                          })
-            {
-              if (formula)
-              {
-                element.evaluate(value, coefficient, *formula, sample.getIndex());
-                return value;
-              }
-            }
-            element.evaluate(
-              value, coefficient, sample.getPoint().getReferenceCoordinates());
+            static_cast<const Derived&>(*this).interpolate(res, ip.getPoint());
+            return;
           }
+          const auto& p = ip.getPoint();
+          const auto& polytope = p.getPolytope();
+          const size_t d = polytope.getDimension();
+          const Index i = polytope.getIndex();
+
+          const auto& dofs = getCachedDOFs(d, i);
+          const auto& fes = this->getFiniteElementSpace();
+          const auto& element = fes.getFiniteElement(d, i);
+          const auto coefficient = [&](size_t local) -> decltype(auto) {
+            return this->operator[](dofs[local]);
+          };
+          const auto expansion = [&](const auto& sample) {
+            RangeType value;
+            if constexpr (std::is_same_v<std::decay_t<decltype(sample)>,
+                            IntegrationPoint>)
+            {
+              const auto* formula = sample.getReferenceQuadratureFormula();
+              if constexpr (requires {
+                              element.evaluate(
+                                value, coefficient, *formula, sample.getIndex());
+                            })
+              {
+                if (formula)
+                {
+                  element.evaluate(value, coefficient, *formula, sample.getIndex());
+                  return value;
+                }
+              }
+              element.evaluate(
+                value, coefficient, sample.getPoint().getReferenceCoordinates());
+            }
+            else
+              element.evaluate(value, coefficient, sample);
+            return value;
+          };
+          const auto mapping = fes.getPushforward({d, i}, expansion);
+          if constexpr (requires { mapping(ip); })
+            res = mapping(ip);
           else
-            element.evaluate(value, coefficient, sample);
-          return value;
-        };
-        const auto mapping = fes.getPushforward({d, i}, expansion);
-        if constexpr (requires { mapping(ip); })
-          res = mapping(ip);
-        else
-          res = mapping(p);
+            res = mapping(p);
         }
       }
 
@@ -1094,10 +1110,9 @@ namespace Rodin::Variational
       template <class T, class Pred>
         requires IsDevice &&
         (!std::is_invocable_r_v<bool, const Pred&, const Geometry::Polytope&>) &&
-        DeviceProjection<typename FormLanguage::Traits<
-          typename FESType::MeshType>::ContextType>::template
-      IsPredicate<Pred> Derived& project(
-        const Geometry::Region& region, const T& fn, const Pred& pred)
+        IsDeviceProjectionPredicate<
+          typename FormLanguage::Traits<typename FESType::MeshType>::ContextType, Pred>
+      Derived& project(const Geometry::Region& region, const T& fn, const Pred& pred)
       {
         DeviceProjection<typename FormLanguage::Traits<
           typename FESType::MeshType>::ContextType>::project(static_cast<Derived&>(*this),
