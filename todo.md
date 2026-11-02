@@ -449,6 +449,9 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       | jacobienne affine réutilisée entre points (simplexes) | 59.0 ms | 9.1x |
       | bornes statiques (tétraèdres, dimension maximale) | 54.6 ms | 8.4x |
       | produits structurellement nuls sautés (`overlaps`) | 45.2 ms | 7.0x |
+      | optimisations des jalons 10 et 16 (mesure du 2026-11-02) | 14.3 ms | 2.2x |
+      | formes diagonales par composante intégrées une fois | 13.1 ms | 2.0x |
+      | groupement du second membre gardé entre assemblages | 9.7 ms | 1.5x |
 
       Grille 16: 6.9 ms contre 1.1 ms (6.0x). Atrium `Coarse.mesh`
       (683704 tétraèdres): 234 ms contre 36.6 ms (6.4x).
@@ -465,6 +468,13 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
         l'hôte, alors que l'intégrande est constant;
       - `IntegrationPointView` dimensionné pour 8 sommets même sur les
         tétraèdres.
+- [x] Profil nsys (2080 Ti, grille 30): le second membre était regroupé
+      par ligne (tri radix, environ 1.5 ms) à chaque assemblage alors que
+      ses lignes ne changent pas; le groupement est gardé dans le cache COO
+      et refait seulement quand les lignes listées changent. Restent par
+      assemblage: 7 intégrateurs bilinéaires 3.9 ms, linéaire 1.0 ms,
+      `merge` des doublons dans l'ordre hôte 2.45 ms (le noyau manuel paie
+      le même gather dans `MatSetValuesCOO`, 2.6 ms), petits noyaux 1 ms.
 - [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
       noyau (somme des intégrandes), capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles

@@ -162,6 +162,20 @@ namespace Rodin::Assembly::Internal
     /// @brief Number of listed contributions to the right-hand side.
     size_t contributions = 0;
 
+    /// @brief Rows of the contributions grouped at the last assembly.
+    ::Kokkos::View<Index*, MemorySpace> groupedRows;
+
+    /// @brief Positions of these contributions, grouped by row in list
+    /// order.
+    ::Kokkos::View<Index*, MemorySpace> groupedPositions;
+
+    /// @brief Start of every row group in groupedPositions, followed by the
+    /// contribution count.
+    ::Kokkos::View<Index*, MemorySpace> groupStarts;
+
+    /// @brief Row of every group.
+    ::Kokkos::View<Index*, MemorySpace> groupKeys;
+
     /// @brief Whether each degree of freedom is fixed.
     ::Kokkos::View<unsigned char*, MemorySpace> fixed;
 
@@ -890,6 +904,25 @@ namespace Rodin::Assembly::Internal
       }
 
       /**
+       * @brief Counts the positions at which two index lists differ.
+       *
+       * Public as the enclosing function of a device lambda.
+       */
+      template <class Indices, class Previous>
+      static size_t countDifferences(
+        const ExecutionSpace& execution, const Indices& indices, const Previous& previous)
+      {
+        size_t differences = 0;
+        ::Kokkos::parallel_reduce(
+          "Rodin::Assembly::Kokkos::PETSc::differences",
+          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, indices.extent(0)),
+          KOKKOS_LAMBDA(
+            const size_t i, size_t& sum) { sum += indices(i) != previous(i); },
+          differences);
+        return differences;
+      }
+
+      /**
        * @brief Counts the coordinates that differ between two patterns.
        *
        * Public as the enclosing function of device lambdas.
@@ -1328,21 +1361,37 @@ namespace Rodin::Assembly::Internal
         const size_t count = cache.contributions;
         if (count == 0)
           return;
-        const ::Kokkos::View<Index*, MemorySpace> keys(
-          ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
-            std::string("Rodin contribution keys")),
-          count);
-        const ::Kokkos::View<Index*, MemorySpace> positions(
-          ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
-            std::string("Rodin contribution positions")),
-          count);
-        ::Kokkos::deep_copy(m_execution, keys,
-          ::Kokkos::subview(cache.contributionRows, std::make_pair(size_t(0), count)));
-        sequence(m_execution, positions);
-        // Without segments, the rank of a contribution is its position.
-        const typename ReferenceType::Ranks ranks;
-        ReferenceType::accumulate(m_execution, positions,
-          ReferenceType::group(m_execution, keys, positions, ranks),
+        const auto rows =
+          ::Kokkos::subview(cache.contributionRows, std::make_pair(size_t(0), count));
+        // The grouping depends on the listed rows only, which do not change
+        // between the assemblies of a same problem.
+        if (cache.groupedRows.extent(0) != count ||
+          countDifferences(m_execution, rows, cache.groupedRows) > 0)
+        {
+          cache.groupedRows = ::Kokkos::View<Index*, MemorySpace>(
+            ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
+              std::string("Rodin grouped contribution rows")),
+            count);
+          ::Kokkos::deep_copy(m_execution, cache.groupedRows, rows);
+          const ::Kokkos::View<Index*, MemorySpace> keys(
+            ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
+              std::string("Rodin contribution keys")),
+            count);
+          ::Kokkos::deep_copy(m_execution, keys, rows);
+          cache.groupedPositions = ::Kokkos::View<Index*, MemorySpace>(
+            ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
+              std::string("Rodin contribution positions")),
+            count);
+          sequence(m_execution, cache.groupedPositions);
+          // Without segments, the rank of a contribution is its position.
+          const typename ReferenceType::Ranks ranks;
+          const auto groups =
+            ReferenceType::group(m_execution, keys, cache.groupedPositions, ranks);
+          cache.groupStarts = groups.starts;
+          cache.groupKeys = groups.keys;
+        }
+        const typename ReferenceType::Groups groups{cache.groupStarts, cache.groupKeys};
+        ReferenceType::accumulate(m_execution, cache.groupedPositions, groups,
           cache.contributionValues, cache.rhs);
       }
 
