@@ -37,7 +37,8 @@ COMPONENTS = {
 NATIVE_RESTRICTION = r"^RodinMPIH1SubMeshRestrictionTest_.*_np(1|2|3|4|8)$"
 UNIT_SLOW_GEOMETRY = (
     r"^RodinMPIAssemblyGeometrySlowTest_np(1|2|3|4|8)_"
-    r"(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)$"
+    r"(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)"
+    r"(?:_Halo(?:P1|H1Degree[1-6]))?$"
 )
 
 

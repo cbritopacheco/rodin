@@ -129,3 +129,11 @@ jobs:
           name: ci-result-${{ inputs.family }}-${{ steps.selection.outputs.common }}-${{ inputs.id }}
           path: ci-result/
           if-no-files-found: error
+      - name: Report execution disk usage
+        if: always()
+        shell: bash
+        run: |
+          df -h . "$RUNNER_TEMP"
+          for path in build ci-runtime-inputs "$RUNNER_TEMP/rodin-apt-archives"; do
+            if [ -e "$path" ]; then du -sh "$path"; fi
+          done

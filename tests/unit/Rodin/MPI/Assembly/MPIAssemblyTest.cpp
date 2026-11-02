@@ -171,6 +171,10 @@ namespace Rodin::Tests::Unit
   class MPITraceGeometryTest : public testing::TestWithParam<Polytope::Type>
   {
     protected:
+      /** Audit P1 (K = 0) or one H1 degree with every scalar/vector range. */
+      template <size_t K>
+      void auditPhysicalBoundaryIncidence();
+
       Mesh<Context::MPI> makeMesh(
         const Context::MPI& ctx, std::vector<Index>* physicalBoundary = nullptr) const
       {
@@ -1719,8 +1723,8 @@ namespace Rodin::Tests::Unit
     ranges(std::type_identity<Complex>{});
   }
 
-  /** Certifies the mesh metadata independently of constraint assembly. */
-  TEST_P(MPITraceGeometryTest, HaloContainsRequiredPhysicalBoundaryIncidence)
+  template <size_t K>
+  void MPITraceGeometryTest::auditPhysicalBoundaryIncidence()
   {
     Context::MPI ctx(*g_env, *g_world);
     std::vector<Index> parentBoundary;
@@ -1806,9 +1810,13 @@ namespace Rodin::Tests::Unit
                   << " artificial shard-boundary faces=" << globalFalse << '\n';
       }
     };
-    P1<Real, Mesh<Context::MPI>> p1(mesh);
-    probe(p1, "P1");
-    const auto orders = [&]<size_t K>() {
+    if constexpr (K == 0)
+    {
+      P1<Real, Mesh<Context::MPI>> p1(mesh);
+      probe(p1, "P1");
+    }
+    else
+    {
       H1<K, Real, Mesh<Context::MPI>> scalar(std::integral_constant<size_t, K>{}, mesh);
       probe(scalar, "H1 real");
       H1<K, Complex, Mesh<Context::MPI>> complex(
@@ -1820,13 +1828,42 @@ namespace Rodin::Tests::Unit
       H1<K, Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(
         std::integral_constant<size_t, K>{}, mesh, 3);
       probe(complexVector, "H1 complex vector");
-    };
-    orders.template operator()<1>();
-    orders.template operator()<2>();
-    orders.template operator()<3>();
-    orders.template operator()<4>();
-    orders.template operator()<5>();
-    orders.template operator()<6>();
+    }
+  }
+
+  TEST_P(MPITraceGeometryTest, HaloContainsRequiredPhysicalBoundaryIncidenceP1)
+  {
+    auditPhysicalBoundaryIncidence<0>();
+  }
+
+  TEST_P(MPITraceGeometryTest, HaloContainsRequiredPhysicalBoundaryIncidenceH1Degree1)
+  {
+    auditPhysicalBoundaryIncidence<1>();
+  }
+
+  TEST_P(MPITraceGeometryTest, HaloContainsRequiredPhysicalBoundaryIncidenceH1Degree2)
+  {
+    auditPhysicalBoundaryIncidence<2>();
+  }
+
+  TEST_P(MPITraceGeometryTest, HaloContainsRequiredPhysicalBoundaryIncidenceH1Degree3)
+  {
+    auditPhysicalBoundaryIncidence<3>();
+  }
+
+  TEST_P(MPITraceGeometryTest, HaloContainsRequiredPhysicalBoundaryIncidenceH1Degree4)
+  {
+    auditPhysicalBoundaryIncidence<4>();
+  }
+
+  TEST_P(MPITraceGeometryTest, HaloContainsRequiredPhysicalBoundaryIncidenceH1Degree5)
+  {
+    auditPhysicalBoundaryIncidence<5>();
+  }
+
+  TEST_P(MPITraceGeometryTest, HaloContainsRequiredPhysicalBoundaryIncidenceH1Degree6)
+  {
+    auditPhysicalBoundaryIncidence<6>();
   }
 
   /** Certifies the mesh metadata independently of constraint assembly. */

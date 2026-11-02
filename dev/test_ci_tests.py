@@ -60,6 +60,46 @@ class ExecutionProfilesTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'missing from the execution plan'):
                     ci.configured_profiles(build)
 
+    def test_all_halo_degrees_remain_scheduled_with_independent_watchdogs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            assembly = Path(__file__).resolve().parents[1] / 'tests/unit/Rodin/MPI/Assembly'
+            (root / 'MPIAssemblyTest.cpp').write_text('int main() { return 0; }\n')
+            (root / 'assembly.cmake').write_text((assembly / 'CMakeLists.txt').read_text())
+            (root / 'CMakeLists.txt').write_text("""\
+cmake_minimum_required(VERSION 3.20)
+project(HaloRegistration CXX)
+enable_testing()
+foreach(name Geometry Variational MPI)
+  add_library(Rodin::${name} INTERFACE IMPORTED)
+endforeach()
+add_library(GTest::gtest INTERFACE IMPORTED)
+function(rodin_suppress_external_mpi_lsan_for_test name)
+endfunction()
+set(MPIEXEC_EXECUTABLE mpiexec)
+set(MPIEXEC_NUMPROC_FLAG -n)
+include(assembly.cmake)
+""")
+            subprocess.run(['cmake', '-S', str(root), '-B', str(root / 'build')],
+                           check=True, capture_output=True)
+            result = subprocess.check_output(['ctest', '--test-dir', str(root / 'build'),
+                                              '--show-only=json-v1'], text=True)
+            registered = json.loads(result)['tests']
+            halos = [t for t in registered if '_Halo' in t['name']]
+            self.assertEqual(len(halos), 5 * 7 * 7)
+            for test in halos:
+                self.assertTrue(ci.selected('unit', test), test['name'])
+                props = {p['name']: p['value'] for p in test['properties']}
+                self.assertEqual(props['TIMEOUT'], 600)
+                self.assertEqual(int(props.get('PROCESSORS', 1)),
+                                 int(test['name'].split('_np')[1].split('_')[0]))
+                expression = next(a for a in test['command'] if a.startswith('--gtest_filter='))
+                self.assertNotIn(':', expression)
+            filters = [a for t in registered for a in t.get('command', [])
+                       if a.startswith('--gtest_filter=')]
+            self.assertTrue(any('HaloContainsRequiredPhysicalBoundaryIncidence*/*' in f
+                                for f in filters if f.startswith('--gtest_filter=-')))
+
     def test_preserve_old_selections(self):
         def test(name, *labels):
             return {"name": name, "properties": [{"name": "LABELS", "value": list(labels)}]}

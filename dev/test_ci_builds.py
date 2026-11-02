@@ -127,6 +127,16 @@ class SharedBuildArchiveTest(unittest.TestCase):
         ci.pack(self.spec, self.build, self.artifact)
         self.build.rename(self.root / 'producer-build')
 
+    def test_restore_reserves_expanded_payload_before_extraction(self):
+        self.package()
+        with patch.object(ci.ci_environment, 'disk_space', side_effect=RuntimeError('disk full')) as check:
+            with self.assertRaisesRegex(RuntimeError, 'disk full'):
+                ci.restore(self.spec, self.build, self.artifact)
+        self.assertFalse((self.build / 'test').exists())
+        self.assertGreater(check.call_args.args[1], ci.ci_environment.MIN_FREE_GIB)
+        # Capacity failure leaves the immutable input available for diagnosis.
+        self.assertTrue((self.artifact / 'build.tar.gz').is_file())
+
     def test_two_restores_have_independent_clean_counters_and_complete_notes(self):
         self.package()
         for lane in ['first', 'second']:

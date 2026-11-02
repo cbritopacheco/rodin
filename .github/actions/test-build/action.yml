@@ -53,3 +53,9 @@ runs:
         MATRIX: ${{ inputs.matrix }}
         CI_RESTORED_ARTIFACTS: ${{ github.workspace }}/ci-runtime-inputs
       run: python3 dev/ci_build_graph.py restore --job "$JOB" --matrix "$MATRIX"
+    - name: Release restored archive inputs and check execution headroom
+      shell: bash
+      run: |
+        du -sh ci-runtime-inputs build
+        rm -rf -- ci-runtime-inputs
+        python3 dev/ci_environment.py disk

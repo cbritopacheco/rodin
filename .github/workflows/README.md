@@ -121,6 +121,11 @@ They never delete dependency archives or Rodin build/coverage artifacts. If the
 allowlisted cleanup cannot supply enough space, the job fails explicitly. Local
 and self-hosted machines are never cleaned by this helper. Dependency setup and
 artifact restoration recheck headroom, replacing unconditional bulk deletion.
+Before extraction, restoration reserves the archive's expanded regular-file size
+in addition to the 8 GiB floor. After a successful execution-build restore, the
+runner deletes its downloaded `ci-runtime-inputs` copy and rechecks headroom.
+The extracted build, coverage notes, manifests and remote artifacts remain intact.
+Execution jobs also report final workspace and temporary-directory disk usage.
 
 Change package lists in `test-environment/action.yml` for shared environments,
 or in `../ci/targeted-lanes.yml` for dedicated lanes, then regenerate dedicated
