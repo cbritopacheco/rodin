@@ -511,6 +511,38 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       passé par valeur ont été essayés et sont plus lents. Hyperélastique
       sur ares inchangé (boucles d'ordre supérieur dynamiques): Q2 n=20
       126 ms, Q3 n=14 595 ms, P3 tétraèdres n=14 35 ms.
+- [ ] Ordre des mailles (atrium, 2080 Ti): l'écart de l'atrium (60.5 ms
+      contre 34.9 ms) vient du `merge` des doublons, 36 ms par assemblage
+      contre 2.45 ms sur la grille 30. Les entrées sont rangées en
+      k + j * M (écritures coalescées), donc le gather du merge n'est local
+      que si les mailles voisines ont des numéros proches; le noyau manuel
+      range ses 256 valeurs par maille de façon contiguë. Le rangement
+      maille par maille (spacing 1) est plus lent partout (atrium 69 ms,
+      grille 30 12.3 ms). Maillage renuméroté hors de Rodin:
+
+      | atrium | DSL | manuel | ratio |
+      |---|---|---|---|
+      | original | 60.5 ms | 34.9 ms | 1.73x |
+      | sommets en Morton | 59.9 ms | 32.9 ms | 1.82x |
+      | mailles en Morton | 40.7 ms | 30.8 ms | 1.32x |
+      | mailles triées par plus petit sommet | 42.6 ms | 31.1 ms | 1.37x |
+      | sommets en Morton, mailles par plus petit sommet | 24.2 ms | 27.1 ms | 0.89x |
+
+      Deux options, à décider:
+      - parcours interne: les noyaux traitent la maille `traversal(t)`
+        (mailles triées par plus petit sommet, une fois par maillage) et
+        rangent ses entrées à l'emplacement t. Gain attendu 60 contre
+        43 ms sans toucher à la numérotation. Pour garder les mêmes
+        résultats il faut faire passer la correspondance emplacement et
+        rang hôte dans tous les consommateurs dépendant de l'ordre:
+        `sortPattern`, `listVector` (le second membre somme aujourd'hui
+        dans l'ordre de stockage), élimination des DOFs fixés, expansion
+        des contraintes, `Ranks` de `Assembly::Kokkos`, chemin MPI;
+      - renumérotation explicite du maillage hôte (sommets par courbe de
+        Morton ou RCM, mailles par plus petit sommet), opt-in, qui change
+        la numérotation visible mais pas l'ordre de sommation pour un
+        maillage donné, et profite aussi aux solveurs. Gain 60 contre
+        24 ms.
 - [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
       noyau (somme des intégrandes), capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles
