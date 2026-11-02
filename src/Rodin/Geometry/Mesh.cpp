@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <cmath>
+#include <limits>
+#include <numeric>
+
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Rodin/Math/SpatialVector.h"
@@ -359,6 +363,96 @@ namespace Rodin::Geometry
     }
 
     return *this;
+  }
+
+  Mesh<Context::Local> Mesh<Context::Local>::renumber() const
+  {
+    const size_t sdim = getSpaceDimension();
+    const size_t D = getDimension();
+    const size_t vertexCount = getVertexCount();
+
+    // Morton code of each vertex: the coordinates are quantized on a grid of
+    // the bounding box and their bits are interleaved, most significant first.
+    const size_t bits = sdim > 0 ? std::min<size_t>(63 / sdim, 52) : 0;
+    const Real cells = std::ldexp(Real(1), static_cast<int>(bits)) - 1;
+    std::vector<Real> lower(sdim, std::numeric_limits<Real>::max());
+    std::vector<Real> upper(sdim, std::numeric_limits<Real>::lowest());
+    for (Index v = 0; v < vertexCount; ++v)
+    {
+      for (size_t i = 0; i < sdim; ++i)
+      {
+        lower[i] = std::min(lower[i], m_vertices(i, v));
+        upper[i] = std::max(upper[i], m_vertices(i, v));
+      }
+    }
+    std::vector<std::uint64_t> code(vertexCount, 0);
+    std::vector<std::uint64_t> quantized(sdim);
+    for (Index v = 0; v < vertexCount; ++v)
+    {
+      for (size_t i = 0; i < sdim; ++i)
+      {
+        const Real extent = upper[i] - lower[i];
+        const Real scaled = extent > 0 ? (m_vertices(i, v) - lower[i]) / extent : 0;
+        quantized[i] = static_cast<std::uint64_t>(std::floor(scaled * cells));
+      }
+      std::uint64_t key = 0;
+      for (size_t b = bits; b-- > 0;)
+      {
+        for (size_t i = 0; i < sdim; ++i)
+          key = (key << 1) | ((quantized[i] >> b) & 1);
+      }
+      code[v] = key;
+    }
+
+    std::vector<Index> vertexOrder(vertexCount);
+    std::iota(vertexOrder.begin(), vertexOrder.end(), Index(0));
+    std::stable_sort(vertexOrder.begin(), vertexOrder.end(),
+      [&](Index a, Index b) { return code[a] < code[b]; });
+    std::vector<Index> newVertex(vertexCount);
+    for (Index v = 0; v < vertexCount; ++v)
+      newVertex[vertexOrder[v]] = v;
+
+    Builder build;
+    build.initialize(sdim).nodes(vertexCount);
+    for (Index v = 0; v < vertexCount; ++v)
+    {
+      build.vertex(m_vertices[vertexOrder[v]]);
+      build.attribute({0, v}, getAttribute(0, vertexOrder[v]));
+    }
+
+    const auto& conn = getConnectivity();
+    for (size_t d = 1; d <= D; ++d)
+    {
+      const size_t count = conn.getCount(d);
+      if (count == 0)
+        continue;
+      std::vector<Index> smallest(count);
+      for (Index p = 0; p < count; ++p)
+      {
+        const auto& key = conn.getPolytope(d, p);
+        Index least = std::numeric_limits<Index>::max();
+        for (std::uint8_t j = 0; j < key.size(); ++j)
+          least = std::min(least, newVertex[key[j]]);
+        smallest[p] = least;
+      }
+      std::vector<Index> order(count);
+      std::iota(order.begin(), order.end(), Index(0));
+      std::stable_sort(order.begin(), order.end(),
+        [&](Index a, Index b) { return smallest[a] < smallest[b]; });
+
+      build.reserve(d, count);
+      for (Index p = 0; p < count; ++p)
+      {
+        const Index old = order[p];
+        const auto& key = conn.getPolytope(d, old);
+        IndexArray vertices(key.size());
+        for (std::uint8_t j = 0; j < key.size(); ++j)
+          vertices.coeffRef(j) = newVertex[key[j]];
+        build.polytope(conn.getGeometry(d, old), std::move(vertices));
+        build.attribute({d, p}, getAttribute(d, old));
+      }
+    }
+    return build.finalize();
   }
 
   Mesh<Context::Local>& Mesh<Context::Local>::scale(Real c)

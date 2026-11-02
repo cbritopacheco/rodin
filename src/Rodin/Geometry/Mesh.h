@@ -1693,6 +1693,30 @@ namespace Rodin::Geometry
       virtual Mesh& trace(
         const Map<Attribute, Attribute>& tmap, const FlatSet<Attribute>& attrs);
 
+      /**
+       * @brief Returns a copy of the mesh whose numbering follows space.
+       *
+       * The vertices are ordered along a Morton curve of their coordinates in
+       * the bounding box, so that vertices close in space get close indices.
+       * The polytopes of every other dimension held by the connectivity are
+       * then ordered by their smallest new vertex index, ties keeping their
+       * original order. Coordinates, vertex lists, orientations and attributes
+       * are carried over unchanged; only the indices change. Connectivity
+       * other than the polytope to vertex lists is not carried and must be
+       * computed again, and polytope transformations set on this mesh are not
+       * carried either: the copy has the affine geometry of its vertices.
+       *
+       * Assembly on a device sums the contributions of the cells in index
+       * order, so a mesh whose cell and vertex numberings are unrelated, such
+       * as one produced by a mesher, scatters its contributions across the
+       * matrix. Renumbering it once before building the spaces restores the
+       * locality. The numbering seen by the user changes, so the method is
+       * never applied implicitly.
+       *
+       * @returns Renumbered copy of this mesh.
+       */
+      Mesh renumber() const;
+
       SubMeshBase& asSubMesh() override;
 
       const SubMeshBase& asSubMesh() const override;

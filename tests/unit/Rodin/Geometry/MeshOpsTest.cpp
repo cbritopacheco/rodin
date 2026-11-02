@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <algorithm>
+#include <numeric>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include <Rodin/Geometry.h>
@@ -227,5 +231,132 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(it.end());
     EXPECT_EQ(it->getDimension(), 0);
   }
-}
 
+  namespace
+  {
+    /// @brief Rebuilds @p mesh with its vertices and polytopes listed in a
+    /// scrambled order, as a mesher would produce them.
+    Mesh<Context::Local> scramble(const Mesh<Context::Local>& mesh)
+    {
+      const size_t vertexCount = mesh.getVertexCount();
+      std::vector<Index> vertexOrder(vertexCount);
+      std::iota(vertexOrder.begin(), vertexOrder.end(), Index(0));
+      std::vector<Index> newVertex(vertexCount);
+      for (size_t i = 0; i < vertexCount; ++i)
+        std::swap(vertexOrder[i], vertexOrder[(7 * i + 3) % vertexCount]);
+      for (Index v = 0; v < vertexCount; ++v)
+        newVertex[vertexOrder[v]] = v;
+
+      Mesh<Context::Local>::Builder build;
+      build.initialize(mesh.getSpaceDimension()).nodes(vertexCount);
+      for (Index v = 0; v < vertexCount; ++v)
+        build.vertex(mesh.getVertexCoordinates(vertexOrder[v]));
+      const auto& conn = mesh.getConnectivity();
+      for (size_t d = 1; d <= mesh.getDimension(); ++d)
+      {
+        const size_t count = conn.getCount(d);
+        build.reserve(d, count);
+        for (Index p = 0; p < count; ++p)
+        {
+          const Index old = (2 * count - 1 - p + count / 3) % count;
+          const auto& key = conn.getPolytope(d, old);
+          IndexArray vertices(key.size());
+          for (std::uint8_t j = 0; j < key.size(); ++j)
+            vertices.coeffRef(j) = newVertex[key[j]];
+          build.polytope(conn.getGeometry(d, old), std::move(vertices));
+          build.attribute({d, p}, mesh.getAttribute(d, old));
+        }
+      }
+      return build.finalize();
+    }
+
+    /// @brief Lists the polytopes of dimension @p d by the coordinates of their
+    /// vertices in stored order, with their attribute, in a canonical order.
+    std::vector<std::vector<Real>> describe(const Mesh<Context::Local>& mesh, size_t d)
+    {
+      std::vector<std::vector<Real>> res;
+      const auto& conn = mesh.getConnectivity();
+      for (Index p = 0; p < conn.getCount(d); ++p)
+      {
+        std::vector<Real> entry;
+        const auto& key = conn.getPolytope(d, p);
+        for (std::uint8_t j = 0; j < key.size(); ++j)
+        {
+          const auto x = mesh.getVertexCoordinates(key[j]);
+          for (Eigen::Index i = 0; i < x.size(); ++i)
+            entry.push_back(x(i));
+        }
+        const auto attribute = mesh.getAttribute(d, p);
+        entry.push_back(attribute ? Real(*attribute) : Real(-1));
+        res.push_back(std::move(entry));
+      }
+      std::sort(res.begin(), res.end());
+      return res;
+    }
+  }
+
+  /// @brief Renumbering keeps every polytope, its orientation and its
+  /// attribute, numbers the vertices along space and the cells by their
+  /// smallest vertex, independently of the input numbering.
+  TEST(Geometry_MeshOps, Renumber_KeepsPolytopesAndOrdersBySpace)
+  {
+    Mesh<Context::Local> grid =
+      Mesh<Context::Local>::UniformGrid(Polytope::Type::Tetrahedron, {5, 4, 3});
+    grid.getConnectivity().compute(2, 3);
+    for (Index c = 0; c < grid.getCellCount(); ++c)
+      grid.setAttribute({3, c}, Attribute(1 + c % 3));
+    for (Index f = 0; f < grid.getFaceCount(); ++f)
+    {
+      if (grid.isBoundary(f))
+        grid.setAttribute({2, f}, Attribute(10 + f % 2));
+    }
+    const Mesh<Context::Local> mesh = scramble(grid);
+    const Mesh<Context::Local> renumbered = mesh.renumber();
+
+    ASSERT_EQ(renumbered.getDimension(), mesh.getDimension());
+    ASSERT_EQ(renumbered.getSpaceDimension(), mesh.getSpaceDimension());
+    for (size_t d = 0; d <= mesh.getDimension(); ++d)
+    {
+      ASSERT_EQ(
+        renumbered.getConnectivity().getCount(d), mesh.getConnectivity().getCount(d));
+      EXPECT_EQ(describe(renumbered, d), describe(mesh, d)) << "dimension " << d;
+    }
+
+    // The cells follow their smallest vertex.
+    const auto& conn = renumbered.getConnectivity();
+    Index previous = 0;
+    for (Index c = 0; c < renumbered.getCellCount(); ++c)
+    {
+      const auto& key = conn.getPolytope(3, c);
+      Index least = key[0];
+      for (std::uint8_t j = 1; j < key.size(); ++j)
+        least = std::min(least, key[j]);
+      EXPECT_LE(previous, least);
+      previous = least;
+    }
+
+    // The vertex numbering depends only on the coordinates.
+    const Mesh<Context::Local> reference = grid.renumber();
+    for (Index v = 0; v < renumbered.getVertexCount(); ++v)
+    {
+      const auto x = renumbered.getVertexCoordinates(v);
+      const auto y = reference.getVertexCoordinates(v);
+      for (Eigen::Index i = 0; i < x.size(); ++i)
+        EXPECT_EQ(x(i), y(i)) << "vertex " << v;
+    }
+
+    // Renumbering a renumbered mesh changes nothing.
+    const Mesh<Context::Local> again = renumbered.renumber();
+    for (size_t d = 1; d <= mesh.getDimension(); ++d)
+    {
+      for (Index p = 0; p < conn.getCount(d); ++p)
+      {
+        const auto& a = conn.getPolytope(d, p);
+        const auto& b = again.getConnectivity().getPolytope(d, p);
+        ASSERT_EQ(a.size(), b.size());
+        for (std::uint8_t j = 0; j < a.size(); ++j)
+          EXPECT_EQ(a[j], b[j]);
+      }
+    }
+  }
+}

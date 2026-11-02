@@ -9,9 +9,10 @@
  * @file
  * @brief Compares the device form language with a hand written Oseen kernel.
  *
- * Usage: `KokkosOseenAssembly [mesh.mesh | n] [repetitions]`. A number n
- * builds an n x n x n tetrahedral grid, otherwise the tetrahedra of a MEDIT
- * mesh are used.
+ * Usage: `KokkosOseenAssembly [mesh.mesh | n] [repetitions] [renumber]`. A
+ * number n builds an n x n x n tetrahedral grid, otherwise the tetrahedra of a
+ * MEDIT mesh are used. The word renumber orders the vertices and the cells of
+ * the mesh along space before the assembly, see Mesh::renumber.
  *
  * Both sides assemble the same linearized Navier-Stokes (Oseen) step with
  * P1/P1 elements and a pressure stabilization,
@@ -382,9 +383,10 @@ namespace Rodin::Examples
     {
       const std::string source = argc > 1 ? argv[1] : "16";
       const int repetitions = argc > 2 ? std::atoi(argv[2]) : 20;
+      const bool renumber = argc > 3 && std::string(argv[3]) == "renumber";
       const Parameters P;
 
-      const HostMesh host = load(source);
+      const HostMesh host = renumber ? load(source).renumber() : load(source);
       const DeviceMesh mesh(DeviceContext{}, host);
       std::printf("mesh: %zu vertices, %zu tetrahedra, %zu unknowns\n",
         host.getVertexCount(), host.getCellCount(), 4 * host.getVertexCount());

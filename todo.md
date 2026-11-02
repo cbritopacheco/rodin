@@ -511,7 +511,7 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       passé par valeur ont été essayés et sont plus lents. Hyperélastique
       sur ares inchangé (boucles d'ordre supérieur dynamiques): Q2 n=20
       126 ms, Q3 n=14 595 ms, P3 tétraèdres n=14 35 ms.
-- [ ] Ordre des mailles (atrium, 2080 Ti): l'écart de l'atrium (60.5 ms
+- [x] Ordre des mailles (atrium, 2080 Ti): l'écart de l'atrium (60.5 ms
       contre 34.9 ms) vient du `merge` des doublons, 36 ms par assemblage
       contre 2.45 ms sur la grille 30. Les entrées sont rangées en
       k + j * M (écritures coalescées), donc le gather du merge n'est local
@@ -528,7 +528,7 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       | mailles triées par plus petit sommet | 42.6 ms | 31.1 ms | 1.37x |
       | sommets en Morton, mailles par plus petit sommet | 24.2 ms | 27.1 ms | 0.89x |
 
-      Deux options, à décider:
+      Deux options étaient sur la table:
       - parcours interne: les noyaux traitent la maille `traversal(t)`
         (mailles triées par plus petit sommet, une fois par maillage) et
         rangent ses entrées à l'emplacement t. Gain attendu 60 contre
@@ -543,6 +543,16 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
         la numérotation visible mais pas l'ordre de sommation pour un
         maillage donné, et profite aussi aux solveurs. Gain 60 contre
         24 ms.
+
+      Retenu: la renumérotation explicite, `Mesh<Context::Local>::renumber()`
+      (sommets par code de Morton dans la boîte englobante, polytopes de
+      chaque dimension par plus petit nouveau sommet, ordre d'origine en cas
+      d'égalité; coordonnées, listes de sommets, orientations et attributs
+      conservés, transformations non reportées). Testé dans
+      `Geometry_MeshOps.Renumber_KeepsPolytopesAndOrdersBySpace`. Option
+      `renumber` de `KokkosOseenAssembly`: atrium 24.6 ms contre 27.7 ms
+      (0.89x, 60.4 ms sans renumérotation), grille 30 6.24 ms contre
+      6.25 ms (6.60 ms sans). Le parcours interne n'est pas fait.
 - [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
       noyau (somme des intégrandes), capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles
