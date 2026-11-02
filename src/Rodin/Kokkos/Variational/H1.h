@@ -532,21 +532,25 @@ namespace Rodin::Kokkos::Variational
        * @param x Coordinate.
        * @return @f$ \ell_i(x) @f$ and @f$ \ell_i'(x) @f$.
        *
-       * The product skips node @f$ i @f$ by selection, without a branch.
+       * The product skips node @f$ i @f$ by selection, without a branch, and
+       * the weight is selected the same way, since an index differing
+       * between the threads of a warp would serialize its read.
        */
       KOKKOS_INLINE_FUNCTION
       Line getLine(Index i, Real x) const
       {
         Real value = 1;
         Real derivative = 0;
+        Real weight = 0;
         for (Index m = 0; m <= K; ++m)
         {
           const Real e = x - m_line[m];
           const bool skip = m == i;
           derivative = skip ? derivative : derivative * e + value;
           value = skip ? value : value * e;
+          weight = skip ? m_weights[m] : weight;
         }
-        return {m_weights[i] * value, m_weights[i] * derivative};
+        return {weight * value, weight * derivative};
       }
 
       /// @brief Gets the powers @f$ r_k^p @f$, @f$ p \leq K @f$.

@@ -625,11 +625,22 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       880 à 575 ms, Jacobian·Jacobian vectoriel de 3100 à 2385 ms. Le
       reste du noyau par thread: géométrie 45 ms, bases 200 ms, produits
       300 ms (scalaire), la matrice locale débordant en mémoire locale.
-- [ ] Matrice locale par thread limitée à 8192 coefficients
-      (`LocalCapacity`): hexaèdres vectoriels d'ordre 3 refusés. Une
-      stratégie par équipe (une équipe par cellule, matrice en mémoire
-      partagée) serait nécessaire pour les ordres élevés, et pour les
-      performances dès l'ordre 2 sur hexaèdres.
+- [x] Matrice locale au delà de 256 coefficients (et toujours au delà de
+      `LocalCapacity`): une équipe par cellule sur device. Les points de
+      quadrature sont traités par groupes en mémoire partagée (géométrie,
+      valeurs des bases test et essai calculées en boucles séparées), puis
+      chaque thread accumule des blocs de 8 coefficients (32 au delà de
+      `LocalCapacity`). Le poids du polynôme 1D est sélectionné sans index
+      par voie pour éviter la sérialisation de la mémoire constante. Banc
+      `KokkosH1_Assembly`: scalaire Q2 (n=30) de 575 à 445 ms, scalaire Q3
+      (n=14) de 3560 à 775 ms, vectoriel Q3 (n=14, 2197 hexaèdres, refusé
+      avant) 5150 ms; le vectoriel Q2 reste par thread (2370 ms), ses
+      valeurs matricielles ne tenant pas assez de points en mémoire
+      partagée. Tests Q3 scalaire et vectoriel sur hexaèdres.
+- [ ] Equipe vectorielle plus rapide: ne calculer par bloc que les lignes
+      de bases utiles, éviter de recalculer géométrie et bases à chaque
+      bloc de coefficients. Même stratégie à appliquer à
+      `InternalVirtualWork` (`LocalCapacity` séparé).
 
 ## 16. Optimisations génériques de l'assemblage device
 

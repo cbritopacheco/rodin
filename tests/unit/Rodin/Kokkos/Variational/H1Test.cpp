@@ -403,6 +403,17 @@ namespace Rodin::Tests::Unit
     checkVectorForms(withClosure(makeHexahedronMesh()));
   }
 
+  /// One team per cell holds the local matrices beyond the thread capacity.
+  TEST(Kokkos_Variational_H1, ScalarFormsOfDegreeThreeOnHexahedra)
+  {
+    checkScalarForms<3>(withClosure(makeHexahedronMesh()));
+  }
+
+  TEST(Kokkos_Variational_H1, VectorFormsOfDegreeThreeOnHexahedra)
+  {
+    checkVectorForms<3>(withClosure(makeHexahedronMesh()));
+  }
+
   TEST(Kokkos_Variational_H1, FaceFormsOnMixedMesh)
   {
     checkFaceForms(withClosure(makeMixedMesh()));

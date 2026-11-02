@@ -7,15 +7,15 @@
 
 /**
  * @file H1_Assembly.cpp
- * @brief Times the device assembly of quadratic forms on a hexahedral grid.
+ * @brief Times the device assembly of H1 forms on a hexahedral grid.
  *
  * The first argument is the number of grid nodes per side, the second the
- * number of assemblies of each form. The scalar form is the stiffness of a
- * quadratic H1 space, the vector form the Jacobian product of its vector
- * counterpart. The first assembly of each form also builds the sparsity, so
+ * number of assemblies of each form, the third the degree, 2 or 3. The scalar
+ * form is the stiffness of an H1 space, the vector form the Jacobian product
+ * of its vector counterpart. The first assembly of each form also builds the sparsity, so
  * the later ones measure the integration kernel and the matrix update.
  * @code
- *   KokkosH1_Assembly 40 3
+ *   KokkosH1_Assembly 30 3 2
  * @endcode
  */
 #include <chrono>
@@ -73,16 +73,47 @@ static void time(const char* name, Problem& problem, size_t repetitions)
   }
 }
 
+/**
+ * @brief Times the scalar and vector forms of degree K.
+ * @param mesh Device mesh.
+ * @param repetitions Number of assemblies of each form.
+ */
+template <size_t K, class Mesh>
+static void run(const Mesh& mesh, size_t repetitions)
+{
+  using namespace Rodin;
+  using namespace Rodin::Variational;
+  constexpr std::integral_constant<size_t, K> degree{};
+  {
+    H1 vh(degree, mesh);
+    Alert::Info() << "Scalar degrees of freedom: " << vh.getSize() << Alert::Raise;
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    Problem<DeviceSystem, decltype(u), decltype(v)> problem(u, v);
+    problem = Integral(Grad(u), Grad(v));
+    time("Scalar", problem, repetitions);
+  }
+  {
+    H1 vh(degree, mesh, mesh.getSpaceDimension());
+    Alert::Info() << "Vector degrees of freedom: " << vh.getSize() << Alert::Raise;
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    Problem<DeviceSystem, decltype(u), decltype(v)> problem(u, v);
+    problem = Integral(Jacobian(u), Jacobian(v));
+    time("Vector", problem, repetitions);
+  }
+}
+
 int main(int argc, char** argv)
 {
   using namespace Rodin;
   using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
 
   ::Kokkos::ScopeGuard runtime(argc, argv);
   {
     const size_t n = argc > 1 ? std::stoul(argv[1]) : 16;
     const size_t repetitions = argc > 2 ? std::stoul(argv[2]) : 3;
+    const size_t degree = argc > 3 ? std::stoul(argv[3]) : 2;
     Mesh host = Mesh().UniformGrid(Polytope::Type::Hexahedron, {n, n, n});
     host.scale(1.0 / (n - 1));
     Alert::Info() << "Number of cells in the mesh: " << host.getCellCount()
@@ -91,27 +122,10 @@ int main(int argc, char** argv)
     const size_t cellDim = host.getDimension();
     host.getConnectivity().compute(cellDim - 1, cellDim);
     const Mesh<DeviceContext> mesh(DeviceContext{}, host);
-    constexpr std::integral_constant<size_t, 2> quadratic{};
-
-    {
-      H1 vh(quadratic, mesh);
-      Alert::Info() << "Scalar degrees of freedom: " << vh.getSize() << Alert::Raise;
-      TrialFunction u(vh);
-      TestFunction v(vh);
-      Problem<DeviceSystem, decltype(u), decltype(v)> problem(u, v);
-      problem = Integral(Grad(u), Grad(v));
-      time("Scalar", problem, repetitions);
-    }
-
-    {
-      H1 vh(quadratic, mesh, mesh.getSpaceDimension());
-      Alert::Info() << "Vector degrees of freedom: " << vh.getSize() << Alert::Raise;
-      TrialFunction u(vh);
-      TestFunction v(vh);
-      Problem<DeviceSystem, decltype(u), decltype(v)> problem(u, v);
-      problem = Integral(Jacobian(u), Jacobian(v));
-      time("Vector", problem, repetitions);
-    }
+    if (degree == 3)
+      run<3>(mesh, repetitions);
+    else
+      run<2>(mesh, repetitions);
   }
   return 0;
 }

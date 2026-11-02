@@ -517,7 +517,7 @@ namespace Rodin::Kokkos::Variational::Internal
   /// @brief Scalar trial function and divergence test operator.
   template <class LHSDerived, class RHSDerived, class TrialFES, class TestFES>
   struct DerivativeForm<::Rodin::Variational::ShapeFunction<LHSDerived, TrialFES,
-                              ::Rodin::Variational::ShapeFunctionSpaceType::Trial>,
+                          ::Rodin::Variational::ShapeFunctionSpaceType::Trial>,
     ::Rodin::Variational::Div<::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
       ::Rodin::Variational::ShapeFunctionSpaceType::Test>>>
   {
@@ -1342,24 +1342,11 @@ namespace Rodin::Kokkos::Variational
         }
         constexpr Index Capacity = IntegrationPointView::Capacity;
         if (vertices <= 4)
-        {
-          if constexpr (getLocalSize<4>() <= LocalCapacity)
-          {
-            integratePolytopes<4>(mesh, m_polytopes, trial, test, trialDOFs, trialVDim,
-              testDOFs, testVDim, values, offset, sign, accumulate, rows, cols);
-            return;
-          }
-        }
-        else if constexpr (getLocalSize<Capacity>() <= LocalCapacity)
-        {
+          integratePolytopes<4>(mesh, m_polytopes, trial, test, trialDOFs, trialVDim,
+            testDOFs, testVDim, values, offset, sign, accumulate, rows, cols);
+        else
           integratePolytopes<Capacity>(mesh, m_polytopes, trial, test, trialDOFs,
             trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, rows, cols);
-          return;
-        }
-        Alert::MemberFunctionException(*this, __func__)
-          << "Kokkos integrals of these spaces on polytopes of " << vertices
-          << " vertices need local matrices of more than " << LocalCapacity
-          << " entries, lower the polynomial degree." << Alert::Raise;
       }
 
       /**
@@ -1375,6 +1362,35 @@ namespace Rodin::Kokkos::Variational
       }
 
       /**
+       * @brief Gets the team scratch bytes of one quadrature point.
+       * @return Bytes of an integration point, its weight and the test and
+       * trial basis values at this point.
+       */
+      template <Index Vertices, class Trial, class Test>
+      static constexpr size_t getTeamPointBytes()
+      {
+        using TestValue = std::decay_t<decltype(std::declval<const Test&>().getBasis(
+          std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
+        using TrialValue = std::decay_t<decltype(std::declval<const Trial&>().getBasis(
+          std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
+        return sizeof(IntegrationPointView) + sizeof(Real) +
+          TestDOFsType::getCapacity(Vertices) * VectorCapacity<TestRange> *
+          sizeof(TestValue) +
+          TrialDOFsType::getCapacity(Vertices) * VectorCapacity<TrialRange> *
+          sizeof(TrialValue);
+      }
+
+      /**
+       * @brief Gets the number of quadrature points of a group of the team
+       * kernel that fit in TeamScratch.
+       */
+      template <Index Vertices, class Trial, class Test>
+      static constexpr Index getTeamPoints()
+      {
+        return TeamScratch / getTeamPointBytes<Vertices, Trial, Test>();
+      }
+
+      /**
        * @brief Integrates the polytopes of at most Vertices vertices.
        *
        * When Exact, both spaces are P1, every polytope has Vertices vertices
@@ -1385,6 +1401,225 @@ namespace Rodin::Kokkos::Variational
       template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
         class Trial, class Test>
       static void integratePolytopes(const MeshType& mesh, const PolytopesType& polytopes,
+        const Trial& trial, const Test& test, const TrialDOFsType& trialDOFs,
+        Index trialVDim, const TestDOFsType& testDOFs, Index testVDim,
+        const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset, Real sign,
+        bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
+        const ::Kokkos::View<Index*, MemorySpace>& cols)
+      {
+        constexpr Index size = getLocalSize<Vertices>();
+        // One thread per polytope bounds its local matrix by LocalCapacity. On
+        // the device, teams are faster beyond TeamThreshold when the basis
+        // values of a group of points fit TeamScratch.
+        if constexpr (size > LocalCapacity ||
+          (!OnHost && size > TeamThreshold &&
+            getTeamPoints<Vertices, Trial, Test>() >= TeamMinimumPoints))
+        {
+          integrateTeams<Vertices, Exact, Shape>(mesh, polytopes, trial, test, trialDOFs,
+            trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, rows, cols);
+        }
+        else
+        {
+          integrateThreads<Vertices, Exact, Shape>(mesh, polytopes, trial, test,
+            trialDOFs, trialVDim, testDOFs, testVDim, values, offset, sign, accumulate,
+            rows, cols);
+        }
+      }
+
+      /**
+       * @brief Integrates the polytopes with one team per polytope.
+       *
+       * The quadrature points are taken by groups of P points. The threads
+       * of the team build the integration points of a group in team scratch
+       * memory, one point per thread, then evaluate the test and trial basis
+       * functions at these points, one pair of a point and a basis function
+       * per thread. Each thread then accumulates in registers the entries of
+       * rank @f$ k @f$ such that @f$ k \equiv r \pmod T @f$, for its rank r
+       * in a team of T threads. The local matrix is covered by blocks of
+       * TeamEntries entries per thread, or TeamWideEntries beyond
+       * LocalCapacity, so its size is not bounded. Public as the enclosing
+       * function of a device lambda.
+       */
+      template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
+        class Trial, class Test>
+      static void integrateTeams(const MeshType& mesh, const PolytopesType& polytopes,
+        const Trial& trial, const Test& test, const TrialDOFsType& trialDOFs,
+        Index trialVDim, const TestDOFsType& testDOFs, Index testVDim,
+        const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset, Real sign,
+        bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
+        const ::Kokkos::View<Index*, MemorySpace>& cols)
+      {
+        using TestValue = std::decay_t<decltype(test.getBasis(
+          std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
+        using TrialValue = std::decay_t<decltype(trial.getBasis(
+          std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
+        static_assert(std::is_trivially_copyable_v<TestValue> &&
+          std::is_trivially_copyable_v<TrialValue> &&
+          std::is_trivially_destructible_v<IntegrationPointView>);
+        using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>;
+        using Member = typename Policy::member_type;
+        constexpr Index TrialCapacity =
+          TrialDOFsType::getCapacity(Vertices) * VectorCapacity<TrialRange>;
+        constexpr Index TestCapacity =
+          TestDOFsType::getCapacity(Vertices) * VectorCapacity<TestRange>;
+        constexpr size_t PointBytes = getTeamPointBytes<Vertices, Trial, Test>();
+        // Groups that do not fit TeamScratch go to the slower scratch level.
+        constexpr Index Fit = getTeamPoints<Vertices, Trial, Test>();
+        constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
+          : Fit > TeamPoints                        ? TeamPoints
+                                                    : Fit;
+        // Wider blocks reduce the passes over the quadrature of large matrices.
+        constexpr Index E =
+          TrialCapacity * TestCapacity > LocalCapacity ? TeamWideEntries : TeamEntries;
+        constexpr size_t Alignment = std::max({alignof(TestValue), alignof(TrialValue),
+          alignof(IntegrationPointView), alignof(Real)});
+        const auto& execution = mesh.getContext().getExecutionSpace();
+        const auto view = mesh.getDeviceView();
+        const auto quadrature = polytopes.getQuadrature();
+        const auto attributes = polytopes.getAttributes();
+        const auto offsets = polytopes.getOffsets();
+        const size_t spacing = polytopes.getSpacing();
+        const auto region = polytopes.getRegion();
+        const Index dimension = polytopes.getDimension();
+        const bool index = rows.extent(0) > 0;
+        const size_t scratch = P * PointBytes + 4 * Alignment;
+        const int level = scratch <= size_t(Policy::scratch_size_max(0)) ? 0 : 1;
+        const auto kernel = KOKKOS_LAMBDA(const Member& team)
+        {
+          const Index p = team.league_rank();
+          const auto polytope = view.getPolytope(dimension, p);
+          if (!Rodin::Kokkos::Variational::isIntegrated(
+                view, region, polytope, attributes))
+            return;
+          KOKKOS_ASSERT(Exact ? polytope.getVertices().size() == Vertices
+                              : polytope.getVertices().size() <= Vertices);
+          const auto trialIndices = trialDOFs.bind(polytope);
+          const auto testIndices = testDOFs.bind(polytope);
+          const Index ntr = Exact ? TrialCapacity : trialIndices.size() * trialVDim;
+          const Index nte = Exact ? TestCapacity : testIndices.size() * testVDim;
+          const Index trialStride = Exact ? VectorCapacity<TrialRange> : trialVDim;
+          const Index testStride = Exact ? VectorCapacity<TestRange> : testVDim;
+          const Index g = static_cast<Index>(polytope.getGeometry());
+          const Index rank = team.team_rank();
+          const Index threads = team.team_size();
+          auto* const points =
+            static_cast<IntegrationPointView*>(team.team_scratch(level).get_shmem_aligned(
+              P * sizeof(IntegrationPointView), Alignment));
+          auto* const weights = static_cast<Real*>(
+            team.team_scratch(level).get_shmem_aligned(P * sizeof(Real), Alignment));
+          auto* const phi =
+            static_cast<TestValue*>(team.team_scratch(level).get_shmem_aligned(
+              P * TestCapacity * sizeof(TestValue), Alignment));
+          auto* const psi =
+            static_cast<TrialValue*>(team.team_scratch(level).get_shmem_aligned(
+              P * TrialCapacity * sizeof(TrialValue), Alignment));
+          const Index entries = nte * ntr;
+          const Index begin = quadrature.begin(g);
+          const Index end = quadrature.end(g);
+          const size_t base = offset + offsets(p);
+          // Groups of balanced sizes, at most P points each.
+          const Index groups = (end - begin + P - 1) / P;
+          const Index size = groups > 0 ? (end - begin + groups - 1) / groups : 0;
+          for (Index first = 0; first < entries; first += threads * E)
+          {
+            Real local[E] = {};
+            for (Index q0 = begin; q0 < end; q0 += size)
+            {
+              const Index count = end - q0 < size ? end - q0 : size;
+              // The points and the values of the previous group are no longer read.
+              team.team_barrier();
+              for (Index c = rank; c < count; c += threads)
+              {
+                new (points + c) IntegrationPointView(
+                  polytope, quadrature.getReference(polytope, q0 + c), Shape{});
+                weights[c] = quadrature.getWeight(q0 + c) * points[c].getDistortion();
+              }
+              team.team_barrier();
+              // Separate loops keep the lanes of a warp on the same basis.
+              for (Index i = rank; i < count * nte; i += threads)
+              {
+                const Index c = i / nte;
+                const Index te = i - c * nte;
+                const auto basis = Rodin::Kokkos::Variational::bindBasis(test, points[c]);
+                phi[c * TestCapacity + te] =
+                  basis.getBasis(te / testStride, te % testStride);
+              }
+              for (Index i = rank; i < count * ntr; i += threads)
+              {
+                const Index c = i / ntr;
+                const Index tr = i - c * ntr;
+                const auto basis =
+                  Rodin::Kokkos::Variational::bindBasis(trial, points[c]);
+                psi[c * TrialCapacity + tr] =
+                  basis.getBasis(tr / trialStride, tr % trialStride);
+              }
+              team.team_barrier();
+              RODIN_KOKKOS_UNROLL
+              for (Index j = 0; j < E; ++j)
+              {
+                const Index k = first + j * threads + rank;
+                if (k < entries)
+                {
+                  const Index te = k / ntr;
+                  const Index tr = k - te * ntr;
+                  for (Index c = 0; c < count; ++c)
+                  {
+                    const auto& u = psi[c * TrialCapacity + tr];
+                    const auto& v = phi[c * TestCapacity + te];
+                    if (Rodin::Kokkos::Variational::overlaps(u, v))
+                      local[j] += weights[c] * Rodin::Kokkos::Variational::dot(u, v);
+                  }
+                }
+              }
+            }
+            // Local index a * vdim + r is component r of the scalar degree of
+            // freedom a, numbered globally as dof + r * stride.
+            RODIN_KOKKOS_UNROLL
+            for (Index j = 0; j < E; ++j)
+            {
+              const Index k = first + j * threads + rank;
+              if (k >= entries)
+                continue;
+              const Index te = k / ntr;
+              const Index tr = k - te * ntr;
+              const size_t e = base + size_t(k) * spacing;
+              const Real v = sign * local[j];
+              if (accumulate)
+                values(e) += v;
+              else
+                values(e) = v;
+              if (index)
+              {
+                rows(e) =
+                  testIndices[te / testStride] + (te % testStride) * testDOFs.getStride();
+                cols(e) = trialIndices[tr / trialStride] +
+                  (tr % trialStride) * trialDOFs.getStride();
+              }
+            }
+          }
+        };
+        Policy policy(execution, polytopes.getPolytopeCount(), ::Kokkos::AUTO);
+        policy.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
+        // About TeamEntries / 2 entries per thread balance the occupancy against
+        // the passes over the quadrature.
+        const Index wanted =
+          (2 * TrialCapacity * TestCapacity + 32 * E - 1) / (32 * E) * 32;
+        const int maximum = policy.team_size_max(kernel, ::Kokkos::ParallelForTag());
+        int threads = std::max(1, std::min(maximum, int(std::min<Index>(wanted, 1024))));
+        Policy launch(execution, polytopes.getPolytopeCount(), threads);
+        launch.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
+        ::Kokkos::parallel_for("Rodin bilinear form team integration", launch, kernel);
+      }
+
+      /**
+       * @brief Integrates the polytopes with one thread per polytope.
+       *
+       * Each thread holds the local matrix of its polytope. Public as the
+       * enclosing function of a device lambda.
+       */
+      template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
+        class Trial, class Test>
+      static void integrateThreads(const MeshType& mesh, const PolytopesType& polytopes,
         const Trial& trial, const Test& test, const TrialDOFsType& trialDOFs,
         Index trialVDim, const TestDOFsType& testDOFs, Index testVDim,
         const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset, Real sign,
@@ -1496,9 +1731,40 @@ namespace Rodin::Kokkos::Variational
        * @brief Maximum number of entries of the local matrix of a kernel.
        *
        * Each thread holds its local matrix, which spills beyond the
-       * registers, so higher degrees on large polytopes are rejected.
+       * registers, so larger local matrices take one team per polytope.
        */
       static constexpr Index LocalCapacity = 8192;
+
+      /// @brief Local matrix size above which device kernels use one team per polytope.
+      static constexpr Index TeamThreshold = 256;
+
+      /// @brief Number of entries of the local matrix accumulated by each team thread.
+      static constexpr Index TeamEntries = 8;
+
+      /// @brief Maximum number of quadrature points of a group of the team kernel.
+      static constexpr Index TeamPoints = 32;
+
+      /// @brief Team scratch bytes targeted by the groups of quadrature points.
+      static constexpr size_t TeamScratch = 24576;
+
+      /**
+       * @brief Minimum number of quadrature points of a group.
+       *
+       * Smaller groups leave the threads waiting on the integration points,
+       * so below LocalCapacity the forms whose groups would be smaller keep
+       * one thread per polytope.
+       */
+      static constexpr Index TeamMinimumPoints = 4;
+
+      /// @brief Number of points of a group whose values exceed TeamScratch, in the slower scratch level.
+      static constexpr Index TeamSlowPoints = 8;
+
+      /// @brief Number of entries per team thread beyond LocalCapacity.
+      static constexpr Index TeamWideEntries = 32;
+
+      /// @brief Whether the kernels run on the host.
+      static constexpr bool OnHost =
+        ::Kokkos::SpaceAccessibility<ExecutionSpace, ::Kokkos::HostSpace>::accessible;
 
       /**
        * @brief Selects the quadrature order on a polytope.
