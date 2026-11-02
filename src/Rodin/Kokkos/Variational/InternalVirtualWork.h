@@ -479,10 +479,12 @@ namespace Rodin::Solid
        * team per cell.
        *
        * The quadrature points are taken by groups of P points. The threads
-       * of the team build the integration points and the kinematics of a
-       * group in team scratch memory, one point per thread, then the
-       * gradients @f$ \nabla \phi_a @f$ and @f$ \alpha_a @f$, one pair of
-       * a point and a scalar basis function per thread. Each thread then
+       * of the team build the integration points of a group in team scratch
+       * memory, one point per thread, then sum the displacement gradients,
+       * one pair of a point and a basis function of the state per thread,
+       * then build the kinematics, one point per thread, and the gradients
+       * @f$ \nabla \phi_a @f$ and @f$ \alpha_a @f$, one pair of a point and
+       * a scalar basis function per thread. Each thread then
        * accumulates in registers the entries of rank @f$ k @f$ such that
        * @f$ k \equiv r \pmod T @f$, for its rank r in a team of T threads,
        * by blocks of TeamEntries entries per thread. The entries are laid
@@ -509,8 +511,11 @@ namespace Rodin::Solid
         using Member = typename Policy::member_type;
         constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
         constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
+        constexpr Index Square =
+          RODIN_MAXIMAL_SPACE_DIMENSION * RODIN_MAXIMAL_SPACE_DIMENSION;
         constexpr size_t PointBytes = sizeof(Point) + sizeof(Kinematics) +
-          3 * sizeof(Real) + 2 * (TrialCapacity + TestCapacity) * sizeof(Vector);
+          (3 + Square) * sizeof(Real) +
+          2 * (TrialCapacity + TestCapacity) * sizeof(Vector);
         // Groups that do not fit TeamScratch go to the slower scratch level.
         constexpr Index Fit = TeamScratch / PointBytes;
         constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
@@ -539,6 +544,10 @@ namespace Rodin::Solid
           KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
           const auto trialIndices = trialDOFs.bind(polytope);
           const auto testIndices = testDOFs.bind(polytope);
+          const auto& stateDOFs = state.getDOFs();
+          const auto& data = state.getData();
+          const auto stateIndices = stateDOFs.bind(polytope);
+          const Index ns = stateIndices.size();
           const Index na = trialIndices.size();
           const Index nb = testIndices.size();
           const Index ntr = na * vdim;
@@ -553,6 +562,8 @@ namespace Rodin::Solid
             memory.get_shmem_aligned(P * sizeof(Kinematics), Alignment));
           auto* const coefficients =
             static_cast<Real*>(memory.get_shmem_aligned(3 * P * sizeof(Real), Alignment));
+          auto* const jacobians = static_cast<Real*>(
+            memory.get_shmem_aligned(Square * P * sizeof(Real), Alignment));
           auto* const ga = static_cast<Vector*>(
             memory.get_shmem_aligned(P * TrialCapacity * sizeof(Vector), Alignment));
           auto* const aa = static_cast<Vector*>(
@@ -581,7 +592,33 @@ namespace Rodin::Solid
                 new (points + c)
                   Point(polytope, quadrature.getReference(polytope, q0 + c),
                     Rodin::Kokkos::Variational::DynamicGeometry{});
-                new (kinematics + c) Kinematics(state.interpolateJacobian(points[c]));
+                for (Index k = 0; k < Square; ++k)
+                  jacobians[c * Square + k] = 0;
+              }
+              team.team_barrier();
+              // The displacement gradient sums one term per pair of a point
+              // and a basis function of the state.
+              for (Index i = rank; i < count * ns; i += threads)
+              {
+                const Index c = i / ns;
+                const Index q = i - c * ns;
+                const Vector gradient = stateDOFs.getGradient(points[c], q);
+                for (Index r = 0; r < vdim; ++r)
+                {
+                  const Real value = data(stateIndices[q] + r * stateDOFs.getStride());
+                  for (Index k = 0; k < vdim; ++k)
+                    ::Kokkos::atomic_add(
+                      &jacobians[c * Square + r * vdim + k], gradient(k) * value);
+                }
+              }
+              team.team_barrier();
+              for (Index c = rank; c < count; c += threads)
+              {
+                Kokkos::Geometry::Matrix h(vdim, vdim);
+                for (Index r = 0; r < vdim; ++r)
+                  for (Index k = 0; k < vdim; ++k)
+                    h(r, k) = jacobians[c * Square + r * vdim + k];
+                new (kinematics + c) Kinematics(h);
                 const Real wdet =
                   quadrature.getWeight(q0 + c) * points[c].getDistortion();
                 coefficients[3 * c] = wdet * mu;

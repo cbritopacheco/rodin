@@ -1603,6 +1603,20 @@ namespace Rodin::Kokkos::Variational
         execution.fence("Rodin grid function transfer");
       }
 
+      /// @brief Gets the device degrees of freedom. @return Degrees of freedom.
+      KOKKOS_INLINE_FUNCTION
+      const DOFsType& getDOFs() const
+      {
+        return m_dofs;
+      }
+
+      /// @brief Gets the coefficients. @return Device coefficients.
+      KOKKOS_INLINE_FUNCTION
+      const ::Kokkos::View<Real*, MemorySpace>& getData() const
+      {
+        return m_data;
+      }
+
       /// @brief Returns the vector dimension. @return Component count.
       KOKKOS_INLINE_FUNCTION
       Index getVectorDimension() const
