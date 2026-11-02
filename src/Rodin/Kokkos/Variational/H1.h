@@ -13,6 +13,7 @@
  */
 
 #include <array>
+#include <cmath>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -197,6 +198,18 @@ namespace Rodin::Kokkos::Variational
    * monomials at the host nodes, computed once on the host in extended
    * precision.
    *
+   * The nodes of the segment, the quadrilateral and the hexahedron are the
+   * tensor products of the nodes @f$ x_0, \dots, x_K @f$ of the segment, so
+   * their basis functions factor into the one dimensional Lagrange
+   * polynomials
+   * @f[
+   *   \phi_q(r) = \prod_k \ell_{i_k}(r_k) , \quad
+   *   \ell_i(x) = w_i \prod_{m \neq i} (x - x_m) ,
+   * @f]
+   * where @f$ (i_k) @f$ are the indices of the coordinates of node
+   * @f$ q @f$ and @f$ w_i @f$ the barycentric weights. They are evaluated in
+   * this form, which takes a fixed number of operations whatever the node.
+   *
    * The physical gradient follows from the reference one through
    * @f$ \nabla r_k = \sum_a \hat{x}_{a,k} \nabla \lambda_a @f$, where
    * @f$ \lambda_a @f$ is the P1 basis cached by IntegrationPointView and
@@ -275,9 +288,28 @@ namespace Rodin::Kokkos::Variational
         m_coefficients = ::Kokkos::View<Real*, MemorySpace>(
           ::Kokkos::view_alloc(execution, std::string("Rodin H1 coefficients")),
           coefficients);
+        m_lines = ::Kokkos::View<std::uint8_t*, MemorySpace>(
+          ::Kokkos::view_alloc(execution, std::string("Rodin H1 line indices")),
+          3 * nodes);
         auto exponents = ::Kokkos::create_mirror_view(m_exponents);
         auto points = ::Kokkos::create_mirror_view(m_nodes);
         auto values = ::Kokkos::create_mirror_view(m_coefficients);
+        auto lines = ::Kokkos::create_mirror_view(m_lines);
+        const auto& segment =
+          ::Rodin::Variational::H1Element<K, Real>::getNodes(Type::Segment);
+        assert(segment.size() == K + 1);
+        for (Index i = 0; i <= K; ++i)
+          m_line[i] = segment[i](0);
+        for (Index i = 0; i <= K; ++i)
+        {
+          long double product = 1;
+          for (Index m = 0; m <= K; ++m)
+          {
+            if (m != i)
+              product *= static_cast<long double>(segment[i](0)) - segment[m](0);
+          }
+          m_weights[i] = static_cast<Real>(1 / product);
+        }
         for (Index g = 0; g < GeometryCount; ++g)
         {
           const Type type = static_cast<Type>(g);
@@ -312,6 +344,29 @@ namespace Rodin::Kokkos::Variational
             for (Index k = 0; k < 3; ++k)
               exponents(3 * (m_nodeOffsets[g] + m) + k) = alpha[m][k];
           }
+          // A tensor geometry factors when each node coordinate is a segment node.
+          m_tensor[g] = type == Type::Segment || type == Type::Quadrilateral ||
+            type == Type::Hexahedron;
+          for (Index i = 0; i < n && m_tensor[g]; ++i)
+          {
+            const Index rdim = reference[i].size();
+            for (Index k = 0; k < 3; ++k)
+            {
+              Index match = 0;
+              if (k < rdim)
+              {
+                match = K + 1;
+                for (Index m = 0; m <= K; ++m)
+                {
+                  if (std::abs(reference[i](k) - m_line[m]) < 1e-12)
+                    match = m;
+                }
+                if (match > K)
+                  m_tensor[g] = false;
+              }
+              lines(3 * (m_nodeOffsets[g] + i) + k) = static_cast<std::uint8_t>(match);
+            }
+          }
           for (Index q = 0; q < n; ++q)
           {
             for (Index m = 0; m < n; ++m)
@@ -322,6 +377,7 @@ namespace Rodin::Kokkos::Variational
         ::Kokkos::deep_copy(execution, m_exponents, exponents);
         ::Kokkos::deep_copy(execution, m_nodes, points);
         ::Kokkos::deep_copy(execution, m_coefficients, values);
+        ::Kokkos::deep_copy(execution, m_lines, lines);
         execution.fence("Rodin H1 basis transfer");
       }
 
@@ -339,6 +395,14 @@ namespace Rodin::Kokkos::Variational
         const Geometry::Vector& r = p.getReferenceCoordinates();
         const Index n = m_count[g];
         KOKKOS_ASSERT(q < n);
+        if (m_tensor[g])
+        {
+          const std::uint8_t* line = m_lines.data() + 3 * (m_nodeOffsets[g] + q);
+          Real result = 1;
+          for (Index k = 0; k < r.size(); ++k)
+            result *= getLine(line[k], r(k)).value;
+          return result;
+        }
         const Powers powers = getPowers(r);
         const Real* c = m_coefficients.data() + m_coefficientOffsets[g] + q * n;
         const std::uint8_t* alpha = m_exponents.data() + 3 * m_nodeOffsets[g];
@@ -368,11 +432,26 @@ namespace Rodin::Kokkos::Variational
         const Geometry::Vector& r = p.getReferenceCoordinates();
         const Index n = m_count[g];
         KOKKOS_ASSERT(q < n);
+        const Index rdim = r.size();
+        ::Kokkos::Array<Real, 3> reference = {0, 0, 0};
+        if (m_tensor[g])
+        {
+          const std::uint8_t* line = m_lines.data() + 3 * (m_nodeOffsets[g] + q);
+          ::Kokkos::Array<Line, 3> factors;
+          for (Index k = 0; k < rdim; ++k)
+            factors[k] = getLine(line[k], r(k));
+          for (Index k = 0; k < rdim; ++k)
+          {
+            Real derivative = factors[k].derivative;
+            for (Index l = 0; l < rdim; ++l)
+              derivative *= l == k ? Real(1) : factors[l].value;
+            reference[k] = derivative;
+          }
+          return map(ip, type, reference);
+        }
         const Powers powers = getPowers(r);
         const Real* c = m_coefficients.data() + m_coefficientOffsets[g] + q * n;
         const std::uint8_t* alpha = m_exponents.data() + 3 * m_nodeOffsets[g];
-        const Index rdim = r.size();
-        ::Kokkos::Array<Real, 3> reference = {0, 0, 0};
         for (Index m = 0; m < n; ++m)
         {
           for (Index k = 0; k < rdim; ++k)
@@ -389,21 +468,7 @@ namespace Rodin::Kokkos::Variational
             reference[k] += derivative;
           }
         }
-        // The P1 basis reproduces the reference coordinates.
-        const Index sdim = ip.getGradient(0).size();
-        Geometry::Vector result(sdim);
-        for (Index a = 0; a < ip.getCount(); ++a)
-        {
-          Real weight = 0;
-          for (Index k = 0; k < rdim; ++k)
-            weight += reference[k] * Geometry::getReferenceVertexCoordinate(type, a, k);
-          if (weight == 0)
-            continue;
-          const Geometry::Vector& gradient = ip.getGradient(a);
-          for (Index s = 0; s < sdim; ++s)
-            result(s) += weight * gradient(s);
-        }
-        return result;
+        return map(ip, type, reference);
       }
 
       /**
@@ -426,6 +491,63 @@ namespace Rodin::Kokkos::Variational
 
     private:
       using Powers = ::Kokkos::Array<::Kokkos::Array<Real, K + 1>, 3>;
+
+      /**
+       * @brief Maps a reference gradient to the physical polytope.
+       * @param ip Integration point.
+       * @param type Reference geometry of the polytope.
+       * @param reference Reference gradient.
+       * @return Physical gradient.
+       */
+      template <class Point>
+      KOKKOS_INLINE_FUNCTION static Geometry::Vector map(const Point& ip,
+        ::Rodin::Geometry::Polytope::Type type, const ::Kokkos::Array<Real, 3>& reference)
+      {
+        const Index rdim = ip.getPoint().getReferenceCoordinates().size();
+        // The P1 basis reproduces the reference coordinates.
+        const Index sdim = ip.getGradient(0).size();
+        Geometry::Vector result(sdim);
+        for (Index a = 0; a < ip.getCount(); ++a)
+        {
+          Real weight = 0;
+          for (Index k = 0; k < rdim; ++k)
+            weight += reference[k] * Geometry::getReferenceVertexCoordinate(type, a, k);
+          const Geometry::Vector& gradient = ip.getGradient(a);
+          for (Index s = 0; s < sdim; ++s)
+            result(s) += weight * gradient(s);
+        }
+        return result;
+      }
+
+      /// @brief Value and derivative of a one dimensional Lagrange polynomial.
+      struct Line
+      {
+        Real value;
+        Real derivative;
+      };
+
+      /**
+       * @brief Evaluates a one dimensional Lagrange polynomial.
+       * @param i Index of its segment node.
+       * @param x Coordinate.
+       * @return @f$ \ell_i(x) @f$ and @f$ \ell_i'(x) @f$.
+       *
+       * The product skips node @f$ i @f$ by selection, without a branch.
+       */
+      KOKKOS_INLINE_FUNCTION
+      Line getLine(Index i, Real x) const
+      {
+        Real value = 1;
+        Real derivative = 0;
+        for (Index m = 0; m <= K; ++m)
+        {
+          const Real e = x - m_line[m];
+          const bool skip = m == i;
+          derivative = skip ? derivative : derivative * e + value;
+          value = skip ? value : value * e;
+        }
+        return {m_weights[i] * value, m_weights[i] * derivative};
+      }
 
       /// @brief Gets the powers @f$ r_k^p @f$, @f$ p \leq K @f$.
       KOKKOS_INLINE_FUNCTION
@@ -474,6 +596,10 @@ namespace Rodin::Kokkos::Variational
       ::Kokkos::View<std::uint8_t*, MemorySpace> m_exponents;
       ::Kokkos::View<Real*, MemorySpace> m_nodes;
       ::Kokkos::View<Real*, MemorySpace> m_coefficients;
+      ::Kokkos::Array<bool, GeometryCount> m_tensor = {};
+      ::Kokkos::Array<Real, K + 1> m_line = {};
+      ::Kokkos::Array<Real, K + 1> m_weights = {};
+      ::Kokkos::View<std::uint8_t*, MemorySpace> m_lines;
   };
 
   /**

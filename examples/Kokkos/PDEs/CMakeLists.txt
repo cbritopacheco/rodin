@@ -31,6 +31,17 @@ target_link_libraries(KokkosElasticity
   Rodin::IO
   )
 
+add_executable(KokkosH1_Assembly H1_Assembly.cpp)
+target_link_libraries(KokkosH1_Assembly
+  PUBLIC
+  Rodin::Kokkos
+  Rodin::Solver
+  Rodin::Geometry
+  Rodin::Assembly
+  Rodin::Variational
+  Rodin::IO
+  )
+
 add_executable(KokkosStokes Stokes.cpp)
 target_link_libraries(KokkosStokes
   PUBLIC

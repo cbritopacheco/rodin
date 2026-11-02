@@ -618,6 +618,13 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       Tests à 1e-12: K=3 sur triangles et tétraèdres, K=2 sur quadrangles,
       hexaèdres et maillage mixte, K=3 sur quadrangles, refus des pyramides
       (29 tests).
+- [x] Base de Lagrange des segments, quadrangles et hexaèdres évaluée en
+      produit tensoriel des polynômes de Lagrange 1D aux noeuds GLL
+      (poids barycentriques, sans branche), au lieu des monômes. Banc
+      `KokkosH1_Assembly 30` (27000 hexaèdres Q2): Grad·Grad scalaire de
+      880 à 575 ms, Jacobian·Jacobian vectoriel de 3100 à 2385 ms. Le
+      reste du noyau par thread: géométrie 45 ms, bases 200 ms, produits
+      300 ms (scalaire), la matrice locale débordant en mémoire locale.
 - [ ] Matrice locale par thread limitée à 8192 coefficients
       (`LocalCapacity`): hexaèdres vectoriels d'ordre 3 refusés. Une
       stratégie par équipe (une équipe par cellule, matrice en mémoire
