@@ -105,6 +105,40 @@ namespace Rodin::Tests::Unit
     expectSameOperator(ha.getOperator(), da.getOperator());
   }
 
+  /// @brief Changing cell attributes between assemblies changes the result.
+  void checkAttributeChange(HostMesh source)
+  {
+    DeviceMesh mesh(TestContext{}, source);
+    P1 hfes(source);
+    P1 dfes(mesh);
+    TrialFunction hu(hfes);
+    TestFunction hv(hfes);
+    TrialFunction du(dfes);
+    TestFunction dv(dfes);
+
+    BilinearForm ha(hu, hv);
+    ha = Integral(hu, hv).over(2) + Integral(Grad(hu), Grad(hv)).over(1);
+    BilinearForm da(du, dv);
+    da = Integral(du, dv).over(2) + Integral(Grad(du), Grad(dv)).over(1);
+    da.assemble();
+    ha.assemble();
+    expectSameOperator(ha.getOperator(), da.getOperator());
+
+    // The entries of the device integrals are located again for the new
+    // selection, on the same form.
+    const size_t d = source.getDimension();
+    for (Index i = 0; i < source.getCellCount(); i += 2)
+    {
+      const auto attribute = source.getAttribute(d, i);
+      const Geometry::Attribute next = attribute && *attribute == 1 ? 2 : 1;
+      source.setAttribute({d, i}, next);
+      mesh.setAttribute({d, i}, next);
+    }
+    da.assemble();
+    ha.assemble();
+    expectSameOperator(ha.getOperator(), da.getOperator());
+  }
+
   /// @brief Host evaluation of a device integral raises.
   void checkHostEvaluationRaises(const HostMesh& source)
   {
@@ -182,6 +216,11 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_Variational_BilinearForm, Attributes)
   {
     checkAttributes(makeMixedMesh());
+  }
+
+  TEST(Kokkos_Variational_BilinearForm, AttributeChangeBetweenAssemblies)
+  {
+    checkAttributeChange(makeMixedMesh());
   }
 
   TEST(Kokkos_Variational_BilinearForm, HostEvaluationRaises)

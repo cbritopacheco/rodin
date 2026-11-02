@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <cstdlib>
 #include <limits>
 #include <memory>
@@ -983,7 +984,10 @@ namespace Rodin::Kokkos::Variational::Internal
    * integration region. The quadrature tables and the attribute selection
    * are uploaded on the first integration and again only when the mesh, the
    * region, the quadrature orders or the selection change, so that repeated
-   * integrations do not allocate device memory.
+   * integrations do not allocate device memory. The entry offsets are
+   * located again only when the mesh revision, the region, the selection or
+   * the vector dimensions change, so that repeated integrations neither launch
+   * the counting kernels nor wait for them.
    *
    * @tparam Mesh Resident Kokkos mesh type.
    */
@@ -1002,6 +1006,23 @@ namespace Rodin::Kokkos::Variational::Internal
 
       /// @brief Device attribute selection.
       using AttributesType = ::Kokkos::View<::Rodin::Geometry::Attribute*, MemorySpace>;
+
+      DevicePolytopes() = default;
+
+      /// @brief Starts empty: a copy must not share the offsets it may locate again.
+      DevicePolytopes(const DevicePolytopes&) {}
+
+      DevicePolytopes(DevicePolytopes&&) = default;
+
+      /// @brief Empties this object, see the copy constructor. @returns This object.
+      DevicePolytopes& operator=(const DevicePolytopes& other)
+      {
+        if (this != &other)
+          *this = DevicePolytopes();
+        return *this;
+      }
+
+      DevicePolytopes& operator=(DevicePolytopes&&) = default;
 
       /**
        * @brief Locates the entries of every selected polytope.
@@ -1048,15 +1069,25 @@ namespace Rodin::Kokkos::Variational::Internal
           m_mesh = &mesh;
           m_dimension = dimension;
           m_polytopeCount = count;
+          m_located.reset();
         }
         if (!m_selection || *m_selection != attributes)
         {
           m_attributes = uploadAttributes(execution, attributes);
           m_selection = attributes;
+          m_located.reset();
         }
+        // The entries of a polytope depend on its attributes, on the
+        // entities of the mesh and on the spaces, which are fixed for the
+        // integrator owning this object; the offsets of the last integration
+        // hold as long as the mesh keeps its revision.
+        const Located located{mesh.getRevision(), region, trialVDim, testVDim};
+        if (m_located && *m_located == located)
+          return m_count;
         m_region = region;
         m_count = locate(execution, mesh.getDeviceView(), region, dimension, m_attributes,
           m_offsets, count, trialDOFs, trialVDim, testDOFs, testVDim, m_spacing);
+        m_located = located;
         return m_count;
       }
 
@@ -1172,7 +1203,19 @@ namespace Rodin::Kokkos::Variational::Internal
       }
 
     private:
+      /// @brief What the offsets of the last integration were computed for.
+      struct Located
+      {
+        std::uint64_t revision;
+        ::Rodin::Geometry::Region region;
+        Index trialVDim;
+        Index testVDim;
+
+        bool operator==(const Located&) const = default;
+      };
+
       const Mesh* m_mesh = nullptr;
+      Optional<Located> m_located;
       ::Rodin::Geometry::Region m_region = ::Rodin::Geometry::Region::Cells;
       Index m_dimension = 0;
       Index m_polytopeCount = 0;

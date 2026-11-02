@@ -553,6 +553,19 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       `renumber` de `KokkosOseenAssembly`: atrium 24.6 ms contre 27.7 ms
       (0.89x, 60.4 ms sans renumérotation), grille 30 6.24 ms contre
       6.25 ms (6.60 ms sans). Le parcours interne n'est pas fait.
+- [x] Positions des entrées gardées entre assemblages: `DevicePolytopes`
+      relançait à chaque assemblage, pour chaque intégrateur, le comptage
+      et le scan des entrées (3 noyaux et 2 synchronisations hôte). Elles
+      ne sont recalculées que si la révision du maillage
+      (`Mesh<Context::Kokkos>::getRevision()`, unique entre maillages,
+      changée par la construction, `setAttribute`, la connectivité rendue
+      modifiable et les entités découvertes), la région, la sélection ou
+      les dimensions vectorielles changent. Une copie de `DevicePolytopes`
+      repart vide pour ne pas partager des positions recalculées. Oseen
+      (2080 Ti): grille 16 1.42 ms contre 1.76 ms (1.24x du noyau manuel
+      au lieu de 1.5x), grille 30 6.07 ms contre 6.60 ms (0.94x). Test
+      `AttributeChangeBetweenAssemblies`, qui échoue si `setAttribute` ne
+      change pas la révision.
 - [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
       noyau (somme des intégrandes), capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles

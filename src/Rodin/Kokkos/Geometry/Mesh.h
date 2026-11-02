@@ -12,7 +12,9 @@
  * @brief Resident Kokkos specialization of MeshBase.
  */
 
+#include <atomic>
 #include <cmath>
+#include <cstdint>
 #include <memory>
 #include <typeinfo>
 #include <utility>
@@ -363,9 +365,10 @@ namespace Rodin::Geometry
         return m_sdim;
       }
 
-      /// @returns Resident connectivity owner.
+      /// @returns Resident connectivity owner, which the caller may change.
       ConnectivityType& getConnectivity() override
       {
+        m_revision = nextRevision();
         return m_connectivity;
       }
 
@@ -373,6 +376,23 @@ namespace Rodin::Geometry
       const ConnectivityType& getConnectivity() const override
       {
         return m_connectivity;
+      }
+
+      /**
+       * @brief Gets the revision of the entities and of their attributes.
+       *
+       * Revisions are unique across meshes. A mesh gets a new one when it is
+       * built or assigned, when an attribute is set, when its connectivity is
+       * handed out for modification and when discovered entities get their
+       * slots, so that a cache computed from the entities can tell whether it
+       * still holds. Coordinates and transformations do not change it.
+       *
+       * @returns Revision, current after the entity slots are synchronized.
+       */
+      std::uint64_t getRevision() const
+      {
+        synchronizeEntities();
+        return m_revision;
       }
 
       /// @returns Borrowed resident data; kernels must finish before owner replacement.
@@ -523,6 +543,7 @@ namespace Rodin::Geometry
         ::Kokkos::deep_copy(execution, ::Kokkos::subview(m_attributePresent, index),
           static_cast<unsigned char>(attribute.has_value()));
         execution.fence("Rodin attribute update");
+        m_revision = nextRevision();
         return *this;
       }
 
@@ -1127,6 +1148,7 @@ namespace Rodin::Geometry
         m_geometryKinds = std::move(work.kinds);
         m_controlOffsets = std::move(work.controls);
         m_layoutOffsets = offsets;
+        m_revision = nextRevision();
       }
 
       /// @param count Iteration count. @returns Policy on this mesh's execution instance.
@@ -1150,8 +1172,16 @@ namespace Rodin::Geometry
       }
 
       /// @brief Initializes host compatibility cache buckets.
+      /// @returns Revision never handed out before, in any mesh.
+      static std::uint64_t nextRevision()
+      {
+        static std::atomic<std::uint64_t> counter{0};
+        return ++counter;
+      }
+
       void initializeCaches()
       {
+        m_revision = nextRevision();
         m_transformations.initialize(getDimension());
         m_quadratures.initialize(getDimension());
         m_layoutOffsets = {};
@@ -1292,6 +1322,7 @@ namespace Rodin::Geometry
       mutable DeviceArray<Index> m_controlOffsets;
       mutable ::Kokkos::Array<Index, 5> m_layoutOffsets{};
       mutable std::mutex m_entityMutex;
+      mutable std::uint64_t m_revision = 0;
       mutable PolytopeTransformationIndex m_transformations;
       mutable PolytopeQuadratureIndex m_quadratures;
   };
