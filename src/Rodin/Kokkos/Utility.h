@@ -19,6 +19,7 @@
 #include <vector>
 #include <Kokkos_Core.hpp>
 #include "Rodin/Configure.h"
+#include "Rodin/Alert/Exception.h"
 
 /**
  * @def RODIN_KOKKOS_UNROLL
@@ -141,6 +142,41 @@ namespace Rodin::Kokkos::Internal
     ::Kokkos::deep_copy(execution, value, ::Kokkos::subview(source, index));
     execution.fence("Rodin host query");
     return value;
+  }
+
+  /**
+   * @brief Clears the pending launch error of the device runtime, so the
+   * next checkLaunches() reports only the kernels launched in between.
+   */
+  inline void clearLaunches()
+  {
+#ifdef KOKKOS_ENABLE_CUDA
+    static_cast<void>(cudaGetLastError());
+#endif
+  }
+
+  /**
+   * @brief Raises the launch error of a kernel launched since
+   * clearLaunches().
+   *
+   * Kokkos checks the launches only with its bounds checks enabled. A kernel
+   * refused at launch, for instance for lack of memory for its local arrays
+   * on a nearly full device, otherwise leaves its outputs unwritten without
+   * an error, and the assembled system silently misses its entries.
+   * @param what Name of the launched work, for the message.
+   */
+  inline void checkLaunches(const char* what)
+  {
+#ifdef KOKKOS_ENABLE_CUDA
+    const cudaError_t error = cudaGetLastError();
+    if (error != cudaSuccess)
+    {
+      Alert::Exception() << what << " failed to launch: " << cudaGetErrorString(error)
+                         << Alert::Raise;
+    }
+#else
+    static_cast<void>(what);
+#endif
   }
 }
 

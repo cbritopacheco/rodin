@@ -106,6 +106,12 @@ imposes constraints that host Kokkos backends do not detect:
   `SparseLU` are therefore instantiated in `RodinSolver`, which is compiled by
   the host compiler (solvers-assembly.md). Their layout does not depend on
   the compiler: `EIGEN_MAX_ALIGN_BYTES` is 16 under both.
+- Kokkos checks kernel launches only when its bounds checks are enabled. A
+  kernel refused at launch, for instance when a nearly full device has no
+  memory left for its local arrays, leaves its outputs unwritten without an
+  error. The device assemblers call `Kokkos::Internal::checkLaunches()` after
+  each integrator fill (`Rodin/Kokkos/Utility.h`); a new path launching
+  integrator kernels does the same.
 - A Kokkos change is CUDA-verified only after building and running the Kokkos
   tests with a CUDA-enabled Kokkos installation.
 

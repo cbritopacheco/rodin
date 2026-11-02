@@ -26,6 +26,7 @@
 #include <Kokkos_Sort.hpp>
 
 #include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Kokkos/Utility.h"
 #include "Rodin/Assembly/AssemblyBase.h"
 #include "Rodin/Assembly/ConstraintMap.h"
 #include "Rodin/Assembly/Sequential.h"
@@ -1540,6 +1541,7 @@ namespace Rodin::Assembly::Internal
         triplets.cols = allocate<Index>(total, "Rodin matrix columns");
         triplets.values = allocate<Real>(total, "Rodin matrix values");
         size_t offset = 0;
+        ::Rodin::Kokkos::Internal::clearLaunches();
         for (size_t k = 0; k < m_matrices.size(); ++k)
         {
           const auto& m = m_matrices[k];
@@ -1548,6 +1550,7 @@ namespace Rodin::Assembly::Internal
           {
             m.integrator->fill(
               triplets.values, offset, m.sign, false, triplets.rows, triplets.cols);
+            ::Rodin::Kokkos::Internal::checkLaunches("A device bilinear integrator");
             if (m.row != 0 || m.col != 0)
               shift(
                 m_execution, offset, count, m.row, m.col, triplets.rows, triplets.cols);
@@ -1776,11 +1779,13 @@ namespace Rodin::Assembly::Internal
           const auto indices = allocate<Index>(total, "Rodin vector indices");
           const auto values = allocate<Real>(total, "Rodin vector values");
           size_t offset = 0;
+          ::Rodin::Kokkos::Internal::clearLaunches();
           for (size_t k = begin; k < end; ++k)
           {
             const auto& v = m_vectors[k];
             const size_t count = counts[k - begin];
             v.integrator->fill(values, offset, v.sign, false, indices);
+            ::Rodin::Kokkos::Internal::checkLaunches("A device linear integrator");
             if (v.row != 0)
               shift(m_execution, offset, count, v.row, 0, indices, Array<Index>());
             offset += count;

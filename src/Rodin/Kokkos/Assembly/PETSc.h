@@ -1180,6 +1180,7 @@ namespace Rodin::Assembly::Internal
         }
         const ::Kokkos::View<Index*, MemorySpace> none;
         std::vector<bool> filled(segments.size(), false);
+        ::Rodin::Kokkos::Internal::clearLaunches();
         for (size_t k = 0; k < m_matrices.size(); ++k)
         {
           const auto& m = m_matrices[k];
@@ -1188,6 +1189,7 @@ namespace Rodin::Assembly::Internal
           m.integrator->fill(cache.values, offsets[s], m.sign, !first,
             first && index ? cache.nextRows : none,
             first && index ? cache.nextCols : none);
+          ::Rodin::Kokkos::Internal::checkLaunches("A device bilinear integrator");
           filled[s] = true;
         }
         const auto range = std::make_pair(offsets.back(), tail);
@@ -1376,11 +1378,13 @@ namespace Rodin::Assembly::Internal
         resize(cache.entryValues, offsets.back(), "Rodin entry values");
         const Expansions none;
         const Expansions& expansions = x ? *x : none;
+        ::Rodin::Kokkos::Internal::clearLaunches();
         for (size_t k = 0; k < m_vectors.size(); ++k)
         {
           const auto& v = m_vectors[k];
           v.integrator->fill(
             cache.entryValues, offsets[k], v.sign, false, cache.entryIndices);
+          ::Rodin::Kokkos::Internal::checkLaunches("A device linear integrator");
           listEntries(cache, offsets[k], offsets[k + 1] - offsets[k], v.row, fixed,
             expansions, x != nullptr);
         }

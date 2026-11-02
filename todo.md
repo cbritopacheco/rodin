@@ -738,6 +738,13 @@ cellules, CUDA sm_75).
       Second membre identique bit à bit d'un assemblage à l'autre (test
       `Reassembly`). `KokkosSeq_Poisson 100`: noyaux du second membre de
       2.9 ms à environ 10 ms, premier assemblage inchangé (environ 1.1 s).
+- [x] Lancements refusés signalés. Kokkos ne vérifie les lancements
+      qu'avec ses contrôles de bornes: un noyau refusé au lancement (pas
+      de mémoire pour ses tableaux locaux sur une carte presque pleine)
+      laissait la matrice vide sans erreur. `KokkosH1_Assembly 40 1 2`
+      sur la 2080 Ti: vectoriel Q2 en 89 ms avec 0 non nuls.
+      `Kokkos::Internal::checkLaunches()` lève une exception après chaque
+      `fill()` des assembleurs Kokkos et PETSc.
 
 ## 17. Temps de compilation des tests Kokkos
 
