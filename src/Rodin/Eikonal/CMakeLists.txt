@@ -7,6 +7,7 @@ Distributed under the Boost Software License, Version 1.0.
 
 set(RodinEikonal_HEADERS
   FMM.h
+  FIM.h
 )
 
 # Header-only / interface library

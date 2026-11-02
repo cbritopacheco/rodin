@@ -26,6 +26,7 @@ parallel execution through template specializations.
 | Linear/bilinear assembly | `Sequential` | `OpenMP` if enabled | `MPI` if distributed | PETSc Sequential/OpenMP/MPI if PETSc support is claimed |
 | Solver | sparse/dense specialization as appropriate | same solver | usually not standalone | PETSc `LinearSystem` specialization if claimed |
 | IO format | local loader/printer | same | shard-aware loader/printer if distributed | PETSc data specialization if PETSc fields are claimed |
+| Native-cell Eikonal FIM | local real P1, scalar/tensor coefficient, mapped geometry | not implemented | not implemented | not implemented |
 
 A feature can deliberately support only one column. Say that explicitly in the
 class docs, guides, tests, and PR notes. Do not imply backend parity merely
