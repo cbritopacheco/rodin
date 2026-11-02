@@ -17,7 +17,7 @@ import matplotlib.tri as mtri
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from plot_style import apply_style
+from plot_style import apply_style, turbo_colors
 
 
 def read_case(directory):
@@ -53,6 +53,25 @@ def read_case(directory):
     return parameters, table, vertices, topology[:, 1:], times, values
 
 
+def repolarization_times(case):
+    """First post-peak 90% recovery, relative to each node's initial voltage."""
+    values, times = case[5], case[4]
+    peaks = values.argmax(axis=0)
+    columns = np.arange(values.shape[1])
+    threshold = values[0] + 0.1 * (values[peaks, columns] - values[0])
+    crossings = ((np.arange(len(times))[:, None] > peaks)
+                 & (values <= threshold))
+    valid = crossings.any(axis=0)
+    columns = columns[valid]
+    upper = crossings.argmax(axis=0)[valid]
+    lower = upper - 1
+    result = np.full(values.shape[1], np.inf)
+    fraction = ((threshold[valid] - values[lower, columns])
+                / (values[upper, columns] - values[lower, columns]))
+    result[valid] = times[lower] + fraction * (times[upper] - times[lower])
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('isotropic', type=Path)
@@ -61,6 +80,8 @@ def main():
     parser.add_argument('--end-ms', type=float, default=50)
     parser.add_argument('--duration', type=float, default=10,
                         help='Playback duration in seconds; physical time remains labelled')
+    parser.add_argument('--repolarization', action='store_true',
+                        help='Show 90% repolarization and export matched-probe traces')
     args = parser.parse_args()
     ffmpeg = shutil.which('ffmpeg')
     if ffmpeg is None:
@@ -83,12 +104,15 @@ def main():
     if not (0 < args.end_ms <= min(case[4][-1] for case in cases)
             and 0 < args.duration):
         raise ValueError('Requested duration/end time is outside the exported series')
+    repolarization = [repolarization_times(case) for case in cases] if args.repolarization else []
     args.output.mkdir(parents=True, exist_ok=True)
     apply_style()
     plt.rcParams['animation.ffmpeg_path'] = ffmpeg
     figure, axes = plt.subplots(1, 2, figsize=(10, 7), dpi=150)
     figure.subplots_adjust(left=0.07, right=0.85, bottom=0.16, top=0.79, wspace=0.18)
-    figure.suptitle('RE+ propagation on the same tissue sheet', fontsize=17, y=0.98)
+    title = ('RE+ depolarization and repolarization' if args.repolarization
+             else 'RE+ propagation on the same tissue sheet')
+    figure.suptitle(title, fontsize=17, y=0.98)
     figure.text(0.5, 0.905, 'Same mesh, source region, ionic kinetics and time step',
                 ha='center', fontsize=11)
     surfaces, percentages = [], []
@@ -115,23 +139,27 @@ def main():
                      fontsize=14, color='#303b49')
     colorbar = figure.colorbar(surfaces[0], cax=figure.add_axes([0.9, 0.25, 0.022, 0.48]))
     colorbar.set_label(r'$V\;[\mathrm{mV}]$', fontsize=12)
-    clock = figure.text(0.5, 0.075, '', ha='center', fontsize=15)
-    figure.text(0.5, 0.025,
+    clock = figure.text(0.5, 0.045 if args.repolarization else 0.075, '', ha='center', fontsize=15)
+    figure.text(0.5, 0.008 if args.repolarization else 0.025,
                 rf'Playback: ${args.end_ms / args.duration:g}\,\mathrm{{ms}}$ per second'
                 '  |  Linear interpolation between exported snapshots',
                 ha='center', fontsize=10)
 
     def update(time):
-        for case, surface, percentage in zip(cases, surfaces, percentages):
+        for index, (case, surface, percentage) in enumerate(zip(cases, surfaces, percentages)):
             times, values = case[4:]
             upper = min(max(1, np.searchsorted(times, time)), len(times) - 1)
             weight = (time - times[upper - 1]) / (times[upper] - times[upper - 1])
             surface.set_array((1 - weight) * values[upper - 1] + weight * values[upper])
             fraction = np.count_nonzero(case[1]['replus_lat_ms'] <= time) / len(case[1])
-            percentage.set_text(f'Nodes activated: {100 * fraction:5.1f}%')
+            label = f'Activated: {100 * fraction:5.1f}%' if args.repolarization else f'Nodes activated: {100 * fraction:5.1f}%'
+            if args.repolarization:
+                recovered = np.count_nonzero(repolarization[index] <= time) / len(case[1])
+                label += f' | 90% repolarized: {100 * recovered:5.1f}%'
+            percentage.set_text(label)
         clock.set_text(rf'$t={time:05.2f}\;\mathrm{{ms}}$')
 
-    poster_time = min(20, args.end_ms)
+    poster_time = min(300 if args.repolarization else 20, args.end_ms)
     update(poster_time)
     figure.savefig(args.output / 'REPlusComparison.png', transparent=True, dpi=150)
     fps = 30
@@ -158,6 +186,36 @@ def main():
                    spatial_display='native P1 triangles', temporal_display='linear interpolation',
                    cases=[dict(parameters=case[0], latest_activation_ms=float(case[1]['replus_lat_ms'].max()))
                           for case in cases])
+    if args.repolarization:
+        summary['repolarization90_definition'] = 'First post-peak crossing of V_initial + 0.1*(V_peak_exported - V_initial)'
+        summary['apd90_definition'] = 'Repolarization90 time minus steepest-upstroke LAT; unweighted nodal statistics'
+        summary['repolarization_sampling'] = 'Peaks and linearly interpolated crossings from exported snapshots, approximately 1 ms cadence'
+        probe = np.linalg.norm(first[2] - first[2].mean(axis=0), axis=1).argmin()
+        traces, trace_axes = plt.subplots(1, 2, figsize=(11, 4), layout='constrained')
+        for case, recovery, color, label, item in zip(
+                cases, repolarization, turbo_colors(2), ['Isotropic', 'Anisotropic'], summary['cases']):
+            lat = case[1]['replus_lat_ms']
+            apd = recovery - lat
+            finite = np.isfinite(recovery)
+            item['repolarized_nodes'] = int(finite.sum())
+            item['latest_repolarization90_ms'] = float(recovery[finite].max()) if finite.any() else None
+            item['mean_nodal_apd90_ms'] = float(apd[finite].mean()) if finite.any() else None
+            item['apd90_range_ms'] = [float(apd[finite].min()), float(apd[finite].max())] if finite.any() else None
+            item['probe'] = dict(vertex=int(probe), coordinates_mm=case[2][probe].tolist(),
+                                 lat_ms=float(lat[probe]),
+                                 apd90_ms=float(apd[probe]) if np.isfinite(apd[probe]) else None)
+            for axis, shift in zip(trace_axes, [0, lat[probe]]):
+                axis.plot(case[4] - shift, case[5][:, probe], label=label, color=color)
+                if np.isfinite(recovery[probe]):
+                    voltage90 = np.interp(recovery[probe], case[4], case[5][:, probe])
+                    axis.plot(recovery[probe] - shift, voltage90, 'o', color=color, markersize=4)
+                axis.set(ylabel=r'$V\;[\mathrm{mV}]$', ylim=(-85, 35))
+                axis.legend()
+        trace_axes[0].set(title='Same central probe: absolute time', xlabel=r'$t\;[\mathrm{ms}]$')
+        trace_axes[1].set(title='Aligned by local activation time', xlabel=r'$t-t_{\mathrm{LAT}}\;[\mathrm{ms}]$')
+        traces.savefig(args.output / 'REPlusRepolarizationTraces.png', dpi=180, transparent=True)
+        traces.savefig(args.output / 'REPlusRepolarizationTraces.svg', transparent=True)
+        plt.close(traces)
     (args.output / 'REPlusComparison.json').write_text(json.dumps(summary, indent=2) + '\n')
     print(json.dumps(summary, indent=2))
 
