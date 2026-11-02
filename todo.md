@@ -645,6 +645,15 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       groupes en mémoire partagée, gradients et tirés en arrière par
       paire point et fonction de base, blocs de 32 coefficients par thread.
       Test Q3 vectoriel sur hexaèdres (refusé avant) identique à l'hôte.
+- [ ] Equipe hyperélastique plus rapide. Mesures (tangente seule,
+      déplacement nul): Q3 vectoriel n=14 (2197 hexaèdres) 14,7 s; forcer
+      l'équipe en Q2 n=20 donne 7,2 s contre 1,7 s par thread. Le noyau
+      d'équipe utilise 255 registres, donc une équipe de 256 threads par SM,
+      et la cinématique (`interpolateJacobian`, sériel par point) laisse
+      le SM presque vide pendant la construction des points; la taille
+      d'équipe ne change rien. Piste: calculer le gradient du déplacement
+      par réduction d'équipe sur les fonctions de base de l'état, et
+      réduire les registres. En Q2 n=30 le banc manque de mémoire device.
 
 ## 16. Optimisations génériques de l'assemblage device
 
