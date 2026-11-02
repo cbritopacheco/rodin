@@ -39,6 +39,7 @@ target_sources(RodinKokkos INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/DOFs.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/DeviceView.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/H1.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/HyperElasticLaw.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Integral.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/InternalVirtualWork.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/LinearElasticityIntegral.h>

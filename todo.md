@@ -565,8 +565,18 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       fausse. `*SetType`, `*SetFromOptions` et `*Solve` lèvent maintenant
       une `Alert::MemberFunctionException` avec le message PETSc.
 - [x] `Darcy` reste vide côté hôte, rien a porter.
-- [ ] Néo-hookéen device seulement: les autres lois de
-      `Solid::InternalVirtualWork` restent hôte.
+- [x] Lois de `Solid::InternalVirtualWork` sur device
+      (`Kokkos/Variational/HyperElasticLaw.h`): Saint Venant-Kirchhoff,
+      Mooney-Rivlin et Yeoh donnent la contrainte et le tenseur
+      d'élasticité en forme fermée, `Kokkos::Variational::DeviceLaw` les
+      associe aux lois hôte et des spécialisations génériques de la
+      tangente (par thread ou par équipe) et du résidu contractent ce
+      tenseur. Le néo-hookéen garde ses noyaux dédiés. Mêmes formes que
+      l'hôte à 1e-12 et mêmes Newton pour les quatre lois. Sur hexaèdres
+      cubiques, la tangente générique en équipe prend 0.29 à 0.32 s contre
+      0.24 s pour le néo-hookéen. `HolzapfelOgden` et les lois actives
+      lisent des entrées constitutives (fibres, activation), absentes du
+      device: elles restent hôte.
 - [x] Bogue cudafe++ (nvcc 13.1, gcc 14): `Integral(Grad(u), Grad(v)).over(1)`
       en premier terme d'une somme est mal parenthésé; le mettre ailleurs
       dans la somme. Contraintes nvcc gardées: noyaux en membres statiques

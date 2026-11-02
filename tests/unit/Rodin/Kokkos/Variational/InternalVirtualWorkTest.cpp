@@ -29,9 +29,9 @@ namespace Rodin::Tests::Unit
       data.coeffRef(i) = Real(0.005) * std::sin(Real(0.7) * i);
   }
 
-  /// @brief The Neo-Hookean tangent and residual match the host.
-  template <class HostFES, class DeviceFES>
-  void checkForms(const HostFES& hfes, const DeviceFES& dfes)
+  /// @brief The tangent and residual of a law match the host.
+  template <class Law, class HostFES, class DeviceFES>
+  void checkForms(const Law& law, const HostFES& hfes, const DeviceFES& dfes)
   {
     GridFunction hw(hfes);
     GridFunction dw(dfes);
@@ -41,11 +41,32 @@ namespace Rodin::Tests::Unit
     TestFunction hv(hfes);
     TrialFunction du(dfes);
     TestFunction dv(dfes);
-    const Solid::NeoHookean law(Real(1.2), Real(0.8));
     const auto hivw = Solid::InternalVirtualWork(law, hw);
     const auto divw = Solid::InternalVirtualWork(law, dw);
     expectSameForm(hu, hv, hivw.Tangent(hu, hv), du, dv, divw.Tangent(du, dv));
     expectSameLinearForm(hv, hivw.Residual(hv), dv, divw.Residual(dv));
+  }
+
+  /// @brief Device laws, the Neo-Hookean one first.
+  template <class F>
+  void visitLaws(const F& f)
+  {
+    {
+      SCOPED_TRACE("Neo-Hookean");
+      f(Solid::NeoHookean(Real(1.2), Real(0.8)));
+    }
+    {
+      SCOPED_TRACE("Saint Venant-Kirchhoff");
+      f(Solid::SaintVenantKirchhoff(Real(1.2), Real(0.8)));
+    }
+    {
+      SCOPED_TRACE("Mooney-Rivlin");
+      f(Solid::MooneyRivlin(Real(0.3), Real(0.1), Real(2.5)));
+    }
+    {
+      SCOPED_TRACE("Yeoh");
+      f(Solid::Yeoh(Real(0.4), Real(0.2), Real(0.1), Real(2.5)));
+    }
   }
 
   /// @brief Forms on vector P1 and quadratic spaces match the host.
@@ -53,18 +74,21 @@ namespace Rodin::Tests::Unit
   {
     const DeviceMesh mesh(TestContext{}, source);
     const size_t d = source.getSpaceDimension();
-    {
-      SCOPED_TRACE("P1");
-      checkForms(P1(source, d), P1(mesh, d));
-    }
-    {
-      SCOPED_TRACE("H1 quadratic");
-      checkForms(H1(Quadratic, source, d), H1(Quadratic, mesh, d));
-    }
+    visitLaws([&](const auto& law) {
+      {
+        SCOPED_TRACE("P1");
+        checkForms(law, P1(source, d), P1(mesh, d));
+      }
+      {
+        SCOPED_TRACE("H1 quadratic");
+        checkForms(law, H1(Quadratic, source, d), H1(Quadratic, mesh, d));
+      }
+    });
   }
 
   /// @brief A Newton solve under a body force converges to the host solution.
-  void checkNewton(const HostMesh& source)
+  template <class Law>
+  void checkNewton(const Law& law, const HostMesh& source)
   {
     ASSERT_EQ(source.getSpaceDimension(), 2);
     const DeviceMesh mesh(TestContext{}, source);
@@ -78,7 +102,6 @@ namespace Rodin::Tests::Unit
     TestFunction hv(hfes);
     TrialFunction du(dfes);
     TestFunction dv(dfes);
-    const Solid::NeoHookean law(Real(1.2), Real(0.8));
     const auto hivw = Solid::InternalVirtualWork(law, hw);
     const auto divw = Solid::InternalVirtualWork(law, dw);
 
@@ -125,11 +148,14 @@ namespace Rodin::Tests::Unit
   {
     const auto source = withClosure(makeHexahedronMesh());
     const DeviceMesh mesh(TestContext{}, source);
-    checkForms(H1(Cubic, source, 3), H1(Cubic, mesh, 3));
+    visitLaws([&](const auto& law) {
+      checkForms(law, H1(Cubic, source, 3), H1(Cubic, mesh, 3));
+    });
   }
 
   TEST(Kokkos_Variational_InternalVirtualWork, NewtonOnTriangles)
   {
-    checkNewton(withClosure(makeTriangleMesh()));
+    const auto source = withClosure(makeTriangleMesh());
+    visitLaws([&](const auto& law) { checkNewton(law, source); });
   }
 }
