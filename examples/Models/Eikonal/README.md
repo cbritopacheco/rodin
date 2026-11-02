@@ -238,3 +238,11 @@ and factors tensors during local updates, whereas FIM caches one factor per
 cell. Runtime differences therefore include coefficient preparation, local
 update implementation, and queue versus active-list scheduling. These cases do
 not measure the quadrilateral search used on other native geometries.
+
+## Reaction–eikonal tissue example
+
+[ReactionEikonal.md](ReactionEikonal.md) describes the Courtemanche RE+ example
+from the model structure in Nagel et al. (2023). Anisotropic FIM activation
+times schedule an exponential foot current while native P1 finite elements
+retain diffusion. Strand-calibrated velocities and tensor FMM qualify the
+comparison.
