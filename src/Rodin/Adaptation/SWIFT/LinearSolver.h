@@ -22,13 +22,13 @@
 namespace Rodin::Adaptation::SWIFT
 {
   template <class Scalar>
-  class LowRankDowndate;
+  class LowRankUpdate;
 }
 
 namespace Eigen::internal
 {
   template <class Scalar>
-  struct traits<Rodin::Adaptation::SWIFT::LowRankDowndate<Scalar>>
+  struct traits<Rodin::Adaptation::SWIFT::LowRankUpdate<Scalar>>
     : traits<Rodin::Math::SparseMatrix<Scalar>>
   {};
 }
@@ -49,7 +49,7 @@ namespace Rodin::Adaptation::SWIFT
    * @tparam ScalarType Scalar of the core and factor.
    */
   template <class ScalarType>
-  class LowRankDowndate final : public Eigen::EigenBase<LowRankDowndate<ScalarType>>
+  class LowRankUpdate final : public Eigen::EigenBase<LowRankUpdate<ScalarType>>
   {
     public:
       /// @brief Scalar required by Eigen's matrix-free solver interface.
@@ -74,7 +74,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param core Square sparse matrix.
        * @param factor Factor with one row per core row, or an empty matrix.
        */
-      LowRankDowndate(
+      LowRankUpdate(
         const Math::SparseMatrix<Scalar>& core, const Math::Matrix<Scalar>& factor)
         : m_core(core),
           m_factor(factor)
@@ -83,7 +83,7 @@ namespace Rodin::Adaptation::SWIFT
           (factor.size() != 0 && factor.rows() != core.rows()))
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "A low-rank downdate requires a square core and matching factor rows."
+            << "A low-rank update requires a square core and matching factor rows."
             << Alert::Raise;
         }
       }
@@ -306,7 +306,7 @@ namespace Rodin::Adaptation::SWIFT
            * @param op Complete operator to precondition.
            * @returns This preconditioner.
            */
-          Preconditioner& compute(const LowRankDowndate<Real>& op)
+          Preconditioner& compute(const LowRankUpdate<Real>& op)
           {
             m_invdiag = op.diagonal();
             for (Eigen::Index i = 0; i < m_invdiag.size(); ++i)
@@ -336,7 +336,7 @@ namespace Rodin::Adaptation::SWIFT
           std::is_same_v<VectorType, Math::Vector<Real>>)
         {
           const auto& rhs = axb.getVector();
-          const LowRankDowndate<Real> op(axb.getOperator(), m_centering);
+          const LowRankUpdate<Real> op(axb.getOperator(), m_centering);
           if (m_parameters.linear.solver != Parameters::LinearSolver::CG)
           {
             const auto solveDirect = [&](auto& direct, StringView backend) {
@@ -407,9 +407,7 @@ namespace Rodin::Adaptation::SWIFT
                   std::cout << "  detail=" << direct.getResources().instance.infog[1];
                 std::cout << '\n';
               }
-              if (!ok)
-                return false;
-              return true;
+              return ok;
             };
 #ifdef RODIN_USE_MUMPS
             if (m_parameters.linear.solver == Parameters::LinearSolver::MUMPS)
@@ -432,7 +430,7 @@ namespace Rodin::Adaptation::SWIFT
             : std::min<std::size_t>(AutomaticCGMaxIterations,
                 std::max<std::size_t>(AutomaticCGMinIterations,
                   AutomaticCGIterationsPerDOF * axb.getOperator().rows()));
-          Eigen::ConjugateGradient<LowRankDowndate<Real>, Eigen::Lower | Eigen::Upper,
+          Eigen::ConjugateGradient<LowRankUpdate<Real>, Eigen::Lower | Eigen::Upper,
             Preconditioner>
             cg;
           cg.setTolerance(m_parameters.convergence.tolerance.linearRelative)

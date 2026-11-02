@@ -1258,7 +1258,8 @@ namespace Rodin::Adaptation::SWIFT
                 .setAbsoluteTolerance(residualTolerance)
                 .setRelativeTolerance(Real(0))
                 .setStepTolerance(Real(0));
-              const auto recordResidual = [&](Real residual, size_t inner) {
+              const auto recordResidual = [&](
+                                            Real residual, size_t inner, bool converged) {
                 const Real assemblySeconds = m_hingeProblem.getAssemblySeconds();
                 rep.tAssembly += assemblySeconds;
                 rep.tInnerAssembly += assemblySeconds;
@@ -1266,7 +1267,7 @@ namespace Rodin::Adaptation::SWIFT
                 rep.innerResidualTolerance = residualTolerance;
                 rep.innerRelativeResidual =
                   residualScale > Real(0) ? residual / residualScale : residual;
-                innerConverged = std::isfinite(residual) && residual <= residualTolerance;
+                innerConverged = converged;
                 if (p.trace)
                 {
                   const auto precision = std::cout.precision();
@@ -1281,11 +1282,16 @@ namespace Rodin::Adaptation::SWIFT
                 }
               };
               newton.setMonitor([&](const typename Newton::Report& report) {
-                if (report.converged || !std::isfinite(report.finalResidual))
-                  recordResidual(report.finalResidual, report.iterations);
+                if (report.converged ||
+                  report.reason == Newton::ConvergedReason::ResidualNormIsNotFinite)
+                {
+                  recordResidual(
+                    report.finalResidual, report.iterations, report.converged);
+                }
               });
               newton.setStepPolicy([&](auto&, auto& system, auto& newtonReport) {
-                recordResidual(newtonReport.finalResidual, newtonReport.iterations);
+                recordResidual(newtonReport.finalResidual, newtonReport.iterations,
+                  newtonReport.converged);
                 const size_t linearIterations = m_linearSolver.getIterations();
                 const Real linearError = m_linearSolver.getError();
                 recordLinearSolve(linearIterations, linearError);
@@ -1418,8 +1424,8 @@ namespace Rodin::Adaptation::SWIFT
                 newton.getReport().reason == Newton::ConvergedReason::MaxIterations)
               {
                 m_hingeProblem.assemble();
-                recordResidual(
-                  m_hingeProblem.getLinearSystem().getVector().norm(), innerIterations);
+                const Real residual = m_hingeProblem.getLinearSystem().getVector().norm();
+                recordResidual(residual, innerIterations, residual <= residualTolerance);
               }
             }
             rep.innerConverged = innerConverged;
