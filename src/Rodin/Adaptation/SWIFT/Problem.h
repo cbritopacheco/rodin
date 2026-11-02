@@ -243,7 +243,8 @@ namespace Rodin::Adaptation::SWIFT
    * Native bilinear and linear forms assemble fitting and distribution;
    * native variational problems own the predictor and inner systems.
    * The inner model is solved through @ref Rodin::Solver::NewtonSolver.
-   * The local Eigen backend supports CG, SparseLU and optional MUMPS.
+   * The local Eigen backend defaults to MUMPS when available and otherwise CG.
+   * SparseLU remains available as an explicit backend.
    * Added bilinear forms from getMetric() change @f$M_k@f$, not @f$E@f$ or
    * @f$f_k@f$. Custom additions must preserve the required solve properties;
    * an arbitrary bilinear form need not be positive semidefinite.
@@ -442,7 +443,7 @@ namespace Rodin::Adaptation::SWIFT
    * | @f$\varepsilon_{\mathrm{geom}}@f$ | `convergence.tolerance.geometric` | Maximum sampled normalized-residual target | @f$h^{p+1}@f$, automatic (`0`) |
    * | @f$\tau_{\mathrm{rel}}@f$ | `convergence.tolerance.innerRelative` | Inner stationarity tolerance relative to the fitting force norm | @f$10^{-3}@f$ |
    * | @f$\tau_{\mathrm{abs}}@f$ | `convergence.tolerance.innerAbsolute` | Absolute allowance in the inner stationarity test | @f$10^{-12}@f$ |
-   * | @f$\tau_{\mathrm{lin}}@f$ | `convergence.tolerance.linearRelative` | Relative linear residual tolerance | @f$10^{-6}@f$ |
+   * | @f$\tau_{\mathrm{lin}}@f$ | `convergence.tolerance.linearRelative` | CG relative residual tolerance | @f$10^{-6}@f$ |
    * | @f$N_{\mathrm{outer}}@f$ | `convergence.iterations.outer` | Maximum outer iterations | @f$30@f$ |
    * | @f$N_{\mathrm{inner}}@f$ | `convergence.iterations.inner` | Maximum Newton corrections per outer iteration | @f$15@f$ |
    * | @f$N_{\mathrm{CG}}@f$ | `convergence.iterations.linear` | Maximum iterations per CG solve; not a direct-solver limit | @f$1000@f$ |
@@ -498,8 +499,9 @@ namespace Rodin::Adaptation::SWIFT
    * distance target; zero selects @f$h^{p+1}@f$.
    * @ref Parameters::Convergence::Tolerance::innerRelative and
    * @ref Parameters::Convergence::Tolerance::innerAbsolute control stationarity of the
-   * direction problem, not geometric accuracy. Linear residual accuracy is
-   * controlled separately by @ref Parameters::Convergence::Tolerance::linearRelative.
+   * direction problem, not geometric accuracy. Linear-solve success is reported
+   * by the selected backend. CG convergence is controlled separately by
+   * @ref Parameters::Convergence::Tolerance::linearRelative.
    * @ref Parameters::Convergence::Iterations::outer and
    * @ref Parameters::Convergence::Iterations::inner are work limits, not convergence
    * certificates. Persistent small accepted motion or small energy changes
@@ -2500,7 +2502,7 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Solves the assembled centered metric for the unconstrained predictor.
        * @param out Returned predictor displacement, updated only on success.
        * @param report Destination for linear-solver diagnostics.
-       * @returns Whether the centered physical residual met the linear tolerance.
+       * @returns Whether the selected backend reported a successful solve.
        */
       bool solvePredictor(Displacement& out, Report& report)
       {

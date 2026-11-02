@@ -60,7 +60,7 @@ namespace Rodin::Adaptation::SWIFT
           Real(1e-3); ///< Stationarity residual relative to force.
         Real innerAbsolute = Real(1e-12); ///< Absolute stationarity allowance.
         Real linearRelative =
-          Real(1e-6); ///< Linear residual tolerance for all backends.
+          Real(1e-6); ///< Relative convergence tolerance for CG.
         Real energy = Real(1e-8); ///< Relative energy-change stagnation threshold.
         Real step = 0; ///< Absolute accepted-motion stagnation threshold.
         Real stepOverH = Real(5e-4); ///< Accepted-motion/reference-size threshold.
@@ -103,7 +103,7 @@ namespace Rodin::Adaptation::SWIFT
 #ifdef RODIN_USE_MUMPS
       LinearSolver solver = LinearSolver::MUMPS; ///< Default direct backend.
 #else
-      LinearSolver solver = LinearSolver::SparseLU; ///< Default direct backend.
+      LinearSolver solver = LinearSolver::CG; ///< Fallback without MUMPS.
 #endif
       Index threads = 0; ///< Zero leaves the backend thread policy unchanged.
     };

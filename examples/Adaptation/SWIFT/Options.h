@@ -55,7 +55,7 @@ namespace Rodin::Examples
       auto& p = parameters;
       solver = p.linear.solver == Adaptation::SWIFT::Parameters::LinearSolver::MUMPS
         ? "mumps"
-        : "sparse-lu";
+        : "cg";
       const FlatMap<std::string, Option> options = {
         {"n", {&n, "Grid points per axis (at least 4)"}},
         {"dimension", {&dimension, "Spatial dimension: 2 or 3"}},
@@ -107,7 +107,7 @@ namespace Rodin::Examples
           {&p.convergence.tolerance.innerAbsolute,
             "Absolute inner stationarity allowance"}},
         {"convergence-tolerance-linear-relative",
-          {&p.convergence.tolerance.linearRelative, "Linear residual tolerance"}},
+          {&p.convergence.tolerance.linearRelative, "CG relative residual tolerance"}},
         {"convergence-tolerance-energy",
           {&p.convergence.tolerance.energy, "Relative energy stagnation threshold"}},
         {"convergence-tolerance-step",
