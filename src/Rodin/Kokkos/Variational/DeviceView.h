@@ -483,6 +483,60 @@ namespace Rodin::Kokkos::Variational
     return a.row == b.row;
   }
 
+  /**
+   * @brief Tells whether a basis value type is sparse by component.
+   *
+   * Values of these types come from the vector basis @f$ \phi_a e_r @f$,
+   * scaled by scalars or multiplied on the right by vectors: the value of
+   * the scalar degree of freedom a and component r has its nonzero
+   * component or row at r, and its entries do not depend on r. The inner
+   * product of two such values vanishes across components and, within one
+   * component, equals the product of the values of component 0, so the
+   * bilinear kernels integrate one scalar matrix and replicate it on the
+   * diagonal of the component blocks. An operation producing these types
+   * keeps this property.
+   *
+   * @tparam T Basis value type.
+   */
+  template <class T>
+  inline constexpr bool IsComponentSparse =
+    std::is_same_v<T, UnitVector> || std::is_same_v<T, RowMatrix>;
+
+  /// @param v Unit vector. @return Value of its nonzero component.
+  KOKKOS_INLINE_FUNCTION
+  Real getPayload(const UnitVector& v)
+  {
+    return v.value;
+  }
+
+  /// @param m Row matrix. @return Entries of its nonzero row.
+  KOKKOS_INLINE_FUNCTION
+  Geometry::Vector getPayload(const RowMatrix& m)
+  {
+    return m.values;
+  }
+
+  /**
+   * @brief Gets the value stored by a bilinear kernel.
+   *
+   * A component diagonal kernel (IsComponentSparse values on both sides)
+   * stores the payload of the values of component 0 only: their inner
+   * product is the inner product of the payloads, and the payload is
+   * smaller, so more quadrature points fit the team scratch memory.
+   *
+   * @tparam Reduce Whether the kernel is component diagonal.
+   * @param v Basis value.
+   * @return Payload of @p v if Reduce, @p v otherwise.
+   */
+  template <bool Reduce, class T>
+  KOKKOS_INLINE_FUNCTION auto getStored(const T& v)
+  {
+    if constexpr (Reduce)
+      return getPayload(v);
+    else
+      return v;
+  }
+
   /// @brief Tag of polytopes whose geometry is known at run time only.
   struct DynamicGeometry
   {};

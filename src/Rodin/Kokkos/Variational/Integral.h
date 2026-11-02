@@ -387,6 +387,78 @@ namespace Rodin::Kokkos::Variational
 
 namespace Rodin::Kokkos::Variational::Internal
 {
+  /**
+   * @brief Writes an integrated entry of a local matrix and its copies.
+   *
+   * The integrated entry (te, tr) stands for copies by copies entries of
+   * the local matrix: test index te * copies + t and trial index
+   * tr * copies + s hold the value when t equals s, zero otherwise. Local
+   * index a * vdim + r is component r of the scalar degree of freedom a,
+   * numbered globally as dof + r * stride, with vdim the product of the
+   * integrated components and the copies. The entry of local test index i
+   * and local trial index j has rank i * ntr * copies + j.
+   *
+   * @param values Values of the entries.
+   * @param rows Rows of the entries, written when @p index.
+   * @param cols Columns of the entries, written when @p index.
+   * @param base Position of the first entry of the polytope.
+   * @param spacing Distance between consecutive entries of the polytope.
+   * @param accumulate Whether to add to the values.
+   * @param index Whether to write the rows and columns.
+   * @param testIndices Global scalar test degrees of freedom of the polytope.
+   * @param testStride Global distance between the components of a test
+   * degree of freedom.
+   * @param testComponents Integrated test components per scalar degree of
+   * freedom.
+   * @param trialIndices Global scalar trial degrees of freedom of the
+   * polytope.
+   * @param trialStride Global distance between the components of a trial
+   * degree of freedom.
+   * @param trialComponents Integrated trial components per scalar degree
+   * of freedom.
+   * @param copies Copies of each entry on the diagonal of its block.
+   * @param ntr Number of integrated trial indices.
+   * @param te Integrated test index.
+   * @param tr Integrated trial index.
+   * @param v Integrated value.
+   */
+  template <class Values, class Indices, class TestIndices, class TrialIndices>
+  KOKKOS_INLINE_FUNCTION void writeEntries(const Values& values, const Indices& rows,
+    const Indices& cols, size_t base, size_t spacing, bool accumulate, bool index,
+    const TestIndices& testIndices, Index testStride, Index testComponents,
+    const TrialIndices& trialIndices, Index trialStride, Index trialComponents,
+    Index copies, Index ntr, Index te, Index tr, Real v)
+  {
+    const Index testVDim = testComponents * copies;
+    const Index trialVDim = trialComponents * copies;
+    for (Index t = 0; t < copies; ++t)
+    {
+      const Index i = te * copies + t;
+      for (Index s = 0; s < copies; ++s)
+      {
+        const Index j = tr * copies + s;
+        const size_t e = base + size_t(i * ntr * copies + j) * spacing;
+        // The entries off the diagonal of a block vanish.
+        if (t == s)
+        {
+          if (accumulate)
+            values(e) += v;
+          else
+            values(e) = v;
+        }
+        else if (!accumulate)
+        {
+          values(e) = 0;
+        }
+        if (index)
+        {
+          rows(e) = testIndices[i / testVDim] + (i % testVDim) * testStride;
+          cols(e) = trialIndices[j / trialVDim] + (j % trialVDim) * trialStride;
+        }
+      }
+    }
+  }
+
   /// @brief Kokkos backend of a device space.
   template <class Mesh>
   struct MeshBackend;
@@ -1354,12 +1426,57 @@ namespace Rodin::Kokkos::Variational
        * @tparam Vertices Maximum vertex count of the polytopes.
        * @return Entry count of the local matrix in the kernel.
        */
-      template <Index Vertices>
+      template <Index Vertices, class Trial, class Test>
       static constexpr Index getLocalSize()
       {
-        return TrialDOFsType::getCapacity(Vertices) * VectorCapacity<TrialRange> *
-          TestDOFsType::getCapacity(Vertices) * VectorCapacity<TestRange>;
+        return TrialDOFsType::getCapacity(Vertices) *
+          getComponentCapacity<TrialRange, Trial, Test>() *
+          TestDOFsType::getCapacity(Vertices) *
+          getComponentCapacity<TestRange, Trial, Test>();
       }
+
+      /**
+       * @brief Tells whether the kernels integrate one scalar matrix
+       * replicated on the diagonal of the component blocks.
+       * @return Whether the test and trial values are sparse by component
+       * (Rodin::Kokkos::Variational::IsComponentSparse).
+       */
+      template <class Trial, class Test>
+      static constexpr bool isComponentDiagonal()
+      {
+        using TestValue = std::decay_t<decltype(std::declval<const Test&>().getBasis(
+          std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
+        using TrialValue = std::decay_t<decltype(std::declval<const Trial&>().getBasis(
+          std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
+        return Rodin::Kokkos::Variational::IsComponentSparse<TestValue> &&
+          Rodin::Kokkos::Variational::IsComponentSparse<TrialValue>;
+      }
+
+      /**
+       * @brief Gets the maximum number of components integrated per scalar
+       * degree of freedom.
+       * @return One for component diagonal integrands, the vector capacity
+       * of the range otherwise.
+       */
+      template <class Range, class Trial, class Test>
+      static constexpr Index getComponentCapacity()
+      {
+        return isComponentDiagonal<Trial, Test>() ? 1 : VectorCapacity<Range>;
+      }
+
+      /**
+       * @brief Value of a basis function stored by the kernels.
+       *
+       * The payload of a component sparse value for component diagonal
+       * integrands (Rodin::Kokkos::Variational::getStored()), the basis value
+       * otherwise.
+       *
+       * @tparam Space Test or trial function.
+       */
+      template <class Space, class Trial, class Test>
+      using StoredValue = std::decay_t<decltype(Rodin::Kokkos::Variational::getStored<
+        isComponentDiagonal<Trial, Test>()>(std::declval<const Space&>().getBasis(
+        std::declval<const IntegrationPointView&>(), Index(0), Index(0))))>;
 
       /**
        * @brief Gets the team scratch bytes of one quadrature point.
@@ -1369,15 +1486,13 @@ namespace Rodin::Kokkos::Variational
       template <Index Vertices, class Trial, class Test>
       static constexpr size_t getTeamPointBytes()
       {
-        using TestValue = std::decay_t<decltype(std::declval<const Test&>().getBasis(
-          std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
-        using TrialValue = std::decay_t<decltype(std::declval<const Trial&>().getBasis(
-          std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
+        using TestValue = StoredValue<Test, Trial, Test>;
+        using TrialValue = StoredValue<Trial, Trial, Test>;
         return sizeof(IntegrationPointView) + sizeof(Real) +
-          TestDOFsType::getCapacity(Vertices) * VectorCapacity<TestRange> *
-          sizeof(TestValue) +
-          TrialDOFsType::getCapacity(Vertices) * VectorCapacity<TrialRange> *
-          sizeof(TrialValue);
+          TestDOFsType::getCapacity(Vertices) *
+          getComponentCapacity<TestRange, Trial, Test>() * sizeof(TestValue) +
+          TrialDOFsType::getCapacity(Vertices) *
+          getComponentCapacity<TrialRange, Trial, Test>() * sizeof(TrialValue);
       }
 
       /**
@@ -1407,7 +1522,7 @@ namespace Rodin::Kokkos::Variational
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
-        constexpr Index size = getLocalSize<Vertices>();
+        constexpr Index size = getLocalSize<Vertices, Trial, Test>();
         // One thread per polytope bounds its local matrix by LocalCapacity. On
         // the device, teams are faster beyond TeamThreshold when the basis
         // values of a group of points fit TeamScratch.
@@ -1437,8 +1552,13 @@ namespace Rodin::Kokkos::Variational
        * rank @f$ k @f$ such that @f$ k \equiv r \pmod T @f$, for its rank r
        * in a team of T threads. The local matrix is covered by blocks of
        * TeamEntries entries per thread, or TeamWideEntries beyond
-       * LocalCapacity, so its size is not bounded. Public as the enclosing
-       * function of a device lambda.
+       * LocalCapacity, so its size is not bounded. A component diagonal
+       * integrand (isComponentDiagonal()) integrates the pairs of scalar
+       * degrees of freedom only, with the payloads of the values of component 0
+       * (StoredValue), and writes
+       * each entry on the diagonal of its component block
+       * (Internal::writeEntries()). Public as the enclosing function of a
+       * device lambda.
        */
       template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
         class Trial, class Test>
@@ -1449,19 +1569,20 @@ namespace Rodin::Kokkos::Variational
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
-        using TestValue = std::decay_t<decltype(test.getBasis(
-          std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
-        using TrialValue = std::decay_t<decltype(trial.getBasis(
-          std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
+        using TestValue = StoredValue<Test, Trial, Test>;
+        using TrialValue = StoredValue<Trial, Trial, Test>;
         static_assert(std::is_trivially_copyable_v<TestValue> &&
           std::is_trivially_copyable_v<TrialValue> &&
           std::is_trivially_destructible_v<IntegrationPointView>);
         using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>;
         using Member = typename Policy::member_type;
-        constexpr Index TrialCapacity =
-          TrialDOFsType::getCapacity(Vertices) * VectorCapacity<TrialRange>;
-        constexpr Index TestCapacity =
-          TestDOFsType::getCapacity(Vertices) * VectorCapacity<TestRange>;
+        // Component diagonal integrands integrate one entry per pair of
+        // scalar degrees of freedom.
+        constexpr bool Diagonal = isComponentDiagonal<Trial, Test>();
+        constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices) *
+          getComponentCapacity<TrialRange, Trial, Test>();
+        constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices) *
+          getComponentCapacity<TestRange, Trial, Test>();
         constexpr size_t PointBytes = getTeamPointBytes<Vertices, Trial, Test>();
         // Groups that do not fit TeamScratch go to the slower scratch level.
         constexpr Index Fit = getTeamPoints<Vertices, Trial, Test>();
@@ -1495,10 +1616,16 @@ namespace Rodin::Kokkos::Variational
                               : polytope.getVertices().size() <= Vertices);
           const auto trialIndices = trialDOFs.bind(polytope);
           const auto testIndices = testDOFs.bind(polytope);
-          const Index ntr = Exact ? TrialCapacity : trialIndices.size() * trialVDim;
-          const Index nte = Exact ? TestCapacity : testIndices.size() * testVDim;
           const Index trialStride = Exact ? VectorCapacity<TrialRange> : trialVDim;
           const Index testStride = Exact ? VectorCapacity<TestRange> : testVDim;
+          KOKKOS_ASSERT(!Diagonal || trialStride == testStride);
+          // Integrated components per scalar degree of freedom, and copies of
+          // each integrated entry on the diagonal of the component blocks.
+          const Index trialComponents = Diagonal ? 1 : trialStride;
+          const Index testComponents = Diagonal ? 1 : testStride;
+          const Index copies = Diagonal ? trialStride : 1;
+          const Index ntr = Exact ? TrialCapacity : trialIndices.size() * trialComponents;
+          const Index nte = Exact ? TestCapacity : testIndices.size() * testComponents;
           const Index g = static_cast<Index>(polytope.getGeometry());
           const Index rank = team.team_rank();
           const Index threads = team.team_size();
@@ -1520,6 +1647,12 @@ namespace Rodin::Kokkos::Variational
           // Groups of balanced sizes, at most P points each.
           const Index groups = (end - begin + P - 1) / P;
           const Index size = groups > 0 ? (end - begin + groups - 1) / groups : 0;
+          const auto write = [&](Index te, Index tr, Real v) {
+            Rodin::Kokkos::Variational::Internal::writeEntries(values, rows, cols, base,
+              spacing, accumulate, index, testIndices, testDOFs.getStride(),
+              testComponents, trialIndices, trialDOFs.getStride(), trialComponents,
+              copies, ntr, te, tr, v);
+          };
           for (Index first = 0; first < entries; first += threads * E)
           {
             Real local[E] = {};
@@ -1542,7 +1675,8 @@ namespace Rodin::Kokkos::Variational
                 const Index te = i - c * nte;
                 const auto basis = Rodin::Kokkos::Variational::bindBasis(test, points[c]);
                 phi[c * TestCapacity + te] =
-                  basis.getBasis(te / testStride, te % testStride);
+                  Rodin::Kokkos::Variational::getStored<Diagonal>(
+                    basis.getBasis(te / testComponents, te % testComponents));
               }
               for (Index i = rank; i < count * ntr; i += threads)
               {
@@ -1551,7 +1685,8 @@ namespace Rodin::Kokkos::Variational
                 const auto basis =
                   Rodin::Kokkos::Variational::bindBasis(trial, points[c]);
                 psi[c * TrialCapacity + tr] =
-                  basis.getBasis(tr / trialStride, tr % trialStride);
+                  Rodin::Kokkos::Variational::getStored<Diagonal>(
+                    basis.getBasis(tr / trialComponents, tr % trialComponents));
               }
               team.team_barrier();
               RODIN_KOKKOS_UNROLL
@@ -1572,28 +1707,15 @@ namespace Rodin::Kokkos::Variational
                 }
               }
             }
-            // Local index a * vdim + r is component r of the scalar degree of
-            // freedom a, numbered globally as dof + r * stride.
             RODIN_KOKKOS_UNROLL
             for (Index j = 0; j < E; ++j)
             {
               const Index k = first + j * threads + rank;
-              if (k >= entries)
-                continue;
-              const Index te = k / ntr;
-              const Index tr = k - te * ntr;
-              const size_t e = base + size_t(k) * spacing;
-              const Real v = sign * local[j];
-              if (accumulate)
-                values(e) += v;
-              else
-                values(e) = v;
-              if (index)
+              if (k < entries)
               {
-                rows(e) =
-                  testIndices[te / testStride] + (te % testStride) * testDOFs.getStride();
-                cols(e) = trialIndices[tr / trialStride] +
-                  (tr % trialStride) * trialDOFs.getStride();
+                const Index te = k / ntr;
+                const Index tr = k - te * ntr;
+                write(te, tr, sign * local[j]);
               }
             }
           }
@@ -1614,8 +1736,10 @@ namespace Rodin::Kokkos::Variational
       /**
        * @brief Integrates the polytopes with one thread per polytope.
        *
-       * Each thread holds the local matrix of its polytope. Public as the
-       * enclosing function of a device lambda.
+       * Each thread holds the local matrix of its polytope, reduced to the
+       * pairs of scalar degrees of freedom for a component diagonal
+       * integrand as in integrateTeams(). Public as the enclosing function
+       * of a device lambda.
        */
       template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
         class Trial, class Test>
@@ -1626,12 +1750,14 @@ namespace Rodin::Kokkos::Variational
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
-        using TestValue = std::decay_t<decltype(test.getBasis(
-          std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
-        constexpr Index TrialCapacity =
-          TrialDOFsType::getCapacity(Vertices) * VectorCapacity<TrialRange>;
-        constexpr Index TestCapacity =
-          TestDOFsType::getCapacity(Vertices) * VectorCapacity<TestRange>;
+        using TestValue = StoredValue<Test, Trial, Test>;
+        // Component diagonal integrands integrate one entry per pair of
+        // scalar degrees of freedom.
+        constexpr bool Diagonal = isComponentDiagonal<Trial, Test>();
+        constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices) *
+          getComponentCapacity<TrialRange, Trial, Test>();
+        constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices) *
+          getComponentCapacity<TestRange, Trial, Test>();
         const auto& execution = mesh.getContext().getExecutionSpace();
         const auto view = mesh.getDeviceView();
         const auto quadrature = polytopes.getQuadrature();
@@ -1653,10 +1779,17 @@ namespace Rodin::Kokkos::Variational
                                 : polytope.getVertices().size() <= Vertices);
             const auto trialIndices = trialDOFs.bind(polytope);
             const auto testIndices = testDOFs.bind(polytope);
-            const Index ntr = Exact ? TrialCapacity : trialIndices.size() * trialVDim;
-            const Index nte = Exact ? TestCapacity : testIndices.size() * testVDim;
             const Index trialStride = Exact ? VectorCapacity<TrialRange> : trialVDim;
             const Index testStride = Exact ? VectorCapacity<TestRange> : testVDim;
+            KOKKOS_ASSERT(!Diagonal || trialStride == testStride);
+            // Integrated components per scalar degree of freedom, and copies of
+            // each integrated entry on the diagonal of the component blocks.
+            const Index trialComponents = Diagonal ? 1 : trialStride;
+            const Index testComponents = Diagonal ? 1 : testStride;
+            const Index copies = Diagonal ? trialStride : 1;
+            const Index ntr =
+              Exact ? TrialCapacity : trialIndices.size() * trialComponents;
+            const Index nte = Exact ? TestCapacity : testIndices.size() * testComponents;
             const Index g = static_cast<Index>(polytope.getGeometry());
             ::Kokkos::Array<Real, TrialCapacity * TestCapacity> local{};
             ::Kokkos::Array<TestValue, TestCapacity> phi;
@@ -1675,12 +1808,13 @@ namespace Rodin::Kokkos::Variational
                 const auto trialBasis = Rodin::Kokkos::Variational::bindBasis(trial, ip);
                 RODIN_KOKKOS_UNROLL
                 for (Index te = 0; te < nte; ++te)
-                  phi[te] = testBasis.getBasis(te / testStride, te % testStride);
+                  phi[te] = Rodin::Kokkos::Variational::getStored<Diagonal>(
+                    testBasis.getBasis(te / testComponents, te % testComponents));
                 RODIN_KOKKOS_UNROLL
                 for (Index tr = 0; tr < ntr; ++tr)
                 {
-                  const auto psi =
-                    trialBasis.getBasis(tr / trialStride, tr % trialStride);
+                  const auto psi = Rodin::Kokkos::Variational::getStored<Diagonal>(
+                    trialBasis.getBasis(tr / trialComponents, tr % trialComponents));
                   RODIN_KOKKOS_UNROLL
                   for (Index te = 0; te < nte; ++te)
                   {
@@ -1691,29 +1825,17 @@ namespace Rodin::Kokkos::Variational
                 }
               }
             }
-            // Local index a * vdim + r is component r of the scalar degree of
-            // freedom a, numbered globally as dof + r * stride.
             const size_t base = offset + offsets(p);
             RODIN_KOKKOS_UNROLL
             for (Index te = 0; te < nte; ++te)
             {
-              const Index row =
-                testIndices[te / testStride] + (te % testStride) * testDOFs.getStride();
               RODIN_KOKKOS_UNROLL
               for (Index tr = 0; tr < ntr; ++tr)
               {
-                const size_t e = base + size_t(te * ntr + tr) * spacing;
-                const Real v = sign * local[te * ntr + tr];
-                if (accumulate)
-                  values(e) += v;
-                else
-                  values(e) = v;
-                if (index)
-                {
-                  rows(e) = row;
-                  cols(e) = trialIndices[tr / trialStride] +
-                    (tr % trialStride) * trialDOFs.getStride();
-                }
+                Rodin::Kokkos::Variational::Internal::writeEntries(values, rows, cols,
+                  base, spacing, accumulate, index, testIndices, testDOFs.getStride(),
+                  testComponents, trialIndices, trialDOFs.getStride(), trialComponents,
+                  copies, ntr, te, tr, sign * local[te * ntr + tr]);
               }
             }
           });

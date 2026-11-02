@@ -647,9 +647,21 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       avant) 5150 ms; le vectoriel Q2 reste par thread (2370 ms), ses
       valeurs matricielles ne tenant pas assez de points en mémoire
       partagée. Tests Q3 scalaire et vectoriel sur hexaèdres.
-- [ ] Equipe vectorielle plus rapide: ne calculer par bloc que les lignes
-      de bases utiles, éviter de recalculer géométrie et bases à chaque
-      bloc de coefficients.
+- [x] Equipe vectorielle plus rapide. Les valeurs `UnitVector` et
+      `RowMatrix` (base vectorielle de Lagrange, mises à l'échelle ou
+      multipliées à droite) ont leur composante non nulle à r et une
+      charge utile indépendante de r: la matrice locale est une matrice
+      scalaire répliquée sur la diagonale des blocs de composantes. Les
+      noyaux par thread et par équipe n'intègrent que les paires de degrés
+      de liberté scalaires, avec la charge utile de la composante 0 en
+      mémoire partagée (autant de points par groupe qu'en scalaire), et
+      écrivent chaque coefficient sur la diagonale des blocs, zéros hors
+      diagonale compris (`Internal::writeEntries`). Banc `KokkosH1_Assembly`,
+      Jacobian:Jacobian vectoriel, 2080 Ti: Q2 n=24 de 1638 à 383 ms, Q3
+      n=14 de 5163 à 909 ms (scalaire 781 ms), P2 tétraèdres n=30 de 187 à
+      115 ms, P3 n=14 de 114 à 62 ms; RTX 5090: Q2 n=30 de 1082 à 191 ms,
+      Q3 n=14 de 1404 à 276 ms, P2 tétraèdres de 55 à 36 ms, P3 de 52 à
+      16 ms.
 - [x] Tangente hyperélastique (`InternalVirtualWork`) au delà de
       `LocalCapacity`: une équipe par cellule, points et cinématique par
       groupes en mémoire partagée, gradients et tirés en arrière par
