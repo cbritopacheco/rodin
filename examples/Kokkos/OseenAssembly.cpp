@@ -410,9 +410,11 @@ namespace Rodin::Examples
         Integral(p, Div(v)) + Integral(Div(u), q) + Integral(P.eps * Grad(p), Grad(q)) -
         Integral(P.rho / P.dt * w, v);
 
-      HandAssembly hand(host);
-
+      // The hand written assembly is built after the first ones of the form
+      // language, so that its arrays do not share the device memory with the
+      // sort of the coordinate pattern.
       const Timing dsl = measure([&] { oseen.assemble(); }, repetitions);
+      HandAssembly hand(host);
       const Timing manual = measure([&] { hand.assemble(P, hw.getData()); }, repetitions);
 
       auto& axb = oseen.getLinearSystem();

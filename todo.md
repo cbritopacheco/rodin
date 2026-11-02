@@ -457,10 +457,11 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       | points de cellule, trace d'interface hors des noyaux de géométrie statique | 6.65 ms | 1.03x |
 
       Grille 16: 1.76 ms contre 1.16 ms (1.5x), les petits noyaux et les
-      lancements dominent. Atrium `Coarse.mesh` (683704 tétraèdres):
-      manque de mémoire sur la 2080 Ti (11 Go) dans le tri du motif COO
-      au premier assemblage (`DeviceCOOSystem::sortPattern`), à corriger;
-      mesure précédente 234 ms contre 36.6 ms (6.4x).
+      lancements dominent. Atrium `Coarse.mesh` (683704 tétraèdres,
+      110 M entrées COO): 61 ms contre 34.9 ms (1.75x), contre 6.4x
+      auparavant. L'exemple construit le noyau manuel après la mesure du
+      DSL: ses 175 M valeurs et sa préallocation COO PETSc ne tenaient
+      pas avec le tri du motif DSL sur les 11 Go de la 2080 Ti.
 - [x] Essai `TeamPolicy` (une équipe par maille): correct mais 2x plus
       lent (occupation faible a ~160 registres), abandonné.
 - [x] Objectif 10-20% atteint sur la grille 30 (6.65 ms contre 6.44 ms,
