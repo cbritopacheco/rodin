@@ -26,6 +26,28 @@ class EnvironmentTest(unittest.TestCase):
         self.release.start()
         self.addCleanup(self.release.stop)
 
+    def test_reporting_disk_errors_warn_without_failing_successful_tests(self):
+        workflow = yaml.safe_load((ROOT / '.github/workflows/TestGroup.yml').read_text())
+        step = next(s for s in workflow['jobs']['Run']['steps']
+                    if s.get('name') == 'Report execution disk usage')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'build').mkdir()
+            (root / 'rodin-apt-archives').mkdir()
+            tools = root / 'bin'
+            tools.mkdir()
+            for name in ('df', 'du'):
+                tool = tools / name
+                tool.write_text('#!/bin/sh\necho "diagnostic: Permission denied" >&2\nexit 1\n')
+                tool.chmod(0o755)
+            result = subprocess.run(['bash', '-e', '-o', 'pipefail', '-c', step['run']],
+                                    cwd=root, text=True, capture_output=True,
+                                    env=dict(os.environ, PATH=str(tools) + os.pathsep + os.environ['PATH'],
+                                             RUNNER_TEMP=str(root)))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.count('::warning::'), 3)
+            self.assertIn('Permission denied', result.stderr)
+
     def test_python_dependency_reuses_exact_importable_version(self):
         with patch.object(environment.subprocess, 'run', return_value=SimpleNamespace(returncode=0)) as run:
             environment.install_python()

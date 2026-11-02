@@ -133,7 +133,9 @@ jobs:
         if: always()
         shell: bash
         run: |
-          df -h . "$RUNNER_TEMP"
+          df -h . "$RUNNER_TEMP" || echo "::warning::Filesystem usage could not be reported."
           for path in build ci-runtime-inputs "$RUNNER_TEMP/rodin-apt-archives"; do
-            if [ -e "$path" ]; then du -sh "$path"; fi
+            if [ -e "$path" ] && ! du -sh "$path"; then
+              echo "::warning::Disk usage for $path is incomplete; some entries could not be read."
+            fi
           done
