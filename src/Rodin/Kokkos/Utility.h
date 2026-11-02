@@ -14,12 +14,15 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <list>
+#include <mutex>
 #include <string>
 #include <type_traits>
 #include <vector>
 #include <Kokkos_Core.hpp>
 #include "Rodin/Configure.h"
 #include "Rodin/Alert/Exception.h"
+#include "Rodin/Types.h"
 
 /**
  * @def RODIN_KOKKOS_UNROLL
@@ -143,6 +146,137 @@ namespace Rodin::Kokkos::Internal
     execution.fence("Rodin host query");
     return value;
   }
+
+  /**
+   * @brief Resident copies of host arrays, reused while their content holds.
+   *
+   * Keeps the arrays last uploaded together with a host snapshot of their
+   * content. Uploading the same content again returns the resident copy
+   * without any transfer. Another content of the same size goes to a copy
+   * nobody references any more, so that neither an allocation nor a
+   * release, both waiting for the device on CUDA, happens between kernel
+   * launches. The copies are read only. A copy of the cache starts empty.
+   *
+   * @tparam MemorySpace Memory space of the copies.
+   */
+  template <class MemorySpace>
+  class TransferCache
+  {
+    public:
+      /// @brief Resident array type.
+      using Array = ::Kokkos::View<Real*, MemorySpace>;
+
+      /// @brief Largest number of arrays kept.
+      static constexpr size_t Capacity = 4;
+
+      TransferCache() = default;
+
+      /// @brief Waits for the transfers still reading the snapshots.
+      ~TransferCache()
+      {
+        if (!m_entries.empty())
+          ::Kokkos::fence("Rodin transfer release");
+      }
+
+      /// @brief Starts empty, the arrays of the source stay with it.
+      TransferCache(const TransferCache&) {}
+
+      /// @brief Keeps the arrays of this cache. @returns This object.
+      TransferCache& operator=(const TransferCache&)
+      {
+        return *this;
+      }
+
+      /**
+       * @brief Gets a resident copy of a host array.
+       * @param execution Execution instance ordering the transfer.
+       * @param values Host values.
+       * @param label Label of a new allocation.
+       * @returns Resident copy, to be read only.
+       */
+      template <class Execution>
+      Array upload(
+        const Execution& execution, std::vector<Real>&& values, const std::string& label)
+      {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        ++m_clock;
+        for (auto& entry : m_entries)
+        {
+          if (entry.snapshot == values)
+          {
+            entry.used = m_clock;
+            return entry.array;
+          }
+        }
+        // A free copy of the same size is overwritten in place; otherwise
+        // the least recently used free copy is released.
+        Entry* target = nullptr;
+        Entry* oldest = nullptr;
+        for (auto& entry : m_entries)
+        {
+          if (entry.array.use_count() != 1)
+            continue;
+          if (entry.snapshot.size() == values.size() &&
+            (!target || entry.used < target->used))
+            target = &entry;
+          if (!oldest || entry.used < oldest->used)
+            oldest = &entry;
+        }
+        if (!target)
+        {
+          if (m_entries.size() < Capacity)
+          {
+            target = &m_entries.emplace_back();
+          }
+          else if (oldest)
+          {
+            target = oldest;
+          }
+          else
+          {
+            // Every copy is referenced: this one is not kept.
+            Array array(
+              ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing, label),
+              values.size());
+            ::Kokkos::deep_copy(execution, array,
+              ::Kokkos::View<const Real*, ::Kokkos::HostSpace,
+                ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(
+                values.data(), values.size()));
+            execution.fence("Rodin transfer");
+            return array;
+          }
+          if (target->array.extent(0) != values.size())
+          {
+            target->array = Array();
+            target->array =
+              Array(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing, label),
+                values.size());
+          }
+        }
+        // A former transfer may still read the snapshot being replaced.
+        if (!target->snapshot.empty())
+          execution.fence("Rodin transfer reuse");
+        target->snapshot = std::move(values);
+        target->used = m_clock;
+        ::Kokkos::deep_copy(execution, target->array,
+          ::Kokkos::View<const Real*, ::Kokkos::HostSpace,
+            ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(
+            target->snapshot.data(), target->snapshot.size()));
+        return target->array;
+      }
+
+    private:
+      struct Entry
+      {
+        std::vector<Real> snapshot;
+        Array array;
+        std::uint64_t used = 0;
+      };
+
+      std::mutex m_mutex;
+      std::list<Entry> m_entries;
+      std::uint64_t m_clock = 0;
+  };
 
   /**
    * @brief Clears the pending launch error of the device runtime, so the

@@ -583,6 +583,20 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       contre 1.345 ms (1.04x du noyau manuel), grille 30 5.68 ms contre
       5.96 ms (0.88x). Retirer le vidage fait échouer 4 tests
       `Kokkos_Connectivity` et `Kokkos_Mesh`.
+- [x] Coefficients des `GridFunction` gardés sur le device: chaque
+      intégrateur qui lit une `GridFunction` la recopiait à chaque
+      assemblage (allocation, copie, attente du noyau précédent, puis
+      `cudaFree` qui attend le device). `TransferCache` (Utility.h),
+      tenu par le maillage device (`getTransferCache()`), garde les
+      copies avec un instantané hôte: le même contenu reprend la même
+      copie sans transfert, un autre contenu réécrit une copie que plus
+      personne ne référence (au plus 4 gardées). Plus aucune copie
+      hôte-device ni allocation par assemblage, 13 synchronisations
+      restantes. Oseen (2080 Ti): grille 16 1.03 ms contre 1.18 ms
+      (0.90x du noyau manuel), grille 30 5.28 ms contre 5.68 ms (0.82x).
+      Tests `GridFunctionChangeOn*` (contenu changé, échangé, rétabli
+      entre assemblages) et `Kokkos_TransferCache`; comparer seulement
+      la taille ou réécrire une copie référencée les fait échouer.
 - [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
       noyau (somme des intégrandes), capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles

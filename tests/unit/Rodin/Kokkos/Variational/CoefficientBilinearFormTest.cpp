@@ -40,6 +40,56 @@ namespace Rodin::Tests::Unit
       hu, hv, Integral((hg * hf) * hu, hv), du, dv, Integral((dg * df) * du, dv));
   }
 
+  /**
+   * @brief Coefficients changed between assemblies reach the device.
+   *
+   * Two grid functions of the same space enter one form, their device
+   * copies being reused while their coefficients do not change. The
+   * coefficients are then changed, swapped and restored between
+   * assemblies of the same form.
+   */
+  void checkGridFunctionChange(const HostMesh& source)
+  {
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 hfes(source);
+    P1 dfes(mesh);
+    TrialFunction hu(hfes);
+    TestFunction hv(hfes);
+    TrialFunction du(dfes);
+    TestFunction dv(dfes);
+
+    GridFunction hf(hfes);
+    GridFunction hg(hfes);
+    fill(hf, source, 1);
+    hg.getData() = hf.getData().array() * Real(-0.5) + Real(2);
+    GridFunction df(dfes);
+    GridFunction dg(dfes);
+    df.getData() = hf.getData();
+    dg.getData() = hg.getData();
+
+    BilinearForm ha(hu, hv);
+    ha = Integral(hf * hu, hv) + Integral((hf * hg) * Grad(hu), Grad(hv));
+    BilinearForm da(du, dv);
+    da = Integral(df * du, dv) + Integral((df * dg) * Grad(du), Grad(dv));
+    const auto check = [&]() {
+      df.getData() = hf.getData();
+      dg.getData() = hg.getData();
+      ha.assemble();
+      da.assemble();
+      expectSameOperator(ha.getOperator(), da.getOperator());
+    };
+    check();
+    check();
+    const Math::Vector<Real> first = hf.getData();
+    hf.getData() = hf.getData().array() + Real(1);
+    check();
+    hg.getData() = first;
+    check();
+    hf.getData() = first;
+    hg.getData() = first.array() * Real(-0.5) + Real(2);
+    check();
+  }
+
   /// @brief Component-wise vector function coefficients match the host.
   void checkVectorFunction(const HostMesh& source)
   {
@@ -81,6 +131,16 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_Variational_CoefficientBilinearForm, ScalarGridFunctionOnTetrahedra)
   {
     checkScalarGridFunction(makeTetrahedronMesh());
+  }
+
+  TEST(Kokkos_Variational_CoefficientBilinearForm, GridFunctionChangeOnTriangles)
+  {
+    checkGridFunctionChange(makeTriangleMesh());
+  }
+
+  TEST(Kokkos_Variational_CoefficientBilinearForm, GridFunctionChangeOnMixedMesh)
+  {
+    checkGridFunctionChange(makeMixedMesh());
   }
 
   TEST(Kokkos_Variational_CoefficientBilinearForm, VectorFunctionOnTriangles)

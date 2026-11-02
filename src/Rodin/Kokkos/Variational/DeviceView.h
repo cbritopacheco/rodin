@@ -1635,7 +1635,9 @@ namespace Rodin::Kokkos::Variational
    * memory.
    *
    * The coefficients are copied to the mesh memory space when the view is
-   * built, so the view reflects the grid function at lowering time. Values and
+   * built, so the view reflects the grid function at lowering time. The
+   * copy comes from the transfer cache of the mesh, which keeps it
+   * resident while the coefficients do not change. Values and
    * derivatives are interpolated from the degrees of freedom of the polytope
    * holding the point, as on the host.
    *
@@ -1664,15 +1666,29 @@ namespace Rodin::Kokkos::Variational
         : m_vdim(fes.getVectorDimension()),
           m_dofs(fes.getDeviceDOFs())
       {
-        const auto& execution = fes.getMesh().getContext().getExecutionSpace();
+        const auto& mesh = fes.getMesh();
+        const auto& execution = mesh.getContext().getExecutionSpace();
         const Index size = data.size();
-        m_data = ::Kokkos::View<Real*, MemorySpace>(
-          ::Kokkos::view_alloc(execution, std::string("Rodin grid function")), size);
-        auto host = ::Kokkos::create_mirror_view(m_data);
-        for (Index i = 0; i < size; ++i)
-          host(i) = data.coeff(i);
-        ::Kokkos::deep_copy(execution, m_data, host);
-        execution.fence("Rodin grid function transfer");
+        if constexpr (requires { mesh.getTransferCache(); })
+        {
+          // Lowered at every assembly, so that the same coefficients stay
+          // resident instead of being reallocated and copied each time.
+          std::vector<Real> values(size);
+          for (Index i = 0; i < size; ++i)
+            values[i] = data.coeff(i);
+          m_data = mesh.getTransferCache().upload(
+            execution, std::move(values), "Rodin grid function");
+        }
+        else
+        {
+          m_data = ::Kokkos::View<Real*, MemorySpace>(
+            ::Kokkos::view_alloc(execution, std::string("Rodin grid function")), size);
+          auto host = ::Kokkos::create_mirror_view(m_data);
+          for (Index i = 0; i < size; ++i)
+            host(i) = data.coeff(i);
+          ::Kokkos::deep_copy(execution, m_data, host);
+          execution.fence("Rodin grid function transfer");
+        }
       }
 
       /// @brief Gets the device degrees of freedom. @return Degrees of freedom.
