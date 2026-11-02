@@ -64,6 +64,36 @@
           ]
         }
       ]
+    },
+    {
+      "commit": "ee6d21a5e368b4f1a41971474855e5443aa2c57a",
+      "date": "2026-11-02T11:02:35.665935+00:00",
+      "run": "41411890798.1",
+      "results": [
+        {
+          "name": "Wedge/2/5/1/2/interior/1",
+          "value": 3658.03303645,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            3658.03303645
+          ],
+          "records": [
+            {
+              "geometry": "Wedge",
+              "degree": "2",
+              "resolution": "5",
+              "cells": "128",
+              "distortion": "1.000000",
+              "warp_degree": "2",
+              "query": "interior",
+              "pruning": "1",
+              "samples": "64",
+              "ns": "3658.03303645"
+            }
+          ]
+        }
+      ]
     }
   ],
   "format": "csv",

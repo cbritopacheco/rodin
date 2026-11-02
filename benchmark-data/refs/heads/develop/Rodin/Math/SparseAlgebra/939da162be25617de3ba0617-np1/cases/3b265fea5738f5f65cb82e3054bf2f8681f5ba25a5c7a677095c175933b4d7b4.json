@@ -184,6 +184,96 @@
           }
         }
       ]
+    },
+    {
+      "commit": "ee6d21a5e368b4f1a41971474855e5443aa2c57a",
+      "date": "2026-11-02T11:02:35.665935+00:00",
+      "run": "41411890798.1",
+      "results": [
+        {
+          "name": "SparseAlgebra/Product/Conductivity/H1/P3/Complex/Triangle/5/real_time",
+          "value": 2939.1324499852203,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            2939.1324499852203
+          ],
+          "records": [
+            {
+              "name": "SparseAlgebra/Product/Conductivity/H1/P3/Complex/Triangle/5/real_time",
+              "family_index": 73,
+              "per_family_instance_index": 1,
+              "run_name": "SparseAlgebra/Product/Conductivity/H1/P3/Complex/Triangle/5/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 95470,
+              "real_time": 2939.1324499852203,
+              "cpu_time": 2936.869812506406,
+              "time_unit": "ns",
+              "cells": 32.0,
+              "compressed_storage_bytes": 33100.0,
+              "degree": 3.0,
+              "dimension": 2.0,
+              "dot_relative_error": 4.9981569458642227e-17,
+              "nnz": 1621.0,
+              "norm_relative_error": 3.816253094817653e-16,
+              "product_relative_error": 3.2792257893913314e-16,
+              "reference_mantissa_bits": 64.0,
+              "rows": 169.0,
+              "scalar_bytes": 16.0,
+              "vector_entries": 169.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-02T08:51:13+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinSparseAlgebraBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2445,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.0791,
+              0.402344,
+              0.182129
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "Math product/reduction; assembly excluded"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

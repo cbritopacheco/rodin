@@ -154,6 +154,81 @@
           }
         }
       ]
+    },
+    {
+      "commit": "ee6d21a5e368b4f1a41971474855e5443aa2c57a",
+      "date": "2026-11-02T11:02:35.665935+00:00",
+      "run": "41411890798.1",
+      "results": [
+        {
+          "name": "MeshIO/Load_MEDIT_2D_Square",
+          "value": 9003.576659998711,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            9003.576659998711
+          ],
+          "records": [
+            {
+              "name": "MeshIO/Load_MEDIT_2D_Square",
+              "family_index": 0,
+              "per_family_instance_index": 0,
+              "run_name": "MeshIO/Load_MEDIT_2D_Square",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 30994,
+              "real_time": 9004.904820287546,
+              "cpu_time": 9003.576659998711,
+              "time_unit": "ns"
+            }
+          ],
+          "context": {
+            "date": "2026-11-02T08:42:45+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinIOBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2800,
+            "cpu_scaling_enabled": true,
+            "aslr_enabled": false,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1310720,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 50331648,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.863281,
+              0.253418,
+              0.0820312
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",
