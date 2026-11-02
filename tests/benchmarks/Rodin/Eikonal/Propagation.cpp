@@ -74,11 +74,9 @@ namespace
     });
     Eikonal::FMM referenceMarching(marchingReference, marchingCoefficient);
     Eikonal::FIM referenceIterative(iterativeReference, iterativeCoefficient);
-    static constexpr Real LocalTolerance = Real(1e-6);
-    referenceIterative.setLocalTolerance(LocalTolerance);
     Eikonal::FMM marching(arrival, coefficient);
     Eikonal::FIM iterative(arrival, coefficient);
-    iterative.setLocalTolerance(LocalTolerance).setThreadCount(threads);
+    iterative.setThreadCount(threads);
     try
     {
       referenceMarching.seed(seeds).solve();
@@ -127,7 +125,6 @@ namespace
     state.counters["rounds"] = Marching ? 0 : iterative.getIterations();
     state.counters["max_error"] = maximumError;
     state.counters["max_difference_fmm"] = maximumDifference;
-    state.counters["search_resolution"] = Marching ? 0 : LocalTolerance;
     state.counters["coefficient_evaluations"] =
       Marching ? marchingEvaluations : iterativeEvaluations;
   }

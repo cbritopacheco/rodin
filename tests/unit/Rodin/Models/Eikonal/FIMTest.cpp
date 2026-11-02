@@ -498,3 +498,85 @@ TEST(FIM, SpatialCoefficientDiscretization)
     EXPECT_NEAR(arrival[space.getDOFs(0, vertex)[0]], expected, 1e-12);
   }
 }
+
+/// @brief Analytic edge updates can precede a supporting time on a noncausal stencil.
+TEST(FIM, AnalyticRefractionWithoutMarchingCutoff)
+{
+  auto mesh = LocalMesh::Builder()
+                .initialize(2)
+                .nodes(4)
+                .vertex({0, 0})
+                .vertex({-1, Real(0.2)})
+                .vertex({2, Real(0.2)})
+                .vertex({Real(0.5), Real(1.2)})
+                .polytope(Polytope::Type::Triangle, {0, 2, 1})
+                .polytope(Polytope::Type::Triangle, {1, 2, 3})
+                .finalize();
+  mesh.getConnectivity().compute(2, 0);
+  mesh.getConnectivity().compute(0, 2);
+  P1 space(mesh);
+  GridFunction arrival(space);
+  const Real upperSpeed = Real(1.2);
+  const auto speed = [upperSpeed](const Point& point) {
+    return point.getPolytope().getIndex() == 0 ? Real(1) : upperSpeed;
+  };
+  const Real exact =
+    Real(1) / upperSpeed + Real(0.2) * std::sqrt(1 - Real(1) / (upperSpeed * upperSpeed));
+  const auto verify = [&](const auto& coefficient) {
+    Eikonal::FIM solver(arrival, coefficient);
+    solver.setLocalTolerance(Real(0.25)).seed(IndexVector{1}).solve();
+    const Real value = arrival[space.getDOFs(0, 0)[0]];
+    EXPECT_NEAR(value, exact, 1e-12);
+    EXPECT_LT(value, arrival[space.getDOFs(0, 2)[0]]);
+    const auto coarse = arrival.getData();
+    const size_t rounds = solver.getIterations();
+    solver.setLocalTolerance(1e-10).seed(IndexVector{1}).solve();
+    EXPECT_EQ(solver.getIterations(), rounds);
+    EXPECT_TRUE((arrival.getData().array() == coarse.array()).all());
+  };
+  verify(speed);
+  MatrixFunction tensor(2, 2, [&](const Point& point) {
+    const Real value = speed(point);
+    return (value * value) * Math::SpatialMatrix<Real>::Identity(2, 2);
+  });
+  verify(tensor);
+}
+
+/// @brief Triangular traces use the exact interior minimum independently of search resolution.
+TEST(FIM, AnalyticTriangularTrace)
+{
+  auto mesh = LocalMesh::Builder()
+                .initialize(3)
+                .nodes(4)
+                .vertex({0, 0, 0})
+                .vertex({1, 0, 0})
+                .vertex({0, 1, 0})
+                .vertex({Real(0.2), Real(0.3), 1})
+                .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+                .finalize();
+  mesh.getConnectivity().compute(3, 0);
+  mesh.getConnectivity().compute(0, 3);
+  const auto verify = [](const LocalMesh& current, const auto& coefficient, Real exact) {
+    P1 space(current);
+    GridFunction arrival(space);
+    Eikonal::FIM solver(arrival, coefficient);
+    solver.setLocalTolerance(Real(0.25)).seed(IndexVector{0, 1, 2}).solve();
+    EXPECT_NEAR(arrival[space.getDOFs(0, 3)[0]], exact, 1e-12);
+    const auto coarse = arrival.getData();
+    solver.setLocalTolerance(1e-10).seed(IndexVector{0, 1, 2}).solve();
+    EXPECT_TRUE((arrival.getData().array() == coarse.array()).all());
+  };
+  verify(mesh, [](const Point&) { return Real(2); }, Real(0.5));
+  auto transform = Math::SpatialMatrix<Real>::Identity(3, 3);
+  transform(0, 0) = Real(1.6);
+  transform(1, 0) = Real(1.2);
+  transform(0, 1) = Real(-0.6);
+  transform(1, 1) = Real(0.8);
+  transform(2, 2) = 3;
+  for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+  {
+    const Math::SpatialPoint physical = transform * vertex->getCoordinates();
+    mesh.setVertexCoordinates(vertex->getIndex(), physical);
+  }
+  verify(mesh, MatrixFunction(transform * transform.transpose()), Real(1));
+}

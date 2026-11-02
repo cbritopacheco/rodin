@@ -92,9 +92,10 @@ namespace Rodin::Eikonal
    * Validity, convexity and planar-face conformity are caller preconditions;
    * first-order multilinear geometry alone does not certify these properties.
    * Spatially varying coefficients are explicitly approximated as cellwise
-   * constants; they are not integrated along a path. Face minimization remains
-   * a deterministic multistart projected pattern search, with no certificate
-   * of global minimization on arbitrary native quadrilateral traces.
+   * constants; they are not integrated along a path. Point, edge and triangle
+   * traces use analytic affine-time updates, including boundary-subset fallback.
+   * Quadrilateral traces retain a deterministic multistart projected pattern
+   * search, with no certificate of global minimization on arbitrary traces.
    *
    * OpenMP is opt-in through setThreadCount(). Dependency levels preserve
    * serial co-cell read/write ordering and active-list reconstruction, giving
@@ -133,7 +134,7 @@ namespace Rodin::Eikonal
       /// @brief Absolute time decrease below which an active update is converged.
       static constexpr Real DefaultTolerance = Real(1e-10);
 
-      /// @brief Reference-coordinate pattern-search resolution; a heuristic policy.
+      /// @brief Quadrilateral reference-coordinate search resolution; a heuristic policy.
       static constexpr Real DefaultLocalTolerance = Real(1e-5);
 
       /// @brief Safety limit on active-list rounds; exhaustion is reported as failure.
@@ -179,7 +180,7 @@ namespace Rodin::Eikonal
       }
 
       /**
-       * @brief Sets the reference-coordinate pattern-search resolution.
+       * @brief Sets the quadrilateral reference-coordinate pattern-search resolution.
        * @param tolerance Finite resolution strictly between zero and one.
        * @returns This solver.
        */
@@ -449,6 +450,123 @@ namespace Rodin::Eikonal
 
     private:
       /**
+       * @brief Minimizes an affine time trace plus travel cost on a simplex entity.
+       * @param origin Target physical vertex.
+       * @param positions Supporting physical vertices (first count entries).
+       * @param times Supporting times (first count entries).
+       * @param count Number of supporting vertices: one, two, or three.
+       * @param coefficient Cellwise speed or travel metric.
+       * @returns Interior stationary candidate, or infinity when a boundary subset
+       * supplies the minimum. Point entities return their full candidate.
+       *
+       * Let @f$y=x_0-x_i@f$, @f$E=[x_1-x_0,\ldots]@f$,
+       * @f$H=E^TGE@f$ and @f$b=E^TGy@f$. For scalar speed use
+       * @f$G=I@f$ and @f$s=c_K@f$; a tensor uses @f$G=M_K^{-1}@f$,
+       * @f$s=1@f$. With @f$g_j=s(T_j-T_0)@f$,
+       * @f$z_c=-H^{-1}b@f$, @f$v=H^{-1}g@f$, and
+       * @f$h^2=|y+Ez_c|_G^2@f$, the interior minimizer is
+       * @f[
+       * L=\sqrt{h^2/(1-g^Tv)},\qquad z=z_c-Lv.
+       * @f]
+       * It exists only when @f$g^Tv<1@f$ and is admissible when the
+       * barycentric weights are nonnegative. All lower-dimensional native
+       * entities are evaluated by the caller, supplying the constrained minimum
+       * otherwise. The perpendicular residual is evaluated directly to avoid
+       * cancellation in @f$y^TGy-b^TH^{-1}b@f$. Candidates may precede some
+       * supporting times; no marching-order condition is imposed.
+       */
+      Real simplexUpdate(const Math::SpatialPoint& origin,
+        const std::array<Math::SpatialPoint, 4>& positions,
+        const std::array<Real, 4>& times, size_t count,
+        const CellCoefficient& coefficient) const
+      {
+        const auto dot = [&](const Math::SpatialVector<Real>& lhs,
+                           const Math::SpatialVector<Real>& rhs) {
+          if constexpr (std::is_arithmetic_v<CellCoefficient>)
+            return lhs.dot(rhs);
+          else
+            return coefficient.dot(lhs, rhs);
+        };
+        const Real speed = [&]() {
+          if constexpr (std::is_arithmetic_v<CellCoefficient>)
+            return coefficient;
+          else
+            return Real(1);
+        }();
+        const Math::SpatialVector<Real> offset = positions[0] - origin;
+        const Real infinity = std::numeric_limits<Real>::infinity();
+        if (count == 1)
+        {
+          const Real cost = std::sqrt(dot(offset, offset)) / speed;
+          if (!(cost > 0) || !std::isfinite(cost))
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Invalid straight-cell geometry or nonfinite travel cost."
+              << Alert::Raise;
+          }
+          return times[0] + cost;
+        }
+        const size_t dimension = count - 1;
+        std::array<Math::SpatialVector<Real>, 2> edges;
+        std::array<Real, 2> slope{}, center{}, inverseSlope{};
+        for (size_t axis = 0; axis < dimension; ++axis)
+        {
+          edges[axis] = positions[axis + 1] - positions[0];
+          slope[axis] = speed * (times[axis + 1] - times[0]);
+        }
+        const Real h00 = dot(edges[0], edges[0]);
+        if (!(h00 > 0) || !std::isfinite(h00))
+          return infinity;
+        const Real b0 = dot(edges[0], offset);
+        if (dimension == 1)
+        {
+          center[0] = -b0 / h00;
+          inverseSlope[0] = slope[0] / h00;
+        }
+        else
+        {
+          const Real h01 = dot(edges[0], edges[1]);
+          const Real h11 = dot(edges[1], edges[1]);
+          const Real determinant = h00 * h11 - h01 * h01;
+          if (!(determinant > 0) || !std::isfinite(determinant))
+            return infinity;
+          const Real b1 = dot(edges[1], offset);
+          center[0] = -(h11 * b0 - h01 * b1) / determinant;
+          center[1] = -(h00 * b1 - h01 * b0) / determinant;
+          inverseSlope[0] = (h11 * slope[0] - h01 * slope[1]) / determinant;
+          inverseSlope[1] = (h00 * slope[1] - h01 * slope[0]) / determinant;
+        }
+        Math::SpatialVector<Real> perpendicular = offset;
+        Real squaredSlope = 0;
+        for (size_t axis = 0; axis < dimension; ++axis)
+        {
+          perpendicular += center[axis] * edges[axis];
+          squaredSlope += slope[axis] * inverseSlope[axis];
+        }
+        if (!(squaredSlope < 1))
+          return infinity;
+        const Real heightSquared = dot(perpendicular, perpendicular);
+        const Real distance = std::sqrt(heightSquared / (1 - squaredSlope));
+        if (!(distance > 0) || !std::isfinite(distance))
+          return infinity;
+        Real sum = 0, time = times[0];
+        Math::SpatialVector<Real> displacement = offset;
+        for (size_t axis = 0; axis < dimension; ++axis)
+        {
+          const Real coordinate = center[axis] - distance * inverseSlope[axis];
+          if (!(coordinate >= 0))
+            return infinity;
+          sum += coordinate;
+          time += (times[axis + 1] - times[0]) * coordinate;
+          displacement += coordinate * edges[axis];
+        }
+        if (!(sum <= 1))
+          return infinity;
+        const Real cost = std::sqrt(dot(displacement, displacement)) / speed;
+        return cost > 0 && std::isfinite(cost) ? time + cost : infinity;
+      }
+
+      /**
        * @brief Minimizes the native trace candidate at one vertex.
        * @param vertex Target global vertex index.
        * @returns Best finite candidate found, or infinity when no support is reached.
@@ -504,6 +622,13 @@ namespace Rodin::Eikonal
               }
               if (!reached || minimumTime >= best)
                 continue;
+              if (entity.geometry != Geometry::Polytope::Type::Quadrilateral)
+              {
+                best = std::min(best,
+                  simplexUpdate(
+                    origin, positions, times, entity.vertices.size(), coefficient));
+                continue;
+              }
               const Variational::P1Element<Real> element(entity.geometry);
               const Geometry::Polytope::Traits traits(entity.geometry);
               auto objective = [&](const Math::SpatialPoint& parameter) {
@@ -531,11 +656,6 @@ namespace Rodin::Eikonal
                 }
                 return time + cost;
               };
-              if (entityDimension == 0)
-              {
-                best = std::min(best, objective(traits.getCentroid()));
-                continue;
-              }
               for (size_t start = 0; start <= traits.getVertexCount(); ++start)
               {
                 Math::SpatialPoint parameter = start == traits.getVertexCount()

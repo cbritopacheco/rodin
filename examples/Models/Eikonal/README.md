@@ -121,8 +121,11 @@ an interpolated entry time and physical entry point. The local candidate is
 The scalar travel cost is \(|d|/c_K\). Physical vertices are evaluated through
 `Geometry::Point`, retaining the supplied first-order chart. Native point,
 segment, triangle, and quadrilateral traces are used directly; no cell is
-subdivided into simplices. There is no path quadrature or integration-order
-setting.
+subdivided into simplices. Point, edge, and triangular trace minima are computed
+analytically, including constrained boundary minima. Candidates may precede
+some supporting times; FIM imposes no marching-order cutoff. Quadrilateral
+traces retain multistart projected search of their native bilinear interpolant.
+There is no path quadrature or integration-order setting.
 
 Point, segment, triangle, quadrilateral, tetrahedron, hexahedron, wedge, and
 pyramid reference types are covered, including mixed meshes. The input geometry
@@ -141,8 +144,9 @@ positive normal block.
 ### Iteration and OpenMP
 
 `setTolerance` controls absolute accepted time decreases. `setLocalTolerance`
-controls the reference-coordinate resolution of the multistart projected face
-search. `setMaxIterations` limits active-list rounds; exhaustion raises and
+controls the reference-coordinate resolution of the multistart projected
+quadrilateral search; it has no effect on analytic point, edge, or triangular
+updates. `setMaxIterations` limits active-list rounds; exhaustion raises and
 retains the last iterate. `getIterations` reports the last solve's round count.
 Face search remains approximate, without a global-minimum certificate for
 arbitrary native quadrilateral traces. Search resolution, spatial refinement,
@@ -225,10 +229,12 @@ case the physical mesh, coefficients, and sources are identical for both
 methods. Timing includes coefficient preparation, seeding, and iteration;
 setup, reference solves, and error checks are excluded.
 
-Counters report cells, vertices, local-search resolution, coefficient
+Counters report cells, vertices, coefficient
 evaluations per solve (counted in untimed reference solves), analytic maximum
 error, difference from FMM, and iteration count. The benchmark checks exactly
 one FIM coefficient evaluation per cell and exact worker-count invariance.
-FMM uses analytic simplex updates while FIM retains numerical native-face
-minimization, so runtime differences include local-solver work as well as
-queue versus active-list scheduling.
+Both methods use analytic local updates on these simplex meshes. FMM evaluates
+and factors tensors during local updates, whereas FIM caches one factor per
+cell. Runtime differences therefore include coefficient preparation, local
+update implementation, and queue versus active-list scheduling. These cases do
+not measure the quadrilateral search used on other native geometries.

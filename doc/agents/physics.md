@@ -61,8 +61,9 @@ examples/Models).
 - **Eikonal/FIM** — local real P1 active-list solver on native first-order
   straight convex cells with planar faces. Scalar speeds or SPD tensor metrics
   are sampled/factored once per cell before each pending solve, then shared
-  read-only by all updates. Native face interpolation and numerical face search
-  use straight travel costs without path quadrature or simplex subdivision.
+  read-only by all updates. Point, edge, and triangular trace updates are
+  analytic; native bilinear quadrilateral traces retain numerical search.
+  Straight travel costs use no path quadrature or simplex subdivision.
   Higher-order geometric charts are rejected; cell validity, convexity and
   planar-face conformity are caller preconditions. OpenMP dependency levels
   preserve serial values and round counts. No MPI/PETSc specialization.

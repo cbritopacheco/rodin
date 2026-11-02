@@ -405,8 +405,8 @@ namespace Rodin::Eikonal
           !cell->getTransformation().isFirstOrder())
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Tensor FMM requires affine simplices. Use FIM for native or curved cells."
-            << Alert::Raise;
+            << "Tensor FMM requires affine simplices. "
+            << "Use FIM for supported native first-order cells." << Alert::Raise;
         }
         const Geometry::Point point(*cell, traits.getCentroid());
         const Metric metric(m_speed(point), mesh.getSpaceDimension());

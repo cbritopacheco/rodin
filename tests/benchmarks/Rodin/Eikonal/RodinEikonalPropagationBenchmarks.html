@@ -8,9 +8,10 @@ solves, and error checks are excluded. Counters report vertices, cells,
 dimension, velocity ratio, workers, FIM rounds, coefficient evaluations per
 solve, maximum analytic error, and maximum difference from tensor FMM.
 FIM workers must reproduce the serial field and round count exactly.</p>
-<p>FMM uses analytic simplex updates while FIM uses numerical native-face
-search with cellwise coefficients. Their difference includes this local-update
-approximation. Search resolution and coefficient evaluation counts are
-reported. FIM must sample each cell exactly once per solve; there is no path
-quadrature. Measurements characterize these constant-coefficient affine cases,
-not arbitrary native cells or anisotropy.</p>
+<p>Both methods use analytic local updates on these simplex meshes. FMM samples
+and factors tensors during local updates; FIM caches one factor per cell.
+Runtime differences include coefficient preparation, local-update implementation,
+and queue versus active-list scheduling. FIM must sample each cell exactly once
+per solve; there is no path quadrature. Measurements characterize these
+constant-coefficient affine cases, not arbitrary native cells or anisotropy.
+Quadrilateral trace search is not exercised here.</p>
