@@ -216,10 +216,10 @@ int main(int argc, char** argv)
   using namespace Rodin::Examples;
   try
   {
-    if (argc > 7)
+    if (argc > 8 || (argc == 8 && std::string(argv[7]) != "fixed"))
     {
       throw std::runtime_error("Usage: Eikonal_ReactionEikonal [intervals dt_ms end_ms "
-                               "pace_beats velocity_ratio workers]");
+                               "pace_beats velocity_ratio workers [fixed]]");
     }
     const size_t intervals = argc > 1 ? std::stoul(argv[1]) : 40;
     const Real dt = argc > 2 ? std::stod(argv[2]) : Real(0.02);
@@ -227,6 +227,7 @@ int main(int argc, char** argv)
     const size_t paceBeats = argc > 4 ? std::stoul(argv[4]) : 10;
     const Real ratio = argc > 5 ? std::stod(argv[5]) : Real(2);
     const size_t workers = argc > 6 ? std::stoul(argv[6]) : 1;
+    const bool fixedGeometry = argc == 8;
     if (intervals < 20 || !(dt > 0 && dt <= Real(0.02)) ||
       !(endTime >= 40 && endTime <= 1000) || !(ratio >= 1 && ratio <= 4) ||
       !std::isfinite(dt) || !std::isfinite(endTime) || !std::isfinite(ratio) ||
@@ -271,7 +272,8 @@ int main(int argc, char** argv)
     std::array<Real, 2> velocity{};
     for (size_t axis = 0; axis < 2; ++axis)
     {
-      const Real stretch = axis == 0 ? ratio : Real(1);
+      const Real velocityStretch = axis == 0 ? ratio : Real(1);
+      const Real stretch = fixedGeometry ? Real(1) : velocityStretch;
       auto strand = LocalMesh::UniformGrid(Polytope::Type::Segment, {intervals + 1});
       strand.scale(length * stretch / intervals);
       strand.getConnectivity().compute(1, 0);
@@ -281,7 +283,8 @@ int main(int argc, char** argv)
       for (auto vertex = strand.getVertex(); vertex; ++vertex)
       {
         const Real coordinate = vertex->getCoordinates()(0) / stretch;
-        if (coordinate <= Real(0.5) + Real(1e-12))
+        const Real stimulatedLength = fixedGeometry ? Real(1) : Real(0.5);
+        if (coordinate <= stimulatedLength + Real(1e-12))
           seeds.push_back(vertex->getIndex());
         if (std::abs(coordinate - 3) <
           std::abs(strand.getVertexCoordinates(first)(0) / stretch - 3))
@@ -291,7 +294,7 @@ int main(int argc, char** argv)
           second = vertex->getIndex();
       }
       Math::SpatialMatrix<Real> diffusion(1, 1);
-      diffusion(0, 0) = diffusionT * stretch * stretch;
+      diffusion(0, 0) = diffusionT * velocityStretch * velocityStretch;
       ReactionDiffusion calibration(strand, diffusion, dt, initial);
       calibration.run(endTime, seeds);
       const auto& activation = calibration.getActivation();
@@ -306,8 +309,15 @@ int main(int argc, char** argv)
     }
     std::cout << "longitudinal_velocity_mm_per_ms=" << velocity[0]
               << " transverse_velocity_mm_per_ms=" << velocity[1] << '\n';
+    std::ofstream parameters("ReactionEikonalParameters.csv");
+    parameters << std::setprecision(17) << "parameter,value\n"
+               << "intervals," << intervals << "\ndt_ms," << dt << "\nend_ms," << endTime
+               << "\nconditioning_beats," << paceBeats << "\nnominal_velocity_ratio,"
+               << ratio << "\nfixed_geometry," << fixedGeometry
+               << "\nlongitudinal_velocity_mm_per_ms," << velocity[0]
+               << "\ntransverse_velocity_mm_per_ms," << velocity[1] << '\n';
 
-    // Rotate the fiber axes, stretching the physical mesh consistently with D.
+    // Rotate the fiber axes; optionally hold geometry fixed across tensor ratios.
     auto mesh =
       LocalMesh::UniformGrid(Polytope::Type::Triangle, {intervals + 1, intervals + 1});
     mesh.scale(length / intervals);
@@ -317,8 +327,10 @@ int main(int argc, char** argv)
     rotation(1, 0) = Real(0.6);
     rotation(1, 1) = Real(0.8);
     Math::SpatialMatrix<Real> stretch = Math::SpatialMatrix<Real>::Identity(2, 2);
-    stretch(0, 0) = ratio;
+    stretch(0, 0) = fixedGeometry ? Real(1) : ratio;
     const Math::SpatialMatrix<Real> transform = rotation * stretch;
+    stretch(0, 0) = ratio;
+    const Math::SpatialMatrix<Real> velocityTransform = rotation * stretch;
     Math::SpatialMatrix<Real> squaredVelocity(2, 2);
     squaredVelocity.setZero();
     squaredVelocity(0, 0) = velocity[0] * velocity[0];
@@ -326,7 +338,7 @@ int main(int argc, char** argv)
     const Math::SpatialMatrix<Real> tensor =
       rotation * squaredVelocity * rotation.transpose();
     const Math::SpatialMatrix<Real> diffusion =
-      diffusionT * transform * transform.transpose();
+      diffusionT * velocityTransform * velocityTransform.transpose();
     IndexVector seeds;
     std::vector<bool> source(mesh.getVertexCount(), false);
     for (auto vertex = mesh.getVertex(); vertex; ++vertex)
@@ -393,7 +405,7 @@ int main(int argc, char** argv)
               << " rms_lat_minus_onset_ms=" << std::sqrt(sum / count) << '\n';
     if (maximumMarchingDifference > 1e-8)
       throw std::runtime_error("FIM and FMM disagree on the matched causal mesh");
-    return cellTrace && comparison ? EXIT_SUCCESS : EXIT_FAILURE;
+    return cellTrace && comparison && parameters ? EXIT_SUCCESS : EXIT_FAILURE;
   }
   catch (const std::exception& error)
   {

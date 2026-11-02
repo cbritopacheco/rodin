@@ -243,3 +243,50 @@ insights from a mathematical model*, AJP Heart 275, H301–H321 (1998),
 The repository reference is Lloyd et al., *The CellML Model Repository*,
 Bioinformatics 24, 2122–2123 (2008),
 [doi:10.1093/bioinformatics/btn390](https://doi.org/10.1093/bioinformatics/btn390).
+
+## Animation on identical geometry
+
+Append `fixed` to hold the physical sheet and source region fixed while changing
+the conductivity tensor. In this mode both calibration strands also retain their
+physical length and spacing. Their stimulated segment is 1 mm in both cases,
+which launches propagation at the larger longitudinal conductivity. Velocities
+are measured independently, so their ratio can differ from the nominal ratio
+because of spatial and temporal discretization. The original mode, without
+`fixed`, retains the geometry/stretch covariance check described above.
+
+Run each case in a separate directory, for example:
+
+```sh
+mkdir -p isotropic anisotropic
+(cd isotropic && /path/to/Eikonal_ReactionEikonal 40 0.02 80 10 1 1 fixed > run.log)
+(cd anisotropic && /path/to/Eikonal_ReactionEikonal 40 0.02 80 10 2 1 fixed > run.log)
+python3 /path/to/rodin/examples/Models/Eikonal/animate_reaction_eikonal.py \
+  isotropic anisotropic animation --end-ms 50 --duration 10
+```
+
+The renderer requires NumPy, Matplotlib, h5py, and FFmpeg with `libvpx-vp9` and
+`libx264`. It verifies identical native mesh coordinates, connectivity, source
+nodes, output times, time steps and conditioning counts. Run parameters and
+calibrated velocities are read from `ReactionEikonalParameters.csv`.
+
+`REPlusComparison.webm` retains a transparent background; the MP4 version uses
+a white background for player compatibility. Both are encoded at 30 fps.
+The first 50 ms of simulated time are shown over approximately ten seconds,
+with physical time labelled explicitly. Voltage is interpolated linearly
+between exported snapshots; both panels use the same -85 to 35 mV color scale,
+camera bounds and physical coordinate scale. The arrow marks the anisotropic
+fiber direction. The activated-node percentage uses the measured RE+ LATs,
+not the instantaneous voltage threshold.
+
+The renderer also writes a poster PNG and a JSON record of the input parameters,
+latest activation times and playback settings. This comparison isolates the
+conductivity/velocity change on a common domain; it differs from the original
+stretched-domain invariance experiment.
+
+In the fixed-geometry comparison with 40 intervals, 0.02 ms steps and ten
+conditioning beats, calibrated longitudinal/transverse velocities were
+0.361664/0.361664 mm/ms for the isotropic case and 0.800000/0.361664 mm/ms
+for the anisotropic case. The latest RE+ LAT changed from 45.11 to 28.53 ms.
+At 20 ms, 34.6% and 71.9% of nodes, respectively, had activated. FIM/FMM
+onset differences stayed below \(4\times10^{-12}\) ms in both runs. These
+are activation-time comparisons, not measurements of computational speed.
