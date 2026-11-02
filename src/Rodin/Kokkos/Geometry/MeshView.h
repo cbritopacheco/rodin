@@ -218,14 +218,16 @@ namespace Rodin::Kokkos::Geometry
         Matrix result(m_rows, m_cols);
         const Real det = determinant();
         KOKKOS_ASSERT(det != 0);
+        // One division, instead of one per entry.
+        const Real inverse = 1 / det;
         if (m_rows == 1)
-          result(0, 0) = 1 / det;
+          result(0, 0) = inverse;
         else if (m_rows == 2)
         {
-          result(0, 0) = operator()(1, 1) / det;
-          result(0, 1) = -operator()(0, 1) / det;
-          result(1, 0) = -operator()(1, 0) / det;
-          result(1, 1) = operator()(0, 0) / det;
+          result(0, 0) = operator()(1, 1) * inverse;
+          result(0, 1) = -operator()(0, 1) * inverse;
+          result(1, 0) = -operator()(1, 0) * inverse;
+          result(1, 1) = operator()(0, 0) * inverse;
         }
         else if (m_rows == 3)
         {
@@ -238,8 +240,8 @@ namespace Rodin::Kokkos::Geometry
               const Index c0 = (i + 1) % 3;
               const Index c1 = (i + 2) % 3;
               result(i, j) = (operator()(r0, c0) * operator()(r1, c1) -
-                               operator()(r0, c1) * operator()(r1, c0)) /
-                det;
+                               operator()(r0, c1) * operator()(r1, c0)) *
+                inverse;
             }
           }
         }

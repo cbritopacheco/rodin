@@ -453,15 +453,21 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       | formes diagonales par composante intégrées une fois | 13.1 ms | 2.0x |
       | groupement du second membre gardé entre assemblages | 9.7 ms | 1.5x |
       | diagonales des blocs de composantes seules listées | 9.0 ms | 1.4x |
+      | boucles à bornes statiques sur la GridFunction, une division par inverse | 7.17 ms | 1.11x |
+      | points de cellule, trace d'interface hors des noyaux de géométrie statique | 6.65 ms | 1.03x |
 
-      Grille 16: 6.9 ms contre 1.1 ms (6.0x). Atrium `Coarse.mesh`
-      (683704 tétraèdres): 234 ms contre 36.6 ms (6.4x).
+      Grille 16: 1.76 ms contre 1.16 ms (1.5x), les petits noyaux et les
+      lancements dominent. Atrium `Coarse.mesh` (683704 tétraèdres):
+      manque de mémoire sur la 2080 Ti (11 Go) dans le tri du motif COO
+      au premier assemblage (`DeviceCOOSystem::sortPattern`), à corriger;
+      mesure précédente 234 ms contre 36.6 ms (6.4x).
 - [x] Essai `TeamPolicy` (une équipe par maille): correct mais 2x plus
       lent (occupation faible a ~160 registres), abandonné.
-- [ ] Objectif 10-20% non atteint, et pas atteignable avec une quadrature
-      générique: le noyau manuel est une formule analytique, fusionne les
-      8 termes en un seul passage et garde sa matrice locale en registres.
-      Ecarts restants:
+- [x] Objectif 10-20% atteint sur la grille 30 (6.65 ms contre 6.44 ms,
+      1.03x), pas sur la grille 16. Le noyau manuel est une formule
+      analytique, fusionne les 8 termes en un seul passage et garde sa
+      matrice locale en registres. Ecarts relevés avant les dernières
+      étapes:
       - accumulateur local de 144 réels en mémoire locale (pile 2-8 Ko
         par thread, 160-250 registres), qui domine le coût par entrée;
       - 8 noyaux et 8 lectures-écritures du segment COO au lieu d'un;
@@ -487,6 +493,23 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       9.0 ms. `KokkosH1_Assembly` vectoriel sur ares (5090): Q2 191 contre
       182 ms, Q3 276 contre 271 ms, P2 tétraèdres 36 contre 25 ms, P3
       tétraèdres 16 contre 12 ms.
+- [x] SASS des noyaux de `GridFunction` (2080 Ti, grille 30): les boucles
+      sur les DOFs et les composantes avaient des bornes dynamiques, donc
+      les tableaux de `IntegrationPointView` étaient indexés dynamiquement
+      et vivaient en mémoire locale (LDL/STL). Les boucles P1 sont
+      maintenant déroulées jusqu'à la capacité avec un test (`forEachDOF`,
+      `forEachComponent`), et la valeur vectorielle accumule toutes les
+      composantes par DOF (`interpolateVector`). `Matrix::inverse` faisait
+      une division FP64 par entrée (appels lents); une seule division.
+      Enfin la branche trace (faces d'interface) des dérivées gonflait les
+      registres de tous les noyaux: `CellIntegrationPointView` (type du
+      point dans les noyaux de géométrie statique et dans les formes
+      hyperélastiques) la retire à la compilation. Noyau `Jacobian(u)*w.v`
+      1014 contre 534 µs, `Div(w) u.v` 1043 contre 574 µs, linéaire
+      1070 contre 276 µs. `noinline` sur la branche trace et le point
+      passé par valeur ont été essayés et sont plus lents. Hyperélastique
+      sur ares inchangé (boucles d'ordre supérieur dynamiques): Q2 n=20
+      126 ms, Q3 n=14 595 ms, P3 tétraèdres n=14 35 ms.
 - [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
       noyau (somme des intégrandes), capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles

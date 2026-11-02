@@ -397,6 +397,15 @@ namespace Rodin::Kokkos::Variational
     }
     return isSelected(polytope, attributes);
   }
+
+  /**
+   * @brief Integration point type of the kernels of a geometry tag.
+   *
+   * A static geometry fills the space, so its polytopes are cells.
+   */
+  template <class Shape>
+  using KernelPointView = std::conditional_t<std::is_same_v<Shape, DynamicGeometry>,
+    IntegrationPointView, CellIntegrationPointView>;
 }
 
 namespace Rodin::Kokkos::Variational::Internal
@@ -1614,6 +1623,7 @@ namespace Rodin::Kokkos::Variational
         static_assert(std::is_trivially_copyable_v<TestValue> &&
           std::is_trivially_copyable_v<TrialValue> &&
           std::is_trivially_destructible_v<IntegrationPointView>);
+        using PointType = Rodin::Kokkos::Variational::KernelPointView<Shape>;
         using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>;
         using Member = typename Policy::member_type;
         // Component diagonal integrands integrate one entry per pair of
@@ -1669,9 +1679,8 @@ namespace Rodin::Kokkos::Variational
           const Index g = static_cast<Index>(polytope.getGeometry());
           const Index rank = team.team_rank();
           const Index threads = team.team_size();
-          auto* const points =
-            static_cast<IntegrationPointView*>(team.team_scratch(level).get_shmem_aligned(
-              P * sizeof(IntegrationPointView), Alignment));
+          auto* const points = static_cast<PointType*>(
+            team.team_scratch(level).get_shmem_aligned(P * sizeof(PointType), Alignment));
           auto* const weights = static_cast<Real*>(
             team.team_scratch(level).get_shmem_aligned(P * sizeof(Real), Alignment));
           auto* const phi =
@@ -1703,8 +1712,8 @@ namespace Rodin::Kokkos::Variational
               team.team_barrier();
               for (Index c = rank; c < count; c += threads)
               {
-                new (points + c) IntegrationPointView(
-                  polytope, quadrature.getReference(polytope, q0 + c), Shape{});
+                new (points + c)
+                  PointType(polytope, quadrature.getReference(polytope, q0 + c), Shape{});
                 weights[c] = quadrature.getWeight(q0 + c) * points[c].getDistortion();
               }
               team.team_barrier();
@@ -1837,7 +1846,7 @@ namespace Rodin::Kokkos::Variational
             const Index end = quadrature.end(g);
             if (begin < end)
             {
-              IntegrationPointView ip(
+              Rodin::Kokkos::Variational::KernelPointView<Shape> ip(
                 polytope, quadrature.getReference(polytope, begin), Shape{});
               for (Index q = begin; q < end; ++q)
               {
@@ -2261,7 +2270,7 @@ namespace Rodin::Kokkos::Variational
             const Index end = quadrature.end(g);
             if (begin < end)
             {
-              IntegrationPointView ip(
+              Rodin::Kokkos::Variational::KernelPointView<Shape> ip(
                 polytope, quadrature.getReference(polytope, begin), Shape{});
               for (Index q = begin; q < end; ++q)
               {

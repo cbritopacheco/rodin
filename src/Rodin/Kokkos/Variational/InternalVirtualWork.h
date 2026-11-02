@@ -417,7 +417,7 @@ namespace Rodin::Solid
             ::Kokkos::Array<Rodin::Kokkos::Geometry::Vector, TestCapacity> ab;
             for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
             {
-              const Rodin::Kokkos::Variational::IntegrationPointView ip(polytope,
+              const Rodin::Kokkos::Variational::CellIntegrationPointView ip(polytope,
                 quadrature.getReference(polytope, q),
                 Rodin::Kokkos::Variational::DynamicGeometry{});
               const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
@@ -506,7 +506,7 @@ namespace Rodin::Solid
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
-        using Point = Kokkos::Variational::IntegrationPointView;
+        using Point = Kokkos::Variational::CellIntegrationPointView;
         using Kinematics = Kokkos::Variational::NeoHookeanPoint;
         using Vector = Kokkos::Geometry::Vector;
         static_assert(std::is_trivially_destructible_v<Point> &&
@@ -1113,7 +1113,7 @@ namespace Rodin::Solid
             ::Kokkos::Array<Real, Capacity> local{};
             for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
             {
-              const Rodin::Kokkos::Variational::IntegrationPointView ip(polytope,
+              const Rodin::Kokkos::Variational::CellIntegrationPointView ip(polytope,
                 quadrature.getReference(polytope, q),
                 Rodin::Kokkos::Variational::DynamicGeometry{});
               const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
@@ -1505,7 +1505,7 @@ namespace Rodin::Solid
             Real elasticity[D * Row];
             for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
             {
-              const Rodin::Kokkos::Variational::IntegrationPointView ip(polytope,
+              const Rodin::Kokkos::Variational::CellIntegrationPointView ip(polytope,
                 quadrature.getReference(polytope, q),
                 Rodin::Kokkos::Variational::DynamicGeometry{});
               const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
@@ -1602,7 +1602,7 @@ namespace Rodin::Solid
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
-        using Point = Kokkos::Variational::IntegrationPointView;
+        using Point = Kokkos::Variational::CellIntegrationPointView;
         using Vector = Kokkos::Geometry::Vector;
         static_assert(std::is_trivially_destructible_v<Point> &&
           std::is_trivially_copyable_v<Vector>);
@@ -2196,7 +2196,7 @@ namespace Rodin::Solid
             ::Kokkos::Array<Real, Capacity> local{};
             for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
             {
-              const Rodin::Kokkos::Variational::IntegrationPointView ip(polytope,
+              const Rodin::Kokkos::Variational::CellIntegrationPointView ip(polytope,
                 quadrature.getReference(polytope, q),
                 Rodin::Kokkos::Variational::DynamicGeometry{});
               const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
