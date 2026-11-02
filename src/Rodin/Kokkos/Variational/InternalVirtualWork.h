@@ -483,16 +483,20 @@ namespace Rodin::Solid
        *
        * The quadrature points are taken by groups of P points. The threads
        * of the team build the integration points of a group in team scratch
-       * memory, one point per thread, then sum the displacement gradients,
-       * one pair of a point and a basis function of the state per thread,
-       * then build the kinematics, one point per thread, and the gradients
-       * @f$ \nabla \phi_a @f$ and @f$ \alpha_a @f$, one pair of a point and
-       * a scalar basis function per thread. Each thread then
-       * accumulates in registers the entries of rank @f$ k @f$ such that
-       * @f$ k \equiv r \pmod T @f$, for its rank r in a team of T threads,
-       * by blocks of TeamEntries entries per thread. The entries are laid
-       * out as by integratePolytopes(). Public as the enclosing function of
-       * a device lambda.
+       * memory, one point per thread, then the gradients
+       * @f$ \nabla \phi_a @f$, one pair of a point and a scalar basis
+       * function per thread, which the test and state spaces share when
+       * they have the type of the trial space. They then sum the
+       * displacement gradients, one pair of a point and a basis function
+       * of the state per thread, build the kinematics, one point per
+       * thread, and the pullbacks @f$ \alpha_a @f$, one pair of a point
+       * and a scalar basis function per thread. Each thread then takes a
+       * slot, a trial function and a block of TeamPairs test functions,
+       * and accumulates in registers the vdim by vdim entries of each of
+       * its pairs over the group, reusing the products of the trial
+       * function across the block. The entries are laid out as by
+       * integratePolytopes(). Public as the enclosing function of a device
+       * lambda.
        */
       template <Index Vertices>
       static void integrateTeams(const MeshType& mesh, const PolytopesType& polytopes,
@@ -510,21 +514,30 @@ namespace Rodin::Solid
           std::is_trivially_copyable_v<Vector>);
         const auto& execution = mesh.getContext().getExecutionSpace();
         using ExecutionSpace = std::decay_t<decltype(execution)>;
-        using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>;
+        // The register bound keeps enough threads for one pass over the
+        // quadrature, at the price of a few spills.
+        using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>,
+          ::Kokkos::LaunchBounds<TeamThreads, 1>>;
         using Member = typename Policy::member_type;
         constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
         constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
-        constexpr Index Square =
-          RODIN_MAXIMAL_SPACE_DIMENSION * RODIN_MAXIMAL_SPACE_DIMENSION;
+        constexpr Index D = RODIN_MAXIMAL_SPACE_DIMENSION;
+        constexpr Index Square = D * D;
+        using StateDOFsType =
+          std::decay_t<decltype(std::declval<const StateViewType&>().getDOFs())>;
+        // Spaces of one type share their basis gradients.
+        constexpr bool SharedTest = std::is_same_v<TrialDOFsType, TestDOFsType>;
+        constexpr bool SharedState = std::is_same_v<TrialDOFsType, StateDOFsType>;
+        constexpr Index TestStorage = SharedTest ? 0 : TestCapacity;
         constexpr size_t PointBytes = sizeof(Point) + sizeof(Kinematics) +
           (3 + Square) * sizeof(Real) +
-          2 * (TrialCapacity + TestCapacity) * sizeof(Vector);
+          2 * (TrialCapacity + TestStorage) * sizeof(Vector);
         // Groups that do not fit TeamScratch go to the slower scratch level.
         constexpr Index Fit = TeamScratch / PointBytes;
         constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
           : Fit > TeamPoints                        ? TeamPoints
                                                     : Fit;
-        constexpr Index E = TeamEntries;
+        constexpr Index E = TeamPairs;
         constexpr size_t Alignment =
           std::max({alignof(Point), alignof(Kinematics), alignof(Vector), alignof(Real)});
         const auto view = mesh.getDeviceView();
@@ -554,7 +567,6 @@ namespace Rodin::Solid
           const Index na = trialIndices.size();
           const Index nb = testIndices.size();
           const Index ntr = na * vdim;
-          const Index nte = nb * vdim;
           const Index g = static_cast<Index>(polytope.getGeometry());
           const Index rank = team.team_rank();
           const Index threads = team.team_size();
@@ -571,20 +583,29 @@ namespace Rodin::Solid
             memory.get_shmem_aligned(P * TrialCapacity * sizeof(Vector), Alignment));
           auto* const aa = static_cast<Vector*>(
             memory.get_shmem_aligned(P * TrialCapacity * sizeof(Vector), Alignment));
-          auto* const gb = static_cast<Vector*>(
-            memory.get_shmem_aligned(P * TestCapacity * sizeof(Vector), Alignment));
-          auto* const ab = static_cast<Vector*>(
-            memory.get_shmem_aligned(P * TestCapacity * sizeof(Vector), Alignment));
-          const Index entries = nte * ntr;
+          Vector* gb = ga;
+          Vector* ab = aa;
+          if (!SharedTest)
+          {
+            gb = static_cast<Vector*>(
+              memory.get_shmem_aligned(P * TestCapacity * sizeof(Vector), Alignment));
+            ab = static_cast<Vector*>(
+              memory.get_shmem_aligned(P * TestCapacity * sizeof(Vector), Alignment));
+          }
+          // A slot is a trial function and a block of E test functions.
+          const Index slots = na * ((nb + E - 1) / E);
           const Index begin = quadrature.begin(g);
           const Index end = quadrature.end(g);
           const size_t base = offset + offsets(p);
           // Groups of balanced sizes, at most P points each.
           const Index groups = (end - begin + P - 1) / P;
           const Index size = groups > 0 ? (end - begin + groups - 1) / groups : 0;
-          for (Index first = 0; first < entries; first += threads * E)
+          for (Index first = 0; first < slots; first += threads)
           {
-            Real local[E] = {};
+            const Index slot = first + rank;
+            const Index a = slot % na;
+            const Index b0 = (slot / na) * E;
+            Real local[E][D][D] = {};
             for (Index q0 = begin; q0 < end; q0 += size)
             {
               const Index count = end - q0 < size ? end - q0 : size;
@@ -599,13 +620,32 @@ namespace Rodin::Solid
                   jacobians[c * Square + k] = 0;
               }
               team.team_barrier();
-              // The displacement gradient sums one term per pair of a point
-              // and a basis function of the state.
-              for (Index i = rank; i < count * ns; i += threads)
+              for (Index i = rank; i < count * na; i += threads)
               {
+                const Index c = i / na;
+                const Index a = i - c * na;
+                ga[c * TrialCapacity + a] = trialDOFs.getGradient(points[c], a);
+              }
+              if (!SharedTest)
+              {
+                for (Index i = rank; i < count * nb; i += threads)
+                {
+                  const Index c = i / nb;
+                  const Index b = i - c * nb;
+                  gb[c * TestCapacity + b] = testDOFs.getGradient(points[c], b);
+                }
+              }
+              // The displacement gradient sums one term per pair of a point
+              // and a basis function of the state, after the trial gradients
+              // when the state shares them.
+              const auto sum = [&](Index i) {
                 const Index c = i / ns;
                 const Index q = i - c * ns;
-                const Vector gradient = stateDOFs.getGradient(points[c], q);
+                Vector gradient;
+                if (SharedState)
+                  gradient = ga[c * TrialCapacity + q];
+                else
+                  gradient = stateDOFs.getGradient(points[c], q);
                 for (Index r = 0; r < vdim; ++r)
                 {
                   const Real value = data(stateIndices[q] + r * stateDOFs.getStride());
@@ -613,8 +653,19 @@ namespace Rodin::Solid
                     ::Kokkos::atomic_add(
                       &jacobians[c * Square + r * vdim + k], gradient(k) * value);
                 }
+              };
+              if (!SharedState)
+              {
+                for (Index i = rank; i < count * ns; i += threads)
+                  sum(i);
               }
               team.team_barrier();
+              if (SharedState)
+              {
+                for (Index i = rank; i < count * ns; i += threads)
+                  sum(i);
+                team.team_barrier();
+              }
               for (Index c = rank; c < count; c += threads)
               {
                 Kokkos::Geometry::Matrix h(vdim, vdim);
@@ -633,42 +684,73 @@ namespace Rodin::Solid
               {
                 const Index c = i / na;
                 const Index a = i - c * na;
-                ga[c * TrialCapacity + a] = trialDOFs.getGradient(points[c], a);
                 aa[c * TrialCapacity + a] =
                   kinematics[c].pullBack(ga[c * TrialCapacity + a]);
               }
-              for (Index i = rank; i < count * nb; i += threads)
+              if (!SharedTest)
               {
-                const Index c = i / nb;
-                const Index b = i - c * nb;
-                gb[c * TestCapacity + b] = testDOFs.getGradient(points[c], b);
-                ab[c * TestCapacity + b] =
-                  kinematics[c].pullBack(gb[c * TestCapacity + b]);
+                for (Index i = rank; i < count * nb; i += threads)
+                {
+                  const Index c = i / nb;
+                  const Index b = i - c * nb;
+                  ab[c * TestCapacity + b] =
+                    kinematics[c].pullBack(gb[c * TestCapacity + b]);
+                }
               }
               team.team_barrier();
-              RODIN_KOKKOS_UNROLL
-              for (Index j = 0; j < E; ++j)
+              if (slot < slots)
               {
-                const Index k = first + j * threads + rank;
-                if (k < entries)
+                for (Index c = 0; c < count; ++c)
                 {
-                  const Index te = k / ntr;
-                  const Index tr = k - te * ntr;
-                  const Index b = te / vdim;
-                  const Index t = te - b * vdim;
-                  const Index a = tr / vdim;
-                  const Index s = tr - a * vdim;
-                  for (Index c = 0; c < count; ++c)
+                  // The products of the trial function, shared by the block.
+                  Real va[D] = {};
+                  Real ta[D] = {};
+                  Real sa[D] = {};
                   {
                     const Vector& alpha = aa[c * TrialCapacity + a];
-                    const Vector& beta = ab[c * TestCapacity + b];
-                    Real v = coefficients[3 * c + 1] * alpha(s) * beta(t) +
-                      coefficients[3 * c + 2] * alpha(t) * beta(s);
-                    if (t == s)
-                      v += coefficients[3 * c] *
-                        Rodin::Kokkos::Variational::dot(
-                          ga[c * TrialCapacity + a], gb[c * TestCapacity + b]);
-                    local[j] += v;
+                    const Vector& gradient = ga[c * TrialCapacity + a];
+                    const Real volume = coefficients[3 * c + 1];
+                    const Real twist = coefficients[3 * c + 2];
+                    const Real shear = coefficients[3 * c];
+                    RODIN_KOKKOS_UNROLL
+                    for (Index s = 0; s < D; ++s)
+                    {
+                      if (s < vdim)
+                      {
+                        va[s] = volume * alpha(s);
+                        ta[s] = twist * alpha(s);
+                        sa[s] = shear * gradient(s);
+                      }
+                    }
+                  }
+                  RODIN_KOKKOS_UNROLL
+                  for (Index j = 0; j < E; ++j)
+                  {
+                    const Index b = b0 + j;
+                    if (b < nb)
+                    {
+                      const Vector& beta = ab[c * TestCapacity + b];
+                      const Vector& gradient = gb[c * TestCapacity + b];
+                      Real bt[D] = {};
+                      Real shear = 0;
+                      RODIN_KOKKOS_UNROLL
+                      for (Index t = 0; t < D; ++t)
+                      {
+                        if (t < vdim)
+                        {
+                          bt[t] = beta(t);
+                          shear += sa[t] * gradient(t);
+                        }
+                      }
+                      RODIN_KOKKOS_UNROLL
+                      for (Index t = 0; t < D; ++t)
+                      {
+                        RODIN_KOKKOS_UNROLL
+                        for (Index s = 0; s < D; ++s)
+                          local[j][t][s] += va[s] * bt[t] + ta[t] * bt[s];
+                        local[j][t][t] += shear;
+                      }
+                    }
                   }
                 }
               }
@@ -676,34 +758,42 @@ namespace Rodin::Solid
             RODIN_KOKKOS_UNROLL
             for (Index j = 0; j < E; ++j)
             {
-              const Index k = first + j * threads + rank;
-              if (k >= entries)
+              const Index b = b0 + j;
+              if (slot >= slots || b >= nb)
                 continue;
-              const Index te = k / ntr;
-              const Index tr = k - te * ntr;
-              const size_t e = base + size_t(k) * spacing;
-              const Real v = sign * local[j];
-              if (accumulate)
-                values(e) += v;
-              else
-                values(e) = v;
-              if (index)
+              RODIN_KOKKOS_UNROLL
+              for (Index t = 0; t < D; ++t)
               {
-                rows(e) = testIndices[te / vdim] + (te % vdim) * testDOFs.getStride();
-                cols(e) = trialIndices[tr / vdim] + (tr % vdim) * trialDOFs.getStride();
+                RODIN_KOKKOS_UNROLL
+                for (Index s = 0; s < D; ++s)
+                {
+                  if (t >= vdim || s >= vdim)
+                    continue;
+                  const size_t e =
+                    base + size_t((b * vdim + t) * ntr + a * vdim + s) * spacing;
+                  const Real v = sign * local[j][t][s];
+                  if (accumulate)
+                    values(e) += v;
+                  else
+                    values(e) = v;
+                  if (index)
+                  {
+                    rows(e) = testIndices[b] + t * testDOFs.getStride();
+                    cols(e) = trialIndices[a] + s * trialDOFs.getStride();
+                  }
+                }
               }
             }
           }
         };
         Policy policy(execution, polytopes.getPolytopeCount(), ::Kokkos::AUTO);
         policy.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
-        // About TeamEntries / 2 entries per thread balance the occupancy
-        // against the passes over the quadrature.
-        constexpr Index Size = getLocalSize<Vertices>();
-        const Index wanted = (2 * Size + 32 * E - 1) / (32 * E) * 32;
+        // One slot per thread, the fewest passes over the quadrature.
+        constexpr Index Slots = TrialCapacity * ((TestCapacity + E - 1) / E);
+        const Index wanted = (Slots + 31) / 32 * 32;
         const int maximum = policy.team_size_max(kernel, ::Kokkos::ParallelForTag());
         const int threads =
-          std::max(1, std::min(maximum, int(std::min<Index>(wanted, 1024))));
+          std::max(1, std::min(maximum, int(std::min<Index>(wanted, TeamThreads))));
         Policy launch(execution, polytopes.getPolytopeCount(), threads);
         launch.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
         ::Kokkos::parallel_for(
@@ -713,13 +803,13 @@ namespace Rodin::Solid
     private:
       /// @brief Maximum number of entries of the local matrix of a thread,
       /// so larger local matrices take one team per cell.
-      static constexpr Index LocalCapacity = 8192;
+      static constexpr Index LocalCapacity = 1024;
 
       /// @brief Largest group of quadrature points of a team.
       static constexpr Index TeamPoints = 32;
 
       /// @brief Bytes of team scratch memory of a group in the fast level.
-      static constexpr size_t TeamScratch = 24576;
+      static constexpr size_t TeamScratch = 47104;
 
       /// @brief Fewest points of a group in the fast scratch level.
       static constexpr Index TeamMinimumPoints = 4;
@@ -728,8 +818,12 @@ namespace Rodin::Solid
       /// in the slower scratch level.
       static constexpr Index TeamSlowPoints = 8;
 
-      /// @brief Entries accumulated by a thread per pass over the quadrature.
-      static constexpr Index TeamEntries = 32;
+      /// @brief Largest team, whose register bound the kernel is compiled for.
+      static constexpr unsigned int TeamThreads = 512;
+
+      /// @brief Test functions of the block of a thread, whose entries
+      /// with one trial function it accumulates per pass over the quadrature.
+      static constexpr Index TeamPairs = 4;
 
       /// @brief Selects the quadrature order of a cell, as on the host.
       size_t getOrder(const Geometry::Polytope& polytope) const
@@ -1486,16 +1580,19 @@ namespace Rodin::Solid
        *
        * The quadrature points are taken by groups of P points. The threads
        * of the team build the integration points of a group in team scratch
-       * memory, one point per thread, then sum the displacement gradients,
-       * one pair of a point and a basis function of the state per thread,
-       * then evaluate the elasticity tensors, one pair of a point and a row
-       * of the tensor per thread, and the gradients @f$ \nabla \phi_a @f$,
-       * one pair of a point and a scalar basis function per thread. Each
-       * thread then accumulates in registers the entries of rank @f$ k @f$
-       * such that @f$ k \equiv r \pmod T @f$, for its rank r in a team of T
-       * threads, by blocks of TeamEntries entries per thread. The entries are
-       * laid out as by integratePolytopes(). Public as the enclosing function
-       * of a device lambda.
+       * memory, one point per thread, then the gradients
+       * @f$ \nabla \phi_a @f$, one pair of a point and a scalar basis
+       * function per thread, which the test and state spaces share when
+       * they have the type of the trial space. They then sum the
+       * displacement gradients, one pair of a point and a basis function
+       * of the state per thread, and evaluate the elasticity tensors, one
+       * pair of a point and a row of the tensor per thread. Each thread
+       * then takes a slot, a trial function and a block of TeamPairs test
+       * functions, and accumulates in registers the vdim by vdim entries of
+       * each of its pairs over the group, contracting each row of the
+       * tensor with the trial gradient once for the whole block. The
+       * entries are laid out as by integratePolytopes(). Public as the
+       * enclosing function of a device lambda.
        */
       template <Index Vertices>
       static void integrateTeams(const MeshType& mesh, const PolytopesType& polytopes,
@@ -1511,7 +1608,10 @@ namespace Rodin::Solid
           std::is_trivially_copyable_v<Vector>);
         const auto& execution = mesh.getContext().getExecutionSpace();
         using ExecutionSpace = std::decay_t<decltype(execution)>;
-        using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>;
+        // The register bound keeps enough threads for one pass over the
+        // quadrature, at the price of a few spills.
+        using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>,
+          ::Kokkos::LaunchBounds<TeamThreads, 1>>;
         using Member = typename Policy::member_type;
         constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
         constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
@@ -1519,14 +1619,20 @@ namespace Rodin::Solid
         constexpr Index Row = Kokkos::Variational::ElasticityRow;
         constexpr Index Square = D * D;
         constexpr Index Tensor = D * Row;
+        using StateDOFsType =
+          std::decay_t<decltype(std::declval<const StateViewType&>().getDOFs())>;
+        // Spaces of one type share their basis gradients.
+        constexpr bool SharedTest = std::is_same_v<TrialDOFsType, TestDOFsType>;
+        constexpr bool SharedState = std::is_same_v<TrialDOFsType, StateDOFsType>;
+        constexpr Index TestStorage = SharedTest ? 0 : TestCapacity;
         constexpr size_t PointBytes = sizeof(Point) + (Square + Tensor) * sizeof(Real) +
-          (TrialCapacity + TestCapacity) * sizeof(Vector);
+          (TrialCapacity + TestStorage) * sizeof(Vector);
         // Groups that do not fit TeamScratch go to the slower scratch level.
         constexpr Index Fit = TeamScratch / PointBytes;
         constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
           : Fit > TeamPoints                        ? TeamPoints
                                                     : Fit;
-        constexpr Index E = TeamEntries;
+        constexpr Index E = TeamPairs;
         constexpr size_t Alignment =
           std::max({alignof(Point), alignof(Vector), alignof(Real)});
         const auto view = mesh.getDeviceView();
@@ -1556,7 +1662,6 @@ namespace Rodin::Solid
           const Index na = trialIndices.size();
           const Index nb = testIndices.size();
           const Index ntr = na * vdim;
-          const Index nte = nb * vdim;
           const Index g = static_cast<Index>(polytope.getGeometry());
           const Index rank = team.team_rank();
           const Index threads = team.team_size();
@@ -1569,18 +1674,24 @@ namespace Rodin::Solid
             memory.get_shmem_aligned(Tensor * P * sizeof(Real), Alignment));
           auto* const ga = static_cast<Vector*>(
             memory.get_shmem_aligned(P * TrialCapacity * sizeof(Vector), Alignment));
-          auto* const gb = static_cast<Vector*>(
-            memory.get_shmem_aligned(P * TestCapacity * sizeof(Vector), Alignment));
-          const Index entries = nte * ntr;
+          Vector* gb = ga;
+          if (!SharedTest)
+            gb = static_cast<Vector*>(
+              memory.get_shmem_aligned(P * TestCapacity * sizeof(Vector), Alignment));
+          // A slot is a trial function and a block of E test functions.
+          const Index slots = na * ((nb + E - 1) / E);
           const Index begin = quadrature.begin(g);
           const Index end = quadrature.end(g);
           const size_t base = offset + offsets(p);
           // Groups of balanced sizes, at most P points each.
           const Index groups = (end - begin + P - 1) / P;
           const Index size = groups > 0 ? (end - begin + groups - 1) / groups : 0;
-          for (Index first = 0; first < entries; first += threads * E)
+          for (Index first = 0; first < slots; first += threads)
           {
-            Real local[E] = {};
+            const Index slot = first + rank;
+            const Index a = slot % na;
+            const Index b0 = (slot / na) * E;
+            Real local[E][D][D] = {};
             for (Index q0 = begin; q0 < end; q0 += size)
             {
               const Index count = end - q0 < size ? end - q0 : size;
@@ -1595,13 +1706,32 @@ namespace Rodin::Solid
                   jacobians[c * Square + k] = 0;
               }
               team.team_barrier();
-              // The displacement gradient sums one term per pair of a point
-              // and a basis function of the state.
-              for (Index i = rank; i < count * ns; i += threads)
+              for (Index i = rank; i < count * na; i += threads)
               {
+                const Index c = i / na;
+                const Index a = i - c * na;
+                ga[c * TrialCapacity + a] = trialDOFs.getGradient(points[c], a);
+              }
+              if (!SharedTest)
+              {
+                for (Index i = rank; i < count * nb; i += threads)
+                {
+                  const Index c = i / nb;
+                  const Index b = i - c * nb;
+                  gb[c * TestCapacity + b] = testDOFs.getGradient(points[c], b);
+                }
+              }
+              // The displacement gradient sums one term per pair of a point
+              // and a basis function of the state, after the trial gradients
+              // when the state shares them.
+              const auto sum = [&](Index i) {
                 const Index c = i / ns;
                 const Index q = i - c * ns;
-                const Vector gradient = stateDOFs.getGradient(points[c], q);
+                Vector gradient;
+                if (SharedState)
+                  gradient = ga[c * TrialCapacity + q];
+                else
+                  gradient = stateDOFs.getGradient(points[c], q);
                 for (Index r = 0; r < vdim; ++r)
                 {
                   const Real value = data(stateIndices[q] + r * stateDOFs.getStride());
@@ -1609,8 +1739,19 @@ namespace Rodin::Solid
                     ::Kokkos::atomic_add(
                       &jacobians[c * Square + r * vdim + k], gradient(k) * value);
                 }
+              };
+              if (!SharedState)
+              {
+                for (Index i = rank; i < count * ns; i += threads)
+                  sum(i);
               }
               team.team_barrier();
+              if (SharedState)
+              {
+                for (Index i = rank; i < count * ns; i += threads)
+                  sum(i);
+                team.team_barrier();
+              }
               // Each row of an elasticity tensor rebuilds the kinematics of
               // its point.
               for (Index i = rank; i < count * vdim; i += threads)
@@ -1626,47 +1767,67 @@ namespace Rodin::Solid
                 law.getElasticity(
                   law.getPoint(h), t, wdet, tensors + c * Tensor + t * Row);
               }
-              for (Index i = rank; i < count * na; i += threads)
-              {
-                const Index c = i / na;
-                const Index a = i - c * na;
-                ga[c * TrialCapacity + a] = trialDOFs.getGradient(points[c], a);
-              }
-              for (Index i = rank; i < count * nb; i += threads)
-              {
-                const Index c = i / nb;
-                const Index b = i - c * nb;
-                gb[c * TestCapacity + b] = testDOFs.getGradient(points[c], b);
-              }
               team.team_barrier();
-              RODIN_KOKKOS_UNROLL
-              for (Index j = 0; j < E; ++j)
+              if (slot < slots)
               {
-                const Index k = first + j * threads + rank;
-                if (k < entries)
+                for (Index c = 0; c < count; ++c)
                 {
-                  const Index te = k / ntr;
-                  const Index tr = k - te * ntr;
-                  const Index b = te / vdim;
-                  const Index t = te - b * vdim;
-                  const Index a = tr / vdim;
-                  const Index s = tr - a * vdim;
-                  for (Index c = 0; c < count; ++c)
+                  Real alpha[D] = {};
                   {
-                    const Vector& alpha = ga[c * TrialCapacity + a];
-                    const Vector& beta = gb[c * TestCapacity + b];
-                    const Real* const A = tensors + c * Tensor + t * Row;
-                    Real v = 0;
-                    for (Index J = 0; J < vdim; ++J)
+                    const Vector& gradient = ga[c * TrialCapacity + a];
+                    RODIN_KOKKOS_UNROLL
+                    for (Index L = 0; L < D; ++L)
+                      if (L < vdim)
+                        alpha[L] = gradient(L);
+                  }
+                  Real beta[E][D] = {};
+                  RODIN_KOKKOS_UNROLL
+                  for (Index j = 0; j < E; ++j)
+                  {
+                    if (b0 + j < nb)
                     {
-                      const Real* const AJ =
-                        A + Rodin::Kokkos::Variational::getElasticityIndex(J, s, 0);
-                      Real w = 0;
-                      for (Index L = 0; L < vdim; ++L)
-                        w += AJ[L] * alpha(L);
-                      v += beta(J) * w;
+                      const Vector& gradient = gb[c * TestCapacity + b0 + j];
+                      RODIN_KOKKOS_UNROLL
+                      for (Index J = 0; J < D; ++J)
+                        if (J < vdim)
+                          beta[j][J] = gradient(J);
                     }
-                    local[j] += v;
+                  }
+                  const Real* const A = tensors + c * Tensor;
+                  // Row t of the tensor contracted with the trial gradient,
+                  // shared by the block. Unused components are zero.
+                  RODIN_KOKKOS_UNROLL
+                  for (Index t = 0; t < D; ++t)
+                  {
+                    if (t < vdim)
+                    {
+                      Real m[D][D] = {};
+                      RODIN_KOKKOS_UNROLL
+                      for (Index J = 0; J < D; ++J)
+                      {
+                        RODIN_KOKKOS_UNROLL
+                        for (Index s = 0; s < D; ++s)
+                        {
+                          const Real* const AJ = A + t * Row +
+                            Rodin::Kokkos::Variational::getElasticityIndex(J, s, 0);
+                          RODIN_KOKKOS_UNROLL
+                          for (Index L = 0; L < D; ++L)
+                            if (J < vdim && s < vdim && L < vdim)
+                              m[J][s] += AJ[L] * alpha[L];
+                        }
+                      }
+                      RODIN_KOKKOS_UNROLL
+                      for (Index j = 0; j < E; ++j)
+                      {
+                        RODIN_KOKKOS_UNROLL
+                        for (Index J = 0; J < D; ++J)
+                        {
+                          RODIN_KOKKOS_UNROLL
+                          for (Index s = 0; s < D; ++s)
+                            local[j][t][s] += beta[j][J] * m[J][s];
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -1674,34 +1835,42 @@ namespace Rodin::Solid
             RODIN_KOKKOS_UNROLL
             for (Index j = 0; j < E; ++j)
             {
-              const Index k = first + j * threads + rank;
-              if (k >= entries)
+              const Index b = b0 + j;
+              if (slot >= slots || b >= nb)
                 continue;
-              const Index te = k / ntr;
-              const Index tr = k - te * ntr;
-              const size_t e = base + size_t(k) * spacing;
-              const Real v = sign * local[j];
-              if (accumulate)
-                values(e) += v;
-              else
-                values(e) = v;
-              if (index)
+              RODIN_KOKKOS_UNROLL
+              for (Index t = 0; t < D; ++t)
               {
-                rows(e) = testIndices[te / vdim] + (te % vdim) * testDOFs.getStride();
-                cols(e) = trialIndices[tr / vdim] + (tr % vdim) * trialDOFs.getStride();
+                RODIN_KOKKOS_UNROLL
+                for (Index s = 0; s < D; ++s)
+                {
+                  if (t >= vdim || s >= vdim)
+                    continue;
+                  const size_t e =
+                    base + size_t((b * vdim + t) * ntr + a * vdim + s) * spacing;
+                  const Real v = sign * local[j][t][s];
+                  if (accumulate)
+                    values(e) += v;
+                  else
+                    values(e) = v;
+                  if (index)
+                  {
+                    rows(e) = testIndices[b] + t * testDOFs.getStride();
+                    cols(e) = trialIndices[a] + s * trialDOFs.getStride();
+                  }
+                }
               }
             }
           }
         };
         Policy policy(execution, polytopes.getPolytopeCount(), ::Kokkos::AUTO);
         policy.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
-        // About TeamEntries / 2 entries per thread balance the occupancy
-        // against the passes over the quadrature.
-        constexpr Index Size = getLocalSize<Vertices>();
-        const Index wanted = (2 * Size + 32 * E - 1) / (32 * E) * 32;
+        // One slot per thread, the fewest passes over the quadrature.
+        constexpr Index Slots = TrialCapacity * ((TestCapacity + E - 1) / E);
+        const Index wanted = (Slots + 31) / 32 * 32;
         const int maximum = policy.team_size_max(kernel, ::Kokkos::ParallelForTag());
         const int threads =
-          std::max(1, std::min(maximum, int(std::min<Index>(wanted, 1024))));
+          std::max(1, std::min(maximum, int(std::min<Index>(wanted, TeamThreads))));
         Policy launch(execution, polytopes.getPolytopeCount(), threads);
         launch.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
         ::Kokkos::parallel_for(
@@ -1711,13 +1880,13 @@ namespace Rodin::Solid
     private:
       /// @brief Maximum number of entries of the local matrix of a thread,
       /// so larger local matrices take one team per cell.
-      static constexpr Index LocalCapacity = 8192;
+      static constexpr Index LocalCapacity = 1024;
 
       /// @brief Largest group of quadrature points of a team.
       static constexpr Index TeamPoints = 32;
 
       /// @brief Bytes of team scratch memory of a group in the fast level.
-      static constexpr size_t TeamScratch = 24576;
+      static constexpr size_t TeamScratch = 47104;
 
       /// @brief Fewest points of a group in the fast scratch level.
       static constexpr Index TeamMinimumPoints = 4;
@@ -1726,8 +1895,12 @@ namespace Rodin::Solid
       /// in the slower scratch level.
       static constexpr Index TeamSlowPoints = 8;
 
-      /// @brief Entries accumulated by a thread per pass over the quadrature.
-      static constexpr Index TeamEntries = 32;
+      /// @brief Largest team, whose register bound the kernel is compiled for.
+      static constexpr unsigned int TeamThreads = 512;
+
+      /// @brief Test functions of the block of a thread, whose entries
+      /// with one trial function it accumulates per pass over the quadrature.
+      static constexpr Index TeamPairs = 4;
 
       /// @brief Selects the quadrature order of a cell, as on the host.
       size_t getOrder(const Geometry::Polytope& polytope) const

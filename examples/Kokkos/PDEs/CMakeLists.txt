@@ -39,6 +39,7 @@ target_link_libraries(KokkosH1_Assembly
   Rodin::Geometry
   Rodin::Assembly
   Rodin::Variational
+  Rodin::Solid
   Rodin::IO
   )
 

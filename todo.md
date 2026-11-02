@@ -660,11 +660,24 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       partagée), au lieu d'un `interpolateJacobian` sériel par point.
       Tangente seule, déplacement nul: Q3 vectoriel n=14 (2197 hexaèdres)
       de 14,7 à 6,6 s; équipe forcée en Q2 n=20 de 7,2 à 3,2 s.
-- [ ] Equipe hyperélastique encore plus lente que le thread en Q2 (3,2 s
-      contre 1,7 s à n=20), d'où le seuil `LocalCapacity` gardé. Le noyau
-      d'équipe utilise 255 registres (une équipe de 256 threads par SM) et
-      la construction des points reste sérielle par point. Pistes: réduire
-      les registres, construire les points par plusieurs threads.
+- [x] Equipe hyperélastique plus rapide que le thread dès P3 sur
+      tétraèdres et Q2 sur hexaèdres. Une passe par groupe de points:
+      chaque thread prend une fonction d'essai et un bloc de `TeamPairs`
+      (4) fonctions test et accumule leurs blocs vdim x vdim en registres,
+      en réutilisant les produits de la fonction d'essai. Gradients
+      partagés entre espaces d'essai, test et état de même type, groupes
+      de points deux fois plus grands (`TeamScratch` 47104 octets), noyau
+      compilé pour 512 threads (`LaunchBounds`, 128 registres au lieu de
+      254). RTX 2080 Ti, Neo-Hookean, Q2 vectoriel n=20: équipe de 3,2 s à
+      0,46 s (thread 1,7 s); Q3 n=14: 6,6 s à 2,4 s. Seuil `LocalCapacity`
+      abaissé de 8192 à 1024 entrées: P2 sur tétraèdres (900 entrées)
+      reste par thread (n=30: 300 ms contre 455 ms en équipe, égalité sur
+      RTX 5090), P3 sur tétraèdres (n=14) à égalité sur la 2080 Ti (180
+      contre 190 ms). RTX 5090 (ares, sm_120), thread puis équipe: Q2 n=20
+      1305 à 121 ms, Q2 n=30 1700 à 415 ms, P3 tétraèdres n=14 95 à 35 ms,
+      Q3 n=14 en équipe 610 ms. Banc `KokkosH1_Assembly n répétitions
+      degré [tetrahedra]` (degré 2 ou 3), tangente Neo-Hookean à petit
+      déplacement.
 
 ## 16. Optimisations génériques de l'assemblage device
 
