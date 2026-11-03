@@ -768,6 +768,17 @@ namespace Rodin::IO
         boost::filesystem::path staticMeshFile; ///< Path to the static mesh file.
         std::vector<AttributeRecord> attributes; ///< Registered attributes.
         std::vector<SnapshotRecord> snapshots; ///< Recorded snapshots.
+        std::string xml; ///< XML of the first serialized snapshots.
+        size_t serialized = 0; ///< Number of snapshots serialized in xml.
+      };
+
+      /// @brief State of the document at the last flush.
+      struct FlushRecord
+      {
+        bool rewrite = true; ///< Whether the next flush rewrites the document.
+        boost::filesystem::path path; ///< Document written.
+        std::uintmax_t size = 0; ///< Size of the document written.
+        std::vector<size_t> grids; ///< Size of the XML written for each grid.
       };
 
       boost::filesystem::path m_stem; ///< Output stem path.
@@ -776,6 +787,7 @@ namespace Rodin::IO
       bool m_closed = false; ///< Whether close() has been called.
       size_t m_snapshotCount = 0; ///< Total snapshots written.
       std::vector<GridRecord> m_grids; ///< All grids in this domain.
+      FlushRecord m_flushed; ///< Document written by the last flush.
 
       // --- MPI distributed mode -----------------------------------------------
       bool m_distributed = false; ///< Whether the writer is in distributed mode.
@@ -795,6 +807,14 @@ namespace Rodin::IO
        */
       void writeUniformGrid(std::ostream& os, const std::string& gridName,
         const SnapshotRecord& snap, size_t baseIndent) const;
+
+      /**
+       * @brief Writes the XML element of one snapshot of a grid.
+       * @param os Output stream receiving the formatted data.
+       * @param gr Grid of the snapshot.
+       * @param s Index of the snapshot.
+       */
+      void writeSnapshot(std::ostream& os, const GridRecord& gr, size_t s) const;
 
       /**
        * @brief Gathers per-rank mesh metadata into snap.pieces.
