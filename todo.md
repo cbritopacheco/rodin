@@ -635,20 +635,21 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       une `FormLanguage::List` d'intégrateurs polymorphes (`Sum.h`), le
       type des intégrandes n'existe plus qu'à l'intérieur de chaque
       `fill`: fusionner demande de garder les types de la somme à la
-      compilation, changement du langage de formes, décision à prendre.
+      compilation, changement du langage de formes, décision laissée à
+      Carlos.
       Capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles
       (aussi côté hôte), découpage de la matrice locale par blocs de
       composantes. Ajouter les entrées par atomiques directement dans les
       coordonnées distinctes supprimerait la fusion COO (environ 200 µs
       sur 1 ms à la grille 16), mais la somme ne serait plus
-      déterministe: décision à prendre. `PETSc::Problem::assemble()`
+      déterministe: décision laissée à Carlos. `PETSc::Problem::assemble()`
       rassemble à chaque assemblage les fonctions solution dans le vecteur
       solution (estimation initiale, `VecGetSubVector` puis `VecCopy` par
       champ, avec des `cudaDeviceSynchronize`), environ 80 µs à la grille
       16 que le noyau manuel ne paie pas; le faire dans `solve()`
       changerait ce que voit `getSolution()` après `assemble()`:
-      décision à prendre.
+      décision laissée à Carlos.
 
 ## 13. DSL device, jalon 8: intégrales de bord, de faces et élasticité
 
