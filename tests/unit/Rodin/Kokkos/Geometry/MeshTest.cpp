@@ -602,6 +602,56 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(copy.getMeasure(2), source.getMeasure(2), 1e-12);
   }
 
+  /// @brief The host copy keeps identity and independent P1 maps next to default ones.
+  TEST(Kokkos_Mesh, ToHostKeepsTransformations)
+  {
+    auto source = HostMesh::Builder()
+                    .initialize(2)
+                    .nodes(4)
+                    .vertex({0, 0})
+                    .vertex({1, 0})
+                    .vertex({0, 1})
+                    .vertex({1, 1})
+                    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                    .polytope(Polytope::Type::Triangle, {1, 3, 2})
+                    .polytope(Polytope::Type::Triangle, {0, 3, 2})
+                    .finalize();
+    source.getConnectivity().compute(2, 1);
+    source.setPolytopeTransformation({2, 0}, new Geometry::IdentityTransformation(2));
+    Variational::RealP1Element element(Polytope::Type::Triangle);
+    Geometry::PointCloud controls(2, element.getCount());
+    for (Index a = 0; a < element.getCount(); ++a)
+    {
+      const auto reference = element.getNode(a);
+      controls(0, a) = 5 + 3 * reference(0);
+      controls(1, a) = 7 + 2 * reference(1) + Real(0.2) * reference(0);
+    }
+    source.setPolytopeTransformation({2, 1},
+      new Geometry::ParametricTransformation<Variational::RealP1Element>(
+        std::move(controls), std::move(element)));
+    const DeviceMesh mesh(TestContext{}, source);
+    const HostMesh copy = mesh.toHost();
+    EXPECT_NE(dynamic_cast<const Geometry::IdentityTransformation*>(
+                &copy.getPolytopeTransformation(2, 0)),
+      nullptr);
+    const Real sample[] = {Real(0.2), Real(0.3)};
+    for (size_t d = 1; d <= 2; ++d)
+    {
+      for (Index i = 0; i < source.getPolytopeCount(d); ++i)
+      {
+        SCOPED_TRACE(testing::Message() << d << ", " << i);
+        Math::SpatialPoint reference(static_cast<std::uint8_t>(d)), expected, actual;
+        for (size_t j = 0; j < d; ++j)
+          reference(j) = sample[j];
+        source.getPolytopeTransformation(d, i).transform(expected, reference);
+        copy.getPolytopeTransformation(d, i).transform(actual, reference);
+        ASSERT_EQ(actual.size(), expected.size());
+        for (Index s = 0; s < expected.size(); ++s)
+          EXPECT_DOUBLE_EQ(actual(s), expected(s));
+      }
+    }
+  }
+
   /// @brief Device discovery creates usable mesh entities on every supported reference family.
   TEST(Kokkos_Mesh, DiscoveryBuildsResidentGeometry)
   {

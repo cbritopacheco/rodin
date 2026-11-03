@@ -872,17 +872,10 @@ namespace Rodin::Kokkos::Variational::Internal
       static HostMeshType supported(const DeviceMeshType& mesh)
       {
         using Type = ::Rodin::Geometry::Polytope::Type;
-        for (size_t d = 1; d <= mesh.getDimension(); ++d)
+        if (mesh.getPolytopeCount(Type::Pyramid) > 0)
         {
-          for (Index i = 0; i < mesh.getPolytopeCount(d); ++i)
-          {
-            if (mesh.getGeometry(d, i) == Type::Pyramid)
-            {
-              Alert::Exception()
-                << "Kokkos H1 spaces do not support pyramids, found one at (" << d << ", "
-                << i << ")." << Alert::Raise;
-            }
-          }
+          Alert::Exception()
+            << "Kokkos H1 spaces do not support pyramids." << Alert::Raise;
         }
         // The incidences missing on the device only number the host
         // closure, the kernels never bind the polytopes they create.

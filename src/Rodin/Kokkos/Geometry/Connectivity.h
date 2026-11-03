@@ -342,6 +342,40 @@ namespace Rodin::Geometry
         return it->second;
       }
 
+      /**
+       * @brief Materializes the host keys and families of a whole dimension.
+       *
+       * Copies the vertex lists and the families of the entities of
+       * dimension @p d in one transfer per table, where getPolytope() and
+       * getGeometry() read each entity on its own.
+       * @param d Entity dimension.
+       */
+      void materialize(size_t d) const
+      {
+        assert(d <= m_dimension);
+        std::lock_guard<std::mutex> lock(m_mutex);
+        const Index begin = m_offsets[d];
+        const Index end = m_offsets[d + 1];
+        if (begin == end)
+          return;
+        const auto offsets = ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{},
+          ::Kokkos::subview(m_vertexOffsets, std::make_pair(begin, end + 1)));
+        const auto geometries = ::Kokkos::create_mirror_view_and_copy(
+          ::Kokkos::HostSpace{}, ::Kokkos::subview(m_geometries, std::make_pair(begin, end)));
+        const auto vertices = ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{},
+          ::Kokkos::subview(m_vertices, std::make_pair(offsets(0), offsets(end - begin))));
+        for (Index i = 0; i < end - begin; ++i)
+        {
+          m_types.emplace(begin + i, geometries(i));
+          if (m_keys.find(begin + i) != m_keys.end())
+            continue;
+          Polytope::Key key(offsets(i + 1) - offsets(i));
+          for (Index a = 0; a < key.size(); ++a)
+            key[a] = vertices(offsets(i) - offsets(0) + a);
+          m_keys.emplace(begin + i, std::move(key));
+        }
+      }
+
       /// @param d Source dimension. @param dp Target dimension. @returns Host relation, materialized on demand.
       const Incidence& getIncidence(size_t d, size_t dp) const override
       {

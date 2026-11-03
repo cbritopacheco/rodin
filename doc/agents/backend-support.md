@@ -60,7 +60,10 @@ Only small sizes and reference-cell constants cross the host boundary during
 computation. Device views
 borrow resident arrays and require completed kernels before mutation, owner
 replacement or destruction. Existing host iterators and caches remain host
-interfaces, with transfers as necessary. KokkosIteration follows the existing
+interfaces, with transfers as necessary. Each per-entity host query costs a
+copy and a device synchronization, so host code visiting a whole mesh goes
+through `toHost()` or `Connectivity::materialize(d)`, which copy each resident
+table once. KokkosIteration follows the existing
 indexed assembly region contract and keeps device handles private. Boundary
 and Interface require explicit face-to-cell incidence; their counts include
 all face candidates, and filtering uses exactly one or more than one incident

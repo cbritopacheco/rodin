@@ -643,43 +643,35 @@ namespace Rodin::Geometry
           [this](
             size_t dimension, Index index) -> std::unique_ptr<PolytopeTransformation> {
             const Index entity = m_connectivity.getOffset(dimension) + index;
-            const auto kind = Rodin::Kokkos::Internal::read(
-              m_context.getExecutionSpace(), m_geometryKinds, entity);
+            const auto& execution = m_context.getExecutionSpace();
+            const auto kind = Rodin::Kokkos::Internal::read(execution, m_geometryKinds, entity);
             if (kind == GeometryKind::Identity)
               return std::make_unique<IdentityTransformation>(dimension);
             const auto& vertices = m_connectivity.getPolytope(dimension, index);
-            PointCloud points(m_sdim, vertices.size());
+            const size_t sdim = m_sdim;
+            ::Kokkos::View<Real*, ::Kokkos::HostSpace> host(
+              "transformation points", vertices.size() * sdim);
             if (kind == GeometryKind::VertexP1)
             {
               for (Index a = 0; a < vertices.size(); ++a)
               {
-                for (size_t s = 0; s < m_sdim; ++s)
-                {
-                  points(s, a) =
-                    Rodin::Kokkos::Internal::read(m_context.getExecutionSpace(),
-                      m_coordinates, vertices[a] * m_sdim + s);
-                }
+                ::Kokkos::deep_copy(execution,
+                  ::Kokkos::subview(host, std::make_pair(a * sdim, (a + 1) * sdim)),
+                  ::Kokkos::subview(m_coordinates,
+                    std::make_pair(vertices[a] * sdim, (vertices[a] + 1) * sdim)));
               }
             }
             else
             {
               const auto first =
-                Rodin::Kokkos::Internal::read(
-                  m_context.getExecutionSpace(), m_controlOffsets, entity) *
-                m_sdim;
-              const auto host =
-                ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{},
-                  ::Kokkos::subview(
-                    m_controls, std::make_pair(first, first + vertices.size() * m_sdim)));
-              for (Index a = 0; a < vertices.size(); ++a)
-              {
-                for (size_t s = 0; s < m_sdim; ++s)
-                  points(s, a) = host(a * m_sdim + s);
-              }
+                Rodin::Kokkos::Internal::read(execution, m_controlOffsets, entity) * sdim;
+              ::Kokkos::deep_copy(execution, host,
+                ::Kokkos::subview(
+                  m_controls, std::make_pair(first, first + vertices.size() * sdim)));
             }
-            return std::make_unique<ParametricTransformation<Variational::RealP1Element>>(
-              std::move(points),
-              Variational::RealP1Element(getGeometry(dimension, index)));
+            execution.fence("Rodin host query");
+            return makeTransformation(dimension, index, vertices.size(),
+              [&](Index a, size_t s) { return host(a * sdim + s); });
           });
       }
 
@@ -712,10 +704,31 @@ namespace Rodin::Geometry
        */
       Mesh<Rodin::Context::Local> toHost() const
       {
+        // One transfer per resident table: reading entity by entity costs a
+        // copy and a synchronization per value.
+        synchronizeEntities();
+        for (size_t d = 0; d <= getDimension(); ++d)
+          m_connectivity.materialize(d);
+        const auto mirror = [](const auto& source) {
+          return ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{}, source);
+        };
+        const auto coordinates = mirror(m_coordinates);
+        const auto attributes = mirror(m_attributes);
+        const auto present = mirror(m_attributePresent);
+        const auto kinds = mirror(m_geometryKinds);
+        const auto controlOffsets = mirror(m_controlOffsets);
+        const auto controls = mirror(m_controls);
+        const size_t sdim = m_sdim;
+
         typename Mesh<Rodin::Context::Local>::Builder builder;
-        builder.initialize(m_sdim).nodes(getVertexCount());
+        builder.initialize(sdim).nodes(getVertexCount());
         for (Index v = 0; v < getVertexCount(); ++v)
-          builder.vertex(getVertexCoordinates(v));
+        {
+          Math::SpatialPoint point(sdim);
+          for (size_t s = 0; s < sdim; ++s)
+            point(s) = coordinates(v * sdim + s);
+          builder.vertex(point);
+        }
         for (size_t d = 1; d <= getDimension(); ++d)
         {
           for (Index i = 0; i < getPolytopeCount(d); ++i)
@@ -732,9 +745,28 @@ namespace Rodin::Geometry
         {
           for (Index i = 0; i < getPolytopeCount(d); ++i)
           {
-            output.setAttribute({d, i}, getAttribute(d, i));
-            output.setPolytopeTransformation(
-              {d, i}, getPolytopeTransformation(d, i).copy());
+            const Index entity = m_connectivity.getOffset(d) + i;
+            output.setAttribute({d, i},
+              present(entity) ? Optional<Attribute>(attributes(entity))
+                              : Optional<Attribute>());
+            const auto& vertices = m_connectivity.getPolytope(d, i);
+            std::unique_ptr<PolytopeTransformation> map;
+            if (kinds(entity) == GeometryKind::Identity)
+              map = std::make_unique<IdentityTransformation>(d);
+            else if (kinds(entity) == GeometryKind::VertexP1)
+            {
+              map = makeTransformation(d, i, vertices.size(), [&](Index a, size_t s) {
+                return coordinates(vertices[a] * sdim + s);
+              });
+            }
+            else
+            {
+              const Index first = controlOffsets(entity) * sdim;
+              map = makeTransformation(d, i, vertices.size(), [&](Index a, size_t s) {
+                return controls(first + a * sdim + s);
+              });
+            }
+            output.setPolytopeTransformation({d, i}, map.release());
           }
         }
         for (size_t d = 0; d <= getDimension(); ++d)
@@ -1114,6 +1146,27 @@ namespace Rodin::Geometry
       };
 
     private:
+      /**
+       * @brief Builds the host P1 map of an entity from its control points.
+       * @param d Entity dimension. @param i Entity index.
+       * @param count Number of control points.
+       * @param point Coordinate @p s of control point @p a, as `point(a, s)`.
+       * @returns Owned parametric map.
+       */
+      template <class Point>
+      std::unique_ptr<PolytopeTransformation> makeTransformation(
+        size_t d, Index i, size_t count, const Point& point) const
+      {
+        PointCloud points(m_sdim, count);
+        for (Index a = 0; a < count; ++a)
+        {
+          for (size_t s = 0; s < m_sdim; ++s)
+            points(s, a) = point(a, s);
+        }
+        return std::make_unique<ParametricTransformation<Variational::RealP1Element>>(
+          std::move(points), Variational::RealP1Element(getGeometry(d, i)));
+      }
+
       /**
        * @brief Extends resident entity slots on first use after connectivity discovery.
        * Like the core attribute and transformation indices, const queries may
