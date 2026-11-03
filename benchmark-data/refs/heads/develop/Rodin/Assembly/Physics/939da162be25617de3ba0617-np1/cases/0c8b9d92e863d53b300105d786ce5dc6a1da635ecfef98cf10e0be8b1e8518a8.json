@@ -340,6 +340,90 @@
           }
         }
       ]
+    },
+    {
+      "commit": "fbe5d99ccce0131947adbe553d076803f64ab195",
+      "date": "2026-11-03T21:26:07.855431+00:00",
+      "run": "41651457881.1",
+      "results": [
+        {
+          "name": "Poisson/P2/Quadrilateral/5/real_time",
+          "value": 54955.54856115243,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            54955.54856115243
+          ],
+          "records": [
+            {
+              "name": "Poisson/P2/Quadrilateral/5/real_time",
+              "family_index": 27,
+              "per_family_instance_index": 1,
+              "run_name": "Poisson/P2/Quadrilateral/5/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 5004,
+              "real_time": 54955.54856115243,
+              "cpu_time": 54946.84572342174,
+              "time_unit": "ns",
+              "cells": 16.0,
+              "cells_per_second": 291144.39613310044,
+              "components": 1.0,
+              "degree": 2.0,
+              "dofs": 81.0,
+              "nnz": 1089.0,
+              "quadrature_order": 6.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-03T15:13:01+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinPhysicsAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3248,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.39258,
+              0.397949,
+              0.137207
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

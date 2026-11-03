@@ -124,6 +124,36 @@
           ]
         }
       ]
+    },
+    {
+      "commit": "fbe5d99ccce0131947adbe553d076803f64ab195",
+      "date": "2026-11-03T21:26:07.855431+00:00",
+      "run": "41651457881.1",
+      "results": [
+        {
+          "name": "Pyramid/4/8/0/4/miss/1",
+          "value": 10.8783807533,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            10.8783807533
+          ],
+          "records": [
+            {
+              "geometry": "Pyramid",
+              "degree": "4",
+              "resolution": "8",
+              "cells": "2058",
+              "distortion": "0.000000",
+              "warp_degree": "4",
+              "query": "miss",
+              "pruning": "1",
+              "samples": "64",
+              "ns": "10.8783807533"
+            }
+          ]
+        }
+      ]
     }
   ],
   "format": "csv",

@@ -124,6 +124,36 @@
           ]
         }
       ]
+    },
+    {
+      "commit": "fbe5d99ccce0131947adbe553d076803f64ab195",
+      "date": "2026-11-03T21:26:07.855431+00:00",
+      "run": "41651457881.1",
+      "results": [
+        {
+          "name": "Triangle/4/4/0/4/shared/1",
+          "value": 1446.56867422,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            1446.56867422
+          ],
+          "records": [
+            {
+              "geometry": "Triangle",
+              "degree": "4",
+              "resolution": "4",
+              "cells": "18",
+              "distortion": "0.000000",
+              "warp_degree": "4",
+              "query": "shared",
+              "pruning": "1",
+              "samples": "18",
+              "ns": "1446.56867422"
+            }
+          ]
+        }
+      ]
     }
   ],
   "format": "csv",

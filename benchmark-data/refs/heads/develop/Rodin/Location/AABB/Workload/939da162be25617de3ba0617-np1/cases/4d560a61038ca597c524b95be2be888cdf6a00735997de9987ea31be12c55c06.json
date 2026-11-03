@@ -124,6 +124,36 @@
           ]
         }
       ]
+    },
+    {
+      "commit": "fbe5d99ccce0131947adbe553d076803f64ab195",
+      "date": "2026-11-03T21:26:07.855431+00:00",
+      "run": "41651457881.1",
+      "results": [
+        {
+          "name": "Tetrahedron/4/3/0/4/interior/0",
+          "value": 484187.5,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            484187.5
+          ],
+          "records": [
+            {
+              "geometry": "Tetrahedron",
+              "degree": "4",
+              "resolution": "3",
+              "cells": "48",
+              "distortion": "0.000000",
+              "warp_degree": "4",
+              "query": "interior",
+              "pruning": "0",
+              "samples": "48",
+              "ns": "484187.5"
+            }
+          ]
+        }
+      ]
     }
   ],
   "format": "csv",

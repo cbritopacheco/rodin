@@ -360,6 +360,95 @@
           }
         }
       ]
+    },
+    {
+      "commit": "fbe5d99ccce0131947adbe553d076803f64ab195",
+      "date": "2026-11-03T21:26:07.855431+00:00",
+      "run": "41651457881.1",
+      "results": [
+        {
+          "name": "LinearElasticity/P2/Pyramid/3/iterations:3/manual_time",
+          "value": 16901469.0,
+          "unit": "ns",
+          "metric": "manual_time",
+          "samples": [
+            16901469.0
+          ],
+          "records": [
+            {
+              "name": "LinearElasticity/P2/Pyramid/3/iterations:3/manual_time",
+              "family_index": 35,
+              "per_family_instance_index": 0,
+              "run_name": "LinearElasticity/P2/Pyramid/3/iterations:3/manual_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 3,
+              "real_time": 16901469.0,
+              "cpu_time": 16903178.999999825,
+              "time_unit": "ns",
+              "cell_imbalance": 1.0,
+              "cells": 48.0,
+              "cells_per_second": 2839.9898257364493,
+              "components": 3.0,
+              "degree": 2.0,
+              "dofs": 567.0,
+              "nnz": 50409.0,
+              "owned_cells_max": 48.0,
+              "owned_cells_min": 48.0,
+              "quadrature_order": 6.0,
+              "ranks": 1.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-03T16:04:41+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinPETScPhysicsAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2800,
+            "cpu_scaling_enabled": true,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1310720,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 50331648,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.674805,
+              0.270508,
+              0.103516
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "PETSc/Sequential",
+            "compiler": "14.2.0",
+            "petsc_version": "3.19.6"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

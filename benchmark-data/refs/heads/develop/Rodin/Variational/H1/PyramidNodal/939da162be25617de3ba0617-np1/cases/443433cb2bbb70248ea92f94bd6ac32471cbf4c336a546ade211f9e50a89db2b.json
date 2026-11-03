@@ -340,6 +340,90 @@
           }
         }
       ]
+    },
+    {
+      "commit": "fbe5d99ccce0131947adbe553d076803f64ab195",
+      "date": "2026-11-03T21:26:07.855431+00:00",
+      "run": "41651457881.1",
+      "results": [
+        {
+          "name": "H1/Pyramid/NodalDerivatives/SharedModes/P3/Real/12",
+          "value": 733341.8900523533,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            733341.8900523533
+          ],
+          "records": [
+            {
+              "name": "H1/Pyramid/NodalDerivatives/SharedModes/P3/Real/12",
+              "family_index": 14,
+              "per_family_instance_index": 3,
+              "run_name": "H1/Pyramid/NodalDerivatives/SharedModes/P3/Real/12",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 382,
+              "real_time": 733384.4005235311,
+              "cpu_time": 733341.8900523533,
+              "time_unit": "ns",
+              "basis_functions": 30.0,
+              "factor_degree": 3.0,
+              "modal_derivative_evaluations": 30870.0,
+              "nodal_contraction_products": 926100.0,
+              "output_entries": 30870.0,
+              "quadrature_points": 343.0,
+              "scratch_bytes": 720.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-03T20:19:33+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinH1PyramidNodalBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3236,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.26514,
+              0.520996,
+              0.197266
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "Experimental nodal derivative sweep; no source repair"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

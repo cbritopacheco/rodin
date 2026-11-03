@@ -352,6 +352,93 @@
           }
         }
       ]
+    },
+    {
+      "commit": "fbe5d99ccce0131947adbe553d076803f64ab195",
+      "date": "2026-11-03T21:26:07.855431+00:00",
+      "run": "41651457881.1",
+      "results": [
+        {
+          "name": "ReactionDiffusion/Constrained/H1/P2/Complex/Segment/9/real_time",
+          "value": 14042.315447372997,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            14042.315447372997
+          ],
+          "records": [
+            {
+              "name": "ReactionDiffusion/Constrained/H1/P2/Complex/Segment/9/real_time",
+              "family_index": 27,
+              "per_family_instance_index": 2,
+              "run_name": "ReactionDiffusion/Constrained/H1/P2/Complex/Segment/9/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 22308,
+              "real_time": 14042.315447372997,
+              "cpu_time": 14041.603550295898,
+              "time_unit": "ns",
+              "cells": 8.0,
+              "cells_per_second": 569706.6149796983,
+              "degree": 2.0,
+              "dimension": 1.0,
+              "dofs": 17.0,
+              "local_basis_per_cell": 3.0,
+              "local_entries_per_operator_term": 72.0,
+              "nnz": 57.0,
+              "quadrature_order": 12.0,
+              "quadrature_points_per_cell": 7.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-03T15:13:07+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinConstrainedAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 4209,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.789062,
+              0.285156,
+              0.105957
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",
