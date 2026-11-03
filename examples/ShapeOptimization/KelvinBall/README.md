@@ -248,18 +248,44 @@ source-area variation is also omitted. The actual penalty is re-evaluated
 after each step, and its change can differ from the surrogate prediction.
 
 The surrogate load is Hilbert-extended and projected into the volume
-constraint null space. A nonnegative multiplier of the projected
-thickness-repair direction is sought by bracketing and bisection so that the normalized
-direction satisfies
+constraint null space. Let $a$ and $b$ denote the volume-projected objective
+ascent and thickness-repair directions. Their separately normalized versions
+are combined as
+
+```math
+\widehat a=\frac{a}{\|a\|_\infty},\qquad
+\widehat b=\frac{b}{\|b\|_\infty},\qquad
+\theta_\eta=\frac{\widehat a+\eta\widehat b}
+  {\|\widehat a+\eta\widehat b\|_\infty}.
+```
+
+Zero directions remain zero. The norm is the maximum nodal Euclidean vector
+norm. The coefficient is bounded by `--thickness-mixing-cap` (default: 1),
+and `--objective-retention` (default: 0.5) imposes
+
+```math
+0\leq\eta\leq\eta_{\max},\qquad
+D\rho[\theta_\eta]\geq\gamma D\rho[\widehat a].
+```
+
+Within this interval, 32 equally spaced coefficients are tested for the guard
+target
 
 ```math
 \widetilde{D P}_D[\theta]\leq-P_D/d_{\min}.
 ```
 
-If this aggregate target is infeasible, the projected repair direction is
-used alone. The penalty, nominal penalty, minimum exit distance, incidence,
-load concentration, active multiplier, and actual and predicted changes are
-reported each iterate. The full shape direction transports the level set.
+The first sampled crossing is refined by bisection. If no tested coefficient
+reaches the target, the tested coefficient giving the lowest surrogate rate
+is retained, including zero. The thickness-only fallback is removed. If the
+objective-only rate is nonpositive, no repair is added. Setting the mixing cap
+to zero gives the objective-only direction while retaining thickness diagnostics.
+The same bounded policy applies to nominal violations; it does not guarantee
+a minimum thickness after transport and remeshing. The guard anticipates motion
+but cannot override objective retention. The penalty, nominal penalty, minimum
+exit distance, incidence, load concentration, selected coefficient, retained
+objective fraction, achieved rate, and actual and predicted changes are reported
+each iterate. The full shape direction transports the level set.
 
 The normal fields are written on separate `Interface` surface grids in the
 chamber and sewn XDMF files, containing only triangles labelled $\Gamma$,

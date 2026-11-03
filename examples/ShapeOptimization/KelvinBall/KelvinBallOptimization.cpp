@@ -86,6 +86,8 @@ namespace KelvinBall
           Real normalRegularizationFactor = 1;
           Real stepFactor = 0.1;
           Real minimumThickness = 0;
+          Real thicknessMixingCap = 1;
+          Real objectiveRetention = 0.5;
           Math::SpatialVector<Real> motionForce;
           std::string reconstructionMethod = "swift";
 
@@ -106,6 +108,10 @@ namespace KelvinBall
                 stepFactor = std::stod(std::string(mode.substr(7)));
               else if (mode.rfind("--thickness-min=", 0) == 0)
                 minimumThickness = std::stod(std::string(mode.substr(16)));
+              else if (mode.rfind("--thickness-mixing-cap=", 0) == 0)
+                thicknessMixingCap = std::stod(std::string(mode.substr(23)));
+              else if (mode.rfind("--objective-retention=", 0) == 0)
+                objectiveRetention = std::stod(std::string(mode.substr(22)));
               else if (mode.rfind("--motion-force=", 0) == 0)
               {
                 std::istringstream components{std::string(mode.substr(15))};
@@ -151,6 +157,11 @@ namespace KelvinBall
               throw std::runtime_error("The advection step factor must be positive.");
             if (!std::isfinite(minimumThickness) || minimumThickness < 0)
               throw std::runtime_error("--thickness-min must be nonnegative.");
+            if (!std::isfinite(thicknessMixingCap) || thicknessMixingCap < 0)
+              throw std::runtime_error("--thickness-mixing-cap must be nonnegative.");
+            if (!std::isfinite(objectiveRetention) ||
+                !(objectiveRetention > 0 && objectiveRetention <= 1))
+              throw std::runtime_error("--objective-retention must lie in (0, 1].");
             if (!std::isfinite(motionForce.norm()) || !(motionForce.norm() > 0))
               throw std::runtime_error("The motion force must be finite and nonzero.");
             if (reconstructionMethod != "mmg" && reconstructionMethod != "swift")
@@ -871,6 +882,11 @@ namespace KelvinBall
           << "             Advection time step in multiples of h0 (default: 0.1)."
           << Alert::NewLine << Alert::Notation("--thickness-min=<value>")
           << "      Absolute minimum body thickness (default: 0, off)." << Alert::NewLine
+          << Alert::Notation("--thickness-mixing-cap=<value>")
+          << " Maximum normalized repair coefficient (default: 1)." << Alert::NewLine
+          << Alert::Notation("--objective-retention=<value>")
+          << "  Minimum retained normalized objective ascent (default: 0.5)."
+          << Alert::NewLine
           << Alert::Notation("--motion-force=<fx,fy,fz>")
           << "  Force for the Motion field at each iterate (default: 1,0,0)."
 
@@ -1519,6 +1535,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
              "thickness_min,normal_smoothing_length,"
              "thickness_penalty,thickness_nominal_penalty,thickness_guard_distance,"
              "thickness_active_multiplier,thickness_active_feasible,"
+             "thickness_mixing_cap,objective_retention,objective_only_rate,"
+             "objective_retained_fraction,thickness_achieved_rate,"
              "thickness_violating_rays,"
              "thickness_maximum_pair_load,thickness_top_one_percent_load_share,"
              "thickness_descent_normal_rms,thickness_descent_tangent_rms,"
@@ -1664,6 +1682,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         Real thicknessGuardDistance = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessActiveMultiplier = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessActiveFeasible = std::numeric_limits<Real>::quiet_NaN();
+        Real objectiveOnlyRate = std::numeric_limits<Real>::quiet_NaN();
+        Real objectiveRetainedFraction = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessAchievedRate = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessViolating = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessMaximumPairLoad = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessTopOnePercentLoadShare = std::numeric_limits<Real>::quiet_NaN();
@@ -1741,6 +1762,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << stageDiagnostics.thicknessGuardDistance << ','
               << stageDiagnostics.thicknessActiveMultiplier << ','
               << stageDiagnostics.thicknessActiveFeasible << ','
+              << m_options.thicknessMixingCap << ',' << m_options.objectiveRetention << ','
+              << stageDiagnostics.objectiveOnlyRate << ','
+              << stageDiagnostics.objectiveRetainedFraction << ','
+              << stageDiagnostics.thicknessAchievedRate << ','
               << stageDiagnostics.thicknessViolating << ','
               << stageDiagnostics.thicknessMaximumPairLoad << ','
               << stageDiagnostics.thicknessTopOnePercentLoadShare << ','
@@ -2078,72 +2103,116 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       thicknessRepair = thicknessDescent + thicknessVolumeMultiplier * volumeGradient;
       GridFunction candidate(shapeSpace);
       GridFunction candidateMagnitude(levelSetSpace);
-      const auto thicknessRate = [&](Real multiplier) {
+      // Compare unit directions, rather than the magnitudes of their loads.
+      candidateMagnitude = Frobenius(xiRho);
+      const Real objectiveMagnitude = std::max(candidateMagnitude.max(), Real(1e-30));
+      xiRho /= objectiveMagnitude;
+      nullSpaceMultiplier /= objectiveMagnitude;
+      candidateMagnitude = Frobenius(thicknessRepair);
+      const Real repairMagnitude = std::max(candidateMagnitude.max(), Real(1e-30));
+      thicknessRepair /= repairMagnitude;
+      const Real objectiveRate = dRho(xiRho);
+      const Real retainedRate = m_options.objectiveRetention * objectiveRate;
+      const auto candidateNorm = [&](Real multiplier) {
         candidate = xiRho + multiplier * thicknessRepair;
         candidateMagnitude = Frobenius(candidate);
-        const Real magnitude = std::max(candidateMagnitude.max(), Real(1e-30));
-        return -thicknessLoad.dot(candidate.getData()) / magnitude;
+        return candidateMagnitude.max();
+      };
+      const auto retainsObjective = [&](Real multiplier) {
+        const Real magnitude = candidateNorm(multiplier);
+        return magnitude > 0 && dRho(candidate) / magnitude >= retainedRate;
+      };
+      const auto thicknessRate = [&](Real multiplier) {
+        const Real magnitude = candidateNorm(multiplier);
+        return magnitude > 0 ? -thicknessLoad.dot(candidate.getData()) / magnitude
+                             : std::numeric_limits<Real>::infinity();
       };
       const Real targetRate =
         -stageDiagnostics.thicknessPenalty / m_options.minimumThickness;
       Real multiplier = 0;
-      bool feasible = true;
-      if (thicknessRate(0) > targetRate)
+      Real achievedRate = thicknessRate(0);
+      // These scalar searches only combine existing gradients; no state solve
+      // or design-step line search is performed. Forty bisections resolve the
+      // coefficient to about 1e-12 of its interval. The bounded sample search
+      // also permits partial repair when the guard target cannot be reached.
+      constexpr size_t coefficientBisections = 40;
+      constexpr size_t repairSamples = 32;
+      Real upper = m_options.thicknessMixingCap;
+      if (objectiveRate > 0 && achievedRate > targetRate && upper > 0)
       {
-        candidateMagnitude = Frobenius(thicknessRepair);
-        const Real repairMagnitude = std::max(candidateMagnitude.max(), Real(1e-30));
-        const Real maximumRepairRate =
-          -thicknessLoad.dot(thicknessRepair.getData()) / repairMagnitude;
-        if (maximumRepairRate >= targetRate)
+        // The positive objective superlevel set is convex along the mixing
+        // segment, so bisection gives an admissible upper coefficient.
+        if (!retainsObjective(upper))
         {
-          feasible = false;
-          multiplier = std::numeric_limits<Real>::infinity();
-        }
-        else
-        {
-          Real lower = 0, upper = 1;
-          while (thicknessRate(upper) > targetRate && upper < Real(1e6))
-            upper *= Real(2);
-          if (thicknessRate(upper) > targetRate)
+          Real lower = 0;
+          for (size_t search = 0; search < coefficientBisections; ++search)
           {
-            feasible = false;
-            multiplier = std::numeric_limits<Real>::infinity();
+            const Real middle = (lower + upper) / Real(2);
+            if (retainsObjective(middle))
+              lower = middle;
+            else
+              upper = middle;
           }
-          else
+          upper = lower;
+        }
+        Real previous = 0;
+        for (size_t sample = 1; sample <= repairSamples; ++sample)
+        {
+          const Real coefficient = upper * Real(sample) / Real(repairSamples);
+          const Real rate = thicknessRate(coefficient);
+          if (rate < achievedRate && retainsObjective(coefficient))
           {
-            for (size_t search = 0; search < 40; ++search)
+            multiplier = coefficient;
+            achievedRate = rate;
+          }
+          if (achievedRate <= targetRate)
+          {
+            Real lower = previous, upperTarget = multiplier;
+            for (size_t search = 0; search < coefficientBisections; ++search)
             {
-              const Real middle = (lower + upper) / Real(2);
+              const Real middle = (lower + upperTarget) / Real(2);
               if (thicknessRate(middle) > targetRate)
                 lower = middle;
               else
-                upper = middle;
+                upperTarget = middle;
             }
-            multiplier = upper;
+            // Retain the checked sample if rounding at the objective boundary
+            // makes the refined coefficient inadmissible.
+            if (retainsObjective(upperTarget))
+              multiplier = upperTarget;
+            achievedRate = thicknessRate(multiplier);
+            break;
           }
+          previous = coefficient;
         }
       }
-      if (feasible)
-      {
-        xiRho = rhoGradient + nullSpaceMultiplier * volumeGradient +
-          multiplier * thicknessRepair;
-        nullSpaceMultiplier += multiplier * thicknessVolumeMultiplier;
-      }
-      else
-      {
-        xiRho = thicknessRepair;
-        nullSpaceMultiplier = thicknessVolumeMultiplier;
-      }
+      // The guard is preventive: failure to reach it never replaces the
+      // objective with a thickness-only direction, even for a nominal violation.
+      const bool feasible = achievedRate <= targetRate;
+      const Real selectedMagnitude = candidateNorm(multiplier);
+      stageDiagnostics.objectiveOnlyRate = objectiveRate;
+      stageDiagnostics.objectiveRetainedFraction = objectiveRate > 0
+        ? dRho(candidate) / (selectedMagnitude * objectiveRate) : nan;
+      stageDiagnostics.thicknessAchievedRate = achievedRate;
+      xiRho = candidate;
+      nullSpaceMultiplier += multiplier * thicknessVolumeMultiplier / repairMagnitude;
       stageDiagnostics.thicknessActiveMultiplier = multiplier;
       stageDiagnostics.thicknessActiveFeasible = feasible ? Real(1) : Real(0);
-      Alert::Info() << substageHeading("Aggregate thickness correction") << Alert::NewLine
+      Alert::Info() << substageHeading("Bounded thickness correction") << Alert::NewLine
                     << diagnosticLabel("Target D guard P [theta]:")
                     << Alert::Notation::Number(targetRate) << Alert::NewLine
+                    << diagnosticLabel("Achieved D guard P [theta]:")
+                    << Alert::Notation::Number(achievedRate) << Alert::NewLine
                     << diagnosticLabel("Selected multiplier:")
-                    << (feasible ? std::to_string(multiplier) : "Repair-only fallback")
+                    << Alert::Notation::Number(multiplier) << Alert::NewLine
+                    << diagnosticLabel("Mixing cap:")
+                    << Alert::Notation::Number(m_options.thicknessMixingCap)
+                    << Alert::NewLine << diagnosticLabel("Retained objective fraction:")
+                    << Alert::Notation::Number(stageDiagnostics.objectiveRetainedFraction)
                     << Alert::NewLine
-                    << diagnosticLabel("Target feasible in tested span:")
-                    << (feasible ? "Yes" : "No") << Alert::Raise;
+                    << diagnosticLabel("Guard target reached:")
+                    << (feasible ? "Yes" : "No; retaining bounded correction")
+                    << Alert::Raise;
     }
     GridFunction xiRhoNorm(levelSetSpace);
     xiRhoNorm = Frobenius(xiRho);
