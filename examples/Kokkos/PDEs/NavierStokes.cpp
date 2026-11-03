@@ -84,16 +84,21 @@ int main(int argc, char** argv)
   xdmf.write(0).flush();
 
   // The problem and the solver outlive the time loop: the sparsity pattern is
-  // the same at every step, so cuDSS keeps its symbolic analysis and only
-  // refactorizes the matrix. With cuDSS the matrix stays in the memory of the
-  // backend, where the solver reads it in place.
-#ifdef RODIN_USE_CUDSS
+  // the same at every step, so cuDSS and RocSolverRF keep their symbolic
+  // analysis and only refactorize the matrix. The matrix stays in the memory
+  // of the backend, where the solver reads it in place.
+#if defined(RODIN_USE_CUDSS) || defined(RODIN_USE_ROCSOLVER)
+#define DEVICE_SOLVER
   using System =
     Math::LinearSystem<Rodin::Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>;
   Problem<System, decltype(u), decltype(p), decltype(multiplier), decltype(v),
     decltype(q), decltype(meanTest)>
     flow(u, p, multiplier, v, q, meanTest);
+#ifdef RODIN_USE_CUDSS
   Solver::CuDSS solver(flow);
+#else
+  Solver::RocSolverRF solver(flow);
+#endif
 #else
   Problem flow(u, p, multiplier, v, q, meanTest);
   Solver::SparseLU solver(flow);
@@ -121,7 +126,7 @@ int main(int argc, char** argv)
     auto t0 = std::chrono::steady_clock::now();
     flow.assemble();
     auto t1 = std::chrono::steady_clock::now();
-#ifdef RODIN_USE_CUDSS
+#ifdef DEVICE_SOLVER
     solver.factorize(flow.getLinearSystem());
     if (!solver.success())
       return EXIT_FAILURE;
