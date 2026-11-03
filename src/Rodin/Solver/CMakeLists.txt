@@ -54,6 +54,11 @@ if (RODIN_USE_CUDSS)
   target_link_libraries(RodinSolver PUBLIC cudss CUDA::cudart)
 endif()
 
+# ---- rocSOLVER -------------------------------------------------------------
+if (RODIN_USE_ROCSOLVER)
+  target_link_libraries(RodinSolver PUBLIC roc::rocsolver roc::rocsparse roc::rocblas hip::host)
+endif()
+
 if (RODIN_USE_SPQR)
   target_link_libraries(RodinSolver PUBLIC SuiteSparse::SPQR)
 endif()

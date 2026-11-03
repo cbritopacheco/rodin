@@ -241,8 +241,9 @@ namespace Rodin::FormLanguage
 namespace Rodin::Solver::Internal
 {
   /**
-   * @brief CSR arrays of a Kokkos::SparseMatrix, read in place by CuDSS when
-   * they are in device memory and copied to the device otherwise.
+   * @brief CSR arrays of a Kokkos::SparseMatrix, read in place by the GPU
+   * direct solvers when they are in device memory and copied to the device
+   * otherwise.
    */
   template <class Backend>
   struct CuDSSOperator<::Rodin::Kokkos::SparseMatrix<Real, Backend>>

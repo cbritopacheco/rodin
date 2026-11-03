@@ -128,6 +128,21 @@ if (RODIN_USE_CUDSS)
   )
 endif()
 
+if (RODIN_USE_ROCSOLVER)
+  add_executable(RodinRocSolverRFTest RocSolverRFTest.cpp)
+  target_link_libraries(RodinRocSolverRFTest
+    GTest::gtest
+    GTest::gtest_main
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::Solver
+  )
+  rodin_discover_tests(RodinRocSolverRFTest
+    PROPERTIES
+      LABELS unit
+  )
+endif()
+
 add_executable(RodinDenseSolverTest DenseSolverTest.cpp)
 target_link_libraries(RodinDenseSolverTest
   GTest::gtest

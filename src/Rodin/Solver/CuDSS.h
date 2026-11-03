@@ -38,6 +38,7 @@
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/Vector.h"
 
+#include "CuDSSOperator.h"
 #include "ForwardDecls.h"
 #include "Info.h"
 #include "LinearSolver.h"
@@ -49,65 +50,6 @@ namespace Rodin::FormLanguage
   {
     /// @brief Linear system type.
     using LinearSystemType = LinearSystem;
-  };
-}
-
-namespace Rodin::Solver::Internal
-{
-  /// @brief Host CSC arrays, read as the CSR arrays of the transpose.
-  template <>
-  struct CuDSSOperator<Math::SparseMatrix<Real>>
-  {
-    /// @brief Matrix type.
-    using MatrixType = Math::SparseMatrix<Real>;
-
-    /// @brief Whether the arrays are those of the transpose.
-    static constexpr bool Transposed = true;
-
-    /// @brief Whether the arrays are in device memory.
-    static constexpr bool Resident = false;
-
-    /// @brief Compresses the matrix.
-    static void prepare(MatrixType& matrix)
-    {
-      matrix.makeCompressed();
-    }
-
-    /// @brief Number of rows.
-    static size_t getRowCount(const MatrixType& matrix)
-    {
-      return static_cast<size_t>(matrix.rows());
-    }
-
-    /// @brief Number of columns.
-    static size_t getColumnCount(const MatrixType& matrix)
-    {
-      return static_cast<size_t>(matrix.cols());
-    }
-
-    /// @brief Number of stored coefficients.
-    static size_t getNonZeroCount(const MatrixType& matrix)
-    {
-      return static_cast<size_t>(matrix.nonZeros());
-    }
-
-    /// @brief Start of every compressed row, followed by the coefficient count.
-    static const Math::SparseIndex* getStarts(const MatrixType& matrix)
-    {
-      return matrix.outerIndexPtr();
-    }
-
-    /// @brief Index of every coefficient in its compressed row.
-    static const Math::SparseIndex* getIndices(const MatrixType& matrix)
-    {
-      return matrix.innerIndexPtr();
-    }
-
-    /// @brief Value of every coefficient.
-    static const Real* getValues(const MatrixType& matrix)
-    {
-      return matrix.valuePtr();
-    }
   };
 }
 

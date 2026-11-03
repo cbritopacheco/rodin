@@ -172,6 +172,19 @@
 #cmakedefine RODIN_USE_CUDSS
 
 /**
+ * @brief Indicates if Rodin is built with AMD rocSOLVER support.
+ *
+ * # Utilization
+ *
+ * @code{.cpp}
+ * #ifdef RODIN_USE_ROCSOLVER
+ * // Code depending on rocSOLVER
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_ROCSOLVER
+
+/**
  * @brief Indicates if Rodin is built with hypre support.
  *
  * # Utilization

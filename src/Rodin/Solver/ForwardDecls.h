@@ -365,15 +365,31 @@ namespace Rodin::Solver
   class CuDSS;
 #endif
 
+#ifdef RODIN_USE_ROCSOLVER
+  /**
+   * @brief AMD rocSOLVER sparse refactorization on the GPU.
+   * @tparam LinearSystem Type of linear system to solve
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref RocSolverRF "RocSolverRF<Math::LinearSystem<Matrix, Math::Vector<Real>>>" | rocSOLVER refactorization for real sparse systems whose matrix has a CuDSSOperator. |
+   *
+   * @see @ref RocSolverRFSpecializations "RocSolverRF Template Specializations"
+   */
+  template <class LinearSystem>
+  class RocSolverRF;
+#endif
+
   namespace Internal
   {
     /**
-     * @brief How CuDSS reads the compressed arrays of a matrix type.
+     * @brief How the GPU direct solvers, CuDSS and RocSolverRF, read the
+     * compressed arrays of a matrix type.
      * @tparam Matrix Operator type of the linear system.
      *
      * A specialization provides the compressed arrays as the CSR arrays of
      * the matrix, or of its transpose, and tells whether they are in device
-     * memory. It needs no cuDSS header, so that the module defining the
+     * memory. It needs no GPU header, so that the module defining the
      * matrix type defines it.
      *
      * | Specialization | Description |

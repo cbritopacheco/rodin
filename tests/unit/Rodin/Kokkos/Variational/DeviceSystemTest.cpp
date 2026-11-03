@@ -11,6 +11,10 @@
 #include <Rodin/Solver/CuDSS.h>
 #endif
 
+#ifdef RODIN_USE_ROCSOLVER
+#include <Rodin/Solver/RocSolverRF.h>
+#endif
+
 #include "Common.h"
 
 namespace Rodin::Tests::Unit
@@ -183,6 +187,49 @@ namespace Rodin::Tests::Unit
     EXPECT_LE((x - reference).norm(), Real(1e-12) * reference.norm());
   }
 #endif
+
+#ifdef RODIN_USE_ROCSOLVER
+  /// @brief Solution by RocSolverRF from the device matrix equals the host one.
+  void checkRocSolverRF()
+  {
+    auto source = makeTriangleMesh();
+    source.getConnectivity().compute(1, 2);
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      return 1 + p.x() * p.y();
+    });
+    Problem host(u, v);
+    host = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(f, v) +
+      DirichletBC(u, RealFunction(1));
+    Problem<DeviceLinearSystem, decltype(u), decltype(v)> device(u, v);
+    device = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(f, v) +
+      DirichletBC(u, RealFunction(1));
+    Solver::RocSolverRF hs(host);
+    hs.solve();
+    ASSERT_TRUE(hs.success());
+    const Math::Vector<Real> reference = u.getSolution().getData();
+    Solver::RocSolverRF ds(device);
+    static_assert(std::is_same_v<decltype(ds), Solver::RocSolverRF<DeviceLinearSystem>>);
+    ds.solve();
+    ASSERT_TRUE(ds.success());
+    const Math::Vector<Real> solution = u.getSolution().getData();
+    ASSERT_GT(reference.norm(), Real(0));
+    EXPECT_LE((solution - reference).norm(), Real(1e-12) * reference.norm());
+
+    // A refactorization after a reassembly keeps the analysis.
+    device.assemble();
+    ds.factorize(device.getLinearSystem());
+    ASSERT_TRUE(ds.success());
+    ds.solve(device.getLinearSystem());
+    ASSERT_TRUE(ds.success());
+    const auto& x = device.getLinearSystem().getSolution();
+    EXPECT_LE((x - reference).norm(), Real(1e-12) * reference.norm());
+  }
+#endif
+
   TEST(Kokkos_Variational_DeviceSystem, Poisson)
   {
     checkPoisson();
@@ -202,6 +249,13 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_Variational_DeviceSystem, CuDSS)
   {
     checkCuDSS();
+  }
+#endif
+
+#ifdef RODIN_USE_ROCSOLVER
+  TEST(Kokkos_Variational_DeviceSystem, RocSolverRF)
+  {
+    checkRocSolverRF();
   }
 #endif
 }

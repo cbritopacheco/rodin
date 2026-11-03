@@ -75,6 +75,7 @@ option(RODIN_USE_UMFPACK              "Use Rodin with UMFPACK support"          
 option(RODIN_USE_PARU                 "Use Rodin with ParU support"               OFF)
 option(RODIN_USE_MUMPS                "Use Rodin with MUMPS support"              OFF)
 option(RODIN_USE_CUDSS                "Use Rodin with NVIDIA cuDSS support"       OFF)
+option(RODIN_USE_ROCSOLVER            "Use Rodin with AMD rocSOLVER support"      OFF)
 option(RODIN_USE_HYPRE                "Use Rodin with hypre support"              OFF)
 option(RODIN_USE_PASTIX               "Use Rodin with PaStiX support"             OFF)
 option(RODIN_USE_KLU                  "Use Rodin with KLU support"                OFF)
@@ -332,6 +333,19 @@ if (RODIN_BUILD_SRC)
   if (RODIN_USE_CUDSS)
     find_package(CUDAToolkit REQUIRED)
     find_package(cudss CONFIG REQUIRED)
+  endif()
+
+  # ---- rocSOLVER ----
+  # The refactorization of rocSOLVER needs a first pivot order, which
+  # UMFPACK computes on the host.
+  if (RODIN_USE_ROCSOLVER)
+    if (NOT RODIN_USE_UMFPACK)
+      message(FATAL_ERROR "RODIN_USE_ROCSOLVER requires RODIN_USE_UMFPACK.")
+    endif()
+    find_package(hip CONFIG REQUIRED)
+    find_package(rocblas CONFIG REQUIRED)
+    find_package(rocsparse CONFIG REQUIRED)
+    find_package(rocsolver CONFIG REQUIRED)
   endif()
 
   # ---- hypre ----

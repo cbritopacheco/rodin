@@ -51,6 +51,13 @@ if(@RODIN_USE_CUDSS@)
   find_dependency(cudss CONFIG REQUIRED)
 endif()
 
+if(@RODIN_USE_ROCSOLVER@)
+  find_dependency(hip CONFIG REQUIRED)
+  find_dependency(rocblas CONFIG REQUIRED)
+  find_dependency(rocsparse CONFIG REQUIRED)
+  find_dependency(rocsolver CONFIG REQUIRED)
+endif()
+
 if(@RODIN_USE_HYPRE@)
   find_dependency(HYPRE REQUIRED)
 endif()
