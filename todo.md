@@ -1067,3 +1067,46 @@ Mesures sur demeter (RTX 2080 Ti, 32 coeurs), exemples
       refait; 343 ms (initialisation MPI et hypre comprise) puis 90 à
       113 ms à 262k. Test: matrice doublée résolue avec l'ancienne
       hiérarchie, `setup`, `clear`, copie.
+
+## 19. Benchmark des gros problèmes, RTX 5090 et R9700
+
+Kokkos 5.2.2, RTX 5090 sur ares (CUDA 12.9, cuDSS 1.0) et R9700 sur zephyr
+(HIP, ROCm 10.1), script `bigbench.sh` sur les deux machines. Atrium Fine
+réduit à ses tétraèdres (151k mailles); `KokkosOseenAssembly` refuse
+désormais les maillages mixtes, car le noyau manuel ne lit que 4 sommets par
+maille (les prismes de l'atrium FluidSolid donnaient un écart de 1e-1), et
+calcule la distance sur l'hôte (le `spadd` de Kokkos-Kernels demande 65536
+octets de scratch, plus que les 65264 de RDNA). Toutes les distances DSL
+contre manuel sont à 1e-15.
+
+| cas | 5090 | R9700 |
+|---|---|---|
+| Oseen atrium Fine, DSL / manuel | 1.51 / 1.62 ms | 5.25 / 6.48 ms |
+| idem renuméroté | 1.14 / 1.28 ms | 3.19 / 6.23 ms |
+| Oseen grille 30, DSL / manuel | 1.00 / 1.48 ms | 3.50 / 6.58 ms |
+| Oseen grille 48 renumérotée (664k mailles) | 4.45 / 5.99 ms | 13.4 / 24.7 ms |
+| BoomerAMG Poisson 1M: assemblage, hiérarchie, résolution | 70, 284, 86 ms | 141, 1394, 221 ms |
+| BoomerAMG Poisson 3.4M | 234, 320, 260 ms | 609, 1806, 748 ms |
+| CG Kokkos Poisson 1M (158 it.): assemblage, résolution | 69, 51 ms | 160, 234 ms |
+| CG Kokkos Poisson 3.4M (237 it.) | 224, 241 ms | 496, 828 ms |
+| H1 Q2 n=40: scalaire, vecteur, hyperélastique | 360, 405, 1243 ms | 959, 1033, 4308 ms |
+| H1 Q3 hexaèdres n=24 | mémoire épuisée | 4.37, 4.50, 10.7 s |
+| H1 P3 tétraèdres n=24 | 36, 67, 209 ms | 96, 145, 562 ms |
+| PETSc Poisson 1M hypre: assemblage, résolution | 567, 971 ms | 1062, 2659 ms |
+| PETSc élasticité 822k GAMG | 302, 2183 ms | 569, 3883 ms |
+| PETSc Navier-Stokes 149k, 5 pas Schur | 285 ms, 10.8 s | 475 ms, 13.7 s |
+| NavierStokes Kokkos 160 pas | 0.65 s, 0.91 s (cuDSS) | 1.81 s, 84.5 s (SparseLU hôte) |
+
+- [ ] H1 Q3 hexaèdres n=24 épuise les 32 Go de la 5090 (`bad_alloc` de
+      thrust) alors que la R9700 l'assemble: chercher l'allocation propre au
+      chemin CUDA.
+- [ ] NavierStokes Kokkos sur HIP: brancher `RocSolverRF` comme `CuDSS`,
+      la résolution hôte fait 98% du temps.
+- [ ] PETSc Navier-Stokes: 10.8 s sur la 5090 contre 6.1 s sur la 2080 Ti,
+      1.5 M lancements de noyaux sur zephyr; le split de Schur est dominé
+      par la latence.
+- [ ] La préparation des intégrateurs est refaite à chaque assemblage
+      (`prepare`, `DevicePolytopes::locate`, quadratures, attributs).
+- [ ] CantileverBeam: environ 90 s de temps hôte non attribué sur 111 s
+      (`SparseLU` hôte à chaque itération de Newton, `Problem` reconstruit et
+      XDMF écrit à chaque pas).
