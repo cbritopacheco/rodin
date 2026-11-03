@@ -274,6 +274,96 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9bc17fdd6181661cbe3fca442e89b1d37f2e33d8",
+      "date": "2026-11-03T05:38:17.973890+00:00",
+      "run": "41480189296.1",
+      "results": [
+        {
+          "name": "SparseAlgebra/TransposeProduct/Poisson/H1/P1/Complex/Tetrahedron/9/real_time",
+          "value": 6657.170120877223,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            6657.170120877223
+          ],
+          "records": [
+            {
+              "name": "SparseAlgebra/TransposeProduct/Poisson/H1/P1/Complex/Tetrahedron/9/real_time",
+              "family_index": 48,
+              "per_family_instance_index": 2,
+              "run_name": "SparseAlgebra/TransposeProduct/Poisson/H1/P1/Complex/Tetrahedron/9/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 41447,
+              "real_time": 6657.170120877223,
+              "cpu_time": 6656.876155089954,
+              "time_unit": "ns",
+              "cells": 3072.0,
+              "compressed_storage_bytes": 91660.0,
+              "degree": 1.0,
+              "dimension": 3.0,
+              "dot_relative_error": 2.060318651371589e-16,
+              "nnz": 4437.0,
+              "norm_relative_error": 7.047179508293119e-16,
+              "product_relative_error": 5.003080751293179e-17,
+              "reference_mantissa_bits": 64.0,
+              "rows": 729.0,
+              "scalar_bytes": 16.0,
+              "vector_entries": 729.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-02T17:23:51+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinSparseAlgebraBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2300,
+            "cpu_scaling_enabled": true,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 2097152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 272629760,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.53271,
+              0.499512,
+              0.177734
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "Math product/reduction; assembly excluded"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

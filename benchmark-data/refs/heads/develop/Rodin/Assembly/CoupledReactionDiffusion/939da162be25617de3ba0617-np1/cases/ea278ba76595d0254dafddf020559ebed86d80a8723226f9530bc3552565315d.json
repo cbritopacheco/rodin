@@ -289,6 +289,101 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9bc17fdd6181661cbe3fca442e89b1d37f2e33d8",
+      "date": "2026-11-03T05:38:17.973890+00:00",
+      "run": "41480189296.1",
+      "results": [
+        {
+          "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Segment/3/real_time",
+          "value": 17104.435439306562,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            17104.435439306562
+          ],
+          "records": [
+            {
+              "name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Segment/3/real_time",
+              "family_index": 28,
+              "per_family_instance_index": 0,
+              "run_name": "CoupledReactionDiffusion/Assembly/H1/P2/Complex/Segment/3/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 16287,
+              "real_time": 17104.435439306562,
+              "cpu_time": 17104.031865905756,
+              "time_unit": "ns",
+              "cells": 2.0,
+              "degree": 2.0,
+              "diffusion_terms": 2.0,
+              "dimension": 1.0,
+              "fields": 2.0,
+              "local_basis_per_field": 3.0,
+              "local_entries_per_operator_term": 18.0,
+              "nnz": 32.0,
+              "omitted_coupling_normalized_residual": 1.0000000000000018,
+              "quadrature_order": 16.0,
+              "quadrature_points_per_cell": 9.0,
+              "reaction_terms": 4.0,
+              "relative_load_error": 0.0,
+              "relative_matrix_error": 7.424105178489466e-20,
+              "relative_residual": 1.7963185556001877e-16,
+              "rows": 10.0,
+              "scalar_bytes": 16.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-02T19:35:30+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinCoupledReactionDiffusionAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3244,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.0459,
+              0.358887,
+              0.128906
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "Warmed full coupled reaction-diffusion assembly"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

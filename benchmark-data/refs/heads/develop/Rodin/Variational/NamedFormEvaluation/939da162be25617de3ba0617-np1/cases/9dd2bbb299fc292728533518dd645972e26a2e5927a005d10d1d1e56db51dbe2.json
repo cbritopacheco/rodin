@@ -274,6 +274,96 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9bc17fdd6181661cbe3fca442e89b1d37f2e33d8",
+      "date": "2026-11-03T05:38:17.973890+00:00",
+      "run": "41480189296.1",
+      "results": [
+        {
+          "name": "NamedEvaluation/P2/Mass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+          "value": 1.571987685393259,
+          "unit": "ms",
+          "metric": "cpu_time",
+          "samples": [
+            1.571987685393259
+          ],
+          "records": [
+            {
+              "name": "NamedEvaluation/P2/Mass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+              "family_index": 23,
+              "per_family_instance_index": 1,
+              "run_name": "NamedEvaluation/P2/Mass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 178,
+              "real_time": 1.5721577640450055,
+              "cpu_time": 1.571987685393259,
+              "time_unit": "ms",
+              "cells": 384.0,
+              "coefficient_degree": 2.0,
+              "cold_geometry": 0.0,
+              "components": 1.0,
+              "dimension": 3.0,
+              "dofs": 729.0,
+              "field_degree": 2.0,
+              "gradient_points_per_cell": 0.0,
+              "local_dofs": 10.0,
+              "mass_points_per_cell": 23.0,
+              "named_nonzeros": 17025.0,
+              "nonzeros": 17025.0,
+              "paused_timing": 0.0,
+              "relative_error": 7.902881025710174e-17,
+              "scatter_slots": 38400.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-02T20:18:53+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinNamedFormBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2445,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.07422,
+              0.392578,
+              0.151855
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

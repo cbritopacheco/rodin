@@ -268,6 +268,94 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9bc17fdd6181661cbe3fca442e89b1d37f2e33d8",
+      "date": "2026-11-03T05:38:17.973890+00:00",
+      "run": "41480189296.1",
+      "results": [
+        {
+          "name": "FieldDerivative/Gradient/Provenance/H1/P3/Complex/Wedge/16/real_time",
+          "value": 1024614.1824817033,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            1024614.1824817033
+          ],
+          "records": [
+            {
+              "name": "FieldDerivative/Gradient/Provenance/H1/P3/Complex/Wedge/16/real_time",
+              "family_index": 85,
+              "per_family_instance_index": 2,
+              "run_name": "FieldDerivative/Gradient/Provenance/H1/P3/Complex/Wedge/16/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 274,
+              "real_time": 1024614.1824817033,
+              "cpu_time": 1024585.4014598357,
+              "time_unit": "ns",
+              "cells": 1.0,
+              "checksum_imag": 2616.3121409108467,
+              "checksum_real": 5232.624281821693,
+              "degree": 3.0,
+              "dimension": 3.0,
+              "global_dofs": 64.0,
+              "point_evaluations": 477.0,
+              "quadrature_order": 16.0,
+              "relative_derivative_error": 1.176648860879764e-13,
+              "scalar_basis": 40.0,
+              "scalar_output_entries": 1431.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-02T20:34:43+00:00",
+            "host_name": "ip-10-0-128-105",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinFieldDerivativeBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3873,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 65536,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 2097152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 503316480,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.23926,
+              0.62793,
+              0.245117
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "One-cell public field differential; warmed maps/tables"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

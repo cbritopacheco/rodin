@@ -286,6 +286,100 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9bc17fdd6181661cbe3fca442e89b1d37f2e33d8",
+      "date": "2026-11-03T05:38:17.973890+00:00",
+      "run": "41480189296.1",
+      "results": [
+        {
+          "name": "Stokes/Assembly/H1/P2P1/Real/Hexahedron/5/real_time",
+          "value": 102704183.66666926,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            102704183.66666926
+          ],
+          "records": [
+            {
+              "name": "Stokes/Assembly/H1/P2P1/Real/Hexahedron/5/real_time",
+              "family_index": 0,
+              "per_family_instance_index": 0,
+              "run_name": "Stokes/Assembly/H1/P2P1/Real/Hexahedron/5/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 3,
+              "real_time": 102704183.66666926,
+              "cpu_time": 102704414.33333333,
+              "time_unit": "ns",
+              "cells": 64.0,
+              "dimension": 3.0,
+              "explicit_unit_viscosity": 0.0,
+              "mean_dofs": 1.0,
+              "nnz": 67387.0,
+              "pressure_degree": 1.0,
+              "pressure_dofs": 125.0,
+              "quadrature_order": 16.0,
+              "quadrature_points_per_cell": 729.0,
+              "relative_missing_pressure_load_residual": 0.9999999999999123,
+              "relative_missing_pressure_residual": 0.003815564133974413,
+              "relative_patch_residual": 5.458263029573714e-16,
+              "relative_pressure_control_error": 5.455761699790317e-16,
+              "rows": 2313.0,
+              "velocity_degree": 2.0,
+              "velocity_dofs": 2187.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-02T19:46:20+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinStokesAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3242,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.28174,
+              0.541992,
+              0.203613
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "Public mixed Stokes assembly, constraints and completion"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

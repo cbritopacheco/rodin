@@ -274,6 +274,96 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9bc17fdd6181661cbe3fca442e89b1d37f2e33d8",
+      "date": "2026-11-03T05:38:17.973890+00:00",
+      "run": "41480189296.1",
+      "results": [
+        {
+          "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/2/16/real_time",
+          "value": 25.70865581136767,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            25.70865581136767
+          ],
+          "records": [
+            {
+              "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/2/16/real_time",
+              "family_index": 0,
+              "per_family_instance_index": 7,
+              "run_name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/2/16/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 10657961,
+              "real_time": 25.70865581136767,
+              "cpu_time": 25.708654122491144,
+              "time_unit": "ns",
+              "basis_functions": 2.0,
+              "contraction_products": 0.0,
+              "embedding_dimension": 2.0,
+              "jacobian_output_payload_bytes": 720.0,
+              "output_entries": 18.0,
+              "point_constructions": 9.0,
+              "point_size_bytes": 320.0,
+              "prepared_jacobian_count": 9.0,
+              "quadrature_order": 16.0,
+              "quadrature_points": 9.0,
+              "reference_dimension": 1.0,
+              "reference_table_payload_bytes": 288.0,
+              "retained_point_capacity": 9.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-02T17:36:32+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinBulkP1JacobianBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 4014,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.787109,
+              0.289551,
+              0.11084
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "geometry_element": "Native P1, not H1<1>"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

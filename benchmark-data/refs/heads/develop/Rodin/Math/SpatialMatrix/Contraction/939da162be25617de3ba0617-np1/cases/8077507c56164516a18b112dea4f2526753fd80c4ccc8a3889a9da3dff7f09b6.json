@@ -250,6 +250,88 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9bc17fdd6181661cbe3fca442e89b1d37f2e33d8",
+      "date": "2026-11-03T05:38:17.973890+00:00",
+      "run": "41480189296.1",
+      "results": [
+        {
+          "name": "SpatialMatrixContraction/PairBatch/Original/ComplexComplex/1/3/30/real_time",
+          "value": 3301.3381630504086,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            3301.3381630504086
+          ],
+          "records": [
+            {
+              "name": "SpatialMatrixContraction/PairBatch/Original/ComplexComplex/1/3/30/real_time",
+              "family_index": 4,
+              "per_family_instance_index": 23,
+              "run_name": "SpatialMatrixContraction/PairBatch/Original/ComplexComplex/1/3/30/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 84477,
+              "real_time": 3301.3381630504086,
+              "cpu_time": 3301.0064869727476,
+              "time_unit": "ns",
+              "columns": 3.0,
+              "entries_per_pair": 3.0,
+              "items_per_second": 272616725.5669463,
+              "pairs": 900.0,
+              "rows": 1.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-02T17:18:38+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinSpatialMatrixContractionBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2596,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.655762,
+              0.194824,
+              0.0673828
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "Conjugating matrix product; weighted pair batches include zeroing"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

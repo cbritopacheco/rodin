@@ -286,6 +286,100 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9bc17fdd6181661cbe3fca442e89b1d37f2e33d8",
+      "date": "2026-11-03T05:38:17.973890+00:00",
+      "run": "41480189296.1",
+      "results": [
+        {
+          "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Segment/5/real_time",
+          "value": 13517.72825616597,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            13517.72825616597
+          ],
+          "records": [
+            {
+              "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Segment/5/real_time",
+              "family_index": 28,
+              "per_family_instance_index": 1,
+              "run_name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Segment/5/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 20799,
+              "real_time": 13517.72825616597,
+              "cpu_time": 13517.711380354773,
+              "time_unit": "ns",
+              "cells": 4.0,
+              "degree": 3.0,
+              "dimension": 1.0,
+              "imaginary_diagonal_sum": 0.0,
+              "local_basis_per_cell": 4.0,
+              "local_entries_per_operator_term": 64.0,
+              "mass_imaginary": 0.0,
+              "mass_real": -0.25,
+              "nnz": 49.0,
+              "quadrature_order": 12.0,
+              "quadrature_points_per_cell": 7.0,
+              "relative_load_error": 0.0,
+              "relative_matrix_error": 0.0,
+              "relative_residual": 8.816285914775302e-16,
+              "rows": 13.0,
+              "scalar_bytes": 16.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-02T19:30:14+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinHelmholtzAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3247,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.43701,
+              0.530762,
+              0.192383
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "Warmed full Helmholtz problem assembly"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",
