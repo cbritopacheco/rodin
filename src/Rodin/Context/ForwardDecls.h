@@ -23,6 +23,8 @@ namespace Rodin::Context
 
   class CUDA;
 
+  class HIP;
+
   template <class Distribution, class Backend>
   class Kokkos;
 

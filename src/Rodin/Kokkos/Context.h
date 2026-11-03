@@ -13,6 +13,7 @@
  */
 
 #include "Context/CUDA.h"
+#include "Context/HIP.h"
 #include "Context/Kokkos.h"
 
 #endif

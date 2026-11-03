@@ -41,8 +41,11 @@ namespace Rodin::Examples
 {
   using namespace Rodin::Variational;
 
-#ifdef KOKKOS_ENABLE_CUDA
+#if defined(KOKKOS_ENABLE_CUDA)
   using Backend = Context::CUDA;
+
+#elif defined(KOKKOS_ENABLE_HIP)
+  using Backend = Context::HIP;
 #else
   using Backend = ::Kokkos::DefaultHostExecutionSpace;
 #endif

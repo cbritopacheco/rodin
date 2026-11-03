@@ -31,8 +31,11 @@
 #include <Rodin/Kokkos.h>
 #include <Rodin/Kokkos/Solver/BoomerAMG.h>
 
-#ifdef KOKKOS_ENABLE_CUDA
+#if defined(KOKKOS_ENABLE_CUDA)
 using Backend = Rodin::Context::CUDA;
+
+#elif defined(KOKKOS_ENABLE_HIP)
+using Backend = Rodin::Context::HIP;
 #else
 using Backend = ::Kokkos::DefaultHostExecutionSpace;
 #endif

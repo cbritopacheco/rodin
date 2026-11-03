@@ -9,7 +9,7 @@
 
 /**
  * @file
- * @brief Selects the real CUDA backend when enabled and explicit host validation otherwise.
+ * @brief Selects the real CUDA or HIP backend when enabled and explicit host validation otherwise.
  */
 
 #include <Rodin/Kokkos/Context.h>
@@ -19,6 +19,8 @@ namespace Rodin::Tests::Unit
 {
 #ifdef KOKKOS_ENABLE_CUDA
   using TestBackend = Context::CUDA;
+#elif defined(KOKKOS_ENABLE_HIP)
+  using TestBackend = Context::HIP;
 #else
   using TestBackend = ::Kokkos::DefaultHostExecutionSpace;
 #endif

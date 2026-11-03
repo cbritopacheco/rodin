@@ -38,9 +38,10 @@ because the primary template compiles.
 | Kokkos | `Context::Kokkos<Context::Local, Backend>` | MeshBase and ConnectivityBase specializations with resident arrays, coordinate/attribute/map updates, device traversal and geometry, quadrature measure reductions, indexed assembly region traversal, host compatibility adapters |
 
 The optional `Rodin::Kokkos` target requires `RODIN_USE_KOKKOS=ON` and an
-external Kokkos installation (4.2 or newer). `Context::CUDA` requires Kokkos built with CUDA;
-there is no implicit host fallback. Native execution spaces can exercise the
-same specialization on the host without establishing CUDA correctness.
+external Kokkos installation (4.2 or newer; validated with 5.2.2). `Context::CUDA` requires
+Kokkos built with CUDA and `Context::HIP` Kokkos built with HIP; there is no
+implicit host fallback. Native execution spaces can exercise the same
+specialization on the host without establishing device correctness.
 
 The mesh derives directly from MeshBase and retains no LocalMesh. Temporary
 host builders/loaders create independently owned Kokkos arrays. Reference-
@@ -120,6 +121,28 @@ imposes constraints that host Kokkos backends do not detect:
   integrator kernels does the same.
 - A Kokkos change is CUDA-verified only after building and running the Kokkos
   tests with a CUDA-enabled Kokkos installation.
+
+In HIP builds, the ROCm `clang++` compiles Rodin and the Kokkos target adds
+`-xhip` to the targets linking it, as the Kokkos launcher hands only those to
+`nvcc_wrapper` under CUDA. Configuring with `hipcc` compiles the host-only core
+as HIP too, where `constexpr` functions calling host code and Eigen
+`long double` math fail. Clang enforces rules that GCC and NVCC let pass:
+
+- A partial specialization that refines a core specialization through a
+  `requires` clause, such as the device `Integral<Dot<...>>`, declares its
+  template parameters in the order of the core one. Clang orders partial
+  specializations by their constraints only when their template parameter
+  lists are equivalent, and otherwise reports them ambiguous.
+- `-Wunused-lambda-capture` is an error. A capture used only in one branch of
+  an `if constexpr` is discarded explicitly in the other branch, and a member
+  called from a generic lambda capturing `this` is named `this->template f<T>`.
+- With the ROCm `clang++`, `FindOpenMP` resolves the ROCm libomp. Under
+  `hipcc` it returns `-fopenmp=libomp` without a library and the links miss
+  libomp.
+- `Kokkos::Internal::checkLaunches()` reads `hipGetLastError()` as it reads
+  `cudaGetLastError()` under CUDA.
+- A Kokkos change is HIP-verified only after building and running the Kokkos
+  tests with a HIP-enabled Kokkos installation.
 
 ## Common extension decisions
 

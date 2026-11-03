@@ -16,8 +16,10 @@ namespace Rodin::Tests::Unit
   static_assert(std::is_same_v<TestContext::DistributionType, Context::Local>);
   static_assert(std::is_same_v<TestContext::BackendType, TestBackend>);
   static_assert(std::is_same_v<TestMemorySpace, TestExecutionSpace::memory_space>);
-#ifdef KOKKOS_ENABLE_CUDA
+#if defined(KOKKOS_ENABLE_CUDA)
   static_assert(std::is_same_v<TestExecutionSpace, ::Kokkos::Cuda>);
+#elif defined(KOKKOS_ENABLE_HIP)
+  static_assert(std::is_same_v<TestExecutionSpace, ::Kokkos::HIP>);
 #endif
 
   /// @brief A copied context retains a usable local execution association.

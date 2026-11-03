@@ -2407,7 +2407,7 @@ namespace Rodin::Variational
    * for device trial and test spaces on a resident Kokkos mesh, as described in
    * Rodin::Kokkos::Variational::DeviceBilinearIntegral.
    */
-  template <class LHSDerived, class RHSDerived, class TrialFES, class TestFES>
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
     requires Rodin::Kokkos::Variational::DeviceSpace<TrialFES> &&
     Rodin::Kokkos::Variational::DeviceSpace<TestFES>
   class Integral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
@@ -2576,7 +2576,7 @@ namespace Rodin::Variational
    * for device trial and test spaces on a resident Kokkos mesh, as described in
    * Rodin::Kokkos::Variational::DeviceBilinearIntegral.
    */
-  template <class LHSDerived, class RHSDerived, class TrialFES, class TestFES>
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
     requires Rodin::Kokkos::Variational::DeviceSpace<TrialFES> &&
     Rodin::Kokkos::Variational::DeviceSpace<TestFES>
   class BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
@@ -2745,7 +2745,7 @@ namespace Rodin::Variational
    * for device trial and test spaces on a resident Kokkos mesh, as described in
    * Rodin::Kokkos::Variational::DeviceBilinearIntegral.
    */
-  template <class LHSDerived, class RHSDerived, class TrialFES, class TestFES>
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
     requires Rodin::Kokkos::Variational::DeviceSpace<TrialFES> &&
     Rodin::Kokkos::Variational::DeviceSpace<TestFES>
   class FaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
@@ -2914,7 +2914,7 @@ namespace Rodin::Variational
    * for device trial and test spaces on a resident Kokkos mesh, as described in
    * Rodin::Kokkos::Variational::DeviceBilinearIntegral.
    */
-  template <class LHSDerived, class RHSDerived, class TrialFES, class TestFES>
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
     requires Rodin::Kokkos::Variational::DeviceSpace<TrialFES> &&
     Rodin::Kokkos::Variational::DeviceSpace<TestFES>
   class InterfaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,

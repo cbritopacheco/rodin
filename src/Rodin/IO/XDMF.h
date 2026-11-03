@@ -930,6 +930,12 @@ namespace Rodin::IO
         }
         return;
       }
+      else
+      {
+        // The host copy of the mesh is only needed by device fields.
+        static_cast<void>(owner);
+        static_cast<void>(index);
+      }
       switch (center)
       {
         case Center::Node:

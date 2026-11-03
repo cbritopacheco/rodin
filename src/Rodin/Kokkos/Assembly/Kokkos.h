@@ -1658,7 +1658,7 @@ namespace Rodin::Assembly::Internal
         // A sequence of systems with one pattern keeps its arrays.
         const auto reuse = [this](const auto& a, size_t size, const char* label) {
           using T = typename std::decay_t<decltype(a)>::value_type;
-          return a.extent(0) == size ? a : allocate<T>(size, label);
+          return a.extent(0) == size ? a : this->template allocate<T>(size, label);
         };
         const auto starts =
           reuse(A.getRowStarts(), m_rows + 1, "Rodin matrix row starts");

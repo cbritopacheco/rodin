@@ -12,7 +12,8 @@
   for `Context::Kokkos<Context::Local, Backend>`. The mesh derives directly
   from `Geometry::MeshBase`; its topology, coordinates, optional attributes,
   and geometric maps live in the selected Kokkos memory space. The CUDA tag
-  selects `::Kokkos::Cuda` and its device memory. A native Kokkos execution
+  selects `::Kokkos::Cuda` and its device memory, and the HIP tag selects
+  `::Kokkos::HIP` and its device memory. A native Kokkos execution
   space, such as `::Kokkos::Serial`, selects that execution space explicitly.
 
   There is no persistent CPU mesh and no separate publication step. File
@@ -284,7 +285,8 @@
 
   @section guides-kokkos-build CUDA Build
 
-  Kokkos 4.2 or newer is required for comparator-based device sorting.
+  Kokkos 4.2 or newer is required for comparator-based device sorting; Rodin
+  is validated with Kokkos 5.2.2.
   Build and install Kokkos separately with CUDA enabled and an architecture
   matching the target GPU. This example selects an Ampere compute-capability
   8.0 target; substitute the appropriate Kokkos architecture option for the
@@ -297,7 +299,8 @@
     -DCMAKE_CXX_STANDARD=20 \
     -DKokkos_ENABLE_CUDA=ON \
     -DKokkos_ENABLE_SERIAL=ON \
-    -DKokkos_ARCH_AMPERE80=ON
+    -DKokkos_ARCH_AMPERE80=ON \
+    -DCUDAToolkit_ROOT=/usr/local/cuda
   cmake --build /path/to/kokkos-build --parallel
   cmake --install /path/to/kokkos-build
 
@@ -326,6 +329,12 @@
   translation unit through NVCC. A Kokkos build without CUDA cannot
   instantiate the CUDA context and never substitutes CPU execution.
 
+  When several CUDA toolkits are installed, `CUDAToolkit_ROOT` must name the
+  toolkit of the `nvcc` that compiles Kokkos: CMake otherwise links the CUDA
+  runtime of the system directories, whose `cudaDeviceProp` layout may differ
+  from the headers, and every kernel launch then fails with a zero block size.
+  Check that `libkokkoscore` links the `libcudart` of that toolkit.
+
   Place `using namespace Rodin;` inside a function, as in the examples, not
   at namespace scope. Rodin has its own `Rodin::Kokkos` namespace, and a
   directive at global scope makes the name `Kokkos` ambiguous at global
@@ -345,6 +354,47 @@
   [source-build instructions](https://kokkos.org/kokkos-core-wiki/get-started/building-from-source.html)
   for compiler and architecture requirements.
 
+  @section guides-kokkos-build-hip HIP Build
+
+  Build Kokkos with HIP enabled and the architecture of the target GPU, here
+  an RDNA4 `gfx1201`, with `hipcc` as compiler. Rodin is then configured with
+  the `clang++` of ROCm. The Kokkos target adds `-xhip` and the offload
+  architecture to the targets that link it, so only the Kokkos module and its
+  consumers are compiled for the device. Configuring Rodin with `hipcc`
+  instead compiles every translation unit as HIP: the host-only core then
+  fails on `constexpr` functions that call host code, and Eigen
+  `long double` calls become ambiguous with the device math overloads.
+
+  @code{.bash}
+  cmake -S /path/to/kokkos -B /path/to/kokkos-build \
+    -DCMAKE_INSTALL_PREFIX=/path/to/kokkos-install \
+    -DCMAKE_CXX_COMPILER=/opt/rocm/bin/hipcc \
+    -DCMAKE_PREFIX_PATH=/opt/rocm \
+    -DCMAKE_CXX_STANDARD=20 \
+    -DKokkos_ENABLE_HIP=ON \
+    -DKokkos_ENABLE_SERIAL=ON \
+    -DKokkos_ARCH_AMD_GFX1201=ON
+  cmake --build /path/to/kokkos-build --parallel
+  cmake --install /path/to/kokkos-build
+
+  cmake -S . -B build-kokkos-hip -G Ninja \
+    -DCMAKE_CXX_COMPILER=/opt/rocm/lib/llvm/bin/clang++ \
+    -DCMAKE_C_COMPILER=/opt/rocm/lib/llvm/bin/clang \
+    -DCMAKE_PREFIX_PATH="/opt/rocm;/path/to/kokkos-install" \
+    -DRODIN_USE_KOKKOS=ON \
+    -DRODIN_BUILD_UNIT_TESTS=ON
+  @endcode
+
+  With the ROCm `clang++`, `FindOpenMP` resolves the libomp of ROCm by itself;
+  under `hipcc` it returns the flag without the library and the links fail.
+  A PETSc built for HIP (`--with-hip --with-hip-arch=gfx1201
+  --with-kokkos-dir=...`) provides
+  Kokkos-Kernels and hypre as on CUDA. Kokkos-Kernels 5.2.2 still names
+  `rocsparse_indextype_u16`, which rocSPARSE no longer declares from ROCm 10:
+  remove that branch of `rocsparse_index_type()` in
+  `sparse/src/KokkosSparse_Utils_rocsparse.hpp` and hand PETSc the patched
+  sources with `--download-kokkos-kernels=/path/to/kokkos-kernels.tar.gz`.
+
   Installed consumers enable the same compiler setup and link the module:
 
   @code{.cmake}
@@ -355,7 +405,7 @@
 
   @section guides-kokkos-validation Validation
 
-  Tests select CUDA when Kokkos has CUDA enabled. Otherwise they explicitly
+  Tests select CUDA or HIP when Kokkos has that backend enabled. Otherwise they explicitly
   select the default host execution space and exercise the same specialization.
   They compare all reference geometries and embeddings with LocalMesh,
   topology and attributes, resident updates, copy independence, lifetime,
@@ -367,6 +417,6 @@
   nonmanifold adjacency, including explicit incidence requirements and empty
   selections. A Threads
   build can exercise the same kernels concurrently on the host. Passing host tests does not
-  certify CUDA compilation, device execution or GPU performance; those require
-  a CUDA toolchain and compatible hardware.
+  certify CUDA or HIP compilation, device execution or GPU performance; those
+  require the device toolchain and compatible hardware.
 */

@@ -284,8 +284,10 @@ namespace Rodin::Kokkos::Internal
    */
   inline void clearLaunches()
   {
-#ifdef KOKKOS_ENABLE_CUDA
+#if defined(KOKKOS_ENABLE_CUDA)
     static_cast<void>(cudaGetLastError());
+#elif defined(KOKKOS_ENABLE_HIP)
+    static_cast<void>(hipGetLastError());
 #endif
   }
 
@@ -301,11 +303,18 @@ namespace Rodin::Kokkos::Internal
    */
   inline void checkLaunches(const char* what)
   {
-#ifdef KOKKOS_ENABLE_CUDA
+#if defined(KOKKOS_ENABLE_CUDA)
     const cudaError_t error = cudaGetLastError();
     if (error != cudaSuccess)
     {
       Alert::Exception() << what << " failed to launch: " << cudaGetErrorString(error)
+                         << Alert::Raise;
+    }
+#elif defined(KOKKOS_ENABLE_HIP)
+    const hipError_t error = hipGetLastError();
+    if (error != hipSuccess)
+    {
+      Alert::Exception() << what << " failed to launch: " << hipGetErrorString(error)
                          << Alert::Raise;
     }
 #else
