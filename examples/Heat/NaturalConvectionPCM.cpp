@@ -35,6 +35,13 @@
 // of the current Newton iterate (group finite elements), refreshed by the SNES
 // state update before each assembly.
 //
+// Energy conservation. Advection is in conservative form, div(H u) =
+// H'(T) u.grad T + H(T) div u: the discrete u is only weakly divergence-free
+// (P1/P1 + PSPG) and H carries the latent heat (~1e8 J/m^3), so H'(T) u.grad T
+// alone made int div(H u) != 0 and lost 7-18% of the energy entering during
+// melting with convection (the version of 8 Oct 2026 too). H is referred to
+// its liquid value H(T_high) there.
+//
 // Phase-change truncation. H is convex at T_s and concave at T_l, so a plain
 // Newton step taken from the solid (slope rho c_p, no latent heat) overshoots
 // to the liquid, and from there back to the solid: the iteration cycles and no
@@ -1001,6 +1008,11 @@ namespace Rodin::Examples::Heat
         const auto cdA = RealFunction([&m, &Tq, darcy](const Point& p) {
           return darcy == 0 ? m.dA(Tq.getValue(p)) : 0.0; });
         const auto cH1 = atT(&PCM::dH), cH2 = atT(&PCM::d2H);
+        // H - H(T_high) in the conservative term: any constant keeps
+        // int div((H - c) u) = 0; referred to the liquid, where u != 0, it is
+        // the sensible part only (u ~ 0 in the mush and solid by Darcy).
+        const Real Href = m.H(m.Thigh());
+        const auto cH0 = RealFunction([&m, &Tq, Href](const Point& p) { return m.H(Tq.getValue(p)) - Href; });
         const auto cK = atT(&PCM::kappa), cdK = atT(&PCM::dKappa);
         const Real aWall = m.C / m.eps, kAl = m_cfg.alK;  // plates: Darcy of the solid PCM
 
@@ -1045,6 +1057,8 @@ namespace Rodin::Examples::Heat
             // ---- Jacobian: energy ----------------------------------------
             + Integral(cH1 * dAdvT, m_w).over(PCM)  // M_L H'(T)/dt: added in jacobian()
             + Integral(cH2 * advT * dT, m_w).over(PCM)  // H''(T) dT u.grad T
+            + Integral(cH1 * Div(U) * dT, m_w).over(PCM)    // conservative form:
+            + Integral(Div(du), cH0 * m_w).over(PCM)        //   H(T) div u
             + Integral(m_rhoCpTauT * dAdvT, streamW).over(PCM)
             + Integral(cK * Grad(dT), Grad(m_w)).over(PCM)
             + kAl * Integral(Grad(dT), Grad(m_w)).over(AL)
@@ -1070,6 +1084,7 @@ namespace Rodin::Examples::Heat
 
             // ---- Residual: energy ----------------------------------------
             + Integral(cH1 * advT, m_w).over(PCM)   // dH/dt: lumped, added in residual()
+            + Integral(cH0 * Div(U), m_w).over(PCM) // div(H u) = u.grad H + H div u
             + Integral(m_rhoCpTauT * (advT - m_piAdv.get()), streamW).over(PCM)
             + Integral(cK * Grad(Th), Grad(m_w)).over(PCM)
             + kAl * Integral(Dot(Grad(Th), Grad(m_w))).over(AL)

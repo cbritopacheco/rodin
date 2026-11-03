@@ -8,6 +8,7 @@ the last simulated day (periodic regime) and writes to OUT/post:
   resumen_espesor.png       peaks, daily energies, lag and melting vs thickness
   fraccion_liquida.png      mean liquid fraction over the day
   T_contornos_e_XXmm.png    temperature at several hours (+ melt front Y = 0.5)
+  perfiles_T.png/.csv       T(y) at mid-slope at the same hours, one panel per thickness
 
 Sign convention (W/m^2 of roof): q_top > 0 enters the PCM through the roof
 surface, q_bottom > 0 leaves the PCM into the attic, q_ceiling > 0 enters the
@@ -98,6 +99,7 @@ def analyse(d, info):
         "h_qCeiling_max": h[ic],
         "E_vivienda_pos": energy(t, qc, True),
         "E_vivienda_neto": energy(t, qc),
+        "E_almacenada": energy(t, qt) - energy(t, qb),
         "desfase_h": h[ib] - h[it],
         "Tsup_max": float(d["topT_C"][m].max()),
         "Tinf_max": float(d["bottomT_C"][m].max()),
@@ -129,6 +131,7 @@ COLUMNS = [
     ("qBottom_medio", "q_inf medio [W/m2]", "%.1f"),
     ("E_atico_pos", "E al entretecho [Wh/m2]", "%.0f"),
     ("E_atico_neto", "E neta entretecho [Wh/m2]", "%.0f"),
+    ("E_almacenada", "E almacenada = E_sup - E_inf [Wh/m2]", "%.0f"),
     ("qCeiling_max", "q_cielo max [W/m2]", "%.2f"),
     ("E_vivienda_pos", "E a vivienda [Wh/m2]", "%.1f"),
     ("desfase_h", "desfase [h]", "%.1f"),
@@ -155,7 +158,9 @@ def write_summary(rows, out):
         "",
         "q_sup > 0: entra al PCM por el techo; q_inf > 0: sale del PCM al entretecho; "
         "q_cielo > 0: entra a la vivienda por el cielo. Energias por m2 de techo y dia. "
-        "Desfase: hora del maximo de q_inf menos hora del maximo de q_sup.",
+        "Desfase: hora del maximo de q_inf menos hora del maximo de q_sup. "
+        "E_sup - E_inf es la energia que queda almacenada en el dia (Al + PCM, sensible "
+        "y latente); en regimen periodico (cambio dia-1 ~ 0) debe ser ~0.",
         "",
         "| " + " | ".join(c[1] for c in COLUMNS) + " | reduccion pico vs %g mm |" % rows[0]["e_mm"],
         "|" + "---|" * (len(COLUMNS) + 1),
@@ -378,6 +383,70 @@ def plot_contours(case_dir, r, nd, hours, out):
     plt.close(fig)
 
 
+def profiles(case_dir, r, nd, hours):
+    """T(y) at mid-slope (x = L/2) at the given solar hours of the last day."""
+    xdmf = os.path.join(case_dir, "NaturalConvectionPCM.xdmf")
+    if not os.path.exists(xdmf):
+        return None
+    base, steps = read_xdmf(xdmf)
+    times = np.array([s[0] for s in steps])
+    t0 = (nd - 1) * DAY
+    out = []
+    for hh in hours:
+        k = int(np.argmin(np.abs(times - (t0 + hh * 3600.0))))
+        xy, tri, f = load_step(base, steps[k][1])
+        xm = 0.5 * (xy[:, 0].min() + xy[:, 0].max())
+        xs = np.unique(np.round(xy[:, 0], 9))
+        xc = xs[np.argmin(np.abs(xs - xm))]
+        sel = np.abs(xy[:, 0] - xc) < 1e-9
+        y = xy[sel, 1] * 1e3
+        o = np.argsort(y)
+        y, idx = np.unique(y[o], return_index=True)
+        T = (f["temperature"][sel][o] - 273.15)[idx]
+        Y = f["liquid_fraction"][sel][o][idx] if "liquid_fraction" in f else np.full_like(T, np.nan)
+        out.append((hh, (times[k] - t0) / 3600.0, y, T, Y))
+    return out
+
+
+def plot_profiles(cases, hours, out):
+    """One panel per thickness: T(y) at mid-slope at several hours; plates shaded."""
+    data = [(r, profiles(r["_dir"], r, r["dias"], hours)) for r, *_ in cases]
+    data = [(r, p) for r, p in data if p]
+    if not data:
+        return
+    n = len(data)
+    fig, ax = plt.subplots(1, n, figsize=(2.6 * n + 1.2, 4.6), sharex=True, squeeze=False)
+    ax = ax[0]
+    cmap = plt.get_cmap("plasma")
+    rows = []
+    for a, (r, prof) in zip(ax, data):
+        al, e = r.get("al_mm", 0.0), r["e_mm"]
+        if al > 0:
+            a.axhspan(0, al, color="0.85", lw=0)
+            a.axhspan(al + e, 2 * al + e, color="0.85", lw=0)
+        for k, (hh, ht, y, T, Y) in enumerate(prof):
+            a.plot(T, y, color=cmap(0.1 + 0.8 * k / max(len(prof) - 1, 1)), lw=1.5,
+                   label="%02d:%02d" % (int(ht), int(round((ht % 1) * 60))))
+            for yi, Ti, Yi in zip(y, T, Y):
+                rows.append((e, ht, yi, Ti, Yi))
+        a.set_title("PCM %g mm" % e, fontsize=9)
+        a.set_ylim(0, 2 * al + e)
+        a.set_xlabel("T [$^\\circ$C]")
+        a.grid(True, alpha=0.25)
+    ax[0].set_ylabel("y desde la cara inferior [mm]")
+    ax[-1].legend(title="hora solar", fontsize=7, title_fontsize=7, loc="best")
+    fig.suptitle("Perfiles de temperatura a mitad de la pendiente, ultimo dia (gris: placas de Al)",
+                 fontsize=10)
+    fig.tight_layout()
+    fig.savefig(os.path.join(out, "perfiles_T.png"))
+    plt.close(fig)
+    with open(os.path.join(out, "perfiles_T.csv"), "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["e_mm", "hora_solar", "y_mm", "T_C", "Y"])
+        for row in rows:
+            w.writerow(["%g" % row[0], "%.3f" % row[1], "%.4f" % row[2], "%.4f" % row[3], "%.4f" % row[4]])
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("out", nargs="?", default="pcm_runs")
@@ -419,6 +488,7 @@ def main():
     plot_fluxes(cases, post)
     plot_vs_thickness(rows, post)
     plot_liquid(cases, post)
+    plot_profiles(cases, a.hours, post)
 
     es = [r["e_mm"] for r in rows]
     if a.all_contours:
