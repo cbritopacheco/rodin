@@ -106,6 +106,33 @@ class EnvironmentTest(unittest.TestCase):
             self.assertEqual([call.args[0][0] for call in probe.call_args_list], ['gcc-14', 'g++-14'])
             cmake.assert_called_once_with(['cmake', '--version'], check=True, timeout=30)
 
+    def test_cmake_probe_retries_only_timeouts_before_exporting_compilers(self):
+        with tempfile.TemporaryDirectory() as folder, \
+                patch.dict(os.environ, GITHUB_ENV=str(Path(folder) / 'environment')), \
+                patch.object(environment.subprocess, 'check_output', return_value='14.2.0\n'), \
+                patch.object(environment.subprocess, 'run', side_effect=[
+                    subprocess.TimeoutExpired(['cmake', '--version'], 30),
+                    SimpleNamespace(returncode=0)]) as probe, \
+                patch.object(environment.time, 'sleep') as sleep:
+            environment.select_compiler('gcc-14')
+            self.assertEqual(probe.call_count, 2)
+            sleep.assert_called_once_with(2)
+            self.assertEqual(Path(os.environ['GITHUB_ENV']).read_text(), 'CC=gcc-14\nCXX=g++-14\n')
+
+    def test_cmake_probe_exhaustion_or_failed_exit_cannot_export_compilers(self):
+        for error in (subprocess.TimeoutExpired(['cmake', '--version'], 30),
+                      subprocess.CalledProcessError(1, ['cmake', '--version'])):
+            with self.subTest(error=error), tempfile.TemporaryDirectory() as folder, \
+                    patch.dict(os.environ, GITHUB_ENV=str(Path(folder) / 'environment')), \
+                    patch.object(environment.subprocess, 'check_output', return_value='14.2.0\n'), \
+                    patch.object(environment.subprocess, 'run', side_effect=error) as probe, \
+                    patch.object(environment.time, 'sleep') as sleep:
+                with self.assertRaises((RuntimeError, subprocess.CalledProcessError)):
+                    environment.select_compiler('gcc-14')
+                self.assertEqual(probe.call_count, 3 if isinstance(error, subprocess.TimeoutExpired) else 1)
+                self.assertEqual(sleep.call_count, 2 if isinstance(error, subprocess.TimeoutExpired) else 0)
+                self.assertFalse(Path(os.environ['GITHUB_ENV']).exists())
+
     def test_mismatched_or_missing_compilers_cannot_export_a_fallback(self):
         for versions in [['13.3.0', '13.3.0'], ['14.2.0', '14.3.0'], FileNotFoundError('g++-14')]:
             with self.subTest(versions=versions), tempfile.TemporaryDirectory() as folder, \

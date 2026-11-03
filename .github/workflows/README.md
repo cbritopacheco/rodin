@@ -112,6 +112,11 @@ Final installation is offline, allows no package removals and has a
 900-second budget; configuration failures are not retried as download failures.
 Exhausted mirrors fail the job rather than skip its tests.
 
+Compiler selection verifies matching GCC/G++ versions before exporting them.
+If `cmake --version` stalls, it retries up to three 30-second attempts with
+2- and 4-second delays. A nonzero exit fails immediately; exhausted timeouts
+fail before compiler variables are exported.
+
 Disk checks log available space and require **8 GiB of free headroom**. This is
 a conservative initial policy, not a measured peak for every hierarchy group.
 With sufficient space they do nothing. Otherwise, on GitHub-hosted runners only,
@@ -253,9 +258,10 @@ compatibility. Compilation stops at `Unit / Rodin / <Module>`,
 `Manufactured / Rodin / <Module>` and `Convergence / H`, `/ P`, `/ HP` or
 `/ Isoparametric`. Selected descendants normally share their group's single
 artifact; direct root targets retain a separate parent group. The optional
-Debug and Release builds with both sanitizers divide the oversized Variational
+Debug and Release builds with either sanitizer enabled divide the oversized Variational
 producer into numbered parts of at most 24 executables. Release previously lost
-its runner during compilation; Debug exhausted disk space during linking. Each
+its runner during compilation; Debug exhausted disk space with ASan alone and
+with both sanitizers. Each
 part restores the same common libraries, and dependent lanes wait for the group.
 
 The 3D P1 manufactured elasticity group runs tetrahedron, hexahedron, pyramid and

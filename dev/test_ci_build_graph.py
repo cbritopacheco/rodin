@@ -71,7 +71,8 @@ class BuildGraphPlanTest(unittest.TestCase):
             self.assertEqual(json.dumps(records, sort_keys=True), frozen)
 
     def test_oversized_optional_sanitizer_build_is_split_without_losing_targets(self):
-        for build_type, mt in itertools.product(['Debug', 'Release'], ['ON', 'OFF']):
+        for build_type, mt, (asan, ubsan) in itertools.product(
+                ['Debug', 'Release'], ['ON', 'OFF'], [('ON', 'OFF'), ('OFF', 'ON'), ('ON', 'ON')]):
             with tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
                 folder = root / 'tests/unit/Rodin/Variational'
@@ -80,7 +81,7 @@ class BuildGraphPlanTest(unittest.TestCase):
                 targets = [{'target': f'Target{i:03}', 'owner': 'tests/unit/Rodin/Variational',
                             'kind': 'test'} for i in range(133)]
                 first = planning.entry('unit', 'unit/Rodin/Variational', build_type, mt,
-                                       asan='ON', ubsan='ON', backend='optional')
+                                       asan=asan, ubsan=ubsan, backend='optional')
                 request = {'job': 'Ordinary', 'matrix': first}
                 entry = {'id': 'common', 'definition': graph.common_specification(graph.specification(**request))}
                 records = [{'request': request, 'selected': targets, 'configured': targets}]
