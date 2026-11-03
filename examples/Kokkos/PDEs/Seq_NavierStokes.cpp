@@ -20,9 +20,16 @@
  *   KokkosSeq_NavierStokes 20 33 -ksp_type fgmres -pc_type fieldsplit
  *     -pc_fieldsplit_type schur -pc_fieldsplit_schur_fact_type full
  *     -pc_fieldsplit_schur_precondition selfp
- *     -fieldsplit_u_pc_type gamg -fieldsplit_p_pc_type jacobi
+ *     -fieldsplit_u_ksp_type preonly -fieldsplit_u_pc_type gamg
+ *     -fieldsplit_p_pc_type jacobi -fieldsplit_p_ksp_rtol 1e-2
  *     -ksp_converged_reason
  * @endcode
+ * At such sizes the device time is the launch latency of small kernels, so
+ * the split keeps few nested iterations: one V-cycle for each velocity solve
+ * and a loose pressure solve, the outer FGMRES absorbing both. Solving the
+ * velocity to 1e-5 inside each Schur complement product makes about 15000
+ * V-cycles and 2 million launches for 5 steps at 149k unknowns, 3.6 times
+ * slower on an RTX 5090.
  */
 #include <chrono>
 #include <cmath>

@@ -1102,9 +1102,16 @@ contre manuel sont à 1e-15.
       chemin CUDA.
 - [ ] NavierStokes Kokkos sur HIP: brancher `RocSolverRF` comme `CuDSS`,
       la résolution hôte fait 98% du temps.
-- [ ] PETSc Navier-Stokes: 10.8 s sur la 5090 contre 6.1 s sur la 2080 Ti,
-      1.5 M lancements de noyaux sur zephyr; le split de Schur est dominé
-      par la latence.
+- [x] PETSc Navier-Stokes: 10.8 s sur la 5090 contre 6.1 s sur la 2080 Ti.
+      Ce n'est pas le GPU: les options documentées résolvent la vitesse à
+      1e-5 (GMRES et GAMG) dans chaque produit par le complément de Schur,
+      et le complément prend environ 130 itérations: 15000 V-cycles et
+      2 M lancements pour 5 pas (nsys: 2.5 µs de GPU et 3.2 µs de CPU par
+      noyau). Options de `Seq_NavierStokes.cpp` remplacées par un V-cycle par
+      résolution de vitesse (`-fieldsplit_u_ksp_type preonly`) et une
+      pression à 1e-2, FGMRES extérieur inchangé à 1e-8: 3.15 s sur la 5090
+      (61 itérations en 5 pas), 4.9 s sur la R9700. GAMG sur la pression ou
+      moins de niveaux de vitesse sont plus lents.
 - [ ] La préparation des intégrateurs est refaite à chaque assemblage
       (`prepare`, `DevicePolytopes::locate`, quadratures, attributs).
 - [ ] CantileverBeam: environ 90 s de temps hôte non attribué sur 111 s
