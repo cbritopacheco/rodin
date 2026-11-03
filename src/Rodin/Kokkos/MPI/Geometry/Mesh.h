@@ -141,6 +141,19 @@ namespace Rodin::Geometry
         return res;
       }
 
+      /**
+       * @brief Gets the revision of the entities and of their attributes.
+       *
+       * The entities are those of the resident shard, whose revision this
+       * forwards; the ownership is fixed when this mesh is built.
+       *
+       * @returns Revision of the resident shard.
+       */
+      std::uint64_t getRevision() const
+      {
+        return m_shard.getRevision();
+      }
+
       /// @param d Entity dimension. @param i Local entity index. @returns Whether this process owns the entity.
       bool isOwned(size_t d, Index i) const
       {
