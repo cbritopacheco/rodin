@@ -87,6 +87,8 @@ def execution_key(request, family):
     job, matrix = request['job'], request['matrix']
     selection = (matrix['group'] if job in ['Ordinary', 'ConvergenceBaseline'] else
                  graph.specification(job, matrix)['targets'])
+    if job == 'Ordinary' and matrix.get('partition'):
+        selection = [selection, matrix['partition']]
     return key('e', [job, family, selection])
 
 
@@ -222,7 +224,7 @@ def configuration_workflow(variant=None):
             job.update({'strategy': {'fail-fast': False, 'matrix': expression('fromJSON(needs.Common.outputs.' + identity + ')')},
                         'uses': './.github/workflows/TestGroup.yml',
                         'with': {k: expression('matrix.' + k) for k in ['family', 'backend', 'profile', 'group',
-                                 'build_type', 'multithreaded', 'asan', 'ubsan', 'id', 'name', 'baseline']}})
+                                 'build_type', 'multithreaded', 'asan', 'ubsan', 'id', 'name', 'baseline', 'partition']}})
         else:
             job.update({'uses': './.github/workflows/Test' + execution['job'] + '.yml',
                         'with': {'matrix': expression('needs.Common.outputs.' + identity)}})

@@ -47,14 +47,17 @@ flowchart LR
     b_3418b4119a4f13ce["Build / Unit / Rodin / Utility"]:::build
     b_53c1b5c7da997368["Build / Unit / Rodin / Variational"]:::build
     e_02ad63ad55a5966b["Manufactured / Rodin / Slow"]:::execution
+    e_0438e1d735b66d11["Manufactured / Rodin / P1 / LinearElasticity3D / Slow / Hexahedron"]:::execution
     e_0902c944445fce1e["Unit / Rodin / Variational / H1 / ShapeFunction / Backends / Baseline"]:::execution
+    e_0a7142552b7731b0["Manufactured / Rodin / P1 / LinearElasticity3D / Backends / Baseline / Wedge"]:::execution
     e_1e60a7246d24bcf4["Manufactured / Rodin / Backends / Baseline"]:::execution
     e_1fea204855efc00f["Unit / Rodin / MPI / Variational / Backends / Baseline"]:::execution
+    e_26efa33aa070421f["Manufactured / Rodin / P1 / LinearElasticity3D / Backends / Baseline / Pyramid"]:::execution
     e_2cc98b51c9d77f30["Unit / Rodin / PETSc / Backends / Baseline"]:::execution
     e_3b9348adab56cb6b["Manufactured / Rodin / P1 / Slow"]:::execution
     e_41b363ca687142b3["Manufactured / Rodin / H1 / Slow"]:::execution
     e_4a2b49e231129006["Unit / Rodin / MPI / Variational / Slow"]:::execution
-    e_4cca9a8538cc6aad["Manufactured / Rodin / P1 / LinearElasticity3D / Slow"]:::execution
+    e_4aedf2275356db84["Manufactured / Rodin / P1 / LinearElasticity3D / Slow / Tetrahedron"]:::execution
     e_58bfd15ee9417aa2["Manufactured / Rodin / H1 / Backends / Baseline"]:::execution
     e_680fee2db4506cf4["Unit / Rodin / Variational / MatrixQuadrature / Backends / Baseline"]:::execution
     e_6d8bcfd9c4246aac["Unit / Rodin / MPI / Assembly / Slow"]:::execution
@@ -63,20 +66,23 @@ flowchart LR
     e_98047d7208498759["Manufactured / Rodin / MPI / H1 / LinearElasticity / Slow"]:::execution
     e_9c68bf931a59a45f["Unit / Rodin / PETSc / Slow"]:::execution
     e_ab3f31961e0632cc["Unit / Rodin / Variational / QuadratureExpression / Backends / Baseline"]:::execution
+    e_b1c9dda0fed5eaab["Manufactured / Rodin / P1 / LinearElasticity3D / Backends / Baseline / Hexahedron"]:::execution
     e_b1dd47638d1bef42["Manufactured / Rodin / P1 / Backends / Baseline"]:::execution
     e_b88223a2a372730c["Manufactured / Rodin / MPI / H1 / Poisson / Backends / Baseline"]:::execution
     e_cee61ec2449cb999["Unit / Rodin / Variational / QuadratureRuleSpecialization / Backends / Baseline"]:::execution
     e_d0380ee0576ba0f7["Unit / Rodin / Adaptation / Backends / Baseline"]:::execution
     e_d19b8fc0b65f74a7["Unit / Rodin / Variational / Backends / Baseline"]:::execution
+    e_d8dc993985b1c7e3["Manufactured / Rodin / P1 / LinearElasticity3D / Backends / Baseline / Tetrahedron"]:::execution
     e_d9c53777a387fc06["Manufactured / Rodin / MPI / H1 / Poisson / Slow"]:::execution
     e_e40e24bb0f7f2d9e["Unit / Rodin / MPI / Backends / Baseline"]:::execution
     e_e541e873336ae2ab["Unit / Rodin / MPI / Assembly / Backends / Baseline"]:::execution
     e_e69b3dbff2bf906c["Unit / Rodin / Variational / H1 / Backends / Baseline"]:::execution
+    e_ea89e8119cc3be39["Manufactured / Rodin / P1 / LinearElasticity3D / Slow / Pyramid"]:::execution
     e_ec3565cfb8138ed9["Coverage / Baseline / Libraries / Rodin"]:::execution
     e_f1f84fad36c84070["Unit / Rodin / Backends / Baseline"]:::execution
+    e_f76e5038749e50ae["Manufactured / Rodin / P1 / LinearElasticity3D / Slow / Wedge"]:::execution
     e_f902161e19bc35bc["Unit / Rodin / Geometry / Backends / Baseline"]:::execution
     e_fce35885472e0a05["Unit / Rodin / Variational / H1 / MassQuadrature / Backends / Baseline"]:::execution
-    e_fe559a2375c8bb17["Manufactured / Rodin / P1 / LinearElasticity3D / Backends / Baseline"]:::execution
     Publish_baseline["Coverage / Publish / Baseline"]:::coverage
     Publish_manufactured_1["Coverage / Publish / Manufactured / 1"]:::coverage
     Publish_manufactured_2["Coverage / Publish / Manufactured / 2"]:::coverage
@@ -128,8 +134,12 @@ flowchart LR
     b_ae3ddeee44430a7b --> e_02ad63ad55a5966b
     b_c73f1c5dc55cbb1f --> e_02ad63ad55a5966b
     b_e96c266e7ada561e --> e_02ad63ad55a5966b
+    Common --> e_0438e1d735b66d11
+    b_0dbff32f8c18754e --> e_0438e1d735b66d11
     Common --> e_0902c944445fce1e
     b_53c1b5c7da997368 --> e_0902c944445fce1e
+    Common --> e_0a7142552b7731b0
+    b_0dbff32f8c18754e --> e_0a7142552b7731b0
     Common --> e_1e60a7246d24bcf4
     b_1b3e09feff6d0310 --> e_1e60a7246d24bcf4
     b_40fe281c3dcd857e --> e_1e60a7246d24bcf4
@@ -141,6 +151,8 @@ flowchart LR
     b_e96c266e7ada561e --> e_1e60a7246d24bcf4
     Common --> e_1fea204855efc00f
     b_c1bc7e84d44b7de8 --> e_1fea204855efc00f
+    Common --> e_26efa33aa070421f
+    b_0dbff32f8c18754e --> e_26efa33aa070421f
     Common --> e_2cc98b51c9d77f30
     b_a2c40791b7670c5d --> e_2cc98b51c9d77f30
     Common --> e_3b9348adab56cb6b
@@ -149,8 +161,8 @@ flowchart LR
     b_4fc891bf60607765 --> e_41b363ca687142b3
     Common --> e_4a2b49e231129006
     b_c1bc7e84d44b7de8 --> e_4a2b49e231129006
-    Common --> e_4cca9a8538cc6aad
-    b_0dbff32f8c18754e --> e_4cca9a8538cc6aad
+    Common --> e_4aedf2275356db84
+    b_0dbff32f8c18754e --> e_4aedf2275356db84
     Common --> e_58bfd15ee9417aa2
     b_4fc891bf60607765 --> e_58bfd15ee9417aa2
     Common --> e_680fee2db4506cf4
@@ -167,6 +179,8 @@ flowchart LR
     b_a2c40791b7670c5d --> e_9c68bf931a59a45f
     Common --> e_ab3f31961e0632cc
     b_53c1b5c7da997368 --> e_ab3f31961e0632cc
+    Common --> e_b1c9dda0fed5eaab
+    b_0dbff32f8c18754e --> e_b1c9dda0fed5eaab
     Common --> e_b1dd47638d1bef42
     b_0dbff32f8c18754e --> e_b1dd47638d1bef42
     Common --> e_b88223a2a372730c
@@ -177,6 +191,8 @@ flowchart LR
     b_5833ff7d963e7fee --> e_d0380ee0576ba0f7
     Common --> e_d19b8fc0b65f74a7
     b_53c1b5c7da997368 --> e_d19b8fc0b65f74a7
+    Common --> e_d8dc993985b1c7e3
+    b_0dbff32f8c18754e --> e_d8dc993985b1c7e3
     Common --> e_d9c53777a387fc06
     b_22bdf11a32b1e59b --> e_d9c53777a387fc06
     Common --> e_e40e24bb0f7f2d9e
@@ -185,6 +201,8 @@ flowchart LR
     b_c1bc7e84d44b7de8 --> e_e541e873336ae2ab
     Common --> e_e69b3dbff2bf906c
     b_53c1b5c7da997368 --> e_e69b3dbff2bf906c
+    Common --> e_ea89e8119cc3be39
+    b_0dbff32f8c18754e --> e_ea89e8119cc3be39
     Common --> e_ec3565cfb8138ed9
     b_0dbff32f8c18754e --> e_ec3565cfb8138ed9
     b_0e82251d491a0194 --> e_ec3565cfb8138ed9
@@ -241,12 +259,12 @@ flowchart LR
     b_dcc15e3351f9c5a5 --> e_f1f84fad36c84070
     b_ecbe4399e9f2fd07 --> e_f1f84fad36c84070
     b_fc7950278f0f6db5 --> e_f1f84fad36c84070
+    Common --> e_f76e5038749e50ae
+    b_0dbff32f8c18754e --> e_f76e5038749e50ae
     Common --> e_f902161e19bc35bc
     b_152c84d53dc9e29a --> e_f902161e19bc35bc
     Common --> e_fce35885472e0a05
     b_53c1b5c7da997368 --> e_fce35885472e0a05
-    Common --> e_fe559a2375c8bb17
-    b_0dbff32f8c18754e --> e_fe559a2375c8bb17
     Common --> Publish_baseline
     e_ec3565cfb8138ed9 --> Publish_baseline
     Common --> Publish_manufactured_1
@@ -256,7 +274,10 @@ flowchart LR
     Common --> Publish_manufactured_2
     e_58bfd15ee9417aa2 --> Publish_manufactured_2
     e_8e1d1dc208212471 --> Publish_manufactured_2
-    e_fe559a2375c8bb17 --> Publish_manufactured_2
+    e_d8dc993985b1c7e3 --> Publish_manufactured_2
+    e_b1c9dda0fed5eaab --> Publish_manufactured_2
+    e_26efa33aa070421f --> Publish_manufactured_2
+    e_0a7142552b7731b0 --> Publish_manufactured_2
     Common --> Publish_slow
     e_6d8bcfd9c4246aac --> Publish_slow
     e_4a2b49e231129006 --> Publish_slow
@@ -266,7 +287,10 @@ flowchart LR
     e_d9c53777a387fc06 --> Publish_slow
     e_98047d7208498759 --> Publish_slow
     e_3b9348adab56cb6b --> Publish_slow
-    e_4cca9a8538cc6aad --> Publish_slow
+    e_4aedf2275356db84 --> Publish_slow
+    e_0438e1d735b66d11 --> Publish_slow
+    e_ea89e8119cc3be39 --> Publish_slow
+    e_f76e5038749e50ae --> Publish_slow
     Common --> Publish_unit_1
     e_d0380ee0576ba0f7 --> Publish_unit_1
     e_e541e873336ae2ab --> Publish_unit_1

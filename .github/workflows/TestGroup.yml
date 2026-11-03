@@ -33,6 +33,9 @@ name: Tests / Group
       name:
         type: string
         required: true
+      partition:
+        type: string
+        default: ''
       baseline:
         type: boolean
         required: true
@@ -99,7 +102,8 @@ jobs:
           GROUP: ${{ inputs.group }}
           PROFILE: ${{ inputs.profile }}
           BACKEND: ${{ inputs.backend }}
-        run: python3 dev/ci_tests.py run --group "$GROUP" --profile "$PROFILE" --backend "$BACKEND"
+          PARTITION: ${{ inputs.partition }}
+        run: python3 dev/ci_tests.py run --group "$GROUP" --profile "$PROFILE" --backend "$BACKEND" --partition "$PARTITION"
       - name: Capture production coverage
         id: capture
         if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.selection.outputs.has_targets == 'true' && env.RODIN_COVERAGE == 'ON' }}

@@ -431,6 +431,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_1fea204855efc00f:
     name: Unit / Rodin / MPI / Variational
@@ -454,6 +455,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_2cc98b51c9d77f30:
     name: Unit / Rodin / PETSc
@@ -477,6 +479,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_680fee2db4506cf4:
     name: Unit / Rodin / Variational / MatrixQuadrature
@@ -500,6 +503,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_74373ab9a7387dc3:
     name: Unit / Rodin / Models / Solid
@@ -523,6 +527,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_84e1789adadc2e2e:
     name: CMake / ThirdPartyIsolation
@@ -545,6 +550,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_ab3f31961e0632cc:
     name: Unit / Rodin / Variational / QuadratureExpression
@@ -568,6 +574,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_cee61ec2449cb999:
     name: Unit / Rodin / Variational / QuadratureRuleSpecialization
@@ -591,6 +598,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_d0380ee0576ba0f7:
     name: Unit / Rodin / Adaptation
@@ -614,6 +622,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_d19b8fc0b65f74a7:
     name: Unit / Rodin / Variational
@@ -637,6 +646,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_e40e24bb0f7f2d9e:
     name: Unit / Rodin / MPI
@@ -660,6 +670,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_e541e873336ae2ab:
     name: Unit / Rodin / MPI / Assembly
@@ -683,6 +694,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_e69b3dbff2bf906c:
     name: Unit / Rodin / Variational / H1
@@ -706,6 +718,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_f1f84fad36c84070:
     name: Unit / Rodin
@@ -746,6 +759,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_f902161e19bc35bc:
     name: Unit / Rodin / Geometry
@@ -769,6 +783,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_fce35885472e0a05:
     name: Unit / Rodin / Variational / H1 / MassQuadrature
@@ -792,4 +807,5 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit

@@ -3,6 +3,7 @@
 import importlib.util
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import tempfile
@@ -101,6 +102,51 @@ include(assembly.cmake)
                        if a.startswith('--gtest_filter=')]
             self.assertTrue(any('HaloContainsRequiredPhysicalBoundaryIncidence*/*' in f
                                 for f in filters if f.startswith('--gtest_filter=-')))
+
+    def test_elasticity_partitions_are_a_disjoint_complete_invocation_union(self):
+        tests = [{"name": f"PolytopeCoverage3D/Elasticity3DTest8.Case{i}/{geometry}",
+                  "command": ["solver", f"--case={i}", f"--geometry={geometry}"],
+                  "properties": [{"name": "TIMEOUT", "value": 1200}]}
+                 for geometry in ci.ELASTICITY3D_PARTITIONS for i in range(6)]
+        parts = [ci.partition_tests(tests, ci.ELASTICITY3D_GROUP, geometry)
+                 for geometry in ci.ELASTICITY3D_PARTITIONS]
+        self.assertEqual([len(part) for part in parts], [6] * 4)
+        union = [test for part in parts for test in part]
+        self.assertEqual(sorted(union, key=lambda t: t['name']),
+                         sorted(tests, key=lambda t: t['name']))
+        self.assertEqual(len({test['name'] for test in union}), len(tests))
+        with self.assertRaisesRegex(ValueError, 'unaccounted geometry'):
+            ci.partition_tests(tests + [dict(tests[0], name='NewGeometry')],
+                               ci.ELASTICITY3D_GROUP, 'Tetrahedron')
+        with self.assertRaisesRegex(ValueError, 'Unknown execution partition'):
+            ci.partition_tests(tests, 'unit/Rodin', 'Tetrahedron')
+        with self.assertRaisesRegex(ValueError, 'Empty elasticity'):
+            ci.partition_tests([], ci.ELASTICITY3D_GROUP, 'Tetrahedron')
+
+    def test_elasticity_geometry_filter_executes_exact_recorded_ctest_commands(self):
+        with tempfile.TemporaryDirectory() as directory:
+            build = Path(directory)
+            commands = []
+            for geometry in ci.ELASTICITY3D_PARTITIONS:
+                for index in range(6):
+                    name = f'Suite.Case{index}/{geometry}'
+                    commands += [f'add_test({ci.quote(name)} {ci.quote(shutil.which("cmake"))} -E true)',
+                                 f'set_tests_properties({ci.quote(name)} PROPERTIES LABELS manufactured TIMEOUT 600)']
+            (build / 'CTestTestfile.cmake').write_text('\n'.join(commands))
+            report = json.loads(subprocess.check_output(
+                ['ctest', '--test-dir', str(build), '--show-only=json-v1'], text=True))
+            selected = []
+            with patch.object(ci, 'prepare', return_value=(build, report)), \
+                    patch.object(ci, 'selected_targets', return_value=[]):
+                for geometry in ci.ELASTICITY3D_PARTITIONS:
+                    self.assertEqual(ci.run_group(build, ci.ELASTICITY3D_GROUP, 'manufactured',
+                                                  partition=geometry), 0)
+                    inventory = json.loads((build / 'ci-selection.json').read_text())
+                    self.assertEqual(inventory['partition'], geometry)
+                    self.assertEqual(len(inventory['selected']), 6)
+                    selected.extend(inventory['selected'])
+            self.assertEqual(sorted(selected, key=lambda t: t['name']),
+                             sorted(report['tests'], key=lambda t: t['name']))
 
     def test_preserve_old_selections(self):
         def test(name, *labels):

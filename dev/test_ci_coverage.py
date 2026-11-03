@@ -61,6 +61,44 @@ class ProductionCoverageTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "Non-production"):
                     coverage.production_lines([report])
 
+    def test_geometry_receipts_require_every_partition_and_complete_selection(self):
+        from ci_test_plan import entry
+        from ci_tests import ELASTICITY3D_GROUP, ELASTICITY3D_PARTITIONS
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            invocations = [{"name": f"Suite.Case{i}/{geometry}",
+                            "properties": [{"name": "LABELS", "value": ["manufactured"]}]}
+                           for geometry in ELASTICITY3D_PARTITIONS for i in range(2)]
+            definitions = []
+            for geometry in ELASTICITY3D_PARTITIONS:
+                definition = entry('manufactured', ELASTICITY3D_GROUP, asan='ON', partition=geometry)
+                definitions.append(definition)
+                folder = root / geometry
+                folder.mkdir()
+                receipt = {"definition": definition, "commit": "current", "build": "success",
+                           "tests": "success", "compiled": [], "coverage_expected": False}
+                (folder / 'receipt.json').write_text(json.dumps(receipt))
+                (folder / 'ci-invocations.json').write_text(json.dumps({'tests': invocations}))
+                selection = {'group': ELASTICITY3D_GROUP, 'profile': 'manufactured',
+                             'partition': geometry,
+                             'selected': [t for t in invocations if t['name'].endswith('/' + geometry)]}
+                (folder / 'ci-selection.json').write_text(json.dumps(selection))
+            plan = {'manufactured': definitions}
+            self.assertEqual(len(coverage.verify_receipts(plan, root, 'current')), 4)
+            path = root / 'Wedge/ci-selection.json'
+            original = json.loads(path.read_text())
+            changed = dict(original, selected=original['selected'][:-1])
+            path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(ValueError, 'Incomplete invocation partition'):
+                coverage.verify_receipts(plan, root, 'current')
+            path.write_text(json.dumps(dict(original, partition='Pyramid')))
+            with self.assertRaisesRegex(ValueError, 'Wrong invocation partition'):
+                coverage.verify_receipts(plan, root, 'current')
+            path.write_text(json.dumps(original))
+            (root / 'Wedge/receipt.json').unlink()
+            with self.assertRaisesRegex(ValueError, 'Missing producer records'):
+                coverage.verify_receipts(plan, root, 'current')
+
     def test_missing_stale_and_uncompiled_producers_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory)

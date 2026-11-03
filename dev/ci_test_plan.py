@@ -16,7 +16,7 @@ import os
 from pathlib import Path
 import re
 
-from ci_tests import COMPONENTS, ROOT, display_group, execution_group
+from ci_tests import COMPONENTS, ROOT, display_group, execution_group, ELASTICITY3D_GROUP, ELASTICITY3D_PARTITIONS
 
 
 @functools.lru_cache(maxsize=8)
@@ -49,9 +49,11 @@ def native_convergence_groups(root=ROOT):
 
 
 def entry(profile, group, build_type="Release", multithreaded="ON",
-          asan="OFF", ubsan="OFF", baseline=False, backend=None):
+          asan="OFF", ubsan="OFF", baseline=False, backend=None, partition=""):
     backend = backend or {"unit": "optional", "manufactured": "default"}.get(profile, "baseline")
     coordinates = [profile, group, build_type, multithreaded, asan, ubsan, str(baseline), backend]
+    if partition:
+        coordinates.append(partition)
     identity = hashlib.sha256(json.dumps(coordinates).encode()).hexdigest()[:20]
     path = display_group(group)
     if baseline:
@@ -62,7 +64,9 @@ def entry(profile, group, build_type="Release", multithreaded="ON",
         path = "Coverage / " + path
     if backend == "baseline" and profile in ["unit", "manufactured"] and not baseline:
         path += " / Backends / Baseline"
-    return {"profile": profile, "backend": backend, "group": group, "build_type": build_type,
+    if partition:
+        path += " / " + partition
+    return {"profile": profile, "backend": backend, "group": group, "partition": partition, "build_type": build_type,
             "multithreaded": multithreaded, "asan": asan, "ubsan": ubsan,
             "baseline": baseline, "name": path, "id": identity}
 
@@ -103,6 +107,14 @@ def plan(root=ROOT):
                                  ("manufactured", ["Debug", "Release"])]:
         for build_type, mt in itertools.product(build_types, ["ON", "OFF"]):
             matrices["baseline"].append(entry(profile, "src/Rodin", build_type, mt, baseline=True))
+    # A single Debug coverage lane exceeded six hours after 23/24 passing
+    # elasticity cases. Each geometry now retains its complete original cases
+    # and configuration in an independently mandatory execution contribution.
+    for key, rows in matrices.items():
+        matrices[key] = [part for row in rows for part in (
+            [entry(**{k: v for k, v in row.items() if k not in {"name", "id", "partition"}},
+                   partition=geometry) for geometry in ELASTICITY3D_PARTITIONS]
+            if row["group"] == ELASTICITY3D_GROUP and not row["baseline"] else [row])]
     for key, rows in matrices.items():
         if not rows or len(rows) > 256:
             raise ValueError(f"{key} has {len(rows)} jobs; adjust the named family bands (limit 256)")

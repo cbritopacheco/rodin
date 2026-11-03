@@ -74,6 +74,16 @@ def verify_receipts(plan, folder, commit, check_inventory=True):
             selection = json.loads(selection_path.read_text())
             if selection["group"] != definition["group"] or selection["profile"] != definition["profile"]:
                 raise ValueError("Wrong invocation manifest: " + identity)
+            if selection.get("partition", "") != definition.get("partition", ""):
+                raise ValueError("Wrong invocation partition: " + identity)
+            if definition.get("partition"):
+                from ci_tests import selected, partition_tests
+                invocations = json.loads((path.parent / "ci-invocations.json").read_text())
+                wanted = partition_tests([test for test in invocations["tests"]
+                                          if selected(definition["profile"], test)],
+                                         definition["group"], definition["partition"])
+                if sorted(t["name"] for t in wanted) != sorted(t["name"] for t in selection["selected"]):
+                    raise ValueError("Incomplete invocation partition: " + identity)
         coverage_expected = definition["asan"] == "OFF" and definition["ubsan"] == "OFF" and bool(receipt["compiled"])
         if receipt["coverage_expected"] != coverage_expected:
             raise ValueError("Incorrect coverage eligibility: " + identity)

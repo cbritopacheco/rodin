@@ -253,11 +253,19 @@ compatibility. Compilation stops at `Unit / Rodin / <Module>`,
 `Manufactured / Rodin / <Module>` and `Convergence / H`, `/ P`, `/ HP` or
 `/ Isoparametric`. Selected descendants normally share their group's single
 artifact; direct root targets retain a separate parent group. The optional
-Release build with both sanitizers divides the oversized Variational producer
-into numbered parts of at most 24 executables. This configuration selected 133
-executables and lost its runner after four hours of compilation. Each part
-restores the same common libraries, and dependent lanes wait for the group.
-Execution lanes retain their existing partitions. Test enable switches register a superset
+Debug and Release builds with both sanitizers divide the oversized Variational
+producer into numbered parts of at most 24 executables. Release previously lost
+its runner during compilation; Debug exhausted disk space during linking. Each
+part restores the same common libraries, and dependent lanes wait for the group.
+
+The 3D P1 manufactured elasticity group runs tetrahedron, hexahedron, pyramid and
+wedge cases in four independent geometry jobs. Every build, threading, sanitizer
+and backend configuration retains all its original regular and slow cases.
+The jobs reuse the same compiled executable and retain the six-hour job limit.
+Each geometry has a distinct producer receipt; coverage finalization requires
+all four and checks their selections against the complete invocation manifest.
+
+Test enable switches register a superset
 without changing production ABI; original configuration-specific
 inventories and runtime selectors remain required.
 
