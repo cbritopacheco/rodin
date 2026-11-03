@@ -10,8 +10,9 @@
  * @brief Compares the device form language with a hand written Oseen kernel.
  *
  * Usage: `KokkosOseenAssembly [mesh.mesh | n] [repetitions] [renumber]`. A
- * number n builds an n x n x n tetrahedral grid, otherwise the tetrahedra of a
- * MEDIT mesh are used. The word renumber orders the vertices and the cells of
+ * number n builds an n x n x n tetrahedral grid, otherwise a MEDIT mesh is
+ * loaded, whose cells must all be tetrahedra since the hand written kernel
+ * knows no other cell. The word renumber orders the vertices and the cells of
  * the mesh along space before the assembly, see Mesh::renumber.
  *
  * Both sides assemble the same linearized Navier-Stokes (Oseen) step with
@@ -330,9 +331,13 @@ namespace Rodin::Examples
    */
   Real distance(::Mat A, ::Mat B)
   {
-    ::Mat D = nullptr;
-    MatDuplicate(A, MAT_COPY_VALUES, &D);
-    MatAXPY(D, -1, B, DIFFERENT_NONZERO_PATTERN);
+    // The difference is taken on host copies: the device sum of Kokkos-Kernels
+    // asks for more team scratch memory than RDNA GPUs have on large grids.
+    ::Mat D = nullptr, H = nullptr;
+    MatConvert(A, MATSEQAIJ, MAT_INITIAL_MATRIX, &D);
+    MatConvert(B, MATSEQAIJ, MAT_INITIAL_MATRIX, &H);
+    MatAXPY(D, -1, H, DIFFERENT_NONZERO_PATTERN);
+    MatDestroy(&H);
     PetscReal d = 0, a = 0;
     MatNorm(D, NORM_FROBENIUS, &d);
     MatNorm(A, NORM_FROBENIUS, &a);
@@ -390,6 +395,12 @@ namespace Rodin::Examples
       const Parameters P;
 
       const HostMesh host = renumber ? load(source).renumber() : load(source);
+      if (host.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron) != host.getCellCount())
+      {
+        std::fprintf(stderr, "%s has cells other than tetrahedra.\n", source.c_str());
+        PetscFinalize();
+        return EXIT_FAILURE;
+      }
       const DeviceMesh mesh(DeviceContext{}, host);
       std::printf("mesh: %zu vertices, %zu tetrahedra, %zu unknowns\n",
         host.getVertexCount(), host.getCellCount(), 4 * host.getVertexCount());
