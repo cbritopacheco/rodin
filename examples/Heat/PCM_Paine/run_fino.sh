@@ -18,7 +18,9 @@
 #
 # Mesh: h_x = 5 mm (400 cells over 2 m); PCM: 0.25 mm at its top face growing
 # by 1.04 (20 cells at 5 mm, 37 at 20 mm); 4 cells per 10 mm plate. Mushy
-# range 2 K (4 K on retry), dt 30 s. Any variable of run_pcm_sweep.sh can be
+# range 4 K (39-43 C; RT42 melts over 38-43 C) for every thickness: with 2 K,
+# 20 mm loses Newton when the melt flows (~4e-4 m/s); dt 30 s. Any variable
+# of run_pcm_sweep.sh can be
 # overridden (SITE=paine, THICKNESSES, NDAYS, ...). The sweep skips finished
 # cases, so the script can be relaunched after an interruption.
 set -euo pipefail
@@ -49,7 +51,9 @@ export NYMIN="${NYMIN:-20}"
 export AL="${AL:-0.01}"
 export NAL="${NAL:-4}"
 export NDAYS="${NDAYS:-2}"
-export MUSHY="${MUSHY:-2}"
+export MUSHY="${MUSHY:-4}"
+export EXTRA="${EXTRA:--pcm_round 1}"
+export RETRIES="${RETRIES:-0}"
 export NP="${NP:-8}"
 export NJOBS="${NJOBS:-4}"
 

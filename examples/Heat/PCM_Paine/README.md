@@ -11,6 +11,7 @@ h_a = 8.91 + 2 w and long-wave radiation to the sky; inside: convection only
 |---|---|
 | `paine_weather.py` | Clear January day, `--site paine` (-33.81, 370 m; GHI 8.2 kWh/m2/day, T_a 13-31 C, wind 1.5-4 m/s) or `--site calama` (-22.50, 2326 m; 8.3, 6-26 C, 2-9 m/s): irradiance on the roof plane (Hottel + isotropic sky) |
 | `run_pcm_sweep.sh` | Runs e = 5, 10, 15, 20 mm of PCM (2 periodic days each; `SITE`, `AL`, `THICKNESSES`, ... at its top) |
+| `run_fino.sh` | Build + fine-mesh sweep (2 m, h_x 5 mm, PCM 0.25 mm x1.04, 4 K, 2 days) + post-processing, for another machine |
 | `postprocess_pcm.sh` | Heat-flux summary (`summary.md/csv`), plots and temperature contours |
 
 ```sh
