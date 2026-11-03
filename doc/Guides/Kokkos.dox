@@ -211,6 +211,20 @@
   a reassembly with the same sizes reuses the device arrays. Such a problem
   takes no preassembled bilinear form; mixed problems are supported.
 
+  On an AMD GPU, `Solver::RocSolverRF` (`RODIN_USE_ROCSOLVER`) reads the
+  same arrays. rocSOLVER only refactorizes: the first factorization fixes
+  the pivots on the host with UMFPACK, or with AMD after
+  `setSymmetric(RocSolverRF<System>::Symmetry::PositiveDefinite)`, and the
+  following ones run on the device with those pivots:
+  @code{.cpp}
+  Solver::RocSolverRF solver(poisson);
+  solver.setSymmetric(decltype(solver)::Symmetry::PositiveDefinite);
+  solver.solve();
+  @endcode
+  rocSOLVER reports neither a zero pivot nor a negative one; the solver
+  checks the diagonal of the factors for the former, and a matrix declared
+  positive definite must be so, otherwise the solution is wrong.
+
   With `RODIN_USE_KOKKOSKERNELS`, `Rodin/Kokkos/Solver.h` specializes
   `Solver::CG` and `Solver::GMRES` for such a system. Both iterate on the
   device with a Jacobi preconditioner and link `Rodin::KokkosKernels`:
@@ -394,6 +408,19 @@
   remove that branch of `rocsparse_index_type()` in
   `sparse/src/KokkosSparse_Utils_rocsparse.hpp` and hand PETSc the patched
   sources with `--download-kokkos-kernels=/path/to/kokkos-kernels.tar.gz`.
+
+  hypre takes the warp size of the GPU from `rocm-smi`, which ROCm 10 no
+  longer ships, and otherwise assumes the 64 lanes of the CDNA GPUs. On a
+  RDNA GPU, whose `rocminfo` reports a wavefront of 32, BoomerAMG then
+  faults on the device: pass
+  `--download-hypre-configure-arguments=--with-gpu-warp-size=32` to PETSc.
+
+  The ROCm runtime loads its own zlib, `librocm_sysdeps_z.so.1`. When MPI
+  initializes, the PCI component of hwloc reads compressed PCI identifiers
+  through libpciaccess, whose `gzopen64` binds to the system zlib and whose
+  `gzgets` and `gzclose` bind to that of ROCm, and the process intermittently
+  aborts in `MPI_Init`. Running with `HWLOC_COMPONENTS=-pci`, or preloading
+  the system `libz.so.1`, avoids it.
 
   Installed consumers enable the same compiler setup and link the module:
 

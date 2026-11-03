@@ -72,6 +72,22 @@ from the system type.
   checked against the analysis. `setSymmetric` selects `LDL^T` or `LL^T`,
   `setRefinementSteps` adds iterative refinement. Configure with
   `-Dcudss_DIR=<cudss>/lib/cmake/cudss`.
+- rocSOLVER (`RODIN_USE_ROCSOLVER`, requires `RODIN_USE_UMFPACK`):
+  `RocSolverRF`, a direct solver on an AMD GPU through the sparse
+  refactorization of rocSOLVER, on the same two layouts as `CuDSS`.
+  rocSOLVER only refactorizes, so the first `factorize` fixes the pivots on
+  the host, with AMD under `setSymmetric(PositiveDefinite)` and with UMFPACK
+  otherwise, and computes the pattern of the factors from them; later
+  factorizations of the same pattern run on the device with those pivots.
+  rocSOLVER reports no zero pivot and then solves to a wrong but finite
+  result, so `factorize` gathers the diagonal of the factors and reports
+  `Breakdown` with the analysis kept. The Cholesky refactorization takes the
+  square root of the absolute value of each pivot: an indefinite matrix
+  declared positive definite gives a wrong solution without failing. A
+  refactorization whose values call for other pivots than the first ones
+  loses accuracy; `clear(Factorization::Symbolic)` pivots again.
+  `Info::status` holds the rocBLAS, rocSPARSE or UMFPACK status, or
+  `Breakdown`.
 - Kokkos-Kernels (`RODIN_USE_KOKKOSKERNELS`, target `Rodin::KokkosKernels`,
   header `Rodin/Kokkos/Solver.h`): `CG` and `GMRES` specialized for a system
   whose matrix is a `Kokkos::SparseMatrix`, so a device assembly is solved

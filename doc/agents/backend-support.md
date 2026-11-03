@@ -71,7 +71,7 @@ Venant-Kirchhoff, Mooney-Rivlin and Yeoh hyperelastic laws) into Eigen or PETSc 
 Problem named with a `Math::LinearSystem<Kokkos::SparseMatrix<Real, Backend>,
 Math::Vector<Real>>` keeps its matrix in device memory as a CSR, equal
 coefficient by coefficient to the host matrix of the same assembly, and copies
-only the right-hand side to the host; `CuDSS` and the Kokkos-Kernels `CG`
+only the right-hand side to the host; `CuDSS`, `RocSolverRF` and the Kokkos-Kernels `CG`
 and `GMRES` (`Rodin/Kokkos/Solver.h`) read it in place, and `BoomerAMG`
 (`Rodin/Kokkos/Solver/BoomerAMG.h`) hands it to hypre on the device. Such a
 problem takes no preassembled bilinear form. SubMesh
@@ -141,6 +141,10 @@ as HIP too, where `constexpr` functions calling host code and Eigen
   libomp.
 - `Kokkos::Internal::checkLaunches()` reads `hipGetLastError()` as it reads
   `cudaGetLastError()` under CUDA.
+- hypre needs `--with-gpu-warp-size=32` on RDNA GPUs, since ROCm 10 lacks
+  the `rocm-smi` it detects the warp size with, and MPI runs need
+  `HWLOC_COMPONENTS=-pci` against the zlib that ROCm loads (see the HIP
+  build section of `doc/Guides/Kokkos.dox`).
 - A Kokkos change is HIP-verified only after building and running the Kokkos
   tests with a HIP-enabled Kokkos installation.
 
