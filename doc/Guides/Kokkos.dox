@@ -422,6 +422,22 @@
   aborts in `MPI_Init`. Running with `HWLOC_COMPONENTS=-pci`, or preloading
   the system `libz.so.1`, avoids it.
 
+  PETSc also builds the distributed direct solvers for HIP. SuperLU_DIST
+  (`--download-superlu_dist`) needs no option. STRUMPACK links rocSOLVER
+  through rocThrust, whose `hip::device` target compiles every C++ source as
+  HIP, so it takes the ROCm `clang++`:
+  `--download-strumpack-cmake-arguments=-DCMAKE_CXX_COMPILER=/opt/rocm/lib/llvm/bin/clang++`.
+  SLATE, which STRUMPACK uses for the fronts shared by several ranks
+  (`--download-slate`), must take the same compiler through
+  `--download-slate-cmake-arguments`. Its headers hold an `omp_nest_lock_t`,
+  of 16 bytes with libgomp and of 8 with libomp, so a SLATE built by `g++`
+  disagrees with STRUMPACK on the layout of its matrices and faults in every
+  factorization on more than one rank. SLATE also requires
+  `MPI_THREAD_MULTIPLE`. Rodin does not initialize MPI, so the application
+  requests that level, for instance with
+  `boost::mpi::environment env(argc, argv, boost::mpi::threading::multiple)`,
+  or sets `PETSC_MPI_THREAD_REQUIRED` before `PetscInitialize`.
+
   Installed consumers enable the same compiler setup and link the module:
 
   @code{.cmake}

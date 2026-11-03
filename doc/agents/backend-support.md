@@ -145,6 +145,10 @@ as HIP too, where `constexpr` functions calling host code and Eigen
   the `rocm-smi` it detects the warp size with, and MPI runs need
   `HWLOC_COMPONENTS=-pci` against the zlib that ROCm loads (see the HIP
   build section of `doc/Guides/Kokkos.dox`).
+- PETSc builds STRUMPACK and SLATE with the ROCm `clang++`, both of them:
+  SLATE headers embed `omp_nest_lock_t`, whose size differs between libgomp
+  and libomp, and a mixed pair faults in every multi-rank factorization.
+  SLATE requires `MPI_THREAD_MULTIPLE` from the application.
 - A Kokkos change is HIP-verified only after building and running the Kokkos
   tests with a HIP-enabled Kokkos installation.
 
