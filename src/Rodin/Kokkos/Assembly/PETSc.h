@@ -73,6 +73,35 @@ namespace Rodin::Assembly::Internal
   };
 
   /**
+   * @brief Permutation sorting a coordinate list, as indices in the list.
+   *
+   * The indices are stored on 32 bits when the list is short enough, which
+   * halves the traffic of the permutation in the sums of the values per
+   * coordinate, and on the width of Index otherwise. One of the two views
+   * is empty.
+   *
+   * @tparam MemorySpace Kokkos memory space of the indices.
+   */
+  template <class MemorySpace>
+  struct COOOrder
+  {
+    /// @brief Indices, when the list has at most 2^32 - 1 entries.
+    ::Kokkos::View<std::uint32_t*, MemorySpace> narrow;
+
+    /// @brief Indices, when the list is longer.
+    ::Kokkos::View<Index*, MemorySpace> wide;
+
+    /// @brief Calls the function with the view that holds the indices.
+    template <class Function>
+    decltype(auto) visit(Function&& function) const
+    {
+      if (wide.extent(0) > 0)
+        return function(wide);
+      return function(narrow);
+    }
+  };
+
+  /**
    * @brief Device buffers and sparsity pattern kept between the assemblies
    * of a PETSc system.
    *
@@ -137,7 +166,7 @@ namespace Rodin::Assembly::Internal
     ::Kokkos::View<PetscScalar*, MemorySpace> values;
 
     /// @brief Coordinates sorted by row then column, as indices in the list.
-    ::Kokkos::View<Index*, MemorySpace> order;
+    COOOrder<MemorySpace> order;
 
     /// @brief Start in the sorted coordinates of each distinct coordinate,
     /// and the list size.
@@ -212,7 +241,7 @@ namespace Rodin::Assembly::Internal
     ::Kokkos::View<PetscScalar*, MemorySpace> expandedValues;
 
     /// @brief Expanded coordinates sorted by row then column.
-    ::Kokkos::View<Index*, MemorySpace> expandedOrder;
+    COOOrder<MemorySpace> expandedOrder;
 
     /// @brief Start of each distinct expanded coordinate, and the list size.
     ::Kokkos::View<Index*, MemorySpace> expandedStarts;
@@ -979,18 +1008,44 @@ namespace Rodin::Assembly::Internal
        * The coordinates are handed to the sort in rank order, so that the
        * duplicates of a coordinate follow one another as the integrators
        * ranked them, whatever the spacing of their entries.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       template <class Indices>
       static void sortPattern(const ExecutionSpace& execution, size_t columns,
         const std::vector<COOSegment>& segments, const std::vector<size_t>& offsets,
-        const Indices& rows, const Indices& cols, Indices& order)
+        const Indices& rows, const Indices& cols, COOOrder<MemorySpace>& order)
       {
         const size_t count = rows.extent(0);
-        order = Indices(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
-                          std::string("Rodin COO order")),
-          count);
+        order = {};
+        if (count <= std::numeric_limits<std::uint32_t>::max())
+        {
+          order.narrow = decltype(order.narrow)(
+            ::Kokkos::view_alloc(
+              execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO order")),
+            count);
+          sortPattern(execution, columns, segments, offsets, rows, cols, order.narrow);
+        }
+        else
+        {
+          order.wide = decltype(order.wide)(
+            ::Kokkos::view_alloc(
+              execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO order")),
+            count);
+          sortPattern(execution, columns, segments, offsets, rows, cols, order.wide);
+        }
+      }
+
+      /**
+       * @brief Sorts the coordinates into the given indices.
+       *
+       * Public as the enclosing function of device lambdas.
+       */
+      template <class Indices, class Order>
+      static void sortPattern(const ExecutionSpace& execution, size_t columns,
+        const std::vector<COOSegment>& segments, const std::vector<size_t>& offsets,
+        const Indices& rows, const Indices& cols, const Order& order)
+      {
+        using Position = typename Order::value_type;
+        const size_t count = rows.extent(0);
         if (count == 0)
           return;
         const ::Kokkos::View<std::uint64_t*, MemorySpace> keys(
@@ -1009,7 +1064,7 @@ namespace Rodin::Assembly::Internal
               const size_t e =
                 begin + ::Rodin::Kokkos::Variational::getEntryPosition(r, size, spacing);
               keys(begin + r) = std::uint64_t(rows(e)) * columns + cols(e);
-              order(begin + r) = e;
+              order(begin + r) = static_cast<Position>(e);
             });
         }
         ::Kokkos::Experimental::sort_by_key(execution, keys, order);
@@ -1022,9 +1077,9 @@ namespace Rodin::Assembly::Internal
        *
        * Public as the enclosing function of device lambdas.
        */
-      template <class Indices>
+      template <class Indices, class Order>
       static Indices distinctStarts(const ExecutionSpace& execution, const Indices& rows,
-        const Indices& cols, const Indices& order)
+        const Indices& cols, const Order& order)
       {
         const size_t count = order.extent(0);
         const auto head = KOKKOS_LAMBDA(const size_t i)
@@ -1063,9 +1118,9 @@ namespace Rodin::Assembly::Internal
        *
        * Public as the enclosing function of device lambdas.
        */
-      template <class Indices, class Coordinates>
+      template <class Indices, class Order, class Coordinates>
       static void listDistinct(const ExecutionSpace& execution, const Indices& rows,
-        const Indices& cols, const Indices& order, const Indices& starts,
+        const Indices& cols, const Order& order, const Indices& starts,
         const Coordinates& distinctRows, const Coordinates& distinctCols)
       {
         ::Kokkos::parallel_for(
@@ -1083,8 +1138,8 @@ namespace Rodin::Assembly::Internal
        *
        * Public as the enclosing function of device lambdas.
        */
-      template <class Indices, class Scalars>
-      static void merge(const ExecutionSpace& execution, const Indices& order,
+      template <class Order, class Indices, class Scalars>
+      static void merge(const ExecutionSpace& execution, const Order& order,
         const Indices& starts, const Scalars& values, const Scalars& merged)
       {
         ::Kokkos::parallel_for(
@@ -1295,8 +1350,9 @@ namespace Rodin::Assembly::Internal
           {
             sortPattern(m_execution, m_cols, cache.segments, offsets, cache.rows,
               cache.cols, cache.order);
-            cache.starts =
-              distinctStarts(m_execution, cache.rows, cache.cols, cache.order);
+            cache.starts = cache.order.visit([&](const auto& order) {
+              return distinctStarts(m_execution, cache.rows, cache.cols, order);
+            });
             cache.matrix = -1;
           }
         }
@@ -1350,8 +1406,10 @@ namespace Rodin::Assembly::Internal
         {
           sortPattern(m_execution, m_cols, {}, {0}, cache.expandedRows,
             cache.expandedCols, cache.expandedOrder);
-          cache.expandedStarts = distinctStarts(
-            m_execution, cache.expandedRows, cache.expandedCols, cache.expandedOrder);
+          cache.expandedStarts = cache.expandedOrder.visit([&](const auto& order) {
+            return distinctStarts(
+              m_execution, cache.expandedRows, cache.expandedCols, order);
+          });
           cache.matrix = -1;
         }
         fillDiagonal(m_execution, entries + extra, diagonal, fixed, cache.fixed, m_owned,
@@ -1611,8 +1669,8 @@ namespace Rodin::Assembly::Internal
        */
       template <class Indices, class Scalars>
       void setMatrix(CacheType& cache, ::Mat A, bool expanded, const Indices& coordRows,
-        const Indices& coordCols, const Indices& order, const Indices& starts,
-        const Scalars& values) const
+        const Indices& coordCols, const COOOrder<MemorySpace>& order,
+        const Indices& starts, const Scalars& values) const
       {
         PetscErrorCode ierr;
         PetscInt64 id = -1;
@@ -1656,7 +1714,9 @@ namespace Rodin::Assembly::Internal
             ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
               std::string("Rodin PETSc cols")),
             distinct);
-          listDistinct(m_execution, coordRows, coordCols, order, starts, rows, cols);
+          order.visit([&](const auto& o) {
+            listDistinct(m_execution, coordRows, coordCols, o, starts, rows, cols);
+          });
           // PETSc may modify the coordinates it is given, which are temporaries.
           const auto hostRows =
             ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), rows);
@@ -1679,7 +1739,8 @@ namespace Rodin::Assembly::Internal
         }
 
         resize(cache.merged, starts.extent(0) - 1, "Rodin COO merged values");
-        merge(m_execution, order, starts, values, cache.merged);
+        order.visit(
+          [&](const auto& o) { merge(m_execution, o, starts, values, cache.merged); });
         m_execution.fence("Rodin COO merge");
 
         PetscBool device = PETSC_FALSE;

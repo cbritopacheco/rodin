@@ -618,6 +618,15 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       `finish()` l'attend déjà. Il reste 2 synchronisations de flux par
       assemblage (fusion COO, fin de `finish()`), contre 19 au départ.
       Oseen (2080 Ti) grille 16: 0.92 ms contre 1.13 ms.
+- [x] Permutation de tri COO sur 32 bits quand la liste a moins de 2^32
+      entrées (`COOOrder`), sur la largeur de `Index` sinon. La fusion
+      par coordonnée est limitée par la bande passante (valeurs et
+      permutation lues une fois, ~500 Go/s sur 2080 Ti): 1425 µs ->
+      1049 µs à la grille 30. Une fusion par équipes, chargeant les
+      valeurs de façon coalescée en mémoire partagée, ne gagnait que 3%
+      et a été écartée. Oseen (2080 Ti) grille 16: 0.89 ms contre
+      1.14 ms, grille 30: 4.46 ms contre 6.43 ms. Chemin 64 bits validé
+      en le forçant sur toute la suite.
 - [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
       noyau (somme des intégrandes), capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles
