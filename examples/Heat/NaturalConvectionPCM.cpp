@@ -42,13 +42,18 @@
 // whose update crosses the whole interval [T_s, T_l] to T_m, where the slope
 // carries the latent heat; from there the next step is exact while the node
 // stays mushy. Full (basic) steps are the default so the truncated iterate is
-// the one evaluated.
+// the one evaluated. The same post-check damps the update of a node within
+// dT of [T_s, T_l] whose update reverses its previous one, halving its factor
+// at every reversal and doubling it back while it does not reverse: around
+// the kinks of H a node can 2-cycle across the kink without crossing the
+// whole interval (seen at 40.51 <-> 40.72 C, T_high = 40.7 C, with melt
+// convection).
 //
 // Stabilisation: split OSGS exactly as ForcedConvectionNewton, with the Darcy
 // coefficient in tau_1 (Brinkman-type) and the lagged sensible capacity in the
 // energy term:
 //   tau_1 = [4 nu/h^2 + 2|u^n|/h + A(T^n)/rho_l]^{-1},  tau_2 = rho_l h^2/(4 tau_1),
-//   tau_T = [4 alpha(T^n)/h^2 + 2|u^n|/h]^{-1},          weight rho c_p(T^n) tau_T.
+//   tau_T = [4 kappa/(C h^2) + 2|u^n|/h]^{-1},           weight C tau_T, C = H'(T^n).
 //
 // Boundary conditions (Eqs. 9-12 of the paper), outward flux q_n = -kappa dT/dn:
 //   top    : q_n = h_a(t) (T - T_a) + sigma eps (T^4 - T_sky^4) - alpha_s I(t),
@@ -59,8 +64,9 @@
 // Solar irradiance I enters with a + sign as a gain (Eq. 9 in the PDF writes
 // it on the loss side; the sign there should be checked).
 //
-// Attic (entretecho). The bottom face sees the attic air through h_in (ISO 6946,
-// R_si = 0.17 m^2K/W, downward flow, radiation included). The attic air is a
+// Attic (entretecho). The bottom face sees the attic air through convection only,
+// h_in (default 2 W/m^2K; -pcm_hin 6 for ISO 6946 R_si = 0.17 m^2K/W with
+// radiation). The attic air is a
 // quasi-steady massless node exchanging with the PCM, with the room through the
 // insulated ceiling (U_c) and with the outdoor air by ventilation (H_v = rho_a
 // c_a N V/(3600 A), per unit roof area):
@@ -69,6 +75,21 @@
 //   h_b = h_in (U_c + H_v)/(h_in + U_c + H_v),
 //   T_b(t) = (U_c T_in + H_v T_a(t))/(U_c + H_v).
 // The heat gain of the dwelling is q_c = U_c (T_att - T_in).
+//
+// Aluminium sandwich (-pcm_al e_al): plates of thickness e_al below and above
+// the PCM, cells tagged pcm / aluminium. In the plates: conduction with
+// (rho c, k) of aluminium, enthalpy rho c T (lumped mass split by region, so a
+// node on an interface carries both); no flow: momentum and continuity are
+// integrated over the PCM only, the interfaces are no-slip walls (Dirichlet on
+// the interior facets tagged `interface`; a Darcy wall left 5% of the
+// along-slope buoyancy unbalanced) and the plates add u = 0 through a Darcy
+// term at the solid-PCM value C/eps (with the flow equations also in the plates,
+// their pressure, left without PSPG by tau_1 ~ rho/A, developed spurious
+// modes that drove the melt at the interface); the OSGS projections are
+// restricted to the PCM too (projected over the whole domain, the meaningless
+// plate pressure entered Pi[grad p] near the interfaces: the PSPG term then
+// left 6% of the along-slope buoyancy unbalanced and drove a spurious net flow).
+// The phase-change truncation skips aluminium-only nodes.
 //
 // Inclination. The mesh stays a horizontal rectangle; the roof slope theta
 // enters only through gravity in the local frame,
@@ -89,7 +110,7 @@
 //   mpirun -n 4 ./examples/Heat/NaturalConvectionPCM -pcm_dt 30 -pcm_tend 86400 \
 //     -pcm_angle 15 -snes_converged_reason
 //
-// Options: -pcm_length, -pcm_thickness (m), -pcm_nx, -pcm_ny, -pcm_ygrade (cell
+// Options: -pcm_length, -pcm_thickness (m), -pcm_al (m, plates), -pcm_al_n, -pcm_nx, -pcm_ny, -pcm_ygrade (cell
 // height ratio from the top face down, 1: uniform), -pcm_dt, -pcm_tend, -pcm_angle (deg), -pcm_mushy (T_l - T_s, K;
 // PETSc option names are case-insensitive, so not -pcm_dT), -pcm_round (K, 0: Eq. 4),
 // -pcm_absorptivity, -pcm_hin, -pcm_tin (C), -pcm_weather, -pcm_output_every,
@@ -232,6 +253,28 @@ namespace Rodin::Examples::Heat
       return rho(T) * cp(T) + L * (rhoS + 2.0 * (rhoL - rhoS) * y) * dY(T);
     }
 
+    /// Y''(T): +-1/(2 d dT) on the two rounding intervals, 0 elsewhere.
+    Real d2Y(Real T) const
+    {
+      const Real d = std::min(round, 0.25 * dT);
+      if (d <= 0.0 || T <= Ts() - d || T >= Tl() + d)
+        return 0.0;
+      if (T < Ts() + d)
+        return 1.0 / (2.0 * d * dT);
+      if (T > Tl() - d)
+        return -1.0 / (2.0 * d * dT);
+      return 0.0;
+    }
+
+    /// H''(T) = ((rho_l - rho_s) c_p + rho (c_pl - c_ps)) Y'
+    ///        + L (2 (rho_l - rho_s) Y'^2 + (rho_s + 2 (rho_l - rho_s) Y) Y'').
+    Real d2H(Real T) const
+    {
+      const Real y = Y(T), yp = dY(T), dr = rhoL - rhoS;
+      return (dr * cp(T) + rho(T) * (cpL - cpS)) * yp
+             + L * (2.0 * dr * yp * yp + (rhoS + 2.0 * dr * y) * d2Y(T));
+    }
+
     /// A(Y) = C (1 - Y)^2 / (Y^3 + eps).
     Real A(Real T) const
     {
@@ -342,7 +385,9 @@ namespace Rodin::Examples::Heat
 
       struct Labels
       {
-        Attribute bottom = 1, top = 2, sides = 3;
+        Attribute bottom = 1, top = 2, sides = 3;   ///< boundary facets
+        Attribute interface = 4;                    ///< interior facets PCM / aluminium
+        Attribute pcm = 1, aluminium = 2;           ///< cells
       };
 
       struct Config
@@ -352,6 +397,12 @@ namespace Rodin::Examples::Heat
 
         Real length = 2.0;     ///< m, roof span (x)
         Real thickness = 0.005; ///< m, PCM layer (y)
+        Real alThickness = 0.0; ///< m, aluminium plate below and above the PCM (0: none)
+        size_t alCells = 4;     ///< cells across each plate
+        Real alRho = 2700.0, alCp = 900.0, alK = 200.0;  ///< aluminium: kg/m^3, J/(kg K), W/(m K)
+
+        /// Plates + PCM.
+        Real totalThickness() const { return thickness + 2.0 * alThickness; }
         size_t nx = 400;       ///< h = 5 mm
         size_t ny = 20;
         Real yGrade = 1.0;     ///< height ratio of consecutive cells from the top face down (1: uniform)
@@ -362,7 +413,11 @@ namespace Rodin::Examples::Heat
 
         Real absorptivity = 1.0;       ///< solar absorptivity of the top face (Eq. 9: 1)
         Real emissivity = 0.9;         ///< long-wave emissivity of the top face
-        Real hIn = 6.0;                ///< W/(m^2 K), 1/R_si for downward flux (ISO 6946)
+        /// W/(m^2 K), convection only on the attic side: natural convection
+        /// under a 2 m underside at 25 deg, Fujii-Imura, ~1.7 day (heat flowing
+        /// down) to ~5 night (ISO 6946 convective part, upward). 6 = 1/R_si with
+        /// radiation included (ISO 6946, downward).
+        Real hIn = 2.0;
         Real tIn = T0 + 24.0;          ///< K, room air
         bool attic = true;             ///< bottom face sees a ventilated attic
         Real uCeiling = 0.38;          ///< W/(m^2 K), insulated ceiling (OGUC 4.1.10, zone 4)
@@ -389,6 +444,7 @@ namespace Rodin::Examples::Heat
         std::string weatherFile;       ///< empty: Calama, January
 
         Real pressurePenalty = 1.0e-7; ///< 1/(Pa s): eps (p, q) fixes the mean pressure
+        int darcy = 2;                 ///< Carman-Kozeny treatment (see setupProblem)
 
         // Time step. With h = 5 mm and RT42: cell diffusion time
         // h^2/alpha = 190 s (Fourier alpha dt/h^2 = 0.16 at 30 s); a cell melts
@@ -426,6 +482,14 @@ namespace Rodin::Examples::Heat
         Math::SpatialVector<Real> zero(dim);
         for (size_t i = 0; i < dim; ++i)
           zero(i) = 0.0;
+        if (m_cfg.alThickness > 0.0)
+        {
+          // Flow fields only mean something in the PCM (see the header).
+          m_piConv.restrictTo(m_cfg.labels.pcm);
+          m_piGradP.restrictTo(m_cfg.labels.pcm);
+          m_piDiv.restrictTo(m_cfg.labels.pcm);
+          m_piAdv.restrictTo(m_cfg.labels.pcm);
+        }
         for (auto* g : { &m_uOld, &m_u.getSolution(), &m_piConv.get(), &m_piGradP.get() })
           *g = zero;
         for (auto* g : { &m_p.getSolution(), &m_piDiv.get(), &m_piAdv.get() })
@@ -442,7 +506,7 @@ namespace Rodin::Examples::Heat
         const auto& L = m_cfg.labels;
         m_topArea = integral(m_one, L.top);
         m_bottomArea = integral(m_one, L.bottom);
-        m_volume = integral(m_one);
+        m_volume = integralCells(m_one, L.pcm);  // PCM only
 
         setupProblem();
 
@@ -471,7 +535,8 @@ namespace Rodin::Examples::Heat
                    "liquidFraction,qBottom,I,Ta_C,ha,qTop,Tb_C,Tattic_C,qCeiling\n";
           const auto& m = m_cfg.pcm;
           Alert::Info() << "[mesh] cells=" << cells << " vertices=" << vertices
-                        << "  " << m_cfg.length << " m x " << m_cfg.thickness << " m"
+                        << "  " << m_cfg.length << " m x " << m_cfg.thickness << " m PCM + 2 x "
+                        << m_cfg.alThickness << " m Al"
                         << "  angle=" << m_cfg.angle << " deg  ny=" << m_cfg.ny
                         << " grade=" << m_cfg.yGrade << Alert::Raise;
           Alert::Info() << "[bottom] " << (m_cfg.attic ? "attic" : "room")
@@ -497,6 +562,8 @@ namespace Rodin::Examples::Heat
           updateWeather(m_t);     // boundary data at t^{n+1}
           updateStabilization();  // tau and Pi at (u^n, p^n, T^n)
           m_jacobianState = -1;   // Rodin reassembles at the start of a solve
+          std::fill(m_truncation.previous.begin(), m_truncation.previous.end(), 0.0);
+          std::fill(m_truncation.factor.begin(), m_truncation.factor.end(), 1.0);
           m_snes.solve();
           const Real elapsed = std::chrono::duration<Real>(Clock::now() - t0).count();
           if (!m_snes.converged())
@@ -515,33 +582,63 @@ namespace Rodin::Examples::Heat
       }
 
     private:
-      /// Structured triangulation of [0, length] x [0, thickness] built on
-      /// rank 0, boundary facets tagged by position, then partitioned.
+      /// Structured triangulation of [0, length] x [0, total thickness] built on
+      /// rank 0 (plates, PCM, plates from the bottom), boundary facets and cells
+      /// tagged by position, then partitioned.
       static MeshType makeMesh(const Context::MPI& context, const Config& cfg)
       {
         const auto& comm = context.getCommunicator();
         Rodin::MPI::Sharder sharder(context);
         if (comm.rank() == 0)
         {
-          auto mesh = Mesh<Context::Local>::UniformGrid(
-              Polytope::Type::Triangle, { cfg.nx + 1, cfg.ny + 1 });
-          const Real hx = cfg.length / static_cast<Real>(cfg.nx);
-          // Cell heights h_k = hy r^k, k = 0 at the top face (melting and
-          // solidification fronts start there), summing to the thickness.
+          // Rows of vertices across the layers. PCM: cell heights h_k = hy r^k,
+          // k = 0 at its top face (melting and solidification fronts start
+          // there), summing to the thickness. Plates: uniform.
           const Real r = cfg.yGrade, e = cfg.thickness, n = static_cast<Real>(cfg.ny);
           const bool uniform = std::abs(r - 1.0) < 1e-12;
           const Real hy = uniform ? e / n : e * (r - 1.0) / (std::pow(r, n) - 1.0);
+          const Real ea = cfg.alThickness;
+          const size_t na = ea > 0.0 ? cfg.alCells : 0;
+          std::vector<Real> ys;
+          for (size_t j = 0; j < na; ++j)
+            ys.push_back(ea * static_cast<Real>(j) / static_cast<Real>(na));
+          for (size_t j = 0; j <= cfg.ny; ++j)
+          {
+            const Real jj = static_cast<Real>(j);
+            ys.push_back(ea + (uniform ? jj * hy : e - hy * (std::pow(r, n - jj) - 1.0) / (r - 1.0)));
+          }
+          for (size_t j = 1; j <= na; ++j)
+            ys.push_back(ea + e + ea * static_cast<Real>(j) / static_cast<Real>(na));
+
+          auto mesh = Mesh<Context::Local>::UniformGrid(
+              Polytope::Type::Triangle, { cfg.nx + 1, ys.size() });
+          const Real hx = cfg.length / static_cast<Real>(cfg.nx);
           for (auto it = mesh.getVertex(); it; ++it)
           {
             Math::SpatialPoint x = mesh.getVertexCoordinates(it->getIndex());
             x(0) *= hx;
-            x(1) = uniform ? x(1) * hy : e - hy * (std::pow(r, n - x(1)) - 1.0) / (r - 1.0);
+            x(1) = ys[static_cast<size_t>(std::lround(x(1)))];
             mesh.setVertexCoordinates(it->getIndex(), x);
           }
           mesh.flush();
           connect(mesh);
 
           const Real tol = 1e-3 * std::min(hx, hy);
+          {
+            const size_t D = mesh.getDimension();
+            std::vector<std::pair<Index, Attribute>> cells;
+            for (auto it = mesh.getCell(); it; ++it)
+            {
+              Real yc = 0.0;
+              for (const auto& v : it->getVertices())
+                yc += mesh.getVertexCoordinates(v)(1);
+              yc /= static_cast<Real>(it->getVertices().size());
+              const bool inPCM = yc > ea && yc < ea + e;
+              cells.emplace_back(it->getIndex(), inPCM ? cfg.labels.pcm : cfg.labels.aluminium);
+            }
+            for (const auto& [c, a] : cells)
+              mesh.setAttribute({ D, c }, a);
+          }
           const auto& L = cfg.labels;
           std::vector<std::pair<Index, Attribute>> tags;
           for (auto it = mesh.getBoundary(); it; ++it)
@@ -554,9 +651,26 @@ namespace Rodin::Examples::Heat
             Attribute a = L.sides;
             if (c(1) < tol)
               a = L.bottom;
-            else if (c(1) > cfg.thickness - tol)
+            else if (c(1) > cfg.totalThickness() - tol)
               a = L.top;
             tags.emplace_back(it->getIndex(), a);
+          }
+          if (na > 0)
+          {
+            // Interior facets on the PCM / plate interfaces: no-slip walls.
+            for (auto it = mesh.getFace(); it; ++it)
+            {
+              if (mesh.isBoundary(it->getIndex()))
+                continue;
+              bool onInterface = true;
+              for (const auto& v : it->getVertices())
+              {
+                const Real y = mesh.getVertexCoordinates(v)(1);
+                onInterface = onInterface && (std::abs(y - ea) < tol || std::abs(y - ea - e) < tol);
+              }
+              if (onInterface)
+                tags.emplace_back(it->getIndex(), L.interface);
+            }
           }
           for (const auto& [f, a] : tags)
             mesh.setAttribute({ 1, f }, a);
@@ -599,18 +713,28 @@ namespace Rodin::Examples::Heat
       /// form, the wrapper adds these nodal terms on the T rows (offset + i).
       void setLumpedEnthalpy(size_t offset)
       {
-        m_flux = Integral(m_one, m_z);
-        m_flux.assemble();
         PetscErrorCode ierr;
         PetscInt rb = 0, re = 0;
-        ierr = VecGetOwnershipRange(m_flux.getVector(), &rb, &re);
-        assert(ierr == PETSC_SUCCESS);
-        const PetscScalar* m;
-        ierr = VecGetArrayRead(m_flux.getVector(), &m);
-        assert(ierr == PETSC_SUCCESS);
-        m_lumped.assign(m, m + (re - rb));
-        ierr = VecRestoreArrayRead(m_flux.getVector(), &m);
-        assert(ierr == PETSC_SUCCESS);
+        // m_i = (1, phi_i) over the PCM cells and over the aluminium cells.
+        const auto lumpedOver = [&](Attribute a, std::vector<PetscScalar>& out) {
+          m_flux = Integral(m_one, m_z).over(a);
+          m_flux.assemble();
+          ierr = VecGetOwnershipRange(m_flux.getVector(), &rb, &re);
+          assert(ierr == PETSC_SUCCESS);
+          const PetscScalar* m;
+          ierr = VecGetArrayRead(m_flux.getVector(), &m);
+          assert(ierr == PETSC_SUCCESS);
+          out.assign(m, m + (re - rb));
+          ierr = VecRestoreArrayRead(m_flux.getVector(), &m);
+          assert(ierr == PETSC_SUCCESS);
+        };
+        lumpedOver(m_cfg.labels.pcm, m_lumped);
+        if (m_cfg.alThickness > 0.0)
+          lumpedOver(m_cfg.labels.aluminium, m_lumpedAl);
+        else
+          m_lumpedAl.assign(m_lumped.size(), 0.0);
+        m_truncation.mask = &m_lumped;
+        m_truncation.rowBegin = static_cast<PetscInt>(offset) + rb;
         m_rows.resize(re - rb);
         for (PetscInt k = 0; k < re - rb; ++k)
           m_rows[k] = static_cast<PetscInt>(offset) + rb + k;
@@ -650,7 +774,8 @@ namespace Rodin::Examples::Heat
         const Real dt = self.m_cfg.dt;
         std::vector<PetscScalar> values(self.m_lumped.size());
         PetscCall(self.lumped(self.m_T.getSolution(), self.m_TOld, [&](size_t k, Real t, Real t0) {
-          values[k] = self.m_lumped[k] * (m.H(t) - m.H(t0)) / dt; }));
+          values[k] = (self.m_lumped[k] * (m.H(t) - m.H(t0))
+                       + self.m_lumpedAl[k] * self.m_cfg.alRho * self.m_cfg.alCp * (t - t0)) / dt; }));
         PetscCall(VecSetValues(f, static_cast<PetscInt>(values.size()), self.m_rows.data(),
                                values.data(), ADD_VALUES));
         PetscCall(VecAssemblyBegin(f));
@@ -678,7 +803,8 @@ namespace Rodin::Examples::Heat
         const Real dt = self.m_cfg.dt;
         PetscCall(self.lumped(self.m_T.getSolution(), self.m_TOld, [&](size_t k, Real t, Real) {
           const PetscInt row = self.m_rows[k];
-          const PetscScalar v = self.m_lumped[k] * m.dH(t) / dt;
+          const PetscScalar v = (self.m_lumped[k] * m.dH(t)
+                                 + self.m_lumpedAl[k] * self.m_cfg.alRho * self.m_cfg.alCp) / dt;
           (void)MatSetValues(P, 1, &row, 1, &row, &v, ADD_VALUES); }));
         PetscCall(MatAssemblyBegin(P, MAT_FINAL_ASSEMBLY));
         PetscCall(MatAssemblyEnd(P, MAT_FINAL_ASSEMBLY));
@@ -694,8 +820,12 @@ namespace Rodin::Examples::Heat
       /// mushy interval is moved to T_m.
       void setPhaseChangeTruncation(size_t offset, size_t size)
       {
-        m_truncation = { static_cast<PetscInt>(offset), static_cast<PetscInt>(offset + size),
-                         m_cfg.pcm.Tlow(), m_cfg.pcm.Thigh(), m_cfg.pcm.Tm };
+        m_truncation.begin = static_cast<PetscInt>(offset);
+        m_truncation.end = static_cast<PetscInt>(offset + size);
+        m_truncation.Ts = m_cfg.pcm.Tlow();
+        m_truncation.Tl = m_cfg.pcm.Thigh();
+        m_truncation.Tm = m_cfg.pcm.Tm;
+        m_truncation.band = m_cfg.pcm.dT;
         ::SNES snes = m_snes.getHandle();
         PetscErrorCode ierr = SNESSetType(snes, SNESNEWTONLS);
         assert(ierr == PETSC_SUCCESS);
@@ -711,12 +841,17 @@ namespace Rodin::Examples::Heat
       {
         PetscInt begin = 0, end = 0;
         Real Ts = 0.0, Tl = 0.0, Tm = 0.0;
+        const std::vector<PetscScalar>* mask = nullptr;  ///< PCM lumped mass of the owned T rows
+        PetscInt rowBegin = 0;                           ///< first owned T row
+        Real band = 0.0;                                 ///< K around [T_low, T_high] for damping
+        std::vector<PetscScalar> previous;               ///< last update of each owned T row (this solve)
+        std::vector<PetscScalar> factor;                 ///< damping factor of each owned T row
       };
 
       static PetscErrorCode truncate(::SNESLineSearch, ::Vec X, ::Vec, ::Vec W,
                                      PetscBool*, PetscBool* changedW, void* ctx)
       {
-        const auto& c = *static_cast<const Truncation*>(ctx);
+        auto& c = *static_cast<Truncation*>(ctx);
         PetscInt lo = 0, hi = 0;
         PetscCall(VecGetOwnershipRange(W, &lo, &hi));
         const PetscScalar* x;
@@ -724,14 +859,43 @@ namespace Rodin::Examples::Heat
         PetscCall(VecGetArrayRead(X, &x));
         PetscCall(VecGetArray(W, &w));
         PetscInt changed = 0;
+        const PetscInt nOwned = c.mask ? static_cast<PetscInt>(c.mask->size()) : 0;
+        if (static_cast<PetscInt>(c.previous.size()) != nOwned)
+          c.previous.assign(nOwned, 0.0);
+        if (static_cast<PetscInt>(c.factor.size()) != nOwned)
+          c.factor.assign(nOwned, 1.0);
         for (PetscInt i = std::max(lo, c.begin); i < std::min(hi, c.end); ++i)
         {
-          const PetscScalar xi = x[i - lo], wi = w[i - lo];
+          const PetscScalar xi = x[i - lo];
+          PetscScalar& wi = w[i - lo];
+          const PetscInt k = i - c.rowBegin;
+          const bool owned = k >= 0 && k < nOwned;
+          if (owned && (*c.mask)[k] <= 0.0)
+            continue;  // aluminium-only node: no phase change
           if ((xi <= c.Ts && wi >= c.Tl) || (xi >= c.Tl && wi <= c.Ts))  // [T_low, T_high]
           {
-            w[i - lo] = c.Tm;
+            wi = c.Tm;
             ++changed;
           }
+          else if (owned && xi > c.Ts - c.band && xi < c.Tl + c.band
+                   && (wi - xi) * c.previous[k] < 0.0)
+          {
+            // The update reverses the previous one near the phase change: a
+            // node cycling across a kink of H (e.g. 40.51 <-> 40.72 C around
+            // T_high). Each further reversal halves the step again (Newton
+            // overshoots there by 2-4x the distance to the root).
+            c.factor[k] *= 0.5;
+            wi = xi + c.factor[k] * (wi - xi);
+            ++changed;
+          }
+          else if (owned && c.factor[k] < 1.0)
+          {
+            c.factor[k] = std::min<PetscScalar>(1.0, 2.0 * c.factor[k]);
+            wi = xi + c.factor[k] * (wi - xi);
+            ++changed;
+          }
+          if (owned)
+            c.previous[k] = wi - xi;
         }
         PetscCall(VecRestoreArray(W, &w));
         PetscCall(VecRestoreArrayRead(X, &x));
@@ -777,18 +941,22 @@ namespace Rodin::Examples::Heat
         const auto tau1 = [this, &m, rho, nu](const Point& p) {
           const auto u = m_uOld.getValue(p);
           const Real h = cellSize(p);
-          return 1.0 / (4.0 * nu / (h * h) + 2.0 * std::sqrt(Math::dot(u, u)) / h
-                        + m.A(m_TOld.getValue(p)) / rho);
+          const auto a = p.getPolytope().getAttribute();
+          const Real A = (a && *a == m_cfg.labels.aluminium) ? m.C / m.eps : m.A(m_TOld.getValue(p));
+          return 1.0 / (4.0 * nu / (h * h) + 2.0 * std::sqrt(Math::dot(u, u)) / h + A / rho);
         };
         m_tau1.project(RealFunction(tau1));
         m_tau2.project(RealFunction([rho, tau1](const Point& p) {
           const Real h = cellSize(p);
           return rho * h * h / (4.0 * tau1(p)); }));
+        // Energy: the advective term is H'(T) u.grad T, so the capacity in
+        // tau_T and in its weight is H'(T^n) (rho c_p outside the mush; inside,
+        // the advection of latent heat, ~100 x rho c_p, was left unstabilised).
         m_rhoCpTauT.project(RealFunction([this, &m](const Point& p) {
           const auto u = m_uOld.getValue(p);
           const Real T = m_TOld.getValue(p), h = cellSize(p);
-          const Real rhoCp = m.rho(T) * m.cp(T), alpha = m.kappa(T) / rhoCp;
-          return rhoCp / (4.0 * alpha / (h * h) + 2.0 * std::sqrt(Math::dot(u, u)) / h); }));
+          const Real C = m.dH(T), alpha = m.kappa(T) / C;
+          return C / (4.0 * alpha / (h * h) + 2.0 * std::sqrt(Math::dot(u, u)) / h); }));
 
         const auto& U = m_u.getSolution();
         m_piConv.project(Mult(Jacobian(U), U));
@@ -805,6 +973,36 @@ namespace Rodin::Examples::Heat
         const Real sigmaEps = Sigma * m_cfg.emissivity, alphaS = m_cfg.absorptivity;
         const Real hB = m_cfg.hBottom(), epsP = m_cfg.pressurePenalty;
         const auto& L = m_cfg.labels;
+        const Attribute PCM = L.pcm, AL = L.aluminium;
+
+        // T-dependent coefficients evaluated at the quadrature points of the
+        // current iterate T_h: the Jacobian terms below are then the exact
+        // derivatives of the residual. (P1 interpolants of nodal values are
+        // not: the derivative of I_h[A(T)] is I_h[A'(T) dT], not I_h[A'] dT,
+        // and at the front A' changes by orders of magnitude between nodes,
+        // which made Newton converge linearly or cycle.)
+        const auto& Tq = m_T.getSolution();
+        const auto atT = [&m, &Tq](Real (PCM::*f)(Real) const) {
+          return RealFunction([&m, &Tq, f](const Point& p) { return (m.*f)(Tq.getValue(p)); });
+        };
+        // Carman-Kozeny, -pcm_darcy:
+        //   0: A(T^{n+1}) with its exact derivative A'(T) dT u in the Jacobian;
+        //   1: A(T^n) (explicit);
+        //   2: A(T^{n+1}) in the residual, A'(T) dT u dropped from the Jacobian
+        //      (default).
+        // A'(T) u is ~5x the buoyancy per kelvin in the mush: with mode 0 the
+        // linearised coupling sends Newton far off; mode 1 oscillates in time
+        // when the top of the layer turns fully liquid (A drops from ~1e5 to 0
+        // within a step).
+        const int darcy = m_cfg.darcy;
+        const auto& Tn = m_TOld;
+        const auto cA = RealFunction([&m, &Tq, &Tn, darcy](const Point& p) {
+          return m.A(darcy == 1 ? Tn.getValue(p) : Tq.getValue(p)); });
+        const auto cdA = RealFunction([&m, &Tq, darcy](const Point& p) {
+          return darcy == 0 ? m.dA(Tq.getValue(p)) : 0.0; });
+        const auto cH1 = atT(&PCM::dH), cH2 = atT(&PCM::d2H);
+        const auto cK = atT(&PCM::kappa), cdK = atT(&PCM::dKappa);
+        const Real aWall = m.C / m.eps, kAl = m_cfg.alK;  // plates: Darcy of the solid PCM
 
         // Gravity in the roof frame: x along the slope, y across the layer.
         const Real theta = m_cfg.angle * M_PI / 180.0;
@@ -828,53 +1026,59 @@ namespace Rodin::Examples::Heat
 
         m_problem =
             // ---- Jacobian: momentum --------------------------------------
-              Integral(Dot((rho / dt) * du + 0.5 * rho * (Div(du) * U) + 0.5 * rho * (Div(U) * du), m_v))
-            + Integral(dConvU, rho * m_v + rho * (m_tau1 * streamV))
-            + rho * Integral(du, Mult(Transpose(Jacobian(m_v)), m_tau1 * (convU - m_piConv.get())))
-            + mu * Integral(Jacobian(du), Jacobian(m_v))
-            + Integral(m_tau2 * Div(du), Div(m_v))
-            - Integral(dp, Div(m_v))
-            + Integral(m_A * du, m_v)                                  // Carman-Kozeny
-            + Integral(m_dA * dT, Dot(U, m_v))                         //   A'(T) dT u
-            + Integral(rhoBeta * dT, Dot(g, m_v))                      // buoyancy
+              Integral(Dot((rho / dt) * du + 0.5 * rho * (Div(du) * U) + 0.5 * rho * (Div(U) * du), m_v)).over(PCM)
+            + Integral(dConvU, rho * m_v + rho * (m_tau1 * streamV)).over(PCM)
+            + rho * Integral(du, Mult(Transpose(Jacobian(m_v)), m_tau1 * (convU - m_piConv.get()))).over(PCM)
+            + mu * Integral(Jacobian(du), Jacobian(m_v)).over(PCM)
+            + Integral(m_tau2 * Div(du), Div(m_v)).over(PCM)
+            - Integral(dp, Div(m_v)).over(PCM)
+            + Integral(cA * du, m_v).over(PCM)                         // Carman-Kozeny
+            + Integral(cdA * dT, Dot(U, m_v)).over(PCM)                //   A'(T) dT u
+            + aWall * Integral(du, m_v).over(AL)                       // plates: u = 0
+            + Integral(rhoBeta * dT, Dot(g, m_v)).over(PCM)            // buoyancy
 
             // ---- Jacobian: continuity ------------------------------------
-            + Integral(Div(du), m_q)
-            + (1.0 / rho) * Integral(m_tau1 * Grad(dp), Grad(m_q))
+            + Integral(Div(du), m_q).over(PCM)
+            + (1.0 / rho) * Integral(m_tau1 * Grad(dp), Grad(m_q)).over(PCM)
             + epsP * Integral(dp, m_q)
 
             // ---- Jacobian: energy ----------------------------------------
-            + Integral(m_C * dAdvT, m_w)  // M_L H'(T)/dt: added in jacobian()
-            + Integral(m_rhoCpTauT * dAdvT, streamW)
-            + Integral(m_kappa * Grad(dT), Grad(m_w))
-            + Integral(m_dKappa * dT, Dot(Grad(Th), Grad(m_w)))
-            + Integral(dAdvU, m_C * m_w + m_rhoCpTauT * streamW)
-            + Integral(m_rhoCpTauT * (advT - m_piAdv.get()) * du, Grad(m_w))
+            + Integral(cH1 * dAdvT, m_w).over(PCM)  // M_L H'(T)/dt: added in jacobian()
+            + Integral(cH2 * advT * dT, m_w).over(PCM)  // H''(T) dT u.grad T
+            + Integral(m_rhoCpTauT * dAdvT, streamW).over(PCM)
+            + Integral(cK * Grad(dT), Grad(m_w)).over(PCM)
+            + kAl * Integral(Grad(dT), Grad(m_w)).over(AL)
+            + Integral(cdK * dT, Dot(Grad(Th), Grad(m_w))).over(PCM)
+            + Integral(dAdvU, cH1 * m_w + m_rhoCpTauT * streamW).over(PCM)
+            + Integral(m_rhoCpTauT * (advT - m_piAdv.get()) * du, Grad(m_w)).over(PCM)
             + BoundaryIntegral((m_ha + 4.0 * sigmaEps * Pow(Th, 3)) * dT, m_w).over(L.top)
             + hB * BoundaryIntegral(dT, m_w).over(L.bottom)
 
             // ---- Residual: momentum --------------------------------------
-            + Integral(Dot((rho / dt) * (U - m_uOld) + rho * convU + 0.5 * rho * (Div(U) * U), m_v))
-            + rho * Integral(m_tau1 * (convU - m_piConv.get()), streamV)
-            + mu * Integral(Jacobian(U), Jacobian(m_v))
-            + Integral(m_tau2 * (Div(U) - m_piDiv.get()) - P, Div(m_v))
-            + Integral(Dot(m_A * U + (rhoBeta * (Th - Tref)) * g, m_v))
+            + Integral(Dot((rho / dt) * (U - m_uOld) + rho * convU + 0.5 * rho * (Div(U) * U), m_v)).over(PCM)
+            + rho * Integral(m_tau1 * (convU - m_piConv.get()), streamV).over(PCM)
+            + mu * Integral(Jacobian(U), Jacobian(m_v)).over(PCM)
+            + Integral(m_tau2 * (Div(U) - m_piDiv.get()) - P, Div(m_v)).over(PCM)
+            + Integral(Dot(cA * U, m_v)).over(PCM)
+            + aWall * Integral(Dot(U, m_v)).over(AL)
+            + Integral(Dot((rhoBeta * (Th - Tref)) * g, m_v)).over(PCM)
 
             // ---- Residual: continuity ------------------------------------
-            + Integral(Div(U), m_q)
-            + (1.0 / rho) * Integral(m_tau1 * (Grad(P) - m_piGradP.get()), Grad(m_q))
+            + Integral(Div(U), m_q).over(PCM)
+            + (1.0 / rho) * Integral(m_tau1 * (Grad(P) - m_piGradP.get()), Grad(m_q)).over(PCM)
             + epsP * Integral(P, m_q)
 
             // ---- Residual: energy ----------------------------------------
-            + Integral(m_C * advT, m_w)   // dH/dt: lumped, added in residual()
-            + Integral(m_rhoCpTauT * (advT - m_piAdv.get()), streamW)
-            + Integral(m_kappa * Grad(Th), Grad(m_w))
+            + Integral(cH1 * advT, m_w).over(PCM)   // dH/dt: lumped, added in residual()
+            + Integral(m_rhoCpTauT * (advT - m_piAdv.get()), streamW).over(PCM)
+            + Integral(cK * Grad(Th), Grad(m_w)).over(PCM)
+            + kAl * Integral(Dot(Grad(Th), Grad(m_w))).over(AL)
             + BoundaryIntegral((m_ha * (Th - m_Ta) + sigmaEps * (Pow(Th, 4) - m_Tsky4)
                                 - alphaS * m_I) * m_w).over(L.top)
             + hB * BoundaryIntegral((Th - m_Tb) * m_w).over(L.bottom)
 
             // ---- No-slip on every wall: correction = 0 - state -----------
-            + DirichletBC(du, -U).on(FlatSet<Attribute>{ L.bottom, L.top, L.sides });
+            + DirichletBC(du, -U).on(FlatSet<Attribute>{ L.bottom, L.top, L.sides, L.interface });
       }
 
       template <class Expression>
@@ -889,6 +1093,15 @@ namespace Rodin::Examples::Heat
       Real integral(const Expression& f)
       {
         m_flux = Integral(f, m_z);
+        m_flux.assemble();
+        return m_flux(m_one);
+      }
+
+      /// Integral over the cells of one region.
+      template <class Expression>
+      Real integralCells(const Expression& f, Attribute a)
+      {
+        m_flux = Integral(f, m_z).over(a);
         m_flux.assemble();
         return m_flux(m_one);
       }
@@ -918,7 +1131,7 @@ namespace Rodin::Examples::Heat
                   + m_cfg.hVent() * (T0 + m_sample.Ta)) / g;
           qCeiling = m_cfg.uCeiling * (Tatt - m_cfg.tIn);
         }
-        const Real Ybar = integral(m_Y) / m_volume;
+        const Real Ybar = integralCells(m_Y, m_cfg.labels.pcm) / m_volume;
         const Real umax = std::max(std::abs(u.max()), std::abs(u.min()));
         const Real Tmax = T.max() - T0, Tmin = T.min() - T0;
         const int its = static_cast<int>(m_snes.getIterationNumber());
@@ -984,7 +1197,7 @@ namespace Rodin::Examples::Heat
       Truncation m_truncation;
 
       // Lumped enthalpy rate: (1, phi_i), monolithic T rows, wrapped callbacks.
-      std::vector<PetscScalar> m_lumped;
+      std::vector<PetscScalar> m_lumped, m_lumpedAl;
       std::vector<PetscInt> m_rows;
       PetscErrorCode (*m_rodinResidual)(::SNES, ::Vec, ::Vec, void*) = nullptr;
       void* m_rodinResidualCtx = nullptr;
@@ -1048,6 +1261,10 @@ int main(int argc, char** argv)
     cfg.ny = static_cast<size_t>(ny);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_length", &cfg.length, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_thickness", &cfg.thickness, PETSC_NULLPTR);
+    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_al", &cfg.alThickness, PETSC_NULLPTR);
+    PetscInt alCells = static_cast<PetscInt>(cfg.alCells);
+    PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_al_n", &alCells, PETSC_NULLPTR);
+    cfg.alCells = static_cast<size_t>(alCells);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_dt", &cfg.dt, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_tend", &cfg.tEnd, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_angle", &cfg.angle, PETSC_NULLPTR);
@@ -1062,6 +1279,9 @@ int main(int argc, char** argv)
     PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_attic", &attic, PETSC_NULLPTR);
     cfg.attic = attic == PETSC_TRUE;
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_uceil", &cfg.uCeiling, PETSC_NULLPTR);
+    PetscInt darcy = cfg.darcy;
+    PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_darcy", &darcy, PETSC_NULLPTR);
+    cfg.darcy = static_cast<int>(darcy);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_attic_ach", &cfg.atticAch, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_attic_height", &cfg.atticHeight, PETSC_NULLPTR);
     PetscInt every = cfg.outputEvery, print = cfg.printEvery;

@@ -1,20 +1,24 @@
 #!/usr/bin/env bash
-# Thickness sweep of NaturalConvectionPCM: RT42 roof layer, typical clear
-# January day in Paine (RM), north-facing roof at ANGLE deg, ventilated attic
-# underneath (entretecho: h_in 6 W/m^2K, ceiling U_c, ventilation ACH).
+# Thickness sweep of NaturalConvectionPCM: RT42 roof layer between two
+# aluminium plates of AL m (sandwich), typical clear January day in SITE
+# (paine or calama), north-facing roof at ANGLE deg. Outside: solar gain,
+# convection h_a(wind) and long-wave radiation to the sky. Inside: convection
+# only (h_in = HIN) to a ventilated attic (entretecho: ceiling U_c, ACH).
 #
 #   cd ~/runs && bash ~/rodin/examples/Heat/PCM_Paine/run_pcm_sweep.sh
 #   NP=8 NJOBS=10 bash run_pcm_sweep.sh            # pc9: all cases at once
-#   THICKNESSES="5 25 50" REFINE=2 bash run_pcm_sweep.sh   # mesh check
+#   THICKNESSES="5 20" REFINE=2 bash run_pcm_sweep.sh   # mesh check
+#   AL=0 HX=0.005 GRADE=1.04 NYMIN=20 bash run_pcm_sweep.sh # PCM alone
 #
 # Every case runs in OUT/e_XXmm (CSV + XDMF/HDF5 of u, p, T, Y every hour);
 # finished cases (file DONE) are skipped, so the script can be relaunched.
 # Then: bash postprocess_pcm.sh OUT
 #
-# Mesh (structured, triangles): h_x = HX (5 mm: 400 cells over 2 m); across
-# the layer, cells of HYTOP = 0.25 mm at the top face growing by GRADE = 1.04
-# downwards, n_y = max(NYMIN, ln(1 + e (GRADE - 1)/HYTOP)/ln GRADE): 20 cells
-# at 5 mm (h_y 0.17-0.36 mm), 57 at 50 mm (0.24-2.2 mm). Melting and
+# Mesh (structured, triangles): h_x = HX (10 mm: 200 cells over 2 m); NAL
+# cells across each plate; across the PCM, cells of HYTOP = 0.25 mm at its top
+# face growing by GRADE = 1.08 downwards,
+# n_y = max(NYMIN, ln(1 + e (GRADE - 1)/HYTOP)/ln GRADE): 13 cells at 5 mm,
+# 26 at 20 mm (0.25-1.7 mm). Melting and
 # solidification start at the top face; the first liquid layer must span
 # several cells: with a uniform h_y of 1.25 mm (or 0.5 mm) at 50 mm, Newton
 # iterations grow from ~5 to 30 within minutes of the onset of melting and the
@@ -29,22 +33,27 @@ REPO="$(cd "$HERE/../../.." && pwd)"
 
 BUILD="${BUILD:-$REPO/build}"
 BIN="${BIN:-$BUILD/examples/Heat/NaturalConvectionPCM}"
-OUT="${OUT:-$PWD/pcm_paine_runs}"
+OUT="${OUT:-$PWD/pcm_runs}"
 MPIRUN="${MPIRUN:-mpirun}"     # may carry options, e.g. "mpirun --oversubscribe"
 NP="${NP:-4}"                 # MPI ranks per case
 NJOBS="${NJOBS:-1}"           # cases running at the same time
-THICKNESSES="${THICKNESSES:-5 10 15 20 25 30 35 40 45 50}"   # mm
+THICKNESSES="${THICKNESSES:-5 10 15 20}"   # mm of PCM
+SITE="${SITE:-calama}"        # weather: paine or calama (paine_weather.py --site)
+AL="${AL:-0.01}"              # m, aluminium plate below and above the PCM (0: none)
+NAL="${NAL:-4}"               # cells across each plate
+HIN="${HIN:-2}"               # W/m^2K, convection only on the attic side
 ANGLE="${ANGLE:-25}"          # deg, roof slope (typical gable roof)
 FACING="${FACING:-north}"     # roof orientation (north: most sun in Chile)
-NDAYS="${NDAYS:-3}"           # periodic days; the last one is analysed
+NDAYS="${NDAYS:-2}"           # periodic days; the last one is analysed
 DT="${DT:-30}"                # s
-MUSHY="${MUSHY:-1}"           # K, T_l - T_s (solver default 1 K)
-RETRIES="${RETRIES:-2}"       # restarts of a failed case (see run_case)
+MUSHY="${MUSHY:-2}"           # K, T_l - T_s (solver default 1 K; RT42 melts over 38-43 C)
+MAXIT="${MAXIT:-100}"         # Newton iterations per step
+RETRIES="${RETRIES:-1}"       # restarts of a failed case (see run_case)
 LENGTH="${LENGTH:-2.0}"       # m, along the slope
-HX="${HX:-0.005}"             # m
+HX="${HX:-0.01}"              # m
 HYTOP="${HYTOP:-0.00025}"     # m, cell height at the top face
-GRADE="${GRADE:-1.04}"        # height ratio of consecutive cells, top -> bottom
-NYMIN="${NYMIN:-20}"
+GRADE="${GRADE:-1.08}"        # height ratio of consecutive cells, top -> bottom
+NYMIN="${NYMIN:-10}"
 REFINE="${REFINE:-1}"
 TIN="${TIN:-24}"              # C, room below the ceiling
 UCEIL="${UCEIL:-0.38}"        # W/m^2K, insulated ceiling (OGUC 4.1.10)
@@ -57,8 +66,8 @@ if [ ! -x "$BIN" ]; then
   exit 1
 fi
 mkdir -p "$OUT"
-WEATHER="$OUT/paine_enero_${FACING}_${ANGLE}deg.csv"
-python3 "$HERE/paine_weather.py" --tilt "$ANGLE" --facing "$FACING" -o "$WEATHER"
+WEATHER="$OUT/${SITE}_enero_${FACING}_${ANGLE}deg.csv"
+python3 "$HERE/paine_weather.py" --site "$SITE" --tilt "$ANGLE" --facing "$FACING" -o "$WEATHER"
 
 TEND=$(awk -v d="$NDAYS" 'BEGIN { printf "%d", d * 86400 }')
 EVERY=$(awk -v dt="$DT" 'BEGIN { printf "%d", 3600 / dt + 0.5 }')
@@ -67,7 +76,7 @@ NX=$(awk -v L="$LENGTH" -v h="$HX" -v r="$REFINE" 'BEGIN { printf "%d", r * int(
 {
   echo "date: $(date)"
   echo "git: $(git -C "$REPO" rev-parse --short HEAD 2>/dev/null || echo '?')"
-  echo "THICKNESSES=$THICKNESSES ANGLE=$ANGLE FACING=$FACING NDAYS=$NDAYS DT=$DT"
+  echo "THICKNESSES=$THICKNESSES SITE=$SITE AL=$AL NAL=$NAL HIN=$HIN ANGLE=$ANGLE FACING=$FACING NDAYS=$NDAYS DT=$DT"
   echo "LENGTH=$LENGTH HX=$HX HYTOP=$HYTOP GRADE=$GRADE NYMIN=$NYMIN REFINE=$REFINE NP=$NP"
   echo "TIN=$TIN UCEIL=$UCEIL ACH=$ACH ATTICH=$ATTICH EXTRA=$EXTRA"
 } > "$OUT/sweep.txt"
@@ -86,22 +95,22 @@ run_case() {
     return 0
   fi
   mkdir -p "$dir"
-  # If Newton fails (the run aborts), the case restarts with a 2 K mushy range
-  # (RT42 melts over 38-43 C, so still physical), then also with dt/2. A 1 K
-  # range under ~2 cells of melt at the onset of melting can make Newton
-  # diverge in thick layers (seen at 50 mm); a smaller dt alone does not help.
-  # Retries also allow 100 Newton iterations (default 30).
+  # If Newton fails (the run aborts), the case restarts with a 4 K mushy range
+  # (RT42 melts over 38-43 C, so still physical). A smaller dt does not help:
+  # in the tests it failed earlier, in the same state (melt-layer flow
+  # ~3e-4 m/s). With 2 K and 100 iterations, 5-20 mm passed in the tests.
   local dt="$DT" every="$EVERY" mushy="$MUSHY" try=0 retryOpts=""
   while :; do
-    echo "thickness_mm=$mm nx=$NX ny=$ny grade=$grade angle=$ANGLE dt=$dt mushy=$mushy ndays=$NDAYS" > "$dir/case.txt"
+    echo "thickness_mm=$mm al_mm=$(awk -v a="$AL" 'BEGIN { printf "%g", a * 1000 }') nx=$NX ny=$ny nal=$NAL grade=$grade angle=$ANGLE dt=$dt mushy=$mushy ndays=$NDAYS" > "$dir/case.txt"
     echo "[run ] e = $mm mm  mesh $NX x $ny (grade $grade)  dt = $dt s  mushy = $mushy K  ($(date +%H:%M))"
     # shellcheck disable=SC2086
     if (cd "$dir" && $MPIRUN -n "$NP" "$BIN" \
           -pcm_thickness "$e" -pcm_length "$LENGTH" -pcm_nx "$NX" -pcm_ny "$ny" -pcm_ygrade "$grade" \
           -pcm_angle "$ANGLE" -pcm_weather "$WEATHER" -pcm_dt "$dt" -pcm_tend "$TEND" -pcm_mushy "$mushy" \
           -pcm_output_every "$every" -pcm_print_every "$every" \
+          -pcm_al "$AL" -pcm_al_n "$NAL" -pcm_hin "$HIN" \
           -pcm_attic 1 -pcm_tin "$TIN" -pcm_uceil "$UCEIL" -pcm_attic_ach "$ACH" \
-          -pcm_attic_height "$ATTICH" $retryOpts $EXTRA > run.log 2>&1); then
+          -pcm_attic_height "$ATTICH" -snes_max_it "$MAXIT" $retryOpts $EXTRA > run.log 2>&1); then
       touch "$dir/DONE"
       echo "[done] e = $mm mm  ($(date +%H:%M))"
       return 0
@@ -114,12 +123,11 @@ run_case() {
       return 0
     fi
     echo "[retry] e = $mm mm: Newton failed with dt = $dt s, mushy = $mushy K ($(grep -m1 'Fatal' "$dir/run.log" || true))"
-    retryOpts="-snes_max_it 100"
     if awk -v m="$mushy" 'BEGIN { exit !(m < 2) }'; then
       mushy=2
     else
-      dt=$(awk -v d="$dt" 'BEGIN { printf "%g", d / 2 }')
-      every=$((every * 2))
+      mushy=4
+      retryOpts="-pcm_round 1"
     fi
   done
 }

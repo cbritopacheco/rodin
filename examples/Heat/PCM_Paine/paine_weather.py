@@ -16,6 +16,11 @@ Site: Paine, -33.81, -70.74, 370 m (Santiago basin, southern end).
   - w: valley breeze, --wnight at night to --wday at 16 h.
 
     python3 paine_weather.py --tilt 25 --facing north -o paine_enero.csv
+
+--site calama: typical clear January day in Calama (El Loa, -22.50, 2326 m),
+the defaults of NaturalConvectionPCM's built-in table: GHI 8.3 kWh/m^2/day,
+T_a 6-26 C, Loa basin afternoon wind 2 -> 9 m/s. Explicit options override
+the preset.
 """
 import argparse
 import math
@@ -23,19 +28,27 @@ import math
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--lat", type=float, default=-33.81)
-    ap.add_argument("--alt", type=float, default=0.37, help="km")
+    ap.add_argument("--site", choices=["paine", "calama"], default="paine")
+    ap.add_argument("--lat", type=float, default=None)
+    ap.add_argument("--alt", type=float, default=None, help="km")
     ap.add_argument("--day", type=int, default=15, help="day of the year")
     ap.add_argument("--tilt", type=float, default=25.0, help="roof slope, deg")
     ap.add_argument("--facing", choices=["north", "south", "east", "west", "flat"], default="north")
-    ap.add_argument("--ghi", type=float, default=8.2, help="daily GHI, kWh/m^2/day")
+    ap.add_argument("--ghi", type=float, default=None, help="daily GHI, kWh/m^2/day")
     ap.add_argument("--albedo", type=float, default=0.2)
-    ap.add_argument("--tmin", type=float, default=13.0)
-    ap.add_argument("--tmax", type=float, default=31.0)
-    ap.add_argument("--wnight", type=float, default=1.5)
-    ap.add_argument("--wday", type=float, default=4.0)
+    ap.add_argument("--tmin", type=float, default=None)
+    ap.add_argument("--tmax", type=float, default=None)
+    ap.add_argument("--wnight", type=float, default=None)
+    ap.add_argument("--wday", type=float, default=None)
     ap.add_argument("-o", "--output", default="paine_enero.csv")
     a = ap.parse_args()
+    preset = {
+        "paine": dict(lat=-33.81, alt=0.37, ghi=8.2, tmin=13.0, tmax=31.0, wnight=1.5, wday=4.0),
+        "calama": dict(lat=-22.50, alt=2.326, ghi=8.3, tmin=6.0, tmax=26.0, wnight=2.0, wday=9.0),
+    }[a.site]
+    for k, v in preset.items():
+        if getattr(a, k) is None:
+            setattr(a, k, v)
 
     d2r = math.pi / 180.0
     phi = a.lat * d2r
@@ -101,9 +114,9 @@ def main():
     poa_day *= 24.0 / m / 1000.0
 
     with open(a.output, "w") as f:
-        f.write("# Paine (RM) clear January day: lat %.2f, day %d, tilt %.1f deg facing %s;"
+        f.write("# %s clear January day: lat %.2f, day %d, tilt %.1f deg facing %s;"
                 " GHI %.2f kWh/m2/day, plane of roof %.2f kWh/m2/day\n"
-                % (a.lat, n, a.tilt, a.facing, a.ghi, poa_day))
+                % (a.site, a.lat, n, a.tilt, a.facing, a.ghi, poa_day))
         f.write("# hour, I [W/m^2] (plane of roof), T_a [C], w [m/s]\n")
         for r in rows:
             f.write("%.2f,%.1f,%.2f,%.2f\n" % r)

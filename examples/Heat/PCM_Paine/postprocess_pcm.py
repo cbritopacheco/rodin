@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.tri as mtri  # noqa: E402
 
 DAY = 86400.0
+SITE = "?"  # read from OUT/sweep.txt
 
 
 def read_csv(path):
@@ -82,6 +83,7 @@ def analyse(d, info):
         "e_mm": info["thickness_mm"],
         "malla": "%dx%d" % (info.get("nx", 0), info.get("ny", 0)),
         "dias": nd,
+        "al_mm": info.get("al_mm", 0.0),
         "dt": info.get("dt", float("nan")),
         "mushy": info.get("mushy", 1.0),
         "qTop_max": qt[it],
@@ -149,7 +151,7 @@ def write_summary(rows, out):
             w.writerow([r[c[0]] for c in COLUMNS] + [r["newton_max"]])
     ref = rows[0]["qBottom_max"]
     lines = [
-        "# Barrido de espesor PCM (RT42), Paine enero, ultimo dia simulado",
+        "# Barrido de espesor PCM (RT42), %s enero, ultimo dia simulado" % SITE,
         "",
         "q_sup > 0: entra al PCM por el techo; q_inf > 0: sale del PCM al entretecho; "
         "q_cielo > 0: entra a la vivienda por el cielo. Energias por m2 de techo y dia. "
@@ -210,7 +212,7 @@ def plot_fluxes(cases, out):
     for a in ax:
         a.axhline(0, color="0.3", lw=0.6)
     ax[1].legend(ncol=5, fontsize=7, loc="upper left")
-    fig.suptitle("Flujos de calor en la capa de PCM, ultimo dia (Paine, enero)", fontsize=10)
+    fig.suptitle("Flujos de calor, ultimo dia (%s, enero)" % SITE, fontsize=10)
     fig.tight_layout()
     fig.savefig(os.path.join(out, "flujos_dia.png"))
     plt.close(fig)
@@ -346,10 +348,18 @@ def plot_contours(case_dir, r, nd, hours, out):
         tr = mtri.Triangulation(xy[:, 0], y_mm, tri)
         T = f["temperature"] - 273.15
         cf = a.tricontourf(tr, T, levels=levels, cmap="inferno")
+        al = r.get("al_mm", 0.0)
+        e = r["e_mm"]
         if "liquid_fraction" in f:
+            # Y only means something in the PCM: mask triangles in the plates.
             Y = f["liquid_fraction"]
+            yc = y_mm[tri].mean(axis=1)
+            trp = mtri.Triangulation(xy[:, 0], y_mm, tri, mask=(yc < al) | (yc > al + e))
             if Y.min() < 0.5 < Y.max():
-                a.tricontour(tr, Y, levels=[0.5], colors="cyan", linewidths=0.9)
+                a.tricontour(trp, Y, levels=[0.5], colors="cyan", linewidths=0.9)
+        if al > 0:
+            for yl in (al, al + e):
+                a.axhline(yl, color="white", lw=0.6, ls="--")
         a.set_ylabel("y [mm]")
         a.set_ylim(0, y_mm.max())
         a.grid(False)
@@ -358,15 +368,19 @@ def plot_contours(case_dir, r, nd, hours, out):
     ax[-1].set_xlabel("x a lo largo de la pendiente [m] (escala vertical exagerada)")
     cb = fig.colorbar(cf, ax=list(ax), fraction=0.025, pad=0.06)
     cb.set_label("T [$^\\circ$C]")
-    fig.suptitle("Temperatura en el PCM, e = %g mm, ultimo dia (cian: frente de fusion Y = 0.5)"
-                 % r["e_mm"], fontsize=10)
+    if r.get("al_mm", 0.0) > 0:
+        title = ("Temperatura, PCM %g mm entre placas de Al de %g mm (- -), ultimo dia"
+                 " (cian: frente de fusion Y = 0.5)" % (r["e_mm"], r["al_mm"]))
+    else:
+        title = "Temperatura en el PCM, e = %g mm, ultimo dia (cian: frente de fusion Y = 0.5)" % r["e_mm"]
+    fig.suptitle(title, fontsize=10)
     fig.savefig(os.path.join(out, "T_contornos_e_%02dmm.png" % int(r["e_mm"])), bbox_inches="tight")
     plt.close(fig)
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("out", nargs="?", default="pcm_paine_runs")
+    ap.add_argument("out", nargs="?", default="pcm_runs")
     ap.add_argument("--hours", type=float, nargs="+", default=[9, 13, 17, 21],
                     help="solar hours of the last day for the contours (>= 3)")
     ap.add_argument("--cases", type=float, nargs="*", default=None,
@@ -378,6 +392,11 @@ def main():
                   if os.path.exists(os.path.join(d, "NaturalConvectionPCM.csv")))
     if not dirs:
         sys.exit("No cases with NaturalConvectionPCM.csv in %s" % a.out)
+    global SITE
+    sw = os.path.join(a.out, "sweep.txt")
+    if os.path.exists(sw):
+        m = re.search(r"SITE=(\w+)", open(sw).read())
+        SITE = m.group(1).capitalize() if m else "Paine"
     post = os.path.join(a.out, "post")
     os.makedirs(post, exist_ok=True)
     style()
