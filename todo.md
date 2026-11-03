@@ -1090,18 +1090,32 @@ contre manuel sont à 1e-15.
 | CG Kokkos Poisson 1M (158 it.): assemblage, résolution | 69, 51 ms | 160, 234 ms |
 | CG Kokkos Poisson 3.4M (237 it.) | 224, 241 ms | 496, 828 ms |
 | H1 Q2 n=40: scalaire, vecteur, hyperélastique | 360, 405, 1243 ms | 959, 1033, 4308 ms |
-| H1 Q3 hexaèdres n=24 | mémoire épuisée | 4.37, 4.50, 10.7 s |
+| H1 Q3 hexaèdres n=24 | 1.46, 1.56, 4.30 s | 4.37, 4.50, 10.7 s |
 | H1 P3 tétraèdres n=24 | 36, 67, 209 ms | 96, 145, 562 ms |
 | PETSc Poisson 1M hypre: assemblage, résolution | 567, 971 ms | 1062, 2659 ms |
 | PETSc élasticité 822k GAMG | 302, 2183 ms | 569, 3883 ms |
 | PETSc Navier-Stokes 149k, 5 pas Schur | 285 ms, 10.8 s | 475 ms, 13.7 s |
-| NavierStokes Kokkos 160 pas | 0.65 s, 0.91 s (cuDSS) | 1.81 s, 84.5 s (SparseLU hôte) |
+| NavierStokes Kokkos 160 pas | 0.65 s, 0.91 s (cuDSS) | 1.37 s, 12.1 s (RocSolverRF) |
 
-- [ ] H1 Q3 hexaèdres n=24 épuise les 32 Go de la 5090 (`bad_alloc` de
-      thrust) alors que la R9700 l'assemble: chercher l'allocation propre au
-      chemin CUDA.
-- [ ] NavierStokes Kokkos sur HIP: brancher `RocSolverRF` comme `CuDSS`,
-      la résolution hôte fait 98% du temps.
+- [x] H1 Q3 hexaèdres n=24 épuisait les 32 Go de la 5090 (`bad_alloc` de
+      thrust) alors que la R9700 l'assemble. La forme hyperélastique liste
+      448 M contributions (192² par maille): lignes, colonnes et valeurs
+      (10.8 Go), clés et positions (7.2 Go), et le tri radix de thrust en
+      double tampon redemande autant que les clés et positions. Les lignes
+      et colonnes ne servent plus après la liste (les clés les contiennent,
+      les colonnes restent pour l'élimination de Dirichlet): libérées avant
+      le tri, l'assemblage passe en 1.46, 1.56 et 4.30 s sur la 5090.
+- [x] NavierStokes Kokkos sur HIP: `RocSolverRF` branché comme `CuDSS`
+      (matrice lue en place, analyse UMFPACK au premier pas puis
+      refactorisation device): 160 pas en 1.37 s d'assemblage et 12.1 s de
+      résolution sur la R9700 au lieu de 84.5 s, dont 1.4 s pour la
+      première analyse; la refactorisation rocSOLVER reste vers 70 ms par
+      pas pour 9.5k inconnues.
+- [x] cuDSS activé sur ares (`RODIN_USE_CUDSS=ON`, cuDSS 1.0.0.35):
+      0.91 s de résolution au lieu de 36.7 s.
+- [x] Tests `MPIForm` et `SWIFTOutput` lancés seuls sur un processus:
+      comparaison des faces réservée à plus d'un rang, test SWIFT ignoré
+      hors de la fixture ctest.
 - [x] PETSc Navier-Stokes: 10.8 s sur la 5090 contre 6.1 s sur la 2080 Ti.
       Ce n'est pas le GPU: les options documentées résolvent la vitesse à
       1e-5 (GMRES et GAMG) dans chaque produit par le complément de Schur,
@@ -1112,8 +1126,11 @@ contre manuel sont à 1e-15.
       pression à 1e-2, FGMRES extérieur inchangé à 1e-8: 3.15 s sur la 5090
       (61 itérations en 5 pas), 4.9 s sur la R9700. GAMG sur la pression ou
       moins de niveaux de vitesse sont plus lents.
-- [ ] La préparation des intégrateurs est refaite à chaque assemblage
-      (`prepare`, `DevicePolytopes::locate`, quadratures, attributs).
+- [x] La préparation des intégrateurs est refaite à chaque assemblage
+      (`prepare`, `DevicePolytopes::locate`, quadratures, attributs), mais
+      elle ne pèse pas: nsys sur H1 Q2 n=40 donne 340 ms de noyau
+      d'intégration pour 360 ms d'assemblage scalaire et 994 ms pour
+      1185 ms hyperélastique. Le temps est dans les noyaux eux-mêmes.
 - [ ] CantileverBeam: environ 90 s de temps hôte non attribué sur 111 s
       (`SparseLU` hôte à chaque itération de Newton, `Problem` reconstruit et
       XDMF écrit à chaque pas).

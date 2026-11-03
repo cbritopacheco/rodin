@@ -881,6 +881,15 @@ namespace Rodin::Assembly::Internal
             triplets, fixed, coefficientRanks(triplets.ranks),
             triplets.ranks.sorting(m_rows), A != nullptr, eliminate, coefficients,
             eliminated);
+          // The sort keys hold the indices, and the sorts need buffers as
+          // large as the listed entries.
+          triplets.rows = {};
+          lifted.triplets.rows = {};
+          if (!eliminate)
+          {
+            triplets.cols = {};
+            lifted.triplets.cols = {};
+          }
         }
         if (A)
           compress(triplets, coefficientRanks(triplets.ranks), coefficients, *A);
