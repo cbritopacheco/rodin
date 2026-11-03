@@ -246,7 +246,11 @@ namespace
     auto mesh = distributeP2Tetrahedron(ctx, 9);
     // MPI Mesh::getFaceCount() is global, while facet indices are shard-local.
     // The previous affine-defect loop used the former as a local loop bound.
-    EXPECT_GT(mesh.getFaceCount(), mesh.getShard().getFaceCount());
+    // Both counts coincide on a single rank.
+    if (world.size() > 1)
+    {
+      EXPECT_GT(mesh.getFaceCount(), mesh.getShard().getFaceCount());
+    }
     H1<2, Real, Mesh<Context::MPI>> space(std::integral_constant<size_t, 2>{}, mesh);
     PETSc::Variational::TrialFunction uValue(space);
     PETSc::Variational::TestFunction vValue(space);
