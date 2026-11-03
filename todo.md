@@ -628,7 +628,15 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       1.14 ms, grille 30: 4.46 ms contre 6.43 ms. Chemin 64 bits validé
       en le forçant sur toute la suite.
 - [ ] Pistes: fusionner les intégrateurs d'un même segment dans un seul
-      noyau (somme des intégrandes), capacité de `IntegrationPointView`
+      noyau (somme des intégrandes). A la grille 30 les 7 noyaux
+      bilinéaires prennent 2.6 ms sur 4.3 ms de GPU: chacun relit et
+      réécrit les cases partagées du segment (bloc uu: 23 M entrées, 190
+      Mo), près de la bande passante. Les sommes d'intégrales deviennent
+      une `FormLanguage::List` d'intégrateurs polymorphes (`Sum.h`), le
+      type des intégrandes n'existe plus qu'à l'intérieur de chaque
+      `fill`: fusionner demande de garder les types de la somme à la
+      compilation, changement du langage de formes, décision à prendre.
+      Capacité de `IntegrationPointView`
       en paramètre, ordre exact pour les formes dérivées vectorielles
       (aussi côté hôte), découpage de la matrice locale par blocs de
       composantes. Ajouter les entrées par atomiques directement dans les
