@@ -16,6 +16,7 @@
 #include <string>
 #include <tuple>
 #include <type_traits>
+#include <vector>
 
 #include <Kokkos_Core.hpp>
 
@@ -1631,6 +1632,56 @@ namespace Rodin::Kokkos::Variational
   };
 
   /**
+   * @brief Copies the coefficients of a grid function to the memory space
+   * of its mesh, in the local numbering of the device degrees of freedom.
+   *
+   * This primary template reads containers indexed by coeff(), such as
+   * Math::Vector. Modules whose grid functions keep their coefficients in
+   * another container specialize it, as Rodin/Kokkos/Assembly/PETSc.h does
+   * for PETSc vectors.
+   *
+   * @tparam Data Coefficient container of the grid function.
+   */
+  template <class Data>
+  struct GridFunctionCoefficients
+  {
+    /**
+     * @param fes Device space of the grid function.
+     * @param data Coefficients, numbered as by the space.
+     * @returns Device coefficients, after transfer completion.
+     */
+    template <class FES>
+    static ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> upload(
+      const FES& fes, const Data& data)
+    {
+      const auto& mesh = fes.getMesh();
+      const auto& execution = mesh.getContext().getExecutionSpace();
+      const Index size = data.size();
+      if constexpr (requires { mesh.getTransferCache(); })
+      {
+        // Lowered at every assembly, so that the same coefficients stay
+        // resident instead of being reallocated and copied each time.
+        std::vector<Real> values(size);
+        for (Index i = 0; i < size; ++i)
+          values[i] = data.coeff(i);
+        return mesh.getTransferCache().upload(
+          execution, std::move(values), "Rodin grid function");
+      }
+      else
+      {
+        ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> res(
+          ::Kokkos::view_alloc(execution, std::string("Rodin grid function")), size);
+        auto host = ::Kokkos::create_mirror_view(res);
+        for (Index i = 0; i < size; ++i)
+          host(i) = data.coeff(i);
+        ::Kokkos::deep_copy(execution, res, host);
+        execution.fence("Rodin grid function transfer");
+        return res;
+      }
+    }
+  };
+
+  /**
    * @brief Coefficients of a grid function of a device space in device
    * memory.
    *
@@ -1664,32 +1715,9 @@ namespace Rodin::Kokkos::Variational
       template <class Data>
       GridFunctionView(const FESType& fes, const Data& data)
         : m_vdim(fes.getVectorDimension()),
-          m_dofs(fes.getDeviceDOFs())
-      {
-        const auto& mesh = fes.getMesh();
-        const auto& execution = mesh.getContext().getExecutionSpace();
-        const Index size = data.size();
-        if constexpr (requires { mesh.getTransferCache(); })
-        {
-          // Lowered at every assembly, so that the same coefficients stay
-          // resident instead of being reallocated and copied each time.
-          std::vector<Real> values(size);
-          for (Index i = 0; i < size; ++i)
-            values[i] = data.coeff(i);
-          m_data = mesh.getTransferCache().upload(
-            execution, std::move(values), "Rodin grid function");
-        }
-        else
-        {
-          m_data = ::Kokkos::View<Real*, MemorySpace>(
-            ::Kokkos::view_alloc(execution, std::string("Rodin grid function")), size);
-          auto host = ::Kokkos::create_mirror_view(m_data);
-          for (Index i = 0; i < size; ++i)
-            host(i) = data.coeff(i);
-          ::Kokkos::deep_copy(execution, m_data, host);
-          execution.fence("Rodin grid function transfer");
-        }
-      }
+          m_dofs(fes.getDeviceDOFs()),
+          m_data(GridFunctionCoefficients<std::decay_t<Data>>::upload(fes, data))
+      {}
 
       /// @brief Gets the device degrees of freedom. @return Degrees of freedom.
       KOKKOS_INLINE_FUNCTION

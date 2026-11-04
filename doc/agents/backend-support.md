@@ -80,9 +80,14 @@ and `GMRES` (`Rodin/Kokkos/Solver.h`) read it in place, and `BoomerAMG`
 problem takes no preassembled bilinear form. SubMesh
 is not provided. `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the
 shard of a `Mesh<Context::MPI>` resident and marks owned entities in its
-device view; single field `P1` PETSc problems are assembled on it into
-distributed Kokkos systems (`Rodin::KokkosMPI`). Periodic conditions,
-preassembled forms, mixed problems and Eigen systems are not distributed.
+device view; `P1` and `P0g` PETSc problems, single or multi-field, are
+assembled on it into distributed Kokkos systems (`Rodin::KokkosMPI`). Each
+field keeps its global numbering shifted by its offset, as on the host, and
+PETSc sends the entries of rows owned elsewhere to their process; each test
+function must share the space of the trial function of its block. PETSc grid functions enter
+device expressions, local or distributed: their coefficients, ghosts included,
+are read from the local form of the vector without communication. Periodic conditions,
+preassembled forms, `H1<2>` and Eigen systems are not distributed.
 See [the Kokkos guide](../Guides/Kokkos.dox) for lifecycle and build details.
 
 In CUDA builds, Kokkos's launcher compiles targets linked to `Kokkos::kokkos`

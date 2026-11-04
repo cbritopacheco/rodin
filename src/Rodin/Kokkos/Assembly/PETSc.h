@@ -276,18 +276,24 @@ namespace Rodin::Assembly::Internal
    * processes.
    *
    * The local degrees of freedom, ghosts included, are those the device
-   * integrators number. Each one has a global index, and the process owns
-   * the contiguous global range @f$ [b, e) @f$.
+   * integrators number. Each one has a global index and is owned by one
+   * process, the one owning it in its space. The process holds the
+   * contiguous range @f$ [b, e) @f$ of the rows of the PETSc layout, whose
+   * length is its number of owned degrees of freedom. With a single field
+   * this range is the owned range of the space. With several fields, each
+   * numbered from its offset in the system as on the host, the owned
+   * degrees of freedom of a field may lie in the rows of other processes,
+   * and PETSc sends their entries there.
    */
   struct COODistribution
   {
     /// @brief Communicator of the processes.
     MPI_Comm comm = MPI_COMM_NULL;
 
-    /// @brief First owned global index.
+    /// @brief First row of this process in the PETSc layout.
     PetscInt begin = 0;
 
-    /// @brief One past the last owned global index.
+    /// @brief One past the last row of this process in the PETSc layout.
     PetscInt end = 0;
 
     /// @brief Global number of degrees of freedom.
@@ -296,10 +302,53 @@ namespace Rodin::Assembly::Internal
     /// @brief Global index of each local degree of freedom.
     std::vector<PetscInt> globals;
 
+    /// @brief Whether this process owns each local degree of freedom.
+    std::vector<unsigned char> owned;
+
     /// @brief Gets the number of owned degrees of freedom. @return Owned count.
     PetscInt getOwnedSize() const
     {
       return end - begin;
+    }
+
+    /**
+     * @brief Appends the local degrees of freedom of a field.
+     * @param fes Space numbering the local degrees of freedom of the field.
+     * @param offset Global index of the first degree of freedom of the field.
+     */
+    template <class FES>
+    void append(const FES& fes, PetscInt offset)
+    {
+      Index first = 0, last = 0;
+      fes.getOwnershipRange(first, last);
+      const size_t count = fes.getLocalSize();
+      globals.reserve(globals.size() + count);
+      owned.reserve(owned.size() + count);
+      for (size_t i = 0; i < count; ++i)
+      {
+        const Index g = fes.getGlobalIndex(static_cast<Index>(i));
+        globals.push_back(offset + static_cast<PetscInt>(g));
+        owned.push_back(g >= first && g < last);
+      }
+    }
+
+    /**
+     * @brief Lays out the rows of the processes in rank order; collective.
+     * @param communicator Communicator of the processes.
+     * @param total Global number of degrees of freedom.
+     */
+    void close(MPI_Comm communicator, PetscInt total)
+    {
+      comm = communicator;
+      size = total;
+      const PetscInt count =
+        static_cast<PetscInt>(std::count(owned.begin(), owned.end(), 1));
+      PetscInt first = 0;
+      MPI_Exscan(&count, &first, 1, MPIU_INT, MPI_SUM, comm);
+      int rank = 0;
+      MPI_Comm_rank(comm, &rank);
+      begin = rank == 0 ? 0 : first;
+      end = begin + count;
     }
 
     /**
@@ -312,15 +361,12 @@ namespace Rodin::Assembly::Internal
     {
       COODistribution res;
       res.comm = fes.getMesh().getContext().getCommunicator();
+      res.append(fes, 0);
       Index begin = 0, end = 0;
       fes.getOwnershipRange(begin, end);
       res.begin = static_cast<PetscInt>(begin);
       res.end = static_cast<PetscInt>(end);
       res.size = static_cast<PetscInt>(fes.getSize());
-      res.globals.resize(fes.getLocalSize());
-      for (size_t i = 0; i < res.globals.size(); ++i)
-        res.globals[i] =
-          static_cast<PetscInt>(fes.getGlobalIndex(static_cast<Index>(i)));
       return res;
     }
   };
@@ -463,14 +509,15 @@ namespace Rodin::Assembly::Internal
                "degrees of freedom to be the same."
             << Alert::Raise;
         }
-        std::vector<unsigned char> owned(m_rows);
-        for (size_t i = 0; i < m_rows; ++i)
-        {
-          const PetscInt g = distribution.globals[i];
-          owned[i] = g >= distribution.begin && g < distribution.end;
-        }
-        copy(m_owned, owned, "Rodin owned DOFs");
+        copy(m_owned, distribution.owned, "Rodin owned DOFs");
         m_distribution = std::move(distribution);
+      }
+
+      /// @brief Gets the distribution of a distributed system. @return Distribution.
+      const COODistribution& getDistribution() const
+      {
+        assert(m_distribution);
+        return *m_distribution;
       }
 
       /**
@@ -2503,31 +2550,84 @@ namespace Rodin::Assembly
       }
 
     private:
+      /// @brief Whether the mesh of the first field is distributed over MPI processes.
+      static constexpr bool IsDistributed =
+        Context::IsMPI<typename FormLanguage::Traits<typename FormLanguage::Traits<
+          typename FormLanguage::Traits<U1>::FESType>::MeshType>::ContextType>::value;
+
       void assemble(
         LinearSystemType& axb, const InputType& input, bool doMatrix, bool doVector)
       {
         auto& pb = input.getProblemBody();
-        const auto& trialOffsets = input.getTrialOffsets();
-        const auto& testOffsets = input.getTestOffsets();
+        const auto& us = input.getTrialFunctions();
+        const auto& vs = input.getTestFunctions();
         const auto& trialUUIDMap = input.getTrialUUIDMap();
         const auto& testUUIDMap = input.getTestUUIDMap();
+        // The kernels number the local degrees of freedom, ghosts included,
+        // and the blocks of a distributed system follow each other in the
+        // local numbering.
+        std::vector<Index> trialOffsets(input.getTrialOffsets().begin(),
+          input.getTrialOffsets().end());
+        std::vector<Index> testOffsets(
+          input.getTestOffsets().begin(), input.getTestOffsets().end());
+        size_t rows = input.getTotalTestSize();
+        size_t cols = input.getTotalTrialSize();
+        Internal::COODistribution distribution;
+        if constexpr (IsDistributed)
+        {
+          std::vector<size_t> sizes(trialOffsets.size());
+          std::vector<size_t> globalSizes(trialOffsets.size());
+          cols = 0;
+          size_t i = 0;
+          us.apply([&](const auto& u) {
+            const auto& fes = u.get().getFiniteElementSpace();
+            trialOffsets[i] = static_cast<Index>(cols);
+            sizes[i] = fes.getLocalSize();
+            globalSizes[i] = fes.getSize();
+            cols += sizes[i];
+            distribution.append(fes, static_cast<PetscInt>(input.getTrialOffsets()[i]));
+            ++i;
+          });
+          rows = 0;
+          bool same = testOffsets.size() == trialOffsets.size();
+          i = 0;
+          vs.apply([&](const auto& v) {
+            const auto& fes = v.get().getFiniteElementSpace();
+            testOffsets[i] = static_cast<Index>(rows);
+            rows += fes.getLocalSize();
+            same = same && i < sizes.size() && fes.getLocalSize() == sizes[i] &&
+              fes.getSize() == globalSizes[i];
+            ++i;
+          });
+          if (!same)
+          {
+            Alert::Exception()
+              << "A distributed device problem requires each test function to "
+                 "share the space of the trial function of its block."
+              << Alert::Raise;
+          }
+          distribution.close(
+            us.template get<0>().get().getFiniteElementSpace().getMesh().getContext()
+              .getCommunicator(),
+            static_cast<PetscInt>(input.getTotalTrialSize()));
+        }
         const auto trialOffset = [&](const auto& uuid) -> Index {
           const auto it = trialUUIDMap.left.find(uuid);
           assert(it != trialUUIDMap.left.end());
-          return static_cast<Index>(trialOffsets[it->second]);
+          return trialOffsets[it->second];
         };
         const auto testOffset = [&](const auto& uuid) -> Index {
           const auto it = testUUIDMap.left.find(uuid);
           assert(it != testUUIDMap.left.end());
-          return static_cast<Index>(testOffsets[it->second]);
+          return testOffsets[it->second];
         };
 
-        const size_t rows = input.getTotalTestSize();
-        const size_t cols = input.getTotalTrialSize();
-        const auto& u1 = input.getTrialFunctions().template get<0>().get();
+        const auto& u1 = us.template get<0>().get();
         SystemType system(
           u1.getFiniteElementSpace().getMesh().getContext().getExecutionSpace(), rows,
           cols);
+        if constexpr (IsDistributed)
+          system.distribute(std::move(distribution));
         for (auto& dbc : pb.getDBCs())
         {
           const Index offset = trialOffset(dbc.getOperand().getUUID());
@@ -2562,12 +2662,161 @@ namespace Rodin::Assembly
           for (const auto& lf : pb.getLFs())
             system.addVector(lf.getVector(), testOffset(lf.getTestFunction().getUUID()));
         }
-        Internal::prepareDeviceSystem(axb, rows, cols, doVector);
+        if constexpr (IsDistributed)
+        {
+          const size_t owned = system.getDistribution().getOwnedSize();
+          Internal::prepareDeviceSystem(axb, owned, input.getTotalTestSize(), owned,
+            input.getTotalTrialSize(), doVector);
+        }
+        else
+        {
+          Internal::prepareDeviceSystem(axb, rows, cols, doVector);
+        }
         system.finish(m_cache, doMatrix ? axb.getOperator() : nullptr,
           doVector ? axb.getVector() : nullptr);
       }
 
       typename SystemType::CacheType m_cache;
+  };
+}
+
+namespace Rodin::Kokkos::Variational
+{
+  /**
+   * @brief Gathers the local form of a ghosted PETSc vector in the local
+   * numbering of the device degrees of freedom.
+   *
+   * Kernel functor at namespace scope, as NVCC requires.
+   */
+  template <class MemorySpace>
+  struct GhostedCoefficientsGather
+  {
+    /// @brief Coefficients in the local numbering.
+    ::Kokkos::View<Real*, MemorySpace> res;
+
+    /// @brief Local form of the vector, owned entries then ghosts.
+    ::Kokkos::View<const Real*, MemorySpace> form;
+
+    /// @brief Position in the local form of each local degree of freedom.
+    ::Kokkos::View<const Index*, MemorySpace> position;
+
+    /// @param i Local degree of freedom.
+    KOKKOS_INLINE_FUNCTION void operator()(Index i) const
+    {
+      res(i) = form(position(i));
+    }
+  };
+
+  /**
+   * @brief Copies the coefficients of a PETSc grid function to the device.
+   *
+   * The values are read where PETSc keeps them, on the host or on the
+   * device. On a distributed mesh the ghosted local form is read, without
+   * communication: the collective writes of PETSc grid functions keep the
+   * ghosts up to date. Its owned entries are numbered from the first owned
+   * global index and its ghosts follow in the order of the local degrees of
+   * freedom, as PETSc::Variational::GridFunction lays them out.
+   */
+  template <>
+  struct GridFunctionCoefficients<::Vec>
+  {
+    /**
+     * @param fes Device space of the grid function.
+     * @param data Coefficients of the grid function.
+     * @returns Device coefficients in the local numbering, after transfer
+     * completion.
+     */
+    template <class FES>
+    static ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> upload(
+      const FES& fes, ::Vec data)
+    {
+      using MemorySpace = typename FES::MeshType::MemorySpace;
+      using Unmanaged = ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>;
+      using ContextType = typename FES::MeshType::ContextType;
+      const auto& execution = fes.getMesh().getContext().getExecutionSpace();
+
+      ::Vec form = data;
+      PetscErrorCode ierr = PETSC_SUCCESS;
+      if constexpr (::Rodin::Context::IsMPI<ContextType>::value)
+      {
+        ierr = VecGhostGetLocalForm(data, &form);
+        assert(ierr == PETSC_SUCCESS);
+        if (!form)
+        {
+          Alert::Exception()
+            << "The PETSc vector of a distributed grid function has no ghosts."
+            << Alert::Raise;
+        }
+      }
+      PetscInt count = 0;
+      ierr = VecGetLocalSize(form, &count);
+      assert(ierr == PETSC_SUCCESS);
+
+      ::Kokkos::View<Real*, MemorySpace> values(
+        ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+          std::string("Rodin PETSc grid function")),
+        count);
+      const PetscScalar* array = nullptr;
+      PetscMemType type;
+      ierr = VecGetArrayReadAndMemType(form, &array, &type);
+      assert(ierr == PETSC_SUCCESS);
+      if (PetscMemTypeHost(type))
+      {
+        ::Kokkos::deep_copy(execution, values,
+          ::Kokkos::View<const PetscScalar*, ::Kokkos::HostSpace, Unmanaged>(array, count));
+      }
+      else
+      {
+        ::Kokkos::deep_copy(execution, values,
+          ::Kokkos::View<const PetscScalar*,
+            ::Kokkos::DefaultExecutionSpace::memory_space, Unmanaged>(array, count));
+      }
+      // PETSc may release the array once it is restored.
+      execution.fence("Rodin PETSc grid function transfer");
+      ierr = VecRestoreArrayReadAndMemType(form, &array);
+      assert(ierr == PETSC_SUCCESS);
+
+      if constexpr (::Rodin::Context::IsMPI<ContextType>::value)
+      {
+        ierr = VecGhostRestoreLocalForm(data, &form);
+        assert(ierr == PETSC_SUCCESS);
+
+        Index begin = 0, end = 0;
+        fes.getOwnershipRange(begin, end);
+        const Index owned = end - begin;
+        const size_t size = fes.getLocalSize();
+        Index ghosts = 0;
+        auto position = ::Rodin::Kokkos::Internal::upload<Index>(
+          execution, size, "Rodin PETSc grid function positions", [&](Index* out) {
+            for (size_t i = 0; i < size; ++i)
+            {
+              const Index g = fes.getGlobalIndex(static_cast<Index>(i));
+              out[i] = (g >= begin && g < end) ? g - begin : owned + ghosts++;
+            }
+          });
+        if (owned + ghosts != static_cast<Index>(count))
+        {
+          Alert::Exception()
+            << "The PETSc vector of a distributed grid function does not have "
+            << "the layout of its space." << Alert::Raise;
+        }
+        ::Kokkos::View<Real*, MemorySpace> res(
+          ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+            std::string("Rodin grid function")),
+          size);
+        ::Kokkos::parallel_for("Rodin PETSc grid function gather",
+          ::Kokkos::RangePolicy<std::decay_t<decltype(execution)>>(execution, 0, size),
+          GhostedCoefficientsGather<MemorySpace>{ res, values, position });
+        execution.fence("Rodin PETSc grid function gather");
+        (void)ierr;
+        return res;
+      }
+      else
+      {
+        (void)ierr;
+        return values;
+      }
+    }
   };
 }
 

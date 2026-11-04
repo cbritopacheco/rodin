@@ -569,6 +569,19 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(reason, 0);
     const auto solution = toVector(pu.getSolution().getData());
     EXPECT_LE((solution - expected).norm(), Real(1e-10) * expected.norm());
+
+    // The PETSc solution enters a problem as a coefficient, through its
+    // values and its gradient, as the same coefficients in an Eigen vector.
+    GridFunction gs(fes);
+    gs.getData() = solution;
+    const auto& gp = pu.getSolution();
+    Problem sq(su, sv);
+    sq = Integral(Grad(su), Grad(sv)) + Integral(gs * su, sv) - Integral(gs, sv) -
+      Integral(Dot(Grad(gs), Grad(sv)));
+    Problem pq(pu, pv);
+    pq = Integral(Grad(pu), Grad(pv)) + Integral(gp * pu, pv) - Integral(gp, pv) -
+      Integral(Dot(Grad(gp), Grad(pv)));
+    expectSameSystem(sq, pq);
   }
 
   TEST(Kokkos_PETSc_Problem, PoissonOnTriangles)

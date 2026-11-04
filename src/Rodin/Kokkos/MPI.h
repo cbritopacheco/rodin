@@ -20,5 +20,6 @@
 #include "Rodin/Kokkos/PETSc.h"
 #include "Rodin/Kokkos/MPI/Geometry/Mesh.h"
 #include "Rodin/Kokkos/MPI/Variational/P1.h"
+#include "Rodin/Kokkos/MPI/Variational/P0g.h"
 
 #endif

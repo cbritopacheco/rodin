@@ -12,7 +12,8 @@
  * Rank 0 builds and partitions a grid, every rank reloads its shard, and the
  * same problem is solved with the distributed host assembly and with the
  * distributed device assembly. The owned coefficients of both solutions must
- * agree to the solver tolerance.
+ * agree to the solver tolerance. The solutions then enter a second
+ * problem as coefficients.
  */
 
 #include <algorithm>
@@ -27,6 +28,7 @@
 #include <boost/mpi/environment.hpp>
 
 #include <Rodin/Geometry.h>
+#include <Rodin/Variational.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
 #include <Rodin/IO.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
@@ -110,6 +112,22 @@ namespace Rodin::Tests::Unit
   }
 
   /**
+   * @brief Solves a saddle point problem with a redundant LU factorization.
+   *
+   * Block Jacobi ILU, the default preconditioner, breaks down on the rows of
+   * the multipliers once the system is split over several processes.
+   */
+  template <class Problem>
+  void solveDirect(Problem& problem)
+  {
+    PETSc::Solver::GMRES solver(problem);
+    ::PC pc;
+    KSPGetPC(solver.getHandle(), &pc);
+    PCSetType(pc, PCREDUNDANT);
+    solver.solve();
+  }
+
+  /**
    * @brief Expects two distributed vectors with the same layout to agree.
    * @param host Reference vector. @param device Compared vector.
    */
@@ -138,6 +156,54 @@ namespace Rodin::Tests::Unit
   }
 
   /**
+   * @brief Expects a distributed device operator to match the host one.
+   * @param host Operator assembled on the host. @param device Operator
+   * assembled on the device, with the same layout.
+   */
+  void expectSameOperator(::Mat host, ::Mat device)
+  {
+    PetscBool kokkos = PETSC_FALSE;
+    PetscObjectTypeCompareAny(reinterpret_cast<PetscObject>(device), &kokkos,
+      MATSEQAIJKOKKOS, MATMPIAIJKOKKOS, "");
+    EXPECT_TRUE(kokkos);
+    PetscInt mh = 0, md = 0, nh = 0, nd = 0;
+    MatGetLocalSize(host, &mh, &nh);
+    MatGetLocalSize(device, &md, &nd);
+    ASSERT_EQ(mh, md);
+    ASSERT_EQ(nh, nd);
+    PetscReal ah = 0, ad = 0;
+    MatNorm(host, NORM_FROBENIUS, &ah);
+    MatNorm(device, NORM_FROBENIUS, &ad);
+    ASSERT_GT(ah, PetscReal(0));
+    EXPECT_LE(std::abs(ah - ad), PetscReal(1e-12) * ah);
+
+    // The norm does not see a permutation of the rows: the operators must
+    // also agree on a vector that differs at each global index.
+    ::Vec xh, yh, xd, yd;
+    MatCreateVecs(host, &xh, &yh);
+    MatCreateVecs(device, &xd, &yd);
+    PetscInt begin = 0, end = 0;
+    VecGetOwnershipRange(xh, &begin, &end);
+    for (PetscInt g = begin; g < end; ++g)
+    {
+      const PetscScalar value = std::sin(PetscReal(1 + g));
+      VecSetValue(xh, g, value, INSERT_VALUES);
+      VecSetValue(xd, g, value, INSERT_VALUES);
+    }
+    VecAssemblyBegin(xh);
+    VecAssemblyEnd(xh);
+    VecAssemblyBegin(xd);
+    VecAssemblyEnd(xd);
+    MatMult(host, xh, yh);
+    MatMult(device, xd, yd);
+    expectSameVector(yh, yd);
+    VecDestroy(&xh);
+    VecDestroy(&yh);
+    VecDestroy(&xd);
+    VecDestroy(&yd);
+  }
+
+  /**
    * @brief Expects a distributed device system to match the host one.
    * @param host Problem assembled on the host. @param device Problem
    * assembled on the device.
@@ -147,23 +213,8 @@ namespace Rodin::Tests::Unit
   {
     const auto& h = host.getLinearSystem();
     const auto& d = device.getLinearSystem();
-    PetscBool kokkos = PETSC_FALSE;
-    PetscObjectTypeCompareAny(reinterpret_cast<PetscObject>(d.getOperator()), &kokkos,
-      MATSEQAIJKOKKOS, MATMPIAIJKOKKOS, "");
-    EXPECT_TRUE(kokkos);
-    PetscInt mh = 0, md = 0;
-    MatGetLocalSize(h.getOperator(), &mh, nullptr);
-    MatGetLocalSize(d.getOperator(), &md, nullptr);
-    EXPECT_EQ(mh, md);
-    PetscReal ah = 0, ad = 0, bh = 0, bd = 0;
-    MatNorm(h.getOperator(), NORM_FROBENIUS, &ah);
-    MatNorm(d.getOperator(), NORM_FROBENIUS, &ad);
-    VecNorm(h.getVector(), NORM_2, &bh);
-    VecNorm(d.getVector(), NORM_2, &bd);
-    ASSERT_GT(ah, PetscReal(0));
-    ASSERT_GT(bh, PetscReal(0));
-    EXPECT_LE(std::abs(ah - ad), PetscReal(1e-12) * ah);
-    EXPECT_LE(std::abs(bh - bd), PetscReal(1e-12) * bh);
+    expectSameOperator(h.getOperator(), d.getOperator());
+    expectSameVector(h.getVector(), d.getVector());
   }
 
   /// @brief A Poisson problem with lifted Dirichlet values matches the host.
@@ -206,6 +257,133 @@ namespace Rodin::Tests::Unit
     // A second solve reuses the cached pattern and coordinates.
     solve(dp);
     expectSameVector(hu.getSolution().getData(), du.getSolution().getData());
+
+    // The solutions enter a second problem as coefficients, through their
+    // values and their gradients, ghosts included.
+    const auto& hs = hu.getSolution();
+    const auto& ds = du.getSolution();
+    PETSc::Variational::TrialFunction hw(hfes);
+    PETSc::Variational::TestFunction hz(hfes);
+    PETSc::Variational::TrialFunction dw(dfes);
+    PETSc::Variational::TestFunction dz(dfes);
+    Problem hq(hw, hz);
+    hq = Integral(Grad(hw), Grad(hz)) + Integral(hs * hw, hz) - Integral(hs, hz) -
+      Integral(Dot(Grad(hs), Grad(hz))) + DirichletBC(hw, hg);
+    Problem dq(dw, dz);
+    dq = Integral(Grad(dw), Grad(dz)) + Integral(ds * dw, dz) - Integral(ds, dz) -
+      Integral(Dot(Grad(ds), Grad(dz))) + DirichletBC(dw, dg);
+    solve(hq);
+    solve(dq);
+    expectSameSystem(hq, dq);
+    expectSameVector(hw.getSolution().getData(), dw.getSolution().getData());
+  }
+
+  /// @brief A stabilized P1/P1 Stokes problem matches the host.
+  void checkStokes(Polytope::Type type)
+  {
+    using namespace Rodin::Variational;
+    Context::MPI ctx(*g_env, *g_world);
+    const HostMesh host = distributeFromRoot(ctx, type, 12);
+    const DeviceMesh mesh(DeviceContext(ctx), host);
+    P1 hvh(host, 2);
+    P1 hqh(host);
+    P1 dvh(mesh, 2);
+    P1 dqh(mesh);
+
+    PETSc::Variational::TrialFunction hu(hvh);
+    PETSc::Variational::TestFunction hv(hvh);
+    PETSc::Variational::TrialFunction hp(hqh);
+    PETSc::Variational::TestFunction hq(hqh);
+    PETSc::Variational::TrialFunction du(dvh);
+    PETSc::Variational::TestFunction dv(dvh);
+    PETSc::Variational::TrialFunction dp(dqh);
+    PETSc::Variational::TestFunction dq(dqh);
+
+    const Real eps = 1e-2;
+    VectorFunction hf{[](const Geometry::Point& p) { return p.x() * p.y(); }, Real(1)};
+    VectorFunction df(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() * p.y(); },
+      Real(1));
+
+    Problem hs(hu, hp, hv, hq);
+    hs = Integral(Jacobian(hu), Jacobian(hv)) - Integral(hp, Div(hv)) +
+      Integral(Div(hu), hq) + Integral(eps * hp, hq) - Integral(hf, hv) +
+      DirichletBC(hu, VectorFunction{0, 0});
+    Problem ds(du, dp, dv, dq);
+    ds = Integral(Jacobian(du), Jacobian(dv)) - Integral(dp, Div(dv)) +
+      Integral(Div(du), dq) + Integral(eps * dp, dq) - Integral(df, dv) +
+      DirichletBC(du, VectorFunction{0, 0});
+
+    solveDirect(hs);
+    solveDirect(ds);
+    expectSameSystem(hs, ds);
+    expectSameVector(hu.getSolution().getData(), du.getSolution().getData());
+    expectSameVector(hp.getSolution().getData(), dp.getSolution().getData());
+  }
+
+  /**
+   * @brief A Neumann problem whose mean is held by a global multiplier
+   * matches the host; the multiplier is owned by rank 0 and shared by all.
+   */
+  void checkMean(Polytope::Type type)
+  {
+    using namespace Rodin::Variational;
+    Context::MPI ctx(*g_env, *g_world);
+    const HostMesh host = distributeFromRoot(ctx, type, 12);
+    const DeviceMesh mesh(DeviceContext(ctx), host);
+    P1 hvh(host);
+    P0g hgh(host);
+    P1 dvh(mesh);
+    P0g dgh(mesh);
+
+    PETSc::Variational::TrialFunction hu(hvh);
+    PETSc::Variational::TestFunction hv(hvh);
+    PETSc::Variational::TrialFunction hl(hgh);
+    PETSc::Variational::TestFunction hm(hgh);
+    PETSc::Variational::TrialFunction du(dvh);
+    PETSc::Variational::TestFunction dv(dvh);
+    PETSc::Variational::TrialFunction dl(dgh);
+    PETSc::Variational::TestFunction dm(dgh);
+
+    // The small multiplier block gives its row the diagonal entry the LU
+    // factorization of PETSc requires.
+    const Real eps = 1e-2;
+    RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() * p.y(); });
+    RealFunction df(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 1 + p.x() * p.y(); });
+
+    Problem hn(hu, hl, hv, hm);
+    hn = Integral(Grad(hu), Grad(hv)) + Integral(hl, hv) + Integral(hu, hm) -
+      Integral(eps * hl, hm) - Integral(hf, hv);
+    Problem dn(du, dl, dv, dm);
+    dn = Integral(Grad(du), Grad(dv)) + Integral(dl, dv) + Integral(du, dm) -
+      Integral(eps * dl, dm) - Integral(df, dv);
+
+    solveDirect(hn);
+    solveDirect(dn);
+    expectSameSystem(hn, dn);
+    expectSameVector(hu.getSolution().getData(), du.getSolution().getData());
+    expectSameVector(hl.getSolution().getData(), dl.getSolution().getData());
+  }
+
+  TEST(Kokkos_MPI_Mean, Triangles)
+  {
+    checkMean(Polytope::Type::Triangle);
+  }
+
+  TEST(Kokkos_MPI_Mean, Quadrilaterals)
+  {
+    checkMean(Polytope::Type::Quadrilateral);
+  }
+
+  TEST(Kokkos_MPI_Stokes, Triangles)
+  {
+    checkStokes(Polytope::Type::Triangle);
+  }
+
+  TEST(Kokkos_MPI_Stokes, Quadrilaterals)
+  {
+    checkStokes(Polytope::Type::Quadrilateral);
   }
 
   TEST(Kokkos_MPI_Poisson, Triangles)

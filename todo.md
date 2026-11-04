@@ -423,9 +423,23 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       Dirichlet synchronisé par Vec fantôme (fixé partout dès qu'un
       processus le fixe). GridFunction PETSc en Vec Kokkos fantôme. Test
       `RodinKokkosMPIPoissonTest_np{1,2,4}` (build-mpi) contre l'hôte MPI.
-- [ ] MPI: PBC, formes préassemblées, multi-champs, H1<2>, P0g et systèmes
-      Eigen non distribués; vues device de `GridFunction<..., ::Vec>` non
-      supportées.
+- [ ] MPI: PBC, formes préassemblées, H1<2> et systèmes Eigen non
+      distribués.
+- [x] MPI multi-champs et `P0g<Real, Mesh<Kokkos<MPI, B>>>` (DOF unique
+      possédé par le rang 0): chaque champ garde sa numérotation globale
+      décalée de son offset, comme l'hôte; les lignes de PETSc sont
+      réparties par MPI_Exscan des DOFs possédés et PETSc envoie les entrées
+      hors processus. Tests `Kokkos_MPI_Stokes` (P1²/P1 régularisé) et
+      `Kokkos_MPI_Mean` (Neumann + multiplicateur P0g régularisé) à np 1, 2, 4, avec
+      comparaison de `A x` et `b` entrée par entrée. GMRES + ILU par blocs
+      casse sur ces points selle dès np 2 (hôte comme device): LU
+      redondante dans les tests.
+- [x] Vues device de `GridFunction<..., ::Vec>`, locales et distribuées
+      (`GridFunctionCoefficients<::Vec>`): la forme locale fantôme est lue là
+      où PETSc la garde et réordonnée en numérotation locale, sans
+      communication. Tests: solution réutilisée comme coefficient (valeurs
+      et gradient) dans `RodinKokkosMPIPoissonTest_np{1,2,4}` et
+      `Kokkos_PETSc_Problem.SolveOnTriangles`.
 
 ## 12. DSL device, jalon 7: benchmark Oseen
 
