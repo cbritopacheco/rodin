@@ -23,6 +23,7 @@
 #include <limits>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <Kokkos_Core.hpp>
@@ -305,6 +306,12 @@ namespace Rodin::Assembly::Internal
     /// @brief Whether this process owns each local degree of freedom.
     std::vector<unsigned char> owned;
 
+    /// @brief Local index of the first degree of freedom of each field.
+    std::vector<Index> starts;
+
+    /// @brief Global index of the first degree of freedom of each field.
+    std::vector<PetscInt> offsets;
+
     /// @brief Gets the number of owned degrees of freedom. @return Owned count.
     PetscInt getOwnedSize() const
     {
@@ -322,6 +329,8 @@ namespace Rodin::Assembly::Internal
       Index first = 0, last = 0;
       fes.getOwnershipRange(first, last);
       const size_t count = fes.getLocalSize();
+      starts.push_back(static_cast<Index>(globals.size()));
+      offsets.push_back(offset);
       globals.reserve(globals.size() + count);
       owned.reserve(owned.size() + count);
       for (size_t i = 0; i < count; ++i)
@@ -330,6 +339,28 @@ namespace Rodin::Assembly::Internal
         globals.push_back(offset + static_cast<PetscInt>(g));
         owned.push_back(g >= first && g < last);
       }
+    }
+
+    /**
+     * @brief Gets the global offset of a field.
+     * @param start Local index of the first degree of freedom of the field.
+     * @return Global index of the first degree of freedom of the field.
+     */
+    PetscInt getOffset(Index start) const
+    {
+      const auto it = std::find(starts.begin(), starts.end(), start);
+      assert(it != starts.end());
+      return offsets[it - starts.begin()];
+    }
+
+    /// @brief Gets the local index of each global index held. @return Map from global to local indices.
+    std::unordered_map<PetscInt, Index> getLocals() const
+    {
+      std::unordered_map<PetscInt, Index> res;
+      res.reserve(globals.size());
+      for (size_t i = 0; i < globals.size(); ++i)
+        res.emplace(globals[i], static_cast<Index>(i));
+      return res;
     }
 
     /**
@@ -502,7 +533,7 @@ namespace Rodin::Assembly::Internal
        */
       void distribute(COODistribution distribution)
       {
-        if (distribution.globals.size() != m_rows || m_rows != m_cols)
+        if (distribution.globals.size() != m_rows || (m_cols > 0 && m_rows != m_cols))
         {
           Alert::Exception()
             << "A distributed device system requires the local trial and test "
@@ -511,6 +542,25 @@ namespace Rodin::Assembly::Internal
         }
         copy(m_owned, distribution.owned, "Rodin owned DOFs");
         m_distribution = std::move(distribution);
+      }
+
+      /**
+       * @brief Distributes a system without constraints whose rows and
+       * columns are numbered apart.
+       * @param rows Global numbering of the local rows.
+       * @param cols Global numbering of the local columns.
+       */
+      void distribute(COODistribution rows, COODistribution cols)
+      {
+        if (rows.globals.size() != m_rows || cols.globals.size() != m_cols)
+        {
+          Alert::Exception()
+            << "The distributions do not number the local rows and columns."
+            << Alert::Raise;
+        }
+        copy(m_owned, rows.owned, "Rodin owned DOFs");
+        m_distribution = std::move(rows);
+        m_columns = std::move(cols);
       }
 
       /// @brief Gets the distribution of a distributed system. @return Distribution.
@@ -587,13 +637,10 @@ namespace Rodin::Assembly::Internal
       void finish(CacheType& cache, ::Mat A, ::Vec b)
       {
         const size_t n = std::max(m_rows, m_cols);
-        if (m_distribution &&
-          (m_constraints.isIdentified() || !m_operators.empty() ||
-            !m_preassembled.empty()))
+        if (m_distribution && m_constraints.isIdentified())
         {
           Alert::Exception()
-            << "Periodic conditions and preassembled forms are not supported by "
-               "distributed device systems."
+            << "Periodic conditions are not supported by distributed device systems."
             << Alert::Raise;
         }
         typename ConstraintsType::Resolved constraints;
@@ -1237,15 +1284,38 @@ namespace Rodin::Assembly::Internal
         std::vector<PetscScalar> values;
       };
 
-      /// @brief Lists the entries of the preassembled operators.
+      /**
+       * @brief Lists the entries of the preassembled operators.
+       *
+       * A distributed operator lists its owned rows, which are complete, in
+       * the global numbering of its spaces. Their entries are numbered
+       * locally, as the integrated ones, so that they are eliminated and sent
+       * alike.
+       */
       Entries listOperators() const
       {
         Entries res;
+        std::unordered_map<PetscInt, Index> locals;
+        if (m_distribution && !m_operators.empty())
+          locals = m_distribution->getLocals();
+        const auto local = [&](PetscInt global) {
+          const auto it = locals.find(global);
+          if (it == locals.end())
+          {
+            Alert::Exception()
+              << "A preassembled operator couples a degree of freedom the "
+                 "process does not hold."
+              << Alert::Raise;
+          }
+          return it->second;
+        };
         for (const auto& o : m_operators)
         {
           PetscInt begin = 0, end = 0;
           PetscErrorCode ierr = MatGetOwnershipRange(o.op, &begin, &end);
           assert(ierr == PETSC_SUCCESS);
+          const PetscInt rowOffset = m_distribution ? m_distribution->getOffset(o.row) : 0;
+          const PetscInt colOffset = m_distribution ? m_distribution->getOffset(o.col) : 0;
           for (PetscInt i = begin; i < end; ++i)
           {
             PetscInt count = 0;
@@ -1255,8 +1325,16 @@ namespace Rodin::Assembly::Internal
             assert(ierr == PETSC_SUCCESS);
             for (PetscInt k = 0; k < count; ++k)
             {
-              res.rows.push_back(o.row + static_cast<Index>(i));
-              res.cols.push_back(o.col + static_cast<Index>(cols[k]));
+              if (m_distribution)
+              {
+                res.rows.push_back(local(rowOffset + i));
+                res.cols.push_back(local(colOffset + cols[k]));
+              }
+              else
+              {
+                res.rows.push_back(o.row + static_cast<Index>(i));
+                res.cols.push_back(o.col + static_cast<Index>(cols[k]));
+              }
               res.values.push_back(values[k]);
             }
             ierr = MatRestoreRow(o.op, i, &count, &cols, &values);
@@ -1659,6 +1737,9 @@ namespace Rodin::Assembly::Internal
         // The integrators may still read the buffers the vectors reuse.
         if (!m_preassembled.empty())
           m_execution.fence("Rodin linear integrators");
+        std::unordered_map<PetscInt, Index> locals;
+        if (m_distribution && !m_preassembled.empty())
+          locals = m_distribution->getLocals();
         for (const auto& p : m_preassembled)
         {
           PetscInt n = 0;
@@ -1668,8 +1749,31 @@ namespace Rodin::Assembly::Internal
           resize(cache.entryIndices, count, "Rodin entry indices");
           resize(cache.entryValues, count, "Rodin entry values");
           getVector(p.vec, cache.entryValues);
-          sequence(m_execution, cache.entryIndices);
-          listEntries(cache, 0, count, p.row, fixed, expansions, x != nullptr);
+          Index row = p.row;
+          // Alive until the fence that ends the iteration.
+          std::vector<Index> indices;
+          if (m_distribution)
+          {
+            // The owned entries are numbered locally, each once.
+            PetscInt begin = 0, end = 0;
+            ierr = VecGetOwnershipRange(p.vec, &begin, &end);
+            assert(ierr == PETSC_SUCCESS);
+            const PetscInt offset = m_distribution->getOffset(p.row);
+            indices.resize(count);
+            for (size_t i = 0; i < count; ++i)
+            {
+              const auto it = locals.find(offset + begin + static_cast<PetscInt>(i));
+              assert(it != locals.end());
+              indices[i] = it->second;
+            }
+            copy(cache.entryIndices, indices, "Rodin entry indices");
+            row = 0;
+          }
+          else
+          {
+            sequence(m_execution, cache.entryIndices);
+          }
+          listEntries(cache, 0, count, row, fixed, expansions, x != nullptr);
           // The buffers are reused by the next vector.
           m_execution.fence("Rodin preassembled vector");
           (void)ierr;
@@ -1733,8 +1837,9 @@ namespace Rodin::Assembly::Internal
           {
             if (m_distribution)
             {
-              const PetscInt m = m_distribution->getOwnedSize();
-              ierr = MatSetSizes(A, m, m, m_distribution->size, m_distribution->size);
+              const auto& columns = getColumns();
+              ierr = MatSetSizes(A, m_distribution->getOwnedSize(),
+                columns.getOwnedSize(), m_distribution->size, columns.size);
             }
             else
             {
@@ -1771,11 +1876,12 @@ namespace Rodin::Assembly::Internal
             ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), cols);
           if (m_distribution)
           {
-            const auto& globals = m_distribution->globals;
+            const auto& rowGlobals = m_distribution->globals;
+            const auto& colGlobals = getColumns().globals;
             for (size_t i = 0; i < distinct; ++i)
             {
-              hostRows(i) = globals[hostRows(i)];
-              hostCols(i) = globals[hostCols(i)];
+              hostRows(i) = rowGlobals[hostRows(i)];
+              hostCols(i) = colGlobals[hostCols(i)];
             }
           }
           ierr = MatSetPreallocationCOO(
@@ -1838,6 +1944,13 @@ namespace Rodin::Assembly::Internal
         ierr = VecRestoreArrayWriteAndMemType(b, &array);
         assert(ierr == PETSC_SUCCESS);
         (void)ierr;
+      }
+
+      /// @brief Gets the distribution of the columns. @return Distribution of the columns.
+      const COODistribution& getColumns() const
+      {
+        assert(m_distribution);
+        return m_columns ? *m_columns : *m_distribution;
       }
 
       /**
@@ -1990,6 +2103,7 @@ namespace Rodin::Assembly::Internal
       std::vector<Operator> m_operators;
       std::vector<Preassembled> m_preassembled;
       std::optional<COODistribution> m_distribution;
+      std::optional<COODistribution> m_columns;
       ::Kokkos::View<unsigned char*, MemorySpace> m_owned;
   };
 
@@ -2120,8 +2234,28 @@ namespace Rodin::Assembly
        */
       void execute(OperatorType& res, const InputType& input) override
       {
-        SystemType system(input.getTrialFES().getMesh().getContext().getExecutionSpace(),
-          input.getTestFES().getSize(), input.getTrialFES().getSize());
+        const auto& trial = input.getTrialFES();
+        const auto& test = input.getTestFES();
+        constexpr bool distributed = Context::IsMPI<typename FormLanguage::Traits<
+          typename FormLanguage::Traits<TrialFES>::MeshType>::ContextType>::value;
+        // The kernels number the local degrees of freedom, ghosts included.
+        size_t rows, cols;
+        if constexpr (distributed)
+        {
+          rows = test.getLocalSize();
+          cols = trial.getLocalSize();
+        }
+        else
+        {
+          rows = test.getSize();
+          cols = trial.getSize();
+        }
+        SystemType system(trial.getMesh().getContext().getExecutionSpace(), rows, cols);
+        if constexpr (distributed)
+        {
+          system.distribute(Internal::COODistribution::of(test),
+            Internal::COODistribution::of(trial));
+        }
         for (const auto& lbfi : input.getLocalBFIs())
           system.addMatrix(lbfi, 0, 0);
         for (const auto& gbfi : input.getGlobalBFIs())
@@ -2221,14 +2355,27 @@ namespace Rodin::Assembly
        */
       void execute(VectorType& res, const InputType& input) override
       {
-        const size_t size = input.getFES().getSize();
-        SystemType system(
-          input.getFES().getMesh().getContext().getExecutionSpace(), size, 0);
+        const auto& fes = input.getFES();
+        constexpr bool distributed = Context::IsMPI<typename FormLanguage::Traits<
+          typename FormLanguage::Traits<FES>::MeshType>::ContextType>::value;
+        PetscInt n = static_cast<PetscInt>(fes.getSize());
+        const PetscInt N = n;
+        size_t size = fes.getSize();
+        if constexpr (distributed)
+        {
+          // The kernels number the local degrees of freedom, ghosts included.
+          size = fes.getLocalSize();
+          Index begin = 0, end = 0;
+          fes.getOwnershipRange(begin, end);
+          n = static_cast<PetscInt>(end - begin);
+        }
+        SystemType system(fes.getMesh().getContext().getExecutionSpace(), size, 0);
+        if constexpr (distributed)
+          system.distribute(Internal::COODistribution::of(fes));
         for (const auto& lfi : input.getLFIs())
           system.addVector(lfi, 0, Real(1));
-        const PetscInt n = static_cast<PetscInt>(size);
         PetscErrorCode ierr =
-          PETSc::Assembly::VectorSetup(res).prepare({n, n, VECKOKKOS, false, false});
+          PETSc::Assembly::VectorSetup(res).prepare({n, N, VECKOKKOS, false, false});
         assert(ierr == PETSC_SUCCESS);
         (void)ierr;
         system.finish(m_cache, nullptr, res);

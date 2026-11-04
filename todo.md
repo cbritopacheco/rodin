@@ -423,8 +423,18 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       Dirichlet synchronisé par Vec fantôme (fixé partout dès qu'un
       processus le fixe). GridFunction PETSc en Vec Kokkos fantôme. Test
       `RodinKokkosMPIPoissonTest_np{1,2,4}` (build-mpi) contre l'hôte MPI.
-- [ ] MPI: PBC, formes préassemblées, H1<2> et systèmes Eigen non
-      distribués.
+- [ ] MPI: PBC et systèmes Eigen non distribués.
+- [x] MPI `H1<K, Range, Mesh<Kokkos<MPI, B>>>`, scalaire et vectoriel: le H1
+      du shard résident numérote les DOFs locaux comme le H1 hôte du shard.
+      Tests `Kokkos_MPI_Quadratic` (Poisson P2 puis solution P2 relue en
+      coefficient, valeurs et gradient) et `Kokkos_MPI_TaylorHood` (P2²/P1
+      régularisé) à np 1, 2, 4 contre l'hôte MPI.
+- [x] MPI formes device seules et préassemblées: `BilinearForm` (carrée ou
+      rectangulaire) et `LinearForm` sur espaces distribués donnent des Mat
+      et Vec Kokkos distribués; préassemblées dans un problème, leurs lignes
+      possédées, complètes, sont renumérotées localement (exception si une
+      entrée couple un DOF non tenu). Test `Kokkos_MPI_Forms` (masse,
+      charge, `Integral(Div(w), v)`, Poisson et Stokes préassemblés).
 - [x] MPI multi-champs et `P0g<Real, Mesh<Kokkos<MPI, B>>>` (DOF unique
       possédé par le rang 0): chaque champ garde sa numérotation globale
       décalée de son offset, comme l'hôte; les lignes de PETSc sont

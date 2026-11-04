@@ -86,8 +86,15 @@ field keeps its global numbering shifted by its offset, as on the host, and
 PETSc sends the entries of rows owned elsewhere to their process; each test
 function must share the space of the trial function of its block. PETSc grid functions enter
 device expressions, local or distributed: their coefficients, ghosts included,
-are read from the local form of the vector without communication. Periodic conditions,
-preassembled forms, `H1<2>` and Eigen systems are not distributed.
+are read from the local form of the vector without communication. `H1<K>`
+spaces, scalar or vector, are distributed alike: the H1 space of the
+resident shard numbers the local degrees of freedom as the host H1 space of
+the shard does. Standalone device `BilinearForm` and `LinearForm` on
+distributed spaces assemble distributed Kokkos `Mat` and `Vec`, rectangular
+included, and enter distributed problems as preassembled forms: their owned
+rows are complete and are renumbered locally, so each of their entries must
+couple degrees of freedom the process holds. Periodic conditions and Eigen
+systems are not distributed.
 See [the Kokkos guide](../Guides/Kokkos.dox) for lifecycle and build details.
 
 In CUDA builds, Kokkos's launcher compiles targets linked to `Kokkos::kokkos`
