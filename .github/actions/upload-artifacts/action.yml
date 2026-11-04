@@ -58,6 +58,6 @@ runs:
           const path = require('node:path');
           const root = path.join(process.env.RUNNER_TEMP, 'rodin-artifact-client/node_modules');
           const {DefaultArtifactClient} = require(path.join(root, '@actions/artifact'));
-          const glob = require(path.join(root, '@actions/glob'));
+          const artifactGlob = require(path.join(root, '@actions/glob'));
           const {uploadArtifact, readInputs} = require(path.join(process.env.UPLOAD_ACTION_PATH, 'upload.js'));
-          await uploadArtifact(new DefaultArtifactClient(), glob, readInputs(process.env), core);
+          await uploadArtifact(new DefaultArtifactClient(), artifactGlob, readInputs(process.env), core);

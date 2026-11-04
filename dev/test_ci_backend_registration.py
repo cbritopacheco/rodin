@@ -50,7 +50,7 @@ class BackendRegistrationTest(unittest.TestCase):
             tests.update({args[0]: args[1:] for command, args, *_ in commands if command == "add_test"})
         return tests, build
 
-    def test_pyramid_elasticity_split_preserves_cases_ranks_and_coverage_budgets(self):
+    def test_elasticity_cases_are_independent_and_preserve_ranks_and_coverage_budgets(self):
         source = (ROOT / "tests/convergence/h/PETScLinearElasticity/LinearElasticity.cpp").read_text()
         local = re.findall(r'TEST_P\(PETScLinearElasticityLocalTest,\s*(\w+)\)', source)
         mpi = re.findall(r'TEST_P\(PETScLinearElasticityMPITest,\s*(\w+)\)', source)
@@ -72,7 +72,8 @@ class BackendRegistrationTest(unittest.TestCase):
                 cases = mpi if context == "MPI" else local
                 matched = [(geometry, case) for geometry, case in itertools.product(GEOMETRIES, cases)
                            if fnmatch.fnmatchcase(f"AllGeometries/PETScLinearElasticity{context}Test.{case}/{geometry}", selected)]
-                self.assertTrue(matched, name)
+                self.assertEqual(len(matched), 1, name)
+                self.assertNotIn('*', selected, name)
                 for geometry, case in matched:
                     actual[context, rank, geometry, case] += 1
                 if matched[0][0] == "Pyramid":

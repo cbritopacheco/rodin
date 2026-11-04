@@ -111,3 +111,30 @@ test('official repeated CreateArtifact resets exhaust the bound without outputs'
   assert.equal(f.state.creates, 3);assert.equal(f.state.finalizes, 0);
   assert.deepEqual(f.outputs, {});
 });
+
+test('composite upload script runs with github-script injected parameters', {timeout: 30000}, async t => {
+  const f = await fixture(t, 'create');
+  const runner = await fs.mkdtemp(path.join(os.tmpdir(), 'rodin-upload-action-'));
+  await fs.symlink(root, path.join(runner, 'rodin-artifact-client'), 'dir');
+  const values = {RUNNER_TEMP: runner,
+    UPLOAD_ACTION_PATH: path.resolve('.github/actions/upload-artifacts'),
+    UPLOAD_NAME: f.input.name, UPLOAD_PATH: f.input.patterns,
+    UPLOAD_OVERWRITE: 'true', UPLOAD_NO_FILES: 'error', UPLOAD_COMPRESSION: '0',
+    UPLOAD_RETENTION: '0', UPLOAD_HIDDEN: 'false'};
+  const previous = Object.fromEntries(Object.keys(values).map(key => [key, process.env[key]]));
+  Object.assign(process.env, values);
+  t.after(async () => {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];else process.env[key] = value;
+    }
+    await fs.rm(runner, {recursive: true, force: true});
+  });
+  const action = await fs.readFile('.github/actions/upload-artifacts/action.yml', 'utf8');
+  const script = action.split('script: |\n')[1].split('\n').map(line => line.replace(/^          /, '')).join('\n');
+  const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
+  const execute = new AsyncFunction('require', '__original_require__', 'github', 'octokit',
+    'context', 'core', 'exec', 'glob', 'io', script);
+  await execute(require, require, {}, {}, {}, f.core, {}, {}, {});
+  assert.equal(f.outputs['artifact-id'], 7);
+  assert.equal(f.state.creates, 2);
+});

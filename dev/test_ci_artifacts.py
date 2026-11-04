@@ -118,6 +118,30 @@ class ArtifactPlanTest(unittest.TestCase):
             self.assertEqual(upload['with']['path'], output)
             self.assertIn('name', upload['with'])
 
+    def test_github_script_bodies_compile_with_injected_action_parameters(self):
+        scripts = []
+        def inspect(value):
+            if isinstance(value, dict):
+                if value.get('uses', '').startswith('actions/github-script@'):
+                    scripts.append(value['with']['script'])
+                for child in value.values():
+                    inspect(child)
+            elif isinstance(value, list):
+                for child in value:
+                    inspect(child)
+        paths = [*(tests.ROOT / '.github/workflows').glob('*.yml'),
+                 *(tests.ROOT / '.github/actions').glob('*/action.yml')]
+        for path in paths:
+            inspect(yaml.safe_load(path.read_text()))
+        self.assertGreater(len(scripts), 0)
+        subprocess.run(['node', '-e',
+                        'const fs = require("node:fs");'
+                        'const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;'
+                        'for (const source of JSON.parse(fs.readFileSync(0, "utf8"))) '
+                        'new AsyncFunction("require", "__original_require__", "github", "octokit", '
+                        '"context", "core", "exec", "glob", "io", source);'],
+                       input=json.dumps(scripts), text=True, check=True, cwd=tests.ROOT)
+
     def test_runtime_upload_retries_and_workflow_wiring(self):
         subprocess.run(['node', '--test', '--test-concurrency=1', 'dev/test_ci_artifact_uploads.js'],
                        cwd=tests.ROOT, check=True)
