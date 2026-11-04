@@ -28,7 +28,9 @@
  * The options -oseen_eps, -oseen_scale and -oseen_wscale override the
  * pressure stabilization eps, the scale of a MEDIT mesh, 1e-3 by default,
  * and the factor of the advection field, 0.1 on a MEDIT mesh and 1 on the
- * grid.
+ * grid. The option -oseen_refine k splits every cell of the mesh into
+ * eight, k times, on rank 0 before the partition, and divides the time step
+ * by 2^k to keep the CFL number; -oseen_dt overrides the step.
  *
  * Usage: KokkosMPIOseenScaling [mesh.mesh | n] [repeat] [renumber]. A number
  * n builds a grid of n cells per side. The word renumber orders the vertices
@@ -40,12 +42,15 @@
  */
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <optional>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include <petsc.h>
 #include <boost/mpi/collectives/broadcast.hpp>
@@ -125,6 +130,137 @@ namespace Rodin::Examples
   }
 
   /**
+   * @brief Splits every tetrahedron of @p mesh into eight, and every
+   * triangle and segment of it into four and two.
+   *
+   * The new vertices are the midpoints of the edges. The interior octahedron
+   * of each tetrahedron is cut along its shortest diagonal, and every child
+   * keeps the orientation and the attribute of its parent, so the grading of
+   * the mesh and its boundary attributes are kept with half the size.
+   */
+  LocalMesh refine(const LocalMesh& mesh)
+  {
+    using Geometry::Polytope;
+    const auto& conn = mesh.getConnectivity();
+    const size_t nv = mesh.getVertexCount();
+    std::unordered_map<std::uint64_t, Index> midpoints;
+    midpoints.reserve(2 * mesh.getCellCount());
+    std::vector<Math::SpatialPoint> coordinates;
+    const auto mid = [&](Index a, Index b) {
+      const auto key = (static_cast<std::uint64_t>(std::min(a, b)) << 32) | std::max(a, b);
+      const auto [it, inserted] = midpoints.emplace(key, nv + coordinates.size());
+      if (inserted)
+        coordinates.push_back(0.5 * (mesh.getVertexCoordinates(a) + mesh.getVertexCoordinates(b)));
+      return it->second;
+    };
+
+    std::vector<std::array<Index, 4>> tets;
+    std::vector<Optional<Geometry::Attribute>> tattrs;
+    tets.reserve(8 * conn.getCount(3));
+    tattrs.reserve(8 * conn.getCount(3));
+    std::vector<Math::SpatialPoint> x(nv);
+    for (Index i = 0; i < nv; ++i)
+      x[i] = mesh.getVertexCoordinates(i);
+    const auto volume = [&](const std::array<Index, 4>& t) {
+      const auto at = [&](Index k) -> Math::SpatialPoint {
+        return k < nv ? x[k] : coordinates[k - nv];
+      };
+      const Math::SpatialPoint a = at(t[1]) - at(t[0]);
+      const Math::SpatialPoint b = at(t[2]) - at(t[0]);
+      const Math::SpatialPoint c = at(t[3]) - at(t[0]);
+      return a.x() * (b.y() * c.z() - b.z() * c.y()) - a.y() * (b.x() * c.z() - b.z() * c.x()) +
+        a.z() * (b.x() * c.y() - b.y() * c.x());
+    };
+    const auto length = [&](Index a, Index b) {
+      const auto at = [&](Index k) -> Math::SpatialPoint {
+        return k < nv ? x[k] : coordinates[k - nv];
+      };
+      return (at(a) - at(b)).squaredNorm();
+    };
+    for (Index i = 0; i < conn.getCount(3); ++i)
+    {
+      const auto& v = conn.getPolytope(3, i);
+      const Index m01 = mid(v[0], v[1]), m02 = mid(v[0], v[2]), m03 = mid(v[0], v[3]);
+      const Index m12 = mid(v[1], v[2]), m13 = mid(v[1], v[3]), m23 = mid(v[2], v[3]);
+      const bool positive = volume({ v[0], v[1], v[2], v[3] }) > 0;
+      std::array<std::array<Index, 4>, 8> children{ { { v[0], m01, m02, m03 },
+        { m01, v[1], m12, m13 }, { m02, m12, v[2], m23 }, { m03, m13, m23, v[3] } } };
+      // The three diagonals of the octahedron, each with the two pairs of
+      // opposite vertices left around it.
+      const std::array<std::array<Index, 6>, 3> diagonals{ { { m01, m23, m02, m13, m03, m12 },
+        { m02, m13, m01, m23, m03, m12 }, { m03, m12, m01, m23, m02, m13 } } };
+      const auto& d = *std::min_element(diagonals.begin(), diagonals.end(),
+        [&](const auto& a, const auto& b) { return length(a[0], a[1]) < length(b[0], b[1]); });
+      const std::array<Index, 4> ring{ d[2], d[4], d[3], d[5] };
+      for (size_t k = 0; k < 4; ++k)
+        children[4 + k] = { d[0], d[1], ring[k], ring[(k + 1) % 4] };
+      const auto attr = mesh.getAttribute(3, i);
+      for (auto& c : children)
+      {
+        if ((volume(c) > 0) != positive)
+          std::swap(c[0], c[1]);
+        tets.push_back(c);
+        tattrs.push_back(attr);
+      }
+    }
+
+    // Every midpoint is made before the vertices are added.
+    std::vector<std::pair<std::array<Index, 2>, Optional<Geometry::Attribute>>> segments;
+    for (Index i = 0; i < conn.getCount(1); ++i)
+    {
+      const auto& v = conn.getPolytope(1, i);
+      const Index m = mid(v[0], v[1]);
+      const auto attr = mesh.getAttribute(1, i);
+      segments.push_back({ { v[0], m }, attr });
+      segments.push_back({ { m, v[1] }, attr });
+    }
+    std::vector<std::pair<std::array<Index, 3>, Optional<Geometry::Attribute>>> triangles;
+    for (Index i = 0; i < conn.getCount(2); ++i)
+    {
+      const auto& v = conn.getPolytope(2, i);
+      const Index m01 = mid(v[0], v[1]), m12 = mid(v[1], v[2]), m02 = mid(v[0], v[2]);
+      const auto attr = mesh.getAttribute(2, i);
+      triangles.push_back({ { v[0], m01, m02 }, attr });
+      triangles.push_back({ { m01, v[1], m12 }, attr });
+      triangles.push_back({ { m02, m12, v[2] }, attr });
+      triangles.push_back({ { m01, m12, m02 }, attr });
+    }
+
+    LocalMesh::Builder build;
+    build.initialize(3).nodes(nv + coordinates.size());
+    for (Index i = 0; i < nv; ++i)
+    {
+      build.vertex(x[i]);
+      build.attribute({ 0, i }, mesh.getAttribute(0, i));
+    }
+    for (const auto& c : coordinates)
+      build.vertex(c);
+    build.reserve(1, segments.size());
+    for (const auto& [s, attr] : segments)
+    {
+      Index index;
+      build.polytope(Polytope::Type::Segment, { s[0], s[1] }, index);
+      build.attribute({ 1, index }, attr);
+    }
+    build.reserve(2, triangles.size());
+    for (const auto& [t, attr] : triangles)
+    {
+      Index index;
+      build.polytope(Polytope::Type::Triangle, { t[0], t[1], t[2] }, index);
+      build.attribute({ 2, index }, attr);
+    }
+    build.reserve(3, tets.size());
+    for (size_t i = 0; i < tets.size(); ++i)
+    {
+      const auto& t = tets[i];
+      Index index;
+      build.polytope(Polytope::Type::Tetrahedron, { t[0], t[1], t[2], t[3] }, index);
+      build.attribute({ 3, index }, tattrs[i]);
+    }
+    return build.finalize();
+  }
+
+  /**
    * @brief Loads or builds the mesh on rank 0 and sends a shard to every
    * process.
    * @param ctx MPI context.
@@ -153,6 +289,10 @@ namespace Rodin::Examples
         PetscOptionsGetReal(nullptr, nullptr, "-oseen_scale", &scale, nullptr);
         mesh.scale(scale);
       }
+      PetscInt levels = 0;
+      PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
+      for (PetscInt l = 0; l < levels; ++l)
+        mesh = refine(mesh);
       if (mesh.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron) != mesh.getCellCount())
         throw std::runtime_error(source + " has cells other than tetrahedra.");
       if (renumber)
@@ -200,6 +340,12 @@ namespace Rodin::Examples
     using namespace Rodin::Variational;
     Parameters P;
     PetscOptionsGetReal(nullptr, nullptr, "-oseen_eps", &P.eps, nullptr);
+    // Each refinement halves the cells, and the step with them, so the CFL
+    // number of the advection stays the same.
+    PetscInt levels = 0;
+    PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
+    P.dt = std::ldexp(P.dt, -static_cast<int>(levels));
+    PetscOptionsGetReal(nullptr, nullptr, "-oseen_dt", &P.dt, nullptr);
 
     // The advection field of KokkosOseenAssembly, interpolated on the host
     // and copied to the device space, whose degrees of freedom are laid out
@@ -310,7 +456,10 @@ int main(int argc, char** argv)
       const size_t dofs = vh->getSize() + qh->getSize();
       const std::string name = isGrid(source) ? "grid" + source
         : source.substr(source.find_last_of('/') + 1);
+      PetscInt levels = 0;
+      PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
       const std::string prefix = "np=" + std::to_string(world.size()) + " mesh=" + name +
+        (levels > 0 ? "+refine" + std::to_string(levels) : "") +
         (renumber ? "+renumber" : "") + " cells=" + std::to_string(cells) +
         " dofs=" + std::to_string(dofs);
       if (world.rank() == 0)
