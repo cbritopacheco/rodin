@@ -56,7 +56,7 @@ jobs:
           BUILD_ID: ${{ inputs.id }}
           CI_RESTORED_ARTIFACTS: ${{ github.workspace }}/ci-runtime-inputs
         run: python3 dev/ci_build_graph.py directory --id "$BUILD_ID"
-      - uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: ci-build-${{ inputs.id }}
@@ -64,7 +64,7 @@ jobs:
           compression-level: 0
           retention-days: 7
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: ci-built-${{ inputs.id }}

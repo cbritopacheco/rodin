@@ -205,7 +205,7 @@ def configuration_workflow(variant=None):
         {'name': 'Bind configured targets to independent hierarchy edges', 'id': 'schedule',
          'env': {'COMMON_ID': expression('inputs.id')},
          'run': 'python3 dev/ci_schedule.py --prepare "$COMMON_ID"'},
-        {'uses': 'actions/upload-artifact@v4', 'with': {'overwrite': True,
+        {'uses': './.github/actions/upload-artifacts', 'with': {'overwrite': True,
          'name': 'ci-build-index-${{ inputs.id }}', 'path': 'ci-build-index.json', 'if-no-files-found': 'error'}}]
     jobs = {'Common': common}
     for identity, producer in sorted(producers.items(), key=lambda x: x[1]['path']):

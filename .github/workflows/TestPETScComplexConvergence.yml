@@ -73,7 +73,7 @@ jobs:
         --output-on-failure --no-tests=error -j 1
     - name: Retain complex H1 restriction diagnostics
       if: always() && matrix.suite == 'submesh'
-      uses: actions/upload-artifact@v4
+      uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: petsc-complex-h1-restriction-diagnostics-mt${{ matrix.multithreaded }}

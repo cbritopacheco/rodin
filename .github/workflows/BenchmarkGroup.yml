@@ -44,7 +44,7 @@ jobs:
           GROUP: ${{ inputs.group }}
           SOURCE: benchmark-inputs/benchmark-common-${{ inputs.configuration }}
         run: python3 dev/benchmark_ci.py build --source "$SOURCE" --id "$GROUP" --output benchmark-group
-      - uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: benchmark-group-${{ inputs.group }}
@@ -52,7 +52,7 @@ jobs:
           compression-level: 0
           retention-days: 7
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: benchmark-plan-group-${{ inputs.group }}
@@ -110,7 +110,7 @@ jobs:
           /usr/bin/time -v -o benchmark-diagnostics/resources.txt \
             python3 -u dev/benchmark_ci.py run --source "$SOURCE" --id "$LANE" --output benchmark-result \
             2>&1 | tee benchmark-diagnostics/execution.log
-      - uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: benchmark-result-${{ matrix.lane.id }}
@@ -126,7 +126,7 @@ jobs:
       - name: Preserve failed benchmark diagnostics
         id: diagnostics
         if: ${{ failure() || cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: benchmark-diagnostics-${{ matrix.lane.id }}-attempt-${{ github.run_attempt }}

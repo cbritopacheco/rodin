@@ -677,14 +677,34 @@ missing endpoints remain unavailable until the first publisher initializes them.
 
 ### Artifact-client bootstrap resilience
 
-The exact-name downloader and its Plan regression checks install the unchanged
-lockfile-pinned client through `dev/ci_artifact_client.py`. Successful installs
+The exact-name downloader, retrying uploader and Plan regression checks install
+the shared lockfile-pinned client through `dev/ci_artifact_client.py`. Successful installs
 are reused on the runner only when the lockfile marker and installed package
 are present. A failed invocation is retried at most twice for recognized
 network resets, DNS failures, timeouts or registry 502/503/504 responses.
 Lockfile, dependency-resolution, integrity and engine errors fail immediately.
 The success marker is written only after npm succeeds and the package exists.
 Install scripts remain disabled.
+
+Repository-owned build, result, coverage and diagnostic uploads use
+[`upload-artifacts`](../actions/upload-artifacts/action.yml). It permits three
+whole-upload attempts with 2- and 4-second delays for network resets, timeouts,
+rate limits and retryable service errors. The official client also retains its
+own bounded request retries. Permission, quota, validation, cancellation and
+missing-required-file failures are not retried. Exhaustion fails the step and
+its producer; mandatory contributions remain required by finalization.
+
+An upload configured with `overwrite: true` clears its exact existing artifact
+name before each attempt. A finalized upload whose acknowledgment was lost can
+therefore be replaced on retry. A failed lookup or deletion is never treated as
+proof of absence unless the client reports `ArtifactNotFoundError`. Successful
+outputs contain the finalized artifact ID, URL and ZIP digest. Input paths,
+exclusions, hidden-file defaults, compression and retention retain their existing
+settings. Pages snapshot packaging continues to use `upload-pages-artifact`.
+
+The Plan job exercises real ZIP uploads to a local HTTP service, including
+injected connection resets during artifact creation and finalization. These
+checks require no GitHub credentials or remote artifact writes.
 
 Benchmark execution also emits memory readings every minute to its live job
 log and `benchmark-diagnostics/memory.log`. Host availability and cgroup limits

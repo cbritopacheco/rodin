@@ -185,7 +185,7 @@ class RecoveryTest(unittest.TestCase):
             data = yaml.safe_load((root / f".github/workflows/{name}.yml").read_text())
             for job in data["jobs"].values():
                 for step in job.get("steps", []):
-                    if step.get("uses") == "actions/upload-artifact@v4":
+                    if step.get("uses") == "./.github/actions/upload-artifacts":
                         self.assertTrue(step["with"]["overwrite"])
 
 

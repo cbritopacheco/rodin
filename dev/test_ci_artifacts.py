@@ -114,9 +114,27 @@ class ArtifactPlanTest(unittest.TestCase):
             self.assertEqual(restore['with']['path'], 'benchmark-inputs')
             execute = next(s for s in steps if '--source "$SOURCE"' in s.get('run', ''))
             self.assertEqual(execute['env']['SOURCE'], 'benchmark-inputs/' + artifact)
-            upload = next(s for s in steps if s.get('uses') == 'actions/upload-artifact@v4')
+            upload = next(s for s in steps if s.get('uses') == './.github/actions/upload-artifacts')
             self.assertEqual(upload['with']['path'], output)
             self.assertIn('name', upload['with'])
+
+    def test_runtime_upload_retries_and_workflow_wiring(self):
+        subprocess.run(['node', '--test', '--test-concurrency=1', 'dev/test_ci_artifact_uploads.js'],
+                       cwd=tests.ROOT, check=True)
+        # A producer must finish its upload before consumers can rely on it.
+        # Preserve mandatory missing-file policies and every action input.
+        action = yaml.safe_load((tests.ROOT / '.github/actions/upload-artifacts/action.yml').read_text())
+        self.assertEqual(set(action['outputs']), {'artifact-id', 'artifact-url', 'artifact-digest'})
+        for workflow in (tests.ROOT / '.github/workflows').glob('*.yml'):
+            self.assertNotIn('uses: actions/upload-artifact@', workflow.read_text(), str(workflow))
+        build = yaml.safe_load((tests.ROOT / '.github/workflows/TestDirectoryBuild.yml').read_text())
+        uploads = [s for s in build['jobs']['Build']['steps']
+                   if s.get('uses') == './.github/actions/upload-artifacts']
+        self.assertEqual(len(uploads), 2)
+        for step in uploads:
+            self.assertEqual(step['with']['if-no-files-found'], 'error')
+            self.assertTrue(step['with']['overwrite'])
+            self.assertNotIn('continue-on-error', step)
 
     def test_runtime_downloads_and_retries(self):
         subprocess.run(['node', '--test', '--test-concurrency=1', 'dev/test_ci_artifact_downloads.js'],

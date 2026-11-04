@@ -127,7 +127,7 @@ jobs:
         run: python3 dev/ci_coverage.py record --output ci-result
       - name: Save invocation and coverage records
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: ci-result-${{ inputs.family }}-${{ steps.selection.outputs.common }}-${{ inputs.id }}

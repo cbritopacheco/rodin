@@ -42,7 +42,7 @@ jobs:
       env:
         DEFINITION: ${{ inputs.definition }}
       run: python3 dev/ci_build_graph.py common --definition "$DEFINITION"
-    - uses: actions/upload-artifact@v4
+    - uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: ci-common-${{ inputs.id }}
@@ -50,7 +50,7 @@ jobs:
         compression-level: 0
         retention-days: 7
         if-no-files-found: error
-    - uses: actions/upload-artifact@v4
+    - uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: ci-common-manifest-${{ fromJSON(inputs.definition).mode }}-${{ inputs.id }}
@@ -61,7 +61,7 @@ jobs:
       env:
         COMMON_ID: ${{ inputs.id }}
       run: python3 dev/ci_schedule.py --prepare "$COMMON_ID"
-    - uses: actions/upload-artifact@v4
+    - uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: ci-build-index-${{ inputs.id }}
