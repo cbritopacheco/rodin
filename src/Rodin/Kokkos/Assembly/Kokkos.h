@@ -386,9 +386,9 @@ namespace Rodin::Assembly::Internal
        * numbering, then expands the local degrees of freedom on local
        * indices.
        *
-       * The periodic conditions relate global indices of their space, which
-       * may be held by other processes; each process may give any of them,
-       * and the map gathers them all. The fixed degrees of freedom are
+       * The periodic and identification conditions relate global indices
+       * of their spaces, which may be held by other processes; each
+       * process may give any of them, and the map gathers them all. The fixed degrees of freedom are
        * those already synchronized over the processes. The masters the
        * process does not hold are appended to the local degrees of
        * freedom, so that their entries are sent to their owners, and only
@@ -418,22 +418,30 @@ namespace Rodin::Assembly::Internal
           if (m_fixed[i] && owned[i])
             map.setFixed(globals[i], m_values[i]);
         }
+        using DBC = Variational::DirichletBCBase<Real>;
         for (const auto& c : m_conditions)
         {
+          const Index first = offset(c.offset);
           if (c.dbc)
           {
-            if (!std::holds_alternative<
-                  typename Variational::DirichletBCBase<Real>::ValueDOFs>(
-                  c.dbc->getDOFs()))
+            // The value conditions are already among the fixed degrees of
+            // freedom.
+            const auto* dofs = std::get_if<typename DBC::IdentifiedDOFs>(&c.dbc->getDOFs());
+            if (!dofs)
+              continue;
+            const Index masters = offset(c.masterOffset);
+            const auto& affine = c.dbc->getIdentificationValues();
+            for (const auto& [slave, relation] : *dofs)
             {
-              Alert::Exception()
-                << "Identification Dirichlet conditions are not supported by "
-                   "distributed device systems."
-                << Alert::Raise;
+              std::vector<Entry> entries;
+              for (Index k = 0; k < static_cast<Index>(relation.first.size()); ++k)
+                entries.push_back({masters + relation.first[k], relation.second[k]});
+              const auto it = affine.find(slave);
+              map.setIdentification(
+                first + slave, entries, it == affine.end() ? Real(0) : it->second);
             }
             continue;
           }
-          const Index first = offset(c.offset);
           for (const auto& [slave, relation] : c.pbc->getDOFs())
           {
             std::vector<Entry> entries;
@@ -497,6 +505,8 @@ namespace Rodin::Assembly::Internal
             m_fixed[i] = 1;
             m_values[i] = map.getFixedValue(g);
             m_constrained = true;
+            // The right-hand side of a fixed row holds its value.
+            res.imposed[i] = 1;
           }
           if (!map.isIdentified(g))
             continue;

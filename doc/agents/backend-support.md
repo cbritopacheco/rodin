@@ -93,12 +93,15 @@ the shard does. Standalone device `BilinearForm` and `LinearForm` on
 distributed spaces assemble distributed Kokkos `Mat` and `Vec`, rectangular
 included, and enter distributed problems as preassembled forms: their owned
 rows are complete and are renumbered locally, so each of their entries must
-couple degrees of freedom the process holds. Periodic conditions are
-distributed: their pairs are given in global indices of the field, each
-process may give any of them, and they are resolved in a global constraint
-map after the fixed values are synchronized; masters the process does not
-hold become virtual local degrees of freedom. Identification Dirichlet
-conditions and Eigen systems are not distributed.
+couple degrees of freedom the process holds. Periodic and identification
+Dirichlet conditions are distributed: their pairs relate global indices of
+their fields, each process may give any of them (an identification Dirichlet
+condition gives those of the boundary it holds), and they are resolved in a
+global constraint map after the fixed values are synchronized; masters the
+process does not hold become virtual local degrees of freedom. Eigen systems
+are not distributed. Two sources of one CUDA executable instantiating the
+same device assembly templates crashed on a null host pointer under nvcc
+13.1, so each distributed Kokkos test source is its own executable.
 See [the Kokkos guide](../Guides/Kokkos.dox) for lifecycle and build details.
 
 In CUDA builds, Kokkos's launcher compiles targets linked to `Kokkos::kokkos`

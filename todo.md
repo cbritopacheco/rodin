@@ -423,13 +423,27 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       Dirichlet synchronisé par Vec fantôme (fixé partout dès qu'un
       processus le fixe). GridFunction PETSc en Vec Kokkos fantôme. Test
       `RodinKokkosMPIPoissonTest_np{1,2,4}` (build-mpi) contre l'hôte MPI.
-- [ ] MPI: systèmes Eigen et Dirichlet d'identification non distribués.
+- [ ] MPI: systèmes Eigen non distribués.
+- [ ] nvcc 13.1: deux sources d'un même exécutable qui instancient les mêmes
+      gabarits d'assemblage device plantent (pointeur hôte nul dans la copie
+      d'un lambda device de `DevicePolytopes::locate`) sauf si un test de
+      l'autre source a tourné avant. Contourné par un exécutable par source
+      (`RodinKokkosMPIConstraintTest`); cause non isolée.
 - [x] MPI PBC device: paires en indices globaux du champ, données par
       n'importe quel processus, résolues dans une `ConstraintMap` PETSc
       globale après synchronisation des valeurs fixées; les maîtres non
       tenus deviennent des DOFs locaux virtuels, seul le propriétaire écrit
       les lignes d'identification. Test `Kokkos_MPI_Periodic` (triangles et
       quadrilatères, contre le problème séquentiel hôte) à np 1, 2, 4.
+- [x] MPI Dirichlet d'identification device: esclaves et maîtres en indices
+      globaux de leurs champs (le DBC donne ceux du bord qu'il tient),
+      résolus dans la même `ConstraintMap` globale. Les lignes fixées sont
+      imposées avec les identifiées une fois la carte aplatie (elles
+      manquaient: valeurs fixées perdues dès qu'une identification existait).
+      `RodinKokkosMPIConstraintTest`: `Kokkos_MPI_Identification` (affine
+      d'un champ sur l'autre, contre l'hôte MPI), `Kokkos_MPI_PeriodicDirichlet`
+      (bord fixé, maîtres fixés et chaînes) et `Kokkos_MPI_PeriodicSecondField`
+      (PBC sur le second champ), contre le séquentiel hôte.
 - [x] MPI `H1<K, Range, Mesh<Kokkos<MPI, B>>>`, scalaire et vectoriel: le H1
       du shard résident numérote les DOFs locaux comme le H1 hôte du shard.
       Tests `Kokkos_MPI_Quadratic` (Poisson P2 puis solution P2 relue en
