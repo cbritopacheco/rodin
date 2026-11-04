@@ -469,6 +469,99 @@
           }
         }
       ]
+    },
+    {
+      "commit": "08bdfc3736c35d6e9359f70ed665608ea1e699bf",
+      "date": "2026-11-04T21:21:07.236449+00:00",
+      "run": "41836831264.1",
+      "results": [
+        {
+          "name": "Mass/Operator/H1/P3/ComplexVector/Triangle/3/real_time",
+          "value": 48040.700155088874,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            48040.700155088874
+          ],
+          "records": [
+            {
+              "name": "Mass/Operator/H1/P3/ComplexVector/Triangle/3/real_time",
+              "family_index": 73,
+              "per_family_instance_index": 0,
+              "run_name": "Mass/Operator/H1/P3/ComplexVector/Triangle/3/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 5803,
+              "real_time": 48040.700155088874,
+              "cpu_time": 48039.69860416978,
+              "time_unit": "ns",
+              "ambient_dimension": 2.0,
+              "cells": 8.0,
+              "components": 2.0,
+              "degree": 3.0,
+              "dimension": 2.0,
+              "dofs": 98.0,
+              "domain_measure": 1.0,
+              "geometry_amplitude": 0.0,
+              "geometry_degree": 1.0,
+              "local_basis": 20.0,
+              "local_entries": 400.0,
+              "nnz": 1346.0,
+              "points_per_axis": 3.0,
+              "quadrature_order": 8.0,
+              "quadrature_points_per_cell": 16.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-04T16:14:02+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinMassAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2300,
+            "cpu_scaling_enabled": true,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 2097152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 272629760,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.819824,
+              0.290527,
+              0.10498
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "scope": "Warmed operator or projection-load assembly; no solve"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

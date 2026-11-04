@@ -154,6 +154,36 @@
           ]
         }
       ]
+    },
+    {
+      "commit": "08bdfc3736c35d6e9359f70ed665608ea1e699bf",
+      "date": "2026-11-04T21:21:07.236449+00:00",
+      "run": "41836831264.1",
+      "results": [
+        {
+          "name": "Hexahedron/3/3/0/3/build/0",
+          "value": 600000.0,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            600000.0
+          ],
+          "records": [
+            {
+              "geometry": "Hexahedron",
+              "degree": "3",
+              "resolution": "3",
+              "cells": "8",
+              "distortion": "0.000000",
+              "warp_degree": "3",
+              "query": "build",
+              "pruning": "0",
+              "samples": "1",
+              "ns": "600000"
+            }
+          ]
+        }
+      ]
     }
   ],
   "format": "csv",

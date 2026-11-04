@@ -154,6 +154,36 @@
           ]
         }
       ]
+    },
+    {
+      "commit": "08bdfc3736c35d6e9359f70ed665608ea1e699bf",
+      "date": "2026-11-04T21:21:07.236449+00:00",
+      "run": "41836831264.1",
+      "results": [
+        {
+          "name": "Tetrahedron/3/3/1/3/miss/0",
+          "value": 1954328.125,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            1954328.125
+          ],
+          "records": [
+            {
+              "geometry": "Tetrahedron",
+              "degree": "3",
+              "resolution": "3",
+              "cells": "48",
+              "distortion": "1.000000",
+              "warp_degree": "3",
+              "query": "miss",
+              "pruning": "0",
+              "samples": "64",
+              "ns": "1954328.125"
+            }
+          ]
+        }
+      ]
     }
   ],
   "format": "csv",

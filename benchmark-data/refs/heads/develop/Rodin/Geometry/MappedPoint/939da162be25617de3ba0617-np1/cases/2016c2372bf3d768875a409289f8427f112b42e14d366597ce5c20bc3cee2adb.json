@@ -454,6 +454,96 @@
           }
         }
       ]
+    },
+    {
+      "commit": "08bdfc3736c35d6e9359f70ed665608ea1e699bf",
+      "date": "2026-11-04T21:21:07.236449+00:00",
+      "run": "41836831264.1",
+      "results": [
+        {
+          "name": "MappedPoint/BulkJacobian/Affine/P4/Quadrilateral/3/8/real_time",
+          "value": 1968.8369354013232,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            1968.8369354013232
+          ],
+          "records": [
+            {
+              "name": "MappedPoint/BulkJacobian/Affine/P4/Quadrilateral/3/8/real_time",
+              "family_index": 7,
+              "per_family_instance_index": 8,
+              "run_name": "MappedPoint/BulkJacobian/Affine/P4/Quadrilateral/3/8/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 142557,
+              "real_time": 1968.8369354013232,
+              "cpu_time": 1968.7617724840202,
+              "time_unit": "ns",
+              "basis_functions": 25.0,
+              "cells": 1.0,
+              "curvature": 0.0,
+              "embedding_dimension": 3.0,
+              "formula_identities": 1.0,
+              "geometry_degree": 4.0,
+              "jacobian_contraction_terms": 3750.0,
+              "jacobian_output_payload_bytes": 2000.0,
+              "output_entries": 150.0,
+              "quadrature_order": 8.0,
+              "quadrature_points": 25.0,
+              "reference_dimension": 2.0,
+              "reference_table_miss": 0.0,
+              "reference_table_payload_bytes": 15000.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-04T14:59:12+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinMappedPointBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2596,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.978516,
+              0.507812,
+              0.241211
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

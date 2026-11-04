@@ -464,6 +464,98 @@
           }
         }
       ]
+    },
+    {
+      "commit": "08bdfc3736c35d6e9359f70ed665608ea1e699bf",
+      "date": "2026-11-04T21:21:07.236449+00:00",
+      "run": "41836831264.1",
+      "results": [
+        {
+          "name": "Assembly/MatrixMass/RightScalarWeighted/H1/P1/Real/Segment/Affine/Operator/4/real_time",
+          "value": 2485.685084095523,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            2485.685084095523
+          ],
+          "records": [
+            {
+              "name": "Assembly/MatrixMass/RightScalarWeighted/H1/P1/Real/Segment/Affine/Operator/4/real_time",
+              "family_index": 0,
+              "per_family_instance_index": 1,
+              "run_name": "Assembly/MatrixMass/RightScalarWeighted/H1/P1/Real/Segment/Affine/Operator/4/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 113027,
+              "real_time": 2485.685084095523,
+              "cpu_time": 2485.3686287347273,
+              "time_unit": "ns",
+              "ambient_dimension": 1.0,
+              "cells": 3.0,
+              "components": 6.0,
+              "degree": 1.0,
+              "dimension": 1.0,
+              "dofs": 24.0,
+              "domain_measure": 1.0,
+              "field_columns": 3.0,
+              "field_rows": 2.0,
+              "geometry_amplitude": 0.0,
+              "geometry_degree": 1.0,
+              "local_basis": 12.0,
+              "local_entries": 144.0,
+              "nnz": 60.0,
+              "points_per_axis": 4.0,
+              "quadrature_order": 8.0,
+              "quadrature_points_per_cell": 5.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-04T16:10:35+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinMatrixMassAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3695,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.769531,
+              0.291992,
+              0.115723
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

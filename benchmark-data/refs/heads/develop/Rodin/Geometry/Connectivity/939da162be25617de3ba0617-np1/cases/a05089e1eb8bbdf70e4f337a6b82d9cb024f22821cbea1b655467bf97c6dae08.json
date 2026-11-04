@@ -414,6 +414,88 @@
           }
         }
       ]
+    },
+    {
+      "commit": "08bdfc3736c35d6e9359f70ed665608ea1e699bf",
+      "date": "2026-11-04T21:21:07.236449+00:00",
+      "run": "41836831264.1",
+      "results": [
+        {
+          "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_2",
+          "value": 4.509892919735932,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            4.509892919735932
+          ],
+          "records": [
+            {
+              "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_2",
+              "family_index": 36,
+              "per_family_instance_index": 0,
+              "run_name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_2",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 62029918,
+              "real_time": 4.510596257760547,
+              "cpu_time": 4.509892919735932,
+              "time_unit": "ns",
+              "D": 2.0,
+              "cells": 3969.0,
+              "entities_1": 0.0,
+              "entities_2": 3969.0,
+              "from": 2.0,
+              "to": 2.0,
+              "vertices": 4096.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-04T15:00:29+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinGeometryConnectivityBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3693,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": false,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.534668,
+              0.242188,
+              0.0947266
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

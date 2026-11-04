@@ -154,6 +154,36 @@
           ]
         }
       ]
+    },
+    {
+      "commit": "08bdfc3736c35d6e9359f70ed665608ea1e699bf",
+      "date": "2026-11-04T21:21:07.236449+00:00",
+      "run": "41836831264.1",
+      "results": [
+        {
+          "name": "Quadrilateral/4/16/1/4/miss/1",
+          "value": 36967.5347222,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            36967.5347222
+          ],
+          "records": [
+            {
+              "geometry": "Quadrilateral",
+              "degree": "4",
+              "resolution": "16",
+              "cells": "225",
+              "distortion": "1.000000",
+              "warp_degree": "4",
+              "query": "miss",
+              "pruning": "1",
+              "samples": "64",
+              "ns": "36967.5347222"
+            }
+          ]
+        }
+      ]
     }
   ],
   "format": "csv",
