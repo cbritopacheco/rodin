@@ -1131,6 +1131,15 @@ contre manuel sont à 1e-15.
       elle ne pèse pas: nsys sur H1 Q2 n=40 donne 340 ms de noyau
       d'intégration pour 360 ms d'assemblage scalaire et 994 ms pour
       1185 ms hyperélastique. Le temps est dans les noyaux eux-mêmes.
-- [ ] CantileverBeam: environ 90 s de temps hôte non attribué sur 111 s
+- [x] CantileverBeam: environ 90 s de temps hôte non attribué sur 111 s
       (`SparseLU` hôte à chaque itération de Newton, `Problem` reconstruit et
-      XDMF écrit à chaque pas).
+      XDMF écrit à chaque pas). Le vidage XDMF était quadratique (12.8 s à
+      0.13 s), `SparseLU` réutilise son ordre, le problème et le solveur
+      sortent de la boucle, et la tangente est factorisée sur le device par
+      cuDSS ou RocSolverRF. Le motif de la tangente change vers le pas 51
+      (les contributions nulles sont omises tant que u = 0): les solveurs
+      qui gardent leur analyse comparent le motif et le réanalysent. 2000
+      pas: 23.1 s sur la 5090 (cuDSS, 33.1 s avec `SparseLU`), 48.1 s sur la
+      R9700 (RocSolverRF), 61 s en local (`SparseLU`). Le reste est le
+      pilote de l'assemblage device (synchronisations et copies par
+      itération).
