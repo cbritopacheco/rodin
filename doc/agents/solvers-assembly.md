@@ -141,7 +141,10 @@ nonsymmetric → BiCGSTAB/GMRES or SparseLU/UMFPack/ParU; symmetric indefinite
 PartialPivLU. Examples default to CG for Poisson-like and SparseLU/LDLT
 for Newton tangents. A sequence of systems with one sparsity pattern, such
 as the time steps of a flow, keeps one `CuDSS` or `MUMPS` instance and calls
-`factorize` at each step. On a 2D Poisson system with 1M unknowns, `CuDSS`
+`factorize` at each step. The retaining solvers (`CuDSS`, `RocSolverRF`,
+`MUMPS`, `ParU`) compare the pattern with the analyzed one at each
+`factorize` and analyze a new one again: the assemblies drop zero
+contributions, so the pattern of a tangent may change with the iterate. On a 2D Poisson system with 1M unknowns, `CuDSS`
 takes 6.6 s for the first solve against 38 s for `SparseLU`, then 234 ms per
 refactorization and 15 ms per solve (RTX 2080 Ti, 32 cores). The Kokkos
 `NavierStokes` example does this on a device matrix: 160 steps take 3.3 s

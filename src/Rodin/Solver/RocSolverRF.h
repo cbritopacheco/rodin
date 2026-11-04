@@ -326,15 +326,15 @@ namespace Rodin::Solver
    * place and only copied to the host for the first factorization.
    *
    * The analysis, the pivot order included, is reused across explicit
-   * @ref factorize calls, which assume that the sparsity pattern is
-   * unchanged; only the values are copied again. The pivots are therefore
-   * those of the first matrix: a later matrix whose values call for other
-   * pivots needs the analysis to be cleared. The numeric factorization is
-   * retained after @ref factorize, so several right-hand sides are solved
-   * without refactorization. The ordinary @ref solve entry point builds a
-   * factorization only when none is retained. Call @ref factorize
-   * explicitly after changing matrix values, and clear the symbolic
-   * factorization after changing the sparsity pattern.
+   * @ref factorize calls while the sparsity pattern is unchanged; only the
+   * values are copied again. A matrix with another pattern, such as a
+   * tangent whose assembly drops other zero contributions, is analyzed
+   * again. The pivots are therefore those of the first matrix of a pattern:
+   * a later matrix whose values call for other pivots needs the analysis to
+   * be cleared. The numeric factorization is retained after @ref factorize,
+   * so several right-hand sides are solved without refactorization. The
+   * ordinary @ref solve entry point builds a factorization only when none is
+   * retained. Call @ref factorize explicitly after changing the matrix.
    *
    * Symmetry is never inferred from the entries. A matrix is factorized as
    * @f$ LL^T @f$ only after @ref setSymmetric, and only its lower triangle
@@ -348,7 +348,8 @@ namespace Rodin::Solver
    * 2. Fix the pivot order on the host once per sparsity pattern, by
    *    UMFPACK for @f$ LU @f$ and by AMD for @f$ LL^T @f$, and compute the
    *    exact pattern of the factors from it.
-   * 3. Refactorize on the device for every numeric factorization.
+   * 3. Refactorize on the device for every numeric factorization of the
+   *    pattern, kept on the host and compared at each factorization.
    * 4. Retain the numeric factorization for explicit repeated solves.
    *
    * The solver runs on the current HIP device, on the default stream. Every
@@ -533,6 +534,10 @@ namespace Rodin::Solver
         /// @brief Number of nonzeros of the analyzed matrix.
         Index nonzeros = 0;
 
+        /// @brief Line starts then indices of the compressed arrays of the
+        /// analyzed matrix, on the host.
+        std::vector<Math::SparseIndex> pattern;
+
         /// @brief Number of nonzeros of the bundled factors.
         Index factorNonzeros = 0;
 
@@ -568,6 +573,8 @@ namespace Rodin::Solver
           gather.shrink_to_fit();
           staging.clear();
           staging.shrink_to_fit();
+          pattern.clear();
+          pattern.shrink_to_fit();
           rows = 0;
           nonzeros = 0;
           factorNonzeros = 0;
@@ -632,8 +639,8 @@ namespace Rodin::Solver
        * @brief Analyzes and numerically factorizes the system matrix.
        *
        * Reuses the existing analysis and replaces any previous numeric
-       * factorization. The matrix sparsity pattern must remain unchanged
-       * until the symbolic factorization is cleared.
+       * factorization. A matrix whose sparsity pattern differs from the
+       * analyzed one is analyzed again.
        */
       void factorize(LinearSystemType& axb)
       {
@@ -650,12 +657,11 @@ namespace Rodin::Solver
         auto& res = m_resources;
         const Index rows = static_cast<Index>(Arrays::getRowCount(matrix));
         const Index nonzeros = static_cast<Index>(Arrays::getNonZeroCount(matrix));
-        if (res.symbolic && (rows != res.rows || nonzeros != res.nonzeros))
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "The matrix sparsity pattern changed since the symbolic analysis."
-            << Alert::Raise;
-        }
+        // The assemblies list only the nonzero contributions, so the pattern
+        // of a tangent may change with the iterate. A new pattern is
+        // analyzed again.
+        if (res.symbolic && !hasPattern(matrix, rows, nonzeros))
+          res.clear(Factorization::Symbolic);
 
         res.numeric = false;
         if (!res.symbolic)
@@ -1000,7 +1006,31 @@ namespace Rodin::Solver
         if (!complete(status, Optional<Factorization>{}))
           return false;
         res.symbolic = true;
+        res.pattern.assign(starts, starts + rows + 1);
+        res.pattern.insert(res.pattern.end(), indices, indices + nonzeros);
         return true;
+      }
+
+      /// @brief Returns whether the matrix has the analyzed sparsity pattern.
+      bool hasPattern(const OperatorType& matrix, Index rows, Index nonzeros)
+      {
+        auto& res = m_resources;
+        if (rows != res.rows || nonzeros != res.nonzeros)
+          return false;
+        const Math::SparseIndex* starts = Arrays::getStarts(matrix);
+        const Math::SparseIndex* indices = Arrays::getIndices(matrix);
+        if constexpr (Arrays::Resident)
+        {
+          std::vector<Math::SparseIndex> pattern(rows + 1 + nonzeros);
+          copy(pattern.data(), starts, rows + 1, hipMemcpyDeviceToHost);
+          copy(pattern.data() + rows + 1, indices, nonzeros, hipMemcpyDeviceToHost);
+          return pattern == res.pattern;
+        }
+        else
+        {
+          return std::equal(starts, starts + rows + 1, res.pattern.begin()) &&
+            std::equal(indices, indices + nonzeros, res.pattern.begin() + rows + 1);
+        }
       }
 
       /**

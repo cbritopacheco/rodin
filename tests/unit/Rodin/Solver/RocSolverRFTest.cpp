@@ -278,6 +278,54 @@ namespace Rodin::Tests::Unit::Solver
     expectSolution(other, oneTwoThree());
   }
 
+  /// @brief A matrix with another pattern is analyzed again.
+  TEST(Rodin_Solver_RocSolverRF, FactorizationAnalyzesNewPattern)
+  {
+    Fixture f;
+    RocSolverRFSolver solver(f.problem);
+    auto system = makeUnsymmetricSystem();
+    solver.factorize(system);
+    ASSERT_TRUE(solver.success());
+    solver.solve(system);
+    ASSERT_TRUE(solver.success());
+    expectSolution(system, oneTwoThree());
+
+    // As many entries as the analyzed matrix, but (2, 0) instead of (1, 0).
+    LinearSystemType moved;
+    moved.getOperator().resize(3, 3);
+    moved.getOperator().insert(0, 0) = 4.0;
+    moved.getOperator().insert(2, 0) = 2.0;
+    moved.getOperator().insert(0, 1) = 1.0;
+    moved.getOperator().insert(1, 1) = 5.0;
+    moved.getOperator().insert(2, 1) = 3.0;
+    moved.getOperator().insert(1, 2) = 1.0;
+    moved.getOperator().insert(2, 2) = 6.0;
+    moved.getVector().resize(3);
+    moved.getVector() << 6.0, 13.0, 26.0;
+    solver.factorize(moved);
+    ASSERT_TRUE(solver.success());
+    expectResourceState(solver, true, true, Factorization::Numeric);
+    solver.solve(moved);
+    ASSERT_TRUE(solver.success());
+    expectSolution(moved, oneTwoThree());
+
+    // Fewer entries.
+    auto fewer = makeSymmetricSystem();
+    solver.factorize(fewer);
+    ASSERT_TRUE(solver.success());
+    solver.solve(fewer);
+    ASSERT_TRUE(solver.success());
+    expectSolution(fewer, oneTwoThree());
+
+    // The first pattern again.
+    system.getSolution().setZero();
+    solver.factorize(system);
+    ASSERT_TRUE(solver.success());
+    solver.solve(system);
+    ASSERT_TRUE(solver.success());
+    expectSolution(system, oneTwoThree());
+  }
+
   /// @brief Declaring another symmetry discards the retained factorization.
   TEST(Rodin_Solver_RocSolverRF, SymmetryChangeReleasesFactorization)
   {
@@ -321,10 +369,6 @@ namespace Rodin::Tests::Unit::Solver
     rectangular.getVector().resize(2);
     rectangular.getVector().setZero();
     EXPECT_ANY_THROW(solver.factorize(rectangular));
-
-    // Another pattern without clearing the analysis is an error.
-    auto other = makeSymmetricSystem();
-    EXPECT_ANY_THROW(solver.factorize(other));
   }
 
   /// @brief A copy keeps the configuration but owns no device state.

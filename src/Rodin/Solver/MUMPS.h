@@ -75,13 +75,12 @@ namespace Rodin::Solver
    *
    * MUMPS factorizes a general matrix as @f$ A = LU @f$ and a symmetric matrix
    * as @f$ A = LDL^T @f$. Symbolic analysis is reused across explicit
-   * @ref factorize calls, which assume that the matrix sparsity pattern is
-   * unchanged. The numeric factorization is retained after @ref factorize so
-   * multiple right-hand sides can be solved without refactorization. The
-   * ordinary @ref solve entry point builds a factorization only when none is
-   * retained. Call @ref factorize explicitly after changing matrix values.
-   * After changing the sparsity pattern, clear the symbolic factorization so
-   * the next factorization also repeats symbolic analysis.
+   * @ref factorize calls while the matrix sparsity pattern is unchanged, and
+   * a matrix with another pattern is analyzed again. The numeric
+   * factorization is retained after @ref factorize so multiple right-hand
+   * sides can be solved without refactorization. The ordinary @ref solve
+   * entry point builds a factorization only when none is retained. Call
+   * @ref factorize explicitly after changing the matrix.
    *
    * Symmetry is never inferred from the entries. A matrix is factorized as
    * symmetric only after @ref setSymmetric, which selects the triangle MUMPS
@@ -93,7 +92,7 @@ namespace Rodin::Solver
    * 1. Convert the zero-based CSC structure to one-based coordinate arrays,
    *    keeping only the lower triangle for a symmetric matrix.
    * 2. Share the values of an unsymmetric matrix with MUMPS without a copy.
-   * 3. Reuse symbolic analysis until explicitly cleared.
+   * 3. Reuse symbolic analysis while the sparsity pattern is unchanged.
    * 4. Retain the numeric factorization for explicit repeated solves.
    *
    * MUMPS is parallel over MPI processes, and within each process over OpenMP
@@ -380,8 +379,8 @@ namespace Rodin::Solver
        * factorization. Workspace exhaustion (INFOG(1)=-9) retries numeric
        * factorization at most three times with increasing workspace, retaining
        * symbolic analysis. Other failures are returned without retry.
-       * The matrix sparsity pattern must remain unchanged until
-       * the symbolic factorization is cleared.
+       * A matrix whose sparsity pattern differs from the analyzed one is
+       * analyzed again.
        */
       void factorize(LinearSystemType& axb)
       {
@@ -399,6 +398,14 @@ namespace Rodin::Solver
         }
 
         matrix.makeCompressed();
+        // The assemblies list only the nonzero contributions, so the pattern
+        // of a tangent may change with the iterate. A new pattern is
+        // analyzed again.
+        if (m_resources.symbolic && !hasPattern(matrix))
+        {
+          m_resources.clear(Factorization::Symbolic);
+          dropConvertedState();
+        }
         initializeSession();
         m_resources.initialize(*this, m_symmetry);
 
@@ -634,6 +641,32 @@ namespace Rodin::Solver
             ++entry;
           }
         }
+      }
+
+      /// @brief Returns whether the matrix has the analyzed coordinate structure.
+      bool hasPattern(const OperatorType& matrix) const
+      {
+        const auto* outer = matrix.outerIndexPtr();
+        const auto* inner = matrix.innerIndexPtr();
+        const Eigen::Index columns = matrix.outerSize();
+        const bool symmetric = m_symmetry != Symmetry::Unsymmetric;
+        Eigen::Index entry = 0;
+        for (Eigen::Index column = 0; column < columns; ++column)
+        {
+          for (Eigen::Index k = outer[column]; k < outer[column + 1]; ++k)
+          {
+            if (symmetric && inner[k] < column)
+              continue;
+            if (entry == m_rowIndices.size() ||
+              m_rowIndices(entry) != static_cast<MUMPS_INT>(inner[k]) + 1 ||
+              m_columnIndices(entry) != static_cast<MUMPS_INT>(column) + 1)
+            {
+              return false;
+            }
+            ++entry;
+          }
+        }
+        return entry == m_rowIndices.size();
       }
 
       /// @brief Copies the lower triangle values in the order of @ref buildIndices.

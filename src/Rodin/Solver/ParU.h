@@ -69,21 +69,19 @@ namespace Rodin::Solver
    * @brief Parallel multifrontal LU solver for real sparse square systems.
    *
    * ParU factorizes a general matrix as @f$ PAQ = LU @f$. Symbolic analysis is
-   * reused across explicit @ref factorize calls, which assume that the matrix
-   * sparsity pattern is unchanged.
-   * The numeric factorization is retained after @ref factorize so multiple
-   * right-hand sides can be solved without refactorization. The ordinary
-   * @ref solve entry point builds a factorization only when none is retained.
-   * Call @ref factorize explicitly after changing matrix values. After changing
-   * the sparsity pattern, clear the symbolic factorization so the next
-   * factorization also repeats symbolic analysis.
+   * reused across explicit @ref factorize calls while the matrix sparsity
+   * pattern is unchanged, and a matrix with another pattern is analyzed
+   * again. The numeric factorization is retained after @ref factorize so
+   * multiple right-hand sides can be solved without refactorization. The
+   * ordinary @ref solve entry point builds a factorization only when none is
+   * retained. Call @ref factorize explicitly after changing the matrix.
    *
    * @par Architecture
    * 1. Compress the Eigen CSC matrix and expose its values through
    *    Eigen::viewAsCholmod without copying them.
    * 2. Convert the CSC column pointers and row indices to the signed 64-bit
    *    layout required by ParU.
-   * 3. Reuse symbolic analysis until explicitly cleared.
+   * 3. Reuse symbolic analysis while the sparsity pattern is unchanged.
    * 4. Retain the numeric factorization for explicit repeated solves.
    *
    * | Specialization | Description |
@@ -228,8 +226,8 @@ namespace Rodin::Solver
        * @brief Analyzes and numerically factorizes the system matrix.
        *
        * Reuses existing symbolic analysis and replaces any previous numeric
-       * factorization. The matrix sparsity pattern must remain unchanged until
-       * the symbolic factorization is cleared.
+       * factorization. A matrix whose sparsity pattern differs from the
+       * analyzed one is analyzed again.
        */
       void factorize(LinearSystemType& axb)
       {
@@ -244,6 +242,11 @@ namespace Rodin::Solver
         cholmod_sparse view = Eigen::viewAsCholmod(matrix);
 
         m_resources.initialize(*this);
+        // The assemblies list only the nonzero contributions, so the pattern
+        // of a tangent may change with the iterate. A new pattern is
+        // analyzed again.
+        if (m_resources.symbolic && !hasPattern(matrix))
+          m_resources.clear(Factorization::Symbolic);
         if (!m_resources.symbolic)
         {
           m_columnPointers.resize(matrix.outerSize() + 1);
@@ -433,6 +436,29 @@ namespace Rodin::Solver
 
       Index m_maxThreads = 0;
       Ordering m_ordering = Ordering::Default;
+      /// @brief Returns whether the matrix has the analyzed sparsity pattern.
+      bool hasPattern(const OperatorType& matrix) const
+      {
+        if (m_columnPointers.size() != matrix.outerSize() + 1 ||
+          m_rowIndices.size() != matrix.nonZeros())
+        {
+          return false;
+        }
+        for (Eigen::Index i = 0; i <= matrix.outerSize(); ++i)
+        {
+          const auto start = static_cast<SuiteSparse_long>(matrix.outerIndexPtr()[i]);
+          if (m_columnPointers(i) != start)
+            return false;
+        }
+        for (Eigen::Index i = 0; i < matrix.nonZeros(); ++i)
+        {
+          const auto index = static_cast<SuiteSparse_long>(matrix.innerIndexPtr()[i]);
+          if (m_rowIndices(i) != index)
+            return false;
+        }
+        return true;
+      }
+
       Array<SuiteSparse_long> m_columnPointers;
       Array<SuiteSparse_long> m_rowIndices;
       Resources m_resources;

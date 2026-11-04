@@ -27,8 +27,10 @@
 
 #ifdef RODIN_USE_CUDSS
 
+#include <algorithm>
 #include <cstdint>
 #include <limits>
+#include <vector>
 
 #include <cuda_runtime.h>
 #include <cudss.h>
@@ -77,13 +79,14 @@ namespace Rodin::Solver
    * matrix already in device memory, such as a Kokkos::SparseMatrix on the
    * CUDA backend, is read in place and only the vectors are copied.
    * Symbolic analysis (reordering and symbolic factorization) is reused
-   * across explicit @ref factorize calls, which assume that the sparsity
-   * pattern is unchanged; only the values are copied again. The numeric
-   * factorization is retained after @ref factorize, so several right-hand
-   * sides are solved without refactorization. The ordinary @ref solve entry
-   * point builds a factorization only when none is retained. Call
-   * @ref factorize explicitly after changing matrix values, and clear the
-   * symbolic factorization after changing the sparsity pattern.
+   * across explicit @ref factorize calls while the sparsity pattern is
+   * unchanged; only the values are copied again. A matrix with another
+   * pattern, such as a tangent whose assembly drops other zero
+   * contributions, is analyzed again. The numeric factorization is retained
+   * after @ref factorize, so several right-hand sides are solved without
+   * refactorization. The ordinary @ref solve entry point builds a
+   * factorization only when none is retained. Call @ref factorize
+   * explicitly after changing the matrix.
    *
    * Symmetry is never inferred from the entries. A matrix is factorized as
    * symmetric only after @ref setSymmetric.
@@ -95,7 +98,8 @@ namespace Rodin::Solver
    *    assembly may have moved them.
    * 2. Hand CSC arrays to cuDSS as the CSR arrays of @f$ A^T @f$ and solve
    *    with the transpose, so that no conversion is needed.
-   * 3. Reuse symbolic analysis until explicitly cleared.
+   * 3. Reuse symbolic analysis while the pattern, kept on the host and
+   *    compared at each factorization, is unchanged.
    * 4. Retain the numeric factorization for explicit repeated solves.
    *
    * The solver runs on the current CUDA device, on the default stream. Every
@@ -248,6 +252,10 @@ namespace Rodin::Solver
         /// @brief Number of nonzeros of the analyzed matrix.
         Index nonzeros = 0;
 
+        /// @brief Line starts then indices of the compressed arrays of the
+        /// analyzed matrix, on the host.
+        std::vector<Math::SparseIndex> pattern;
+
         /**
          * @brief Releases a retained factorization stage.
          *
@@ -271,6 +279,8 @@ namespace Rodin::Solver
           values.release();
           b.release();
           x.release();
+          pattern.clear();
+          pattern.shrink_to_fit();
           rows = 0;
           nonzeros = 0;
         }
@@ -376,8 +386,8 @@ namespace Rodin::Solver
        * @brief Analyzes and numerically factorizes the system matrix.
        *
        * Reuses existing symbolic analysis and replaces any previous numeric
-       * factorization. The matrix sparsity pattern must remain unchanged
-       * until the symbolic factorization is cleared.
+       * factorization. A matrix whose sparsity pattern differs from the
+       * analyzed one is analyzed again.
        */
       void factorize(LinearSystemType& axb)
       {
@@ -394,12 +404,11 @@ namespace Rodin::Solver
         auto& res = m_resources;
         const Index rows = static_cast<Index>(Arrays::getRowCount(matrix));
         const Index nonzeros = static_cast<Index>(Arrays::getNonZeroCount(matrix));
-        if (res.symbolic && (rows != res.rows || nonzeros != res.nonzeros))
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "The matrix sparsity pattern changed since the symbolic analysis."
-            << Alert::Raise;
-        }
+        // The assemblies list only the nonzero contributions, so the pattern
+        // of a tangent may change with the iterate. A new pattern is
+        // analyzed again.
+        if (res.symbolic && !hasPattern(matrix, rows, nonzeros))
+          res.clear(Factorization::Symbolic);
 
         res.numeric = false;
         const Math::SparseIndex* starts = res.outer.data;
@@ -442,6 +451,7 @@ namespace Rodin::Solver
           res.symbolic = true;
           res.rows = rows;
           res.nonzeros = nonzeros;
+          readPattern(res.pattern, matrix, rows, nonzeros);
         }
         else if constexpr (Arrays::Resident)
         {
@@ -570,6 +580,42 @@ namespace Rodin::Solver
       {
         check(cudaMemcpy(device, host, count * sizeof(T), cudaMemcpyHostToDevice),
           "copy to the device");
+      }
+
+      /// @brief Copies the row starts then the column indices of the matrix
+      /// to the host.
+      template <class M>
+      void readPattern(
+        std::vector<Math::SparseIndex>& pattern, M& matrix, Index rows, Index nonzeros)
+      {
+        pattern.resize(rows + 1 + nonzeros);
+        const Math::SparseIndex* starts = Arrays::getStarts(matrix);
+        const Math::SparseIndex* indices = Arrays::getIndices(matrix);
+        if constexpr (Arrays::Resident)
+        {
+          check(cudaMemcpy(pattern.data(), starts, (rows + 1) * sizeof(Math::SparseIndex),
+            cudaMemcpyDeviceToHost), "copy the matrix pattern to the host");
+          check(cudaMemcpy(pattern.data() + rows + 1, indices,
+            nonzeros * sizeof(Math::SparseIndex), cudaMemcpyDeviceToHost),
+            "copy the matrix pattern to the host");
+        }
+        else
+        {
+          std::copy_n(starts, rows + 1, pattern.data());
+          std::copy_n(indices, nonzeros, pattern.data() + rows + 1);
+        }
+      }
+
+      /// @brief Returns whether the matrix has the analyzed sparsity pattern.
+      template <class M>
+      bool hasPattern(M& matrix, Index rows, Index nonzeros)
+      {
+        auto& res = m_resources;
+        if (rows != res.rows || nonzeros != res.nonzeros)
+          return false;
+        std::vector<Math::SparseIndex> pattern;
+        readPattern(pattern, matrix, rows, nonzeros);
+        return pattern == res.pattern;
       }
 
       /// @brief Creates the descriptors over the device arrays.
