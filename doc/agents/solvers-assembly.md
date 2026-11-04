@@ -144,7 +144,10 @@ as the time steps of a flow, keeps one `CuDSS` or `MUMPS` instance and calls
 `factorize` at each step. The retaining solvers (`CuDSS`, `RocSolverRF`,
 `MUMPS`, `ParU`) compare the pattern with the analyzed one at each
 `factorize` and analyze a new one again: the assemblies drop zero
-contributions, so the pattern of a tangent may change with the iterate. On a 2D Poisson system with 1M unknowns, `CuDSS`
+contributions, so the pattern of a tangent may change with the iterate.
+`NewtonSolver` calls `factorize` at each iteration of a solver that has it,
+since a retained factorization would otherwise serve the tangent of the
+first iterate. On a 2D Poisson system with 1M unknowns, `CuDSS`
 takes 6.6 s for the first solve against 38 s for `SparseLU`, then 234 ms per
 refactorization and 15 ms per solve (RTX 2080 Ti, 32 cores). The Kokkos
 `NavierStokes` example does this on a device matrix: 160 steps take 3.3 s

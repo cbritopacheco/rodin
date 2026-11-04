@@ -739,6 +739,11 @@ namespace Rodin::Solver
           increment.resize(linearSystem.getVector().size());
           increment.setZero();
 
+          // A solver retaining its factorization, such as MUMPS, cuDSS or
+          // RocSolverRF, solves with it until it is refactorized, and the
+          // tangent changes with each iterate.
+          if constexpr (requires { this->getLinearSolver().factorize(linearSystem); })
+            this->getLinearSolver().factorize(linearSystem);
           this->getLinearSolver().solve();
 
           if (m_stepPolicy)
