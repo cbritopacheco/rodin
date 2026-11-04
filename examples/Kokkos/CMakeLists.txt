@@ -5,3 +5,7 @@ endif()
 
 add_subdirectory(PDEs)
 add_subdirectory(Solid)
+
+if (TARGET Rodin::KokkosMPI)
+  add_subdirectory(MPI)
+endif()

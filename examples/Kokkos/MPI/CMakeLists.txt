@@ -1,0 +1,2 @@
+add_executable(KokkosMPIPoissonScaling PoissonScaling.cpp)
+target_link_libraries(KokkosMPIPoissonScaling PUBLIC Rodin::KokkosMPI)
