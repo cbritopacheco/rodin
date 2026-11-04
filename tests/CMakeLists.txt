@@ -2,12 +2,18 @@ enable_testing()
 include(GoogleTest)
 
 # Record which execution profiles can use each GoogleTest executable before
-# building it. Forward its registration unchanged, including filters/properties.
+# building it. Preserve filters and execution properties.
 function(rodin_discover_tests target)
   cmake_parse_arguments(PARSE_ARGV 1 _registration
     "NO_PRETTY_TYPES;NO_PRETTY_VALUES"
     "TEST_PREFIX;TEST_SUFFIX;WORKING_DIRECTORY;TEST_LIST;DISCOVERY_TIMEOUT;XML_OUTPUT_DIR;DISCOVERY_MODE"
     "EXTRA_ARGS;DISCOVERY_EXTRA_ARGS;PROPERTIES;TEST_FILTER")
+  # Sanitized executables can exceed CMake's five-second startup default on
+  # shared runners. This bounds listing only; execution watchdogs are unchanged.
+  set(_discovery_default)
+  if(NOT DEFINED _registration_DISCOVERY_TIMEOUT)
+    set(_discovery_default DISCOVERY_TIMEOUT 60)
+  endif()
   set(_labels)
   list(FIND _registration_PROPERTIES LABELS _label_index)
   if(NOT _label_index EQUAL -1)
@@ -35,7 +41,7 @@ function(rodin_discover_tests target)
   set_property(TARGET ${target} APPEND PROPERTY RODIN_TEST_PROFILES ${_profiles})
   if(CMAKE_VERSION VERSION_LESS 3.18)
     # CMake 3.16's GoogleTest module also expands ARGN as a list.
-    gtest_discover_tests(${target} ${ARGN})
+    gtest_discover_tests(${target} ${ARGN} ${_discovery_default})
   else()
     # Preserve argument boundaries, including semicolons and empty arguments.
     # Expanding ARGN directly would alter modern GoogleTest registrations.
@@ -51,6 +57,10 @@ function(rodin_discover_tests target)
       endwhile()
       string(APPEND _call " [${_bracket}[${_value}]${_bracket}]")
     endforeach()
+    if(_discovery_default)
+      list(JOIN _discovery_default " " _discovery_arguments)
+      string(APPEND _call " ${_discovery_arguments}")
+    endif()
     cmake_language(EVAL CODE "${_call})")
   endif()
 endfunction()

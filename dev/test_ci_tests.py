@@ -244,6 +244,40 @@ set_property(DIRECTORY APPEND PROPERTY TEST_INCLUDE_FILES
 
 
 class GoogleTestForwardingTest(unittest.TestCase):
+    def test_slow_discovery_has_bounded_allowance_and_honors_explicit_timeout(self):
+        with tempfile.TemporaryDirectory(prefix="rodin-ci-discovery-startup-") as directory:
+            root = Path(directory)
+            registration = (ci.ROOT / "tests/CMakeLists.txt").read_text()
+            begin = registration.index("function(rodin_discover_tests")
+            end = registration.index("endfunction()", begin) + len("endfunction()")
+            (root / "Registration.cmake").write_text(registration[begin:end])
+            (root / "fake.cpp").write_text(
+                '#include <chrono>\n#include <thread>\n#include <iostream>\n'
+                'int main() { std::this_thread::sleep_for(std::chrono::seconds(6)); '
+                'std::cout << "Suite.\\n  One\\n"; }\n')
+            (root / "CMakeLists.txt").write_text('''cmake_minimum_required(VERSION 3.20)
+project(DiscoveryStartup CXX)
+enable_testing()
+include(GoogleTest)
+include(Registration.cmake)
+add_executable(Default fake.cpp)
+rodin_discover_tests(Default PROPERTIES LABELS unit TIMEOUT 17)
+add_executable(Explicit fake.cpp)
+rodin_discover_tests(Explicit DISCOVERY_TIMEOUT 1 PROPERTIES LABELS unit TIMEOUT 17)
+''')
+            build = root / 'build'
+            subprocess.run(['cmake', '-S', str(root), '-B', str(build)], check=True, capture_output=True)
+            subprocess.run(['cmake', '--build', str(build), '--target', 'Default'],
+                           check=True, capture_output=True)
+            failed = subprocess.run(['cmake', '--build', str(build), '--target', 'Explicit'],
+                                    capture_output=True, text=True)
+            self.assertNotEqual(failed.returncode, 0)
+            self.assertIn('timeout', failed.stdout + failed.stderr)
+            generated = next(build.glob('Default*_tests.cmake')).read_text()
+            self.assertIn('Suite.One', generated)
+            self.assertIn('TIMEOUT', generated)
+            self.assertIn('17', generated)
+
     def test_semicolon_properties_and_empty_arguments_are_preserved(self):
         with tempfile.TemporaryDirectory(prefix="rodin-ci-forward-") as directory:
             source = Path(directory) / "source"

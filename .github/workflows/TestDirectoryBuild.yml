@@ -31,7 +31,7 @@ jobs:
       - name: Check compilation disk headroom
         run: python3 dev/ci_environment.py disk
       - name: Hydrate discovery resources
-        run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
+        run: python3 dev/ci_lfs.py --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
       - uses: actions/download-artifact@v4
         with:
           name: ci-build-index-${{ inputs.common }}

@@ -142,10 +142,8 @@ def directory(target):
 
 
 def split_variational_build(spec, group):
-    """Bound every optional sanitizer producer in both Debug and Release."""
-    flags = spec['cmake']
-    return (group == 'unit/Rodin/Variational' and spec['mode'] == 'optional' and
-            (flags['RODIN_USE_ASAN'] == 'ON' or flags['RODIN_USE_UBSAN'] == 'ON'))
+    """Bound optional Variational artifacts, including unsanitized Debug builds."""
+    return group == 'unit/Rodin/Variational' and spec['mode'] == 'optional'
 
 
 def directory_plan(entry, records):

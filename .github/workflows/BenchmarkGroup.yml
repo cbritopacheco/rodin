@@ -90,7 +90,7 @@ jobs:
           configuration: ${{ inputs.configuration }}
       - name: Hydrate benchmark resources
         id: resources
-        run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/medit/UniformTriangular64.medit.mesh"
+        run: python3 dev/ci_lfs.py --include="resources/medit/Square.medit.mesh,resources/medit/UniformTriangular64.medit.mesh"
       - uses: ./.github/actions/download-artifacts
         id: restore
         with:

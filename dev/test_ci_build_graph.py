@@ -70,9 +70,9 @@ class BuildGraphPlanTest(unittest.TestCase):
             self.assertEqual(slow_record['selected'], targets[:1])
             self.assertEqual(json.dumps(records, sort_keys=True), frozen)
 
-    def test_oversized_optional_sanitizer_build_is_split_without_losing_targets(self):
+    def test_oversized_optional_build_is_split_without_losing_targets(self):
         for build_type, mt, (asan, ubsan) in itertools.product(
-                ['Debug', 'Release'], ['ON', 'OFF'], [('ON', 'OFF'), ('OFF', 'ON'), ('ON', 'ON')]):
+                ['Debug', 'Release'], ['ON', 'OFF'], [('OFF', 'OFF'), ('ON', 'OFF'), ('OFF', 'ON'), ('ON', 'ON')]):
             with tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
                 folder = root / 'tests/unit/Rodin/Variational'

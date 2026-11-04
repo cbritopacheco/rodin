@@ -258,10 +258,10 @@ compatibility. Compilation stops at `Unit / Rodin / <Module>`,
 `Manufactured / Rodin / <Module>` and `Convergence / H`, `/ P`, `/ HP` or
 `/ Isoparametric`. Selected descendants normally share their group's single
 artifact; direct root targets retain a separate parent group. The optional
-Debug and Release builds with either sanitizer enabled divide the oversized Variational
+Debug and Release builds divide the oversized Variational
 producer into numbered parts of at most 24 executables. Release previously lost
 its runner during compilation; Debug exhausted disk space with ASan alone and
-with both sanitizers. Each
+with both sanitizers, and later without sanitizers. Each
 part restores the same common libraries, and dependent lanes wait for the group.
 
 The 3D P1 manufactured elasticity group runs tetrahedron, hexahedron, pyramid and
@@ -712,3 +712,10 @@ and OOM counters are recorded where exposed. Missing counters remain unknown.
 The monitor is stopped when the lane exits. These measurements help distinguish
 resource exhaustion from hosted runner interruptions; they do not prevent a
 runner shutdown or replace the existing single-retry policy.
+
+Explicit resource hydration uses `dev/ci_lfs.py` with three attempts, 300 seconds
+per attempt, and two- and four-second backoffs for transient network/server
+failures. Authentication, missing objects, quota and unknown errors fail
+immediately. Exhaustion fails the job; required resources remain mandatory.
+GoogleTest discovery has a 60-second default startup allowance. Explicit
+`DISCOVERY_TIMEOUT` values and all test execution watchdogs remain unchanged.
