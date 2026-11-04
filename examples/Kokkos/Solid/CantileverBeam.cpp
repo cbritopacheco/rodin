@@ -11,12 +11,14 @@
  *
  * Device port of examples/Solid/CantileverBeam.cpp. The Newmark predictors
  * and correctors act on the coefficient vectors, and the Neo-Hookean tangent
- * and residual are assembled by a device kernel at each Newton iteration.
+ * and residual are assembled by a device kernel at each Newton iteration,
+ * and solved on the device by cuDSS or RocSolverRF when Rodin has them.
  * The discrete derivative check of the host example is kept.
  */
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <cstdlib>
 #include <iostream>
 
 #include <Rodin/Geometry.h>
@@ -25,7 +27,7 @@
 #include <Rodin/Solid.h>
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Solver/NewtonSolver.h>
-#include <Rodin/Solver/SparseLU.h>
+#include <Rodin/Solver.h>
 #include <Rodin/Kokkos.h>
 
 #if defined(KOKKOS_ENABLE_CUDA)
@@ -278,6 +280,41 @@ int main(int argc, char** argv)
 
   TrialFunction du(vh);
   TestFunction w(vh);
+  auto ivw = Solid::InternalVirtualWork(law, u);
+
+  // The problem and the solvers outlive the time loop: the sparsity pattern
+  // is the same at every Newton iteration of every step, so cuDSS and
+  // RocSolverRF keep their symbolic analysis and SparseLU its ordering, and
+  // each iteration only refactorizes the tangent. With a device solver the
+  // tangent stays in the memory of the backend, where the solver reads it
+  // in place.
+#if defined(RODIN_USE_CUDSS) || defined(RODIN_USE_ROCSOLVER)
+  using System =
+    Math::LinearSystem<Rodin::Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>;
+  Problem<System, decltype(du), decltype(w)> newton(du, w);
+#ifdef RODIN_USE_CUDSS
+  Solver::CuDSS linearSolver(newton);
+#else
+  Solver::RocSolverRF linearSolver(newton);
+#endif
+#else
+  Problem newton(du, w);
+  Solver::SparseLU linearSolver(newton);
+#endif
+  Solver::NewtonSolver solver(linearSolver);
+  solver.setMaxIterations(50)
+    .setDampingFactor(1.0)
+    .setAbsoluteTolerance(1e-10)
+    .setRelativeTolerance(1e-8);
+
+  const auto define = [&](auto& pb, Real ty)
+  {
+    pb = ivw(du, w) + aMass * Integral(du, w) + aDamp * Integral(du, w) +
+      aMass * Integral(u, w) + aDamp * Integral(u, w) -
+      BoundaryIntegral(VectorFunction{0, ty}, w).over(rightBC) -
+      aMass * Integral(uPred, w) + c * Integral(rhsDamp, w) +
+      DirichletBC(du, Zero(2)).on(leftBC);
+  };
 
   for (size_t step = 1; step <= nSteps; ++step)
   {
@@ -291,25 +328,18 @@ int main(int argc, char** argv)
     rhsDamp.getData() = vPred.getData() - (gamma / (beta * dt)) * uPred.getData();
     u.getData() = uPred.getData();
 
-    auto ivw = Solid::InternalVirtualWork(law, u);
-
-    Problem newton(du, w);
-    newton = ivw(du, w) + aMass * Integral(du, w) + aDamp * Integral(du, w) +
-      aMass * Integral(u, w) + aDamp * Integral(u, w) -
-      BoundaryIntegral(VectorFunction{0, ty}, w).over(rightBC) -
-      aMass * Integral(uPred, w) + c * Integral(rhsDamp, w) +
-      DirichletBC(du, Zero(2)).on(leftBC);
-
     if (step == 1)
-      checkDiscreteDerivative(newton, u, dbcMap);
+    {
+      // The check multiplies the tangent on the host.
+      Problem check(du, w);
+      define(check, ty);
+      checkDiscreteDerivative(check, u, dbcMap);
+    }
 
-    Solver::SparseLU linearSolver(newton);
-    Solver::NewtonSolver solver(linearSolver);
-    solver.setMaxIterations(50)
-      .setDampingFactor(1.0)
-      .setAbsoluteTolerance(1e-10)
-      .setRelativeTolerance(1e-8);
+    define(newton, ty);
     solver.solve(u);
+    if (!linearSolver.success())
+      return EXIT_FAILURE;
 
     std::cout << "Step " << step << ", time " << t << std::endl;
 
