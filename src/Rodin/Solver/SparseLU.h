@@ -39,7 +39,9 @@
 #ifndef RODIN_SOLVER_SPARSELU_H
 #define RODIN_SOLVER_SPARSELU_H
 
+#include <algorithm>
 #include <string>
+#include <vector>
 
 #include <Eigen/SparseLU>
 
@@ -99,6 +101,9 @@ namespace Rodin::Solver
    * @par Architecture
    * The operator is factorized once and the right-hand side is solved with
    * those factors. Optional iterative refinement reuses the same factors.
+   * The column ordering depends only on the sparsity pattern, so a solve
+   * whose operator has the pattern of the previous one, as in the
+   * iterations of a Newton solver, reuses it and only refactorizes.
    * @f[
    * r_k=b-Ax_k,\qquad A\delta x_k=r_k,\qquad x_{k+1}=x_k+\delta x_k.
    * @f]
@@ -258,6 +263,12 @@ namespace Rodin::Solver
       /// @brief Outcome of the most recent operation.
       Info m_info;
 
+      /// Column pointers of the operator of the retained ordering.
+      std::vector<typename OperatorType::StorageIndex> m_outer;
+
+      /// Row indices of the operator of the retained ordering.
+      std::vector<typename OperatorType::StorageIndex> m_inner;
+
       /// Underlying Eigen SparseLU solver
       Eigen::SparseLU<OperatorType> m_solver;
   };
@@ -270,7 +281,28 @@ namespace Rodin::Solver
     LinearSystemType& axb)
   {
     m_info = Info{};
-    m_solver.compute(axb.getOperator());
+    const OperatorType& matrix = axb.getOperator();
+    const bool reuse = matrix.isCompressed()
+      && !m_outer.empty()
+      && m_outer.size() == static_cast<size_t>(matrix.outerSize() + 1)
+      && m_inner.size() == static_cast<size_t>(matrix.nonZeros())
+      && std::equal(m_outer.begin(), m_outer.end(), matrix.outerIndexPtr())
+      && std::equal(m_inner.begin(), m_inner.end(), matrix.innerIndexPtr());
+    if (!reuse)
+    {
+      m_outer.clear();
+      m_inner.clear();
+      m_solver.analyzePattern(matrix);
+      if (matrix.isCompressed())
+      {
+        m_outer.assign(
+          matrix.outerIndexPtr(), matrix.outerIndexPtr() + matrix.outerSize() + 1);
+        m_inner.assign(
+          matrix.innerIndexPtr(), matrix.innerIndexPtr() + matrix.nonZeros());
+      }
+    }
+    m_info.factorization = Factorization::Symbolic;
+    m_solver.factorize(matrix);
     if (!record())
     {
       // Eigen guards its solve with an assertion that a release build

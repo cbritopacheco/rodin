@@ -85,9 +85,65 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_EQ(system.getSolution()(0), 7.0);
     EXPECT_EQ(system.getSolution()(1), 7.0);
     EXPECT_EQ(system.getSolution()(2), 7.0);
-    EXPECT_FALSE(solver.getInfo().factorization.has_value());
+    // The ordering depends only on the pattern and is retained.
+    EXPECT_EQ(solver.getInfo().factorization, Rodin::Solver::Factorization::Symbolic);
     EXPECT_NE(solver.getInfo().status, 0);
     EXPECT_FALSE(solver.getLastErrorMessage().empty());
+  }
+
+  /// @brief Solves with the pattern of the previous one reuse its ordering.
+  ///
+  /// The values change between the first two solves, then the pattern.
+  TEST(Rodin_Solver_SparseLU, ReusesOrderingOfSamePattern)
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Segment, {2});
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    Problem problem(u, v);
+
+    SparseLULinearSystem system;
+    auto& a = system.getOperator();
+    a.resize(3, 3);
+    a.insert(0, 0) = 4.0;
+    a.insert(1, 0) = 2.0;
+    a.insert(0, 1) = 1.0;
+    a.insert(1, 1) = 5.0;
+    a.insert(2, 1) = 3.0;
+    a.insert(1, 2) = 1.0;
+    a.insert(2, 2) = 6.0;
+    a.makeCompressed();
+    Math::Vector<Real> expected(3);
+    expected << 1.0, 2.0, 3.0;
+
+    Rodin::Solver::SparseLU solver(problem);
+    const auto check = [&]()
+    {
+      system.getVector() = a * expected;
+      solver.solve(system);
+      EXPECT_TRUE(solver.success());
+      EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+    };
+    check();
+
+    // Same pattern: the ordering is reused with pivots that changed.
+    a.coeffRef(0, 0) = 0.5;
+    a.coeffRef(1, 0) = 8.0;
+    a.coeffRef(2, 2) = -2.0;
+    check();
+
+    // New pattern: the ordering is recomputed.
+    a.insert(2, 0) = 7.0;
+    a.insert(0, 2) = -3.0;
+    a.makeCompressed();
+    check();
+
+    // Back to a smaller pattern of the same size.
+    a.coeffRef(2, 0) = 0.0;
+    a.prune(0.0);
+    a.makeCompressed();
+    check();
   }
 
   template <class Scalar>
