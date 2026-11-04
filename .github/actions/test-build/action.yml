@@ -23,10 +23,11 @@ runs:
         JOB: ${{ inputs.job }}
         MATRIX: ${{ inputs.matrix }}
       run: python3 dev/ci_build_graph.py mode --job "$JOB" --matrix "$MATRIX"
-    - uses: actions/download-artifact@v4
+    - uses: ./.github/actions/download-artifacts
       with:
-        name: ci-build-index-${{ steps.configuration.outputs.common }}
+        names: '["ci-build-index-${{ steps.configuration.outputs.common }}"]'
         path: .
+        merge-single: true
     - name: Identify compatible build
       id: build
       shell: bash

@@ -123,3 +123,96 @@ test('digest mismatch is retried and never published as valid input', async () =
     assert.deepEqual(await fs.readdir(folder), []);
   });
 });
+
+test('lookup resets recover within three attempts and preserve the resolved ID', async () => {
+  await temporary(async folder => {
+    let gets = 0, downloads = 0;
+    const delays = [];
+    const client = {
+      async getArtifact(name) {
+        if (++gets < 3) throw new Error('Failed to ListArtifacts: Unable to make request: ECONNRESET');
+        return {artifact: {name, id: 42}};
+      },
+      async downloadArtifact(id, {path: staging}) {
+        ++downloads;
+        assert.equal(id, 42);
+        await fs.writeFile(path.join(staging, 'index.json'), 'verified');
+      }
+    };
+    await downloadArtifacts(client, ['ci-build-index-a'], folder, core, async ms => delays.push(ms));
+    assert.equal(gets, 3);
+    assert.equal(downloads, 1);
+    assert.deepEqual(delays, [2000, 4000]);
+    assert.equal(await fs.readFile(path.join(folder, 'ci-build-index-a/index.json'), 'utf8'), 'verified');
+  });
+});
+
+test('lookup exhaustion and permanent failures never publish input', async () => {
+  for (const [error, expected] of [
+    [new Error('ECONNRESET'), 3],
+    [Object.assign(new Error('service unavailable'), {statusCode: 503}), 3],
+    [Object.assign(new Error('unauthorized'), {statusCode: 403}), 1],
+    [Object.assign(new Error('missing'), {name: 'ArtifactNotFoundError'}), 1],
+    [new Error('unknown failure'), 1],
+    [Object.assign(new Error('ECONNRESET'), {name: 'AbortError'}), 1]
+  ]) await temporary(async folder => {
+    let attempts = 0;
+    const client = {
+      async getArtifact() { ++attempts; throw error; },
+      async downloadArtifact() { assert.fail('Unresolved artifact cannot be downloaded'); }
+    };
+    await assert.rejects(downloadArtifacts(client, ['ci-build-index-a'], folder, core, async () => {}));
+    assert.equal(attempts, expected);
+    assert.deepEqual(await fs.readdir(folder), []);
+  });
+});
+
+test('single-artifact merge preserves workspace and publishes only verified bytes', async () => {
+  await temporary(async folder => {
+    await fs.writeFile(path.join(folder, 'source.cpp'), 'keep');
+    await fs.writeFile(path.join(folder, 'ci-build-index.json'), 'old');
+    let gets = 0, transfers = 0;
+    const client = {
+      async getArtifact(name) {
+        if (++gets === 1) throw Object.assign(new Error('reset'), {code: 'ECONNRESET'});
+        return {artifact: {name, id: 51, digest: 'sha256:verified'}};
+      },
+      async downloadArtifact(id, {path: staging, expectedHash}) {
+        assert.equal(expectedHash, 'sha256:verified');
+        assert.equal(await fs.readFile(path.join(folder, 'ci-build-index.json'), 'utf8'), 'old');
+        assert.deepEqual(await fs.readdir(staging), []);
+        if (++transfers === 1) {
+          await fs.writeFile(path.join(staging, 'partial'), 'bad');
+          throw new Error('Interrupted transfer');
+        }
+        await fs.writeFile(path.join(staging, 'ci-build-index.json'), 'new');
+        await fs.mkdir(path.join(staging, 'nested'));
+        await fs.writeFile(path.join(staging, 'nested/receipt'), 'valid');
+      }
+    };
+    await downloadArtifacts(client, ['ci-build-index-a'], folder, core, async () => {}, true);
+    assert.equal(gets, 2);
+    assert.equal(transfers, 2);
+    assert.equal(await fs.readFile(path.join(folder, 'source.cpp'), 'utf8'), 'keep');
+    assert.equal(await fs.readFile(path.join(folder, 'ci-build-index.json'), 'utf8'), 'new');
+    assert.equal(await fs.readFile(path.join(folder, 'nested/receipt'), 'utf8'), 'valid');
+    assert.deepEqual((await fs.readdir(folder)).sort(), ['ci-build-index.json', 'nested', 'source.cpp']);
+    await assert.rejects(downloadArtifacts(client, ['one', 'two'], folder, core, async () => {}, true), /exactly one/);
+  });
+});
+
+test('failed merged download leaves existing workspace files unchanged', async () => {
+  await temporary(async folder => {
+    await fs.writeFile(path.join(folder, 'index.json'), 'old');
+    const client = {
+      async getArtifact(name) { return {artifact: {name, id: 52}}; },
+      async downloadArtifact(id, {path: staging}) {
+        await fs.writeFile(path.join(staging, 'index.json'), 'bad');
+        return {digestMismatch: true};
+      }
+    };
+    await assert.rejects(downloadArtifacts(client, ['ci-build-index-a'], folder, core, async () => {}, true), /digest mismatch/);
+    assert.equal(await fs.readFile(path.join(folder, 'index.json'), 'utf8'), 'old');
+    assert.deepEqual(await fs.readdir(folder), ['index.json']);
+  });
+});

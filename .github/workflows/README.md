@@ -719,3 +719,15 @@ failures. Authentication, missing objects, quota and unknown errors fail
 immediately. Exhaustion fails the job; required resources remain mandatory.
 GoogleTest discovery has a 60-second default startup allowance. Explicit
 `DISCOVERY_TIMEOUT` values and all test execution watchdogs remain unchanged.
+
+MPI Poisson registers nine complete cases independently on each of seven
+geometries and four MPI ranks. All 252 entries retain their numerical checks and
+300-second watchdogs; no refinement history is subdivided.
+
+All build-index and test-plan downloads use the pinned exact-name downloader.
+Transient artifact lookup failures receive three attempts with two- and
+four-second backoffs. Missing artifacts, authorization and unknown lookup errors
+fail immediately. Transfer retries retain their separate three-attempt bound,
+clean staging and digest verification. Single-artifact metadata restores merge
+verified contents into their original destinations while retaining workspace
+sources. A failed lookup or transfer never publishes partial input.

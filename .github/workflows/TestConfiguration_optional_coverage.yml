@@ -34,10 +34,11 @@ jobs:
         definition: ${{ inputs.definition }}
     - name: Install pinned lane planning dependency
       run: python3 dev/ci_environment.py python
-    - uses: actions/download-artifact@v4
+    - uses: ./.github/actions/download-artifacts
       with:
-        name: ci-test-plan
+        names: '["ci-test-plan"]'
         path: .
+        merge-single: true
     - name: Compile common libraries once
       env:
         DEFINITION: ${{ inputs.definition }}

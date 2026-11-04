@@ -94,14 +94,32 @@ class ArtifactPlanTest(unittest.TestCase):
             groups = [job.get('steps', []) for job in jobs.values()] + [document.get('runs', {}).get('steps', [])]
             for steps in groups:
                 for step in steps:
-                    if step.get('uses', '').startswith('actions/download-artifact@'):
-                        self.assertIn('name', step['with'], str(path))
-                        self.assertNotIn('pattern', step['with'], str(path))
+                    self.assertFalse(step.get('uses', '').startswith('actions/download-artifact@'), str(path))
         finalize = yaml.safe_load((root / '.github/workflows/Tests.yml').read_text())['jobs']['CoverageFinalize']
         commands = [step.get('run', '') for step in finalize['steps']]
         self.assertIn('python3 dev/ci_coverage.py finalize', commands)
         self.assertIn('python3 dev/ci_coverage.py threshold', commands)
         self.assertIn('python3 dev/ci_artifacts.py final --output ci-final-inputs.json', commands)
+
+    def test_single_artifact_metadata_restores_keep_their_existing_layout(self):
+        root = tests.ROOT
+        expected = {
+            '.github/workflows/TestCommon.yml': [('ci-test-plan', '.')],
+            '.github/workflows/CoveragePublish.yml': [('ci-test-plan', '.')],
+            '.github/workflows/Tests.yml': [('ci-test-plan', '.')],
+            '.github/workflows/TestDirectoryBuild.yml': [
+                ('ci-build-index-${{ inputs.common }}', '.'),
+                ('ci-common-${{ inputs.common }}', 'ci-runtime-inputs/ci-common-${{ inputs.common }}')],
+            '.github/actions/test-build/action.yml': [('ci-build-index-${{ steps.configuration.outputs.common }}', '.')]
+        }
+        for path, contract in expected.items():
+            document = yaml.safe_load((root / path).read_text())
+            groups = [j.get('steps', []) for j in document.get('jobs', {}).values()]
+            groups += [document.get('runs', {}).get('steps', [])]
+            actual = [(json.loads(s['with']['names'])[0], s['with']['path'])
+                      for steps in groups for s in steps
+                      if s.get('uses') == './.github/actions/download-artifacts' and s['with'].get('merge-single')]
+            self.assertEqual(actual, contract, path)
 
     def test_benchmark_restore_uses_retrying_exact_names_and_preserves_uploads(self):
         workflow = yaml.safe_load((tests.ROOT / '.github/workflows/BenchmarkGroup.yml').read_text())

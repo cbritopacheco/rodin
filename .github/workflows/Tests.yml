@@ -360,10 +360,11 @@ jobs:
       with:
         lfs: false
     - name: Download expected plan
-      uses: actions/download-artifact@v4
+      uses: ./.github/actions/download-artifacts
       with:
-        name: ci-test-plan
+        names: '["ci-test-plan"]'
         path: .
+        merge-single: true
     - name: Plan exact shared-build indices
       run: python3 dev/ci_artifacts.py indices --output ci-index-inputs.json
     - name: Download every shared-build index

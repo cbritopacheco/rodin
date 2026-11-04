@@ -86,6 +86,27 @@ class BackendRegistrationTest(unittest.TestCase):
                     self.assertEqual(properties[name]["PROCESSORS"], str(rank))
             self.assertEqual(actual, expected)
 
+    def test_mpi_poisson_cases_are_independent_and_complete_at_every_rank(self):
+        source = (ROOT / 'tests/convergence/h/PETScMPIPoisson/Poisson.cpp').read_text()
+        cases = re.findall(r'TEST_P\(PETScMPIPoissonTest,\s*(\w+)\)', source)
+        self.assertEqual(len(cases), 9)
+        tests, build = self.configure('tests/convergence/h/PETScMPIPoisson')
+        properties = self.properties(build)
+        actual = Counter()
+        for name, command in tests.items():
+            rank = int(command[command.index('-n') + 1])
+            selected = next(arg.split('=', 1)[1] for arg in command if arg.startswith('--gtest_filter='))
+            matches = [(case, geometry) for case, geometry in itertools.product(cases, GEOMETRIES)
+                       if fnmatch.fnmatchcase(f'AllGeometries/PETScMPIPoissonTest.{case}/{geometry}', selected)]
+            self.assertEqual(len(matches), 1, name)
+            self.assertNotIn('*', selected)
+            actual[(rank,) + matches[0]] += 1
+            self.assertIn('--gtest_fail_if_no_test_selected', command)
+            self.assertEqual(properties[name]['TIMEOUT'], '300')
+            self.assertEqual(properties[name]['PROCESSORS'], str(rank))
+            self.assertEqual(set(properties[name]['LABELS'].split(';')), {'convergence', 'petsc', 'distributed'})
+        self.assertEqual(actual, Counter(itertools.product([1, 2, 3, 4], cases, GEOMETRIES)))
+
     def test_named_mpi_oracles_are_disjoint_and_keep_every_rank(self):
         source = (ROOT / "tests/unit/Rodin/PETSc/MPIFormTest.cpp").read_text()
         cases = re.findall(r'TEST\(PETSc_MPI_Form,\s*(\w+)\)', source)
