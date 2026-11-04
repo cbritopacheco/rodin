@@ -18,6 +18,7 @@
 #include <limits>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -378,6 +379,167 @@ namespace Rodin::Assembly::Internal
         res.expansions.values = upload(execution, values, "Rodin expansion values");
         execution.fence("Rodin expansions");
         return res;
+      }
+
+      /**
+       * @brief Resolves the conditions of a distributed system in the global
+       * numbering, then expands the local degrees of freedom on local
+       * indices.
+       *
+       * The periodic conditions relate global indices of their space, which
+       * may be held by other processes; each process may give any of them,
+       * and the map gathers them all. The fixed degrees of freedom are
+       * those already synchronized over the processes. The masters the
+       * process does not hold are appended to the local degrees of
+       * freedom, so that their entries are sent to their owners, and only
+       * the owner of an identified degree of freedom writes its row.
+       *
+       * @param execution Execution space of the uploads.
+       * @param map Empty constraint map of the global degrees of freedom.
+       * @param globals Global index of each local degree of freedom,
+       * appended with the masters the process does not hold.
+       * @param owned Whether the process owns each local degree of freedom,
+       * appended likewise.
+       * @param offset Callable giving the global index of the first degree
+       * of freedom of a field from its local one.
+       * @param finalize Callable resolving the map over the processes;
+       * collective.
+       */
+      template <class Map, class Offset, class Finalize>
+      Resolved resolve(const ExecutionSpace& execution, Map& map,
+        std::vector<Index>& globals, std::vector<unsigned char>& owned,
+        Offset&& offset, Finalize&& finalize)
+      {
+        using Entry = typename Map::Entry;
+        const size_t local = globals.size();
+        assert(owned.size() == local && m_fixed.size() >= local);
+        for (size_t i = 0; i < local; ++i)
+        {
+          if (m_fixed[i] && owned[i])
+            map.setFixed(globals[i], m_values[i]);
+        }
+        for (const auto& c : m_conditions)
+        {
+          if (c.dbc)
+          {
+            if (!std::holds_alternative<
+                  typename Variational::DirichletBCBase<Real>::ValueDOFs>(
+                  c.dbc->getDOFs()))
+            {
+              Alert::Exception()
+                << "Identification Dirichlet conditions are not supported by "
+                   "distributed device systems."
+                << Alert::Raise;
+            }
+            continue;
+          }
+          const Index first = offset(c.offset);
+          for (const auto& [slave, relation] : c.pbc->getDOFs())
+          {
+            std::vector<Entry> entries;
+            for (Index k = 0; k < static_cast<Index>(relation.first.size()); ++k)
+              entries.push_back({first + relation.first[k], relation.second[k]});
+            map.setIdentification(first + slave, entries);
+          }
+        }
+        finalize(map);
+
+        std::unordered_map<Index, Index> locals;
+        locals.reserve(local);
+        for (size_t i = 0; i < local; ++i)
+          locals.emplace(globals[i], static_cast<Index>(i));
+        const auto find = [&](Index global) {
+          const auto [it, inserted] =
+            locals.emplace(global, static_cast<Index>(globals.size()));
+          if (inserted)
+          {
+            globals.push_back(global);
+            owned.push_back(0);
+          }
+          return it->second;
+        };
+        Resolved res;
+        std::vector<Index> starts(1, 0), indices;
+        std::vector<Real> coefficients;
+        std::vector<std::vector<std::pair<Index, Real>>> rows(local);
+        for (size_t i = 0; i < local; ++i)
+        {
+          for (const auto& e : map.expand(globals[i]))
+          {
+            const Index master = find(e.index);
+            indices.push_back(master);
+            coefficients.push_back(e.coefficient);
+            if (map.isIdentified(globals[i]))
+              rows[i].emplace_back(master, e.coefficient);
+          }
+          starts.push_back(indices.size());
+        }
+        // The appended masters, never identified once flattened, expand on
+        // themselves.
+        const size_t size = globals.size();
+        for (size_t i = local; i < size; ++i)
+        {
+          indices.push_back(static_cast<Index>(i));
+          coefficients.push_back(Real(1));
+          starts.push_back(indices.size());
+        }
+        m_rows = size;
+        m_fixed.assign(size, 0);
+        m_values.assign(size, Real(0));
+        m_constrained = false;
+        std::vector<Real> values(size, Real(0));
+        res.imposed.assign(size, 0);
+        for (size_t i = 0; i < local; ++i)
+        {
+          const Index g = globals[i];
+          if (map.isFixed(g))
+          {
+            m_fixed[i] = 1;
+            m_values[i] = map.getFixedValue(g);
+            m_constrained = true;
+          }
+          if (!map.isIdentified(g))
+            continue;
+          values[i] = map.getIdentificationValue(g);
+          m_values[i] = values[i];
+          res.imposed[i] = 1;
+          if (!owned[i])
+            continue;
+          res.rows.push_back(i);
+          res.cols.push_back(i);
+          res.values.push_back(Real(1));
+          for (const auto& [master, coefficient] : rows[i])
+          {
+            res.rows.push_back(i);
+            res.cols.push_back(master);
+            res.values.push_back(-coefficient);
+          }
+        }
+        // The map, and so the expansion, is the same on every process.
+        if (map.getIdentifiedRows().empty())
+          return res;
+        res.expansions.starts = upload(execution, starts, "Rodin expansion starts");
+        res.expansions.indices = upload(execution, indices, "Rodin expansion masters");
+        res.expansions.coefficients =
+          upload(execution, coefficients, "Rodin expansion coefficients");
+        res.expansions.values = upload(execution, values, "Rodin expansion values");
+        execution.fence("Rodin expansions");
+        return res;
+      }
+
+      /**
+       * @brief Replaces the fixed degrees of freedom, before a distributed
+       * resolution.
+       * @param fixed Whether each local degree of freedom is fixed.
+       * @param values Fixed value of each local degree of freedom.
+       */
+      void setFixed(std::vector<unsigned char> fixed, std::vector<Real> values)
+      {
+        assert(fixed.size() == values.size());
+        m_constrained =
+          std::find(fixed.begin(), fixed.end(), static_cast<unsigned char>(1)) != fixed.end();
+        m_fixed = std::move(fixed);
+        m_values = std::move(values);
       }
 
     private:

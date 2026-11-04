@@ -32,7 +32,11 @@
 #include <petscmat.h>
 #include <petscvec.h>
 
+#include "Rodin/Configure.h"
 #include "Rodin/PETSc/Assembly/VectorSetup.h"
+#ifdef RODIN_USE_MPI
+#include "Rodin/PETSc/Assembly/ConstraintMap.h"
+#endif
 #include "Rodin/PETSc/Math/LinearSystem.h"
 #include "Rodin/PETSc/Variational/BilinearForm.h"
 #include "Rodin/PETSc/Variational/LinearForm.h"
@@ -636,16 +640,12 @@ namespace Rodin::Assembly::Internal
        */
       void finish(CacheType& cache, ::Mat A, ::Vec b)
       {
-        const size_t n = std::max(m_rows, m_cols);
-        if (m_distribution && m_constraints.isIdentified())
-        {
-          Alert::Exception()
-            << "Periodic conditions are not supported by distributed device systems."
-            << Alert::Raise;
-        }
         typename ConstraintsType::Resolved constraints;
-        if (m_constraints.isIdentified())
+        if (m_distribution && isFixed(m_constraints.isIdentified()))
+          constraints = resolveDistributed();
+        else if (m_constraints.isIdentified())
           constraints = m_constraints.resolve(m_execution);
+        const size_t n = std::max(m_rows, m_cols);
         const bool expanded = constraints.isExpanded();
         // A degree of freedom fixed on one process is fixed on all of them.
         const bool fixed = m_distribution ? isFixed(m_constraints.isConstrained())
@@ -2049,6 +2049,47 @@ namespace Rodin::Assembly::Internal
           mask[i] = c > Real(0.5);
           values[i] = mask[i] ? PetscRealPart(value[i]) / c : Real(0);
         }
+      }
+
+      /**
+       * @brief Resolves the identifications of a distributed system;
+       * collective.
+       *
+       * The fixed degrees of freedom are first synchronized, then every
+       * condition is resolved in a map of the global degrees of freedom.
+       * The masters the process does not hold become local degrees of
+       * freedom past the held ones, with their global index, so that the
+       * entries the expansion moves to them are sent to their owners.
+       */
+      typename ConstraintsType::Resolved resolveDistributed()
+      {
+#ifndef RODIN_USE_MPI
+        Alert::Exception() << "Distributed device systems require MPI." << Alert::Raise;
+        return {};
+#else
+        using ConstraintMap = ::Rodin::PETSc::Assembly::ConstraintMap;
+        auto& dist = *m_distribution;
+        assert(m_rows == m_cols && !m_columns);
+        auto mask = m_constraints.getFixed();
+        auto values = m_constraints.getValues();
+        mask.resize(m_rows, 0);
+        values.resize(m_rows, Real(0));
+        if (isFixed(m_constraints.isConstrained()))
+          synchronize(mask, values);
+        m_constraints.setFixed(std::move(mask), std::move(values));
+        std::vector<Index> globals(dist.globals.begin(), dist.globals.end());
+        ConstraintMap map(static_cast<size_t>(dist.size));
+        auto res = m_constraints.resolve(
+          m_execution, map, globals, dist.owned,
+          [&](size_t start) {
+            return static_cast<Index>(dist.getOffset(static_cast<Index>(start)));
+          },
+          [&](ConstraintMap& m) { m.finalize(dist.comm); });
+        dist.globals.assign(globals.begin(), globals.end());
+        m_rows = m_cols = globals.size();
+        copy(m_owned, dist.owned, "Rodin owned DOFs");
+        return res;
+#endif
       }
 
       /**

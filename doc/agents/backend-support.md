@@ -93,8 +93,12 @@ the shard does. Standalone device `BilinearForm` and `LinearForm` on
 distributed spaces assemble distributed Kokkos `Mat` and `Vec`, rectangular
 included, and enter distributed problems as preassembled forms: their owned
 rows are complete and are renumbered locally, so each of their entries must
-couple degrees of freedom the process holds. Periodic conditions and Eigen
-systems are not distributed.
+couple degrees of freedom the process holds. Periodic conditions are
+distributed: their pairs are given in global indices of the field, each
+process may give any of them, and they are resolved in a global constraint
+map after the fixed values are synchronized; masters the process does not
+hold become virtual local degrees of freedom. Identification Dirichlet
+conditions and Eigen systems are not distributed.
 See [the Kokkos guide](../Guides/Kokkos.dox) for lifecycle and build details.
 
 In CUDA builds, Kokkos's launcher compiles targets linked to `Kokkos::kokkos`

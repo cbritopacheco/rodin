@@ -18,19 +18,25 @@
 
 #include <algorithm>
 #include <cmath>
+#include <map>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include <gtest/gtest.h>
 
 #include <petsc.h>
 #include <boost/filesystem.hpp>
+#include <boost/mpi/collectives/all_gather.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
+#include <boost/serialization/vector.hpp>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
 #include <Rodin/IO.h>
+#include <Rodin/Solver.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/IO.h>
 #include <Rodin/Kokkos/MPI.h>
@@ -367,6 +373,118 @@ namespace Rodin::Tests::Unit
   }
 
   /**
+   * @brief A doubly periodic problem matches the sequential host solution.
+   *
+   * The periodic pairs relate global degrees of freedom. Each process
+   * gives those of the slaves it holds, whose masters another process may
+   * hold.
+   */
+  void checkPeriodic(Polytope::Type type)
+  {
+    using namespace Rodin::Variational;
+    constexpr size_t n = 13;
+    Context::MPI ctx(*g_env, *g_world);
+    const HostMesh host = distributeFromRoot(ctx, type, n);
+    const DeviceMesh mesh(DeviceContext(ctx), host);
+    P1<Real, DeviceMesh> dfes(mesh);
+    const auto position = [&](const auto& x) {
+      return std::pair<size_t, size_t>(std::llround(x.x() * (n - 1)),
+        std::llround(x.y() * (n - 1)));
+    };
+
+    // Global degree of freedom of each grid node, gathered over the processes.
+    const auto& shard = host.getShard();
+    std::vector<size_t> held;
+    std::map<Index, std::pair<size_t, size_t>> nodes;
+    for (auto it = shard.getVertex(); !it.end(); ++it)
+    {
+      const auto [i, j] = position(it->getCoordinates());
+      const Index g = dfes.getGlobalIndex(dfes.getShard().getDOFs(0, it->getIndex())[0]);
+      nodes[g] = {i, j};
+      held.insert(held.end(), {i, j, static_cast<size_t>(g)});
+    }
+    std::vector<std::vector<size_t>> gathered;
+    boost::mpi::all_gather(ctx.getCommunicator(), held, gathered);
+    std::map<std::pair<size_t, size_t>, Index> globals;
+    for (const auto& h : gathered)
+    {
+      for (size_t k = 0; k < h.size(); k += 3)
+        globals[{h[k], h[k + 1]}] = static_cast<Index>(h[k + 2]);
+    }
+    EXPECT_EQ(globals.size(), n * n);
+    IndexMap<IndexSet> pairs;
+    for (const auto& [g, node] : nodes)
+    {
+      const auto [i, j] = node;
+      if (i == n - 1 || j == n - 1)
+        pairs[g].insert(globals.at({i % (n - 1), j % (n - 1)}));
+    }
+
+    // Sequential reference on the whole grid.
+    auto seq = Geometry::Mesh<Context::Local>::UniformGrid(type, {n, n});
+    seq.scale(Real(1) / static_cast<Real>(n - 1));
+    seq.getConnectivity().compute(1, 2);
+    P1 sfes(seq);
+    std::map<std::pair<size_t, size_t>, Index> seqDOFs;
+    for (auto it = seq.getVertex(); !it.end(); ++it)
+      seqDOFs[position(it->getCoordinates())] = sfes.getDOFs(0, it->getIndex())[0];
+    IndexMap<IndexSet> seqPairs;
+    for (const auto& [node, dof] : seqDOFs)
+    {
+      const auto [i, j] = node;
+      if (i == n - 1 || j == n - 1)
+        seqPairs[dof].insert(seqDOFs.at({i % (n - 1), j % (n - 1)}));
+    }
+    RealFunction hf([](const Geometry::Point& p) {
+      return 1 + std::sin(2 * M_PI * p.x()) * std::cos(2 * M_PI * p.y()) + p.x() * p.y();
+    });
+    TrialFunction su(sfes);
+    TestFunction sv(sfes);
+    Problem sp(su, sv);
+    sp = Integral(Grad(su), Grad(sv)) + Integral(su, sv) - Integral(hf, sv) +
+      PeriodicBC(su, seqPairs);
+    Solver::SparseLU solver(sp);
+    solver.solve();
+
+    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      return 1 + ::Kokkos::sin(2 * M_PI * p.x()) * ::Kokkos::cos(2 * M_PI * p.y()) +
+        p.x() * p.y();
+    });
+    PETSc::Variational::TrialFunction du(dfes);
+    PETSc::Variational::TestFunction dv(dfes);
+    Problem dp(du, dv);
+    dp = Integral(Grad(du), Grad(dv)) + Integral(du, dv) - Integral(df, dv) +
+      PeriodicBC(du, pairs);
+
+    const auto check = [&]() {
+      ::Vec x = du.getSolution().getData();
+      PetscInt begin = 0, end = 0;
+      VecGetOwnershipRange(x, &begin, &end);
+      const PetscScalar* values = nullptr;
+      VecGetArrayRead(x, &values);
+      int compared = 0;
+      for (const auto& [g, node] : nodes)
+      {
+        const PetscInt global = static_cast<PetscInt>(g);
+        if (global < begin || global >= end)
+          continue;
+        EXPECT_NEAR(values[global - begin], su.getSolution().getData()(seqDOFs.at(node)),
+          Real(1e-9));
+        ++compared;
+      }
+      VecRestoreArrayRead(x, &values);
+      int total = 0;
+      MPI_Allreduce(&compared, &total, 1, MPI_INT, MPI_SUM, ctx.getCommunicator());
+      EXPECT_EQ(static_cast<size_t>(total), n * n);
+    };
+    solveDirect(dp);
+    check();
+    // A second solve reuses the cached pattern and coordinates.
+    solveDirect(dp);
+    check();
+  }
+
+  /**
    * @brief A quadratic Poisson problem matches the host, and so does a
    * second problem reading its solution, edge degrees of freedom included.
    */
@@ -594,6 +712,16 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_MPI_TaylorHood, Quadrilaterals)
   {
     checkTaylorHood(Polytope::Type::Quadrilateral);
+  }
+
+  TEST(Kokkos_MPI_Periodic, Triangles)
+  {
+    checkPeriodic(Polytope::Type::Triangle);
+  }
+
+  TEST(Kokkos_MPI_Periodic, Quadrilaterals)
+  {
+    checkPeriodic(Polytope::Type::Quadrilateral);
   }
 
   TEST(Kokkos_MPI_Mean, Triangles)

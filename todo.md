@@ -423,7 +423,13 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       Dirichlet synchronisé par Vec fantôme (fixé partout dès qu'un
       processus le fixe). GridFunction PETSc en Vec Kokkos fantôme. Test
       `RodinKokkosMPIPoissonTest_np{1,2,4}` (build-mpi) contre l'hôte MPI.
-- [ ] MPI: PBC et systèmes Eigen non distribués.
+- [ ] MPI: systèmes Eigen et Dirichlet d'identification non distribués.
+- [x] MPI PBC device: paires en indices globaux du champ, données par
+      n'importe quel processus, résolues dans une `ConstraintMap` PETSc
+      globale après synchronisation des valeurs fixées; les maîtres non
+      tenus deviennent des DOFs locaux virtuels, seul le propriétaire écrit
+      les lignes d'identification. Test `Kokkos_MPI_Periodic` (triangles et
+      quadrilatères, contre le problème séquentiel hôte) à np 1, 2, 4.
 - [x] MPI `H1<K, Range, Mesh<Kokkos<MPI, B>>>`, scalaire et vectoriel: le H1
       du shard résident numérote les DOFs locaux comme le H1 hôte du shard.
       Tests `Kokkos_MPI_Quadratic` (Poisson P2 puis solution P2 relue en
