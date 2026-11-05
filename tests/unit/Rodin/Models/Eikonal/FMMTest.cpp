@@ -10,6 +10,9 @@
 #include <algorithm>
 
 #include "Rodin/Eikonal/FMM.h"
+#include "Rodin/Variational/MatrixFunction.h"
+#include "Rodin/Geometry/ParametricTransformation.h"
+#include "Rodin/Variational/H1/H1Element.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -789,4 +792,92 @@ TEST(FMMSubsets, TetrahedronAllNeighborOrders)
       EXPECT_NEAR(arrival[0], 0.5, 2e-13);
     } while (std::next_permutation(order.begin(), order.end()));
   }
+}
+
+/// @brief Constant tensor metrics reduce to scalar FMM on the corresponding stretched mesh.
+TEST(FMMTensor, AffineSimplexReduction)
+{
+  for (auto geometry : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+  {
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    auto referenceMesh = dimension == 2 ? LocalMesh::UniformGrid(geometry, {5, 5})
+                                        : LocalMesh::UniformGrid(geometry, {4, 4, 4});
+    referenceMesh.scale(Real(0.25));
+    auto mesh = referenceMesh;
+    Math::SpatialMatrix<Real> tensor =
+      Math::SpatialMatrix<Real>::Identity(dimension, dimension);
+    tensor(0, 0) = 4;
+    for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+    {
+      auto coordinates = vertex->getCoordinates();
+      coordinates(0) *= 2;
+      mesh.setVertexCoordinates(vertex->getIndex(), coordinates);
+    }
+    for (auto* current : {&referenceMesh, &mesh})
+    {
+      current->getConnectivity().compute(dimension, 0);
+      current->getConnectivity().compute(0, dimension);
+      current->getConnectivity().compute(0, 0);
+    }
+    P1 referenceSpace(referenceMesh), space(mesh);
+    GridFunction reference(referenceSpace), arrival(space);
+    Eikonal::FMM baseline(reference, [](const Point&) { return Real(1); });
+    MatrixFunction coefficient(tensor);
+    Eikonal::FMM solver(arrival, coefficient);
+    baseline.seed(IndexVector{0}).solve();
+    solver.seed(IndexVector{0}).solve();
+    EXPECT_LT((reference.getData() - arrival.getData()).norm(), 1e-12);
+  }
+}
+
+/// @brief Tensor FMM rejects unsupported native cells and noncausal metric simplices.
+TEST(FMMTensor, CausalityAndGeometryContracts)
+{
+  for (auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral})
+  {
+    auto mesh = LocalMesh::UniformGrid(geometry, {2, 2});
+    mesh.getConnectivity().compute(2, 0);
+    mesh.getConnectivity().compute(0, 2);
+    mesh.getConnectivity().compute(0, 0);
+    P1 space(mesh);
+    GridFunction arrival(space);
+    Math::SpatialMatrix<Real> tensor = Math::SpatialMatrix<Real>::Identity(2, 2);
+    tensor(0, 1) = tensor(1, 0) = Real(0.5);
+    MatrixFunction coefficient(tensor);
+    Eikonal::FMM solver(arrival, coefficient);
+    EXPECT_THROW(solver.seed(IndexVector{0}).solve(), Alert::Exception);
+  }
+}
+
+/// @brief Tensor FMM rejects nonnative mapped charts and invalid squared velocities.
+TEST(FMMTensor, CurvedAndInvalidTensorContracts)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  mesh.getConnectivity().compute(2, 0);
+  mesh.getConnectivity().compute(0, 2);
+  mesh.getConnectivity().compute(0, 0);
+  P1 space(mesh);
+  GridFunction arrival(space);
+  Math::SpatialMatrix<Real> tensor = Math::SpatialMatrix<Real>::Identity(2, 2);
+  tensor(0, 0) = -1;
+  MatrixFunction invalidCoefficient(tensor);
+  Eikonal::FMM invalid(arrival, invalidCoefficient);
+  EXPECT_THROW(invalid.seed(IndexVector{0}).solve(), Alert::Exception);
+  RealH1Element<2> element(Polytope::Type::Triangle);
+  for (auto cell = mesh.getCell(); cell; ++cell)
+  {
+    PointCloud controls(2, element.getCount());
+    for (size_t node = 0; node < element.getCount(); ++node)
+    {
+      const Point point(*cell, element.getNode(node));
+      const auto physical = point.getPhysicalCoordinates();
+      controls(0, node) = physical(0);
+      controls(1, node) = physical(1) + Real(0.1) * physical(0) * physical(0);
+    }
+    mesh.setPolytopeTransformation(
+      {2, cell->getIndex()}, new ParametricTransformation(controls, element));
+  }
+  MatrixFunction coefficient(Math::SpatialMatrix<Real>::Identity(2, 2));
+  Eikonal::FMM solver(arrival, coefficient);
+  EXPECT_THROW(solver.seed(IndexVector{0}).solve(), Alert::Exception);
 }

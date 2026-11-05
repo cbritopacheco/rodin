@@ -1,0 +1,17 @@
+<p>Compares tensor FMM and serial/OpenMP native-cell FIM on matched affine
+triangle and tetrahedron meshes. A rotation and stretch map the reference
+grid to a mesh nonobtuse in the constant inverse-velocity metric. Both
+methods use the same zero-time corner source and squared-velocity tensor.</p>
+<p>Wall-clock timing includes seeding, cellwise coefficient preparation, and
+propagation. Mesh construction, coefficient-expression construction, reference
+solves, and error checks are excluded. Counters report vertices, cells,
+dimension, velocity ratio, workers, FIM rounds, coefficient evaluations per
+solve, maximum analytic error, and maximum difference from tensor FMM.
+FIM workers must reproduce the serial field and round count exactly.</p>
+<p>Both methods use analytic local updates on these simplex meshes. FMM samples
+and factors tensors during local updates; FIM caches one factor per cell.
+Runtime differences include coefficient preparation, local-update implementation,
+and queue versus active-list scheduling. FIM must sample each cell exactly once
+per solve; there is no path quadrature. Measurements characterize these
+constant-coefficient affine cases, not arbitrary native cells or anisotropy.
+Quadrilateral trace search is not exercised here.</p>

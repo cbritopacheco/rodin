@@ -13,6 +13,10 @@
  */
 
 #include <queue>
+#include <type_traits>
+#include <utility>
+
+#include "Metric.h"
 #include <limits>
 #include <algorithm>
 #include <functional>
@@ -37,6 +41,13 @@ namespace Rodin::Eikonal
    * speed @f$F@f$ on unstructured meshes.
    * It propagates a wavefront from initial seed points, updating arrival
    * times in a manner that ensures causality.
+   *
+   * Matrix-valued coefficients supply an ambient SPD squared-velocity tensor
+   * @f$M@f$ for @f$\sqrt{\nabla T^T M\nabla T}=1@f$. This overload freezes
+   * the tensor at each cell centroid and requires affine simplices nonobtuse
+   * in @f$M^{-1}@f$; unsupported cells raise instead of applying a noncausal
+   * acceptance order. Scalar coefficient behavior is unchanged. Tensor sampling
+   * is a piecewise-constant approximation for spatially varying coefficients.
    *
    * @tparam Solution Solution type (typically a GridFunction)
    * @tparam SpeedFunction Type of the speed function @f$ F(x) @f$
@@ -123,7 +134,7 @@ namespace Rodin::Eikonal
        *
        * @tparam Callable Type of the speed function (deduced)
        * @param[in,out] u Grid function to store the solution (arrival times)
-       * @param[in] speed Speed function @f$ F(x) @f$ defining propagation velocity
+       * @param[in] speed Scalar speed function or ambient SPD squared-velocity tensor function.
        */
       template <class Callable>
       FMM(SolutionType& u, Callable&& speed)
@@ -282,26 +293,37 @@ namespace Rodin::Eikonal
        */
       Real local(Index p, const SolutionType& u, const Mesh& mesh) const
       {
-        Math::SpatialPoint dummy(mesh.getSpaceDimension());
-
         const int D = mesh.getDimension();
         const auto& conn = mesh.getConnectivity();
         const auto& v2c = conn.getIncidence(0, D);
         const auto& c2v = conn.getIncidence(D, 0);
 
-        const Geometry::VertexIterator vertex = mesh.getVertex(p);
-        const Real s = m_speed(Geometry::Point(*vertex, dummy, vertex->getCoordinates()));
-        const Real F = std::isnan(s) ? std::numeric_limits<Real>::infinity()
-                                     : std::max(std::numeric_limits<Real>::min(), s);
-
-        if (!(F > 0) || std::isnan(F))
-          return std::numeric_limits<Real>::infinity();
+        using Value =
+          std::remove_cvref_t<decltype(m_speed(std::declval<const Geometry::Point&>()))>;
+        Real F = 1;
+        if constexpr (std::is_arithmetic_v<Value>)
+        {
+          Math::SpatialPoint dummy(mesh.getSpaceDimension());
+          const Geometry::VertexIterator vertex = mesh.getVertex(p);
+          const Real s =
+            m_speed(Geometry::Point(*vertex, dummy, vertex->getCoordinates()));
+          F = std::isnan(s) ? std::numeric_limits<Real>::infinity()
+                            : std::max(std::numeric_limits<Real>::min(), s);
+          if (!(F > 0) || std::isnan(F))
+            return std::numeric_limits<Real>::infinity();
+        }
 
         Real best = std::numeric_limits<Real>::infinity();
 
         for (Index cid : v2c.at(p))
         {
           const auto& verts = c2v.at(cid);
+          const auto metric = [&]() {
+            if constexpr (std::is_arithmetic_v<Value>)
+              return F;
+            else
+              return getMetric(cid, mesh);
+          }();
 
           Index A[3];
           int k = 0;
@@ -325,7 +347,7 @@ namespace Rodin::Eikonal
           if (D == 3 && k == 3)
           {
             const Real candidate =
-              volumeTetrahedronUpdate(p, A[0], A[1], A[2], u, mesh, F);
+              volumeTetrahedronUpdate(p, A[0], A[1], A[2], u, mesh, metric);
             if (std::isfinite(candidate))
             {
               best = std::min(best, candidate);
@@ -338,8 +360,8 @@ namespace Rodin::Eikonal
             for (int second = first + 1; second < k; ++second)
             {
               const Real candidate = D == 2
-                ? surfaceTriangleUpdate(p, A[first], A[second], u, mesh, F)
-                : volumeTetrahedronUpdate(p, A[first], A[second], u, mesh, F);
+                ? surfaceTriangleUpdate(p, A[first], A[second], u, mesh, metric)
+                : volumeTetrahedronUpdate(p, A[first], A[second], u, mesh, metric);
               if (std::isfinite(candidate))
               {
                 best = std::min(best, candidate);
@@ -351,14 +373,108 @@ namespace Rodin::Eikonal
           {
             if (!covered[neighbor])
             {
-              const Real distance = computeEdgeDistance(p, A[neighbor], mesh);
-              if (!std::isnan(distance))
-                best = std::min(best, u[A[neighbor]] + distance / F);
+              Real travel;
+              if constexpr (std::is_arithmetic_v<Value>)
+                travel = computeEdgeDistance(p, A[neighbor], mesh) / F;
+              else
+              {
+                const Math::SpatialVector<Real> direction =
+                  mesh.getVertexCoordinates(p) - mesh.getVertexCoordinates(A[neighbor]);
+                travel = std::sqrt(metric.dot(direction, direction));
+              }
+              if (!std::isnan(travel))
+                best = std::min(best, u[A[neighbor]] + travel);
             }
           }
         }
         assert(!std::isnan(best));
         return best;
+      }
+
+      /**
+       * @brief Builds the frozen tensor metric and checks the causal simplex stencil.
+       * @param index Cell whose tensor is sampled at its reference centroid.
+       * @param mesh Mesh carrying the affine simplex.
+       * @returns Validated travel metric.
+       */
+      Metric getMetric(Index index, const Mesh& mesh) const
+      {
+        const auto cell = mesh.getCell(index);
+        const Geometry::Polytope::Traits traits(cell->getGeometry());
+        if (traits.getVertexCount() != mesh.getDimension() + 1 ||
+          !cell->getTransformation().isFirstOrder())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Tensor FMM requires affine simplices. "
+            << "Use FIM for supported native first-order cells." << Alert::Raise;
+        }
+        const Geometry::Point point(*cell, traits.getCentroid());
+        const Metric metric(m_speed(point), mesh.getSpaceDimension());
+        const auto& vertices = cell->getVertices();
+        // Nonnegative Gram entries imply t-u = G*mu >= 0 for an upwind
+        // minimizer with mu >= 0, so supporting times precede acceptance.
+        static constexpr Real RoundoffFactor = Real(64);
+        for (Index origin : vertices)
+        {
+          for (Index first : vertices)
+          {
+            if (first == origin)
+              continue;
+            const Math::SpatialVector<Real> a =
+              mesh.getVertexCoordinates(first) - mesh.getVertexCoordinates(origin);
+            for (Index second : vertices)
+            {
+              if (second == origin || second <= first)
+                continue;
+              const Math::SpatialVector<Real> b =
+                mesh.getVertexCoordinates(second) - mesh.getVertexCoordinates(origin);
+              const Real scale = std::sqrt(metric.dot(a, a) * metric.dot(b, b));
+              const Real tolerance =
+                RoundoffFactor * std::numeric_limits<Real>::epsilon() * scale;
+              if (metric.dot(a, b) < -tolerance)
+              {
+                Alert::MemberFunctionException(*this, __func__)
+                  << "Tensor FMM requires metric-nonobtuse simplices; cell " << index
+                  << " violates the causal stencil condition. Use FIM or a suitable mesh."
+                  << Alert::Raise;
+              }
+            }
+          }
+        }
+        return metric;
+      }
+
+      /**
+       * @brief Contracts stencil directions, retaining scalar Euclidean arithmetic.
+       * @tparam LocalMetric Scalar speed or travel metric.
+       * @param lhs First stencil direction.
+       * @param rhs Second stencil direction.
+       * @param metric Scalar speed or travel metric.
+       * @returns Euclidean or inverse-velocity Gram entry.
+       */
+      template <class LocalMetric>
+      static Real gram(const Math::SpatialVector<Real>& lhs,
+        const Math::SpatialVector<Real>& rhs, const LocalMetric& metric)
+      {
+        if constexpr (std::is_arithmetic_v<LocalMetric>)
+          return lhs.dot(rhs);
+        else
+          return metric.dot(lhs, rhs);
+      }
+
+      /**
+       * @brief Supplies the level of the local squared eikonal equation.
+       * @tparam LocalMetric Scalar speed or travel metric.
+       * @param metric Scalar speed or a metric already containing inverse squared speed.
+       * @returns Inverse squared scalar speed, or one for metric-normalized geometry.
+       */
+      template <class LocalMetric>
+      static Real squaredSlowness(const LocalMetric& metric)
+      {
+        if constexpr (std::is_arithmetic_v<LocalMetric>)
+          return 1.0 / (metric * metric);
+        else
+          return 1.0;
       }
 
       /**
@@ -447,11 +563,13 @@ namespace Rodin::Eikonal
        * @param j Index of a supporting accepted vertex.
        * @param u Current arrival-time solution.
        * @param mesh Mesh carrying the arrival-time solution.
-       * @param F Local propagation cost multiplying geometric distance.
+       * @tparam LocalMetric Scalar speed or inverse-velocity metric.
+       * @param metric Scalar speed or validated travel metric.
        * @returns Candidate arrival time obtained from the accepted supporting vertices.
        */
-      Real surfaceTriangleUpdate(
-        Index p, Index i, Index j, const SolutionType& u, const Mesh& mesh, Real F) const
+      template <class LocalMetric>
+      Real surfaceTriangleUpdate(Index p, Index i, Index j, const SolutionType& u,
+        const Mesh& mesh, const LocalMetric& metric) const
       {
         const auto xp = mesh.getVertexCoordinates(p);
         const auto xi = mesh.getVertexCoordinates(i);
@@ -460,9 +578,9 @@ namespace Rodin::Eikonal
         const auto d1 = xi - xp;
         const auto d2 = xj - xp;
 
-        const Real g11 = d1.dot(d1);
-        const Real g22 = d2.dot(d2);
-        const Real g12 = d1.dot(d2);
+        const Real g11 = gram(d1, d1, metric);
+        const Real g22 = gram(d2, d2, metric);
+        const Real g12 = gram(d1, d2, metric);
 
         if (!(g11 > 0 && g22 > 0))
           return std::numeric_limits<Real>::infinity();
@@ -489,7 +607,7 @@ namespace Rodin::Eikonal
 
         const Real A = alpha;
         const Real B = -2 * beta;
-        const Real C = gamma - 1.0 / (F * F);
+        const Real C = gamma - squaredSlowness(metric);
 
         const Real disc = B * B - 4 * A * C;
         if (!(disc >= 0) || std::isnan(disc))
@@ -528,11 +646,13 @@ namespace Rodin::Eikonal
        * @param j Index of a supporting accepted vertex.
        * @param u Current arrival-time solution.
        * @param mesh Mesh carrying the arrival-time solution.
-       * @param F Local propagation cost multiplying geometric distance.
+       * @tparam LocalMetric Scalar speed or inverse-velocity metric.
+       * @param metric Scalar speed or validated travel metric.
        * @returns Candidate arrival time obtained from the accepted supporting vertices.
        */
-      Real volumeTetrahedronUpdate(
-        Index p, Index i, Index j, const SolutionType& u, const Mesh& mesh, Real F) const
+      template <class LocalMetric>
+      Real volumeTetrahedronUpdate(Index p, Index i, Index j, const SolutionType& u,
+        const Mesh& mesh, const LocalMetric& metric) const
       {
         const auto xp = mesh.getVertexCoordinates(p);
         const auto xi = mesh.getVertexCoordinates(i);
@@ -541,9 +661,9 @@ namespace Rodin::Eikonal
         const auto d1 = xi - xp;
         const auto d2 = xj - xp;
 
-        const Real g11 = d1.dot(d1);
-        const Real g22 = d2.dot(d2);
-        const Real g12 = d1.dot(d2);
+        const Real g11 = gram(d1, d1, metric);
+        const Real g22 = gram(d2, d2, metric);
+        const Real g12 = gram(d1, d2, metric);
 
         if (!(g11 > 0 && g22 > 0))
           return std::numeric_limits<Real>::infinity();
@@ -570,7 +690,7 @@ namespace Rodin::Eikonal
 
         const Real A = alpha;
         const Real B = -2 * beta;
-        const Real C = gamma - 1.0 / (F * F);
+        const Real C = gamma - squaredSlowness(metric);
 
         const Real disc = B * B - 4 * A * C;
         if (!(disc >= 0) || std::isnan(disc))
@@ -616,11 +736,13 @@ namespace Rodin::Eikonal
        * @param k Index of a supporting accepted vertex.
        * @param u Current arrival-time solution.
        * @param mesh Mesh carrying the arrival-time solution.
-       * @param F Local propagation cost multiplying geometric distance.
+       * @tparam LocalMetric Scalar speed or inverse-velocity metric.
+       * @param metric Scalar speed or validated travel metric.
        * @returns Candidate arrival time obtained from the accepted supporting vertices.
        */
+      template <class LocalMetric>
       Real volumeTetrahedronUpdate(Index p, Index i, Index j, Index k,
-        const SolutionType& u, const Mesh& mesh, Real F) const
+        const SolutionType& u, const Mesh& mesh, const LocalMetric& metric) const
       {
         const auto xp = mesh.getVertexCoordinates(p);
         const auto xi = mesh.getVertexCoordinates(i);
@@ -631,12 +753,12 @@ namespace Rodin::Eikonal
         const auto d2 = xj - xp;
         const auto d3 = xk - xp;
 
-        const Real g11 = d1.dot(d1);
-        const Real g22 = d2.dot(d2);
-        const Real g33 = d3.dot(d3);
-        const Real g12 = d1.dot(d2);
-        const Real g13 = d1.dot(d3);
-        const Real g23 = d2.dot(d3);
+        const Real g11 = gram(d1, d1, metric);
+        const Real g22 = gram(d2, d2, metric);
+        const Real g33 = gram(d3, d3, metric);
+        const Real g12 = gram(d1, d2, metric);
+        const Real g13 = gram(d1, d3, metric);
+        const Real g23 = gram(d2, d3, metric);
 
         if (!(g11 > 0 && g22 > 0 && g33 > 0))
           return std::numeric_limits<Real>::infinity();
@@ -676,7 +798,7 @@ namespace Rodin::Eikonal
 
         const Real A = alpha;
         const Real B = -2 * beta;
-        const Real C = gamma - 1.0 / (F * F);
+        const Real C = gamma - squaredSlowness(metric);
 
         const Real disc = B * B - 4 * A * C;
         if (!(disc >= 0) || std::isnan(disc))
