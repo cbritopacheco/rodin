@@ -84,7 +84,15 @@ LABELS.update({
     'xi_rho_inf_norm': r'$\|\xi_\rho\|_\infty$',
     'theta_inf_norm': r'$\|\theta\|_\infty$',
     'thickness_violating_rays': 'Guard-Active Rays',
-    'thickness_active_feasible': 'Correction Target Feasible',
+    'thickness_active_feasible': 'Correction Target Feasible',  # Legacy histories.
+    'thickness_active_multiplier': r'Selected $\eta$',
+    'thickness_cancellation_multiplier': r'Cancellation $\eta_0$',
+    'thickness_balance_satisfied': r'$L[\theta]\leq0$',
+    'thickness_objective_rate': r'$L[a]$',
+    'thickness_repair_rate': r'$L[b]$',
+    'thickness_achieved_rate': r'$L[\theta]$',
+    'objective_only_rate': r'$D\rho[a]$',
+    'objective_retained_fraction': r'$D\rho[\theta]/D\rho[a]$',
     **{f'z_{a}': f'$Z_{a}$' for a in 'xyz'},
     **{f'omega_{a}': rf'$\omega_{a}$' for a in 'xyz'},
 })
@@ -108,7 +116,8 @@ GROUPS = [
     ('Directional Volume Derivative', r'$DV[\theta]$', ['d_volume_theta', 'required_d_volume_theta']),
     ('Thickness Surrogate Differential', r'$\widetilde{D}P[\theta]$', ['d_thickness_theta']),
     ('Null-Space Multiplier', 'Multiplier', ['null_space_multiplier']),
-    ('Thickness Correction', 'Multiplier', ['thickness_active_multiplier']),
+    ('First-Variation Thickness Balance', 'Multiplier', ['thickness_active_multiplier', 'thickness_cancellation_multiplier']),
+    ('Thickness First Variations', r'$L[v]$', ['thickness_objective_rate', 'thickness_repair_rate', 'thickness_achieved_rate']),
     ('Direction Magnitude', 'Infinity Norm', ['xi_rho_inf_norm', 'theta_inf_norm']),
     ('Direction Tangential Fractions', 'Fraction', ['thickness_descent_tangent_fraction', 'theta_tangent_fraction']),
     ('Thickness Direction Components', 'RMS', ['thickness_descent_normal_rms', 'thickness_descent_tangent_rms']),
@@ -144,6 +153,8 @@ GROUPS = [
 
 # Direction of preference concerns the named diagnostic, not every component.
 PREFERENCES = {
+    'First-Variation Thickness Balance': r'$a$ and $b$ are the separately normalised, volume-projected objective and repair directions. The coefficients are computed before normalising $a+\eta b$.',
+    'Thickness First Variations': r'$L$ is the frozen paired thickness surrogate differential. Negative values predict a decrease of the thickness penalty; they do not certify the next reconstructed geometry.',
     'Objective': r'Higher $\rho$ is better.',
     'Volume Constraint': 'Closer to zero is better; the sign distinguishes excess and deficit.',
     'First-Exit Thickness Penalties': 'Lower penalties are better; zero means no sampled active deficit.',
@@ -197,6 +208,10 @@ PREFERENCES = {
 
 SUPPLEMENT_PREFERENCES = {
     'volume': 'Closer to the target volume is better.',
+    'thickness_balance_satisfied': 'One indicates a nonpositive predicted thickness variation; this is not a geometric feasibility certificate.',
+    'objective_retained_fraction': 'The objective variation relative to the volume-projected objective direction; negative values indicate predicted objective decrease.',
+    'thickness_cancellation_multiplier': r'$\eta_0=\max(0,L[a]/(-L[b]))$ when $L[b]<0$; cancels a positive thickness variation.',
+    'thickness_active_multiplier': r'$\eta=\max(0,1+L[a]/(-L[b]))$ when $L[b]<0$; the combined direction is normalised afterward.',
     'remesh_cells_before': 'Fewer cells reduce cost at comparable accuracy.',
     'thickness_active_feasible': 'One indicates a feasible correction target in the tested span; zero indicates infeasibility.',
     'thickness_seam_samples': 'Neither higher nor lower is intrinsically better; this records diagnostic sampling density.',
@@ -251,7 +266,7 @@ class HistoryReport:
         result = ''
         for start in range(0, len(keys), 26):
             result += r'\newpage' if result else ''
-            result += ('\\subsection*{' if start else '\\section{') + title.capitalize() + (' (continued)' if start else '') + '}\n'
+            result += ('\\section*{' if start else '\\section{') + title.capitalize() + (' (continued)' if start else '') + '}\n'
             parameters = title == 'Parameters'
             result += (r'\small\begin{tabular}{@{}p{2.1cm}p{9.1cm}p{4.1cm}@{}}\toprule Symbol & Definition & Value \\ \midrule'
                        if parameters else r'\small\begin{tabular}{@{}p{10cm}p{5.3cm}@{}}\toprule Quantity & Recorded Value \\ \midrule') + '\n'

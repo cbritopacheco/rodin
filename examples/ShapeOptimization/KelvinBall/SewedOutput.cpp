@@ -14,6 +14,74 @@
 
 namespace KelvinBall
 {
+  struct SewedOutput::StateFields
+  {
+    explicit StateFields(const Mesh& mesh)
+      : velocitySpace(mesh, 3),
+        pressureSpace(mesh),
+        motion(velocitySpace)
+    {
+      for (size_t load = 0; load < 3; ++load)
+      {
+        translations[load] = std::make_unique<Velocity>(velocitySpace);
+        rotations[load] = std::make_unique<Velocity>(velocitySpace);
+        translationPressures[load] = std::make_unique<Pressure>(pressureSpace);
+        rotationPressures[load] = std::make_unique<Pressure>(pressureSpace);
+      }
+    }
+
+    VelocitySpace velocitySpace;
+    PressureSpace pressureSpace;
+    std::array<std::unique_ptr<Velocity>, 3> translations, rotations;
+    std::array<std::unique_ptr<Pressure>, 3> translationPressures, rotationPressures;
+    Velocity motion;
+  };
+
+  SewedOutput::~SewedOutput() = default;
+
+  void SewedOutput::addStates(IO::XDMF::Grid& grid,
+    const std::array<Velocity*, 3>& translations,
+    const std::array<Velocity*, 3>& rotations,
+    const std::array<Pressure*, 3>& translationPressures,
+    const std::array<Pressure*, 3>& rotationPressures,
+    const Math::SpatialVector<Real>& translation,
+    const Math::SpatialVector<Real>& angular)
+  {
+    grid.clear();
+    m_states = std::make_unique<StateFields>(m_mesh);
+    auto& fields = *m_states;
+    grid.setMesh(m_mesh, IO::XDMF::MeshPolicy::Transient);
+    for (size_t load = 0; load < 3; ++load)
+    {
+      setVectorLoad(*fields.translations[load], translations, load);
+      setVectorLoad(*fields.rotations[load], rotations, load);
+      setScalarLoad(*fields.translationPressures[load], translationPressures, load);
+      setScalarLoad(*fields.rotationPressures[load], rotationPressures, load);
+    }
+    // Preserve the field ordering of the chamber output.
+    for (size_t load = 0; load < 3; ++load)
+      grid.add("Translation_" + std::to_string(load), *fields.translations[load]);
+    for (size_t load = 0; load < 3; ++load)
+      grid.add("Rotation_" + std::to_string(load), *fields.rotations[load]);
+    for (size_t load = 0; load < 3; ++load)
+    {
+      grid.add("Pressure_Translation_" + std::to_string(load),
+        *fields.translationPressures[load]);
+    }
+    for (size_t load = 0; load < 3; ++load)
+    {
+      grid.add(
+        "Pressure_Rotation_" + std::to_string(load), *fields.rotationPressures[load]);
+    }
+    fields.motion.getData() = translation(0) * fields.translations[0]->getData() +
+      translation(1) * fields.translations[1]->getData() +
+      translation(2) * fields.translations[2]->getData() +
+      angular(0) * fields.rotations[0]->getData() +
+      angular(1) * fields.rotations[1]->getData() +
+      angular(2) * fields.rotations[2]->getData();
+    grid.add("Motion", fields.motion);
+  }
+
   const std::vector<Math::SpatialMatrix<Real>>& SewedOutput::getCubeRotations()
   {
     static const std::vector<Math::SpatialMatrix<Real>> rotations = [] {

@@ -7,7 +7,11 @@
 #ifndef KELVIN_BALL_SEWED_OUTPUT_H
 #define KELVIN_BALL_SEWED_OUTPUT_H
 
+#include <array>
+#include <memory>
 #include <vector>
+
+#include <Rodin/IO/XDMF.h>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -38,6 +42,34 @@ namespace KelvinBall
 
       SewedOutput(const Mesh& chamber, const FlatSet<Attribute>& boundaryAttributes = {},
         Real tolerance = 1e-10);
+
+      ~SewedOutput();
+
+      using VelocitySpace = P1<Math::SpatialVector<Real>, Mesh>;
+      using PressureSpace = P1<Real, Mesh>;
+      using Velocity = GridFunction<VelocitySpace, Math::Vector<Real>>;
+      using Pressure = GridFunction<PressureSpace, Math::Vector<Real>>;
+
+      /**
+       * @brief Attaches the sewn Stokes families and their free-motion field.
+       * @param grid Output grid, whose callbacks must be cleared before this object expires.
+       * @param translations Chamber translational velocity family.
+       * @param rotations Chamber rotational velocity family.
+       * @param translationPressures Chamber translational pressure family.
+       * @param rotationPressures Chamber rotational pressure family.
+       * @param translation Free translational velocity.
+       * @param angular Free angular velocity.
+       *
+       * The exported fields and their spaces remain owned by this object until
+       * destruction. Keep it alive through the XDMF write and flush, and destroy
+       * it before reconstructing the next chamber mesh.
+       */
+      void addStates(IO::XDMF::Grid& grid, const std::array<Velocity*, 3>& translations,
+        const std::array<Velocity*, 3>& rotations,
+        const std::array<Pressure*, 3>& translationPressures,
+        const std::array<Pressure*, 3>& rotationPressures,
+        const Math::SpatialVector<Real>& translation,
+        const Math::SpatialVector<Real>& angular);
 
       const Mesh& getMesh() const;
 
@@ -144,9 +176,12 @@ namespace KelvinBall
           Index vertex;
       };
 
+      struct StateFields;
+
       Mesh m_mesh;
       std::vector<std::vector<Source>> m_sources;
       std::vector<Math::SpatialMatrix<Real>> m_rotations;
+      std::unique_ptr<StateFields> m_states;
   };
 }
 

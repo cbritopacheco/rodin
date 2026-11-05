@@ -260,32 +260,35 @@ are combined as
 ```
 
 Zero directions remain zero. The norm is the maximum nodal Euclidean vector
-norm. The coefficient is bounded by `--thickness-mixing-cap` (default: 1),
-and `--objective-retention` (default: 0.5) imposes
+norm. Let $L_k$ denote the current paired-point thickness first variation and
+set $s_\rho=L_k[\widehat a]$ and $s_P=L_k[\widehat b]$. When $s_P<0$, the
+mixing coefficient is
 
 ```math
-0\leq\eta\leq\eta_{\max},\qquad
-D\rho[\theta_\eta]\geq\gamma D\rho[\widehat a].
+\eta_0=\max(0,s_\rho/(-s_P)),\qquad
+\eta=\max(0,1+s_\rho/(-s_P)).
 ```
 
-Within this interval, 32 equally spaced coefficients are tested for the guard
-target
+The cancellation coefficient $\eta_0$ offsets predicted deterioration from
+the objective direction. The selected coefficient supplies a repair margin:
+$L_k[\widehat a+\eta\widehat b]=\min(s_\rho,s_P)<0$. Common normalization
+preserves its sign. If the objective already supplies at least as much repair
+as $\widehat b$, no correction is added. If the repair direction is zero or
+has a nonnegative thickness variation, the objective direction is retained
+and the absence of a usable repair is reported.
 
-```math
-\widetilde{D P}_D[\theta]\leq-P_D/d_{\min}.
-```
+The measured penalty is not used to set a decay target or a mixing weight.
+There is no mixing cap or objective-ascent retention constraint; the objective
+may decrease when thickness repair requires it. Both directions remain in the
+volume-constraint null space. No additional variational solve or line search
+is introduced. The CSV records both thickness rates, the cancellation and
+selected coefficients, the achieved normalized rate, and the retained objective
+fraction. The latter is diagnostic and can be negative.
 
-The first sampled crossing is refined by bisection. If no tested coefficient
-reaches the target, the tested coefficient giving the lowest surrogate rate
-is retained, including zero. The thickness-only fallback is removed. If the
-objective-only rate is nonpositive, no repair is added. Setting the mixing cap
-to zero gives the objective-only direction while retaining thickness diagnostics.
-The same bounded policy applies to nominal violations; it does not guarantee
-a minimum thickness after transport and remeshing. The guard anticipates motion
-but cannot override objective retention. The penalty, nominal penalty, minimum
-exit distance, incidence, load concentration, selected coefficient, retained
-objective fraction, achieved rate, and actual and predicted changes are reported
-each iterate. The full shape direction transports the level set.
+This rule balances the frozen surrogate first variations. It does not guarantee
+that the measured first-exit penalty decreases after transport, classification
+and reconstruction. Actual and predicted penalty changes remain reported at
+every iterate.
 
 The normal fields are written on separate `Interface` surface grids in the
 chamber and sewn XDMF files, containing only triangles labelled $\Gamma$,

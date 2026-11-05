@@ -85,10 +85,8 @@ namespace KelvinBall
           Real regularizationFactor = 4;
           Real normalRegularizationFactor = 1;
           Real stepFactor = 0.1;
-          Real minimumThickness = 0;
-          Real thicknessMixingCap = 1;
-          Real objectiveRetention = 0.5;
-          Math::SpatialVector<Real> motionForce;
+        Real minimumThickness = 0;
+        Math::SpatialVector<Real> motionForce;
           std::string reconstructionMethod = "swift";
 
           bool parse(int argc, char** argv)
@@ -107,12 +105,8 @@ namespace KelvinBall
               else if (mode.rfind("--step=", 0) == 0)
                 stepFactor = std::stod(std::string(mode.substr(7)));
               else if (mode.rfind("--thickness-min=", 0) == 0)
-                minimumThickness = std::stod(std::string(mode.substr(16)));
-              else if (mode.rfind("--thickness-mixing-cap=", 0) == 0)
-                thicknessMixingCap = std::stod(std::string(mode.substr(23)));
-              else if (mode.rfind("--objective-retention=", 0) == 0)
-                objectiveRetention = std::stod(std::string(mode.substr(22)));
-              else if (mode.rfind("--motion-force=", 0) == 0)
+              minimumThickness = std::stod(std::string(mode.substr(16)));
+            else if (mode.rfind("--motion-force=", 0) == 0)
               {
                 std::istringstream components{std::string(mode.substr(15))};
                 std::string component;
@@ -156,13 +150,8 @@ namespace KelvinBall
             if (!(stepFactor > 0))
               throw std::runtime_error("The advection step factor must be positive.");
             if (!std::isfinite(minimumThickness) || minimumThickness < 0)
-              throw std::runtime_error("--thickness-min must be nonnegative.");
-            if (!std::isfinite(thicknessMixingCap) || thicknessMixingCap < 0)
-              throw std::runtime_error("--thickness-mixing-cap must be nonnegative.");
-            if (!std::isfinite(objectiveRetention) ||
-                !(objectiveRetention > 0 && objectiveRetention <= 1))
-              throw std::runtime_error("--objective-retention must lie in (0, 1].");
-            if (!std::isfinite(motionForce.norm()) || !(motionForce.norm() > 0))
+            throw std::runtime_error("--thickness-min must be nonnegative.");
+          if (!std::isfinite(motionForce.norm()) || !(motionForce.norm() > 0))
               throw std::runtime_error("The motion force must be finite and nonzero.");
             if (reconstructionMethod != "mmg" && reconstructionMethod != "swift")
               throw std::runtime_error("The reconstruction method must be mmg or swift.");
@@ -736,7 +725,7 @@ namespace KelvinBall
                           << Alert::Notation::Number(m_options.regularizationFactor)
                           << " h0" << Alert::NewLine
                           << diagnosticLabel("Thickness model:")
-                          << "Paired first-exit surrogate with aggregate correction"
+                          << "First-variation balanced paired first-exit surrogate"
                           << Alert::NewLine << diagnosticLabel("Normal smoothing length:")
                           << Alert::Notation::Number(m_options.normalRegularizationFactor)
                           << " h0" << Alert::NewLine << diagnosticLabel("Advection step:")
@@ -882,11 +871,6 @@ namespace KelvinBall
           << "             Advection time step in multiples of h0 (default: 0.1)."
           << Alert::NewLine << Alert::Notation("--thickness-min=<value>")
           << "      Absolute minimum body thickness (default: 0, off)." << Alert::NewLine
-          << Alert::Notation("--thickness-mixing-cap=<value>")
-          << " Maximum normalized repair coefficient (default: 1)." << Alert::NewLine
-          << Alert::Notation("--objective-retention=<value>")
-          << "  Minimum retained normalized objective ascent (default: 0.5)."
-          << Alert::NewLine
           << Alert::Notation("--motion-force=<fx,fy,fz>")
           << "  Force for the Motion field at each iterate (default: 1,0,0)."
 
@@ -1534,8 +1518,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
              "revolution_period,pitch,resistance_radius,"
              "thickness_min,normal_smoothing_length,"
              "thickness_penalty,thickness_nominal_penalty,thickness_guard_distance,"
-             "thickness_active_multiplier,thickness_active_feasible,"
-             "thickness_mixing_cap,objective_retention,objective_only_rate,"
+       "thickness_active_multiplier,thickness_balance_satisfied,"
+       "thickness_objective_rate,thickness_repair_rate,thickness_cancellation_multiplier,"
+       "objective_only_rate,"
              "objective_retained_fraction,thickness_achieved_rate,"
              "thickness_violating_rays,"
              "thickness_maximum_pair_load,thickness_top_one_percent_load_share,"
@@ -1681,7 +1666,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         Real thicknessNominalPenalty = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessGuardDistance = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessActiveMultiplier = std::numeric_limits<Real>::quiet_NaN();
-        Real thicknessActiveFeasible = std::numeric_limits<Real>::quiet_NaN();
+      Real thicknessBalanceSatisfied = std::numeric_limits<Real>::quiet_NaN();
+      Real thicknessObjectiveRate = std::numeric_limits<Real>::quiet_NaN();
+      Real thicknessRepairRate = std::numeric_limits<Real>::quiet_NaN();
+      Real thicknessCancellationMultiplier = std::numeric_limits<Real>::quiet_NaN();
         Real objectiveOnlyRate = std::numeric_limits<Real>::quiet_NaN();
         Real objectiveRetainedFraction = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessAchievedRate = std::numeric_limits<Real>::quiet_NaN();
@@ -1761,8 +1749,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << stageDiagnostics.thicknessNominalPenalty << ','
               << stageDiagnostics.thicknessGuardDistance << ','
               << stageDiagnostics.thicknessActiveMultiplier << ','
-              << stageDiagnostics.thicknessActiveFeasible << ','
-              << m_options.thicknessMixingCap << ',' << m_options.objectiveRetention << ','
+              << stageDiagnostics.thicknessBalanceSatisfied << ','
+              << stageDiagnostics.thicknessObjectiveRate << ','
+              << stageDiagnostics.thicknessRepairRate << ','
+              << stageDiagnostics.thicknessCancellationMultiplier << ','
               << stageDiagnostics.objectiveOnlyRate << ','
               << stageDiagnostics.objectiveRetainedFraction << ','
               << stageDiagnostics.thicknessAchievedRate << ','
@@ -1957,8 +1947,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       }
       const auto geometricSeam =
         interfaceSeamJump(mesh, geometricNormal, shapeCoupling.getLocator());
-      const auto normalSeam =
-        interfaceSeamJump(mesh, smoothedNormal, shapeCoupling.getLocator());
+      const auto normalSeam = m_options.thicknessDiagnostics
+        ? interfaceSeamJump(mesh, smoothedNormal, shapeCoupling.getLocator())
+        : InterfaceSeamJump{};
       const auto raySeam =
         interfaceSeamJump(mesh, rayDirection, shapeCoupling.getLocator());
       stageDiagnostics.thicknessGeometricSeamJump = geometricSeam.maximum;
@@ -2112,107 +2103,55 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       const Real repairMagnitude = std::max(candidateMagnitude.max(), Real(1e-30));
       thicknessRepair /= repairMagnitude;
       const Real objectiveRate = dRho(xiRho);
-      const Real retainedRate = m_options.objectiveRetention * objectiveRate;
-      const auto candidateNorm = [&](Real multiplier) {
-        candidate = xiRho + multiplier * thicknessRepair;
-        candidateMagnitude = Frobenius(candidate);
-        return candidateMagnitude.max();
-      };
-      const auto retainsObjective = [&](Real multiplier) {
-        const Real magnitude = candidateNorm(multiplier);
-        return magnitude > 0 && dRho(candidate) / magnitude >= retainedRate;
-      };
-      const auto thicknessRate = [&](Real multiplier) {
-        const Real magnitude = candidateNorm(multiplier);
-        return magnitude > 0 ? -thicknessLoad.dot(candidate.getData()) / magnitude
-                             : std::numeric_limits<Real>::infinity();
-      };
-      const Real targetRate =
-        -stageDiagnostics.thicknessPenalty / m_options.minimumThickness;
+      // Balance the two effects on thickness, rather than its measured value.
+      // L[b] < 0 for a usable volume-projected repair direction. The coefficient
+      // eta_0 cancels L[a]; eta additionally retains one unit of repair before
+      // common normalization. If L[a] <= L[b], the objective already repairs
+      // at least as much and no correction is needed.
+      const Real objectiveThicknessRate = -thicknessLoad.dot(xiRho.getData());
+      const Real repairThicknessRate = -thicknessLoad.dot(thicknessRepair.getData());
+      Real cancellationMultiplier = 0;
       Real multiplier = 0;
-      Real achievedRate = thicknessRate(0);
-      // These scalar searches only combine existing gradients; no state solve
-      // or design-step line search is performed. Forty bisections resolve the
-      // coefficient to about 1e-12 of its interval. The bounded sample search
-      // also permits partial repair when the guard target cannot be reached.
-      constexpr size_t coefficientBisections = 40;
-      constexpr size_t repairSamples = 32;
-      Real upper = m_options.thicknessMixingCap;
-      if (objectiveRate > 0 && achievedRate > targetRate && upper > 0)
+      if (repairThicknessRate < Real(0))
       {
-        // The positive objective superlevel set is convex along the mixing
-        // segment, so bisection gives an admissible upper coefficient.
-        if (!retainsObjective(upper))
-        {
-          Real lower = 0;
-          for (size_t search = 0; search < coefficientBisections; ++search)
-          {
-            const Real middle = (lower + upper) / Real(2);
-            if (retainsObjective(middle))
-              lower = middle;
-            else
-              upper = middle;
-          }
-          upper = lower;
-        }
-        Real previous = 0;
-        for (size_t sample = 1; sample <= repairSamples; ++sample)
-        {
-          const Real coefficient = upper * Real(sample) / Real(repairSamples);
-          const Real rate = thicknessRate(coefficient);
-          if (rate < achievedRate && retainsObjective(coefficient))
-          {
-            multiplier = coefficient;
-            achievedRate = rate;
-          }
-          if (achievedRate <= targetRate)
-          {
-            Real lower = previous, upperTarget = multiplier;
-            for (size_t search = 0; search < coefficientBisections; ++search)
-            {
-              const Real middle = (lower + upperTarget) / Real(2);
-              if (thicknessRate(middle) > targetRate)
-                lower = middle;
-              else
-                upperTarget = middle;
-            }
-            // Retain the checked sample if rounding at the objective boundary
-            // makes the refined coefficient inadmissible.
-            if (retainsObjective(upperTarget))
-              multiplier = upperTarget;
-            achievedRate = thicknessRate(multiplier);
-            break;
-          }
-          previous = coefficient;
-        }
+        const Real balance = objectiveThicknessRate / (-repairThicknessRate);
+        cancellationMultiplier = std::max(Real(0), balance);
+        multiplier = std::max(Real(0), Real(1) + balance);
       }
-      // The guard is preventive: failure to reach it never replaces the
-      // objective with a thickness-only direction, even for a nominal violation.
-      const bool feasible = achievedRate <= targetRate;
-      const Real selectedMagnitude = candidateNorm(multiplier);
+      candidate = xiRho + multiplier * thicknessRepair;
+      candidateMagnitude = Frobenius(candidate);
+      const Real selectedMagnitude = candidateMagnitude.max();
+      const Real achievedRate = selectedMagnitude > Real(0)
+        ? -thicknessLoad.dot(candidate.getData()) / selectedMagnitude
+        : Real(0);
+      const bool feasible = achievedRate <= Real(0);
+      stageDiagnostics.thicknessObjectiveRate = objectiveThicknessRate;
+      stageDiagnostics.thicknessRepairRate = repairThicknessRate;
+      stageDiagnostics.thicknessCancellationMultiplier = cancellationMultiplier;
       stageDiagnostics.objectiveOnlyRate = objectiveRate;
-      stageDiagnostics.objectiveRetainedFraction = objectiveRate > 0
+      stageDiagnostics.objectiveRetainedFraction =
+        objectiveRate > Real(0) && selectedMagnitude > Real(0)
         ? dRho(candidate) / (selectedMagnitude * objectiveRate) : nan;
       stageDiagnostics.thicknessAchievedRate = achievedRate;
       xiRho = candidate;
       nullSpaceMultiplier += multiplier * thicknessVolumeMultiplier / repairMagnitude;
       stageDiagnostics.thicknessActiveMultiplier = multiplier;
-      stageDiagnostics.thicknessActiveFeasible = feasible ? Real(1) : Real(0);
-      Alert::Info() << substageHeading("Bounded thickness correction") << Alert::NewLine
-                    << diagnosticLabel("Target D guard P [theta]:")
-                    << Alert::Notation::Number(targetRate) << Alert::NewLine
-                    << diagnosticLabel("Achieved D guard P [theta]:")
-                    << Alert::Notation::Number(achievedRate) << Alert::NewLine
-                    << diagnosticLabel("Selected multiplier:")
+      stageDiagnostics.thicknessBalanceSatisfied = feasible ? Real(1) : Real(0);
+      Alert::Info() << substageHeading("First-variation thickness balance")
+                    << Alert::NewLine << diagnosticLabel("Objective thickness rate:")
+                    << Alert::Notation::Number(objectiveThicknessRate) << Alert::NewLine
+                    << diagnosticLabel("Repair thickness rate:")
+                    << Alert::Notation::Number(repairThicknessRate) << Alert::NewLine
+                    << diagnosticLabel("Cancellation coefficient:")
+                    << Alert::Notation::Number(cancellationMultiplier) << Alert::NewLine
+                    << diagnosticLabel("Selected coefficient:")
                     << Alert::Notation::Number(multiplier) << Alert::NewLine
-                    << diagnosticLabel("Mixing cap:")
-                    << Alert::Notation::Number(m_options.thicknessMixingCap)
-                    << Alert::NewLine << diagnosticLabel("Retained objective fraction:")
+                    << diagnosticLabel("Predicted thickness rate:")
+                    << Alert::Notation::Number(achievedRate) << Alert::NewLine
+                    << diagnosticLabel("Retained objective fraction:")
                     << Alert::Notation::Number(stageDiagnostics.objectiveRetainedFraction)
-                    << Alert::NewLine
-                    << diagnosticLabel("Guard target reached:")
-                    << (feasible ? "Yes" : "No; retaining bounded correction")
-                    << Alert::Raise;
+                    << Alert::NewLine << diagnosticLabel("Predicted non-increase:")
+                    << (feasible ? "Yes" : "No usable repair direction") << Alert::Raise;
     }
     GridFunction xiRhoNorm(levelSetSpace);
     xiRhoNorm = Frobenius(xiRho);
@@ -2445,51 +2384,12 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       }
 
       KelvinBall::SewedOutput sewedFluid(fluid, FlatSet<Attribute>{Gamma, Outer});
-      VelocitySpace sewedVelocitySpace(sewedFluid.getMesh(), 3);
-      PressureSpace sewedPressureSpace(sewedFluid.getMesh());
-      GridFunction sewedUT0(sewedVelocitySpace), sewedUT1(sewedVelocitySpace),
-        sewedUT2(sewedVelocitySpace), sewedUR0(sewedVelocitySpace),
-        sewedUR1(sewedVelocitySpace), sewedUR2(sewedVelocitySpace);
-      GridFunction sewedPT0(sewedPressureSpace), sewedPT1(sewedPressureSpace),
-        sewedPT2(sewedPressureSpace), sewedPR0(sewedPressureSpace),
-        sewedPR1(sewedPressureSpace), sewedPR2(sewedPressureSpace);
       const auto translations = std::array{&uT0, &uT1, &uT2};
       const auto rotations = std::array{&uR0, &uR1, &uR2};
       const auto translationPressures = std::array{&pT0, &pT1, &pT2};
       const auto rotationPressures = std::array{&pR0, &pR1, &pR2};
-      sewedFluid.setVectorLoad(sewedUT0, translations, 0);
-      sewedFluid.setVectorLoad(sewedUT1, translations, 1);
-      sewedFluid.setVectorLoad(sewedUT2, translations, 2);
-      sewedFluid.setVectorLoad(sewedUR0, rotations, 0);
-      sewedFluid.setVectorLoad(sewedUR1, rotations, 1);
-      sewedFluid.setVectorLoad(sewedUR2, rotations, 2);
-      sewedFluid.setScalarLoad(sewedPT0, translationPressures, 0);
-      sewedFluid.setScalarLoad(sewedPT1, translationPressures, 1);
-      sewedFluid.setScalarLoad(sewedPT2, translationPressures, 2);
-      sewedFluid.setScalarLoad(sewedPR0, rotationPressures, 0);
-      sewedFluid.setScalarLoad(sewedPR1, rotationPressures, 1);
-      sewedFluid.setScalarLoad(sewedPR2, rotationPressures, 2);
-      sewedFluidOutput.clear();
-      sewedFluidOutput.setMesh(sewedFluid.getMesh(), IO::XDMF::MeshPolicy::Transient);
-      sewedFluidOutput.add("Translation_0", sewedUT0, IO::XDMF::Center::Node);
-      sewedFluidOutput.add("Translation_1", sewedUT1, IO::XDMF::Center::Node);
-      sewedFluidOutput.add("Translation_2", sewedUT2, IO::XDMF::Center::Node);
-      sewedFluidOutput.add("Rotation_0", sewedUR0, IO::XDMF::Center::Node);
-      sewedFluidOutput.add("Rotation_1", sewedUR1, IO::XDMF::Center::Node);
-      sewedFluidOutput.add("Rotation_2", sewedUR2, IO::XDMF::Center::Node);
-      sewedFluidOutput.add("Pressure_Translation_0", sewedPT0, IO::XDMF::Center::Node);
-      sewedFluidOutput.add("Pressure_Translation_1", sewedPT1, IO::XDMF::Center::Node);
-      sewedFluidOutput.add("Pressure_Translation_2", sewedPT2, IO::XDMF::Center::Node);
-      sewedFluidOutput.add("Pressure_Rotation_0", sewedPR0, IO::XDMF::Center::Node);
-      sewedFluidOutput.add("Pressure_Rotation_1", sewedPR1, IO::XDMF::Center::Node);
-      sewedFluidOutput.add("Pressure_Rotation_2", sewedPR2, IO::XDMF::Center::Node);
-      GridFunction fluidMotion(sewedVelocitySpace);
-      fluidMotion.getData() = motionTranslation(0) * sewedUT0.getData() +
-        motionTranslation(1) * sewedUT1.getData() +
-        motionTranslation(2) * sewedUT2.getData() +
-        motionAngular(0) * sewedUR0.getData() + motionAngular(1) * sewedUR1.getData() +
-        motionAngular(2) * sewedUR2.getData();
-      sewedFluidOutput.add("Motion", fluidMotion, IO::XDMF::Center::Node);
+      sewedFluid.addStates(sewedFluidOutput, translations, rotations,
+        translationPressures, rotationPressures, motionTranslation, motionAngular);
       sewedInterfaceOutput.add("Motion", bodyMotion, IO::XDMF::Center::Node);
 
       if (iteration + 1 == m_options.maxIterations)
