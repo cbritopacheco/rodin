@@ -1,11 +1,5 @@
-# One executable per source: with nvcc 13.1, two sources of one executable
-# instantiating the same device assembly templates call a null host pointer
-# in the copy of a device lambda unless a test of the other source ran first.
-add_executable(RodinKokkosMPIPoissonTest PoissonTest.cpp)
-target_link_libraries(RodinKokkosMPIPoissonTest
-  PRIVATE GTest::gtest Rodin::KokkosMPI Rodin::IO)
-add_executable(RodinKokkosMPIConstraintTest ConstraintTest.cpp)
-target_link_libraries(RodinKokkosMPIConstraintTest
+add_executable(RodinKokkosMPITest Main.cpp PoissonTest.cpp ConstraintTest.cpp)
+target_link_libraries(RodinKokkosMPITest
   PRIVATE GTest::gtest Rodin::KokkosMPI Rodin::IO)
 
 # Detect Open MPI for --oversubscribe flag (not supported by MPICH).
@@ -21,7 +15,7 @@ if (MPIEXEC_EXECUTABLE)
   endif()
 endif()
 
-foreach(test RodinKokkosMPIPoissonTest RodinKokkosMPIConstraintTest)
+foreach(test RodinKokkosMPITest)
   foreach(np 1 2 4)
     add_test(
       NAME ${test}_np${np}

@@ -230,6 +230,72 @@ namespace Rodin::Variational
     static std::false_type isFunction(const void*);
 
     /**
+     * @brief Marks every degree of freedom of a selected polytope with one plus
+     * the polytope index, keeping the largest.
+     */
+    template <class AttributeView, class Select, class DOFs>
+    struct Owners
+    {
+      ::Rodin::Kokkos::Geometry::MeshView view;
+      Geometry::Region region;
+      Index d;
+      AttributeView attributes;
+      Select select;
+      ::Kokkos::View<Index*, MemorySpace> owners;
+      DOFs dofs;
+
+      KOKKOS_INLINE_FUNCTION void operator()(Index i) const
+      {
+        const auto polytope = view.getPolytope(d, i);
+        if (!::Rodin::Kokkos::Variational::isIntegrated(
+              view, region, polytope, attributes) ||
+          !select(polytope))
+          return;
+        const auto indices = dofs.bind(polytope);
+        for (Index q = 0; q < indices.size(); ++q)
+          ::Kokkos::atomic_max(&owners(indices[q]), i + 1);
+      }
+    };
+
+    /**
+     * @brief Evaluates the source at the nodes of the degrees of freedom a
+     * selected polytope owns.
+     */
+    template <class AttributeView, class Select, class ValueView, class DOFs>
+    struct Values
+    {
+      ::Rodin::Kokkos::Geometry::MeshView view;
+      Geometry::Region region;
+      Index d;
+      AttributeView attributes;
+      Select select;
+      ::Kokkos::View<Index*, MemorySpace> owners;
+      ::Kokkos::View<Real*, MemorySpace> values;
+      ValueView value;
+      DOFs dofs;
+      Index stride;
+      Index vdim;
+
+      KOKKOS_INLINE_FUNCTION void operator()(Index i) const
+      {
+        const auto polytope = view.getPolytope(d, i);
+        if (!::Rodin::Kokkos::Variational::isIntegrated(
+              view, region, polytope, attributes) ||
+          !select(polytope))
+          return;
+        const auto indices = dofs.bind(polytope);
+        for (Index q = 0; q < indices.size(); ++q)
+        {
+          const Index dof = indices[q];
+          if (owners(dof) != i + 1)
+            continue;
+          const auto p = polytope.getPoint(dofs.getNode(polytope, q));
+          store(values, dof, stride, vdim, value.getValue(p));
+        }
+      }
+    };
+
+    /**
      * @brief Selects the degrees of freedom and evaluates the source.
      * @param execution Execution space instance.
      * @param view Device mesh.
@@ -247,8 +313,7 @@ namespace Rodin::Variational
      * @param vdim Vector dimension of the space.
      *
      * The count is given by the host, since the topology of the device mesh
-     * is not readable on the host. Public as the enclosing function of
-     * device lambdas.
+     * is not readable on the host.
      */
     template <class AttributeView, class Select, class ValueView, class DOFs>
     static void evaluate(const ExecutionSpace& execution,
@@ -262,34 +327,12 @@ namespace Rodin::Variational
       const auto policy =
         ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>(
           execution, 0, count);
-      ::Kokkos::parallel_for(
-        "Rodin projection owners", policy, KOKKOS_LAMBDA(Index i) {
-          const auto polytope = view.getPolytope(d, i);
-          if (!::Rodin::Kokkos::Variational::isIntegrated(
-                view, region, polytope, attributes) ||
-            !select(polytope))
-            return;
-          const auto indices = dofs.bind(polytope);
-          for (Index q = 0; q < indices.size(); ++q)
-            ::Kokkos::atomic_max(&owners(indices[q]), i + 1);
-        });
-      ::Kokkos::parallel_for(
-        "Rodin projection values", policy, KOKKOS_LAMBDA(Index i) {
-          const auto polytope = view.getPolytope(d, i);
-          if (!::Rodin::Kokkos::Variational::isIntegrated(
-                view, region, polytope, attributes) ||
-            !select(polytope))
-            return;
-          const auto indices = dofs.bind(polytope);
-          for (Index q = 0; q < indices.size(); ++q)
-          {
-            const Index dof = indices[q];
-            if (owners(dof) != i + 1)
-              continue;
-            const auto p = polytope.getPoint(dofs.getNode(polytope, q));
-            store(values, dof, stride, vdim, value.getValue(p));
-          }
-        });
+      ::Kokkos::parallel_for("Rodin projection owners", policy,
+        Owners<AttributeView, Select, DOFs>{view, region, d, attributes, select, owners,
+          dofs});
+      ::Kokkos::parallel_for("Rodin projection values", policy,
+        Values<AttributeView, Select, ValueView, DOFs>{view, region, d, attributes,
+          select, owners, values, value, dofs, stride, vdim});
     }
 
     /**

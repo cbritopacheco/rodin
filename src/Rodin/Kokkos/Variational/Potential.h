@@ -334,6 +334,71 @@ namespace Rodin::Kokkos::Variational
           accumulate, rows, cols);
       }
 
+      /// @brief Counts the selected cells and bounds their local counts.
+      template <class DOFs>
+      struct CellRange
+      {
+        Geometry::MeshView view;
+        ::Rodin::Geometry::Region region;
+        Index dimension;
+        AttributesType attributes;
+        DOFs dofs;
+        Index vdim;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          Index p, Index& m, Index& lo, Index& hi) const
+        {
+          const auto cell = view.getPolytope(dimension, p);
+          if (!Rodin::Kokkos::Variational::isIntegrated(view, region, cell, attributes))
+            return;
+          const Index n = dofs.bind(cell).size() * vdim;
+          m += 1;
+          lo = n < lo ? n : lo;
+          hi = n > hi ? n : hi;
+        }
+      };
+
+      /// @brief Writes the selected cells, in increasing order.
+      struct SelectedCells
+      {
+        Geometry::MeshView view;
+        ::Rodin::Geometry::Region region;
+        Index dimension;
+        AttributesType attributes;
+        ::Kokkos::View<Index*, MemorySpace> cells;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          Index p, Index& update, const bool final) const
+        {
+          const auto cell = view.getPolytope(dimension, p);
+          if (!Rodin::Kokkos::Variational::isIntegrated(view, region, cell, attributes))
+            return;
+          if (final)
+            cells(update) = p;
+          update += 1;
+        }
+      };
+
+      /// @brief Writes the sum of the local counts of the previous selected cells.
+      template <class DOFs>
+      struct CellOffsets
+      {
+        Geometry::MeshView view;
+        Index dimension;
+        DOFs dofs;
+        Index vdim;
+        ::Kokkos::View<Index*, MemorySpace> cells;
+        ::Kokkos::View<Index*, MemorySpace> offsets;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          Index a, Index& update, const bool final) const
+        {
+          if (final)
+            offsets(a) = update;
+          update += dofs.bind(view.getPolytope(dimension, cells(a))).size() * vdim;
+        }
+      };
+
       /**
        * @brief Selects the cells of one side of the pairs.
        * @param execution Execution space instance.
@@ -344,8 +409,6 @@ namespace Rodin::Kokkos::Variational
        * @param dofs Device degrees of freedom of the side.
        * @param vdim Vector dimension of the side.
        * @param selection Selected cells and their offsets.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       template <class DOFs>
       static void select(const ExecutionSpace& execution, const Geometry::MeshView& view,
@@ -359,15 +422,7 @@ namespace Rodin::Kokkos::Variational
         Index largest = 0;
         ::Kokkos::parallel_reduce(
           "Rodin potential cell counts", policy(execution, count),
-          KOKKOS_LAMBDA(Index p, Index & m, Index & lo, Index & hi) {
-            const auto cell = view.getPolytope(dimension, p);
-            if (!Rodin::Kokkos::Variational::isIntegrated(view, region, cell, attributes))
-              return;
-            const Index n = dofs.bind(cell).size() * vdim;
-            m += 1;
-            lo = n < lo ? n : lo;
-            hi = n > hi ? n : hi;
-          },
+          CellRange<DOFs>{view, region, dimension, attributes, dofs, vdim},
           ::Kokkos::Sum<Index>(selected), ::Kokkos::Min<Index>(smallest),
           ::Kokkos::Max<Index>(largest));
         if (selection.cells.extent(0) != selected)
@@ -385,34 +440,18 @@ namespace Rodin::Kokkos::Variational
         const auto offsets = selection.offsets;
         ::Kokkos::parallel_scan(
           "Rodin potential cells", policy(execution, count),
-          KOKKOS_LAMBDA(Index p, Index & update, bool final) {
-            const auto cell = view.getPolytope(dimension, p);
-            if (!Rodin::Kokkos::Variational::isIntegrated(view, region, cell, attributes))
-              return;
-            if (final)
-              cells(update) = p;
-            update += 1;
-          });
+          SelectedCells{view, region, dimension, attributes, cells});
         Index total = 0;
         ::Kokkos::parallel_scan(
           "Rodin potential offsets", policy(execution, selected),
-          KOKKOS_LAMBDA(Index a, Index & update, bool final) {
-            if (final)
-              offsets(a) = update;
-            update += dofs.bind(view.getPolytope(dimension, cells(a))).size() * vdim;
-          },
-          total);
+          CellOffsets<DOFs>{view, dimension, dofs, vdim, cells, offsets}, total);
         selection.count = selected;
         selection.total = total;
         selection.smallest = selected > 0 ? smallest : 0;
         selection.largest = largest;
       }
 
-      /**
-       * @brief Integrates the pairs of selected cells.
-       *
-       * Public as the enclosing function of a device lambda.
-       */
+      /// @brief Integrates the pairs of selected cells.
       static void integratePairs(const MeshType& mesh, const KernelType& kernel,
         const Selection& test, const Selection& trial, bool uniform, size_t spacing,
         const TableType& nodes, const TableType& weights, const TableType& centroids,
@@ -426,191 +465,15 @@ namespace Rodin::Kokkos::Variational
         if (pairs == 0)
           return;
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const auto view = mesh.getDeviceView();
-        const Index dimension = mesh.getDimension();
-        const auto testCells = test.cells;
-        const auto testOffsets = test.offsets;
-        const auto trialCells = trial.cells;
-        const auto trialOffsets = trial.offsets;
-        const Index trialCount = trial.count;
-        const Index trialTotal = trial.total;
-        const Index n = nodes.extent(0);
-        const bool index = rows.extent(0) > 0;
         ::Kokkos::parallel_for(
           "Rodin potential integration",
           ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<size_t>>(
             execution, 0, pairs),
-          KOKKOS_LAMBDA(size_t k) {
-            // nvcc refuses a first capture inside if constexpr.
-            const auto& f = kernel;
-            const Index a = k / trialCount;
-            const Index b = k % trialCount;
-            const Index te = testCells(a);
-            const Index tr = trialCells(b);
-            const auto testCell = view.getPolytope(dimension, te);
-            const auto trialCell = view.getPolytope(dimension, tr);
-            const auto testIndices = testDOFs.bind(testCell);
-            const auto trialIndices = trialDOFs.bind(trialCell);
-            const Index nte = testIndices.size() * testVDim;
-            const Index ntr = trialIndices.size() * trialVDim;
-            const size_t base = offset +
-              (uniform
-                  ? k
-                  : size_t(testOffsets(a)) * trialTotal + size_t(nte) * trialOffsets(b));
-            // Local index q * vdim + r is component r of the vertex q,
-            // numbered globally as vertex + r * stride.
-            const auto write = [&](Index l, Index m, Real v) {
-              const size_t e = base + size_t(l * ntr + m) * spacing;
-              if (accumulate)
-                values(e) += sign * v;
-              else
-                values(e) = sign * v;
-              if (index)
-              {
-                rows(e) =
-                  testIndices[l / testVDim] + (l % testVDim) * testDOFs.getStride();
-                cols(e) =
-                  trialIndices[m / trialVDim] + (m % trialVDim) * trialDOFs.getStride();
-              }
-            };
-            if (te == tr &&
-              testCell.getGeometry() == ::Rodin::Geometry::Polytope::Type::Triangle)
-            {
-              ::Kokkos::Array<Real, TriangleCapacity * TriangleCapacity> local{};
-              Geometry::Vector gradient(2);
-              for (Index i3 = 0; i3 < n; ++i3)
-              {
-                const Real eta3 = nodes(i3);
-                const Real w3 = weights(i3);
-                for (Index i2 = 0; i2 < n; ++i2)
-                {
-                  const Real eta2 = nodes(i2);
-                  const Real w2 = weights(i2);
-                  for (Index i1 = 0; i1 < n; ++i1)
-                  {
-                    const Real eta1 = nodes(i1);
-                    const Real w1 = weights(i1);
-                    for (Index i0 = 0; i0 < n; ++i0)
-                    {
-                      const Real xi = nodes(i0);
-                      const Real w0 = weights(i0);
-                      const Real jacobian = xi * xi * xi * eta1 * eta1 * eta2;
-                      const Real factor = w0 * w1 * w2 * w3 * jacobian;
-                      // The six sub-domains of the identical-panel case of
-                      // Sauter and Schwab, as on the host.
-                      const Real ca = xi - xi * eta1;
-                      const Real cb = xi - xi * eta1 * eta2 * eta3;
-                      const Real cc = xi - xi * eta1 * eta2;
-                      const Real cd = xi * eta1 * (1 - eta2);
-                      const Real ce = xi * eta1 * (1 - eta2 * eta3);
-                      const Real cf = xi * eta1 * (1 - eta2 + eta2 * eta3);
-                      const Real cg = xi - xi * eta1 + xi * eta1 * eta2;
-                      const ::Kokkos::Array<Real, 24> r{1 - xi, cg, 1 - cb, ca, 1 - cb,
-                        ca, 1 - xi, cg, 1 - xi, cf, 1 - cc, cd, 1 - cc, cd, 1 - xi, cf,
-                        1 - cb, ce, 1 - xi, cd, 1 - xi, cd, 1 - cb, ce};
-                      ::Kokkos::Array<Real, 6> s;
-                      ::Kokkos::Array<Real, 18> px;
-                      ::Kokkos::Array<Real, 18> pz;
-                      ::Kokkos::Array<std::conditional_t<Scalar, Real, Geometry::Matrix>,
-                        6>
-                        kv;
-                      for (Index i = 0; i < 6; ++i)
-                      {
-                        Geometry::Vector rx(2);
-                        rx(0) = r[4 * i];
-                        rx(1) = r[4 * i + 1];
-                        Geometry::Vector rz(2);
-                        rz(0) = r[4 * i + 2];
-                        rz(1) = r[4 * i + 3];
-                        const auto x = trialCell.getPoint(rx);
-                        const auto z = testCell.getPoint(rz);
-                        s[i] = x.getDistortion() * z.getDistortion();
-                        if constexpr (Scalar)
-                        {
-                          kv[i] = f(x, z);
-                        }
-                        else
-                        {
-                          kv[i] = Geometry::Matrix(testVDim, trialVDim);
-                          f(kv[i], x, z);
-                        }
-                        for (Index q = 0; q < 3; ++q)
-                        {
-                          x.evaluateBasis(q, px[3 * i + q], gradient);
-                          z.evaluateBasis(q, pz[3 * i + q], gradient);
-                        }
-                      }
-                      for (Index l = 0; l < nte; ++l)
-                      {
-                        for (Index m = 0; m < ntr; ++m)
-                        {
-                          for (Index i = 0; i < 6; ++i)
-                          {
-                            const Real phi = px[3 * i + m / trialVDim];
-                            const Real psi = pz[3 * i + l / testVDim];
-                            if constexpr (Scalar)
-                              local[l * ntr + m] += factor * s[i] * kv[i] * (phi * psi);
-                            else
-                              local[l * ntr + m] += factor * s[i] *
-                                (kv[i](l % testVDim, m % trialVDim) * phi * psi);
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-              for (Index l = 0; l < nte; ++l)
-              {
-                for (Index m = 0; m < ntr; ++m)
-                  write(l, m, local[l * ntr + m]);
-              }
-              return;
-            }
-            const auto centroid = [&](const Geometry::PolytopeView& cell) {
-              const Index g = static_cast<Index>(cell.getGeometry());
-              Geometry::Vector reference(cell.getDimension());
-              for (Index d = 0; d < cell.getDimension(); ++d)
-                reference(d) = centroids(g * ReferenceStride + d);
-              return cell.getPoint(reference);
-            };
-            const auto x = centroid(trialCell);
-            const auto y = centroid(testCell);
-            const Real scale = (x.getDistortion() * y.getDistortion()) *
-              (centroidWeights(static_cast<Index>(trialCell.getGeometry())) *
-                centroidWeights(static_cast<Index>(testCell.getGeometry())));
-            Geometry::Vector gradient(dimension);
-            ::Kokkos::Array<Real, RODIN_MAXIMUM_POLYTOPE_VERTICES> px;
-            ::Kokkos::Array<Real, RODIN_MAXIMUM_POLYTOPE_VERTICES> py;
-            for (Index q = 0; q < trialIndices.size(); ++q)
-              x.evaluateBasis(q, px[q], gradient);
-            for (Index q = 0; q < testIndices.size(); ++q)
-              y.evaluateBasis(q, py[q], gradient);
-            if constexpr (Scalar)
-            {
-              const Real sk = f(x, y);
-              for (Index l = 0; l < nte; ++l)
-              {
-                for (Index m = 0; m < ntr; ++m)
-                  write(l, m, scale * (sk * (px[m] * py[l])));
-              }
-            }
-            else
-            {
-              Geometry::Matrix mk(testVDim, trialVDim);
-              f(mk, x, y);
-              for (Index l = 0; l < nte; ++l)
-              {
-                for (Index m = 0; m < ntr; ++m)
-                {
-                  write(l, m,
-                    scale *
-                      (mk(l % testVDim, m % trialVDim) * px[m / trialVDim] *
-                        py[l / testVDim]));
-                }
-              }
-            }
-          });
+          PairKernel{kernel, mesh.getDeviceView(), mesh.getDimension(), test.cells,
+            test.offsets, trial.cells, trial.offsets, trial.count, trial.total, uniform,
+            spacing, nodes, weights, centroids, centroidWeights, nodes.extent(0),
+            trialDOFs, trialVDim, testDOFs, testVDim, values, offset, sign, accumulate,
+            rows.extent(0) > 0, rows, cols});
       }
 
       DevicePotentialIntegral* copy() const noexcept override = 0;
@@ -675,6 +538,210 @@ namespace Rodin::Kokkos::Variational
       mutable bool m_uniform = false;
       mutable size_t m_spacing = 1;
       mutable size_t m_count = 0;
+
+    public:
+      /// @brief Kernel of integratePairs(), one pair of selected cells per thread.
+      struct PairKernel
+      {
+        KernelType kernel;
+        Geometry::MeshView view;
+        Index dimension;
+        ::Kokkos::View<Index*, MemorySpace> testCells;
+        ::Kokkos::View<Index*, MemorySpace> testOffsets;
+        ::Kokkos::View<Index*, MemorySpace> trialCells;
+        ::Kokkos::View<Index*, MemorySpace> trialOffsets;
+        Index trialCount;
+        Index trialTotal;
+        bool uniform;
+        size_t spacing;
+        TableType nodes;
+        TableType weights;
+        TableType centroids;
+        TableType centroidWeights;
+        Index n;
+        TrialDOFsType trialDOFs;
+        Index trialVDim;
+        TestDOFsType testDOFs;
+        Index testVDim;
+        ::Kokkos::View<Real*, MemorySpace> values;
+        size_t offset;
+        Real sign;
+        bool accumulate;
+        bool index;
+        ::Kokkos::View<Index*, MemorySpace> rows;
+        ::Kokkos::View<Index*, MemorySpace> cols;
+
+        KOKKOS_INLINE_FUNCTION void operator()(size_t k) const
+        {
+          const Index a = k / trialCount;
+          const Index b = k % trialCount;
+          const Index te = testCells(a);
+          const Index tr = trialCells(b);
+          const auto testCell = view.getPolytope(dimension, te);
+          const auto trialCell = view.getPolytope(dimension, tr);
+          const auto testIndices = testDOFs.bind(testCell);
+          const auto trialIndices = trialDOFs.bind(trialCell);
+          const Index nte = testIndices.size() * testVDim;
+          const Index ntr = trialIndices.size() * trialVDim;
+          const size_t base = offset +
+            (uniform
+                ? k
+                : size_t(testOffsets(a)) * trialTotal + size_t(nte) * trialOffsets(b));
+          // Local index q * vdim + r is component r of the vertex q,
+          // numbered globally as vertex + r * stride.
+          const auto write = [&](Index l, Index m, Real v) {
+            const size_t e = base + size_t(l * ntr + m) * spacing;
+            if (accumulate)
+              values(e) += sign * v;
+            else
+              values(e) = sign * v;
+            if (index)
+            {
+              rows(e) =
+                testIndices[l / testVDim] + (l % testVDim) * testDOFs.getStride();
+              cols(e) =
+                trialIndices[m / trialVDim] + (m % trialVDim) * trialDOFs.getStride();
+            }
+          };
+          if (te == tr &&
+            testCell.getGeometry() == ::Rodin::Geometry::Polytope::Type::Triangle)
+          {
+            ::Kokkos::Array<Real, TriangleCapacity * TriangleCapacity> local{};
+            Geometry::Vector gradient(2);
+            for (Index i3 = 0; i3 < n; ++i3)
+            {
+              const Real eta3 = nodes(i3);
+              const Real w3 = weights(i3);
+              for (Index i2 = 0; i2 < n; ++i2)
+              {
+                const Real eta2 = nodes(i2);
+                const Real w2 = weights(i2);
+                for (Index i1 = 0; i1 < n; ++i1)
+                {
+                  const Real eta1 = nodes(i1);
+                  const Real w1 = weights(i1);
+                  for (Index i0 = 0; i0 < n; ++i0)
+                  {
+                    const Real xi = nodes(i0);
+                    const Real w0 = weights(i0);
+                    const Real jacobian = xi * xi * xi * eta1 * eta1 * eta2;
+                    const Real factor = w0 * w1 * w2 * w3 * jacobian;
+                    // The six sub-domains of the identical-panel case of
+                    // Sauter and Schwab, as on the host.
+                    const Real ca = xi - xi * eta1;
+                    const Real cb = xi - xi * eta1 * eta2 * eta3;
+                    const Real cc = xi - xi * eta1 * eta2;
+                    const Real cd = xi * eta1 * (1 - eta2);
+                    const Real ce = xi * eta1 * (1 - eta2 * eta3);
+                    const Real cf = xi * eta1 * (1 - eta2 + eta2 * eta3);
+                    const Real cg = xi - xi * eta1 + xi * eta1 * eta2;
+                    const ::Kokkos::Array<Real, 24> r{1 - xi, cg, 1 - cb, ca, 1 - cb,
+                      ca, 1 - xi, cg, 1 - xi, cf, 1 - cc, cd, 1 - cc, cd, 1 - xi, cf,
+                      1 - cb, ce, 1 - xi, cd, 1 - xi, cd, 1 - cb, ce};
+                    ::Kokkos::Array<Real, 6> s;
+                    ::Kokkos::Array<Real, 18> px;
+                    ::Kokkos::Array<Real, 18> pz;
+                    ::Kokkos::Array<std::conditional_t<Scalar, Real, Geometry::Matrix>,
+                      6>
+                      kv;
+                    for (Index i = 0; i < 6; ++i)
+                    {
+                      Geometry::Vector rx(2);
+                      rx(0) = r[4 * i];
+                      rx(1) = r[4 * i + 1];
+                      Geometry::Vector rz(2);
+                      rz(0) = r[4 * i + 2];
+                      rz(1) = r[4 * i + 3];
+                      const auto x = trialCell.getPoint(rx);
+                      const auto z = testCell.getPoint(rz);
+                      s[i] = x.getDistortion() * z.getDistortion();
+                      if constexpr (Scalar)
+                      {
+                        kv[i] = kernel(x, z);
+                      }
+                      else
+                      {
+                        kv[i] = Geometry::Matrix(testVDim, trialVDim);
+                        kernel(kv[i], x, z);
+                      }
+                      for (Index q = 0; q < 3; ++q)
+                      {
+                        x.evaluateBasis(q, px[3 * i + q], gradient);
+                        z.evaluateBasis(q, pz[3 * i + q], gradient);
+                      }
+                    }
+                    for (Index l = 0; l < nte; ++l)
+                    {
+                      for (Index m = 0; m < ntr; ++m)
+                      {
+                        for (Index i = 0; i < 6; ++i)
+                        {
+                          const Real phi = px[3 * i + m / trialVDim];
+                          const Real psi = pz[3 * i + l / testVDim];
+                          if constexpr (Scalar)
+                            local[l * ntr + m] += factor * s[i] * kv[i] * (phi * psi);
+                          else
+                            local[l * ntr + m] += factor * s[i] *
+                              (kv[i](l % testVDim, m % trialVDim) * phi * psi);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            for (Index l = 0; l < nte; ++l)
+            {
+              for (Index m = 0; m < ntr; ++m)
+                write(l, m, local[l * ntr + m]);
+            }
+            return;
+          }
+          const auto centroid = [&](const Geometry::PolytopeView& cell) {
+            const Index g = static_cast<Index>(cell.getGeometry());
+            Geometry::Vector reference(cell.getDimension());
+            for (Index d = 0; d < cell.getDimension(); ++d)
+              reference(d) = centroids(g * ReferenceStride + d);
+            return cell.getPoint(reference);
+          };
+          const auto x = centroid(trialCell);
+          const auto y = centroid(testCell);
+          const Real scale = (x.getDistortion() * y.getDistortion()) *
+            (centroidWeights(static_cast<Index>(trialCell.getGeometry())) *
+              centroidWeights(static_cast<Index>(testCell.getGeometry())));
+          Geometry::Vector gradient(dimension);
+          ::Kokkos::Array<Real, RODIN_MAXIMUM_POLYTOPE_VERTICES> px;
+          ::Kokkos::Array<Real, RODIN_MAXIMUM_POLYTOPE_VERTICES> py;
+          for (Index q = 0; q < trialIndices.size(); ++q)
+            x.evaluateBasis(q, px[q], gradient);
+          for (Index q = 0; q < testIndices.size(); ++q)
+            y.evaluateBasis(q, py[q], gradient);
+          if constexpr (Scalar)
+          {
+            const Real sk = kernel(x, y);
+            for (Index l = 0; l < nte; ++l)
+            {
+              for (Index m = 0; m < ntr; ++m)
+                write(l, m, scale * (sk * (px[m] * py[l])));
+            }
+          }
+          else
+          {
+            Geometry::Matrix mk(testVDim, trialVDim);
+            kernel(mk, x, y);
+            for (Index l = 0; l < nte; ++l)
+            {
+              for (Index m = 0; m < ntr; ++m)
+              {
+                write(l, m,
+                  scale *
+                    (mk(l % testVDim, m % trialVDim) * px[m / trialVDim] *
+                      py[l / testVDim]));
+              }
+            }
+          }
+        }
+      };
   };
 }
 

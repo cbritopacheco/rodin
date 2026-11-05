@@ -464,7 +464,7 @@ namespace Rodin::Geometry
         const auto coordinates = m_coordinates;
         ::Kokkos::parallel_for(
           "Rodin mesh scale", policy(coordinates.extent(0)),
-          KOKKOS_LAMBDA(Index i) { coordinates(i) *= factor; });
+          ScaleCoordinates{coordinates, factor});
         flush();
         return *this;
       }
@@ -522,7 +522,7 @@ namespace Rodin::Geometry
         const size_t sdim = m_sdim;
         ::Kokkos::parallel_for(
           "Rodin vertex update", policy(sdim),
-          KOKKOS_LAMBDA(Index s) { coordinates(vertex * sdim + s) = value(s); });
+          SetVertexCoordinates{coordinates, vertex, sdim, value});
         flush();
         return *this;
       }
@@ -609,9 +609,8 @@ namespace Rodin::Geometry
           (total - oldCount + count) * m_sdim);
         const auto previous = m_controlOffsets;
         ::Kokkos::parallel_for(
-          "Rodin control offsets", policy(offsets.extent(0)), KOKKOS_LAMBDA(Index i) {
-            offsets(i) = i > index ? previous(i) - oldCount + count : previous(i);
-          });
+          "Rodin control offsets", policy(offsets.extent(0)),
+          ShiftControlOffsets{offsets, previous, index, oldCount, count});
         ::Kokkos::deep_copy(execution,
           ::Kokkos::subview(controls, std::make_pair(Index(0), first * m_sdim)),
           ::Kokkos::subview(m_controls, std::make_pair(Index(0), first * m_sdim)));
@@ -1142,6 +1141,53 @@ namespace Rodin::Geometry
             kinds(i) = GeometryKind::VertexP1;
             controls(i) = oldControls.extent(0) ? oldControls(oldOffsets[d + 1]) : 0;
           }
+        }
+      };
+
+      /// @brief Scales the resident coordinates.
+      struct ScaleCoordinates
+      {
+        DeviceArray<Real> coordinates; ///< Packed vertex coordinates.
+        Real factor; ///< Coordinate scale.
+
+        /// @param i Flattened coordinate index.
+        KOKKOS_INLINE_FUNCTION void operator()(Index i) const
+        {
+          coordinates(i) *= factor;
+        }
+      };
+
+      /// @brief Writes the resident coordinates of one vertex.
+      struct SetVertexCoordinates
+      {
+        DeviceArray<Real> coordinates; ///< Packed vertex coordinates.
+        Index vertex; ///< Updated vertex.
+        size_t sdim; ///< Embedding dimension.
+        Rodin::Kokkos::Geometry::Vector value; ///< New coordinates.
+
+        /// @param s Coordinate index.
+        KOKKOS_INLINE_FUNCTION void operator()(Index s) const
+        {
+          coordinates(vertex * sdim + s) = value(s);
+        }
+      };
+
+      /**
+       * @brief Writes the control-point offsets after the control points of one
+       * entity change count.
+       */
+      struct ShiftControlOffsets
+      {
+        DeviceArray<Index> offsets; ///< Replacement control-point offsets.
+        DeviceArray<Index> previous; ///< Existing control-point offsets.
+        Index index; ///< Flattened index of the updated entity.
+        Index oldCount; ///< Previous control-point count of the entity.
+        Index count; ///< New control-point count of the entity.
+
+        /// @param i Flattened entity index, including the terminal control offset.
+        KOKKOS_INLINE_FUNCTION void operator()(Index i) const
+        {
+          offsets(i) = i > index ? previous(i) - oldCount + count : previous(i);
         }
       };
 

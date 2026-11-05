@@ -709,11 +709,23 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::fence("Rodin PETSc system");
       }
 
-      /**
-       * @brief Adds the block offsets to the coordinates of a segment.
-       *
-       * Public as the enclosing function of device lambdas.
-       */
+      /// @brief Adds the block offsets to the coordinates of entry e.
+      template <class Indices>
+      struct Shift
+      {
+        Indices rows;
+        Indices cols;
+        Index row;
+        Index col;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t e) const
+        {
+          rows(e) += row;
+          cols(e) += col;
+        }
+      };
+
+      /// @brief Adds the block offsets to the coordinates of a segment.
       template <class Indices>
       static void shift(const ExecutionSpace& execution, const Indices& rows,
         const Indices& cols, size_t offset, size_t count, Index row, Index col)
@@ -721,17 +733,25 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::shift",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, offset, offset + count),
-          KOKKOS_LAMBDA(const size_t e) {
-            rows(e) += row;
-            cols(e) += col;
-          });
+          Shift<Indices>{ rows, cols, row, col });
       }
 
-      /**
-       * @brief Lists every diagonal entry.
-       *
-       * Public as the enclosing function of device lambdas.
-       */
+      /// @brief Lists the diagonal entry i after the given offset.
+      template <class Indices>
+      struct DiagonalList
+      {
+        size_t offset;
+        Indices rows;
+        Indices cols;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
+        {
+          rows(offset + i) = i;
+          cols(offset + i) = i;
+        }
+      };
+
+      /// @brief Lists every diagonal entry.
       template <class Indices>
       static void listDiagonal(const ExecutionSpace& execution, size_t offset,
         size_t count, const Indices& rows, const Indices& cols)
@@ -739,17 +759,28 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::diagonal",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t i) {
-            rows(offset + i) = i;
-            cols(offset + i) = i;
-          });
+          DiagonalList<Indices>{ offset, rows, cols });
       }
 
-      /**
-       * @brief Writes the diagonal values, one on fixed rows.
-       *
-       * Public as the enclosing function of device lambdas.
-       */
+      /// @brief Writes the diagonal value of row i, one when it is fixed.
+      template <class Fixed, class Owned, class Scalars>
+      struct DiagonalFill
+      {
+        size_t offset;
+        bool hasFixed;
+        Fixed fixed;
+        Owned owned;
+        Scalars coo;
+        bool distributed;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
+        {
+          const bool one = hasFixed && fixed(i) && (!distributed || owned(i));
+          coo(offset + i) = one ? PetscScalar(1) : PetscScalar(0);
+        }
+      };
+
+      /// @brief Writes the diagonal values, one on fixed rows.
       template <class Fixed, class Owned, class Scalars>
       static void fillDiagonal(const ExecutionSpace& execution, size_t offset,
         size_t count, bool hasFixed, const Fixed& fixed, const Owned& owned,
@@ -759,17 +790,27 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::diagonal",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t i) {
-            const bool one = hasFixed && fixed(i) && (!distributed || owned(i));
-            coo(offset + i) = one ? PetscScalar(1) : PetscScalar(0);
-          });
+          DiagonalFill<Fixed, Owned, Scalars>{
+            offset, hasFixed, fixed, owned, coo, distributed });
       }
+
+      /// @brief Counts entry e when its value moves to the right-hand side.
+      template <class Indices, class Fixed>
+      struct EliminatedCount
+      {
+        Indices rows;
+        Indices cols;
+        Fixed fixed;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t e, size_t& sum) const
+        {
+          sum += !fixed(rows(e)) && fixed(cols(e));
+        }
+      };
 
       /**
        * @brief Counts the matrix values moved to the right-hand side by the
        * columns of the fixed degrees of freedom.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       template <class Indices, class Fixed>
       static size_t countEliminated(const ExecutionSpace& execution, size_t count,
@@ -779,45 +820,60 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::countEliminated",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(
-            const size_t e, size_t& sum) { sum += !fixed(rows(e)) && fixed(cols(e)); },
-          res);
+          EliminatedCount<Indices, Fixed>{ rows, cols, fixed }, res);
         return res;
       }
+
+      /**
+       * @brief Clears entry e when its row is fixed and lists its value when
+       * its column alone is fixed, at the scanned position.
+       */
+      template <class Indices, class Fixed, class Values, class Scalars>
+      struct Elimination
+      {
+        Indices rows;
+        Indices cols;
+        Fixed fixed;
+        Values values;
+        Scalars coo;
+        ::Kokkos::View<Index*, MemorySpace> resRows;
+        ::Kokkos::View<Real*, MemorySpace> resValues;
+        size_t offset;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t e, size_t& update, const bool final) const
+        {
+          const Index r = rows(e);
+          const Index c = cols(e);
+          const bool moved = !fixed(r) && fixed(c);
+          if (final && (moved || fixed(r)))
+          {
+            if (moved)
+            {
+              resRows(offset + update) = r;
+              resValues(offset + update) = -(coo(e) * values(c));
+            }
+            coo(e) = 0;
+          }
+          update += moved;
+        }
+      };
 
       /**
        * @brief Clears the rows of the fixed degrees of freedom and lists the
        * values of their columns moved to the right-hand side.
        * @param res Receives the moved values, in coordinate order.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       template <class Indices, class Fixed, class Values, class Scalars>
       static void eliminate(const ExecutionSpace& execution, size_t count,
         const Indices& rows, const Indices& cols, const Fixed& fixed,
         const Values& values, const Scalars& coo, const Contributions& res)
       {
-        const auto resRows = res.rows;
-        const auto resValues = res.values;
-        const size_t offset = res.offset;
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::PETSc::eliminate",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t e, size_t& update, const bool final) {
-            const Index r = rows(e);
-            const Index c = cols(e);
-            const bool moved = !fixed(r) && fixed(c);
-            if (final && (moved || fixed(r)))
-            {
-              if (moved)
-              {
-                resRows(offset + update) = r;
-                resValues(offset + update) = -(coo(e) * values(c));
-              }
-              coo(e) = 0;
-            }
-            update += moved;
-          });
+          Elimination<Indices, Fixed, Values, Scalars>{
+            rows, cols, fixed, values, coo, res.rows, res.values, res.offset });
       }
 
       /**
@@ -840,14 +896,30 @@ namespace Rodin::Assembly::Internal
         return !hasFixed || !fixed(i);
       }
 
+      /// @brief Counts the contributions of entry e of a linear integrator.
+      template <class Indices, class Values, class Fixed>
+      struct VectorCount
+      {
+        Indices indices;
+        Values values;
+        Index row;
+        bool hasFixed;
+        Fixed fixed;
+        Expansions x;
+        bool expanded;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t e, size_t& sum) const
+        {
+          sum += countEntry(e, indices, values, row, hasFixed, fixed, x, expanded);
+        }
+      };
+
       /**
        * @brief Counts the contributions of the entries of a linear
        * integrator to the right-hand side.
        * @param begin Position of the first entry. @param count Entry count.
        *
        * See countEntry for the other parameters.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       template <class Indices, class Values, class Fixed>
       static size_t countVector(const ExecutionSpace& execution, size_t begin,
@@ -858,12 +930,57 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::countVector",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, begin, begin + count),
-          KOKKOS_LAMBDA(const size_t e, size_t& sum) {
-            sum += countEntry(e, indices, values, row, hasFixed, fixed, x, expanded);
-          },
+          VectorCount<Indices, Values, Fixed>{
+            indices, values, row, hasFixed, fixed, x, expanded },
           res);
         return res;
       }
+
+      /**
+       * @brief Lists the contributions of entry e of a linear integrator at
+       * the scanned position.
+       */
+      template <class Indices, class Values, class Fixed>
+      struct VectorList
+      {
+        Indices indices;
+        Values values;
+        Index row;
+        bool hasFixed;
+        Fixed fixed;
+        Expansions x;
+        bool expanded;
+        ::Kokkos::View<Index*, MemorySpace> resRows;
+        ::Kokkos::View<Real*, MemorySpace> resValues;
+        size_t offset;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t e, size_t& update, const bool final) const
+        {
+          const size_t n =
+            countEntry(e, indices, values, row, hasFixed, fixed, x, expanded);
+          if (final && n > 0)
+          {
+            const Real v = values(e);
+            const Index i = row + indices(e);
+            if (expanded)
+            {
+              const Index r0 = x.starts(i);
+              for (size_t r = 0; r < n; ++r)
+              {
+                resRows(offset + update + r) = x.indices(r0 + r);
+                resValues(offset + update + r) = x.coefficients(r0 + r) * v;
+              }
+            }
+            else
+            {
+              resRows(offset + update) = i;
+              resValues(offset + update) = v;
+            }
+          }
+          update += n;
+        }
+      };
 
       /**
        * @brief Lists the nonzero entries of a linear integrator as
@@ -872,8 +989,6 @@ namespace Rodin::Assembly::Internal
        *
        * The contributions follow the order of the entries, and of the masters
        * of an entry. See countVector for the other parameters.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       template <class Indices, class Values, class Fixed>
       static void listVector(const ExecutionSpace& execution, size_t begin, size_t count,
@@ -882,42 +997,30 @@ namespace Rodin::Assembly::Internal
       {
         const auto policy =
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, begin, begin + count);
-        const auto resRows = res.rows;
-        const auto resValues = res.values;
-        const size_t offset = res.offset;
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::PETSc::vector", policy,
-          KOKKOS_LAMBDA(const size_t e, size_t& update, const bool final) {
-            const size_t n =
-              countEntry(e, indices, values, row, hasFixed, fixed, x, expanded);
-            if (final && n > 0)
-            {
-              const Real v = values(e);
-              const Index i = row + indices(e);
-              if (expanded)
-              {
-                const Index r0 = x.starts(i);
-                for (size_t r = 0; r < n; ++r)
-                {
-                  resRows(offset + update + r) = x.indices(r0 + r);
-                  resValues(offset + update + r) = x.coefficients(r0 + r) * v;
-                }
-              }
-              else
-              {
-                resRows(offset + update) = i;
-                resValues(offset + update) = v;
-              }
-            }
-            update += n;
-          });
+          VectorList<Indices, Values, Fixed>{ indices, values, row, hasFixed, fixed, x,
+            expanded, res.rows, res.values, res.offset });
       }
 
-      /**
-       * @brief Writes the fixed values on the fixed rows.
-       *
-       * Public as the enclosing function of device lambdas.
-       */
+      /// @brief Writes the fixed value of row i when it is fixed.
+      template <class Fixed, class Values, class Owned, class RHS>
+      struct FixedImposition
+      {
+        Fixed fixed;
+        Values values;
+        Owned owned;
+        RHS rhs;
+        bool distributed;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
+        {
+          if (fixed(i))
+            rhs(i) = !distributed || owned(i) ? values(i) : Real(0);
+        }
+      };
+
+      /// @brief Writes the fixed values on the fixed rows.
       template <class Fixed, class Values, class Owned, class RHS>
       static void imposeFixed(const ExecutionSpace& execution, size_t count,
         const Fixed& fixed, const Values& values, const Owned& owned, const RHS& rhs)
@@ -926,19 +1029,29 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::fixed",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t i) {
-            if (fixed(i))
-              rhs(i) = !distributed || owned(i) ? values(i) : Real(0);
-          });
+          FixedImposition<Fixed, Values, Owned, RHS>{
+            fixed, values, owned, rhs, distributed });
       }
+
+      /// @brief Writes the row of entry e of a linear integrator.
+      template <class Indices>
+      struct EntryRows
+      {
+        Indices indices;
+        Index row;
+        Indices res;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t e) const
+        {
+          res(e) = row + indices(e);
+        }
+      };
 
       /**
        * @brief Writes the rows of the entries of a linear integrator.
        * @param indices Entry indices. @param begin Position of the first
        * entry. @param end Position past the last one.
        * @param row Offset of the test space. @param res Receives the rows.
-       *
-       * Public as the enclosing function of a device lambda.
        */
       template <class Indices>
       static void shiftEntries(const ExecutionSpace& execution, const Indices& indices,
@@ -947,28 +1060,55 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::rows",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, begin, end),
-          KOKKOS_LAMBDA(const size_t e) { res(e) = row + indices(e); });
+          EntryRows<Indices>{ indices, row, res });
       }
 
-      /**
-       * @brief Numbers the entries of a dense vector.
-       *
-       * Public as the enclosing function of device lambdas.
-       */
+      /// @brief Numbers entry i of a dense vector.
+      template <class Indices>
+      struct Sequence
+      {
+        Indices res;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const { res(i) = i; }
+      };
+
+      /// @brief Numbers the entries of a dense vector.
       template <class Indices>
       static void sequence(const ExecutionSpace& execution, const Indices& res)
       {
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::sequence",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, res.extent(0)),
-          KOKKOS_LAMBDA(const size_t i) { res(i) = i; });
+          Sequence<Indices>{ res });
       }
+
+      /**
+       * @brief Counts the contributions of entry e expanded on the masters,
+       * and the affine values it lifts.
+       */
+      template <class Indices, class Scalars>
+      struct ExpandedCount
+      {
+        Indices rows;
+        Indices cols;
+        Scalars values;
+        Expansions x;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t e, Sizes& sum) const
+        {
+          if (values(e) == PetscScalar(0))
+            return;
+          const size_t nr = x.count(rows(e));
+          Sizes c;
+          c.entries = nr * x.count(cols(e));
+          c.lifts = x.values(cols(e)) != Real(0) ? nr : 0;
+          sum += c;
+        }
+      };
 
       /**
        * @brief Counts the contributions of the coordinate list expanded on
        * the masters, and the affine values they lift.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       template <class Indices, class Scalars>
       static Sizes countExpanded(const ExecutionSpace& execution, size_t count,
@@ -979,18 +1119,64 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::countExpanded",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t e, Sizes& sum) {
-            if (values(e) == PetscScalar(0))
-              return;
-            const size_t nr = x.count(rows(e));
-            Sizes c;
-            c.entries = nr * x.count(cols(e));
-            c.lifts = x.values(cols(e)) != Real(0) ? nr : 0;
-            sum += c;
-          },
-          res);
+          ExpandedCount<Indices, Scalars>{ rows, cols, values, x }, res);
         return res;
       }
+
+      /**
+       * @brief Expands entry e on the masters and lists the affine values it
+       * lifts, at the scanned positions.
+       */
+      template <class Indices, class Scalars>
+      struct Expansion
+      {
+        Indices rows;
+        Indices cols;
+        Scalars values;
+        Expansions x;
+        Indices resRows;
+        Indices resCols;
+        Scalars resValues;
+        ::Kokkos::View<Index*, MemorySpace> liftRows;
+        ::Kokkos::View<Real*, MemorySpace> liftValues;
+        size_t offset;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t e, Sizes& update, const bool final) const
+        {
+          const PetscScalar v = values(e);
+          if (v == PetscScalar(0))
+            return;
+          const size_t nr = x.count(rows(e));
+          const size_t nc = x.count(cols(e));
+          const Real d = x.values(cols(e));
+          if (final)
+          {
+            const Index r0 = x.starts(rows(e));
+            const Index c0 = x.starts(cols(e));
+            for (size_t ri = 0; ri < nr; ++ri)
+            {
+              const Real rv = x.coefficients(r0 + ri) * v;
+              for (size_t ci = 0; ci < nc; ++ci)
+              {
+                const size_t q = update.entries + ri * nc + ci;
+                resRows(q) = x.indices(r0 + ri);
+                resCols(q) = x.indices(c0 + ci);
+                resValues(q) = rv * x.coefficients(c0 + ci);
+              }
+              if (d != Real(0))
+              {
+                liftRows(offset + update.lifts + ri) = x.indices(r0 + ri);
+                liftValues(offset + update.lifts + ri) = -(rv * d);
+              }
+            }
+          }
+          Sizes c;
+          c.entries = nr * nc;
+          c.lifts = d != Real(0) ? nr : 0;
+          update += c;
+        }
+      };
 
       /**
        * @brief Expands the coordinate list on the masters.
@@ -1001,8 +1187,6 @@ namespace Rodin::Assembly::Internal
        * @f$ i @f$ and @f$ s @f$ of @f$ j @f$, and lifts @f$ -(c_r a) d_j @f$
        * to row @f$ r @f$ when @f$ j @f$ has a nonzero affine value
        * @f$ d_j @f$, as the host assemblies do.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       template <class Indices, class Scalars>
       static void expand(const ExecutionSpace& execution, size_t count,
@@ -1010,52 +1194,27 @@ namespace Rodin::Assembly::Internal
         const Expansions& x, const Indices& resRows, const Indices& resCols,
         const Scalars& resValues, const Contributions& lifts)
       {
-        const auto liftRows = lifts.rows;
-        const auto liftValues = lifts.values;
-        const size_t offset = lifts.offset;
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::PETSc::expand",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t e, Sizes& update, const bool final) {
-            const PetscScalar v = values(e);
-            if (v == PetscScalar(0))
-              return;
-            const size_t nr = x.count(rows(e));
-            const size_t nc = x.count(cols(e));
-            const Real d = x.values(cols(e));
-            if (final)
-            {
-              const Index r0 = x.starts(rows(e));
-              const Index c0 = x.starts(cols(e));
-              for (size_t ri = 0; ri < nr; ++ri)
-              {
-                const Real rv = x.coefficients(r0 + ri) * v;
-                for (size_t ci = 0; ci < nc; ++ci)
-                {
-                  const size_t q = update.entries + ri * nc + ci;
-                  resRows(q) = x.indices(r0 + ri);
-                  resCols(q) = x.indices(c0 + ci);
-                  resValues(q) = rv * x.coefficients(c0 + ci);
-                }
-                if (d != Real(0))
-                {
-                  liftRows(offset + update.lifts + ri) = x.indices(r0 + ri);
-                  liftValues(offset + update.lifts + ri) = -(rv * d);
-                }
-              }
-            }
-            Sizes c;
-            c.entries = nr * nc;
-            c.lifts = d != Real(0) ? nr : 0;
-            update += c;
-          });
+          Expansion<Indices, Scalars>{ rows, cols, values, x, resRows, resCols,
+            resValues, lifts.rows, lifts.values, lifts.offset });
       }
 
-      /**
-       * @brief Counts the positions at which two index lists differ.
-       *
-       * Public as the enclosing function of a device lambda.
-       */
+      /// @brief Counts position i when two index lists differ there.
+      template <class Indices, class Previous>
+      struct DifferenceCount
+      {
+        Indices indices;
+        Previous previous;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i, size_t& sum) const
+        {
+          sum += indices(i) != previous(i);
+        }
+      };
+
+      /// @brief Counts the positions at which two index lists differ.
       template <class Indices, class Previous>
       static size_t countDifferences(
         const ExecutionSpace& execution, const Indices& indices, const Previous& previous)
@@ -1064,17 +1223,26 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::differences",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, indices.extent(0)),
-          KOKKOS_LAMBDA(
-            const size_t i, size_t& sum) { sum += indices(i) != previous(i); },
-          differences);
+          DifferenceCount<Indices, Previous>{ indices, previous }, differences);
         return differences;
       }
 
-      /**
-       * @brief Counts the coordinates that differ between two patterns.
-       *
-       * Public as the enclosing function of device lambdas.
-       */
+      /// @brief Counts coordinate e when it differs between two patterns.
+      template <class Indices>
+      struct ChangeCount
+      {
+        Indices rows;
+        Indices cols;
+        Indices previousRows;
+        Indices previousCols;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t e, size_t& sum) const
+        {
+          sum += rows(e) != previousRows(e) || cols(e) != previousCols(e);
+        }
+      };
+
+      /// @brief Counts the coordinates that differ between two patterns.
       template <class Indices>
       static size_t countChanges(const ExecutionSpace& execution, const Indices& rows,
         const Indices& cols, const Indices& previousRows, const Indices& previousCols)
@@ -1083,10 +1251,7 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::pattern",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, rows.extent(0)),
-          KOKKOS_LAMBDA(const size_t e, size_t& sum) {
-            sum += rows(e) != previousRows(e) || cols(e) != previousCols(e);
-          },
-          changes);
+          ChangeCount<Indices>{ rows, cols, previousRows, previousCols }, changes);
         return changes;
       }
 
@@ -1129,16 +1294,38 @@ namespace Rodin::Assembly::Internal
       }
 
       /**
-       * @brief Sorts the coordinates into the given indices.
-       *
-       * Public as the enclosing function of device lambdas.
+       * @brief Writes the sort key and the index of the coordinate of rank r
+       * in a segment.
        */
+      template <class Indices, class Order>
+      struct PatternKeys
+      {
+        using Position = typename Order::value_type;
+
+        size_t begin;
+        size_t size;
+        size_t spacing;
+        ::Kokkos::View<std::uint64_t*, MemorySpace> keys;
+        Indices rows;
+        Indices cols;
+        size_t columns;
+        Order order;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t r) const
+        {
+          const size_t e =
+            begin + ::Rodin::Kokkos::Variational::getEntryPosition(r, size, spacing);
+          keys(begin + r) = std::uint64_t(rows(e)) * columns + cols(e);
+          order(begin + r) = static_cast<Position>(e);
+        }
+      };
+
+      /// @brief Sorts the coordinates into the given indices.
       template <class Indices, class Order>
       static void sortPattern(const ExecutionSpace& execution, size_t columns,
         const std::vector<COOSegment>& segments, const std::vector<size_t>& offsets,
         const Indices& rows, const Indices& cols, const Order& order)
       {
-        using Position = typename Order::value_type;
         const size_t count = rows.extent(0);
         if (count == 0)
           return;
@@ -1154,30 +1341,14 @@ namespace Rodin::Assembly::Internal
           ::Kokkos::parallel_for(
             "Rodin::Assembly::Kokkos::PETSc::keys",
             ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, size),
-            KOKKOS_LAMBDA(const size_t r) {
-              const size_t e =
-                begin + ::Rodin::Kokkos::Variational::getEntryPosition(r, size, spacing);
-              keys(begin + r) = std::uint64_t(rows(e)) * columns + cols(e);
-              order(begin + r) = static_cast<Position>(e);
-            });
+            PatternKeys<Indices, Order>{
+              begin, size, spacing, keys, rows, cols, columns, order });
         }
         ::Kokkos::Experimental::sort_by_key(execution, keys, order);
       }
 
       /**
-       * @brief Finds where each distinct coordinate starts in the sorted
-       * coordinates.
-       * @returns Starts of the distinct coordinates, followed by the list size.
-       *
-       * Public as the enclosing function of device lambdas.
-       */
-      /**
        * @brief Whether the sorted coordinate i differs from the previous one.
-       *
-       * A functor rather than a device lambda captured by two kernels: with
-       * nvcc 13.1, copying a captured extended lambda on the host goes
-       * through a function pointer that stays null when another translation
-       * unit of the executable instantiates the same template.
        */
       template <class Indices, class Order>
       struct DistinctHead
@@ -1196,6 +1367,45 @@ namespace Rodin::Assembly::Internal
         }
       };
 
+      /// @brief Counts the sorted coordinate i when it starts a distinct one.
+      template <class Indices, class Order>
+      struct DistinctCount
+      {
+        DistinctHead<Indices, Order> head;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i, size_t& sum) const
+        {
+          sum += head(i);
+        }
+      };
+
+      /**
+       * @brief Writes the sorted coordinate i at the scanned position when it
+       * starts a distinct one.
+       */
+      template <class Indices, class Order>
+      struct DistinctStartList
+      {
+        DistinctHead<Indices, Order> head;
+        Indices starts;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t i, size_t& update, const bool final) const
+        {
+          if (head(i))
+          {
+            if (final)
+              starts(update) = i;
+            ++update;
+          }
+        }
+      };
+
+      /**
+       * @brief Finds where each distinct coordinate starts in the sorted
+       * coordinates.
+       * @returns Starts of the distinct coordinates, followed by the list size.
+       */
       template <class Indices, class Order>
       static Indices distinctStarts(const ExecutionSpace& execution, const Indices& rows,
         const Indices& cols, const Order& order)
@@ -1206,30 +1416,38 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::distinct",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t i, size_t& sum) { sum += head(i); }, distinct);
+          DistinctCount<Indices, Order>{ head }, distinct);
         Indices starts(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
                          std::string("Rodin COO starts")),
           distinct + 1);
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::PETSc::starts",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t i, size_t& update, const bool final) {
-            if (head(i))
-            {
-              if (final)
-                starts(update) = i;
-              ++update;
-            }
-          });
+          DistinctStartList<Indices, Order>{ head, starts });
         ::Kokkos::deep_copy(execution, ::Kokkos::subview(starts, distinct), count);
         return starts;
       }
 
-      /**
-       * @brief Lists the distinct coordinates in the PETSc index type.
-       *
-       * Public as the enclosing function of device lambdas.
-       */
+      /// @brief Lists the distinct coordinate u in the PETSc index type.
+      template <class Indices, class Order, class Coordinates>
+      struct DistinctList
+      {
+        Indices rows;
+        Indices cols;
+        Order order;
+        Indices starts;
+        Coordinates distinctRows;
+        Coordinates distinctCols;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
+        {
+          const Index e = order(starts(u));
+          distinctRows(u) = static_cast<PetscInt>(rows(e));
+          distinctCols(u) = static_cast<PetscInt>(cols(e));
+        }
+      };
+
+      /// @brief Lists the distinct coordinates in the PETSc index type.
       template <class Indices, class Order, class Coordinates>
       static void listDistinct(const ExecutionSpace& execution, const Indices& rows,
         const Indices& cols, const Order& order, const Indices& starts,
@@ -1238,18 +1456,29 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::distinctCoordinates",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, distinctRows.extent(0)),
-          KOKKOS_LAMBDA(const size_t u) {
-            const Index e = order(starts(u));
-            distinctRows(u) = static_cast<PetscInt>(rows(e));
-            distinctCols(u) = static_cast<PetscInt>(cols(e));
-          });
+          DistinctList<Indices, Order, Coordinates>{
+            rows, cols, order, starts, distinctRows, distinctCols });
       }
 
-      /**
-       * @brief Sums the values of each distinct coordinate.
-       *
-       * Public as the enclosing function of device lambdas.
-       */
+      /// @brief Sums the values of the distinct coordinate u.
+      template <class Order, class Indices, class Scalars>
+      struct Merge
+      {
+        Order order;
+        Indices starts;
+        Scalars values;
+        Scalars merged;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
+        {
+          PetscScalar sum = 0;
+          for (Index i = starts(u); i < starts(u + 1); ++i)
+            sum += values(order(i));
+          merged(u) = sum;
+        }
+      };
+
+      /// @brief Sums the values of each distinct coordinate.
       template <class Order, class Indices, class Scalars>
       static void merge(const ExecutionSpace& execution, const Order& order,
         const Indices& starts, const Scalars& values, const Scalars& merged)
@@ -1257,12 +1486,7 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::merge",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, merged.extent(0)),
-          KOKKOS_LAMBDA(const size_t u) {
-            PetscScalar sum = 0;
-            for (Index i = starts(u); i < starts(u + 1); ++i)
-              sum += values(order(i));
-            merged(u) = sum;
-          });
+          Merge<Order, Indices, Scalars>{ order, starts, values, merged });
       }
 
     private:

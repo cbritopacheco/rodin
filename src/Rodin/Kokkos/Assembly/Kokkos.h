@@ -861,13 +861,6 @@ namespace Rodin::Assembly::Internal
           return *this;
         }
       };
-
-      // The predicates below are functors rather than device lambdas
-      // captured by two kernels: with nvcc 13.1, copying a captured extended
-      // lambda on the host goes through a function pointer that stays null
-      // when another translation unit of the executable instantiates the
-      // same template.
-
       /// @brief Whether a sorted key starts a group.
       struct GroupHead
       {
@@ -1197,11 +1190,26 @@ namespace Rodin::Assembly::Internal
       }
 
     public:
+      /// @brief Adds the offsets of their spaces to the indices of an entry.
+      struct IndexShift
+      {
+        Array<Index> rows;
+        Array<Index> cols;
+        Index row;
+        Index col;
+        bool matrix;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t e) const
+        {
+          rows(e) += row;
+          if (matrix)
+            cols(e) += col;
+        }
+      };
+
       /**
        * @brief Adds the offsets of their spaces to the indices of entries.
        * @param cols Column indices, empty for a vector.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       static void shift(const ExecutionSpace& execution, size_t offset, size_t count,
         Index row, Index col, const Array<Index>& rows, const Array<Index>& cols)
@@ -1210,12 +1218,71 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::shift",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, offset, offset + count),
-          KOKKOS_LAMBDA(const size_t e) {
-            rows(e) += row;
-            if (matrix)
-              cols(e) += col;
-          });
+          IndexShift{ rows, cols, row, col, matrix });
       }
+
+      /// @brief Counts the groups of sorted keys and the entries following
+      /// an entry of higher rank in their group.
+      struct GroupCount
+      {
+        GroupHead head;
+        Ranks ranks;
+        Array<Index> positions;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t i, size_t& d, size_t& u) const
+        {
+          if (head(i))
+            ++d;
+          else
+            u += ranks(positions(i)) < ranks(positions(i - 1));
+        }
+      };
+
+      /// @brief Writes the start and the key of every group of sorted keys.
+      struct GroupStarts
+      {
+        GroupHead head;
+        Array<Index> starts;
+        Array<Index> groupKeys;
+        Array<Index> keys;
+        unsigned shift;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t i, size_t& update, const bool final) const
+        {
+          if (head(i))
+          {
+            if (final)
+            {
+              starts(update) = i;
+              groupKeys(update) = keys(i) >> shift;
+            }
+            ++update;
+          }
+        }
+      };
+
+      /// @brief Sorts the positions of a group in rank order, by insertion.
+      struct GroupOrder
+      {
+        Array<Index> starts;
+        Array<Index> positions;
+        Ranks ranks;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
+        {
+          for (Index i = starts(u) + 1; i < starts(u + 1); ++i)
+          {
+            const Index p = positions(i);
+            const Index r = ranks(p);
+            Index j = i;
+            for (; j > starts(u) && ranks(positions(j - 1)) > r; --j)
+              positions(j) = positions(j - 1);
+            positions(j) = p;
+          }
+        }
+      };
 
       /**
        * @brief Sorts keys with the positions of their entries.
@@ -1226,8 +1293,6 @@ namespace Rodin::Assembly::Internal
        * @returns Groups of equal keys.
        *
        * The order among equal keys does not depend on the sort being stable.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       static Groups group(const ExecutionSpace& execution, const Array<Index>& keys,
         const Array<Index>& positions, const Ranks& ranks)
@@ -1242,13 +1307,8 @@ namespace Rodin::Assembly::Internal
         size_t unordered = 0;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::groups", policy,
-          KOKKOS_LAMBDA(const size_t i, size_t& d, size_t& u) {
-            if (head(i))
-              ++d;
-            else
-              u += ranks(positions(i)) < ranks(positions(i - 1));
-          },
-          ::Kokkos::Sum<size_t>(distinct), ::Kokkos::Sum<size_t>(unordered));
+          GroupCount{ head, ranks, positions }, ::Kokkos::Sum<size_t>(distinct),
+          ::Kokkos::Sum<size_t>(unordered));
         Groups res;
         res.starts =
           Array<Index>(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
@@ -1262,17 +1322,7 @@ namespace Rodin::Assembly::Internal
         const auto groupKeys = res.keys;
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::starts", policy,
-          KOKKOS_LAMBDA(const size_t i, size_t& update, const bool final) {
-            if (head(i))
-            {
-              if (final)
-              {
-                starts(update) = i;
-                groupKeys(update) = keys(i) >> shift;
-              }
-              ++update;
-            }
-          });
+          GroupStarts{ head, starts, groupKeys, keys, shift });
         ::Kokkos::deep_copy(execution, ::Kokkos::subview(starts, distinct), count);
         if (unordered == 0)
           return res;
@@ -1281,19 +1331,59 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::order",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, distinct),
-          KOKKOS_LAMBDA(const size_t u) {
-            for (Index i = starts(u) + 1; i < starts(u + 1); ++i)
-            {
-              const Index p = positions(i);
-              const Index r = ranks(p);
-              Index j = i;
-              for (; j > starts(u) && ranks(positions(j - 1)) > r; --j)
-                positions(j) = positions(j - 1);
-              positions(j) = p;
-            }
-          });
+          GroupOrder{ starts, positions, ranks });
         return res;
       }
+
+      /// @brief Sums the lists of the contributions.
+      struct ContributionCount
+      {
+        Classification classify;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t e, Counts& sum) const
+        {
+          sum += classify(e);
+        }
+      };
+
+      /// @brief Writes the sort key and the position of every listed
+      /// contribution.
+      struct ContributionList
+      {
+        Classification classify;
+        size_t size;
+        Array<Index> rows;
+        Array<Index> cols;
+        bool rowMajor;
+        size_t innerCount;
+        Array<Index> ck;
+        Array<Index> cp;
+        Ranks coefficientRanks;
+        Array<Index> ek;
+        Array<Index> ep;
+        Ranks eliminatedRanks;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t e, Counts& update, const bool final) const
+        {
+          const Counts c = classify(e);
+          if (final && c.coefficients)
+          {
+            const Index row = e < size ? rows(e) : e - size;
+            const Index col = e < size ? cols(e) : e - size;
+            const Index key =
+              rowMajor ? row * innerCount + col : col * innerCount + row;
+            ck(update.coefficients) = coefficientRanks.sortKey(key, e);
+            cp(update.coefficients) = e;
+          }
+          if (final && c.eliminated)
+          {
+            ek(update.eliminated) = eliminatedRanks.sortKey(rows(e), e);
+            ep(update.eliminated) = e;
+          }
+          update += c;
+        }
+      };
 
       /**
        * @brief Lists the matrix contributions kept on their coefficients
@@ -1313,8 +1403,6 @@ namespace Rodin::Assembly::Internal
        * major sort keys, the diagonal of the fixed row i being at position size + i.
        * @param eliminated Receives the eliminated contributions, as row sort
        * keys.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       static void listContributions(const ExecutionSpace& execution, size_t innerCount,
         bool rowMajor, size_t diagonal, const Triplets& triplets,
@@ -1334,7 +1422,7 @@ namespace Rodin::Assembly::Internal
         Counts count;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::countContributions", policy,
-          KOKKOS_LAMBDA(const size_t e, Counts& sum) { sum += classify(e); }, count);
+          ContributionCount{ classify }, count);
         const auto allocate = [&](Listed& listed, size_t n, const char* label) {
           listed.keys =
             Array<Index>(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
@@ -1353,25 +1441,54 @@ namespace Rodin::Assembly::Internal
         const auto ep = eliminated.positions;
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::listContributions", policy,
-          KOKKOS_LAMBDA(const size_t e, Counts& update, const bool final) {
-            const Counts c = classify(e);
-            if (final && c.coefficients)
-            {
-              const Index row = e < size ? rows(e) : e - size;
-              const Index col = e < size ? cols(e) : e - size;
-              const Index key =
-                rowMajor ? row * innerCount + col : col * innerCount + row;
-              ck(update.coefficients) = coefficientRanks.sortKey(key, e);
-              cp(update.coefficients) = e;
-            }
-            if (final && c.eliminated)
-            {
-              ek(update.eliminated) = eliminatedRanks.sortKey(rows(e), e);
-              ep(update.eliminated) = e;
-            }
-            update += c;
-          });
+          ContributionList{ classify, size, rows, cols, rowMajor, innerCount, ck, cp,
+            coefficientRanks, ek, ep, eliminatedRanks });
       }
+
+      /// @brief Sums the contributions of a coefficient and writes its inner
+      /// index.
+      struct CoefficientSum
+      {
+        size_t size;
+        Array<Real> values;
+        Array<Index> positions;
+        Array<Index> starts;
+        Array<Real> data;
+        Array<Math::SparseIndex> inner;
+        Array<Index> keys;
+        size_t innerCount;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
+        {
+          const auto value = [&](const Index e) {
+            return e < size ? values(e) : Real(1);
+          };
+          Real sum = value(positions(starts(u)));
+          for (Index i = starts(u) + 1; i < starts(u + 1); ++i)
+            sum += value(positions(i));
+          data(u) = sum;
+          inner(u) = static_cast<Math::SparseIndex>(keys(u) % innerCount);
+        }
+      };
+
+      /// @brief Starts the outer indices following the one of the previous
+      /// coefficient, up to its own, at a coefficient.
+      struct OuterStarts
+      {
+        size_t nnz;
+        Array<Index> keys;
+        size_t innerCount;
+        size_t outerCount;
+        Array<Math::SparseIndex> outer;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
+        {
+          const Index end = u < nnz ? keys(u) / innerCount : outerCount;
+          const Index begin = u > 0 ? keys(u - 1) / innerCount + 1 : 0;
+          for (Index j = begin; j <= end; ++j)
+            outer(j) = static_cast<Math::SparseIndex>(u);
+        }
+      };
 
       /**
        * @brief Sums the contributions of every coefficient into the
@@ -1380,8 +1497,6 @@ namespace Rodin::Assembly::Internal
        * of a column major one.
        * @param outerCount Number of rows of a row major matrix, of columns
        * of a column major one.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       static void sumCoefficients(const ExecutionSpace& execution, size_t innerCount,
         size_t outerCount, const Triplets& triplets, const Array<Index>& positions,
@@ -1396,34 +1511,55 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::sumCoefficients",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, nnz),
-          KOKKOS_LAMBDA(const size_t u) {
-            const auto value = [&](const Index e) {
-              return e < size ? values(e) : Real(1);
-            };
-            Real sum = value(positions(starts(u)));
-            for (Index i = starts(u) + 1; i < starts(u + 1); ++i)
-              sum += value(positions(i));
-            data(u) = sum;
-            inner(u) = static_cast<Math::SparseIndex>(keys(u) % innerCount);
-          });
+          CoefficientSum{
+            size, values, positions, starts, data, inner, keys, innerCount });
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::outer",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, nnz + 1),
-          KOKKOS_LAMBDA(const size_t u) {
-            const Index end = u < nnz ? keys(u) / innerCount : outerCount;
-            const Index begin = u > 0 ? keys(u - 1) / innerCount + 1 : 0;
-            for (Index j = begin; j <= end; ++j)
-              outer(j) = static_cast<Math::SparseIndex>(u);
-          });
+          OuterStarts{ nnz, keys, innerCount, outerCount, outer });
       }
+
+      /// @brief Counts the nonzero entries of a vector.
+      struct NonzeroCount
+      {
+        Array<Real> values;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t e, size_t& sum) const
+        {
+          sum += values(e) != Real(0);
+        }
+      };
+
+      /// @brief Writes the sort key and the position of every nonzero entry
+      /// of a vector.
+      struct EntryList
+      {
+        Array<Real> values;
+        Array<Index> k;
+        Array<Index> p;
+        Ranks ranks;
+        Array<Index> indices;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t e, size_t& update, const bool final) const
+        {
+          if (values(e) != Real(0))
+          {
+            if (final)
+            {
+              k(update) = ranks.sortKey(indices(e), e);
+              p(update) = e;
+            }
+            ++update;
+          }
+        }
+      };
 
       /**
        * @brief Lists the nonzero entries of a vector.
        * @param ranks Ranks of the entries, with the layout of the sort keys.
        * @param keys Receives the sort keys of their indices.
        * @param positions Receives their positions.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       static void listEntries(const ExecutionSpace& execution,
         const Array<Index>& indices, const Array<Real>& values, const Ranks& ranks,
@@ -1433,9 +1569,7 @@ namespace Rodin::Assembly::Internal
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, indices.extent(0));
         size_t count = 0;
         ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::countEntries", policy,
-          KOKKOS_LAMBDA(const size_t e, size_t& sum) { sum += values(e) != Real(0); },
-          count);
+          "Rodin::Assembly::Kokkos::countEntries", policy, NonzeroCount{ values }, count);
         keys = Array<Index>(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
                               std::string("Rodin vector keys")),
           count);
@@ -1447,25 +1581,34 @@ namespace Rodin::Assembly::Internal
         const auto p = positions;
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::listEntries", policy,
-          KOKKOS_LAMBDA(const size_t e, size_t& update, const bool final) {
-            if (values(e) != Real(0))
-            {
-              if (final)
-              {
-                k(update) = ranks.sortKey(indices(e), e);
-                p(update) = e;
-              }
-              ++update;
-            }
-          });
+          EntryList{ values, k, p, ranks, indices });
       }
+
+      /// @brief Adds the contributions of a group to its entry of the
+      /// right-hand side, in rank order.
+      template <class Contribution>
+      struct Accumulation
+      {
+        Array<Index> keys;
+        Array<Real> rhs;
+        Array<Index> starts;
+        Contribution contributions;
+        Array<Index> positions;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
+        {
+          const Index i = keys(u);
+          Real x = rhs(i);
+          for (Index k = starts(u); k < starts(u + 1); ++k)
+            x += contributions(positions(k));
+          rhs(i) = x;
+        }
+      };
 
       /**
        * @brief Adds grouped contributions to the right-hand side, in rank
        * order.
        * @param contributions Contribution of an entry, by position.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       template <class Contribution>
       static void accumulate(const ExecutionSpace& execution,
@@ -1477,34 +1620,47 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::accumulate",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, groups.size()),
-          KOKKOS_LAMBDA(const size_t u) {
-            const Index i = keys(u);
-            Real x = rhs(i);
-            for (Index k = starts(u); k < starts(u + 1); ++k)
-              x += contributions(positions(k));
-            rhs(i) = x;
-          });
+          Accumulation<Contribution>{ keys, rhs, starts, contributions, positions });
       }
 
-      /**
-       * @brief Adds a preassembled vector to the right-hand side.
-       *
-       * Public as the enclosing function of device lambdas.
-       */
+      /// @brief Adds an entry of a preassembled vector to the right-hand side.
+      struct DenseSum
+      {
+        Array<Real> rhs;
+        Index row;
+        Array<Real> values;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
+        {
+          rhs(row + i) += values(i);
+        }
+      };
+
+      /// @brief Adds a preassembled vector to the right-hand side.
       static void addDense(const ExecutionSpace& execution, const Array<Real>& values,
         Index row, const Array<Real>& rhs)
       {
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::addDense",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, values.extent(0)),
-          KOKKOS_LAMBDA(const size_t i) { rhs(row + i) += values(i); });
+          DenseSum{ rhs, row, values });
       }
 
-      /**
-       * @brief Writes the fixed values on the fixed rows.
-       *
-       * Public as the enclosing function of device lambdas.
-       */
+      /// @brief Writes the fixed value on a fixed row.
+      struct FixedValue
+      {
+        Array<unsigned char> fixed;
+        Array<Real> rhs;
+        Array<Real> values;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
+        {
+          if (fixed(i))
+            rhs(i) = values(i);
+        }
+      };
+
+      /// @brief Writes the fixed values on the fixed rows.
       static void imposeFixed(const ExecutionSpace& execution, size_t count,
         const Array<unsigned char>& fixed, const Array<Real>& values,
         const Array<Real>& rhs)
@@ -1512,18 +1668,25 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::imposeFixed",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t i) {
-            if (fixed(i))
-              rhs(i) = values(i);
-          });
+          FixedValue{ fixed, rhs, values });
       }
+
+      /// @brief Writes the position of an entry at its rank.
+      struct RankOrder
+      {
+        Array<Index> res;
+        Ranks ranks;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t e) const
+        {
+          res(ranks(e)) = e;
+        }
+      };
 
       /**
        * @brief Inverts the ranks of entries.
        * @param count Number of entries.
        * @returns Position of the entry of every rank.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       static Array<Index> order(
         const ExecutionSpace& execution, size_t count, const Ranks& ranks)
@@ -1535,9 +1698,75 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::rankOrder",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t e) { res(ranks(e)) = e; });
+          RankOrder{ res, ranks });
         return res;
       }
+
+      /// @brief Sums the expanded sizes of the matrix contributions.
+      struct MatrixExpansionCount
+      {
+        MatrixExpansionSizes sizes;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t k, Sizes& sum) const
+        {
+          sum += sizes(k);
+        }
+      };
+
+      /// @brief Expands the matrix contribution of rank k and lifts its
+      /// affine values.
+      struct MatrixExpansion
+      {
+        MatrixExpansionSizes sizes;
+        Array<Index> ls;
+        Array<Index> positions;
+        Array<Real> values;
+        Expansions x;
+        Array<Index> rows;
+        Array<Index> cols;
+        Array<Index> er;
+        Array<Index> ec;
+        Array<Real> ev;
+        Array<Index> lr;
+        Array<Real> lv;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t k, Sizes& update, const bool final) const
+        {
+          const Sizes c = sizes(k);
+          if (final)
+          {
+            ls(k) = update.lifts;
+            if (c.entries > 0)
+            {
+              const Index e = positions(k);
+              const Real v = values(e);
+              const Index r0 = x.starts(rows(e));
+              const Index c0 = x.starts(cols(e));
+              const size_t nr = x.count(rows(e));
+              const size_t nc = x.count(cols(e));
+              const Real d = x.values(cols(e));
+              for (size_t ri = 0; ri < nr; ++ri)
+              {
+                const Real rv = x.coefficients(r0 + ri) * v;
+                for (size_t ci = 0; ci < nc; ++ci)
+                {
+                  const size_t q = update.entries + ri * nc + ci;
+                  er(q) = x.indices(r0 + ri);
+                  ec(q) = x.indices(c0 + ci);
+                  ev(q) = rv * x.coefficients(c0 + ci);
+                }
+                if (c.lifts > 0)
+                {
+                  lr(update.lifts + ri) = x.indices(r0 + ri);
+                  lv(update.lifts + ri) = -(rv * d);
+                }
+              }
+            }
+          }
+          update += c;
+        }
+      };
 
       /**
        * @brief Expands the matrix contributions on the masters of their rows
@@ -1551,8 +1780,6 @@ namespace Rodin::Assembly::Internal
        * masters @f$ r @f$ of @f$ i @f$ and @f$ s @f$ of @f$ j @f$, and lifts
        * @f$ -(c_r a) d_j @f$ to row @f$ r @f$ when @f$ j @f$ has a nonzero
        * affine value @f$ d_j @f$, as the host assemblies do.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       static void expandMatrix(const ExecutionSpace& execution, const Triplets& triplets,
         const Expansions& x, size_t extra, Lifted& res)
@@ -1567,7 +1794,7 @@ namespace Rodin::Assembly::Internal
         Sizes total;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::countExpansions", policy,
-          KOKKOS_LAMBDA(const size_t k, Sizes& sum) { sum += sizes(k); }, total);
+          MatrixExpansionCount{ sizes }, total);
         const auto allocate = [&](auto& array, size_t n, const char* label) {
           using ArrayType = std::decay_t<decltype(array)>;
           array = ArrayType(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
@@ -1589,42 +1816,51 @@ namespace Rodin::Assembly::Internal
         const auto ls = res.starts;
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::expandMatrix", policy,
-          KOKKOS_LAMBDA(const size_t k, Sizes& update, const bool final) {
-            const Sizes c = sizes(k);
-            if (final)
-            {
-              ls(k) = update.lifts;
-              if (c.entries > 0)
-              {
-                const Index e = positions(k);
-                const Real v = values(e);
-                const Index r0 = x.starts(rows(e));
-                const Index c0 = x.starts(cols(e));
-                const size_t nr = x.count(rows(e));
-                const size_t nc = x.count(cols(e));
-                const Real d = x.values(cols(e));
-                for (size_t ri = 0; ri < nr; ++ri)
-                {
-                  const Real rv = x.coefficients(r0 + ri) * v;
-                  for (size_t ci = 0; ci < nc; ++ci)
-                  {
-                    const size_t q = update.entries + ri * nc + ci;
-                    er(q) = x.indices(r0 + ri);
-                    ec(q) = x.indices(c0 + ci);
-                    ev(q) = rv * x.coefficients(c0 + ci);
-                  }
-                  if (c.lifts > 0)
-                  {
-                    lr(update.lifts + ri) = x.indices(r0 + ri);
-                    lv(update.lifts + ri) = -(rv * d);
-                  }
-                }
-              }
-            }
-            update += c;
-          });
+          MatrixExpansion{
+            sizes, ls, positions, values, x, rows, cols, er, ec, ev, lr, lv });
         ::Kokkos::deep_copy(execution, ::Kokkos::subview(ls, size), total.lifts);
       }
+
+      /// @brief Sums the expanded sizes of the vector contributions.
+      struct VectorExpansionCount
+      {
+        VectorExpansionSize sizes;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t k, size_t& sum) const
+        {
+          sum += sizes(k);
+        }
+      };
+
+      /// @brief Expands the vector contribution of rank k.
+      struct VectorExpansion
+      {
+        VectorExpansionSize sizes;
+        Array<Index> positions;
+        Array<Real> values;
+        Expansions x;
+        Array<Index> indices;
+        Array<Index> ei;
+        Array<Real> ev;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t k, size_t& update, const bool final) const
+        {
+          const size_t n = sizes(k);
+          if (final && n > 0)
+          {
+            const Index e = positions(k);
+            const Real v = values(e);
+            const Index r0 = x.starts(indices(e));
+            for (size_t ri = 0; ri < n; ++ri)
+            {
+              ei(update + ri) = x.indices(r0 + ri);
+              ev(update + ri) = x.coefficients(r0 + ri) * v;
+            }
+          }
+          update += n;
+        }
+      };
 
       /**
        * @brief Expands the vector contributions on the masters of their
@@ -1633,8 +1869,6 @@ namespace Rodin::Assembly::Internal
        *
        * The nonzero contribution @f$ a @f$ of index @f$ i @f$ becomes the
        * contributions @f$ c_r a @f$ of the masters @f$ r @f$ of @f$ i @f$.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       static void expandVector(const ExecutionSpace& execution,
         const Array<Index>& indices, const Array<Real>& values, const Ranks& ranks,
@@ -1647,7 +1881,7 @@ namespace Rodin::Assembly::Internal
         size_t total = 0;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::countVectorExpansions", policy,
-          KOKKOS_LAMBDA(const size_t k, size_t& sum) { sum += sizes(k); }, total);
+          VectorExpansionCount{ sizes }, total);
         resIndices =
           Array<Index>(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
                          std::string("Rodin expanded indices")),
@@ -1660,28 +1894,24 @@ namespace Rodin::Assembly::Internal
         const auto ev = resValues;
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::expandVector", policy,
-          KOKKOS_LAMBDA(const size_t k, size_t& update, const bool final) {
-            const size_t n = sizes(k);
-            if (final && n > 0)
-            {
-              const Index e = positions(k);
-              const Real v = values(e);
-              const Index r0 = x.starts(indices(e));
-              for (size_t ri = 0; ri < n; ++ri)
-              {
-                ei(update + ri) = x.indices(r0 + ri);
-                ev(update + ri) = x.coefficients(r0 + ri) * v;
-              }
-            }
-            update += n;
-          });
+          VectorExpansion{ sizes, positions, values, x, indices, ei, ev });
       }
+
+      /// @brief Writes the index of an entry of a preassembled vector.
+      struct Sequence
+      {
+        Array<Index> res;
+        Index first;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
+        {
+          res(i) = first + i;
+        }
+      };
 
       /**
        * @brief Indices of a preassembled vector in the system.
        * @param count Size of the vector. @param first Offset of its space.
-       *
-       * Public as the enclosing function of device lambdas.
        */
       static Array<Index> sequence(
         const ExecutionSpace& execution, size_t count, Index first)
@@ -1693,7 +1923,7 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::sequence",
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
-          KOKKOS_LAMBDA(const size_t i) { res(i) = first + i; });
+          Sequence{ res, first });
         return res;
       }
 
@@ -2715,6 +2945,59 @@ namespace Rodin::Assembly
         }
       }
 
+      /// @brief Assigns the degrees of freedom of a constrained face to their
+      /// first constrained face.
+      template <class AttributeView>
+      struct BoundaryOwners
+      {
+        ::Rodin::Kokkos::Geometry::MeshView view;
+        AttributeView attributes;
+        DOFsType dofs;
+        Index faceDim;
+        ::Kokkos::View<Index*, MemorySpace> owners;
+
+        KOKKOS_INLINE_FUNCTION void operator()(Index f) const
+        {
+          if (!isConstrained(view, attributes, f))
+            return;
+          const auto indices = dofs.bind(view.getPolytope(faceDim, f));
+          for (Index q = 0; q < indices.size(); ++q)
+            ::Kokkos::atomic_min(&owners(indices[q]), f);
+        }
+      };
+
+      /// @brief Evaluates the value at the nodes of the degrees of freedom
+      /// owned by a constrained face.
+      template <class AttributeView, class ValueView>
+      struct BoundaryValues
+      {
+        ::Rodin::Kokkos::Geometry::MeshView view;
+        AttributeView attributes;
+        Index faceDim;
+        DOFsType dofs;
+        ::Kokkos::View<Index*, MemorySpace> owners;
+        ::Kokkos::View<Real*, MemorySpace> values;
+        Index stride;
+        Index vdim;
+        ValueView value;
+
+        KOKKOS_INLINE_FUNCTION void operator()(Index f) const
+        {
+          if (!isConstrained(view, attributes, f))
+            return;
+          const auto face = view.getPolytope(faceDim, f);
+          const auto indices = dofs.bind(face);
+          for (Index q = 0; q < indices.size(); ++q)
+          {
+            const Index dof = indices[q];
+            if (owners(dof) != f)
+              continue;
+            const auto p = face.getPoint(dofs.getNode(face, q));
+            store(values, dof, stride, vdim, value.getValue(p));
+          }
+        }
+      };
+
       /**
        * @brief Selects the constrained faces and evaluates the value.
        * @param execution Execution space instance.
@@ -2729,8 +3012,7 @@ namespace Rodin::Assembly
        * @param vdim Vector dimension of the space.
        *
        * The counts are given by the host, since the topology of the device
-       * mesh is not readable on the host. Public as the enclosing function of
-       * device lambdas.
+       * mesh is not readable on the host.
        */
       template <class AttributeView, class ValueView>
       static void evaluate(const ExecutionSpace& execution,
@@ -2744,29 +3026,11 @@ namespace Rodin::Assembly
           ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>(
             execution, 0, faceCount);
         const Index faceDim = view.getDimension() - 1;
-        ::Kokkos::parallel_for(
-          "Rodin boundary owners", policy, KOKKOS_LAMBDA(Index f) {
-            if (!isConstrained(view, attributes, f))
-              return;
-            const auto indices = dofs.bind(view.getPolytope(faceDim, f));
-            for (Index q = 0; q < indices.size(); ++q)
-              ::Kokkos::atomic_min(&owners(indices[q]), f);
-          });
-        ::Kokkos::parallel_for(
-          "Rodin boundary values", policy, KOKKOS_LAMBDA(Index f) {
-            if (!isConstrained(view, attributes, f))
-              return;
-            const auto face = view.getPolytope(faceDim, f);
-            const auto indices = dofs.bind(face);
-            for (Index q = 0; q < indices.size(); ++q)
-            {
-              const Index dof = indices[q];
-              if (owners(dof) != f)
-                continue;
-              const auto p = face.getPoint(dofs.getNode(face, q));
-              store(values, dof, stride, vdim, value.getValue(p));
-            }
-          });
+        ::Kokkos::parallel_for("Rodin boundary owners", policy,
+          BoundaryOwners<AttributeView>{ view, attributes, dofs, faceDim, owners });
+        ::Kokkos::parallel_for("Rodin boundary values", policy,
+          BoundaryValues<AttributeView, ValueView>{
+            view, attributes, faceDim, dofs, owners, values, stride, vdim, value });
       }
 
       /**

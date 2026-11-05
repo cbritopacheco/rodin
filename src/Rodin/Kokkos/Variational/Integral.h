@@ -928,8 +928,6 @@ namespace Rodin::Kokkos::Variational::Internal
        * @param first Per-geometry minimum, initialized to the maximum index.
        * @param dimension Dimension of the polytopes.
        * @param count Polytope count.
-       *
-       * Public as the enclosing function of a device lambda.
        */
       static void findRepresentatives(const ExecutionSpace& execution,
         const Rodin::Kokkos::Geometry::MeshView& view,
@@ -1159,25 +1157,8 @@ namespace Rodin::Kokkos::Variational::Internal
       }
 
       /**
-       * @brief Computes the entry offsets of the polytopes.
-       *
-       * A polytope owns the product of its trial and test local counts. When
-       * every integrated polytope owns the same count and there are more
-       * than one, the offset of a polytope is its rank among them and the
-       * spacing is their number, as described by getEntryPosition().
-       * Otherwise the offset of a polytope is the count of the previous
-       * ones and the spacing is one.
-       *
-       * Public as the enclosing function of a device lambda.
-       */
-      /**
        * @brief Number of entries of the local matrix of a polytope, zero
        * when the polytope is not integrated.
-       *
-       * A functor rather than a device lambda captured by the kernels of
-       * locate: with nvcc 13.1, copying a captured extended lambda on the
-       * host goes through a function pointer that stays null when another
-       * translation unit of the executable instantiates the same template.
        */
       template <class TrialDOFs, class TestDOFs>
       struct EntryCount
@@ -1239,6 +1220,16 @@ namespace Rodin::Kokkos::Variational::Internal
         }
       };
 
+      /**
+       * @brief Computes the entry offsets of the polytopes.
+       *
+       * A polytope owns the product of its trial and test local counts. When
+       * every integrated polytope owns the same count and there are more
+       * than one, the offset of a polytope is its rank among them and the
+       * spacing is their number, as described by getEntryPosition().
+       * Otherwise the offset of a polytope is the count of the previous
+       * ones and the spacing is one.
+       */
       template <class TrialDOFs, class TestDOFs>
       static size_t locate(const ExecutionSpace& execution,
         const Rodin::Kokkos::Geometry::MeshView& view, ::Rodin::Geometry::Region region,
@@ -1665,7 +1656,6 @@ namespace Rodin::Kokkos::Variational
        * When Exact, both spaces are P1, every polytope has Vertices vertices
        * and both vector dimensions are maximal, so the local loops have
        * static bounds. Shape is the geometry tag of the integration points.
-       * Public as the enclosing function of a device lambda.
        */
       template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
         class Trial, class Test>
@@ -1712,8 +1702,7 @@ namespace Rodin::Kokkos::Variational
        * degrees of freedom only, with the payloads of the values of component 0
        * (StoredValue), and writes
        * each entry on the diagonal of its component block
-       * (Internal::writeEntries()). Public as the enclosing function of a
-       * device lambda.
+       * (Internal::writeEntries()).
        */
       template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
         class Trial, class Test>
@@ -1758,8 +1747,7 @@ namespace Rodin::Kokkos::Variational
        *
        * Each thread holds the local matrix of its polytope, reduced to the
        * pairs of scalar degrees of freedom for a component diagonal
-       * integrand as in integrateTeams(). Public as the enclosing function
-       * of a device lambda.
+       * integrand as in integrateTeams().
        */
       template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
         class Trial, class Test>
@@ -1905,9 +1893,6 @@ namespace Rodin::Kokkos::Variational
     public:
       /**
        * @brief Kernel of integrateTeams(), one team per polytope.
-       *
-       * A functor rather than a device lambda, see
-       * Internal::DevicePolytopes::EntryCount.
        */
       template <Index Vertices, bool Exact, class Shape, class Trial, class Test>
       struct TeamKernel
@@ -2077,9 +2062,6 @@ namespace Rodin::Kokkos::Variational
 
       /**
        * @brief Kernel of integrateThreads(), one thread per polytope.
-       *
-       * A functor rather than a device lambda, see
-       * Internal::DevicePolytopes::EntryCount.
        */
       template <Index Vertices, bool Exact, class Shape, class Trial, class Test>
       struct ThreadKernel
@@ -2407,8 +2389,7 @@ namespace Rodin::Kokkos::Variational
        *
        * When Exact, the space is P1, every polytope has Vertices vertices and
        * the vector dimension is maximal, so the local loop has a static bound.
-       * Shape is the geometry tag of the integration points. Public as the
-       * enclosing function of a device lambda.
+       * Shape is the geometry tag of the integration points.
        */
       template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
         class Test>
@@ -2470,9 +2451,6 @@ namespace Rodin::Kokkos::Variational
     public:
       /**
        * @brief Kernel of integratePolytopes(), one thread per polytope.
-       *
-       * A functor rather than a device lambda, see
-       * Internal::DevicePolytopes::EntryCount.
        */
       template <Index Vertices, bool Exact, class Shape, class Test>
       struct PolytopeKernel

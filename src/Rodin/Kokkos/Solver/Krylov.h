@@ -113,6 +113,54 @@ namespace Rodin::Solver::Internal
       ::Kokkos::deep_copy(h, device);
     }
 
+    /// @brief Writes the inverse of the diagonal coefficient of each row.
+    struct InvertDiagonal
+    {
+      ::Kokkos::View<Math::SparseIndex*, MemorySpace> starts;
+      ::Kokkos::View<Math::SparseIndex*, MemorySpace> columns;
+      ::Kokkos::View<Real*, MemorySpace> values;
+      Vector inverse;
+
+      KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
+      {
+        Real d = 0;
+        for (auto k = starts(i); k < starts(i + 1); ++k)
+        {
+          if (static_cast<size_t>(columns(k)) == i)
+            d = values(k);
+        }
+        inverse(i) = d != Real(0) ? Real(1) / d : Real(1);
+      }
+    };
+
+    /// @brief Sums the products of the coefficients of two vectors.
+    struct Dot
+    {
+      Vector a;
+      Vector b;
+
+      KOKKOS_INLINE_FUNCTION void operator()(const size_t i, Real& sum) const
+      {
+        sum += a(i) * b(i);
+      }
+    };
+
+    /// @brief Writes @f$ y = \beta y + \alpha D^{-1} x @f$ coefficientwise.
+    struct Scale
+    {
+      Vector inverse;
+      ::Kokkos::View<const Real*, Device> x;
+      Vector y;
+      Real alpha;
+      Real beta;
+
+      KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
+      {
+        const Real v = alpha * inverse(i) * x(i);
+        y(i) = beta == Real(0) ? v : beta * y(i) + v;
+      }
+    };
+
     /**
      * @brief Inverts the diagonal of a matrix, as Eigen's
      * DiagonalPreconditioner: a zero or missing diagonal coefficient gives one.
@@ -129,15 +177,7 @@ namespace Rodin::Solver::Internal
       ::Kokkos::parallel_for(
         "Rodin::Solver::Krylov::invertDiagonal",
         ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, inverse.extent(0)),
-        KOKKOS_LAMBDA(const size_t i) {
-          Real d = 0;
-          for (auto k = starts(i); k < starts(i + 1); ++k)
-          {
-            if (static_cast<size_t>(columns(k)) == i)
-              d = values(k);
-          }
-          inverse(i) = d != Real(0) ? Real(1) / d : Real(1);
-        });
+        InvertDiagonal{starts, columns, values, inverse});
     }
 
     /**
@@ -153,7 +193,7 @@ namespace Rodin::Solver::Internal
       ::Kokkos::parallel_reduce(
         "Rodin::Solver::Krylov::dot",
         ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, a.extent(0)),
-        KOKKOS_LAMBDA(const size_t i, Real& sum) { sum += a(i) * b(i); }, res);
+        Dot{a, b}, res);
       return res;
     }
 
@@ -173,10 +213,7 @@ namespace Rodin::Solver::Internal
       ::Kokkos::parallel_for(
         "Rodin::Solver::Krylov::scale",
         ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, y.extent(0)),
-        KOKKOS_LAMBDA(const size_t i) {
-          const Real v = alpha * inverse(i) * x(i);
-          y(i) = beta == Real(0) ? v : beta * y(i) + v;
-        });
+        Scale{inverse, x, y, alpha, beta});
     }
   };
 

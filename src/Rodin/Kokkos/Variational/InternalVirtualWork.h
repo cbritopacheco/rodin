@@ -370,7 +370,6 @@ namespace Rodin::Solid
        * The entry of local test index te and local trial index tr has rank
        * te * ntr + tr among the entries of the cell, the local index
        * a * vdim + r being component r of the scalar degree of freedom a.
-       * Public as the enclosing function of a device lambda.
        */
       template <Index Vertices>
       static void integratePolytopes(const MeshType& mesh, const PolytopesType& polytopes,
@@ -380,101 +379,15 @@ namespace Rodin::Solid
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
-        constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
-        constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const auto view = mesh.getDeviceView();
-        const auto quadrature = polytopes.getQuadrature();
-        const auto attributes = polytopes.getAttributes();
-        const auto offsets = polytopes.getOffsets();
-        const size_t spacing = polytopes.getSpacing();
-        const auto region = polytopes.getRegion();
-        const Index dimension = polytopes.getDimension();
-        const bool index = rows.extent(0) > 0;
+        const PolytopeKernel<Vertices> kernel{mesh.getDeviceView(),
+          polytopes.getQuadrature(), polytopes.getAttributes(), polytopes.getOffsets(),
+          polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(),
+          trialDOFs, testDOFs, vdim, state, lambda, mu, values, offset, sign, accumulate,
+          rows.extent(0) > 0, rows, cols};
         ::Kokkos::parallel_for(
           "Rodin hyperelastic tangent integration",
-          QuadratureType::policy(execution, polytopes.getPolytopeCount()),
-          KOKKOS_LAMBDA(Index p) {
-            const auto polytope = view.getPolytope(dimension, p);
-            if (!Rodin::Kokkos::Variational::isIntegrated(
-                  view, region, polytope, attributes))
-              return;
-            KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
-            const auto trialIndices = trialDOFs.bind(polytope);
-            const auto testIndices = testDOFs.bind(polytope);
-            const Index na = trialIndices.size();
-            const Index nb = testIndices.size();
-            const Index ntr = na * vdim;
-            const Index nte = nb * vdim;
-            const Index g = static_cast<Index>(polytope.getGeometry());
-            ::Kokkos::Array<Real,
-              TrialCapacity * RODIN_MAXIMAL_SPACE_DIMENSION * TestCapacity *
-                RODIN_MAXIMAL_SPACE_DIMENSION>
-              local{};
-            ::Kokkos::Array<Rodin::Kokkos::Geometry::Vector, TrialCapacity> ga;
-            ::Kokkos::Array<Rodin::Kokkos::Geometry::Vector, TrialCapacity> aa;
-            ::Kokkos::Array<Rodin::Kokkos::Geometry::Vector, TestCapacity> gb;
-            ::Kokkos::Array<Rodin::Kokkos::Geometry::Vector, TestCapacity> ab;
-            for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
-            {
-              const Rodin::Kokkos::Variational::CellIntegrationPointView ip(polytope,
-                quadrature.getReference(polytope, q),
-                Rodin::Kokkos::Variational::DynamicGeometry{});
-              const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
-              const Rodin::Kokkos::Variational::NeoHookeanPoint point(
-                state.interpolateJacobian(ip));
-              for (Index a = 0; a < na; ++a)
-              {
-                ga[a] = trialDOFs.getGradient(ip, a);
-                aa[a] = point.pullBack(ga[a]);
-              }
-              for (Index b = 0; b < nb; ++b)
-              {
-                gb[b] = testDOFs.getGradient(ip, b);
-                ab[b] = point.pullBack(gb[b]);
-              }
-              const Real c1 = wdet * mu;
-              const Real c2 = wdet * lambda;
-              const Real c3 = wdet * (mu - lambda * point.logJ);
-              for (Index b = 0; b < nb; ++b)
-              {
-                for (Index a = 0; a < na; ++a)
-                {
-                  const Real shear = c1 * Rodin::Kokkos::Variational::dot(ga[a], gb[b]);
-                  for (Index c = 0; c < vdim; ++c)
-                  {
-                    for (Index s = 0; s < vdim; ++s)
-                    {
-                      Real v = c2 * aa[a](s) * ab[b](c) + c3 * aa[a](c) * ab[b](s);
-                      if (c == s)
-                        v += shear;
-                      local[(b * vdim + c) * ntr + a * vdim + s] += v;
-                    }
-                  }
-                }
-              }
-            }
-            const size_t base = offset + offsets(p);
-            for (Index te = 0; te < nte; ++te)
-            {
-              const Index row =
-                testIndices[te / vdim] + (te % vdim) * testDOFs.getStride();
-              for (Index tr = 0; tr < ntr; ++tr)
-              {
-                const size_t e = base + size_t(te * ntr + tr) * spacing;
-                const Real v = sign * local[te * ntr + tr];
-                if (accumulate)
-                  values(e) += v;
-                else
-                  values(e) = v;
-                if (index)
-                {
-                  rows(e) = row;
-                  cols(e) = trialIndices[tr / vdim] + (tr % vdim) * trialDOFs.getStride();
-                }
-              }
-            }
-          });
+          QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
 
       /**
@@ -495,8 +408,7 @@ namespace Rodin::Solid
        * and accumulates in registers the vdim by vdim entries of each of
        * its pairs over the group, reusing the products of the trial
        * function across the block. The entries are laid out as by
-       * integratePolytopes(). Public as the enclosing function of a device
-       * lambda.
+       * integratePolytopes().
        */
       template <Index Vertices>
       static void integrateTeams(const MeshType& mesh, const PolytopesType& polytopes,
@@ -506,51 +418,279 @@ namespace Rodin::Solid
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
+        using Kernel = TeamKernel<Vertices>;
+        using Policy = typename Kernel::Policy;
+        static_assert(std::is_trivially_destructible_v<typename Kernel::Point> &&
+          std::is_trivially_destructible_v<typename Kernel::Kinematics> &&
+          std::is_trivially_copyable_v<typename Kernel::Vector>);
+        constexpr Index TrialCapacity = Kernel::TrialCapacity;
+        constexpr Index TestCapacity = Kernel::TestCapacity;
+        constexpr Index E = Kernel::E;
+        const auto& execution = mesh.getContext().getExecutionSpace();
+        const size_t scratch = Kernel::P * Kernel::PointBytes + 8 * Kernel::Alignment;
+        const int level = scratch <= size_t(Policy::scratch_size_max(0)) ? 0 : 1;
+        const Kernel kernel{mesh.getDeviceView(), polytopes.getQuadrature(),
+          polytopes.getAttributes(), polytopes.getOffsets(), polytopes.getSpacing(),
+          polytopes.getRegion(), polytopes.getDimension(), trialDOFs, testDOFs, vdim,
+          state, lambda, mu, values, offset, sign, accumulate, rows.extent(0) > 0, rows,
+          cols, level};
+        Policy policy(execution, polytopes.getPolytopeCount(), ::Kokkos::AUTO);
+        policy.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
+        // One slot per thread, the fewest passes over the quadrature.
+        constexpr Index Slots = TrialCapacity * ((TestCapacity + E - 1) / E);
+        const Index wanted = (Slots + 31) / 32 * 32;
+        const int maximum = policy.team_size_max(kernel, ::Kokkos::ParallelForTag());
+        const int threads =
+          std::max(1, std::min(maximum, int(std::min<Index>(wanted, TeamThreads))));
+        Policy launch(execution, polytopes.getPolytopeCount(), threads);
+        launch.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
+        ::Kokkos::parallel_for(
+          "Rodin hyperelastic tangent team integration", launch, kernel);
+      }
+
+    private:
+      /// @brief Maximum number of entries of the local matrix of a thread,
+      /// so larger local matrices take one team per cell.
+      static constexpr Index LocalCapacity = 1024;
+
+      /// @brief Largest group of quadrature points of a team.
+      static constexpr Index TeamPoints = 32;
+
+      /// @brief Bytes of team scratch memory of a group in the fast level.
+      static constexpr size_t TeamScratch = 47104;
+
+      /// @brief Fewest points of a group in the fast scratch level.
+      static constexpr Index TeamMinimumPoints = 4;
+
+      /// @brief Number of points of a group whose values exceed TeamScratch,
+      /// in the slower scratch level.
+      static constexpr Index TeamSlowPoints = 8;
+
+      /// @brief Largest team, whose register bound the kernel is compiled for.
+      static constexpr unsigned int TeamThreads = 512;
+
+      /// @brief Test functions of the block of a thread, whose entries
+      /// with one trial function it accumulates per pass over the quadrature.
+      static constexpr Index TeamPairs = 4;
+
+      /// @brief Selects the quadrature order of a cell, as on the host.
+      size_t getOrder(const Geometry::Polytope& polytope) const
+      {
+        if (m_quadOrder > 0)
+          return m_quadOrder;
+        const auto trialOrder = m_trial.get().getOrder(polytope);
+        const auto testOrder = m_test.get().getOrder(polytope);
+        const auto stateOrder = m_displacement.get().getOrder(polytope);
+        if (!trialOrder || !testOrder || !stateOrder)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "No automatic constitutive quadrature order is established. "
+            << "Specify it with setQuadratureOrder()." << Alert::Raise;
+        }
+        return 2 * std::max({*trialOrder, *testOrder, *stateOrder});
+      }
+
+      void checkCompatibility(const StateType& displacement) const
+      {
+        const auto& trialfes = m_trial.get().getFiniteElementSpace();
+        const auto& testfes = m_test.get().getFiniteElementSpace();
+        const auto& statefes = displacement.getFiniteElementSpace();
+        const size_t d = trialfes.getMesh().getSpaceDimension();
+        if (&trialfes.getMesh() != &testfes.getMesh() ||
+          &statefes.getMesh() != &testfes.getMesh() ||
+          trialfes.getVectorDimension() != d || testfes.getVectorDimension() != d ||
+          statefes.getVectorDimension() != d || trialfes.getMesh().getDimension() != d)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Kokkos hyperelastic tangents require displacement spaces of the "
+            << "space dimension on one mesh of full dimension." << Alert::Raise;
+        }
+      }
+
+      LawType m_law;
+      std::reference_wrapper<const TrialType> m_trial;
+      std::reference_wrapper<const TestType> m_test;
+      std::reference_wrapper<const StateType> m_displacement;
+      size_t m_quadOrder;
+      mutable PolytopesType m_polytopes;
+
+    public:
+      /**
+       * @brief Kernel of integratePolytopes(), the local matrix of one cell
+       * per thread.
+       */
+      template <Index Vertices>
+      struct PolytopeKernel
+      {
+        static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
+        static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
+
+        Rodin::Kokkos::Geometry::MeshView view;
+        QuadratureType quadrature;
+        typename PolytopesType::AttributesType attributes;
+        ::Kokkos::View<Index*, MemorySpace> offsets;
+        size_t spacing;
+        Geometry::Region region;
+        Index dimension;
+        TrialDOFsType trialDOFs;
+        TestDOFsType testDOFs;
+        Index vdim;
+        StateViewType state;
+        Real lambda;
+        Real mu;
+        ::Kokkos::View<Real*, MemorySpace> values;
+        size_t offset;
+        Real sign;
+        bool accumulate;
+        bool index;
+        ::Kokkos::View<Index*, MemorySpace> rows;
+        ::Kokkos::View<Index*, MemorySpace> cols;
+
+        KOKKOS_INLINE_FUNCTION void operator()(Index p) const
+        {
+          const auto polytope = view.getPolytope(dimension, p);
+          if (!Rodin::Kokkos::Variational::isIntegrated(
+                view, region, polytope, attributes))
+            return;
+          KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
+          const auto trialIndices = trialDOFs.bind(polytope);
+          const auto testIndices = testDOFs.bind(polytope);
+          const Index na = trialIndices.size();
+          const Index nb = testIndices.size();
+          const Index ntr = na * vdim;
+          const Index nte = nb * vdim;
+          const Index g = static_cast<Index>(polytope.getGeometry());
+          ::Kokkos::Array<Real,
+            TrialCapacity * RODIN_MAXIMAL_SPACE_DIMENSION * TestCapacity *
+              RODIN_MAXIMAL_SPACE_DIMENSION>
+            local{};
+          ::Kokkos::Array<Rodin::Kokkos::Geometry::Vector, TrialCapacity> ga;
+          ::Kokkos::Array<Rodin::Kokkos::Geometry::Vector, TrialCapacity> aa;
+          ::Kokkos::Array<Rodin::Kokkos::Geometry::Vector, TestCapacity> gb;
+          ::Kokkos::Array<Rodin::Kokkos::Geometry::Vector, TestCapacity> ab;
+          for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
+          {
+            const Rodin::Kokkos::Variational::CellIntegrationPointView ip(polytope,
+              quadrature.getReference(polytope, q),
+              Rodin::Kokkos::Variational::DynamicGeometry{});
+            const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
+            const Rodin::Kokkos::Variational::NeoHookeanPoint point(
+              state.interpolateJacobian(ip));
+            for (Index a = 0; a < na; ++a)
+            {
+              ga[a] = trialDOFs.getGradient(ip, a);
+              aa[a] = point.pullBack(ga[a]);
+            }
+            for (Index b = 0; b < nb; ++b)
+            {
+              gb[b] = testDOFs.getGradient(ip, b);
+              ab[b] = point.pullBack(gb[b]);
+            }
+            const Real c1 = wdet * mu;
+            const Real c2 = wdet * lambda;
+            const Real c3 = wdet * (mu - lambda * point.logJ);
+            for (Index b = 0; b < nb; ++b)
+            {
+              for (Index a = 0; a < na; ++a)
+              {
+                const Real shear = c1 * Rodin::Kokkos::Variational::dot(ga[a], gb[b]);
+                for (Index c = 0; c < vdim; ++c)
+                {
+                  for (Index s = 0; s < vdim; ++s)
+                  {
+                    Real v = c2 * aa[a](s) * ab[b](c) + c3 * aa[a](c) * ab[b](s);
+                    if (c == s)
+                      v += shear;
+                    local[(b * vdim + c) * ntr + a * vdim + s] += v;
+                  }
+                }
+              }
+            }
+          }
+          const size_t base = offset + offsets(p);
+          for (Index te = 0; te < nte; ++te)
+          {
+            const Index row =
+              testIndices[te / vdim] + (te % vdim) * testDOFs.getStride();
+            for (Index tr = 0; tr < ntr; ++tr)
+            {
+              const size_t e = base + size_t(te * ntr + tr) * spacing;
+              const Real v = sign * local[te * ntr + tr];
+              if (accumulate)
+                values(e) += v;
+              else
+                values(e) = v;
+              if (index)
+              {
+                rows(e) = row;
+                cols(e) = trialIndices[tr / vdim] + (tr % vdim) * trialDOFs.getStride();
+              }
+            }
+          }
+        }
+      };
+
+      /**
+       * @brief Kernel of integrateTeams(), the local matrix of one cell per
+       * team.
+       */
+      template <Index Vertices>
+      struct TeamKernel
+      {
         using Point = Kokkos::Variational::CellIntegrationPointView;
         using Kinematics = Kokkos::Variational::NeoHookeanPoint;
         using Vector = Kokkos::Geometry::Vector;
-        static_assert(std::is_trivially_destructible_v<Point> &&
-          std::is_trivially_destructible_v<Kinematics> &&
-          std::is_trivially_copyable_v<Vector>);
-        const auto& execution = mesh.getContext().getExecutionSpace();
-        using ExecutionSpace = std::decay_t<decltype(execution)>;
+        using ExecutionSpace = typename MeshType::ExecutionSpace;
         // The register bound keeps enough threads for one pass over the
         // quadrature, at the price of a few spills.
         using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>,
           ::Kokkos::LaunchBounds<TeamThreads, 1>>;
         using Member = typename Policy::member_type;
-        constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
-        constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
-        constexpr Index D = RODIN_MAXIMAL_SPACE_DIMENSION;
-        constexpr Index Square = D * D;
         using StateDOFsType =
           std::decay_t<decltype(std::declval<const StateViewType&>().getDOFs())>;
+        static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
+        static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
+        static constexpr Index D = RODIN_MAXIMAL_SPACE_DIMENSION;
+        static constexpr Index Square = D * D;
         // Spaces of one type share their basis gradients.
-        constexpr bool SharedTest = std::is_same_v<TrialDOFsType, TestDOFsType>;
-        constexpr bool SharedState = std::is_same_v<TrialDOFsType, StateDOFsType>;
-        constexpr Index TestStorage = SharedTest ? 0 : TestCapacity;
-        constexpr size_t PointBytes = sizeof(Point) + sizeof(Kinematics) +
+        static constexpr bool SharedTest = std::is_same_v<TrialDOFsType, TestDOFsType>;
+        static constexpr bool SharedState = std::is_same_v<TrialDOFsType, StateDOFsType>;
+        static constexpr Index TestStorage = SharedTest ? 0 : TestCapacity;
+        static constexpr size_t PointBytes = sizeof(Point) + sizeof(Kinematics) +
           (3 + Square) * sizeof(Real) +
           2 * (TrialCapacity + TestStorage) * sizeof(Vector);
         // Groups that do not fit TeamScratch go to the slower scratch level.
-        constexpr Index Fit = TeamScratch / PointBytes;
-        constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
-          : Fit > TeamPoints                        ? TeamPoints
-                                                    : Fit;
-        constexpr Index E = TeamPairs;
-        constexpr size_t Alignment =
+        static constexpr Index Fit = TeamScratch / PointBytes;
+        static constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
+          : Fit > TeamPoints                               ? TeamPoints
+                                                           : Fit;
+        static constexpr Index E = TeamPairs;
+        static constexpr size_t Alignment =
           std::max({alignof(Point), alignof(Kinematics), alignof(Vector), alignof(Real)});
-        const auto view = mesh.getDeviceView();
-        const auto quadrature = polytopes.getQuadrature();
-        const auto attributes = polytopes.getAttributes();
-        const auto offsets = polytopes.getOffsets();
-        const size_t spacing = polytopes.getSpacing();
-        const auto region = polytopes.getRegion();
-        const Index dimension = polytopes.getDimension();
-        const bool index = rows.extent(0) > 0;
-        const size_t scratch = P * PointBytes + 8 * Alignment;
-        const int level = scratch <= size_t(Policy::scratch_size_max(0)) ? 0 : 1;
-        const auto kernel = KOKKOS_LAMBDA(const Member& team)
+
+        Rodin::Kokkos::Geometry::MeshView view;
+        QuadratureType quadrature;
+        typename PolytopesType::AttributesType attributes;
+        ::Kokkos::View<Index*, MemorySpace> offsets;
+        size_t spacing;
+        Geometry::Region region;
+        Index dimension;
+        TrialDOFsType trialDOFs;
+        TestDOFsType testDOFs;
+        Index vdim;
+        StateViewType state;
+        Real lambda;
+        Real mu;
+        ::Kokkos::View<Real*, MemorySpace> values;
+        size_t offset;
+        Real sign;
+        bool accumulate;
+        bool index;
+        ::Kokkos::View<Index*, MemorySpace> rows;
+        ::Kokkos::View<Index*, MemorySpace> cols;
+        int level;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const Member& team) const
         {
           const Index p = team.league_rank();
           const auto polytope = view.getPolytope(dimension, p);
@@ -785,86 +925,8 @@ namespace Rodin::Solid
               }
             }
           }
-        };
-        Policy policy(execution, polytopes.getPolytopeCount(), ::Kokkos::AUTO);
-        policy.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
-        // One slot per thread, the fewest passes over the quadrature.
-        constexpr Index Slots = TrialCapacity * ((TestCapacity + E - 1) / E);
-        const Index wanted = (Slots + 31) / 32 * 32;
-        const int maximum = policy.team_size_max(kernel, ::Kokkos::ParallelForTag());
-        const int threads =
-          std::max(1, std::min(maximum, int(std::min<Index>(wanted, TeamThreads))));
-        Policy launch(execution, polytopes.getPolytopeCount(), threads);
-        launch.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
-        ::Kokkos::parallel_for(
-          "Rodin hyperelastic tangent team integration", launch, kernel);
-      }
-
-    private:
-      /// @brief Maximum number of entries of the local matrix of a thread,
-      /// so larger local matrices take one team per cell.
-      static constexpr Index LocalCapacity = 1024;
-
-      /// @brief Largest group of quadrature points of a team.
-      static constexpr Index TeamPoints = 32;
-
-      /// @brief Bytes of team scratch memory of a group in the fast level.
-      static constexpr size_t TeamScratch = 47104;
-
-      /// @brief Fewest points of a group in the fast scratch level.
-      static constexpr Index TeamMinimumPoints = 4;
-
-      /// @brief Number of points of a group whose values exceed TeamScratch,
-      /// in the slower scratch level.
-      static constexpr Index TeamSlowPoints = 8;
-
-      /// @brief Largest team, whose register bound the kernel is compiled for.
-      static constexpr unsigned int TeamThreads = 512;
-
-      /// @brief Test functions of the block of a thread, whose entries
-      /// with one trial function it accumulates per pass over the quadrature.
-      static constexpr Index TeamPairs = 4;
-
-      /// @brief Selects the quadrature order of a cell, as on the host.
-      size_t getOrder(const Geometry::Polytope& polytope) const
-      {
-        if (m_quadOrder > 0)
-          return m_quadOrder;
-        const auto trialOrder = m_trial.get().getOrder(polytope);
-        const auto testOrder = m_test.get().getOrder(polytope);
-        const auto stateOrder = m_displacement.get().getOrder(polytope);
-        if (!trialOrder || !testOrder || !stateOrder)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "No automatic constitutive quadrature order is established. "
-            << "Specify it with setQuadratureOrder()." << Alert::Raise;
         }
-        return 2 * std::max({*trialOrder, *testOrder, *stateOrder});
-      }
-
-      void checkCompatibility(const StateType& displacement) const
-      {
-        const auto& trialfes = m_trial.get().getFiniteElementSpace();
-        const auto& testfes = m_test.get().getFiniteElementSpace();
-        const auto& statefes = displacement.getFiniteElementSpace();
-        const size_t d = trialfes.getMesh().getSpaceDimension();
-        if (&trialfes.getMesh() != &testfes.getMesh() ||
-          &statefes.getMesh() != &testfes.getMesh() ||
-          trialfes.getVectorDimension() != d || testfes.getVectorDimension() != d ||
-          statefes.getVectorDimension() != d || trialfes.getMesh().getDimension() != d)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Kokkos hyperelastic tangents require displacement spaces of the "
-            << "space dimension on one mesh of full dimension." << Alert::Raise;
-        }
-      }
-
-      LawType m_law;
-      std::reference_wrapper<const TrialType> m_trial;
-      std::reference_wrapper<const TestType> m_test;
-      std::reference_wrapper<const StateType> m_displacement;
-      size_t m_quadOrder;
-      mutable PolytopesType m_polytopes;
+      };
   };
 
   /**
@@ -1078,7 +1140,7 @@ namespace Rodin::Solid
        * @brief Integrates the cells of at most Vertices vertices.
        *
        * Local index a * vdim + c is component c of the scalar degree of
-       * freedom a. Public as the enclosing function of a device lambda.
+       * freedom a.
        */
       template <Index Vertices>
       static void integratePolytopes(const MeshType& mesh, const PolytopesType& polytopes,
@@ -1086,66 +1148,15 @@ namespace Rodin::Solid
         Real mu, const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
         Real sign, bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& indices)
       {
-        constexpr Index Capacity =
-          DOFsType::getCapacity(Vertices) * RODIN_MAXIMAL_SPACE_DIMENSION;
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const auto view = mesh.getDeviceView();
-        const auto quadrature = polytopes.getQuadrature();
-        const auto attributes = polytopes.getAttributes();
-        const auto offsets = polytopes.getOffsets();
-        const size_t spacing = polytopes.getSpacing();
-        const auto region = polytopes.getRegion();
-        const Index dimension = polytopes.getDimension();
-        const bool index = indices.extent(0) > 0;
+        const PolytopeKernel<Vertices> kernel{mesh.getDeviceView(),
+          polytopes.getQuadrature(), polytopes.getAttributes(), polytopes.getOffsets(),
+          polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(), dofs,
+          vdim, state, lambda, mu, values, offset, sign, accumulate,
+          indices.extent(0) > 0, indices};
         ::Kokkos::parallel_for(
           "Rodin hyperelastic residual integration",
-          QuadratureType::policy(execution, polytopes.getPolytopeCount()),
-          KOKKOS_LAMBDA(Index p) {
-            const auto polytope = view.getPolytope(dimension, p);
-            if (!Rodin::Kokkos::Variational::isIntegrated(
-                  view, region, polytope, attributes))
-              return;
-            KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
-            const auto testIndices = dofs.bind(polytope);
-            const Index nb = testIndices.size();
-            const Index nte = nb * vdim;
-            const Index g = static_cast<Index>(polytope.getGeometry());
-            ::Kokkos::Array<Real, Capacity> local{};
-            for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
-            {
-              const Rodin::Kokkos::Variational::CellIntegrationPointView ip(polytope,
-                quadrature.getReference(polytope, q),
-                Rodin::Kokkos::Variational::DynamicGeometry{});
-              const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
-              const Rodin::Kokkos::Variational::NeoHookeanPoint point(
-                state.interpolateJacobian(ip));
-              // P = mu F + (lambda ln J - mu) F^{-T}
-              const Real scale = lambda * point.logJ - mu;
-              for (Index b = 0; b < nb; ++b)
-              {
-                const auto& gradient = dofs.getGradient(ip, b);
-                for (Index c = 0; c < vdim; ++c)
-                {
-                  Real v = 0;
-                  for (Index k = 0; k < vdim; ++k)
-                    v += (mu * point.F(c, k) + scale * point.Finv(k, c)) * gradient(k);
-                  local[b * vdim + c] += wdet * v;
-                }
-              }
-            }
-            const size_t base = offset + offsets(p);
-            for (Index te = 0; te < nte; ++te)
-            {
-              const size_t e = base + te * spacing;
-              const Real v = sign * local[te];
-              if (accumulate)
-                values(e) += v;
-              else
-                values(e) = v;
-              if (index)
-                indices(e) = testIndices[te / vdim] + (te % vdim) * dofs.getStride();
-            }
-          });
+          QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
 
     private:
@@ -1185,6 +1196,85 @@ namespace Rodin::Solid
       std::reference_wrapper<const StateType> m_displacement;
       size_t m_quadOrder;
       mutable PolytopesType m_polytopes;
+
+    public:
+      /**
+       * @brief Kernel of integratePolytopes(), the local vector of one cell
+       * per thread.
+       */
+      template <Index Vertices>
+      struct PolytopeKernel
+      {
+        static constexpr Index Capacity =
+          DOFsType::getCapacity(Vertices) * RODIN_MAXIMAL_SPACE_DIMENSION;
+
+        Rodin::Kokkos::Geometry::MeshView view;
+        QuadratureType quadrature;
+        typename PolytopesType::AttributesType attributes;
+        ::Kokkos::View<Index*, MemorySpace> offsets;
+        size_t spacing;
+        Geometry::Region region;
+        Index dimension;
+        DOFsType dofs;
+        Index vdim;
+        StateViewType state;
+        Real lambda;
+        Real mu;
+        ::Kokkos::View<Real*, MemorySpace> values;
+        size_t offset;
+        Real sign;
+        bool accumulate;
+        bool index;
+        ::Kokkos::View<Index*, MemorySpace> indices;
+
+        KOKKOS_INLINE_FUNCTION void operator()(Index p) const
+        {
+          const auto polytope = view.getPolytope(dimension, p);
+          if (!Rodin::Kokkos::Variational::isIntegrated(
+                view, region, polytope, attributes))
+            return;
+          KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
+          const auto testIndices = dofs.bind(polytope);
+          const Index nb = testIndices.size();
+          const Index nte = nb * vdim;
+          const Index g = static_cast<Index>(polytope.getGeometry());
+          ::Kokkos::Array<Real, Capacity> local{};
+          for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
+          {
+            const Rodin::Kokkos::Variational::CellIntegrationPointView ip(polytope,
+              quadrature.getReference(polytope, q),
+              Rodin::Kokkos::Variational::DynamicGeometry{});
+            const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
+            const Rodin::Kokkos::Variational::NeoHookeanPoint point(
+              state.interpolateJacobian(ip));
+            // P = mu F + (lambda ln J - mu) F^{-T}
+            const Real scale = lambda * point.logJ - mu;
+            for (Index b = 0; b < nb; ++b)
+            {
+              const auto& gradient = dofs.getGradient(ip, b);
+              for (Index c = 0; c < vdim; ++c)
+              {
+                Real v = 0;
+                for (Index k = 0; k < vdim; ++k)
+                  v += (mu * point.F(c, k) + scale * point.Finv(k, c)) * gradient(k);
+                local[b * vdim + c] += wdet * v;
+              }
+            }
+          }
+          const size_t base = offset + offsets(p);
+          for (Index te = 0; te < nte; ++te)
+          {
+            const size_t e = base + te * spacing;
+            const Real v = sign * local[te];
+            if (accumulate)
+              values(e) += v;
+            else
+              values(e) = v;
+            if (index)
+              indices(e) = testIndices[te / vdim] + (te % vdim) * dofs.getStride();
+          }
+        }
+      };
   };
 
   /**
@@ -1458,7 +1548,6 @@ namespace Rodin::Solid
        * At each quadrature point, the thread evaluates the elasticity
        * tensor, contracts it with @f$ \nabla \phi_a @f$ for each trial
        * function, then with @f$ \nabla \phi_b @f$ for each test function.
-       * Public as the enclosing function of a device lambda.
        */
       template <Index Vertices>
       static void integratePolytopes(const MeshType& mesh, const PolytopesType& polytopes,
@@ -1468,110 +1557,15 @@ namespace Rodin::Solid
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
-        constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
-        constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
-        constexpr Index D = Kokkos::Variational::ElasticityStride;
-        constexpr Index Row = Kokkos::Variational::ElasticityRow;
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const auto view = mesh.getDeviceView();
-        const auto quadrature = polytopes.getQuadrature();
-        const auto attributes = polytopes.getAttributes();
-        const auto offsets = polytopes.getOffsets();
-        const size_t spacing = polytopes.getSpacing();
-        const auto region = polytopes.getRegion();
-        const Index dimension = polytopes.getDimension();
-        const bool index = rows.extent(0) > 0;
+        const PolytopeKernel<Vertices> kernel{mesh.getDeviceView(),
+          polytopes.getQuadrature(), polytopes.getAttributes(), polytopes.getOffsets(),
+          polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(),
+          trialDOFs, testDOFs, vdim, state, law, values, offset, sign, accumulate,
+          rows.extent(0) > 0, rows, cols};
         ::Kokkos::parallel_for(
           "Rodin hyperelastic law tangent integration",
-          QuadratureType::policy(execution, polytopes.getPolytopeCount()),
-          KOKKOS_LAMBDA(Index p) {
-            const auto polytope = view.getPolytope(dimension, p);
-            if (!Rodin::Kokkos::Variational::isIntegrated(
-                  view, region, polytope, attributes))
-              return;
-            KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
-            const auto trialIndices = trialDOFs.bind(polytope);
-            const auto testIndices = testDOFs.bind(polytope);
-            const Index na = trialIndices.size();
-            const Index nb = testIndices.size();
-            const Index ntr = na * vdim;
-            const Index nte = nb * vdim;
-            const Index g = static_cast<Index>(polytope.getGeometry());
-            ::Kokkos::Array<Real,
-              TrialCapacity * RODIN_MAXIMAL_SPACE_DIMENSION * TestCapacity *
-                RODIN_MAXIMAL_SPACE_DIMENSION>
-              local{};
-            ::Kokkos::Array<Rodin::Kokkos::Geometry::Vector, TestCapacity> gb;
-            Real elasticity[D * Row];
-            for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
-            {
-              const Rodin::Kokkos::Variational::CellIntegrationPointView ip(polytope,
-                quadrature.getReference(polytope, q),
-                Rodin::Kokkos::Variational::DynamicGeometry{});
-              const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
-              {
-                const auto point = law.getPoint(state.interpolateJacobian(ip));
-                for (Index t = 0; t < vdim; ++t)
-                  law.getElasticity(point, t, wdet, elasticity + t * Row);
-              }
-              for (Index b = 0; b < nb; ++b)
-                gb[b] = testDOFs.getGradient(ip, b);
-              for (Index a = 0; a < na; ++a)
-              {
-                const auto ga = trialDOFs.getGradient(ip, a);
-                // m(t, J, s) = sum_L A(t, J, s, L) d_L phi_a
-                Real m[D * D * D];
-                for (Index t = 0; t < vdim; ++t)
-                {
-                  for (Index J = 0; J < vdim; ++J)
-                  {
-                    for (Index s = 0; s < vdim; ++s)
-                    {
-                      const Real* const A = elasticity + t * Row +
-                        Rodin::Kokkos::Variational::getElasticityIndex(J, s, 0);
-                      Real v = 0;
-                      for (Index L = 0; L < vdim; ++L)
-                        v += A[L] * ga(L);
-                      m[(t * D + J) * D + s] = v;
-                    }
-                  }
-                }
-                for (Index b = 0; b < nb; ++b)
-                {
-                  for (Index t = 0; t < vdim; ++t)
-                  {
-                    for (Index s = 0; s < vdim; ++s)
-                    {
-                      Real v = 0;
-                      for (Index J = 0; J < vdim; ++J)
-                        v += gb[b](J) * m[(t * D + J) * D + s];
-                      local[(b * vdim + t) * ntr + a * vdim + s] += v;
-                    }
-                  }
-                }
-              }
-            }
-            const size_t base = offset + offsets(p);
-            for (Index te = 0; te < nte; ++te)
-            {
-              const Index row =
-                testIndices[te / vdim] + (te % vdim) * testDOFs.getStride();
-              for (Index tr = 0; tr < ntr; ++tr)
-              {
-                const size_t e = base + size_t(te * ntr + tr) * spacing;
-                const Real v = sign * local[te * ntr + tr];
-                if (accumulate)
-                  values(e) += v;
-                else
-                  values(e) = v;
-                if (index)
-                {
-                  rows(e) = row;
-                  cols(e) = trialIndices[tr / vdim] + (tr % vdim) * trialDOFs.getStride();
-                }
-              }
-            }
-          });
+          QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
 
       /**
@@ -1591,8 +1585,7 @@ namespace Rodin::Solid
        * functions, and accumulates in registers the vdim by vdim entries of
        * each of its pairs over the group, contracting each row of the
        * tensor with the trial gradient once for the whole block. The
-       * entries are laid out as by integratePolytopes(). Public as the
-       * enclosing function of a device lambda.
+       * entries are laid out as by integratePolytopes().
        */
       template <Index Vertices>
       static void integrateTeams(const MeshType& mesh, const PolytopesType& polytopes,
@@ -1602,50 +1595,286 @@ namespace Rodin::Solid
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
+        using Kernel = TeamKernel<Vertices>;
+        using Policy = typename Kernel::Policy;
+        static_assert(std::is_trivially_destructible_v<typename Kernel::Point> &&
+          std::is_trivially_copyable_v<typename Kernel::Vector>);
+        constexpr Index TrialCapacity = Kernel::TrialCapacity;
+        constexpr Index TestCapacity = Kernel::TestCapacity;
+        constexpr Index E = Kernel::E;
+        const auto& execution = mesh.getContext().getExecutionSpace();
+        const size_t scratch = Kernel::P * Kernel::PointBytes + 8 * Kernel::Alignment;
+        const int level = scratch <= size_t(Policy::scratch_size_max(0)) ? 0 : 1;
+        const Kernel kernel{mesh.getDeviceView(), polytopes.getQuadrature(),
+          polytopes.getAttributes(), polytopes.getOffsets(), polytopes.getSpacing(),
+          polytopes.getRegion(), polytopes.getDimension(), trialDOFs, testDOFs, vdim,
+          state, law, values, offset, sign, accumulate, rows.extent(0) > 0, rows, cols,
+          level};
+        Policy policy(execution, polytopes.getPolytopeCount(), ::Kokkos::AUTO);
+        policy.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
+        // One slot per thread, the fewest passes over the quadrature.
+        constexpr Index Slots = TrialCapacity * ((TestCapacity + E - 1) / E);
+        const Index wanted = (Slots + 31) / 32 * 32;
+        const int maximum = policy.team_size_max(kernel, ::Kokkos::ParallelForTag());
+        const int threads =
+          std::max(1, std::min(maximum, int(std::min<Index>(wanted, TeamThreads))));
+        Policy launch(execution, polytopes.getPolytopeCount(), threads);
+        launch.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
+        ::Kokkos::parallel_for(
+          "Rodin hyperelastic law tangent team integration", launch, kernel);
+      }
+
+    private:
+      /// @brief Maximum number of entries of the local matrix of a thread,
+      /// so larger local matrices take one team per cell.
+      static constexpr Index LocalCapacity = 1024;
+
+      /// @brief Largest group of quadrature points of a team.
+      static constexpr Index TeamPoints = 32;
+
+      /// @brief Bytes of team scratch memory of a group in the fast level.
+      static constexpr size_t TeamScratch = 47104;
+
+      /// @brief Fewest points of a group in the fast scratch level.
+      static constexpr Index TeamMinimumPoints = 4;
+
+      /// @brief Number of points of a group whose values exceed TeamScratch,
+      /// in the slower scratch level.
+      static constexpr Index TeamSlowPoints = 8;
+
+      /// @brief Largest team, whose register bound the kernel is compiled for.
+      static constexpr unsigned int TeamThreads = 512;
+
+      /// @brief Test functions of the block of a thread, whose entries
+      /// with one trial function it accumulates per pass over the quadrature.
+      static constexpr Index TeamPairs = 4;
+
+      /// @brief Selects the quadrature order of a cell, as on the host.
+      size_t getOrder(const Geometry::Polytope& polytope) const
+      {
+        if (m_quadOrder > 0)
+          return m_quadOrder;
+        const auto trialOrder = m_trial.get().getOrder(polytope);
+        const auto testOrder = m_test.get().getOrder(polytope);
+        const auto stateOrder = m_displacement.get().getOrder(polytope);
+        if (!trialOrder || !testOrder || !stateOrder)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "No automatic constitutive quadrature order is established. "
+            << "Specify it with setQuadratureOrder()." << Alert::Raise;
+        }
+        return 2 * std::max({*trialOrder, *testOrder, *stateOrder});
+      }
+
+      void checkCompatibility(const StateType& displacement) const
+      {
+        const auto& trialfes = m_trial.get().getFiniteElementSpace();
+        const auto& testfes = m_test.get().getFiniteElementSpace();
+        const auto& statefes = displacement.getFiniteElementSpace();
+        const size_t d = trialfes.getMesh().getSpaceDimension();
+        if (&trialfes.getMesh() != &testfes.getMesh() ||
+          &statefes.getMesh() != &testfes.getMesh() ||
+          trialfes.getVectorDimension() != d || testfes.getVectorDimension() != d ||
+          statefes.getVectorDimension() != d || trialfes.getMesh().getDimension() != d)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Kokkos hyperelastic tangents require displacement spaces of the "
+            << "space dimension on one mesh of full dimension." << Alert::Raise;
+        }
+      }
+
+      LawType m_law;
+      std::reference_wrapper<const TrialType> m_trial;
+      std::reference_wrapper<const TestType> m_test;
+      std::reference_wrapper<const StateType> m_displacement;
+      size_t m_quadOrder;
+      mutable PolytopesType m_polytopes;
+
+    public:
+      /**
+       * @brief Kernel of integratePolytopes(), the local matrix of one cell
+       * per thread.
+       */
+      template <Index Vertices>
+      struct PolytopeKernel
+      {
+        static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
+        static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
+        static constexpr Index D = Kokkos::Variational::ElasticityStride;
+        static constexpr Index Row = Kokkos::Variational::ElasticityRow;
+
+        Rodin::Kokkos::Geometry::MeshView view;
+        QuadratureType quadrature;
+        typename PolytopesType::AttributesType attributes;
+        ::Kokkos::View<Index*, MemorySpace> offsets;
+        size_t spacing;
+        Geometry::Region region;
+        Index dimension;
+        TrialDOFsType trialDOFs;
+        TestDOFsType testDOFs;
+        Index vdim;
+        StateViewType state;
+        DeviceLawType law;
+        ::Kokkos::View<Real*, MemorySpace> values;
+        size_t offset;
+        Real sign;
+        bool accumulate;
+        bool index;
+        ::Kokkos::View<Index*, MemorySpace> rows;
+        ::Kokkos::View<Index*, MemorySpace> cols;
+
+        KOKKOS_INLINE_FUNCTION void operator()(Index p) const
+        {
+          const auto polytope = view.getPolytope(dimension, p);
+          if (!Rodin::Kokkos::Variational::isIntegrated(
+                view, region, polytope, attributes))
+            return;
+          KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
+          const auto trialIndices = trialDOFs.bind(polytope);
+          const auto testIndices = testDOFs.bind(polytope);
+          const Index na = trialIndices.size();
+          const Index nb = testIndices.size();
+          const Index ntr = na * vdim;
+          const Index nte = nb * vdim;
+          const Index g = static_cast<Index>(polytope.getGeometry());
+          ::Kokkos::Array<Real,
+            TrialCapacity * RODIN_MAXIMAL_SPACE_DIMENSION * TestCapacity *
+              RODIN_MAXIMAL_SPACE_DIMENSION>
+            local{};
+          ::Kokkos::Array<Rodin::Kokkos::Geometry::Vector, TestCapacity> gb;
+          Real elasticity[D * Row];
+          for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
+          {
+            const Rodin::Kokkos::Variational::CellIntegrationPointView ip(polytope,
+              quadrature.getReference(polytope, q),
+              Rodin::Kokkos::Variational::DynamicGeometry{});
+            const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
+            {
+              const auto point = law.getPoint(state.interpolateJacobian(ip));
+              for (Index t = 0; t < vdim; ++t)
+                law.getElasticity(point, t, wdet, elasticity + t * Row);
+            }
+            for (Index b = 0; b < nb; ++b)
+              gb[b] = testDOFs.getGradient(ip, b);
+            for (Index a = 0; a < na; ++a)
+            {
+              const auto ga = trialDOFs.getGradient(ip, a);
+              // m(t, J, s) = sum_L A(t, J, s, L) d_L phi_a
+              Real m[D * D * D];
+              for (Index t = 0; t < vdim; ++t)
+              {
+                for (Index J = 0; J < vdim; ++J)
+                {
+                  for (Index s = 0; s < vdim; ++s)
+                  {
+                    const Real* const A = elasticity + t * Row +
+                      Rodin::Kokkos::Variational::getElasticityIndex(J, s, 0);
+                    Real v = 0;
+                    for (Index L = 0; L < vdim; ++L)
+                      v += A[L] * ga(L);
+                    m[(t * D + J) * D + s] = v;
+                  }
+                }
+              }
+              for (Index b = 0; b < nb; ++b)
+              {
+                for (Index t = 0; t < vdim; ++t)
+                {
+                  for (Index s = 0; s < vdim; ++s)
+                  {
+                    Real v = 0;
+                    for (Index J = 0; J < vdim; ++J)
+                      v += gb[b](J) * m[(t * D + J) * D + s];
+                    local[(b * vdim + t) * ntr + a * vdim + s] += v;
+                  }
+                }
+              }
+            }
+          }
+          const size_t base = offset + offsets(p);
+          for (Index te = 0; te < nte; ++te)
+          {
+            const Index row =
+              testIndices[te / vdim] + (te % vdim) * testDOFs.getStride();
+            for (Index tr = 0; tr < ntr; ++tr)
+            {
+              const size_t e = base + size_t(te * ntr + tr) * spacing;
+              const Real v = sign * local[te * ntr + tr];
+              if (accumulate)
+                values(e) += v;
+              else
+                values(e) = v;
+              if (index)
+              {
+                rows(e) = row;
+                cols(e) = trialIndices[tr / vdim] + (tr % vdim) * trialDOFs.getStride();
+              }
+            }
+          }
+        }
+      };
+
+      /**
+       * @brief Kernel of integrateTeams(), the local matrix of one cell per
+       * team.
+       */
+      template <Index Vertices>
+      struct TeamKernel
+      {
         using Point = Kokkos::Variational::CellIntegrationPointView;
         using Vector = Kokkos::Geometry::Vector;
-        static_assert(std::is_trivially_destructible_v<Point> &&
-          std::is_trivially_copyable_v<Vector>);
-        const auto& execution = mesh.getContext().getExecutionSpace();
-        using ExecutionSpace = std::decay_t<decltype(execution)>;
+        using ExecutionSpace = typename MeshType::ExecutionSpace;
         // The register bound keeps enough threads for one pass over the
         // quadrature, at the price of a few spills.
         using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>,
           ::Kokkos::LaunchBounds<TeamThreads, 1>>;
         using Member = typename Policy::member_type;
-        constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
-        constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
-        constexpr Index D = Kokkos::Variational::ElasticityStride;
-        constexpr Index Row = Kokkos::Variational::ElasticityRow;
-        constexpr Index Square = D * D;
-        constexpr Index Tensor = D * Row;
         using StateDOFsType =
           std::decay_t<decltype(std::declval<const StateViewType&>().getDOFs())>;
+        static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
+        static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
+        static constexpr Index D = Kokkos::Variational::ElasticityStride;
+        static constexpr Index Row = Kokkos::Variational::ElasticityRow;
+        static constexpr Index Square = D * D;
+        static constexpr Index Tensor = D * Row;
         // Spaces of one type share their basis gradients.
-        constexpr bool SharedTest = std::is_same_v<TrialDOFsType, TestDOFsType>;
-        constexpr bool SharedState = std::is_same_v<TrialDOFsType, StateDOFsType>;
-        constexpr Index TestStorage = SharedTest ? 0 : TestCapacity;
-        constexpr size_t PointBytes = sizeof(Point) + (Square + Tensor) * sizeof(Real) +
+        static constexpr bool SharedTest = std::is_same_v<TrialDOFsType, TestDOFsType>;
+        static constexpr bool SharedState = std::is_same_v<TrialDOFsType, StateDOFsType>;
+        static constexpr Index TestStorage = SharedTest ? 0 : TestCapacity;
+        static constexpr size_t PointBytes = sizeof(Point) +
+          (Square + Tensor) * sizeof(Real) +
           (TrialCapacity + TestStorage) * sizeof(Vector);
         // Groups that do not fit TeamScratch go to the slower scratch level.
-        constexpr Index Fit = TeamScratch / PointBytes;
-        constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
-          : Fit > TeamPoints                        ? TeamPoints
-                                                    : Fit;
-        constexpr Index E = TeamPairs;
-        constexpr size_t Alignment =
+        static constexpr Index Fit = TeamScratch / PointBytes;
+        static constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
+          : Fit > TeamPoints                               ? TeamPoints
+                                                           : Fit;
+        static constexpr Index E = TeamPairs;
+        static constexpr size_t Alignment =
           std::max({alignof(Point), alignof(Vector), alignof(Real)});
-        const auto view = mesh.getDeviceView();
-        const auto quadrature = polytopes.getQuadrature();
-        const auto attributes = polytopes.getAttributes();
-        const auto offsets = polytopes.getOffsets();
-        const size_t spacing = polytopes.getSpacing();
-        const auto region = polytopes.getRegion();
-        const Index dimension = polytopes.getDimension();
-        const bool index = rows.extent(0) > 0;
-        const size_t scratch = P * PointBytes + 8 * Alignment;
-        const int level = scratch <= size_t(Policy::scratch_size_max(0)) ? 0 : 1;
-        const auto kernel = KOKKOS_LAMBDA(const Member& team)
+
+        Rodin::Kokkos::Geometry::MeshView view;
+        QuadratureType quadrature;
+        typename PolytopesType::AttributesType attributes;
+        ::Kokkos::View<Index*, MemorySpace> offsets;
+        size_t spacing;
+        Geometry::Region region;
+        Index dimension;
+        TrialDOFsType trialDOFs;
+        TestDOFsType testDOFs;
+        Index vdim;
+        StateViewType state;
+        DeviceLawType law;
+        ::Kokkos::View<Real*, MemorySpace> values;
+        size_t offset;
+        Real sign;
+        bool accumulate;
+        bool index;
+        ::Kokkos::View<Index*, MemorySpace> rows;
+        ::Kokkos::View<Index*, MemorySpace> cols;
+        int level;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const Member& team) const
         {
           const Index p = team.league_rank();
           const auto polytope = view.getPolytope(dimension, p);
@@ -1862,86 +2091,8 @@ namespace Rodin::Solid
               }
             }
           }
-        };
-        Policy policy(execution, polytopes.getPolytopeCount(), ::Kokkos::AUTO);
-        policy.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
-        // One slot per thread, the fewest passes over the quadrature.
-        constexpr Index Slots = TrialCapacity * ((TestCapacity + E - 1) / E);
-        const Index wanted = (Slots + 31) / 32 * 32;
-        const int maximum = policy.team_size_max(kernel, ::Kokkos::ParallelForTag());
-        const int threads =
-          std::max(1, std::min(maximum, int(std::min<Index>(wanted, TeamThreads))));
-        Policy launch(execution, polytopes.getPolytopeCount(), threads);
-        launch.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
-        ::Kokkos::parallel_for(
-          "Rodin hyperelastic law tangent team integration", launch, kernel);
-      }
-
-    private:
-      /// @brief Maximum number of entries of the local matrix of a thread,
-      /// so larger local matrices take one team per cell.
-      static constexpr Index LocalCapacity = 1024;
-
-      /// @brief Largest group of quadrature points of a team.
-      static constexpr Index TeamPoints = 32;
-
-      /// @brief Bytes of team scratch memory of a group in the fast level.
-      static constexpr size_t TeamScratch = 47104;
-
-      /// @brief Fewest points of a group in the fast scratch level.
-      static constexpr Index TeamMinimumPoints = 4;
-
-      /// @brief Number of points of a group whose values exceed TeamScratch,
-      /// in the slower scratch level.
-      static constexpr Index TeamSlowPoints = 8;
-
-      /// @brief Largest team, whose register bound the kernel is compiled for.
-      static constexpr unsigned int TeamThreads = 512;
-
-      /// @brief Test functions of the block of a thread, whose entries
-      /// with one trial function it accumulates per pass over the quadrature.
-      static constexpr Index TeamPairs = 4;
-
-      /// @brief Selects the quadrature order of a cell, as on the host.
-      size_t getOrder(const Geometry::Polytope& polytope) const
-      {
-        if (m_quadOrder > 0)
-          return m_quadOrder;
-        const auto trialOrder = m_trial.get().getOrder(polytope);
-        const auto testOrder = m_test.get().getOrder(polytope);
-        const auto stateOrder = m_displacement.get().getOrder(polytope);
-        if (!trialOrder || !testOrder || !stateOrder)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "No automatic constitutive quadrature order is established. "
-            << "Specify it with setQuadratureOrder()." << Alert::Raise;
         }
-        return 2 * std::max({*trialOrder, *testOrder, *stateOrder});
-      }
-
-      void checkCompatibility(const StateType& displacement) const
-      {
-        const auto& trialfes = m_trial.get().getFiniteElementSpace();
-        const auto& testfes = m_test.get().getFiniteElementSpace();
-        const auto& statefes = displacement.getFiniteElementSpace();
-        const size_t d = trialfes.getMesh().getSpaceDimension();
-        if (&trialfes.getMesh() != &testfes.getMesh() ||
-          &statefes.getMesh() != &testfes.getMesh() ||
-          trialfes.getVectorDimension() != d || testfes.getVectorDimension() != d ||
-          statefes.getVectorDimension() != d || trialfes.getMesh().getDimension() != d)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Kokkos hyperelastic tangents require displacement spaces of the "
-            << "space dimension on one mesh of full dimension." << Alert::Raise;
-        }
-      }
-
-      LawType m_law;
-      std::reference_wrapper<const TrialType> m_trial;
-      std::reference_wrapper<const TestType> m_test;
-      std::reference_wrapper<const StateType> m_displacement;
-      size_t m_quadOrder;
-      mutable PolytopesType m_polytopes;
+      };
   };
 
   /**
@@ -2160,7 +2311,7 @@ namespace Rodin::Solid
        * @brief Integrates the cells of at most Vertices vertices.
        *
        * Local index a * vdim + c is component c of the scalar degree of
-       * freedom a. Public as the enclosing function of a device lambda.
+       * freedom a.
        */
       template <Index Vertices>
       static void integratePolytopes(const MeshType& mesh, const PolytopesType& polytopes,
@@ -2169,64 +2320,15 @@ namespace Rodin::Solid
         size_t offset, Real sign, bool accumulate,
         const ::Kokkos::View<Index*, MemorySpace>& indices)
       {
-        constexpr Index Capacity =
-          DOFsType::getCapacity(Vertices) * RODIN_MAXIMAL_SPACE_DIMENSION;
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const auto view = mesh.getDeviceView();
-        const auto quadrature = polytopes.getQuadrature();
-        const auto attributes = polytopes.getAttributes();
-        const auto offsets = polytopes.getOffsets();
-        const size_t spacing = polytopes.getSpacing();
-        const auto region = polytopes.getRegion();
-        const Index dimension = polytopes.getDimension();
-        const bool index = indices.extent(0) > 0;
+        const PolytopeKernel<Vertices> kernel{mesh.getDeviceView(),
+          polytopes.getQuadrature(), polytopes.getAttributes(), polytopes.getOffsets(),
+          polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(), dofs,
+          vdim, state, law, values, offset, sign, accumulate, indices.extent(0) > 0,
+          indices};
         ::Kokkos::parallel_for(
           "Rodin hyperelastic law residual integration",
-          QuadratureType::policy(execution, polytopes.getPolytopeCount()),
-          KOKKOS_LAMBDA(Index p) {
-            const auto polytope = view.getPolytope(dimension, p);
-            if (!Rodin::Kokkos::Variational::isIntegrated(
-                  view, region, polytope, attributes))
-              return;
-            KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
-            const auto testIndices = dofs.bind(polytope);
-            const Index nb = testIndices.size();
-            const Index nte = nb * vdim;
-            const Index g = static_cast<Index>(polytope.getGeometry());
-            ::Kokkos::Array<Real, Capacity> local{};
-            for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
-            {
-              const Rodin::Kokkos::Variational::CellIntegrationPointView ip(polytope,
-                quadrature.getReference(polytope, q),
-                Rodin::Kokkos::Variational::DynamicGeometry{});
-              const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
-              Rodin::Kokkos::Geometry::Matrix stress;
-              law.getStress(law.getPoint(state.interpolateJacobian(ip)), stress);
-              for (Index b = 0; b < nb; ++b)
-              {
-                const auto& gradient = dofs.getGradient(ip, b);
-                for (Index c = 0; c < vdim; ++c)
-                {
-                  Real v = 0;
-                  for (Index k = 0; k < vdim; ++k)
-                    v += stress(c, k) * gradient(k);
-                  local[b * vdim + c] += wdet * v;
-                }
-              }
-            }
-            const size_t base = offset + offsets(p);
-            for (Index te = 0; te < nte; ++te)
-            {
-              const size_t e = base + te * spacing;
-              const Real v = sign * local[te];
-              if (accumulate)
-                values(e) += v;
-              else
-                values(e) = v;
-              if (index)
-                indices(e) = testIndices[te / vdim] + (te % vdim) * dofs.getStride();
-            }
-          });
+          QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
 
     private:
@@ -2266,6 +2368,82 @@ namespace Rodin::Solid
       std::reference_wrapper<const StateType> m_displacement;
       size_t m_quadOrder;
       mutable PolytopesType m_polytopes;
+
+    public:
+      /**
+       * @brief Kernel of integratePolytopes(), the local vector of one cell
+       * per thread.
+       */
+      template <Index Vertices>
+      struct PolytopeKernel
+      {
+        static constexpr Index Capacity =
+          DOFsType::getCapacity(Vertices) * RODIN_MAXIMAL_SPACE_DIMENSION;
+
+        Rodin::Kokkos::Geometry::MeshView view;
+        QuadratureType quadrature;
+        typename PolytopesType::AttributesType attributes;
+        ::Kokkos::View<Index*, MemorySpace> offsets;
+        size_t spacing;
+        Geometry::Region region;
+        Index dimension;
+        DOFsType dofs;
+        Index vdim;
+        StateViewType state;
+        DeviceLawType law;
+        ::Kokkos::View<Real*, MemorySpace> values;
+        size_t offset;
+        Real sign;
+        bool accumulate;
+        bool index;
+        ::Kokkos::View<Index*, MemorySpace> indices;
+
+        KOKKOS_INLINE_FUNCTION void operator()(Index p) const
+        {
+          const auto polytope = view.getPolytope(dimension, p);
+          if (!Rodin::Kokkos::Variational::isIntegrated(
+                view, region, polytope, attributes))
+            return;
+          KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
+          const auto testIndices = dofs.bind(polytope);
+          const Index nb = testIndices.size();
+          const Index nte = nb * vdim;
+          const Index g = static_cast<Index>(polytope.getGeometry());
+          ::Kokkos::Array<Real, Capacity> local{};
+          for (Index q = quadrature.begin(g); q < quadrature.end(g); ++q)
+          {
+            const Rodin::Kokkos::Variational::CellIntegrationPointView ip(polytope,
+              quadrature.getReference(polytope, q),
+              Rodin::Kokkos::Variational::DynamicGeometry{});
+            const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
+            Rodin::Kokkos::Geometry::Matrix stress;
+            law.getStress(law.getPoint(state.interpolateJacobian(ip)), stress);
+            for (Index b = 0; b < nb; ++b)
+            {
+              const auto& gradient = dofs.getGradient(ip, b);
+              for (Index c = 0; c < vdim; ++c)
+              {
+                Real v = 0;
+                for (Index k = 0; k < vdim; ++k)
+                  v += stress(c, k) * gradient(k);
+                local[b * vdim + c] += wdet * v;
+              }
+            }
+          }
+          const size_t base = offset + offsets(p);
+          for (Index te = 0; te < nte; ++te)
+          {
+            const size_t e = base + te * spacing;
+            const Real v = sign * local[te];
+            if (accumulate)
+              values(e) += v;
+            else
+              values(e) = v;
+            if (index)
+              indices(e) = testIndices[te / vdim] + (te % vdim) * dofs.getStride();
+          }
+        }
+      };
   };
 }
 

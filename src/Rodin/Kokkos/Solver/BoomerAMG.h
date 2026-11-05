@@ -396,14 +396,26 @@ namespace Rodin::Solver
         return new BoomerAMG(*this);
       }
 
+      /// @brief Writes the row count and the row number of each row of a CSR matrix.
+      template <class Starts, class Counts, class Rows>
+      struct FillRows
+      {
+        Starts starts;
+        Counts counts;
+        Rows rows;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
+        {
+          counts(i) = starts(i + 1) - starts(i);
+          rows(i) = static_cast<HYPRE_BigInt>(i);
+        }
+      };
+
       /**
        * @brief Writes the row counts and the row numbers of a CSR matrix.
        * @param starts Row starts.
        * @param counts Row counts, one per row.
        * @param rows Row numbers, one per row.
-       *
-       * Public because nvcc does not compile a device lambda in a private
-       * member function.
        */
       template <class Starts, class Counts, class Rows>
       static void fillRows(const Starts& starts, const Counts& counts, const Rows& rows)
@@ -411,10 +423,7 @@ namespace Rodin::Solver
         ::Kokkos::parallel_for(
           "Rodin::Solver::BoomerAMG::rows",
           ::Kokkos::RangePolicy<ExecutionSpace>(0, counts.extent(0)),
-          KOKKOS_LAMBDA(const size_t i) {
-            counts(i) = starts(i + 1) - starts(i);
-            rows(i) = static_cast<HYPRE_BigInt>(i);
-          });
+          FillRows<Starts, Counts, Rows>{starts, counts, rows});
       }
 
     private:

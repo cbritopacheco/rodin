@@ -25,6 +25,64 @@
 
 namespace Rodin::Solver::Internal
 {
+  /// @brief Writes @f$ p = D^{-1} r @f$ and sums @f$ r \cdot p @f$.
+  template <class Backend>
+  struct KokkosCGPrecondition
+  {
+    typename KokkosKrylov<Backend>::Vector inverse;
+    typename KokkosKrylov<Backend>::Vector r;
+    typename KokkosKrylov<Backend>::Vector p;
+
+    KOKKOS_INLINE_FUNCTION void operator()(const size_t i, Real& sum) const
+    {
+      const Real v = inverse(i) * r(i);
+      p(i) = v;
+      sum += r(i) * v;
+    }
+  };
+
+  /**
+   * @brief Updates the iterate and the residual of a conjugate gradient step,
+   * writes the preconditioned residual and sums @f$ |r|^2 @f$ and
+   * @f$ r \cdot z @f$.
+   */
+  template <class Backend>
+  struct KokkosCGUpdate
+  {
+    typename KokkosKrylov<Backend>::Vector x;
+    typename KokkosKrylov<Backend>::Vector p;
+    typename KokkosKrylov<Backend>::Vector r;
+    typename KokkosKrylov<Backend>::Vector q;
+    typename KokkosKrylov<Backend>::Vector inverse;
+    typename KokkosKrylov<Backend>::Vector z;
+    Real alpha;
+
+    KOKKOS_INLINE_FUNCTION void operator()(const size_t k, Real& rr, Real& dz) const
+    {
+      x(k) += alpha * p(k);
+      const Real rk = r(k) - alpha * q(k);
+      r(k) = rk;
+      const Real zk = inverse(k) * rk;
+      z(k) = zk;
+      rr += rk * rk;
+      dz += rk * zk;
+    }
+  };
+
+  /// @brief Writes the next search direction @f$ p = z + \beta p @f$.
+  template <class Backend>
+  struct KokkosCGDirection
+  {
+    typename KokkosKrylov<Backend>::Vector p;
+    typename KokkosKrylov<Backend>::Vector z;
+    Real beta;
+
+    KOKKOS_INLINE_FUNCTION void operator()(const size_t k) const
+    {
+      p(k) = z(k) + beta * p(k);
+    }
+  };
+
   /**
    * @brief Jacobi preconditioned conjugate gradient, following the iteration
    * and the stopping test of Eigen's ConjugateGradient.
@@ -84,12 +142,7 @@ namespace Rodin::Solver::Internal
     Real absNew = 0;
     ::Kokkos::parallel_reduce(
       "Rodin::Solver::CG::precondition", Policy(execution, 0, n),
-      KOKKOS_LAMBDA(const size_t i, Real& sum) {
-        const Real v = inverse(i) * r(i);
-        p(i) = v;
-        sum += r(i) * v;
-      },
-      absNew);
+      KokkosCGPrecondition<Backend>{inverse, r, p}, absNew);
 
     size_t i = 0;
     while (i < maxIterations)
@@ -101,15 +154,7 @@ namespace Rodin::Solver::Internal
       Real rz = 0;
       ::Kokkos::parallel_reduce(
         "Rodin::Solver::CG::update", Policy(execution, 0, n),
-        KOKKOS_LAMBDA(const size_t k, Real& rr, Real& dz) {
-          x(k) += alpha * p(k);
-          const Real rk = r(k) - alpha * q(k);
-          r(k) = rk;
-          const Real zk = inverse(k) * rk;
-          z(k) = zk;
-          rr += rk * rk;
-          dz += rk * zk;
-        },
+        KokkosCGUpdate<Backend>{x, p, r, q, inverse, z, alpha},
         ::Kokkos::Sum<Real>(residualNorm2), ::Kokkos::Sum<Real>(rz));
       if (residualNorm2 < threshold)
         break;
@@ -118,7 +163,7 @@ namespace Rodin::Solver::Internal
       absNew = rz;
       ::Kokkos::parallel_for(
         "Rodin::Solver::CG::direction", Policy(execution, 0, n),
-        KOKKOS_LAMBDA(const size_t k) { p(k) = z(k) + beta * p(k); });
+        KokkosCGDirection<Backend>{p, z, beta});
       ++i;
     }
     res.iterations = i;

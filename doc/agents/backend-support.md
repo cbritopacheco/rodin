@@ -99,9 +99,7 @@ their fields, each process may give any of them (an identification Dirichlet
 condition gives those of the boundary it holds), and they are resolved in a
 global constraint map after the fixed values are synchronized; masters the
 process does not hold become virtual local degrees of freedom. Eigen systems
-are not distributed. Two sources of one CUDA executable instantiating the
-same device assembly templates crashed on a null host pointer under nvcc
-13.1, so each distributed Kokkos test source is its own executable.
+are not distributed.
 See [the Kokkos guide](../Guides/Kokkos.dox) for lifecycle and build details.
 
 In CUDA builds, Kokkos's launcher compiles targets linked to `Kokkos::kokkos`
@@ -114,6 +112,18 @@ imposes constraints that host Kokkos backends do not detect:
 - Extended lambdas (`KOKKOS_LAMBDA`) cannot appear in private or protected
   member functions, including GoogleTest's `TestBody`; tests launch device
   work from free functions.
+- Library headers launch no extended lambda: every kernel is a named functor,
+  a public nested struct template or a namespace scope struct, never a class
+  local to the launching function. NVCC wraps an extended lambda in
+  `__nv_hdl_wrapper_t`, whose copy calls a function pointer stored once per
+  translation unit and set by the wrapper constructor of that unit. When two
+  sources of an executable instantiate the same header kernel, the linker
+  keeps one copy of the out of line launch, which can read the still null
+  pointer of the other source and jump to address zero (Kokkos 5.2, CUDA 12.5
+  and 13.1). A lambda of a test or example source is unique to it and is
+  safe; a user lambda carried as a functor member is too.
+  A nested functor whose static members use private constants of its class
+  is declared after them, in a public section at the end of the class.
 - A `using namespace Rodin;` directive at namespace scope makes `Kokkos`
   ambiguous with `Rodin::Kokkos`; NVCC resolves the `using namespace Kokkos;`
   directives of the Kokkos templates at instantiation and fails. Examples and

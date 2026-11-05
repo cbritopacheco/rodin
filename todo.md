@@ -422,13 +422,14 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       (`MATMPIAIJKOKKOS`, COO `VecSetValuesCOO` pour le second membre),
       Dirichlet synchronisé par Vec fantôme (fixé partout dès qu'un
       processus le fixe). GridFunction PETSc en Vec Kokkos fantôme. Test
-      `RodinKokkosMPIPoissonTest_np{1,2,4}` (build-mpi) contre l'hôte MPI.
+      `RodinKokkosMPITest_np{1,2,4}` (build-mpi) contre l'hôte MPI.
 - [ ] MPI: systèmes Eigen non distribués.
-- [ ] nvcc 13.1: deux sources d'un même exécutable qui instancient les mêmes
-      gabarits d'assemblage device plantent (pointeur hôte nul dans la copie
-      d'un lambda device de `DevicePolytopes::locate`) sauf si un test de
-      l'autre source a tourné avant. Contourné par un exécutable par source
-      (`RodinKokkosMPIConstraintTest`); cause non isolée.
+- [x] nvcc: deux sources d'un même exécutable qui instancient les mêmes
+      gabarits d'assemblage device plantaient (saut à l'adresse nulle dans la
+      copie d'un lambda device de `DevicePolytopes::locate`). La copie d'un
+      `__nv_hdl_wrapper_t` lit un pointeur de fonction propre à chaque unité
+      de traduction, et l'éditeur de liens ne garde qu'une copie du
+      lancement. Les en-têtes ne lancent plus que des foncteurs nommés.
 - [x] MPI PBC device: paires en indices globaux du champ, données par
       n'importe quel processus, résolues dans une `ConstraintMap` PETSc
       globale après synchronisation des valeurs fixées; les maîtres non
@@ -440,7 +441,7 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       résolus dans la même `ConstraintMap` globale. Les lignes fixées sont
       imposées avec les identifiées une fois la carte aplatie (elles
       manquaient: valeurs fixées perdues dès qu'une identification existait).
-      `RodinKokkosMPIConstraintTest`: `Kokkos_MPI_Identification` (affine
+      `RodinKokkosMPITest`: `Kokkos_MPI_Identification` (affine
       d'un champ sur l'autre, contre l'hôte MPI), `Kokkos_MPI_PeriodicDirichlet`
       (bord fixé, maîtres fixés et chaînes) et `Kokkos_MPI_PeriodicSecondField`
       (PBC sur le second champ), contre le séquentiel hôte.
@@ -468,7 +469,7 @@ seul le type du maillage (`Mesh<Context::Kokkos<...>>`) change.
       (`GridFunctionCoefficients<::Vec>`): la forme locale fantôme est lue là
       où PETSc la garde et réordonnée en numérotation locale, sans
       communication. Tests: solution réutilisée comme coefficient (valeurs
-      et gradient) dans `RodinKokkosMPIPoissonTest_np{1,2,4}` et
+      et gradient) dans `RodinKokkosMPITest_np{1,2,4}` et
       `Kokkos_PETSc_Problem.SolveOnTriangles`.
 
 ## 12. DSL device, jalon 7: benchmark Oseen
