@@ -324,8 +324,9 @@ namespace Rodin::Examples
         partitioner.partition(static_cast<size_t>(comm.size()));
         sharder.shard(partitioner);
       }
-      sharder.scatter(0);
     }
+    // The global mesh is released before the shards are sent.
+    sharder.scatter(0);
     HostMesh mesh = sharder.gather(0);
     boost::mpi::broadcast(comm, cells, 0);
     auto& conn = mesh.getConnectivity();

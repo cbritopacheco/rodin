@@ -58,29 +58,30 @@ namespace Rodin::Geometry
     const int tag = ctx.getEnvironment().collectives_tag();
     auto& shards = this->getShards();
     assert(root >= 0);
-    std::vector<std::string> buffers(shards.size());
-    std::vector<std::uint64_t> sizes(shards.size(), 0);
-    std::vector<boost::mpi::request> reqs;
+    // One serialized shard at a time, released once sent, so that the root
+    // holds at most one archive besides the shards left to send.
     for (size_t i = 0; i < shards.size(); i++)
     {
       if (i == static_cast<size_t>(root))
         continue;
+      std::string buffer;
       {
         std::ostringstream os(std::ios::binary);
-        boost::archive::binary_oarchive oa(os);
-        oa << shards[i];
-        buffers[i] = std::move(os).str();
+        {
+          boost::archive::binary_oarchive oa(os);
+          oa << shards[i];
+        }
+        shards[i] = Shard();
+        buffer = std::move(os).str();
       }
-      sizes[i] = buffers[i].size();
-      reqs.push_back(comm.isend(static_cast<int>(i), tag, sizes[i]));
-      for (size_t offset = 0; offset < buffers[i].size(); offset += ChunkBytes)
+      const std::uint64_t size = buffer.size();
+      comm.send(static_cast<int>(i), tag, size);
+      for (size_t offset = 0; offset < buffer.size(); offset += ChunkBytes)
       {
-        const size_t n = std::min(ChunkBytes, buffers[i].size() - offset);
-        reqs.push_back(comm.isend(static_cast<int>(i), tag,
-          buffers[i].data() + offset, static_cast<int>(n)));
+        const size_t n = std::min(ChunkBytes, buffer.size() - offset);
+        comm.send(static_cast<int>(i), tag, buffer.data() + offset, static_cast<int>(n));
       }
     }
-    boost::mpi::wait_all(reqs.begin(), reqs.end());
     return *this;
   }
 

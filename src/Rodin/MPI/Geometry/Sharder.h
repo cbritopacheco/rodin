@@ -53,8 +53,10 @@ namespace Rodin::Geometry
       /**
        * @brief Scatter shards from the root rank to all ranks.
        *
-       * Only the root rank performs non-blocking sends of each shard
-       * to its respective owner rank. Other ranks do nothing.
+       * Only the root rank sends each shard to its owner rank, one after
+       * the other, and releases it once sent, so that only the shard of the
+       * root remains. Other ranks do nothing, and receive their shard in
+       * gather().
        *
        * @param root The rank that owns the global mesh and performs sends.
        * @return Reference to this object for chaining.
