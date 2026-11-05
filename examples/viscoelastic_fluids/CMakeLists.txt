@@ -64,3 +64,6 @@ if (RODIN_USE_PETSC AND RODIN_USE_MPI)
     Rodin::Assembly)
   target_include_directories(test_kolmogorov_viscoelastic PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
+
+# Pathlines through the 3D output.
+add_subdirectory(Pathlines3D)
