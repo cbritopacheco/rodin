@@ -506,6 +506,15 @@ namespace Rodin::Assembly::Internal
       /// @brief Execution space of the kernels.
       using ExecutionSpace = typename ContextType::ExecutionSpaceType;
 
+      /**
+       * @brief Range of the kernels, indexed by Index.
+       *
+       * The default index of a Kokkos 5 range is the index_type of the execution
+       * space, a 32 bit int on the GPUs, and a bound past it aborts. One process
+       * can hold more than 2^31 entries.
+       */
+      using Range = ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>;
+
       /// @brief Memory space of the system.
       using MemorySpace = typename ContextType::MemorySpaceType;
 
@@ -822,7 +831,7 @@ namespace Rodin::Assembly::Internal
       {
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::shift",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, offset, offset + count),
+          Range(execution, offset, offset + count),
           Shift<Indices>{ rows, cols, row, col });
       }
 
@@ -848,7 +857,7 @@ namespace Rodin::Assembly::Internal
       {
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::diagonal",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          Range(execution, 0, count),
           DiagonalList<Indices>{ offset, rows, cols });
       }
 
@@ -879,7 +888,7 @@ namespace Rodin::Assembly::Internal
         const bool distributed = owned.extent(0) > 0;
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::diagonal",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          Range(execution, 0, count),
           DiagonalFill<Fixed, Owned, Scalars>{
             offset, hasFixed, fixed, owned, coo, distributed });
       }
@@ -909,7 +918,7 @@ namespace Rodin::Assembly::Internal
         size_t res = 0;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::countEliminated",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          Range(execution, 0, count),
           EliminatedCount<Indices, Fixed>{ rows, cols, fixed }, res);
         return res;
       }
@@ -961,7 +970,7 @@ namespace Rodin::Assembly::Internal
       {
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::PETSc::eliminate",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          Range(execution, 0, count),
           Elimination<Indices, Fixed, Values, Scalars>{
             rows, cols, fixed, values, coo, res.rows, res.values, res.offset });
       }
@@ -1019,7 +1028,7 @@ namespace Rodin::Assembly::Internal
         size_t res = 0;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::countVector",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, begin, begin + count),
+          Range(execution, begin, begin + count),
           VectorCount<Indices, Values, Fixed>{
             indices, values, row, hasFixed, fixed, x, expanded },
           res);
@@ -1086,7 +1095,7 @@ namespace Rodin::Assembly::Internal
         const Fixed& fixed, const Expansions& x, bool expanded, const Contributions& res)
       {
         const auto policy =
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, begin, begin + count);
+          Range(execution, begin, begin + count);
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::PETSc::vector", policy,
           VectorList<Indices, Values, Fixed>{ indices, values, row, hasFixed, fixed, x,
@@ -1118,7 +1127,7 @@ namespace Rodin::Assembly::Internal
         const bool distributed = owned.extent(0) > 0;
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::fixed",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          Range(execution, 0, count),
           FixedImposition<Fixed, Values, Owned, RHS>{
             fixed, values, owned, rhs, distributed });
       }
@@ -1149,7 +1158,7 @@ namespace Rodin::Assembly::Internal
       {
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::rows",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, begin, end),
+          Range(execution, begin, end),
           EntryRows<Indices>{ indices, row, res });
       }
 
@@ -1168,7 +1177,7 @@ namespace Rodin::Assembly::Internal
       {
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::sequence",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, res.extent(0)),
+          Range(execution, 0, res.extent(0)),
           Sequence<Indices>{ res });
       }
 
@@ -1208,7 +1217,7 @@ namespace Rodin::Assembly::Internal
         Sizes res;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::countExpanded",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          Range(execution, 0, count),
           ExpandedCount<Indices, Scalars>{ rows, cols, values, x }, res);
         return res;
       }
@@ -1286,7 +1295,7 @@ namespace Rodin::Assembly::Internal
       {
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::PETSc::expand",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          Range(execution, 0, count),
           Expansion<Indices, Scalars>{ rows, cols, values, x, resRows, resCols,
             resValues, lifts.rows, lifts.values, lifts.offset });
       }
@@ -1312,7 +1321,7 @@ namespace Rodin::Assembly::Internal
         size_t differences = 0;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::differences",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, indices.extent(0)),
+          Range(execution, 0, indices.extent(0)),
           DifferenceCount<Indices, Previous>{ indices, previous }, differences);
         return differences;
       }
@@ -1340,7 +1349,7 @@ namespace Rodin::Assembly::Internal
         size_t changes = 0;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::pattern",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, rows.extent(0)),
+          Range(execution, 0, rows.extent(0)),
           ChangeCount<Indices>{ rows, cols, previousRows, previousCols }, changes);
         return changes;
       }
@@ -1430,7 +1439,7 @@ namespace Rodin::Assembly::Internal
           const size_t spacing = s < segments.size() ? segments[s].spacing : 1;
           ::Kokkos::parallel_for(
             "Rodin::Assembly::Kokkos::PETSc::keys",
-            ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, size),
+            Range(execution, 0, size),
             PatternKeys<Indices, Order>{
               begin, size, spacing, keys, rows, cols, columns, order });
         }
@@ -1505,14 +1514,14 @@ namespace Rodin::Assembly::Internal
         size_t distinct = 0;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::distinct",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          Range(execution, 0, count),
           DistinctCount<Indices, Order>{ head }, distinct);
         Indices starts(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
                          std::string("Rodin COO starts")),
           distinct + 1);
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::PETSc::starts",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          Range(execution, 0, count),
           DistinctStartList<Indices, Order>{ head, starts });
         ::Kokkos::deep_copy(execution, ::Kokkos::subview(starts, distinct), count);
         return starts;
@@ -1545,7 +1554,7 @@ namespace Rodin::Assembly::Internal
       {
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::distinctCoordinates",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, distinctRows.extent(0)),
+          Range(execution, 0, distinctRows.extent(0)),
           DistinctList<Indices, Order, Coordinates>{
             rows, cols, order, starts, distinctRows, distinctCols });
       }
@@ -1575,7 +1584,7 @@ namespace Rodin::Assembly::Internal
       {
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::PETSc::merge",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, merged.extent(0)),
+          Range(execution, 0, merged.extent(0)),
           Merge<Order, Indices, Scalars>{ order, starts, values, merged });
       }
 

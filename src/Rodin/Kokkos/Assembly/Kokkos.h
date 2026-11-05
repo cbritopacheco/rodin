@@ -621,6 +621,15 @@ namespace Rodin::Assembly::Internal
       /// @brief Execution space of the kernels.
       using ExecutionSpace = typename ContextType::ExecutionSpaceType;
 
+      /**
+       * @brief Range of the kernels, indexed by Index.
+       *
+       * The default index of a Kokkos 5 range is the index_type of the execution
+       * space, a 32 bit int on the GPUs, and a bound past it aborts. One process
+       * can hold more than 2^31 entries.
+       */
+      using Range = ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>;
+
       /// @brief Memory space of the system.
       using MemorySpace = typename ContextType::MemorySpaceType;
 
@@ -1217,7 +1226,7 @@ namespace Rodin::Assembly::Internal
         const bool matrix = cols.extent(0) > 0;
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::shift",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, offset, offset + count),
+          Range(execution, offset, offset + count),
           IndexShift{ rows, cols, row, col, matrix });
       }
 
@@ -1302,7 +1311,7 @@ namespace Rodin::Assembly::Internal
           ::Kokkos::Experimental::sort_by_key(execution, keys, positions);
         const unsigned shift = ranks.shift;
         const GroupHead head{ keys, shift };
-        const auto policy = ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count);
+        const auto policy = Range(execution, 0, count);
         size_t distinct = 0;
         size_t unordered = 0;
         ::Kokkos::parallel_reduce(
@@ -1330,7 +1339,7 @@ namespace Rodin::Assembly::Internal
         // Groups are small, a few polytopes sharing a pair of degrees of freedom.
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::order",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, distinct),
+          Range(execution, 0, distinct),
           GroupOrder{ starts, positions, ranks });
         return res;
       }
@@ -1418,7 +1427,7 @@ namespace Rodin::Assembly::Internal
         const Classification classify{ size, rows, cols, values, fixed, coefficientRanks,
           constrained, listCoefficients, listEliminated };
         const auto policy =
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, size + diagonal);
+          Range(execution, 0, size + diagonal);
         Counts count;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::countContributions", policy,
@@ -1510,12 +1519,12 @@ namespace Rodin::Assembly::Internal
         const size_t nnz = data.extent(0);
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::sumCoefficients",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, nnz),
+          Range(execution, 0, nnz),
           CoefficientSum{
             size, values, positions, starts, data, inner, keys, innerCount });
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::outer",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, nnz + 1),
+          Range(execution, 0, nnz + 1),
           OuterStarts{ nnz, keys, innerCount, outerCount, outer });
       }
 
@@ -1566,7 +1575,7 @@ namespace Rodin::Assembly::Internal
         Array<Index>& keys, Array<Index>& positions)
       {
         const auto policy =
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, indices.extent(0));
+          Range(execution, 0, indices.extent(0));
         size_t count = 0;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::countEntries", policy, NonzeroCount{ values }, count);
@@ -1619,7 +1628,7 @@ namespace Rodin::Assembly::Internal
         const auto keys = groups.keys;
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::accumulate",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, groups.size()),
+          Range(execution, 0, groups.size()),
           Accumulation<Contribution>{ keys, rhs, starts, contributions, positions });
       }
 
@@ -1642,7 +1651,7 @@ namespace Rodin::Assembly::Internal
       {
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::addDense",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, values.extent(0)),
+          Range(execution, 0, values.extent(0)),
           DenseSum{ rhs, row, values });
       }
 
@@ -1667,7 +1676,7 @@ namespace Rodin::Assembly::Internal
       {
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::imposeFixed",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          Range(execution, 0, count),
           FixedValue{ fixed, rhs, values });
       }
 
@@ -1697,7 +1706,7 @@ namespace Rodin::Assembly::Internal
           count);
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::rankOrder",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          Range(execution, 0, count),
           RankOrder{ res, ranks });
         return res;
       }
@@ -1790,7 +1799,7 @@ namespace Rodin::Assembly::Internal
         const auto values = triplets.values;
         const auto positions = order(execution, size, triplets.ranks);
         const MatrixExpansionSizes sizes{ positions, rows, cols, values, x };
-        const auto policy = ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, size);
+        const auto policy = Range(execution, 0, size);
         Sizes total;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::countExpansions", policy,
@@ -1877,7 +1886,7 @@ namespace Rodin::Assembly::Internal
         const size_t size = indices.extent(0);
         const auto positions = order(execution, size, ranks);
         const VectorExpansionSize sizes{ positions, indices, values, x };
-        const auto policy = ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, size);
+        const auto policy = Range(execution, 0, size);
         size_t total = 0;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::countVectorExpansions", policy,
@@ -1922,7 +1931,7 @@ namespace Rodin::Assembly::Internal
           count);
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::sequence",
-          ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count),
+          Range(execution, 0, count),
           Sequence{ res, first });
         return res;
       }
