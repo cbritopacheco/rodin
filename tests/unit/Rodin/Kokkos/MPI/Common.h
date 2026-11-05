@@ -127,7 +127,117 @@ namespace Rodin::Tests::Unit
     ::PC pc;
     KSPGetPC(solver.getHandle(), &pc);
     PCSetType(pc, PCREDUNDANT);
+    // A distributed device system lays out the rows of the multipliers among
+    // those of each process, where the default nested dissection ordering of
+    // the factorization meets a zero pivot.
+    ::KSP inner;
+    PCRedundantGetKSP(pc, &inner);
+    ::PC lu;
+    KSPGetPC(inner, &lu);
+    PCSetType(lu, PCLU);
+    PCFactorSetMatOrderingType(lu, MATORDERINGRCM);
     solver.solve();
+  }
+
+  /**
+   * @brief Owned rows of a field in the host and device systems.
+   *
+   * The host numbers the rows field after field over all processes, and a
+   * distributed device assembly of several fields lays out the owned rows of
+   * a process field after field, so that a field owns the rows
+   * @f$ [h, h + n) @f$ of the host system and @f$ [d, d + n) @f$ of the
+   * device one on each process.
+   */
+  struct FieldRows
+  {
+    PetscInt host;   ///< First owned row in the host system.
+    PetscInt device; ///< First owned row in the device system.
+    PetscInt count;  ///< Number of owned rows.
+  };
+
+  /**
+   * @brief Gets the owned rows of each field.
+   * @param v Device vector. @param starts First row of each field on the
+   * process in the device system, empty when both systems share the layout.
+   */
+  inline std::vector<FieldRows> getFieldRows(::Vec v, const std::vector<PetscInt>& starts)
+  {
+    PetscInt begin = 0, end = 0;
+    VecGetOwnershipRange(v, &begin, &end);
+    if (starts.empty())
+      return { FieldRows{ begin, begin, end - begin } };
+    std::vector<FieldRows> res;
+    PetscInt offset = 0;
+    for (size_t k = 0; k < starts.size(); ++k)
+    {
+      const PetscInt count = (k + 1 < starts.size() ? starts[k + 1] : end) - starts[k];
+      PetscInt first = 0, total = 0;
+      MPI_Exscan(&count, &first, 1, MPIU_INT, MPI_SUM, *g_world);
+      if (g_world->rank() == 0)
+        first = 0;
+      MPI_Allreduce(&count, &total, 1, MPIU_INT, MPI_SUM, *g_world);
+      res.push_back(FieldRows{ offset + first, starts[k], count });
+      offset += total;
+    }
+    return res;
+  }
+
+  /**
+   * @brief Calls a function on the subvectors of each field.
+   * @param host Host vector. @param device Device vector. @param fields Owned
+   * rows of each field. @param f Called with the host and device subvectors
+   * and the first owned row of the field in the host system.
+   */
+  template <class F>
+  void forEachField(::Vec host, ::Vec device, const std::vector<FieldRows>& fields, F&& f)
+  {
+    for (const auto& field : fields)
+    {
+      ::IS ih, id;
+      ISCreateStride(*g_world, field.count, field.host, 1, &ih);
+      ISCreateStride(*g_world, field.count, field.device, 1, &id);
+      ::Vec sh, sd;
+      VecGetSubVector(host, ih, &sh);
+      VecGetSubVector(device, id, &sd);
+      f(sh, sd, field.host);
+      VecRestoreSubVector(host, ih, &sh);
+      VecRestoreSubVector(device, id, &sd);
+      ISDestroy(&ih);
+      ISDestroy(&id);
+    }
+  }
+
+  /**
+   * @brief Expects two distributed vectors to agree.
+   * @param host Reference vector. @param device Compared vector. @param
+   * fields Owned rows of each field, see getFieldRows.
+   */
+  inline void expectSameVector(::Vec host, ::Vec device, const std::vector<FieldRows>& fields)
+  {
+    PetscInt nh = 0, nd = 0;
+    VecGetLocalSize(host, &nh);
+    VecGetLocalSize(device, &nd);
+    ASSERT_EQ(nh, nd);
+    PetscReal local[2] = {0, 0};
+    forEachField(host, device, fields, [&](::Vec sh, ::Vec sd, PetscInt) {
+      PetscInt n = 0;
+      VecGetLocalSize(sh, &n);
+      const PetscScalar* x = nullptr;
+      const PetscScalar* y = nullptr;
+      VecGetArrayRead(sh, &x);
+      VecGetArrayRead(sd, &y);
+      for (PetscInt i = 0; i < n; ++i)
+      {
+        local[0] = std::max(local[0], PetscAbsScalar(x[i] - y[i]));
+        local[1] = std::max(local[1], PetscAbsScalar(x[i]));
+      }
+      VecRestoreArrayRead(sh, &x);
+      VecRestoreArrayRead(sd, &y);
+    });
+    PetscReal global[2];
+    MPI_Allreduce(local, global, 2, MPIU_REAL, MPI_MAX, *g_world);
+    ASSERT_GT(global[1], PetscReal(0));
+    EXPECT_LE(global[0], PetscReal(1e-9) * global[1]);
   }
 
   /**
@@ -136,34 +246,18 @@ namespace Rodin::Tests::Unit
    */
   inline void expectSameVector(::Vec host, ::Vec device)
   {
-    PetscInt nh = 0, nd = 0;
-    VecGetLocalSize(host, &nh);
-    VecGetLocalSize(device, &nd);
-    ASSERT_EQ(nh, nd);
-    const PetscScalar* x = nullptr;
-    const PetscScalar* y = nullptr;
-    VecGetArrayRead(host, &x);
-    VecGetArrayRead(device, &y);
-    PetscReal local[2] = {0, 0};
-    for (PetscInt i = 0; i < nh; ++i)
-    {
-      local[0] = std::max(local[0], PetscAbsScalar(x[i] - y[i]));
-      local[1] = std::max(local[1], PetscAbsScalar(x[i]));
-    }
-    VecRestoreArrayRead(host, &x);
-    VecRestoreArrayRead(device, &y);
-    PetscReal global[2];
-    MPI_Allreduce(local, global, 2, MPIU_REAL, MPI_MAX, *g_world);
-    ASSERT_GT(global[1], PetscReal(0));
-    EXPECT_LE(global[0], PetscReal(1e-9) * global[1]);
+    expectSameVector(host, device, getFieldRows(device, {}));
   }
 
   /**
    * @brief Expects a distributed device operator to match the host one.
    * @param host Operator assembled on the host. @param device Operator
-   * assembled on the device, with the same layout.
+   * assembled on the device. @param fields Owned rows of each field of a
+   * square system, see getFieldRows, or empty when the operators share their
+   * layout.
    */
-  inline void expectSameOperator(::Mat host, ::Mat device)
+  inline void expectSameOperator(::Mat host, ::Mat device,
+                                 const std::vector<FieldRows>& fields = {})
   {
     PetscBool kokkos = PETSC_FALSE;
     PetscObjectTypeCompareAny(reinterpret_cast<PetscObject>(device), &kokkos,
@@ -181,25 +275,27 @@ namespace Rodin::Tests::Unit
     EXPECT_LE(std::abs(ah - ad), PetscReal(1e-12) * ah);
 
     // The norm does not see a permutation of the rows: the operators must
-    // also agree on a vector that differs at each global index.
+    // also agree on a vector that differs at each host row.
     ::Vec xh, yh, xd, yd;
     MatCreateVecs(host, &xh, &yh);
     MatCreateVecs(device, &xd, &yd);
-    PetscInt begin = 0, end = 0;
-    VecGetOwnershipRange(xh, &begin, &end);
-    for (PetscInt g = begin; g < end; ++g)
-    {
-      const PetscScalar value = std::sin(PetscReal(1 + g));
-      VecSetValue(xh, g, value, INSERT_VALUES);
-      VecSetValue(xd, g, value, INSERT_VALUES);
-    }
-    VecAssemblyBegin(xh);
-    VecAssemblyEnd(xh);
-    VecAssemblyBegin(xd);
-    VecAssemblyEnd(xd);
+    const auto columns = fields.empty() ? getFieldRows(xd, {}) : fields;
+    const auto rows = fields.empty() ? getFieldRows(yd, {}) : fields;
+    forEachField(xh, xd, columns, [](::Vec sh, ::Vec sd, PetscInt first) {
+      PetscInt n = 0;
+      VecGetLocalSize(sh, &n);
+      PetscScalar* x = nullptr;
+      PetscScalar* y = nullptr;
+      VecGetArray(sh, &x);
+      VecGetArray(sd, &y);
+      for (PetscInt i = 0; i < n; ++i)
+        x[i] = y[i] = std::sin(PetscReal(1 + first + i));
+      VecRestoreArray(sh, &x);
+      VecRestoreArray(sd, &y);
+    });
     MatMult(host, xh, yh);
     MatMult(device, xd, yd);
-    expectSameVector(yh, yd);
+    expectSameVector(yh, yd, rows);
     VecDestroy(&xh);
     VecDestroy(&yh);
     VecDestroy(&xd);
@@ -216,8 +312,9 @@ namespace Rodin::Tests::Unit
   {
     const auto& h = host.getLinearSystem();
     const auto& d = device.getLinearSystem();
-    expectSameOperator(h.getOperator(), d.getOperator());
-    expectSameVector(h.getVector(), d.getVector());
+    const auto fields = getFieldRows(d.getVector(), d.getFieldStarts());
+    expectSameOperator(h.getOperator(), d.getOperator(), fields);
+    expectSameVector(h.getVector(), d.getVector(), fields);
   }
 }
 

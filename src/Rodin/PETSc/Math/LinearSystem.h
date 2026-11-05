@@ -33,6 +33,7 @@
 #include <boost/mpi/communicator.hpp>
 #include <petscmat.h>
 #include <petscvec.h>
+#include <vector>
 
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Math/LinearSystem.h"
@@ -490,6 +491,32 @@ namespace Rodin::Math
         return m_fieldSplits;
       }
 
+      /**
+       * @brief Sets the first row of each field on this process.
+       *
+       * An assembly sets them when it lays out the owned rows of a process
+       * field after field, instead of numbering each field from its offset
+       * in the system. The owned degrees of freedom of field @f$ k @f$ are
+       * then the rows from @p starts[k] on, in the order of its space.
+       * @param starts First row of each field, empty for the offsets.
+       * @returns Reference to `*this`.
+       */
+      LinearSystem& setFieldStarts(std::vector<PetscInt> starts)
+      {
+        m_fieldStarts = std::move(starts);
+        return *this;
+      }
+
+      /**
+       * @brief Gets the first row of each field on this process.
+       * @returns First row of each field, empty when each field is numbered
+       * from its offset in the system.
+       */
+      const std::vector<PetscInt>& getFieldStarts() const noexcept
+      {
+        return m_fieldStarts;
+      }
+
     private:
       MPI_Comm m_comm; ///< The MPI communicator for the linear system.
       MatrixType m_operator; ///< The operator of the linear system.
@@ -497,6 +524,8 @@ namespace Rodin::Math
       VectorType m_vector; ///< The vector of the linear system.
 
       FieldSplits m_fieldSplits; ///< The field splits for block preconditioning.
+
+      std::vector<PetscInt> m_fieldStarts; ///< First row of each field on this process.
   };
 }
 

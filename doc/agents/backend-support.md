@@ -82,8 +82,15 @@ is not provided. `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the
 shard of a `Mesh<Context::MPI>` resident and marks owned entities in its
 device view; `P1` and `P0g` PETSc problems, single or multi-field, are
 assembled on it into distributed Kokkos systems (`Rodin::KokkosMPI`). Each
-field keeps its global numbering shifted by its offset, as on the host, and
-PETSc sends the entries of rows owned elsewhere to their process; each test
+field keeps its global numbering shifted by its offset, as on the host, for
+the constraints, the preassembled forms and the problem, but the PETSc rows of
+a process hold its owned degrees of freedom of each field in turn, so that the
+halo of a product stays that of its part of the mesh. With the offsets alone
+the owned rows of a process are not its degrees of freedom, and the halo is
+about as large as the local part. `LinearSystem::getFieldStarts()` gives the
+first row of each field on the process, and `Problem` reads and writes the
+fields and builds its field splits from it; code that slices the system by
+the offsets must use it too. Each test
 function must share the space of the trial function of its block. PETSc grid functions enter
 device expressions, local or distributed: their coefficients, ghosts included,
 are read from the local form of the vector without communication. `H1<K>`

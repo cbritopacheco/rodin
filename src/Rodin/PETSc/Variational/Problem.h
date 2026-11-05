@@ -383,6 +383,13 @@ namespace Rodin::Variational
    * scattered back into each trial function's grid function using the
    * precomputed offset arrays.
    *
+   * A distributed device assembly instead lays out the owned rows of a
+   * process field after field, so that the rows of a process stay those of
+   * its part of the mesh, and sets the first row of each field on the
+   * process, see PETSc::Math::LinearSystem::getFieldStarts. The offsets
+   * then still number the constraints and the problem, but not the rows of
+   * the PETSc system.
+   *
    * # Block Structure
    *
    * For @f$ K @f$ trial fields with sizes @f$ N_1, \ldots, N_K @f$, the
@@ -691,7 +698,7 @@ namespace Rodin::Variational
           const auto& u = uref.get().getSolution();
           u.flush();
 
-          const PetscInt off = static_cast<PetscInt>(m_trialOffsets[i]);
+          const PetscInt off = getFieldOffset(i, u.getData());
 
           PetscInt rb = 0, re = 0;
           ierr = VecGetOwnershipRange(u.getData(), &rb, &re);
@@ -765,7 +772,8 @@ namespace Rodin::Variational
 
         // Scatter global solution back into each trial function solution
         m_us.iapply([&](size_t i, auto& u) {
-          u.get().getSolution().setData(axb.getSolution(), m_trialOffsets[i]);
+          auto& gf = u.get().getSolution();
+          gf.setData(axb.getSolution(), static_cast<size_t>(getFieldOffset(i, gf.getData())));
         });
       }
 
@@ -789,6 +797,10 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the DOF offset array for trial fields.
+       *
+       * A distributed device assembly does not number the rows of the system
+       * from these offsets: the rows of a field on a process start at
+       * PETSc::Math::LinearSystem::getFieldStarts.
        * @returns The DOF offset array for trial fields.
        */
       const auto& getTrialOffsets() const
@@ -885,14 +897,25 @@ namespace Rodin::Variational
         ierr = MatGetOwnershipRange(m_axb.getOperator(), &ownershipBegin, &ownershipEnd);
         assert(ierr == PETSC_SUCCESS);
 
+        // Owned size of each trial field on this process.
+        std::array<PetscInt, TrialFunctionTuple::Size> owned{};
+        m_us.iapply([&](size_t i, const auto& u) {
+          ierr = VecGetLocalSize(u.get().getSolution().getData(), &owned[i]);
+          assert(ierr == PETSC_SUCCESS);
+        });
+        const auto& starts = m_axb.getFieldStarts();
+
         // Build one IS per trial field (block layout: [u][p][lambda]...)
         for (size_t k = 0; k < TrialFunctionTuple::Size; ++k)
         {
           const PetscInt n = sz[k];
           const PetscInt start = static_cast<PetscInt>(m_trialOffsets[k]);
 
-          const PetscInt begin = std::max(start, ownershipBegin);
-          const PetscInt end = std::min(start + n, ownershipEnd);
+          // Without field starts, each field is numbered from its offset.
+          const PetscInt begin =
+            starts.empty() ? std::max(start, ownershipBegin) : starts[k];
+          const PetscInt end =
+            starts.empty() ? std::min(start + n, ownershipEnd) : starts[k] + owned[k];
           const PetscInt count = std::max(PetscInt(0), end - begin);
           ::IS is = PETSC_NULLPTR;
           ierr = ISCreateStride(m_axb.getCommunicator(), count, begin, 1, &is);
@@ -924,6 +947,31 @@ namespace Rodin::Variational
       }
 
     private:
+      /**
+       * @brief Gets the offset from which a trial field is read in the
+       * system, as GridFunction::setData takes it.
+       *
+       * The process owns the entries @f$ [o + b, o + e) @f$ of the system,
+       * where @f$ [b, e) @f$ is the owned range of the field and @f$ o @f$
+       * its offset, unless the assembly laid out the owned rows of the
+       * process field after field: @f$ o @f$ is then the first row of the
+       * field on the process minus @f$ b @f$, and differs between processes.
+       * @param i Index of the trial field.
+       * @param field Vector of the grid function of the field.
+       * @return Offset of the field.
+       */
+      PetscInt getFieldOffset(size_t i, ::Vec field) const
+      {
+        const auto& starts = m_axb.getFieldStarts();
+        if (starts.empty())
+          return static_cast<PetscInt>(m_trialOffsets[i]);
+        PetscInt rb = 0, re = 0;
+        const PetscErrorCode ierr = VecGetOwnershipRange(field, &rb, &re);
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+        return starts[i] - rb;
+      }
+
       /// @brief Builds UUID-to-index maps for all trial and test functions.
       void buildUUIDMaps()
       {
