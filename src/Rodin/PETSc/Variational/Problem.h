@@ -383,12 +383,12 @@ namespace Rodin::Variational
    * scattered back into each trial function's grid function using the
    * precomputed offset arrays.
    *
-   * A distributed device assembly instead lays out the owned rows of a
-   * process field after field, so that the rows of a process stay those of
-   * its part of the mesh, and sets the first row of each field on the
-   * process, see PETSc::Math::LinearSystem::getFieldStarts. The offsets
-   * then still number the constraints and the problem, but not the rows of
-   * the PETSc system.
+   * A distributed assembly, on the host or on the device, instead lays out
+   * the owned rows of a process field after field, so that the rows of a
+   * process stay those of its part of the mesh, and sets the first row of
+   * each field on the process, see PETSc::Math::LinearSystem::getFieldStarts.
+   * The offsets then still number the constraints and the problem, but not
+   * the rows of the PETSc system.
    *
    * # Block Structure
    *
@@ -798,8 +798,8 @@ namespace Rodin::Variational
       /**
        * @brief Returns the DOF offset array for trial fields.
        *
-       * A distributed device assembly does not number the rows of the system
-       * from these offsets: the rows of a field on a process start at
+       * A distributed assembly does not number the rows of the system from
+       * these offsets: the rows of a field on a process start at
        * PETSc::Math::LinearSystem::getFieldStarts.
        * @returns The DOF offset array for trial fields.
        */

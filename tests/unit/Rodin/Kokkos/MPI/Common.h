@@ -159,8 +159,11 @@ namespace Rodin::Tests::Unit
    * @brief Gets the owned rows of each field.
    * @param v Device vector. @param starts First row of each field on the
    * process in the device system, empty when both systems share the layout.
+   * @param hostStarts First row of each field on the process in the host
+   * system, empty when the host system lays out its rows field after field.
    */
-  inline std::vector<FieldRows> getFieldRows(::Vec v, const std::vector<PetscInt>& starts)
+  inline std::vector<FieldRows> getFieldRows(::Vec v, const std::vector<PetscInt>& starts,
+                                             const std::vector<PetscInt>& hostStarts = {})
   {
     PetscInt begin = 0, end = 0;
     VecGetOwnershipRange(v, &begin, &end);
@@ -171,6 +174,11 @@ namespace Rodin::Tests::Unit
     for (size_t k = 0; k < starts.size(); ++k)
     {
       const PetscInt count = (k + 1 < starts.size() ? starts[k + 1] : end) - starts[k];
+      if (!hostStarts.empty())
+      {
+        res.push_back(FieldRows{ hostStarts[k], starts[k], count });
+        continue;
+      }
       PetscInt first = 0, total = 0;
       MPI_Exscan(&count, &first, 1, MPIU_INT, MPI_SUM, *g_world);
       if (g_world->rank() == 0)
@@ -312,7 +320,7 @@ namespace Rodin::Tests::Unit
   {
     const auto& h = host.getLinearSystem();
     const auto& d = device.getLinearSystem();
-    const auto fields = getFieldRows(d.getVector(), d.getFieldStarts());
+    const auto fields = getFieldRows(d.getVector(), d.getFieldStarts(), h.getFieldStarts());
     expectSameOperator(h.getOperator(), d.getOperator(), fields);
     expectSameVector(h.getVector(), d.getVector(), fields);
   }

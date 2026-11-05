@@ -87,7 +87,11 @@ the constraints, the preassembled forms and the problem, but the PETSc rows of
 a process hold its owned degrees of freedom of each field in turn, so that the
 halo of a product stays that of its part of the mesh. With the offsets alone
 the owned rows of a process are not its degrees of freedom, and the halo is
-about as large as the local part. `LinearSystem::getFieldStarts()` gives the
+about as large as the local part. The host MPI assembly of several fields
+(`PETSc::Assembly::MPI`) lays out its rows the same way through
+`PETSc::Assembly::FieldLayout`, which maps an index of the system to its row
+only where it enters PETSc; the constraints stay in the numbering of the
+system. `LinearSystem::getFieldStarts()` gives the
 first row of each field on the process, and `Problem` reads and writes the
 fields and builds its field splits from it; code that slices the system by
 the offsets must use it too. Each test
