@@ -47,6 +47,10 @@ Per case, over the last cycle of snapshots (the period T from run.log):
     cycle-to-cycle (irregular) rms, its Welch PSD against St = f d/U_jet
     (d the throat diameter, U_jet the peak jet velocity) and its dominant
     Strouhal number;
+  - the cycle statistics of the velocity: the mean u_bar and the rms of the
+    fluctuation u' = u - u_bar, the fields on which two fluids can be
+    compared in an unsteady jet (the instantaneous fields decorrelate
+    between runs, even of the same fluid);
   - figures (midplane z = 0 cuts at the systolic peak and at the strongest
     deceleration of the inflow): |u|, p, gd, |sigma_p|; axial profiles of
     TAWSS and OSI; dp(t), recirculation length, wall shear at the throat.
@@ -630,6 +634,16 @@ def analyse(case, out, figures=True):
     # time: every snapshot).
     U = np.array([case.field(s, "velocity") for s in sel])
     P = np.array([case.field(s, "pressure") for s in sel])
+    # Cycle statistics of the velocity: the mean u_bar = (1/T) int u dt and
+    # the rms of the fluctuation u' = u - u_bar, |u'|_rms = sqrt((1/T) int
+    # |u'|^2 dt). In an unsteady jet these, not the instantaneous fields, are
+    # what two fluids can be compared on.
+    def cycle_stats(Us, ts):
+        span_ = ts[-1] - ts[0]
+        um = _trapz(Us, ts, axis=0) / span_
+        ur = np.sqrt(_trapz(((Us - um[None]) ** 2).sum(axis=2), ts, axis=0) / span_)
+        return um, ur
+    umean, urms = cycle_stats(U, t)
     metrics = {
         "case": case.name, "fluid": case.tag, "geo": case.geo, "D": case.D, "Ubar": case.Ubar, "T": case.T,
         "snapshots": len(sel), "dp_mean": float(_trapz(dp, tt) / (tt[-1] - tt[0])), "dp_peak": float(dp.max()),
@@ -699,7 +713,11 @@ def analyse(case, out, figures=True):
     if len(case.sel_prev):
         tp = case.times[case.sel_prev]
         match = np.array([int(np.argmin(np.abs(tp + case.T - ti))) for ti in t])
-        Up = np.array([case.field(case.sel_prev[j], "velocity") for j in match])
+        Up_all = np.array([case.field(sp, "velocity") for sp in case.sel_prev])
+        Up = Up_all[match]
+        umean_p, urms_p = cycle_stats(Up_all, tp)
+        noise["umean_relL2"] = rel_l2(umean[None], umean_p[None], case.nodevol)
+        noise["urms_relL2"] = rel_l2(urms[None], urms_p[None], case.nodevol)
         Pp = np.array([case.field(case.sel_prev[j], "pressure") for j in match])
         taup_all = np.array([case.field(sp, "shearStress") for sp in case.sel_prev])
         magp = np.linalg.norm(taup_all, axis=2)
@@ -720,7 +738,8 @@ def analyse(case, out, figures=True):
             noise["dp_mean_relchange"] = (dpm - dpm_p) / max(abs(dpm_p), 1.0e-30)
         for k, v in noise.items():
             metrics["noise_" + k] = v
-    fields = {"t": t, "U": U, "P": P, "tau": tau, "tawss": tawss, "osi": osi, "rec": rec, "noise": noise,
+    metrics["urms_over_umean"] = float(np.sqrt((urms ** 2 * case.nodevol).sum() / max(((umean ** 2).sum(axis=1) * case.nodevol).sum(), 1.0e-300)))
+    fields = {"t": t, "U": U, "P": P, "umean": umean, "urms": urms, "tau": tau, "tawss": tawss, "osi": osi, "rec": rec, "noise": noise,
               "tt": tt, "dp": dp, "q": q, "xc": xc, "prof_tawss": prof_tawss, "prof_osi": prof_osi,
               "tau_throat": tau_throat, "inst": inst, "spectra": spectra}
     # Per-case files.
@@ -945,6 +964,34 @@ def comparison_figures(cases, out):
     fig.suptitle(os.path.basename(out))
     fig.savefig(os.path.join(out, "comparison.png"), dpi=160)
     plt.close(fig)
+    # Mean and rms velocity on the midplane, one row per fluid, common scales.
+    import matplotlib.tri as mtri
+    tags = list(cases)
+    cuts = {}
+    for tag in tags:
+        case, M, F = cases[tag]
+        x, y, tris, cut = midplane(case, [np.linalg.norm(F["umean"], axis=1), F["urms"]])
+        cuts[tag] = (mtri.Triangulation(x, y, tris), cut, (x >= -4.0) & (x <= 10.0))
+    lims = []
+    for k in range(2):
+        lims.append(max(np.percentile(cuts[tg][1][k][cuts[tg][2]], 99) for tg in tags))
+    fig, axes = plt.subplots(len(tags), 2, figsize=(16, 1.5 * len(tags) + 0.8), constrained_layout=True, squeeze=False)
+    for i, tag in enumerate(tags):
+        tri, cut, _ = cuts[tag]
+        for k, lab in enumerate(("|u mean| [m/s]", "u' rms [m/s]")):
+            ax = axes[i, k]
+            im = ax.tripcolor(tri, cut[k], shading="gouraud", cmap="viridis" if k == 0 else "magma",
+                              vmin=0.0, vmax=lims[k], antialiased=False)
+            ax.set_xlim(-4.0, 10.0); ax.set_aspect("equal")
+            ax.set_ylabel("%s\ny/D" % tag)
+            if i == 0:
+                ax.set_title(lab)
+            if i == len(tags) - 1:
+                ax.set_xlabel("x/D")
+                fig.colorbar(im, ax=axes[:, k], label=lab, pad=0.01, shrink=0.8)
+    fig.suptitle("%s: cycle-mean velocity and rms of the fluctuation" % os.path.basename(out))
+    fig.savefig(os.path.join(out, "comparison_mean_rms.png"), dpi=160)
+    plt.close(fig)
     fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), constrained_layout=True)
     for tag, (case, M, F) in cases.items():
         S = F["spectra"]
@@ -992,6 +1039,8 @@ def compare(cases):
         if same:
             vol = ca.nodevol
             row["u_relL2"] = rel_l2(Fa["U"][-n:], Fb["U"][-n:], vol)
+            row["umean_relL2"] = rel_l2(Fa["umean"][None], Fb["umean"][None], vol)
+            row["urms_relL2"] = rel_l2(Fa["urms"][None], Fb["urms"][None], vol)
             pa, pb = Fa["P"][-n:], Fb["P"][-n:]
             pa = pa - pa.mean(axis=1, keepdims=True); pb = pb - pb.mean(axis=1, keepdims=True)
             row["p_relL2"] = rel_l2(pa, pb, vol)
@@ -1023,7 +1072,7 @@ def compare(cases):
         row["A1_psd_relL2"] = float(np.linalg.norm(Pa - Pb_on_a) / max(np.linalg.norm(Pb_on_a), 1.0e-300))
         # Noise floor of the pair: the larger cycle-to-cycle difference of
         # the two cases; a difference is significant when it exceeds it.
-        for k in ("u_relL2", "p_relL2", "tau_relL2", "tawss_relL2", "dp_mean_relchange"):
+        for k in ("u_relL2", "umean_relL2", "urms_relL2", "p_relL2", "tau_relL2", "tawss_relL2", "dp_mean_relchange"):
             na, nb = Fa["noise"].get(k), Fb["noise"].get(k)
             if na is None or nb is None or k not in row:
                 continue
@@ -1049,7 +1098,8 @@ def write_tables(metrics, comparisons, out):
             for r in comparisons:
                 w.writerow(r)
         # LaTeX: the headline differences per pair and case.
-        cols = [("u_relL2", r"$\|\Delta u\|/\|u\|$"), ("tau_relL2", r"$\|\Delta\tau_w\|/\|\tau_w\|$"),
+        cols = [("u_relL2", r"$\|\Delta u\|/\|u\|$"), ("umean_relL2", r"$\|\Delta\bar u\|/\|\bar u\|$"),
+                ("urms_relL2", r"$\|\Delta u'_{\rm rms}\|/\|u'_{\rm rms}\|$"), ("tau_relL2", r"$\|\Delta\tau_w\|/\|\tau_w\|$"),
                 ("tawss_relL2", r"$\Delta$TAWSS"), ("osi_lesion_absdiff_max", r"max $|\Delta$OSI$|$"),
                 ("dp_mean_relchange", r"$\Delta\overline{\Delta p}$"), ("dp_peak_relchange", r"$\Delta\,\Delta p_{\max}$"),
                 ("recirc_max_D_relchange", r"$\Delta L_{rec}$"), ("low_tawss_area_relchange", r"$\Delta A_{\rm low}$"),
@@ -1177,8 +1227,9 @@ def main():
                     if "noise_" + k in r:
                         v += " (noise %.2f%%%s)" % (100 * r["noise_" + k], "" if r[k + "_over_noise"] > 1.0 else ", n.s.")
                     return v
-                print("   %s: u %s, tau_w %s, TAWSS %s, dp mean %s, recirculation %+.1f%%" % (
-                    r["pair"], withnoise("u_relL2"), withnoise("tau_relL2"), withnoise("tawss_relL2"),
+                print("   %s: u %s, u mean %s, u rms %s, tau_w %s, TAWSS %s, dp mean %s, recirculation %+.1f%%" % (
+                    r["pair"], withnoise("u_relL2"), withnoise("umean_relL2"), withnoise("urms_relL2"),
+                    withnoise("tau_relL2"), withnoise("tawss_relL2"),
                     withnoise("dp_mean_relchange", True), 100 * r["recirc_max_D_relchange"]))
             all_comp += comp
             if not args.no_figures:
