@@ -24,7 +24,12 @@ Per case, over the last cycle of snapshots (the period T from run.log):
     reversed wall shear downstream of the lesion) in time; the shear rate
     gd = sqrt(2 eps:eps) from the P1 velocity (cell gradients, volume-averaged
     to the nodes); for R, the polymer stress |sigma_p|_F and its share of the
-    viscous stress 2 eta_CY(gd) |eps|_F;
+    viscous stress 2 eta_CY(gd) |eps|_F; the first and second normal stress
+    differences N1 = s11 - s22, N2 = s22 - s33 of the polymer stress in the
+    local (flow, gradient, vorticity) frame -- on the wall (shear direction,
+    inward normal) -- (N2 = 0 in steady shear for this sPTT: it flags
+    non-viscometric flow), and the recoverable shear N1/(2 tau_w) at the
+    lesion wall;
   - the spectral content of the jet fluctuations, from the per-step series
     of case.csv (dp, the m = 1 jet amplitude |(<u_y>, <u_z>)|/Ubar, max|u|):
     the part above the INFLOW_HARMONICS cardiac harmonics, its rms, its
@@ -70,6 +75,9 @@ CAP_ALIGNMENT = 0.985
 # per window, 50 % overlap, Hann window.
 INFLOW_HARMONICS = 10
 SPECTRUM_SEGMENTS = 4
+# The local flow frame needs a direction: velocities (or vorticities, or wall
+# shears) below this fraction of their maximum fall back on the vessel frame.
+FRAME_SPEED_FLOOR = 1.0e-6
 # A wall node belongs to the lesion when its radius departs from the parent
 # radius by more than this fraction (the lesions change it by 50-100%).
 LESION_DEVIATION = 0.05
@@ -192,6 +200,69 @@ class Case:
         # Node volumes (lumped) for cell-to-node averages.
         self.nodevol = np.zeros(len(self.X))
         np.add.at(self.nodevol, self.tets.ravel(), np.repeat(self.vol / 4.0, 4))
+
+    def wall_normals(self):
+        """Inward unit normal at each wall node (area-weighted mean of the
+        normals of its wall faces, oriented towards the axis)."""
+        if getattr(self, "_wn", None) is None:
+            xf = self.X[self.wall_faces]
+            n = np.cross(xf[:, 1] - xf[:, 0], xf[:, 2] - xf[:, 0])   # |n| = 2 area
+            acc = np.zeros_like(self.X)
+            for k in range(3):
+                np.add.at(acc, self.wall_faces[:, k], n)
+            c = self.X.mean(axis=0)
+            d = self.X - c
+            radial = d - np.outer(d @ self.axis, self.axis)
+            flip = np.einsum("ij,ij->i", acc, radial) > 0.0           # make it point inwards
+            acc[flip] *= -1.0
+            nrm = np.linalg.norm(acc, axis=1)
+            self._wn = np.where(nrm[:, None] > 0.0, acc / np.maximum(nrm, 1.0e-300)[:, None], 0.0)
+        return self._wn
+
+    def flow_frame(self, u, gu, tau):
+        """Per node, the local viscometric frame (e1, e2, e3) = (flow,
+        gradient, vorticity) directions. Inside: e1 = u/|u|, e3 the vorticity
+        orthogonalised to e1, e2 = e3 x e1. On the wall (u = 0): e1 the wall
+        shear direction, e2 the inward normal orthogonalised to e1. Nodes with
+        neither a defined velocity nor vorticity get the frame of the vessel
+        (axis, radial, azimuthal)."""
+        n = len(self.X)
+        c = self.X.mean(axis=0)
+        d = self.X - c
+        radial = d - np.outer(d @ self.axis, self.axis)
+        r = np.linalg.norm(radial, axis=1)
+        helper = np.array([0.0, 1.0, 0.0]) if abs(self.axis[1]) < 0.9 else np.array([0.0, 0.0, 1.0])
+        fb = helper - helper.dot(self.axis) * self.axis
+        fb /= np.linalg.norm(fb)
+        er = np.where((r > 1.0e-6 * self.D)[:, None], radial / np.maximum(r, 1.0e-300)[:, None], fb)
+        e1 = np.broadcast_to(self.axis, (n, 3)).copy()
+        e2 = er.copy()
+        speed = np.linalg.norm(u, axis=1)
+        w = np.stack([gu[:, 2, 1] - gu[:, 1, 2], gu[:, 0, 2] - gu[:, 2, 0], gu[:, 1, 0] - gu[:, 0, 1]], axis=1)
+        inside = speed > FRAME_SPEED_FLOOR * max(speed.max(), 1.0e-30)
+        e1[inside] = u[inside] / speed[inside, None]
+        w3 = w - np.einsum("ij,ij->i", w, e1)[:, None] * e1
+        wn = np.linalg.norm(w3, axis=1)
+        ok = inside & (wn > FRAME_SPEED_FLOOR * max(wn.max(), 1.0e-30))
+        e3 = np.cross(e1, e2)
+        e3[ok] = w3[ok] / wn[ok, None]
+        e2[ok] = np.cross(e3[ok], e1[ok])
+        # Wall nodes: shear direction and inward normal.
+        wnodes = self.wall_nodes
+        tw = tau[wnodes]
+        twn = np.linalg.norm(tw, axis=1)
+        good = twn > FRAME_SPEED_FLOOR * max(twn.max(), 1.0e-30)
+        idx = wnodes[good]
+        e1[idx] = tw[good] / twn[good, None]
+        nin = self.wall_normals()[idx]
+        nin = nin - np.einsum("ij,ij->i", nin, e1[idx])[:, None] * e1[idx]
+        e2[idx] = nin / np.maximum(np.linalg.norm(nin, axis=1), 1.0e-300)[:, None]
+        e3[idx] = np.cross(e1[idx], e2[idx])
+        # Re-orthonormalise the default nodes (e1 = axis, e2 = radial).
+        rest = ~(ok)
+        rest[idx] = False
+        e3[rest] = np.cross(e1[rest], e2[rest])
+        return e1, e2, e3
 
     def field(self, step, name):
         """Nodal field of a step, merged over the pieces (nodes shared by two
@@ -428,6 +499,25 @@ def analyse(case, out, figures=True):
             sp = np.sqrt((sd ** 2).sum(1) + 2.0 * (so ** 2).sum(1))
             d["sigma_p"] = sp
             d["share"] = sp / np.maximum(2.0 * eta_cy(gd) * np.sqrt(np.einsum("nij,nij->n", eps, eps)), 1.0e-30)
+            # The polymer stress in the local viscometric frame (e1, e2, e3)
+            # = (flow, gradient, vorticity) directions (Case.flow_frame; on
+            # the wall: shear direction, inward normal):
+            #   N1 = s11 - s22,  N2 = s22 - s33,  s12 the polymer shear.
+            # In a developed pipe flow the frame is (x, r, theta). The sPTT
+            # used here (no slip parameter) has N2 = 0 in steady simple
+            # shear, so N2 is nonzero only where the flow is not viscometric
+            # (the lesion, the recirculation, the unsteady jet); the frame of
+            # the vessel instead would mix N1 into N2 wherever the flow is
+            # not axial (the inclined lesion wall, a swirling jet).
+            S = np.empty((len(sd), 3, 3))
+            S[:, 0, 0], S[:, 1, 1], S[:, 2, 2] = sd[:, 0], sd[:, 1], sd[:, 2]
+            S[:, 0, 1] = S[:, 1, 0] = so[:, 0]
+            S[:, 0, 2] = S[:, 2, 0] = so[:, 1]
+            S[:, 1, 2] = S[:, 2, 1] = so[:, 2]
+            e1, e2, e3 = case.flow_frame(u, gu, tau[i])
+            comp = lambda a, b: np.einsum("ni,nij,nj->n", a, S, b)
+            s11, s22, s33, s12 = comp(e1, e1), comp(e2, e2), comp(e3, e3), comp(e1, e2)
+            d["N1"], d["N2"], d["s12"] = s11 - s22, s22 - s33, s12
         inst[label] = d
     # Velocity and pressure over the cycle, for the comparison (coarse in
     # time: every snapshot).
@@ -453,6 +543,22 @@ def analyse(case, out, figures=True):
             sh = inst[label]["share"]
             metrics["share_p95_" + label] = float(np.percentile(sh[np.isfinite(sh)], 95))
             metrics["share_max_" + label] = float(np.nanmax(sh))
+            di = inst[label]
+            metrics["N1_max_" + label] = float(np.abs(di["N1"]).max())
+            metrics["N2_max_" + label] = float(np.abs(di["N2"]).max())
+            metrics["N1_lesion_wall_max_" + label] = float(np.abs(di["N1"][ln]).max())
+            metrics["N2_lesion_wall_max_" + label] = float(np.abs(di["N2"][ln]).max())
+            # Recoverable shear N1/(2 tau): the elastic measure of the
+            # literature (the local Weissenberg number of the wall flow), with
+            # tau the total wall shear |tau_w| at that instant.
+            tw = np.linalg.norm(tau[i_peak if label == "peak" else i_min][ln], axis=1)
+            sr = np.abs(di["N1"][ln]) / np.maximum(2.0 * tw, 1.0e-30)
+            metrics["recoverable_shear_p95_" + label] = float(np.percentile(sr[tw > 1.0e-3 * tw.max()], 95))
+            # |N2|/|N1| at the lesion wall: its median (the bulk of the wall is
+            # viscometric, ~0) and its 95th percentile (the non-viscometric spots).
+            ratio = np.abs(di["N2"][ln]) / np.maximum(np.abs(di["N1"][ln]), 1.0e-30)
+            metrics["N2_over_N1_lesion_wall_median_" + label] = float(np.median(ratio))
+            metrics["N2_over_N1_lesion_wall_p95_" + label] = float(np.percentile(ratio, 95))
     fields = {"t": t, "U": U, "P": P, "tau": tau, "tawss": tawss, "osi": osi, "rec": rec,
               "tt": tt, "dp": dp, "q": q, "xc": xc, "prof_tawss": prof_tawss, "prof_osi": prof_osi,
               "tau_throat": tau_throat, "inst": inst, "spectra": spectra}
@@ -533,7 +639,7 @@ def case_figures(case, F, M, out):
     # 1. Midplane cuts.
     names = [("u", "|u| [m/s]"), ("p", "p [Pa]"), ("gd", "shear rate [1/s]")]
     if "sigma_p" in F["inst"]["peak"]:
-        names.append(("sigma_p", "|sigma_p| [Pa]"))
+        names += [("sigma_p", "|sigma_p| [Pa]"), ("N1", "N1 = s11 - s22 [Pa]"), ("N2", "N2 = s22 - s33 [Pa]")]
     import matplotlib.tri as mtri
     for label in ("peak", "decel"):
         d = F["inst"][label]
@@ -547,9 +653,14 @@ def case_figures(case, F, M, out):
             if k in ("gd", "sigma_p"):
                 Z = np.log10(np.maximum(Z, 1.0e-3))
                 lab = "log10 " + lab
-            # Colour limits from the plotted window (the caps carry outliers).
+            # Colour limits from the plotted window (the caps carry outliers);
+            # the signed normal stress differences on a symmetric scale.
             lo, hi = np.percentile(Z[inwin], [1, 99]) if inwin.any() else (Z.min(), Z.max())
-            im = ax.tripcolor(triang, Z, shading="gouraud", cmap="viridis", vmin=lo, vmax=hi, antialiased=False)
+            cmap = "viridis"
+            if k in ("N1", "N2"):
+                hi = max(abs(lo), abs(hi), 1.0e-12)
+                lo, cmap = -hi, "RdBu_r"
+            im = ax.tripcolor(triang, Z, shading="gouraud", cmap=cmap, vmin=lo, vmax=hi, antialiased=False)
             ax.set_xlim(*xlim)
             ax.set_aspect("equal")
             ax.set_ylabel("y/D")
@@ -725,7 +836,9 @@ def write_tables(metrics, comparisons, out):
     cols = [("fluid", "fluid"), ("dp_mean", r"$\overline{\Delta p}$ [Pa]"), ("dp_peak", r"$\Delta p_{\max}$ [Pa]"),
             ("dp_lag_T", r"lag/T"), ("tawss_max", r"TAWSS$_{\max}$ [Pa]"), ("osi_lesion_max", r"OSI$_{\max}$"),
             ("low_tawss_area", r"$A_{\rm low}$"), ("recirc_max_D", r"$L_{rec}/D$"), ("A1_rms", r"$A_1'$"),
-            ("A1_St", r"St$^*$"), ("share_p95_decel", r"$\sigma_p$ share p95")]
+            ("A1_St", r"St$^*$"), ("share_p95_decel", r"$\sigma_p$ share p95"),
+            ("N1_lesion_wall_max_peak", r"$N_{1,w}$ [Pa]"), ("N2_lesion_wall_max_peak", r"$N_{2,w}$ [Pa]"),
+            ("recoverable_shear_p95_peak", r"$N_1/2\tau_w$")]
     with open(os.path.join(out, "summary_cases.tex"), "w") as f:
         f.write("\\begin{tabular}{l" + "r" * len(cols) + "}\n\\toprule\ncase & " + " & ".join(c[1] for c in cols) + "\\\\\n\\midrule\n")
         for m in metrics:
@@ -785,6 +898,11 @@ def main():
                       tag, M["dp_mean"], M["dp_peak"], M["dp_lag_T"], M["tawss_max"], M["osi_lesion_max"],
                       100 * M["low_tawss_area"], M["recirc_max_D"],
                       (", polymer share p95 %.2f" % M["share_p95_decel"]) if "share_p95_decel" in M else ""))
+            if "N1_lesion_wall_max_peak" in M:
+                print("       normal stresses at the lesion wall (peak): N1 max %.3g Pa, N2 max %.3g Pa, |N2/N1| median %.3f p95 %.3f, "
+                      "N1/(2 tau_w) p95 %.3g" % (M["N1_lesion_wall_max_peak"], M["N2_lesion_wall_max_peak"],
+                                                 M["N2_over_N1_lesion_wall_median_peak"], M["N2_over_N1_lesion_wall_p95_peak"],
+                                                 M["recoverable_shear_p95_peak"]))
             print("       jet: A1' rms %.2e (irregular %.2e), St* %.3f, dp' rms %.2e of mean; %d cycles, Nyquist St %.1f" % (
                 M["A1_rms"], M["A1_rms_irregular"], M["A1_St"], M["dp_rms"], M["spectrum_cycles"], M["nyquist_St"]))
             cases[tag] = (case, M, F)
