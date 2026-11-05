@@ -936,14 +936,23 @@ namespace Rodin::Kokkos::Variational::Internal
         const ::Kokkos::View<Index[GeometryCount], MemorySpace>& first, Index dimension,
         Index count)
       {
-        ::Kokkos::parallel_for(
-          "Rodin geometry representatives", policy(execution, count),
-          KOKKOS_LAMBDA(Index p) {
-            const Index g =
-              static_cast<Index>(view.getPolytope(dimension, p).getGeometry());
-            ::Kokkos::atomic_min(&first(g), p);
-          });
+        ::Kokkos::parallel_for("Rodin geometry representatives",
+          policy(execution, count), Representatives{view, first, dimension});
       }
+
+      /// @brief Records the minimum polytope index of every geometry.
+      struct Representatives
+      {
+        Rodin::Kokkos::Geometry::MeshView view;
+        ::Kokkos::View<Index[GeometryCount], MemorySpace> first;
+        Index dimension;
+
+        KOKKOS_INLINE_FUNCTION void operator()(Index p) const
+        {
+          const Index g = static_cast<Index>(view.getPolytope(dimension, p).getGeometry());
+          ::Kokkos::atomic_min(&first(g), p);
+        }
+      };
 
     private:
       ::Kokkos::View<Index*, MemorySpace> m_offsets;
@@ -1161,6 +1170,75 @@ namespace Rodin::Kokkos::Variational::Internal
        *
        * Public as the enclosing function of a device lambda.
        */
+      /**
+       * @brief Number of entries of the local matrix of a polytope, zero
+       * when the polytope is not integrated.
+       *
+       * A functor rather than a device lambda captured by the kernels of
+       * locate: with nvcc 13.1, copying a captured extended lambda on the
+       * host goes through a function pointer that stays null when another
+       * translation unit of the executable instantiates the same template.
+       */
+      template <class TrialDOFs, class TestDOFs>
+      struct EntryCount
+      {
+        Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Geometry::Region region;
+        Index dimension;
+        AttributesType attributes;
+        TrialDOFs trialDOFs;
+        Index trialVDim;
+        TestDOFs testDOFs;
+        Index testVDim;
+
+        KOKKOS_INLINE_FUNCTION Index operator()(Index p) const
+        {
+          const auto polytope = view.getPolytope(dimension, p);
+          if (!Rodin::Kokkos::Variational::isIntegrated(view, region, polytope, attributes))
+            return 0;
+          return trialDOFs.bind(polytope).size() * trialVDim *
+            testDOFs.bind(polytope).size() * testVDim;
+        }
+      };
+
+      /// @brief Counts the integrated polytopes and bounds their entry counts.
+      template <class TrialDOFs, class TestDOFs>
+      struct EntryRange
+      {
+        EntryCount<TrialDOFs, TestDOFs> count;
+
+        KOKKOS_INLINE_FUNCTION void operator()(
+          Index p, Index& m, Index& lo, Index& hi) const
+        {
+          const Index n = count(p);
+          if (n == 0)
+            return;
+          m += 1;
+          lo = n < lo ? n : lo;
+          hi = n > hi ? n : hi;
+        }
+      };
+
+      /**
+       * @brief Writes the entry offsets of the polytopes, one entry per
+       * integrated polytope when their entry counts are uniform.
+       */
+      template <class TrialDOFs, class TestDOFs>
+      struct EntryOffsets
+      {
+        EntryCount<TrialDOFs, TestDOFs> count;
+        ::Kokkos::View<Index*, MemorySpace> offsets;
+        bool uniform;
+
+        KOKKOS_INLINE_FUNCTION void operator()(Index p, Index& update, bool final) const
+        {
+          if (final)
+            offsets(p) = update;
+          const Index n = count(p);
+          update += uniform && n > 0 ? 1 : n;
+        }
+      };
+
       template <class TrialDOFs, class TestDOFs>
       static size_t locate(const ExecutionSpace& execution,
         const Rodin::Kokkos::Geometry::MeshView& view, ::Rodin::Geometry::Region region,
@@ -1169,41 +1247,20 @@ namespace Rodin::Kokkos::Variational::Internal
         const TrialDOFs& trialDOFs, Index trialVDim, const TestDOFs& testDOFs,
         Index testVDim, size_t& spacing)
       {
-        const auto local = KOKKOS_LAMBDA(Index p)->Index
-        {
-          const auto polytope = view.getPolytope(dimension, p);
-          if (!Rodin::Kokkos::Variational::isIntegrated(
-                view, region, polytope, attributes))
-            return 0;
-          return trialDOFs.bind(polytope).size() * trialVDim *
-            testDOFs.bind(polytope).size() * testVDim;
-        };
+        const EntryCount<TrialDOFs, TestDOFs> local{
+          view, region, dimension, attributes, trialDOFs, trialVDim, testDOFs, testVDim };
         Index selected = 0;
         Index smallest = 0;
         Index largest = 0;
-        ::Kokkos::parallel_reduce(
-          "Rodin entry counts", QuadratureType::policy(execution, count),
-          KOKKOS_LAMBDA(Index p, Index & m, Index & lo, Index & hi) {
-            const Index n = local(p);
-            if (n == 0)
-              return;
-            m += 1;
-            lo = n < lo ? n : lo;
-            hi = n > hi ? n : hi;
-          },
-          ::Kokkos::Sum<Index>(selected), ::Kokkos::Min<Index>(smallest),
-          ::Kokkos::Max<Index>(largest));
+        ::Kokkos::parallel_reduce("Rodin entry counts",
+          QuadratureType::policy(execution, count),
+          EntryRange<TrialDOFs, TestDOFs>{local}, ::Kokkos::Sum<Index>(selected),
+          ::Kokkos::Min<Index>(smallest), ::Kokkos::Max<Index>(largest));
         const bool uniform = selected > 1 && smallest == largest;
         Index total = 0;
-        ::Kokkos::parallel_scan(
-          "Rodin entry offsets", QuadratureType::policy(execution, count),
-          KOKKOS_LAMBDA(Index p, Index & update, bool final) {
-            if (final)
-              offsets(p) = update;
-            const Index n = local(p);
-            update += uniform && n > 0 ? 1 : n;
-          },
-          total);
+        ::Kokkos::parallel_scan("Rodin entry offsets",
+          QuadratureType::policy(execution, count),
+          EntryOffsets<TrialDOFs, TestDOFs>{local, offsets, uniform}, total);
         spacing = uniform ? selected : 1;
         return uniform ? size_t(selected) * smallest : total;
       }
@@ -1667,157 +1724,22 @@ namespace Rodin::Kokkos::Variational
         bool accumulate, bool compact, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
-        using TestValue = StoredValue<Test, Trial, Test>;
-        using TrialValue = StoredValue<Trial, Trial, Test>;
-        static_assert(std::is_trivially_copyable_v<TestValue> &&
-          std::is_trivially_copyable_v<TrialValue> &&
+        using Kernel = TeamKernel<Vertices, Exact, Shape, Trial, Test>;
+        using Policy = typename Kernel::Policy;
+        static_assert(std::is_trivially_copyable_v<typename Kernel::TestValue> &&
+          std::is_trivially_copyable_v<typename Kernel::TrialValue> &&
           std::is_trivially_destructible_v<IntegrationPointView>);
-        using PointType = Rodin::Kokkos::Variational::KernelPointView<Shape>;
-        using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>;
-        using Member = typename Policy::member_type;
-        // Component diagonal integrands integrate one entry per pair of
-        // scalar degrees of freedom.
-        constexpr bool Diagonal = isComponentDiagonal<Trial, Test>();
-        constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices) *
-          getComponentCapacity<TrialRange, Trial, Test>();
-        constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices) *
-          getComponentCapacity<TestRange, Trial, Test>();
-        constexpr size_t PointBytes = getTeamPointBytes<Vertices, Trial, Test>();
-        // Groups that do not fit TeamScratch go to the slower scratch level.
-        constexpr Index Fit = getTeamPoints<Vertices, Trial, Test>();
-        constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
-          : Fit > TeamPoints                        ? TeamPoints
-                                                    : Fit;
-        // Wider blocks reduce the passes over the quadrature of large matrices.
-        constexpr Index E =
-          TrialCapacity * TestCapacity > LocalCapacity ? TeamWideEntries : TeamEntries;
-        constexpr size_t Alignment = std::max({alignof(TestValue), alignof(TrialValue),
-          alignof(IntegrationPointView), alignof(Real)});
+        constexpr Index TrialCapacity = Kernel::TrialCapacity;
+        constexpr Index TestCapacity = Kernel::TestCapacity;
+        constexpr Index E = Kernel::E;
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const auto view = mesh.getDeviceView();
-        const auto quadrature = polytopes.getQuadrature();
-        const auto attributes = polytopes.getAttributes();
-        const auto offsets = polytopes.getOffsets();
-        const size_t spacing = polytopes.getSpacing();
-        const auto region = polytopes.getRegion();
-        const Index dimension = polytopes.getDimension();
-        const bool index = rows.extent(0) > 0;
-        const size_t scratch = P * PointBytes + 4 * Alignment;
+        const size_t scratch = Kernel::P * Kernel::PointBytes + 4 * Kernel::Alignment;
         const int level = scratch <= size_t(Policy::scratch_size_max(0)) ? 0 : 1;
-        const auto kernel = KOKKOS_LAMBDA(const Member& team)
-        {
-          const Index p = team.league_rank();
-          const auto polytope = view.getPolytope(dimension, p);
-          if (!Rodin::Kokkos::Variational::isIntegrated(
-                view, region, polytope, attributes))
-            return;
-          KOKKOS_ASSERT(Exact ? polytope.getVertices().size() == Vertices
-                              : polytope.getVertices().size() <= Vertices);
-          const auto trialIndices = trialDOFs.bind(polytope);
-          const auto testIndices = testDOFs.bind(polytope);
-          const Index trialStride = Exact ? VectorCapacity<TrialRange> : trialVDim;
-          const Index testStride = Exact ? VectorCapacity<TestRange> : testVDim;
-          KOKKOS_ASSERT(!Diagonal || trialStride == testStride);
-          // Integrated components per scalar degree of freedom, and copies of
-          // each integrated entry on the diagonal of the component blocks.
-          const Index trialComponents = Diagonal ? 1 : trialStride;
-          const Index testComponents = Diagonal ? 1 : testStride;
-          const Index copies = Diagonal ? trialStride : 1;
-          const Index ntr = Exact ? TrialCapacity : trialIndices.size() * trialComponents;
-          const Index nte = Exact ? TestCapacity : testIndices.size() * testComponents;
-          const Index g = static_cast<Index>(polytope.getGeometry());
-          const Index rank = team.team_rank();
-          const Index threads = team.team_size();
-          auto* const points = static_cast<PointType*>(
-            team.team_scratch(level).get_shmem_aligned(P * sizeof(PointType), Alignment));
-          auto* const weights = static_cast<Real*>(
-            team.team_scratch(level).get_shmem_aligned(P * sizeof(Real), Alignment));
-          auto* const phi =
-            static_cast<TestValue*>(team.team_scratch(level).get_shmem_aligned(
-              P * TestCapacity * sizeof(TestValue), Alignment));
-          auto* const psi =
-            static_cast<TrialValue*>(team.team_scratch(level).get_shmem_aligned(
-              P * TrialCapacity * sizeof(TrialValue), Alignment));
-          const Index entries = nte * ntr;
-          const Index begin = quadrature.begin(g);
-          const Index end = quadrature.end(g);
-          const size_t base = offset + offsets(p);
-          // Groups of balanced sizes, at most P points each.
-          const Index groups = (end - begin + P - 1) / P;
-          const Index size = groups > 0 ? (end - begin + groups - 1) / groups : 0;
-          const auto write = [&](Index te, Index tr, Real v) {
-            Rodin::Kokkos::Variational::Internal::writeEntries(values, rows, cols, base,
-              spacing, accumulate, index, testIndices, testDOFs.getStride(),
-              testComponents, trialIndices, trialDOFs.getStride(), trialComponents,
-              copies, compact, ntr, te, tr, v);
-          };
-          for (Index first = 0; first < entries; first += threads * E)
-          {
-            Real local[E] = {};
-            for (Index q0 = begin; q0 < end; q0 += size)
-            {
-              const Index count = end - q0 < size ? end - q0 : size;
-              // The points and the values of the previous group are no longer read.
-              team.team_barrier();
-              for (Index c = rank; c < count; c += threads)
-              {
-                new (points + c)
-                  PointType(polytope, quadrature.getReference(polytope, q0 + c), Shape{});
-                weights[c] = quadrature.getWeight(q0 + c) * points[c].getDistortion();
-              }
-              team.team_barrier();
-              // Separate loops keep the lanes of a warp on the same basis.
-              for (Index i = rank; i < count * nte; i += threads)
-              {
-                const Index c = i / nte;
-                const Index te = i - c * nte;
-                const auto basis = Rodin::Kokkos::Variational::bindBasis(test, points[c]);
-                phi[c * TestCapacity + te] =
-                  Rodin::Kokkos::Variational::getStored<Diagonal>(
-                    basis.getBasis(te / testComponents, te % testComponents));
-              }
-              for (Index i = rank; i < count * ntr; i += threads)
-              {
-                const Index c = i / ntr;
-                const Index tr = i - c * ntr;
-                const auto basis =
-                  Rodin::Kokkos::Variational::bindBasis(trial, points[c]);
-                psi[c * TrialCapacity + tr] =
-                  Rodin::Kokkos::Variational::getStored<Diagonal>(
-                    basis.getBasis(tr / trialComponents, tr % trialComponents));
-              }
-              team.team_barrier();
-              RODIN_KOKKOS_UNROLL
-              for (Index j = 0; j < E; ++j)
-              {
-                const Index k = first + j * threads + rank;
-                if (k < entries)
-                {
-                  const Index te = k / ntr;
-                  const Index tr = k - te * ntr;
-                  for (Index c = 0; c < count; ++c)
-                  {
-                    const auto& u = psi[c * TrialCapacity + tr];
-                    const auto& v = phi[c * TestCapacity + te];
-                    if (Rodin::Kokkos::Variational::overlaps(u, v))
-                      local[j] += weights[c] * Rodin::Kokkos::Variational::dot(u, v);
-                  }
-                }
-              }
-            }
-            RODIN_KOKKOS_UNROLL
-            for (Index j = 0; j < E; ++j)
-            {
-              const Index k = first + j * threads + rank;
-              if (k < entries)
-              {
-                const Index te = k / ntr;
-                const Index tr = k - te * ntr;
-                write(te, tr, sign * local[j]);
-              }
-            }
-          }
-        };
+        const Kernel kernel{mesh.getDeviceView(), polytopes.getQuadrature(),
+          polytopes.getAttributes(), polytopes.getOffsets(), polytopes.getSpacing(),
+          polytopes.getRegion(), polytopes.getDimension(), trial, test, trialDOFs,
+          trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, compact,
+          rows.extent(0) > 0, rows, cols, level};
         Policy policy(execution, polytopes.getPolytopeCount(), ::Kokkos::AUTO);
         policy.set_scratch_size(level, ::Kokkos::PerTeam(scratch));
         // About TeamEntries / 2 entries per thread balance the occupancy against
@@ -1848,95 +1770,15 @@ namespace Rodin::Kokkos::Variational
         bool accumulate, bool compact, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
-        using TestValue = StoredValue<Test, Trial, Test>;
-        // Component diagonal integrands integrate one entry per pair of
-        // scalar degrees of freedom.
-        constexpr bool Diagonal = isComponentDiagonal<Trial, Test>();
-        constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices) *
-          getComponentCapacity<TrialRange, Trial, Test>();
-        constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices) *
-          getComponentCapacity<TestRange, Trial, Test>();
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const auto view = mesh.getDeviceView();
-        const auto quadrature = polytopes.getQuadrature();
-        const auto attributes = polytopes.getAttributes();
-        const auto offsets = polytopes.getOffsets();
-        const size_t spacing = polytopes.getSpacing();
-        const auto region = polytopes.getRegion();
-        const Index dimension = polytopes.getDimension();
-        const bool index = rows.extent(0) > 0;
-        ::Kokkos::parallel_for(
-          "Rodin bilinear form integration",
-          QuadratureType::policy(execution, polytopes.getPolytopeCount()),
-          KOKKOS_LAMBDA(Index p) {
-            const auto polytope = view.getPolytope(dimension, p);
-            if (!Rodin::Kokkos::Variational::isIntegrated(
-                  view, region, polytope, attributes))
-              return;
-            KOKKOS_ASSERT(Exact ? polytope.getVertices().size() == Vertices
-                                : polytope.getVertices().size() <= Vertices);
-            const auto trialIndices = trialDOFs.bind(polytope);
-            const auto testIndices = testDOFs.bind(polytope);
-            const Index trialStride = Exact ? VectorCapacity<TrialRange> : trialVDim;
-            const Index testStride = Exact ? VectorCapacity<TestRange> : testVDim;
-            KOKKOS_ASSERT(!Diagonal || trialStride == testStride);
-            // Integrated components per scalar degree of freedom, and copies of
-            // each integrated entry on the diagonal of the component blocks.
-            const Index trialComponents = Diagonal ? 1 : trialStride;
-            const Index testComponents = Diagonal ? 1 : testStride;
-            const Index copies = Diagonal ? trialStride : 1;
-            const Index ntr =
-              Exact ? TrialCapacity : trialIndices.size() * trialComponents;
-            const Index nte = Exact ? TestCapacity : testIndices.size() * testComponents;
-            const Index g = static_cast<Index>(polytope.getGeometry());
-            ::Kokkos::Array<Real, TrialCapacity * TestCapacity> local{};
-            ::Kokkos::Array<TestValue, TestCapacity> phi;
-            const Index begin = quadrature.begin(g);
-            const Index end = quadrature.end(g);
-            if (begin < end)
-            {
-              Rodin::Kokkos::Variational::KernelPointView<Shape> ip(
-                polytope, quadrature.getReference(polytope, begin), Shape{});
-              for (Index q = begin; q < end; ++q)
-              {
-                if (q > begin)
-                  ip.setPoint(quadrature.getReference(polytope, q), Shape{});
-                const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
-                const auto testBasis = Rodin::Kokkos::Variational::bindBasis(test, ip);
-                const auto trialBasis = Rodin::Kokkos::Variational::bindBasis(trial, ip);
-                RODIN_KOKKOS_UNROLL
-                for (Index te = 0; te < nte; ++te)
-                  phi[te] = Rodin::Kokkos::Variational::getStored<Diagonal>(
-                    testBasis.getBasis(te / testComponents, te % testComponents));
-                RODIN_KOKKOS_UNROLL
-                for (Index tr = 0; tr < ntr; ++tr)
-                {
-                  const auto psi = Rodin::Kokkos::Variational::getStored<Diagonal>(
-                    trialBasis.getBasis(tr / trialComponents, tr % trialComponents));
-                  RODIN_KOKKOS_UNROLL
-                  for (Index te = 0; te < nte; ++te)
-                  {
-                    if (Rodin::Kokkos::Variational::overlaps(psi, phi[te]))
-                      local[te * ntr + tr] +=
-                        wdet * Rodin::Kokkos::Variational::dot(psi, phi[te]);
-                  }
-                }
-              }
-            }
-            const size_t base = offset + offsets(p);
-            RODIN_KOKKOS_UNROLL
-            for (Index te = 0; te < nte; ++te)
-            {
-              RODIN_KOKKOS_UNROLL
-              for (Index tr = 0; tr < ntr; ++tr)
-              {
-                Rodin::Kokkos::Variational::Internal::writeEntries(values, rows, cols,
-                  base, spacing, accumulate, index, testIndices, testDOFs.getStride(),
-                  testComponents, trialIndices, trialDOFs.getStride(), trialComponents,
-                  copies, compact, ntr, te, tr, sign * local[te * ntr + tr]);
-              }
-            }
-          });
+        const ThreadKernel<Vertices, Exact, Shape, Trial, Test> kernel{
+          mesh.getDeviceView(), polytopes.getQuadrature(), polytopes.getAttributes(),
+          polytopes.getOffsets(), polytopes.getSpacing(), polytopes.getRegion(),
+          polytopes.getDimension(), trial, test, trialDOFs, trialVDim, testDOFs,
+          testVDim, values, offset, sign, accumulate, compact, rows.extent(0) > 0, rows,
+          cols};
+        ::Kokkos::parallel_for("Rodin bilinear form integration",
+          QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
 
       DeviceBilinearIntegral* copy() const noexcept override = 0;
@@ -2059,6 +1901,291 @@ namespace Rodin::Kokkos::Variational
       std::unique_ptr<IntegrandType> m_integrand;
       mutable PolytopesType m_polytopes;
       mutable bool m_compact = false;
+
+    public:
+      /**
+       * @brief Kernel of integrateTeams(), one team per polytope.
+       *
+       * A functor rather than a device lambda, see
+       * Internal::DevicePolytopes::EntryCount.
+       */
+      template <Index Vertices, bool Exact, class Shape, class Trial, class Test>
+      struct TeamKernel
+      {
+        using TestValue = StoredValue<Test, Trial, Test>;
+        using TrialValue = StoredValue<Trial, Trial, Test>;
+        using PointType = Rodin::Kokkos::Variational::KernelPointView<Shape>;
+        using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>;
+        using Member = typename Policy::member_type;
+        // Component diagonal integrands integrate one entry per pair of
+        // scalar degrees of freedom.
+        static constexpr bool Diagonal = isComponentDiagonal<Trial, Test>();
+        static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices) *
+          getComponentCapacity<TrialRange, Trial, Test>();
+        static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices) *
+          getComponentCapacity<TestRange, Trial, Test>();
+        static constexpr size_t PointBytes = getTeamPointBytes<Vertices, Trial, Test>();
+        // Groups that do not fit TeamScratch go to the slower scratch level.
+        static constexpr Index Fit = getTeamPoints<Vertices, Trial, Test>();
+        static constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
+          : Fit > TeamPoints                               ? TeamPoints
+                                                           : Fit;
+        // Wider blocks reduce the passes over the quadrature of large matrices.
+        static constexpr Index E =
+          TrialCapacity * TestCapacity > LocalCapacity ? TeamWideEntries : TeamEntries;
+        static constexpr size_t Alignment = std::max({alignof(TestValue),
+          alignof(TrialValue), alignof(IntegrationPointView), alignof(Real)});
+
+        Rodin::Kokkos::Geometry::MeshView view;
+        QuadratureType quadrature;
+        typename PolytopesType::AttributesType attributes;
+        ::Kokkos::View<Index*, MemorySpace> offsets;
+        size_t spacing;
+        ::Rodin::Geometry::Region region;
+        Index dimension;
+        Trial trial;
+        Test test;
+        TrialDOFsType trialDOFs;
+        Index trialVDim;
+        TestDOFsType testDOFs;
+        Index testVDim;
+        ::Kokkos::View<Real*, MemorySpace> values;
+        size_t offset;
+        Real sign;
+        bool accumulate;
+        bool compact;
+        bool index;
+        ::Kokkos::View<Index*, MemorySpace> rows;
+        ::Kokkos::View<Index*, MemorySpace> cols;
+        int level;
+
+        KOKKOS_INLINE_FUNCTION void operator()(const Member& team) const
+        {
+          const Index p = team.league_rank();
+          const auto polytope = view.getPolytope(dimension, p);
+          if (!Rodin::Kokkos::Variational::isIntegrated(
+                view, region, polytope, attributes))
+            return;
+          KOKKOS_ASSERT(Exact ? polytope.getVertices().size() == Vertices
+                              : polytope.getVertices().size() <= Vertices);
+          const auto trialIndices = trialDOFs.bind(polytope);
+          const auto testIndices = testDOFs.bind(polytope);
+          const Index trialStride = Exact ? VectorCapacity<TrialRange> : trialVDim;
+          const Index testStride = Exact ? VectorCapacity<TestRange> : testVDim;
+          KOKKOS_ASSERT(!Diagonal || trialStride == testStride);
+          // Integrated components per scalar degree of freedom, and copies of
+          // each integrated entry on the diagonal of the component blocks.
+          const Index trialComponents = Diagonal ? 1 : trialStride;
+          const Index testComponents = Diagonal ? 1 : testStride;
+          const Index copies = Diagonal ? trialStride : 1;
+          const Index ntr = Exact ? TrialCapacity : trialIndices.size() * trialComponents;
+          const Index nte = Exact ? TestCapacity : testIndices.size() * testComponents;
+          const Index g = static_cast<Index>(polytope.getGeometry());
+          const Index rank = team.team_rank();
+          const Index threads = team.team_size();
+          auto* const points = static_cast<PointType*>(
+            team.team_scratch(level).get_shmem_aligned(P * sizeof(PointType), Alignment));
+          auto* const weights = static_cast<Real*>(
+            team.team_scratch(level).get_shmem_aligned(P * sizeof(Real), Alignment));
+          auto* const phi =
+            static_cast<TestValue*>(team.team_scratch(level).get_shmem_aligned(
+              P * TestCapacity * sizeof(TestValue), Alignment));
+          auto* const psi =
+            static_cast<TrialValue*>(team.team_scratch(level).get_shmem_aligned(
+              P * TrialCapacity * sizeof(TrialValue), Alignment));
+          const Index entries = nte * ntr;
+          const Index begin = quadrature.begin(g);
+          const Index end = quadrature.end(g);
+          const size_t base = offset + offsets(p);
+          // Groups of balanced sizes, at most P points each.
+          const Index groups = (end - begin + P - 1) / P;
+          const Index size = groups > 0 ? (end - begin + groups - 1) / groups : 0;
+          const auto write = [&](Index te, Index tr, Real v) {
+            Rodin::Kokkos::Variational::Internal::writeEntries(values, rows, cols, base,
+              spacing, accumulate, index, testIndices, testDOFs.getStride(),
+              testComponents, trialIndices, trialDOFs.getStride(), trialComponents,
+              copies, compact, ntr, te, tr, v);
+          };
+          for (Index first = 0; first < entries; first += threads * E)
+          {
+            Real local[E] = {};
+            for (Index q0 = begin; q0 < end; q0 += size)
+            {
+              const Index count = end - q0 < size ? end - q0 : size;
+              // The points and the values of the previous group are no longer read.
+              team.team_barrier();
+              for (Index c = rank; c < count; c += threads)
+              {
+                new (points + c)
+                  PointType(polytope, quadrature.getReference(polytope, q0 + c), Shape{});
+                weights[c] = quadrature.getWeight(q0 + c) * points[c].getDistortion();
+              }
+              team.team_barrier();
+              // Separate loops keep the lanes of a warp on the same basis.
+              for (Index i = rank; i < count * nte; i += threads)
+              {
+                const Index c = i / nte;
+                const Index te = i - c * nte;
+                const auto basis = Rodin::Kokkos::Variational::bindBasis(test, points[c]);
+                phi[c * TestCapacity + te] =
+                  Rodin::Kokkos::Variational::getStored<Diagonal>(
+                    basis.getBasis(te / testComponents, te % testComponents));
+              }
+              for (Index i = rank; i < count * ntr; i += threads)
+              {
+                const Index c = i / ntr;
+                const Index tr = i - c * ntr;
+                const auto basis =
+                  Rodin::Kokkos::Variational::bindBasis(trial, points[c]);
+                psi[c * TrialCapacity + tr] =
+                  Rodin::Kokkos::Variational::getStored<Diagonal>(
+                    basis.getBasis(tr / trialComponents, tr % trialComponents));
+              }
+              team.team_barrier();
+              RODIN_KOKKOS_UNROLL
+              for (Index j = 0; j < E; ++j)
+              {
+                const Index k = first + j * threads + rank;
+                if (k < entries)
+                {
+                  const Index te = k / ntr;
+                  const Index tr = k - te * ntr;
+                  for (Index c = 0; c < count; ++c)
+                  {
+                    const auto& u = psi[c * TrialCapacity + tr];
+                    const auto& v = phi[c * TestCapacity + te];
+                    if (Rodin::Kokkos::Variational::overlaps(u, v))
+                      local[j] += weights[c] * Rodin::Kokkos::Variational::dot(u, v);
+                  }
+                }
+              }
+            }
+            RODIN_KOKKOS_UNROLL
+            for (Index j = 0; j < E; ++j)
+            {
+              const Index k = first + j * threads + rank;
+              if (k < entries)
+              {
+                const Index te = k / ntr;
+                const Index tr = k - te * ntr;
+                write(te, tr, sign * local[j]);
+              }
+            }
+          }
+        }
+      };
+
+      /**
+       * @brief Kernel of integrateThreads(), one thread per polytope.
+       *
+       * A functor rather than a device lambda, see
+       * Internal::DevicePolytopes::EntryCount.
+       */
+      template <Index Vertices, bool Exact, class Shape, class Trial, class Test>
+      struct ThreadKernel
+      {
+        using TestValue = StoredValue<Test, Trial, Test>;
+        // Component diagonal integrands integrate one entry per pair of
+        // scalar degrees of freedom.
+        static constexpr bool Diagonal = isComponentDiagonal<Trial, Test>();
+        static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices) *
+          getComponentCapacity<TrialRange, Trial, Test>();
+        static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices) *
+          getComponentCapacity<TestRange, Trial, Test>();
+
+        Rodin::Kokkos::Geometry::MeshView view;
+        QuadratureType quadrature;
+        typename PolytopesType::AttributesType attributes;
+        ::Kokkos::View<Index*, MemorySpace> offsets;
+        size_t spacing;
+        ::Rodin::Geometry::Region region;
+        Index dimension;
+        Trial trial;
+        Test test;
+        TrialDOFsType trialDOFs;
+        Index trialVDim;
+        TestDOFsType testDOFs;
+        Index testVDim;
+        ::Kokkos::View<Real*, MemorySpace> values;
+        size_t offset;
+        Real sign;
+        bool accumulate;
+        bool compact;
+        bool index;
+        ::Kokkos::View<Index*, MemorySpace> rows;
+        ::Kokkos::View<Index*, MemorySpace> cols;
+
+        KOKKOS_INLINE_FUNCTION void operator()(Index p) const
+        {
+          const auto polytope = view.getPolytope(dimension, p);
+          if (!Rodin::Kokkos::Variational::isIntegrated(
+                view, region, polytope, attributes))
+            return;
+          KOKKOS_ASSERT(Exact ? polytope.getVertices().size() == Vertices
+                              : polytope.getVertices().size() <= Vertices);
+          const auto trialIndices = trialDOFs.bind(polytope);
+          const auto testIndices = testDOFs.bind(polytope);
+          const Index trialStride = Exact ? VectorCapacity<TrialRange> : trialVDim;
+          const Index testStride = Exact ? VectorCapacity<TestRange> : testVDim;
+          KOKKOS_ASSERT(!Diagonal || trialStride == testStride);
+          // Integrated components per scalar degree of freedom, and copies of
+          // each integrated entry on the diagonal of the component blocks.
+          const Index trialComponents = Diagonal ? 1 : trialStride;
+          const Index testComponents = Diagonal ? 1 : testStride;
+          const Index copies = Diagonal ? trialStride : 1;
+          const Index ntr =
+            Exact ? TrialCapacity : trialIndices.size() * trialComponents;
+          const Index nte = Exact ? TestCapacity : testIndices.size() * testComponents;
+          const Index g = static_cast<Index>(polytope.getGeometry());
+          ::Kokkos::Array<Real, TrialCapacity * TestCapacity> local{};
+          ::Kokkos::Array<TestValue, TestCapacity> phi;
+          const Index begin = quadrature.begin(g);
+          const Index end = quadrature.end(g);
+          if (begin < end)
+          {
+            Rodin::Kokkos::Variational::KernelPointView<Shape> ip(
+              polytope, quadrature.getReference(polytope, begin), Shape{});
+            for (Index q = begin; q < end; ++q)
+            {
+              if (q > begin)
+                ip.setPoint(quadrature.getReference(polytope, q), Shape{});
+              const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
+              const auto testBasis = Rodin::Kokkos::Variational::bindBasis(test, ip);
+              const auto trialBasis = Rodin::Kokkos::Variational::bindBasis(trial, ip);
+              RODIN_KOKKOS_UNROLL
+              for (Index te = 0; te < nte; ++te)
+                phi[te] = Rodin::Kokkos::Variational::getStored<Diagonal>(
+                  testBasis.getBasis(te / testComponents, te % testComponents));
+              RODIN_KOKKOS_UNROLL
+              for (Index tr = 0; tr < ntr; ++tr)
+              {
+                const auto psi = Rodin::Kokkos::Variational::getStored<Diagonal>(
+                  trialBasis.getBasis(tr / trialComponents, tr % trialComponents));
+                RODIN_KOKKOS_UNROLL
+                for (Index te = 0; te < nte; ++te)
+                {
+                  if (Rodin::Kokkos::Variational::overlaps(psi, phi[te]))
+                    local[te * ntr + tr] +=
+                      wdet * Rodin::Kokkos::Variational::dot(psi, phi[te]);
+                }
+              }
+            }
+          }
+          const size_t base = offset + offsets(p);
+          RODIN_KOKKOS_UNROLL
+          for (Index te = 0; te < nte; ++te)
+          {
+            RODIN_KOKKOS_UNROLL
+            for (Index tr = 0; tr < ntr; ++tr)
+            {
+              Rodin::Kokkos::Variational::Internal::writeEntries(values, rows, cols,
+                base, spacing, accumulate, index, testIndices, testDOFs.getStride(),
+                testComponents, trialIndices, trialDOFs.getStride(), trialComponents,
+                copies, compact, ntr, te, tr, sign * local[te * ntr + tr]);
+            }
+          }
+        }
+      };
   };
 
   /**
@@ -2290,64 +2417,13 @@ namespace Rodin::Kokkos::Variational
         const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset, Real sign,
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& indices)
       {
-        constexpr Index Capacity = DOFsType::getCapacity(Vertices) * VectorCapacity;
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const auto view = mesh.getDeviceView();
-        const auto quadrature = polytopes.getQuadrature();
-        const auto attributes = polytopes.getAttributes();
-        const auto offsets = polytopes.getOffsets();
-        const size_t spacing = polytopes.getSpacing();
-        const auto region = polytopes.getRegion();
-        const Index dimension = polytopes.getDimension();
-        const bool index = indices.extent(0) > 0;
-        ::Kokkos::parallel_for(
-          "Rodin linear form integration",
-          QuadratureType::policy(execution, polytopes.getPolytopeCount()),
-          KOKKOS_LAMBDA(Index p) {
-            const auto polytope = view.getPolytope(dimension, p);
-            if (!Rodin::Kokkos::Variational::isIntegrated(
-                  view, region, polytope, attributes))
-              return;
-            KOKKOS_ASSERT(Exact ? polytope.getVertices().size() == Vertices
-                                : polytope.getVertices().size() <= Vertices);
-            const auto testIndices = dofs.bind(polytope);
-            const Index nte = Exact ? Capacity : testIndices.size() * vdim;
-            const Index stride = Exact ? VectorCapacity : vdim;
-            const Index g = static_cast<Index>(polytope.getGeometry());
-            ::Kokkos::Array<Real, Capacity> local{};
-            const Index begin = quadrature.begin(g);
-            const Index end = quadrature.end(g);
-            if (begin < end)
-            {
-              Rodin::Kokkos::Variational::KernelPointView<Shape> ip(
-                polytope, quadrature.getReference(polytope, begin), Shape{});
-              for (Index q = begin; q < end; ++q)
-              {
-                if (q > begin)
-                  ip.setPoint(quadrature.getReference(polytope, q), Shape{});
-                const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
-                const auto basis = Rodin::Kokkos::Variational::bindBasis(test, ip);
-                RODIN_KOKKOS_UNROLL
-                for (Index te = 0; te < nte; ++te)
-                  local[te] += wdet * basis.getBasis(te / stride, te % stride);
-              }
-            }
-            // Local index a * vdim + r is component r of the scalar degree of
-            // freedom a, numbered globally as dof + r * stride.
-            const size_t base = offset + offsets(p);
-            RODIN_KOKKOS_UNROLL
-            for (Index te = 0; te < nte; ++te)
-            {
-              const size_t e = base + te * spacing;
-              const Real v = sign * local[te];
-              if (accumulate)
-                values(e) += v;
-              else
-                values(e) = v;
-              if (index)
-                indices(e) = testIndices[te / stride] + (te % stride) * dofs.getStride();
-            }
-          });
+        const PolytopeKernel<Vertices, Exact, Shape, Test> kernel{mesh.getDeviceView(),
+          polytopes.getQuadrature(), polytopes.getAttributes(), polytopes.getOffsets(),
+          polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(), test,
+          dofs, vdim, values, offset, sign, accumulate, indices.extent(0) > 0, indices};
+        ::Kokkos::parallel_for("Rodin linear form integration",
+          QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
 
       DeviceLinearIntegral* copy() const noexcept override = 0;
@@ -2390,6 +2466,83 @@ namespace Rodin::Kokkos::Variational
 
       std::unique_ptr<IntegrandType> m_integrand;
       mutable PolytopesType m_polytopes;
+
+    public:
+      /**
+       * @brief Kernel of integratePolytopes(), one thread per polytope.
+       *
+       * A functor rather than a device lambda, see
+       * Internal::DevicePolytopes::EntryCount.
+       */
+      template <Index Vertices, bool Exact, class Shape, class Test>
+      struct PolytopeKernel
+      {
+        static constexpr Index Capacity = DOFsType::getCapacity(Vertices) * VectorCapacity;
+
+        Rodin::Kokkos::Geometry::MeshView view;
+        QuadratureType quadrature;
+        typename PolytopesType::AttributesType attributes;
+        ::Kokkos::View<Index*, MemorySpace> offsets;
+        size_t spacing;
+        ::Rodin::Geometry::Region region;
+        Index dimension;
+        Test test;
+        DOFsType dofs;
+        Index vdim;
+        ::Kokkos::View<Real*, MemorySpace> values;
+        size_t offset;
+        Real sign;
+        bool accumulate;
+        bool index;
+        ::Kokkos::View<Index*, MemorySpace> indices;
+
+        KOKKOS_INLINE_FUNCTION void operator()(Index p) const
+        {
+          const auto polytope = view.getPolytope(dimension, p);
+          if (!Rodin::Kokkos::Variational::isIntegrated(
+                view, region, polytope, attributes))
+            return;
+          KOKKOS_ASSERT(Exact ? polytope.getVertices().size() == Vertices
+                              : polytope.getVertices().size() <= Vertices);
+          const auto testIndices = dofs.bind(polytope);
+          const Index nte = Exact ? Capacity : testIndices.size() * vdim;
+          const Index stride = Exact ? VectorCapacity : vdim;
+          const Index g = static_cast<Index>(polytope.getGeometry());
+          ::Kokkos::Array<Real, Capacity> local{};
+          const Index begin = quadrature.begin(g);
+          const Index end = quadrature.end(g);
+          if (begin < end)
+          {
+            Rodin::Kokkos::Variational::KernelPointView<Shape> ip(
+              polytope, quadrature.getReference(polytope, begin), Shape{});
+            for (Index q = begin; q < end; ++q)
+            {
+              if (q > begin)
+                ip.setPoint(quadrature.getReference(polytope, q), Shape{});
+              const Real wdet = quadrature.getWeight(q) * ip.getDistortion();
+              const auto basis = Rodin::Kokkos::Variational::bindBasis(test, ip);
+              RODIN_KOKKOS_UNROLL
+              for (Index te = 0; te < nte; ++te)
+                local[te] += wdet * basis.getBasis(te / stride, te % stride);
+            }
+          }
+          // Local index a * vdim + r is component r of the scalar degree of
+          // freedom a, numbered globally as dof + r * stride.
+          const size_t base = offset + offsets(p);
+          RODIN_KOKKOS_UNROLL
+          for (Index te = 0; te < nte; ++te)
+          {
+            const size_t e = base + te * spacing;
+            const Real v = sign * local[te];
+            if (accumulate)
+              values(e) += v;
+            else
+              values(e) = v;
+            if (index)
+              indices(e) = testIndices[te / stride] + (te % stride) * dofs.getStride();
+          }
+        }
+      };
   };
 }
 

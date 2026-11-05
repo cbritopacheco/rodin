@@ -862,6 +862,93 @@ namespace Rodin::Assembly::Internal
         }
       };
 
+      // The predicates below are functors rather than device lambdas
+      // captured by two kernels: with nvcc 13.1, copying a captured extended
+      // lambda on the host goes through a function pointer that stays null
+      // when another translation unit of the executable instantiates the
+      // same template.
+
+      /// @brief Whether a sorted key starts a group.
+      struct GroupHead
+      {
+        Array<Index> keys;
+        unsigned shift;
+
+        KOKKOS_INLINE_FUNCTION bool operator()(const size_t i) const
+        {
+          return i == 0 || (keys(i) >> shift) != (keys(i - 1) >> shift);
+        }
+      };
+
+      /// @brief Lists of a contribution, or of a fixed diagonal entry past
+      /// the triplets.
+      struct Classification
+      {
+        size_t size;
+        Array<Index> rows;
+        Array<Index> cols;
+        Array<Real> values;
+        Array<unsigned char> fixed;
+        Ranks coefficientRanks;
+        bool constrained;
+        bool listCoefficients;
+        bool listEliminated;
+
+        KOKKOS_INLINE_FUNCTION Counts operator()(const size_t e) const
+        {
+          Counts c;
+          if (e >= size)
+          {
+            c.coefficients = fixed(e - size) != 0;
+            return c;
+          }
+          if (!coefficientRanks.kept(values, e))
+            return c;
+          const bool row = constrained && fixed(rows(e));
+          const bool col = constrained && fixed(cols(e));
+          c.coefficients = listCoefficients && !row && !col;
+          c.eliminated = listEliminated && !row && col;
+          return c;
+        }
+      };
+
+      /// @brief Expanded sizes of the matrix contribution of rank k.
+      struct MatrixExpansionSizes
+      {
+        Array<Index> positions;
+        Array<Index> rows;
+        Array<Index> cols;
+        Array<Real> values;
+        Expansions x;
+
+        KOKKOS_INLINE_FUNCTION Sizes operator()(const size_t k) const
+        {
+          Sizes c;
+          const Index e = positions(k);
+          if (values(e) == Real(0))
+            return c;
+          const size_t nr = x.count(rows(e));
+          c.entries = nr * x.count(cols(e));
+          c.lifts = x.values(cols(e)) != Real(0) ? nr : 0;
+          return c;
+        }
+      };
+
+      /// @brief Expanded size of the vector contribution of rank k.
+      struct VectorExpansionSize
+      {
+        Array<Index> positions;
+        Array<Index> indices;
+        Array<Real> values;
+        Expansions x;
+
+        KOKKOS_INLINE_FUNCTION size_t operator()(const size_t k) const
+        {
+          const Index e = positions(k);
+          return values(e) != Real(0) ? x.count(indices(e)) : 0;
+        }
+      };
+
       /// @brief Expanded matrix contributions.
       struct Lifted
       {
@@ -1149,10 +1236,7 @@ namespace Rodin::Assembly::Internal
         if (count > 0)
           ::Kokkos::Experimental::sort_by_key(execution, keys, positions);
         const unsigned shift = ranks.shift;
-        const auto head = KOKKOS_LAMBDA(const size_t i)
-        {
-          return i == 0 || (keys(i) >> shift) != (keys(i - 1) >> shift);
-        };
+        const GroupHead head{ keys, shift };
         const auto policy = ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, count);
         size_t distinct = 0;
         size_t unordered = 0;
@@ -1243,22 +1327,8 @@ namespace Rodin::Assembly::Internal
         const auto cols = triplets.cols;
         const auto values = triplets.values;
         const bool constrained = fixed.extent(0) > 0;
-        const auto classify = KOKKOS_LAMBDA(const size_t e)->Counts
-        {
-          Counts c;
-          if (e >= size)
-          {
-            c.coefficients = fixed(e - size) != 0;
-            return c;
-          }
-          if (!coefficientRanks.kept(values, e))
-            return c;
-          const bool row = constrained && fixed(rows(e));
-          const bool col = constrained && fixed(cols(e));
-          c.coefficients = listCoefficients && !row && !col;
-          c.eliminated = listEliminated && !row && col;
-          return c;
-        };
+        const Classification classify{ size, rows, cols, values, fixed, coefficientRanks,
+          constrained, listCoefficients, listEliminated };
         const auto policy =
           ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, size + diagonal);
         Counts count;
@@ -1492,17 +1562,7 @@ namespace Rodin::Assembly::Internal
         const auto cols = triplets.cols;
         const auto values = triplets.values;
         const auto positions = order(execution, size, triplets.ranks);
-        const auto sizes = KOKKOS_LAMBDA(const size_t k)->Sizes
-        {
-          Sizes c;
-          const Index e = positions(k);
-          if (values(e) == Real(0))
-            return c;
-          const size_t nr = x.count(rows(e));
-          c.entries = nr * x.count(cols(e));
-          c.lifts = x.values(cols(e)) != Real(0) ? nr : 0;
-          return c;
-        };
+        const MatrixExpansionSizes sizes{ positions, rows, cols, values, x };
         const auto policy = ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, size);
         Sizes total;
         ::Kokkos::parallel_reduce(
@@ -1582,11 +1642,7 @@ namespace Rodin::Assembly::Internal
       {
         const size_t size = indices.extent(0);
         const auto positions = order(execution, size, ranks);
-        const auto sizes = KOKKOS_LAMBDA(const size_t k)->size_t
-        {
-          const Index e = positions(k);
-          return values(e) != Real(0) ? x.count(indices(e)) : 0;
-        };
+        const VectorExpansionSize sizes{ positions, indices, values, x };
         const auto policy = ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, size);
         size_t total = 0;
         ::Kokkos::parallel_reduce(

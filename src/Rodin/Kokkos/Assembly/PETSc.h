@@ -1171,19 +1171,37 @@ namespace Rodin::Assembly::Internal
        *
        * Public as the enclosing function of device lambdas.
        */
+      /**
+       * @brief Whether the sorted coordinate i differs from the previous one.
+       *
+       * A functor rather than a device lambda captured by two kernels: with
+       * nvcc 13.1, copying a captured extended lambda on the host goes
+       * through a function pointer that stays null when another translation
+       * unit of the executable instantiates the same template.
+       */
       template <class Indices, class Order>
-      static Indices distinctStarts(const ExecutionSpace& execution, const Indices& rows,
-        const Indices& cols, const Order& order)
+      struct DistinctHead
       {
-        const size_t count = order.extent(0);
-        const auto head = KOKKOS_LAMBDA(const size_t i)
+        Indices rows;
+        Indices cols;
+        Order order;
+
+        KOKKOS_INLINE_FUNCTION bool operator()(const size_t i) const
         {
           const Index e = order(i);
           if (i == 0)
             return true;
           const Index p = order(i - 1);
           return rows(e) != rows(p) || cols(e) != cols(p);
-        };
+        }
+      };
+
+      template <class Indices, class Order>
+      static Indices distinctStarts(const ExecutionSpace& execution, const Indices& rows,
+        const Indices& cols, const Order& order)
+      {
+        const size_t count = order.extent(0);
+        const DistinctHead<Indices, Order> head{ rows, cols, order };
         size_t distinct = 0;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::PETSc::distinct",
