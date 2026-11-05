@@ -25,7 +25,10 @@
  * Kokkos objects, so the solver runs on the devices too: BiCGStab with
  * Jacobi by default, which PETSc options override.
  *
- * The options -oseen_eps, -oseen_scale and -oseen_wscale override the
+ * The option -oseen_partitioner greedy partitions the mesh with
+ * GreedyPartitioner instead of BalancedCompactPartitioner, and the
+ * first repetition prints the extreme local row and ghost column counts of
+ * the operator. The options -oseen_eps, -oseen_scale and -oseen_wscale override the
  * pressure stabilization eps, the scale of a MEDIT mesh, 1e-3 by default,
  * and the factor of the advection field, 0.1 on a MEDIT mesh and 1 on the
  * grid. The option -oseen_refine k splits every cell of the mesh into
@@ -53,6 +56,7 @@
 #include <vector>
 
 #include <petsc.h>
+#include <boost/mpi/collectives/all_reduce.hpp>
 #include <boost/mpi/collectives/broadcast.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
@@ -60,6 +64,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
+#include <Rodin/Geometry/GreedyPartitioner.h>
 #include <Rodin/IO.h>
 #include <Rodin/Solver.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
@@ -304,9 +309,21 @@ namespace Rodin::Examples
       conn.compute(3, 2);
       conn.compute(2, 3);
       conn.compute(2, 0);
-      Geometry::BalancedCompactPartitioner partitioner(mesh);
-      partitioner.partition(static_cast<size_t>(comm.size()));
-      sharder.shard(partitioner);
+      char name[16] = "compact";
+      PetscOptionsGetString(nullptr, nullptr, "-oseen_partitioner", name, sizeof(name),
+        nullptr);
+      if (std::string(name) == "greedy")
+      {
+        Geometry::GreedyPartitioner partitioner(mesh);
+        partitioner.partition(static_cast<size_t>(comm.size()));
+        sharder.shard(partitioner);
+      }
+      else
+      {
+        Geometry::BalancedCompactPartitioner partitioner(mesh);
+        partitioner.partition(static_cast<size_t>(comm.size()));
+        sharder.shard(partitioner);
+      }
       sharder.scatter(0);
     }
     HostMesh mesh = sharder.gather(0);
@@ -323,6 +340,32 @@ namespace Rodin::Examples
 
   using VelocitySpace = Variational::P1<Math::SpatialVector<Real>, DeviceMesh>;
   using PressureSpace = Variational::P1<Real, DeviceMesh>;
+
+  /**
+   * @brief Prints the extreme local row and ghost column counts of the
+   * operator over the processes, which bound the work and the halo of a
+   * product.
+   * @param comm World communicator.
+   * @param A Assembled operator.
+   * @param prefix Leading keys of the printed line.
+   */
+  void printLayout(const boost::mpi::communicator& comm, ::Mat A, const std::string& prefix)
+  {
+    PetscInt rows = 0, ghosts = 0;
+    ::Mat Ad, Ao;
+    const PetscInt* colmap = nullptr;
+    MatGetLocalSize(A, &rows, nullptr);
+    if (MatMPIAIJGetSeqAIJ(A, &Ad, &Ao, &colmap) == PETSC_SUCCESS && Ao)
+      MatGetSize(Ao, nullptr, &ghosts);
+    const std::array<long, 4> local{ rows, -rows, ghosts, -ghosts };
+    std::array<long, 4> extreme;
+    boost::mpi::all_reduce(comm, local.data(), 4, extreme.data(), boost::mpi::maximum<long>());
+    if (comm.rank() == 0)
+    {
+      std::cout << prefix << " rows=" << -extreme[1] << ".." << extreme[0]
+                << " ghosts=" << -extreme[3] << ".." << extreme[2] << std::endl;
+    }
+  }
 
   /**
    * @brief Assembles and solves the Oseen step @p repeat times.
@@ -410,6 +453,8 @@ namespace Rodin::Examples
       // same problem.
       PetscReal norm = 0;
       VecNorm(oseen.getLinearSystem().getSolution(), NORM_2, &norm);
+      if (r == 0)
+        printLayout(comm, oseen.getLinearSystem().getOperator(), prefix);
       if (comm.rank() == 0)
       {
         std::cout << prefix << " rep=" << r << " assemble=" << assemble
