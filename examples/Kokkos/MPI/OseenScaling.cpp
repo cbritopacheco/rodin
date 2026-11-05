@@ -356,7 +356,8 @@ namespace Rodin::Examples
     ::Mat Ad, Ao;
     const PetscInt* colmap = nullptr;
     MatGetLocalSize(A, &rows, nullptr);
-    if (MatMPIAIJGetSeqAIJ(A, &Ad, &Ao, &colmap) == PETSC_SUCCESS && Ao)
+    // A single process holds a sequential matrix, without ghost columns.
+    if (comm.size() > 1 && MatMPIAIJGetSeqAIJ(A, &Ad, &Ao, &colmap) == PETSC_SUCCESS && Ao)
       MatGetSize(Ao, nullptr, &ghosts);
     const std::array<long, 4> local{ rows, -rows, ghosts, -ghosts };
     std::array<long, 4> extreme;
