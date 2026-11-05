@@ -54,7 +54,10 @@ Across fluids, in each (artery, geometry), the differences CY - N and R - CY:
   relative L2 norms over the last cycle of u, p and tau_w, and the relative
   change of TAWSS, OSI, dp, recirculation length, low-TAWSS area, the jet
   fluctuation rms, its dominant Strouhal number and the L2 distance of the
-  jet spectra, in comparison.csv and comparison.tex. Needs numpy, scipy,
+  jet spectra, in comparison.csv and comparison.tex; each difference is
+  set against the noise floor of the pair, the larger cycle-to-cycle
+  difference (last cycle against the one before, at the same phase) of its
+  two cases, and marked not significant when below it. Needs numpy, scipy,
   h5py, matplotlib.
 """
 import argparse
@@ -321,6 +324,11 @@ class Case:
             self.sel = np.arange(len(self.times))
         self.t = self.times[self.sel]
         self.span = self.t[-1] - self.t[0]
+        # The cycle before (the noise floor: the same case against itself).
+        t0 = self.t[0]
+        self.sel_prev = np.where((self.times >= t0 - fraction * self.T - 1.0e-9) & (self.times < t0 - 1.0e-9))[0]
+        if len(self.sel_prev) < max(3, len(self.sel) // 2):
+            self.sel_prev = np.array([], dtype=int)
 
     # -- boundary faces, caps and wall; axial coordinate
     def classify_boundary(self):
@@ -682,7 +690,37 @@ def analyse(case, out, figures=True):
             ratio = np.abs(di["N2"][ln]) / np.maximum(np.abs(di["N1"][ln]), 1.0e-30)
             metrics["N2_over_N1_lesion_wall_median_" + label] = float(np.median(ratio))
             metrics["N2_over_N1_lesion_wall_p95_" + label] = float(np.percentile(ratio, 95))
-    fields = {"t": t, "U": U, "P": P, "tau": tau, "tawss": tawss, "osi": osi, "rec": rec,
+    # The noise floor: the last cycle against the one before it, at the same
+    # phase. In a periodic flow the difference is the convergence to the
+    # periodic regime; in an unsteady jet it is the cycle-to-cycle
+    # variability. A difference between fluids below it cannot be told from
+    # the fluid's own variability.
+    noise = {}
+    if len(case.sel_prev):
+        tp = case.times[case.sel_prev]
+        match = np.array([int(np.argmin(np.abs(tp + case.T - ti))) for ti in t])
+        Up = np.array([case.field(case.sel_prev[j], "velocity") for j in match])
+        Pp = np.array([case.field(case.sel_prev[j], "pressure") for j in match])
+        taup_all = np.array([case.field(sp, "shearStress") for sp in case.sel_prev])
+        magp = np.linalg.norm(taup_all, axis=2)
+        span_p = tp[-1] - tp[0]
+        tawss_p = _trapz(magp, tp, axis=0) / span_p
+        noise["u_relL2"] = rel_l2(U, Up, case.nodevol)
+        pc = P - P.mean(axis=1, keepdims=True)
+        ppc = Pp - Pp.mean(axis=1, keepdims=True)
+        noise["p_relL2"] = rel_l2(pc, ppc, case.nodevol)
+        noise["tau_relL2"] = rel_l2(tau, taup_all[match], case.wall_nodearea)
+        noise["tawss_relL2"] = rel_l2(tawss[None], tawss_p[None], case.wall_nodearea)
+        tcs = np.array([r["t"] for r in csvrows])
+        dps = np.array([r["dp"] for r in csvrows])
+        prev = (tcs >= tp[0] - 1.0e-9) & (tcs <= t[0] + 1.0e-9)
+        if prev.sum() > 2:
+            dpm_p = _trapz(dps[prev], tcs[prev]) / (tcs[prev][-1] - tcs[prev][0])
+            dpm = _trapz(dp, tt) / (tt[-1] - tt[0])
+            noise["dp_mean_relchange"] = (dpm - dpm_p) / max(abs(dpm_p), 1.0e-30)
+        for k, v in noise.items():
+            metrics["noise_" + k] = v
+    fields = {"t": t, "U": U, "P": P, "tau": tau, "tawss": tawss, "osi": osi, "rec": rec, "noise": noise,
               "tt": tt, "dp": dp, "q": q, "xc": xc, "prof_tawss": prof_tawss, "prof_osi": prof_osi,
               "tau_throat": tau_throat, "inst": inst, "spectra": spectra}
     # Per-case files.
@@ -983,6 +1021,15 @@ def compare(cases):
         fb, Pb = Fb["spectra"]["A1"]
         Pb_on_a = np.interp(fa * Fa["spectra"]["St_per_Hz"], fb * Fb["spectra"]["St_per_Hz"], Pb)
         row["A1_psd_relL2"] = float(np.linalg.norm(Pa - Pb_on_a) / max(np.linalg.norm(Pb_on_a), 1.0e-300))
+        # Noise floor of the pair: the larger cycle-to-cycle difference of
+        # the two cases; a difference is significant when it exceeds it.
+        for k in ("u_relL2", "p_relL2", "tau_relL2", "tawss_relL2", "dp_mean_relchange"):
+            na, nb = Fa["noise"].get(k), Fb["noise"].get(k)
+            if na is None or nb is None or k not in row:
+                continue
+            floor = max(abs(na), abs(nb))
+            row["noise_" + k] = floor
+            row[k + "_over_noise"] = abs(row[k]) / max(floor, 1.0e-30)
         rows.append(row)
     return rows
 
@@ -1014,9 +1061,17 @@ def write_tables(metrics, comparisons, out):
                 vals = []
                 for k, _ in cols:
                     v = r.get(k)
-                    vals.append("--" if v is None or not np.isfinite(v) else "%.1f\\%%" % (100.0 * v))
+                    if v is None or not np.isfinite(v):
+                        vals.append("--")
+                        continue
+                    cell = "%.1f\\%%" % (100.0 * v)
+                    # Below the cycle-to-cycle noise floor: not significant.
+                    if r.get(k + "_over_noise", 2.0) <= 1.0:
+                        cell += "$^{\\circ}$"
+                    vals.append(cell)
                 f.write("%s & %s & %s\\\\\n" % (r["case"].replace("_", r"\_"), r["pair"], " & ".join(vals)))
             f.write("\\bottomrule\n\\end{tabular}\n")
+            f.write("% $^\\circ$: below the noise floor (the cycle-to-cycle difference of the cases)\n")
     # LaTeX of the per-case metrics.
     cols = [("fluid", "fluid"), ("dp_mean", r"$\overline{\Delta p}$ [Pa]"), ("dp_peak", r"$\Delta p_{\max}$ [Pa]"),
             ("dp_lag_T", r"lag/T"), ("tawss_max", r"TAWSS$_{\max}$ [Pa]"), ("osi_lesion_max", r"OSI$_{\max}$"),
@@ -1115,11 +1170,16 @@ def main():
         if len(cases) > 1:
             comp = compare(cases)
             for r in comp:
-                print("   %s: u %s, tau_w %s, TAWSS %s, dp mean %+.1f%%, recirculation %+.1f%%" % (
-                    r["pair"], ("%.2f%%" % (100 * r["u_relL2"])) if "u_relL2" in r else "-",
-                    ("%.2f%%" % (100 * r["tau_relL2"])) if "tau_relL2" in r else "-",
-                    ("%.2f%%" % (100 * r["tawss_relL2"])) if "tawss_relL2" in r else "-",
-                    100 * r["dp_mean_relchange"], 100 * r["recirc_max_D_relchange"]))
+                def withnoise(k, signed=False):
+                    if k not in r:
+                        return "-"
+                    v = ("%+.2f%%" if signed else "%.2f%%") % (100 * r[k])
+                    if "noise_" + k in r:
+                        v += " (noise %.2f%%%s)" % (100 * r["noise_" + k], "" if r[k + "_over_noise"] > 1.0 else ", n.s.")
+                    return v
+                print("   %s: u %s, tau_w %s, TAWSS %s, dp mean %s, recirculation %+.1f%%" % (
+                    r["pair"], withnoise("u_relL2"), withnoise("tau_relL2"), withnoise("tawss_relL2"),
+                    withnoise("dp_mean_relchange", True), 100 * r["recirc_max_D_relchange"]))
             all_comp += comp
             if not args.no_figures:
                 comparison_figures(cases, gout)
