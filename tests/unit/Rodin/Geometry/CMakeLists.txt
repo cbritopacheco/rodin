@@ -334,6 +334,11 @@ rodin_discover_tests(RodinGeometryEuclideanTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES LABELS unit)
 
+add_executable(RodinGeometryBalancedCompactPartitionerTest BalancedCompactPartitionerTest.cpp)
+target_link_libraries(RodinGeometryBalancedCompactPartitionerTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Geometry)
+rodin_discover_tests(RodinGeometryBalancedCompactPartitionerTest PROPERTIES LABELS unit)
+
 add_executable(RodinGeometryGreedyPartitionerTest GreedyPartitionerTest.cpp)
 target_link_libraries(RodinGeometryGreedyPartitionerTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Geometry)

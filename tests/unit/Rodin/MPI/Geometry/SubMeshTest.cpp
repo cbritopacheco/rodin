@@ -270,16 +270,20 @@ TEST(MPI_Geometry_SubMesh, SparseBoundarySelection_DimensionConsistentOnEmptyRan
     GTEST_SKIP() << "Requires at least two MPI ranks to exercise empty submesh ranks.";
 
   Context::MPI ctx(*g_env, world);
-  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {8, 8});
   const size_t faceDim = mesh.getDimension() - 1;
   const auto& shard = mesh.getShard();
 
+  // A face that no other rank holds, so that the other ranks get an empty
+  // submesh.
+  const auto& halo = shard.getHalo(faceDim);
   bool hasOwnedBoundary = false;
   Index selectedFace = std::numeric_limits<Index>::max();
   for (auto it = mesh.getBoundary(); it; ++it)
   {
     const Index faceIdx = it->getIndex();
-    if (shard.isOwned(faceDim, faceIdx))
+    const auto remote = halo.find(faceIdx);
+    if (shard.isOwned(faceDim, faceIdx) && (remote == halo.end() || remote->second.empty()))
     {
       hasOwnedBoundary = true;
       selectedFace = faceIdx;
