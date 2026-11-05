@@ -12,6 +12,8 @@ Usage:
                      (a case folder itself, or any folder holding such trees,
                      also works: every case.xdmf below the root is used)
     --out            output folder (default <root>/postprocess)
+    Only finished cases (a DONE file in the folder) are used unless
+    --include-running is given; a group compares the fluids it has.
 
 Per case, over the last cycle of snapshots (the period T from run.log):
   - from case.csv: flow rate, pressure drop dp(t), its cycle mean, peak and
@@ -1009,6 +1011,8 @@ def main():
     ap.add_argument("--fluids", default="")
     ap.add_argument("--no-figures", action="store_true")
     ap.add_argument("--cycle-fraction", type=float, default=1.0)
+    ap.add_argument("--include-running", action="store_true",
+                    help="also cases without DONE (still running or failed): their last cycle may be incomplete")
     args = ap.parse_args()
     root = os.path.abspath(args.root)
     out = args.out or os.path.join(root, "postprocess")
@@ -1026,6 +1030,9 @@ def main():
             if args.geos and not any("/%s/" % g in "/" + rel + "/" for g in args.geos.split(",")):
                 continue
             if args.fluids and tag not in args.fluids.split(","):
+                continue
+            if not args.include_running and "DONE" not in files:
+                print("   skipping %s (no DONE: running or failed; --include-running to use it)" % rel)
                 continue
             groups.setdefault(group, {})[tag] = d
     if not groups:
