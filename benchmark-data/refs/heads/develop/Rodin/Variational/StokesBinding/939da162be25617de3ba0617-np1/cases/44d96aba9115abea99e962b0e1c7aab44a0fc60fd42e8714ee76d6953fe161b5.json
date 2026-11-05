@@ -556,6 +556,98 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9758b5cfd5bf5b5e951138f625d9d30cdcfd0ac4",
+      "date": "2026-11-05T10:28:52.434502+00:00",
+      "run": "41913825467.1",
+      "results": [
+        {
+          "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/ScalarBlockScaling/2/4/real_time",
+          "value": 114156.73262901368,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            114156.73262901368
+          ],
+          "records": [
+            {
+              "name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/ScalarBlockScaling/2/4/real_time",
+              "family_index": 11,
+              "per_family_instance_index": 1,
+              "run_name": "Stokes/Binding/WeightedVectorDiffusion/H1/P4P3/Real/Tetrahedron/ScalarBlockScaling/2/4/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 2461,
+              "real_time": 114156.73262901368,
+              "cpu_time": 114148.05241772396,
+              "time_unit": "ns",
+              "cell_sample_pairs": 66.0,
+              "cells": 6.0,
+              "dimension": 3.0,
+              "local_columns": 105.0,
+              "local_entries": 66150.0,
+              "local_entry_sample_pairs": 727650.0,
+              "local_rows": 105.0,
+              "pressure_degree": 3.0,
+              "pressure_dofs": 64.0,
+              "quadrature_order": 4.0,
+              "quadrature_points_per_cell": 11.0,
+              "relative_reference_error": 8.419009137681634e-17,
+              "specialized": 1.0,
+              "velocity_degree": 4.0,
+              "velocity_dofs": 375.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-05T05:07:28+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinStokesBindingBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3239,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.962891,
+              0.357422,
+              0.129395
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "Local Stokes binding; no scatter or solve"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

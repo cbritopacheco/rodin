@@ -568,6 +568,100 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9758b5cfd5bf5b5e951138f625d9d30cdcfd0ac4",
+      "date": "2026-11-05T10:28:52.434502+00:00",
+      "run": "41913825467.1",
+      "results": [
+        {
+          "name": "Field/AssemblyAndSolve/H1/P2/Real/Vector/Segment/5/real_time",
+          "value": 3658.989286590034,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            3658.989286590034
+          ],
+          "records": [
+            {
+              "name": "Field/AssemblyAndSolve/H1/P2/Real/Vector/Segment/5/real_time",
+              "family_index": 35,
+              "per_family_instance_index": 1,
+              "run_name": "Field/AssemblyAndSolve/H1/P2/Real/Vector/Segment/5/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 76353,
+              "real_time": 3658.989286590034,
+              "cpu_time": 3708.1329875794454,
+              "time_unit": "ns",
+              "absolute_field_error": 4.440892098500626e-16,
+              "cells": 4.0,
+              "components": 1.0,
+              "degree": 2.0,
+              "dimension": 1.0,
+              "dofs": 9.0,
+              "local_dofs_per_cell": 3.0,
+              "matrix_norm": 0.30276503540974914,
+              "nnz": 33.0,
+              "oracle_points_per_cell": 5.0,
+              "oracle_quadrature_order": 8.0,
+              "quadrature_order": 8.0,
+              "quadrature_points_per_cell": 5.0,
+              "relative_coefficient_error": 1.6710559485197459e-16,
+              "relative_residual": 1.0927381047259614e-16,
+              "rhs_norm": 0.5613413993878117,
+              "solver_reported_iterations": 0.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-05T05:20:13+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinFieldOperationBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 4500,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.52393,
+              0.44043,
+              0.152832
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

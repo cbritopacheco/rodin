@@ -184,6 +184,36 @@
           ]
         }
       ]
+    },
+    {
+      "commit": "9758b5cfd5bf5b5e951138f625d9d30cdcfd0ac4",
+      "date": "2026-11-05T10:28:52.434502+00:00",
+      "run": "41913825467.1",
+      "results": [
+        {
+          "name": "Point/1/1/0/1/miss/1",
+          "value": 34.6092614384,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            34.6092614384
+          ],
+          "records": [
+            {
+              "geometry": "Point",
+              "degree": "1",
+              "resolution": "1",
+              "cells": "1",
+              "distortion": "0.000000",
+              "warp_degree": "1",
+              "query": "miss",
+              "pruning": "1",
+              "samples": "1",
+              "ns": "34.6092614384"
+            }
+          ]
+        }
+      ]
     }
   ],
   "format": "csv",

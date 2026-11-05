@@ -544,6 +544,96 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9758b5cfd5bf5b5e951138f625d9d30cdcfd0ac4",
+      "date": "2026-11-05T10:28:52.434502+00:00",
+      "run": "41913825467.1",
+      "results": [
+        {
+          "name": "SparseAlgebra/Product/Poisson/H1/P2/Complex/Hexahedron/9/real_time",
+          "value": 291021.0269430225,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            291021.0269430225
+          ],
+          "records": [
+            {
+              "name": "SparseAlgebra/Product/Poisson/H1/P2/Complex/Hexahedron/9/real_time",
+              "family_index": 68,
+              "per_family_instance_index": 2,
+              "run_name": "SparseAlgebra/Product/Poisson/H1/P2/Complex/Hexahedron/9/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 965,
+              "real_time": 291021.0269430225,
+              "cpu_time": 291010.57409325975,
+              "time_unit": "ns",
+              "cells": 512.0,
+              "compressed_storage_bytes": 3377916.0,
+              "degree": 2.0,
+              "dimension": 3.0,
+              "dot_relative_error": 2.1090931949182495e-15,
+              "nnz": 167913.0,
+              "norm_relative_error": 3.340307202380615e-15,
+              "product_relative_error": 5.597087748447876e-17,
+              "reference_mantissa_bits": 64.0,
+              "rows": 4913.0,
+              "scalar_bytes": 16.0,
+              "vector_entries": 4913.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-04T23:18:29+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinSparseAlgebraBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3250,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.69531,
+              0.566895,
+              0.202637
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "Math product/reduction; assembly excluded"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

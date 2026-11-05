@@ -550,6 +550,97 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9758b5cfd5bf5b5e951138f625d9d30cdcfd0ac4",
+      "date": "2026-11-05T10:28:52.434502+00:00",
+      "run": "41913825467.1",
+      "results": [
+        {
+          "name": "H1/Convection/P3/ComplexDirection/Tetrahedron/Warm/3/8/real_time",
+          "value": 72716.82615424285,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            72716.82615424285
+          ],
+          "records": [
+            {
+              "name": "H1/Convection/P3/ComplexDirection/Tetrahedron/Warm/3/8/real_time",
+              "family_index": 24,
+              "per_family_instance_index": 7,
+              "run_name": "H1/Convection/P3/ComplexDirection/Tetrahedron/Warm/3/8/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 3877,
+              "real_time": 72716.82615424285,
+              "cpu_time": 72711.49574413258,
+              "time_unit": "ns",
+              "alternate_order": 8.0,
+              "alternate_samples": 44.0,
+              "ambient_dimension": 3.0,
+              "base_order": 8.0,
+              "base_samples": 44.0,
+              "columns": 60.0,
+              "components": 3.0,
+              "degree": 3.0,
+              "dimension": 3.0,
+              "entries": 3600.0,
+              "field_complex": 1.0,
+              "local_dofs": 60.0,
+              "reference_error": 9.145197135516136e-17,
+              "rows": 60.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-05T05:44:29+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinH1ConvectionBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2300,
+            "cpu_scaling_enabled": true,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 2097152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 272629760,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.08984,
+              0.399902,
+              0.144531
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "H1 directional-gradient binding; real/complex fields and compatible directions"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

@@ -184,6 +184,36 @@
           ]
         }
       ]
+    },
+    {
+      "commit": "9758b5cfd5bf5b5e951138f625d9d30cdcfd0ac4",
+      "date": "2026-11-05T10:28:52.434502+00:00",
+      "run": "41913825467.1",
+      "results": [
+        {
+          "name": "Segment/4/16/0/4/miss/1",
+          "value": 7.95753449906,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            7.95753449906
+          ],
+          "records": [
+            {
+              "geometry": "Segment",
+              "degree": "4",
+              "resolution": "16",
+              "cells": "15",
+              "distortion": "0.000000",
+              "warp_degree": "4",
+              "query": "miss",
+              "pruning": "1",
+              "samples": "64",
+              "ns": "7.95753449906"
+            }
+          ]
+        }
+      ]
     }
   ],
   "format": "csv",

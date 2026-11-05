@@ -598,6 +598,105 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9758b5cfd5bf5b5e951138f625d9d30cdcfd0ac4",
+      "date": "2026-11-05T10:28:52.434502+00:00",
+      "run": "41913825467.1",
+      "results": [
+        {
+          "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Quadrilateral/3/real_time",
+          "value": 21738.906186414853,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            21738.906186414853
+          ],
+          "records": [
+            {
+              "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Quadrilateral/3/real_time",
+              "family_index": 0,
+              "per_family_instance_index": 0,
+              "run_name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Quadrilateral/3/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 6.0,
+              "real_time": 21738.906186414853,
+              "cpu_time": 21780.08997650756,
+              "time_unit": "ns",
+              "cells": 4.0,
+              "dimension": 2.0,
+              "estimated_relative_error": 3.619203925740842e-18,
+              "explicit_unit_viscosity": 0.0,
+              "mean_dofs": 1.0,
+              "nnz": 344.0,
+              "pressure_degree": 1.0,
+              "pressure_dofs": 9.0,
+              "quadrature_order": 16.0,
+              "quadrature_points_per_cell": 81.0,
+              "relative_coefficient_error": 7.434964693646799e-15,
+              "relative_missing_pressure_load_residual": 0.9999999999999901,
+              "relative_missing_pressure_residual": 0.05002919994191077,
+              "relative_patch_residual": 6.776024062673122e-16,
+              "relative_pressure_control_error": 5.737776159197205e-16,
+              "relative_residual": 3.797745012757237e-16,
+              "restart": 60.0,
+              "rows": 60.0,
+              "velocity_degree": 2.0,
+              "velocity_dofs": 50.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-05T00:07:32+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinStokesGMRESBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2600,
+            "cpu_scaling_enabled": true,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 65536,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 2097152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 503316480,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.0376,
+              0.408203,
+              0.17627
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "preconditioner": "Full block Schur: velocity incomplete Cholesky, pressure mass LDLT, explicit mean",
+            "timed_operation": "Public GMRES preconditioner setup and restarted solve from zero"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

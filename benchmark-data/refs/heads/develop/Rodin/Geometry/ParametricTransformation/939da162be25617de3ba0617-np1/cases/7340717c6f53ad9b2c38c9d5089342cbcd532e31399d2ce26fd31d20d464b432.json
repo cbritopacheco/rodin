@@ -454,6 +454,81 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9758b5cfd5bf5b5e951138f625d9d30cdcfd0ac4",
+      "date": "2026-11-05T10:28:52.434502+00:00",
+      "run": "41913825467.1",
+      "results": [
+        {
+          "name": "Parametric/Transform/P4/Point/0/3",
+          "value": 6.676757944704737,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            6.676757944704737
+          ],
+          "records": [
+            {
+              "name": "Parametric/Transform/P4/Point/0/3",
+              "family_index": 11,
+              "per_family_instance_index": 0,
+              "run_name": "Parametric/Transform/P4/Point/0/3",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 42259563,
+              "real_time": 6.6769003030155725,
+              "cpu_time": 6.676757944704737,
+              "time_unit": "ns"
+            }
+          ],
+          "context": {
+            "date": "2026-11-04T23:39:33+00:00",
+            "host_name": "ip-10-0-135-96",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinGeometryParametricTransformationBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3900,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": false,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 65536,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 2097152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 503316480,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.14062,
+              0.572754,
+              0.224121
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

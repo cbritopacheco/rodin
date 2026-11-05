@@ -562,6 +562,99 @@
           }
         }
       ]
+    },
+    {
+      "commit": "9758b5cfd5bf5b5e951138f625d9d30cdcfd0ac4",
+      "date": "2026-11-05T10:28:52.434502+00:00",
+      "run": "41913825467.1",
+      "results": [
+        {
+          "name": "H1/BasisLifecycle/AssociatedNine/Sweep/P1/Real/Vector/Pyramid/2/real_time",
+          "value": 1305.2058244931513,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            1305.2058244931513
+          ],
+          "records": [
+            {
+              "name": "H1/BasisLifecycle/AssociatedNine/Sweep/P1/Real/Vector/Pyramid/2/real_time",
+              "family_index": 21,
+              "per_family_instance_index": 0,
+              "run_name": "H1/BasisLifecycle/AssociatedNine/Sweep/P1/Real/Vector/Pyramid/2/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 215023,
+              "real_time": 1305.2058244931513,
+              "cpu_time": 1305.0938271719701,
+              "time_unit": "ns",
+              "ambient_dimension": 3.0,
+              "bound_samples": 5.0,
+              "components": 3.0,
+              "degree": 1.0,
+              "dimension": 3.0,
+              "field_columns": 1.0,
+              "field_rows": 3.0,
+              "first_binding": 0.0,
+              "formula_identities": 9.0,
+              "local_basis": 15.0,
+              "post_timed_reference_tables": 8.0,
+              "primed_reference_tables": 8.0,
+              "quadrature_order": 2.0,
+              "quadrature_points": 5.0,
+              "reference_authority": 1.0,
+              "retained_output_bytes": 1800.0,
+              "scalar_basis": 5.0,
+              "stored_scalar_values": 225.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-05T06:20:41+00:00",
+            "host_name": "runnervm48cm3",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinH1BasisLifecycleBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2445,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.78174,
+              0.604492,
+              0.215332
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",
