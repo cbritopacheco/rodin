@@ -30,6 +30,15 @@ Per case, over the last cycle of snapshots (the period T from run.log):
     inward normal) -- (N2 = 0 in steady shear for this sPTT: it flags
     non-viscometric flow), and the recoverable shear N1/(2 tau_w) at the
     lesion wall;
+  - the kinematics of the jet region (from the lesion to POST_LESION_LENGTH D
+    downstream): the velocity gradient invariants Q = (|W|^2 - |S|^2)/2
+    (rotation vs strain) and R = -det(grad u) (stretching vs compression of
+    the vortices; sheet vs tube forming strain), their volume-weighted joint
+    PDF with the Vieillefosse line, the flow type xi = (|S| - |W|)/(|S| +
+    |W|) and the extension rate along the flow; for R: the polymer stretch
+    tr c - 3, the Pakdel-McKinley criterion M = sqrt(lambda |u| kappa N1 /
+    tau12) of elastic instability on curved streamlines (critical ~5.9) and
+    the polymer power sigma_p : eps against the viscous one;
   - the spectral content of the jet fluctuations, from the per-step series
     of case.csv (dp, the m = 1 jet amplitude |(<u_y>, <u_z>)|/Ubar, max|u|):
     the part above the INFLOW_HARMONICS cardiac harmonics, its rms, its
@@ -75,6 +84,14 @@ CAP_ALIGNMENT = 0.985
 # per window, 50 % overlap, Hann window.
 INFLOW_HARMONICS = 10
 SPECTRUM_SEGMENTS = 4
+# Q-R analysis and the post-lesion region: the jet and its wake, from the
+# lesion end to POST_LESION_LENGTH diameters downstream.
+POST_LESION_LENGTH = 8.0
+# Pakdel-McKinley: elastic instability of curved streamlines when
+# M = sqrt(lambda |u| / Rc * N1 / tau12) exceeds about M_CRIT (Pakdel and
+# McKinley, PRL 77, 1996; McKinley et al., JNNFM 67, 1996: 5.9 for the
+# Taylor-Couette and lid-driven cavity flows of Boger fluids).
+M_CRIT = 5.9
 # The local flow frame needs a direction: velocities (or vorticities, or wall
 # shears) below this fraction of their maximum fall back on the vessel frame.
 FRAME_SPEED_FLOOR = 1.0e-6
@@ -118,6 +135,7 @@ class Case:
     # -- run.log: D, Ubar, T, fluid
     def read_log(self):
         self.D = self.Ubar = self.T = None
+        self.lam = 0.0
         self.fluid = "?"
         with open(os.path.join(self.folder, "run.log"), errors="replace") as f:
             for line in f:
@@ -125,6 +143,9 @@ class Case:
                 m = re.search(r"\[inflow\] D=([\d.e+-]+) m\s+Ubar=([\d.e+-]+) m/s\s+T=([\d.e+-]+) s", line)
                 if m:
                     self.D, self.Ubar, self.T = (float(v) for v in m.groups())
+                m = re.search(r"\[inflow\].*\blambda=([\d.e+-]+) s", line)
+                if m:
+                    self.lam = float(m.group(1))
                 m = re.search(r"\[groups\].*fluid=(\w+)", line)
                 if m:
                     self.fluid = m.group(1)
@@ -494,6 +515,30 @@ def analyse(case, out, figures=True):
         eps = 0.5 * (gu + np.swapaxes(gu, 1, 2))
         gd = np.sqrt(2.0 * np.einsum("nij,nij->n", eps, eps))
         d = {"u": u, "p": p, "gd": gd, "t": t[i]}
+        # Velocity gradient invariants (incompressible: P = tr(grad u) = 0):
+        #   Q = (|W|^2 - |S|^2)/2  > 0 rotation dominates (vortex cores),
+        #                          < 0 strain dominates;
+        #   R = -det(grad u)       with Q > 0: R < 0 vortex stretching, R > 0
+        #                          vortex compression; with Q < 0: R > 0
+        #                          biaxial strain (sheet forming), R < 0
+        #                          axial strain (tube forming);
+        #   the Vieillefosse line D = 27 R^2/4 + Q^3 = 0 separates the
+        #   focal (complex eigenvalues, D > 0) from the nodal topologies.
+        # Q is scaled by (Ubar/D)^2, R by (Ubar/D)^3 in the figures.
+        W = 0.5 * (gu - np.swapaxes(gu, 1, 2))
+        S2 = np.einsum("nij,nij->n", eps, eps)
+        W2 = np.einsum("nij,nij->n", W, W)
+        d["Q"] = 0.5 * (W2 - S2)
+        d["R"] = -np.linalg.det(gu)
+        # Flow type xi = (|S| - |W|)/(|S| + |W|): 1 extension, 0 shear, -1 rotation.
+        d["xi"] = (np.sqrt(S2) - np.sqrt(W2)) / np.maximum(np.sqrt(S2) + np.sqrt(W2), 1.0e-30)
+        # Extension rate along the flow, eps_ss = e1 . eps . e1 with e1 = u/|u|.
+        sp_ = np.linalg.norm(u, axis=1)
+        e1u = u / np.maximum(sp_, 1.0e-30)[:, None]
+        d["ext"] = np.einsum("ni,nij,nj->n", e1u, eps, e1u)
+        # Streamline curvature kappa = |u x (u . grad u)| / |u|^3.
+        acc = np.einsum("nij,nj->ni", gu, u)
+        d["kappa"] = np.linalg.norm(np.cross(u, acc), axis=1) / np.maximum(sp_ ** 3, 1.0e-30)
         sd, so = case.field(s, "elasticStressDiag"), case.field(s, "elasticStressOff")
         if sd is not None:
             sp = np.sqrt((sd ** 2).sum(1) + 2.0 * (so ** 2).sum(1))
@@ -518,6 +563,25 @@ def analyse(case, out, figures=True):
             comp = lambda a, b: np.einsum("ni,nij,nj->n", a, S, b)
             s11, s22, s33, s12 = comp(e1, e1), comp(e2, e2), comp(e3, e3), comp(e1, e2)
             d["N1"], d["N2"], d["s12"] = s11 - s22, s22 - s33, s12
+            # Polymer stretch tr(c) - 3, c = exp(psi).
+            ld, lo = case.field(s, "logConformationDiag"), case.field(s, "logConformationOff")
+            if ld is not None:
+                Ps = np.empty((len(ld), 3, 3))
+                Ps[:, 0, 0], Ps[:, 1, 1], Ps[:, 2, 2] = ld[:, 0], ld[:, 1], ld[:, 2]
+                Ps[:, 0, 1] = Ps[:, 1, 0] = lo[:, 0]
+                Ps[:, 0, 2] = Ps[:, 2, 0] = lo[:, 1]
+                Ps[:, 1, 2] = Ps[:, 2, 1] = lo[:, 2]
+                d["stretch"] = np.exp(np.linalg.eigvalsh(Ps)).sum(axis=1) - 3.0
+            # Pakdel-McKinley M = sqrt(lambda |u| kappa N1 / tau12), tau12 the
+            # total shear stress in the flow frame (polymer + viscous, the
+            # viscous part 2 eta_s(gd) eps12 approximated by eta_CY(gd) gd).
+            tau12 = np.abs(s12) + eta_cy(gd) * gd
+            M2 = case.lam * sp_ * d["kappa"] * np.maximum(d["N1"], 0.0) / np.maximum(tau12, 1.0e-30)
+            d["M"] = np.sqrt(M2)
+            # Polymer power sigma_p : eps (> 0 stores or dissipates, < 0 returns
+            # energy to the flow) and the viscous one 2 eta_CY eps : eps.
+            d["power_p"] = np.einsum("nij,nij->n", S, eps)
+            d["power_v"] = 2.0 * eta_cy(gd) * S2
         inst[label] = d
     # Velocity and pressure over the cycle, for the comparison (coarse in
     # time: every snapshot).
@@ -537,6 +601,28 @@ def analyse(case, out, figures=True):
     }
     smetrics, spectra = jet_spectra(case, csvrows)
     metrics.update(smetrics)
+    # Kinematics of the jet region (lesion end to POST_LESION_LENGTH D downstream):
+    # volume fractions of rotation (Q > 0) and of extension (xi > 1/2), the
+    # largest Weissenberg number of the extension, lambda eps_ss.
+    region = (case.xD > -lesion_half_length(case.geo)) & (case.xD < lesion_half_length(case.geo) + POST_LESION_LENGTH)
+    vreg = case.nodevol[region]
+    for label in ("peak", "decel"):
+        di = inst[label]
+        metrics["rotation_fraction_" + label] = float(vreg[di["Q"][region] > 0.0].sum() / vreg.sum())
+        metrics["extension_fraction_" + label] = float(vreg[di["xi"][region] > 0.5].sum() / vreg.sum())
+        metrics["Wi_ext_max_" + label] = float(case.lam * di["ext"][region].max()) if case.lam > 0.0 else float("nan")
+        if "M" in di:
+            Mr = di["M"][region]
+            metrics["M_max_" + label] = float(Mr.max())
+            metrics["M_p99_" + label] = float(np.percentile(Mr, 99))
+            metrics["M_supercritical_fraction_" + label] = float(vreg[Mr > M_CRIT].sum() / vreg.sum())
+            metrics["stretch_max_" + label] = float(di["stretch"].max()) if "stretch" in di else float("nan")
+            # Volume integrals of the powers over the jet region.
+            Pp = float((di["power_p"][region] * vreg).sum())
+            Pv = float((di["power_v"][region] * vreg).sum())
+            metrics["polymer_power_ratio_" + label] = Pp / max(Pv, 1.0e-30)
+            metrics["polymer_power_returned_fraction_" + label] = float(
+                (np.minimum(di["power_p"][region], 0.0) * vreg).sum() / max(Pv, 1.0e-30))
     if "sigma_p" in inst["peak"]:
         metrics["sigma_p_max"] = float(max(inst["peak"]["sigma_p"].max(), inst["decel"]["sigma_p"].max()))
         for label in ("peak", "decel"):
@@ -669,6 +755,66 @@ def case_figures(case, F, M, out):
         fig.suptitle("%s, %s (t = %.3f s)" % (ttl, "systolic peak" if label == "peak" else "peak deceleration", d["t"]))
         fig.savefig(os.path.join(out, "cut_%s.png" % label), dpi=160)
         plt.close(fig)
+    # 1b. Kinematic and elastic invariants on the midplane, and the Q-R
+    #     joint PDF of the jet region.
+    kin = [("Q", "Q (D/Ubar)^2"), ("xi", "flow type xi"), ("ext", "lambda eps_ss" if case.lam > 0 else "eps_ss [1/s]")]
+    if "M" in F["inst"]["peak"]:
+        kin += [("M", "Pakdel-McKinley M"), ("stretch", "tr c - 3"), ("power_p", "sigma_p : eps [W/m^3]")]
+    region = (case.xD > -lesion_half_length(case.geo)) & (case.xD < lesion_half_length(case.geo) + POST_LESION_LENGTH)
+    sQ, sR = (case.Ubar / case.D) ** 2, (case.Ubar / case.D) ** 3
+    for label in ("peak", "decel"):
+        d = F["inst"][label]
+        fields = []
+        for k, _ in kin:
+            f = d[k]
+            if k == "Q":
+                f = f / sQ
+            if k == "ext" and case.lam > 0:
+                f = case.lam * f
+            fields.append(f)
+        x, y, tris, cut = midplane(case, fields)
+        triang = mtri.Triangulation(x, y, tris)
+        xlim = (-4.0, 10.0)
+        inwin = (x >= xlim[0]) & (x <= xlim[1])
+        fig, axes = plt.subplots(len(kin), 1, figsize=(12, 1.6 * len(kin) + 0.6), constrained_layout=True)
+        for ax, (k, lab), Z in zip(np.atleast_1d(axes), kin, cut):
+            if k == "stretch":
+                Z = np.log10(np.maximum(Z, 1.0e-3)); lab = "log10 " + lab
+            lo, hi = np.percentile(Z[inwin], [1, 99]) if inwin.any() else (Z.min(), Z.max())
+            cmap = "viridis"
+            if k in ("Q", "ext", "power_p"):
+                hi = max(abs(lo), abs(hi), 1.0e-12); lo, cmap = -hi, "RdBu_r"
+            if k == "xi":
+                lo, hi, cmap = -1.0, 1.0, "PuOr_r"
+            if k == "M":
+                lo, hi, cmap = 0.0, max(hi, M_CRIT), "magma"
+            im = ax.tripcolor(triang, Z, shading="gouraud", cmap=cmap, vmin=lo, vmax=hi, antialiased=False)
+            if k == "M":
+                ax.tricontour(triang, Z, levels=[M_CRIT], colors="c", linewidths=0.8)
+            ax.set_xlim(*xlim); ax.set_aspect("equal"); ax.set_ylabel("y/D")
+            fig.colorbar(im, ax=ax, label=lab, pad=0.01)
+        np.atleast_1d(axes)[-1].set_xlabel("x/D")
+        fig.suptitle("%s, %s (t = %.3f s): kinematics%s" % (ttl, "systolic peak" if label == "peak" else "peak deceleration",
+                                                          d["t"], " and elasticity" if "M" in d else ""))
+        fig.savefig(os.path.join(out, "cut_kinematics_%s.png" % label), dpi=160)
+        plt.close(fig)
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.4), constrained_layout=True)
+    for ax, label in zip(axes, ("peak", "decel")):
+        d = F["inst"][label]
+        Qn, Rn = d["Q"][region] / sQ, d["R"][region] / sR
+        w = case.nodevol[region]
+        qa, ra = np.percentile(np.abs(Qn), 99), np.percentile(np.abs(Rn), 99)
+        H, xe, ye = np.histogram2d(Rn, Qn, bins=120, range=[[-ra, ra], [-qa, qa]], weights=w, density=True)
+        im = ax.pcolormesh(xe, ye, np.log10(np.maximum(H.T, H[H > 0].min() if (H > 0).any() else 1.0)), cmap="Greys")
+        rr = np.linspace(-ra, ra, 400)
+        ax.plot(rr, -np.cbrt(27.0 / 4.0 * rr ** 2), "r-", lw=0.8)       # Vieillefosse line D = 0
+        ax.axhline(0.0, c="k", lw=0.5); ax.axvline(0.0, c="k", lw=0.5)
+        ax.set_xlabel("R (D/Ubar)^3"); ax.set_ylabel("Q (D/Ubar)^2")
+        ax.set_title("%s (t = %.3f s)" % ("systolic peak" if label == "peak" else "peak deceleration", d["t"]))
+        fig.colorbar(im, ax=ax, label="log10 joint PDF (volume-weighted)")
+    fig.suptitle("%s: Q-R in the jet region (x/D < %.0f past the lesion); red: D = 27R^2/4 + Q^3 = 0" % (ttl, POST_LESION_LENGTH))
+    fig.savefig(os.path.join(out, "QR.png"), dpi=160)
+    plt.close(fig)
     # 2. Axial TAWSS and OSI; time series.
     fig, axes = plt.subplots(2, 2, figsize=(11, 6), constrained_layout=True)
     axes[0, 0].plot(F["xc"], F["prof_tawss"]); axes[0, 0].set_ylabel("TAWSS [Pa]"); axes[0, 0].set_yscale("log")
@@ -794,6 +940,8 @@ def compare(cases):
             den = abs(Mb.get(k, float("nan")))
             row[k + "_relchange"] = (Ma[k] - Mb[k]) / den if den > 1.0e-30 else float("nan")
         row["A1_St_diff"] = Ma["A1_St"] - Mb["A1_St"]
+        for k in ("rotation_fraction_peak", "rotation_fraction_decel", "extension_fraction_peak", "extension_fraction_decel"):
+            row[k + "_diff"] = Ma[k] - Mb[k]
         fa, Pa = Fa["spectra"]["A1"]
         fb, Pb = Fb["spectra"]["A1"]
         Pb_on_a = np.interp(fa * Fa["spectra"]["St_per_Hz"], fb * Fb["spectra"]["St_per_Hz"], Pb)
@@ -838,7 +986,8 @@ def write_tables(metrics, comparisons, out):
             ("low_tawss_area", r"$A_{\rm low}$"), ("recirc_max_D", r"$L_{rec}/D$"), ("A1_rms", r"$A_1'$"),
             ("A1_St", r"St$^*$"), ("share_p95_decel", r"$\sigma_p$ share p95"),
             ("N1_lesion_wall_max_peak", r"$N_{1,w}$ [Pa]"), ("N2_lesion_wall_max_peak", r"$N_{2,w}$ [Pa]"),
-            ("recoverable_shear_p95_peak", r"$N_1/2\tau_w$")]
+            ("recoverable_shear_p95_peak", r"$N_1/2\tau_w$"), ("M_max_peak", r"$M_{\max}$"),
+            ("polymer_power_ratio_decel", r"$P_p/P_v$")]
     with open(os.path.join(out, "summary_cases.tex"), "w") as f:
         f.write("\\begin{tabular}{l" + "r" * len(cols) + "}\n\\toprule\ncase & " + " & ".join(c[1] for c in cols) + "\\\\\n\\midrule\n")
         for m in metrics:
@@ -903,6 +1052,15 @@ def main():
                       "N1/(2 tau_w) p95 %.3g" % (M["N1_lesion_wall_max_peak"], M["N2_lesion_wall_max_peak"],
                                                  M["N2_over_N1_lesion_wall_median_peak"], M["N2_over_N1_lesion_wall_p95_peak"],
                                                  M["recoverable_shear_p95_peak"]))
+            if "M_max_peak" in M:
+                print("       elasticity (peak/decel): M max %.3g/%.3g (critical %.1f, supercritical volume %.2g/%.2g), "
+                      "Wi_ext max %.3g/%.3g, stretch max %.3g/%.3g, polymer/viscous power %.3g/%.3g" % (
+                          M["M_max_peak"], M["M_max_decel"], M_CRIT, M["M_supercritical_fraction_peak"],
+                          M["M_supercritical_fraction_decel"], M["Wi_ext_max_peak"], M["Wi_ext_max_decel"],
+                          M["stretch_max_peak"], M["stretch_max_decel"], M["polymer_power_ratio_peak"],
+                          M["polymer_power_ratio_decel"]))
+            print("       kinematics (peak/decel): rotation-dominated volume %.2f/%.2f, extensional volume %.2f/%.2f" % (
+                M["rotation_fraction_peak"], M["rotation_fraction_decel"], M["extension_fraction_peak"], M["extension_fraction_decel"]))
             print("       jet: A1' rms %.2e (irregular %.2e), St* %.3f, dp' rms %.2e of mean; %d cycles, Nyquist St %.1f" % (
                 M["A1_rms"], M["A1_rms_irregular"], M["A1_St"], M["dp_rms"], M["spectrum_cycles"], M["nyquist_St"]))
             cases[tag] = (case, M, F)
