@@ -25,13 +25,21 @@ Per case, over the last cycle of snapshots (the period T from run.log):
     gd = sqrt(2 eps:eps) from the P1 velocity (cell gradients, volume-averaged
     to the nodes); for R, the polymer stress |sigma_p|_F and its share of the
     viscous stress 2 eta_CY(gd) |eps|_F;
+  - the spectral content of the jet fluctuations, from the per-step series
+    of case.csv (dp, the m = 1 jet amplitude |(<u_y>, <u_z>)|/Ubar, max|u|):
+    the part above the INFLOW_HARMONICS cardiac harmonics, its rms, its
+    cycle-to-cycle (irregular) rms, its Welch PSD against St = f d/U_jet
+    (d the throat diameter, U_jet the peak jet velocity) and its dominant
+    Strouhal number;
   - figures (midplane z = 0 cuts at the systolic peak and at the strongest
     deceleration of the inflow): |u|, p, gd, |sigma_p|; axial profiles of
     TAWSS and OSI; dp(t), recirculation length, wall shear at the throat.
 Across fluids, in each (artery, geometry), the differences CY - N and R - CY:
   relative L2 norms over the last cycle of u, p and tau_w, and the relative
-  change of TAWSS, OSI, dp, recirculation length and low-TAWSS area, in
-  comparison.csv and comparison.tex. Needs numpy, h5py, matplotlib.
+  change of TAWSS, OSI, dp, recirculation length, low-TAWSS area, the jet
+  fluctuation rms, its dominant Strouhal number and the L2 distance of the
+  jet spectra, in comparison.csv and comparison.tex. Needs numpy, scipy,
+  h5py, matplotlib.
 """
 import argparse
 import csv
@@ -56,6 +64,12 @@ LOW_TAWSS = 0.4     # Pa
 HIGH_OSI = 0.2
 # A wall face is a cap when its normal is within 10 degrees of the axis.
 CAP_ALIGNMENT = 0.985
+# Spectra: the inflow carries the first INFLOW_HARMONICS harmonics of the
+# cardiac frequency (run_3d.sh, HARMONICS=10); content above them is the
+# jet's own dynamics (shedding, flapping). Welch segments of SPECTRUM_SEGMENTS
+# per window, 50 % overlap, Hann window.
+INFLOW_HARMONICS = 10
+SPECTRUM_SEGMENTS = 4
 # A wall node belongs to the lesion when its radius departs from the parent
 # radius by more than this fraction (the lesions change it by 50-100%).
 LESION_DEVIATION = 0.05
@@ -252,6 +266,89 @@ class Case:
         self.lesion_nodes = self.wall_nodes[np.abs(self.xD[self.wall_nodes]) <= lesion_half_length(self.geo)]
 
 
+# ---- spectral content of the jet fluctuations -----------------------------------------
+def jet_spectra(case, rows):
+    """Spectral content of the jet fluctuations from the per-step series of
+    case.csv (the XDMF snapshots, ~20 per cycle, are far too sparse: the
+    shedding of the throat jet is at St = f d/U_jet ~ 0.3, i.e. 100-300 Hz).
+
+    Signals: the pressure drop dp, the volume means <u_y>, <u_z> (over Ubar;
+    both vanish for an axisymmetric flow, so their modulus A1 = |(<u_y>,
+    <u_z>)| is the amplitude of the m = 1 deflected/flapping jet) and max|u|.
+    Window: the free cycles (cycle >= 1 in case.csv: cycle 0 is the ramp),
+    resampled to a uniform step (the step control makes dt variable).
+    Decomposition of each signal y(t):
+      y = y_per + y'     y_per its first INFLOW_HARMONICS cardiac harmonics
+                         (least squares over the window): the driven part;
+                         y' the jet's own dynamics (locked shedding included);
+      y' = y_cyc + y''   with >= 2 whole cycles, y_cyc the phase average of y'
+                         over the cycles: y'' the cycle-to-cycle (irregular,
+                         turbulent) part.
+    Returns metrics (rms of y' and y'', the dominant frequency of y' and its
+    Strouhal number, the fraction of the variance above the inflow
+    harmonics) and the spectra (Welch PSD of y')."""
+    from scipy.signal import welch
+    t = np.array([r["t"] for r in rows])
+    cyc = np.array([r.get("cycle", 0.0) for r in rows])
+    free = cyc >= 1
+    if free.sum() < 50:
+        free = t >= t[-1] - case.T - 1.0e-9   # only the ramp cycle: use the last period
+    t = t[free]
+    dt = float(np.median(np.diff(t)))
+    tu = np.arange(t[0], t[-1], dt)
+    fs = 1.0 / dt
+    fc = 1.0 / case.T
+    ncyc = int(np.floor((tu[-1] - tu[0]) / case.T + 1.0e-6))
+    # The jet scale: throat diameter of a stenosis, D otherwise; the jet
+    # velocity at the flow peak.
+    ltype, par = GEOS[case.geo]
+    d = case.D * (np.sqrt(1.0 - par) if ltype == 1 else 1.0)
+    qpk = max(r["qIn"] for r in rows)
+    Ujet = qpk / (0.25 * np.pi * d * d)
+    # The harmonic basis.
+    w = 2.0 * np.pi * fc * (tu - tu[0])
+    B = [np.ones_like(tu)]
+    for k in range(1, INFLOW_HARMONICS + 1):
+        B += [np.cos(k * w), np.sin(k * w)]
+    B = np.column_stack(B)
+    uy = np.array([r.get("uyMean", 0.0) for r in rows])[free]
+    uz = np.array([r.get("uzMean", 0.0) for r in rows])[free]
+    signals = {"dp": np.array([r["dp"] for r in rows])[free],
+               "A1": np.hypot(uy, uz), "uy": uy, "uz": uz,
+               "umax": np.array([r["maxU"] for r in rows])[free]}
+    nper = max(16, len(tu) // SPECTRUM_SEGMENTS)
+    metrics, spectra = {}, {"St_per_Hz": d / Ujet, "fc": fc, "fs": fs, "window_cycles": ncyc}
+    for name, y in signals.items():
+        yu = np.interp(tu, t, y)
+        coef, *_ = np.linalg.lstsq(B, yu, rcond=None)
+        yper = B @ coef
+        yp = yu - yper
+        var_total = np.var(yu)
+        f, P = welch(yp, fs=fs, window="hann", nperseg=nper, noverlap=nper // 2, detrend="constant")
+        spectra[name] = (f, P)
+        cut = f > (INFLOW_HARMONICS + 0.5) * fc
+        fdom = float(f[cut][np.argmax(P[cut])]) if cut.any() and P[cut].max() > 0 else float("nan")
+        scale = abs(np.mean(yu)) if name in ("dp", "umax") else 1.0    # A1, uy, uz are already /Ubar
+        m = {"rms": float(np.sqrt(np.mean(yp ** 2))) / max(scale, 1.0e-30),
+             "fdom_Hz": fdom, "St": fdom * d / Ujet if np.isfinite(fdom) else float("nan"),
+             "hf_fraction": float(_trapz(P[cut], f[cut]) / max(var_total, 1.0e-300)) if cut.any() else 0.0}
+        if ncyc >= 2:
+            # Phase average of y' over the whole cycles, y'' = y' - <y'>.
+            n_in = int(round(case.T / dt))
+            stack = np.array([yp[k * n_in:(k + 1) * n_in] for k in range(ncyc) if (k + 1) * n_in <= len(yp)])
+            ycyc = np.tile(stack.mean(axis=0), len(stack))
+            m["rms_irregular"] = float(np.sqrt(np.mean((yp[:len(ycyc)] - ycyc) ** 2))) / max(scale, 1.0e-30)
+        else:
+            m["rms_irregular"] = float("nan")
+        for k, v in m.items():
+            metrics["%s_%s" % (name, k)] = v
+    metrics["jet_d"] = d
+    metrics["jet_U"] = Ujet
+    metrics["spectrum_cycles"] = ncyc
+    metrics["nyquist_St"] = 0.5 * fs * d / Ujet
+    return metrics, spectra
+
+
 # ---- per-case analysis ---------------------------------------------------------------
 def analyse(case, out, figures=True):
     """Metrics and figures of one case. Returns a dict of scalars and the
@@ -348,6 +445,8 @@ def analyse(case, out, figures=True):
         "umax": float(np.linalg.norm(U, axis=2).max()), "gd_max_peak": float(inst["peak"]["gd"].max()),
         "newton_mean": float(newton.mean()), "retries": int(retries),
     }
+    smetrics, spectra = jet_spectra(case, csvrows)
+    metrics.update(smetrics)
     if "sigma_p" in inst["peak"]:
         metrics["sigma_p_max"] = float(max(inst["peak"]["sigma_p"].max(), inst["decel"]["sigma_p"].max()))
         for label in ("peak", "decel"):
@@ -356,13 +455,17 @@ def analyse(case, out, figures=True):
             metrics["share_max_" + label] = float(np.nanmax(sh))
     fields = {"t": t, "U": U, "P": P, "tau": tau, "tawss": tawss, "osi": osi, "rec": rec,
               "tt": tt, "dp": dp, "q": q, "xc": xc, "prof_tawss": prof_tawss, "prof_osi": prof_osi,
-              "tau_throat": tau_throat, "inst": inst}
+              "tau_throat": tau_throat, "inst": inst, "spectra": spectra}
     # Per-case files.
     os.makedirs(out, exist_ok=True)
     np.savetxt(os.path.join(out, "axial_profiles.csv"), np.column_stack([xc, prof_tawss, prof_osi]),
                delimiter=",", header="x/D,TAWSS[Pa],OSI", comments="")
     np.savetxt(os.path.join(out, "timeseries.csv"), np.column_stack([t, rec, tau_throat]),
                delimiter=",", header="t[s],recirculation[D],throat_wall_shear[Pa]", comments="")
+    f, P = spectra["A1"]
+    cols = [f, f * spectra["St_per_Hz"], P] + [spectra[k][1] for k in ("dp", "uy", "uz", "umax")]
+    np.savetxt(os.path.join(out, "spectra.csv"), np.column_stack(cols), delimiter=",",
+               header="f[Hz],St,PSD_A1,PSD_dp,PSD_uy,PSD_uz,PSD_umax", comments="")
     if figures:
         case_figures(case, fields, metrics, out)
     return metrics, fields
@@ -471,6 +574,20 @@ def case_figures(case, F, M, out):
     fig.suptitle(ttl)
     fig.savefig(os.path.join(out, "profiles.png"), dpi=160)
     plt.close(fig)
+    # 3. Spectra of the jet fluctuations y' (above the inflow harmonics).
+    S = F["spectra"]
+    fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), constrained_layout=True)
+    for ax, keys, lab in ((axes[0], ("A1", "uy", "uz"), "PSD of <u>/Ubar [1/Hz]"), (axes[1], ("dp", "umax"), "PSD [unit^2/Hz]")):
+        for k in keys:
+            f, P = S[k]
+            ax.loglog(f[1:] * S["St_per_Hz"], P[1:], label=k)
+        ax.axvline((INFLOW_HARMONICS + 0.5) * S["fc"] * S["St_per_Hz"], ls="--", c="k", lw=0.8)
+        ax.set_xlabel("St = f d/U_jet")
+        ax.set_ylabel(lab)
+        ax.legend()
+    fig.suptitle("%s: jet fluctuations (%d free cycles; dashed: last inflow harmonic)" % (ttl, S["window_cycles"]))
+    fig.savefig(os.path.join(out, "spectra.png"), dpi=160)
+    plt.close(fig)
 
 
 def comparison_figures(cases, out):
@@ -495,6 +612,16 @@ def comparison_figures(cases, out):
         ax.legend()
     fig.suptitle(os.path.basename(out))
     fig.savefig(os.path.join(out, "comparison.png"), dpi=160)
+    plt.close(fig)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), constrained_layout=True)
+    for tag, (case, M, F) in cases.items():
+        S = F["spectra"]
+        for ax, k in zip(axes, ("A1", "dp")):
+            f, P = S[k]
+            ax.loglog(f[1:] * S["St_per_Hz"], P[1:], label="%s (St* %.2f)" % (tag, M.get(k + "_St", float("nan"))))
+    for ax, k in zip(axes, ("m = 1 jet amplitude A1", "pressure drop dp")):
+        ax.set_xlabel("St = f d/U_jet"); ax.set_ylabel("PSD"); ax.set_title(k); ax.legend()
+    fig.savefig(os.path.join(out, "comparison_spectra.png"), dpi=160)
     plt.close(fig)
 
 
@@ -550,6 +677,16 @@ def compare(cases):
             den = abs(Mb[k])
             row[k + "_relchange"] = (Ma[k] - Mb[k]) / den if den > 1.0e-30 else float("nan")
         row["dp_lag_diff_T"] = Ma["dp_lag_T"] - Mb["dp_lag_T"]
+        # Jet dynamics: change of the fluctuation rms and of the dominant
+        # Strouhal number; the L2 distance of the PSDs of A1 on the St axis.
+        for k in ("A1_rms", "dp_rms", "A1_rms_irregular", "dp_rms_irregular"):
+            den = abs(Mb.get(k, float("nan")))
+            row[k + "_relchange"] = (Ma[k] - Mb[k]) / den if den > 1.0e-30 else float("nan")
+        row["A1_St_diff"] = Ma["A1_St"] - Mb["A1_St"]
+        fa, Pa = Fa["spectra"]["A1"]
+        fb, Pb = Fb["spectra"]["A1"]
+        Pb_on_a = np.interp(fa * Fa["spectra"]["St_per_Hz"], fb * Fb["spectra"]["St_per_Hz"], Pb)
+        row["A1_psd_relL2"] = float(np.linalg.norm(Pa - Pb_on_a) / max(np.linalg.norm(Pb_on_a), 1.0e-300))
         rows.append(row)
     return rows
 
@@ -572,7 +709,8 @@ def write_tables(metrics, comparisons, out):
         cols = [("u_relL2", r"$\|\Delta u\|/\|u\|$"), ("tau_relL2", r"$\|\Delta\tau_w\|/\|\tau_w\|$"),
                 ("tawss_relL2", r"$\Delta$TAWSS"), ("osi_lesion_absdiff_max", r"max $|\Delta$OSI$|$"),
                 ("dp_mean_relchange", r"$\Delta\overline{\Delta p}$"), ("dp_peak_relchange", r"$\Delta\,\Delta p_{\max}$"),
-                ("recirc_max_D_relchange", r"$\Delta L_{rec}$"), ("low_tawss_area_relchange", r"$\Delta A_{\rm low}$")]
+                ("recirc_max_D_relchange", r"$\Delta L_{rec}$"), ("low_tawss_area_relchange", r"$\Delta A_{\rm low}$"),
+                ("A1_rms_relchange", r"$\Delta A_1'$"), ("A1_psd_relL2", r"$\|\Delta S_{A_1}\|$")]
         with open(os.path.join(out, "comparison.tex"), "w") as f:
             f.write("\\begin{tabular}{ll" + "r" * len(cols) + "}\n\\toprule\ncase & pair & " +
                     " & ".join(c[1] for c in cols) + "\\\\\n\\midrule\n")
@@ -586,7 +724,8 @@ def write_tables(metrics, comparisons, out):
     # LaTeX of the per-case metrics.
     cols = [("fluid", "fluid"), ("dp_mean", r"$\overline{\Delta p}$ [Pa]"), ("dp_peak", r"$\Delta p_{\max}$ [Pa]"),
             ("dp_lag_T", r"lag/T"), ("tawss_max", r"TAWSS$_{\max}$ [Pa]"), ("osi_lesion_max", r"OSI$_{\max}$"),
-            ("low_tawss_area", r"$A_{\rm low}$"), ("recirc_max_D", r"$L_{rec}/D$"), ("share_p95_decel", r"$\sigma_p$ share p95")]
+            ("low_tawss_area", r"$A_{\rm low}$"), ("recirc_max_D", r"$L_{rec}/D$"), ("A1_rms", r"$A_1'$"),
+            ("A1_St", r"St$^*$"), ("share_p95_decel", r"$\sigma_p$ share p95")]
     with open(os.path.join(out, "summary_cases.tex"), "w") as f:
         f.write("\\begin{tabular}{l" + "r" * len(cols) + "}\n\\toprule\ncase & " + " & ".join(c[1] for c in cols) + "\\\\\n\\midrule\n")
         for m in metrics:
@@ -646,6 +785,8 @@ def main():
                       tag, M["dp_mean"], M["dp_peak"], M["dp_lag_T"], M["tawss_max"], M["osi_lesion_max"],
                       100 * M["low_tawss_area"], M["recirc_max_D"],
                       (", polymer share p95 %.2f" % M["share_p95_decel"]) if "share_p95_decel" in M else ""))
+            print("       jet: A1' rms %.2e (irregular %.2e), St* %.3f, dp' rms %.2e of mean; %d cycles, Nyquist St %.1f" % (
+                M["A1_rms"], M["A1_rms_irregular"], M["A1_St"], M["dp_rms"], M["spectrum_cycles"], M["nyquist_St"]))
             cases[tag] = (case, M, F)
             all_metrics.append(M)
         if len(cases) > 1:
