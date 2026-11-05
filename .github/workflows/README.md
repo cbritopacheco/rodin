@@ -731,3 +731,11 @@ fail immediately. Transfer retries retain their separate three-attempt bound,
 clean staging and digest verification. Single-artifact metadata restores merge
 verified contents into their original destinations while retaining workspace
 sources. A failed lookup or transfer never publishes partial input.
+
+The distributed named vector P2 form oracle retains its tetrahedral grid,
+material parameters, two reassembly passes and independent full-matrix
+comparisons. Its Debug build with coverage has a 300-second per-case allowance
+at each existing MPI rank. Hosted Debug/coverage runs took 90--111 seconds,
+with the three-rank check exceeding the former 120-second limit twice.
+Other named-form cases and configurations retain 120 seconds. Compiler flags,
+coverage instrumentation and numerical acceptance thresholds are unchanged.

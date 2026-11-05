@@ -22,7 +22,7 @@ GEOMETRIES = ["Segment", "Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", 
 
 
 class BackendRegistrationTest(unittest.TestCase):
-    def configure(self, directory, petsc=True, complex=False, coverage=False):
+    def configure(self, directory, petsc=True, complex=False, coverage=False, build_type=None):
         temporary = tempfile.TemporaryDirectory(prefix="rodin-ci-registration-")
         self.addCleanup(temporary.cleanup)
         source = Path(temporary.name)
@@ -42,8 +42,10 @@ class BackendRegistrationTest(unittest.TestCase):
             + f'include("{ROOT / "tests/convergence/PETScRefinement.cmake"}")\n'
             + ''.join(f'add_subdirectory("{ROOT / entry}" {folder})\n' for entry, folder in zip(directories, folders)))
         build = source / "build"
-        subprocess.run(["cmake", "-S", str(source), "-B", str(build)],
-                       check=True, capture_output=True, text=True)
+        command = ["cmake", "-S", str(source), "-B", str(build)]
+        if build_type:
+            command.append('-DCMAKE_BUILD_TYPE=' + build_type)
+        subprocess.run(command, check=True, capture_output=True, text=True)
         tests = {}
         for folder in folders:
             commands = ci.commands((build / folder / "CTestTestfile.cmake").read_text())
@@ -134,6 +136,23 @@ class BackendRegistrationTest(unittest.TestCase):
                 counts.update(matches)
                 self.assertIn("--gtest_fail_if_no_test_selected", command)
             self.assertEqual(counts, Counter(cases))
+
+    def test_only_debug_coverage_vector_p2_named_oracle_gets_extended_budget(self):
+        for build_type, coverage in itertools.product(['Debug', 'Release'], [False, True]):
+            with self.subTest(build_type=build_type, coverage=coverage):
+                tests, build = self.configure('tests/unit/Rodin/PETSc',
+                                              coverage=coverage, build_type=build_type)
+                properties = self.properties(build)
+                for rank in [2, 3, 4]:
+                    for case in ['NamedScalarP1MatchesIntegrals', 'NamedScalarP2MatchesIntegrals',
+                                 'NamedVectorP1MatchesIntegrals', 'NamedVectorP2MatchesIntegrals']:
+                        name = f'RodinPETScMPINamedFormTest_{case}_np{rank}'
+                        expected = 300 if build_type == 'Debug' and coverage and case == 'NamedVectorP2MatchesIntegrals' else 120
+                        self.assertEqual(properties[name]['TIMEOUT'], str(expected))
+                        self.assertEqual(properties[name]['PROCESSORS'], str(rank))
+                        self.assertIn(f'--gtest_filter=PETSc_MPI_Form.{case}', tests[name])
+                        self.assertIn('--gtest_fail_if_no_test_selected', tests[name])
+                    self.assertEqual(properties[f'RodinPETScMPIFormTest_np{rank}']['TIMEOUT'], '120')
 
     @staticmethod
     def properties(build):

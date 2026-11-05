@@ -167,8 +167,16 @@ if (RODIN_USE_MPI)
         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
           ${_RODIN_MPI_OVERSUBSCRIBE_FLAG} $<TARGET_FILE:RodinPETScMPIFormTest>
           "--gtest_filter=PETSc_MPI_Form.${case}" --gtest_fail_if_no_test_selected)
+      set(_named_timeout 120)
+      # Debug/coverage takes about 90--111 seconds on hosted runners and the
+      # three-rank P2 vector oracle exceeded 120 seconds twice. Keep the complete
+      # tetrahedral mesh, two reassembly passes and matrix comparisons intact.
+      if (case STREQUAL "NamedVectorP2MatchesIntegrals" AND
+          RODIN_CODE_COVERAGE AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(_named_timeout 300)
+      endif()
       set_tests_properties(${test} PROPERTIES
-        LABELS "unit;petsc;distributed" TIMEOUT 120 PROCESSORS ${np})
+        LABELS "unit;petsc;distributed" TIMEOUT ${_named_timeout} PROCESSORS ${np})
       rodin_suppress_external_mpi_lsan_for_test(${test})
     endforeach()
     set(test RodinPETScMPIFormTest_np${np})
