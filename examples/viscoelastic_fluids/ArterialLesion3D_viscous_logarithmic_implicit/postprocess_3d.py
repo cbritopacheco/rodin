@@ -85,6 +85,9 @@ CAP_ALIGNMENT = 0.985
 # jet's own dynamics (shedding, flapping). Welch segments of SPECTRUM_SEGMENTS
 # per window, 50 % overlap, Hann window.
 INFLOW_HARMONICS = 10
+# Relative rms below which a fluctuation is taken as numerical noise (an
+# axisymmetric jet gives A1' ~ 1e-6; flapping jets ~ 1e-3 and above).
+FLUCTUATION_FLOOR = 1.0e-4
 SPECTRUM_SEGMENTS = 4
 # Q-R analysis and the post-lesion region: the jet and its wake, from the
 # lesion end to POST_LESION_LENGTH diameters downstream.
@@ -423,6 +426,10 @@ def jet_spectra(case, rows):
         cut = f > (INFLOW_HARMONICS + 0.5) * fc
         fdom = float(f[cut][np.argmax(P[cut])]) if cut.any() and P[cut].max() > 0 else float("nan")
         scale = abs(np.mean(yu)) if name in ("dp", "umax") else 1.0    # A1, uy, uz are already /Ubar
+        # A dominant frequency of a fluctuation at the noise level is
+        # meaningless (an axisymmetric jet has A1' ~ 1e-6): no St then.
+        if np.sqrt(np.mean(yp ** 2)) / max(scale, 1.0e-30) < FLUCTUATION_FLOOR:
+            fdom = float("nan")
         m = {"rms": float(np.sqrt(np.mean(yp ** 2))) / max(scale, 1.0e-30),
              "fdom_Hz": fdom, "St": fdom * d / Ujet if np.isfinite(fdom) else float("nan"),
              "hf_fraction": float(_trapz(P[cut], f[cut]) / max(var_total, 1.0e-300)) if cut.any() else 0.0}
@@ -489,15 +496,38 @@ def analyse(case, out, figures=True):
         return num / np.maximum(den, 1.0e-30)
     xc = 0.5 * (edges[1:] + edges[:-1])
     prof_tawss, prof_osi = axial(tawss), axial(osi)
-    # Recirculation length: downstream of the lesion, the farthest wall node
-    # with reversed axial wall shear (tau_w . axis < 0), per snapshot.
+    # Recirculation: the region of reversed axial wall shear attached to the
+    # lesion, on the circumferential mean of tau_w . axis in the axial bins.
+    # Per snapshot: the first reversed bin downstream of the lesion centre
+    # (within the lesion or one diameter past it) starts it; the first
+    # forward bin after it is the reattachment x_r; L_rec = x_r - ell (0 when
+    # it reattaches within the lesion). The farthest reversed node, used
+    # before, measured the near-wall Womersley reversal of the whole parent
+    # vessel at high Wo, not the separation.
     ell = lesion_half_length(case.geo)
-    down = wn[case.xD[wn] > 0.0]
-    taux = tau[:, down, :] @ case.axis
+    w_w = case.wall_nodearea[wn]
+    den = np.histogram(case.xD[wn], edges, weights=w_w)[0]
     rec = np.zeros(len(t))
+    reach_outlet = np.zeros(len(t), dtype=bool)
+    # The sign of forward wall shear: the shearStress field follows the
+    # traction convention of the solver, so forward flow may give tau . axis
+    # < 0; it is fixed by the cycle mean on the parent wall upstream
+    # (x/D < -3, before the lesion), where the flow is forward on average.
+    taux_all = tau[:, wn, :] @ case.axis
+    upstream = case.xD[wn] < -3.0
+    forward = np.sign(_trapz((taux_all[:, upstream] * w_w[upstream]).sum(axis=1), t)) or 1.0
+    taux_all = forward * taux_all
     for i in range(len(t)):
-        rev = case.xD[down][taux[i] < 0.0]
-        rec[i] = (rev.max() - ell) if len(rev) and rev.max() > ell else 0.0
+        tm = np.histogram(case.xD[wn], edges, weights=taux_all[i] * w_w)[0] / np.maximum(den, 1.0e-30)
+        valid = den > 0.0
+        cand = np.where(valid & (xc > 0.0) & (xc < ell + 1.0) & (tm < 0.0))[0]
+        if len(cand) == 0:
+            continue
+        k = cand[0]
+        while k + 1 < len(xc) and (not valid[k + 1] or tm[k + 1] < 0.0):
+            k += 1
+        reach_outlet[i] = k + 1 >= len(xc) or xc[k] > case.outlet_x - 1.0
+        rec[i] = max(edges[k + 1] - ell, 0.0)
     # Throat wall shear in time (|x/D| < 0.1 for a stenosis, the neck for an
     # aneurysm) and the instants of the peak and of the minimum wall shear.
     throat = wn[np.abs(case.xD[wn]) < 0.1]
@@ -542,7 +572,10 @@ def analyse(case, out, figures=True):
         acc = np.einsum("nij,nj->ni", gu, u)
         d["kappa"] = np.linalg.norm(np.cross(u, acc), axis=1) / np.maximum(sp_ ** 3, 1.0e-30)
         sd, so = case.field(s, "elasticStressDiag"), case.field(s, "elasticStressOff")
-        if sd is not None:
+        # The elastic quantities only for the viscoelastic fluid: N (an sPTT
+        # at Wi 0.01, so a viscous polymer) and CY also write the stress
+        # fields, but their N1, M or stretch are noise or viscous artefacts.
+        if sd is not None and case.fluid == "gsptt":
             sp = np.sqrt((sd ** 2).sum(1) + 2.0 * (so ** 2).sum(1))
             d["sigma_p"] = sp
             d["share"] = sp / np.maximum(2.0 * eta_cy(gd) * np.sqrt(np.einsum("nij,nij->n", eps, eps)), 1.0e-30)
@@ -596,6 +629,8 @@ def analyse(case, out, figures=True):
         "tawss_max": float(tawss[wn].max()), "tawss_lesion_mean": float((tawss[ln] * case.wall_nodearea[ln]).sum() / A_les),
         "osi_lesion_max": float(osi[ln].max()), "low_tawss_area": float(low_area), "high_osi_area": float(high_osi_area),
         "recirc_max_D": float(rec.max()), "recirc_mean_D": float(rec.mean()),
+        "recirc_peak_D": float(rec[int(np.argmax(tau_throat))]),
+        "recirc_reaches_outlet_fraction": float(reach_outlet.mean()),
         "throat_tau_peak": float(tau_throat.max()), "throat_tau_min": float(tau_throat.min()),
         "t_peak": float(t[i_peak]), "t_decel": float(t[i_min]),
         "umax": float(np.linalg.norm(U, axis=2).max()), "gd_max_peak": float(inst["peak"]["gd"].max()),
@@ -931,7 +966,7 @@ def compare(cases):
             ua, ub = Fa["inst"]["peak"]["u"], Fb["inst"]["peak"]["u"]
             row["u_peak_relL2"] = rel_l2(ua[None], ub[None], vol)
             row["gd_peak_relL2"] = rel_l2(Fa["inst"]["peak"]["gd"][None], Fb["inst"]["peak"]["gd"][None], vol)
-        for k in ("dp_mean", "dp_peak", "tawss_lesion_mean", "tawss_max", "recirc_max_D", "recirc_mean_D",
+        for k in ("dp_mean", "dp_peak", "tawss_lesion_mean", "tawss_max", "recirc_max_D", "recirc_mean_D", "recirc_peak_D",
                   "low_tawss_area", "high_osi_area", "osi_lesion_max", "throat_tau_peak", "umax"):
             den = abs(Mb[k])
             row[k + "_relchange"] = (Ma[k] - Mb[k]) / den if den > 1.0e-30 else float("nan")
@@ -1050,9 +1085,11 @@ def main():
                 print("   %s: FAILED (%s)" % (tag, e))
                 continue
             print("   %-3s dp mean %.1f Pa, peak %.1f Pa, lag %.3f T; TAWSS max %.2f Pa, OSI max %.3f, "
-                  "low-TAWSS area %.1f%%, recirculation max %.2f D%s" % (
+                  "low-TAWSS area %.1f%%, recirculation %.2f D at the peak, max %.2f D%s%s" % (
                       tag, M["dp_mean"], M["dp_peak"], M["dp_lag_T"], M["tawss_max"], M["osi_lesion_max"],
-                      100 * M["low_tawss_area"], M["recirc_max_D"],
+                      100 * M["low_tawss_area"], M["recirc_peak_D"], M["recirc_max_D"],
+                      (" (reaches the outlet in %.0f%% of the cycle)" % (100 * M["recirc_reaches_outlet_fraction"]))
+                      if M["recirc_reaches_outlet_fraction"] > 0 else "",
                       (", polymer share p95 %.2f" % M["share_p95_decel"]) if "share_p95_decel" in M else ""))
             if "N1_lesion_wall_max_peak" in M:
                 print("       normal stresses at the lesion wall (peak): N1 max %.3g Pa, N2 max %.3g Pa, |N2/N1| median %.3f p95 %.3f, "
@@ -1061,15 +1098,18 @@ def main():
                                                  M["recoverable_shear_p95_peak"]))
             if "M_max_peak" in M:
                 print("       elasticity (peak/decel): M max %.3g/%.3g (critical %.1f, supercritical volume %.2g/%.2g), "
-                      "Wi_ext max %.3g/%.3g, stretch max %.3g/%.3g, polymer/viscous power %.3g/%.3g" % (
+                      "Wi_ext max %.3g/%.3g, stretch max %.3g/%.3g, polymer/viscous power %.3g/%.3g (returned %.3g/%.3g)" % (
                           M["M_max_peak"], M["M_max_decel"], M_CRIT, M["M_supercritical_fraction_peak"],
                           M["M_supercritical_fraction_decel"], M["Wi_ext_max_peak"], M["Wi_ext_max_decel"],
                           M["stretch_max_peak"], M["stretch_max_decel"], M["polymer_power_ratio_peak"],
-                          M["polymer_power_ratio_decel"]))
+                          M["polymer_power_ratio_decel"], M["polymer_power_returned_fraction_peak"],
+                          M["polymer_power_returned_fraction_decel"]))
             print("       kinematics (peak/decel): rotation-dominated volume %.2f/%.2f, extensional volume %.2f/%.2f" % (
                 M["rotation_fraction_peak"], M["rotation_fraction_decel"], M["extension_fraction_peak"], M["extension_fraction_decel"]))
-            print("       jet: A1' rms %.2e (irregular %.2e), St* %.3f, dp' rms %.2e of mean; %d cycles, Nyquist St %.1f" % (
-                M["A1_rms"], M["A1_rms_irregular"], M["A1_St"], M["dp_rms"], M["spectrum_cycles"], M["nyquist_St"]))
+            print("       jet: A1' rms %.2e (irregular %.2e), St* %s; dp' rms %.2e of mean (irregular %.2e), St* %s; %d cycles, Nyquist St %.1f" % (
+                M["A1_rms"], M["A1_rms_irregular"], "%.3f" % M["A1_St"] if np.isfinite(M["A1_St"]) else "- (axisymmetric)",
+                M["dp_rms"], M["dp_rms_irregular"], "%.3f" % M["dp_St"] if np.isfinite(M["dp_St"]) else "-",
+                M["spectrum_cycles"], M["nyquist_St"]))
             cases[tag] = (case, M, F)
             all_metrics.append(M)
         if len(cases) > 1:
