@@ -634,6 +634,96 @@
           }
         }
       ]
+    },
+    {
+      "commit": "a71ed59aaf921d740a65c7097d8256a944b062ca",
+      "date": "2026-11-05T23:58:06.598071+00:00",
+      "run": "42009914937.1",
+      "results": [
+        {
+          "name": "Conductivity/Constrained/H1/P1/Complex/Triangle/5/real_time",
+          "value": 3309.811920097297,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            3309.811920097297
+          ],
+          "records": [
+            {
+              "name": "Conductivity/Constrained/H1/P1/Complex/Triangle/5/real_time",
+              "family_index": 45,
+              "per_family_instance_index": 1,
+              "run_name": "Conductivity/Constrained/H1/P1/Complex/Triangle/5/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 84395,
+              "real_time": 3309.811920097297,
+              "cpu_time": 3327.598341150054,
+              "time_unit": "ns",
+              "cells": 32.0,
+              "degree": 1.0,
+              "dofs": 25.0,
+              "initial_relative_residual": 1.0,
+              "local_entries_per_operator_term": 288.0,
+              "nnz": 49.0,
+              "quadrature_order": 8.0,
+              "quadrature_points_per_cell": 16.0,
+              "relative_coefficient_error": 1.2744117831776678e-16,
+              "relative_residual": 4.229066217501983e-16,
+              "solver_reported_iterations": 4.0,
+              "system_rows": 25.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-05T13:48:30+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinConstrainedSolveBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3237,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.847168,
+              0.269531,
+              0.0961914
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "CG setup and solve; zero initial guess"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

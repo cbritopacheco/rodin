@@ -606,6 +606,92 @@
           }
         }
       ]
+    },
+    {
+      "commit": "a71ed59aaf921d740a65c7097d8256a944b062ca",
+      "date": "2026-11-05T23:58:06.598071+00:00",
+      "run": "42009914937.1",
+      "results": [
+        {
+          "name": "DiagonalPreconditioner/Apply/Conductivity/H1/P3/Complex/Segment/3/real_time",
+          "value": 5.323144740331967,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            5.323144740331967
+          ],
+          "records": [
+            {
+              "name": "DiagonalPreconditioner/Apply/Conductivity/H1/P3/Complex/Segment/3/real_time",
+              "family_index": 73,
+              "per_family_instance_index": 0,
+              "run_name": "DiagonalPreconditioner/Apply/Conductivity/H1/P3/Complex/Segment/3/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 52282587,
+              "real_time": 5.323144740331967,
+              "cpu_time": 5.322887197605104,
+              "time_unit": "ns",
+              "cells": 2.0,
+              "degree": 3.0,
+              "diagonal_search_entries": 13.0,
+              "dimension": 1.0,
+              "inverse_diagonal_bytes": 112.0,
+              "nnz": 19.0,
+              "relative_error": 4.004939155809309e-18,
+              "rows": 7.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-05T13:54:30+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinDiagonalPreconditionerBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2600,
+            "cpu_scaling_enabled": true,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 65536,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 2097152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 503316480,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.650879,
+              0.184082,
+              0.0634766
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "Eigen CG diagonal setup/apply; assembly excluded"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

@@ -606,6 +606,92 @@
           }
         }
       ]
+    },
+    {
+      "commit": "a71ed59aaf921d740a65c7097d8256a944b062ca",
+      "date": "2026-11-05T23:58:06.598071+00:00",
+      "run": "42009914937.1",
+      "results": [
+        {
+          "name": "Field/Interpolation/P1/Complex/Vector/Triangle/3/real_time",
+          "value": 2883.683510857945,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            2883.683510857945
+          ],
+          "records": [
+            {
+              "name": "Field/Interpolation/P1/Complex/Vector/Triangle/3/real_time",
+              "family_index": 66,
+              "per_family_instance_index": 0,
+              "run_name": "Field/Interpolation/P1/Complex/Vector/Triangle/3/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 72666,
+              "real_time": 2883.683510857945,
+              "cpu_time": 2881.8525445188225,
+              "time_unit": "ns",
+              "absolute_field_error": 1.1102230246251565e-15,
+              "cells": 8.0,
+              "components": 2.0,
+              "degree": 1.0,
+              "dimension": 2.0,
+              "dofs": 18.0,
+              "local_dofs_per_cell": 6.0,
+              "oracle_points_per_cell": 16.0,
+              "oracle_quadrature_order": 8.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-05T15:21:11+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinFieldOperationBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3683,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.18311,
+              0.405762,
+              0.145508
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

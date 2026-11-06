@@ -592,6 +592,90 @@
           }
         }
       ]
+    },
+    {
+      "commit": "a71ed59aaf921d740a65c7097d8256a944b062ca",
+      "date": "2026-11-05T23:58:06.598071+00:00",
+      "run": "42009914937.1",
+      "results": [
+        {
+          "name": "MappedQuadratureLifecycle/CacheFirstCell/Tetrahedron/3/20",
+          "value": 15550.309061756978,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            15550.309061756978
+          ],
+          "records": [
+            {
+              "name": "MappedQuadratureLifecycle/CacheFirstCell/Tetrahedron/3/20",
+              "family_index": 26,
+              "per_family_instance_index": 1,
+              "run_name": "MappedQuadratureLifecycle/CacheFirstCell/Tetrahedron/3/20",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 18087,
+              "real_time": 15550.310720406776,
+              "cpu_time": 15550.309061756978,
+              "time_unit": "ns",
+              "dense_slots": 960.0,
+              "dimension": 3.0,
+              "empty_slots": 940.0,
+              "formulas": 20.0,
+              "held_cells": 48.0,
+              "items_per_second": 1286148.0707921227,
+              "mapped_points": 160.0,
+              "mapped_quadratures": 20.0,
+              "visited_cells": 1.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-05T13:32:39+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinMappedQuadratureCacheBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3597,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.51416,
+              0.542969,
+              0.197266
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

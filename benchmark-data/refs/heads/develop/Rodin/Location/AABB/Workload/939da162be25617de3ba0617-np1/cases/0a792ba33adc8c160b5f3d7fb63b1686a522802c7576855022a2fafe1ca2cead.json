@@ -214,6 +214,36 @@
           ]
         }
       ]
+    },
+    {
+      "commit": "a71ed59aaf921d740a65c7097d8256a944b062ca",
+      "date": "2026-11-05T23:58:06.598071+00:00",
+      "run": "42009914937.1",
+      "results": [
+        {
+          "name": "Triangle/3/4/1/3/miss/0",
+          "value": 18712.9289216,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            18712.9289216
+          ],
+          "records": [
+            {
+              "geometry": "Triangle",
+              "degree": "3",
+              "resolution": "4",
+              "cells": "18",
+              "distortion": "1.000000",
+              "warp_degree": "3",
+              "query": "miss",
+              "pruning": "0",
+              "samples": "64",
+              "ns": "18712.9289216"
+            }
+          ]
+        }
+      ]
     }
   ],
   "format": "csv",

@@ -578,6 +578,88 @@
           }
         }
       ]
+    },
+    {
+      "commit": "a71ed59aaf921d740a65c7097d8256a944b062ca",
+      "date": "2026-11-05T23:58:06.598071+00:00",
+      "run": "42009914937.1",
+      "results": [
+        {
+          "name": "SpatialMatrix/Real/SquaredNorm/Spatial/rows:1/cols:3/count:1",
+          "value": 1.2975106997887496,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            1.2975106997887496
+          ],
+          "records": [
+            {
+              "name": "SpatialMatrix/Real/SquaredNorm/Spatial/rows:1/cols:3/count:1",
+              "family_index": 1,
+              "per_family_instance_index": 14,
+              "run_name": "SpatialMatrix/Real/SquaredNorm/Spatial/rows:1/cols:3/count:1",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 215793980,
+              "real_time": 1.2975201671520282,
+              "cpu_time": 1.2975106997887496,
+              "time_unit": "ns",
+              "entries": 3.0,
+              "input_value_bytes": 80.0,
+              "items_per_second": 770706553.836367,
+              "operations": 1.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-05T13:21:30+00:00",
+            "host_name": "ip-10-0-134-225",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinMathSpatialMatrixBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3874,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 65536,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 2097152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 503316480,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.782227,
+              0.338379,
+              0.130859
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "result": "Owned result assigned to retained output; dynamic allocations included",
+            "timing": "Calling-thread CPU; input setup and numerical guards excluded"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

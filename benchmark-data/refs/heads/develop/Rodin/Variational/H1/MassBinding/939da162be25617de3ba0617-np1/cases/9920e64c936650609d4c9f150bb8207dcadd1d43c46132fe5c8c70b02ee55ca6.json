@@ -690,6 +690,104 @@
           }
         }
       ]
+    },
+    {
+      "commit": "a71ed59aaf921d740a65c7097d8256a944b062ca",
+      "date": "2026-11-05T23:58:06.598071+00:00",
+      "run": "42009914937.1",
+      "results": [
+        {
+          "name": "H1/MassBinding/Unit/Real/Scalar/P3/Quadrilateral/Warm/1/1/11/real_time",
+          "value": 6051.924332600053,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            6051.924332600053
+          ],
+          "records": [
+            {
+              "name": "H1/MassBinding/Unit/Real/Scalar/P3/Quadrilateral/Warm/1/1/11/real_time",
+              "family_index": 18,
+              "per_family_instance_index": 5,
+              "run_name": "H1/MassBinding/Unit/Real/Scalar/P3/Quadrilateral/Warm/1/1/11/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 46374,
+              "real_time": 6051.924332600053,
+              "cpu_time": 6051.819403113755,
+              "time_unit": "ns",
+              "ambient_dimension": 2.0,
+              "cells": 1.0,
+              "component_pair_sample_proxy": 9216.0,
+              "components": 1.0,
+              "degree": 3.0,
+              "dense_entry_sample_proxy": 9216.0,
+              "dimension": 2.0,
+              "field_columns": 1.0,
+              "field_rows": 1.0,
+              "first_order_geometry": 1.0,
+              "fixture_cells": 1.0,
+              "global_dofs": 16.0,
+              "local_basis": 16.0,
+              "local_entries": 256.0,
+              "quadrature_order": 11.0,
+              "quadrature_points": 36.0,
+              "reference_error": 1.481692283948744e-17,
+              "scalar_basis": 16.0,
+              "scalar_pair_sample_proxy": 9216.0,
+              "specialized_kernel": 1.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-05T16:00:42+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinH1MassBindingBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3231,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.25684,
+              0.370605,
+              0.126953
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "One-cell H1 mass binding; no traversal, scatter or solve",
+            "work_proxies": "Logical entry/sample counts, not executed FLOPs"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

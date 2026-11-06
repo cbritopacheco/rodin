@@ -543,6 +543,83 @@
           }
         }
       ]
+    },
+    {
+      "commit": "a71ed59aaf921d740a65c7097d8256a944b062ca",
+      "date": "2026-11-05T23:58:06.598071+00:00",
+      "run": "42009914937.1",
+      "results": [
+        {
+          "name": "BM_AABBCurvedBuild<4>/PrunedP4Triangle",
+          "value": 838949.1137724539,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            838949.1137724539
+          ],
+          "records": [
+            {
+              "name": "BM_AABBCurvedBuild<4>/PrunedP4Triangle",
+              "family_index": 68,
+              "per_family_instance_index": 0,
+              "run_name": "BM_AABBCurvedBuild<4>/PrunedP4Triangle",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 334,
+              "real_time": 839097.4311377627,
+              "cpu_time": 838949.1137724539,
+              "time_unit": "ns",
+              "cells": 98.0,
+              "degree": 4.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-05T11:58:14+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinLocationBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3117,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": false,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.06152,
+              0.306152,
+              0.10498
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",
