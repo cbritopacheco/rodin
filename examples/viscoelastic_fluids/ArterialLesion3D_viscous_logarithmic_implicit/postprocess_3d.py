@@ -1019,9 +1019,11 @@ def rel_l2(a, b, w=None):
 
 def compare(cases):
     """cases: {tag: (case, metrics, fields)} of one (artery, geometry).
-    The fields of different fluids are on the same mesh and the same output
-    instants (the campaign runs them with the same mesh and steps); the
-    comparison uses the common snapshots of the last cycle."""
+    The fluids are compared at the same Re and Wo, in units of the case's own
+    scales: u/Ubar, p and tau/(rho Ubar^2), t/T. N has its own reference
+    viscosity (eta_s + eta_p != eta_inf), hence its own Ubar and T; for a
+    Newtonian fluid this rescaling is exact, and it is the identity between CY
+    and R. Snapshots are paired by phase t/T mod 1, not by index."""
     rows = []
     pairs = [("CY", "N"), ("R", "CY"), ("R", "N")]
     for a, b in pairs:
@@ -1034,35 +1036,58 @@ def compare(cases):
             same = False
         else:
             same = True
-        n = min(len(Fa["t"]), len(Fb["t"]))
         row = {"pair": "%s-%s" % (a, b), "case": os.path.dirname(ca.name)}
-        if same:
+        # Scales: velocity Ubar, stress rho Ubar^2 (rho is common).
+        sua, sub = 1.0 / ca.Ubar, 1.0 / cb.Ubar
+        ssa, ssb = sua ** 2, sub ** 2
+        # Phase pairing: for each snapshot of a, the snapshot of b nearest in t/T mod 1.
+        pha, phb = np.mod(Fa["t"] / ca.T, 1.0), np.mod(Fb["t"] / cb.T, 1.0)
+        dph = np.abs(pha[:, None] - phb[None, :]); dph = np.minimum(dph, 1.0 - dph)
+        jb = np.argmin(dph, axis=1)
+        dsnap = np.median(np.diff(np.sort(phb))) if len(phb) > 1 else 1.0
+        ia = np.where(dph[np.arange(len(pha)), jb] <= 0.5 * dsnap + 1.0e-9)[0]
+        jb = jb[ia]
+        row["phase_pairs"] = len(ia)
+        row["phase_mismatch_max"] = float(dph[ia, jb].max()) if len(ia) else float("nan")
+        if same and len(ia):
             vol = ca.nodevol
-            row["u_relL2"] = rel_l2(Fa["U"][-n:], Fb["U"][-n:], vol)
-            row["umean_relL2"] = rel_l2(Fa["umean"][None], Fb["umean"][None], vol)
-            row["urms_relL2"] = rel_l2(Fa["urms"][None], Fb["urms"][None], vol)
-            pa, pb = Fa["P"][-n:], Fb["P"][-n:]
+            row["u_relL2"] = rel_l2(Fa["U"][ia] * sua, Fb["U"][jb] * sub, vol)
+            row["umean_relL2"] = rel_l2(Fa["umean"][None] * sua, Fb["umean"][None] * sub, vol)
+            row["urms_relL2"] = rel_l2(Fa["urms"][None] * sua, Fb["urms"][None] * sub, vol)
+            pa, pb = Fa["P"][ia] * ssa, Fb["P"][jb] * ssb
             pa = pa - pa.mean(axis=1, keepdims=True); pb = pb - pb.mean(axis=1, keepdims=True)
             row["p_relL2"] = rel_l2(pa, pb, vol)
             wa = ca.wall_nodearea
-            row["tau_relL2"] = rel_l2(Fa["tau"][-n:], Fb["tau"][-n:], wa)
-            row["tawss_relL2"] = rel_l2(Fa["tawss"][None], Fb["tawss"][None], wa)
+            row["tau_relL2"] = rel_l2(Fa["tau"][ia] * ssa, Fb["tau"][jb] * ssb, wa)
+            row["tawss_relL2"] = rel_l2(Fa["tawss"][None] * ssa, Fb["tawss"][None] * ssb, wa)
             ln = ca.lesion_nodes
             row["osi_lesion_absdiff_max"] = float(np.abs(Fa["osi"][ln] - Fb["osi"][ln]).max())
-            # Peak-instant fields.
-            ua, ub = Fa["inst"]["peak"]["u"], Fb["inst"]["peak"]["u"]
-            row["u_peak_relL2"] = rel_l2(ua[None], ub[None], vol)
-            row["gd_peak_relL2"] = rel_l2(Fa["inst"]["peak"]["gd"][None], Fb["inst"]["peak"]["gd"][None], vol)
+            # Peak instant of a, against b at the same phase.
+            ipk = int(np.argmin(np.abs(Fa["t"] - Fa["inst"]["peak"]["t"])))
+            k = np.where(ia == ipk)[0]
+            if len(k):
+                row["u_peak_relL2"] = rel_l2(Fa["U"][ipk][None] * sua, Fb["U"][jb[k[0]]][None] * sub, vol)
+            # gd is stored only at each case's own peak: compared only if both peaks share the phase.
+            dpk = abs(np.mod(Fa["inst"]["peak"]["t"] / ca.T, 1.0) - np.mod(Fb["inst"]["peak"]["t"] / cb.T, 1.0))
+            if min(dpk, 1.0 - dpk) <= 0.5 * dsnap + 1.0e-9:
+                row["gd_peak_relL2"] = rel_l2(Fa["inst"]["peak"]["gd"][None] / sua, Fb["inst"]["peak"]["gd"][None] / sub, vol)
+        # Scalars in the same units; areas, OSI and lengths in D are already dimensionless
+        # (the low-TAWSS area keeps its dimensional 0.4 Pa threshold).
+        scale = {"dp_mean": (ssa, ssb), "dp_peak": (ssa, ssb), "tawss_lesion_mean": (ssa, ssb), "tawss_max": (ssa, ssb),
+                 "throat_tau_peak": (ssa, ssb), "umax": (sua, sub)}
         for k in ("dp_mean", "dp_peak", "tawss_lesion_mean", "tawss_max", "recirc_max_D", "recirc_mean_D", "recirc_peak_D",
                   "low_tawss_area", "high_osi_area", "osi_lesion_max", "throat_tau_peak", "umax"):
-            den = abs(Mb[k])
-            row[k + "_relchange"] = (Ma[k] - Mb[k]) / den if den > 1.0e-30 else float("nan")
+            fa_, fb_ = scale.get(k, (1.0, 1.0))
+            va, vb = Ma[k] * fa_, Mb[k] * fb_
+            den = abs(vb)
+            row[k + "_relchange"] = (va - vb) / den if den > 1.0e-30 else float("nan")
         row["dp_lag_diff_T"] = Ma["dp_lag_T"] - Mb["dp_lag_T"]
         # Jet dynamics: change of the fluctuation rms and of the dominant
         # Strouhal number; the L2 distance of the PSDs of A1 on the St axis.
         for k in ("A1_rms", "dp_rms", "A1_rms_irregular", "dp_rms_irregular"):
-            den = abs(Mb.get(k, float("nan")))
-            row[k + "_relchange"] = (Ma[k] - Mb[k]) / den if den > 1.0e-30 else float("nan")
+            fa_, fb_ = (ssa, ssb) if k.startswith("dp") else (1.0, 1.0)
+            den = abs(Mb.get(k, float("nan")) * fb_)
+            row[k + "_relchange"] = (Ma[k] * fa_ - Mb[k] * fb_) / den if den > 1.0e-30 else float("nan")
         row["A1_St_diff"] = Ma["A1_St"] - Mb["A1_St"]
         for k in ("rotation_fraction_peak", "rotation_fraction_decel", "extension_fraction_peak", "extension_fraction_decel"):
             row[k + "_diff"] = Ma[k] - Mb[k]
