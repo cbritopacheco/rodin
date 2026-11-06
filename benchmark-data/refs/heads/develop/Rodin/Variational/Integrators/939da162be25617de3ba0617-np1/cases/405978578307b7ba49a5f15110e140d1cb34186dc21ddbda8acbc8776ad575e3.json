@@ -628,6 +628,84 @@
           }
         }
       ]
+    },
+    {
+      "commit": "08f2b1df730e2f6c6ec854001b199f67c990ac38",
+      "date": "2026-11-06T19:12:50.964402+00:00",
+      "run": "42170388299.1",
+      "results": [
+        {
+          "name": "Integrator/Assembly/P1/D3/BoundaryLoad",
+          "value": 24218.370200622438,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            24218.370200622438
+          ],
+          "records": [
+            {
+              "name": "Integrator/Assembly/P1/D3/BoundaryLoad",
+              "family_index": 155,
+              "per_family_instance_index": 0,
+              "run_name": "Integrator/Assembly/P1/D3/BoundaryLoad",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 11564,
+              "real_time": 24219.500864752346,
+              "cpu_time": 24218.370200622438,
+              "time_unit": "ns",
+              "cells": 378.0,
+              "dofs": 64.0,
+              "items_per_second": 15607986.700537141
+            }
+          ],
+          "context": {
+            "date": "2026-11-06T09:30:54+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinVariationalIntegratorsBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2800,
+            "cpu_scaling_enabled": true,
+            "aslr_enabled": false,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1310720,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 50331648,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.796387,
+              0.241699,
+              0.0849609
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

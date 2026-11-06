@@ -756,6 +756,100 @@
           }
         }
       ]
+    },
+    {
+      "commit": "08f2b1df730e2f6c6ec854001b199f67c990ac38",
+      "date": "2026-11-06T19:12:50.964402+00:00",
+      "run": "42170388299.1",
+      "results": [
+        {
+          "name": "Field/ProjectionAssembly/H1/P1/Real/Vector/Wedge/9/real_time",
+          "value": 15460904.055555288,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            15460904.055555288
+          ],
+          "records": [
+            {
+              "name": "Field/ProjectionAssembly/H1/P1/Real/Vector/Wedge/9/real_time",
+              "family_index": 34,
+              "per_family_instance_index": 2,
+              "run_name": "Field/ProjectionAssembly/H1/P1/Real/Vector/Wedge/9/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 18,
+              "real_time": 15460904.055555288,
+              "cpu_time": 15399921.50000005,
+              "time_unit": "ns",
+              "absolute_field_error": 2.7967603158270106e-12,
+              "cells": 1024.0,
+              "components": 3.0,
+              "degree": 1.0,
+              "dimension": 3.0,
+              "dofs": 2187.0,
+              "local_dofs_per_cell": 18.0,
+              "matrix_norm": 0.026809560666511897,
+              "nnz": 37275.0,
+              "oracle_points_per_cell": 80.0,
+              "oracle_quadrature_order": 8.0,
+              "quadrature_order": 8.0,
+              "quadrature_points_per_cell": 80.0,
+              "relative_coefficient_error": 7.962662921259738e-14,
+              "relative_residual": 1.4230070965499682e-14,
+              "rhs_norm": 0.6193212355365071,
+              "solver_reported_iterations": 21.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-06T09:30:53+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinFieldOperationBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2596,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.36768,
+              0.455078,
+              0.162598
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

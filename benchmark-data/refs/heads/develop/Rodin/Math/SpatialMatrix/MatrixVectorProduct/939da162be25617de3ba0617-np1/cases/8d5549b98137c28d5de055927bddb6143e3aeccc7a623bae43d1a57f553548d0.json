@@ -652,6 +652,87 @@
           }
         }
       ]
+    },
+    {
+      "commit": "08f2b1df730e2f6c6ec854001b199f67c990ac38",
+      "date": "2026-11-06T19:12:50.964402+00:00",
+      "run": "42170388299.1",
+      "results": [
+        {
+          "name": "SpatialMatrixVector/RealByReal/1/1/real_time",
+          "value": 1.8743688255905162,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            1.8743688255905162
+          ],
+          "records": [
+            {
+              "name": "SpatialMatrixVector/RealByReal/1/1/real_time",
+              "family_index": 0,
+              "per_family_instance_index": 5,
+              "run_name": "SpatialMatrixVector/RealByReal/1/1/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 149625442,
+              "real_time": 1.8743688255905162,
+              "cpu_time": 1.8732601906031445,
+              "time_unit": "ns",
+              "columns": 1.0,
+              "result_bytes": 32.0,
+              "rows": 1.0,
+              "scalar_products": 1.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-06T08:51:22+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinSpatialMatrixVectorBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3359,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.976074,
+              0.30127,
+              0.105957
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "Canonical product including result initialization"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",
