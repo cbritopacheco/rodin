@@ -54,8 +54,21 @@ docker run --rm --device /dev/kfd --device /dev/dri --group-add render \
 On a host with several GPUs, `--gpus device=0`, or `HIP_VISIBLE_DEVICES`,
 selects one. `ci-test.sh [source-dir] [build-dir]` configures Rodin for the
 backend of the image, builds the Kokkos unit tests with the cuDSS or
-RocSolverRF test, and runs them; the MPI tests run on 1, 2 and 4 processes,
+RocSolverRF test and the Kokkos examples, and runs the tests; the MPI tests run on 1, 2 and 4 processes,
 which share the GPU. Logs land in `<build-dir>/test-logs`.
+
+`ci-test.sh --build-only` stops after the build, on a host without GPU,
+and compiles at -O0 on the host and the device.
+The workflow `KokkosBuild.yml` runs it on GitHub hosted runners, with the
+images pulled from `ghcr.io/<owner>/rodin-kokkos-ci`, or from the registry
+named by the repository variable `RODIN_KOKKOS_CI_IMAGES`. To publish them:
+
+```sh
+docker tag rodin-kokkos-ci:cuda-sm52 ghcr.io/<owner>/rodin-kokkos-ci:cuda-sm52
+docker push ghcr.io/<owner>/rodin-kokkos-ci:cuda-sm52
+```
+
+The package must be public, or readable by the repository.
 
 The submodules must be checked out (`git submodule update --init
 --recursive`), GoogleTest among them.
