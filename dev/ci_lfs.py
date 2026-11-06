@@ -6,9 +6,15 @@ import subprocess
 import time
 
 
+# Six seconds between three requests did not outlast a hosted LFS 502 burst.
+# Spread five attempts over 225 seconds while retaining per-attempt watchdogs.
+RETRY_DELAYS = (15, 30, 60, 120)
+
+
 def pull(include):
     command = ['git', 'lfs', 'pull', '--include=' + include]
-    for attempt in range(3):
+    attempts = len(RETRY_DELAYS) + 1
+    for attempt in range(attempts):
         try:
             result = subprocess.run(command, capture_output=True, text=True, timeout=300)
         except subprocess.TimeoutExpired:
@@ -29,10 +35,10 @@ def pull(include):
                 r'connection refused|timed? out|timeout|TLS handshake|'
                 r'temporary failure|could not resolve host|unexpected EOF', output, re.I)
             failure = subprocess.CalledProcessError(result.returncode, command)
-        if not retryable or attempt == 2:
+        if not retryable or attempt == attempts - 1:
             raise failure
-        delay = 2 ** (attempt + 1)
-        print(f'Git LFS transient failure; retry {attempt + 2}/3 in {delay}s.', flush=True)
+        delay = RETRY_DELAYS[attempt]
+        print(f'Git LFS transient failure; retry {attempt + 2}/{attempts} in {delay}s.', flush=True)
         time.sleep(delay)
 
 

@@ -713,9 +713,11 @@ The monitor is stopped when the lane exits. These measurements help distinguish
 resource exhaustion from hosted runner interruptions; they do not prevent a
 runner shutdown or replace the existing single-retry policy.
 
-Explicit resource hydration uses `dev/ci_lfs.py` with three attempts, 300 seconds
-per attempt, and two- and four-second backoffs for transient network/server
-failures. Authentication, missing objects, quota and unknown errors fail
+Explicit resource hydration uses `dev/ci_lfs.py` with five attempts, 300 seconds
+per attempt, and 15-, 30-, 60- and 120-second backoffs for transient network/server
+failures. The retry span is 225 seconds; the worst-case total with all command
+watchdogs exhausted is 1,725 seconds. Manufactured 3D elasticity partitions
+generate their meshes with `UniformGrid` and skip resource hydration. Authentication, missing objects, quota and unknown errors fail
 immediately. Exhaustion fails the job; required resources remain mandatory.
 GoogleTest discovery has a 60-second default startup allowance. Explicit
 `DISCOVERY_TIMEOUT` values and all test execution watchdogs remain unchanged.
@@ -739,3 +741,9 @@ at each existing MPI rank. Hosted Debug/coverage runs took 90--111 seconds,
 with the three-rank check exceeding the former 120-second limit twice.
 Other named-form cases and configurations retain 120 seconds. Compiler flags,
 coverage instrumentation and numerical acceptance thresholds are unchanged.
+
+The local curved P3 mixed-traction hexahedron history retains all three
+refinements and numerical requirements. Coverage runs have a 3,600-second
+allowance, matching the existing local P3 pyramid allowance. Its first two
+hosted levels took 25 and 194 seconds before the final level exhausted the
+former 1,800-second limit. MPI cases and non-coverage watchdogs remain unchanged.

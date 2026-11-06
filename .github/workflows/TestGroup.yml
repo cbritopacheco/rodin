@@ -64,7 +64,9 @@ jobs:
         with:
           submodules: recursive
           lfs: false
+      # These manufactured partitions construct every mesh with UniformGrid.
       - name: Hydrate test resources
+        if: inputs.group != 'manufactured/Rodin/P1/LinearElasticity3D'
         run: python3 dev/ci_lfs.py --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
       - name: Check execution disk headroom
         run: python3 dev/ci_environment.py disk

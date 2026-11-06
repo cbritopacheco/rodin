@@ -223,24 +223,25 @@ class BackendRegistrationTest(unittest.TestCase):
         flags = (build / f"cases/CMakeFiles/{target}.dir/flags.make").read_text()
         self.assertIn("-DRODIN_ELASTICITY_BOUNDARY_CURVED", flags)
 
-    def test_local_curved_p3_pyramid_coverage_budget_preserves_other_commands(self):
+    def test_local_curved_p3_coverage_budgets_preserve_other_commands(self):
         baseline, build = self.configure("tests/convergence/isoparametric/LinearElasticity", coverage=False)
         original = self.properties(build)
         baseline_build = str(build)
         covered, build = self.configure("tests/convergence/isoparametric/LinearElasticity", coverage=True)
         properties = self.properties(build)
         self.assertEqual(covered.keys(), baseline.keys())
-        selected = "RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MixedTractionP3Rates_Pyramid"
+        selected = {f"RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MixedTractionP3Rates_{geometry}"
+                    for geometry in ['Pyramid', 'Hexahedron']}
         for name in covered:
             self.assertEqual([arg.replace(str(build), "<build>") for arg in covered[name]],
                              [arg.replace(baseline_build, "<build>") for arg in baseline[name]], name)
             expected = dict(original[name])
-            if name == selected:
+            if name in selected:
                 self.assertEqual(expected["TIMEOUT"], "1800")
                 expected["TIMEOUT"] = "3600"
             self.assertEqual(properties[name], expected, name)
-        for rank in [1, 2, 3, 4]:
-            name = f"RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MPI_np{rank}_MixedTractionP3Rates_Pyramid"
+        for rank, geometry in itertools.product([1, 2, 3, 4], ['Pyramid', 'Hexahedron']):
+            name = f"RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MPI_np{rank}_MixedTractionP3Rates_{geometry}"
             self.assertEqual(properties[name]["TIMEOUT"], "1800")
             self.assertEqual(properties[name]["PROCESSORS"], str(rank))
 
