@@ -33,8 +33,10 @@ case "${RODIN_KOKKOS_BACKEND:-}" in
     # the HIP sources of Rodin itself.
     options+=(-DCMAKE_CXX_COMPILER=/opt/rocm/lib/llvm/bin/clang++
               -DRODIN_USE_ROCSOLVER=ON -DRODIN_USE_UMFPACK=ON) ;;
+  sycl)
+    options+=(-DCMAKE_CXX_COMPILER=icpx) ;;
   *)
-    echo "RODIN_KOKKOS_BACKEND must be cuda or hip" >&2; exit 2 ;;
+    echo "RODIN_KOKKOS_BACKEND must be cuda, hip or sycl" >&2; exit 2 ;;
 esac
 
 # A build that does not run needs no optimization: at -O0 on the host and the

@@ -1,0 +1,167 @@
+# syntax=docker/dockerfile:1
+#
+# Dependencies of the Kokkos CI lane on Intel GPUs: the oneAPI 2026 C, C++
+# and Fortran compilers and oneMKL, the Level Zero runtime, UCX and Open MPI
+# with Level Zero, Boost with MPI, Kokkos 5 with SYCL, PETSc with Kokkos,
+# Kokkos-Kernels, hypre on the device, and MUMPS and SuperLU_DIST on the host.
+# Rodin itself is built by the CI job. See README.md.
+#
+# The kernels are compiled ahead of time for one architecture: the default is
+# the Arc Pro B70 of demeter (Battlemage, Xe2), which ocloc names bmg.
+# Kokkos 5.2.2 and PETSc 3.26 do not know it: two patches add it.
+#
+# The Level Zero loader comes from Ubuntu 26.04, the GPU runtime and its
+# compiler from the releases of Intel: ocloc of Ubuntu (IGC 2.28) crashes on
+# a kernel of Kokkos-Kernels.
+
+ARG UBUNTU_IMAGE=ubuntu:26.04
+FROM ${UBUNTU_IMAGE}
+
+ARG JOBS=36
+ARG SYCL_ARCH=bmg
+ARG KOKKOS_ARCH=INTEL_BMG
+ARG ONEAPI_VERSION=2026.2
+ARG COMPUTE_RUNTIME_VERSION=26.35.39758.10
+ARG IGC_VERSION=2.41.5+22716
+ARG GMM_VERSION=22.10.0
+ARG UCX_VERSION=1.22.0
+ARG OMPI_VERSION=5.0.11
+ARG BOOST_VERSION=1.90.0
+ARG KOKKOS_VERSION=5.2.2
+ARG PETSC_VERSION=3.26.0
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      autoconf automake bison bzip2 ca-certificates cmake curl file flex g++ gcc \
+      gfortran git gpg libhdf5-dev libnuma-dev libsuitesparse-dev libeigen3-dev \
+      libtool make ninja-build patch pkg-config python3 xz-utils zlib1g-dev \
+      libze1 libze-dev clinfo \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---- Intel GPU runtime -----------------------------------------------------
+RUN mkdir /tmp/neo && cd /tmp/neo \
+    && igc=https://github.com/intel/intel-graphics-compiler/releases/download/v${IGC_VERSION%+*} \
+    && neo=https://github.com/intel/compute-runtime/releases/download/${COMPUTE_RUNTIME_VERSION} \
+    && curl -fsSLO $igc/intel-igc-core-2_${IGC_VERSION}_amd64.deb \
+    && curl -fsSLO $igc/intel-igc-opencl-2_${IGC_VERSION}_amd64.deb \
+    && curl -fsSLO $neo/intel-ocloc_${COMPUTE_RUNTIME_VERSION}-0_amd64.deb \
+    && curl -fsSLO $neo/intel-opencl-icd_${COMPUTE_RUNTIME_VERSION}-0_amd64.deb \
+    && curl -fsSLO $neo/libigdgmm12_${GMM_VERSION}_amd64.deb \
+    && curl -fsSLO $neo/libze-intel-gpu1_${COMPUTE_RUNTIME_VERSION}-0_amd64.deb \
+    && apt-get update && apt-get install -y --no-install-recommends ./*.deb \
+    && rm -rf /tmp/neo /var/lib/apt/lists/*
+
+# ---- oneAPI ----------------------------------------------------------------
+RUN install -d /etc/apt/keyrings \
+    && curl -fsSL https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+      | gpg --dearmor -o /etc/apt/keyrings/oneapi.gpg \
+    && echo 'deb [signed-by=/etc/apt/keyrings/oneapi.gpg] https://apt.repos.intel.com/oneapi all main' \
+         > /etc/apt/sources.list.d/oneapi.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+         intel-oneapi-compiler-dpcpp-cpp-${ONEAPI_VERSION} \
+         intel-oneapi-compiler-fortran-${ONEAPI_VERSION} \
+         intel-oneapi-mkl-devel-${ONEAPI_VERSION} \
+    && rm -rf /var/lib/apt/lists/*
+
+# The environment of setvars.sh, through the latest links of each component.
+ENV ONEAPI_ROOT=/opt/intel/oneapi
+ENV CMPLR_ROOT=${ONEAPI_ROOT}/compiler/latest MKLROOT=${ONEAPI_ROOT}/mkl/latest \
+    TBBROOT=${ONEAPI_ROOT}/tbb/latest
+ENV PATH=${CMPLR_ROOT}/bin:${MKLROOT}/bin:${PATH}
+ENV LD_LIBRARY_PATH=${CMPLR_ROOT}/lib:${CMPLR_ROOT}/opt/compiler/lib:${MKLROOT}/lib:${TBBROOT}/lib/intel64/gcc4.8:${ONEAPI_ROOT}/umf/latest/lib:${ONEAPI_ROOT}/tcm/latest/lib
+ENV LIBRARY_PATH=${LD_LIBRARY_PATH}
+ENV CPATH=${MKLROOT}/include:${ONEAPI_ROOT}/umf/latest/include
+ENV CMAKE_PREFIX_PATH=${MKLROOT}/lib/cmake:${TBBROOT}
+ENV OCL_ICD_FILENAMES=${CMPLR_ROOT}/lib/libintelocl.so
+# Kernels compiled once per process are kept between runs.
+ENV SYCL_CACHE_PERSISTENT=1
+
+# ---- UCX and Open MPI, Level Zero aware through UCX ------------------------
+RUN curl -fsSL https://github.com/openucx/ucx/releases/download/v${UCX_VERSION}/ucx-${UCX_VERSION}.tar.gz \
+      | tar xz -C /tmp \
+    && cd /tmp/ucx-${UCX_VERSION} \
+    && ./contrib/configure-release --prefix=/opt/ompi --with-ze=/usr \
+         --without-cuda --without-rocm --without-verbs --without-rdmacm --without-knem --without-xpmem \
+    && make -j${JOBS} && make install \
+    && rm -rf /tmp/ucx-${UCX_VERSION}
+
+# The MPI wrappers call the oneAPI compilers: PETSc requires a SYCL compiler
+# for C as well, and links Fortran with the OpenMP flag of C. Open MPI 5.0
+# reaches Level Zero memory through UCX only. The MPL of its ROMIO detects
+# Level Zero by itself, but is written for an older API: the cache variable
+# turns the detection off, as Open MPI does for CUDA.
+RUN curl -fsSL https://download.open-mpi.org/release/open-mpi/v${OMPI_VERSION%.*}/openmpi-${OMPI_VERSION}.tar.bz2 \
+      | tar xj -C /tmp \
+    && cd /tmp/openmpi-${OMPI_VERSION} \
+    && ./configure --prefix=/opt/ompi CC=icx CXX=icpx FC=ifx --with-ucx=/opt/ompi \
+         --without-verbs --without-ofi --with-hwloc=internal --with-libevent=internal \
+         --with-pmix=internal --with-prrte=internal --enable-mpi-fortran=usempif08 \
+         --with-io-romio-flags=ac_cv_lib_ze_loader_zeInit=no \
+    && make -j${JOBS} && make install \
+    && rm -rf /tmp/openmpi-${OMPI_VERSION}
+
+ENV PATH=/opt/ompi/bin:${PATH}
+ENV LD_LIBRARY_PATH=/opt/ompi/lib:${LD_LIBRARY_PATH}
+# GitHub runs container jobs as root.
+ENV OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+# The CI processes share one GPU.
+ENV OMPI_MCA_rmaps_base_oversubscribe=1
+
+# ---- Boost with MPI --------------------------------------------------------
+RUN curl -fsSL https://archives.boost.io/release/${BOOST_VERSION}/source/boost_$(echo ${BOOST_VERSION} | tr . _).tar.bz2 \
+      | tar xj -C /tmp \
+    && cd /tmp/boost_$(echo ${BOOST_VERSION} | tr . _) \
+    && ./bootstrap.sh --prefix=/opt/boost \
+         --with-libraries=atomic,container,filesystem,graph,mpi,serialization,system \
+    && echo "using mpi : /opt/ompi/bin/mpicxx ;" >> project-config.jam \
+    && ./b2 -j${JOBS} cxxstd=20 variant=release link=shared threading=multi install \
+    && rm -rf /tmp/boost_*
+
+ENV LD_LIBRARY_PATH=/opt/boost/lib:${LD_LIBRARY_PATH}
+
+# ---- Kokkos 5 --------------------------------------------------------------
+# Kokkos sorts on the device with oneDPL, whose headers are not on the path
+# of icpx.
+ENV CPATH=${ONEAPI_ROOT}/dpl/latest/include:${CPATH}
+ENV CMAKE_PREFIX_PATH=${ONEAPI_ROOT}/dpl/latest:${CMAKE_PREFIX_PATH}
+COPY kokkos-sycl-bmg.patch /tmp/
+RUN curl -fsSL https://github.com/kokkos/kokkos/releases/download/${KOKKOS_VERSION}/kokkos-${KOKKOS_VERSION}.tar.gz \
+      | tar xz -C /tmp \
+    && patch -d /tmp/kokkos-${KOKKOS_VERSION} -p1 < /tmp/kokkos-sycl-bmg.patch \
+    && cmake -S /tmp/kokkos-${KOKKOS_VERSION} -B /tmp/kokkos-build -G Ninja \
+         -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/kokkos \
+         -DCMAKE_CXX_COMPILER=icpx -DCMAKE_CXX_EXTENSIONS=OFF \
+         -DCMAKE_CXX_STANDARD=20 -DBUILD_SHARED_LIBS=ON \
+         -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_SYCL=ON \
+         -DKokkos_ENABLE_COMPLEX_ALIGN=ON -DKokkos_ARCH_${KOKKOS_ARCH}=ON \
+    && cmake --build /tmp/kokkos-build -j${JOBS} && cmake --install /tmp/kokkos-build \
+    && rm -rf /tmp/kokkos-build /tmp/kokkos-${KOKKOS_VERSION} /tmp/kokkos-sycl-bmg.patch
+
+ENV LD_LIBRARY_PATH=/opt/kokkos/lib:${LD_LIBRARY_PATH}
+
+# ---- PETSc -----------------------------------------------------------------
+# oneMKL serves BLAS and LAPACK, and the sparse kernels of Kokkos-Kernels and
+# hypre on the device.
+COPY petsc-sycl-bmg.patch /tmp/
+RUN curl -fsSL https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-${PETSC_VERSION}.tar.gz \
+      | tar xz -C /tmp \
+    && cd /tmp/petsc-${PETSC_VERSION} \
+    && patch -p1 < /tmp/petsc-sycl-bmg.patch \
+    && ./configure PETSC_ARCH=arch-sycl --prefix=/opt/petsc \
+         --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif90 \
+         --with-sycl=1 --with-syclc=icpx --with-sycl-arch=${SYCL_ARCH} \
+         --with-cxx-dialect=20 --with-debugging=0 --with-openmp=1 \
+         --with-blaslapack-dir=${MKLROOT} \
+         --with-kokkos-dir=/opt/kokkos --download-kokkos-kernels \
+         --download-hypre --download-metis --download-mumps \
+         --download-parmetis --download-scalapack --download-superlu_dist \
+         --with-make-np=${JOBS} \
+    && make PETSC_DIR=$PWD PETSC_ARCH=arch-sycl all \
+    && make PETSC_DIR=$PWD PETSC_ARCH=arch-sycl install \
+    && rm -rf /tmp/petsc-${PETSC_VERSION} /tmp/petsc-sycl-bmg.patch
+
+ENV PETSC_DIR=/opt/petsc
+ENV LD_LIBRARY_PATH=/opt/petsc/lib:${LD_LIBRARY_PATH}
+ENV CMAKE_PREFIX_PATH=/opt/petsc:/opt/kokkos:/opt/boost:${CMAKE_PREFIX_PATH}
+ENV RODIN_KOKKOS_BACKEND=sycl
