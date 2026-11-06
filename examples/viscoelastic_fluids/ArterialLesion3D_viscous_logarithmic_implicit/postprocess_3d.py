@@ -85,6 +85,10 @@ CY = dict(eta0=0.056, etaInf=0.00345, lam=1.902, n=0.22, a=1.25)
 # Thresholds of the TAWSS / OSI literature (Malek et al. 1999; Lee et al. 2009).
 LOW_TAWSS = 0.4     # Pa
 HIGH_OSI = 0.2
+# Thresholds relative to the Poiseuille wall shear tau_P = 8 eta_ref Ubar/D of
+# each case (eta_ref the viscosity of Re and Wo), comparable across arteries:
+LOW_TAWSS_REL = 0.1   # TAWSS < 0.1 tau_P
+HIGH_RRT_REL = 10.0   # RRT* = tau_P RRT = tau_P/|time-mean tau| > 10, i.e. |mean tau| < 0.1 tau_P
 # A wall face is a cap when its normal is within 10 degrees of the axis.
 CAP_ALIGNMENT = 0.985
 # Spectra: the inflow carries the first INFLOW_HARMONICS harmonics of the
@@ -147,6 +151,7 @@ class Case:
     # -- run.log: D, Ubar, T, fluid
     def read_log(self):
         self.D = self.Ubar = self.T = None
+        self.eta_ref = None
         self.lam = 0.0
         self.fluid = "?"
         with open(os.path.join(self.folder, "run.log"), errors="replace") as f:
@@ -158,6 +163,9 @@ class Case:
                 m = re.search(r"\[inflow\].*\blambda=([\d.e+-]+) s", line)
                 if m:
                     self.lam = float(m.group(1))
+                m = re.search(r"\[groups\].*\beta_ref=([\d.e+-]+)", line)
+                if m:
+                    self.eta_ref = float(m.group(1))
                 m = re.search(r"\[groups\].*fluid=(\w+)", line)
                 if m:
                     self.fluid = m.group(1)
@@ -499,6 +507,23 @@ def analyse(case, out, figures=True):
     A_les = case.wall_nodearea[ln].sum()
     low_area = case.wall_nodearea[ln][tawss[ln] < LOW_TAWSS].sum() / A_les
     high_osi_area = case.wall_nodearea[ln][osi[ln] > HIGH_OSI].sum() / A_les
+    # Relative residence time RRT = 1/((1 - 2 OSI) TAWSS) = 1/|time-mean tau|,
+    # normalised by the Poiseuille wall shear: RRT* = tau_P/|mean tau|. It is
+    # singular where the mean shear cancels, so only its median, p90 and the
+    # area above a threshold are reported (no mean or max).
+    if case.eta_ref is not None:
+        tau_P = 8.0 * case.eta_ref * case.Ubar / case.D
+        mean_vec = int_vec / case.span
+        rrt = tau_P / np.maximum(mean_vec, 1.0e-12 * tau_P)
+        wl = case.wall_nodearea[ln]
+        order = np.argsort(rrt[ln]); cw = np.cumsum(wl[order]) / A_les
+        wq = lambda q: float(rrt[ln][order][min(np.searchsorted(cw, q), len(order) - 1)])
+        rel = {"tau_P": float(tau_P), "rrt_lesion_median": wq(0.5), "rrt_lesion_p90": wq(0.9),
+               "high_rrt_area": float(wl[rrt[ln] > HIGH_RRT_REL].sum() / A_les),
+               "low_tawss_rel_area": float(wl[tawss[ln] < LOW_TAWSS_REL * tau_P].sum() / A_les)}
+    else:
+        rrt = None
+        rel = {}
     # Axial profiles (circumferential area-weighted mean in bins of 0.1 D).
     edges = np.arange(np.floor(case.inlet_x), np.ceil(case.outlet_x) + 0.1, 0.1)
     def axial(f):
@@ -658,6 +683,7 @@ def analyse(case, out, figures=True):
         "umax": float(np.linalg.norm(U, axis=2).max()), "gd_max_peak": float(inst["peak"]["gd"].max()),
         "newton_mean": float(newton.mean()), "retries": int(retries),
     }
+    metrics.update(rel)
     smetrics, spectra = jet_spectra(case, csvrows)
     metrics.update(smetrics)
     # Kinematics of the jet region (lesion end to POST_LESION_LENGTH D downstream):
@@ -1076,7 +1102,10 @@ def compare(cases):
         scale = {"dp_mean": (ssa, ssb), "dp_peak": (ssa, ssb), "tawss_lesion_mean": (ssa, ssb), "tawss_max": (ssa, ssb),
                  "throat_tau_peak": (ssa, ssb), "umax": (sua, sub)}
         for k in ("dp_mean", "dp_peak", "tawss_lesion_mean", "tawss_max", "recirc_max_D", "recirc_mean_D", "recirc_peak_D",
-                  "low_tawss_area", "high_osi_area", "osi_lesion_max", "throat_tau_peak", "umax"):
+                  "low_tawss_area", "high_osi_area", "osi_lesion_max", "throat_tau_peak", "umax",
+                  "low_tawss_rel_area", "high_rrt_area", "rrt_lesion_median", "rrt_lesion_p90"):
+            if k not in Ma or k not in Mb:
+                continue
             fa_, fb_ = scale.get(k, (1.0, 1.0))
             va, vb = Ma[k] * fa_, Mb[k] * fb_
             den = abs(vb)
@@ -1127,8 +1156,9 @@ def write_tables(metrics, comparisons, out):
                 ("urms_relL2", r"$\|\Delta u'_{\rm rms}\|/\|u'_{\rm rms}\|$"), ("tau_relL2", r"$\|\Delta\tau_w\|/\|\tau_w\|$"),
                 ("tawss_relL2", r"$\Delta$TAWSS"), ("osi_lesion_absdiff_max", r"max $|\Delta$OSI$|$"),
                 ("dp_mean_relchange", r"$\Delta\overline{\Delta p}$"), ("dp_peak_relchange", r"$\Delta\,\Delta p_{\max}$"),
-                ("recirc_max_D_relchange", r"$\Delta L_{rec}$"), ("low_tawss_area_relchange", r"$\Delta A_{\rm low}$"),
-                ("A1_rms_relchange", r"$\Delta A_1'$"), ("A1_psd_relL2", r"$\|\Delta S_{A_1}\|$")]
+                ("recirc_max_D_relchange", r"$\Delta L_{rec}$"), ("low_tawss_rel_area_relchange", r"$\Delta A_{\rm low}$"),
+                ("high_osi_area_relchange", r"$\Delta A_{\rm OSI}$"), ("high_rrt_area_relchange", r"$\Delta A_{\rm RRT}$"),
+                ("rrt_lesion_median_relchange", r"$\Delta\,{\rm RRT}^*_{50}$"), ("A1_rms_relchange", r"$\Delta A_1'$"), ("A1_psd_relL2", r"$\|\Delta S_{A_1}\|$")]
         with open(os.path.join(out, "comparison.tex"), "w") as f:
             f.write("\\begin{tabular}{ll" + "r" * len(cols) + "}\n\\toprule\ncase & pair & " +
                     " & ".join(c[1] for c in cols) + "\\\\\n\\midrule\n")
@@ -1150,7 +1180,8 @@ def write_tables(metrics, comparisons, out):
     # LaTeX of the per-case metrics.
     cols = [("fluid", "fluid"), ("dp_mean", r"$\overline{\Delta p}$ [Pa]"), ("dp_peak", r"$\Delta p_{\max}$ [Pa]"),
             ("dp_lag_T", r"lag/T"), ("tawss_max", r"TAWSS$_{\max}$ [Pa]"), ("osi_lesion_max", r"OSI$_{\max}$"),
-            ("low_tawss_area", r"$A_{\rm low}$"), ("recirc_max_D", r"$L_{rec}/D$"), ("A1_rms", r"$A_1'$"),
+            ("low_tawss_rel_area", r"$A_{\rm low}$"), ("high_osi_area", r"$A_{\rm OSI}$"),
+            ("high_rrt_area", r"$A_{\rm RRT}$"), ("rrt_lesion_median", r"RRT$^*_{50}$"), ("recirc_max_D", r"$L_{rec}/D$"), ("A1_rms", r"$A_1'$"),
             ("A1_St", r"St$^*$"), ("share_p95_decel", r"$\sigma_p$ share p95"),
             ("N1_lesion_wall_max_peak", r"$N_{1,w}$ [Pa]"), ("N2_lesion_wall_max_peak", r"$N_{2,w}$ [Pa]"),
             ("recoverable_shear_p95_peak", r"$N_1/2\tau_w$"), ("M_max_peak", r"$M_{\max}$"),
