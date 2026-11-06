@@ -41,7 +41,8 @@
  * prints one line of key=value timings, in seconds, per repetition; each one
  * is the time between two barriers after a fence, so the slowest process.
  * The first repetition also builds the sparsity pattern and the
- * preconditioner, and every solve starts from zero.
+ * preconditioner, and every solve starts from zero. With -log_view, the first
+ * repetition and the next ones are reported in two stages.
  */
 
 #include <algorithm>
@@ -126,6 +127,24 @@ namespace Rodin::Examples
     private:
       const boost::mpi::communicator& m_comm;
   };
+
+  /**
+   * @brief PETSc log stage of repetition @p r, so that -log_view reports
+   * the first repetition apart from the next ones.
+   *
+   * The first repetition also loads the device kernels and builds the
+   * pattern and the preconditioner, which can take far longer than the
+   * repetitions that follow.
+   */
+  PetscLogStage getRepetitionStage(size_t r)
+  {
+    const char* name = r == 0 ? "First repetition" : "Next repetitions";
+    PetscLogStage stage = -1;
+    PetscLogStageGetId(name, &stage);
+    if (stage < 0)
+      PetscLogStageRegister(name, &stage);
+    return stage;
+  }
 
   /// @returns Whether @p source is a cell count rather than a path.
   bool isGrid(const std::string& source)
@@ -443,6 +462,7 @@ namespace Rodin::Examples
     Stopwatch time(comm);
     for (size_t r = 0; r < repeat; ++r)
     {
+      PetscLogStagePush(getRepetitionStage(r));
       const double assemble = time([&] { oseen.assemble(); });
       // Each solve starts from zero, not from the previous solution.
       VecSet(oseen.getLinearSystem().getSolution(), 0);
@@ -463,6 +483,7 @@ namespace Rodin::Examples
                   << " solve=" << solve << " its=" << its << " reason=" << reason
                   << " norm=" << norm << std::endl;
       }
+      PetscLogStagePop();
     }
   }
 }

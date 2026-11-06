@@ -26,7 +26,8 @@
  * key=value timings, in seconds, per repetition; each one is the time between
  * two barriers after a fence, so the slowest process. The first repetition
  * also builds the sparsity pattern and the multigrid hierarchy, and every
- * solve starts from zero.
+ * solve starts from zero. With -log_view, the first repetition and the next
+ * ones are reported in two stages.
  */
 
 #include <chrono>
@@ -84,6 +85,24 @@ namespace Rodin::Examples
       const boost::mpi::communicator& m_comm;
   };
 
+  /**
+   * @brief PETSc log stage of repetition @p r, so that -log_view reports
+   * the first repetition apart from the next ones.
+   *
+   * The first repetition also loads the device kernels and builds the
+   * pattern and the preconditioner, which can take far longer than the
+   * repetitions that follow.
+   */
+  PetscLogStage getRepetitionStage(size_t r)
+  {
+    const char* name = r == 0 ? "First repetition" : "Next repetitions";
+    PetscLogStage stage = -1;
+    PetscLogStageGetId(name, &stage);
+    if (stage < 0)
+      PetscLogStageRegister(name, &stage);
+    return stage;
+  }
+
   Geometry::Polytope::Type parseType(const std::string& name)
   {
     using Type = Geometry::Polytope::Type;
@@ -119,6 +138,7 @@ namespace Rodin::Examples
     PCSetType(pc, PCGAMG);
     for (size_t r = 0; r < repeat; ++r)
     {
+      PetscLogStagePush(getRepetitionStage(r));
       const double assemble = time([&] { pb.assemble(); });
       // Each solve starts from zero, not from the previous solution.
       VecSet(pb.getLinearSystem().getSolution(), 0);
@@ -133,6 +153,7 @@ namespace Rodin::Examples
                   << " solve=" << solve << " its=" << its << " reason=" << reason
                   << std::endl;
       }
+      PetscLogStagePop();
     }
   }
 
