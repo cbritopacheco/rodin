@@ -274,7 +274,7 @@ def main():
         valve, op = tag.split("_open")
         op = int(op)
         env = read_env(d)
-        D = BORE.get(valve, env.get("D", 0.0) / 1000.0 or 1.0)
+        D = BORE.get(valve.split("-")[0], env.get("D", 1.0))
         tc = env.get("tc", 0.0)
         h = read_history(d, tag)
         if h is None:

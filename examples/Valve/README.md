@@ -213,6 +213,58 @@ post-proceso es el mismo: `python3 postprocess_valves.py runs_bingham`.
   las mallas de la estela se estiman ~10–12 GB en total. `SOLVER=direct`
   vuelve al LU. El log imprime la memoria por paso (`memory [GB]`).
 
+## Diseños del asiento (sello) — `run_valves_seat.sh`
+
+Con la compuerta abierta, la ranura del asiento (10 × 3.4 mm en el fondo del
+diámetro, donde asienta la punta del cuchillo) es una bolsa muerta: los
+sólidos de la pulpa se depositan y el cuchillo los aplasta al cerrar
+(desgaste del asiento y de la punta). `make_meshes.py --seat` genera la
+misma válvula con tres asientos alternativos y `seat_designs.py` dibuja los
+cuatro (figura `seat_designs.pdf`). Los tres conservan lo que sella y retiene
+el cuchillo: el fondo plano en R_k y paredes verticales sobre las que
+aprietan los labios y que toman la carga de presión del cuchillo cerrado
+(una pared inclinada daría una componente que lo levanta; por eso se
+descartaron asientos rasantes, con rampas a ambos lados o redondeados).
+
+| malla | asiento | sello / retención |
+|---|---|---|
+| `FPC8` | ranura del CAD, 10 × 3.4 mm | referencia |
+| `FPC8-fillet` | esquinas del fondo con radio 1.5 mm (la punta del cuchillo con los mismos radios) | fondo y paredes verticales (1.9 mm) iguales; sin rincones estancados |
+| `FPC8-chamfer` | chaflanes de entrada de 30° y 1.2 mm de hondo en los dos bordes superiores | paredes verticales en los 2.2 mm restantes; bidireccional; la capa de corte entra en la bolsa |
+| `FPC8-upramp` | pared aguas arriba reemplazada por una rampa de 15° hasta el fondo; pared aguas abajo vertical completa | la pared aguas abajo toma la presión; válvula unidireccional; el flujo barre todo el fondo |
+
+Sólo cambia la mitad inferior (y < 0); la ranura-guía y las bolsas
+laterales sobre el eje quedan como en el CAD. Punta del cuchillo: en el
+STEP de la FPC8 la punta es recta en el espesor (rectángulo de 10 mm hasta
+el borde; lo "ovalado" es el borde semicircular de radio 105 mm en el plano
+de la placa, que sí está en las mallas). Como a 10–25 % la punta queda a
+≥ 17 mm del asiento, las mallas usan la punta del CAD en los cuatro casos.
+
+Mallas `resources/examples/Valve/seat/` (aperturas 10 y 25 %, estela como en
+`wake/`, zona del sello a 1.2 mm: `--hs 0.006`): 0.83–0.91 M tetraedros.
+
+```sh
+cd ~/valve_runs && NP=8 bash ~/rodin/examples/Valve/run_valves_seat.sh      # 8 casos, runs_seat/
+python3 ~/rodin/examples/Valve/seat_stats.py runs_seat -o seat_report.pdf   # barrido del sello
+python3 ~/rodin/examples/Valve/postprocess_valves.py runs_seat -o seat_forces.pdf
+python3 ~/rodin/examples/Valve/seat_designs.py -o seat_designs.pdf --meshes ~/rodin/resources/examples/Valve/seat
+```
+
+`seat_stats.py` promedia en el tiempo los campos guardados (tras el
+transitorio) en la **zona del sello** (y < 0, |z| ≤ 25 mm, fuera del
+diámetro o a menos de 1 mm de él) y reporta: ū media y percentil 10,
+fracción del volumen con ū < 0.1 y < 0.3 m/s, percentil 10 del esfuerzo de
+corte τ = μ(γ̇)γ̇ y fracción del volumen que no fluye (τ < τ_y, tapón de
+Bingham); lo mismo restringido a la bolsa, y ū en la bolsa a lo largo del
+perímetro (−90° = fondo). Figuras: ū y τ promedio en el plano x = 0
+alrededor del asiento.
+
+Caudal: el mismo 188.8 m³/h. A 10 % eso exige un chorro de ~55 m/s y
+Δp ≈ 2.7 MPa (390 psi), más que la presión de trabajo: con
+`PRESSURE_OPENINGS=10` el 10 % se corre con 150 psi aguas arriba y presión
+atmosférica a la salida (el caudal resulta, ~110 m³/h). Corridas de 14 D/U
+(1.75 s), promedio desde 6 D/U, XDMF cada 10 pasos.
+
 ## Cómo se calcula la fuerza (y por qué así)
 
 `F = −∫_cuchillo σn dS`, fuerza del fluido sobre el cuchillo, ejes globales.

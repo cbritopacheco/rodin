@@ -51,7 +51,7 @@ OUT_DIR="${OUT_DIR:-$PWD/runs}"
 
 NP="${NP:-8}"                         # MPI processes in total (8 on the Mac)
 NJOBS="${NJOBS:-1}"                   # cases run at the same time (NP/NJOBS processes each)
-VALVES="${VALVES:-FPC8 FPC16}"
+VALVES="${VALVES:-FPC8 FPC16}"       # also seat variants: FPC8-fillet, FPC8-chamfer, FPC8-upramp
 OPENINGS="${OPENINGS:-0 25 50 75 100}"
 OUTPUT_EVERY="${OUTPUT_EVERY:-10}"    # XDMF every N time steps
 
@@ -77,6 +77,11 @@ DT_CONV="${DT_CONV:-0.0075}"          # initial dt, units of D/U (adaptive after
 DTMAX_CONV="${DTMAX_CONV:-0.015}"     # largest dt, units of D/U (CFL ~ 6 in the 25 % jet)
 NBATCH="${NBATCH:-6}"                 # batches for the standard error of the mean
 TEND_CLOSED="${TEND_CLOSED:-2e-3}"    # s, closed gate (hydrostatic, no ramp: a few steps)
+# Openings (space-separated) driven by the line pressure instead of the flow
+# rate: pressure inlet PLINE, outlet POUT, ramp of 1 D/U; the flow rate is
+# then a result. For small openings, where the imposed flow rate would need
+# a pressure drop above the rating of the valve.
+PRESSURE_OPENINGS="${PRESSURE_OPENINGS:-}"; export PRESSURE_OPENINGS
 SOLVER="${SOLVER:-direct}"            # direct (MUMPS LU) | iterative (Schur field split + AMG, far less memory)
 EXTRA="${EXTRA:-}"                    # any other -kv_* or PETSc options
 
@@ -150,7 +155,9 @@ for valve in $VALVES; do
     if [ -f "$log" ] && grep -qE "average over the last|Steady state reached|End of the time interval" "$log"; then
       echo "[$tag] already done (skipped)"; continue
     fi
-    case "$valve" in
+    # A design variant is named <valve>-<variant> (FPC8-upramp: the FPC8 with
+    # the "upramp" seat of make_meshes.py --seat); same bore and flow rate.
+    case "${valve%%-*}" in
       FPC8)  D=0.2032; Qh="$Q_FPC8" ;;
       FPC16) D=0.382;  Qh="$Q_FPC16" ;;
       *) echo "[$tag] unknown bore for $valve (skipped)"; failed+=("$tag"); continue ;;
@@ -173,6 +180,9 @@ for valve in $VALVES; do
     if [ "$o" -eq 0 ]; then
       bc=(-kv_inlet pressure -kv_pin "$PIN_CLOSED" -kv_pout "$POUT_CLOSED" -kv_ramp 0
           -kv_tend "$TEND_CLOSED" -kv_tavg 0)
+    elif [[ " $PRESSURE_OPENINGS " == *" $o "* ]]; then
+      bc=(-kv_inlet pressure -kv_pin "$PLINE" -kv_pout "$POUT" -kv_ramp "$tc" -kv_tend "$tend" -kv_tavg "$tavg"
+          -kv_dt "$dt0" -kv_dtmax "$dtmax")
     else
       bc=(-kv_inlet velocity "${inflow[@]}" -kv_pout "$POUT" -kv_tend "$tend" -kv_tavg "$tavg"
           -kv_dt "$dt0" -kv_dtmax "$dtmax")
@@ -248,7 +258,7 @@ for d in sorted(glob.glob(os.path.join(out, "*_open*"))):
     q, pin, pout = mean("Q_in"), mean("p_in_mean"), mean("p_out_mean")
     row = {
         "valve": valve, "opening_pct": opening,
-        "inlet": "pressure" if opening == 0 else "velocity",
+        "inlet": "pressure" if (opening == 0 or str(opening) in os.environ.get("PRESSURE_OPENINGS", "").split()) else "velocity",
         "U_mean_m_s": 0.0 if opening == 0 else env.get("U", umean),
         "t_end_s": float(data[-1]["t"]), "t_avg_from_s": t0, "steps": len(data),
         "steps_averaged": len(win),

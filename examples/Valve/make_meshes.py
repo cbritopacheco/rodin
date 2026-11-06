@@ -44,8 +44,67 @@ VALVES = {
 
 ATTR_INLET, ATTR_OUTLET, ATTR_WALL, ATTR_KNIFE = 1, 2, 3, 4
 
+# Seat (seal) designs, --seat. The CAD seat is a rectangular groove in the
+# lower half of the bore, t wide (the knife thickness) and R_k - R deep
+# (3.4 mm in the FPC8), the slot of the same width continuing above: a dead
+# pocket where solids settle and get crushed by the knife. The alternatives
+# keep what seals and retains the knife, the flat floor at R_k and vertical
+# walls that the lips press on and that take the pressure load on the closed
+# knife (an inclined wall would give a lifting component), and change the
+# pocket only where the flow needs it. Lower half (y < 0) only; the slot and
+# the side pockets above the axis stay as in the CAD. Flow along +z.
+#   cad      the CAD groove (reference).
+#   fillet   floor corners rounded, radius FILLET_MM (the knife tip corners
+#            are to be rounded alike): no stagnant corners; vertical walls
+#            over the rest of the depth.
+#   chamfer  lead-in chamfers of CHAMFER_DEG, CHAMFER_MM deep, on both top
+#            edges of the groove (bidirectional): the shear layer is turned
+#            into the pocket; vertical walls over the lower depth - CHAMFER_MM.
+#   upramp   upstream wall replaced by a ramp of UPRAMP_DEG down to the
+#            floor; downstream wall vertical, full depth (it takes the
+#            pressure load; unidirectional valve): the flow runs down the
+#            ramp over the floor and against the downstream wall, nothing is
+#            left behind.
+SEATS = ("cad", "fillet", "chamfer", "upramp")
+FILLET_MM = 1.5
+CHAMFER_DEG = 30.0
+CHAMFER_MM = 1.2
+UPRAMP_DEG = 15.0
+SEAT_Z = 30.0      # mm, half-length along the pipe of the refined seat zone (--hs)
+SEAT_LAYER = 3.0   # mm, layer of the bore above the seat included in it
 
-def build(step, name, f, lup, ldown, hk_rel, hm_rel, hf_rel, out, cavity_mode="full", wake_end=3.0):
+
+def seat_solid(seat, R, Rk, t):
+    """The pocket of the modified seat in the lower half of the bore (y < 0),
+    overlapping the bore (r >= R - 1) so that it fuses cleanly with the pipe.
+    Solids of revolution about the pipe axis: cylinders, cones, tori."""
+    occ = gmsh.model.occ
+    d = Rk - R
+    h = 0.5 * t
+    if seat == "fillet":
+        f = FILLET_MM
+        parts = [occ.addCylinder(0, 0, -h, 0, 0, t, Rk - f),
+                 occ.addCylinder(0, 0, -h + f, 0, 0, t - 2 * f, Rk),
+                 occ.addTorus(0, 0, h - f, Rk - f, f), occ.addTorus(0, 0, -h + f, Rk - f, f)]
+    elif seat == "chamfer":
+        c, L = CHAMFER_MM, (CHAMFER_MM + 1.0) / math.tan(math.radians(CHAMFER_DEG))
+        parts = [occ.addCylinder(0, 0, -h, 0, 0, t, Rk),
+                 occ.addCone(0, 0, h, 0, 0, L, R + c, R - 1.0),
+                 occ.addCone(0, 0, -h, 0, 0, -L, R + c, R - 1.0)]
+    elif seat == "upramp":
+        L = (d + 1.0) / math.tan(math.radians(UPRAMP_DEG))
+        parts = [occ.addCylinder(0, 0, -h, 0, 0, t, Rk),
+                 occ.addCone(0, 0, -h, 0, 0, -L, Rk, R - 1.0)]
+    else:
+        raise ValueError(seat)
+    solid = occ.fuse([(3, parts[0])], [(3, x) for x in parts[1:]])[0]
+    half = occ.addBox(-2 * Rk, -2 * Rk, -2 * Rk, 4 * Rk, 2 * Rk, 4 * Rk)
+    solid, _ = occ.intersect(solid, [(3, half)])
+    return solid
+
+
+def build(step, name, f, lup, ldown, hk_rel, hm_rel, hf_rel, out, cavity_mode="full", wake_end=3.0,
+          seat="cad", hs_rel=0.0):
     v = VALVES[name]
     R, Rk, t = v["R"], v["Rk"], v["t"]
     D = 2.0 * R
@@ -95,7 +154,14 @@ def build(step, name, f, lup, ldown, hk_rel, hm_rel, hf_rel, out, cavity_mode="f
     # the seated FPC16 knife meets the bore (zero-length edge, sliver tets).
     # Rotate the seam to an angle where nothing happens.
     gmsh.model.occ.rotate([(3, pipe)], 0, 0, 0, 0, 0, 1, 1.1)
+    if seat != "cad" and cavity:
+        # the CAD groove goes (lower half of the cavity; the pipe restores
+        # the bore there) and the pocket of the design takes its place
+        lower = gmsh.model.occ.addBox(-2 * Rk, -2 * Rk, -2 * zc, 4 * Rk, 2 * Rk, 4 * zc)
+        cavity, _ = gmsh.model.occ.cut(cavity, [(3, lower)])
     duct = gmsh.model.occ.fuse([(3, pipe)], cavity)[0] if cavity else [(3, pipe)]
+    if seat != "cad":
+        duct = gmsh.model.occ.fuse(duct, seat_solid(seat, R, Rk, t))[0]
     # The knife is as wide as the slot (2 R_k) and its sides are tangent to its
     # semicircular edge, so each side pocket ends in a cusp at (+-R_k, y_c)
     # (zero angle: sliver tetrahedra). Cut the pocket where it is narrower
@@ -105,8 +171,9 @@ def build(step, name, f, lup, ldown, hk_rel, hm_rel, hf_rel, out, cavity_mode="f
     hcusp = math.sqrt(2.0 * Rk * g)
     # The cap reaches 1.5 g inwards, into the knife, so that the knife edge
     # crosses its bottom face and not its corner.
-    caps = [gmsh.model.occ.addBox(sx * Rk - (1.5 * g if sx > 0 else 0.0), yc - hcusp, -t,
-                                  1.5 * g, hcusp + 2 * t, 2 * t)
+    cap_in = 1.5 * g
+    caps = [gmsh.model.occ.addBox(sx * Rk - (cap_in if sx > 0 else 0.0), yc - hcusp, -t,
+                                  cap_in, hcusp + 2 * t, 2 * t)
             for sx in (1.0, -1.0)]
     duct, _ = gmsh.model.occ.cut(duct, [(3, c) for c in caps])
     fluid, _ = gmsh.model.occ.cut(duct, [(3, knife)])
@@ -188,7 +255,18 @@ def build(step, name, f, lup, ldown, hk_rel, hm_rel, hf_rel, out, cavity_mode="f
     cavity_walls = [x for x in wall
                     if gmsh.model.getBoundingBox(2, x)[2] > -0.5 * t - tol
                     and gmsh.model.getBoundingBox(2, x)[5] < 0.5 * t + tol]
+    # seat zone (lower half of the bore, |z| <= SEAT_Z, the pocket and a
+    # SEAT_LAYER thick layer of the bore above it): finer, hs (e.g. D/170 =
+    # 1.2 mm: 3 cells across a 3.4 mm pocket), growing by 1 mm per mm away
+    # from the zone. Geometric, so that the flush seat (no pocket) gets the
+    # same near-wall resolution as the others.
     fields = [thr, box]
+    if hs_rel > 0.0:
+        hs = hs_rel * D
+        ms = fd.add("MathEval")
+        fd.setString(ms, "F", "Min(%g + 1.0*Sqrt(Max(Abs(z)-%g,0)^2 + Max(%g-Sqrt(x*x+y*y),0)^2 + Max(y,0)^2), %g)"
+                     % (hs, SEAT_Z, R - SEAT_LAYER, hf))
+        fields.append(ms)
     if cavity_walls:
         dc = fd.add("Distance")
         fd.setNumbers(dc, "SurfacesList", cavity_walls)
@@ -217,7 +295,7 @@ def build(step, name, f, lup, ldown, hk_rel, hm_rel, hf_rel, out, cavity_mode="f
     gmsh.option.setNumber("Mesh.MeshSizeExtendFromBoundary", 0)
     gmsh.option.setNumber("Mesh.MeshSizeFromPoints", 0)
     gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 24)
-    gmsh.option.setNumber("Mesh.MeshSizeMin", 0.35 * hk)
+    gmsh.option.setNumber("Mesh.MeshSizeMin", min(0.35 * hk, 0.5 * hs_rel * D) if hs_rel > 0 else 0.35 * hk)
     gmsh.option.setNumber("Mesh.MeshSizeMax", hf)
     gmsh.option.setNumber("Mesh.Algorithm", 6)
     gmsh.option.setNumber("Mesh.Algorithm3D", 10)  # HXT
@@ -277,7 +355,7 @@ def build(step, name, f, lup, ldown, hk_rel, hm_rel, hf_rel, out, cavity_mode="f
     bore = math.pi * R * R * 1e-6
     vol = gmsh.model.occ.getMass(3, fvols[0]) if len(fvols) == 1 else sum(
         gmsh.model.occ.getMass(3, x) for x in fvols)
-    info = dict(name=name, opening=f, yc_mm=yc, gap_mm=gap, gap_over_D=gap / D,
+    info = dict(name=name, seat=seat, opening=f, yc_mm=yc, gap_mm=gap, gap_over_D=gap / D,
                 vertices=len(p), tets=len(tets_i), triangles=len(tris_i),
                 regions=len(fvols), knife_faces=len(knf), knife_area_m2=knife_area,
                 bore_area_m2=bore, volume_m3=vol * 1e-9,
@@ -301,6 +379,9 @@ def main():
     ap.add_argument("--outdir", default="meshes")
     ap.add_argument("--cavity", default="full", choices=["full", "groove", "none"],
                     help="liner cavity: full (groove + slot, as in the CAD), groove, none (straight pipe)")
+    ap.add_argument("--seat", default="cad", help="comma-separated seat designs: " + ",".join(SEATS))
+    ap.add_argument("--hs", type=float, default=0.0,
+                    help="size in the seat pocket / D (0: none; 0.006 = 1.2 mm in the FPC8)")
     a = ap.parse_args()
     os.makedirs(a.outdir, exist_ok=True)
     gmsh.initialize()
@@ -309,11 +390,15 @@ def main():
     for name, step in files.items():
         if a.only and name != a.only:
             continue
-        for o in [int(x) for x in a.openings.split(",")]:
-            out = os.path.join(a.outdir, f"{name}_open{o:03d}.mesh")
-            info = build(step, name, o / 100.0, a.lup, a.ldown, a.hk, a.hm, a.hf, out, a.cavity, a.wake_end)
-            print(" ".join(f"{k}={v:.4g}" if isinstance(v, float) else f"{k}={v}"
-                           for k, v in info.items()), flush=True)
+        for seat in a.seat.split(","):
+            assert seat in SEATS, seat
+            for o in [int(x) for x in a.openings.split(",")]:
+                tag = name if seat == "cad" else f"{name}-{seat}"
+                out = os.path.join(a.outdir, f"{tag}_open{o:03d}.mesh")
+                info = build(step, name, o / 100.0, a.lup, a.ldown, a.hk, a.hm, a.hf, out, a.cavity,
+                             a.wake_end, seat, a.hs)
+                print(" ".join(f"{k}={v:.4g}" if isinstance(v, float) else f"{k}={v}"
+                               for k, v in info.items()), flush=True)
     gmsh.finalize()
 
 
