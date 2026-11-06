@@ -288,14 +288,51 @@
   holding it. Grid functions store their coefficients in ghosted Kokkos
   vectors.
 
-  Distributed device assembly covers `P1` spaces, integrals and Dirichlet
-  conditions. Periodic conditions, preassembled forms, mixed problems and
-  Eigen systems are rejected or not provided on distributed meshes. Link the
+  Distributed device assembly covers `P1`, `H1<K>` and `P0g` spaces, single
+  or multi-field problems, integrals, standalone bilinear and linear forms,
+  and Dirichlet, periodic and identification conditions. The owned rows of a
+  process hold its degrees of freedom of each field in turn, and
+  `LinearSystem::getFieldStarts()` gives the first row of each field. Eigen
+  systems are not distributed. Link the
   `Rodin::KokkosMPI` target, available when Rodin is configured with both
   `RODIN_USE_MPI` and `RODIN_USE_PETSC`. PETSc must be built with Kokkos;
   with a CUDA-aware MPI, such as Open MPI configured `--with-cuda`, device
   buffers are exchanged directly, otherwise run with
   `-use_gpu_aware_mpi 0`.
+
+  @section guides-kokkos-solvers Choosing a Solver
+
+  The device kernels assemble the system; where it is solved depends on the
+  system type the problem is named with:
+
+  | System | Assembled into | Solvers | Where the solve runs |
+  | --- | --- | --- | --- |
+  | `Math::LinearSystem<Math::SparseMatrix<Real>, ...>` (default) | host matrix, copied from the device | every Rodin solver | host, or GPU for `CuDSS` and `RocSolverRF`, which copy the matrix to the device |
+  | `Math::LinearSystem<Kokkos::SparseMatrix<Real, Backend>, ...>` | device CSR | `CuDSS`, `RocSolverRF`, Kokkos-Kernels `CG` and `GMRES`, `BoomerAMG` | device, on one process |
+  | PETSc system on a Kokkos mesh | `MATAIJKOKKOS` or `MATMPIAIJKOKKOS` | PETSc KSP and SNES | device for the Krylov iteration and the PETSc preconditioners implemented on Kokkos matrices, one or several processes |
+
+  A distributed device system is solved by PETSc only; the other device
+  solvers act on one process.
+
+  | Problem | One GPU | Several GPUs |
+  | --- | --- | --- |
+  | SPD (Poisson, diffusion, mass) | Kokkos-Kernels `CG`; `BoomerAMG` when the Jacobi iteration count grows with the mesh | PETSc CG with GAMG (`KokkosMPIPoissonScaling`) or Jacobi |
+  | Vector elasticity | PETSc CG with GAMG and the rigid body modes (`MatSetNearNullSpace`) | same |
+  | Nonsymmetric (advection, Oseen step) | Kokkos-Kernels `GMRES`, or PETSc BiCGStab with Jacobi | PETSc BiCGStab with Jacobi (`KokkosMPIOseenScaling`) |
+  | Saddle point (Stokes, Navier-Stokes) | `CuDSS` or `RocSolverRF` while the factors fit in device memory; PETSc FGMRES with a Schur field split beyond | PETSc FGMRES with a Schur field split |
+  | Sequence of systems with one pattern (time steps, Newton tangents) | `CuDSS` or `RocSolverRF`, one instance, `factorize` at each step | PETSc, reusing the preconditioner |
+
+  Parts of the work stay on the host:
+  - mesh loading, partitioning and distribution of the shards;
+  - the first factorization of `RocSolverRF`, which fixes the pivots with
+    UMFPACK or AMD; the later ones run on the device;
+  - the Eigen and SuiteSparse solvers, `MUMPS`, and most of SuperLU_DIST in
+    PETSc (it hands only a few large Schur updates to the GPU);
+  - the ghost exchanges of PETSc without a GPU-aware MPI
+    (`-use_gpu_aware_mpi 0`), which go through host buffers.
+
+  The measurements behind these choices are in the
+  `doc/agents/solvers-assembly.md` agent guide.
 
   @section guides-kokkos-build CUDA Build
 
