@@ -1587,7 +1587,8 @@ namespace Rodin::Assembly
        */
       Sequential* copy() const noexcept override
       {
-        return new Sequential(*this);
+        // NVCC's front end fails to parse new Sequential(*this) in this specialization.
+        return new auto(*this);
       }
   };
 
@@ -2180,7 +2181,8 @@ namespace Rodin::Assembly
        */
       Sequential* copy() const noexcept override
       {
-        return new Sequential(*this);
+        // NVCC's front end fails to parse new Sequential(*this) in this specialization.
+        return new auto(*this);
       }
   };
 

@@ -107,6 +107,7 @@
   and collective-operation rules.
 
   - @subpage guides-backends — Local, OpenMP, MPI, and PETSc execution paths.
+  - @subpage guides-kokkos — Resident local meshes, device geometry and incidence computation.
   - @subpage guides-mpi — Distributed meshes, partitioning, and reconciliation.
   - @subpage guides-petsc — Distributed algebra, KSP/SNES, and multi-field problems.
   - @subpage guides-thread-safety — Shared state and synchronization requirements.

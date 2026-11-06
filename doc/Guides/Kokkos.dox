@@ -1,0 +1,268 @@
+/**
+  @page guides-kokkos Kokkos local mesh
+  @brief MeshBase specialization backed by resident Kokkos arrays.
+
+  @tableofcontents
+  @m_footernavigation
+
+  @section guides-kokkos-architecture Architecture
+
+  The optional `Rodin::Kokkos` target mirrors the core Context, Geometry and Assembly
+  directories. It specializes `Geometry::Mesh` and `Geometry::Connectivity`
+  for `Context::Kokkos<Context::Local, Backend>`. The mesh derives directly
+  from `Geometry::MeshBase`; its topology, coordinates, optional attributes,
+  and geometric maps live in the selected Kokkos memory space. The CUDA tag
+  selects `::Kokkos::Cuda` and its device memory. A native Kokkos execution
+  space, such as `::Kokkos::Serial`, selects that execution space explicitly.
+
+  There is no persistent CPU mesh and no separate publication step. File
+  loading and builders use temporary host construction data, then create
+  independently owned resident arrays. Copies deep-copy those arrays.
+  Scaling, coordinate edits, label edits and map replacement update resident
+  storage before returning. Measures use Kokkos quadrature reductions.
+
+  @section guides-kokkos-usage Usage
+
+  @code{.cpp}
+  #include <Rodin/Kokkos.h>
+
+  int main(int argc, char** argv)
+  {
+    ::Kokkos::ScopeGuard runtime(argc, argv);
+    using namespace Rodin;
+    using ContextType = Context::Kokkos<Context::Local, Context::CUDA>;
+    ContextType context;
+
+    // Reuse Rodin construction, then compute incidences on the resident mesh.
+    auto input = Geometry::Mesh<Context::Local>::UniformGrid(
+      Geometry::Polytope::Type::Triangle, {8, 8});
+    Geometry::Mesh<ContextType> mesh(context, input);
+    mesh.getConnectivity().compute(1, 2);
+
+    mesh.scale(0.5); // Executes on the selected Kokkos instance.
+    const Real area = mesh.getArea(); // Resident quadrature reduction.
+    const Assembly::KokkosIteration iteration(mesh, Geometry::Region::Cells);
+    const Index count = iteration.getCount();
+    using ExecutionSpace = ContextType::ExecutionSpaceType;
+    ::Kokkos::View<Real*, ContextType::MemorySpaceType> distortion(
+      "triangle distortion", count);
+    ::Kokkos::parallel_for("mesh geometry",
+      ::Kokkos::RangePolicy<ExecutionSpace>(context.getExecutionSpace(), 0, count),
+      KOKKOS_LAMBDA(Index i)
+      {
+        if (!iteration.filter(i))
+          return;
+        Rodin::Kokkos::Geometry::Vector reference(2);
+        reference(0) = 1.0 / 3.0;
+        reference(1) = 1.0 / 3.0;
+        distortion(i) = iteration.getPolytope(i).getPoint(reference).getDistortion();
+      });
+    context.getExecutionSpace().fence();
+  }
+  @endcode
+
+  `Geometry::Mesh<ContextType>::Builder` also accepts the usual
+  `initialize`, `nodes`, `vertex`, `polytope`, and `attribute` construction
+  operations; `finalize()` returns a resident mesh. `mesh.load(path, format)`
+  and `mesh.save(path, format)` reuse existing Rodin file formats with
+  temporary host adapters. Input meshes and builders need not outlive the
+  resulting mesh. Construction imports explicitly materialized input incidences
+  and preserves entity numbering and ordered vertices. Additional relations and
+  missing intermediate entities are computed directly in resident memory.
+
+  @section guides-kokkos-interfaces Host and Device Interfaces
+
+  `MeshBase` remains a host polymorphic interface. Existing iterators,
+  transformations, quadrature caches, Eigen-valued points and
+  reference-returning connectivity queries work through it. Coordinates and
+  labels are read from resident memory. Connectivity references and host
+  evaluation objects are materialized lazily; they do not own authoritative
+  mesh state. These compatibility queries incur transfers on CUDA and are
+  not intended for the device execution loop.
+
+  Kernels use the borrowed device view, which accesses resident topology,
+  geometry and labels without host callbacks or virtual dispatch. The
+  pointer-backed view queries must execute in the selected memory space.
+  Launch counts are available through the mesh's small host metadata.
+  Device point-evaluation scratch belongs to the calling thread.
+
+  Geometry must remain fixed while evaluation is in progress. Finish kernels
+  before mutating or destroying the mesh. Reacquire views after mutations,
+  loading, assignment, or moving their owner. A borrowed view does not own allocations.
+  `flush()` has the existing LocalMesh meaning: it clears evaluation caches
+  and resets attached transformations to default vertex-based maps. It does
+  not transfer a host mesh. Coordinate setters and scaling perform this
+  invalidation automatically.
+
+  @section guides-kokkos-incidence Resident Incidence Computation
+
+  The Kokkos connectivity specialization implements Rodin's existing
+  `compute(d, dp, mode)` dispatch, `discover`, `restrict`, `clear`, `isDirty`,
+  and `setDirty` vocabulary. Transposition and ordered intersection use
+  device kernels, sorting, duplicate removal and prefix sums. Each relation
+  owns independent CSR arrays.
+
+  @code{.cpp}
+  auto& connectivity = mesh.getConnectivity();
+  connectivity.compute(1, 2); // Discover edges and compute edge-to-cell incidence.
+  connectivity.compute(2, 1); // Reference-ordered cell-to-edge incidence.
+  connectivity.clear(2, 1).restrict(2, 1); // Use existing edges only.
+  @endcode
+
+  Discovery emits reference-cell subentities in Rodin's local ordering.
+  Symmetric vertex keys group identical entities; first-occurrence scans
+  retain existing IDs and assign new IDs in the same order as LocalMesh.
+  Ordered vertices are retained independently of the canonical keys. This
+  supports mixed reference geometries, duplicate incidence contributions,
+  and nonmanifold adjacency. Restricted computation skips missing entities.
+  Like the core API, a clean relation is cached independently of the mode;
+  clear it explicitly before requesting recomputation under another mode.
+  Entity growth invalidates relations touching the enlarged dimension.
+
+  Actual mesh topology stays in Kokkos memory throughout computation. The
+  host launches passes and reads small allocation/count scalars. The tiny
+  reference-cell tables reuse Rodin's existing subentity enumeration and are
+  uploaded as immutable constants; they contain no actual mesh topology.
+  Host compatibility queries still explicitly materialize host data when used.
+
+  Mesh attribute and map slots grow on their first use after discovery, using
+  resident kernels. Existing local IDs, labels and independent control points
+  are preserved; new entities have absent attributes and vertex-based default
+  maps. This is internal storage provisioning, with no user synchronization or
+  publication method. Finish kernels before computing connectivity and reacquire
+  borrowed views afterward.
+
+  @section guides-kokkos-iteration Assembly Region Traversal
+
+  @ref Rodin::Assembly::KokkosIteration follows the indexed traversal contract
+  of @ref Rodin::Assembly::SequentialIteration and
+  @ref Rodin::Assembly::OpenMPIteration. Construct it on the host from the
+  resident mesh and the existing @ref Rodin::Geometry::Region enumeration.
+  Its private device handle is captured through the iteration object; callers
+  use getDimension(), getCount(), filter(i) and getPolytope(i), without
+  explicitly obtaining a mesh device view. Scheduling remains the assembly
+  backend's responsibility. The usage example above shows the corresponding
+  internal kernel launch; iteration does not schedule traversal kernels.
+
+  Cells visits maximal-dimensional entities. Faces visits all codimension-one
+  entities. Boundary and Interface scan the same face candidates, accepting
+  exactly one and more than one incident cell respectively. Interface thus
+  retains LocalMesh semantics for nonmanifold adjacency. getCount() reports
+  candidates before filtering, and an empty selection is valid. Attribute
+  selection remains separate from the region predicate, as in existing assembly.
+
+  @code{.cpp}
+  const size_t dimension = mesh.getDimension();
+  mesh.getConnectivity().compute(dimension - 1, dimension);
+  const Assembly::KokkosIteration boundary(mesh, Geometry::Region::Boundary);
+  const Assembly::KokkosIteration interface(mesh, Geometry::Region::Interface);
+  // Both counts equal mesh.getFaceCount(); filter(i) selects the region.
+  @endcode
+
+  No incidence is discovered or computed by iteration. Nonempty filtered face
+  traversal diagnoses missing face-to-cell incidence during host construction.
+  Zero-dimensional meshes support Cells; face regions raise an exception.
+  getCount() and getDimension() use scalar metadata on either host or device.
+  filter() and getPolytope() run in the selected execution space. Their entity
+  results access resident geometry and optional labels without host callbacks.
+  Descriptors borrow mesh allocations and must be reconstructed after mutation;
+  their kernels must finish before the mesh changes or is destroyed.
+
+  @section guides-kokkos-scope Current Support
+
+  This specialization implements the MeshBase contract for a complete local
+  mesh, including host iteration, optional attributes, coordinate updates,
+  measures, boundary/interface classification, transformations, quadrature
+  queries and existing mesh file formats. Missing intermediate entities and
+  incidence relations can be computed on the resident mesh. Mesh loading
+  replaces the topology as a whole. A Kokkos SubMesh specialization is not provided;
+  `isSubMesh()` returns false and `asSubMesh()` raises an exception.
+
+  Identity and `ParametricTransformation<Variational::RealP1Element>` maps
+  are supported on points, segments, triangles, quadrilaterals, tetrahedra,
+  hexahedra, wedges and pyramids, including embedded entities. Default maps
+  use resident mesh vertices directly. Independent P1 control points remain
+  independent until geometry invalidation, matching the local mesh. Other
+  transformations are rejected without silently approximating their geometry.
+
+  Assembly region traversal is available through KokkosIteration. Device finite
+  element spaces, grid functions, variational expression evaluation, operator
+  assembly, solvers and MPI distribution
+  remain outside this module's current support. MeshBase compatibility does
+  not establish device support for its higher-level consumers.
+
+  @section guides-kokkos-build CUDA Build
+
+  Kokkos 4.2 or newer is required for comparator-based device sorting.
+  Build and install Kokkos separately with CUDA enabled and an architecture
+  matching the target GPU. This example selects an Ampere compute-capability
+  8.0 target; substitute the appropriate Kokkos architecture option for the
+  actual device.
+
+  @code{.bash}
+  cmake -S /path/to/kokkos -B /path/to/kokkos-build \
+    -DCMAKE_INSTALL_PREFIX=/path/to/kokkos-install \
+    -DCMAKE_CXX_COMPILER=/path/to/kokkos/bin/nvcc_wrapper \
+    -DCMAKE_CXX_STANDARD=20 \
+    -DKokkos_ENABLE_CUDA=ON \
+    -DKokkos_ENABLE_SERIAL=ON \
+    -DKokkos_ARCH_AMPERE80=ON
+  cmake --build /path/to/kokkos-build --parallel
+  cmake --install /path/to/kokkos-build
+
+  cmake -S . -B build-kokkos-cuda \
+    -DCMAKE_CXX_COMPILER=g++ \
+    -DCMAKE_PREFIX_PATH=/path/to/kokkos-install \
+    -DRODIN_USE_KOKKOS=ON \
+    -DRODIN_BUILD_UNIT_TESTS=ON \
+    -DRODIN_BUILD_EXAMPLES=OFF \
+    -DRODIN_USE_PETSC=OFF \
+    -DRODIN_MULTITHREADED=OFF \
+    -DRODIN_INSTALL_RESOURCES=OFF
+  cmake --build build-kokkos-cuda --parallel \
+    --target RodinKokkosContextTest RodinKokkosGeometryMeshTest \
+      RodinKokkosGeometryConnectivityTest RodinKokkosAssemblyKokkosIterationTest
+  ctest --test-dir build-kokkos-cuda/tests -R '^Kokkos_' --output-on-failure
+  @endcode
+
+  Application translation units that instantiate device geometry kernels must
+  be compiled by a CUDA-capable compiler. Rodin is configured with the host
+  compiler that built Kokkos's host code: when it is not `nvcc_wrapper`,
+  `find_package(Kokkos)` installs `kokkos_launch_compiler`, which redirects
+  only targets linked to `Kokkos::kokkos` to `nvcc_wrapper`. The remaining
+  Rodin libraries are compiled by the host compiler. Setting
+  `CMAKE_CXX_COMPILER` to `nvcc_wrapper` also works but compiles every
+  translation unit through NVCC. A Kokkos build without CUDA cannot
+  instantiate the CUDA context and never substitutes CPU execution.
+
+  See the upstream
+  [Kokkos configuration guide](https://kokkos.org/kokkos-core-wiki/get-started/configuration-guide.html)
+  and
+  [source-build instructions](https://kokkos.org/kokkos-core-wiki/get-started/building-from-source.html)
+  for compiler and architecture requirements.
+
+  Installed consumers enable the same compiler setup and link the module:
+
+  @code{.cmake}
+  find_package(Rodin REQUIRED)
+  add_executable(mesh_device main.cpp)
+  target_link_libraries(mesh_device PRIVATE Rodin::Kokkos)
+  @endcode
+
+  @section guides-kokkos-validation Validation
+
+  Tests select CUDA when Kokkos has CUDA enabled. Otherwise they explicitly
+  select the default host execution space and exercise the same specialization.
+  They compare all reference geometries and embeddings with LocalMesh,
+  topology and attributes, resident updates, copy independence, lifetime,
+  measure reductions and MeshBase compatibility. Connectivity tests compare
+  exact discovery numbering, oriented keys, incidence traversal order, dirty
+  flags, restriction and recomputation with the CPU implementation. Iteration
+  tests compare every region predicate and entity descriptor against sequential
+  assembly traversal across reference families, embedded mixed meshes and
+  nonmanifold adjacency, including explicit incidence requirements and empty
+  selections. A Threads
+  build can exercise the same kernels concurrently on the host. Passing host tests does not
+  certify CUDA compilation, device execution or GPU performance; those require
+  a CUDA toolchain and compatible hardware.
+*/

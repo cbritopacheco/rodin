@@ -88,6 +88,10 @@ if (RODIN_USE_MPI)
   add_subdirectory(MPI)
 endif()
 
+if (RODIN_USE_KOKKOS)
+  add_subdirectory(Kokkos)
+endif()
+
 # Install target — note: NO INCLUDES DESTINATION to subfolders
 install(TARGETS Rodin
   EXPORT RodinTargets

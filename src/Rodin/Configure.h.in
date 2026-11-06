@@ -88,6 +88,11 @@
 #cmakedefine RODIN_USE_MPI
 
 /**
+ * @brief Indicates if Rodin is built with Kokkos support.
+ */
+#cmakedefine RODIN_USE_KOKKOS
+
+/**
  * @brief Indicates if Rodin is built with OpenMP support.
  *
  * # Utilization

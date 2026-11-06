@@ -68,6 +68,7 @@ option(RODIN_BUILD_TIDY               "Configure the clang-tidy aggregate target
 option(RODIN_WITH_PY                  "Build Python bindings"                     OFF)
 option(RODIN_USE_MCSS                 "Build documentation with m.css"            OFF)
 option(RODIN_USE_MPI                  "Use Rodin with MPI support"                OFF)
+option(RODIN_USE_KOKKOS               "Use Rodin with Kokkos support"             OFF)
 option(RODIN_USE_OPENMP               "Use Rodin with OpenMP support"             OFF)
 option(RODIN_USE_UMFPACK              "Use Rodin with UMFPACK support"            OFF)
 option(RODIN_USE_PARU                 "Use Rodin with ParU support"               OFF)
@@ -299,6 +300,11 @@ if (RODIN_BUILD_SRC)
   # ---- PETSc ----
   if (RODIN_USE_PETSC)
     find_package(PETSc REQUIRED)
+  endif()
+
+  # ---- Kokkos ----
+  if (RODIN_USE_KOKKOS)
+    find_package(Kokkos 4.2 CONFIG REQUIRED)
   endif()
 
   # ---- Scotch ----
