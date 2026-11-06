@@ -241,7 +241,7 @@ namespace Rodin::Examples::ViscoelasticFluids
             if (ct == "Spatial")
             {
               const auto* t = grid.get_child_optional("Time") ? &grid.get_child("Time") : nullptr;
-              times.push_back(t ? t->get<Real>("<xmlattr>.Value") : Real(times.size()));
+              times.push_back(t ? t->template get<Real>("<xmlattr>.Value") : Real(times.size()));
               steps.emplace_back();
             }
             for (const auto& [key, child] : grid)
@@ -260,9 +260,9 @@ namespace Rodin::Examples::ViscoelasticFluids
               throw std::runtime_error("expected a Mixed topology stream, got " + topo);
             for (const auto& [key, attr] : grid)
             {
-              if (key != "Attribute" || attr.get<std::string>("<xmlattr>.Name", "") != "velocity")
+              if (key != "Attribute" || attr.template get<std::string>("<xmlattr>.Name", "") != "velocity")
                 continue;
-              piece.velocity.push_back(splitRef(attr.get<std::string>("DataItem")));
+              piece.velocity.push_back(splitRef(attr.template get<std::string>("DataItem")));
             }
             if (piece.velocity.empty())
               throw std::runtime_error("a grid of case.xdmf has no velocity attribute");
