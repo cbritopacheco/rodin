@@ -1030,6 +1030,28 @@ def comparison_figures(cases, out):
     plt.close(fig)
 
 
+# ---- residence in the lesion (Pathlines3D) ---------------------------------------------
+PATHLINE_KEYS = ("timeMedian_T", "timeP90_T", "washoutHalf_T", "remaining1T", "remaining2T", "censored")
+
+
+def read_pathlines(folder):
+    """The lesion and sac residence of <folder>/pathlines_lesion.csv, written by
+    Pathlines3D, as metrics <region>_<key> (times in cycles: comparable across
+    fluids with different T). Empty when the file is missing."""
+    path = os.path.join(folder, "pathlines_lesion.csv")
+    if not os.path.exists(path):
+        return {}
+    out = {}
+    with open(path) as f:
+        for row in csv.DictReader(f):
+            for k in PATHLINE_KEYS:
+                try:
+                    out["%s_%s" % (row["region"], k)] = float(row[k])
+                except (KeyError, ValueError):
+                    pass
+    return out
+
+
 # ---- the comparison of fluids ----------------------------------------------------------
 def rel_l2(a, b, w=None):
     """||a - b|| / ||b|| over all entries (time, nodes, components), w the
@@ -1103,7 +1125,8 @@ def compare(cases):
                  "throat_tau_peak": (ssa, ssb), "umax": (sua, sub)}
         for k in ("dp_mean", "dp_peak", "tawss_lesion_mean", "tawss_max", "recirc_max_D", "recirc_mean_D", "recirc_peak_D",
                   "low_tawss_area", "high_osi_area", "osi_lesion_max", "throat_tau_peak", "umax",
-                  "low_tawss_rel_area", "high_rrt_area", "rrt_lesion_median", "rrt_lesion_p90"):
+                  "low_tawss_rel_area", "high_rrt_area", "rrt_lesion_median", "rrt_lesion_p90") + tuple(
+                      "%s_%s" % (g, k) for g in ("lesion", "sac") for k in PATHLINE_KEYS if k != "censored"):
             if k not in Ma or k not in Mb:
                 continue
             fa_, fb_ = scale.get(k, (1.0, 1.0))
@@ -1158,7 +1181,8 @@ def write_tables(metrics, comparisons, out):
                 ("dp_mean_relchange", r"$\Delta\overline{\Delta p}$"), ("dp_peak_relchange", r"$\Delta\,\Delta p_{\max}$"),
                 ("recirc_max_D_relchange", r"$\Delta L_{rec}$"), ("low_tawss_rel_area_relchange", r"$\Delta A_{\rm low}$"),
                 ("high_osi_area_relchange", r"$\Delta A_{\rm OSI}$"), ("high_rrt_area_relchange", r"$\Delta A_{\rm RRT}$"),
-                ("rrt_lesion_median_relchange", r"$\Delta\,{\rm RRT}^*_{50}$"), ("A1_rms_relchange", r"$\Delta A_1'$"), ("A1_psd_relL2", r"$\|\Delta S_{A_1}\|$")]
+                ("rrt_lesion_median_relchange", r"$\Delta\,{\rm RRT}^*_{50}$"), ("sac_timeMedian_T_relchange", r"$\Delta t_{\rm sac,50}$"),
+                ("sac_washoutHalf_T_relchange", r"$\Delta t_{1/2}$"), ("A1_rms_relchange", r"$\Delta A_1'$"), ("A1_psd_relL2", r"$\|\Delta S_{A_1}\|$")]
         with open(os.path.join(out, "comparison.tex"), "w") as f:
             f.write("\\begin{tabular}{ll" + "r" * len(cols) + "}\n\\toprule\ncase & pair & " +
                     " & ".join(c[1] for c in cols) + "\\\\\n\\midrule\n")
@@ -1242,6 +1266,7 @@ def main():
             try:
                 case = Case(d, args.cycle_fraction, root)
                 M, F = analyse(case, os.path.join(gout, tag), figures=not args.no_figures)
+                M.update(read_pathlines(d))
             except Exception as e:   # one broken case must not stop the campaign
                 print("   %s: FAILED (%s)" % (tag, e))
                 continue

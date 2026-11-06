@@ -25,6 +25,7 @@
  *   -pl_releases  8            release phases, equally spaced in the cycle
  *   -pl_substeps  4            tracing sub-steps per snapshot interval
  *   -pl_transits  3            stop after this many mean transit times L/U
+ *   -pl_horizon   6            ... but never before this many cycles (washout)
  *   -pl_period    <s>          cycle period (default: read from run.log)
  *   -pl_cycles    1            cycles of snapshots to use (the last ones)
  *
@@ -39,7 +40,21 @@
  *     wall is never crossed by the exact flow, so this flags a tracing
  *     limit), or after -pl_transits mean transit times L/U of the cycle
  *     ("trapped": a particle held in a recirculation), with L the axial
- *     extent and U the cycle-mean inlet speed.
+ *     extent and U the cycle-mean inlet speed, but no earlier than
+ *     -pl_horizon cycles;
+ *   - the lesion: the wall vertices whose distance to the axis departs from
+ *     the parent radius R (the median over the wall) by more than 5 %; the
+ *     lesion slab is their axial range. For a dilation (aneurysm) the sac is
+ *     the part of the slab outside the parent cylinder, r > R.
+ *
+ * Residence in the lesion (the quantity that tells the fluids apart; the
+ * time to the outlet is dominated by the length of the pipe): for each
+ * trajectory, the time spent in the slab and in the sac, and the time from
+ * the first entry to the last exit. Over the trajectories that entered, the
+ * washout curve (the fraction still to leave for good, against the time
+ * since entry, in cycles) and its median, p90 and half-life. Trajectories
+ * stopped while still able to return (trapped, horizon) are censored: their
+ * times are lower bounds, and the censored fraction is reported.
  *
  * Time: the snapshots of the last cycle are a periodic field, u(t + T) = u(t).
  * Each sub-step of length dtau freezes the field at the sub-step midpoint
@@ -58,6 +73,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <limits>
 #include <numeric>
 #include <optional>
 #include <set>
@@ -109,6 +125,7 @@ namespace Rodin::Examples::ViscoelasticFluids
         size_t releases = 8;
         size_t substeps = 4;
         Real transits = 3.0;
+        Real horizon = 6.0;     ///< minimum integration time, in cycles
         Real period = 0.0;      ///< 0: read from run.log
         size_t cycles = 1;
       };
@@ -128,6 +145,11 @@ namespace Rodin::Examples::ViscoelasticFluids
       /// @brief A trajectory that moves less than this fraction of the axial
       ///        extent during one period is stagnant and stops ("trapped").
       static constexpr Real StagnationFraction = 1.0e-4;
+      /// @brief Relative departure of the wall radius from the parent radius
+      ///        that marks the lesion (the same as the postprocessing).
+      static constexpr Real LesionDeviation = 0.05;
+      /// @brief Sampling of the washout curve, in cycles.
+      static constexpr Real WashoutStep = 0.05;
       /// @brief Relative tolerance on coordinates when merging the vertices
       ///        shared by the rank pieces (they come from the same mesh, so
       ///        they match to rounding).
@@ -143,8 +165,10 @@ namespace Rodin::Examples::ViscoelasticFluids
         buildMesh();
         loadVelocity();
         findCaps();
+        findLesion();
         seed();
         integrate();
+        regions();
         write();
       }
 
@@ -177,6 +201,9 @@ namespace Rodin::Examples::ViscoelasticFluids
         size_t seed = 0, release = 0;
         Real releaseTime = 0.0, residence = 0.0, length = 0.0, maxSpeed = 0.0;
         std::string exit;
+        /// Per region (0 the lesion slab, 1 the sac): time inside, and the
+        /// times of the first entry and last exit (< 0: never entered).
+        std::array<Real, 2> inside{ { 0.0, 0.0 } }, firstIn{ { -1.0, -1.0 } }, lastIn{ { -1.0, -1.0 } };
         std::vector<Sample> samples;
       };
 
@@ -562,6 +589,59 @@ namespace Rodin::Examples::ViscoelasticFluids
         (void)D;
       }
 
+      // ---- the lesion ---------------------------------------------------------------
+      void findLesion()
+      {
+        std::set<Index> capFaces(m_outletFaces.begin(), m_outletFaces.end());
+        capFaces.insert(m_inlet.faces.begin(), m_inlet.faces.end());
+        std::set<Index> wallVertices;
+        for (auto it = m_mesh.getBoundary(); it; ++it)
+          if (!capFaces.count(it->getIndex()))
+            for (auto v = it->getVertex(); v; ++v)
+              wallVertices.insert(v->getIndex());
+        std::vector<std::pair<Real, Real>> sr;   // (axial, radial) of each wall vertex
+        sr.reserve(wallVertices.size());
+        for (Index v : wallVertices)
+          sr.push_back(axialRadial(m_mesh.getVertexCoordinates(v)));
+        std::vector<Real> r(sr.size());
+        for (size_t i = 0; i < sr.size(); ++i)
+          r[i] = sr[i].second;
+        std::nth_element(r.begin(), r.begin() + r.size() / 2, r.end());
+        m_parentRadius = r[r.size() / 2];
+        Real lo = std::numeric_limits<Real>::max(), hi = std::numeric_limits<Real>::lowest(), dev = 0.0;
+        size_t n = 0;
+        for (const auto& [sv, rv] : sr)
+          if (std::abs(rv - m_parentRadius) > LesionDeviation * m_parentRadius)
+          {
+            lo = std::min(lo, sv);
+            hi = std::max(hi, sv);
+            dev += rv - m_parentRadius;
+            ++n;
+          }
+        if (n == 0)
+        {
+          Alert::Warning() << "[lesion] no wall departs from the parent radius: no lesion statistics" << Alert::Raise;
+          m_lesionLo = 1.0;
+          m_lesionHi = 0.0;
+          return;
+        }
+        m_lesionLo = lo;
+        m_lesionHi = hi;
+        m_dilation = dev > 0.0;
+        const Real D = 2.0 * m_parentRadius;
+        Alert::Info() << "[lesion] parent D = " << D << " m; " << (m_dilation ? "dilation" : "constriction")
+                      << " over s/D in [" << lo / D << ", " << hi / D << "] from the inlet (length "
+                      << (hi - lo) / D << " D)" << (m_dilation ? "; sac: r > R inside it" : "") << Alert::Raise;
+      }
+
+      /// @brief Axial position from the inlet centroid and distance to the axis.
+      std::pair<Real, Real> axialRadial(const Math::SpatialVector<Real>& x) const
+      {
+        const Math::SpatialVector<Real> d = x - m_inlet.centroid;
+        const Real sv = d.dot(m_axis);
+        return { sv, (d - sv * m_axis).norm() };
+      }
+
       // ---- the seeds ---------------------------------------------------------------
       void seed()
       {
@@ -605,7 +685,7 @@ namespace Rodin::Examples::ViscoelasticFluids
       void integrate()
       {
         const Real transit = m_axialExtent / m_meanSpeed;
-        const Real tMax = m_cfg.transits * transit;
+        const Real tMax = std::max(m_cfg.transits * transit, m_cfg.horizon * m_period);
         // Sub-step: a fraction of the (smallest) snapshot interval.
         Real snapDt = m_span;
         for (size_t s = 0; s + 1 < m_times.size(); ++s)
@@ -614,7 +694,7 @@ namespace Rodin::Examples::ViscoelasticFluids
         const Real stagnation = StagnationFraction * m_axialExtent;
         const size_t stagnationSteps = static_cast<size_t>(std::ceil(m_period / dtau));
         Alert::Info() << "[integrate] mean transit L/U = " << transit << " s, t_max = " << tMax
-                      << " s, sub-step " << dtau << " s (" << m_cfg.substeps
+                      << " s (" << tMax / m_period << " cycles), sub-step " << dtau << " s (" << m_cfg.substeps
                       << " per snapshot interval)" << Alert::Raise;
         // The tracer composes an operand with the flow map; only the traced
         // point is used here, the operand is a constant.
@@ -697,6 +777,39 @@ namespace Rodin::Examples::ViscoelasticFluids
         }
       }
 
+      // ---- residence in the lesion ------------------------------------------------
+      void regions()
+      {
+        if (!(m_lesionHi > m_lesionLo))
+          return;
+        const auto inRegion = [this](const Math::SpatialVector<Real>& x, size_t k) {
+          const auto [sv, rv] = axialRadial(x);
+          const bool slab = sv >= m_lesionLo && sv <= m_lesionHi;
+          return k == 0 ? slab : (slab && m_dilation && rv > m_parentRadius);
+        };
+        for (auto& tr : m_trajectories)
+          for (size_t k = 0; k < 2; ++k)
+          {
+            bool prev = inRegion(tr.samples.front().x, k);
+            if (prev)
+              tr.firstIn[k] = tr.lastIn[k] = tr.samples.front().t;
+            for (size_t i = 1; i < tr.samples.size(); ++i)
+            {
+              const bool cur = inRegion(tr.samples[i].x, k);
+              const Real dt = tr.samples[i].t - tr.samples[i - 1].t;
+              // Trapezoid of the indicator: half a step at a crossing.
+              tr.inside[k] += 0.5 * dt * (Real(prev) + Real(cur));
+              if (cur)
+              {
+                if (tr.firstIn[k] < 0.0)
+                  tr.firstIn[k] = tr.samples[i].t;
+                tr.lastIn[k] = tr.samples[i].t;
+              }
+              prev = cur;
+            }
+          }
+      }
+
       // ---- output -----------------------------------------------------------------
       void write()
       {
@@ -704,13 +817,17 @@ namespace Rodin::Examples::ViscoelasticFluids
         // CSV, one row per trajectory.
         {
           std::ofstream csv(stem.string() + ".csv");
-          csv << "release,releaseTime,seed,x0,y0,z0,exit,residence,length,maxSpeed,samples\n";
+          csv << "release,releaseTime,seed,x0,y0,z0,exit,residence,length,maxSpeed,samples,"
+                 "lesionTime,lesionSpan,sacTime,sacSpan\n";
           for (const auto& tr : m_trajectories)
           {
             const auto& x0 = tr.samples.front().x;
             csv << tr.release << ',' << tr.releaseTime << ',' << tr.seed << ',' << x0(0) << ',' << x0(1)
                 << ',' << x0(2) << ',' << tr.exit << ',' << tr.residence << ',' << tr.length << ','
-                << tr.maxSpeed << ',' << tr.samples.size() << '\n';
+                << tr.maxSpeed << ',' << tr.samples.size();
+            for (size_t k = 0; k < 2; ++k)
+              csv << ',' << tr.inside[k] << ',' << (tr.firstIn[k] < 0.0 ? 0.0 : tr.lastIn[k] - tr.firstIn[k]);
+            csv << '\n';
           }
         }
         // Residence-time statistics per release phase (the exited ones), and
@@ -747,6 +864,7 @@ namespace Rodin::Examples::ViscoelasticFluids
                << (res.empty() ? 0.0 : res.back()) << '\n';
           }
         }
+        writeLesion(stem);
         // XDMF: the pathlines as a segment mesh in 3D with nodal fields.
         size_t nv = 0, ne = 0;
         for (const auto& tr : m_trajectories)
@@ -756,7 +874,7 @@ namespace Rodin::Examples::ViscoelasticFluids
         }
         MeshType::Builder builder;
         builder.initialize(3).nodes(nv).reserve(0, nv).reserve(1, ne);
-        std::vector<Real> time, speed, seedId, releaseId, residence, age;
+        std::vector<Real> time, speed, seedId, releaseId, residence, age, lesionT, sacT;
         time.reserve(nv); speed.reserve(nv); seedId.reserve(nv); releaseId.reserve(nv);
         residence.reserve(nv); age.reserve(nv);
         Index next = 0;
@@ -772,6 +890,8 @@ namespace Rodin::Examples::ViscoelasticFluids
             releaseId.push_back(static_cast<Real>(tr.release));
             residence.push_back(tr.residence);
             age.push_back(s.t - tr.releaseTime);
+            lesionT.push_back(tr.inside[0] / m_period);
+            sacT.push_back(tr.inside[1] / m_period);
             if (i > 0)
               builder.polytope(Polytope::Type::Segment, { next - 1, next });
             ++next;
@@ -780,13 +900,13 @@ namespace Rodin::Examples::ViscoelasticFluids
         MeshType lines = builder.finalize();
         lines.getConnectivity().compute(1, 0);
         ScalarFESType fes(lines);
-        ScalarGridFunctionType gTime(fes), gSpeed(fes), gSeed(fes), gRelease(fes), gResidence(fes), gAge(fes);
+        ScalarGridFunctionType gTime(fes), gSpeed(fes), gSeed(fes), gRelease(fes), gResidence(fes), gAge(fes), gLesion(fes), gSac(fes);
         const auto fill = [&](ScalarGridFunctionType& g, const std::vector<Real>& v) {
           for (Index i = 0; i < static_cast<Index>(v.size()); ++i)
             g.getData()(fes.getGlobalIndex({ 0, i }, 0)) = v[i];
         };
         fill(gTime, time); fill(gSpeed, speed); fill(gSeed, seedId); fill(gRelease, releaseId);
-        fill(gResidence, residence); fill(gAge, age);
+        fill(gResidence, residence); fill(gAge, age); fill(gLesion, lesionT); fill(gSac, sacT);
         IO::XDMF xdmf(boost::filesystem::path(stem.string()));
         xdmf.setMesh(lines)
             .add("time", gTime)
@@ -794,11 +914,76 @@ namespace Rodin::Examples::ViscoelasticFluids
             .add("seed", gSeed)
             .add("release", gRelease)
             .add("residence", gResidence)
-            .add("age", gAge);
+            .add("age", gAge)
+            .add("lesionTime_T", gLesion)
+            .add("sacTime_T", gSac);
         xdmf.write(0.0);
         xdmf.close();
         Alert::Info() << "[write] " << m_trajectories.size() << " pathlines, " << nv << " samples: "
-                      << stem.string() << ".xdmf, .csv, _residence.csv" << Alert::Raise;
+                      << stem.string() << ".xdmf, .csv, _residence.csv, _lesion.csv, _washout.csv" << Alert::Raise;
+      }
+
+      /// @brief Washout of each region over the trajectories that entered it
+      ///        (all release phases together), and its summary statistics.
+      void writeLesion(const std::filesystem::path& stem) const
+      {
+        if (!(m_lesionHi > m_lesionLo))
+          return;
+        const char* names[2] = { "lesion", "sac" };
+        std::ofstream sum(stem.string() + "_lesion.csv");
+        sum << "region,period,released,entered,censored,timeMedian_T,timeP90_T,timeMean_T,"
+               "spanMedian_T,spanP90_T,washoutHalf_T,remaining1T,remaining2T,remaining4T\n";
+        std::ofstream wash(stem.string() + "_washout.csv");
+        wash << "region,tau_T,remaining\n";
+        for (size_t k = 0; k < 2; ++k)
+        {
+          if (k == 1 && !m_dilation)
+            continue;
+          // span: time from the first entry to the last exit, in cycles;
+          // censored: stopped while able to return (not at the outlet).
+          std::vector<Real> time, span;
+          size_t released = 0, censored = 0;
+          for (const auto& tr : m_trajectories)
+          {
+            if (tr.exit == "wall")
+              continue;   // a tracing limit, not a fate
+            ++released;
+            if (tr.firstIn[k] < 0.0)
+              continue;
+            time.push_back(tr.inside[k] / m_period);
+            const bool cens = tr.exit != "outlet";
+            censored += cens;
+            const Real last = cens ? tr.samples.back().t : tr.lastIn[k];
+            span.push_back((last - tr.firstIn[k]) / m_period);
+          }
+          if (time.empty())
+            continue;
+          std::sort(time.begin(), time.end());
+          std::sort(span.begin(), span.end());
+          const auto q = [](const std::vector<Real>& v, Real f) {
+            return v[std::min(v.size() - 1, static_cast<size_t>(f * v.size()))];
+          };
+          const auto remaining = [&span](Real tau) {
+            return static_cast<Real>(span.end() - std::upper_bound(span.begin(), span.end(), tau))
+              / static_cast<Real>(span.size());
+          };
+          const Real mean = std::accumulate(time.begin(), time.end(), 0.0) / time.size();
+          // Half-life: the first tau at which half of the entered are gone
+          // for good (nan if the horizon is reached first).
+          const Real half = remaining(span.back()) <= 0.5 ? q(span, 0.5) : std::numeric_limits<Real>::quiet_NaN();
+          sum << names[k] << ',' << m_period << ',' << released << ',' << time.size() << ','
+              << static_cast<Real>(censored) / time.size() << ',' << q(time, 0.5) << ',' << q(time, 0.9) << ','
+              << mean << ',' << q(span, 0.5) << ',' << q(span, 0.9) << ',' << half << ','
+              << remaining(1.0) << ',' << remaining(2.0) << ',' << remaining(4.0) << '\n';
+          const Real tauMax = span.back();
+          for (Real tau = 0.0; tau <= tauMax + 1.0e-12; tau += WashoutStep)
+            wash << names[k] << ',' << tau << ',' << remaining(tau) << '\n';
+          Alert::Info() << "[" << names[k] << "] " << time.size() << " of " << released
+                        << " trajectories entered (" << 100.0 * censored / time.size()
+                        << " % censored); time inside: median " << q(time, 0.5) << " T, p90 " << q(time, 0.9)
+                        << " T; washout half-life " << half << " T, remaining after 1 T "
+                        << remaining(1.0) << Alert::Raise;
+        }
       }
 
       Config m_cfg;
@@ -817,6 +1002,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       std::unique_ptr<Location::AABB<MeshType>> m_locator;
       std::vector<Point> m_seeds;
       std::vector<Trajectory> m_trajectories;
+      Real m_parentRadius = 0.0, m_lesionLo = 1.0, m_lesionHi = 0.0;
+      bool m_dilation = false;
   };
 }
 
@@ -838,12 +1025,13 @@ int main(int argc, char** argv)
     else if (key == "-pl_releases") cfg.releases = std::stoul(value());
     else if (key == "-pl_substeps") cfg.substeps = std::stoul(value());
     else if (key == "-pl_transits") cfg.transits = std::stod(value());
+    else if (key == "-pl_horizon") cfg.horizon = std::stod(value());
     else if (key == "-pl_period") cfg.period = std::stod(value());
     else if (key == "-pl_cycles") cfg.cycles = std::stoul(value());
     else if (key == "-h" || key == "--help")
     {
       std::cout << "Pathlines3D -pl_case <dir> [-pl_out stem] [-pl_seeds N] [-pl_releases M]\n"
-                   "            [-pl_substeps k] [-pl_transits n] [-pl_period T] [-pl_cycles c]\n";
+                   "            [-pl_substeps k] [-pl_transits n] [-pl_horizon cycles] [-pl_period T] [-pl_cycles c]\n";
       return 0;
     }
     else
