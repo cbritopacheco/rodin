@@ -1,0 +1,137 @@
+# syntax=docker/dockerfile:1
+#
+# Dependencies of the Kokkos CI lane on NVIDIA GPUs: UCX and Open MPI with
+# CUDA, Boost with MPI, Kokkos 5 with CUDA, PETSc with Kokkos, Kokkos-Kernels,
+# hypre, MUMPS and SuperLU_DIST, and cuDSS. Rodin itself is
+# built by the CI job. See README.md.
+#
+# Kokkos compiles for one GPU architecture, given by KOKKOS_ARCH and
+# CUDA_ARCH. The default is the GTX 980 Ti of zephyr (Maxwell, sm_52), which
+# CUDA 13 no longer supports: hence CUDA 12.9.
+
+ARG CUDA_IMAGE=nvidia/cuda:12.9.1-devel-ubuntu24.04
+FROM ${CUDA_IMAGE}
+
+ARG JOBS=36
+ARG KOKKOS_ARCH=MAXWELL52
+ARG CUDA_ARCH=52
+ARG UCX_VERSION=1.22.0
+ARG OMPI_VERSION=5.0.11
+ARG BOOST_VERSION=1.90.0
+ARG KOKKOS_VERSION=5.2.2
+ARG PETSC_VERSION=3.26.0
+ARG CUDSS_VERSION=1.0.0.35
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      autoconf automake bison bzip2 ca-certificates cmake curl file flex g++ gcc \
+      gfortran git libhdf5-dev libnuma-dev libsuitesparse-dev libeigen3-dev \
+      libtool make ninja-build patch pkg-config python3 xz-utils zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# The driver library comes from the NVIDIA container runtime when the
+# container runs; the build links against its stub.
+ENV CUDA_HOME=/usr/local/cuda
+ENV LIBRARY_PATH=/usr/local/cuda/lib64/stubs
+
+# ---- UCX and Open MPI, CUDA aware ----------------------------------------
+RUN curl -fsSL https://github.com/openucx/ucx/releases/download/v${UCX_VERSION}/ucx-${UCX_VERSION}.tar.gz \
+      | tar xz -C /tmp \
+    && cd /tmp/ucx-${UCX_VERSION} \
+    && ./contrib/configure-release --prefix=/opt/ompi --with-cuda=${CUDA_HOME} \
+         --without-rocm --without-verbs --without-rdmacm --without-knem --without-xpmem \
+    && make -j${JOBS} && make install \
+    && rm -rf /tmp/ucx-${UCX_VERSION}
+
+RUN curl -fsSL https://download.open-mpi.org/release/open-mpi/v${OMPI_VERSION%.*}/openmpi-${OMPI_VERSION}.tar.bz2 \
+      | tar xj -C /tmp \
+    && cd /tmp/openmpi-${OMPI_VERSION} \
+    && ./configure --prefix=/opt/ompi --with-ucx=/opt/ompi --with-cuda=${CUDA_HOME} \
+         --with-cuda-libdir=${CUDA_HOME}/lib64/stubs --without-verbs --without-ofi \
+         --with-hwloc=internal --with-libevent=internal --with-pmix=internal \
+         --with-prrte=internal --enable-mpi-fortran=usempif08 \
+    && make -j${JOBS} && make install \
+    && rm -rf /tmp/openmpi-${OMPI_VERSION}
+
+ENV PATH=/opt/ompi/bin:${PATH}
+ENV LD_LIBRARY_PATH=/opt/ompi/lib
+# GitHub runs container jobs as root.
+ENV OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+# The CI processes share one GPU.
+ENV OMPI_MCA_rmaps_base_oversubscribe=1
+
+# ---- Boost with MPI --------------------------------------------------------
+RUN curl -fsSL https://archives.boost.io/release/${BOOST_VERSION}/source/boost_$(echo ${BOOST_VERSION} | tr . _).tar.bz2 \
+      | tar xj -C /tmp \
+    && cd /tmp/boost_$(echo ${BOOST_VERSION} | tr . _) \
+    && ./bootstrap.sh --prefix=/opt/boost \
+         --with-libraries=atomic,container,filesystem,graph,mpi,serialization,system \
+    && echo "using mpi : /opt/ompi/bin/mpicxx ;" >> project-config.jam \
+    && ./b2 -j${JOBS} cxxstd=20 variant=release link=shared threading=multi install \
+    && rm -rf /tmp/boost_*
+
+ENV LD_LIBRARY_PATH=/opt/boost/lib:${LD_LIBRARY_PATH}
+
+# ---- Kokkos 5 --------------------------------------------------------------
+# The source stays in the image: the installed configuration records its
+# nvcc_wrapper as the compiler of Kokkos.
+RUN mkdir -p /opt/src \
+    && curl -fsSL https://github.com/kokkos/kokkos/releases/download/${KOKKOS_VERSION}/kokkos-${KOKKOS_VERSION}.tar.gz \
+      | tar xz -C /opt/src \
+    && cmake -S /opt/src/kokkos-${KOKKOS_VERSION} -B /tmp/kokkos-build -G Ninja \
+         -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/kokkos \
+         -DCMAKE_CXX_COMPILER=/opt/src/kokkos-${KOKKOS_VERSION}/bin/nvcc_wrapper \
+         -DCMAKE_CXX_STANDARD=20 -DBUILD_SHARED_LIBS=ON \
+         -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_CUDA=ON -DKokkos_ENABLE_COMPLEX_ALIGN=ON \
+         -DKokkos_ARCH_${KOKKOS_ARCH}=ON \
+    && cmake --build /tmp/kokkos-build -j${JOBS} && cmake --install /tmp/kokkos-build \
+    && rm -rf /tmp/kokkos-build
+
+ENV LD_LIBRARY_PATH=/opt/kokkos/lib:${LD_LIBRARY_PATH}
+
+# ---- Kokkos-Kernels --------------------------------------------------------
+# Built apart from PETSc, in its own layer: it takes half an hour, and a
+# failure further in the PETSc build would otherwise start it again. The host
+# compiler lets Kokkos route the CUDA sources to nvcc_wrapper, as PETSc does.
+RUN curl -fsSL https://github.com/kokkos/kokkos-kernels/archive/refs/tags/${KOKKOS_VERSION}.tar.gz \
+      | tar xz -C /tmp \
+    && cmake -S /tmp/kokkos-kernels-${KOKKOS_VERSION} -B /tmp/kokkos-kernels-build -G Ninja \
+         -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/kokkos \
+         -DCMAKE_CXX_COMPILER=g++ -DBUILD_SHARED_LIBS=ON -DKokkos_ROOT=/opt/kokkos \
+    && cmake --build /tmp/kokkos-kernels-build -j${JOBS} \
+    && cmake --install /tmp/kokkos-kernels-build \
+    && rm -rf /tmp/kokkos-kernels-build /tmp/kokkos-kernels-${KOKKOS_VERSION}
+
+# ---- PETSc -----------------------------------------------------------------
+# The device code of SuperLU_DIST adds doubles with atomicAdd, which needs
+# sm_60: below, SuperLU_DIST runs on the host.
+RUN curl -fsSL https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-${PETSC_VERSION}.tar.gz \
+      | tar xz -C /tmp \
+    && cd /tmp/petsc-${PETSC_VERSION} \
+    && ./configure PETSC_ARCH=arch-cuda --prefix=/opt/petsc \
+         --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif90 \
+         --with-cuda=1 --with-cuda-dir=${CUDA_HOME} --with-cuda-arch=${CUDA_ARCH} \
+         --with-cxx-dialect=20 --with-debugging=0 --with-kokkos-dir=/opt/kokkos \
+         --with-kokkos-kernels-dir=/opt/kokkos \
+         --download-fblaslapack --download-hypre --download-metis --download-mumps \
+         --download-parmetis --download-scalapack --download-superlu_dist \
+         $([ ${CUDA_ARCH} -lt 60 ] && echo --download-superlu_dist-cmake-arguments=-DTPL_ENABLE_CUDALIB=FALSE) \
+         --with-make-np=${JOBS} \
+    && make PETSC_DIR=$PWD PETSC_ARCH=arch-cuda all \
+    && make PETSC_DIR=$PWD PETSC_ARCH=arch-cuda install \
+    && rm -rf /tmp/petsc-${PETSC_VERSION}
+
+ENV PETSC_DIR=/opt/petsc
+ENV LD_LIBRARY_PATH=/opt/petsc/lib:${LD_LIBRARY_PATH}
+
+# ---- cuDSS -----------------------------------------------------------------
+RUN curl -fsSL https://developer.download.nvidia.com/compute/cudss/redist/libcudss/linux-x86_64/libcudss-linux-x86_64-${CUDSS_VERSION}_cuda12-archive.tar.xz \
+      | tar xJ -C /opt \
+    && mv /opt/libcudss-linux-x86_64-${CUDSS_VERSION}_cuda12-archive /opt/cudss
+
+ENV LD_LIBRARY_PATH=/opt/cudss/lib:${LD_LIBRARY_PATH}
+
+# Only the build needs the stub; at run time it would hide the driver.
+ENV LIBRARY_PATH=
+ENV CMAKE_PREFIX_PATH=/opt/petsc:/opt/kokkos:/opt/boost:/opt/cudss
+ENV RODIN_KOKKOS_BACKEND=cuda
