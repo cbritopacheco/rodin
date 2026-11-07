@@ -3,6 +3,8 @@
  * Distributed under the Boost Software License, Version 1.0.
  */
 #include <gtest/gtest.h>
+#include <atomic>
+#include <complex>
 #include <cmath>
 #include <functional>
 #include <limits>
@@ -1140,6 +1142,90 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  TEST(Rodin_Adaptation_SWIFTSolver, DirectSolvePreservesInputsAcrossUpdates)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
+    TrialFunction trial(space);
+    TestFunction test(space);
+    Problem problem(trial, test);
+    using System = std::remove_reference_t<decltype(problem.getLinearSystem())>;
+    for (const auto backend : {SWIFT::Parameters::LinearSolver::SparseLU
+#ifdef RODIN_USE_MUMPS
+           ,
+           SWIFT::Parameters::LinearSolver::MUMPS
+#endif
+         })
+    {
+      SWIFT::LinearSolver<System> solver(problem);
+      SWIFT::Parameters parameters;
+      parameters.linear.solver = backend;
+      parameters.linear.threads = 1;
+      SWIFT::Report report;
+      solver.setParameters(parameters).setReport(&report);
+      auto& system = problem.getLinearSystem();
+      Math::Matrix<Real> matrix(3, 3), factor(3, 1);
+      matrix << 4, 0.2, 0, 0.2, 3, 0.1, 0, 0.1, 2;
+      factor << 0.3, 0.2, 0.1;
+      for (size_t update = 0; update < 6; ++update)
+      {
+        if (update == 2)
+          matrix(0, 0) += Real(1);
+        if (update == 3)
+          matrix(0, 2) = matrix(2, 0) = Real(0.15);
+        if (update == 4)
+          factor *= Real(0.5);
+        if (update == 5)
+          factor.resize(0, 0);
+        system.getOperator() = matrix.sparseView();
+        system.getVector().resize(3);
+        system.getVector() << Real(1) + update, -0.7, 2.3;
+        const Math::Vector<Real> rhs = system.getVector();
+        solver.setCentering(factor).solve(system);
+        ASSERT_TRUE(solver.success());
+        Math::Matrix<Real> complete = matrix;
+        if (factor.size() != 0)
+          complete -= factor * factor.transpose();
+        EXPECT_LT((complete * system.getSolution() - rhs).norm(), Real(1e-12));
+        EXPECT_EQ((Math::Matrix<Real>(system.getOperator()) - matrix).norm(), Real(0));
+        EXPECT_EQ((system.getVector() - rhs).norm(), Real(0));
+#ifdef RODIN_USE_MUMPS
+        if (backend == SWIFT::Parameters::LinearSolver::MUMPS && update == 1)
+        {
+          EXPECT_EQ(report.directAnalyses, 1u);
+          EXPECT_EQ(report.directFactorizations, 1u);
+        }
+#endif
+      }
+    }
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, AugmentedMetricPreservesStructureAndConjugation)
+  {
+    const auto check = []<class Scalar>() {
+      Math::Matrix<Scalar> core = Math::Matrix<Scalar>::Identity(4, 4);
+      core(0, 2) = Scalar(0.25);
+      const Math::SparseMatrix<Scalar> sparse = core.sparseView();
+      Math::Matrix<Scalar> factor = Math::Matrix<Scalar>::Zero(4, 2);
+      factor(0, 0) = Scalar(0.2);
+      factor(2, 1) = Scalar(-0.3);
+      if constexpr (std::is_same_v<Scalar, std::complex<Real>>)
+        factor(0, 0) = Scalar(0.2, 0.7);
+      const auto augmented = SWIFT::LowRankUpdate<Scalar>(sparse, factor).getAugmented();
+      Math::Matrix<Scalar> expected = Math::Matrix<Scalar>::Zero(6, 6);
+      expected.topLeftCorner(4, 4) = core;
+      expected.topRightCorner(4, 2) = factor;
+      expected.bottomLeftCorner(2, 4) = factor.adjoint();
+      expected.bottomRightCorner(2, 2).setIdentity();
+      EXPECT_EQ((Math::Matrix<Scalar>(augmented) - expected).norm(), Real(0));
+      EXPECT_TRUE(augmented.isCompressed());
+      // Zero couplings remain structural entries for symbolic-analysis reuse.
+      EXPECT_EQ(augmented.nonZeros(), sparse.nonZeros() + 2 * 4 * 2 + 2);
+    };
+    check.template operator()<Real>();
+    check.template operator()<std::complex<Real>>();
+  }
+
   TEST(Rodin_Adaptation_SWIFTSolver, LowRankRepresentation)
   {
     Math::Matrix<Real> core = Math::Matrix<Real>::Identity(4, 4) * Real(4);
@@ -1699,4 +1785,115 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(solver.getParameters().linear.solver, before);
   }
 #endif
+}
+
+namespace Rodin::Tests::Unit
+{
+  TEST(Rodin_Adaptation_SWIFTSolver, MappedQuadratureStorageIsLocalToEvaluation)
+  {
+    class TrackingMesh : public LocalMesh
+    {
+      public:
+        explicit TrackingMesh(LocalMesh&& mesh)
+          : LocalMesh(std::move(mesh))
+        {}
+
+        const PolytopeQuadrature& getQuadrature(size_t dimension, Index index,
+          const QF::QuadratureFormula& formula) const override
+        {
+          if (formula.getSize() > 1)
+            m_requests.fetch_add(1, std::memory_order_relaxed);
+          return LocalMesh::getQuadrature(dimension, index, formula);
+        }
+
+        size_t getRequests() const
+        {
+          return m_requests.load(std::memory_order_relaxed);
+        }
+        void resetRequests()
+        {
+          m_requests.store(0, std::memory_order_relaxed);
+        }
+
+      private:
+        mutable std::atomic<size_t> m_requests{0};
+    };
+
+    const auto check = []<size_t Order>(size_t dimension) {
+      SCOPED_TRACE(
+        ::testing::Message() << "Order " << Order << ", dimension " << dimension);
+      TrackingMesh mesh(dimension == 2
+          ? LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3})
+          : LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3}));
+      mesh.scale(Real(0.5));
+      for (size_t from = 1; from <= dimension; ++from)
+      {
+        for (size_t to = 0; to <= dimension; ++to)
+        {
+          if (from != to)
+            mesh.getConnectivity().compute(from, to);
+        }
+      }
+      constexpr Attribute interface = 10, fixed = 20;
+      for (auto face = mesh.getFace(); face; ++face)
+      {
+        bool middle = true, left = true, right = true;
+        for (const Index vertex : face->getVertices())
+        {
+          const Real x = mesh.getVertexCoordinates(vertex)(0);
+          middle &= x == Real(0.5);
+          left &= x == Real(0);
+          right &= x == Real(1);
+        }
+        if (middle)
+          mesh.setAttribute({dimension - 1, face->getIndex()}, interface);
+        if (left || right)
+          mesh.setAttribute({dimension - 1, face->getIndex()}, fixed);
+      }
+      const auto face = mesh.getFace();
+      const auto& formula = QF::QuadratureFormula::get(32, face->getGeometry());
+      const auto& borrowed = face->getQuadrature(formula);
+      const Point* borrowedPoint = &borrowed.getPoint(0);
+      const Math::SpatialPoint physical(borrowedPoint->getPhysicalCoordinates());
+      mesh.resetRequests();
+      auto space = [&]() {
+        if constexpr (Order == 1)
+          return P1<Math::SpatialVector<Real>, LocalMesh>(mesh, dimension);
+        else
+          return H1(std::integral_constant<size_t, Order>{}, mesh, dimension);
+      }();
+      TrialFunction u(space);
+      TestFunction v(space);
+      SWIFT::Problem fitting(u, v);
+      Math::SpatialVector<Real> zero(dimension), normal(dimension);
+      zero.setZero();
+      normal.setZero();
+      normal(0) = 1;
+      fitting += DirichletBC(u, VectorFunction(dimension, [zero](const Point&) {
+        return zero;
+      })).on(fixed);
+      SWIFT::Parameters parameters;
+      parameters.model.h = Real(0.5);
+      parameters.model.distribution = {.deviatoric = Real(1), .divergence = Real(1)};
+      parameters.interfaceAttribute = interface;
+      parameters.linear.solver = SWIFT::Parameters::LinearSolver::SparseLU;
+      parameters.convergence.iterations.outer = 2;
+      parameters.convergence.tolerance.geometric = Real(1e-10);
+      fitting.setParameters(parameters);
+      const RealFunction phi([](const Point& point) { return point.x() - Real(0.55); });
+      const VectorFunction gradient(dimension, [normal](const Point&) { return normal; });
+      const auto report = fitting.solve(phi, gradient);
+      EXPECT_GT(report.iterations, 0u);
+      EXPECT_TRUE(report.qualityBudgetSatisfied);
+      EXPECT_TRUE(std::isfinite(report.energy));
+      EXPECT_EQ(mesh.getRequests(), 0u);
+      EXPECT_EQ(&borrowed.getPoint(0), borrowedPoint);
+      EXPECT_EQ((borrowedPoint->getPhysicalCoordinates() - physical).norm(), Real(0));
+    };
+    for (const size_t dimension : {size_t(2), size_t(3)})
+    {
+      check.template operator()<1>(dimension);
+      check.template operator()<2>(dimension);
+    }
+  }
 }

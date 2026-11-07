@@ -7,6 +7,7 @@
 #ifndef RODIN_ADAPTATION_SWIFT_PROBLEM_H
 #define RODIN_ADAPTATION_SWIFT_PROBLEM_H
 
+#include "Rodin/Geometry/PolytopeQuadrature.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 #include <algorithm>
 #include <chrono>
@@ -48,6 +49,9 @@ namespace Rodin::Adaptation::SWIFT
 {
   /**
    * @brief Sampled physical displacement norm, independent of FE coefficients.
+   *
+   * Mapped samples are local to each cell evaluation. Reference formulas and
+   * the sampling order are unchanged; no mapped arrays are retained on the mesh.
    * @param[in] mesh Reference mesh.
    * @param[in] fes Displacement finite element space.
    * @param[in] cells Cells on which to sample physical displacement.
@@ -94,7 +98,7 @@ namespace Rodin::Adaptation::SWIFT
           ? validationOrder
           : std::max<size_t>(6, 2 * fe.getDegree().value_or(2 * fe.getOrder()) + 4),
         cell->getGeometry());
-      const auto& quadrature = cell->getQuadrature(qf);
+      const Geometry::PolytopeQuadrature quadrature(*cell, qf);
       for (std::size_t q = 0; q < quadrature.getSize(); ++q)
       {
         maximum =
@@ -1131,24 +1135,18 @@ namespace Rodin::Adaptation::SWIFT
           m_fittingForce.assemble();
           bool solveOk = true;
           Real predictorAction = Real(0);
-          typename ProblemType::ProblemBodyType predictorBody(m_distributionForm);
-          predictorBody = predictorBody + m_fittingMetric - m_fittingForce;
-          m_metricProblem = predictorBody;
+          {
+            typename ProblemType::ProblemBodyType predictorBody(m_distributionForm);
+            predictorBody = predictorBody + m_fittingMetric - m_fittingForce;
+            m_metricProblem = predictorBody;
+          }
           assembleStep();
           rep.tAssembly += secondsSince(tic);
 
-          Math::SparseMatrix<Real> fixedMetric;
-          Math::Vector<Real> fixedForce;
-          if constexpr (std::is_same_v<
-                          typename FormLanguage::Traits<LinearSystemType>::OperatorType,
-                          Math::SparseMatrix<Real>>)
-          {
-            {
-              const auto& system = m_metricProblem.getLinearSystem();
-              fixedMetric = system.getOperator();
-              fixedForce = system.getVector();
-            }
-          }
+          // This problem is not reassembled during the inner solve. Borrow its
+          // frozen metric and force instead of retaining another sparse copy.
+          auto& fixedMetric = m_metricProblem.getLinearSystem().getOperator();
+          const auto& fixedForce = m_metricProblem.getLinearSystem().getVector();
           tic = Clock::now();
           solveOk = solvePredictor(vK, rep);
           recordLinearSolve(m_linearSolver.getIterations(), m_linearSolver.getError());
@@ -1246,9 +1244,11 @@ namespace Rodin::Adaptation::SWIFT
               HingeMetric hingeMetric(
                 m_duStep, m_vStep, u, vK, predictor, p, hingeCoefficient);
               HingeForce hingeForce(m_vStep, u, vK, predictor, p, hingeCoefficient);
-              typename ProblemType::ProblemBodyType body(m_distributionForm);
-              body = body + m_fittingMetric + hingeMetric - m_fittingForce - hingeForce;
-              m_hingeProblem = body;
+              {
+                typename ProblemType::ProblemBodyType body(m_distributionForm);
+                body = body + m_fittingMetric + hingeMetric - m_fittingForce - hingeForce;
+                m_hingeProblem = body;
+              }
               m_hingeProblem.setState(vK)
                 .setBoundaryDOFs(m_fixedIncrementDOFs)
                 .setCentering(m_centering);
@@ -1732,7 +1732,7 @@ namespace Rodin::Adaptation::SWIFT
           {
             const auto face = mesh.getFace(interfaceFacets[static_cast<size_t>(i)]);
             const auto& qf = getQuadrature(*face, fes);
-            const auto& quadrature = face->getQuadrature(qf);
+            const Geometry::PolytopeQuadrature quadrature(*face, qf);
             for (size_t q = 0; q < quadrature.getSize(); ++q)
             {
               const auto& point = quadrature.getPoint(q);
@@ -1823,7 +1823,7 @@ namespace Rodin::Adaptation::SWIFT
           {
             const auto cell = mesh.getCell(cellIndex);
             const auto& qf = getQuadrature(*cell, fes);
-            const auto& quadrature = cell->getQuadrature(qf);
+            const Geometry::PolytopeQuadrature quadrature(*cell, qf);
             for (std::size_t q = 0; q < quadrature.getSize(); ++q)
               measure += qf.getWeight(q) * quadrature.getPoint(q).getDistortion();
           }
@@ -1875,7 +1875,7 @@ namespace Rodin::Adaptation::SWIFT
             const Index facetIndex = interfaceFacets[static_cast<std::size_t>(i)];
             const auto face = mesh.getFace(facetIndex);
             const auto& qf = getQuadrature(*face, fes);
-            const auto& quadrature = face->getQuadrature(qf);
+            const Geometry::PolytopeQuadrature quadrature(*face, qf);
             for (std::size_t q = 0; q < quadrature.getSize(); ++q)
             {
               const auto& point = quadrature.getPoint(q);
@@ -2151,7 +2151,7 @@ namespace Rodin::Adaptation::SWIFT
           const Index facetIdx = interfaceFacets[static_cast<std::size_t>(i)];
           const auto face = mesh.getFace(facetIdx);
           const auto& qf = getQuadrature(*face, fes);
-          const auto& quad = face->getQuadrature(qf);
+          const Geometry::PolytopeQuadrature quad(*face, qf);
           for (std::size_t q = 0; q < quad.getSize(); ++q)
           {
             const auto& src = quad.getPoint(q);
@@ -2249,14 +2249,14 @@ namespace Rodin::Adaptation::SWIFT
             const auto face = mesh.getFace(facetIndex);
             const auto& fe = fes.getFiniteElement(face->getDimension(), facetIndex);
             const auto& qf = getGeometricValidationQuadrature(*face, fes);
-            const auto& quadrature = face->getQuadrature(qf);
+            const Geometry::PolytopeQuadrature quadrature(*face, qf);
             const Geometry::Polytope::Traits traits(face->getGeometry());
             const auto& witnesses = QualityCovering::get(face->getGeometry(),
               m_parameters.sampling.getSubdivision(
                 fe.getDegree().value_or(2 * fe.getOrder()),
                 face->getTransformation().getDegree().value_or(2),
                 traits.getVertexCount() == face->getDimension() + 1));
-            const auto& samples = face->getQuadrature(witnesses);
+            const Geometry::PolytopeQuadrature samples(*face, witnesses);
             for (std::size_t q = 0; q < samples.getSize(); ++q)
             {
               const auto& moved =
@@ -2429,7 +2429,7 @@ namespace Rodin::Adaptation::SWIFT
         {
           const auto face = mesh.getFace(facetIdx);
           const auto& qf = getQuadrature(*face, fes);
-          const auto& quad = face->getQuadrature(qf);
+          const Geometry::PolytopeQuadrature quad(*face, qf);
           for (std::size_t q = 0; q < quad.getSize(); ++q)
           {
             const Variational::IntegrationPoint ip(quad, q);

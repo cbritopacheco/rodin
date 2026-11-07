@@ -11,7 +11,6 @@
 #include <iostream>
 #include <memory>
 #include <limits>
-#include <vector>
 #include <Eigen/IterativeLinearSolvers>
 #include "Rodin/Solver/LinearSolver.h"
 #include "Rodin/Solver/MUMPS.h"
@@ -142,25 +141,27 @@ namespace Rodin::Adaptation::SWIFT
         if (m_factor.size() == 0)
           return m_core;
         const auto n = rows(), rank = m_factor.cols();
-        std::vector<Math::SparseTriplet<Scalar>> entries;
-        entries.reserve(m_core.nonZeros() + 2 * n * rank + rank);
-        for (Eigen::Index column = 0; column < m_core.outerSize(); ++column)
+        Math::SparseMatrix<Scalar> result(n + rank, n + rank);
+        result.reserve(m_core.nonZeros() + 2 * n * rank + rank);
+        // Columns are already ordered. Write compressed storage directly,
+        // preserving structural zeros without a second triplet-sized buffer.
+        for (Eigen::Index column = 0; column < n; ++column)
         {
+          result.startVec(column);
           for (typename Math::SparseMatrix<Scalar>::InnerIterator entry(m_core, column);
             entry; ++entry)
-            entries.emplace_back(entry.row(), entry.col(), entry.value());
+            result.insertBack(entry.row(), column) = entry.value();
+          for (Eigen::Index k = 0; k < rank; ++k)
+            result.insertBack(n + k, column) = Eigen::numext::conj(m_factor(column, k));
         }
         for (Eigen::Index k = 0; k < rank; ++k)
         {
-          for (Eigen::Index i = 0; i < n; ++i)
-          {
-            entries.emplace_back(i, n + k, m_factor(i, k));
-            entries.emplace_back(n + k, i, Eigen::numext::conj(m_factor(i, k)));
-          }
-          entries.emplace_back(n + k, n + k, Scalar(1));
+          result.startVec(n + k);
+          for (Eigen::Index row = 0; row < n; ++row)
+            result.insertBack(row, n + k) = m_factor(row, k);
+          result.insertBack(n + k, n + k) = Scalar(1);
         }
-        Math::SparseMatrix<Scalar> result(n + rank, n + rank);
-        result.setFromTriplets(entries.begin(), entries.end());
+        result.finalize();
         return result;
       }
 
@@ -340,7 +341,8 @@ namespace Rodin::Adaptation::SWIFT
           if (m_parameters.linear.solver != Parameters::LinearSolver::CG)
           {
             const auto solveDirect = [&](auto& direct, StringView backend) {
-              const auto solveSystem = [&](LinearSystemType& system) {
+              const auto solveSystem = [&](LinearSystemType& system,
+                                         bool transferOperator) {
                 if constexpr (requires { direct.factorize(system); })
                 {
                   auto& next = system.getOperator();
@@ -361,7 +363,12 @@ namespace Rodin::Adaptation::SWIFT
                     direct.clear(Solver::Factorization::Symbolic);
                   const bool numeric = direct.success() &&
                     direct.getInfo().factorization == Solver::Factorization::Numeric;
-                  m_directSystem.getOperator() = next;
+                  // The augmented system is temporary; transfer its storage.
+                  // A caller-owned core must remain unchanged after the solve.
+                  if (transferOperator)
+                    m_directSystem.getOperator() = std::move(next);
+                  else
+                    m_directSystem.getOperator() = next;
                   m_directSystem.getVector() = system.getVector();
                   if (!sameValues || !numeric)
                   {
@@ -383,7 +390,7 @@ namespace Rodin::Adaptation::SWIFT
               };
               const auto& matrix = axb.getOperator();
               if (m_centering.size() == 0)
-                solveSystem(axb);
+                solveSystem(axb, false);
               else
               {
                 const auto n = matrix.rows();
@@ -392,7 +399,7 @@ namespace Rodin::Adaptation::SWIFT
                 augmented.getVector() =
                   Math::Vector<Real>::Zero(augmented.getOperator().rows());
                 augmented.getVector().head(n) = rhs;
-                solveSystem(augmented);
+                solveSystem(augmented, true);
                 if (direct.success())
                   axb.getSolution() = augmented.getSolution().head(n);
               }

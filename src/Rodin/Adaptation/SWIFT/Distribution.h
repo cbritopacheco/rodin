@@ -5,6 +5,7 @@
 #ifndef RODIN_ADAPTATION_SWIFT_DISTRIBUTION_H
 #define RODIN_ADAPTATION_SWIFT_DISTRIBUTION_H
 
+#include "Rodin/Geometry/PolytopeQuadrature.h"
 #include <vector>
 #include <functional>
 #include "Rodin/Configure.h"
@@ -75,7 +76,7 @@ namespace Rodin::Adaptation::SWIFT
         const auto nTrial = trialFES.getFiniteElement(d, cell.getIndex()).getCount();
         const auto nTest = testFES.getFiniteElement(d, cell.getIndex()).getCount();
         const auto& qf = QF::QuadratureFormula::get(m_order, cell.getGeometry());
-        const auto& quadrature = cell.getQuadrature(qf);
+        const Geometry::PolytopeQuadrature quadrature(cell, qf);
         m_matrix = Math::Matrix<Real>::Zero(nTest, nTrial);
         m_trialStrains.resize(nTrial);
         m_testStrains.resize(nTest);
@@ -173,7 +174,7 @@ namespace Rodin::Adaptation::SWIFT
               continue;
           }
           const auto& formula = QF::QuadratureFormula::get(m_order, cell->getGeometry());
-          const auto& quadrature = cell->getQuadrature(formula);
+          const Geometry::PolytopeQuadrature quadrature(*cell, formula);
           for (size_t sample = 0; sample < quadrature.getSize(); ++sample)
           {
             const Variational::IntegrationPoint point(quadrature, sample);

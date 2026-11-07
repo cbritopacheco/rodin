@@ -14,31 +14,6 @@
 
 namespace KelvinBall
 {
-  struct SewedOutput::StateFields
-  {
-    explicit StateFields(const Mesh& mesh)
-      : velocitySpace(mesh, 3),
-        pressureSpace(mesh),
-        motion(velocitySpace)
-    {
-      for (size_t load = 0; load < 3; ++load)
-      {
-        translations[load] = std::make_unique<Velocity>(velocitySpace);
-        rotations[load] = std::make_unique<Velocity>(velocitySpace);
-        translationPressures[load] = std::make_unique<Pressure>(pressureSpace);
-        rotationPressures[load] = std::make_unique<Pressure>(pressureSpace);
-      }
-    }
-
-    VelocitySpace velocitySpace;
-    PressureSpace pressureSpace;
-    std::array<std::unique_ptr<Velocity>, 3> translations, rotations;
-    std::array<std::unique_ptr<Pressure>, 3> translationPressures, rotationPressures;
-    Velocity motion;
-  };
-
-  SewedOutput::~SewedOutput() = default;
-
   void SewedOutput::addStates(IO::XDMF::Grid& grid,
     const std::array<Velocity*, 3>& translations,
     const std::array<Velocity*, 3>& rotations,
@@ -48,38 +23,60 @@ namespace KelvinBall
     const Math::SpatialVector<Real>& angular)
   {
     grid.clear();
-    m_states = std::make_unique<StateFields>(m_mesh);
-    auto& fields = *m_states;
     grid.setMesh(m_mesh, IO::XDMF::MeshPolicy::Transient);
     for (size_t load = 0; load < 3; ++load)
     {
-      setVectorLoad(*fields.translations[load], translations, load);
-      setVectorLoad(*fields.rotations[load], rotations, load);
-      setScalarLoad(*fields.translationPressures[load], translationPressures, load);
-      setScalarLoad(*fields.rotationPressures[load], rotationPressures, load);
-    }
-    // Preserve the field ordering of the chamber output.
-    for (size_t load = 0; load < 3; ++load)
-      grid.add("Translation_" + std::to_string(load), *fields.translations[load]);
-    for (size_t load = 0; load < 3; ++load)
-      grid.add("Rotation_" + std::to_string(load), *fields.rotations[load]);
-    for (size_t load = 0; load < 3; ++load)
-    {
-      grid.add("Pressure_Translation_" + std::to_string(load),
-        *fields.translationPressures[load]);
+      grid.add("Translation_" + std::to_string(load), 3,
+        [this, translations, load](Index vertex, std::span<Real> value) {
+          const auto sample = getVectorLoad(translations, load, vertex);
+          for (size_t component = 0; component < 3; ++component)
+            value[component] = sample(component);
+        });
     }
     for (size_t load = 0; load < 3; ++load)
     {
-      grid.add(
-        "Pressure_Rotation_" + std::to_string(load), *fields.rotationPressures[load]);
+      grid.add("Rotation_" + std::to_string(load), 3,
+        [this, rotations, load](Index vertex, std::span<Real> value) {
+          const auto sample = getVectorLoad(rotations, load, vertex);
+          for (size_t component = 0; component < 3; ++component)
+            value[component] = sample(component);
+        });
     }
-    fields.motion.getData() = translation(0) * fields.translations[0]->getData() +
-      translation(1) * fields.translations[1]->getData() +
-      translation(2) * fields.translations[2]->getData() +
-      angular(0) * fields.rotations[0]->getData() +
-      angular(1) * fields.rotations[1]->getData() +
-      angular(2) * fields.rotations[2]->getData();
-    grid.add("Motion", fields.motion);
+    for (size_t load = 0; load < 3; ++load)
+    {
+      grid.add("Pressure_Translation_" + std::to_string(load), 1,
+        [this, translationPressures, load](Index vertex, std::span<Real> value) {
+          value[0] = getScalarLoad(translationPressures, load, vertex);
+        });
+    }
+    for (size_t load = 0; load < 3; ++load)
+    {
+      grid.add("Pressure_Rotation_" + std::to_string(load), 1,
+        [this, rotationPressures, load](Index vertex, std::span<Real> value) {
+          value[0] = getScalarLoad(rotationPressures, load, vertex);
+        });
+    }
+    grid.add("Motion", 3,
+      [this, translations, rotations, translation, angular](
+        Index vertex, std::span<Real> value) {
+        const auto t0 = getVectorLoad(translations, 0, vertex);
+        const auto t1 = getVectorLoad(translations, 1, vertex);
+        const auto t2 = getVectorLoad(translations, 2, vertex);
+        const auto r0 = getVectorLoad(rotations, 0, vertex);
+        const auto r1 = getVectorLoad(rotations, 1, vertex);
+        const auto r2 = getVectorLoad(rotations, 2, vertex);
+        for (size_t component = 0; component < 3; ++component)
+        {
+          // Preserve the separate products of the original Eigen field expression.
+          const Real t0Value = translation(0) * t0(component);
+          const Real t1Value = translation(1) * t1(component);
+          const Real t2Value = translation(2) * t2(component);
+          const Real r0Value = angular(0) * r0(component);
+          const Real r1Value = angular(1) * r1(component);
+          const Real r2Value = angular(2) * r2(component);
+          value[component] = t0Value + t1Value + t2Value + r0Value + r1Value + r2Value;
+        }
+      });
   }
 
   const std::vector<Math::SpatialMatrix<Real>>& SewedOutput::getCubeRotations()
@@ -115,34 +112,50 @@ namespace KelvinBall
     const Mesh& chamber, const FlatSet<Attribute>& boundaryAttributes, Real tolerance)
     : m_rotations(getCubeRotations())
   {
-    using Key = std::tuple<long long, long long, long long>;
-    std::map<Key, Index> vertices;
-    std::vector<Math::SpatialPoint> coordinates;
+    Mesh::Builder builder;
+    {
+      using Key = std::tuple<long long, long long, long long>;
+      std::vector<Math::SpatialPoint> coordinates;
     std::vector<std::vector<Index>> copies(
       m_rotations.size(), std::vector<Index>(chamber.getVertexCount()));
-
-    for (size_t r = 0; r < m_rotations.size(); ++r)
+      std::vector<Index> counts;
     {
-      for (Index vertex = 0; vertex < chamber.getVertexCount(); ++vertex)
+        std::map<Key, Index> vertices;
+        for (size_t r = 0; r < m_rotations.size(); ++r)
       {
-        const Math::SpatialPoint x =
-          m_rotations[r] * chamber.getVertexCoordinates(vertex);
-        const Key key{std::llround(x(0) / tolerance), std::llround(x(1) / tolerance),
-          std::llround(x(2) / tolerance)};
-        const auto [position, inserted] =
-          vertices.emplace(key, static_cast<Index>(coordinates.size()));
-        if (inserted)
+          for (Index vertex = 0; vertex < chamber.getVertexCount(); ++vertex)
         {
-          coordinates.push_back(x);
-          m_sources.emplace_back();
+            const Math::SpatialPoint x =
+              m_rotations[r] * chamber.getVertexCoordinates(vertex);
+            const Key key{std::llround(x(0) / tolerance), std::llround(x(1) / tolerance),
+              std::llround(x(2) / tolerance)};
+            const auto [position, inserted] =
+              vertices.emplace(key, static_cast<Index>(coordinates.size()));
+            if (inserted)
+            {
+              coordinates.push_back(x);
+              counts.push_back(0);
+            }
+            ++counts[position->second];
+            copies[r][vertex] = position->second;
+          }
         }
-        m_sources[position->second].push_back({r, vertex});
-        copies[r][vertex] = position->second;
       }
-    }
-
-    Mesh::Builder builder;
-    builder.initialize(3).nodes(coordinates.size());
+      // Flat representatives avoid an allocation and vector header per sewn node.
+      m_sourceOffsets.resize(counts.size() + 1, 0);
+      for (Index vertex = 0; vertex < counts.size(); ++vertex)
+        m_sourceOffsets[vertex + 1] = m_sourceOffsets[vertex] + counts[vertex];
+      m_sources.resize(m_sourceOffsets.back());
+      std::fill(counts.begin(), counts.end(), 0);
+      for (size_t r = 0; r < m_rotations.size(); ++r)
+      {
+        for (Index vertex = 0; vertex < chamber.getVertexCount(); ++vertex)
+        {
+          const Index target = copies[r][vertex];
+          m_sources[m_sourceOffsets[target] + counts[target]++] = {r, vertex};
+        }
+      }
+      builder.initialize(3).nodes(coordinates.size());
     for (const auto& x : coordinates)
       builder.vertex(x);
 
@@ -169,6 +182,7 @@ namespace KelvinBall
         builder.polytope(face->getGeometry(), std::move(vertices), index);
         builder.attribute({chamber.getDimension() - 1, index}, attribute);
       }
+    }
     }
     m_mesh = builder.finalize();
   }

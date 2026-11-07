@@ -54,6 +54,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -135,6 +136,14 @@ namespace Rodin::IO
         HEXAHEDRON_24 = 49,  ///< Biquadratic hexahedron (24 nodes).
         HEXAHEDRON_27 = 50   ///< Triquadratic hexahedron (27 nodes).
       };
+
+      /**
+       * @brief Fills one visualization node's scalar or vector components.
+       *
+       * The callback is evaluated only when writing; captured data must remain
+       * valid through that write. It does not require a finite element space.
+       */
+      using NodeSampler = std::function<void(Index, std::span<Real>)>;
 
       /// @brief XML element names used in the XDMF 3 document format.
       struct Keyword
@@ -349,7 +358,7 @@ namespace Rodin::IO
           /**
            * @brief Sets the mesh observed by this grid.
            * @tparam MeshType  Concrete mesh type (must derive from MeshBase).
-           * @param[in] mesh    Mesh to observe (must outlive the XDMF writer).
+           * @param[in] mesh    Mesh to observe (must remain valid through each write).
            * @param[in] policy  Export policy selected as Static or Transient.
            * @returns Reference to `*this` for method chaining.
            */
@@ -397,6 +406,32 @@ namespace Rodin::IO
           Grid& add(const std::string& name, const GridFunctionType& gf,
             Center center = Center::Node,
             AttributePolicy policy = AttributePolicy::Transient);
+
+          /**
+           * @brief Registers lazily sampled nodal scalar or vector data.
+           * @param name Attribute name.
+           * @param dimension Components per visualization node; one denotes a scalar.
+           * @param sample Callable filling components in exported geometry-node order.
+           * @param policy Static or transient attribute export.
+           * @returns This grid.
+           *
+           * A mesh must already be set. Samples are generated one attribute at a
+           * time during write(), so no full-domain field or space is retained.
+           */
+          Grid& add(const std::string& name, size_t dimension, NodeSampler sample,
+            AttributePolicy policy = AttributePolicy::Transient);
+
+          /**
+           * @brief Writes only this grid's next temporal snapshot.
+           * @param time Snapshot time.
+           * @returns This grid.
+           *
+           * Each grid uses its own snapshot index. This permits sequential output
+           * of grids whose meshes and fields need not coexist. In distributed
+           * mode all ranks must write the same grid collectively. Use either
+           * per-grid writes or synchronized domain writes consistently.
+           */
+          Grid& write(Real time);
 
           /**
            * @brief Tests whether a mesh has been set on this grid.
@@ -639,7 +674,7 @@ namespace Rodin::IO
       bool isClosed() const noexcept;
 
       /**
-       * @brief Returns the total number of snapshots written so far.
+       * @brief Returns the maximum number of snapshots written for a grid.
        * @returns Snapshot count.
        */
       size_t getSnapshotCount() const noexcept;
@@ -780,6 +815,14 @@ namespace Rodin::IO
 #ifdef RODIN_USE_MPI
       MPI_Comm m_comm = MPI_COMM_NULL; ///< Non-owning MPI communicator.
 #endif
+
+      /**
+       * @brief Exports and records one grid snapshot without retaining heavy data.
+       * @param gridIndex Registered grid index.
+       * @param time Snapshot time.
+       * @param snapshotIndex File index for this snapshot.
+       */
+      void writeGrid(size_t gridIndex, Real time, size_t snapshotIndex);
 
       /**
        * @brief Writes a single Uniform grid XML element.

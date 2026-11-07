@@ -91,6 +91,7 @@
 #ifndef RODIN_IO_HDF5_H
 #define RODIN_IO_HDF5_H
 
+#include <span>
 #include <hdf5.h>
 
 #ifndef RODIN_IO_HDF5_MAXIMUM_GEOMETRY_ORDER
@@ -1697,6 +1698,72 @@ namespace Rodin::IO
       writeXDMFRegionAttribute(file.get(), mesh);
     }
 
+    /**
+     * @brief Creates the shared XDMF attribute-file layout and scalar metadata.
+     * @param filename Heavy-data file to create.
+     * @param count Number of visualization samples.
+     * @param dimension Number of components per sample.
+     * @returns Open file owning the attribute groups and metadata.
+     */
+    inline Handle createXDMFAttributeFile(
+      const boost::filesystem::path& filename, size_t count, size_t dimension)
+    {
+      auto file =
+        File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      if (!file)
+      {
+        Alert::Exception() << "Failed to create HDF5 XDMF attribute file: " << filename
+                           << Alert::Raise;
+      }
+      for (const auto* path :
+        {Path::GridFunction, Path::GridFunctionMeta, Path::GridFunctionValues})
+      {
+        const auto group =
+          Group(H5Gcreate2(file.get(), path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception() << "Failed to create " << path << " group." << Alert::Raise;
+        }
+      }
+      writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<U64>(count));
+      writeScalarDataset(
+        file.get(), Path::GridFunctionMetaDimension, static_cast<U64>(dimension));
+      return file;
+    }
+
+    /**
+     * @brief Exports indexed nodal samples without constructing a finite element space.
+     * @tparam Sampler Callable filling one sample's component span.
+     * @param filename Heavy-data file to create.
+     * @param count Number of visualization nodes.
+     * @param dimension Components per node; one produces scalar data.
+     * @param sample Callable receiving the visualization node index and its output span.
+     *
+     * Only the current attribute's packed values are materialized. The node order
+     * is the order used by the grid's exported geometry, including curved samples.
+     */
+    template <class Sampler>
+    void writeXDMFNodeAttribute(const boost::filesystem::path& filename, size_t count,
+      size_t dimension, const Sampler& sample)
+    {
+      if (dimension == 0)
+      {
+        Alert::Exception() << "An XDMF nodal attribute needs at least one component."
+                           << Alert::Raise;
+      }
+      const auto file = createXDMFAttributeFile(filename, count, dimension);
+      std::vector<F64> values(count * dimension);
+      for (size_t node = 0; node < count; ++node)
+        sample(node, std::span<Real>(values.data() + node * dimension, dimension));
+      if (dimension == 1)
+        writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
+      else
+      {
+        writeMatrixDataset(
+          file.get(), Path::GridFunctionValuesData, values, count, dimension);
+      }
+    }
+
     /// @cond
     // Forward declaration of the explicit-mesh overload, defined below.
     template <class GridFunctionType>
@@ -1854,45 +1921,7 @@ namespace Rodin::IO
       const size_t nv = getXDMFVisualizationVertexCount(visMesh);
       const size_t vdim = gf.getDimension();
 
-      const auto file =
-        HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
-      if (!file)
-      {
-        Alert::Exception() << "Failed to create HDF5 XDMF node attribute file: "
-                           << filename << Alert::Raise;
-      }
-
-      {
-        const auto group = HDF5::Group(H5Gcreate2(
-          file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception() << "Failed to create /GridFunction group." << Alert::Raise;
-        }
-      }
-      {
-        const auto group = HDF5::Group(H5Gcreate2(
-          file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception() << "Failed to create /GridFunction/Meta group."
-                             << Alert::Raise;
-        }
-      }
-      {
-        const auto group = HDF5::Group(H5Gcreate2(
-          file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception() << "Failed to create /GridFunction/Values group."
-                             << Alert::Raise;
-        }
-      }
-
-      HDF5::writeScalarDataset(
-        file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nv));
-      HDF5::writeScalarDataset(
-        file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
+      const auto file = createXDMFAttributeFile(filename, nv, vdim);
 
       // Use the grid function's own FES mesh for polytope lookup so that
       // polytopeMesh == fesMesh in GridFunctionBase::getValue() succeeds.
@@ -2075,45 +2104,7 @@ namespace Rodin::IO
       const size_t vdim = gf.getDimension();
       const size_t D = visMesh.getDimension();
 
-      const auto file =
-        HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
-      if (!file)
-      {
-        Alert::Exception() << "Failed to create HDF5 XDMF cell attribute file: "
-                           << filename << Alert::Raise;
-      }
-
-      {
-        const auto group = HDF5::Group(H5Gcreate2(
-          file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception() << "Failed to create /GridFunction group." << Alert::Raise;
-        }
-      }
-      {
-        const auto group = HDF5::Group(H5Gcreate2(
-          file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception() << "Failed to create /GridFunction/Meta group."
-                             << Alert::Raise;
-        }
-      }
-      {
-        const auto group = HDF5::Group(H5Gcreate2(
-          file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception() << "Failed to create /GridFunction/Values group."
-                             << Alert::Raise;
-        }
-      }
-
-      HDF5::writeScalarDataset(
-        file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nc));
-      HDF5::writeScalarDataset(
-        file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
+      const auto file = createXDMFAttributeFile(filename, nc, vdim);
 
       // Evaluate at the cell centroid (NOT averaged at vertices), so the
       // result is exact for P0 (the cell DOF) and consistent for higher-

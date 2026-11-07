@@ -7,6 +7,7 @@
 #include "KelvinBallOptimization.h"
 #include "LaplacianSmoothing.h"
 
+#include <functional>
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -453,12 +454,12 @@ namespace KelvinBall
       }
 
       template <class LevelSet>
-      SphereDiscretization fitLevelSetSWIFT(const KelvinBall::Mesh& mesh,
+      SphereDiscretization fitLevelSetSWIFT(KelvinBall::Mesh moved,
         const LevelSet& levelSet, Real backgroundH, Real outerRadius)
       {
         size_t interfaceCount = 0;
         Real interfaceSizeSum = 0;
-        for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
+        for (auto face = moved.getPolytope(moved.getDimension() - 1); face; ++face)
         {
           if (face->getAttribute() == Attribute{Gamma})
           {
@@ -471,38 +472,42 @@ namespace KelvinBall
           ? backgroundH
           : interfaceSizeSum / static_cast<Real>(interfaceCount);
 
-        // Classification changes labels only. Copy the P1 coefficients onto
-        // that mesh so the locator used by SWIFT resolves both the target and
-        // its exact element-wise gradient on the same geometry.
-        KelvinBall::Mesh moved(mesh);
-        P1<Real, KelvinBall::Mesh> targetSpace(moved);
-        GridFunction targetLevelSet(targetSpace);
-        targetLevelSet.getData() = levelSet.getData();
-        auto targetGradient = Grad(targetLevelSet);
-        targetGradient.traceOf(Fluid);
-
-        Adaptation::SWIFT::Adapt fitting(moved);
-        fitting.setParameters(m_fittingParameters);
-        const auto& parameters = fitting.getParameters();
-
-        auto& displacement = fitting.getTrialFunction();
-        auto& test = fitting.getTestFunction();
-        fitting.getProblem() +=
-          DirichletBC(displacement, VectorFunction(Real(0), Real(0), Real(0))).on(Outer);
-        // Penalize only normal increments: tangential sliding remains free.
-        // This supplements the fitting metric, not the fitting objective.
-        // The dimensionless coefficient is a heuristic compromise between
-        // cut-plane accuracy and conditioning of the direct linear solves.
+        // Consume the classified mesh; keep only the unchanged background and
+        // the fitted geometry. Copy the P1 coefficients so SWIFT resolves
+        // the target and its exact gradient on the same geometry.
+        const auto& parameters = m_fittingParameters;
         constexpr Real tangencyPenalty = Real(1e7);
-        const Real penalty = tangencyPenalty / parameters.model.h;
-        const FaceNormal normal(moved);
-        fitting.getProblem().getMetric() +=
-          FaceIntegral(penalty * Dot(normal, displacement), Dot(normal, test))
-            .over({SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus});
+        // Destroy the fitting spaces, matrices and backend factors before
+        // projecting and validating the returned geometry.
+        const auto report = [&] {
+          P1<Real, KelvinBall::Mesh> targetSpace(moved);
+          GridFunction targetLevelSet(targetSpace);
+          targetLevelSet.getData() = levelSet.getData();
+          auto targetGradient = Grad(targetLevelSet);
+          targetGradient.traceOf(Fluid);
 
-        RealFunction target(
-          [&](const Geometry::Point& point) { return targetLevelSet.getValue(point); });
-        const auto report = fitting.execute(target, targetGradient);
+          Adaptation::SWIFT::Adapt fitting(moved);
+          fitting.setParameters(m_fittingParameters);
+
+          auto& displacement = fitting.getTrialFunction();
+          auto& test = fitting.getTestFunction();
+          fitting.getProblem() +=
+            DirichletBC(displacement, VectorFunction(Real(0), Real(0), Real(0)))
+              .on(Outer);
+          // Penalize only normal increments: tangential sliding remains free.
+          // This supplements the fitting metric, not the fitting objective.
+          // The dimensionless coefficient is a heuristic compromise between
+          // cut-plane accuracy and conditioning of the direct linear solves.
+          const Real penalty = tangencyPenalty / parameters.model.h;
+          const FaceNormal normal(moved);
+          fitting.getProblem().getMetric() +=
+            FaceIntegral(penalty * Dot(normal, displacement), Dot(normal, test))
+              .over({SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus});
+
+          RealFunction target(
+            [&](const Geometry::Point& point) { return targetLevelSet.getValue(point); });
+          return fitting.execute(target, targetGradient);
+        }();
         if (!report.qualityBudgetSatisfied)
           throw std::runtime_error(
             "The SWIFT fit did not satisfy its mesh quality budget.");
@@ -829,8 +834,8 @@ namespace KelvinBall
           });
           MMG::Mesh classified =
             classifyLevelSetForSWIFT(*swiftBackground, sphereLevelSet);
-          SphereDiscretization fitted =
-            fitLevelSetSWIFT(classified, sphereLevelSet, backgroundH, outerRadius);
+          SphereDiscretization fitted = fitLevelSetSWIFT(
+            std::move(classified), sphereLevelSet, backgroundH, outerRadius);
           mesh = std::move(fitted.mesh);
         }
         else
@@ -1608,68 +1613,76 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << Alert::Notation::Number(meshDiagnostics.fluidCells) << Alert::NewLine
                   << diagnosticLabel("Total cells:")
                   << Alert::Notation::Number(meshDiagnostics.cells) << Alert::Raise;
-    auto& connectivity = mesh.getConnectivity();
-    connectivity.discover(3, 2);
-    connectivity.discover(3, 1);
-    connectivity.restrict(1, 0);
-    connectivity.restrict(2, 0);
-    connectivity.restrict(2, 3);
-    connectivity.discover(0, 0);
-    SubMesh fluid = mesh.trim(Obstacle);
-    splitSelfPairedCut(fluid);
-    auto& fluidConnectivity = fluid.getConnectivity();
-    fluidConnectivity.discover(2, 1);
-    fluidConnectivity.restrict(1, 0);
-    fluidConnectivity.restrict(2, 3);
-
-    VelocitySpace Vh(fluid, 3);
-    PressureSpace Qh(fluid);
-    KelvinBall::RotatedNitscheIntegrator fluidCoupling(
-      fluid, MasterCuts, rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
-    GridFunction uT0(Vh), uT1(Vh), uT2(Vh), uR0(Vh), uR1(Vh), uR2(Vh);
-    GridFunction pT0(Qh), pT1(Qh), pT2(Qh), pR0(Qh), pR1(Qh), pR2(Qh);
-    stageSeconds[1] = elapsedSeconds(stage2Start);
-    reportStageTiming(2, stageSeconds[1]);
-
-    const auto stage3Start = Clock::now();
-    announce("Stage 3: Solving the translational and rotational Stokes states.");
-    const KelvinBall::Parameters metricParameters{h, nitschePenalty, stabilizationFactor};
-    const KelvinBall::Metrics resistanceMetrics(metricParameters);
-    const KelvinBall::Values metrics = resistanceMetrics.evaluateChamber(
-      Vh, Qh, fluidCoupling, uT0, uT1, uT2, uR0, uR1, uR2, pT0, pT1, pT2, pR0, pR1, pR2);
-    stageSeconds[2] = elapsedSeconds(stage3Start);
-    reportStageTiming(3, stageSeconds[2]);
-    const Real k = metrics.k;
-    const Real c = metrics.c;
-    const Real q = metrics.q;
-    const Real resistanceDeterminant = k * q - c * c;
-    const Math::SpatialVector<Real> motionTranslation =
-      (q / resistanceDeterminant) * m_options.motionForce;
-    const Math::SpatialVector<Real> motionAngular =
-      (-c / resistanceDeterminant) * m_options.motionForce;
-    const Real rho = metrics.rho;
-    const Real couplingSymmetry = metrics.couplingSymmetry;
-    const Real volume = mesh.getVolume(Obstacle);
-    const Real nitscheJump = metrics.nitscheJump;
-    const auto chamberBoundingBox = boundingBoxSize(mesh);
-    const auto sewnBoundingBox = sewnBoundingBoxSize(mesh);
-    const Real actualRhoChange = previousRho ? rho - *previousRho : nan;
-    const Real incomingPredictedRhoChange =
-      predictedRhoChange ? *predictedRhoChange : nan;
-    const Real actualVolumeChange = previousVolume ? volume - *previousVolume : nan;
-    const Real incomingPredictedVolumeChange =
-      predictedVolumeChange ? *predictedVolumeChange : nan;
-    // Diagnostics of the later stages, filled as they run.
-    struct
+    MMG::Mesh& advectionMesh = swiftBackground ? *swiftBackground : mesh;
+    P1 advectionLevelSetSpace(advectionMesh);
+    GridFunction advectedDistance(advectionLevelSetSpace);
+    std::function<void()> writeCompletedHistory;
+    // Only the transported scalar and numerical history survive reconstruction.
+    // Release states, spaces, locators and shape fields before the fitting solve.
     {
+      auto& connectivity = mesh.getConnectivity();
+      connectivity.discover(3, 2);
+      connectivity.discover(3, 1);
+      connectivity.restrict(1, 0);
+      connectivity.restrict(2, 0);
+      connectivity.restrict(2, 3);
+      connectivity.discover(0, 0);
+      SubMesh fluid = mesh.trim(Obstacle);
+      splitSelfPairedCut(fluid);
+      auto& fluidConnectivity = fluid.getConnectivity();
+      fluidConnectivity.discover(2, 1);
+      fluidConnectivity.restrict(1, 0);
+      fluidConnectivity.restrict(2, 3);
+
+      VelocitySpace Vh(fluid, 3);
+      PressureSpace Qh(fluid);
+      KelvinBall::RotatedNitscheIntegrator fluidCoupling(
+        fluid, MasterCuts, rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
+      GridFunction uT0(Vh), uT1(Vh), uT2(Vh), uR0(Vh), uR1(Vh), uR2(Vh);
+      GridFunction pT0(Qh), pT1(Qh), pT2(Qh), pR0(Qh), pR1(Qh), pR2(Qh);
+      stageSeconds[1] = elapsedSeconds(stage2Start);
+      reportStageTiming(2, stageSeconds[1]);
+
+      const auto stage3Start = Clock::now();
+      announce("Stage 3: Solving the translational and rotational Stokes states.");
+      const KelvinBall::Parameters metricParameters{
+        h, nitschePenalty, stabilizationFactor};
+      const KelvinBall::Metrics resistanceMetrics(metricParameters);
+      const KelvinBall::Values metrics = resistanceMetrics.evaluateChamber(Vh, Qh,
+        fluidCoupling, uT0, uT1, uT2, uR0, uR1, uR2, pT0, pT1, pT2, pR0, pR1, pR2);
+      stageSeconds[2] = elapsedSeconds(stage3Start);
+      reportStageTiming(3, stageSeconds[2]);
+      const Real k = metrics.k;
+      const Real c = metrics.c;
+      const Real q = metrics.q;
+      const Real resistanceDeterminant = k * q - c * c;
+      const Math::SpatialVector<Real> motionTranslation =
+        (q / resistanceDeterminant) * m_options.motionForce;
+      const Math::SpatialVector<Real> motionAngular =
+        (-c / resistanceDeterminant) * m_options.motionForce;
+      const Real rho = metrics.rho;
+      const Real couplingSymmetry = metrics.couplingSymmetry;
+      const Real volume = mesh.getVolume(Obstacle);
+      const Real nitscheJump = metrics.nitscheJump;
+      const auto chamberBoundingBox = boundingBoxSize(mesh);
+      const auto sewnBoundingBox = sewnBoundingBoxSize(mesh);
+      const Real actualRhoChange = previousRho ? rho - *previousRho : nan;
+      const Real incomingPredictedRhoChange =
+        predictedRhoChange ? *predictedRhoChange : nan;
+      const Real actualVolumeChange = previousVolume ? volume - *previousVolume : nan;
+      const Real incomingPredictedVolumeChange =
+        predictedVolumeChange ? *predictedVolumeChange : nan;
+      // Diagnostics of the later stages, filled as they run.
+      struct
+      {
         Real thicknessPenalty = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessNominalPenalty = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessGuardDistance = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessActiveMultiplier = std::numeric_limits<Real>::quiet_NaN();
-      Real thicknessBalanceSatisfied = std::numeric_limits<Real>::quiet_NaN();
-      Real thicknessObjectiveRate = std::numeric_limits<Real>::quiet_NaN();
-      Real thicknessRepairRate = std::numeric_limits<Real>::quiet_NaN();
-      Real thicknessCancellationMultiplier = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessBalanceSatisfied = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessObjectiveRate = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessRepairRate = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessCancellationMultiplier = std::numeric_limits<Real>::quiet_NaN();
         Real objectiveOnlyRate = std::numeric_limits<Real>::quiet_NaN();
         Real objectiveRetainedFraction = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessAchievedRate = std::numeric_limits<Real>::quiet_NaN();
@@ -1702,848 +1715,877 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         Real advectedJump = std::numeric_limits<Real>::quiet_NaN();
         Real transportAttempted = std::numeric_limits<Real>::quiet_NaN();
         Real transportFallback = std::numeric_limits<Real>::quiet_NaN();
-    } stageDiagnostics;
-    const auto writeHistory = [&](Real nullSpaceMultiplier, Real xiRhoInfinityNorm,
-                                Real thetaInfinityNorm, Real dRhoTheta, Real dVolumeTheta,
-                                Real requiredDVolumeTheta,
-                                const GradientDiagnostics& rhoGradientDiagnostics,
-                                const GradientDiagnostics& volumeGradientDiagnostics) {
-      history << iteration << ',' << outerRadius << ',' << initialGridSpacing << ','
-              << m_options.configuration.hminFactor << ','
-              << m_options.configuration.hmaxFactor << ',' << m_options.configuration.hmin
-              << ',' << m_options.configuration.hmax << ',' << h << ',' << dt << ','
-              << hilbertLength << ',' << nitschePenalty << ',' << stabilizationFactor
-              << ',' << assemblyBackend << ',' << KelvinBall::DirectSolverName << ','
-              << meshDiagnostics.vertices << ',' << meshDiagnostics.cells << ','
-              << meshDiagnostics.obstacleCells << ',' << meshDiagnostics.fluidCells << ','
-              << meshDiagnostics.interfaceTriangles << ','
-              << meshDiagnostics.minimumQuality << ',' << meshDiagnostics.meanQuality
-              << ',' << meshDiagnostics.maximumQuality << ',' << backgroundH << ','
-              << reconstruction.minimumSize << ',' << reconstruction.maximumSize << ','
-              << reconstruction.hausdorffTolerance << ','
-              << reconstruction.requiredBoundaryTriangles << ','
-              << reconstruction.cellsBefore << ',' << reconstruction.cellsAfter << ','
-              << k << ',' << c << ',' << q << ',' << rho << ',' << couplingSymmetry << ','
-              << nitscheJump << ',' << volume << ',' << targetVolume << ','
-              << volume - targetVolume << ',' << chamberBoundingBox(0) << ','
-              << chamberBoundingBox(1) << ',' << chamberBoundingBox(2) << ','
-              << sewnBoundingBox(0) << ',' << sewnBoundingBox(1) << ','
-              << sewnBoundingBox(2) << ',' << actualRhoChange << ','
-              << incomingPredictedRhoChange << ',' << actualVolumeChange << ','
-              << incomingPredictedVolumeChange << ',' << nullSpaceMultiplier << ','
-              << xiRhoInfinityNorm << ',' << thetaInfinityNorm << ',' << dRhoTheta << ','
-              << dVolumeTheta << ',' << requiredDVolumeTheta << ','
-              << rhoGradientDiagnostics.residual << ',' << rhoGradientDiagnostics.jump
-              << ',' << volumeGradientDiagnostics.residual << ','
-              << volumeGradientDiagnostics.jump;
-      for (const Real seconds : stageSeconds)
-        history << ',' << seconds;
-      // Free motion under a unit force without torque, R [Z; w] = [F; 0].
-      const Real determinant = k * q - c * c;
-      history << ',' << q / determinant << ',' << -c / determinant << ','
-              << k / determinant << ','
-              << (c != 0 ? 2 * M_PI / motionAngular.norm() : nan) << ','
-              << (c != 0 ? 2 * M_PI * q / std::abs(c) : nan) << ',' << std::sqrt(q / k)
-              << ',' << m_options.minimumThickness << ',' << normalLength << ','
-              << stageDiagnostics.thicknessPenalty << ','
-              << stageDiagnostics.thicknessNominalPenalty << ','
-              << stageDiagnostics.thicknessGuardDistance << ','
-              << stageDiagnostics.thicknessActiveMultiplier << ','
-              << stageDiagnostics.thicknessBalanceSatisfied << ','
-              << stageDiagnostics.thicknessObjectiveRate << ','
-              << stageDiagnostics.thicknessRepairRate << ','
-              << stageDiagnostics.thicknessCancellationMultiplier << ','
-              << stageDiagnostics.objectiveOnlyRate << ','
-              << stageDiagnostics.objectiveRetainedFraction << ','
-              << stageDiagnostics.thicknessAchievedRate << ','
-              << stageDiagnostics.thicknessViolating << ','
-              << stageDiagnostics.thicknessMaximumPairLoad << ','
-              << stageDiagnostics.thicknessTopOnePercentLoadShare << ','
-              << stageDiagnostics.thicknessDescentNormalRMS << ','
-              << stageDiagnostics.thicknessDescentTangentRMS << ','
-              << stageDiagnostics.thicknessDescentTangentFraction << ','
-              << stageDiagnostics.thetaTangentFraction << ','
-              << stageDiagnostics.thicknessMinimumExit << ','
-              << stageDiagnostics.thicknessMaximumDeficit << ','
-              << stageDiagnostics.thicknessMinimumTransversality << ','
-              << stageDiagnostics.thicknessNormalAlignmentMin << ','
-              << stageDiagnostics.thicknessNormalAlignmentMean << ','
-              << stageDiagnostics.thicknessCurvatureMin << ','
-              << stageDiagnostics.thicknessCurvatureMax << ','
-              << stageDiagnostics.thicknessNormalMagnitudeMin << ','
-              << stageDiagnostics.thicknessNormalMagnitudeMax << ','
-              << stageDiagnostics.thicknessGeometricSeamJump << ','
-              << stageDiagnostics.thicknessNormalSeamJump << ','
-              << stageDiagnostics.thicknessRaySeamJump << ','
-              << stageDiagnostics.thicknessSeamSamples << ','
-              << stageDiagnostics.thicknessSeamUnmatched << ','
-              << stageDiagnostics.actualThicknessChange << ','
-              << stageDiagnostics.predictedThicknessChange << ','
-              << stageDiagnostics.dThicknessTheta << ',' << stageDiagnostics.eikonalJump
-              << ',' << stageDiagnostics.advectionIncrement << ','
-              << stageDiagnostics.advectedJump << ',' << reconstruction.minimumCrossing
-              << ',' << reconstruction.snappedVertices << ',' << reconstruction.scale;
-      // Z and omega for the supplied force, including its magnitude.
-      for (Eigen::Index component = 0; component < 3; ++component)
-        history << ',' << motionTranslation(component);
-      for (Eigen::Index component = 0; component < 3; ++component)
-        history << ',' << motionAngular(component);
-      history << ',' << stageDiagnostics.transportAttempted << ','
-              << stageDiagnostics.transportFallback;
-      for (Eigen::Index component = 0; component < 3; ++component)
-        history << ',' << m_options.motionForce(component);
-      history << '\n';
-      history.flush();
-    };
-    const auto stage4Start = Clock::now();
-    announce("Stage 4: Evaluating the resistance objective.");
-    if (previousRho)
-    {
-      Alert::Info() << substageHeading("Previous update") << Alert::NewLine
-                    << diagnosticLabel("Actual delta rho:")
-                    << Alert::Notation::Number(actualRhoChange) << Alert::NewLine
-                    << diagnosticLabel("Predicted delta rho:")
-                    << Alert::Notation::Number(incomingPredictedRhoChange)
-                    << Alert::NewLine << diagnosticLabel("Actual delta volume:")
-                    << Alert::Notation::Number(actualVolumeChange) << Alert::NewLine
-                    << diagnosticLabel("Predicted delta volume:")
-                    << Alert::Notation::Number(incomingPredictedVolumeChange)
-                    << Alert::Raise;
-    }
-    Alert::Info() << substageHeading("Resistance metrics") << Alert::NewLine
-                  << diagnosticLabel("Translational resistance k:")
-                  << Alert::Notation::Number(k) << Alert::NewLine
-                  << diagnosticLabel("Coupling coefficient c:")
-                  << Alert::Notation::Number(c) << Alert::NewLine
-                  << diagnosticLabel("Rotational resistance q:")
-                  << Alert::Notation::Number(q) << Alert::NewLine
-                  << diagnosticLabel("Objective rho:") << Alert::Notation::Number(rho)
-                  << Alert::NewLine << diagnosticLabel("Volume:")
-                  << Alert::Notation::Number(volume) << Alert::NewLine
-                  << diagnosticLabel("Chamber bounding box:")
-                  << vectorText(chamberBoundingBox) << Alert::NewLine
-                  << diagnosticLabel("Sewn mesh bounding box:")
-                  << vectorText(sewnBoundingBox) << Alert::NewLine
-                  << diagnosticLabel("Nitsche jump:")
-                  << Alert::Notation::Number(nitscheJump) << Alert::NewLine
-                  << diagnosticLabel("Coupling symmetry residual:")
-                  << Alert::Notation::Number(couplingSymmetry) << Alert::Raise;
-    {
-      Alert::Info() << substageHeading("Free motion under the prescribed force")
-                    << Alert::NewLine << diagnosticLabel("Force:")
-                    << vectorText(m_options.motionForce) << Alert::NewLine
-                    << diagnosticLabel("Translational velocity Z:")
-                    << vectorText(motionTranslation) << Alert::NewLine
-                    << diagnosticLabel("Angular velocity omega:")
-                    << vectorText(motionAngular) << Alert::NewLine
-                    << diagnosticLabel("Period of one revolution:")
-                    << Alert::Notation::Number(
-                         c != 0 ? 2 * M_PI / motionAngular.norm() : nan)
-                    << Alert::NewLine << diagnosticLabel("Pitch:")
-                    << Alert::Notation::Number(c != 0 ? 2 * M_PI * q / std::abs(c) : nan)
-                    << Alert::NewLine << diagnosticLabel("Resistance length sqrt(q/k):")
-                    << Alert::Notation::Number(std::sqrt(q / k)) << Alert::Raise;
-    }
-    stageSeconds[3] = elapsedSeconds(stage4Start);
-    reportStageTiming(4, stageSeconds[3]);
-    if (m_options.stateOnly)
-    {
-      const GradientDiagnostics unavailable{nan, nan};
-      writeHistory(nan, nan, nan, nan, nan, nan, unavailable, unavailable);
-      return 0;
-    }
-
-    const auto stage5Start = Clock::now();
-    announce("Stage 5: Computing the shape derivative.");
-    auto gradUT0 = Jacobian(uT0);
-    gradUT0.traceOf(Fluid);
-    auto gradUT1 = Jacobian(uT1);
-    gradUT1.traceOf(Fluid);
-    auto gradUT2 = Jacobian(uT2);
-    gradUT2.traceOf(Fluid);
-    auto gradUR0 = Jacobian(uR0);
-    gradUR0.traceOf(Fluid);
-    auto gradUR1 = Jacobian(uR1);
-    gradUR1.traceOf(Fluid);
-    auto gradUR2 = Jacobian(uR2);
-    gradUR2.traceOf(Fluid);
-    const auto strainUT0 = 0.5 * (gradUT0 + gradUT0.T());
-    const auto strainUT1 = 0.5 * (gradUT1 + gradUT1.T());
-    const auto strainUT2 = 0.5 * (gradUT2 + gradUT2.T());
-    const auto strainUR0 = 0.5 * (gradUR0 + gradUR0.T());
-    const auto strainUR1 = 0.5 * (gradUR1 + gradUR1.T());
-    const auto strainUR2 = 0.5 * (gradUR2 + gradUR2.T());
-    const Real signC = c < 0 ? -1.0 : 1.0;
-    const auto kDensity = chamberMultiplicity * 2.0 * mu / 3.0 *
-      (Dot(strainUT0, strainUT0) + Dot(strainUT1, strainUT1) + Dot(strainUT2, strainUT2));
-    const auto cDensity = chamberMultiplicity * 2.0 * mu / 3.0 *
-      (Dot(strainUT0, strainUR0) + Dot(strainUT1, strainUR1) + Dot(strainUT2, strainUR2));
-    const auto qDensity = chamberMultiplicity * 2.0 * mu / 3.0 *
-      (Dot(strainUR0, strainUR0) + Dot(strainUR1, strainUR1) + Dot(strainUR2, strainUR2));
-    const auto rhoDensity =
-      signC / std::sqrt(k * q) * cDensity - 0.5 * rho * (kDensity / k + qDensity / q);
-
-    P1 levelSetSpace(mesh);
-    P1 shapeSpace(mesh, 3);
-    KelvinBall::RotatedNitscheIntegrator shapeCoupling(mesh,
-      FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus},
-      rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
-    GridFunction rhoGradient(shapeSpace), volumeGradient(shapeSpace);
-    stageSeconds[4] = elapsedSeconds(stage5Start);
-    reportStageTiming(5, stageSeconds[4]);
-    const auto stage6Start = Clock::now();
-    announce("Stage 6: Regularizing and constraining the shape direction.");
-    // The paired first-exit load defines the local thickness correction.
-    Math::Vector<Real> thicknessLoad;
-    GridFunction thicknessDescent(shapeSpace);
-    GridFunction smoothedNormal(shapeSpace);
-    smoothedNormal.getData().setZero();
-    GridFunction geometricNormal(shapeSpace);
-    geometricNormal.getData().setZero();
-    GridFunction rayDirection(shapeSpace);
-    rayDirection.getData().setZero();
-    GridFunction smoothedCurvature(levelSetSpace);
-    smoothedCurvature.getData().setZero();
-    if (m_options.minimumThickness > 0)
-    {
-      thicknessLoad = Math::Vector<Real>::Zero(shapeSpace.getSize());
-      mesh.getConnectivity().compute(mesh.getDimension() - 1, mesh.getDimension());
-      const Real activeGuard = m_options.minimumThickness + Real(2) * dt;
-      const KelvinBall::ThicknessPenalty thicknessPenalty(mesh, activeGuard);
-      Optional<GridFunction<decltype(shapeSpace), Math::Vector<Real>>> projectedNormal;
-      if (m_options.thicknessDiagnostics)
+      } stageDiagnostics;
+      const auto writeHistory = [=, &history, &stageSeconds, &reconstruction, this](
+                                  Real nullSpaceMultiplier, Real xiRhoInfinityNorm,
+                                  Real thetaInfinityNorm, Real dRhoTheta,
+                                  Real dVolumeTheta, Real requiredDVolumeTheta,
+                                  const GradientDiagnostics& rhoGradientDiagnostics,
+                                  const GradientDiagnostics& volumeGradientDiagnostics,
+                                  const auto& diagnostics) {
+        history << iteration << ',' << outerRadius << ',' << initialGridSpacing << ','
+                << m_options.configuration.hminFactor << ','
+                << m_options.configuration.hmaxFactor << ','
+                << m_options.configuration.hmin << ',' << m_options.configuration.hmax
+                << ',' << h << ',' << dt << ',' << hilbertLength << ',' << nitschePenalty
+                << ',' << stabilizationFactor << ',' << assemblyBackend << ','
+                << KelvinBall::DirectSolverName << ',' << meshDiagnostics.vertices << ','
+                << meshDiagnostics.cells << ',' << meshDiagnostics.obstacleCells << ','
+                << meshDiagnostics.fluidCells << ',' << meshDiagnostics.interfaceTriangles
+                << ',' << meshDiagnostics.minimumQuality << ','
+                << meshDiagnostics.meanQuality << ',' << meshDiagnostics.maximumQuality
+                << ',' << backgroundH << ',' << reconstruction.minimumSize << ','
+                << reconstruction.maximumSize << ',' << reconstruction.hausdorffTolerance
+                << ',' << reconstruction.requiredBoundaryTriangles << ','
+                << reconstruction.cellsBefore << ',' << reconstruction.cellsAfter << ','
+                << k << ',' << c << ',' << q << ',' << rho << ',' << couplingSymmetry
+                << ',' << nitscheJump << ',' << volume << ',' << targetVolume << ','
+                << volume - targetVolume << ',' << chamberBoundingBox(0) << ','
+                << chamberBoundingBox(1) << ',' << chamberBoundingBox(2) << ','
+                << sewnBoundingBox(0) << ',' << sewnBoundingBox(1) << ','
+                << sewnBoundingBox(2) << ',' << actualRhoChange << ','
+                << incomingPredictedRhoChange << ',' << actualVolumeChange << ','
+                << incomingPredictedVolumeChange << ',' << nullSpaceMultiplier << ','
+                << xiRhoInfinityNorm << ',' << thetaInfinityNorm << ',' << dRhoTheta
+                << ',' << dVolumeTheta << ',' << requiredDVolumeTheta << ','
+                << rhoGradientDiagnostics.residual << ',' << rhoGradientDiagnostics.jump
+                << ',' << volumeGradientDiagnostics.residual << ','
+                << volumeGradientDiagnostics.jump;
+        for (const Real seconds : stageSeconds)
+          history << ',' << seconds;
+        // Free motion under a unit force without torque, R [Z; w] = [F; 0].
+        const Real determinant = k * q - c * c;
+        history
+          << ',' << q / determinant << ',' << -c / determinant << ',' << k / determinant
+          << ',' << (c != 0 ? 2 * M_PI / motionAngular.norm() : nan) << ','
+          << (c != 0 ? 2 * M_PI * q / std::abs(c) : nan) << ',' << std::sqrt(q / k) << ','
+          << m_options.minimumThickness << ',' << normalLength << ','
+          << diagnostics.thicknessPenalty << ',' << diagnostics.thicknessNominalPenalty
+          << ',' << diagnostics.thicknessGuardDistance << ','
+          << diagnostics.thicknessActiveMultiplier << ','
+          << diagnostics.thicknessBalanceSatisfied << ','
+          << diagnostics.thicknessObjectiveRate << ',' << diagnostics.thicknessRepairRate
+          << ',' << diagnostics.thicknessCancellationMultiplier << ','
+          << diagnostics.objectiveOnlyRate << ',' << diagnostics.objectiveRetainedFraction
+          << ',' << diagnostics.thicknessAchievedRate << ','
+          << diagnostics.thicknessViolating << ',' << diagnostics.thicknessMaximumPairLoad
+          << ',' << diagnostics.thicknessTopOnePercentLoadShare << ','
+          << diagnostics.thicknessDescentNormalRMS << ','
+          << diagnostics.thicknessDescentTangentRMS << ','
+          << diagnostics.thicknessDescentTangentFraction << ','
+          << diagnostics.thetaTangentFraction << ',' << diagnostics.thicknessMinimumExit
+          << ',' << diagnostics.thicknessMaximumDeficit << ','
+          << diagnostics.thicknessMinimumTransversality << ','
+          << diagnostics.thicknessNormalAlignmentMin << ','
+          << diagnostics.thicknessNormalAlignmentMean << ','
+          << diagnostics.thicknessCurvatureMin << ',' << diagnostics.thicknessCurvatureMax
+          << ',' << diagnostics.thicknessNormalMagnitudeMin << ','
+          << diagnostics.thicknessNormalMagnitudeMax << ','
+          << diagnostics.thicknessGeometricSeamJump << ','
+          << diagnostics.thicknessNormalSeamJump << ','
+          << diagnostics.thicknessRaySeamJump << ',' << diagnostics.thicknessSeamSamples
+          << ',' << diagnostics.thicknessSeamUnmatched << ','
+          << diagnostics.actualThicknessChange << ','
+          << diagnostics.predictedThicknessChange << ',' << diagnostics.dThicknessTheta
+          << ',' << diagnostics.eikonalJump << ',' << diagnostics.advectionIncrement
+          << ',' << diagnostics.advectedJump << ',' << reconstruction.minimumCrossing
+          << ',' << reconstruction.snappedVertices << ',' << reconstruction.scale;
+        // Z and omega for the supplied force, including its magnitude.
+        for (Eigen::Index component = 0; component < 3; ++component)
+          history << ',' << motionTranslation(component);
+        for (Eigen::Index component = 0; component < 3; ++component)
+          history << ',' << motionAngular(component);
+        history << ',' << diagnostics.transportAttempted << ','
+                << diagnostics.transportFallback;
+        for (Eigen::Index component = 0; component < 3; ++component)
+          history << ',' << m_options.motionForce(component);
+        history << '\n';
+        history.flush();
+      };
+      const auto stage4Start = Clock::now();
+      announce("Stage 4: Evaluating the resistance objective.");
+      if (previousRho)
       {
-        projectedNormal.emplace(thicknessPenalty.projectNormal(shapeSpace, normalLength));
-        smoothedNormal = *projectedNormal;
+        Alert::Info() << substageHeading("Previous update") << Alert::NewLine
+                      << diagnosticLabel("Actual delta rho:")
+                      << Alert::Notation::Number(actualRhoChange) << Alert::NewLine
+                      << diagnosticLabel("Predicted delta rho:")
+                      << Alert::Notation::Number(incomingPredictedRhoChange)
+                      << Alert::NewLine << diagnosticLabel("Actual delta volume:")
+                      << Alert::Notation::Number(actualVolumeChange) << Alert::NewLine
+                      << diagnosticLabel("Predicted delta volume:")
+                      << Alert::Notation::Number(incomingPredictedVolumeChange)
+                      << Alert::Raise;
+      }
+      Alert::Info() << substageHeading("Resistance metrics") << Alert::NewLine
+                    << diagnosticLabel("Translational resistance k:")
+                    << Alert::Notation::Number(k) << Alert::NewLine
+                    << diagnosticLabel("Coupling coefficient c:")
+                    << Alert::Notation::Number(c) << Alert::NewLine
+                    << diagnosticLabel("Rotational resistance q:")
+                    << Alert::Notation::Number(q) << Alert::NewLine
+                    << diagnosticLabel("Objective rho:") << Alert::Notation::Number(rho)
+                    << Alert::NewLine << diagnosticLabel("Volume:")
+                    << Alert::Notation::Number(volume) << Alert::NewLine
+                    << diagnosticLabel("Chamber bounding box:")
+                    << vectorText(chamberBoundingBox) << Alert::NewLine
+                    << diagnosticLabel("Sewn mesh bounding box:")
+                    << vectorText(sewnBoundingBox) << Alert::NewLine
+                    << diagnosticLabel("Nitsche jump:")
+                    << Alert::Notation::Number(nitscheJump) << Alert::NewLine
+                    << diagnosticLabel("Coupling symmetry residual:")
+                    << Alert::Notation::Number(couplingSymmetry) << Alert::Raise;
+      {
+        Alert::Info()
+          << substageHeading("Free motion under the prescribed force") << Alert::NewLine
+          << diagnosticLabel("Force:") << vectorText(m_options.motionForce)
+          << Alert::NewLine << diagnosticLabel("Translational velocity Z:")
+          << vectorText(motionTranslation) << Alert::NewLine
+          << diagnosticLabel("Angular velocity omega:") << vectorText(motionAngular)
+          << Alert::NewLine << diagnosticLabel("Period of one revolution:")
+          << Alert::Notation::Number(c != 0 ? 2 * M_PI / motionAngular.norm() : nan)
+          << Alert::NewLine << diagnosticLabel("Pitch:")
+          << Alert::Notation::Number(c != 0 ? 2 * M_PI * q / std::abs(c) : nan)
+          << Alert::NewLine << diagnosticLabel("Resistance length sqrt(q/k):")
+          << Alert::Notation::Number(std::sqrt(q / k)) << Alert::Raise;
+      }
+      stageSeconds[3] = elapsedSeconds(stage4Start);
+      reportStageTiming(4, stageSeconds[3]);
+      if (m_options.stateOnly)
+      {
+        const GradientDiagnostics unavailable{nan, nan};
+        writeHistory(
+          nan, nan, nan, nan, nan, nan, unavailable, unavailable, stageDiagnostics);
+        return 0;
+      }
+
+      const auto stage5Start = Clock::now();
+      announce("Stage 5: Computing the shape derivative.");
+      auto gradUT0 = Jacobian(uT0);
+      gradUT0.traceOf(Fluid);
+      auto gradUT1 = Jacobian(uT1);
+      gradUT1.traceOf(Fluid);
+      auto gradUT2 = Jacobian(uT2);
+      gradUT2.traceOf(Fluid);
+      auto gradUR0 = Jacobian(uR0);
+      gradUR0.traceOf(Fluid);
+      auto gradUR1 = Jacobian(uR1);
+      gradUR1.traceOf(Fluid);
+      auto gradUR2 = Jacobian(uR2);
+      gradUR2.traceOf(Fluid);
+      const auto strainUT0 = 0.5 * (gradUT0 + gradUT0.T());
+      const auto strainUT1 = 0.5 * (gradUT1 + gradUT1.T());
+      const auto strainUT2 = 0.5 * (gradUT2 + gradUT2.T());
+      const auto strainUR0 = 0.5 * (gradUR0 + gradUR0.T());
+      const auto strainUR1 = 0.5 * (gradUR1 + gradUR1.T());
+      const auto strainUR2 = 0.5 * (gradUR2 + gradUR2.T());
+      const Real signC = c < 0 ? -1.0 : 1.0;
+      const auto kDensity = chamberMultiplicity * 2.0 * mu / 3.0 *
+        (Dot(strainUT0, strainUT0) + Dot(strainUT1, strainUT1) +
+          Dot(strainUT2, strainUT2));
+      const auto cDensity = chamberMultiplicity * 2.0 * mu / 3.0 *
+        (Dot(strainUT0, strainUR0) + Dot(strainUT1, strainUR1) +
+          Dot(strainUT2, strainUR2));
+      const auto qDensity = chamberMultiplicity * 2.0 * mu / 3.0 *
+        (Dot(strainUR0, strainUR0) + Dot(strainUR1, strainUR1) +
+          Dot(strainUR2, strainUR2));
+      const auto rhoDensity =
+        signC / std::sqrt(k * q) * cDensity - 0.5 * rho * (kDensity / k + qDensity / q);
+
+      P1 levelSetSpace(mesh);
+      P1 shapeSpace(mesh, 3);
+      KelvinBall::RotatedNitscheIntegrator shapeCoupling(mesh,
+        FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus},
+        rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
+      GridFunction rhoGradient(shapeSpace), volumeGradient(shapeSpace);
+      stageSeconds[4] = elapsedSeconds(stage5Start);
+      reportStageTiming(5, stageSeconds[4]);
+      const auto stage6Start = Clock::now();
+      announce("Stage 6: Regularizing and constraining the shape direction.");
+      // The paired first-exit load defines the local thickness correction.
+      Math::Vector<Real> thicknessLoad;
+      GridFunction thicknessDescent(shapeSpace);
+      GridFunction smoothedNormal(shapeSpace);
+      smoothedNormal.getData().setZero();
+      GridFunction geometricNormal(shapeSpace);
+      geometricNormal.getData().setZero();
+      GridFunction rayDirection(shapeSpace);
+      rayDirection.getData().setZero();
+      GridFunction smoothedCurvature(levelSetSpace);
+      smoothedCurvature.getData().setZero();
+      if (m_options.minimumThickness > 0)
+      {
+        thicknessLoad = Math::Vector<Real>::Zero(shapeSpace.getSize());
+        mesh.getConnectivity().compute(mesh.getDimension() - 1, mesh.getDimension());
+        const Real activeGuard = m_options.minimumThickness + Real(2) * dt;
+        const KelvinBall::ThicknessPenalty thicknessPenalty(mesh, activeGuard);
+        Optional<GridFunction<decltype(shapeSpace), Math::Vector<Real>>> projectedNormal;
+        if (m_options.thicknessDiagnostics)
+        {
+          projectedNormal.emplace(
+            thicknessPenalty.projectNormal(shapeSpace, normalLength));
+          smoothedNormal = *projectedNormal;
+          for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+          {
+            const auto dofs = shapeSpace.getDOFs(0, vertex);
+            Math::SpatialVector<Real> normal(3);
+            for (size_t component = 0; component < 3; ++component)
+              normal(component) = smoothedNormal.getData()(dofs(component));
+            const Real magnitude = normal.norm();
+            if (std::isfinite(magnitude) && magnitude > Real(1e-12))
+              for (size_t component = 0; component < 3; ++component)
+                smoothedNormal.getData()(dofs(component)) /= magnitude;
+            else
+              for (size_t component = 0; component < 3; ++component)
+                smoothedNormal.getData()(dofs(component)) = 0;
+          }
+        }
+        const auto thickness = thicknessPenalty.evaluate(mesh, shapeSpace, thicknessLoad,
+          m_options.minimumThickness, projectedNormal ? &*projectedNormal : nullptr);
+        stageDiagnostics.thicknessNominalPenalty = thickness.nominalPenalty;
+        stageDiagnostics.thicknessGuardDistance = activeGuard;
         for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
         {
           const auto dofs = shapeSpace.getDOFs(0, vertex);
-          Math::SpatialVector<Real> normal(3);
           for (size_t component = 0; component < 3; ++component)
-            normal(component) = smoothedNormal.getData()(dofs(component));
-          const Real magnitude = normal.norm();
-          if (std::isfinite(magnitude) && magnitude > Real(1e-12))
-            for (size_t component = 0; component < 3; ++component)
-              smoothedNormal.getData()(dofs(component)) /= magnitude;
-          else
-            for (size_t component = 0; component < 3; ++component)
-              smoothedNormal.getData()(dofs(component)) = 0;
+          {
+            rayDirection.getData()(dofs(component)) =
+              thickness.rayDirection[vertex](component);
+            geometricNormal.getData()(dofs(component)) =
+              thickness.geometricNormal[vertex](component);
+          }
         }
-      }
-      const auto thickness = thicknessPenalty.evaluate(mesh, shapeSpace, thicknessLoad,
-        m_options.minimumThickness, projectedNormal ? &*projectedNormal : nullptr);
-      stageDiagnostics.thicknessNominalPenalty = thickness.nominalPenalty;
-      stageDiagnostics.thicknessGuardDistance = activeGuard;
-      for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
-      {
-        const auto dofs = shapeSpace.getDOFs(0, vertex);
-        for (size_t component = 0; component < 3; ++component)
+        const auto geometricSeam =
+          interfaceSeamJump(mesh, geometricNormal, shapeCoupling.getLocator());
+        const auto normalSeam = m_options.thicknessDiagnostics
+          ? interfaceSeamJump(mesh, smoothedNormal, shapeCoupling.getLocator())
+          : InterfaceSeamJump{};
+        const auto raySeam =
+          interfaceSeamJump(mesh, rayDirection, shapeCoupling.getLocator());
+        stageDiagnostics.thicknessGeometricSeamJump = geometricSeam.maximum;
+        stageDiagnostics.thicknessNormalSeamJump =
+          m_options.thicknessDiagnostics ? normalSeam.maximum : nan;
+        stageDiagnostics.thicknessRaySeamJump = raySeam.maximum;
+        stageDiagnostics.thicknessSeamSamples = static_cast<Real>(raySeam.samples);
+        stageDiagnostics.thicknessSeamUnmatched = static_cast<Real>(raySeam.unmatched);
+        for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
         {
-          rayDirection.getData()(dofs(component)) =
-            thickness.rayDirection[vertex](component);
-          geometricNormal.getData()(dofs(component)) =
-            thickness.geometricNormal[vertex](component);
+          const auto dofs = levelSetSpace.getDOFs(0, vertex);
+          smoothedCurvature.getData()(dofs(0)) = thickness.curvature[vertex];
         }
+        stageDiagnostics.thicknessPenalty = thickness.penalty;
+        stageDiagnostics.thicknessViolating = static_cast<Real>(thickness.violating);
+        stageDiagnostics.thicknessMaximumPairLoad = thickness.maximumPairLoad;
+        stageDiagnostics.thicknessTopOnePercentLoadShare =
+          thickness.topOnePercentLoadShare;
+        stageDiagnostics.thicknessMinimumExit = thickness.minimumExit;
+        stageDiagnostics.thicknessMaximumDeficit = thickness.maximumDeficit;
+        stageDiagnostics.thicknessMinimumTransversality = thickness.minimumTransversality;
+        stageDiagnostics.thicknessNormalAlignmentMin =
+          m_options.thicknessDiagnostics ? thickness.minimumNormalAlignment : nan;
+        stageDiagnostics.thicknessNormalAlignmentMean =
+          m_options.thicknessDiagnostics ? thickness.meanNormalAlignment : nan;
+        stageDiagnostics.thicknessCurvatureMin =
+          m_options.thicknessDiagnostics ? thickness.minimumCurvature : nan;
+        stageDiagnostics.thicknessCurvatureMax =
+          m_options.thicknessDiagnostics ? thickness.maximumCurvature : nan;
+        stageDiagnostics.thicknessNormalMagnitudeMin =
+          m_options.thicknessDiagnostics ? thickness.minimumNormalMagnitude : nan;
+        stageDiagnostics.thicknessNormalMagnitudeMax =
+          m_options.thicknessDiagnostics ? thickness.maximumNormalMagnitude : nan;
+        stageDiagnostics.actualThicknessChange =
+          previousThicknessPenalty ? thickness.penalty - *previousThicknessPenalty : nan;
+        stageDiagnostics.predictedThicknessChange =
+          predictedThicknessChange ? *predictedThicknessChange : nan;
+        Alert::Info() << substageHeading("Thickness penalty") << Alert::NewLine
+                      << diagnosticLabel("Minimum thickness:")
+                      << Alert::Notation::Number(m_options.minimumThickness)
+                      << Alert::NewLine << diagnosticLabel("Guard distance:")
+                      << Alert::Notation::Number(activeGuard) << Alert::NewLine
+                      << diagnosticLabel("Normal smoothing length:")
+                      << Alert::Notation::Number(normalLength) << Alert::NewLine
+                      << diagnosticLabel("Separation load:")
+                      << "Bounded paired-normal surrogate" << Alert::NewLine
+                      << diagnosticLabel("Penalty P:")
+                      << Alert::Notation::Number(thickness.penalty) << Alert::NewLine
+                      << diagnosticLabel("Nominal penalty:")
+                      << Alert::Notation::Number(stageDiagnostics.thicknessNominalPenalty)
+                      << Alert::NewLine << diagnosticLabel("Rays exiting before minimum:")
+                      << Alert::Notation::Number(thickness.violating) << " of "
+                      << Alert::Notation::Number(thickness.samples) << Alert::NewLine
+                      << diagnosticLabel("Largest estimated pair load:")
+                      << Alert::Notation::Number(thickness.maximumPairLoad)
+                      << Alert::NewLine << diagnosticLabel("Top 1% estimated load share:")
+                      << Alert::Notation::Number(thickness.topOnePercentLoadShare)
+                      << Alert::NewLine << diagnosticLabel("Minimum exit distance:")
+                      << Alert::Notation::Number(thickness.minimumExit) << Alert::NewLine
+                      << diagnosticLabel("Maximum thickness deficit:")
+                      << Alert::Notation::Number(thickness.maximumDeficit)
+                      << Alert::NewLine << diagnosticLabel("Minimum exit transversality:")
+                      << Alert::Notation::Number(thickness.minimumTransversality)
+                      << Alert::NewLine << diagnosticLabel("Geometric normal cut jump:")
+                      << Alert::Notation::Number(geometricSeam.maximum) << Alert::NewLine
+                      << diagnosticLabel("Ray direction cut jump:")
+                      << Alert::Notation::Number(raySeam.maximum) << Alert::NewLine
+                      << diagnosticLabel("Interface-cut samples:")
+                      << Alert::Notation::Number(raySeam.samples) << Alert::NewLine
+                      << diagnosticLabel("Unmatched cut samples:")
+                      << Alert::Notation::Number(raySeam.unmatched) << Alert::Raise;
+        if (m_options.thicknessDiagnostics)
+          Alert::Info() << substageHeading("Thickness normal diagnostics")
+                        << Alert::NewLine
+                        << diagnosticLabel("Minimum projected alignment:")
+                        << Alert::Notation::Number(thickness.minimumNormalAlignment)
+                        << Alert::NewLine << diagnosticLabel("Mean projected alignment:")
+                        << Alert::Notation::Number(thickness.meanNormalAlignment)
+                        << Alert::NewLine
+                        << diagnosticLabel("Minimum smoothed curvature:")
+                        << Alert::Notation::Number(thickness.minimumCurvature)
+                        << Alert::NewLine
+                        << diagnosticLabel("Maximum smoothed curvature:")
+                        << Alert::Notation::Number(thickness.maximumCurvature)
+                        << Alert::NewLine
+                        << diagnosticLabel("Raw normal magnitude range:")
+                        << Alert::Notation::Number(thickness.minimumNormalMagnitude)
+                        << " to "
+                        << Alert::Notation::Number(thickness.maximumNormalMagnitude)
+                        << Alert::NewLine << diagnosticLabel("Projected normal cut jump:")
+                        << Alert::Notation::Number(normalSeam.maximum) << Alert::Raise;
+        if (previousThicknessPenalty)
+          Alert::Info() << substageHeading("Thickness change (surrogate prediction)")
+                        << Alert::NewLine << diagnosticLabel("Actual delta P:")
+                        << Alert::Notation::Number(stageDiagnostics.actualThicknessChange)
+                        << Alert::NewLine << diagnosticLabel("Surrogate linear delta P:")
+                        << Alert::Notation::Number(
+                             stageDiagnostics.predictedThicknessChange)
+                        << Alert::Raise;
       }
-      const auto geometricSeam =
-        interfaceSeamJump(mesh, geometricNormal, shapeCoupling.getLocator());
-      const auto normalSeam = m_options.thicknessDiagnostics
-        ? interfaceSeamJump(mesh, smoothedNormal, shapeCoupling.getLocator())
-        : InterfaceSeamJump{};
-      const auto raySeam =
-        interfaceSeamJump(mesh, rayDirection, shapeCoupling.getLocator());
-      stageDiagnostics.thicknessGeometricSeamJump = geometricSeam.maximum;
-      stageDiagnostics.thicknessNormalSeamJump =
-        m_options.thicknessDiagnostics ? normalSeam.maximum : nan;
-      stageDiagnostics.thicknessRaySeamJump = raySeam.maximum;
-      stageDiagnostics.thicknessSeamSamples = static_cast<Real>(raySeam.samples);
-      stageDiagnostics.thicknessSeamUnmatched = static_cast<Real>(raySeam.unmatched);
-      for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      GradientDiagnostics rhoGradientDiagnostics{}, volumeGradientDiagnostics{};
       {
-        const auto dofs = levelSetSpace.getDOFs(0, vertex);
-        smoothedCurvature.getData()(dofs(0)) = thickness.curvature[vertex];
+        // Retain the factorization only while identifying the three differentials.
+        // Release it before output, transport, and reconstruction allocate systems.
+        HilbertIdentification identification(
+          shapeSpace, shapeCoupling, hilbertLength, nitschePenalty);
+        if (m_options.minimumThickness > 0)
+        {
+          identifyGradient(identification, RealFunction{0}, thicknessDescent,
+            "Thickness descent", &thicknessLoad);
+          const auto components = interfaceComponents(mesh, thicknessDescent);
+          stageDiagnostics.thicknessDescentNormalRMS = components.normalRMS;
+          stageDiagnostics.thicknessDescentTangentRMS = components.tangentialRMS;
+          stageDiagnostics.thicknessDescentTangentFraction =
+            components.tangentialFraction;
+          Alert::Info() << substageHeading("Thickness interface direction")
+                        << Alert::NewLine << diagnosticLabel("Normal RMS:")
+                        << Alert::Notation::Number(components.normalRMS) << Alert::NewLine
+                        << diagnosticLabel("Tangential RMS:")
+                        << Alert::Notation::Number(components.tangentialRMS)
+                        << Alert::NewLine << diagnosticLabel("Tangential fraction:")
+                        << Alert::Notation::Number(components.tangentialFraction)
+                        << Alert::Raise;
+        }
+        rhoGradientDiagnostics =
+          identifyGradient(identification, -rhoDensity, rhoGradient, "Rho");
+        volumeGradientDiagnostics =
+          identifyGradient(identification, RealFunction{-1}, volumeGradient, "Volume");
       }
-      stageDiagnostics.thicknessPenalty = thickness.penalty;
-      stageDiagnostics.thicknessViolating = static_cast<Real>(thickness.violating);
-      stageDiagnostics.thicknessMaximumPairLoad = thickness.maximumPairLoad;
-      stageDiagnostics.thicknessTopOnePercentLoadShare = thickness.topOnePercentLoadShare;
-      stageDiagnostics.thicknessMinimumExit = thickness.minimumExit;
-      stageDiagnostics.thicknessMaximumDeficit = thickness.maximumDeficit;
-      stageDiagnostics.thicknessMinimumTransversality = thickness.minimumTransversality;
-      stageDiagnostics.thicknessNormalAlignmentMin =
-        m_options.thicknessDiagnostics ? thickness.minimumNormalAlignment : nan;
-      stageDiagnostics.thicknessNormalAlignmentMean =
-        m_options.thicknessDiagnostics ? thickness.meanNormalAlignment : nan;
-      stageDiagnostics.thicknessCurvatureMin =
-        m_options.thicknessDiagnostics ? thickness.minimumCurvature : nan;
-      stageDiagnostics.thicknessCurvatureMax =
-        m_options.thicknessDiagnostics ? thickness.maximumCurvature : nan;
-      stageDiagnostics.thicknessNormalMagnitudeMin =
-        m_options.thicknessDiagnostics ? thickness.minimumNormalMagnitude : nan;
-      stageDiagnostics.thicknessNormalMagnitudeMax =
-        m_options.thicknessDiagnostics ? thickness.maximumNormalMagnitude : nan;
-      stageDiagnostics.actualThicknessChange =
-        previousThicknessPenalty ? thickness.penalty - *previousThicknessPenalty : nan;
-      stageDiagnostics.predictedThicknessChange =
-        predictedThicknessChange ? *predictedThicknessChange : nan;
-      Alert::Info() << substageHeading("Thickness penalty") << Alert::NewLine
-                    << diagnosticLabel("Minimum thickness:")
-                    << Alert::Notation::Number(m_options.minimumThickness)
-                    << Alert::NewLine << diagnosticLabel("Guard distance:")
-                    << Alert::Notation::Number(activeGuard) << Alert::NewLine
-                    << diagnosticLabel("Normal smoothing length:")
-                    << Alert::Notation::Number(normalLength) << Alert::NewLine
-                    << diagnosticLabel("Separation load:")
-                    << "Bounded paired-normal surrogate" << Alert::NewLine
-                    << diagnosticLabel("Penalty P:")
-                    << Alert::Notation::Number(thickness.penalty) << Alert::NewLine
-                    << diagnosticLabel("Nominal penalty:")
-                    << Alert::Notation::Number(stageDiagnostics.thicknessNominalPenalty)
-                    << Alert::NewLine << diagnosticLabel("Rays exiting before minimum:")
-                    << Alert::Notation::Number(thickness.violating) << " of "
-                    << Alert::Notation::Number(thickness.samples) << Alert::NewLine
-                    << diagnosticLabel("Largest estimated pair load:")
-                    << Alert::Notation::Number(thickness.maximumPairLoad)
-                    << Alert::NewLine << diagnosticLabel("Top 1% estimated load share:")
-                    << Alert::Notation::Number(thickness.topOnePercentLoadShare)
-                    << Alert::NewLine << diagnosticLabel("Minimum exit distance:")
-                    << Alert::Notation::Number(thickness.minimumExit) << Alert::NewLine
-                    << diagnosticLabel("Maximum thickness deficit:")
-                    << Alert::Notation::Number(thickness.maximumDeficit) << Alert::NewLine
-                    << diagnosticLabel("Minimum exit transversality:")
-                    << Alert::Notation::Number(thickness.minimumTransversality)
-                    << Alert::NewLine << diagnosticLabel("Geometric normal cut jump:")
-                    << Alert::Notation::Number(geometricSeam.maximum) << Alert::NewLine
-                    << diagnosticLabel("Ray direction cut jump:")
-                    << Alert::Notation::Number(raySeam.maximum) << Alert::NewLine
-                    << diagnosticLabel("Interface-cut samples:")
-                    << Alert::Notation::Number(raySeam.samples) << Alert::NewLine
-                    << diagnosticLabel("Unmatched cut samples:")
-                    << Alert::Notation::Number(raySeam.unmatched) << Alert::Raise;
-      if (m_options.thicknessDiagnostics)
-        Alert::Info() << substageHeading("Thickness normal diagnostics") << Alert::NewLine
-                      << diagnosticLabel("Minimum projected alignment:")
-                      << Alert::Notation::Number(thickness.minimumNormalAlignment)
-                      << Alert::NewLine << diagnosticLabel("Mean projected alignment:")
-                      << Alert::Notation::Number(thickness.meanNormalAlignment)
-                      << Alert::NewLine << diagnosticLabel("Minimum smoothed curvature:")
-                      << Alert::Notation::Number(thickness.minimumCurvature)
-                      << Alert::NewLine << diagnosticLabel("Maximum smoothed curvature:")
-                      << Alert::Notation::Number(thickness.maximumCurvature)
-                      << Alert::NewLine << diagnosticLabel("Raw normal magnitude range:")
-                      << Alert::Notation::Number(thickness.minimumNormalMagnitude)
-                      << " to "
-                      << Alert::Notation::Number(thickness.maximumNormalMagnitude)
-                      << Alert::NewLine << diagnosticLabel("Projected normal cut jump:")
-                      << Alert::Notation::Number(normalSeam.maximum) << Alert::Raise;
-      if (previousThicknessPenalty)
-        Alert::Info() << substageHeading("Thickness change (surrogate prediction)")
-                      << Alert::NewLine << diagnosticLabel("Actual delta P:")
-                      << Alert::Notation::Number(stageDiagnostics.actualThicknessChange)
-                      << Alert::NewLine << diagnosticLabel("Surrogate linear delta P:")
+      TestFunction testField(shapeSpace);
+      auto interfaceNormal = FaceNormal(mesh);
+      interfaceNormal.traceOf(Fluid);
+      LinearForm dRho(testField), dVolume(testField);
+      dRho = FaceIntegral(-rhoDensity, Dot(interfaceNormal, testField)).over(Gamma);
+      dVolume =
+        FaceIntegral(RealFunction{-1}, Dot(interfaceNormal, testField)).over(Gamma);
+      dRho.assemble();
+      dVolume.assemble();
+      const Real volumeMetric = dVolume(volumeGradient);
+      if (!(std::isfinite(volumeMetric) && std::abs(volumeMetric) > Real(1e-20)))
+        throw std::runtime_error("The volume gradient has zero constraint derivative.");
+      Real nullSpaceMultiplier = -dVolume(rhoGradient) / volumeMetric;
+      GridFunction xiRho(shapeSpace);
+      xiRho = rhoGradient + nullSpaceMultiplier * volumeGradient;
+      if (m_options.minimumThickness > 0)
+      {
+        const Real thicknessVolumeMultiplier = -dVolume(thicknessDescent) / volumeMetric;
+        GridFunction thicknessRepair(shapeSpace);
+        thicknessRepair = thicknessDescent + thicknessVolumeMultiplier * volumeGradient;
+        GridFunction candidate(shapeSpace);
+        GridFunction candidateMagnitude(levelSetSpace);
+        // Compare unit directions, rather than the magnitudes of their loads.
+        candidateMagnitude = Frobenius(xiRho);
+        const Real objectiveMagnitude = std::max(candidateMagnitude.max(), Real(1e-30));
+        xiRho /= objectiveMagnitude;
+        nullSpaceMultiplier /= objectiveMagnitude;
+        candidateMagnitude = Frobenius(thicknessRepair);
+        const Real repairMagnitude = std::max(candidateMagnitude.max(), Real(1e-30));
+        thicknessRepair /= repairMagnitude;
+        const Real objectiveRate = dRho(xiRho);
+        // Balance the two effects on thickness, rather than its measured value.
+        // L[b] < 0 for a usable volume-projected repair direction. The coefficient
+        // eta_0 cancels L[a]; eta additionally retains one unit of repair before
+        // common normalization. If L[a] <= L[b], the objective already repairs
+        // at least as much and no correction is needed.
+        const Real objectiveThicknessRate = -thicknessLoad.dot(xiRho.getData());
+        const Real repairThicknessRate = -thicknessLoad.dot(thicknessRepair.getData());
+        Real cancellationMultiplier = 0;
+        Real multiplier = 0;
+        if (repairThicknessRate < Real(0))
+        {
+          const Real balance = objectiveThicknessRate / (-repairThicknessRate);
+          cancellationMultiplier = std::max(Real(0), balance);
+          multiplier = std::max(Real(0), Real(1) + balance);
+        }
+        candidate = xiRho + multiplier * thicknessRepair;
+        candidateMagnitude = Frobenius(candidate);
+        const Real selectedMagnitude = candidateMagnitude.max();
+        const Real achievedRate = selectedMagnitude > Real(0)
+          ? -thicknessLoad.dot(candidate.getData()) / selectedMagnitude
+          : Real(0);
+        const bool feasible = achievedRate <= Real(0);
+        stageDiagnostics.thicknessObjectiveRate = objectiveThicknessRate;
+        stageDiagnostics.thicknessRepairRate = repairThicknessRate;
+        stageDiagnostics.thicknessCancellationMultiplier = cancellationMultiplier;
+        stageDiagnostics.objectiveOnlyRate = objectiveRate;
+        stageDiagnostics.objectiveRetainedFraction =
+          objectiveRate > Real(0) && selectedMagnitude > Real(0)
+          ? dRho(candidate) / (selectedMagnitude * objectiveRate)
+          : nan;
+        stageDiagnostics.thicknessAchievedRate = achievedRate;
+        xiRho = candidate;
+        nullSpaceMultiplier += multiplier * thicknessVolumeMultiplier / repairMagnitude;
+        stageDiagnostics.thicknessActiveMultiplier = multiplier;
+        stageDiagnostics.thicknessBalanceSatisfied = feasible ? Real(1) : Real(0);
+        Alert::Info() << substageHeading("First-variation thickness balance")
+                      << Alert::NewLine << diagnosticLabel("Objective thickness rate:")
+                      << Alert::Notation::Number(objectiveThicknessRate) << Alert::NewLine
+                      << diagnosticLabel("Repair thickness rate:")
+                      << Alert::Notation::Number(repairThicknessRate) << Alert::NewLine
+                      << diagnosticLabel("Cancellation coefficient:")
+                      << Alert::Notation::Number(cancellationMultiplier) << Alert::NewLine
+                      << diagnosticLabel("Selected coefficient:")
+                      << Alert::Notation::Number(multiplier) << Alert::NewLine
+                      << diagnosticLabel("Predicted thickness rate:")
+                      << Alert::Notation::Number(achievedRate) << Alert::NewLine
+                      << diagnosticLabel("Retained objective fraction:")
                       << Alert::Notation::Number(
-                           stageDiagnostics.predictedThicknessChange)
+                           stageDiagnostics.objectiveRetainedFraction)
+                      << Alert::NewLine << diagnosticLabel("Predicted non-increase:")
+                      << (feasible ? "Yes" : "No usable repair direction")
                       << Alert::Raise;
-    }
-    GradientDiagnostics rhoGradientDiagnostics{}, volumeGradientDiagnostics{};
-    {
-    // Retain the factorization only while identifying the three differentials.
-    // Release it before output, transport, and reconstruction allocate systems.
-      HilbertIdentification identification(
-        shapeSpace, shapeCoupling, hilbertLength, nitschePenalty);
+      }
+      GridFunction xiRhoNorm(levelSetSpace);
+      xiRhoNorm = Frobenius(xiRho);
+      const Real xiRhoInfinityNorm = std::max(xiRhoNorm.max(), Real(1e-30));
+      GridFunction theta(shapeSpace);
+      theta = xiRho;
+      theta /= xiRhoInfinityNorm;
+      stageDiagnostics.thetaTangentFraction =
+        interfaceComponents(mesh, theta).tangentialFraction;
+      xiRhoNorm = Frobenius(theta);
+      const Real thetaInfinityNorm = xiRhoNorm.max();
+      const Real dRhoTheta = dRho(theta);
+      const Real dVolumeTheta = dVolume(theta);
       if (m_options.minimumThickness > 0)
       {
-        identifyGradient(identification, RealFunction{0}, thicknessDescent,
-          "Thickness descent", &thicknessLoad);
-        const auto components = interfaceComponents(mesh, thicknessDescent);
-        stageDiagnostics.thicknessDescentNormalRMS = components.normalRMS;
-        stageDiagnostics.thicknessDescentTangentRMS = components.tangentialRMS;
-        stageDiagnostics.thicknessDescentTangentFraction = components.tangentialFraction;
-        Alert::Info() << substageHeading("Thickness interface direction")
-                      << Alert::NewLine << diagnosticLabel("Normal RMS:")
-                      << Alert::Notation::Number(components.normalRMS) << Alert::NewLine
-                      << diagnosticLabel("Tangential RMS:")
-                      << Alert::Notation::Number(components.tangentialRMS)
-                      << Alert::NewLine << diagnosticLabel("Tangential fraction:")
-                      << Alert::Notation::Number(components.tangentialFraction)
+        stageDiagnostics.dThicknessTheta = -thicknessLoad.dot(theta.getData());
+        previousThicknessPenalty = stageDiagnostics.thicknessPenalty;
+        predictedThicknessChange = dt * stageDiagnostics.dThicknessTheta;
+      }
+      const Real requiredDVolumeTheta = 0;
+      Alert::Info() << substageHeading("Constrained direction") << Alert::NewLine
+                    << diagnosticLabel("Null-space multiplier:")
+                    << Alert::Notation::Number(nullSpaceMultiplier) << Alert::NewLine
+                    << diagnosticLabel("Xi rho infinity norm:")
+                    << Alert::Notation::Number(xiRhoInfinityNorm) << Alert::NewLine
+                    << diagnosticLabel("Theta infinity norm:")
+                    << Alert::Notation::Number(thetaInfinityNorm) << Alert::NewLine
+                    << diagnosticLabel("D rho [theta]:")
+                    << Alert::Notation::Number(dRhoTheta) << Alert::NewLine
+                    << diagnosticLabel("D volume [theta]:")
+                    << Alert::Notation::Number(dVolumeTheta) << Alert::NewLine
+                    << diagnosticLabel("Required D volume [theta]:")
+                    << Alert::Notation::Number(requiredDVolumeTheta) << Alert::Raise;
+      if (m_options.minimumThickness > 0)
+        Alert::Info() << substageHeading("Thickness directional derivative")
+                      << Alert::NewLine
+                      << diagnosticLabel("Surrogate D thickness [theta]:")
+                      << Alert::Notation::Number(stageDiagnostics.dThicknessTheta)
                       << Alert::Raise;
-      }
-      rhoGradientDiagnostics =
-        identifyGradient(identification, -rhoDensity, rhoGradient, "Rho");
-      volumeGradientDiagnostics =
-        identifyGradient(identification, RealFunction{-1}, volumeGradient, "Volume");
-    }
-    TestFunction testField(shapeSpace);
-    auto interfaceNormal = FaceNormal(mesh);
-    interfaceNormal.traceOf(Fluid);
-    LinearForm dRho(testField), dVolume(testField);
-    dRho = FaceIntegral(-rhoDensity, Dot(interfaceNormal, testField)).over(Gamma);
-    dVolume = FaceIntegral(RealFunction{-1}, Dot(interfaceNormal, testField)).over(Gamma);
-    dRho.assemble();
-    dVolume.assemble();
-    const Real volumeMetric = dVolume(volumeGradient);
-    if (!(std::isfinite(volumeMetric) && std::abs(volumeMetric) > Real(1e-20)))
-      throw std::runtime_error("The volume gradient has zero constraint derivative.");
-    Real nullSpaceMultiplier = -dVolume(rhoGradient) / volumeMetric;
-    GridFunction xiRho(shapeSpace);
-    xiRho = rhoGradient + nullSpaceMultiplier * volumeGradient;
-    if (m_options.minimumThickness > 0)
-    {
-      const Real thicknessVolumeMultiplier = -dVolume(thicknessDescent) / volumeMetric;
-      GridFunction thicknessRepair(shapeSpace);
-      thicknessRepair = thicknessDescent + thicknessVolumeMultiplier * volumeGradient;
-      GridFunction candidate(shapeSpace);
-      GridFunction candidateMagnitude(levelSetSpace);
-      // Compare unit directions, rather than the magnitudes of their loads.
-      candidateMagnitude = Frobenius(xiRho);
-      const Real objectiveMagnitude = std::max(candidateMagnitude.max(), Real(1e-30));
-      xiRho /= objectiveMagnitude;
-      nullSpaceMultiplier /= objectiveMagnitude;
-      candidateMagnitude = Frobenius(thicknessRepair);
-      const Real repairMagnitude = std::max(candidateMagnitude.max(), Real(1e-30));
-      thicknessRepair /= repairMagnitude;
-      const Real objectiveRate = dRho(xiRho);
-      // Balance the two effects on thickness, rather than its measured value.
-      // L[b] < 0 for a usable volume-projected repair direction. The coefficient
-      // eta_0 cancels L[a]; eta additionally retains one unit of repair before
-      // common normalization. If L[a] <= L[b], the objective already repairs
-      // at least as much and no correction is needed.
-      const Real objectiveThicknessRate = -thicknessLoad.dot(xiRho.getData());
-      const Real repairThicknessRate = -thicknessLoad.dot(thicknessRepair.getData());
-      Real cancellationMultiplier = 0;
-      Real multiplier = 0;
-      if (repairThicknessRate < Real(0))
-      {
-        const Real balance = objectiveThicknessRate / (-repairThicknessRate);
-        cancellationMultiplier = std::max(Real(0), balance);
-        multiplier = std::max(Real(0), Real(1) + balance);
-      }
-      candidate = xiRho + multiplier * thicknessRepair;
-      candidateMagnitude = Frobenius(candidate);
-      const Real selectedMagnitude = candidateMagnitude.max();
-      const Real achievedRate = selectedMagnitude > Real(0)
-        ? -thicknessLoad.dot(candidate.getData()) / selectedMagnitude
-        : Real(0);
-      const bool feasible = achievedRate <= Real(0);
-      stageDiagnostics.thicknessObjectiveRate = objectiveThicknessRate;
-      stageDiagnostics.thicknessRepairRate = repairThicknessRate;
-      stageDiagnostics.thicknessCancellationMultiplier = cancellationMultiplier;
-      stageDiagnostics.objectiveOnlyRate = objectiveRate;
-      stageDiagnostics.objectiveRetainedFraction =
-        objectiveRate > Real(0) && selectedMagnitude > Real(0)
-        ? dRho(candidate) / (selectedMagnitude * objectiveRate) : nan;
-      stageDiagnostics.thicknessAchievedRate = achievedRate;
-      xiRho = candidate;
-      nullSpaceMultiplier += multiplier * thicknessVolumeMultiplier / repairMagnitude;
-      stageDiagnostics.thicknessActiveMultiplier = multiplier;
-      stageDiagnostics.thicknessBalanceSatisfied = feasible ? Real(1) : Real(0);
-      Alert::Info() << substageHeading("First-variation thickness balance")
-                    << Alert::NewLine << diagnosticLabel("Objective thickness rate:")
-                    << Alert::Notation::Number(objectiveThicknessRate) << Alert::NewLine
-                    << diagnosticLabel("Repair thickness rate:")
-                    << Alert::Notation::Number(repairThicknessRate) << Alert::NewLine
-                    << diagnosticLabel("Cancellation coefficient:")
-                    << Alert::Notation::Number(cancellationMultiplier) << Alert::NewLine
-                    << diagnosticLabel("Selected coefficient:")
-                    << Alert::Notation::Number(multiplier) << Alert::NewLine
-                    << diagnosticLabel("Predicted thickness rate:")
-                    << Alert::Notation::Number(achievedRate) << Alert::NewLine
-                    << diagnosticLabel("Retained objective fraction:")
-                    << Alert::Notation::Number(stageDiagnostics.objectiveRetainedFraction)
-                    << Alert::NewLine << diagnosticLabel("Predicted non-increase:")
-                    << (feasible ? "Yes" : "No usable repair direction") << Alert::Raise;
-    }
-    GridFunction xiRhoNorm(levelSetSpace);
-    xiRhoNorm = Frobenius(xiRho);
-    const Real xiRhoInfinityNorm = std::max(xiRhoNorm.max(), Real(1e-30));
-    GridFunction theta(shapeSpace);
-    theta = xiRho;
-    theta /= xiRhoInfinityNorm;
-    stageDiagnostics.thetaTangentFraction =
-      interfaceComponents(mesh, theta).tangentialFraction;
-    xiRhoNorm = Frobenius(theta);
-    const Real thetaInfinityNorm = xiRhoNorm.max();
-    const Real dRhoTheta = dRho(theta);
-    const Real dVolumeTheta = dVolume(theta);
-    if (m_options.minimumThickness > 0)
-    {
-      stageDiagnostics.dThicknessTheta = -thicknessLoad.dot(theta.getData());
-      previousThicknessPenalty = stageDiagnostics.thicknessPenalty;
-      predictedThicknessChange = dt * stageDiagnostics.dThicknessTheta;
-    }
-    const Real requiredDVolumeTheta = 0;
-    Alert::Info() << substageHeading("Constrained direction") << Alert::NewLine
-                  << diagnosticLabel("Null-space multiplier:")
-                  << Alert::Notation::Number(nullSpaceMultiplier) << Alert::NewLine
-                  << diagnosticLabel("Xi rho infinity norm:")
-                  << Alert::Notation::Number(xiRhoInfinityNorm) << Alert::NewLine
-                  << diagnosticLabel("Theta infinity norm:")
-                  << Alert::Notation::Number(thetaInfinityNorm) << Alert::NewLine
-                  << diagnosticLabel("D rho [theta]:")
-                  << Alert::Notation::Number(dRhoTheta) << Alert::NewLine
-                  << diagnosticLabel("D volume [theta]:")
-                  << Alert::Notation::Number(dVolumeTheta) << Alert::NewLine
-                  << diagnosticLabel("Required D volume [theta]:")
-                  << Alert::Notation::Number(requiredDVolumeTheta) << Alert::Raise;
-    if (m_options.minimumThickness > 0)
-      Alert::Info() << substageHeading("Thickness directional derivative")
-                    << Alert::NewLine << diagnosticLabel("Surrogate D thickness [theta]:")
-                    << Alert::Notation::Number(stageDiagnostics.dThicknessTheta)
+      previousRho = rho;
+      predictedRhoChange = dt * dRhoTheta;
+      previousVolume = volume;
+      predictedVolumeChange = dt * dVolumeTheta;
+      GridFunction distance(levelSetSpace);
+      Distance::Eikonal(distance)
+        .setInterior(Obstacle)
+        .setInterface(Gamma)
+        .solve()
+        .sign();
+      stageDiagnostics.eikonalJump = shapeCoupling.scalarJump(distance);
+      Alert::Info() << substageHeading("Eikonal redistancing") << Alert::NewLine
+                    << diagnosticLabel("Rotated distance jump:")
+                    << Alert::Notation::Number(stageDiagnostics.eikonalJump)
                     << Alert::Raise;
-    previousRho = rho;
-    predictedRhoChange = dt * dRhoTheta;
-    previousVolume = volume;
-    predictedVolumeChange = dt * dVolumeTheta;
-    GridFunction distance(levelSetSpace);
-    Distance::Eikonal(distance).setInterior(Obstacle).setInterface(Gamma).solve().sign();
-    stageDiagnostics.eikonalJump = shapeCoupling.scalarJump(distance);
-    Alert::Info() << substageHeading("Eikonal redistancing") << Alert::NewLine
-                  << diagnosticLabel("Rotated distance jump:")
-                  << Alert::Notation::Number(stageDiagnostics.eikonalJump)
-                  << Alert::Raise;
 
-    stageSeconds[5] = elapsedSeconds(stage6Start);
-    reportStageTiming(6, stageSeconds[5]);
-    MMG::Mesh& advectionMesh = swiftBackground ? *swiftBackground : mesh;
-    // Retain background locators between iterations without adaptation.
-    // Replacement above invalidates both caches before changing the mesh.
-    Optional<Location::AABB<MMG::Mesh>> chamberLocator;
-    P1 advectionLevelSetSpace(advectionMesh);
-    GridFunction advectedDistance(advectionLevelSetSpace);
-    // Only the transported scalar survives this scope. In particular, the
-    // full sewn meshes and their fields must expire before reconstruction.
-    {
-      const auto stage7Start = Clock::now();
-      announce("Stage 7: Writing the chamber and sewn fields.");
-      chamber.clear();
-      chamber.add("Distance", distance, IO::XDMF::Center::Node);
-      chamber.add("Theta", theta, IO::XDMF::Center::Node);
-      if (m_options.minimumThickness > 0)
-        chamber.add("Thickness_Descent", thicknessDescent, IO::XDMF::Center::Node);
-      SubMesh<Context::Local>::Builder interfaceBuilder;
-      interfaceBuilder.initialize(mesh);
-      for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
+      stageSeconds[5] = elapsedSeconds(stage6Start);
+      reportStageTiming(6, stageSeconds[5]);
+      // Retain background locators between iterations without adaptation.
+      // Replacement above invalidates both caches before changing the mesh.
+      Optional<Location::AABB<MMG::Mesh>> chamberLocator;
+      // Only the transported scalar survives this scope. In particular, the
+      // full sewn meshes and their fields must expire before reconstruction.
       {
-        if (face->getAttribute() == Gamma)
-          interfaceBuilder.include(mesh.getDimension() - 1, face->getIndex());
-      }
-      SubMesh<Context::Local> interfaceMesh = interfaceBuilder.finalize();
-      P1 interfaceVectorSpace(interfaceMesh, 3);
-      P1 interfaceScalarSpace(interfaceMesh);
-      GridFunction interfaceGeometricNormal(interfaceVectorSpace);
-      GridFunction interfaceSmoothedNormal(interfaceVectorSpace);
-      GridFunction interfaceRayDirection(interfaceVectorSpace);
-      GridFunction interfaceThicknessDescent(interfaceVectorSpace);
-      GridFunction interfaceCurvature(interfaceScalarSpace);
-      const auto& interfaceParentVertices = interfaceMesh.getPolytopeMap(0).left;
-      if (m_options.minimumThickness > 0)
-        for (Index vertex = 0; vertex < interfaceMesh.getVertexCount(); ++vertex)
+        const auto stage7Start = Clock::now();
+        announce("Stage 7: Writing the chamber and sewn fields.");
+        chamber.clear();
+        chamber.add("Distance", distance, IO::XDMF::Center::Node);
+        chamber.add("Theta", theta, IO::XDMF::Center::Node);
+        if (m_options.minimumThickness > 0)
+          chamber.add("Thickness_Descent", thicknessDescent, IO::XDMF::Center::Node);
+        SubMesh<Context::Local>::Builder interfaceBuilder;
+        interfaceBuilder.initialize(mesh);
+        for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
         {
-          const auto parent = interfaceParentVertices[vertex];
-          const auto source = shapeSpace.getDOFs(0, parent);
-          const auto target = interfaceVectorSpace.getDOFs(0, vertex);
-          for (size_t component = 0; component < 3; ++component)
-          {
-            interfaceGeometricNormal.getData()(target(component)) =
-              geometricNormal.getData()(source(component));
-            interfaceSmoothedNormal.getData()(target(component)) =
-              smoothedNormal.getData()(source(component));
-            interfaceRayDirection.getData()(target(component)) =
-              rayDirection.getData()(source(component));
-            interfaceThicknessDescent.getData()(target(component)) =
-              thicknessDescent.getData()(source(component));
-          }
-          interfaceCurvature.getData()(interfaceScalarSpace.getDOFs(0, vertex)(0)) =
-            smoothedCurvature.getData()(levelSetSpace.getDOFs(0, parent)(0));
+          if (face->getAttribute() == Gamma)
+            interfaceBuilder.include(mesh.getDimension() - 1, face->getIndex());
         }
-      auto interfaceOutput = xdmf.grid("Interface");
-      interfaceOutput.clear();
-      interfaceOutput.setMesh(interfaceMesh, IO::XDMF::MeshPolicy::Transient);
-      if (m_options.minimumThickness > 0)
-      {
-        interfaceOutput.add(
-          "Geometric_Normal", interfaceGeometricNormal, IO::XDMF::Center::Node);
-        interfaceOutput.add(
-          "Smoothed_Normal", interfaceSmoothedNormal, IO::XDMF::Center::Node);
-        interfaceOutput.add(
-          "Ray_Direction", interfaceRayDirection, IO::XDMF::Center::Node);
-        interfaceOutput.add(
-          "Thickness_Descent", interfaceThicknessDescent, IO::XDMF::Center::Node);
-        interfaceOutput.add(
-          "Smoothed_Curvature", interfaceCurvature, IO::XDMF::Center::Node);
-      }
-      fluidState.clear();
-      fluidState.setMesh(fluid, IO::XDMF::MeshPolicy::Transient);
-      fluidState.add("Translation_0", uT0, IO::XDMF::Center::Node);
-      fluidState.add("Translation_1", uT1, IO::XDMF::Center::Node);
-      fluidState.add("Translation_2", uT2, IO::XDMF::Center::Node);
-      fluidState.add("Rotation_0", uR0, IO::XDMF::Center::Node);
-      fluidState.add("Rotation_1", uR1, IO::XDMF::Center::Node);
-      fluidState.add("Rotation_2", uR2, IO::XDMF::Center::Node);
-      fluidState.add("Pressure_Translation_0", pT0, IO::XDMF::Center::Node);
-      fluidState.add("Pressure_Translation_1", pT1, IO::XDMF::Center::Node);
-      fluidState.add("Pressure_Translation_2", pT2, IO::XDMF::Center::Node);
-      fluidState.add("Pressure_Rotation_0", pR0, IO::XDMF::Center::Node);
-      fluidState.add("Pressure_Rotation_1", pR1, IO::XDMF::Center::Node);
-      fluidState.add("Pressure_Rotation_2", pR2, IO::XDMF::Center::Node);
-      GridFunction chamberMotion(Vh);
-      chamberMotion.getData() = motionTranslation(0) * uT0.getData() +
-        motionTranslation(1) * uT1.getData() + motionTranslation(2) * uT2.getData() +
-        motionAngular(0) * uR0.getData() + motionAngular(1) * uR1.getData() +
-        motionAngular(2) * uR2.getData();
-      fluidState.add("Motion", chamberMotion, IO::XDMF::Center::Node);
-
-      KelvinBall::SewedOutput sewedDesign(mesh, FlatSet<Attribute>{Gamma, Outer});
-      P1 sewedDesignScalar(sewedDesign.getMesh());
-      P1 sewedDesignVector(sewedDesign.getMesh(), 3);
-      GridFunction sewedDistance(sewedDesignScalar);
-      GridFunction sewedVelocity(sewedDesignVector);
-      GridFunction sewedGeometricNormal(sewedDesignVector);
-      GridFunction sewedNormal(sewedDesignVector);
-      GridFunction sewedRayDirection(sewedDesignVector);
-      GridFunction sewedThicknessDescent(sewedDesignVector);
-      GridFunction sewedCurvature(sewedDesignScalar);
-      sewedDesign.setScalar(sewedDistance, distance);
-      sewedDesign.setVector(sewedVelocity, theta);
-      sewedDesignOutput.clear();
-      sewedDesignOutput.setMesh(sewedDesign.getMesh(), IO::XDMF::MeshPolicy::Transient);
-      sewedDesignOutput.add("Distance", sewedDistance, IO::XDMF::Center::Node);
-      sewedDesignOutput.add("Theta", sewedVelocity, IO::XDMF::Center::Node);
-      if (m_options.minimumThickness > 0)
-      {
-        sewedDesign.setVector(sewedGeometricNormal, geometricNormal);
-        sewedDesign.setVector(sewedNormal, smoothedNormal);
-        sewedDesign.setVector(sewedRayDirection, rayDirection);
-        sewedDesign.setVector(sewedThicknessDescent, thicknessDescent);
-        sewedDesign.setScalar(sewedCurvature, smoothedCurvature);
-        sewedDesignOutput.add(
-          "Thickness_Descent", sewedThicknessDescent, IO::XDMF::Center::Node);
-      }
-
-      SubMesh<Context::Local>::Builder sewedInterfaceBuilder;
-      sewedInterfaceBuilder.initialize(sewedDesign.getMesh());
-      for (auto face =
-             sewedDesign.getMesh().getPolytope(sewedDesign.getMesh().getDimension() - 1);
-           face; ++face)
-      {
-        if (face->getAttribute() == Gamma)
-          sewedInterfaceBuilder.include(
-            sewedDesign.getMesh().getDimension() - 1, face->getIndex());
-      }
-      SubMesh<Context::Local> sewedInterfaceMesh = sewedInterfaceBuilder.finalize();
-      P1 sewedInterfaceVectorSpace(sewedInterfaceMesh, 3);
-      P1 sewedInterfaceScalarSpace(sewedInterfaceMesh);
-      GridFunction bodyMotion(sewedInterfaceVectorSpace);
-      bodyMotion =
-        VectorFunction(static_cast<size_t>(3), [&](const Geometry::Point& point) {
-          const Math::SpatialVector<Real> velocity =
-            motionTranslation + motionAngular.cross(point.getPhysicalCoordinates());
-          return velocity;
-        });
-      GridFunction sewedInterfaceGeometricNormal(sewedInterfaceVectorSpace);
-      GridFunction sewedInterfaceNormal(sewedInterfaceVectorSpace);
-      GridFunction sewedInterfaceRayDirection(sewedInterfaceVectorSpace);
-      GridFunction sewedInterfaceThicknessDescent(sewedInterfaceVectorSpace);
-      GridFunction sewedInterfaceCurvature(sewedInterfaceScalarSpace);
-      const auto& sewedInterfaceVertices = sewedInterfaceMesh.getPolytopeMap(0).left;
-      if (m_options.minimumThickness > 0)
-        for (Index vertex = 0; vertex < sewedInterfaceMesh.getVertexCount(); ++vertex)
+        SubMesh<Context::Local> interfaceMesh = interfaceBuilder.finalize();
+        P1 interfaceVectorSpace(interfaceMesh, 3);
+        P1 interfaceScalarSpace(interfaceMesh);
+        GridFunction interfaceGeometricNormal(interfaceVectorSpace);
+        GridFunction interfaceSmoothedNormal(interfaceVectorSpace);
+        GridFunction interfaceRayDirection(interfaceVectorSpace);
+        GridFunction interfaceThicknessDescent(interfaceVectorSpace);
+        GridFunction interfaceCurvature(interfaceScalarSpace);
+        const auto& interfaceParentVertices = interfaceMesh.getPolytopeMap(0).left;
+        if (m_options.minimumThickness > 0)
+          for (Index vertex = 0; vertex < interfaceMesh.getVertexCount(); ++vertex)
+          {
+            const auto parent = interfaceParentVertices[vertex];
+            const auto source = shapeSpace.getDOFs(0, parent);
+            const auto target = interfaceVectorSpace.getDOFs(0, vertex);
+            for (size_t component = 0; component < 3; ++component)
+            {
+              interfaceGeometricNormal.getData()(target(component)) =
+                geometricNormal.getData()(source(component));
+              interfaceSmoothedNormal.getData()(target(component)) =
+                smoothedNormal.getData()(source(component));
+              interfaceRayDirection.getData()(target(component)) =
+                rayDirection.getData()(source(component));
+              interfaceThicknessDescent.getData()(target(component)) =
+                thicknessDescent.getData()(source(component));
+            }
+            interfaceCurvature.getData()(interfaceScalarSpace.getDOFs(0, vertex)(0)) =
+              smoothedCurvature.getData()(levelSetSpace.getDOFs(0, parent)(0));
+          }
+        auto interfaceOutput = xdmf.grid("Interface");
+        interfaceOutput.clear();
+        interfaceOutput.setMesh(interfaceMesh, IO::XDMF::MeshPolicy::Transient);
+        if (m_options.minimumThickness > 0)
         {
-          const auto parent = sewedInterfaceVertices[vertex];
-          const auto source = sewedDesignVector.getDOFs(0, parent);
-          const auto target = sewedInterfaceVectorSpace.getDOFs(0, vertex);
-          for (size_t component = 0; component < 3; ++component)
-          {
-            sewedInterfaceGeometricNormal.getData()(target(component)) =
-              sewedGeometricNormal.getData()(source(component));
-            sewedInterfaceNormal.getData()(target(component)) =
-              sewedNormal.getData()(source(component));
-            sewedInterfaceRayDirection.getData()(target(component)) =
-              sewedRayDirection.getData()(source(component));
-            sewedInterfaceThicknessDescent.getData()(target(component)) =
-              sewedThicknessDescent.getData()(source(component));
-          }
-          sewedInterfaceCurvature.getData()(sewedInterfaceScalarSpace.getDOFs(0, vertex)(
-            0)) = sewedCurvature.getData()(sewedDesignScalar.getDOFs(0, parent)(0));
+          interfaceOutput.add(
+            "Geometric_Normal", interfaceGeometricNormal, IO::XDMF::Center::Node);
+          interfaceOutput.add(
+            "Smoothed_Normal", interfaceSmoothedNormal, IO::XDMF::Center::Node);
+          interfaceOutput.add(
+            "Ray_Direction", interfaceRayDirection, IO::XDMF::Center::Node);
+          interfaceOutput.add(
+            "Thickness_Descent", interfaceThicknessDescent, IO::XDMF::Center::Node);
+          interfaceOutput.add(
+            "Smoothed_Curvature", interfaceCurvature, IO::XDMF::Center::Node);
         }
-      auto sewedInterfaceOutput = sewedXdmf.grid("Interface");
-      sewedInterfaceOutput.clear();
-      sewedInterfaceOutput.setMesh(sewedInterfaceMesh, IO::XDMF::MeshPolicy::Transient);
-      if (m_options.minimumThickness > 0)
-      {
-        sewedInterfaceOutput.add(
-          "Geometric_Normal", sewedInterfaceGeometricNormal, IO::XDMF::Center::Node);
-        sewedInterfaceOutput.add(
-          "Smoothed_Normal", sewedInterfaceNormal, IO::XDMF::Center::Node);
-        sewedInterfaceOutput.add(
-          "Ray_Direction", sewedInterfaceRayDirection, IO::XDMF::Center::Node);
-        sewedInterfaceOutput.add(
-          "Thickness_Descent", sewedInterfaceThicknessDescent, IO::XDMF::Center::Node);
-        sewedInterfaceOutput.add(
-          "Smoothed_Curvature", sewedInterfaceCurvature, IO::XDMF::Center::Node);
-      }
+        fluidState.clear();
+        fluidState.setMesh(fluid, IO::XDMF::MeshPolicy::Transient);
+        fluidState.add("Translation_0", uT0, IO::XDMF::Center::Node);
+        fluidState.add("Translation_1", uT1, IO::XDMF::Center::Node);
+        fluidState.add("Translation_2", uT2, IO::XDMF::Center::Node);
+        fluidState.add("Rotation_0", uR0, IO::XDMF::Center::Node);
+        fluidState.add("Rotation_1", uR1, IO::XDMF::Center::Node);
+        fluidState.add("Rotation_2", uR2, IO::XDMF::Center::Node);
+        fluidState.add("Pressure_Translation_0", pT0, IO::XDMF::Center::Node);
+        fluidState.add("Pressure_Translation_1", pT1, IO::XDMF::Center::Node);
+        fluidState.add("Pressure_Translation_2", pT2, IO::XDMF::Center::Node);
+        fluidState.add("Pressure_Rotation_0", pR0, IO::XDMF::Center::Node);
+        fluidState.add("Pressure_Rotation_1", pR1, IO::XDMF::Center::Node);
+        fluidState.add("Pressure_Rotation_2", pR2, IO::XDMF::Center::Node);
+        GridFunction chamberMotion(Vh);
+        chamberMotion.getData() = motionTranslation(0) * uT0.getData() +
+          motionTranslation(1) * uT1.getData() + motionTranslation(2) * uT2.getData() +
+          motionAngular(0) * uR0.getData() + motionAngular(1) * uR1.getData() +
+          motionAngular(2) * uR2.getData();
+        fluidState.add("Motion", chamberMotion, IO::XDMF::Center::Node);
 
-      KelvinBall::SewedOutput sewedFluid(fluid, FlatSet<Attribute>{Gamma, Outer});
-      const auto translations = std::array{&uT0, &uT1, &uT2};
-      const auto rotations = std::array{&uR0, &uR1, &uR2};
-      const auto translationPressures = std::array{&pT0, &pT1, &pT2};
-      const auto rotationPressures = std::array{&pR0, &pR1, &pR2};
-      sewedFluid.addStates(sewedFluidOutput, translations, rotations,
-        translationPressures, rotationPressures, motionTranslation, motionAngular);
-      sewedInterfaceOutput.add("Motion", bodyMotion, IO::XDMF::Center::Node);
+        // Export the fluid first and release it before assembling the design.
+        // Values are generated one attribute at a time from chamber states.
+        {
+          KelvinBall::SewedOutput sewedFluid(fluid, FlatSet<Attribute>{Gamma, Outer});
+          const auto translations = std::array{&uT0, &uT1, &uT2};
+          const auto rotations = std::array{&uR0, &uR1, &uR2};
+          const auto translationPressures = std::array{&pT0, &pT1, &pT2};
+          const auto rotationPressures = std::array{&pR0, &pR1, &pR2};
+          sewedFluid.addStates(sewedFluidOutput, translations, rotations,
+            translationPressures, rotationPressures, motionTranslation, motionAngular);
+          sewedFluidOutput.write(static_cast<Real>(iteration)).clear();
+        }
 
-      if (iteration + 1 == m_options.maxIterations)
-      {
-        xdmf.write(static_cast<Real>(iteration)).flush();
-        sewedXdmf.write(static_cast<Real>(iteration)).flush();
+        // Construct sewn geometry only while writing it, after transport.
+        const auto writeSewedDesign =
+          [&](const GridFunction<decltype(levelSetSpace), Math::Vector<Real>>* advected) {
+            KelvinBall::SewedOutput sewedDesign(mesh, FlatSet<Attribute>{Gamma, Outer});
+            sewedDesignOutput.clear();
+            sewedDesignOutput.setMesh(
+              sewedDesign.getMesh(), IO::XDMF::MeshPolicy::Transient);
+            sewedDesignOutput.add(
+              "Distance", 1, [&](Index vertex, std::span<Real> value) {
+                value[0] = sewedDesign.getScalar(distance, vertex);
+              });
+            sewedDesignOutput.add("Theta", 3, [&](Index vertex, std::span<Real> value) {
+              const auto sample = sewedDesign.getVector(theta, vertex);
+              for (size_t component = 0; component < 3; ++component)
+                value[component] = sample(component);
+            });
+            if (m_options.minimumThickness > 0)
+            {
+              sewedDesignOutput.add(
+                "Thickness_Descent", 3, [&](Index vertex, std::span<Real> value) {
+                  const auto sample = sewedDesign.getVector(thicknessDescent, vertex);
+                  for (size_t component = 0; component < 3; ++component)
+                    value[component] = sample(component);
+                });
+            }
+
+            if (advected)
+            {
+              sewedDesignOutput.add(
+                "Advected", 1, [&, advected](Index vertex, std::span<Real> value) {
+                  value[0] = sewedDesign.getScalar(*advected, vertex);
+                });
+            }
+            {
+              SubMesh<Context::Local>::Builder sewedInterfaceBuilder;
+              sewedInterfaceBuilder.initialize(sewedDesign.getMesh());
+              for (auto face = sewedDesign.getMesh().getPolytope(
+                     sewedDesign.getMesh().getDimension() - 1);
+                face; ++face)
+              {
+                if (face->getAttribute() == Gamma)
+                  sewedInterfaceBuilder.include(
+                    sewedDesign.getMesh().getDimension() - 1, face->getIndex());
+              }
+              SubMesh<Context::Local> sewedInterfaceMesh =
+                sewedInterfaceBuilder.finalize();
+              const auto& sewedInterfaceVertices =
+                sewedInterfaceMesh.getPolytopeMap(0).left;
+              auto sewedInterfaceOutput = sewedXdmf.grid("Interface");
+              sewedInterfaceOutput.clear();
+              sewedInterfaceOutput.setMesh(
+                sewedInterfaceMesh, IO::XDMF::MeshPolicy::Transient);
+              if (m_options.minimumThickness > 0)
+              {
+                sewedInterfaceOutput.add(
+                  "Geometric_Normal", 3, [&](Index vertex, std::span<Real> value) {
+                    const auto sample = sewedDesign.getVector(
+                      geometricNormal, sewedInterfaceVertices[vertex]);
+                    for (size_t component = 0; component < 3; ++component)
+                      value[component] = sample(component);
+                  });
+                sewedInterfaceOutput.add(
+                  "Smoothed_Normal", 3, [&](Index vertex, std::span<Real> value) {
+                    const auto sample = sewedDesign.getVector(
+                      smoothedNormal, sewedInterfaceVertices[vertex]);
+                    for (size_t component = 0; component < 3; ++component)
+                      value[component] = sample(component);
+                  });
+                sewedInterfaceOutput.add(
+                  "Ray_Direction", 3, [&](Index vertex, std::span<Real> value) {
+                    const auto sample =
+                      sewedDesign.getVector(rayDirection, sewedInterfaceVertices[vertex]);
+                    for (size_t component = 0; component < 3; ++component)
+                      value[component] = sample(component);
+                  });
+                sewedInterfaceOutput.add(
+                  "Thickness_Descent", 3, [&](Index vertex, std::span<Real> value) {
+                    const auto sample = sewedDesign.getVector(
+                      thicknessDescent, sewedInterfaceVertices[vertex]);
+                    for (size_t component = 0; component < 3; ++component)
+                      value[component] = sample(component);
+                  });
+                sewedInterfaceOutput.add(
+                  "Smoothed_Curvature", 1, [&](Index vertex, std::span<Real> value) {
+                    value[0] = sewedDesign.getScalar(
+                      smoothedCurvature, sewedInterfaceVertices[vertex]);
+                  });
+              }
+              sewedInterfaceOutput.add(
+                "Motion", 3, [&](Index vertex, std::span<Real> value) {
+                  const Math::SpatialVector<Real> sample = motionTranslation +
+                    motionAngular.cross(sewedInterfaceMesh.getVertexCoordinates(vertex));
+                  for (size_t component = 0; component < 3; ++component)
+                    value[component] = sample(component);
+                });
+
+              sewedInterfaceOutput.write(static_cast<Real>(iteration)).clear();
+            }
+            sewedDesignOutput.write(static_cast<Real>(iteration)).clear();
+          };
+
+        if (iteration + 1 == m_options.maxIterations)
+        {
+          xdmf.write(static_cast<Real>(iteration)).flush();
+          writeSewedDesign(nullptr);
+          sewedXdmf.flush();
+          stageSeconds[6] = elapsedSeconds(stage7Start);
+          reportStageTiming(7, stageSeconds[6]);
+          writeHistory(nullSpaceMultiplier, xiRhoInfinityNorm, thetaInfinityNorm,
+            dRhoTheta, dVolumeTheta, requiredDVolumeTheta, rhoGradientDiagnostics,
+            volumeGradientDiagnostics, stageDiagnostics);
+          chamber.clear();
+          fluidState.clear();
+          interfaceOutput.clear();
+          sewedDesignOutput.clear();
+          sewedFluidOutput.clear();
+          continue;
+        }
+
         stageSeconds[6] = elapsedSeconds(stage7Start);
         reportStageTiming(7, stageSeconds[6]);
-        writeHistory(nullSpaceMultiplier, xiRhoInfinityNorm, thetaInfinityNorm, dRhoTheta,
-          dVolumeTheta, requiredDVolumeTheta, rhoGradientDiagnostics,
-          volumeGradientDiagnostics);
+        const auto stage8Start = Clock::now();
+        announce("Stage 8: Advecting the level set.");
+        if (swiftBackground)
+        {
+          if (!backgroundLocator)
+            backgroundLocator.emplace(advectionMesh);
+        }
+        else
+          chamberLocator.emplace(advectionMesh);
+        const auto& advectionLocator =
+          swiftBackground ? *backgroundLocator : *chamberLocator;
+        auto& advectionConnectivity = advectionMesh.getConnectivity();
+        advectionConnectivity.discover(3, 2);
+        advectionConnectivity.discover(3, 1);
+        advectionConnectivity.restrict(1, 0);
+        advectionConnectivity.restrict(2, 0);
+        advectionConnectivity.restrict(2, 3);
+        advectionConnectivity.discover(0, 0);
+        P1 advectionShapeSpace(advectionMesh, 3);
+        GridFunction advectionDistance(advectionLevelSetSpace);
+        GridFunction advectionDirection(advectionShapeSpace);
+        if (swiftBackground)
+        {
+          // The fitted mesh is the background with its vertices moved: the same
+          // numbering at different positions. Copying nodal values would carry
+          // each one from x + u(x) back to x and undo the fit near the interface,
+          // so both fields are evaluated at the positions of the background.
+          const Location::AABB<MMG::Mesh> fittedLocator(mesh);
+          std::size_t unlocated = 0;
+          advectionDistance = RealFunction([&](const Geometry::Point& point) {
+            const auto located = fittedLocator.locate(3, point.getPhysicalCoordinates());
+            if (!located)
+            {
+              ++unlocated;
+              return Real(0);
+            }
+            return distance.getValue(*located);
+          });
+          advectionDirection =
+            VectorFunction(static_cast<size_t>(3), [&](const Geometry::Point& point) {
+              Math::SpatialVector<Real> value(3);
+              value.setZero();
+              const auto located =
+                fittedLocator.locate(3, point.getPhysicalCoordinates());
+              if (!located)
+              {
+                ++unlocated;
+                return value;
+              }
+              const auto sample = theta.getValue(*located);
+              for (Eigen::Index component = 0; component < 3; ++component)
+                value(component) = sample(component);
+              return value;
+            });
+          if (unlocated > 0)
+            throw std::runtime_error(
+              "Background points fell outside the fitted mesh during the transfer.");
+          Alert::Info()
+            << substageHeading("Fitted-to-background transfer") << Alert::NewLine
+            << diagnosticLabel("Nodal-copy error (distance):")
+            << Alert::Notation::Number((advectionDistance.getData() - distance.getData())
+                   .lpNorm<Eigen::Infinity>())
+            << Alert::NewLine << diagnosticLabel("Nodal-copy error (direction):")
+            << Alert::Notation::Number((advectionDirection.getData() - theta.getData())
+                   .lpNorm<Eigen::Infinity>())
+            << Alert::Raise;
+        }
+        else
+        {
+          advectionDistance.getData() = distance.getData();
+          advectionDirection.getData() = theta.getData();
+        }
+        // MMG transport uses the shape mesh, whose cut locator is already built.
+        // SWIFT transport uses a distinct background and needs its own locator.
+        if (swiftBackground && !backgroundCoupling)
+        {
+          backgroundCoupling.emplace(advectionMesh,
+            FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus},
+            rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
+        }
+        const auto& advectionCoupling =
+          backgroundCoupling ? *backgroundCoupling : shapeCoupling;
+        KelvinBall::RotatedCharacteristicContinuation rotationalContinuation(
+          -dt, advectionMesh, advectionCoupling.getLocator(), RotationPairs);
+        const auto characteristic = Flow(-dt, advectionDistance, advectionDirection,
+          Math::RungeKutta::RK4{}, rotationalContinuation);
+        const KelvinBall::NodalTransport transport(advectionMesh, advectionLocator,
+          advectionDistance, characteristic, advectedDistance);
+        stageDiagnostics.transportAttempted = transport.getAttemptedCount();
+        stageDiagnostics.transportFallback = transport.getFallbackCount();
+        Alert::Info() << substageHeading("Transport coverage") << Alert::NewLine
+                      << diagnosticLabel("Attempted vertices:")
+                      << transport.getAttemptedCount() << Alert::NewLine
+                      << diagnosticLabel("Previous-distance fallback vertices:")
+                      << transport.getFallbackCount() << Alert::Raise;
+        const Real advectionIncrement =
+          (advectedDistance.getData() - advectionDistance.getData())
+            .lpNorm<Eigen::Infinity>();
+        const Real distanceJump = advectionCoupling.scalarJump(advectionDistance);
+        const Real advectedJump = advectionCoupling.scalarJump(advectedDistance);
+        stageDiagnostics.advectionIncrement = advectionIncrement;
+        stageDiagnostics.advectedJump = advectedJump;
+        Alert::Info() << substageHeading("Advected distance") << Alert::NewLine
+                      << diagnosticLabel("Advection step:") << Alert::Notation::Number(dt)
+                      << Alert::NewLine << diagnosticLabel("Minimum:")
+                      << Alert::Notation::Number(advectedDistance.min()) << Alert::NewLine
+                      << diagnosticLabel("Maximum:")
+                      << Alert::Notation::Number(advectedDistance.max()) << Alert::NewLine
+                      << diagnosticLabel("Increment infinity norm:")
+                      << Alert::Notation::Number(advectionIncrement) << Alert::NewLine
+                      << diagnosticLabel("Distance rotated jump:")
+                      << Alert::Notation::Number(distanceJump) << Alert::NewLine
+                      << diagnosticLabel("Advected rotated jump:")
+                      << Alert::Notation::Number(advectedJump) << Alert::Raise;
+        GridFunction advectedOutput(levelSetSpace);
+        advectedOutput.getData() = advectedDistance.getData();
+        chamber.add("Advected", advectedOutput, IO::XDMF::Center::Node);
+        xdmf.write(static_cast<Real>(iteration)).flush();
+        writeSewedDesign(&advectedOutput);
+        sewedXdmf.flush();
+        stageSeconds[7] = elapsedSeconds(stage8Start);
+        reportStageTiming(8, stageSeconds[7]);
+        // Attribute writers capture fields by reference. Remove those callbacks
+        // before their fields expire; the written snapshot metadata is retained.
         chamber.clear();
         fluidState.clear();
         interfaceOutput.clear();
         sewedDesignOutput.clear();
         sewedFluidOutput.clear();
-        sewedInterfaceOutput.clear();
-        continue;
       }
 
-      stageSeconds[6] = elapsedSeconds(stage7Start);
-      reportStageTiming(7, stageSeconds[6]);
-      const auto stage8Start = Clock::now();
-      announce("Stage 8: Advecting the level set.");
-      if (swiftBackground)
-      {
-        if (!backgroundLocator)
-          backgroundLocator.emplace(advectionMesh);
-      }
-      else
-        chamberLocator.emplace(advectionMesh);
-      const auto& advectionLocator =
-        swiftBackground ? *backgroundLocator : *chamberLocator;
-      auto& advectionConnectivity = advectionMesh.getConnectivity();
-      advectionConnectivity.discover(3, 2);
-      advectionConnectivity.discover(3, 1);
-      advectionConnectivity.restrict(1, 0);
-      advectionConnectivity.restrict(2, 0);
-      advectionConnectivity.restrict(2, 3);
-      advectionConnectivity.discover(0, 0);
-      P1 advectionShapeSpace(advectionMesh, 3);
-      GridFunction advectionDistance(advectionLevelSetSpace);
-      GridFunction advectionDirection(advectionShapeSpace);
-      if (swiftBackground)
-      {
-      // The fitted mesh is the background with its vertices moved: the same
-      // numbering at different positions. Copying nodal values would carry
-      // each one from x + u(x) back to x and undo the fit near the interface,
-      // so both fields are evaluated at the positions of the background.
-        const Location::AABB<MMG::Mesh> fittedLocator(mesh);
-        std::size_t unlocated = 0;
-        advectionDistance = RealFunction([&](const Geometry::Point& point) {
-          const auto located = fittedLocator.locate(3, point.getPhysicalCoordinates());
-          if (!located)
-          {
-            ++unlocated;
-            return Real(0);
-          }
-          return distance.getValue(*located);
-        });
-        advectionDirection =
-          VectorFunction(static_cast<size_t>(3), [&](const Geometry::Point& point) {
-            Math::SpatialVector<Real> value(3);
-            value.setZero();
-            const auto located = fittedLocator.locate(3, point.getPhysicalCoordinates());
-            if (!located)
-            {
-              ++unlocated;
-              return value;
-            }
-            const auto sample = theta.getValue(*located);
-            for (Eigen::Index component = 0; component < 3; ++component)
-              value(component) = sample(component);
-            return value;
-          });
-        if (unlocated > 0)
-          throw std::runtime_error(
-            "Background points fell outside the fitted mesh during the transfer.");
-        Alert::Info()
-          << substageHeading("Fitted-to-background transfer") << Alert::NewLine
-          << diagnosticLabel("Nodal-copy error (distance):")
-          << Alert::Notation::Number((advectionDistance.getData() - distance.getData())
-                                       .lpNorm<Eigen::Infinity>())
-          << Alert::NewLine << diagnosticLabel("Nodal-copy error (direction):")
-          << Alert::Notation::Number(
-               (advectionDirection.getData() - theta.getData()).lpNorm<Eigen::Infinity>())
-          << Alert::Raise;
-      }
-      else
-      {
-        advectionDistance.getData() = distance.getData();
-        advectionDirection.getData() = theta.getData();
-      }
-      // MMG transport uses the shape mesh, whose cut locator is already built.
-      // SWIFT transport uses a distinct background and needs its own locator.
-      if (swiftBackground && !backgroundCoupling)
-      {
-        backgroundCoupling.emplace(advectionMesh,
-          FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus},
-          rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
-      }
-      const auto& advectionCoupling =
-        backgroundCoupling ? *backgroundCoupling : shapeCoupling;
-      KelvinBall::RotatedCharacteristicContinuation rotationalContinuation(
-        -dt, advectionMesh, advectionCoupling.getLocator(), RotationPairs);
-      const auto characteristic = Flow(-dt, advectionDistance, advectionDirection,
-        Math::RungeKutta::RK4{}, rotationalContinuation);
-      const KelvinBall::NodalTransport transport(advectionMesh, advectionLocator,
-        advectionDistance, characteristic, advectedDistance);
-      stageDiagnostics.transportAttempted = transport.getAttemptedCount();
-      stageDiagnostics.transportFallback = transport.getFallbackCount();
-      Alert::Info() << substageHeading("Transport coverage") << Alert::NewLine
-                    << diagnosticLabel("Attempted vertices:")
-                    << transport.getAttemptedCount() << Alert::NewLine
-                    << diagnosticLabel("Previous-distance fallback vertices:")
-                    << transport.getFallbackCount() << Alert::Raise;
-      const Real advectionIncrement =
-        (advectedDistance.getData() - advectionDistance.getData())
-          .lpNorm<Eigen::Infinity>();
-      const Real distanceJump = advectionCoupling.scalarJump(advectionDistance);
-      const Real advectedJump = advectionCoupling.scalarJump(advectedDistance);
-      stageDiagnostics.advectionIncrement = advectionIncrement;
-      stageDiagnostics.advectedJump = advectedJump;
-      Alert::Info() << substageHeading("Advected distance") << Alert::NewLine
-                    << diagnosticLabel("Advection step:") << Alert::Notation::Number(dt)
-                    << Alert::NewLine << diagnosticLabel("Minimum:")
-                    << Alert::Notation::Number(advectedDistance.min()) << Alert::NewLine
-                    << diagnosticLabel("Maximum:")
-                    << Alert::Notation::Number(advectedDistance.max()) << Alert::NewLine
-                    << diagnosticLabel("Increment infinity norm:")
-                    << Alert::Notation::Number(advectionIncrement) << Alert::NewLine
-                    << diagnosticLabel("Distance rotated jump:")
-                    << Alert::Notation::Number(distanceJump) << Alert::NewLine
-                    << diagnosticLabel("Advected rotated jump:")
-                    << Alert::Notation::Number(advectedJump) << Alert::Raise;
-      GridFunction advectedOutput(levelSetSpace);
-      advectedOutput.getData() = advectedDistance.getData();
-      chamber.add("Advected", advectedOutput, IO::XDMF::Center::Node);
-      GridFunction sewedAdvected(sewedDesignScalar);
-      sewedDesign.setScalar(sewedAdvected, advectedOutput);
-      sewedDesignOutput.add("Advected", sewedAdvected, IO::XDMF::Center::Node);
-
-      xdmf.write(static_cast<Real>(iteration)).flush();
-      sewedXdmf.write(static_cast<Real>(iteration)).flush();
-      stageSeconds[7] = elapsedSeconds(stage8Start);
-      reportStageTiming(8, stageSeconds[7]);
-    // Attribute writers capture fields by reference. Remove those callbacks
-    // before their fields expire; the written snapshot metadata is retained.
-      chamber.clear();
-      fluidState.clear();
-      interfaceOutput.clear();
-      sewedDesignOutput.clear();
-      sewedFluidOutput.clear();
-      sewedInterfaceOutput.clear();
+      // Capture scalar diagnostics by value; no mesh, space or field is retained.
+      writeCompletedHistory = [=] {
+        writeHistory(nullSpaceMultiplier, xiRhoInfinityNorm, thetaInfinityNorm, dRhoTheta,
+          dVolumeTheta, requiredDVolumeTheta, rhoGradientDiagnostics,
+          volumeGradientDiagnostics, stageDiagnostics);
+      };
     }
 
     const auto stage9Start = Clock::now();
@@ -2571,7 +2613,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
           });
           const Real adaptedH = meanElementSize(adapted);
           MMG::Mesh classified = classifyLevelSetForSWIFT(adapted, target);
-          auto fitted = fitLevelSetSWIFT(classified, target, adaptedH, outerRadius);
+          auto fitted =
+            fitLevelSetSWIFT(std::move(classified), target, adaptedH, outerRadius);
           fitted.diagnostics.cellsBefore = swiftBackground->getCellCount();
           fitted.diagnostics.cellsAfter = fitted.mesh.getCellCount();
           fitted.diagnostics.minimumSize = m_options.configuration.hmin;
@@ -2591,8 +2634,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         }
         MMG::Mesh classified =
           classifyLevelSetForSWIFT(*swiftBackground, advectedDistance);
-        auto fitted =
-          fitLevelSetSWIFT(classified, advectedDistance, backgroundH, outerRadius);
+        auto fitted = fitLevelSetSWIFT(
+          std::move(classified), advectedDistance, backgroundH, outerRadius);
         return fitted;
       }
       // A failed MMG stage is retried on the same advected level set with
@@ -2646,9 +2689,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     nextMesh.emplace(std::move(result.mesh));
     stageSeconds[8] = elapsedSeconds(stage9Start);
     reportStageTiming(9, stageSeconds[8]);
-    writeHistory(nullSpaceMultiplier, xiRhoInfinityNorm, thetaInfinityNorm, dRhoTheta,
-      dVolumeTheta, requiredDVolumeTheta, rhoGradientDiagnostics,
-      volumeGradientDiagnostics);
+    writeCompletedHistory();
   }
 
   Alert::Success() << "Wrote KelvinBall.xdmf, KelvinBallSewed.xdmf, "
