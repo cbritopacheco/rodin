@@ -10,9 +10,12 @@
 # the Arc Pro B70 of demeter (Battlemage, Xe2), which ocloc names bmg.
 # Kokkos 5.2.2 and PETSc 3.26 do not know it: two patches add it.
 #
-# The Level Zero loader comes from Ubuntu 26.04, the GPU runtime and its
-# compiler from the releases of Intel: ocloc of Ubuntu (IGC 2.28) crashes on
-# a kernel of Kokkos-Kernels.
+# The GPU runtime, its compiler and the Level Zero loader come from the
+# releases of Intel: ocloc of Ubuntu 26.04 (IGC 2.28) crashes on a kernel of
+# Kokkos-Kernels, and its loader (1.28) misses the graph extension that the
+# Level Zero v2 adapter of oneAPI 2026 calls when Kokkos starts. IGC 2.41 and
+# 2.42 crash in turn on the reduce_by_segment of oneDPL that hypre compiles
+# just in time when it assembles a matrix, hence the release 26.31 and IGC 2.40.
 
 ARG UBUNTU_IMAGE=ubuntu:26.04
 FROM ${UBUNTU_IMAGE}
@@ -21,9 +24,10 @@ ARG JOBS=36
 ARG SYCL_ARCH=bmg
 ARG KOKKOS_ARCH=INTEL_BMG
 ARG ONEAPI_VERSION=2026.2
-ARG COMPUTE_RUNTIME_VERSION=26.35.39758.10
-ARG IGC_VERSION=2.41.5+22716
+ARG COMPUTE_RUNTIME_VERSION=26.31.39395.13
+ARG IGC_VERSION=2.40.13+22418
 ARG GMM_VERSION=22.10.0
+ARG LEVEL_ZERO_VERSION=1.32.0
 ARG UCX_VERSION=1.22.0
 ARG OMPI_VERSION=5.0.11
 ARG BOOST_VERSION=1.90.0
@@ -35,13 +39,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       autoconf automake bison bzip2 ca-certificates cmake curl file flex g++ gcc \
       gfortran git gpg libhdf5-dev libnuma-dev libsuitesparse-dev libeigen3-dev \
       libtool make ninja-build patch pkg-config python3 xz-utils zlib1g-dev \
-      libze1 libze-dev clinfo \
+      clinfo \
     && rm -rf /var/lib/apt/lists/*
 
 # ---- Intel GPU runtime -----------------------------------------------------
+# The versions are those of the release notes of the compute runtime.
 RUN mkdir /tmp/neo && cd /tmp/neo \
+    && ze=https://github.com/oneapi-src/level-zero/releases/download/v${LEVEL_ZERO_VERSION} \
     && igc=https://github.com/intel/intel-graphics-compiler/releases/download/v${IGC_VERSION%+*} \
     && neo=https://github.com/intel/compute-runtime/releases/download/${COMPUTE_RUNTIME_VERSION} \
+    && curl -fsSLO $ze/libze1_${LEVEL_ZERO_VERSION}+u24.04_amd64.deb \
+    && curl -fsSLO $ze/libze-dev_${LEVEL_ZERO_VERSION}+u24.04_amd64.deb \
     && curl -fsSLO $igc/intel-igc-core-2_${IGC_VERSION}_amd64.deb \
     && curl -fsSLO $igc/intel-igc-opencl-2_${IGC_VERSION}_amd64.deb \
     && curl -fsSLO $neo/intel-ocloc_${COMPUTE_RUNTIME_VERSION}-0_amd64.deb \
@@ -107,6 +115,8 @@ ENV LD_LIBRARY_PATH=/opt/ompi/lib:${LD_LIBRARY_PATH}
 ENV OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 # The CI processes share one GPU.
 ENV OMPI_MCA_rmaps_base_oversubscribe=1
+# The Level Zero component of the hwloc inside Open MPI crashes mpirun.
+ENV HWLOC_COMPONENTS=-levelzero
 
 # ---- Boost with MPI --------------------------------------------------------
 RUN curl -fsSL https://archives.boost.io/release/${BOOST_VERSION}/source/boost_$(echo ${BOOST_VERSION} | tr . _).tar.bz2 \
@@ -142,7 +152,9 @@ ENV LD_LIBRARY_PATH=/opt/kokkos/lib:${LD_LIBRARY_PATH}
 
 # ---- PETSc -----------------------------------------------------------------
 # oneMKL serves BLAS and LAPACK, and the sparse kernels of Kokkos-Kernels and
-# hypre on the device.
+# hypre on the device. The MKLConfig of Kokkos-Kernels takes the 64-bit
+# integer interface of oneMKL by default, PETSc the 32-bit one: both export
+# the same BLAS symbols, so Kokkos-Kernels takes the 32-bit one too.
 COPY petsc-sycl-bmg.patch /tmp/
 RUN curl -fsSL https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-${PETSC_VERSION}.tar.gz \
       | tar xz -C /tmp \
@@ -154,6 +166,7 @@ RUN curl -fsSL https://web.cels.anl.gov/projects/petsc/download/release-snapshot
          --with-cxx-dialect=20 --with-debugging=0 --with-openmp=1 \
          --with-blaslapack-dir=${MKLROOT} \
          --with-kokkos-dir=/opt/kokkos --download-kokkos-kernels \
+         --download-kokkos-kernels-cmake-arguments=-DMKL_INTERFACE=lp64 \
          --download-hypre --download-metis --download-mumps \
          --download-parmetis --download-scalapack --download-superlu_dist \
          --with-make-np=${JOBS} \
@@ -164,4 +177,11 @@ RUN curl -fsSL https://web.cels.anl.gov/projects/petsc/download/release-snapshot
 ENV PETSC_DIR=/opt/petsc
 ENV LD_LIBRARY_PATH=/opt/petsc/lib:${LD_LIBRARY_PATH}
 ENV CMAKE_PREFIX_PATH=/opt/petsc:/opt/kokkos:/opt/boost:${CMAKE_PREFIX_PATH}
+# Open MPI does not know SYCL memory, and PETSc stops at PetscInitialize
+# unless told that MPI takes host buffers only.
+ENV PETSC_OPTIONS="-use_gpu_aware_mpi 0"
+# PETSc builds its own SYCL queue on the default device, which the OpenCL
+# CPU runtime of the image can provide, and Kokkos aborts on a queue that is
+# not on Level Zero.
+ENV ONEAPI_DEVICE_SELECTOR=level_zero:gpu
 ENV RODIN_KOKKOS_BACKEND=sycl

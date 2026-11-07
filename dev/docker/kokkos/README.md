@@ -27,9 +27,15 @@ The SYCL image targets the B70 of demeter, which ocloc names `bmg`. Kokkos
 5.2.2 and PETSc 3.26 do not know Battlemage: `kokkos-sycl-bmg.patch` adds
 the architecture `INTEL_BMG` to Kokkos and `petsc-sycl-bmg.patch` the value
 `bmg` to `--with-sycl-arch`. Another Intel GPU takes `SYCL_ARCH` (`pvc`) and
-`KOKKOS_ARCH` (`INTEL_PVC`). The GPU runtime and its compiler come from the
-releases of Intel (`COMPUTE_RUNTIME_VERSION`, `IGC_VERSION`): ocloc of Ubuntu
-26.04 crashes on a kernel of Kokkos-Kernels.
+`KOKKOS_ARCH` (`INTEL_PVC`). The GPU runtime, its compiler and the Level
+Zero loader come from the releases of Intel (`COMPUTE_RUNTIME_VERSION`,
+`IGC_VERSION`, `LEVEL_ZERO_VERSION`): ocloc of Ubuntu 26.04 crashes on a
+kernel of Kokkos-Kernels, and its loader lacks an extension that oneAPI 2026
+calls when Kokkos starts. The image stays on IGC 2.40: 2.41 and 2.42 crash on
+a kernel of oneDPL that hypre compiles just in time. Open MPI does not know SYCL memory, so the image
+sets `PETSC_OPTIONS=-use_gpu_aware_mpi 0`, and `HWLOC_COMPONENTS=-levelzero`
+keeps mpirun from crashing. `ONEAPI_DEVICE_SELECTOR=level_zero:gpu` keeps
+PETSc off the OpenCL devices, on which Kokkos refuses to run.
 
 ## Build
 
