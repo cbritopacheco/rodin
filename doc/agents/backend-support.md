@@ -52,6 +52,13 @@ OpenMP with `-fopenmp=libomp` (the front end of Clang) and keep libiomp5 at
 link; the default `-fp-model=fast` of icpx is overridden by
 `-fp-model=precise`.
 
+On Intel GPUs, IGC 2.40 and 2.41 drop the stores of some lanes in
+irreducible loops, which LLVM builds when it threads a branch on a value
+of the thread into a loop. A test on the geometry inside a loop over the
+dimension did it in the device projections: keep such tests out of device
+loops, as `Geometry::getReferenceVertexCoordinate` does with one mask per
+geometry, and compare a new device kernel with the host on a mixed mesh.
+
 The mesh derives directly from MeshBase and retains no LocalMesh. Temporary
 host builders/loaders create independently owned Kokkos arrays. Reference-
 returning host queries materialize compatibility entries; those are never

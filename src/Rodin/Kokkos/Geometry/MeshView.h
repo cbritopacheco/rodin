@@ -1237,18 +1237,43 @@ namespace Rodin::Kokkos::Geometry
   Real getReferenceVertexCoordinate(
     ::Rodin::Geometry::Polytope::Type type, Index a, Index d)
   {
+    // The coordinates are bits of one mask per geometry, built at compile
+    // time, and the geometry only selects the mask. Tests on the geometry
+    // inside the loops of the callers end up threaded into them, and IGC
+    // 2.40 and 2.41 drop the stores of some lanes in the irreducible loops
+    // that come out of it.
     using Type = ::Rodin::Geometry::Polytope::Type;
-    bool upper;
-    if (type == Type::Point || type == Type::Segment || type == Type::Triangle ||
-      type == Type::Tetrahedron)
-      upper = a == d + 1;
-    else if (type == Type::Quadrilateral || type == Type::Hexahedron)
-      upper = d == 0 ? a % 4 == 1 || a % 4 == 2 : d == 1 ? a % 4 >= 2 : a >= 4;
-    else if (type == Type::Wedge)
-      upper = d < 2 ? a % 3 == d + 1 : a >= 3;
-    else
-      upper = a == 4 ? d == 2 : d == 0 ? a == 1 || a == 2 : d == 1 && a >= 2;
-    return upper ? Real(1) : Real(0);
+    constexpr auto mask = [](Type g)
+    {
+      std::uint32_t result = 0;
+      for (Index v = 0; v < 8; ++v)
+      {
+        for (Index c = 0; c < 3; ++c)
+        {
+          bool upper;
+          if (g == Type::Quadrilateral || g == Type::Hexahedron)
+            upper = c == 0 ? v % 4 == 1 || v % 4 == 2 : c == 1 ? v % 4 >= 2 : v >= 4;
+          else if (g == Type::Wedge)
+            upper = c < 2 ? v % 3 == c + 1 : v >= 3;
+          else if (g == Type::Pyramid)
+            upper = v == 4 ? c == 2 : c == 0 ? v == 1 || v == 2 : c == 1 && v >= 2;
+          else
+            upper = v == c + 1;
+          if (upper)
+            result |= std::uint32_t(1) << (3 * v + c);
+        }
+      }
+      return result;
+    };
+    constexpr std::uint32_t simplex = mask(Type::Tetrahedron);
+    constexpr std::uint32_t cube = mask(Type::Hexahedron);
+    constexpr std::uint32_t wedge = mask(Type::Wedge);
+    constexpr std::uint32_t pyramid = mask(Type::Pyramid);
+    KOKKOS_ASSERT(a < 8 && d < 3);
+    const std::uint32_t bits =
+      type == Type::Quadrilateral || type == Type::Hexahedron ? cube :
+      type == Type::Wedge ? wedge : type == Type::Pyramid ? pyramid : simplex;
+    return (bits >> (3 * a + d)) & 1 ? Real(1) : Real(0);
   }
 
   KOKKOS_INLINE_FUNCTION
