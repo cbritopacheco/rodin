@@ -63,6 +63,16 @@ in two on the Arc Pro B70: sum each entry in the registers of one thread
 instead, as the team kernels of `InternalVirtualWork.h` do for the
 displacement gradients, and run a new team kernel several times.
 
+IGC gives a thread 128 registers by default, and the bilinear integration
+kernels spill hundreds of them at SIMD16 (the warnings of ocloc in the
+build log say how many). `src/Rodin/Kokkos/CMakeLists.txt` passes
+`-ze-intel-enable-auto-large-GRF-mode` to ocloc for INTEL_BMG, so the kernels
+that would spill get 256 registers; this took the Oseen atrium assembly from
+36.0 to 16.5 ms on the renumbered mesh (104 to 72 ms raw). Device code is compiled ahead of time
+by each compile command, not at link, so a backend option must reach the
+compile line. On the raw mesh the COO merge stays bound by the locality of
+its gather (53 ms against 3.3 ms renumbered): renumber the mesh.
+
 The mesh derives directly from MeshBase and retains no LocalMesh. Temporary
 host builders/loaders create independently owned Kokkos arrays. Reference-
 returning host queries materialize compatibility entries; those are never

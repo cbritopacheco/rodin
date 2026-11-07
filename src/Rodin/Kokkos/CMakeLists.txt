@@ -20,6 +20,17 @@ target_link_libraries(RodinKokkos
     Kokkos::kokkos
 )
 
+# IGC gives a thread 128 registers by default on the Arc Pro B70, and the
+# bilinear integration kernels spill hundreds of them, which made them four
+# times slower than on an RTX 2080 Ti. The automatic mode gives 256 registers
+# to the kernels that would spill and leaves the others at 128. The option goes
+# to ocloc, which compiles the device code ahead of time; SHELL keeps CMake
+# from merging the repeated -Xsycl-target-backend with the one of Kokkos.
+if (Kokkos_ENABLE_SYCL AND "INTEL_BMG" IN_LIST Kokkos_ARCH)
+  target_compile_options(RodinKokkos INTERFACE
+    "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-Xsycl-target-backend \"-options -ze-intel-enable-auto-large-GRF-mode\">")
+endif()
+
 target_sources(RodinKokkos INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ForwardDecls.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Context.h>
