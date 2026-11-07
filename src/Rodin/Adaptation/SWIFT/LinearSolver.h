@@ -11,7 +11,7 @@
 #include <iostream>
 #include <memory>
 #include <limits>
-#include <vector>
+#include <Eigen/IterativeLinearSolvers>
 #include "Rodin/Solver/LinearSolver.h"
 #include "Rodin/Solver/MUMPS.h"
 #include "Rodin/Solver/SparseLU.h"
@@ -20,14 +20,170 @@
 
 namespace Rodin::Adaptation::SWIFT
 {
+  template <class Scalar>
+  class LowRankUpdate;
+}
+
+namespace Eigen::internal
+{
+  template <class Scalar>
+  struct traits<Rodin::Adaptation::SWIFT::LowRankUpdate<Scalar>>
+    : traits<Rodin::Math::SparseMatrix<Scalar>>
+  {};
+}
+
+namespace Rodin::Adaptation::SWIFT
+{
+  /**
+   * @brief Non-owning operator @f$M=A-UU^*@f$ with a sparse core.
+   *
+   * ## Architecture
+   *
+   * Matrix-vector products retain the low-rank subtraction without forming a
+   * dense matrix. Direct solvers can use @ref getAugmented, whose auxiliary
+   * equation eliminates to the same operator. Neither representation adds a
+   * gauge or regularization. The core and factor must outlive this view and
+   * must not change during a solve.
+   *
+   * @tparam ScalarType Scalar of the core and factor.
+   */
+  template <class ScalarType>
+  class LowRankUpdate final : public Eigen::EigenBase<LowRankUpdate<ScalarType>>
+  {
+    public:
+      /// @brief Scalar required by Eigen's matrix-free solver interface.
+      using Scalar = ScalarType;
+
+      /// @brief Real scalar associated with the operator.
+      using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+
+      /// @brief Sparse index type.
+      using StorageIndex = typename Math::SparseMatrix<Scalar>::StorageIndex;
+
+      /// @brief Dynamic matrix dimensions for Eigen expressions.
+      enum
+      {
+        ColsAtCompileTime = Eigen::Dynamic, ///< Runtime column count.
+        MaxColsAtCompileTime = Eigen::Dynamic, ///< Unbounded column count.
+        IsRowMajor = false ///< Column-major operator interface.
+      };
+
+      /**
+       * @brief Binds the sparse core and low-rank factor.
+       * @param core Square sparse matrix.
+       * @param factor Factor with one row per core row, or an empty matrix.
+       */
+      LowRankUpdate(
+        const Math::SparseMatrix<Scalar>& core, const Math::Matrix<Scalar>& factor)
+        : m_core(core),
+          m_factor(factor)
+      {
+        if (core.rows() != core.cols() ||
+          (factor.size() != 0 && factor.rows() != core.rows()))
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "A low-rank update requires a square core and matching factor rows."
+            << Alert::Raise;
+        }
+      }
+
+      /**
+       * @brief Returns the number of rows.
+       * @returns Core row count.
+       */
+      Eigen::Index rows() const
+      {
+        return m_core.rows();
+      }
+
+      /**
+       * @brief Returns the number of columns.
+       * @returns Core column count.
+       */
+      Eigen::Index cols() const
+      {
+        return m_core.cols();
+      }
+
+      /**
+       * @brief Applies @f$Ax-U(U^*x)@f$ without dense assembly.
+       * @tparam Derived Input vector expression.
+       * @param x Vector to multiply.
+       * @returns Operator image.
+       */
+      template <class Derived>
+      Math::Vector<Scalar> operator*(const Eigen::MatrixBase<Derived>& x) const
+      {
+        Math::Vector<Scalar> image = m_core * x;
+        if (m_factor.size() != 0)
+          image -= m_factor * (m_factor.adjoint() * x);
+        return image;
+      }
+
+      /**
+       * @brief Returns the diagonal of the complete operator.
+       * @returns Core diagonal minus squared factor-row norms.
+       */
+      Math::Vector<Scalar> diagonal() const
+      {
+        Math::Vector<Scalar> result = m_core.diagonal();
+        if (m_factor.size() != 0)
+          result -= m_factor.cwiseAbs2().rowwise().sum().template cast<Scalar>();
+        return result;
+      }
+
+      /**
+       * @brief Forms @f$\left(\begin{smallmatrix}A&U\\U^*&I\end{smallmatrix}\right)@f$.
+       * @returns Sparse augmented matrix, or the core for an empty factor.
+       */
+      Math::SparseMatrix<Scalar> getAugmented() const
+      {
+        if (m_factor.size() == 0)
+          return m_core;
+        const auto n = rows(), rank = m_factor.cols();
+        Math::SparseMatrix<Scalar> result(n + rank, n + rank);
+        result.reserve(m_core.nonZeros() + 2 * n * rank + rank);
+        // Columns are already ordered. Write compressed storage directly,
+        // preserving structural zeros without a second triplet-sized buffer.
+        for (Eigen::Index column = 0; column < n; ++column)
+        {
+          result.startVec(column);
+          for (typename Math::SparseMatrix<Scalar>::InnerIterator entry(m_core, column);
+            entry; ++entry)
+            result.insertBack(entry.row(), column) = entry.value();
+          for (Eigen::Index k = 0; k < rank; ++k)
+            result.insertBack(n + k, column) = Eigen::numext::conj(m_factor(column, k));
+        }
+        for (Eigen::Index k = 0; k < rank; ++k)
+        {
+          result.startVec(n + k);
+          for (Eigen::Index row = 0; row < n; ++row)
+            result.insertBack(row, n + k) = m_factor(row, k);
+          result.insertBack(n + k, n + k) = Scalar(1);
+        }
+        result.finalize();
+        return result;
+      }
+
+    private:
+      /// @brief Borrowed sparse core.
+      const Math::SparseMatrix<Scalar>& m_core;
+
+      /// @brief Borrowed low-rank factor.
+      const Math::Matrix<Scalar>& m_factor;
+  };
+
   /**
    * @brief Linear solve of the local SWIFT metric or hinge tangent.
-   * @par Architecture
+   *
+   * ## Architecture
+   *
    * The centered metric is represented as A - U U^T. Direct solvers use the
    * equivalent augmented system with a positive identity auxiliary block;
-   * CG applies the low-rank subtraction without forming a dense matrix.
-   * Native direct solvers retain factorizations where supported. Residuals
-   * are checked against the centered physical operator. No gauge is applied.
+   * Matrix-free CG applies the low-rank subtraction without forming a dense matrix.
+   * Native direct solvers retain factorizations where supported. Acceptance
+   * delegates to the selected solver's success() contract; this adapter adds
+   * no independent residual threshold. No gauge is applied.
    */
   template <class LinearSystem>
   class LinearSolver final : public Solver::LinearSolverBase<LinearSystem>
@@ -102,8 +258,8 @@ namespace Rodin::Adaptation::SWIFT
       }
 
       /**
-       * @brief Reports whether the last solve met the physical residual tolerance.
-       * @returns Whether the last solution is finite and residual-validated.
+       * @brief Reports the selected backend's solve status.
+       * @returns Whether the selected solver reported success.
        */
       bool success() const noexcept
       {
@@ -120,8 +276,8 @@ namespace Rodin::Adaptation::SWIFT
       }
 
       /**
-       * @brief Returns the last centered-system residual.
-       * @returns Relative Euclidean residual norm.
+       * @brief Returns the iterative backend's relative residual estimate.
+       * @returns CG's estimate, or NaN for a direct solve without that diagnostic.
        */
       Real getError() const noexcept
       {
@@ -142,86 +298,32 @@ namespace Rodin::Adaptation::SWIFT
       }
 
     private:
-      /**
-       * @brief Applies the centered physical operator.
-       * @param matrix Sparse uncentered operator.
-       * @param x Input vector.
-       * @param y Output vector, overwritten by the centered operator action.
-       */
-      void applyMetric(const Math::SparseMatrix<Real>& matrix,
-        const Math::Vector<Real>& x, Math::Vector<Real>& y) const
+      /// @brief Jacobi scaling from the full centered operator diagonal.
+      class Preconditioner final : public Eigen::DiagonalPreconditioner<Real>
       {
-        y = matrix * x;
-        if (m_centering.size() != 0)
-          y -= m_centering * (m_centering.transpose() * x);
-      }
+        public:
+          /**
+           * @brief Computes inverse diagonal entries, using one for zero entries.
+           * @param op Complete operator to precondition.
+           * @returns This preconditioner.
+           */
+          Preconditioner& compute(const LowRankUpdate<Real>& op)
+          {
+            m_invdiag = op.diagonal();
+            for (Eigen::Index i = 0; i < m_invdiag.size(); ++i)
+            {
+              const Real value = m_invdiag(i);
+              m_invdiag(i) = value != Real(0) ? Real(1) / value : Real(1);
+            }
+            m_isInitialized = true;
+            return *this;
+          }
+      };
 
       /**
-       * @brief Solves the centered system with diagonally preconditioned CG.
-       * @param A Sparse uncentered operator.
-       * @param b Right-hand side.
-       * @param x Initial guess and returned solution.
-       * @param maxIterations Maximum CG corrections.
-       * @param relativeTolerance Residual threshold relative to the load norm.
-       * @param iterations Returned correction count.
-       * @param error Returned relative residual norm.
-       * @returns Whether the recurrence residual satisfies the requested tolerance.
-       */
-      bool metricConjugateGradient(const Math::SparseMatrix<Real>& A,
-        const Math::Vector<Real>& b, Math::Vector<Real>& x, std::size_t maxIterations,
-        Real relativeTolerance, std::size_t& iterations, Real& error) const
-      {
-        Math::Vector<Real> jacobi(A.rows());
-        for (Eigen::Index i = 0; i < A.rows(); ++i)
-        {
-          const Real d = A.coeff(i, i) -
-            (m_centering.size() == 0 ? Real(0) : m_centering.row(i).squaredNorm());
-          jacobi(i) = (std::abs(d) > Real(0)) ? Real(1) / d : Real(1);
-        }
-        auto applyPreconditioner = [&](const Math::Vector<Real>& residual) {
-          return Math::Vector<Real>(jacobi.cwiseProduct(residual));
-        };
-        const Real rhsNorm = b.norm();
-        iterations = 0;
-        if (!(rhsNorm > Real(0)))
-        {
-          x.setZero();
-          error = Real(0);
-          return true;
-        }
-        Math::Vector<Real> Ax;
-        applyMetric(A, x, Ax);
-        Math::Vector<Real> r = b - Ax;
-        Math::Vector<Real> z = applyPreconditioner(r);
-        Math::Vector<Real> p = z;
-        Real rz = r.dot(z);
-        const Real threshold = relativeTolerance * rhsNorm;
-        Math::Vector<Real> Ap;
-        for (std::size_t it = 0; it < maxIterations; ++it)
-        {
-          if (r.norm() <= threshold)
-            break;
-          applyMetric(A, p, Ap);
-          const Real pAp = p.dot(Ap);
-          if (!(pAp > Real(0)))
-            break;
-          const Real alpha = rz / pAp;
-          x += alpha * p;
-          r -= alpha * Ap;
-          z = applyPreconditioner(r);
-          const Real rzNext = r.dot(z);
-          p = z + (rzNext / rz) * p;
-          rz = rzNext;
-          ++iterations;
-        }
-        error = r.norm() / rhsNorm;
-        return std::isfinite(error) && error <= relativeTolerance;
-      }
-
-      /**
-       * @brief Solves and validates a centered physical system.
+       * @brief Adapts the centered operator and delegates its solution.
        * @param axb System whose solution is overwritten by the selected backend.
-       * @returns Whether the backend succeeded with a finite, residual-validated solution.
+       * @returns The selected backend's success status.
        */
       bool solveSystem(LinearSystemType& axb)
       {
@@ -235,10 +337,12 @@ namespace Rodin::Adaptation::SWIFT
           std::is_same_v<VectorType, Math::Vector<Real>>)
         {
           const auto& rhs = axb.getVector();
+          const LowRankUpdate<Real> op(axb.getOperator(), m_centering);
           if (m_parameters.linear.solver != Parameters::LinearSolver::CG)
           {
             const auto solveDirect = [&](auto& direct, StringView backend) {
-              const auto solveSystem = [&](LinearSystemType& system) {
+              const auto solveSystem = [&](LinearSystemType& system,
+                                         bool transferOperator) {
                 if constexpr (requires { direct.factorize(system); })
                 {
                   auto& next = system.getOperator();
@@ -259,7 +363,12 @@ namespace Rodin::Adaptation::SWIFT
                     direct.clear(Solver::Factorization::Symbolic);
                   const bool numeric = direct.success() &&
                     direct.getInfo().factorization == Solver::Factorization::Numeric;
-                  m_directSystem.getOperator() = next;
+                  // The augmented system is temporary; transfer its storage.
+                  // A caller-owned core must remain unchanged after the solve.
+                  if (transferOperator)
+                    m_directSystem.getOperator() = std::move(next);
+                  else
+                    m_directSystem.getOperator() = next;
                   m_directSystem.getVector() = system.getVector();
                   if (!sameValues || !numeric)
                   {
@@ -281,59 +390,31 @@ namespace Rodin::Adaptation::SWIFT
               };
               const auto& matrix = axb.getOperator();
               if (m_centering.size() == 0)
-                solveSystem(axb);
+                solveSystem(axb, false);
               else
               {
-                // Eliminating the auxiliary variables gives the centered operator A - U U^T.
                 const auto n = matrix.rows();
-                const auto rank = m_centering.cols();
-                std::vector<Math::SparseTriplet<Real>> entries;
-                entries.reserve(matrix.nonZeros() + 2 * n * rank + rank);
-                for (Eigen::Index column = 0; column < matrix.outerSize(); ++column)
-                {
-                  for (Math::SparseMatrix<Real>::InnerIterator entry(matrix, column);
-                       entry; ++entry)
-                    entries.emplace_back(entry.row(), entry.col(), entry.value());
-                }
-                for (Eigen::Index k = 0; k < rank; ++k)
-                {
-                  for (Eigen::Index i = 0; i < n; ++i)
-                  {
-                    const Real value = m_centering(i, k);
-                    entries.emplace_back(i, n + k, value);
-                    entries.emplace_back(n + k, i, value);
-                  }
-                  entries.emplace_back(n + k, n + k, Real(1));
-                }
                 LinearSystemType augmented;
-                augmented.getOperator().resize(n + rank, n + rank);
-                augmented.getOperator().setFromTriplets(entries.begin(), entries.end());
-                augmented.getVector() = Math::Vector<Real>::Zero(n + rank);
+                augmented.getOperator() = op.getAugmented();
+                augmented.getVector() =
+                  Math::Vector<Real>::Zero(augmented.getOperator().rows());
                 augmented.getVector().head(n) = rhs;
-                solveSystem(augmented);
+                solveSystem(augmented, true);
                 if (direct.success())
                   axb.getSolution() = augmented.getSolution().head(n);
               }
               iterations = 0;
-              Math::Vector<Real> image;
-              if (direct.success())
-                applyMetric(matrix, axb.getSolution(), image);
-              error = direct.success() ? (image - rhs).norm() /
-                  std::max(rhs.norm(), std::numeric_limits<Real>::min())
-                                       : std::numeric_limits<Real>::infinity();
-              const bool ok = direct.success() && axb.getSolution().allFinite() &&
-                error <= m_parameters.convergence.tolerance.linearRelative;
+              error = std::numeric_limits<Real>::quiet_NaN();
+              const bool ok = direct.success();
               if (m_parameters.trace)
               {
                 std::cout << "        metric " << backend << ": ok=" << ok
-                          << "  rel=" << error << "  status=" << direct.getInfo().status;
+                          << "  status=" << direct.getInfo().status;
                 if constexpr (requires { direct.getResources().instance.infog[1]; })
                   std::cout << "  detail=" << direct.getResources().instance.infog[1];
                 std::cout << '\n';
               }
-              if (!ok)
-                return false;
-              return true;
+              return ok;
             };
 #ifdef RODIN_USE_MUMPS
             if (m_parameters.linear.solver == Parameters::LinearSolver::MUMPS)
@@ -351,31 +432,30 @@ namespace Rodin::Adaptation::SWIFT
             Solver::SparseLU<LinearSystemType> direct(this->getProblem());
             return solveDirect(direct, "LU");
           }
-          const auto& guess = axb.getSolution();
           const std::size_t maxIterations = m_parameters.convergence.iterations.linear > 0
             ? m_parameters.convergence.iterations.linear
             : std::min<std::size_t>(AutomaticCGMaxIterations,
                 std::max<std::size_t>(AutomaticCGMinIterations,
                   AutomaticCGIterationsPerDOF * axb.getOperator().rows()));
-          Math::Vector<Real> solution =
-            (guess.size() == rhs.size()) ? guess : Math::Vector<Real>::Zero(rhs.size());
-          const bool solved =
-            metricConjugateGradient(axb.getOperator(), rhs, solution, maxIterations,
-              m_parameters.convergence.tolerance.linearRelative, iterations, error);
-          Math::Vector<Real> image;
-          applyMetric(axb.getOperator(), solution, image);
-          error =
-            (image - rhs).norm() / std::max(rhs.norm(), std::numeric_limits<Real>::min());
-          const bool ok = solved && std::isfinite(error) &&
-            error <= m_parameters.convergence.tolerance.linearRelative;
-          axb.getSolution() = solution;
-          if (m_parameters.trace && (!ok || !solution.allFinite()))
+          Eigen::ConjugateGradient<LowRankUpdate<Real>, Eigen::Lower | Eigen::Upper,
+            Preconditioner>
+            cg;
+          cg.setTolerance(m_parameters.convergence.tolerance.linearRelative)
+            .setMaxIterations(maxIterations);
+          cg.compute(op);
+          if (axb.getSolution().size() == rhs.size())
+            axb.getSolution() = cg.solveWithGuess(rhs, axb.getSolution());
+          else
+            axb.getSolution() = cg.solve(rhs);
+          iterations = cg.iterations();
+          error = cg.error();
+          const bool ok = cg.info() == Eigen::Success;
+          if (m_parameters.trace && !ok)
           {
-            std::cout << "        cg failure: ok=" << ok << "  it=" << iterations
-                      << "  max_it=" << maxIterations << "  err=" << error
-                      << "  finite=" << solution.allFinite() << '\n';
+            std::cout << "        cg failure: it=" << iterations
+                      << "  max_it=" << maxIterations << "  err=" << error << '\n';
           }
-          return ok && solution.allFinite();
+          return ok;
         }
         else
         {

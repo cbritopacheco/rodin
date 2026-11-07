@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <fstream>
@@ -352,6 +353,46 @@ namespace Rodin::IO
     return write(static_cast<Real>(m_snapshotCount));
   }
 
+  XDMF::Grid& XDMF::Grid::write(Real time)
+  {
+    auto& grid = m_owner->m_grids[m_index];
+    m_owner->writeGrid(m_index, time, grid.snapshots.size());
+    m_owner->m_snapshotCount = std::max(m_owner->m_snapshotCount, grid.snapshots.size());
+    return *this;
+  }
+
+  XDMF::Grid& XDMF::Grid::add(
+    const std::string& name, size_t dimension, NodeSampler sample, AttributePolicy policy)
+  {
+    auto& grid = m_owner->m_grids[m_index];
+    if (!grid.mesh || dimension == 0 || !sample)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Indexed nodal output requires a mesh, positive dimension and a sampler."
+        << Alert::Raise;
+    }
+    for (const auto& attribute : grid.attributes)
+    {
+      if (attribute.name == name)
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Duplicate XDMF attribute name \"" << name << "\"." << Alert::Raise;
+      }
+    }
+    AttributeRecord attribute;
+    attribute.name = name;
+    attribute.sourceMesh = grid.sourceMesh;
+    attribute.dimension = dimension;
+    attribute.policy = policy;
+    attribute.write = [mesh = grid.mesh, dimension, sample = std::move(sample)](
+                        const boost::filesystem::path& path, Center) {
+      HDF5::writeXDMFNodeAttribute(
+        path, HDF5::getXDMFVisualizationVertexCount(*mesh), dimension, sample);
+    };
+    grid.attributes.push_back(std::move(attribute));
+    return *this;
+  }
+
   XDMF& XDMF::write(Real time)
   {
     if (m_closed)
@@ -359,124 +400,130 @@ namespace Rodin::IO
       Alert::MemberFunctionException(*this, __func__)
         << "Cannot write to a closed XDMF writer." << Alert::Raise;
     }
+    for (size_t index = 0; index < m_grids.size(); ++index)
+      writeGrid(index, time, m_snapshotCount);
+    ++m_snapshotCount;
+    return *this;
+  }
 
-    const std::string stemStr = m_stem.filename().string();
-    const std::string indexStr = padIndex(m_snapshotCount, m_padding);
-    const std::string rankStr = m_distributed ? std::to_string(m_rank) : std::string();
-
-    for (auto& gr : m_grids)
+  void XDMF::writeGrid(size_t gridIndex, Real time, size_t snapshotIndex)
+  {
+    if (m_closed)
     {
-      if (!gr.mesh)
-      {
-        Alert::MemberFunctionException(*this, __func__)
-          << "Grid \"" << gr.name << "\" has no mesh set." << Alert::Raise;
-      }
+      Alert::MemberFunctionException(*this, __func__)
+        << "Cannot write to a closed XDMF writer." << Alert::Raise;
+    }
+    const std::string stemStr = m_stem.filename().string();
+    const std::string indexStr = padIndex(snapshotIndex, m_padding);
+    const std::string rankStr = m_distributed ? std::to_string(m_rank) : std::string();
+    auto& gr = m_grids[gridIndex];
+    if (!gr.mesh)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Grid \"" << gr.name << "\" has no mesh set." << Alert::Raise;
+    }
 
-      const auto& patterns = gr.options.patterns ? *gr.options.patterns : m_patterns;
-      SnapshotRecord snapshot;
-      snapshot.time = time;
-      snapshot.vertexCount = HDF5::getXDMFVisualizationVertexCount(*gr.mesh);
-      // In distributed (per-rank) mode, the rank's mesh is its shard.
-      // The XDMF cell stream emits only OWNED cells (ghosts belong to
-      // some other rank), so the cell count exposed in the XML must
-      // match.
-      snapshot.cellCount = HDF5::getXDMFRenderedCellCount(*gr.mesh);
-      snapshot.meshDimension = gr.mesh->getDimension();
-      snapshot.spaceDimension = gr.mesh->getSpaceDimension();
-      const auto topologyLayout = HDF5::getXDMFTopologyLayout(*gr.mesh, !m_distributed);
-      snapshot.topologySize = topologyLayout.entryCount;
-      snapshot.topologyIsUniform = topologyLayout.isUniform;
-      snapshot.topologyType = topologyLayout.topologyType;
-      snapshot.topologyRows = topologyLayout.rowCount;
-      snapshot.topologyColumns = topologyLayout.columnCount;
+    const auto& patterns = gr.options.patterns ? *gr.options.patterns : m_patterns;
+    SnapshotRecord snapshot;
+    snapshot.time = time;
+    snapshot.vertexCount = HDF5::getXDMFVisualizationVertexCount(*gr.mesh);
+    // In distributed (per-rank) mode, the rank's mesh is its shard.
+    // The XDMF cell stream emits only OWNED cells (ghosts belong to
+    // some other rank), so the cell count exposed in the XML must
+    // match.
+    snapshot.cellCount = HDF5::getXDMFRenderedCellCount(*gr.mesh);
+    snapshot.meshDimension = gr.mesh->getDimension();
+    snapshot.spaceDimension = gr.mesh->getSpaceDimension();
+    const auto topologyLayout = HDF5::getXDMFTopologyLayout(*gr.mesh, !m_distributed);
+    snapshot.topologySize = topologyLayout.entryCount;
+    snapshot.topologyIsUniform = topologyLayout.isUniform;
+    snapshot.topologyType = topologyLayout.topologyType;
+    snapshot.topologyRows = topologyLayout.rowCount;
+    snapshot.topologyColumns = topologyLayout.columnCount;
 
-      gatherPieceMeta(snapshot);
+    gatherPieceMeta(snapshot);
 
-      if (gr.options.meshPolicy == MeshPolicy::Static)
-      {
-        if (!gr.staticMeshWritten)
-        {
-          const auto meshFile =
-            expandPattern(patterns.staticMesh, stemStr, gr.name, "", "", rankStr);
-          const auto meshPath = m_stem.parent_path() / meshFile;
-
-          HDF5::writeXDMFMesh(meshPath, *gr.mesh, !m_distributed);
-
-          gr.staticMeshFile = meshFile;
-          gr.staticMeshWritten = true;
-        }
-
-        snapshot.meshFile = gr.staticMeshFile;
-      }
-      else
+    if (gr.options.meshPolicy == MeshPolicy::Static)
+    {
+      if (!gr.staticMeshWritten)
       {
         const auto meshFile =
-          expandPattern(patterns.transientMesh, stemStr, gr.name, "", indexStr, rankStr);
+          expandPattern(patterns.staticMesh, stemStr, gr.name, "", "", rankStr);
         const auto meshPath = m_stem.parent_path() / meshFile;
 
         HDF5::writeXDMFMesh(meshPath, *gr.mesh, !m_distributed);
 
-        snapshot.meshFile = meshFile;
+        gr.staticMeshFile = meshFile;
+        gr.staticMeshWritten = true;
       }
 
-      if (gr.options.exportMeshAttribute)
+      snapshot.meshFile = gr.staticMeshFile;
+    }
+    else
+    {
+      const auto meshFile =
+        expandPattern(patterns.transientMesh, stemStr, gr.name, "", indexStr, rankStr);
+      const auto meshPath = m_stem.parent_path() / meshFile;
+
+      HDF5::writeXDMFMesh(meshPath, *gr.mesh, !m_distributed);
+
+      snapshot.meshFile = meshFile;
+    }
+
+    if (gr.options.exportMeshAttribute)
+    {
+      SnapshotRecord::MeshAttributeRecord meshAttr;
+      meshAttr.name = "Attribute";
+      meshAttr.center = Center::Cell;
+      meshAttr.topologicalDimension = snapshot.meshDimension;
+      snapshot.meshAttributes.push_back(std::move(meshAttr));
+    }
+
+    snapshot.attributes.clear();
+    snapshot.attributes.reserve(gr.attributes.size());
+
+    for (auto& attr : gr.attributes)
+    {
+      SnapshotRecord::AttributeRecord snapAttr;
+      snapAttr.name = attr.name;
+      snapAttr.center = attr.center;
+      snapAttr.dimension = attr.dimension;
+      snapAttr.rows = attr.rows;
+      snapAttr.columns = attr.columns;
+
+      if (attr.policy == AttributePolicy::Static)
       {
-        SnapshotRecord::MeshAttributeRecord meshAttr;
-        meshAttr.name = "Attribute";
-        meshAttr.center = Center::Cell;
-        meshAttr.topologicalDimension = snapshot.meshDimension;
-        snapshot.meshAttributes.push_back(std::move(meshAttr));
-      }
-
-      snapshot.attributes.clear();
-      snapshot.attributes.reserve(gr.attributes.size());
-
-      for (auto& attr : gr.attributes)
-      {
-        SnapshotRecord::AttributeRecord snapAttr;
-        snapAttr.name = attr.name;
-        snapAttr.center = attr.center;
-        snapAttr.dimension = attr.dimension;
-        snapAttr.rows = attr.rows;
-        snapAttr.columns = attr.columns;
-
-        if (attr.policy == AttributePolicy::Static)
-        {
-          if (!attr.staticWritten)
-          {
-            const auto attrFile = expandPattern(
-              patterns.staticAttribute, stemStr, gr.name, attr.name, "", rankStr);
-            const auto attrPath = m_stem.parent_path() / attrFile;
-
-            attr.write(attrPath, attr.center);
-
-            attr.staticFile = attrFile;
-            attr.staticWritten = true;
-          }
-
-          snapAttr.file = attr.staticFile;
-          snapAttr.isStatic = true;
-        }
-        else
+        if (!attr.staticWritten)
         {
           const auto attrFile = expandPattern(
-            patterns.attribute, stemStr, gr.name, attr.name, indexStr, rankStr);
+            patterns.staticAttribute, stemStr, gr.name, attr.name, "", rankStr);
           const auto attrPath = m_stem.parent_path() / attrFile;
 
           attr.write(attrPath, attr.center);
 
-          snapAttr.file = attrFile;
-          snapAttr.isStatic = false;
+          attr.staticFile = attrFile;
+          attr.staticWritten = true;
         }
 
-        snapshot.attributes.push_back(std::move(snapAttr));
+        snapAttr.file = attr.staticFile;
+        snapAttr.isStatic = true;
+      }
+      else
+      {
+        const auto attrFile = expandPattern(
+          patterns.attribute, stemStr, gr.name, attr.name, indexStr, rankStr);
+        const auto attrPath = m_stem.parent_path() / attrFile;
+
+        attr.write(attrPath, attr.center);
+
+        snapAttr.file = attrFile;
+        snapAttr.isStatic = false;
       }
 
-      gr.snapshots.push_back(std::move(snapshot));
+      snapshot.attributes.push_back(std::move(snapAttr));
     }
 
-    ++m_snapshotCount;
-    return *this;
+    gr.snapshots.push_back(std::move(snapshot));
   }
 
   void XDMF::writeUniformGrid(std::ostream& os, const std::string& gridName,
