@@ -81,6 +81,13 @@ if(_RODIN_SUITESPARSE_COMPONENTS)
 endif()
 unset(_RODIN_SUITESPARSE_COMPONENTS)
 
+# The OpenMP lowering of icpx miscompiles the assembly loops of Rodin, see the
+# top CMakeLists.txt of Rodin: the front end of Clang lowers them instead.
+if(@RODIN_USE_OPENMP@ AND CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
+  set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_COMPILE_OPTIONS
+    $<$<COMPILE_LANGUAGE:CXX>:-fopenmp=libomp>)
+endif()
+
 set(CMAKE_MODULE_PATH "${_RODIN_CONFIG_MODULE_PATH_SAVED}")
 unset(_RODIN_CONFIG_MODULE_PATH_SAVED)
 

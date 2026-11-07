@@ -43,6 +43,14 @@ Kokkos built with CUDA and `Context::HIP` Kokkos built with HIP; there is no
 implicit host fallback. Native execution spaces can exercise the same
 specialization on the host without establishing device correctness.
 
+With icpx (oneAPI 2026.2), the OpenMP lowering of `-fiopenmp` miscompiles
+the host assembly from -O1 on: in an `omp for`, a test on an `Optional`
+under a loop-invariant branch skips every iteration, so `.over(attribute)`
+assembles to zero. The top CMakeLists.txt and RodinConfig.cmake compile
+OpenMP with `-fopenmp=libomp` (the front end of Clang) and keep libiomp5 at
+link; the default `-fp-model=fast` of icpx is overridden by
+`-fp-model=precise`.
+
 The mesh derives directly from MeshBase and retains no LocalMesh. Temporary
 host builders/loaders create independently owned Kokkos arrays. Reference-
 returning host queries materialize compatibility entries; those are never

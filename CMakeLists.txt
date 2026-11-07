@@ -190,6 +190,14 @@ rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-deprecated
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=array-bounds)
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=nontrivial-memcall)
 
+# icx and icpx default to -fp-model=fast, which assumes finite values and
+# reassociates sums: Rodin relies on the IEEE semantics of the other compilers.
+foreach(LANG C CXX)
+  if(CMAKE_${LANG}_COMPILER_ID STREQUAL "IntelLLVM")
+    add_compile_options($<$<COMPILE_LANGUAGE:${LANG}>:-fp-model=precise>)
+  endif()
+endforeach()
+
 # Apple's ld (Xcode >= 15) warns whenever a static library appears more than
 # once on the link line, which CMake's transitive component dependencies
 # produce by design. Silence it where the linker understands the flag.
@@ -316,6 +324,13 @@ if (RODIN_BUILD_SRC)
     if (NOT RODIN_USE_KOKKOS)
       message(FATAL_ERROR "RODIN_USE_KOKKOSKERNELS requires RODIN_USE_KOKKOS.")
     endif()
+    # On SYCL, Kokkos-Kernels links oneMKL through the targets of MKLConfig
+    # but its package does not look for them. PETSc takes the 32-bit integer
+    # interface of oneMKL, which MKLConfig must then take as well.
+    if (Kokkos_ENABLE_SYCL AND NOT TARGET MKL::MKL)
+      set(MKL_INTERFACE lp64 CACHE STRING "Integer interface of oneMKL")
+      find_package(MKL CONFIG QUIET)
+    endif()
     find_package(KokkosKernels CONFIG REQUIRED)
   endif()
 
@@ -423,6 +438,17 @@ if (RODIN_BUILD_SRC)
   if (RODIN_WITH_PY)
     rodin_add_pybind11()
     add_subdirectory(py)
+  endif()
+
+  # The OpenMP lowering of icpx (-fiopenmp) miscompiles the assembly loops of
+  # Rodin from -O1 on (oneAPI 2026.2): in an omp for, a test on an Optional
+  # under a loop-invariant branch skips every iteration, so a form restricted
+  # to attributes assembles to zero. The front end of Clang lowers them right
+  # and calls the same runtime, libiomp5, which the link keeps through
+  # -fiopenmp. Each find_package(OpenMP) resets the target, hence the place.
+  if (RODIN_USE_OPENMP AND CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
+    set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_COMPILE_OPTIONS
+      $<$<COMPILE_LANGUAGE:CXX>:-fopenmp=libomp>)
   endif()
 endif()
 
