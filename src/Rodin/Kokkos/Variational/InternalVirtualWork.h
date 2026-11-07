@@ -756,8 +756,6 @@ namespace Rodin::Solid
                 new (points + c)
                   Point(polytope, quadrature.getReference(polytope, q0 + c),
                     Rodin::Kokkos::Variational::DynamicGeometry{});
-                for (Index k = 0; k < Square; ++k)
-                  jacobians[c * Square + k] = 0;
               }
               team.team_barrier();
               for (Index i = rank; i < count * na; i += threads)
@@ -775,34 +773,40 @@ namespace Rodin::Solid
                   gb[c * TestCapacity + b] = testDOFs.getGradient(points[c], b);
                 }
               }
-              // The displacement gradient sums one term per pair of a point
-              // and a basis function of the state, after the trial gradients
-              // when the state shares them.
+              // Each row of a displacement gradient sums the basis functions
+              // of the state in registers, after the trial gradients when the
+              // state shares them.
               const auto sum = [&](Index i) {
-                const Index c = i / ns;
-                const Index q = i - c * ns;
-                Vector gradient;
-                if (SharedState)
-                  gradient = ga[c * TrialCapacity + q];
-                else
-                  gradient = stateDOFs.getGradient(points[c], q);
-                for (Index r = 0; r < vdim; ++r)
+                const Index c = i / vdim;
+                const Index r = i - c * vdim;
+                Real row[D] = {};
+                for (Index q = 0; q < ns; ++q)
                 {
+                  Vector gradient;
+                  if (SharedState)
+                    gradient = ga[c * TrialCapacity + q];
+                  else
+                    gradient = stateDOFs.getGradient(points[c], q);
                   const Real value = data(stateIndices[q] + r * stateDOFs.getStride());
-                  for (Index k = 0; k < vdim; ++k)
-                    ::Kokkos::atomic_add(
-                      &jacobians[c * Square + r * vdim + k], gradient(k) * value);
+                  RODIN_KOKKOS_UNROLL
+                  for (Index k = 0; k < D; ++k)
+                    if (k < vdim)
+                      row[k] += gradient(k) * value;
                 }
+                RODIN_KOKKOS_UNROLL
+                for (Index k = 0; k < D; ++k)
+                  if (k < vdim)
+                    jacobians[c * Square + r * vdim + k] = row[k];
               };
               if (!SharedState)
               {
-                for (Index i = rank; i < count * ns; i += threads)
+                for (Index i = rank; i < count * vdim; i += threads)
                   sum(i);
               }
               team.team_barrier();
               if (SharedState)
               {
-                for (Index i = rank; i < count * ns; i += threads)
+                for (Index i = rank; i < count * vdim; i += threads)
                   sum(i);
                 team.team_barrier();
               }
@@ -1931,8 +1935,6 @@ namespace Rodin::Solid
                 new (points + c)
                   Point(polytope, quadrature.getReference(polytope, q0 + c),
                     Rodin::Kokkos::Variational::DynamicGeometry{});
-                for (Index k = 0; k < Square; ++k)
-                  jacobians[c * Square + k] = 0;
               }
               team.team_barrier();
               for (Index i = rank; i < count * na; i += threads)
@@ -1950,34 +1952,40 @@ namespace Rodin::Solid
                   gb[c * TestCapacity + b] = testDOFs.getGradient(points[c], b);
                 }
               }
-              // The displacement gradient sums one term per pair of a point
-              // and a basis function of the state, after the trial gradients
-              // when the state shares them.
+              // Each row of a displacement gradient sums the basis functions
+              // of the state in registers, after the trial gradients when the
+              // state shares them.
               const auto sum = [&](Index i) {
-                const Index c = i / ns;
-                const Index q = i - c * ns;
-                Vector gradient;
-                if (SharedState)
-                  gradient = ga[c * TrialCapacity + q];
-                else
-                  gradient = stateDOFs.getGradient(points[c], q);
-                for (Index r = 0; r < vdim; ++r)
+                const Index c = i / vdim;
+                const Index r = i - c * vdim;
+                Real row[D] = {};
+                for (Index q = 0; q < ns; ++q)
                 {
+                  Vector gradient;
+                  if (SharedState)
+                    gradient = ga[c * TrialCapacity + q];
+                  else
+                    gradient = stateDOFs.getGradient(points[c], q);
                   const Real value = data(stateIndices[q] + r * stateDOFs.getStride());
-                  for (Index k = 0; k < vdim; ++k)
-                    ::Kokkos::atomic_add(
-                      &jacobians[c * Square + r * vdim + k], gradient(k) * value);
+                  RODIN_KOKKOS_UNROLL
+                  for (Index k = 0; k < D; ++k)
+                    if (k < vdim)
+                      row[k] += gradient(k) * value;
                 }
+                RODIN_KOKKOS_UNROLL
+                for (Index k = 0; k < D; ++k)
+                  if (k < vdim)
+                    jacobians[c * Square + r * vdim + k] = row[k];
               };
               if (!SharedState)
               {
-                for (Index i = rank; i < count * ns; i += threads)
+                for (Index i = rank; i < count * vdim; i += threads)
                   sum(i);
               }
               team.team_barrier();
               if (SharedState)
               {
-                for (Index i = rank; i < count * ns; i += threads)
+                for (Index i = rank; i < count * vdim; i += threads)
                   sum(i);
                 team.team_barrier();
               }

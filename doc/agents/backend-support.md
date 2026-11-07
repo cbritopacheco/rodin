@@ -58,6 +58,10 @@ of the thread into a loop. A test on the geometry inside a loop over the
 dimension did it in the device projections: keep such tests out of device
 loops, as `Geometry::getReferenceVertexCoordinate` does with one mask per
 geometry, and compare a new device kernel with the host on a mixed mesh.
+Double atomic additions in team scratch memory also hang about one launch
+in two on the Arc Pro B70: sum each entry in the registers of one thread
+instead, as the team kernels of `InternalVirtualWork.h` do for the
+displacement gradients, and run a new team kernel several times.
 
 The mesh derives directly from MeshBase and retains no LocalMesh. Temporary
 host builders/loaders create independently owned Kokkos arrays. Reference-
