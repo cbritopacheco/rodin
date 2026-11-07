@@ -21,6 +21,8 @@ namespace Rodin::Tests::Unit
   using TestBackend = Context::CUDA;
 #elif defined(KOKKOS_ENABLE_HIP)
   using TestBackend = Context::HIP;
+#elif defined(KOKKOS_ENABLE_SYCL)
+  using TestBackend = Context::SYCL;
 #else
   using TestBackend = ::Kokkos::DefaultHostExecutionSpace;
 #endif

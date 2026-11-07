@@ -26,6 +26,10 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Sort.hpp>
 
+#if defined(KOKKOS_ENABLE_SYCL)
+#include <sycl/ext/intel/math.hpp>
+#endif
+
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Kokkos/Utility.h"
 #include "Rodin/Assembly/AssemblyBase.h"
@@ -842,6 +846,9 @@ namespace Rodin::Assembly::Internal
         {
 #if defined(KOKKOS_ENABLE_CUDA) || defined(KOKKOS_ENABLE_HIP)
           KOKKOS_IF_ON_DEVICE((return -__dmul_rn(values(e), fixedValues(cols(e)));))
+#elif defined(KOKKOS_ENABLE_SYCL)
+          KOKKOS_IF_ON_DEVICE(
+            (return -::sycl::ext::intel::math::dmul_rn(values(e), fixedValues(cols(e)));))
 #endif
           return -(values(e) * fixedValues(cols(e)));
         }

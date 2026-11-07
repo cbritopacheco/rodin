@@ -39,7 +39,8 @@ because the primary template compiles.
 
 The optional `Rodin::Kokkos` target requires `RODIN_USE_KOKKOS=ON` and an
 external Kokkos installation (4.2 or newer; validated with 5.2.2). `Context::CUDA` requires
-Kokkos built with CUDA and `Context::HIP` Kokkos built with HIP; there is no
+Kokkos built with CUDA, `Context::HIP` Kokkos built with HIP and
+`Context::SYCL` Kokkos built with SYCL; there is no
 implicit host fallback. Native execution spaces can exercise the same
 specialization on the host without establishing device correctness.
 

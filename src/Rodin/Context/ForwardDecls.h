@@ -25,6 +25,8 @@ namespace Rodin::Context
 
   class HIP;
 
+  class SYCL;
+
   template <class Distribution, class Backend>
   class Kokkos;
 

@@ -20,6 +20,8 @@ namespace Rodin::Tests::Unit
   static_assert(std::is_same_v<TestExecutionSpace, ::Kokkos::Cuda>);
 #elif defined(KOKKOS_ENABLE_HIP)
   static_assert(std::is_same_v<TestExecutionSpace, ::Kokkos::HIP>);
+#elif defined(KOKKOS_ENABLE_SYCL)
+  static_assert(std::is_same_v<TestExecutionSpace, ::Kokkos::SYCL>);
 #endif
 
   /// @brief A copied context retains a usable local execution association.

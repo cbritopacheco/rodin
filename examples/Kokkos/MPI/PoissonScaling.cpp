@@ -50,6 +50,8 @@
 using Backend = Rodin::Context::CUDA;
 #elif defined(KOKKOS_ENABLE_HIP)
 using Backend = Rodin::Context::HIP;
+#elif defined(KOKKOS_ENABLE_SYCL)
+using Backend = Rodin::Context::SYCL;
 #else
 using Backend = ::Kokkos::DefaultHostExecutionSpace;
 #endif

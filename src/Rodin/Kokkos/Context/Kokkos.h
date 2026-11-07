@@ -16,6 +16,7 @@
 
 #include "CUDA.h"
 #include "HIP.h"
+#include "SYCL.h"
 
 namespace Rodin::Context
 {
@@ -49,12 +50,21 @@ namespace Rodin::Context
       using ExecutionSpace = ::Kokkos::HIP;
     };
 #endif
+
+#ifdef KOKKOS_ENABLE_SYCL
+    template <>
+    struct KokkosBackend<SYCL>
+    {
+      /// SYCL execution space selected by the Rodin tag.
+      using ExecutionSpace = ::Kokkos::SYCL;
+    };
+#endif
   }
 
   /**
    * @brief Combines a distribution context with a Kokkos execution space.
    * @tparam Distribution Rodin distribution context, initially @ref Local.
-   * @tparam Backend @ref CUDA, @ref HIP or a native Kokkos execution-space type.
+   * @tparam Backend @ref CUDA, @ref HIP, @ref SYCL or a native Kokkos execution-space type.
    *
    * ## Architecture
    *
@@ -66,7 +76,7 @@ namespace Rodin::Context
    * The application must initialize Kokkos before constructing this context
    * and finalize it only after the context and its dependent allocations have
    * been destroyed. The context does not initialize or finalize either
-   * runtime. CUDA or HIP selection requires a Kokkos installation with that
+   * runtime. CUDA, HIP or SYCL selection requires a Kokkos installation with that
    * backend; execution never falls back to a host backend implicitly.
    */
   template <class Distribution, class Backend>
@@ -179,6 +189,19 @@ namespace Rodin::Context
   {
     static_assert(!std::is_same_v<Distribution, Distribution>,
       "Context::HIP requires Kokkos built with HIP support.");
+  };
+#endif
+
+#ifndef KOKKOS_ENABLE_SYCL
+  /**
+   * @brief Diagnoses SYCL selection with a Kokkos build lacking SYCL support.
+   * @tparam Distribution Requested distribution context.
+   */
+  template <class Distribution>
+  class Kokkos<Distribution, SYCL>
+  {
+    static_assert(!std::is_same_v<Distribution, Distribution>,
+      "Context::SYCL requires Kokkos built with SYCL support.");
   };
 #endif
 }

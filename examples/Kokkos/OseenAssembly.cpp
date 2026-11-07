@@ -47,6 +47,8 @@ namespace Rodin::Examples
 
 #elif defined(KOKKOS_ENABLE_HIP)
   using Backend = Context::HIP;
+#elif defined(KOKKOS_ENABLE_SYCL)
+  using Backend = Context::SYCL;
 #else
   using Backend = ::Kokkos::DefaultHostExecutionSpace;
 #endif
