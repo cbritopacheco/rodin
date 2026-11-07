@@ -321,7 +321,9 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(hostEntities(i, 2), static_cast<Index>(entity.getGeometry()));
         EXPECT_EQ(hostEntities(i, 3), bool(source.getAttribute(d, i)));
         if (const auto attribute = source.getAttribute(d, i))
+        {
           EXPECT_EQ(hostEntities(i, 4), *attribute);
+        }
         for (Index a = 0; a < entity.getVertices().size(); ++a)
           EXPECT_EQ(hostEntities(i, metadataSize + a), entity.getVertices()[a]);
       }
