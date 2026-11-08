@@ -1,5 +1,5 @@
 name: Kokkos Build
-# Compiles the Kokkos unit tests and examples for CUDA and HIP in the images of
+# Compiles the Kokkos unit tests and examples for CUDA, HIP and SYCL in the images of
 # dev/docker/kokkos, without running them: hosted runners have no GPU.
 # The images come from the registry named by the repository variable
 # RODIN_KOKKOS_CI_IMAGES, by default ghcr.io/<owner>/rodin-kokkos-ci.
@@ -27,7 +27,7 @@ jobs:
     timeout-minutes: 330
     strategy:
       matrix:
-        image: [cuda-sm52, hip-gfx1201]
+        image: [cuda-sm52, hip-gfx1201, sycl-bmg]
       fail-fast: false
     env:
       IMAGE: ${{ vars.RODIN_KOKKOS_CI_IMAGES || format('ghcr.io/{0}/rodin-kokkos-ci', github.repository_owner) }}:${{ matrix.image }}
